@@ -265,6 +265,12 @@ export function RequirementsList({
 
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-'
+    // 支援日期範圍（如 "2026-09-25~2026-09-28"）
+    if (dateStr.includes('~')) {
+      const [start, end] = dateStr.split('~')
+      const fmt = (s: string) => new Date(s).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
+      return `${fmt(start)}~${fmt(end)}`
+    }
     return new Date(dateStr).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
   }
 
