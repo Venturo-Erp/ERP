@@ -303,17 +303,23 @@ export function useSyncItineraryToCore() {
           // Accommodation — 續住時解析完整飯店名稱
           if (day.accommodation) {
             let resolvedAccommodation = day.accommodation
+            let resolvedAccommodationId = (day as unknown as Record<string, unknown>).accommodation_id as string | undefined
             if (day.isSameAccommodation || resolvedAccommodation.startsWith('續住')) {
               // 從「續住 (XXX)」提取飯店名，或往前找上一天的住宿
               const match = resolvedAccommodation.match(/續住\s*[（(](.+?)[）)]/)
               if (match) {
                 resolvedAccommodation = match[1]
-              } else if (day_index > 0) {
-                // 往前找最近一天有住宿的
+              }
+              // 往前找最近一天有住宿的（取名稱 + resource_id）
+              if (day_index > 0) {
                 for (let prev = day_index - 1; prev >= 0; prev--) {
                   const prevAcc = daily_itinerary[prev].accommodation
                   if (prevAcc && !prevAcc.startsWith('續住')) {
-                    resolvedAccommodation = prevAcc
+                    if (!match) resolvedAccommodation = prevAcc
+                    // 續住也帶上前一天的 accommodation_id
+                    if (!resolvedAccommodationId) {
+                      resolvedAccommodationId = (daily_itinerary[prev] as unknown as Record<string, unknown>).accommodation_id as string | undefined
+                    }
                     break
                   }
                 }
@@ -328,7 +334,6 @@ export function useSyncItineraryToCore() {
             )
             
             if (!already_exists) {
-              const accommodationId = (day as unknown as Record<string, unknown>).accommodation_id as string | undefined
               const item = accommodationToItem(
                 resolvedAccommodation,
                 day_number,
@@ -337,7 +342,7 @@ export function useSyncItineraryToCore() {
                 itinerary_id,
                 tour_id,
                 workspace_id,
-                accommodationId
+                resolvedAccommodationId
               )
               if (item) new_items.push(item)
             }
