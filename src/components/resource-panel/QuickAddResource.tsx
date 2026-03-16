@@ -55,25 +55,37 @@ export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourc
 
     try {
       const table = TABLE_MAP[type] as 'attractions' | 'hotels' | 'restaurants'
-      const insertData: Record<string, unknown> = {
-        name: trimmed,
-        country_id: countryId,
-        data_verified: false,
-        workspace_id: user?.workspace_id,
+      // 目前只有 attractions 支援快速新增（hotels/restaurants 需要 city_id）
+      if (type !== 'attraction') {
+        setError('酒店/餐廳需要城市資訊，請到資料庫頁面新增')
+        setSaving(false)
+        return
       }
 
-      // hotels/restaurants 沒有 data_verified 欄位
-      if (type !== 'attraction') {
-        delete insertData.data_verified
+      const workspaceId = user?.workspace_id
+      if (!workspaceId) {
+        setError('未登入或缺少 workspace')
+        setSaving(false)
+        return
+      }
+
+      const insertData = {
+        name: trimmed,
+        country_id: countryId,
+        workspace_id: workspaceId,
+        data_verified: false,
       }
 
       const { data, error: dbError } = await supabase
-        .from(table)
-        .insert(insertData as never)
+        .from('attractions')
+        .insert(insertData)
         .select('id, name')
         .single()
 
-      if (dbError) throw dbError
+      if (dbError) {
+        logger.error('DB error detail:', JSON.stringify(dbError), 'insertData:', JSON.stringify(insertData))
+        throw new Error(dbError.message || dbError.code || JSON.stringify(dbError))
+      }
       const result = data as { id: string; name: string }
 
       logger.log(`快速新增${TYPE_LABELS[type]}:`, result)
