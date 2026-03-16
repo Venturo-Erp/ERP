@@ -17,7 +17,7 @@ import type { FlightInfo } from '@/types/flight.types'
 import { logger } from '@/lib/utils/logger'
 import { alert } from '@/lib/ui/alert-dialog'
 import { stripHtml } from '@/lib/utils/string-utils'
-import { syncItineraryToQuote } from '@/lib/utils/itinerary-quote-sync'
+// syncItineraryToQuote 已移除 — 報價單直接讀核心表
 import { useSyncItineraryToCore } from '@/features/tours/hooks/useTourItineraryItems'
 import { isFeatureAvailable } from '@/lib/feature-restrictions'
 import { toast } from 'sonner'
@@ -738,7 +738,7 @@ export function usePackageItinerary({
         }
 
         logger.log('行程表更新成功')
-        await syncItineraryToQuote(existingItinerary.id, formattedDailyItinerary)
+        // syncItineraryToQuote 已移除 — 報價單直接讀核心表
 
         // 同步到核心表
         syncToCore({

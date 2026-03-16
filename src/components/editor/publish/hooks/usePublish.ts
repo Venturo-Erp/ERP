@@ -10,7 +10,7 @@ import { generateUUID } from '@/lib/utils/uuid'
 import { logger } from '@/lib/utils/logger'
 import { alert } from '@/lib/ui/alert-dialog'
 import { stripHtml } from '@/lib/utils/string-utils'
-import { syncItineraryToQuote } from '@/lib/utils/itinerary-quote-sync'
+// syncItineraryToQuote 已移除 — 報價單直接讀核心表
 
 interface PublishButtonData extends Partial<TourFormData> {
   id?: string
@@ -155,10 +155,7 @@ export function usePublish({
           onVersionRecordsChange?.(updatedRecords)
         }
 
-        // 同步餐食/住宿資料到關聯的報價單
-        if (data.dailyItinerary && data.dailyItinerary.length > 0) {
-          await syncItineraryToQuote(data.id, data.dailyItinerary as any)
-        }
+        // 報價單直接讀核心表，不需要同步
       } else {
         const firstVersion: ItineraryVersionRecord = {
           id: generateUUID(),
@@ -217,10 +214,7 @@ export function usePublish({
       await updateItinerary(data.id, { version_records: updatedRecords })
       onVersionRecordsChange?.(updatedRecords)
 
-      // 同步餐食/住宿資料到關聯的報價單
-      if (data.dailyItinerary && data.dailyItinerary.length > 0) {
-        await syncItineraryToQuote(data.id, data.dailyItinerary as any)
-      }
+      // 報價單直接讀核心表，不需要同步
 
       setVersionNote('')
       onVersionChange(updatedRecords.length - 1, newVersion)
