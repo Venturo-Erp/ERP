@@ -445,25 +445,25 @@ export function RequirementsList({
           </div>
         ) : (
           <div className="border border-border rounded-lg overflow-hidden bg-card">
-            <table className="w-full text-sm table-fixed">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="bg-morandi-container/50 border-b border-border">
                   <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[70px]">
                     {COMP_REQUIREMENTS_LABELS.日期}
                   </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[140px]">
+                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[180px]">
                     {COMP_REQUIREMENTS_LABELS.供應商}
                   </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[200px]">
+                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary">
                     {COMP_REQUIREMENTS_LABELS.項目說明}
                   </th>
-                  <th className="px-3 py-2.5 text-right font-medium text-morandi-primary w-[80px]">
+                  <th className="px-3 py-2.5 text-right font-medium text-morandi-primary w-[100px]">
                     {COMP_REQUIREMENTS_LABELS.成本}
                   </th>
                   <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[80px]">
                     {COMP_REQUIREMENTS_LABELS.狀態}
                   </th>
-                  <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[70px]">
+                  <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[90px]">
                     {COMP_REQUIREMENTS_LABELS.操作}
                   </th>
                 </tr>
