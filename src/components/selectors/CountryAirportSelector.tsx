@@ -5,6 +5,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { Input } from '@/components/ui/input'
 import { FormDialog } from '@/components/dialog/form-dialog'
 import { useAirports, type Airport } from '@/features/tours/hooks/useAirports'
+import { useCountries } from '@/data'  // 🔧 核心表架構
 import { SELECTORS_LABELS } from './constants/labels'
 
 // 判斷是否為台灣（支援多種寫法）
@@ -15,12 +16,14 @@ const isTaiwanCountry = (country: string | undefined | null): boolean => {
 }
 
 interface CountryAirportSelectorProps {
-  /** 國家值 */
-  country: string
+  /** 國家值（向下相容，優先用 countryName）*/
+  country?: string
+  /** 國家名稱（新版，建議使用） */
+  countryName?: string
   /** 機場代碼值 */
   airportCode: string
-  /** 國家變更回調 */
-  onCountryChange: (country: string, airportCode: string) => void
+  /** 國家變更回調（🔧 核心表架構：傳完整資料）*/
+  onCountryChange: (data: { id: string; name: string; code: string }) => void
   /** 機場代碼變更回調 */
   onAirportChange: (airportCode: string, cityName: string) => void
   /** 是否在 Dialog 內使用（禁用 Portal） */
@@ -33,6 +36,7 @@ interface CountryAirportSelectorProps {
 
 export function CountryAirportSelector({
   country,
+  countryName,
   airportCode,
   onCountryChange,
   onAirportChange,
@@ -40,6 +44,9 @@ export function CountryAirportSelector({
   showLabels = true,
   countries: externalCountries,
 }: CountryAirportSelectorProps) {
+  // 🔧 核心表架構：用 useCountries 取得完整資料
+  const { items: countriesData } = useCountries()
+  
   const {
     countries: hookCountries,
     countryNameToCode,
@@ -48,6 +55,9 @@ export function CountryAirportSelector({
     addAirport,
     loading,
   } = useAirports({ enabled: true })
+  
+  // 向下相容：優先用 countryName，fallback 到 country
+  const displayCountryName = countryName || country || ''
 
   // 新增機場 Dialog 狀態
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
@@ -65,16 +75,16 @@ export function CountryAirportSelector({
 
   // 根據國家取得機場列表
   const availableAirports = useMemo(() => {
-    if (!country) return []
+    if (!displayCountryName) return []
 
-    const airports = getAirportsByCountry(country)
+    const airports = getAirportsByCountry(displayCountryName)
 
     // favorite 已經排在前面了（由 useAirports 處理）
     return airports.map(a => ({
       value: a.iata_code,
       label: formatAirportLabel(a),
     }))
-  }, [country, getAirportsByCountry])
+  }, [displayCountryName, getAirportsByCountry])
 
   // 格式化機場顯示（只顯示城市名）
   function formatAirportLabel(airport: Airport): string {
@@ -82,13 +92,26 @@ export function CountryAirportSelector({
     return `${city} (${airport.iata_code})`
   }
 
-  // 處理國家變更
+  // 🔧 核心表架構：傳完整國家資料
   const handleCountryChange = useCallback(
-    (newCountry: string) => {
-      const isTaiwan = isTaiwanCountry(newCountry)
-      onCountryChange(newCountry, isTaiwan ? 'TW' : '')
+    (newCountryName: string) => {
+      // 從核心表取得完整資料
+      const countryData = countriesData.find(c => c.name === newCountryName)
+      
+      if (!countryData) {
+        console.warn(`找不到國家資料: ${newCountryName}`)
+        // Fallback：用舊格式（但這不應該發生）
+        return
+      }
+      
+      // 傳完整資料給父元件
+      onCountryChange({
+        id: countryData.id,
+        name: countryData.name,
+        code: countryData.code || '',
+      })
     },
-    [onCountryChange]
+    [countriesData, onCountryChange]
   )
 
   // 處理機場代碼變更
@@ -114,7 +137,7 @@ export function CountryAirportSelector({
     const code = newIataCode.trim().toUpperCase()
     if (code.length !== 3) return
 
-    const countryCode = countryNameToCode[country]
+    const countryCode = countryNameToCode[displayCountryName]
     if (!countryCode) return
 
     setIsSubmitting(true)
@@ -133,7 +156,7 @@ export function CountryAirportSelector({
     }
   }
 
-  const isTaiwan = isTaiwanCountry(country)
+  const isTaiwan = isTaiwanCountry(displayCountryName)
 
   return (
     <div className="space-y-3">
@@ -146,7 +169,7 @@ export function CountryAirportSelector({
             </label>
           )}
           <Combobox
-            value={country}
+            value={displayCountryName}
             onChange={handleCountryChange}
             options={countryOptions}
             placeholder={SELECTORS_LABELS.SELECT_7169}

@@ -156,13 +156,12 @@ export function useTourOperations(params: UseTourOperationsParams) {
           }
         }
 
-        // 🔧 修復：從 country name 查詢 country_id（前端傳的是國家名稱如「越南」，需轉成 id 如 "vietnam"）
+        // 🔧 核心表架構：直接使用前端傳來的 countryId，不查詢
         let countryId: string | undefined
         if (newTour.countryCode === '__custom__') {
           countryId = undefined // 自訂國家不設 country_id
-        } else if (newTour.countryCode) {
-          const country = countries.find(c => c.name === newTour.countryCode)
-          countryId = country?.id
+        } else {
+          countryId = newTour.countryId  // ✅ 直接使用
         }
 
         const tourData = {
@@ -193,14 +192,18 @@ export function useTourOperations(params: UseTourOperationsParams) {
 
         const createdTour = await actions.create(tourData)
 
-        // 更新國家和城市的使用次數（讓常用的排在前面）
+        // 🔧 核心表架構：直接用 entity update，不查詢
         if (countryId) {
+          // 直接更新 usage_count（核心表 CRUD）
           const country = countries.find(c => c.id === countryId)
-          if (country?.name) {
-            incrementCountryUsage(country.name)
+          if (country) {
+            await updateCountry(countryId, { 
+              usage_count: (country.usage_count || 0) + 1 
+            })
           }
         }
-        if (cityName) {
+        if (cityName && newTour.cityCode) {
+          // 城市也直接更新
           incrementCityUsage(cityName)
         }
 

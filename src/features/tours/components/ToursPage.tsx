@@ -203,7 +203,9 @@ export const ToursPage: React.FC = () => {
     setNewTour({
       name: '',
       tour_type: 'proposal',
-      countryCode: '',
+      countryId: '',       // 🔧 核心表架構
+      countryName: '',     // 🔧 核心表架構
+      countryCode: '',     // 🔧 核心表架構
       cityCode: '',
       departure_date: '',
       return_date: '',
@@ -221,7 +223,9 @@ export const ToursPage: React.FC = () => {
     setNewTour({
       name: '',
       tour_type: 'template',
-      countryCode: '',
+      countryId: '',       // 🔧 核心表架構
+      countryName: '',     // 🔧 核心表架構
+      countryCode: '',     // 🔧 核心表架構
       cityCode: '',
       departure_date: '',
       return_date: '',

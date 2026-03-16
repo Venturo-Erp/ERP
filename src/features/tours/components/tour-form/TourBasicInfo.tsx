@@ -17,13 +17,15 @@ interface TourBasicInfoProps {
 export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
   const isProposalOrTemplate = newTour.tour_type === 'proposal' || newTour.tour_type === 'template'
 
-  // 處理國家變更
-  const handleCountryChange = (country: string, airportCode: string) => {
+  // 🔧 核心表架構：接收完整國家資料
+  const handleCountryChange = (data: { id: string; name: string; code: string }) => {
     setNewTour(prev => ({
       ...prev,
-      countryCode: country,
-      cityCode: airportCode,
-      cityName: airportCode === 'TW' ? '台灣' : '',
+      countryId: data.id,      // countries.id
+      countryName: data.name,  // 顯示用
+      countryCode: data.code,  // 用於過濾機場
+      cityCode: '',            // 清空機場
+      cityName: '',
     }))
   }
 
@@ -51,7 +53,7 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
 
       {/* 國家/機場選擇 - 使用共用組件 */}
       <CountryAirportSelector
-        country={newTour.countryCode}
+        countryName={newTour.countryName}
         airportCode={newTour.cityCode}
         onCountryChange={handleCountryChange}
         onAirportChange={handleAirportChange}
