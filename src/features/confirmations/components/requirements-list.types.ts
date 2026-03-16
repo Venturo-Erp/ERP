@@ -25,6 +25,21 @@ export interface RequirementsListProps {
 // 需求單
 // ============================================
 
+export interface TourRequestItem {
+  room_type: string
+  quantity: number
+  nights?: number
+  note?: string
+  category?: string
+  title?: string
+  service_date?: string | null
+  unit_cost?: number | null
+  quoted_cost?: number | null
+  day_number?: number
+  resource_id?: string | null
+  itinerary_item_id?: string | null
+}
+
 export interface TourRequest {
   id: string
   code: string
@@ -42,8 +57,13 @@ export interface TourRequest {
   resource_id?: string | null
   resource_type?: string | null
   request_type?: string | null
-  items?: Array<{ room_type: string; quantity: number; nights?: number; note?: string; category?: string; title?: string; service_date?: string | null; unit_cost?: number | null; day_number?: number }> | null
+  items?: TourRequestItem[] | null
   created_at?: string | null
+  sent_at?: string | null
+  sent_via?: string | null
+  sent_to?: string | null
+  replied_at?: string | null
+  confirmed_at?: string | null
 }
 
 // ============================================

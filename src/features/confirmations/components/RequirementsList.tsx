@@ -38,6 +38,7 @@ import type { FlightInfo } from '@/types/flight.types'
 import type {
   RequirementsListProps,
   TourRequest,
+  TourRequestItem,
   QuoteItem,
   CategoryKey,
 } from './requirements-list.types'
@@ -109,6 +110,16 @@ export function RequirementsList({
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [coreItems, setCoreItems] = useState<TourItineraryItem[]>([])
 
+  // 委託展開狀態
+  const [expandedDelegation, setExpandedDelegation] = useState<string | null>(null)
+  // 發送方式 state（draft→sent 用）
+  const [sentViaInput, setSentViaInput] = useState<string>('line')
+  const [sentToInput, setSentToInput] = useState<string>('')
+  // 回覆報價編輯（sent→replied 用）
+  const [editingItemCosts, setEditingItemCosts] = useState<Record<number, number | null>>({})
+  // 狀態操作 loading
+  const [statusUpdating, setStatusUpdating] = useState(false)
+
   // ============================================
   // 載入資料
   // ============================================
@@ -135,7 +146,7 @@ export function RequirementsList({
           const { data: requests } = await supabase
             .from('tour_requests')
             .select(
-              'id, code, category, supplier_name, supplier_id, title, service_date, quantity, notes, status, quoted_cost, hidden, resource_id, resource_type, request_type, items, created_at'
+              'id, code, category, supplier_name, supplier_id, title, service_date, quantity, notes, status, quoted_cost, hidden, resource_id, resource_type, request_type, items, created_at, sent_at, sent_via, sent_to, replied_at, confirmed_at'
             )
             .eq('tour_id', tourId)
             .order('created_at', { ascending: true })
@@ -558,6 +569,157 @@ export function RequirementsList({
     },
     []
   )
+
+  // ============================================
+  // 委託狀態流轉
+  // ============================================
+
+  // draft → sent
+  const handleMarkSent = useCallback(async (delegation: TourRequest) => {
+    if (!user?.workspace_id) return
+    setStatusUpdating(true)
+    try {
+      const { error } = await supabase
+        .from('tour_requests')
+        .update({
+          status: 'sent',
+          sent_at: new Date().toISOString(),
+          sent_via: sentViaInput || null,
+          sent_to: sentToInput || null,
+          updated_by: user.id,
+        } as never)
+        .eq('id', delegation.id)
+      if (error) throw error
+      toast({ title: '已標記為已發出' })
+      setSentViaInput('line')
+      setSentToInput('')
+      await loadData(false)
+    } catch (error) {
+      logger.error('標記已發出失敗', error)
+      toast({ title: '操作失敗', variant: 'destructive' })
+    } finally {
+      setStatusUpdating(false)
+    }
+  }, [user, sentViaInput, sentToInput, toast, loadData])
+
+  // sent → replied（可以更新每個 item 的 quoted_cost）
+  const handleMarkReplied = useCallback(async (delegation: TourRequest) => {
+    if (!user?.workspace_id) return
+    setStatusUpdating(true)
+    try {
+      // 合併 editingItemCosts 到 items
+      const updatedItems = (delegation.items || []).map((item, idx) => {
+        const editedCost = editingItemCosts[idx]
+        if (editedCost !== undefined && editedCost !== null) {
+          return { ...item, quoted_cost: editedCost }
+        }
+        return item
+      })
+
+      const { error } = await supabase
+        .from('tour_requests')
+        .update({
+          status: 'replied',
+          replied_at: new Date().toISOString(),
+          items: updatedItems as never,
+          updated_by: user.id,
+        } as never)
+        .eq('id', delegation.id)
+      if (error) throw error
+      toast({ title: '已標記為已回覆' })
+      setEditingItemCosts({})
+      await loadData(false)
+    } catch (error) {
+      logger.error('標記已回覆失敗', error)
+      toast({ title: '操作失敗', variant: 'destructive' })
+    } finally {
+      setStatusUpdating(false)
+    }
+  }, [user, editingItemCosts, toast, loadData])
+
+  // replied → confirmed + 回填世界樹
+  const handleMarkConfirmed = useCallback(async (delegation: TourRequest) => {
+    if (!user?.workspace_id || !tourId) return
+    setStatusUpdating(true)
+    try {
+      // 1. 更新 tour_requests 狀態
+      const { error } = await supabase
+        .from('tour_requests')
+        .update({
+          status: 'confirmed',
+          confirmed_at: new Date().toISOString(),
+          confirmed_by: user.id,
+          confirmed_by_name: user.display_name || user.chinese_name || '',
+          updated_by: user.id,
+        } as never)
+        .eq('id', delegation.id)
+      if (error) throw error
+
+      // 2. 回填世界樹：把 quoted_cost 寫回 tour_itinerary_items.unit_cost
+      const items = delegation.items || []
+      const costDiffs: string[] = []
+
+      for (const item of items) {
+        const quotedCost = item.quoted_cost
+        if (quotedCost === undefined || quotedCost === null) continue
+
+        // 用 resource_id 或 itinerary_item_id 找到對應的 core item
+        const resourceId = item.resource_id
+        const itineraryItemId = item.itinerary_item_id
+
+        let matchingCoreItem: TourItineraryItem | undefined
+
+        if (itineraryItemId) {
+          matchingCoreItem = coreItems.find(c => c.id === itineraryItemId)
+        }
+        if (!matchingCoreItem && resourceId) {
+          matchingCoreItem = coreItems.find(c => c.resource_id === resourceId)
+        }
+
+        if (!matchingCoreItem) continue
+
+        const oldCost = matchingCoreItem.unit_price
+        if (oldCost !== quotedCost) {
+          // 更新 tour_itinerary_items
+          const { error: updateError } = await supabase
+            .from('tour_itinerary_items')
+            .update({ unit_price: quotedCost, updated_by: user.id } as never)
+            .eq('id', matchingCoreItem.id)
+          if (updateError) {
+            logger.error('回填成本失敗', updateError)
+            continue
+          }
+
+          const itemTitle = item.title || matchingCoreItem.title || '項目'
+          const diff = (oldCost || 0) - quotedCost
+          if (oldCost && diff !== 0) {
+            const direction = diff > 0 ? `多賺 $${diff.toLocaleString()}` : `多花 $${Math.abs(diff).toLocaleString()}`
+            costDiffs.push(`${itemTitle} $${oldCost.toLocaleString()} → $${quotedCost.toLocaleString()}，${direction}`)
+          } else {
+            costDiffs.push(`${itemTitle} 成本設為 $${quotedCost.toLocaleString()}`)
+          }
+        }
+      }
+
+      // 3. 顯示結果
+      if (costDiffs.length > 0) {
+        toast({
+          title: '已確認預訂，成本已回填',
+          description: costDiffs.join('；'),
+        })
+      } else {
+        toast({ title: '已確認預訂' })
+      }
+
+      // 4. 刷新 coreItems
+      await loadData(false)
+    } catch (error) {
+      logger.error('確認預訂失敗', error)
+      toast({ title: '操作失敗', variant: 'destructive' })
+    } finally {
+      setStatusUpdating(false)
+    }
+  }, [user, tourId, coreItems, toast, loadData])
 
   // 🆕 產生單一供應商的需求單
   const handleGenerateSupplierRequest = useCallback(
@@ -1064,7 +1226,8 @@ export function RequirementsList({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-morandi-container/50 border-b border-border">
-                      <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[120px]">類型</th>
+                      <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[32px]"></th>
+                      <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[100px]">類型</th>
                       <th className="px-3 py-2.5 text-left font-medium text-morandi-primary">供應商</th>
                       <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[80px]">項目數</th>
                       <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[90px]">狀態</th>
@@ -1076,8 +1239,24 @@ export function RequirementsList({
                       const badge = STATUS_BADGE[d.status || 'draft'] || STATUS_BADGE.draft
                       const itemCount = Array.isArray(d.items) ? d.items.length : 0
                       const typeLabel = TYPE_LABELS[d.request_type || ''] || d.request_type || '-'
+                      const isExpanded = expandedDelegation === d.id
                       return (
-                        <tr key={d.id} className="border-t border-border/50 hover:bg-morandi-container/20">
+                        <React.Fragment key={d.id}>
+                        <tr
+                          className={cn(
+                            'border-t border-border/50 hover:bg-morandi-container/20 cursor-pointer',
+                            isExpanded && 'bg-morandi-container/30'
+                          )}
+                          onClick={() => {
+                            setExpandedDelegation(isExpanded ? null : d.id)
+                            setEditingItemCosts({})
+                            setSentViaInput('line')
+                            setSentToInput('')
+                          }}
+                        >
+                          <td className="px-3 py-2.5 text-center">
+                            {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                          </td>
                           <td className="px-3 py-2.5">
                             <span className="text-xs bg-morandi-container/50 px-2 py-0.5 rounded">
                               {typeLabel}
@@ -1094,6 +1273,129 @@ export function RequirementsList({
                             {d.created_at ? new Date(d.created_at).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }) : '-'}
                           </td>
                         </tr>
+                        {/* 展開詳情 */}
+                        {isExpanded && (
+                          <tr>
+                            <td colSpan={6} className="px-4 py-3 bg-morandi-container/10 border-t border-border/30">
+                              {/* items 明細 */}
+                              <div className="mb-3">
+                                <table className="w-full text-xs border border-border/50 rounded">
+                                  <thead>
+                                    <tr className="bg-morandi-container/30">
+                                      <th className="px-2 py-1.5 text-left">項目</th>
+                                      <th className="px-2 py-1.5 text-left">日期</th>
+                                      <th className="px-2 py-1.5 text-center">數量</th>
+                                      <th className="px-2 py-1.5 text-right">
+                                        {d.status === 'sent' ? '報價成本（可編輯）' : '報價成本'}
+                                      </th>
+                                      <th className="px-2 py-1.5 text-left">備註</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {(d.items || []).map((item, idx) => (
+                                      <tr key={idx} className="border-t border-border/30">
+                                        <td className="px-2 py-1.5">
+                                          {item.title || item.room_type || '-'}
+                                        </td>
+                                        <td className="px-2 py-1.5">
+                                          {item.service_date ? formatDate(item.service_date) : (item.day_number ? `Day ${item.day_number}` : '-')}
+                                        </td>
+                                        <td className="px-2 py-1.5 text-center">{item.quantity || '-'}</td>
+                                        <td className="px-2 py-1.5 text-right">
+                                          {d.status === 'sent' ? (
+                                            <input
+                                              type="number"
+                                              className="w-24 px-1.5 py-0.5 border border-border rounded text-right text-xs"
+                                              placeholder="報價"
+                                              value={editingItemCosts[idx] !== undefined ? (editingItemCosts[idx] ?? '') : (item.quoted_cost ?? '')}
+                                              onClick={(e) => e.stopPropagation()}
+                                              onChange={(e) => {
+                                                const val = e.target.value ? Number(e.target.value) : null
+                                                setEditingItemCosts(prev => ({ ...prev, [idx]: val }))
+                                              }}
+                                            />
+                                          ) : (
+                                            item.quoted_cost ? `$${item.quoted_cost.toLocaleString()}` : '-'
+                                          )}
+                                        </td>
+                                        <td className="px-2 py-1.5 text-muted-foreground">
+                                          {item.note || '-'}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+
+                              {/* 時間軸資訊 */}
+                              <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
+                                {d.sent_at && <span>發出：{new Date(d.sent_at).toLocaleString('zh-TW')} {d.sent_via && `(${d.sent_via})`}</span>}
+                                {d.replied_at && <span>回覆：{new Date(d.replied_at).toLocaleString('zh-TW')}</span>}
+                                {d.confirmed_at && <span>確認：{new Date(d.confirmed_at).toLocaleString('zh-TW')}</span>}
+                              </div>
+
+                              {/* 狀態操作按鈕 */}
+                              <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+                                {d.status === 'draft' && (
+                                  <>
+                                    <select
+                                      value={sentViaInput}
+                                      onChange={(e) => setSentViaInput(e.target.value)}
+                                      className="text-xs border border-border rounded px-2 py-1"
+                                    >
+                                      <option value="line">LINE</option>
+                                      <option value="email">Email</option>
+                                      <option value="fax">傳真</option>
+                                      <option value="phone">電話</option>
+                                    </select>
+                                    <input
+                                      type="text"
+                                      placeholder="發送對象"
+                                      value={sentToInput}
+                                      onChange={(e) => setSentToInput(e.target.value)}
+                                      className="text-xs border border-border rounded px-2 py-1 w-32"
+                                    />
+                                    <Button
+                                      size="sm"
+                                      disabled={statusUpdating}
+                                      onClick={() => handleMarkSent(d)}
+                                      className="h-7 px-3 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                                    >
+                                      {statusUpdating ? <Loader2 size={12} className="animate-spin mr-1" /> : <Send size={12} className="mr-1" />}
+                                      標記已發出
+                                    </Button>
+                                  </>
+                                )}
+                                {d.status === 'sent' && (
+                                  <Button
+                                    size="sm"
+                                    disabled={statusUpdating}
+                                    onClick={() => handleMarkReplied(d)}
+                                    className="h-7 px-3 text-xs bg-yellow-600 hover:bg-yellow-700 text-white"
+                                  >
+                                    {statusUpdating && <Loader2 size={12} className="animate-spin mr-1" />}
+                                    供應商已回覆
+                                  </Button>
+                                )}
+                                {d.status === 'replied' && (
+                                  <Button
+                                    size="sm"
+                                    disabled={statusUpdating}
+                                    onClick={() => handleMarkConfirmed(d)}
+                                    className="h-7 px-3 text-xs bg-green-600 hover:bg-green-700 text-white"
+                                  >
+                                    {statusUpdating && <Loader2 size={12} className="animate-spin mr-1" />}
+                                    確認預訂
+                                  </Button>
+                                )}
+                                {d.status === 'confirmed' && (
+                                  <span className="text-xs text-green-600 font-medium">已確認預訂</span>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                        </React.Fragment>
                       )
                     })}
                   </tbody>
