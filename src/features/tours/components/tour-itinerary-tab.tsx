@@ -34,7 +34,7 @@ import { useAuthStore } from '@/stores'
 import { useItineraries, createItinerary, updateItinerary } from '@/data'
 import { updateTour } from '@/data/entities/tours'
 import { useFlightSearch } from '@/hooks'
-import { syncItineraryToQuote } from '@/lib/utils/itinerary-quote-sync'
+// syncItineraryToQuote 已移除 — 報價單直接讀核心表，不需要同步
 import { useSyncItineraryToCore, useTourItineraryItemsByTour } from '@/features/tours/hooks/useTourItineraryItems'
 import type { DailyItinerary } from '@/components/editor/tour-form/types'
 import type { Tour } from '@/stores/types'
@@ -581,12 +581,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         }
       }
 
-      // Background sync (fire-and-forget, don't block UI)
+      // Background sync: 只寫核心表（報價單/需求單直接讀核心表，不需要同步）
       if (savedItineraryId) {
-        syncItineraryToQuote(savedItineraryId, fullDailyItinerary).catch(err => {
-          logger.error('Quote sync error (background):', err)
-        })
-
         syncToCore({
           itinerary_id: savedItineraryId,
           tour_id: tour.id,
