@@ -19,6 +19,7 @@ import {
   ChevronRight,
   ClipboardList,
   Printer,
+  Send,
 } from 'lucide-react'
 // TODO: [品質優化] 將 supabase 操作搬到 confirmations/services/ — 目前因 setState 交錯暫保留
 import { supabase } from '@/lib/supabase/client'
@@ -134,7 +135,7 @@ export function RequirementsList({
           const { data: requests } = await supabase
             .from('tour_requests')
             .select(
-              'id, code, category, supplier_name, supplier_id, title, service_date, quantity, notes, status, quoted_cost, hidden, resource_id, resource_type, request_type, items'
+              'id, code, category, supplier_name, supplier_id, title, service_date, quantity, notes, status, quoted_cost, hidden, resource_id, resource_type, request_type, items, created_at'
             )
             .eq('tour_id', tourId)
             .order('created_at', { ascending: true })
@@ -1025,6 +1026,82 @@ export function RequirementsList({
           </div>
           </>
         )}
+
+        {/* ============================================ */}
+        {/* 已發委託區塊 */}
+        {/* ============================================ */}
+        {(() => {
+          // 篩選有 request_type + items 的委託記錄
+          const delegations = existingRequests.filter(
+            r => r.request_type && r.items && Array.isArray(r.items) && r.items.length > 0
+          )
+          if (delegations.length === 0) return null
+
+          const STATUS_BADGE: Record<string, { label: string; className: string }> = {
+            draft: { label: '草稿', className: 'bg-gray-100 text-gray-600' },
+            sent: { label: '已發出', className: 'bg-blue-100 text-blue-700' },
+            replied: { label: '已回覆', className: 'bg-yellow-100 text-yellow-700' },
+            confirmed: { label: '已確認', className: 'bg-green-100 text-green-700' },
+            closed: { label: '已結案', className: 'bg-purple-100 text-purple-700' },
+          }
+
+          const TYPE_LABELS: Record<string, string> = {
+            mixed: '綜合',
+            transport: '交通',
+            accommodation: '住宿',
+            meal: '餐食',
+            activity: '活動',
+          }
+
+          return (
+            <div className="mt-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Send size={16} className="text-morandi-gold" />
+                <span className="font-medium text-morandi-primary">已發委託</span>
+                <span className="text-xs text-morandi-secondary">({delegations.length})</span>
+              </div>
+              <div className="border border-border rounded-lg overflow-hidden bg-card">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-morandi-container/50 border-b border-border">
+                      <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[120px]">類型</th>
+                      <th className="px-3 py-2.5 text-left font-medium text-morandi-primary">供應商</th>
+                      <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[80px]">項目數</th>
+                      <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[90px]">狀態</th>
+                      <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[100px]">建立日期</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {delegations.map(d => {
+                      const badge = STATUS_BADGE[d.status || 'draft'] || STATUS_BADGE.draft
+                      const itemCount = Array.isArray(d.items) ? d.items.length : 0
+                      const typeLabel = TYPE_LABELS[d.request_type || ''] || d.request_type || '-'
+                      return (
+                        <tr key={d.id} className="border-t border-border/50 hover:bg-morandi-container/20">
+                          <td className="px-3 py-2.5">
+                            <span className="text-xs bg-morandi-container/50 px-2 py-0.5 rounded">
+                              {typeLabel}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5 font-medium">{d.supplier_name || '-'}</td>
+                          <td className="px-3 py-2.5 text-center">{itemCount}</td>
+                          <td className="px-3 py-2.5 text-center">
+                            <span className={cn('inline-flex items-center px-2 py-0.5 rounded text-xs font-medium', badge.className)}>
+                              {badge.label}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5 text-xs text-muted-foreground">
+                            {d.created_at ? new Date(d.created_at).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }) : '-'}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        })()}
       </div>
 
       {/* 從核心表產生需求單 Dialog */}
@@ -1045,10 +1122,12 @@ export function RequirementsList({
         open={showAssignDialog}
         onClose={() => { setShowAssignDialog(false); setCheckedItems(new Set()) }}
         tour={tour}
+        tourId={tourId || ''}
         items={checkedQuoteItems}
         totalPax={totalPax}
         ageBreakdown={ageBreakdownText}
         formatDate={formatDate}
+        onSave={() => loadData(false)}
       />
 
       {/* 交通需求 Dialog */}
@@ -1058,9 +1137,11 @@ export function RequirementsList({
           onClose={() => { setShowTransportDialog(false); setSelectedTransport(null) }}
           supplierName={selectedTransport.name}
           tour={tour}
+          tourId={tourId || ''}
           days={transportDays}
           totalPax={totalPax}
           ageBreakdown={ageBreakdownText}
+          onSave={() => loadData(false)}
         />
       )}
 

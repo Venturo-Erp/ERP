@@ -42,7 +42,8 @@ export interface TourRequest {
   resource_id?: string | null
   resource_type?: string | null
   request_type?: string | null
-  items?: Array<{ room_type: string; quantity: number; nights?: number; note?: string }> | null
+  items?: Array<{ room_type: string; quantity: number; nights?: number; note?: string; category?: string; title?: string; service_date?: string | null; unit_cost?: number | null; day_number?: number }> | null
+  created_at?: string | null
 }
 
 // ============================================

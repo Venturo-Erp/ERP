@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { Bus, Printer } from 'lucide-react'
+import { useState, useMemo, useCallback } from 'react'
+import { Bus, Printer, Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,10 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/stores'
+import { useToast } from '@/components/ui/use-toast'
+import { logger } from '@/lib/utils/logger'
 import type { Tour } from '@/stores/types'
 
 interface DayInfo {
@@ -26,9 +30,11 @@ interface TransportRequirementDialogProps {
   onClose: () => void
   supplierName: string
   tour: Tour | null
+  tourId: string
   days: DayInfo[]
   totalPax: number | null
   ageBreakdown?: string
+  onSave?: () => void
 }
 
 export function TransportRequirementDialog({
@@ -36,14 +42,19 @@ export function TransportRequirementDialog({
   onClose,
   supplierName,
   tour,
+  tourId,
   days,
   totalPax,
   ageBreakdown,
+  onSave,
 }: TransportRequirementDialogProps) {
+  const { user } = useAuthStore()
+  const { toast } = useToast()
   const [selectedDays, setSelectedDays] = useState<Set<number>>(
     new Set(days.map(d => d.dayNumber))
   )
   const [note, setNote] = useState('')
+  const [saving, setSaving] = useState(false)
 
   const toggleDay = (dayNum: number) => {
     setSelectedDays(prev => {
@@ -61,6 +72,52 @@ export function TransportRequirementDialog({
     () => days.filter(d => selectedDays.has(d.dayNumber)).sort((a, b) => a.dayNumber - b.dayNumber),
     [days, selectedDays]
   )
+
+  const handleSaveRequest = useCallback(async () => {
+    if (selectedDaysList.length === 0 || !tourId || !user?.workspace_id) return false
+
+    setSaving(true)
+    try {
+      const sb = createSupabaseBrowserClient()
+      const requestItems = selectedDaysList.map(d => ({
+        category: 'transport',
+        title: `Day ${d.dayNumber} ${d.route}`,
+        service_date: d.date || null,
+        quantity: totalPax || null,
+        day_number: d.dayNumber,
+      }))
+
+      const { error } = await sb.from('tour_requests').insert({
+        workspace_id: user.workspace_id,
+        tour_id: tourId,
+        request_type: 'transport',
+        supplier_name: supplierName,
+        items: requestItems,
+        status: 'draft',
+        note: note.trim() || null,
+        created_by: user.id,
+      } as never)
+
+      if (error) throw error
+
+      toast({ title: `交通委託已儲存：${supplierName}（${selectedDaysList.length} 天）` })
+      onSave?.()
+      return true
+    } catch (err) {
+      logger.error('儲存交通委託失敗:', err)
+      toast({ title: '儲存交通委託失敗', variant: 'destructive' })
+      return false
+    } finally {
+      setSaving(false)
+    }
+  }, [selectedDaysList, tourId, user, supplierName, totalPax, note, toast, onSave])
+
+  const handlePrintAndSave = useCallback(async () => {
+    if (selectedDaysList.length === 0) return
+    const saved = await handleSaveRequest()
+    if (saved === false) return
+    handlePrint()
+  }, [selectedDaysList, handleSaveRequest])
 
   const handlePrint = () => {
     if (selectedDaysList.length === 0) return
@@ -187,12 +244,12 @@ export function TransportRequirementDialog({
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>取消</Button>
           <Button
-            onClick={handlePrint}
-            disabled={selectedDays.size === 0}
+            onClick={handlePrintAndSave}
+            disabled={selectedDays.size === 0 || saving}
             className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
           >
-            <Printer size={14} className="mr-1" />
-            列印需求單
+            {saving ? <Loader2 size={14} className="animate-spin mr-1" /> : <Printer size={14} className="mr-1" />}
+            儲存並列印
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Printer, Search, Building2 } from 'lucide-react'
+import { Printer, Search, Building2, Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/stores'
+import { useToast } from '@/components/ui/use-toast'
+import { logger } from '@/lib/utils/logger'
 import type { Tour } from '@/stores/types'
 import type { QuoteItem } from './requirements-list.types'
 
@@ -25,10 +28,12 @@ interface AssignSupplierDialogProps {
   open: boolean
   onClose: () => void
   tour: Tour | null
+  tourId: string
   items: SelectedItem[]
   totalPax: number | null
   ageBreakdown: string
   formatDate: (d: string | null | undefined) => string
+  onSave?: () => void
 }
 
 interface Supplier {
@@ -52,16 +57,21 @@ export function AssignSupplierDialog({
   open,
   onClose,
   tour,
+  tourId,
   items,
   totalPax,
   ageBreakdown,
   formatDate,
+  onSave,
 }: AssignSupplierDialogProps) {
+  const { user } = useAuthStore()
+  const { toast } = useToast()
   const [supplierSearch, setSupplierSearch] = useState('')
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null)
   const [customName, setCustomName] = useState('')
   const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const supabase = createSupabaseBrowserClient()
 
@@ -93,6 +103,59 @@ export function AssignSupplierDialog({
     acc[category].push(item)
     return acc
   }, {})
+
+  // 存入 tour_requests
+  const handleSaveRequest = useCallback(async () => {
+    if (!canPrint || !tourId || !user?.workspace_id) return
+
+    setSaving(true)
+    try {
+      const requestItems = items.map(({ category, item }) => ({
+        category,
+        title: item.title || item.supplierName || '',
+        service_date: item.serviceDate || null,
+        quantity: item.quantity,
+        unit_cost: item.quotedPrice || null,
+        itinerary_item_id: item.itinerary_item_id || null,
+      }))
+
+      const { error } = await supabase.from('tour_requests').insert({
+        workspace_id: user.workspace_id,
+        tour_id: tourId,
+        request_type: 'mixed',
+        supplier_id: selectedSupplier?.id || null,
+        supplier_name: supplierName,
+        supplier_contact: selectedSupplier?.contact_person || null,
+        items: requestItems,
+        status: 'draft',
+        note: null,
+        created_by: user.id,
+      } as never)
+
+      if (error) throw error
+
+      toast({ title: `委託已儲存：${supplierName}（${items.length} 項）` })
+      onSave?.()
+    } catch (err) {
+      logger.error('儲存委託失敗:', err)
+      toast({ title: '儲存委託失敗', variant: 'destructive' })
+      setSaving(false)
+      return false
+    } finally {
+      setSaving(false)
+    }
+    return true
+  }, [canPrint, tourId, user, items, selectedSupplier, supplierName, supabase, toast, onSave])
+
+  const handlePrintAndSave = useCallback(async () => {
+    if (!canPrint) return
+
+    // 先存再印
+    const saved = await handleSaveRequest()
+    if (saved === false) return
+
+    handlePrint()
+  }, [canPrint, handleSaveRequest])
 
   const handlePrint = useCallback(() => {
     if (!canPrint) return
@@ -264,12 +327,12 @@ export function AssignSupplierDialog({
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>取消</Button>
           <Button
-            onClick={handlePrint}
-            disabled={!canPrint}
+            onClick={handlePrintAndSave}
+            disabled={!canPrint || saving}
             className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
           >
-            <Printer size={14} className="mr-1" />
-            列印需求單
+            {saving ? <Loader2 size={14} className="animate-spin mr-1" /> : <Printer size={14} className="mr-1" />}
+            儲存並列印
           </Button>
         </DialogFooter>
       </DialogContent>
