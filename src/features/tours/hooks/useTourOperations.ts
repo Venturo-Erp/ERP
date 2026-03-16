@@ -8,8 +8,9 @@ import { logger } from '@/lib/utils/logger'
 import { NewTourData } from '../types'
 import { OrderFormData } from '@/features/orders/components/add-order-form'
 import type { CreateInput, UpdateInput } from '@/stores/core/types'
-import { useCountries, useCities, updateCountry, updateCity, updateQuote } from '@/data'
+import { updateCountry, updateCity, updateQuote } from '@/data'
 import { createOrder } from '@/data/entities/orders'
+import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { TOUR_OPERATIONS_LABELS } from '../constants/labels'
 import {
@@ -41,22 +42,36 @@ interface UseTourOperationsParams {
 
 export function useTourOperations(params: UseTourOperationsParams) {
   const router = useRouter()
-  const { items: countries } = useCountries()
-  const { items: cities } = useCities()
-
-  // Helper functions to increment usage count (replaces store methods)
-  const incrementCountryUsage = async (countryName: string) => {
-    const country = countries.find(c => c.name === countryName)
-    if (!country) return
-    const newCount = (country.usage_count || 0) + 1
-    await updateCountry(country.id, { usage_count: newCount })
+  // 🔧 核心表架構：直接用 entity update，不需要 find
+  const incrementCountryUsage = async (countryId: string) => {
+    if (!countryId) return
+    try {
+      // 用 supabase 原子操作取得 + 更新
+      const { data } = await supabase
+        .from('countries')
+        .select('usage_count')
+        .eq('id', countryId)
+        .single()
+      await updateCountry(countryId, { usage_count: ((data?.usage_count as number) || 0) + 1 })
+    } catch {
+      // 非關鍵操作，靜默處理
+    }
   }
 
   const incrementCityUsage = async (cityName: string) => {
-    const city = cities.find(c => c.name === cityName)
-    if (!city) return
-    const newCount = (city.usage_count || 0) + 1
-    await updateCity(city.id, { usage_count: newCount })
+    if (!cityName) return
+    try {
+      const { data } = await supabase
+        .from('cities')
+        .select('id, usage_count')
+        .eq('name', cityName)
+        .single()
+      if (data) {
+        await updateCity(data.id, { usage_count: ((data.usage_count as number) || 0) + 1 })
+      }
+    } catch {
+      // 非關鍵操作，靜默處理
+    }
   }
 
   const {
@@ -192,18 +207,11 @@ export function useTourOperations(params: UseTourOperationsParams) {
 
         const createdTour = await actions.create(tourData)
 
-        // 🔧 核心表架構：直接用 entity update，不查詢
+        // 🔧 核心表架構：直接用 id 更新 usage_count
         if (countryId) {
-          // 直接更新 usage_count（核心表 CRUD）
-          const country = countries.find(c => c.id === countryId)
-          if (country) {
-            await updateCountry(countryId, { 
-              usage_count: (country.usage_count || 0) + 1 
-            })
-          }
+          incrementCountryUsage(countryId)
         }
-        if (cityName && newTour.cityCode) {
-          // 城市也直接更新
+        if (cityName) {
           incrementCityUsage(cityName)
         }
 

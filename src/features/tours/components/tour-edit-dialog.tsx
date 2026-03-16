@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 import { Tour } from '@/stores/types'
 import { useTourEdit } from '../hooks/useTourEdit'
-import { BasicInfoSection } from './edit-dialog/BasicInfoSection'
 import { FlightInfoSection } from './edit-dialog/FlightInfoSection'
+import { CountryAirportSelector } from '@/components/selectors/CountryAirportSelector'
+import { Input } from '@/components/ui/input'
+import { SimpleDateInput } from '@/components/ui/simple-date-input'
 import { ItinerarySyncDialog } from './ItinerarySyncDialog'
 import { COMP_TOURS_LABELS } from '../constants/labels'
 
@@ -23,12 +25,8 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
     formData,
     setFormData,
     submitting,
-    activeCountries,
-    availableCities,
-    setAvailableCities,
     loadingOutbound,
     loadingReturn,
-    getCitiesByCountryId,
     updateFlightField,
     handleSearchOutbound,
     handleSearchReturn,
@@ -40,29 +38,27 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
     closeSyncDialog,
   } = useTourEdit({ tour, isOpen, onClose, onSuccess })
 
-  // 處理欄位變更
-  const handleFieldChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  // 處理國家變更
-  const handleCountryChange = (countryCode: string) => {
-    const selectedCountry = activeCountries.find(c => c.code === countryCode)
-    const cities =
-      countryCode === '__custom__'
-        ? []
-        : selectedCountry
-          ? getCitiesByCountryId(selectedCountry.id)
-          : []
-    setAvailableCities(cities)
+  // 🔧 核心表架構：國家變更 → 接收完整 {id, name, code}
+  const handleCountryChange = (data: { id: string; name: string; code: string }) => {
     setFormData(prev => ({
       ...prev,
-      countryCode,
-      cityCode: countryCode === '__custom__' ? '__custom__' : '',
+      countryId: data.id,
+      countryName: data.name,
+      airportCode: '',
+      airportCityName: '',
     }))
   }
 
-  // 處理出發日期變更（需要同時更新返回日期的最小值）
+  // 機場變更
+  const handleAirportChange = (airportCode: string, cityName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      airportCode,
+      airportCityName: cityName,
+    }))
+  }
+
+  // 處理出發日期變更
   const handleDepartureDateChange = (departure_date: string) => {
     setFormData(prev => ({
       ...prev,
@@ -100,15 +96,82 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            {/* 基本資訊區塊 */}
-            <BasicInfoSection
-              formData={formData}
-              activeCountries={activeCountries}
-              availableCities={availableCities}
-              onFieldChange={handleFieldChange}
+            {/* 旅遊團名稱 */}
+            <div>
+              <label className="text-sm font-medium text-morandi-primary">
+                旅遊團名稱
+              </label>
+              <Input
+                value={formData.name}
+                onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+
+            {/* 🔧 核心表架構：統一用 CountryAirportSelector */}
+            <CountryAirportSelector
+              countryName={formData.countryName}
+              airportCode={formData.airportCode}
               onCountryChange={handleCountryChange}
-              onDepartureDateChange={handleDepartureDateChange}
+              onAirportChange={handleAirportChange}
+              disablePortal
+              showLabels
             />
+
+            {/* 日期 */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-morandi-primary">出發日期</label>
+                <SimpleDateInput
+                  value={formData.departure_date}
+                  onChange={handleDepartureDateChange}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-morandi-primary">返回日期</label>
+                <SimpleDateInput
+                  value={formData.return_date}
+                  onChange={return_date => setFormData(prev => ({ ...prev, return_date }))}
+                  min={formData.departure_date}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+
+            {/* 描述 */}
+            <div>
+              <label className="text-sm font-medium text-morandi-primary">描述</label>
+              <Input
+                value={formData.description}
+                onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+
+            {/* 選項 */}
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="edit-isSpecial"
+                  checked={formData.isSpecial}
+                  onChange={e => setFormData(prev => ({ ...prev, isSpecial: e.target.checked }))}
+                  className="rounded"
+                />
+                <label htmlFor="edit-isSpecial" className="text-sm text-morandi-primary">特殊團</label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="edit-enableCheckin"
+                  checked={formData.enable_checkin}
+                  onChange={e => setFormData(prev => ({ ...prev, enable_checkin: e.target.checked }))}
+                  className="rounded"
+                />
+                <label htmlFor="edit-enableCheckin" className="text-sm text-morandi-primary">開啟報到功能</label>
+              </div>
+            </div>
 
             {/* 航班資訊區塊 */}
             <FlightInfoSection

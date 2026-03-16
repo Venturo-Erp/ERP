@@ -1,10 +1,10 @@
 'use client'
 
 import { getTodayString } from '@/lib/utils/format-date'
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Tour, FlightInfo, Itinerary, DailyItineraryDay } from '@/stores/types'
 import type { Json } from '@/lib/supabase/types'
-import { useCountries, useCities } from '@/data'
+import { useCountries } from '@/data'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { mutate } from 'swr'
@@ -20,9 +20,11 @@ import { COMP_TOURS_LABELS } from '../constants/labels'
 
 export interface EditFormData {
   name: string
-  countryCode: string
-  cityCode: string
-  customLocation?: string
+  // 🔧 核心表架構：統一用 countryId + countryName + airportCode
+  countryId: string        // countries.id (如 "japan")
+  countryName: string      // 顯示用 (如 "日本")
+  airportCode: string      // IATA 碼 (如 "NRT")
+  airportCityName: string  // 城市名 (如 "東京")
   departure_date: string
   return_date: string
   description: string
@@ -69,13 +71,9 @@ export function useTourEdit(params: UseTourEditParams) {
   const { tour, isOpen, onClose, onSuccess } = params
 
   const { items: countries } = useCountries()
-  const { items: cities } = useCities()
 
   // Form state
   const [submitting, setSubmitting] = useState(false)
-  const [availableCities, setAvailableCities] = useState<
-    Array<{ id: string; code: string; name: string }>
-  >([])
   const initializedRef = useRef(false)
   const [loadingOutbound, setLoadingOutbound] = useState(false)
   const [loadingReturn, setLoadingReturn] = useState(false)
@@ -85,18 +83,12 @@ export function useTourEdit(params: UseTourEditParams) {
   const [syncInfo, setSyncInfo] = useState<ItinerarySyncInfo | null>(null)
   const [pendingUpdatedTour, setPendingUpdatedTour] = useState<Tour | null>(null)
 
-  // Helper function to get cities by country
-  const getCitiesByCountry = useCallback(
-    (countryId: string) => {
-      return cities.filter(c => c.country_id === countryId)
-    },
-    [cities]
-  )
-
   const [formData, setFormData] = useState<EditFormData>({
     name: '',
-    countryCode: '',
-    cityCode: '',
+    countryId: '',
+    countryName: '',
+    airportCode: '',
+    airportCityName: '',
     departure_date: '',
     return_date: '',
     description: '',
@@ -113,102 +105,32 @@ export function useTourEdit(params: UseTourEditParams) {
     }
   }, [isOpen])
 
-  // Get active countries
-  const activeCountries = useMemo(() => {
-    return countries
-      .filter(c => c.is_active)
-      .map(c => ({ id: c.id, code: c.code || '', name: c.name }))
-  }, [countries])
-
-  // Initialize form data (only once when dialog opens)
+  // 🔧 核心表架構：初始化表單，直接用 tour 的 country_id 和 airport_code
   useEffect(() => {
     if (!isOpen || !tour || initializedRef.current) return
 
-    // If country data not loaded yet, set basic data first
-    if (activeCountries.length === 0) {
-      const tourOutbound = tour.outbound_flight as FlightInfo | null
-      const tourReturn = tour.return_flight as FlightInfo | null
+    // 等核心表載入
+    if (countries.length === 0) return
 
-      setFormData({
-        name: tour.name,
-        countryCode: '__custom__',
-        cityCode: '__custom__',
-        customLocation: tour.location || undefined,
-        departure_date: tour.departure_date || '',
-        return_date: tour.return_date || '',
-        description: tour.description || '',
-        outboundFlight: tourOutbound || { ...emptyFlightInfo },
-        returnFlight: tourReturn || {
-          ...emptyFlightInfo,
-          departureAirport: '',
-          arrivalAirport: 'TPE',
-        },
-        isSpecial: tour.status === COMP_TOURS_LABELS.特殊團,
-        enable_checkin: tour.enable_checkin || false,
-      })
-      return
-    }
-
-    // Country data loaded, do full initialization
     initializedRef.current = true
 
-    let countryCode = ''
-    let cityCode = ''
-    let citiesList: Array<{ id: string; code: string; name: string }> = []
-
-    // Find by country_id and airport_code
-    if (tour.country_id && tour.airport_code) {
-      const matchedCountry = activeCountries.find(c => c.id === tour.country_id)
-      if (matchedCountry) {
-        countryCode = matchedCountry.code
-        citiesList = getCitiesByCountry(matchedCountry.id)
-          .filter(c => c.is_active)
-          .map(c => ({
-            id: c.id,
-            code: c.airport_code || '',
-            name: c.name,
-          }))
-        const matchedCity = citiesList.find(city => city.id === tour.airport_code)
-        if (matchedCity) {
-          cityCode = matchedCity.code
-        }
-      }
-    }
-
-    // Fallback: match by location text
-    if (!countryCode && tour.location) {
-      for (const country of activeCountries) {
-        const citiesInCountry = getCitiesByCountry(country.id)
-          .filter(c => c.is_active)
-          .map(c => ({
-            id: c.id,
-            code: c.airport_code || '',
-            name: c.name,
-          }))
-        const matchedCity = citiesInCountry.find(city => city.name === tour.location)
-        if (matchedCity) {
-          countryCode = country.code
-          cityCode = matchedCity.code
-          citiesList = citiesInCountry
-          break
-        }
-      }
-    }
-
-    if (!countryCode) {
-      countryCode = '__custom__'
-      cityCode = '__custom__'
+    // 從核心表查國家名稱
+    let countryId = tour.country_id || ''
+    let countryName = ''
+    if (countryId) {
+      const country = countries.find(c => c.id === countryId)
+      countryName = country?.name || ''
     }
 
     const tourOutbound = tour.outbound_flight as FlightInfo | null
     const tourReturn = tour.return_flight as FlightInfo | null
 
-    setAvailableCities(citiesList)
     setFormData({
       name: tour.name,
-      countryCode,
-      cityCode,
-      customLocation: countryCode === '__custom__' ? tour.location || undefined : undefined,
+      countryId,
+      countryName,
+      airportCode: tour.airport_code || '',
+      airportCityName: tour.location || '',
       departure_date: tour.departure_date || '',
       return_date: tour.return_date || '',
       description: tour.description || '',
@@ -221,22 +143,7 @@ export function useTourEdit(params: UseTourEditParams) {
       isSpecial: tour.status === COMP_TOURS_LABELS.特殊團,
       enable_checkin: tour.enable_checkin || false,
     })
-  }, [isOpen, tour, activeCountries, getCitiesByCountry])
-
-  // Get cities list by country id
-  const getCitiesByCountryId = useCallback(
-    (countryId: string) => {
-      return getCitiesByCountry(countryId)
-        .filter(c => c.is_active)
-        .map(c => ({
-          id: c.id,
-          code: c.airport_code || '',
-          name: c.name,
-          country_id: c.country_id,
-        }))
-    },
-    [getCitiesByCountry]
-  )
+  }, [isOpen, tour, countries])
 
   // Update flight field
   const updateFlightField = useCallback(
@@ -402,22 +309,9 @@ export function useTourEdit(params: UseTourEditParams) {
 
     setSubmitting(true)
     try {
-      // Find selected country and city
-      let location = formData.customLocation
-      let countryId = tour.country_id
-      let mainCityId = tour.airport_code
-
-      if (formData.countryCode !== '__custom__') {
-        const selectedCountry = activeCountries.find(c => c.code === formData.countryCode)
-        if (selectedCountry) {
-          countryId = selectedCountry.id
-          const selectedCity = availableCities.find(c => c.code === formData.cityCode)
-          if (selectedCity) {
-            mainCityId = selectedCity.id
-            location = selectedCity.name
-          }
-        }
-      }
+      // 🔧 核心表架構：直接用 formData 的值，不用反查
+      const countryId = formData.countryId || null
+      const location = formData.airportCityName || ''
 
       // Clean empty flight info (convert to Json for Supabase)
       const cleanFlightInfo = (flight: FlightInfo): Json | null => {
@@ -436,7 +330,7 @@ export function useTourEdit(params: UseTourEditParams) {
         name: formData.name.trim(),
         location,
         country_id: countryId,
-        airport_code: mainCityId,
+        airport_code: formData.airportCode || null,
         departure_date: formData.departure_date,
         return_date: formData.return_date,
         description: formData.description.trim(),
@@ -495,7 +389,7 @@ export function useTourEdit(params: UseTourEditParams) {
     } finally {
       setSubmitting(false)
     }
-  }, [tour, formData, activeCountries, availableCities, onSuccess, onClose, checkItinerarySync])
+  }, [tour, formData, onSuccess, onClose, checkItinerarySync])
 
   // Generate date label for itinerary day
   const generateDateLabel = useCallback((departureDate: string, dayIndex: number): string => {
@@ -626,12 +520,8 @@ export function useTourEdit(params: UseTourEditParams) {
     formData,
     setFormData,
     submitting,
-    activeCountries,
-    availableCities,
-    setAvailableCities,
     loadingOutbound,
     loadingReturn,
-    getCitiesByCountryId,
     updateFlightField,
     handleSearchOutbound,
     handleSearchReturn,
