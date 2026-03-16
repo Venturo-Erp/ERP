@@ -18,14 +18,16 @@ export function DroppableZone({ id, acceptType, children, className }: Droppable
   })
 
   const draggedType = active?.data.current?.type as string | undefined
-  const isCompatible = draggedType === acceptType
+  // 景點卡片（itinerary-attraction）也算 attraction 類型
+  const normalizedType = draggedType === 'itinerary-attraction' ? 'attraction' : draggedType
+  const isCompatible = normalizedType === acceptType
   const showHighlight = isOver && isCompatible
-  const showReject = isOver && !isCompatible
+  const showReject = isOver && draggedType !== undefined && !isCompatible
 
   const highlightStyles: Record<DropZoneAcceptType, string> = {
-    attraction: 'ring-2 ring-morandi-gold/60 bg-morandi-gold/10',
-    hotel: 'ring-2 ring-blue-500/60 bg-blue-500/10',
-    restaurant: 'ring-2 ring-orange-500/60 bg-orange-500/10',
+    attraction: 'ring-2 ring-morandi-gold/50 bg-morandi-gold/5',
+    hotel: 'ring-2 ring-morandi-gold/40 bg-morandi-gold/5',
+    restaurant: 'ring-2 ring-morandi-gold/40 bg-morandi-gold/5',
   }
 
   return (

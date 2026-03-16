@@ -297,17 +297,22 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 .filter(a => a.attraction_id)
                 .map(a => ({ id: a.attraction_id!, name: a.title || '' }))
 
-              // 🔧 修復重複：如果有景點卡片，route 要去掉景點名稱部分
-              // day.title = "清水寺 → 金閣寺 → 手動備註" → route 只保留手動備註
+              // 🔧 route 只保留手動備註，過濾掉預設文字和景點名稱
               let routeText = day.title || ''
-              if (attractions.length > 0) {
+              
+              // 過濾預設文字（這些只是 placeholder，不是真正的 route）
+              const defaultTexts = ['抵達目的地', '返回台灣']
+              const defaultPattern = /^第\s*\d+\s*天行程$/
+              if (defaultTexts.includes(routeText) || defaultPattern.test(routeText)) {
+                routeText = ''
+              }
+
+              if (attractions.length > 0 && routeText) {
                 const attractionNames = attractions.map(a => a.name).filter(Boolean)
-                // 從 title 中移除景點名稱，只留手動部分
                 let cleaned = routeText
                 for (const name of attractionNames) {
                   cleaned = cleaned.replace(name, '')
                 }
-                // 清理多餘的 → 分隔符
                 cleaned = cleaned.replace(/^[\s→]+|[\s→]+$/g, '').replace(/→\s*→/g, '→').trim()
                 routeText = cleaned
               }

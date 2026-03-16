@@ -42,16 +42,16 @@ export function SortableAttractionChip({ id, name, onRemove, dayIndex }: Sortabl
       style={style}
       className={`
         inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md
-        bg-blue-50 border border-blue-200 text-blue-700
+        bg-morandi-gold/10 border border-morandi-gold/30 text-morandi-primary
         text-sm cursor-grab active:cursor-grabbing
-        hover:bg-blue-100 hover:border-blue-300
+        hover:bg-morandi-gold/20 hover:border-morandi-gold/50
         transition-colors
-        ${isDragging ? 'shadow-lg ring-2 ring-blue-400' : ''}
+        ${isDragging ? 'shadow-lg ring-2 ring-morandi-gold/60' : ''}
       `}
     >
       <GripVertical
         size={12}
-        className="text-blue-400 shrink-0 cursor-grab"
+        className="text-morandi-gold/60 shrink-0 cursor-grab"
         {...attributes}
         {...listeners}
       />
@@ -59,7 +59,7 @@ export function SortableAttractionChip({ id, name, onRemove, dayIndex }: Sortabl
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); onRemove() }}
-        className="hover:text-destructive opacity-40 hover:opacity-100 transition-opacity ml-0.5"
+        className="text-morandi-muted hover:text-destructive opacity-60 hover:opacity-100 transition-opacity ml-0.5"
       >
         <X size={10} />
       </button>
