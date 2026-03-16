@@ -7,6 +7,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import React from 'react'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Loader2,
   AlertCircle,
@@ -26,6 +27,7 @@ import { useAuthStore } from '@/stores'
 import type { Tour } from '@/stores/types'
 import { RoomRequirementDialog } from './RoomRequirementDialog'
 import { TransportRequirementDialog } from './TransportRequirementDialog'
+import { AssignSupplierDialog } from './AssignSupplierDialog'
 // CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
@@ -89,6 +91,9 @@ export function RequirementsList({
     name: string
     resourceId: string | null
   } | null>(null)
+  // 勾選項目 + 發給供應商
+  const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set())
+  const [showAssignDialog, setShowAssignDialog] = useState(false)
 
 
   // 隱藏項目展開狀態
@@ -343,6 +348,33 @@ export function RequirementsList({
     })
   }, [])
 
+
+  // 勾選項目的 key
+  const getItemKey = (cat: string, item: QuoteItem, idx: number) =>
+    `${cat}::${item.resourceId || item.supplierName || item.title}::${item.serviceDate || idx}`
+
+  const toggleItem = (key: string) => {
+    setCheckedItems(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
+
+  const checkedQuoteItems = useMemo(() => {
+    const result: { category: string; item: QuoteItem }[] = []
+    for (const cat of CATEGORIES) {
+      const items = itemsByCategory[cat.key]
+      items.forEach((item, idx) => {
+        const key = getItemKey(cat.key, item, idx)
+        if (checkedItems.has(key)) {
+          result.push({ category: cat.key, item })
+        }
+      })
+    }
+    return result
+  }, [checkedItems, itemsByCategory])
 
   // 年齡分類文字
   const ageBreakdownText = useMemo(() => {
@@ -669,10 +701,53 @@ export function RequirementsList({
             </p>
           </div>
         ) : (
+          <>
+          {/* 勾選後的浮動操作列 */}
+          {checkedItems.size > 0 && (
+            <div className="mb-3 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5">
+              <span className="text-sm font-medium text-blue-700">
+                已選 {checkedItems.size} 項
+              </span>
+              <Button
+                size="sm"
+                onClick={() => setShowAssignDialog(true)}
+                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white h-7 px-3 text-xs"
+              >
+                <Printer size={12} className="mr-1" />
+                發給供應商
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCheckedItems(new Set())}
+                className="h-7 px-2 text-xs text-muted-foreground"
+              >
+                取消選取
+              </Button>
+            </div>
+          )}
           <div className="border border-border rounded-lg overflow-hidden bg-card">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-morandi-container/50 border-b border-border">
+                  <th className="px-2 py-2.5 text-center w-[40px]">
+                    <Checkbox
+                      checked={checkedItems.size > 0 && checkedItems.size === Object.values(itemsByCategory).flat().length}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          const allKeys = new Set<string>()
+                          CATEGORIES.forEach(cat => {
+                            itemsByCategory[cat.key].forEach((item, idx) => {
+                              allKeys.add(getItemKey(cat.key, item, idx))
+                            })
+                          })
+                          setCheckedItems(allKeys)
+                        } else {
+                          setCheckedItems(new Set())
+                        }
+                      }}
+                    />
+                  </th>
                   <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[70px]">
                     {COMP_REQUIREMENTS_LABELS.日期}
                   </th>
@@ -760,9 +835,16 @@ export function RequirementsList({
                       <tr
                         className={cn(
                           'border-t border-border/50 hover:bg-morandi-container/20',
-                          isHidden && 'bg-morandi-muted/5'
+                          isHidden && 'bg-morandi-muted/5',
+                          checkedItems.has(getItemKey(cat.key, item, idx)) && 'bg-blue-50/50'
                         )}
                       >
+                        <td className="px-2 py-2.5 text-center">
+                          <Checkbox
+                            checked={checkedItems.has(getItemKey(cat.key, item, idx))}
+                            onCheckedChange={() => toggleItem(getItemKey(cat.key, item, idx))}
+                          />
+                        </td>
                         <td className="px-3 py-2.5">{formatDate(item.serviceDate)}</td>
                         <td className="px-3 py-2.5">{item.supplierName || '-'}</td>
                         <td className="px-3 py-2.5">
@@ -865,6 +947,7 @@ export function RequirementsList({
                         return (
                           <tr className="bg-blue-50/30">
                             <td></td>
+                            <td></td>
                             <td colSpan={4} className="px-3 py-1.5">
                               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                                 <span className="font-medium text-blue-600">📋 房型需求：</span>
@@ -887,6 +970,7 @@ export function RequirementsList({
                   return (
                     <React.Fragment key={cat.key}>
                       <tr className="bg-morandi-container/30 border-t border-border">
+                        <td></td>
                         <td colSpan={3} className="px-3 py-2">
                           <div className="flex items-center gap-3">
                             <span className="font-medium text-morandi-primary">{cat.label}</span>
@@ -939,6 +1023,7 @@ export function RequirementsList({
               </tbody>
             </table>
           </div>
+          </>
         )}
       </div>
 
@@ -955,6 +1040,17 @@ export function RequirementsList({
           category={selectedCategory}
         />
       )}
+      {/* 勾選發給供應商 Dialog */}
+      <AssignSupplierDialog
+        open={showAssignDialog}
+        onClose={() => { setShowAssignDialog(false); setCheckedItems(new Set()) }}
+        tour={tour}
+        items={checkedQuoteItems}
+        totalPax={totalPax}
+        ageBreakdown={ageBreakdownText}
+        formatDate={formatDate}
+      />
+
       {/* 交通需求 Dialog */}
       {selectedTransport && (
         <TransportRequirementDialog
