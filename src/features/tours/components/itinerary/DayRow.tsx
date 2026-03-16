@@ -9,9 +9,23 @@ import {
   MapPin,
   X,
 } from 'lucide-react'
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
 import { COMP_TOURS_LABELS } from '../../constants/labels'
 import { DroppableZone } from './DroppableZone'
 import { MentionInput, type MentionInputHandle } from '../mention-input'
+import { SortableAttractionChip } from './SortableAttractionChip'
 
 export interface DailyScheduleItem {
   day: number
@@ -39,6 +53,7 @@ interface DayRowProps {
   isLast: boolean
   updateDaySchedule: (index: number, field: string, value: string | boolean | undefined) => void
   removeAttraction: (dayIdx: number, attractionId: string) => void
+  reorderAttractions: (dayIdx: number, newOrder: { id: string; name: string }[]) => void
   handleMentionSelect: (dayIdx: number, attraction: { id: string; name: string }) => void
   mentionInputRefs: React.MutableRefObject<Record<number, MentionInputHandle | null>>
   tourLocation: string
@@ -53,12 +68,28 @@ export function DayRow({
   isLast,
   updateDaySchedule,
   removeAttraction,
+  reorderAttractions,
   handleMentionSelect,
   mentionInputRefs,
   tourLocation,
   getDateLabel,
   getPreviousAccommodation,
 }: DayRowProps) {
+  // 景點拖曳排序
+  const attractionSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  )
+
+  const handleAttractionDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const attractions = day.attractions || []
+    const oldIndex = attractions.findIndex(a => a.id === active.id)
+    const newIndex = attractions.findIndex(a => a.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+    reorderAttractions(idx, arrayMove(attractions, oldIndex, newIndex))
+  }
+
   return (
     <tbody>
       <tr className={`${idx % 2 === 1 ? 'bg-muted/5' : ''} group hover:bg-morandi-gold/5`}>
@@ -72,17 +103,28 @@ export function DayRow({
         {/* Route -- attraction drop zone */}
         <td className="px-0 py-0 border border-border/20 align-middle">
           <DroppableZone id={`attraction-drop-${idx}`} acceptType="attraction">
-            {/* 景點卡片列 + 手動輸入 */}
+            {/* 景點卡片列（可拖曳排序）+ 手動輸入 */}
+            <DndContext
+              sensors={attractionSensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleAttractionDragEnd}
+            >
             <div className="flex flex-wrap items-center gap-1 px-2 min-h-[32px]">
-              {(day.attractions || []).map((a, aIdx) => (
-                <React.Fragment key={a.id}>
-                  {aIdx > 0 && <span className="text-muted-foreground text-xs">→</span>}
-                  <div className="inline-flex items-center gap-1 text-blue-600 text-base">
-                    <span>{a.name}</span>
-                    <button type="button" onClick={() => removeAttraction(idx, a.id)} className="hover:text-destructive opacity-40 hover:opacity-100 transition-opacity"><X size={10} /></button>
-                  </div>
-                </React.Fragment>
-              ))}
+              <SortableContext
+                items={(day.attractions || []).map(a => a.id)}
+                strategy={horizontalListSortingStrategy}
+              >
+                {(day.attractions || []).map((a, aIdx) => (
+                  <React.Fragment key={a.id}>
+                    {aIdx > 0 && <span className="text-muted-foreground text-xs select-none">→</span>}
+                    <SortableAttractionChip
+                      id={a.id}
+                      name={a.name}
+                      onRemove={() => removeAttraction(idx, a.id)}
+                    />
+                  </React.Fragment>
+                ))}
+              </SortableContext>
               {/* 手動輸入（沒有景點時顯示 placeholder，有景點時縮小） */}
               <MentionInput
                 ref={el => { mentionInputRefs.current[idx] = el }}
@@ -105,6 +147,7 @@ export function DayRow({
                 }`}
               />
             </div>
+            </DndContext>
           </DroppableZone>
         </td>
         {/* Tools */}

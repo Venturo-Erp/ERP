@@ -412,6 +412,16 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
     })
   }, [])
 
+  const reorderAttractions = useCallback((dayIdx: number, newOrder: { id: string; name: string }[]) => {
+    setDailySchedule(prev => {
+      const newSchedule = [...prev]
+      const day = newSchedule[dayIdx]
+      if (!day) return prev
+      newSchedule[dayIdx] = { ...day, attractions: newOrder }
+      return newSchedule
+    })
+  }, [])
+
   // Drag hook (extracted)
   const { activeDragName, handleDragStart, handleDragEnd } = useItineraryDrag(setDailySchedule)
 
@@ -1398,6 +1408,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 isLast={idx === dailySchedule.length - 1}
                 updateDaySchedule={updateDaySchedule}
                 removeAttraction={removeAttraction}
+                reorderAttractions={reorderAttractions}
                 handleMentionSelect={handleMentionSelect}
                 mentionInputRefs={mentionInputRefs}
                 tourLocation={tour.location || ''}
