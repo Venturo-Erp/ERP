@@ -31,12 +31,24 @@ empire/
 ├── LAWS.md                — 帝國法則
 ├── DECISIONS.md           — 決策記錄
 ├── MEMORY_UTOPIA.md       — 烏托記憶魔法（mem0 + OpenViking）
+├── CODEX.md               — 帝國暗號典（公民共通語言）
+├── FULL_FEATURE_MAP.md    — ERP 全功能地圖（147 個功能）
+├── INTEGRATION_MAP.md     — 跨系統整合地圖
 │
 ├── shops/erp/
 │   ├── GAME_GUIDE.md      — 🎮 ERP 遊戲攻略本（技能、狀態機、程式碼）
 │   ├── ARCHITECTURE_MAP.md — 系統架構地圖
 │   ├── BUSINESS_RULES_QUICK_REF.md — 業務規則速查
 │   └── README.md
+│
+├── shops/online/
+│   └── FEATURE_MAP.md     — B2C 功能地圖
+│
+├── shops/ai-console/
+│   └── FEATURE_MAP.md     — AI Console 功能地圖
+│
+├── shops/mcp-server/
+│   └── FEATURE_MAP.md     — MCP Server 工具清單
 │
 ├── handbooks/             — 角色手冊
 │   ├── FOR_WILLIAM.md     — 創世神儀表板
