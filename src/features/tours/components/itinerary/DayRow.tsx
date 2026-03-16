@@ -12,16 +12,7 @@ import {
 import {
   SortableContext,
   horizontalListSortingStrategy,
-  arrayMove,
 } from '@dnd-kit/sortable'
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core'
 import { COMP_TOURS_LABELS } from '../../constants/labels'
 import { DroppableZone } from './DroppableZone'
 import { MentionInput, type MentionInputHandle } from '../mention-input'
@@ -75,21 +66,6 @@ export function DayRow({
   getDateLabel,
   getPreviousAccommodation,
 }: DayRowProps) {
-  // 景點拖曳排序
-  const attractionSensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
-  )
-
-  const handleAttractionDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-    const attractions = day.attractions || []
-    const oldIndex = attractions.findIndex(a => a.id === active.id)
-    const newIndex = attractions.findIndex(a => a.id === over.id)
-    if (oldIndex === -1 || newIndex === -1) return
-    reorderAttractions(idx, arrayMove(attractions, oldIndex, newIndex))
-  }
-
   return (
     <tbody>
       <tr className={`${idx % 2 === 1 ? 'bg-muted/5' : ''} group hover:bg-morandi-gold/5`}>
@@ -103,12 +79,7 @@ export function DayRow({
         {/* Route -- attraction drop zone */}
         <td className="px-0 py-0 border border-border/20 align-middle">
           <DroppableZone id={`attraction-drop-${idx}`} acceptType="attraction">
-            {/* 景點卡片列（可拖曳排序）+ 手動輸入 */}
-            <DndContext
-              sensors={attractionSensors}
-              collisionDetection={closestCenter}
-              onDragEnd={handleAttractionDragEnd}
-            >
+            {/* 景點卡片列（可拖曳排序 + 跨天拖曳）*/}
             <div className="flex flex-wrap items-center gap-1 px-2 min-h-[32px]">
               <SortableContext
                 items={(day.attractions || []).map(a => a.id)}
@@ -120,6 +91,7 @@ export function DayRow({
                     <SortableAttractionChip
                       id={a.id}
                       name={a.name}
+                      dayIndex={idx}
                       onRemove={() => removeAttraction(idx, a.id)}
                     />
                   </React.Fragment>
@@ -147,7 +119,6 @@ export function DayRow({
                 }`}
               />
             </div>
-            </DndContext>
           </DroppableZone>
         </td>
         {/* Tools */}

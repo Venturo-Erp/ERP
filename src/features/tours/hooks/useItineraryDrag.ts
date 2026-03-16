@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { arrayMove } from '@dnd-kit/sortable'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import type { DailyScheduleItem } from '../components/itinerary/DayRow'
 
@@ -10,8 +11,10 @@ export function useItineraryDrag(
   const [activeDragName, setActiveDragName] = useState<string | null>(null)
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
-    const name = event.active.data.current?.resourceName as string | undefined
-    setActiveDragName(name || null)
+    const data = event.active.data.current
+    // 資源庫拖曳 or 景點卡片拖曳
+    const name = data?.resourceName || data?.attractionName || null
+    setActiveDragName(name as string | null)
   }, [])
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
@@ -22,6 +25,73 @@ export function useItineraryDrag(
     const overId = String(over.id)
     const data = active.data.current
     if (!data) return
+
+    // === 景點卡片排序（同天 or 跨天）===
+    if (data.type === 'itinerary-attraction') {
+      const sourceDayIndex = data.sourceDayIndex as number
+      const attractionId = data.attractionId as string
+      const attractionName = data.attractionName as string
+
+      // 目標是另一個景點卡片（同天排序）
+      const overData = over.data?.current
+      if (overData?.type === 'itinerary-attraction') {
+        const targetDayIndex = overData.sourceDayIndex as number
+        if (sourceDayIndex === targetDayIndex) {
+          // 同天內排序
+          setDailySchedule(prev => {
+            const newSchedule = [...prev]
+            const day = newSchedule[sourceDayIndex]
+            if (!day) return prev
+            const attractions = day.attractions || []
+            const oldIdx = attractions.findIndex(a => a.id === attractionId)
+            const newIdx = attractions.findIndex(a => a.id === String(over.id))
+            if (oldIdx === -1 || newIdx === -1) return prev
+            newSchedule[sourceDayIndex] = { ...day, attractions: arrayMove(attractions, oldIdx, newIdx) }
+            return newSchedule
+          })
+        } else {
+          // 跨天移動：從 source 移除，插入 target
+          setDailySchedule(prev => {
+            const newSchedule = [...prev]
+            const sourceDay = newSchedule[sourceDayIndex]
+            const targetDay = newSchedule[targetDayIndex]
+            if (!sourceDay || !targetDay) return prev
+            // 移除
+            const sourceAttractions = (sourceDay.attractions || []).filter(a => a.id !== attractionId)
+            // 插入到目標景點的位置
+            const targetAttractions = [...(targetDay.attractions || [])]
+            const targetIdx = targetAttractions.findIndex(a => a.id === String(over.id))
+            targetAttractions.splice(targetIdx, 0, { id: attractionId, name: attractionName })
+            newSchedule[sourceDayIndex] = { ...sourceDay, attractions: sourceAttractions }
+            newSchedule[targetDayIndex] = { ...targetDay, attractions: targetAttractions }
+            return newSchedule
+          })
+        }
+        return
+      }
+
+      // 目標是 drop zone（拖到空的一天）
+      const dropMatch = overId.match(/^attraction-drop-(\d+)$/)
+      if (dropMatch) {
+        const targetDayIndex = parseInt(dropMatch[1], 10)
+        if (targetDayIndex === sourceDayIndex) return // 同天，不用動
+        setDailySchedule(prev => {
+          const newSchedule = [...prev]
+          const sourceDay = newSchedule[sourceDayIndex]
+          const targetDay = newSchedule[targetDayIndex]
+          if (!sourceDay || !targetDay) return prev
+          const sourceAttractions = (sourceDay.attractions || []).filter(a => a.id !== attractionId)
+          const targetAttractions = [...(targetDay.attractions || []), { id: attractionId, name: attractionName }]
+          if (targetAttractions.some((a, i) => targetAttractions.findIndex(b => b.id === a.id) !== i)) return prev // 已存在
+          newSchedule[sourceDayIndex] = { ...sourceDay, attractions: sourceAttractions }
+          newSchedule[targetDayIndex] = { ...targetDay, attractions: targetAttractions }
+          return newSchedule
+        })
+        return
+      }
+      return
+    }
+
     const resourceType = data.type as string
     const resourceId = data.resourceId as string
     const resourceName = data.resourceName as string

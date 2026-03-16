@@ -11,7 +11,7 @@ interface SortableAttractionChipProps {
   onRemove: () => void
 }
 
-export function SortableAttractionChip({ id, name, onRemove }: SortableAttractionChipProps) {
+export function SortableAttractionChip({ id, name, onRemove, dayIndex }: SortableAttractionChipProps & { dayIndex?: number }) {
   const {
     attributes,
     listeners,
@@ -19,7 +19,15 @@ export function SortableAttractionChip({ id, name, onRemove }: SortableAttractio
     transform,
     transition,
     isDragging,
-  } = useSortable({ id })
+  } = useSortable({
+    id,
+    data: {
+      type: 'itinerary-attraction',
+      attractionId: id,
+      attractionName: name,
+      sourceDayIndex: dayIndex,
+    },
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),
