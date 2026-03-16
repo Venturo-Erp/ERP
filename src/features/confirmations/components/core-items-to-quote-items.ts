@@ -94,8 +94,9 @@ export function coreItemsToQuoteItems(
   // 轉換合併後的住宿
   const accommodationQuoteItems: QuoteItem[] = mergedAccommodation.map(item => {
     const startDate = item._startDay ? calculateDate(item._startDay) : null
-    const endDate = item._endDay !== item._startDay ? calculateDate(item._endDay) : null
-    const serviceDate = endDate ? `${startDate}~${endDate}` : startDate
+    // 退房日 = 最後入住日 + 1（旅遊業慣例：入住~退房）
+    const checkoutDate = calculateDate(item._endDay + 1)
+    const serviceDate = item._nights > 1 ? `${startDate}~${checkoutDate}` : startDate
     const title = item.title || ''
     const supplierName = item.resource_name || title
     const key = `accommodation-${supplierName}-${title}-${serviceDate || ''}`
