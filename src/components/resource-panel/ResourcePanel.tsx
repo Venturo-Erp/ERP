@@ -42,6 +42,7 @@ function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
       type: resource.type,
       resourceId: resource.id,
       resourceName: resource.name,
+      dataVerified: resource.data_verified ?? true,
     },
   })
 

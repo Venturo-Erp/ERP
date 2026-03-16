@@ -11,7 +11,7 @@ interface SortableAttractionChipProps {
   onRemove: () => void
 }
 
-export function SortableAttractionChip({ id, name, onRemove, dayIndex }: SortableAttractionChipProps & { dayIndex?: number }) {
+export function SortableAttractionChip({ id, name, onRemove, dayIndex, verified }: SortableAttractionChipProps & { dayIndex?: number; verified?: boolean }) {
   const {
     attributes,
     listeners,
@@ -25,6 +25,7 @@ export function SortableAttractionChip({ id, name, onRemove, dayIndex }: Sortabl
       type: 'itinerary-attraction',
       attractionId: id,
       attractionName: name,
+      attractionVerified: verified,
       sourceDayIndex: dayIndex,
     },
   })
@@ -42,16 +43,18 @@ export function SortableAttractionChip({ id, name, onRemove, dayIndex }: Sortabl
       style={style}
       className={`
         inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md
-        bg-morandi-gold/10 border border-morandi-gold/30 text-morandi-primary
-        text-sm cursor-grab active:cursor-grabbing
-        hover:bg-morandi-gold/20 hover:border-morandi-gold/50
-        transition-colors
+        text-sm cursor-grab active:cursor-grabbing transition-colors
+        ${verified === false
+          ? 'bg-amber-50 border border-amber-400/50 text-amber-800 hover:bg-amber-100 hover:border-amber-400'
+          : 'bg-morandi-gold/10 border border-morandi-gold/30 text-morandi-primary hover:bg-morandi-gold/20 hover:border-morandi-gold/50'
+        }
         ${isDragging ? 'shadow-lg ring-2 ring-morandi-gold/60' : ''}
       `}
     >
+      {verified === false && <span className="text-amber-500 text-xs mr-0.5">⚠</span>}
       <GripVertical
         size={12}
-        className="text-morandi-gold/60 shrink-0 cursor-grab"
+        className={verified === false ? 'text-amber-400/60 shrink-0 cursor-grab' : 'text-morandi-gold/60 shrink-0 cursor-grab'}
         {...attributes}
         {...listeners}
       />

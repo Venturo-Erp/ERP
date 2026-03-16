@@ -45,6 +45,7 @@ import { ResourcePanel } from '@/components/resource-panel/ResourcePanel'
 import { type MentionInputHandle } from './mention-input'
 import { DayRow, type DailyScheduleItem } from './itinerary/DayRow'
 import { useItineraryDrag } from '../hooks/useItineraryDrag'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 
 interface TourItineraryTabProps {
   tour: Tour
@@ -249,7 +250,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
             const coreAccomByDay: Record<number, string> = {}
             const coreAccomIdByDay: Record<number, string> = {}
             const coreMealIdsByDay: Record<number, { breakfast?: string; lunch?: string; dinner?: string }> = {}
-            const coreActivitiesByDay: Record<number, Array<{ title: string; attraction_id?: string }>> = {}
+            const coreActivitiesByDay: Record<number, Array<{ title: string; attraction_id?: string; verified?: boolean }>> = {}
             for (const item of coreItems) {
               const dn = item.day_number
               if (!dn) continue
@@ -269,6 +270,23 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               } else if (item.category === 'activities') {
                 if (!coreActivitiesByDay[dn]) coreActivitiesByDay[dn] = []
                 coreActivitiesByDay[dn].push({ title: item.title || '', attraction_id: item.resource_id || undefined })
+              }
+            }
+
+            // 查詢所有景點的驗證狀態
+            const allAttractionIds = Object.values(coreActivitiesByDay)
+              .flat()
+              .filter(a => a.attraction_id)
+              .map(a => a.attraction_id!)
+            const verifiedMap: Record<string, boolean> = {}
+            if (allAttractionIds.length > 0) {
+              const sb = createSupabaseBrowserClient()
+              const { data: verifiedData } = await sb
+                .from('attractions')
+                .select('id, data_verified')
+                .in('id', allAttractionIds)
+              for (const v of verifiedData || []) {
+                verifiedMap[v.id] = v.data_verified ?? true
               }
             }
 
@@ -295,7 +313,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               const activities = coreActs || day.activities || []
               const attractions = activities
                 .filter(a => a.attraction_id)
-                .map(a => ({ id: a.attraction_id!, name: a.title || '' }))
+                .map(a => ({ id: a.attraction_id!, name: a.title || '', verified: verifiedMap[a.attraction_id!] ?? true }))
 
               // 🔧 route 只保留手動備註，過濾掉預設文字和景點名稱
               let routeText = day.title || ''

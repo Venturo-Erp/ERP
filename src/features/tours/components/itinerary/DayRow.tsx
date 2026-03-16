@@ -27,7 +27,7 @@ export interface DailyScheduleItem {
   lunchSelf?: boolean
   dinnerSelf?: boolean
   sameAsPrevious?: boolean
-  attractions?: { id: string; name: string }[]
+  attractions?: { id: string; name: string; verified?: boolean }[]
   note?: string
   accommodationId?: string
   mealIds?: {
@@ -44,7 +44,7 @@ interface DayRowProps {
   isLast: boolean
   updateDaySchedule: (index: number, field: string, value: string | boolean | undefined) => void
   removeAttraction: (dayIdx: number, attractionId: string) => void
-  reorderAttractions: (dayIdx: number, newOrder: { id: string; name: string }[]) => void
+  reorderAttractions: (dayIdx: number, newOrder: { id: string; name: string; verified?: boolean }[]) => void
   handleMentionSelect: (dayIdx: number, attraction: { id: string; name: string }) => void
   mentionInputRefs: React.MutableRefObject<Record<number, MentionInputHandle | null>>
   tourLocation: string
@@ -92,6 +92,7 @@ export function DayRow({
                       id={a.id}
                       name={a.name}
                       dayIndex={idx}
+                      verified={a.verified}
                       onRemove={() => removeAttraction(idx, a.id)}
                     />
                   </React.Fragment>

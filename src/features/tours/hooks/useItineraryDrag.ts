@@ -31,6 +31,7 @@ export function useItineraryDrag(
       const sourceDayIndex = data.sourceDayIndex as number
       const attractionId = data.attractionId as string
       const attractionName = data.attractionName as string
+      const attractionVerified = data.attractionVerified as boolean | undefined
 
       // 目標是另一個景點卡片（同天排序）
       const overData = over.data?.current
@@ -61,7 +62,7 @@ export function useItineraryDrag(
             // 插入到目標景點的位置
             const targetAttractions = [...(targetDay.attractions || [])]
             const targetIdx = targetAttractions.findIndex(a => a.id === String(over.id))
-            targetAttractions.splice(targetIdx, 0, { id: attractionId, name: attractionName })
+            targetAttractions.splice(targetIdx, 0, { id: attractionId, name: attractionName, verified: attractionVerified })
             newSchedule[sourceDayIndex] = { ...sourceDay, attractions: sourceAttractions }
             newSchedule[targetDayIndex] = { ...targetDay, attractions: targetAttractions }
             return newSchedule
@@ -81,7 +82,7 @@ export function useItineraryDrag(
           const targetDay = newSchedule[targetDayIndex]
           if (!sourceDay || !targetDay) return prev
           const sourceAttractions = (sourceDay.attractions || []).filter(a => a.id !== attractionId)
-          const targetAttractions = [...(targetDay.attractions || []), { id: attractionId, name: attractionName }]
+          const targetAttractions = [...(targetDay.attractions || []), { id: attractionId, name: attractionName, verified: attractionVerified }]
           if (targetAttractions.some((a, i) => targetAttractions.findIndex(b => b.id === a.id) !== i)) return prev // 已存在
           newSchedule[sourceDayIndex] = { ...sourceDay, attractions: sourceAttractions }
           newSchedule[targetDayIndex] = { ...targetDay, attractions: targetAttractions }
@@ -95,6 +96,7 @@ export function useItineraryDrag(
     const resourceType = data.type as string
     const resourceId = data.resourceId as string
     const resourceName = data.resourceName as string
+    const dataVerified = data.dataVerified as boolean | undefined
 
     // Parse drop zone ID: {zoneType}-drop-{dayIndex}
     const dropMatch = overId.match(/^(attraction|hotel|meal-breakfast|meal-lunch|meal-dinner)-drop-(\d+)$/)
@@ -115,7 +117,7 @@ export function useItineraryDrag(
         if (!day) return prev
         const existing = day.attractions || []
         if (existing.some(a => a.id === resourceId)) return prev
-        const newAttractions = [...existing, { id: resourceId, name: resourceName }]
+        const newAttractions = [...existing, { id: resourceId, name: resourceName, verified: dataVerified ?? true }]
         // 不再 append 到 route 文字 — 景點以卡片顯示，route 留給手動備註
         newSchedule[dayIndex] = { ...day, attractions: newAttractions }
         return newSchedule
