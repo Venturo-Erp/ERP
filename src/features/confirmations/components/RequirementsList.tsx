@@ -551,9 +551,7 @@ export function RequirementsList({
                           </div>
                         </td>
                         <td className="px-3 py-2.5 text-right font-medium text-morandi-primary">
-                          {existingRequest?.quoted_cost
-                            ? `$${existingRequest.quoted_cost.toLocaleString()}`
-                            : '-'}
+                          {item.quotedPrice ? `$${item.quotedPrice.toLocaleString()}` : '-'}
                         </td>
                         <td className="px-3 py-2.5 text-center">
                           <span
