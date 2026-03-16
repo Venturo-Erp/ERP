@@ -503,15 +503,21 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         }
       })
 
-      // 建立展示資料（只存展示設定，不存實際資料）
+      // 🔧 修復：daily_itinerary 必須保留完整資料（activities, meals, accommodation）
+      // 否則重新載入時景點/住宿/餐食全部消失
       const displayDailyItinerary = fullDailyItinerary.map(day => ({
         dayLabel: day.dayLabel,
         date: day.date,
         title: day.title,
         highlight: day.highlight || '',
         description: day.description || '',
+        activities: day.activities || [],
+        meals: day.meals,
+        accommodation: day.accommodation || '',
         images: day.images || [],
         isSameAccommodation: day.isSameAccommodation || false,
+        accommodation_id: day.accommodation_id || undefined,
+        meal_ids: day.meal_ids || undefined,
       }))
 
       const itineraryData = {
