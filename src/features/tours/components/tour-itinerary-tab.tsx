@@ -388,6 +388,11 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         newSchedule[index] = { ...newSchedule[index], accommodation: '', accommodationId: undefined }
         return newSchedule
       }
+      // 取消續住 → 清空住宿欄讓用戶重新選擇
+      if (field === 'sameAsPrevious' && value === false) {
+        newSchedule[index] = { ...newSchedule[index], sameAsPrevious: false, accommodation: '', accommodationId: undefined }
+        return newSchedule
+      }
       if (field === 'meals.breakfast' && value === '') {
         newSchedule[index] = { ...newSchedule[index], meals: { ...newSchedule[index].meals, breakfast: '' }, mealIds: { ...newSchedule[index].mealIds, breakfast: undefined } }
         return newSchedule
