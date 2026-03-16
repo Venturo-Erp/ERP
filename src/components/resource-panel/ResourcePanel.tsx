@@ -252,7 +252,11 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
   }, [resolvedCountryId, selectedRegion])
 
   // ── 第四步：載入資源 ──
+  // 🔧 如果有 countryId prop 但 resolvedCountryId 還沒解析完，不要先載全部
+  const isResolving = !!countryId && !resolvedCountryId
   useEffect(() => {
+    if (isResolving) return  // 等待國家解析完成
+
     const supabase = createSupabaseBrowserClient()
 
     const fetchResources = async (
@@ -309,7 +313,7 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
     void fetchResources('attractions', 'attraction')
     void fetchResources('hotels', 'hotel', ', star_rating')
     void fetchResources('restaurants', 'restaurant')
-  }, [resolvedCountryId, selectedRegion, selectedCity])
+  }, [resolvedCountryId, selectedRegion, selectedCity, isResolving])
 
   // 搜尋過濾
   const filteredResources = useMemo(() => {
