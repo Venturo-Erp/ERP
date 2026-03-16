@@ -156,12 +156,12 @@ export function useTourOperations(params: UseTourOperationsParams) {
           }
         }
 
-        // 🔧 修復：從 country code 查詢 country_id（前端傳的是 code 如 "JP"，需轉成 id 如 "japan"）
+        // 🔧 修復：從 country name 查詢 country_id（前端傳的是國家名稱如「越南」，需轉成 id 如 "vietnam"）
         let countryId: string | undefined
         if (newTour.countryCode === '__custom__') {
           countryId = undefined // 自訂國家不設 country_id
         } else if (newTour.countryCode) {
-          const country = countries.find(c => c.code === newTour.countryCode)
+          const country = countries.find(c => c.name === newTour.countryCode)
           countryId = country?.id
         }
 
