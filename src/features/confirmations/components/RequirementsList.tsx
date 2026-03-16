@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores'
 import type { Tour } from '@/stores/types'
 import { RoomRequirementDialog } from './RoomRequirementDialog'
+import { TransportRequirementDialog } from './TransportRequirementDialog'
 // CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
@@ -75,6 +76,11 @@ export function RequirementsList({
     resourceId: string | null
     serviceDate: string | null
     nights: number
+  } | null>(null)
+  const [showTransportDialog, setShowTransportDialog] = useState(false)
+  const [selectedTransport, setSelectedTransport] = useState<{
+    name: string
+    resourceId: string | null
   } | null>(null)
 
 
@@ -178,6 +184,31 @@ export function RequirementsList({
     [coreItems, calculateDate]
   )
   const itemsByCategory = useMemo(() => groupItemsByCategory(quoteItems), [quoteItems])
+
+  // 交通 Dialog 用：建立天數資訊
+  const transportDays = useMemo(() => {
+    const dayMap = new Map<number, { dayNumber: number; date: string; route: string }>()
+    for (const item of coreItems) {
+      const dn = item.day_number
+      if (!dn || dayMap.has(dn)) continue
+      const date = calculateDate(dn)
+      dayMap.set(dn, {
+        dayNumber: dn,
+        date: date ? new Date(date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }) : `Day ${dn}`,
+        route: item.category === 'activities' ? (item.title || '') : '',
+      })
+    }
+    // 補充每天的景點
+    for (const item of coreItems) {
+      if (item.category === 'activities' && item.day_number && dayMap.has(item.day_number)) {
+        const day = dayMap.get(item.day_number)!
+        if (!day.route.includes(item.title || '')) {
+          day.route = day.route ? `${day.route} → ${item.title}` : (item.title || '')
+        }
+      }
+    }
+    return Array.from(dayMap.values()).sort((a, b) => a.dayNumber - b.dayNumber)
+  }, [coreItems, calculateDate])
 
   // 團確單
   const { generatingSheet, handleGenerateConfirmationSheet } = useConfirmationSheet({
@@ -322,6 +353,66 @@ export function RequirementsList({
     </tbody>
   </table>
   ${draft.notes || draft.note ? `<p style="margin-top:15px"><strong>備註：</strong>${draft.notes || draft.note}</p>` : ''}
+  <div class="footer">
+    <p>列印時間：${new Date().toLocaleString('zh-TW')}</p>
+    <p>此需求單由 Venturo ERP 產生</p>
+  </div>
+</body></html>`
+
+    const printWindow = window.open('', '_blank', 'width=900,height=700')
+    if (printWindow) {
+      printWindow.document.write(html)
+      printWindow.document.close()
+    }
+  }, [tour, quoteGroupSize])
+
+  // 餐廳/活動直接列印（不需填需求）
+  const handlePrintSimpleRequest = useCallback((categoryKey: string, categoryLabel: string, item: QuoteItem) => {
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<title>${categoryLabel}需求單 - ${item.supplierName || item.title}</title>
+<style>
+  @media print { @page { margin: 1.5cm; } body { margin: 0; } }
+  body { font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif; font-size: 12pt; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+  h1 { text-align: center; font-size: 22pt; margin-bottom: 10px; border-bottom: 3px double #333; padding-bottom: 10px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .info-section { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+  .info-section h3 { margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+  .info-row { display: flex; margin-bottom: 5px; }
+  .info-label { font-weight: bold; min-width: 80px; color: #666; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #333; padding: 10px; text-align: center; }
+  th { background: #f0f0f0; font-weight: bold; }
+  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 10pt; color: #666; }
+</style></head><body>
+  <h1>${categoryLabel}需求單</h1>
+  <div class="info-grid">
+    <div class="info-section">
+      <h3>我方資訊</h3>
+      <div class="info-row"><span class="info-label">公司：</span><span>角落旅行社</span></div>
+      <div class="info-row"><span class="info-label">團號：</span><span>${tour?.code || ''}</span></div>
+      <div class="info-row"><span class="info-label">團名：</span><span>${tour?.name || ''}</span></div>
+      <div class="info-row"><span class="info-label">出發日：</span><span>${tour?.departure_date || ''}</span></div>
+      <div class="info-row"><span class="info-label">總人數：</span><span>${quoteGroupSize || '-'} 人</span></div>
+    </div>
+    <div class="info-section">
+      <h3>${categoryLabel}資訊</h3>
+      <div class="info-row"><span class="info-label">名稱：</span><span>${item.supplierName || item.title}</span></div>
+      <div class="info-row"><span class="info-label">日期：</span><span>${item.serviceDate ? formatDate(item.serviceDate) : '-'}</span></div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>日期</th><th>項目</th><th>人數</th><th>預算</th><th>備註</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>${item.serviceDate ? formatDate(item.serviceDate) : '-'}</td>
+        <td>${item.title}</td>
+        <td>${quoteGroupSize || '-'} 人</td>
+        <td>${item.quotedPrice ? 'NT$ ' + item.quotedPrice.toLocaleString() : '-'}</td>
+        <td>${item.notes || ''}</td>
+      </tr>
+    </tbody>
+  </table>
   <div class="footer">
     <p>列印時間：${new Date().toLocaleString('zh-TW')}</p>
     <p>此需求單由 Venturo ERP 產生</p>
@@ -642,41 +733,68 @@ export function RequirementsList({
                           </span>
                         </td>
                         <td className="px-3 py-2.5 text-center">
-                          {cat.key === 'accommodation' && (() => {
-                            // 找這間飯店的 draft 需求
-                            const hotelDraft = existingRequests.find(
-                              r => r.request_type === 'accommodation' &&
-                                   r.supplier_name === (item.supplierName || item.title) &&
+                          {(() => {
+                            const supplierName = item.supplierName || item.title
+                            const draft = existingRequests.find(
+                              r => r.supplier_name === supplierName &&
+                                   r.request_type === cat.key &&
                                    r.status === 'draft'
                             )
-                            return hotelDraft ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePrintRequest(hotelDraft, item)}
-                                className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
-                              >
-                                <Printer size={12} className="mr-1" />
-                                列印需求單
-                              </Button>
-                            ) : (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedHotel({
-                                    name: item.supplierName || item.title,
-                                    resourceId: item.resourceId ?? null,
-                                    serviceDate: item.serviceDate ?? null,
-                                    nights: item.quantity || 1,
-                                  })
-                                  setShowRoomDialog(true)
-                                }}
-                                className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10"
-                              >
-                                新增需求
-                              </Button>
-                            )
+
+                            // 住宿：有 draft → 列印，沒有 → 新增需求
+                            if (cat.key === 'accommodation') {
+                              return draft ? (
+                                <Button variant="outline" size="sm"
+                                  onClick={() => handlePrintRequest(draft, item)}
+                                  className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50">
+                                  <Printer size={12} className="mr-1" />列印需求單
+                                </Button>
+                              ) : (
+                                <Button variant="outline" size="sm"
+                                  onClick={() => {
+                                    setSelectedHotel({
+                                      name: supplierName,
+                                      resourceId: item.resourceId ?? null,
+                                      serviceDate: item.serviceDate ?? null,
+                                      nights: item.quantity || 1,
+                                    })
+                                    setShowRoomDialog(true)
+                                  }}
+                                  className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10">
+                                  新增需求
+                                </Button>
+                              )
+                            }
+
+                            // 交通：需要勾選天數
+                            if (cat.key === 'transport') {
+                              return (
+                                <Button variant="outline" size="sm"
+                                  onClick={() => {
+                                    setSelectedTransport({
+                                      name: supplierName,
+                                      resourceId: item.resourceId ?? null,
+                                    })
+                                    setShowTransportDialog(true)
+                                  }}
+                                  className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10">
+                                  列印需求單
+                                </Button>
+                              )
+                            }
+
+                            // 餐廳/活動：直接列印（不需 Dialog）
+                            if (cat.key === 'meal' || cat.key === 'activity') {
+                              return (
+                                <Button variant="outline" size="sm"
+                                  onClick={() => handlePrintSimpleRequest(cat.key, cat.label, item)}
+                                  className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50">
+                                  <Printer size={12} className="mr-1" />列印需求單
+                                </Button>
+                              )
+                            }
+
+                            return null
                           })()}
                         </td>
                       </tr>
@@ -781,6 +899,18 @@ export function RequirementsList({
           category={selectedCategory}
         />
       )}
+      {/* 交通需求 Dialog */}
+      {selectedTransport && (
+        <TransportRequirementDialog
+          open={showTransportDialog}
+          onClose={() => { setShowTransportDialog(false); setSelectedTransport(null) }}
+          supplierName={selectedTransport.name}
+          tour={tour}
+          days={transportDays}
+          totalPax={quoteGroupSize}
+        />
+      )}
+
       {/* 住宿需求 Dialog */}
       {selectedHotel && (
         <RoomRequirementDialog
