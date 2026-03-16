@@ -17,6 +17,7 @@ import {
   ChevronDown,
   ChevronRight,
   ClipboardList,
+  Printer,
 } from 'lucide-react'
 // TODO: [品質優化] 將 supabase 操作搬到 confirmations/services/ — 目前因 setState 交錯暫保留
 import { supabase } from '@/lib/supabase/client'
@@ -115,11 +116,11 @@ export function RequirementsList({
           const { data: requests } = await supabase
             .from('tour_requests')
             .select(
-              'id, code, category, supplier_name, title, service_date, quantity, notes, status, quoted_cost, hidden, resource_id, resource_type'
+              'id, code, category, supplier_name, supplier_id, title, service_date, quantity, notes, status, quoted_cost, hidden, resource_id, resource_type, request_type, items'
             )
             .eq('tour_id', tourId)
             .order('created_at', { ascending: true })
-          setExistingRequests((requests as TourRequest[]) || [])
+          setExistingRequests((requests as unknown as TourRequest[]) || [])
 
           // 直接讀核心表（不依賴 quote_id）
           const { data: items } = await supabase
@@ -244,11 +245,11 @@ export function RequirementsList({
             .from('tour_requests')
             .insert(insertData)
             .select(
-              'id, code, category, supplier_name, title, service_date, quantity, notes, status, quoted_cost, hidden, resource_id, resource_type'
+              'id, code, category, supplier_name, supplier_id, title, service_date, quantity, notes, status, quoted_cost, hidden, resource_id, resource_type, request_type, items'
             )
             .single()
           if (error) throw error
-          if (newRequest) setExistingRequests(prev => [...prev, newRequest as TourRequest])
+          if (newRequest) setExistingRequests(prev => [...prev, newRequest as unknown as TourRequest])
         }
         toast({
           title: hidden ? COMP_REQUIREMENTS_LABELS.已隱藏 : COMP_REQUIREMENTS_LABELS.已恢復顯示,
@@ -270,6 +271,69 @@ export function RequirementsList({
     })
   }, [])
 
+
+  // 列印住宿需求單
+  const handlePrintRequest = useCallback((draft: TourRequest, item: QuoteItem) => {
+    const rooms = draft.items || []
+    const totalRooms = rooms.reduce((sum, r) => sum + r.quantity, 0)
+    const nights = rooms[0]?.nights || item.quantity || 1
+
+    const html = `<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<title>住宿需求單 - ${draft.supplier_name}</title>
+<style>
+  @media print { @page { margin: 1.5cm; } body { margin: 0; } }
+  body { font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif; font-size: 12pt; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+  h1 { text-align: center; font-size: 22pt; margin-bottom: 10px; border-bottom: 3px double #333; padding-bottom: 10px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .info-section { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+  .info-section h3 { margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+  .info-row { display: flex; margin-bottom: 5px; }
+  .info-label { font-weight: bold; min-width: 80px; color: #666; }
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+  th, td { border: 1px solid #333; padding: 10px; text-align: center; }
+  th { background: #f0f0f0; font-weight: bold; }
+  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 10pt; color: #666; }
+  .highlight { background: #fffde7; }
+</style></head><body>
+  <h1>住宿需求單</h1>
+  <div class="info-grid">
+    <div class="info-section">
+      <h3>我方資訊</h3>
+      <div class="info-row"><span class="info-label">公司：</span><span>角落旅行社</span></div>
+      <div class="info-row"><span class="info-label">團號：</span><span>${tour?.code || ''}</span></div>
+      <div class="info-row"><span class="info-label">團名：</span><span>${tour?.name || ''}</span></div>
+      <div class="info-row"><span class="info-label">出發日：</span><span>${tour?.departure_date || ''}</span></div>
+      <div class="info-row"><span class="info-label">總人數：</span><span>${quoteGroupSize || '-'} 人</span></div>
+    </div>
+    <div class="info-section">
+      <h3>飯店資訊</h3>
+      <div class="info-row"><span class="info-label">飯店：</span><span>${draft.supplier_name}</span></div>
+      <div class="info-row"><span class="info-label">入住日：</span><span>${item.serviceDate?.split('~')[0] || '-'}</span></div>
+      <div class="info-row"><span class="info-label">退房日：</span><span>${item.serviceDate?.split('~')[1] || '-'}</span></div>
+      <div class="info-row"><span class="info-label">晚數：</span><span>${nights} 晚</span></div>
+    </div>
+  </div>
+  <table>
+    <thead><tr><th>房型</th><th>間數</th><th>晚數</th><th>備註</th></tr></thead>
+    <tbody>
+      ${rooms.map(r => `<tr><td>${r.room_type}</td><td>${r.quantity}</td><td>${r.nights || nights}</td><td>${r.note || ''}</td></tr>`).join('')}
+      <tr class="highlight"><td colspan="1"><strong>合計</strong></td><td><strong>${totalRooms} 間</strong></td><td>${nights} 晚</td><td></td></tr>
+    </tbody>
+  </table>
+  ${draft.notes || draft.note ? `<p style="margin-top:15px"><strong>備註：</strong>${draft.notes || draft.note}</p>` : ''}
+  <div class="footer">
+    <p>列印時間：${new Date().toLocaleString('zh-TW')}</p>
+    <p>此需求單由 Venturo ERP 產生</p>
+  </div>
+</body></html>`
+
+    const printWindow = window.open('', '_blank', 'width=900,height=700')
+    if (printWindow) {
+      printWindow.document.write(html)
+      printWindow.document.close()
+    }
+  }, [tour, quoteGroupSize])
 
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-'
@@ -545,8 +609,8 @@ export function RequirementsList({
                     }
 
                     return (
+                      <React.Fragment key={`${cat.key}-${isHidden ? 'hidden' : 'visible'}-${idx}`}>
                       <tr
-                        key={`${cat.key}-${isHidden ? 'hidden' : 'visible'}-${idx}`}
                         className={cn(
                           'border-t border-border/50 hover:bg-morandi-container/20',
                           isHidden && 'bg-morandi-muted/5'
@@ -578,26 +642,71 @@ export function RequirementsList({
                           </span>
                         </td>
                         <td className="px-3 py-2.5 text-center">
-                          {cat.key === 'accommodation' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setSelectedHotel({
-                                  name: item.supplierName || item.title,
-                                  resourceId: item.resourceId ?? null,
-                                  serviceDate: item.serviceDate ?? null,
-                                  nights: item.quantity || 1,
-                                })
-                                setShowRoomDialog(true)
-                              }}
-                              className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10"
-                            >
-                              新增需求
-                            </Button>
-                          )}
+                          {cat.key === 'accommodation' && (() => {
+                            // 找這間飯店的 draft 需求
+                            const hotelDraft = existingRequests.find(
+                              r => r.request_type === 'accommodation' &&
+                                   r.supplier_name === (item.supplierName || item.title) &&
+                                   r.status === 'draft'
+                            )
+                            return hotelDraft ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePrintRequest(hotelDraft, item)}
+                                className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
+                              >
+                                <Printer size={12} className="mr-1" />
+                                列印需求單
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedHotel({
+                                    name: item.supplierName || item.title,
+                                    resourceId: item.resourceId ?? null,
+                                    serviceDate: item.serviceDate ?? null,
+                                    nights: item.quantity || 1,
+                                  })
+                                  setShowRoomDialog(true)
+                                }}
+                                className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10"
+                              >
+                                新增需求
+                              </Button>
+                            )
+                          })()}
                         </td>
                       </tr>
+                      {/* 房型明細（draft 需求） */}
+                      {cat.key === 'accommodation' && (() => {
+                        const hotelDraft = existingRequests.find(
+                          r => r.request_type === 'accommodation' &&
+                               r.supplier_name === (item.supplierName || item.title) &&
+                               r.status === 'draft'
+                        )
+                        if (!hotelDraft?.items || hotelDraft.items.length === 0) return null
+                        return (
+                          <tr className="bg-blue-50/30">
+                            <td></td>
+                            <td colSpan={4} className="px-3 py-1.5">
+                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                <span className="font-medium text-blue-600">📋 房型需求：</span>
+                                {hotelDraft.items.map((room, ri) => (
+                                  <span key={ri} className="bg-blue-100/60 px-2 py-0.5 rounded text-blue-700">
+                                    {room.room_type} × {room.quantity}
+                                  </span>
+                                ))}
+                                <span className="text-amber-600 text-[10px]">（草稿）</span>
+                              </div>
+                            </td>
+                            <td></td>
+                          </tr>
+                        )
+                      })()}
+                      </React.Fragment>
                     )
                   }
 

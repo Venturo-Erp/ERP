@@ -30,15 +30,19 @@ export interface TourRequest {
   code: string
   category: string
   supplier_name: string
+  supplier_id?: string | null
   title: string
   service_date: string | null
   quantity: number | null
   note?: string | null
+  notes?: string | null
   status?: string | null
   quoted_cost?: number | null
   hidden?: boolean | null
   resource_id?: string | null
   resource_type?: string | null
+  request_type?: string | null
+  items?: Array<{ room_type: string; quantity: number; nights?: number; note?: string }> | null
 }
 
 // ============================================
