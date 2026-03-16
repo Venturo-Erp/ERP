@@ -267,9 +267,51 @@ export async function syncItineraryToQuote(
       }
     }
 
+    if (!quoteId && itinerary?.tour_id) {
+      // 🔧 沒有報價單 → 自動建立一個並綁定到 tour
+      logger.log('行程表無關聯報價單，自動建立...')
+      
+      // 取得 tour 資訊
+      const { data: tourInfo } = await toursDb()
+        .select('name, workspace_id')
+        .eq('id', itinerary.tour_id)
+        .single()
+      
+      const tour = tourInfo as { name: string; workspace_id: string } | null
+      if (!tour?.workspace_id) {
+        logger.warn('無法建立報價單：缺少 workspace_id')
+        return
+      }
+
+      const newQuoteId = crypto.randomUUID()
+      const { error: createError } = await quotesDb()
+        .insert({
+          id: newQuoteId,
+          customer_name: tour.name || '未命名',
+          workspace_id: tour.workspace_id,
+          tour_id: itinerary.tour_id,
+          status: 'draft',
+          categories: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+
+      if (createError) {
+        logger.error('自動建立報價單失敗:', createError)
+        return
+      }
+
+      // 綁定到 tour
+      await toursDb()
+        .update({ quote_id: newQuoteId })
+        .eq('id', itinerary.tour_id)
+
+      quoteId = newQuoteId
+      logger.log('已自動建立報價單:', quoteId)
+    }
+
     if (!quoteId) {
-      // 沒有關聯的報價單，不需要同步
-      logger.log('行程表無關聯報價單，跳過同步')
+      logger.log('無法同步：沒有 tour_id')
       return
     }
 

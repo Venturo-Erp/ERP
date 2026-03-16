@@ -346,12 +346,20 @@ export function useSyncItineraryToCore() {
         }
 
         // 5. 批次插入
+        logger.log('[syncToCore] new_items count:', new_items.length,
+          'categories:', new_items.map(i => `${i.category}:${i.title}`).slice(0, 10))
         if (new_items.length > 0) {
-          const { error: insert_error } = await supabase
+          const { error: insert_error, count } = await supabase
             .from('tour_itinerary_items')
             .insert(new_items)
 
-          if (insert_error) throw insert_error
+          if (insert_error) {
+            logger.error('[syncToCore] insert failed:', insert_error)
+            throw insert_error
+          }
+          logger.log('[syncToCore] inserted successfully, count:', count)
+        } else {
+          logger.warn('[syncToCore] no new items to insert!')
         }
 
         // 6. 更新已有下游資料的項目（只更新行程欄位，不動報價/需求/確認欄位）
