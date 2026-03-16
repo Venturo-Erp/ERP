@@ -156,16 +156,21 @@ export function useTourOperations(params: UseTourOperationsParams) {
           }
         }
 
-        // 解析國家名稱（countryCode 存的是國家名稱如「日本」）
-        const countryName =
-          newTour.countryCode === '__custom__' ? newTour.customCountry! : newTour.countryCode
+        // 🔧 修復：從 country code 查詢 country_id（前端傳的是 code 如 "JP"，需轉成 id 如 "japan"）
+        let countryId: string | undefined
+        if (newTour.countryCode === '__custom__') {
+          countryId = undefined // 自訂國家不設 country_id
+        } else if (newTour.countryCode) {
+          const country = countries.find(c => c.code === newTour.countryCode)
+          countryId = country?.id
+        }
 
         const tourData = {
           name: newTour.name,
           tour_type: newTour.tour_type || 'official',
           days_count: isProposalOrTemplate ? (newTour.days_count || null) : null,
           location: cityName || '',
-          country_id: countryName || undefined,
+          country_id: countryId,
           airport_code: cityCode || undefined,
           departure_date: isProposalOrTemplate ? null : newTour.departure_date,
           return_date: isProposalOrTemplate ? null : newTour.return_date,
@@ -183,13 +188,17 @@ export function useTourOperations(params: UseTourOperationsParams) {
           controller_id: isProposalOrTemplate ? undefined : (newTour.controller_id || undefined),
           outbound_flight: isProposalOrTemplate ? undefined : parseFlightText(newTour.outbound_flight_text),
           return_flight: isProposalOrTemplate ? undefined : parseFlightText(newTour.return_flight_text),
+          workspace_id: workspaceId,
         }
 
         const createdTour = await actions.create(tourData)
 
         // 更新國家和城市的使用次數（讓常用的排在前面）
-        if (countryName) {
-          incrementCountryUsage(countryName)
+        if (countryId) {
+          const country = countries.find(c => c.id === countryId)
+          if (country?.name) {
+            incrementCountryUsage(country.name)
+          }
         }
         if (cityName) {
           incrementCityUsage(cityName)
@@ -386,6 +395,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
             current_participants: 0,
             description: tour.description,
             days_count: tour.days_count,
+            workspace_id: workspaceId,
           }
           const createdTour = await (actions.create as (data: unknown) => Promise<Tour>)(newTourData)
           tourId = createdTour.id

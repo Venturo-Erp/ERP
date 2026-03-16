@@ -327,6 +327,7 @@ export async function searchFlightAction(
         'x-rapidapi-host': 'aerodatabox.p.rapidapi.com',
         'x-rapidapi-key': apiKey,
       },
+      // Next.js fetch 有內建 timeout，不需要手動 AbortController
     })
 
     if (!response.ok) {
@@ -340,7 +341,14 @@ export async function searchFlightAction(
       return { error: '無法查詢航班資訊，請稍後再試。' }
     }
 
-    const apiData = await response.json()
+    // 🔧 修復：JSON 解析加上錯誤處理
+    let apiData
+    try {
+      apiData = await response.json()
+    } catch (jsonError) {
+      logger.error('航班 API JSON 解析失敗:', jsonError)
+      return { error: 'API 回應格式錯誤，請稍後再試或手動輸入航班資訊。' }
+    }
 
     if (!apiData || apiData.length === 0) {
       return { error: '找不到該航班的資訊。' }
@@ -463,7 +471,14 @@ export async function searchAirportDeparturesAction(
         return { error: `查詢失敗 (${response.status})，請稍後再試。` }
       }
 
-      const apiData = await response.json()
+      // 🔧 修復：JSON 解析加上錯誤處理
+      let apiData
+      try {
+        apiData = await response.json()
+      } catch (jsonError) {
+        logger.error('機場出發航班 API JSON 解析失敗:', jsonError)
+        return { error: 'API 回應格式錯誤，請稍後再試。' }
+      }
       const departures = apiData.departures || []
       allDepartures = allDepartures.concat(departures)
     }
@@ -565,7 +580,14 @@ export async function searchAirportArrivalsAction(
       return { error: `查詢失敗 (${response.status})，請稍後再試。` }
     }
 
-    const apiData = await response.json()
+    // 🔧 修復：JSON 解析加上錯誤處理
+    let apiData
+    try {
+      apiData = await response.json()
+    } catch (jsonError) {
+      logger.error('機場抵達航班 API JSON 解析失敗:', jsonError)
+      return { error: 'API 回應格式錯誤，請稍後再試。' }
+    }
     const arrivals = apiData.arrivals || []
 
     // 注意：Airport Arrivals API 使用 movement 結構
