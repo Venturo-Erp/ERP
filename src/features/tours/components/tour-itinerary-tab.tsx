@@ -297,9 +297,24 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 .filter(a => a.attraction_id)
                 .map(a => ({ id: a.attraction_id!, name: a.title || '' }))
 
+              // 🔧 修復重複：如果有景點卡片，route 要去掉景點名稱部分
+              // day.title = "清水寺 → 金閣寺 → 手動備註" → route 只保留手動備註
+              let routeText = day.title || ''
+              if (attractions.length > 0) {
+                const attractionNames = attractions.map(a => a.name).filter(Boolean)
+                // 從 title 中移除景點名稱，只留手動部分
+                let cleaned = routeText
+                for (const name of attractionNames) {
+                  cleaned = cleaned.replace(name, '')
+                }
+                // 清理多餘的 → 分隔符
+                cleaned = cleaned.replace(/^[\s→]+|[\s→]+$/g, '').replace(/→\s*→/g, '→').trim()
+                routeText = cleaned
+              }
+
               return {
                 day: dayNum,
-                route: day.title || '',
+                route: routeText,
                 meals: { breakfast, lunch, dinner },
                 accommodation,
                 hotelBreakfast: breakfast === COMP_TOURS_LABELS.飯店早餐,
