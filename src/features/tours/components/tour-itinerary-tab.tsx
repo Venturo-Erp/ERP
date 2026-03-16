@@ -308,7 +308,11 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               const breakfast = coreMeals?.breakfast || day.meals?.breakfast || ''
               const lunch = coreMeals?.lunch || day.meals?.lunch || ''
               const dinner = coreMeals?.dinner || day.meals?.dinner || ''
-              const accommodation = coreAccom || day.accommodation || ''
+              // 清除續住嵌套文字，還原成原始酒店名
+              let accommodation = coreAccom || day.accommodation || ''
+              while (accommodation.match(/^續住\s*\((.+)\)$/)) {
+                accommodation = accommodation.replace(/^續住\s*\((.+)\)$/, '$1')
+              }
 
               const activities = coreActs || day.activities || []
               const attractions = activities
@@ -527,7 +531,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           recommendations: [],
           meals: { breakfast, lunch, dinner },
           accommodation: day.sameAsPrevious
-            ? `續住 (${getPreviousAccommodation(idx) || ''})`
+            ? (getPreviousAccommodation(idx) || '')
             : accommodation,
           isSameAccommodation: day.sameAsPrevious || false,
           images: [],
