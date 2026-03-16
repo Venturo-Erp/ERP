@@ -77,7 +77,7 @@ export function DayRow({
               {(day.attractions || []).map((a, aIdx) => (
                 <React.Fragment key={a.id}>
                   {aIdx > 0 && <span className="text-muted-foreground text-xs">→</span>}
-                  <div className="inline-flex items-center gap-1 text-blue-600 text-sm">
+                  <div className="inline-flex items-center gap-1 text-blue-600 text-base">
                     <span>{a.name}</span>
                     <button type="button" onClick={() => removeAttraction(idx, a.id)} className="hover:text-destructive opacity-40 hover:opacity-100 transition-opacity"><X size={10} /></button>
                   </div>
@@ -101,7 +101,7 @@ export function DayRow({
                         : COMP_TOURS_LABELS.今日行程標題
                 }
                 className={`text-sm border-0 shadow-none focus-visible:ring-0 rounded-none bg-transparent ${
-                  day.attractions && day.attractions.length > 0 ? 'h-6 w-20 px-1 flex-shrink' : 'h-8 w-full px-2'
+                  day.attractions && day.attractions.length > 0 ? 'h-8 w-24 px-2 flex-shrink' : 'h-8 w-full px-2'
                 }`}
               />
             </div>
