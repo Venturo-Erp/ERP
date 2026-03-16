@@ -591,10 +591,16 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           itinerary_id: savedItineraryId,
           tour_id: tour.id,
           daily_itinerary: fullDailyItinerary as DailyItinerary[],
-        }).then(() => {
-          refreshCoreItems()
+        }).then((result) => {
+          if (result && 'success' in result && !result.success) {
+            logger.error('syncToCore failed:', result.message)
+            toast.error(`核心表同步失敗：${result.message}`)
+          } else {
+            refreshCoreItems()
+          }
         }).catch(err => {
           logger.error('syncToCore error (background):', err)
+          toast.error('核心表同步失敗')
         })
       }
 
