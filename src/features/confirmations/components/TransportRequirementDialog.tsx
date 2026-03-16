@@ -28,6 +28,7 @@ interface TransportRequirementDialogProps {
   tour: Tour | null
   days: DayInfo[]
   totalPax: number | null
+  ageBreakdown?: string
 }
 
 export function TransportRequirementDialog({
@@ -37,6 +38,7 @@ export function TransportRequirementDialog({
   tour,
   days,
   totalPax,
+  ageBreakdown,
 }: TransportRequirementDialogProps) {
   const [selectedDays, setSelectedDays] = useState<Set<number>>(
     new Set(days.map(d => d.dayNumber))
@@ -89,6 +91,7 @@ export function TransportRequirementDialog({
       <div class="info-row"><span class="info-label">團名：</span><span>${tour?.name || ''}</span></div>
       <div class="info-row"><span class="info-label">出發日：</span><span>${tour?.departure_date || ''}</span></div>
       <div class="info-row"><span class="info-label">總人數：</span><span>${totalPax || '-'} 人</span></div>
+      ${ageBreakdown ? `<div class="info-row"><span class="info-label">年齡分類：</span><span>${ageBreakdown}</span></div>` : ''}
     </div>
     <div class="info-section">
       <h3>車行資訊</h3>

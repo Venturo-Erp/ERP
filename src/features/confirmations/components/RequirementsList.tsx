@@ -67,6 +67,13 @@ export function RequirementsList({
   const [existingRequests, setExistingRequests] = useState<TourRequest[]>([])
   // quoteCategories 已移除 — 需求單直接讀核心表
   const [quoteGroupSize, setQuoteGroupSize] = useState<number | null>(null)
+  const [memberAgeBreakdown, setMemberAgeBreakdown] = useState<{
+    total: number
+    adult: number    // ≥12
+    child6to12: number  // ≥6 & <12
+    child2to6: number   // ≥2 & <6
+    infant: number      // <2
+  } | null>(null)
   const [startDate, setStartDate] = useState<string | null>(null)
   const [outboundFlight, setOutboundFlight] = useState<FlightInfo | null>(null)
   const [returnFlight, setReturnFlight] = useState<FlightInfo | null>(null)
@@ -137,6 +144,40 @@ export function RequirementsList({
             .order('sort_order', { ascending: true })
           setCoreItems((items as TourItineraryItem[]) || [])
           setStartDate(tourData.departure_date || null)
+
+          // 查團員 + 客戶生日，計算年齡分類
+          const { data: members } = await supabase
+            .from('tour_members')
+            .select('customer_id')
+            .eq('tour_id', tourId)
+          if (members && members.length > 0) {
+            const customerIds = members.map(m => m.customer_id).filter(Boolean)
+            const { data: customers } = await supabase
+              .from('customers')
+              .select('id, birth_date')
+              .in('id', customerIds)
+            
+            const departureDate = tourData.departure_date ? new Date(tourData.departure_date) : new Date()
+            const breakdown = { total: members.length, adult: 0, child6to12: 0, child2to6: 0, infant: 0 }
+            
+            for (const member of members) {
+              const customer = customers?.find(c => c.id === member.customer_id)
+              if (!customer?.birth_date) {
+                breakdown.adult++ // 沒生日預設成人
+                continue
+              }
+              const birth = new Date(customer.birth_date)
+              const ageMs = departureDate.getTime() - birth.getTime()
+              const ageYears = ageMs / (365.25 * 24 * 60 * 60 * 1000)
+              
+              if (ageYears >= 12) breakdown.adult++
+              else if (ageYears >= 6) breakdown.child6to12++
+              else if (ageYears >= 2) breakdown.child2to6++
+              else breakdown.infant++
+            }
+            setMemberAgeBreakdown(breakdown)
+            if (!quoteGroupSize) setQuoteGroupSize(members.length)
+          }
         }
 
         // 保留 quote 讀取（用於 group_size 等 header 資訊）
@@ -303,6 +344,19 @@ export function RequirementsList({
   }, [])
 
 
+  // 年齡分類文字
+  const ageBreakdownText = useMemo(() => {
+    if (!memberAgeBreakdown) return ''
+    const parts: string[] = []
+    if (memberAgeBreakdown.adult > 0) parts.push(`滿12歲以上 ${memberAgeBreakdown.adult} 位`)
+    if (memberAgeBreakdown.child6to12 > 0) parts.push(`滿6歲未滿12歲 ${memberAgeBreakdown.child6to12} 位`)
+    if (memberAgeBreakdown.child2to6 > 0) parts.push(`滿2歲未滿6歲 ${memberAgeBreakdown.child2to6} 位`)
+    if (memberAgeBreakdown.infant > 0) parts.push(`未滿2歲 ${memberAgeBreakdown.infant} 位`)
+    return parts.join('、')
+  }, [memberAgeBreakdown])
+
+  const totalPax = memberAgeBreakdown?.total || quoteGroupSize || null
+
   // 列印住宿需求單
   const handlePrintRequest = useCallback((draft: TourRequest, item: QuoteItem) => {
     const rooms = draft.items || []
@@ -335,7 +389,8 @@ export function RequirementsList({
       <div class="info-row"><span class="info-label">團號：</span><span>${tour?.code || ''}</span></div>
       <div class="info-row"><span class="info-label">團名：</span><span>${tour?.name || ''}</span></div>
       <div class="info-row"><span class="info-label">出發日：</span><span>${tour?.departure_date || ''}</span></div>
-      <div class="info-row"><span class="info-label">總人數：</span><span>${quoteGroupSize || '-'} 人</span></div>
+      <div class="info-row"><span class="info-label">總人數：</span><span>${totalPax || '-'} 人</span></div>
+      ${ageBreakdownText ? `<div class="info-row"><span class="info-label">年齡分類：</span><span>${ageBreakdownText}</span></div>` : ''}
     </div>
     <div class="info-section">
       <h3>飯店資訊</h3>
@@ -364,7 +419,7 @@ export function RequirementsList({
       printWindow.document.write(html)
       printWindow.document.close()
     }
-  }, [tour, quoteGroupSize])
+  }, [tour, totalPax, ageBreakdownText])
 
   // 餐廳/活動直接列印（不需填需求）
   const handlePrintSimpleRequest = useCallback((categoryKey: string, categoryLabel: string, item: QuoteItem) => {
@@ -393,7 +448,8 @@ export function RequirementsList({
       <div class="info-row"><span class="info-label">團號：</span><span>${tour?.code || ''}</span></div>
       <div class="info-row"><span class="info-label">團名：</span><span>${tour?.name || ''}</span></div>
       <div class="info-row"><span class="info-label">出發日：</span><span>${tour?.departure_date || ''}</span></div>
-      <div class="info-row"><span class="info-label">總人數：</span><span>${quoteGroupSize || '-'} 人</span></div>
+      <div class="info-row"><span class="info-label">總人數：</span><span>${totalPax || '-'} 人</span></div>
+      ${ageBreakdownText ? `<div class="info-row"><span class="info-label">年齡分類：</span><span>${ageBreakdownText}</span></div>` : ''}
     </div>
     <div class="info-section">
       <h3>${categoryLabel}資訊</h3>
@@ -407,7 +463,7 @@ export function RequirementsList({
       <tr>
         <td>${item.serviceDate ? formatDate(item.serviceDate) : '-'}</td>
         <td>${item.title}</td>
-        <td>${quoteGroupSize || '-'} 人</td>
+        <td>${totalPax || '-'} 人</td>
         <td>${item.quotedPrice ? 'NT$ ' + item.quotedPrice.toLocaleString() : '-'}</td>
         <td>${item.notes || ''}</td>
       </tr>
@@ -424,7 +480,7 @@ export function RequirementsList({
       printWindow.document.write(html)
       printWindow.document.close()
     }
-  }, [tour, quoteGroupSize])
+  }, [tour, totalPax, ageBreakdownText])
 
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-'
@@ -907,7 +963,8 @@ export function RequirementsList({
           supplierName={selectedTransport.name}
           tour={tour}
           days={transportDays}
-          totalPax={quoteGroupSize}
+          totalPax={totalPax}
+          ageBreakdown={ageBreakdownText}
         />
       )}
 
