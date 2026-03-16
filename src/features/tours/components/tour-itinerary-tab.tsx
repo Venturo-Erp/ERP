@@ -1430,14 +1430,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           className="flex-1 overflow-hidden"
           countryId={tour.country_id || ''}
           locationName={tour.location || ''}
-          onAddNew={(type) => {
-            const pathMap: Record<string, string> = {
-              attraction: '/database/attractions',
-              hotel: '/database/hotels',
-              restaurant: '/database/restaurants',
-            }
-            window.open(pathMap[type] || '/database/attractions', '_blank')
-          }}
+
         />
         <div className="h-48 border-t border-border bg-muted/30 flex flex-col items-center justify-center text-muted-foreground">
           <Map size={24} className="mb-2 opacity-40" />

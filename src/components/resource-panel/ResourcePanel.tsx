@@ -4,7 +4,8 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import { Search, MapPin, Building2, UtensilsCrossed, Loader2, Plus } from 'lucide-react'
+import { Search, MapPin, Building2, UtensilsCrossed, Loader2 } from 'lucide-react'
+import { QuickAddResource } from './QuickAddResource'
 import { Input } from '@/components/ui/input'
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox'
 import { cn } from '@/lib/utils'
@@ -14,7 +15,7 @@ import { logger } from '@/lib/utils/logger'
 // 資源類型定義
 // ============================================
 
-type ResourceType = 'attraction' | 'hotel' | 'restaurant'
+export type ResourceType = 'attraction' | 'hotel' | 'restaurant'
 
 interface ResourceItem {
   id: string
@@ -23,6 +24,7 @@ interface ResourceItem {
   category?: string | null
   thumbnail?: string | null
   city_name?: string | null
+  data_verified?: boolean
 }
 
 // ============================================
@@ -43,6 +45,8 @@ function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
     },
   })
 
+  const isUnverified = resource.data_verified === false
+
   const style = transform
     ? { transform: CSS.Translate.toString(transform) }
     : undefined
@@ -60,9 +64,13 @@ function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
       {...listeners}
       {...attributes}
       className={cn(
-        'flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-card',
+        'flex items-center gap-2 px-3 py-2 rounded-md border bg-card',
         'cursor-grab active:cursor-grabbing hover:bg-accent/50 transition-colors',
-        isDragging && 'opacity-50 shadow-lg z-50'
+        isDragging && 'opacity-50 shadow-lg z-50',
+        // 未驗證 = 橘色警示邊框
+        isUnverified
+          ? 'border-amber-400/60 bg-amber-50/50'
+          : 'border-border'
       )}
     >
       {resource.thumbnail ? (
@@ -72,14 +80,17 @@ function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
           className="w-8 h-8 rounded object-cover flex-shrink-0"
         />
       ) : (
-        <div className="w-8 h-8 rounded bg-muted flex items-center justify-center flex-shrink-0">
+        <div className={cn(
+          'w-8 h-8 rounded flex items-center justify-center flex-shrink-0',
+          isUnverified ? 'bg-amber-100' : 'bg-muted'
+        )}>
           {iconMap[resource.type]}
         </div>
       )}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{resource.name}</p>
         <p className="text-xs text-muted-foreground truncate">
-          {resource.category || resource.city_name || ''}
+          {isUnverified ? '⚠ 待驗證' : resource.category || resource.city_name || ''}
         </p>
       </div>
       {iconMap[resource.type]}
@@ -264,7 +275,8 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
       type: ResourceType,
       extraSelect = ''
     ) => {
-      const selectStr = `id, name, category, thumbnail${extraSelect}`
+      const hasVerified = table === 'attractions'
+      const selectStr = `id, name, category, thumbnail${hasVerified ? ', data_verified' : ''}${extraSelect}`
       let query = supabase
         .from(table)
         .select(selectStr as 'id, name, category, thumbnail')
@@ -390,17 +402,27 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
             disablePortal
           />
         )}
-        {/* 新增資源按鈕 */}
-        {onAddNew && (
-          <button
-            onClick={() => onAddNew?.(activeTab)}
-            className="ml-auto px-2 h-7 rounded border border-dashed border-morandi-gold text-morandi-gold hover:bg-morandi-gold/10 transition-colors flex items-center gap-1 text-xs font-medium whitespace-nowrap"
-            title="新增景點/酒店/餐廳"
-          >
-            <Plus size={12} />
-            新增
-          </button>
-        )}
+        {/* 快速新增資源 */}
+        <div className="ml-auto">
+          <QuickAddResource
+            type={activeTab}
+            countryId={resolvedCountryId || countryId}
+            onCreated={(resource) => {
+              // 新增到當前 tab 的資源列表頂部
+              const newItem: ResourceItem = {
+                id: resource.id,
+                name: resource.name,
+                type: activeTab,
+                category: '',
+                data_verified: false,
+              }
+              setResources(prev => ({
+                ...prev,
+                [activeTab]: [newItem, ...(prev[activeTab] || [])],
+              }))
+            }}
+          />
+        </div>
       </div>
 
       {/* 類型 Tab */}
