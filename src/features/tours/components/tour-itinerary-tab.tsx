@@ -46,6 +46,7 @@ import { type MentionInputHandle } from './mention-input'
 import { DayRow, type DailyScheduleItem } from './itinerary/DayRow'
 import { useItineraryDrag } from '../hooks/useItineraryDrag'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import { AccommodationChangeDialog, type AccommodationChange } from './itinerary/AccommodationChangeDialog'
 
 interface TourItineraryTabProps {
   tour: Tour
@@ -63,6 +64,9 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   // State
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [accommodationChanges, setAccommodationChanges] = useState<AccommodationChange[]>([])
+  const [showChangeDialog, setShowChangeDialog] = useState(false)
+  const pendingSaveRef = useRef<(() => Promise<void>) | null>(null)
   const [currentItineraryId, setCurrentItineraryId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
   const mentionInputRefs = useRef<Record<number, MentionInputHandle | null>>({})
@@ -483,12 +487,99 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   }, [dailySchedule, tour.departure_date])
 
   // Save (with async optimization for background sync)
+  /**
+   * 偵測住宿變更，有影響時跳確認 Dialog
+   */
+  const detectAccommodationChanges = useCallback(async (): Promise<AccommodationChange[]> => {
+    const changes: AccommodationChange[] = []
+    const sb = createSupabaseBrowserClient()
+
+    // 從核心表取得目前住宿
+    const oldAccommodationByDay: Record<number, { title: string; resourceId: string | null; unitPrice: number | null }> = {}
+    for (const item of coreItems) {
+      if (item.category === 'accommodation' && item.day_number) {
+        let title = item.title || ''
+        // 清除續住前綴
+        while (title.match(/^續住\s*[（(](.+?)[）)]$/)) {
+          title = title.replace(/^續住\s*[（(](.+?)[）)]$/, '$1')
+        }
+        oldAccommodationByDay[item.day_number] = {
+          title,
+          resourceId: item.resource_id || null,
+          unitPrice: item.unit_price || null,
+        }
+      }
+    }
+
+    // 比較新的 dailySchedule
+    for (let i = 0; i < dailySchedule.length; i++) {
+      const day = dailySchedule[i]
+      const dayNum = i + 1
+      const old = oldAccommodationByDay[dayNum]
+      if (!old) continue
+
+      let newHotel = day.accommodation || ''
+      if (day.sameAsPrevious) {
+        // 往前找
+        for (let j = i - 1; j >= 0; j--) {
+          if (dailySchedule[j].accommodation && !dailySchedule[j].sameAsPrevious) {
+            newHotel = dailySchedule[j].accommodation
+            break
+          }
+        }
+      }
+
+      if (!newHotel || old.title === newHotel) continue
+
+      // 住宿有變更
+      const change: AccommodationChange = {
+        dayNumber: dayNum,
+        oldHotel: old.title,
+        newHotel,
+        hasQuote: (old.unitPrice ?? 0) > 0,
+        quotedPrice: old.unitPrice || undefined,
+        hasRequest: false,
+      }
+
+      // 查需求單
+      const { data: requests } = await sb
+        .from('tour_requests')
+        .select('status')
+        .eq('tour_id', tour.id)
+        .ilike('supplier_name', `%${old.title.substring(0, 10)}%`)
+        .not('status', 'eq', 'draft')
+        .limit(1)
+
+      if (requests && requests.length > 0) {
+        change.hasRequest = true
+        change.requestStatus = requests[0].status || undefined
+      }
+
+      changes.push(change)
+    }
+
+    return changes
+  }, [coreItems, dailySchedule, tour.id])
+
   const handleSave = async () => {
     if (!title.trim()) {
       toast.error(TOUR_ITINERARY_TAB_LABELS.請輸入行程標題)
       return
     }
 
+    // 偵測住宿變更
+    const changes = await detectAccommodationChanges()
+    if (changes.length > 0) {
+      setAccommodationChanges(changes)
+      pendingSaveRef.current = doSave
+      setShowChangeDialog(true)
+      return
+    }
+
+    await doSave()
+  }
+
+  const doSave = async () => {
     setSaving(true)
     try {
       // 建立完整資料（給 syncToCore 用）
@@ -1476,6 +1567,21 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           </div>
         ) : null}
       </DragOverlay>
+
+      {/* 住宿變更確認 Dialog */}
+      <AccommodationChangeDialog
+        open={showChangeDialog}
+        changes={accommodationChanges}
+        onConfirm={() => {
+          setShowChangeDialog(false)
+          pendingSaveRef.current?.()
+          pendingSaveRef.current = null
+        }}
+        onCancel={() => {
+          setShowChangeDialog(false)
+          pendingSaveRef.current = null
+        }}
+      />
     </div>
     </DndContext>
   )
