@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores'
 import { createItinerary, updateItinerary, createTourLeader } from '@/data'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
-import { syncHotelsFromItineraryToQuote } from '@/features/quotes/services/quoteItinerarySync'
+// syncHotelsFromItineraryToQuote 已移除 — 報價單直接讀核心表
 import { useSyncItineraryToCore } from '@/features/tours/hooks/useTourItineraryItems'
 import { supabase } from '@/lib/supabase/client'
 import { confirm } from '@/lib/ui/alert-dialog'
@@ -170,19 +170,7 @@ export function useItineraryEditor() {
         await updateItinerary(currentItineraryId, convertedData)
         logger.log('[ItineraryEditor] 更新完成')
 
-        // 同步飯店到報價單
-        if (convertedData.daily_itinerary && convertedData.daily_itinerary.length > 0) {
-          syncHotelsFromItineraryToQuote(
-            currentItineraryId,
-            convertedData.daily_itinerary as { accommodation?: string }[]
-          )
-            .then(result => {
-              if (!result.success && result.message !== '無關聯報價單，跳過同步') {
-                logger.warn('飯店同步到報價單:', result.message)
-              }
-            })
-            .catch(err => logger.error('飯店同步錯誤:', err))
-        }
+        // 報價單直接讀核心表，不需要同步飯店
 
         // 同步行程項目到核心表 (tour_itinerary_items)
         if (convertedData.daily_itinerary && convertedData.daily_itinerary.length > 0) {

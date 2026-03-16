@@ -26,7 +26,7 @@ import {
   useCities,
   createTourLeader,
 } from '@/data'
-import { syncHotelsFromItineraryToQuote } from '@/features/quotes/services/quoteItinerarySync'
+// syncHotelsFromItineraryToQuote 已移除 — 報價單直接讀核心表
 import { useSyncItineraryToCore } from '@/features/tours/hooks/useTourItineraryItems'
 import { updateTour } from '@/data'
 import type { DailyItinerary } from '@/components/editor/tour-form/types'
@@ -336,13 +336,8 @@ export function TourWebpageTab({ tour }: TourWebpageTabProps) {
       if (currentItineraryId) {
         await updateItinerary(currentItineraryId, convertedData)
 
-        // 同步飯店到報價單
+        // 同步到核心表（報價單直接讀核心表，不需要額外同步）
         if (convertedData.daily_itinerary && convertedData.daily_itinerary.length > 0) {
-          syncHotelsFromItineraryToQuote(
-            currentItineraryId,
-            convertedData.daily_itinerary as { accommodation?: string }[]
-          ).catch(err => logger.error('飯店同步錯誤:', err))
-
           // 同步到核心表
           logger.log('🔄 syncToCore called', { itinerary_id: currentItineraryId, tour_id: tour.id, days: (convertedData.daily_itinerary as DailyItinerary[]).length })
           syncToCore({

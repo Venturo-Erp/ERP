@@ -23,7 +23,7 @@ import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores'
 import type { Tour } from '@/stores/types'
-import type { CostCategory } from '@/features/quotes/types'
+// CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
 import { getStatusConfig } from '@/lib/status-config'
@@ -37,7 +37,7 @@ import type {
 } from './requirements-list.types'
 import { CATEGORIES } from './requirements-list.types'
 import { COMP_REQUIREMENTS_LABELS } from './constants/labels'
-import { parseQuoteItems, groupItemsByCategory } from './parse-quote-items'
+import { groupItemsByCategory } from './parse-quote-items'
 import { coreItemsToQuoteItems } from './core-items-to-quote-items'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
 import { useConfirmationSheet } from './use-confirmation-sheet'
@@ -62,7 +62,7 @@ export function RequirementsList({
   const [tour, setTour] = useState<Tour | null>(null)
   const [linkedQuoteId, setLinkedQuoteId] = useState<string | null>(propQuoteId || null)
   const [existingRequests, setExistingRequests] = useState<TourRequest[]>([])
-  const [quoteCategories, setQuoteCategories] = useState<CostCategory[]>([])
+  // quoteCategories 已移除 — 需求單直接讀核心表
   const [quoteGroupSize, setQuoteGroupSize] = useState<number | null>(null)
   const [startDate, setStartDate] = useState<string | null>(null)
   const [outboundFlight, setOutboundFlight] = useState<FlightInfo | null>(null)
@@ -165,10 +165,8 @@ export function RequirementsList({
   )
 
   const quoteItems = useMemo(
-    () => coreItems.length > 0
-      ? coreItemsToQuoteItems(coreItems, calculateDate)
-      : parseQuoteItems(quoteCategories, calculateDate),
-    [coreItems, quoteCategories, calculateDate]
+    () => coreItemsToQuoteItems(coreItems, calculateDate),
+    [coreItems, calculateDate]
   )
   const itemsByCategory = useMemo(() => groupItemsByCategory(quoteItems), [quoteItems])
 

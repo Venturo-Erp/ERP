@@ -12,66 +12,13 @@ import type { CostCategory, CostItem } from '../types'
 import { costCategories } from '../types'
 
 /**
- * 去除核心表中的重複項目
- *
- * 重複原因：syncItineraryToQuote 產生格式化名稱（如 "Day1 午餐：XXX"）寫入 quote.categories，
- * 之後 writePricingToCore 又把這些項目插入核心表，造成與 syncToCore 產生的原始項目重複。
- */
-function deduplicateCoreItems(items: TourItineraryItem[]): TourItineraryItem[] {
-  // 建立正確項目的索引（有 itinerary_id 的 = 來自 syncToCore）
-  const properMealSlots = new Set<string>()
-  const properActivityTitles = new Set<string>()
-  const properAccommodationSlots = new Map<string, string>() // key → title
-
-  for (const item of items) {
-    if (item.category === 'meals' && item.sub_category && item.day_number) {
-      properMealSlots.add(`${item.day_number}-${item.sub_category}`)
-    }
-    if (item.category === 'activities' && item.day_number && item.title) {
-      if (!item.title.match(/^Day\d+[：:]/)) {
-        properActivityTitles.add(`${item.day_number}-${item.title}`)
-      }
-    }
-    if (item.category === 'accommodation' && item.day_number && item.itinerary_id && item.title) {
-      properAccommodationSlots.set(`${item.day_number}`, item.title)
-    }
-  }
-
-  return items.filter(item => {
-    // 餐食去重：格式化名稱（"Day1 午餐：XXX"）且有對應正確項目 → 過濾
-    if (item.category === 'meals' && !item.sub_category && item.title) {
-      const match = item.title.match(/^Day(\d+)\s*(早餐|午餐|晚餐)[：:]/)
-      if (match) {
-        const dayNum = parseInt(match[1])
-        const subCat = match[2] === '早餐' ? 'breakfast' : match[2] === '午餐' ? 'lunch' : 'dinner'
-        if (properMealSlots.has(`${dayNum}-${subCat}`)) return false
-      }
-    }
-
-    // 活動去重：格式化名稱（"Day1：XXX"）且有對應正確項目 → 過濾
-    if (item.category === 'activities' && item.title && item.day_number) {
-      const match = item.title.match(/^Day\d+[：:](.+)/)
-      if (match && properActivityTitles.has(`${item.day_number}-${match[1]}`)) return false
-    }
-
-    // 住宿去重：同一天有兩筆相同飯店，沒有 itinerary_id 的是重複 → 過濾
-    if (item.category === 'accommodation' && item.day_number && item.title && !item.itinerary_id) {
-      const properTitle = properAccommodationSlots.get(`${item.day_number}`)
-      if (properTitle && properTitle === item.title) return false
-    }
-
-    return true
-  })
-}
-
-/**
  * 核心表項目 → 報價分類
  *
  * 按 category 分組到 7 個分類，映射欄位名稱
  */
 export function coreItemsToCostCategories(items: TourItineraryItem[]): CostCategory[] {
-  // 去重：移除 syncItineraryToQuote 回寫造成的重複項目
-  const dedupedItems = deduplicateCoreItems(items)
+  // syncItineraryToQuote 已移除，不再有重複項目
+  const dedupedItems = items
 
   // 深拷貝預設分類結構（確保每個分類都存在）
   const categories: CostCategory[] = costCategories.map(cat => ({
