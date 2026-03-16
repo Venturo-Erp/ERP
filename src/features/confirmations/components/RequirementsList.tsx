@@ -458,9 +458,6 @@ export function RequirementsList({
                     {COMP_REQUIREMENTS_LABELS.項目說明}
                   </th>
                   <th className="px-3 py-2.5 text-right font-medium text-morandi-primary w-[80px]">
-                    {COMP_REQUIREMENTS_LABELS.報價}
-                  </th>
-                  <th className="px-3 py-2.5 text-right font-medium text-morandi-primary w-[80px]">
                     {COMP_REQUIREMENTS_LABELS.成本}
                   </th>
                   <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[80px]">
@@ -552,9 +549,6 @@ export function RequirementsList({
                               </div>
                             )}
                           </div>
-                        </td>
-                        <td className="px-3 py-2.5 text-right font-medium text-morandi-secondary">
-                          {item.quotedPrice ? `$${item.quotedPrice.toLocaleString()}` : '-'}
                         </td>
                         <td className="px-3 py-2.5 text-right font-medium text-morandi-primary">
                           {existingRequest?.quoted_cost
