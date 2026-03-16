@@ -8,11 +8,13 @@
 
 | 順序 | 文件 | 你會知道 |
 |------|------|---------|
+| 0️⃣ | [帝國論文](VENTURO_THESIS.md) | 產業分析、核心假設、戰略框架（9 章）|
 | 1️⃣ | [創世記](GENESIS.md) | 帝國為什麼誕生 |
-| 2️⃣ | [世界設定集](WORLD_LORE.md) | 遊戲世界觀、角色、比喻 |
-| 3️⃣ | [帝國藍圖](EMPIRE_BLUEPRINT.md) | 六大機構、路由、DB、紀元路線圖 |
-| 4️⃣ | [帝國法則](LAWS.md) | 設計原則、禁止事項 |
-| 5️⃣ | [決策記錄](DECISIONS.md) | 為什麼做這個決定 |
+| 2️⃣ | [商業模式](BUSINESS_MODEL.md) | 金幣流轉、收入模型、護城河 |
+| 3️⃣ | [世界設定集](WORLD_LORE.md) | 遊戲世界觀、角色、比喻 |
+| 4️⃣ | [帝國藍圖](EMPIRE_BLUEPRINT.md) | 六大機構、路由、DB、紀元路線圖 |
+| 5️⃣ | [帝國法則](LAWS.md) | 設計原則、禁止事項 |
+| 6️⃣ | [決策記錄](DECISIONS.md) | 為什麼做這個決定 |
 
 ---
 
@@ -21,6 +23,8 @@
 ```
 empire/
 ├── README.md              ← 你在這裡
+├── VENTURO_THESIS.md      — 帝國論文（產業分析 + 戰略框架，9 章 687 行）
+├── BUSINESS_MODEL.md      — 商業模式（金幣流轉 + 收入模型）
 ├── GENESIS.md             — 創世記（起源故事）
 ├── WORLD_LORE.md          — 世界設定集（遊戲世界觀）
 ├── EMPIRE_BLUEPRINT.md    — 帝國全貌藍圖（核心！）
