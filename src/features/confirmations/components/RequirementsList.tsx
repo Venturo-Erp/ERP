@@ -469,9 +469,7 @@ export function RequirementsList({
                   <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[80px]">
                     {COMP_REQUIREMENTS_LABELS.狀態}
                   </th>
-                  <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[90px]">
-                    {COMP_REQUIREMENTS_LABELS.操作}
-                  </th>
+
                 </tr>
               </thead>
               <tbody>
@@ -568,92 +566,6 @@ export function RequirementsList({
                           >
                             {statusLabel}
                           </span>
-                        </td>
-                        <td className="px-3 py-2.5 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            {/* 🆕 產生需求單按鈕（只在第一行顯示） */}
-                            {isFirstRowForSupplier && !isHidden && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  const supplierItems = categoryItems.filter(
-                                    i => getSupplierKey(i) === supplierKey
-                                  )
-                                  handleGenerateSupplierRequest(
-                                    cat.key,
-                                    item.supplierName || '未指定',
-                                    supplierItems
-                                  )
-                                }}
-                                className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                title="產生需求單 PDF"
-                                disabled={generatingRequests}
-                              >
-                                {generatingRequests ? (
-                                  <Loader2 size={12} className="animate-spin" />
-                                ) : (
-                                  <FileText size={12} />
-                                )}
-                              </Button>
-                            )}
-                            
-                            {(isHidden || isFirstRowForSupplier) && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() =>
-                                  handleToggleHidden(
-                                    existingRequest?.id || null,
-                                    !isHidden,
-                                    !existingRequest
-                                      ? {
-                                          category: cat.key,
-                                          supplierName: item.supplierName || '',
-                                          title: item.title,
-                                          serviceDate: item.serviceDate,
-                                          quantity: item.quantity,
-                                          notes: item.notes,
-                                          resourceId: item.resourceId,
-                                          resourceType:
-                                            cat.key === 'accommodation'
-                                              ? 'hotel'
-                                              : cat.key === 'meal'
-                                                ? 'restaurant'
-                                                : cat.key === 'activity'
-                                                  ? 'attraction'
-                                                  : undefined,
-                                        }
-                                      : undefined
-                                  )
-                                }
-                                className={cn(
-                                  'h-7 w-7 p-0',
-                                  isHidden
-                                    ? 'text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/50'
-                                    : 'text-morandi-muted hover:text-morandi-secondary hover:bg-morandi-container/30'
-                                )}
-                                title={
-                                  isHidden
-                                    ? COMP_REQUIREMENTS_LABELS.恢復顯示
-                                    : COMP_REQUIREMENTS_LABELS.隱藏
-                                }
-                              >
-                                {isHidden ? <Eye size={14} /> : <EyeOff size={14} />}
-                              </Button>
-                            )}
-                            {isFirstRowForSupplier && item.supplierName && tour && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => openCoreRequestDialog(cat.key, item.supplierName)}
-                                className="h-7 w-7 p-0 text-morandi-gold hover:text-morandi-gold-hover hover:bg-morandi-gold/10"
-                                title="列印需求單"
-                              >
-                                <FileText size={14} />
-                              </Button>
-                            )}
-                          </div>
                         </td>
                       </tr>
                     )
