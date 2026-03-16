@@ -38,6 +38,8 @@ import type {
 import { CATEGORIES } from './requirements-list.types'
 import { COMP_REQUIREMENTS_LABELS } from './constants/labels'
 import { parseQuoteItems, groupItemsByCategory } from './parse-quote-items'
+import { coreItemsToQuoteItems } from './core-items-to-quote-items'
+import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
 import { useConfirmationSheet } from './use-confirmation-sheet'
 import { CoreTableRequestDialog } from '@/features/tours/components/CoreTableRequestDialog'
 
@@ -77,6 +79,7 @@ export function RequirementsList({
   const [showCoreRequestDialog, setShowCoreRequestDialog] = useState(false)
   const [selectedSupplierName, setSelectedSupplierName] = useState<string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('')
+  const [coreItems, setCoreItems] = useState<TourItineraryItem[]>([])
 
   // ============================================
   // 載入資料
@@ -109,22 +112,29 @@ export function RequirementsList({
             .eq('tour_id', tourId)
             .order('created_at', { ascending: true })
           setExistingRequests((requests as TourRequest[]) || [])
+
+          // 直接讀核心表（不依賴 quote_id）
+          const { data: items } = await supabase
+            .from('tour_itinerary_items')
+            .select('*')
+            .eq('tour_id', tourId)
+            .order('day_number', { ascending: true })
+            .order('sort_order', { ascending: true })
+          setCoreItems((items as TourItineraryItem[]) || [])
+          setStartDate(tourData.departure_date || null)
         }
-        setLinkedQuoteId(quoteId)
+
+        // 保留 quote 讀取（用於 group_size 等 header 資訊）
         if (quoteId) {
           const { data: quote } = await supabase
             .from('quotes')
-            .select('categories, start_date, group_size')
+            .select('start_date, group_size')
             .eq('id', quoteId)
             .single()
           if (quote) {
-            setQuoteCategories((quote.categories as unknown as CostCategory[]) || [])
-            setStartDate(quote.start_date || tour?.departure_date || null)
+            if (quote.start_date) setStartDate(quote.start_date)
             setQuoteGroupSize(quote.group_size || null)
           }
-        } else {
-          setQuoteCategories([])
-          setStartDate(tour?.departure_date || null)
         }
       } catch (error) {
         logger.error(COMP_REQUIREMENTS_LABELS.載入需求資料失敗, error)
@@ -155,8 +165,10 @@ export function RequirementsList({
   )
 
   const quoteItems = useMemo(
-    () => parseQuoteItems(quoteCategories, calculateDate),
-    [quoteCategories, calculateDate]
+    () => coreItems.length > 0
+      ? coreItemsToQuoteItems(coreItems, calculateDate)
+      : parseQuoteItems(quoteCategories, calculateDate),
+    [coreItems, quoteCategories, calculateDate]
   )
   const itemsByCategory = useMemo(() => groupItemsByCategory(quoteItems), [quoteItems])
 
@@ -416,13 +428,13 @@ export function RequirementsList({
           </div>
         </div>
 
-        {/* 主表格 */}
-        {!linkedQuoteId ? (
+        {/* 主表格 — 核心表有資料就顯示，不需要綁定報價單 */}
+        {coreItems.length === 0 && !linkedQuoteId ? (
           <div className="bg-card border border-border rounded-lg p-8 text-center">
             <AlertCircle className="mx-auto text-morandi-muted mb-3" size={48} />
-            <p className="text-morandi-secondary mb-2">{COMP_REQUIREMENTS_LABELS.尚無報價單資料}</p>
+            <p className="text-morandi-secondary mb-2">尚無行程資料</p>
             <p className="text-xs text-morandi-muted">
-              {COMP_REQUIREMENTS_LABELS.請到_總覽_頁籤點擊_報價單_按鈕進行綁定}
+              請先到「行程」頁籤填寫行程內容
             </p>
           </div>
         ) : quoteItems.length === 0 && existingRequests.length === 0 ? (
