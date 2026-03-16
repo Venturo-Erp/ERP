@@ -23,6 +23,7 @@ import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores'
 import type { Tour } from '@/stores/types'
+import { RoomRequirementDialog } from './RoomRequirementDialog'
 // CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
@@ -67,6 +68,13 @@ export function RequirementsList({
   const [startDate, setStartDate] = useState<string | null>(null)
   const [outboundFlight, setOutboundFlight] = useState<FlightInfo | null>(null)
   const [returnFlight, setReturnFlight] = useState<FlightInfo | null>(null)
+  const [showRoomDialog, setShowRoomDialog] = useState(false)
+  const [selectedHotel, setSelectedHotel] = useState<{
+    name: string
+    resourceId: string | null
+    serviceDate: string | null
+    nights: number
+  } | null>(null)
 
 
   // 隱藏項目展開狀態
@@ -469,6 +477,8 @@ export function RequirementsList({
                   <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[80px]">
                     {COMP_REQUIREMENTS_LABELS.狀態}
                   </th>
+                  <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[90px]">
+                  </th>
 
                 </tr>
               </thead>
@@ -567,6 +577,26 @@ export function RequirementsList({
                             {statusLabel}
                           </span>
                         </td>
+                        <td className="px-3 py-2.5 text-center">
+                          {cat.key === 'accommodation' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedHotel({
+                                  name: item.supplierName || item.title,
+                                  resourceId: item.resourceId ?? null,
+                                  serviceDate: item.serviceDate ?? null,
+                                  nights: item.quantity || 1,
+                                })
+                                setShowRoomDialog(true)
+                              }}
+                              className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10"
+                            >
+                              新增需求
+                            </Button>
+                          )}
+                        </td>
                       </tr>
                     )
                   }
@@ -640,6 +670,19 @@ export function RequirementsList({
           tour={tour}
           supplierName={selectedSupplierName}
           category={selectedCategory}
+        />
+      )}
+      {/* 住宿需求 Dialog */}
+      {selectedHotel && (
+        <RoomRequirementDialog
+          open={showRoomDialog}
+          onClose={() => { setShowRoomDialog(false); setSelectedHotel(null) }}
+          hotelName={selectedHotel.name}
+          hotelResourceId={selectedHotel.resourceId}
+          tourId={tourId || ''}
+          serviceDate={selectedHotel.serviceDate}
+          nights={selectedHotel.nights}
+          onSaved={() => loadData(false)}
         />
       )}
     </>
