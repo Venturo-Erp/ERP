@@ -251,14 +251,48 @@ export function AssignSupplierDialog({
     onClose()
   }, [canPrint, supplierName, selectedSupplier, tour, totalPax, ageBreakdown, grouped, formatDate, onClose])
 
-  const [step, setStep] = useState<'supplier' | 'rooms' | 'preview'>('supplier')
+  const [step, setStep] = useState<'rooms' | 'preview' | 'send'>('preview')
   const [roomDetails, setRoomDetails] = useState<Record<string, { name: string; qty: number }[]>>({})
+  const [sendMethod, setSendMethod] = useState<'print' | 'line' | 'email' | 'fax' | 'tenant' | null>(null)
 
   // 重置 step
   useEffect(() => {
     if (open) {
-      setStep('supplier')
+      // 有住宿 → 先填房型，否則 → 直接預覽
+      const accItems = items.filter(({ category }) => category === 'accommodation')
+      const hasAcc = accItems.length > 0
+
+      if (hasAcc) {
+        // 初始化房型（從 existingRequests 讀或預設）
+        const init: Record<string, { name: string; qty: number }[]> = {}
+        let allHaveRooms = true
+
+        accItems.forEach(({ item }) => {
+          const existing = existingRequests.find(req =>
+            req.items?.some(ri => ri.rooms && ri.rooms.length > 0)
+          )
+          if (existing?.items) {
+            const withRooms = existing.items.find(ri => ri.rooms && ri.rooms.length > 0)
+            if (withRooms?.rooms) {
+              init[item.key] = withRooms.rooms.map(r => ({ name: r.room_type, qty: r.quantity }))
+              return
+            }
+          }
+          init[item.key] = [{ name: '雙人房', qty: 1 }]
+          allHaveRooms = false
+        })
+
+        setRoomDetails(init)
+        setStep(allHaveRooms ? 'preview' : 'rooms')
+      } else {
+        setStep('preview')
+      }
+
       setRoomDetails({})
+      setSendMethod(null)
+      setSelectedSupplier(null)
+      setSupplierSearch('')
+      setCustomName('')
     }
   }, [open])
 
@@ -371,142 +405,13 @@ export function AssignSupplierDialog({
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
-      <DialogContent className={step === 'preview' ? 'max-w-4xl max-h-[90vh] overflow-hidden flex flex-col' : 'max-w-lg'}>
-        {step === 'supplier' ? (
+      <DialogContent className={step === 'preview' || step === 'send' ? 'max-w-4xl max-h-[90vh] overflow-hidden flex flex-col' : 'max-w-lg'}>
+        {step === 'rooms' ? (
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Building2 size={18} className="text-morandi-gold" />
-                發給供應商 — {items.length} 個項目
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              {/* 已選項目摘要 */}
-              <div className="bg-muted/50 rounded-md p-3 space-y-1">
-                {Object.entries(grouped).map(([catKey, catItems]) => (
-                  <div key={catKey} className="flex items-center gap-2 text-sm">
-                    <span className="font-medium text-morandi-primary w-12">
-                      {CATEGORY_LABELS[catKey] || catKey}
-                    </span>
-                    <span className="text-muted-foreground">
-                      {catItems.map(i => i.title || i.supplierName).join('、')}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* 搜尋供應商 */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">供應商</Label>
-                <div className="relative">
-                  <Search size={14} className="absolute left-2.5 top-2 text-muted-foreground" />
-                  <Input
-                    value={supplierSearch}
-                    onChange={e => {
-                      setSupplierSearch(e.target.value)
-                      setSelectedSupplier(null)
-                      setCustomName(e.target.value)
-                    }}
-                    placeholder="搜尋或輸入供應商名稱..."
-                    className="h-8 text-sm pl-8"
-                  />
-                </div>
-
-                {suppliers.length > 0 && !selectedSupplier && (
-                  <div className="border rounded-md max-h-36 overflow-y-auto">
-                    {suppliers.map(s => (
-                      <button
-                        key={s.id}
-                        className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm border-b border-border/50 last:border-0"
-                        onClick={() => {
-                          setSelectedSupplier(s)
-                          setSupplierSearch(s.name)
-                          setCustomName('')
-                        }}
-                      >
-                        <span className="font-medium">{s.name}</span>
-                        {s.contact_person && (
-                          <span className="text-xs text-muted-foreground ml-2">
-                            窗口: {s.contact_person}
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {selectedSupplier && (
-                  <div className="bg-blue-50/50 border border-blue-200 rounded-md p-2 text-xs space-y-0.5">
-                    <div className="font-medium text-blue-700">{selectedSupplier.name}</div>
-                    {selectedSupplier.contact_person && <div>窗口: {selectedSupplier.contact_person}</div>}
-                    {selectedSupplier.phone && <div>電話: {selectedSupplier.phone}</div>}
-                    {selectedSupplier.email && <div>Email: {selectedSupplier.email}</div>}
-                  </div>
-                )}
-
-                {loading && <div className="text-xs text-muted-foreground">搜尋中...</div>}
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={onClose}>取消</Button>
-              <Button
-                disabled={!canPrint}
-                onClick={() => {
-                  if (hasAccommodation) {
-                    // 檢查每個住宿項目是否已有房型資料（從 existingRequests 讀）
-                    const init: Record<string, { name: string; qty: number }[]> = {}
-                    let allHaveRooms = true
-
-                    accommodationItems.forEach(({ item }) => {
-                      if (roomDetails[item.key]?.some(r => r.name.trim())) return // 已在本次填過
-
-                      // 從 existingRequests 找匹配的住宿委託
-                      const existing = existingRequests.find(req =>
-                        req.items?.some(ri =>
-                          ri.rooms && ri.rooms.length > 0
-                        )
-                      )
-                      if (existing?.items) {
-                        const withRooms = existing.items.find(ri => ri.rooms && ri.rooms.length > 0)
-                        if (withRooms?.rooms) {
-                          init[item.key] = withRooms.rooms.map(r => ({ name: r.room_type, qty: r.quantity }))
-                          return
-                        }
-                      }
-                      // 沒有已存的房型 → 需要填
-                      init[item.key] = [{ name: '雙人房', qty: 1 }]
-                      allHaveRooms = false
-                    })
-
-                    if (Object.keys(init).length > 0) {
-                      setRoomDetails(prev => ({ ...prev, ...init }))
-                    }
-
-                    // 全部都有房型資料 → 跳過房型步驟
-                    if (allHaveRooms && Object.keys(init).length > 0) {
-                      setRoomDetails(prev => ({ ...prev, ...init }))
-                      setStep('preview')
-                    } else {
-                      setStep('rooms')
-                    }
-                  } else {
-                    setStep('preview')
-                  }
-                }}
-                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-              >
-                下一步{hasAccommodation ? '：填寫房型' : '：預覽需求單'}
-              </Button>
-            </DialogFooter>
-          </>
-        ) : step === 'rooms' ? (
-          <>
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2">
-                <Building2 size={18} className="text-morandi-gold" />
-                填寫房型需求 — {accommodationItems.length} 間住宿
+                Step 1 · 填寫房型需求 — {accommodationItems.length} 間住宿
               </DialogTitle>
             </DialogHeader>
 
@@ -568,7 +473,7 @@ export function AssignSupplierDialog({
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setStep('supplier')}>← 返回</Button>
+              <Button variant="outline" onClick={onClose}>取消</Button>
               <Button
                 onClick={() => setStep('preview')}
                 className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
@@ -577,12 +482,12 @@ export function AssignSupplierDialog({
               </Button>
             </DialogFooter>
           </>
-        ) : (
+        ) : step === 'preview' ? (
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Building2 size={18} className="text-morandi-gold" />
-                需求單預覽 — {supplierName}
+                需求單預覽 — {items.length} 個項目
               </DialogTitle>
             </DialogHeader>
 
@@ -595,56 +500,183 @@ export function AssignSupplierDialog({
               />
             </div>
 
-            {/* 發送管道 */}
+            {/* 發送方式選擇 */}
             <div className="border-t pt-3">
-              <p className="text-xs text-muted-foreground mb-2">選擇發送方式</p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <p className="text-sm font-medium mb-2">選擇發送方式</p>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                 <Button
                   size="sm"
-                  onClick={async () => {
-                    const saved = await handleSaveRequest()
-                    if (saved === false) return
-                    const w = window.open('', '_blank', 'width=900,height=700')
-                    if (w) { w.document.write(generateHtml()); w.document.close() }
-                    onClose()
-                  }}
-                  disabled={saving}
-                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                  variant={sendMethod === 'print' ? 'default' : 'outline'}
+                  onClick={() => setSendMethod('print')}
+                  className={sendMethod === 'print' ? 'bg-morandi-gold hover:bg-morandi-gold-hover text-white' : ''}
                 >
-                  {saving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <Printer size={14} className="mr-1.5" />}
+                  <Printer size={14} className="mr-1.5" />
                   列印
                 </Button>
                 <Button
-                  variant="outline"
                   size="sm"
-                  className="opacity-60"
-                  onClick={() => toast({ title: '📠 傳真發送', description: '開發中 — 目前請先用列印後傳真' })}
+                  variant={sendMethod === 'line' ? 'default' : 'outline'}
+                  onClick={() => setSendMethod('line')}
+                  className={sendMethod === 'line' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
                 >
-                  <Phone size={14} className="mr-1.5" />
-                  傳真
-                  <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
+                  <MessageCircle size={14} className="mr-1.5" />
+                  Line
                 </Button>
                 <Button
-                  variant="outline"
                   size="sm"
-                  className="opacity-60"
-                  onClick={() => toast({ title: '📧 Email 發送', description: '功能開發中 — 將夾帶此 PDF 並自動撰寫信件內容' })}
+                  variant={sendMethod === 'email' ? 'default' : 'outline'}
+                  onClick={() => setSendMethod('email')}
+                  className={sendMethod === 'email' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}
                 >
                   <Mail size={14} className="mr-1.5" />
                   Email
-                  <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
                 </Button>
                 <Button
-                  variant="outline"
                   size="sm"
-                  disabled={saving}
-                  onClick={async () => {
-                    // 先儲存委託
+                  variant={sendMethod === 'fax' ? 'default' : 'outline'}
+                  onClick={() => setSendMethod('fax')}
+                  className={sendMethod === 'fax' ? 'bg-gray-700 hover:bg-gray-800 text-white' : ''}
+                >
+                  <Phone size={14} className="mr-1.5" />
+                  傳真
+                </Button>
+                <Button
+                  size="sm"
+                  variant={sendMethod === 'tenant' ? 'default' : 'outline'}
+                  onClick={() => setSendMethod('tenant')}
+                  className={sendMethod === 'tenant' ? 'bg-purple-600 hover:bg-purple-700 text-white' : ''}
+                >
+                  <Globe size={14} className="mr-1.5" />
+                  租戶
+                </Button>
+              </div>
+            </div>
+
+            <DialogFooter>
+              {hasAccommodation && (
+                <Button variant="outline" onClick={() => setStep('rooms')}>← 房型</Button>
+              )}
+              <Button variant="outline" onClick={onClose}>取消</Button>
+              {sendMethod === 'print' ? (
+                <Button
+                  onClick={() => {
+                    const w = window.open('', '_blank', 'width=900,height=700')
+                    if (w) { w.document.write(generateHtml()); w.document.close() }
+                  }}
+                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                >
+                  <Printer size={14} className="mr-1.5" />
+                  直接列印
+                </Button>
+              ) : sendMethod ? (
+                <Button
+                  onClick={() => setStep('send')}
+                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                >
+                  下一步：選擇供應商
+                </Button>
+              ) : null}
+            </DialogFooter>
+          </>
+        ) : (
+          /* step === 'send' — 選供應商 + 確認發送 */
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Building2 size={18} className="text-morandi-gold" />
+                {sendMethod === 'line' ? '💬 Line 發送' : sendMethod === 'email' ? '📧 Email 發送' : sendMethod === 'fax' ? '📠 傳真發送' : '🌐 發給租戶'} — 選擇供應商
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              {/* 搜尋供應商 */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">發送給哪個供應商？</Label>
+                <div className="relative">
+                  <Search size={14} className="absolute left-2.5 top-2 text-muted-foreground" />
+                  <Input
+                    value={supplierSearch}
+                    onChange={e => {
+                      setSupplierSearch(e.target.value)
+                      setSelectedSupplier(null)
+                      setCustomName(e.target.value)
+                    }}
+                    placeholder="搜尋或輸入供應商名稱..."
+                    className="h-8 text-sm pl-8"
+                  />
+                </div>
+
+                {suppliers.length > 0 && !selectedSupplier && (
+                  <div className="border rounded-md max-h-36 overflow-y-auto">
+                    {suppliers.map(s => (
+                      <button
+                        key={s.id}
+                        className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm border-b border-border/50 last:border-0"
+                        onClick={() => {
+                          setSelectedSupplier(s)
+                          setSupplierSearch(s.name)
+                          setCustomName('')
+                        }}
+                      >
+                        <span className="font-medium">{s.name}</span>
+                        {s.contact_person && (
+                          <span className="text-xs text-muted-foreground ml-2">
+                            窗口: {s.contact_person}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {selectedSupplier && (
+                  <div className="bg-blue-50/50 border border-blue-200 rounded-md p-2 text-xs space-y-0.5">
+                    <div className="font-medium text-blue-700">{selectedSupplier.name}</div>
+                    {selectedSupplier.contact_person && <div>窗口: {selectedSupplier.contact_person}</div>}
+                    {selectedSupplier.phone && <div>電話: {selectedSupplier.phone}</div>}
+                    {selectedSupplier.email && <div>Email: {selectedSupplier.email}</div>}
+                  </div>
+                )}
+
+                {loading && <div className="text-xs text-muted-foreground">搜尋中...</div>}
+              </div>
+
+              {/* 發送方式特定提示 */}
+              {sendMethod === 'line' && (
+                <div className="bg-green-50 border border-green-200 rounded-md p-3 text-sm">
+                  <div className="font-medium text-green-700 mb-1">💬 Line 發送</div>
+                  <div className="text-green-600 text-xs">將發送 Flex 卡片到供應商的 LINE 群組，含需求摘要和線上回覆連結</div>
+                </div>
+              )}
+              {sendMethod === 'email' && (
+                <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm">
+                  <div className="font-medium text-blue-700 mb-1">📧 Email 發送</div>
+                  <div className="text-blue-600 text-xs">功能開發中 — 需要設定 Email 寄件帳號</div>
+                </div>
+              )}
+              {sendMethod === 'fax' && (
+                <div className="bg-gray-50 border border-gray-200 rounded-md p-3 text-sm">
+                  <div className="font-medium text-gray-700 mb-1">📠 傳真發送</div>
+                  <div className="text-gray-600 text-xs">功能開發中 — 需要設定虛擬傳真服務</div>
+                </div>
+              )}
+              {sendMethod === 'tenant' && (
+                <div className="bg-purple-50 border border-purple-200 rounded-md p-3 text-sm">
+                  <div className="font-medium text-purple-700 mb-1">🌐 發給租戶</div>
+                  <div className="text-purple-600 text-xs">功能開發中 — 需要先建立附屬國租戶</div>
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setStep('preview')}>← 返回</Button>
+              <Button
+                disabled={!canPrint || saving || (sendMethod !== 'line' && sendMethod !== 'print')}
+                onClick={async () => {
+                  if (sendMethod === 'line') {
                     const saved = await handleSaveRequest()
                     if (saved === false) return
 
-                    // TODO: 從 supplier 表讀 line_group_id
-                    // 目前用測試群組
                     const lineGroupId = 'Cef588e4998134cdb9313b80667924bdb'
                     const senderName = user?.display_name || user?.chinese_name || '業務員'
 
@@ -673,6 +705,7 @@ export function AssignSupplierDialog({
                       })
                       if (res.ok) {
                         toast({ title: '💬 Line 已發送', description: `需求單已發送到 ${supplierName} 群組` })
+                        onSave?.()
                         onClose()
                       } else {
                         const err = await res.json()
@@ -681,29 +714,15 @@ export function AssignSupplierDialog({
                     } catch (err) {
                       toast({ title: 'Line 發送失敗', description: String(err), variant: 'destructive' })
                     }
-                  }}
-                >
-                  <MessageCircle size={14} className="mr-1.5" />
-                  Line 發送
-                </Button>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="opacity-60"
-                  onClick={() => toast({ title: '🌐 系統內發送', description: '功能開發中 — 需要先建立附屬國租戶' })}
-                >
-                  <Globe size={14} className="mr-1.5" />
-                  發給租戶
-                  <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
-                </Button>
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setStep('supplier')}>← 返回</Button>
-              <Button variant="outline" onClick={onClose}>關閉</Button>
+                  } else {
+                    toast({ title: '功能開發中', description: '此發送方式尚未上線' })
+                  }
+                }}
+                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              >
+                {saving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : null}
+                確認發送
+              </Button>
             </DialogFooter>
           </>
         )}
