@@ -146,7 +146,7 @@ export function RequirementsList({
           const { data: requests } = await supabase
             .from('tour_requests')
             .select(
-              'id, code, category, supplier_name, supplier_id, title, service_date, quantity, notes, status, quoted_cost, hidden, resource_id, resource_type, request_type, items, created_at, sent_at, sent_via, sent_to, replied_at, confirmed_at'
+              'id, code, supplier_name, supplier_id, supplier_contact, request_type, items, status, note, created_at, sent_at, sent_via, sent_to, replied_at, confirmed_at, source_type, source_id, created_by'
             )
             .eq('tour_id', tourId)
             .order('created_at', { ascending: true })
@@ -315,26 +315,26 @@ export function RequirementsList({
             code,
             workspace_id: user.workspace_id,
             tour_id: tourId || null,
-            tour_code: tour?.code || null,
-            tour_name: tour?.name || null,
-            category: itemData.category,
             supplier_name: itemData.supplierName || null,
-            title: itemData.title,
-            service_date: itemData.serviceDate || null,
-            quantity: itemData.quantity,
-            notes: itemData.notes || null,
+            request_type: itemData.category || 'other',
+            items: [{
+              category: itemData.category,
+              title: itemData.title,
+              service_date: itemData.serviceDate || null,
+              quantity: itemData.quantity,
+              notes: itemData.notes || null,
+              resource_id: itemData.resourceId || null,
+              resource_type: itemData.resourceType || null,
+            }],
             status: 'draft',
-            hidden: true,
-            resource_id: itemData.resourceId || null,
-            resource_type: itemData.resourceType || null,
+            note: itemData.notes || null,
             created_by: user.id,
-            created_by_name: user.display_name || user.chinese_name || '',
           }
           const { data: newRequest, error } = await supabase
             .from('tour_requests')
-            .insert(insertData)
+            .insert(insertData as never)
             .select(
-              'id, code, category, supplier_name, supplier_id, title, service_date, quantity, notes, status, quoted_cost, hidden, resource_id, resource_type, request_type, items'
+              'id, code, supplier_name, supplier_id, supplier_contact, request_type, items, status, note, created_at, sent_at, sent_via, sent_to, replied_at, confirmed_at, source_type, source_id, created_by'
             )
             .single()
           if (error) throw error
