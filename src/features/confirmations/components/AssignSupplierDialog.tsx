@@ -591,6 +591,14 @@ export function AssignSupplierDialog({
                   <Printer size={14} className="mr-1.5" />
                   直接列印
                 </Button>
+              ) : sendMethod === 'line' ? (
+                <Button
+                  onClick={() => setStep('send')}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <MessageCircle size={14} className="mr-1.5" />
+                  下一步：選群組發送
+                </Button>
               ) : sendMethod ? (
                 <Button
                   onClick={() => setStep('send')}
@@ -602,108 +610,117 @@ export function AssignSupplierDialog({
             </DialogFooter>
           </>
         ) : (
-          /* step === 'send' — 選供應商 + 確認發送 */
+          /* step === 'send' */
           <>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Building2 size={18} className="text-morandi-gold" />
-                {sendMethod === 'line' ? '💬 Line 發送' : sendMethod === 'email' ? '📧 Email 發送' : sendMethod === 'fax' ? '📠 傳真發送' : '🌐 發給租戶'} — 選擇供應商
+                {sendMethod === 'line' ? (
+                  <><MessageCircle size={18} className="text-green-600" /> 💬 Line 發送</>
+                ) : sendMethod === 'email' ? (
+                  <><Mail size={18} className="text-blue-600" /> 📧 Email 發送</>
+                ) : sendMethod === 'fax' ? (
+                  <><Phone size={18} className="text-gray-600" /> 📠 傳真發送</>
+                ) : (
+                  <><Globe size={18} className="text-purple-600" /> 🌐 發給租戶</>
+                )}
               </DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
-              {/* 搜尋供應商 */}
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">發送給哪個供應商？</Label>
-                <div className="relative">
-                  <Search size={14} className="absolute left-2.5 top-2 text-muted-foreground" />
-                  <Input
-                    value={supplierSearch}
-                    onChange={e => {
-                      setSupplierSearch(e.target.value)
-                      setSelectedSupplier(null)
-                      setCustomName(e.target.value)
-                    }}
-                    placeholder="搜尋或輸入供應商名稱..."
-                    className="h-8 text-sm pl-8"
-                  />
-                </div>
-
-                {suppliers.length > 0 && !selectedSupplier && (
-                  <div className="border rounded-md max-h-36 overflow-y-auto">
-                    {suppliers.map(s => (
-                      <button
-                        key={s.id}
-                        className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm border-b border-border/50 last:border-0"
-                        onClick={() => {
-                          setSelectedSupplier(s)
-                          setSupplierSearch(s.name)
-                          setCustomName('')
-                        }}
-                      >
-                        <span className="font-medium">{s.name}</span>
-                        {s.contact_person && (
-                          <span className="text-xs text-muted-foreground ml-2">
-                            窗口: {s.contact_person}
-                          </span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {selectedSupplier && (
-                  <div className="bg-blue-50/50 border border-blue-200 rounded-md p-2 text-xs space-y-0.5">
-                    <div className="font-medium text-blue-700">{selectedSupplier.name}</div>
-                    {selectedSupplier.contact_person && <div>窗口: {selectedSupplier.contact_person}</div>}
-                    {selectedSupplier.phone && <div>電話: {selectedSupplier.phone}</div>}
-                    {selectedSupplier.email && <div>Email: {selectedSupplier.email}</div>}
-                  </div>
-                )}
-
-                {loading && <div className="text-xs text-muted-foreground">搜尋中...</div>}
-              </div>
-
-              {/* 發送方式特定提示 */}
+              {/* LINE：只選群組 */}
               {sendMethod === 'line' && (
-                <div className="bg-green-50 border border-green-200 rounded-md p-3 space-y-2">
-                  <div className="font-medium text-green-700">💬 Line 發送 — 選擇群組</div>
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">發送到哪個群組？</Label>
                   {loadingGroups ? (
-                    <div className="text-xs text-green-600">載入群組中...</div>
+                    <div className="text-sm text-muted-foreground">載入群組中...</div>
                   ) : lineGroups.length === 0 ? (
-                    <div className="text-xs text-green-600">尚無群組。請先將 VENTURO 數位助理加入 LINE 群組。</div>
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm text-yellow-700">
+                      尚無群組。請先將 VENTURO 數位助理加入 LINE 群組。
+                    </div>
                   ) : (
-                    <select
-                      value={selectedGroupId}
-                      onChange={e => setSelectedGroupId(e.target.value)}
-                      className="w-full border border-green-300 rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-green-500"
-                    >
-                      {lineGroups.map(g => (
-                        <option key={g.group_id} value={g.group_id}>
-                          {g.group_name || g.group_id.slice(0, 12)}
-                        </option>
-                      ))}
-                    </select>
+                    <>
+                      <div className="space-y-2">
+                        {lineGroups.map(g => (
+                          <button
+                            key={g.group_id}
+                            className={`w-full text-left px-4 py-3 rounded-md border-2 transition-colors ${
+                              selectedGroupId === g.group_id
+                                ? 'border-green-500 bg-green-50'
+                                : 'border-gray-200 hover:border-green-300 hover:bg-green-50/50'
+                            }`}
+                            onClick={() => setSelectedGroupId(g.group_id)}
+                          >
+                            <div className="font-medium">{g.group_name || g.group_id.slice(0, 12)}</div>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Flex 卡片將發送到此群組，含需求摘要 + 線上回覆連結
+                      </div>
+                    </>
                   )}
-                  <div className="text-green-600 text-xs">將發送 Flex 卡片到此群組，含需求摘要和線上回覆連結</div>
                 </div>
               )}
-              {sendMethod === 'email' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-sm">
-                  <div className="font-medium text-blue-700 mb-1">📧 Email 發送</div>
-                  <div className="text-blue-600 text-xs">功能開發中 — 需要設定 Email 寄件帳號</div>
-                </div>
-              )}
-              {sendMethod === 'fax' && (
-                <div className="bg-gray-50 border border-gray-200 rounded-md p-3 text-sm">
-                  <div className="font-medium text-gray-700 mb-1">📠 傳真發送</div>
-                  <div className="text-gray-600 text-xs">功能開發中 — 需要設定虛擬傳真服務</div>
-                </div>
-              )}
-              {sendMethod === 'tenant' && (
-                <div className="bg-purple-50 border border-purple-200 rounded-md p-3 text-sm">
-                  <div className="font-medium text-purple-700 mb-1">🌐 發給租戶</div>
-                  <div className="text-purple-600 text-xs">功能開發中 — 需要先建立附屬國租戶</div>
+
+              {/* 其他發送方式：需要選供應商 */}
+              {sendMethod !== 'line' && (
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">發送給哪個供應商？</Label>
+                  <div className="relative">
+                    <Search size={14} className="absolute left-2.5 top-2 text-muted-foreground" />
+                    <Input
+                      value={supplierSearch}
+                      onChange={e => {
+                        setSupplierSearch(e.target.value)
+                        setSelectedSupplier(null)
+                        setCustomName(e.target.value)
+                      }}
+                      placeholder="搜尋或輸入供應商名稱..."
+                      className="h-8 text-sm pl-8"
+                    />
+                  </div>
+
+                  {suppliers.length > 0 && !selectedSupplier && (
+                    <div className="border rounded-md max-h-36 overflow-y-auto">
+                      {suppliers.map(s => (
+                        <button
+                          key={s.id}
+                          className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm border-b border-border/50 last:border-0"
+                          onClick={() => {
+                            setSelectedSupplier(s)
+                            setSupplierSearch(s.name)
+                            setCustomName('')
+                          }}
+                        >
+                          <span className="font-medium">{s.name}</span>
+                          {s.contact_person && (
+                            <span className="text-xs text-muted-foreground ml-2">窗口: {s.contact_person}</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedSupplier && (
+                    <div className="bg-blue-50/50 border border-blue-200 rounded-md p-2 text-xs space-y-0.5">
+                      <div className="font-medium text-blue-700">{selectedSupplier.name}</div>
+                      {selectedSupplier.contact_person && <div>窗口: {selectedSupplier.contact_person}</div>}
+                      {selectedSupplier.phone && <div>電話: {selectedSupplier.phone}</div>}
+                      {selectedSupplier.email && <div>Email: {selectedSupplier.email}</div>}
+                    </div>
+                  )}
+
+                  {loading && <div className="text-xs text-muted-foreground">搜尋中...</div>}
+
+                  {sendMethod === 'email' && (
+                    <div className="text-xs text-blue-500 mt-2">📧 功能開發中 — 需要設定 Email 寄件帳號</div>
+                  )}
+                  {sendMethod === 'fax' && (
+                    <div className="text-xs text-gray-500 mt-2">📠 功能開發中 — 需要設定虛擬傳真服務</div>
+                  )}
+                  {sendMethod === 'tenant' && (
+                    <div className="text-xs text-purple-500 mt-2">🌐 功能開發中 — 需要先建立附屬國租戶</div>
+                  )}
                 </div>
               )}
             </div>
@@ -711,27 +728,57 @@ export function AssignSupplierDialog({
             <DialogFooter>
               <Button variant="outline" onClick={() => setStep('preview')}>← 返回</Button>
               <Button
-                disabled={!canPrint || saving || (sendMethod !== 'line' && sendMethod !== 'print') || (sendMethod === 'line' && !selectedGroupId)}
+                disabled={
+                  saving ||
+                  (sendMethod === 'line' && !selectedGroupId) ||
+                  (sendMethod !== 'line' && !canPrint)
+                }
                 onClick={async () => {
                   if (sendMethod === 'line') {
-                    const saved = await handleSaveRequest()
-                    if (saved === false) return
-
-                    const lineGroupId = selectedGroupId
+                    // Line 發送：用群組名稱當供應商名，不需要另選
+                    const groupName = lineGroups.find(g => g.group_id === selectedGroupId)?.group_name || ''
                     const senderName = user?.display_name || user?.chinese_name || '業務員'
 
+                    // 儲存委託（供應商名 = 群組名）
+                    setSaving(true)
                     try {
+                      if (tourId && user?.workspace_id) {
+                        const requestItems = items.map(({ category, item }) => {
+                          const rooms = roomDetails[item.key]?.filter(r => r.name.trim() && r.qty > 0) || []
+                          return {
+                            category,
+                            title: item.title || item.supplierName || '',
+                            service_date: item.serviceDate || null,
+                            quantity: item.quantity,
+                            unit_cost: item.quotedPrice || null,
+                            ...(rooms.length > 0 ? { rooms: rooms.map(r => ({ room_type: r.name, quantity: r.qty })) } : {}),
+                          }
+                        })
+
+                        await supabase.from('tour_requests').insert({
+                          workspace_id: user.workspace_id,
+                          tour_id: tourId,
+                          request_type: 'mixed',
+                          supplier_name: groupName,
+                          items: requestItems,
+                          status: 'sent',
+                          sent_at: new Date().toISOString(),
+                          sent_via: 'line',
+                          created_by: user.id,
+                        } as never)
+                      }
+
                       const res = await fetch('/api/line/send-requirement', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                          lineGroupId,
+                          lineGroupId: selectedGroupId,
                           senderName,
                           tourCode: tour?.code || '',
                           tourName: tour?.name || '',
                           departureDate: tour?.departure_date || '',
                           totalPax,
-                          supplierName,
+                          supplierName: groupName,
                           items: items.map(({ category, item }) => ({
                             category,
                             title: item.title || item.supplierName || '',
@@ -744,7 +791,7 @@ export function AssignSupplierDialog({
                         }),
                       })
                       if (res.ok) {
-                        toast({ title: '💬 Line 已發送', description: `需求單已發送到 ${supplierName} 群組` })
+                        toast({ title: '💬 Line 已發送', description: `需求單已發送到「${groupName}」群組` })
                         onSave?.()
                         onClose()
                       } else {
@@ -753,15 +800,17 @@ export function AssignSupplierDialog({
                       }
                     } catch (err) {
                       toast({ title: 'Line 發送失敗', description: String(err), variant: 'destructive' })
+                    } finally {
+                      setSaving(false)
                     }
                   } else {
                     toast({ title: '功能開發中', description: '此發送方式尚未上線' })
                   }
                 }}
-                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                className={sendMethod === 'line' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-morandi-gold hover:bg-morandi-gold-hover text-white'}
               >
                 {saving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : null}
-                確認發送
+                {sendMethod === 'line' ? '發送到群組' : '確認發送'}
               </Button>
             </DialogFooter>
           </>
