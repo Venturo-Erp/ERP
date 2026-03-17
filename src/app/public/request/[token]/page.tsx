@@ -14,6 +14,8 @@ interface RequestItem {
   // 供應商回填
   quoted_cost?: number | null
   reply_note?: string
+  booking_confirmed?: boolean
+  booking_ref?: string
 }
 
 interface RequestData {
@@ -273,6 +275,39 @@ export default function PublicRequestPage() {
                         />
                       </div>
                     </div>
+
+                    {/* 住宿：確認訂房 + 訂房代號 */}
+                    {item.category === 'accommodation' && (
+                      <div className="mt-3 space-y-2 bg-amber-50 rounded-md p-3">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={item.booking_confirmed || false}
+                            onChange={e => {
+                              setItems(prev => prev.map((it, i) =>
+                                i === idx ? { ...it, booking_confirmed: e.target.checked } : it
+                              ))
+                            }}
+                            className="w-4 h-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
+                          />
+                          <span className="text-sm font-medium text-amber-800">✅ 確認訂房</span>
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <label className="text-sm text-amber-700 shrink-0">訂房代號</label>
+                          <input
+                            type="text"
+                            value={item.booking_ref || ''}
+                            onChange={e => {
+                              setItems(prev => prev.map((it, i) =>
+                                i === idx ? { ...it, booking_ref: e.target.value } : it
+                              ))
+                            }}
+                            placeholder="選填（如 Booking Ref#）"
+                            className="flex-1 border rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                          />
+                        </div>
+                      </div>
+                    )}
 
                     {/* 備註 */}
                     <div className="mt-2">

@@ -756,6 +756,8 @@ export function AssignSupplierDialog({
 
                     // 儲存委託（供應商名 = 群組名）
                     setSaving(true)
+                    let viewUrl: string | undefined
+                    let replyUrl: string | undefined
                     try {
                       if (tourId && user?.workspace_id) {
                         const requestItems = items.map(({ category, item }) => {
@@ -770,7 +772,7 @@ export function AssignSupplierDialog({
                           }
                         })
 
-                        await supabase.from('tour_requests').insert({
+                        const { data: insertedReq } = await supabase.from('tour_requests').insert({
                           workspace_id: user.workspace_id,
                           tour_id: tourId,
                           request_type: 'mixed',
@@ -780,21 +782,32 @@ export function AssignSupplierDialog({
                           sent_at: new Date().toISOString(),
                           sent_via: 'line',
                           created_by: user.id,
-                        } as never)
-                      }
+                        } as never).select('id').single()
 
+                        // 公開回覆連結
+                        const baseUrl = window.location.origin
+                        const requestId = (insertedReq as { id: string } | null)?.id || ''
+                        viewUrl = requestId ? `${baseUrl}/public/request/${requestId}` : undefined
+                        replyUrl = viewUrl
+
+                      } // end if (tourId && user?.workspace_id)
+
+                      // 取得剛插入的 ID（如果有）— 用於 URL
+                      // 如果沒有插入（沒有 tourId），還是能發 LINE 只是沒有回覆連結
                       const res = await fetch('/api/line/send-requirement', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                          lineGroupId: selectedGroupId,
-                          senderName,
-                          tourCode: tour?.code || '',
-                          tourName: tour?.name || '',
-                          departureDate: tour?.departure_date || '',
-                          totalPax,
-                          supplierName: groupName,
-                          items: items.map(({ category, item }) => ({
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            lineGroupId: selectedGroupId,
+                            senderName,
+                            tourCode: tour?.code || '',
+                            tourName: tour?.name || '',
+                            departureDate: tour?.departure_date || '',
+                            totalPax,
+                            supplierName: groupName,
+                            viewUrl,
+                            replyUrl,
+                            items: items.map(({ category, item }) => ({
                             category,
                             title: item.title || item.supplierName || '',
                             serviceDate: formatDate(item.serviceDate),
