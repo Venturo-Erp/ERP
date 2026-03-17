@@ -49,6 +49,7 @@ export interface PaymentRequest {
   request_category?: PaymentRequestCategory // 請款類別（團體/公司）
   expense_type?: CompanyExpenseType | null // 公司費用類型（公司請款時使用）
   amount: number // 總金額
+  total_amount?: number | null // 總金額（含稅/匯率換算後）
   supplier_id?: string | null
   supplier_name?: string | null
   status?: string | null // pending, confirmed, billed
