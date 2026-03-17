@@ -271,27 +271,32 @@ export function AssignSupplierDialog({
         let allHaveRooms = true
 
         accItems.forEach(({ item }) => {
-          const existing = existingRequests.find(req =>
-            req.items?.some(ri => ri.rooms && ri.rooms.length > 0)
-          )
-          if (existing?.items) {
-            const withRooms = existing.items.find(ri => ri.rooms && ri.rooms.length > 0)
-            if (withRooms?.rooms) {
-              init[item.key] = withRooms.rooms.map(r => ({ name: r.room_type, qty: r.quantity }))
-              return
+          // 找匹配此住宿的已存委託（按標題比對）
+          let foundRooms = false
+          for (const req of existingRequests) {
+            const matchItem = req.items?.find(ri =>
+              ri.rooms && ri.rooms.length > 0 &&
+              (item.title || item.supplierName || '').includes(String((ri as Record<string, unknown>).title || ''))
+            )
+            if (matchItem?.rooms) {
+              init[item.key] = matchItem.rooms.map(r => ({ name: r.room_type, qty: r.quantity }))
+              foundRooms = true
+              break
             }
           }
-          init[item.key] = [{ name: '雙人房', qty: 1 }]
-          allHaveRooms = false
+          if (!foundRooms) {
+            init[item.key] = [{ name: '雙人房', qty: 1 }]
+            allHaveRooms = false
+          }
         })
 
         setRoomDetails(init)
         setStep(allHaveRooms ? 'preview' : 'rooms')
       } else {
+        setRoomDetails({})
         setStep('preview')
       }
 
-      setRoomDetails({})
       setSendMethod(null)
       setSelectedSupplier(null)
       setSupplierSearch('')
