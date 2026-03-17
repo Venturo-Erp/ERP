@@ -149,15 +149,26 @@ export function useOrderMembersData({
       // 收集所有有 customer_id 的成員
       const customerIds = membersData.map(m => m.customer_id).filter(Boolean) as string[]
 
-      // 如果有 customer_id，批次查詢顧客驗證狀態和護照照片
+      // 如果有 customer_id，批次查詢顧客完整資料
       let customerDataMap: Record<
         string,
-        { verification_status: string; passport_image_url: string | null }
+        {
+          name: string | null
+          passport_name: string | null
+          birth_date: string | null
+          passport_number: string | null
+          passport_expiry: string | null
+          gender: string | null
+          verification_status: string
+          passport_image_url: string | null
+        }
       > = {}
       if (customerIds.length > 0) {
         const { data: customersData } = await supabase
           .from('customers')
-          .select('id, verification_status, passport_image_url')
+          .select(
+            'id, name, passport_name, birth_date, passport_number, passport_expiry, gender, verification_status, passport_image_url'
+          )
           .in('id', customerIds)
 
         if (customersData) {
@@ -165,6 +176,12 @@ export function useOrderMembersData({
             customersData.map(c => [
               c.id,
               {
+                name: c.name || null,
+                passport_name: c.passport_name || null,
+                birth_date: c.birth_date || null,
+                passport_number: c.passport_number || null,
+                passport_expiry: c.passport_expiry || null,
+                gender: c.gender || null,
                 verification_status: c.verification_status || '',
                 passport_image_url: c.passport_image_url || null,
               },
@@ -174,35 +191,75 @@ export function useOrderMembersData({
       }
 
       // 合併驗證狀態和訂單編號到成員
-      // 同時填補 passport_image_url（從顧客取得）並背景同步到資料庫
-      const membersToSync: Array<{ memberId: string; customerId: string; url: string }> = []
+      // 同時填補缺失的顧客資料（chinese_name, passport_name 等）並背景同步到資料庫
+      const membersToSync: Array<{
+        memberId: string
+        customerId: string
+        updateData: Record<string, any>
+      }> = []
 
       const membersWithStatus = membersData.map(m => {
         const customerData = m.customer_id ? customerDataMap[m.customer_id] : null
-        let passportImageUrl = m.passport_image_url
-
-        // 如果成員沒有護照照片但顧客有，使用顧客的並標記需要同步
-        if (!passportImageUrl && customerData?.passport_image_url && m.customer_id) {
-          passportImageUrl = customerData.passport_image_url
-          // 只有尚未同步過的顧客才加入同步列表
-          if (!syncedCustomerIds.has(m.customer_id)) {
-            membersToSync.push({
-              memberId: m.id,
-              customerId: m.customer_id,
-              url: customerData.passport_image_url,
-            })
+        if (!customerData) {
+          return {
+            ...m,
+            order_code: mode === 'tour' ? orderCodeMap[m.order_id] || null : null,
           }
+        }
+
+        // 準備合併的資料（優先使用 order_members 的資料，缺失時用 customers 的）
+        const mergedData: Record<string, any> = {}
+        const syncData: Record<string, any> = {}
+
+        // 檢查並填補缺失的欄位
+        const fieldsToCheck = [
+          'chinese_name',
+          'passport_name',
+          'birth_date',
+          'passport_number',
+          'passport_expiry',
+          'gender',
+          'passport_image_url',
+        ] as const
+
+        fieldsToCheck.forEach(field => {
+          const memberValue = m[field as keyof typeof m]
+          const customerField =
+            field === 'chinese_name' ? 'name' : (field as keyof typeof customerData)
+          const customerValue = customerData[customerField]
+
+          if (!memberValue && customerValue) {
+            // order_members 沒資料但 customers 有，使用 customers 的資料
+            mergedData[field] = customerValue
+            syncData[field] = customerValue
+          } else {
+            // 使用 order_members 的資料
+            mergedData[field] = memberValue
+          }
+        })
+
+        // 如果有需要同步的資料且尚未同步過，加入同步列表
+        if (
+          Object.keys(syncData).length > 0 &&
+          m.customer_id &&
+          !syncedCustomerIds.has(m.customer_id)
+        ) {
+          membersToSync.push({
+            memberId: m.id,
+            customerId: m.customer_id,
+            updateData: syncData,
+          })
         }
 
         return {
           ...m,
-          customer_verification_status: customerData?.verification_status || null,
-          passport_image_url: passportImageUrl,
+          ...mergedData,
+          customer_verification_status: customerData.verification_status || null,
           order_code: mode === 'tour' ? orderCodeMap[m.order_id] || null : null,
         }
       })
 
-      // 背景同步：將顧客的護照照片同步到成員資料庫（一次性修復）
+      // 背景同步：將顧客資料同步到成員資料庫（一次性修復）
       if (membersToSync.length > 0) {
         const uniqueCustomerIds = [...new Set(membersToSync.map(m => m.customerId))]
         uniqueCustomerIds.forEach(id => syncedCustomerIds.add(id))
@@ -212,10 +269,12 @@ export function useOrderMembersData({
           for (const item of membersToSync) {
             await supabase
               .from('order_members')
-              .update({ passport_image_url: item.url })
+              .update(item.updateData)
               .eq('id', item.memberId)
           }
-          logger.info(`背景同步 ${membersToSync.length} 個成員的護照照片`)
+          logger.info(
+            `背景同步 ${membersToSync.length} 個成員的顧客資料（${Object.keys(membersToSync[0]?.updateData || {}).join(', ')}）`
+          )
         })()
       }
 

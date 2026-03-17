@@ -119,10 +119,12 @@ export function useItineraryDrag(
         if (existing.some(a => a.id === resourceId)) return prev
         const newAttraction = { id: resourceId, name: resourceName, verified: dataVerified ?? true }
         const newAttractions = [...existing, newAttraction]
-        // 同時更新 blocks（混合模式）
-        const currentBlocks = day.blocks || []
-        const newBlocks = [...currentBlocks, { type: 'attraction' as const, ...newAttraction }]
-        newSchedule[dayIndex] = { ...day, attractions: newAttractions, blocks: newBlocks }
+        // 把景點名字加到 route 文字末尾
+        const currentRoute = day.route || ''
+        const newRoute = currentRoute.trim()
+          ? currentRoute.trimEnd() + (currentRoute.trimEnd().endsWith('→') ? ' ' : ' → ') + resourceName
+          : resourceName
+        newSchedule[dayIndex] = { ...day, attractions: newAttractions, route: newRoute }
         return newSchedule
       })
     } else if (zoneType === 'hotel') {

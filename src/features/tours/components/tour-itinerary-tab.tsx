@@ -323,7 +323,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 .filter(a => a.attraction_id)
                 .map(a => ({ id: a.attraction_id!, name: a.title || '', verified: verifiedMap[a.attraction_id!] ?? true }))
 
-              // 🔧 route 只保留手動備註，過濾掉預設文字和景點名稱
+              // route = 完整的行程文字（包含景點名稱）
               let routeText = day.title || ''
               
               // 過濾預設文字（這些只是 placeholder，不是真正的 route）
@@ -331,16 +331,6 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               const defaultPattern = /^第\s*\d+\s*天行程$/
               if (defaultTexts.includes(routeText) || defaultPattern.test(routeText)) {
                 routeText = ''
-              }
-
-              if (attractions.length > 0 && routeText) {
-                const attractionNames = attractions.map(a => a.name).filter(Boolean)
-                let cleaned = routeText
-                for (const name of attractionNames) {
-                  cleaned = cleaned.replace(name, '')
-                }
-                cleaned = cleaned.replace(/^[\s→]+|[\s→]+$/g, '').replace(/→\s*→/g, '→').trim()
-                routeText = cleaned
               }
 
               return {
@@ -599,11 +589,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           : isLast
             ? COMP_TOURS_LABELS.返回台灣
             : `${TOUR_ITINERARY_TAB_LABELS.第(day.day)} 天行程`
-        // 組合路線標題：景點名稱 → 連接 + 手動輸入的文字
-        const attractionNames = (day.attractions || []).map(a => a.name).join(' → ')
-        const manualRoute = day.route?.trim() || ''
-        const combinedRoute = [attractionNames, manualRoute].filter(Boolean).join(' → ')
-        const dayTitle = combinedRoute || defaultTitle
+        // 路線標題 = route 文字（已包含景點名稱）
+        const dayTitle = day.route?.trim() || defaultTitle
         const breakfast = day.hotelBreakfast ? COMP_TOURS_LABELS.飯店早餐 : day.meals.breakfast
         const lunch = day.lunchSelf ? COMP_TOURS_LABELS.敬請自理 : day.meals.lunch
         const dinner = day.dinnerSelf ? COMP_TOURS_LABELS.敬請自理 : day.meals.dinner
@@ -1533,6 +1520,13 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 removeAttraction={removeAttraction}
                 reorderAttractions={reorderAttractions}
                 handleMentionSelect={handleMentionSelect}
+                updateBlocks={(dayIdx, blocks) => {
+                  setDailySchedule(prev => {
+                    const newSchedule = [...prev]
+                    newSchedule[dayIdx] = { ...newSchedule[dayIdx], blocks }
+                    return newSchedule
+                  })
+                }}
                 mentionInputRefs={mentionInputRefs}
                 tourLocation={tour.location || ''}
                 getDateLabel={getDateLabel}

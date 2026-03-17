@@ -30,6 +30,7 @@ export interface TourRequest {
   
   // 狀態
   status: RequestStatus
+  hidden?: boolean
   
   // 發送記錄
   sent_at?: string

@@ -3,20 +3,14 @@
 import React from 'react'
 import { Input } from '@/components/ui/input'
 import {
-  ArrowRight,
   Check,
   Hotel,
   MapPin,
   X,
 } from 'lucide-react'
-import {
-  SortableContext,
-  horizontalListSortingStrategy,
-} from '@dnd-kit/sortable'
 import { COMP_TOURS_LABELS } from '../../constants/labels'
 import { DroppableZone } from './DroppableZone'
 import { MentionInput, type MentionInputHandle } from '../mention-input'
-import { SortableAttractionChip } from './SortableAttractionChip'
 
 export type ItineraryBlock = 
   | { type: 'text'; content: string }
@@ -73,79 +67,74 @@ export function DayRow({
   getDateLabel,
   getPreviousAccommodation,
 }: DayRowProps) {
-  // === Block 模式邏輯 ===
-  // 從 attractions + route 轉成 blocks（向下相容）
-  const blocks: ItineraryBlock[] = React.useMemo(() => {
-    if (day.blocks && day.blocks.length > 0) return day.blocks
-    const result: ItineraryBlock[] = []
-    // 把 route 文字放前面
-    if (day.route?.trim()) result.push({ type: 'text', content: day.route })
-    // 把 attractions 放後面
-    if (day.attractions) {
-      for (const a of day.attractions) {
-        result.push({ type: 'attraction', id: a.id, name: a.name, verified: a.verified })
-      }
-    }
-    // 至少有一個空文字塊
-    if (result.length === 0) result.push({ type: 'text', content: '' })
-    return result
-  }, [day.blocks, day.route, day.attractions])
+  const routeInputRef = React.useRef<HTMLInputElement>(null)
 
-  const syncBlocks = React.useCallback((newBlocks: ItineraryBlock[]) => {
+  // 插入景點：名字插到游標位置 + 加到 attractions 列表
+  const handleInsertAttraction = React.useCallback((attraction: { id: string; name: string }) => {
+    // 加到 attractions 列表（DB 連結）
+    const existing = day.attractions || []
+    if (existing.some(a => a.id === attraction.id)) return
+    const newAttractions = [...existing, attraction]
+    reorderAttractions(idx, newAttractions)
+
+    // 在游標位置插入景點名字
+    const input = routeInputRef.current
+    const currentRoute = day.route || ''
+    const cursorPos = input?.selectionStart ?? currentRoute.length
+    const before = currentRoute.slice(0, cursorPos)
+    const after = currentRoute.slice(cursorPos)
+    const newRoute = before + attraction.name + after
+    updateDaySchedule(idx, 'route', newRoute)
+
+    // 同步 blocks
     if (updateBlocks) {
+      const newBlocks: ItineraryBlock[] = [
+        { type: 'text', content: newRoute },
+        ...newAttractions.map(a => ({ type: 'attraction' as const, id: a.id, name: a.name })),
+      ]
       updateBlocks(idx, newBlocks)
     }
-    // 同步到舊的 attractions 和 route（向下相容）
-    const newAttractions = newBlocks
-      .filter((b): b is ItineraryBlock & { type: 'attraction' } => b.type === 'attraction')
-      .map(b => ({ id: b.id, name: b.name, verified: b.verified }))
-    const routeParts = newBlocks
-      .filter((b): b is ItineraryBlock & { type: 'text' } => b.type === 'text')
-      .map(b => b.content)
-      .filter(Boolean)
-    updateDaySchedule(idx, 'route', routeParts.join(' '))
-    reorderAttractions(idx, newAttractions)
-  }, [idx, updateBlocks, updateDaySchedule, reorderAttractions])
 
-  const handleBlockTextChange = React.useCallback((blockIdx: number, value: string) => {
-    const newBlocks = [...blocks]
-    newBlocks[blockIdx] = { type: 'text', content: value }
-    syncBlocks(newBlocks)
-  }, [blocks, syncBlocks])
-
-  const handleBlockKeyDown = React.useCallback((blockIdx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault()
-      // 在當前 block 後面插入一個空文字塊
-      const newBlocks = [...blocks]
-      newBlocks.splice(blockIdx + 1, 0, { type: 'text', content: '' })
-      syncBlocks(newBlocks)
-      // Focus 新的 input（下一個 tick）
-      setTimeout(() => {
-        const el = document.querySelector(`[data-block-id="block-${idx}-${blockIdx + 1}"]`) as HTMLInputElement
-        el?.focus()
-      }, 50)
-    } else if (e.key === 'Backspace' && blocks[blockIdx].type === 'text' && (blocks[blockIdx] as { content: string }).content === '') {
-      // 空文字塊按 Backspace 刪除（但至少保留一個）
-      const textBlocks = blocks.filter(b => b.type === 'text')
-      if (textBlocks.length > 1 || blocks.length > 1) {
-        e.preventDefault()
-        const newBlocks = blocks.filter((_, i) => i !== blockIdx)
-        if (newBlocks.length === 0) newBlocks.push({ type: 'text', content: '' })
-        syncBlocks(newBlocks)
+    // Focus 回 input，游標放在插入的景點名後面
+    const newCursorPos = cursorPos + attraction.name.length
+    setTimeout(() => {
+      if (input) {
+        input.focus()
+        input.setSelectionRange(newCursorPos, newCursorPos)
       }
-    }
-  }, [blocks, idx, syncBlocks])
+    }, 50)
+  }, [day.route, day.attractions, idx, reorderAttractions, updateDaySchedule, updateBlocks])
 
-  const handleRemoveBlock = React.useCallback((blockIdx: number) => {
-    const block = blocks[blockIdx]
-    if (block.type === 'attraction') {
-      removeAttraction(idx, block.id)
+  // route 文字變更
+  const handleRouteChange = React.useCallback((value: string) => {
+    updateDaySchedule(idx, 'route', value)
+    // 同步 blocks（保留文字 + attractions）
+    if (updateBlocks) {
+      const newBlocks: ItineraryBlock[] = [
+        { type: 'text', content: value },
+        ...(day.attractions || []).map(a => ({ type: 'attraction' as const, id: a.id, name: a.name, verified: a.verified })),
+      ]
+      updateBlocks(idx, newBlocks)
     }
-    const newBlocks = blocks.filter((_, i) => i !== blockIdx)
-    if (newBlocks.length === 0) newBlocks.push({ type: 'text', content: '' })
-    syncBlocks(newBlocks)
-  }, [blocks, idx, removeAttraction, syncBlocks])
+  }, [idx, day.attractions, updateDaySchedule, updateBlocks])
+
+  // 移除景點：從 attractions 移除 + 從 route 文字中移除名字
+  const handleRemoveAttraction = React.useCallback((attractionId: string) => {
+    const attraction = (day.attractions || []).find(a => a.id === attractionId)
+    removeAttraction(idx, attractionId)
+
+    // 從 route 文字中移除景點名
+    if (attraction && day.route) {
+      let newRoute = day.route
+      // 移除 " → 景點名" 或 "景點名 → " 或單獨的 "景點名"
+      newRoute = newRoute.replace(new RegExp(`\\s*→\\s*${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'), '')
+      newRoute = newRoute.replace(new RegExp(`${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*→\\s*`, 'g'), '')
+      newRoute = newRoute.replace(new RegExp(`${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'), '')
+      newRoute = newRoute.replace(/^\s*→\s*|\s*→\s*$/g, '').trim()
+      updateDaySchedule(idx, 'route', newRoute)
+    }
+  }, [day.attractions, day.route, idx, removeAttraction, updateDaySchedule])
+
   return (
     <tbody>
       <tr className={`${idx % 2 === 1 ? 'bg-muted/5' : ''} group hover:bg-morandi-gold/5`}>
@@ -156,96 +145,85 @@ export function DayRow({
             <div className="text-[10px] text-muted-foreground">{getDateLabel(idx)}</div>
           )}
         </td>
-        {/* Route -- block editor (text + attraction mixed) */}
+        {/* Route — 文字輸入 + 景點標籤在下排 */}
         <td className="px-0 py-0 border border-border/20 align-middle">
           <DroppableZone id={`attraction-drop-${idx}`} acceptType="attraction">
-            <div className="flex flex-wrap items-center gap-0.5 px-1.5 min-h-[32px]">
-              <SortableContext
-                items={(day.attractions || []).map(a => a.id)}
-                strategy={horizontalListSortingStrategy}
-              >
-                {blocks.map((block, bIdx) => {
-                  if (block.type === 'attraction') {
-                    return (
-                      <React.Fragment key={`a-${block.id}`}>
-                        <SortableAttractionChip
-                          id={block.id}
-                          name={block.name}
-                          dayIndex={idx}
-                          verified={block.verified}
-                          onRemove={() => handleRemoveBlock(bIdx)}
-                        />
-                      </React.Fragment>
-                    )
+            <div className="flex flex-col">
+              {/* 文字輸入 */}
+              <div className="flex items-center">
+                <input
+                  ref={routeInputRef}
+                  type="text"
+                  value={day.route || ''}
+                  onChange={e => handleRouteChange(e.target.value)}
+                  placeholder={
+                    isFirst
+                      ? COMP_TOURS_LABELS.抵達目的地
+                      : isLast
+                        ? COMP_TOURS_LABELS.返回台灣
+                        : COMP_TOURS_LABELS.今日行程標題
                   }
-                  // text block
-                  return (
-                    <input
-                      key={`t-${bIdx}`}
-                      data-block-id={`block-${idx}-${bIdx}`}
-                      type="text"
-                      value={block.content}
-                      onChange={e => handleBlockTextChange(bIdx, e.target.value)}
-                      onKeyDown={e => handleBlockKeyDown(bIdx, e)}
-                      placeholder={
-                        blocks.length === 1 && !block.content
-                          ? isFirst
-                            ? COMP_TOURS_LABELS.抵達目的地
-                            : isLast
-                              ? COMP_TOURS_LABELS.返回台灣
-                              : COMP_TOURS_LABELS.今日行程標題
-                          : ''
-                      }
-                      className="h-8 text-sm border-0 shadow-none focus-visible:ring-1 focus-visible:ring-morandi-gold/30 rounded px-1.5 bg-transparent outline-none"
-                      style={{ width: Math.max(60, (block.content?.length || 0) * 14 + 30) }}
-                    />
-                  )
-                })}
-              </SortableContext>
-              {/* 最後的 mention input（用 @ 搜景點） */}
-              <MentionInput
-                ref={el => { mentionInputRefs.current[idx] = el }}
-                value=""
-                onChange={() => {}}
-                onAttractionSelect={attraction => {
-                  // 插入景點到 blocks 末尾（在最後一個文字塊後面）
-                  const newBlocks = [...blocks, { type: 'attraction' as const, id: attraction.id, name: attraction.name }]
-                  syncBlocks(newBlocks)
-                }}
-                countryName={tourLocation}
-                attractions={day.attractions}
-                placeholder={blocks.length <= 1 && !(blocks[0] as { content?: string })?.content ? '' : '+'}
-                className="h-8 w-8 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none bg-transparent px-1 flex-shrink-0"
-              />
+                  className="h-8 flex-1 text-sm border-0 shadow-none focus-visible:ring-1 focus-visible:ring-morandi-gold/30 rounded px-2 bg-transparent outline-none min-w-0"
+                />
+                {/* @ mention 搜景點 */}
+                <MentionInput
+                  ref={el => { mentionInputRefs.current[idx] = el }}
+                  value=""
+                  onChange={() => {}}
+                  onAttractionSelect={handleInsertAttraction}
+                  countryName={tourLocation}
+                  attractions={day.attractions}
+                  placeholder="@"
+                  className="h-8 w-8 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none bg-transparent px-1 flex-shrink-0"
+                />
+              </div>
+              {/* 景點標籤列 */}
+              {(day.attractions?.length ?? 0) > 0 && (
+                <div className="flex flex-wrap items-center gap-1 px-2 pb-1">
+                  {(day.attractions || []).map(a => (
+                    <span
+                      key={a.id}
+                      className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] whitespace-nowrap bg-morandi-gold/10 text-morandi-gold"
+                    >
+                      <MapPin size={8} />
+                      <span>{a.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveAttraction(a.id)}
+                        className="hover:text-destructive ml-0.5"
+                      >
+                        <X size={8} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </DroppableZone>
         </td>
-        {/* Tools */}
+        {/* Tools — 簡化，只保留備註 */}
         <td className="px-1 py-0 border border-border/20 align-middle">
           <div className="flex items-center justify-center gap-1">
             <button
               type="button"
-              onClick={() => mentionInputRefs.current[idx]?.insertAtCursor(' → ')}
-              className="p-1 hover:bg-morandi-gold/20 rounded"
-              title={COMP_TOURS_LABELS.插入箭頭}
-            >
-              <ArrowRight size={12} className="text-muted-foreground" />
-            </button>
-            <button
-              type="button"
-              onClick={() => mentionInputRefs.current[idx]?.insertAtCursor(' ⇀ ')}
+              onClick={() => {
+                // 插入箭頭到 route
+                const input = routeInputRef.current
+                if (input) {
+                  const pos = input.selectionStart || input.value.length
+                  const val = input.value
+                  const newVal = val.slice(0, pos) + ' → ' + val.slice(pos)
+                  handleRouteChange(newVal)
+                  setTimeout(() => {
+                    input.focus()
+                    input.setSelectionRange(pos + 3, pos + 3)
+                  }, 0)
+                }
+              }}
               className="px-1 py-0.5 text-[10px] hover:bg-morandi-gold/20 rounded text-muted-foreground"
-              title={COMP_TOURS_LABELS.插入鉤箭頭}
+              title="插入箭頭"
             >
-              ⇀
-            </button>
-            <button
-              type="button"
-              onClick={() => mentionInputRefs.current[idx]?.insertAtCursor(' · ')}
-              className="px-1 py-0.5 text-[10px] hover:bg-morandi-gold/20 rounded text-muted-foreground"
-              title={COMP_TOURS_LABELS.插入間隔點}
-            >
-              ·
+              →
             </button>
             <button
               type="button"

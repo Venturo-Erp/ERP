@@ -35,7 +35,7 @@ interface RoomRequirementDialogProps {
   onSaved?: () => void
 }
 
-const PRESET_ROOM_TYPES = ['雙人房', '三人房', '單人房', '四人房', '家庭房', '套房']
+const PRESET_ROOM_TYPES = ['雙人房', '三人房', '單人房', '四人房', '家庭房', '套房', '其他']
 
 let roomIdCounter = 0
 
@@ -53,14 +53,14 @@ export function RoomRequirementDialog({
   const { toast } = useToast()
   const [saving, setSaving] = useState(false)
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([
-    { id: `room-${++roomIdCounter}`, name: '雙人房', quantity: 1 },
+    { id: `room-${++roomIdCounter}`, name: '雙人房', quantity: 0 },
   ])
   const [note, setNote] = useState('')
 
   const addRoomType = useCallback(() => {
     setRoomTypes(prev => [
       ...prev,
-      { id: `room-${++roomIdCounter}`, name: '', quantity: 1 },
+      { id: `room-${++roomIdCounter}`, name: '', quantity: 0 },
     ])
   }, [])
 
@@ -75,7 +75,7 @@ export function RoomRequirementDialog({
   }, [])
 
   const handleSave = async () => {
-    const validRooms = roomTypes.filter(r => r.name.trim() && r.quantity > 0)
+    const validRooms = roomTypes.filter(r => r.name.trim() && r.quantity >= 0)
     if (validRooms.length === 0) {
       toast({ title: '請至少填寫一個房型', variant: 'destructive' })
       return
@@ -162,10 +162,14 @@ export function RoomRequirementDialog({
                 </div>
                 <div className="flex items-center gap-1">
                   <Input
-                    type="number"
-                    min={1}
-                    value={room.quantity}
-                    onChange={e => updateRoomType(room.id, 'quantity', parseInt(e.target.value) || 1)}
+                    type="text"
+                    inputMode="numeric"
+                    value={room.quantity || ''}
+                    placeholder="0"
+                    onChange={e => {
+                      const v = e.target.value.replace(/[\uff01-\uff5e]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+                      updateRoomType(room.id, 'quantity', v ? parseInt(v) || 0 : 0)
+                    }}
                     className="h-8 w-16 text-sm text-center"
                   />
                   <span className="text-xs text-muted-foreground">間</span>
@@ -205,7 +209,7 @@ export function RoomRequirementDialog({
           </div>
 
           {/* 摘要 */}
-          {roomTypes.some(r => r.name.trim() && r.quantity > 0) && (
+          {roomTypes.some(r => r.name.trim() && r.quantity >= 0) && (
             <div className="bg-morandi-gold/5 border border-morandi-gold/20 rounded-md p-2 text-xs">
               <span className="font-medium text-morandi-primary">摘要：</span>
               {roomTypes

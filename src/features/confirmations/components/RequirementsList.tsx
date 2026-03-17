@@ -20,6 +20,8 @@ import {
   ClipboardList,
   Printer,
   Send,
+  Check,
+  X,
 } from 'lucide-react'
 // TODO: [品質優化] 將 supabase 操作搬到 confirmations/services/ — 目前因 setState 交錯暫保留
 import { supabase } from '@/lib/supabase/client'
@@ -32,6 +34,7 @@ import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSu
 // CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
+import { createInsuranceRequirement } from '../services/create-insurance-requirement'
 import { getStatusConfig } from '@/lib/status-config'
 import type { FlightInfo } from '@/types/flight.types'
 
@@ -143,10 +146,28 @@ export function RequirementsList({
             setOutboundFlight(tourData.outbound_flight as FlightInfo)
             setReturnFlight(tourData.return_flight as FlightInfo | null)
           }
+          // 🛡️ 自動建立保險需求單（如果不存在）
+          if (user?.workspace_id && tourData.departure_date) {
+            const { data: tmMembers } = await supabase
+              .from('tour_members')
+              .select('id')
+              .eq('tour_id', tourId)
+            const pax = tmMembers?.length || 0
+            if (pax > 0) {
+              await createInsuranceRequirement(
+                tourId,
+                user.workspace_id,
+                user.id,
+                pax,
+                tourData.departure_date
+              )
+            }
+          }
+
           const { data: requests } = await supabase
             .from('tour_requests')
             .select(
-              'id, code, supplier_name, supplier_id, supplier_contact, request_type, items, status, note, created_at, sent_at, sent_via, sent_to, replied_at, confirmed_at, source_type, source_id, created_by'
+              'id, code, supplier_name, supplier_id, supplier_contact, request_type, items, status, hidden, note, created_at, sent_at, sent_via, sent_to, replied_at, confirmed_at, source_type, source_id, created_by'
             )
             .eq('tour_id', tourId)
             .order('created_at', { ascending: true })
@@ -315,7 +336,7 @@ export function RequirementsList({
             code,
             workspace_id: user.workspace_id,
             tour_id: tourId || null,
-            supplier_name: itemData.supplierName || null,
+            supplier_name: itemData.supplierName?.trim() || null,
             request_type: itemData.category || 'other',
             items: [{
               category: itemData.category,
@@ -327,6 +348,7 @@ export function RequirementsList({
               resource_type: itemData.resourceType || null,
             }],
             status: 'draft',
+            hidden,
             note: itemData.notes || null,
             created_by: user.id,
           }
@@ -334,7 +356,7 @@ export function RequirementsList({
             .from('tour_requests')
             .insert(insertData as never)
             .select(
-              'id, code, supplier_name, supplier_id, supplier_contact, request_type, items, status, note, created_at, sent_at, sent_via, sent_to, replied_at, confirmed_at, source_type, source_id, created_by'
+              'id, code, supplier_name, supplier_id, supplier_contact, request_type, items, status, hidden, note, created_at, sent_at, sent_via, sent_to, replied_at, confirmed_at, source_type, source_id, created_by'
             )
             .single()
           if (error) throw error
@@ -359,6 +381,68 @@ export function RequirementsList({
       return newSet
     })
   }, [])
+
+  // Blur 自動存檔：更新 tour_request 的 items 欄位
+  const handleInlineUpdate = useCallback(
+    async (
+      item: QuoteItem,
+      category: string,
+      field: string,
+      value: string | number | undefined,
+      existingRequests: TourRequest[]
+    ) => {
+      try {
+        // 找到對應的 request
+        const match = existingRequests.find(
+          r => r.request_type === category && r.supplier_name?.trim() === item.supplierName?.trim()
+        )
+        if (match) {
+          // 更新 items 裡第一筆的欄位
+          const updatedItems = [...(match.items || [])]
+          if (updatedItems.length === 0) updatedItems.push({} as TourRequestItem)
+          ;(updatedItems[0] as any)[field] = value
+          const { error } = await supabase
+            .from('tour_requests')
+            .update({ items: updatedItems } as any)
+            .eq('id', match.id)
+          if (error) throw error
+          setExistingRequests(prev =>
+            prev.map(r => r.id === match.id ? { ...r, items: updatedItems } : r)
+          )
+        } else if (user?.workspace_id) {
+          // 建立新的 draft request
+          const code = `RQ${Date.now().toString().slice(-8)}`
+          const newItem: Record<string, unknown> = {
+            category,
+            title: item.title || '',
+            service_date: item.serviceDate || null,
+            quantity: item.quantity || 1,
+            [field]: value,
+          }
+          const insertData = {
+            code,
+            workspace_id: user.workspace_id,
+            tour_id: tourId || null,
+            supplier_name: item.supplierName?.trim() || null,
+            request_type: category,
+            items: [newItem],
+            status: 'draft',
+            created_by: user.id,
+          }
+          const { data: newReq, error } = await supabase
+            .from('tour_requests')
+            .insert(insertData as never)
+            .select('*')
+            .single()
+          if (error) throw error
+          if (newReq) setExistingRequests(prev => [...prev, newReq as unknown as TourRequest])
+        }
+      } catch (error) {
+        logger.error('自動存檔失敗', error)
+      }
+    },
+    [user, tourId]
+  )
 
 
   // 勾選項目的 key
@@ -502,6 +586,19 @@ export function RequirementsList({
     </div>
   </div>
   <table>
+    ${categoryKey === 'meal' ? `
+    <thead><tr><th>日期</th><th>餐廳</th><th>餐別/時間</th><th>人數</th><th>預算</th><th>備註</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>${item.serviceDate ? formatDate(item.serviceDate) : '-'}</td>
+        <td>${item.supplierName || item.title}</td>
+        <td>${(() => { const req = existingRequests.find(r => r.request_type === 'meal' && r.supplier_name?.trim() === item.supplierName?.trim()); return (req?.items?.[0] as any)?.meal_time as string || item.title || '-'; })()}</td>
+        <td>${(() => { const req = existingRequests.find(r => r.request_type === 'meal' && r.supplier_name?.trim() === item.supplierName?.trim()); const pax = (req?.items?.[0] as any)?.pax; return pax || totalPax || '-'; })()} 人</td>
+        <td>${item.quotedPrice ? 'NT$ ' + item.quotedPrice.toLocaleString() : '-'}</td>
+        <td>${(() => { const req = existingRequests.find(r => r.request_type === 'meal' && r.supplier_name?.trim() === item.supplierName?.trim()); return (req?.items?.[0] as any)?.meal_note as string || item.notes || ''; })()}</td>
+      </tr>
+    </tbody>
+    ` : `
     <thead><tr><th>日期</th><th>項目</th><th>人數</th><th>預算</th><th>備註</th></tr></thead>
     <tbody>
       <tr>
@@ -512,6 +609,7 @@ export function RequirementsList({
         <td>${item.notes || ''}</td>
       </tr>
     </tbody>
+    `}
   </table>
   <div class="footer">
     <p>列印時間：${new Date().toLocaleString('zh-TW')}</p>
@@ -824,43 +922,7 @@ export function RequirementsList({
   return (
     <>
       <div className={cn('space-y-4', className)}>
-        {/* 標題列 */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-morandi-secondary">
-              {COMP_REQUIREMENTS_LABELS.共}
-              {totalItems}
-              {COMP_REQUIREMENTS_LABELS.項}
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => loadData(false)}
-              disabled={refreshing}
-              className="gap-1"
-            >
-              <RefreshCw size={14} className={refreshing ? 'animate-spin' : ''} />
-              {COMP_REQUIREMENTS_LABELS.刷新}
-            </Button>
-            {tourId && quoteItems.length > 0 && (
-              <Button
-                size="sm"
-                onClick={handleGenerateConfirmationSheet}
-                disabled={generatingSheet}
-                className="gap-1 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-              >
-                {generatingSheet ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <ClipboardList size={14} />
-                )}
-                {COMP_REQUIREMENTS_LABELS.產生團確單}
-              </Button>
-            )}
-          </div>
-        </div>
+
 
         {/* 主表格 — 核心表有資料就顯示，不需要綁定報價單 */}
         {coreItems.length === 0 && !linkedQuoteId ? (
@@ -906,10 +968,10 @@ export function RequirementsList({
             </div>
           )}
           <div className="border border-border rounded-lg overflow-hidden bg-card">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
               <thead>
                 <tr className="bg-morandi-container/50 border-b border-border">
-                  <th className="px-2 py-2.5 text-center w-[40px]">
+                  <th className="px-2 py-2.5 text-center" style={{ width: '36px' }}>
                     <Checkbox
                       checked={checkedItems.size > 0 && checkedItems.size === Object.values(itemsByCategory).flat().length}
                       onCheckedChange={(checked) => {
@@ -927,22 +989,27 @@ export function RequirementsList({
                       }}
                     />
                   </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[70px]">
+                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '100px' }}>
                     {COMP_REQUIREMENTS_LABELS.日期}
                   </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[180px]">
+                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '18%' }}>
                     {COMP_REQUIREMENTS_LABELS.供應商}
                   </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary">
+                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '15%' }}>
                     {COMP_REQUIREMENTS_LABELS.項目說明}
                   </th>
-                  <th className="px-3 py-2.5 text-right font-medium text-morandi-primary w-[100px]">
+                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '12%' }}>
+                  </th>
+                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary">
+                  </th>
+                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '70px' }}>
                     {COMP_REQUIREMENTS_LABELS.成本}
                   </th>
-                  <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[80px]">
+                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '90px' }}>
                     {COMP_REQUIREMENTS_LABELS.狀態}
                   </th>
-                  <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[90px]">
+                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '12%' }}>
+                    操作
                   </th>
 
                 </tr>
@@ -955,15 +1022,14 @@ export function RequirementsList({
                   const findMatchingRequest = (item: QuoteItem) => {
                     if (item.resourceId) {
                       const byResourceId = existingRequests.find(
-                        r => r.category === cat.key && r.resource_id === item.resourceId
+                        r => r.request_type === cat.key && r.resource_id === item.resourceId
                       )
                       if (byResourceId) return byResourceId
                     }
                     return existingRequests.find(
                       r =>
-                        r.category === cat.key &&
-                        r.supplier_name === item.supplierName &&
-                        r.service_date === item.serviceDate
+                        r.request_type === cat.key &&
+                        r.supplier_name?.trim() === item.supplierName?.trim()
                     )
                   }
 
@@ -977,9 +1043,14 @@ export function RequirementsList({
 
                   const visibleItems: QuoteItem[] = []
                   const hiddenItems: QuoteItem[] = []
+                  // 不需要需求的餐食關鍵字
+                  const autoHideMealKeywords = ['飯店早餐', '機上簡餐', '敬請自理', '自理']
                   for (const item of categoryItems) {
                     const existingRequest = findMatchingRequest(item)
-                    if (existingRequest?.hidden) hiddenItems.push(item)
+                    const isAutoHideMeal = cat.key === 'meal' && autoHideMealKeywords.some(
+                      kw => item.title?.includes(kw) || item.supplierName?.includes(kw)
+                    )
+                    if (existingRequest?.hidden || isAutoHideMeal) hiddenItems.push(item)
                     else visibleItems.push(item)
                   }
 
@@ -1025,21 +1096,121 @@ export function RequirementsList({
                           />
                         </td>
                         <td className="px-3 py-2.5">{formatDate(item.serviceDate)}</td>
-                        <td className="px-3 py-2.5">{item.supplierName || '-'}</td>
                         <td className="px-3 py-2.5">
-                          <div>
-                            <span>{item.title}</span>
-                            {item.notes && (
-                              <div className="text-xs mt-0.5 text-morandi-secondary whitespace-pre-line">
-                                {item.notes}
-                              </div>
+                          <div className="flex items-center gap-1">
+                            <span className="flex-1">{item.supplierName || '-'}</span>
+                            {(cat.key === 'meal' || cat.key === 'activity') && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const existingRequest = findMatchingRequest(item)
+                                  handleToggleHidden(
+                                    existingRequest?.id || null,
+                                    !isHidden,
+                                    !existingRequest ? {
+                                      category: cat.key,
+                                      supplierName: item.supplierName || item.title || '',
+                                      title: item.title || '',
+                                      serviceDate: item.serviceDate || null,
+                                      quantity: item.quantity || 1,
+                                    } : undefined
+                                  )
+                                }}
+                                className={`p-0.5 rounded hover:bg-morandi-gold/20 ${isHidden ? 'text-emerald-500' : 'text-muted-foreground/40 hover:text-muted-foreground'}`}
+                                title={isHidden ? '恢復顯示' : '隱藏此項'}
+                              >
+                                {isHidden ? <Check size={12} /> : <X size={12} />}
+                              </button>
                             )}
                           </div>
                         </td>
-                        <td className="px-3 py-2.5 text-right font-medium text-morandi-primary">
+                        {/* 欄位4: 項目說明 / 時間 */}
+                        <td className="px-3 py-2.5">
+                          {cat.key === 'meal' ? (
+                            <input
+                              type="text"
+                              placeholder={`${item.title} 12:00`}
+                              defaultValue={(() => {
+                                const req = findMatchingRequest(item)
+                                return (req?.items?.[0] as any)?.meal_time as string || ''
+                              })()}
+                              onBlur={e => {
+                                // 全形→半形 + 4位數自動加冒號
+                                let v = e.target.value.replace(/[\uff01-\uff5e]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+                                const timeMatch = v.match(/(\d{2})(\d{2})/)
+                                if (timeMatch && v.replace(/\D/g, '').length === 4 && !v.includes(':')) {
+                                  const h = parseInt(timeMatch[1]), m = parseInt(timeMatch[2])
+                                  if (h < 24 && m < 60) v = `${timeMatch[1]}:${timeMatch[2]}`
+                                }
+                                e.target.value = v
+                                handleInlineUpdate(item, cat.key, 'meal_time', v, existingRequests)
+                              }}
+                              className="h-7 w-full text-sm px-1.5 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30 rounded placeholder:text-muted-foreground/60"
+                            />
+                          ) : (
+                            <span>{item.title}</span>
+                          )}
+                        </td>
+                        {/* 欄位5: 房型 / 數量 */}
+                        <td className="px-3 py-2.5">
+                          {cat.key === 'accommodation' && (() => {
+                            const supplierName = item.supplierName || item.title
+                            const hotelDraft = existingRequests.find(
+                              r => r.request_type === 'accommodation' &&
+                                   r.supplier_name === supplierName &&
+                                   r.status === 'draft'
+                            )
+                            if (!hotelDraft?.items?.length) return null
+                            return (
+                              <div className="flex items-center gap-1.5">
+                                {hotelDraft.items.map((room: { room_type?: string; quantity?: number }, ri: number) => (
+                                  <span key={ri} className="text-[11px] text-muted-foreground whitespace-nowrap">
+                                    {room.room_type}×{room.quantity}
+                                  </span>
+                                ))}
+                              </div>
+                            )
+                          })()}
+                          {cat.key === 'meal' && (
+                            <input
+                              type="text"
+                              placeholder="數量"
+                              defaultValue={(() => {
+                                const req = findMatchingRequest(item)
+                                return (req?.items?.[0] as any)?.pax as string || ''
+                              })()}
+                              onBlur={e => {
+                                const v = e.target.value.replace(/[\uff01-\uff5e]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+                                e.target.value = v
+                                handleInlineUpdate(item, cat.key, 'pax', v ? parseInt(v) : undefined, existingRequests)
+                              }}
+                              className="w-16 h-6 text-[11px] px-1.5 border border-border/50 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30"
+                            />
+                          )}
+                        </td>
+                        {/* 欄位6: 備註 */}
+                        <td className="px-3 py-2.5">
+                          {(cat.key === 'accommodation' || cat.key === 'meal') && (
+                            <input
+                              type="text"
+                              placeholder="備註"
+                              defaultValue={(() => {
+                                const req = findMatchingRequest(item)
+                                const noteField = cat.key === 'accommodation' ? 'hotel_note' : 'meal_note'
+                                return (req?.items?.[0] as any)?.[noteField] as string || req?.note || ''
+                              })()}
+                              onBlur={e => {
+                                const field = cat.key === 'accommodation' ? 'hotel_note' : 'meal_note'
+                                handleInlineUpdate(item, cat.key, field, e.target.value, existingRequests)
+                              }}
+                              className="w-full h-6 text-[11px] px-1.5 border border-border/50 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30"
+                            />
+                          )}
+                        </td>
+                        <td className="px-3 py-2.5 text-left font-medium text-morandi-primary">
                           {item.quotedPrice ? `$${item.quotedPrice.toLocaleString()}` : '-'}
                         </td>
-                        <td className="px-3 py-2.5 text-center">
+                        <td className="px-3 py-2.5 text-left">
                           <span
                             className={cn(
                               'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
@@ -1049,7 +1220,7 @@ export function RequirementsList({
                             {statusLabel}
                           </span>
                         </td>
-                        <td className="px-3 py-2.5 text-center">
+                        <td className="px-3 py-2.5 text-left">
                           {(() => {
                             const supplierName = item.supplierName || item.title
                             const draft = existingRequests.find(
@@ -1058,28 +1229,65 @@ export function RequirementsList({
                                    r.status === 'draft'
                             )
 
-                            // 住宿：有 draft → 列印，沒有 → 新增需求
+                            // 住宿：有 draft → 列印，沒有 → 新增需求 or 同上
                             if (cat.key === 'accommodation') {
-                              return draft ? (
-                                <Button variant="outline" size="sm"
-                                  onClick={() => handlePrintRequest(draft, item)}
-                                  className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50">
-                                  <Printer size={12} className="mr-1" />列印需求單
-                                </Button>
-                              ) : (
-                                <Button variant="outline" size="sm"
-                                  onClick={() => {
-                                    setSelectedHotel({
-                                      name: supplierName,
-                                      resourceId: item.resourceId ?? null,
-                                      serviceDate: item.serviceDate ?? null,
-                                      nights: item.quantity || 1,
-                                    })
-                                    setShowRoomDialog(true)
-                                  }}
-                                  className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10">
-                                  新增需求
-                                </Button>
+                              if (draft) {
+                                return (
+                                  <Button variant="outline" size="sm"
+                                    onClick={() => handlePrintRequest(draft, item)}
+                                    className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50">
+                                    <Printer size={12} className="mr-1" />列印需求單
+                                  </Button>
+                                )
+                              }
+                              // 找其他飯店已有的 draft（同上來源 = 換飯店但房型通常一樣）
+                              const sameHotelDraft = existingRequests.find(
+                                r => r.request_type === 'accommodation' &&
+                                     r.supplier_name !== supplierName &&
+                                     r.status === 'draft' &&
+                                     r.items && r.items.length > 0
+                              )
+                              return (
+                                <div className="flex items-center gap-1">
+                                  {sameHotelDraft && (
+                                    <Button variant="outline" size="sm"
+                                      onClick={async () => {
+                                        // 複製其他飯店的房型需求
+                                        try {
+                                          if (!user?.workspace_id) throw new Error('缺少 workspace_id')
+                                          const { error: dbError } = await supabase.from('tour_requests').insert({
+                                            workspace_id: user.workspace_id,
+                                            tour_id: tourId,
+                                            supplier_name: supplierName,
+                                            request_type: 'accommodation',
+                                            status: 'draft',
+                                            items: sameHotelDraft.items,
+                                            note: `${item.serviceDate ? item.serviceDate + ' ' : ''}${item.quantity || 1}晚`,
+                                          } as any)
+                                          if (dbError) throw dbError
+                                          loadData(false)
+                                        } catch (err) {
+                                          logger.error('同上需求失敗:', err)
+                                        }
+                                      }}
+                                      className="h-7 px-2 text-xs border-emerald-300 text-emerald-600 hover:bg-emerald-50">
+                                      同上
+                                    </Button>
+                                  )}
+                                  <Button variant="outline" size="sm"
+                                    onClick={() => {
+                                      setSelectedHotel({
+                                        name: supplierName,
+                                        resourceId: item.resourceId ?? null,
+                                        serviceDate: item.serviceDate ?? null,
+                                        nights: item.quantity || 1,
+                                      })
+                                      setShowRoomDialog(true)
+                                    }}
+                                    className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10">
+                                    新增需求
+                                  </Button>
+                                </div>
                               )
                             }
 
@@ -1115,33 +1323,7 @@ export function RequirementsList({
                           })()}
                         </td>
                       </tr>
-                      {/* 房型明細（draft 需求） */}
-                      {cat.key === 'accommodation' && (() => {
-                        const hotelDraft = existingRequests.find(
-                          r => r.request_type === 'accommodation' &&
-                               r.supplier_name === (item.supplierName || item.title) &&
-                               r.status === 'draft'
-                        )
-                        if (!hotelDraft?.items || hotelDraft.items.length === 0) return null
-                        return (
-                          <tr className="bg-blue-50/30">
-                            <td></td>
-                            <td></td>
-                            <td colSpan={4} className="px-3 py-1.5">
-                              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                                <span className="font-medium text-blue-600">📋 房型需求：</span>
-                                {hotelDraft.items.map((room, ri) => (
-                                  <span key={ri} className="bg-blue-100/60 px-2 py-0.5 rounded text-blue-700">
-                                    {room.room_type} × {room.quantity}
-                                  </span>
-                                ))}
-                                <span className="text-amber-600 text-[10px]">（草稿）</span>
-                              </div>
-                            </td>
-                            <td></td>
-                          </tr>
-                        )
-                      })()}
+
                       </React.Fragment>
                     )
                   }
@@ -1149,8 +1331,7 @@ export function RequirementsList({
                   return (
                     <React.Fragment key={cat.key}>
                       <tr className="bg-morandi-container/30 border-t border-border">
-                        <td></td>
-                        <td colSpan={3} className="px-3 py-2">
+                        <td colSpan={9} className="px-3 py-2">
                           <div className="flex items-center gap-3">
                             <span className="font-medium text-morandi-primary">{cat.label}</span>
                             <span className="text-xs text-morandi-secondary">
@@ -1175,18 +1356,13 @@ export function RequirementsList({
                             )}
                           </div>
                         </td>
-                        <td></td>
-                        <td className="px-3 py-2 text-right font-medium text-morandi-primary">
-                          {categoryTotal > 0 ? `$${categoryTotal.toLocaleString()}` : ''}
-                        </td>
-                        <td></td>
-                        <td className="px-3 py-2 text-center"></td>
                       </tr>
+
                       {visibleItems.map((trackItem, idx) => renderItem(trackItem, idx, false))}
                       {isHiddenExpanded && hiddenItems.length > 0 && (
                         <>
                           <tr className="bg-morandi-muted/10 border-t border-dashed border-morandi-muted/30">
-                            <td colSpan={7} className="px-3 py-1.5 text-xs text-morandi-muted">
+                            <td colSpan={9} className="px-3 py-1.5 text-xs text-morandi-muted">
                               <div className="flex items-center gap-1">
                                 <EyeOff size={12} />
                                 <span>{COMP_REQUIREMENTS_LABELS.已隱藏的項目}</span>
@@ -1292,7 +1468,7 @@ export function RequirementsList({
                         {/* 展開詳情 */}
                         {isExpanded && (
                           <tr>
-                            <td colSpan={6} className="px-4 py-3 bg-morandi-container/10 border-t border-border/30">
+                            <td colSpan={9} className="px-4 py-3 bg-morandi-container/10 border-t border-border/30">
                               {/* items 明細 */}
                               <div className="mb-3">
                                 <table className="w-full text-xs border border-border/50 rounded">

@@ -97,8 +97,8 @@ export function coreItemsToQuoteItems(
     // 退房日 = 最後入住日 + 1（旅遊業慣例：入住~退房）
     const checkoutDate = calculateDate(item._endDay + 1)
     const serviceDate = item._nights > 1 ? `${startDate}~${checkoutDate}` : startDate
-    const title = item.title || ''
-    const supplierName = item.resource_name || title
+    const title = (item.title || '').trim()
+    const supplierName = (item.resource_name || title).trim()
     const key = `accommodation-${supplierName}-${title}-${serviceDate || ''}`
 
     return {
@@ -124,13 +124,13 @@ export function coreItemsToQuoteItems(
     const category = mapCategory(item.category || '')
     const serviceDate = item.day_number ? calculateDate(item.day_number) : null
     
-    let title = item.title || ''
-    let supplierName = item.resource_name || item.title || ''
+    let title = (item.title || '').trim()
+    let supplierName = (item.resource_name || item.title || '').trim()
 
     // 餐食：用子分類標題
     if (category === 'meal' && item.sub_category) {
       title = MEAL_LABELS[item.sub_category] || item.sub_category
-      supplierName = item.title || ''
+      supplierName = (item.title || '').trim()
     }
 
     const key = `${category}-${supplierName}-${title}-${serviceDate || ''}`

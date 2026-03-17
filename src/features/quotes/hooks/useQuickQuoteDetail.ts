@@ -3,7 +3,7 @@
 import { getTodayString } from '@/lib/utils/format-date'
 
 import { logger } from '@/lib/utils/logger'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Quote, QuickQuoteItem } from '@/stores/types'
 import { alert } from '@/lib/ui/alert-dialog'
 
@@ -83,23 +83,45 @@ export function useQuickQuoteDetail({ quote, onUpdate }: UseQuickQuoteDetailProp
     setItems(prev => prev.filter(item => item.id !== id))
   }
 
+  // Auto-save debounce
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingItemsRef = useRef<QuickQuoteItem[] | null>(null)
+
+  const triggerAutoSave = useCallback(() => {
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
+    autoSaveTimer.current = setTimeout(async () => {
+      const latestItems = pendingItemsRef.current
+      if (!latestItems) return
+      try {
+        await onUpdate({ quick_quote_items: latestItems })
+        logger.log('✅ [QuickQuote] 自動存檔')
+      } catch (error) {
+        logger.error('❌ [QuickQuote] 自動存檔失敗:', error)
+      }
+      pendingItemsRef.current = null
+    }, 800) // 800ms debounce
+  }, [onUpdate])
+
   const updateItem = <K extends keyof QuickQuoteItem>(
     id: string,
     field: K,
     value: QuickQuoteItem[K]
   ) => {
-    setItems(prev =>
-      prev.map(item => {
+    setItems(prev => {
+      const updated = prev.map(item => {
         if (item.id === id) {
-          const updated = { ...item, [field]: value }
+          const u = { ...item, [field]: value }
           if (field === 'quantity' || field === 'unit_price') {
-            updated.amount = updated.quantity * updated.unit_price
+            u.amount = u.quantity * u.unit_price
           }
-          return updated
+          return u
         }
         return item
       })
-    )
+      pendingItemsRef.current = updated
+      triggerAutoSave()
+      return updated
+    })
   }
 
   // 重新排序項目

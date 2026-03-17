@@ -50,35 +50,43 @@ export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourc
       return
     }
 
+    const workspaceId = user?.workspace_id
+    if (!workspaceId) {
+      setError('未登入或缺少 workspace')
+      return
+    }
+
     setSaving(true)
     setError('')
 
     try {
       const table = TABLE_MAP[type] as 'attractions' | 'hotels' | 'restaurants'
-      // 目前只有 attractions 支援快速新增（hotels/restaurants 需要 city_id）
-      if (type !== 'attraction') {
-        setError('酒店/餐廳需要城市資訊，請到資料庫頁面新增')
-        setSaving(false)
-        return
-      }
 
-      const workspaceId = user?.workspace_id
-      if (!workspaceId) {
-        setError('未登入或缺少 workspace')
-        setSaving(false)
-        return
-      }
-
-      const insertData = {
+      const insertData: Record<string, unknown> = {
         name: trimmed,
         country_id: countryId,
-        workspace_id: workspaceId,
-        data_verified: false,
+        ...(type === 'attraction' ? { workspace_id: workspaceId, data_verified: false } : {}),
+      }
+
+      // 酒店/餐廳需要 city_id — 自動抓該國第一個城市
+      if (type !== 'attraction') {
+        const { data: cities } = await supabase
+          .from('cities')
+          .select('id')
+          .eq('country_id', countryId)
+          .limit(1)
+        
+        if (!cities || cities.length === 0) {
+          setError('該國家尚無城市資料，請先建立城市')
+          setSaving(false)
+          return
+        }
+        insertData.city_id = (cities[0] as { id: string }).id
       }
 
       const { data, error: dbError } = await supabase
-        .from('attractions')
-        .insert(insertData)
+        .from(table)
+        .insert(insertData as any)
         .select('id, name')
         .single()
 
