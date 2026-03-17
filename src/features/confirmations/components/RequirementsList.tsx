@@ -148,20 +148,20 @@ export function RequirementsList({
           }
           // 🛡️ 自動建立保險需求單（如果不存在）
           if (user?.workspace_id && tourData.departure_date) {
+            // 計算團員人數（保險固定出現，人數可為 0）
             const { data: tmMembers } = await supabase
               .from('tour_members')
               .select('id')
               .eq('tour_id', tourId)
             const pax = tmMembers?.length || 0
-            if (pax > 0) {
-              await createInsuranceRequirement(
-                tourId,
-                user.workspace_id,
-                user.id,
-                pax,
-                tourData.departure_date
-              )
-            }
+            await createInsuranceRequirement(
+              tourId,
+              user.workspace_id,
+              user.id,
+              pax,
+              tourData.departure_date,
+              tourData.return_date || null
+            )
           }
 
           const { data: requests } = await supabase
@@ -258,10 +258,31 @@ export function RequirementsList({
     [startDate]
   )
 
-  const quoteItems = useMemo(
-    () => coreItemsToQuoteItems(coreItems, calculateDate),
-    [coreItems, calculateDate]
-  )
+  const quoteItems = useMemo(() => {
+    const items = coreItemsToQuoteItems(coreItems, calculateDate)
+    // 把 existingRequests 中非行程來源的「其他」類需求（如保險）也加入主表格
+    for (const req of existingRequests) {
+      if (req.request_type !== 'other') continue
+      if (!req.items || !Array.isArray(req.items) || req.items.length === 0) continue
+      // 檢查是否已在 quoteItems 裡（避免重複）
+      const already = items.some(
+        qi => qi.category === 'other' && qi.supplierName === req.supplier_name
+      )
+      if (already) continue
+      const firstItem = req.items[0] as unknown as Record<string, unknown>
+      items.push({
+        category: 'other',
+        supplierName: req.supplier_name || '',
+        title: (firstItem.title as string) || req.supplier_name || '',
+        serviceDate: (firstItem.service_date as string) || null,
+        quantity: (firstItem.quantity as number) || 1,
+        key: `other-req-${req.id}`,
+        notes: (firstItem.notes as string) || '',
+        quotedPrice: null,
+      })
+    }
+    return items
+  }, [coreItems, calculateDate, existingRequests])
   const itemsByCategory = useMemo(() => groupItemsByCategory(quoteItems), [quoteItems])
 
   // 交通 Dialog 用：建立天數資訊
@@ -550,6 +571,30 @@ export function RequirementsList({
   }, [tour, totalPax, ageBreakdownText])
 
   // 餐廳/活動直接列印（不需填需求）
+  // 發送保險名單到 LINE
+  const handleSendInsurance = useCallback(async (item: QuoteItem) => {
+    if (!tourId || !tour) return
+    // 判斷是否為人員異動（已經發過的再次發送）
+    const req = existingRequests.find(r => r.supplier_name === '保險公司' && r.request_type === 'other')
+    const isChange = req?.status === 'sent' || req?.status === 'confirmed'
+    try {
+      const res = await fetch('/api/cron/auto-insurance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tourId, isChange }),
+      })
+      const result = await res.json()
+      if (result.success) {
+        toast({ title: isChange ? '✅ 人員異動已發送到保險群組' : '✅ 保險名單已發送到 LINE' })
+        await loadData(false)
+      } else {
+        toast({ title: '❌ 發送失敗', description: result.error, variant: 'destructive' })
+      }
+    } catch (err) {
+      toast({ title: '❌ 發送失敗', description: String(err), variant: 'destructive' })
+    }
+  }, [tourId, tour, existingRequests, toast, loadData])
+
   const handlePrintSimpleRequest = useCallback((categoryKey: string, categoryLabel: string, item: QuoteItem) => {
     const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
@@ -1319,6 +1364,17 @@ export function RequirementsList({
                               )
                             }
 
+                            // 其他（保險等）：發送保險名單
+                            if (cat.key === 'other' && item.supplierName === '保險公司') {
+                              return (
+                                <Button variant="outline" size="sm"
+                                  onClick={() => handleSendInsurance(item)}
+                                  className="h-7 px-2 text-xs border-emerald-300 text-emerald-600 hover:bg-emerald-50">
+                                  <Send size={12} className="mr-1" />發送保險
+                                </Button>
+                              )
+                            }
+
                             return null
                           })()}
                         </td>
@@ -1388,6 +1444,8 @@ export function RequirementsList({
           // 篩選有 request_type + items 的委託記錄
           const delegations = existingRequests.filter(
             r => r.request_type && r.items && Array.isArray(r.items) && r.items.length > 0
+              // 排除已在主表格顯示的「其他」草稿（如保險）
+              && !(r.request_type === 'other' && r.status === 'draft')
           )
           if (delegations.length === 0) return null
 

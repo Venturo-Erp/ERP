@@ -11,18 +11,29 @@ export async function createInsuranceRequirement(
   workspaceId: string,
   userId: string,
   memberCount: number,
-  startDate: string | null
+  startDate: string | null,
+  returnDate: string | null = null
 ) {
   // 檢查是否已存在保險需求（supplier_name = '保險公司'）
   const { data: existing } = await supabase
     .from('tour_requests')
-    .select('id, items')
+    .select('id, items, status')
     .eq('tour_id', tourId)
     .eq('request_type', 'other')
-    .eq('supplier_name', '保險公司')
+    .eq('supplier_name', '保險公司') as { data: { id: string; items: Record<string, unknown>[]; status: string }[] | null }
 
   if (existing && existing.length > 0) {
-    logger.log('[保險] 需求單已存在，跳過')
+    // 已存在 → 更新團員人數（可能有變）
+    const firstItem = existing[0].items?.[0] || {}
+    if ((firstItem as Record<string, unknown>).quantity !== memberCount) {
+      await supabase
+        .from('tour_requests')
+        .update({
+          items: [{ ...firstItem, quantity: memberCount }],
+        } as never)
+        .eq('id', existing[0].id)
+      logger.log('[保險] 已更新團員人數:', memberCount)
+    }
     return existing[0]
   }
 
@@ -40,10 +51,11 @@ export async function createInsuranceRequirement(
       supplier_name: '保險公司',
       items: [
         {
-          title: '旅遊平安保險',
+          title: '旅遊責任險',
           category: 'other',
           quantity: memberCount,
           service_date: startDate,
+          return_date: returnDate,
           notes: '自動產生',
         },
       ],
