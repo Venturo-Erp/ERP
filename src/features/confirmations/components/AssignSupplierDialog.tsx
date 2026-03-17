@@ -271,19 +271,34 @@ export function AssignSupplierDialog({
         let allHaveRooms = true
 
         accItems.forEach(({ item }) => {
-          // 找匹配此住宿的已存委託（按標題比對）
           let foundRooms = false
+          const itemTitle = item.title || item.supplierName || ''
+
           for (const req of existingRequests) {
-            const matchItem = req.items?.find(ri =>
-              ri.rooms && ri.rooms.length > 0 &&
-              (item.title || item.supplierName || '').includes(String((ri as Record<string, unknown>).title || ''))
+            if (!req.items || !Array.isArray(req.items)) continue
+
+            // 格式 A: 混合需求 — items[].rooms[]
+            const matchItem = req.items.find((ri: Record<string, unknown>) =>
+              (ri.rooms as { room_type: string; quantity: number }[])?.length > 0 &&
+              itemTitle.includes(String(ri.title || ''))
             )
             if (matchItem?.rooms) {
-              init[item.key] = matchItem.rooms.map(r => ({ name: r.room_type, qty: r.quantity }))
+              init[item.key] = (matchItem.rooms as { room_type: string; quantity: number }[]).map(r => ({ name: r.room_type, qty: r.quantity }))
+              foundRooms = true
+              break
+            }
+
+            // 格式 B: 單獨住宿需求 — items[] = [{ room_type, quantity, nights }]
+            const roomItems = req.items.filter((ri: Record<string, unknown>) =>
+              ri.room_type && typeof ri.quantity === 'number'
+            )
+            if (roomItems.length > 0 && (req as Record<string, unknown>).supplier_name && itemTitle.includes(String((req as Record<string, unknown>).supplier_name || ''))) {
+              init[item.key] = roomItems.map((r: Record<string, unknown>) => ({ name: String(r.room_type), qty: Number(r.quantity) }))
               foundRooms = true
               break
             }
           }
+
           if (!foundRooms) {
             init[item.key] = [{ name: '雙人房', qty: 1 }]
             allHaveRooms = false
