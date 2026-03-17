@@ -74,4 +74,7 @@ export const COMP_LAYOUT_LABELS = {
   FILTER_4998: '清除篩選',
   遊戲辦公室: '遊戲辦公室',
   會議室: '會議室',
+  Local: 'Local',
+  委託收件匣: '委託收件匣',
+  案件列表: '案件列表',
 }

@@ -93,6 +93,14 @@ const TourTrackingPanel = dynamic(
   { loading: () => <TabLoading /> }
 )
 
+const ConfirmationSheet = dynamic(
+  () =>
+    import('@/features/confirmations/components/ConfirmationSheet').then(
+      m => m.ConfirmationSheet
+    ),
+  { loading: () => <TabLoading /> }
+)
+
 // ============================================================================
 // 頁籤定義（共用）
 // ============================================================================
@@ -106,6 +114,7 @@ export const TOUR_TABS = [
   { value: 'quick-quote', label: COMP_TOURS_LABELS.快速報價 },
   { value: 'requirements', label: COMP_TOURS_LABELS.需求 },
   { value: 'tracking', label: COMP_TOURS_LABELS.追蹤 },
+  { value: 'confirmation-sheet', label: COMP_TOURS_LABELS.團確單 },
   { value: 'checkin', label: COMP_TOURS_LABELS.報到 },
   { value: 'files', label: COMP_TOURS_LABELS.檔案 },
   { value: 'closing', label: COMP_TOURS_LABELS.結案 },
@@ -166,6 +175,8 @@ export function TourTabContent({
       return <TourOrders tour={tour} />
     case 'tracking':
       return <TourTrackingPanel tour={tour} />
+    case 'confirmation-sheet':
+      return <ConfirmationSheet tourId={tour.id} />
     case 'checkin':
       return <TourCheckin tour={tour} />
     case 'requirements':

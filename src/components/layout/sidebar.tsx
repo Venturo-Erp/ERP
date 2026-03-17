@@ -41,6 +41,8 @@ import {
   Gamepad2,
   MessagesSquare,
   Route,
+  Inbox,
+  FolderOpen,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
@@ -230,6 +232,16 @@ const menuItems: MenuItem[] = [
         icon: Archive,
         requiredPermission: 'database',
       },
+    ],
+  },
+  {
+    href: '/local',
+    label: COMP_LAYOUT_LABELS.Local,
+    icon: Truck,
+    children: [
+      { href: '/local', label: COMP_LAYOUT_LABELS.Local, icon: Inbox },
+      { href: '/local/requests', label: COMP_LAYOUT_LABELS.委託收件匣, icon: ClipboardList },
+      { href: '/local/cases', label: COMP_LAYOUT_LABELS.案件列表, icon: FolderOpen },
     ],
   },
   { href: '/meeting', label: COMP_LAYOUT_LABELS.會議室, icon: MessagesSquare },

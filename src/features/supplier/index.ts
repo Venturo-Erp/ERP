@@ -5,6 +5,7 @@
  */
 
 export { SupplierRequestsPage } from './components/SupplierRequestsPage'
+export { SupplierRequestDetailPage } from './components/SupplierRequestDetailPage'
 export { SupplierResponseDialog } from './components/SupplierResponseDialog'
 export { SupplierDispatchPage } from './components/SupplierDispatchPage'
 export { SupplierFinancePage } from './components/SupplierFinancePage'

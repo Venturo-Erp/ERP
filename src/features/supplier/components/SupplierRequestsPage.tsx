@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { EnhancedTable, type TableColumn } from '@/components/ui/enhanced-table'
 import { Button } from '@/components/ui/button'
@@ -68,6 +69,7 @@ const CATEGORY_CONFIG: Record<string, string> = {
 }
 
 export function SupplierRequestsPage() {
+  const router = useRouter()
   const { requests, isLoading, refetch } = useSupplierRequests()
   const [selectedRequest, setSelectedRequest] = useState<SupplierRequest | null>(null)
   const [isResponseDialogOpen, setIsResponseDialogOpen] = useState(false)
@@ -244,6 +246,10 @@ export function SupplierRequestsPage() {
           columns={columns}
           data={filteredRequests}
           loading={isLoading}
+          onRowClick={row => {
+            const req = row as SupplierRequest
+            router.push(`/supplier/requests/${req.id}`)
+          }}
           actions={row => {
             const request = row as SupplierRequest
             const isPending = request.response_status === 'pending'
