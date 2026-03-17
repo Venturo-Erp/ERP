@@ -156,7 +156,7 @@ export function SupplierRequestDetailPage({ paramsPromise }: SupplierRequestDeta
           response_status: 'replied',
           replied_at: new Date().toISOString(),
           replied_by: user.id || null,
-          reply_content: updatedReplyContent,
+          reply_content: updatedReplyContent as never,
           reply_note: replyNote || null,
           quoted_cost: totalQuotedCost,
         })
@@ -189,7 +189,7 @@ export function SupplierRequestDetailPage({ paramsPromise }: SupplierRequestDeta
           { label: SUPPLIER_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
           { label: SUPPLIER_LABELS.BREADCRUMB_SUPPLIER, href: '/supplier' },
           { label: SUPPLIER_LABELS.BREADCRUMB_REQUESTS, href: '/supplier/requests' },
-          { label: '詳情' },
+          { label: '詳情', href: '' },
         ]}
       >
         <div className="flex items-center justify-center py-20 text-morandi-secondary">
@@ -209,7 +209,7 @@ export function SupplierRequestDetailPage({ paramsPromise }: SupplierRequestDeta
           { label: SUPPLIER_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
           { label: SUPPLIER_LABELS.BREADCRUMB_SUPPLIER, href: '/supplier' },
           { label: SUPPLIER_LABELS.BREADCRUMB_REQUESTS, href: '/supplier/requests' },
-          { label: '詳情' },
+          { label: '詳情', href: '' },
         ]}
       >
         <div className="text-center py-20 text-morandi-secondary">找不到此委託</div>
@@ -227,7 +227,7 @@ export function SupplierRequestDetailPage({ paramsPromise }: SupplierRequestDeta
         { label: SUPPLIER_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
         { label: SUPPLIER_LABELS.BREADCRUMB_SUPPLIER, href: '/supplier' },
         { label: SUPPLIER_LABELS.BREADCRUMB_REQUESTS, href: '/supplier/requests' },
-        { label: request.code || '詳情' },
+        { label: request.code || '詳情', href: '' },
       ]}
     >
       <div className="space-y-6 p-4">

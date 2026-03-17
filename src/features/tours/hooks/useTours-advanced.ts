@@ -232,13 +232,15 @@ export function useTourDetails(tour_id: string) {
     }
   )
 
-  // 計算財務摘要
+  // 計算財務摘要 — 從 tours 表讀取真實數據（由 expense-core.service 和 receipt-core.service 維護）
   const financials = tour
     ? {
-        total_revenue: (tour.price || 0) * (tour.current_participants || 0),
-        total_cost: (tour.price || 0) * (tour.current_participants || 0) * 0.7,
-        profit: (tour.price || 0) * (tour.current_participants || 0) * 0.3,
-        profitMargin: 30,
+        total_revenue: tour.total_revenue ?? 0,
+        total_cost: tour.total_cost ?? 0,
+        profit: tour.profit ?? 0,
+        profitMargin: tour.total_revenue
+          ? Math.round(((tour.profit ?? 0) / tour.total_revenue) * 100)
+          : 0,
       }
     : null
 
