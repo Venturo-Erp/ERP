@@ -424,19 +424,23 @@ export function AssignSupplierDialog({
     // 其他項目表格
     const otherHtml = otherItems.length > 0 ? `
       <table>
-        <thead><tr><th style="width:80px">日期</th><th>類別</th><th>項目</th><th style="width:80px">成本</th><th style="width:100px">回覆金額</th><th style="width:60px">確認</th></tr></thead>
+        <thead><tr><th style="width:80px">日期</th><th>項目</th><th style="width:100px">報價金額</th><th style="width:60px">確認</th><th>備註</th></tr></thead>
         <tbody>
-          ${otherItems.map(({ category, item }) => `
+          ${otherItems.map(({ item }) => `
           <tr>
             <td style="text-align:center">${formatDate(item.serviceDate)}</td>
-            <td style="text-align:center">${CATEGORY_LABELS[category] || category}</td>
             <td>${item.title || item.supplierName || ''}</td>
-            <td style="text-align:right">${item.quotedPrice ? 'NT$ ' + item.quotedPrice.toLocaleString() : ''}</td>
+            <td></td>
             <td></td>
             <td></td>
           </tr>`).join('')}
         </tbody>
-      </table>` : ''
+      </table>
+      <div style="border:1px solid #ddd;padding:15px;border-radius:5px;margin-top:15px">
+        <h3 style="margin:0 0 8px 0;font-size:13pt">統包報價</h3>
+        <p style="margin:4px 0"><b>統包總價：</b>NT$ _______________</p>
+        <p style="font-size:10pt;color:#666;margin:4px 0">如為統包報價，可只填此欄，上方單項報價可留空</p>
+      </div>` : ''
 
     return `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">

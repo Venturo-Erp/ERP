@@ -721,6 +721,22 @@ export function RequirementsList({
     }
   }, [user, tourId, coreItems, toast, loadData])
 
+  // 刪除委託
+  const handleDeleteRequest = useCallback(async (delegationId: string) => {
+    if (!confirm('確定要刪除此委託？')) return
+    try {
+      const { error } = await supabase
+        .from('tour_requests')
+        .delete()
+        .eq('id', delegationId)
+      if (error) throw error
+      toast({ title: '已刪除委託' })
+      await loadData(false)
+    } catch {
+      toast({ title: '刪除失敗', variant: 'destructive' })
+    }
+  }, [supabase, toast, loadData])
+
   // 🆕 產生單一供應商的需求單
   const handleGenerateSupplierRequest = useCallback(
     async (category: string, supplierName: string, items: QuoteItem[]) => {
@@ -1391,6 +1407,15 @@ export function RequirementsList({
                                 {d.status === 'confirmed' && (
                                   <span className="text-xs text-green-600 font-medium">已確認預訂</span>
                                 )}
+                                {/* 刪除按鈕 */}
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 ml-auto"
+                                  onClick={() => handleDeleteRequest(d.id)}
+                                >
+                                  刪除
+                                </Button>
                               </div>
                             </td>
                           </tr>
