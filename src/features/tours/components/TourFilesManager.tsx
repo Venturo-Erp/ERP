@@ -14,10 +14,11 @@ import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { Upload, File as FileIcon, Download, Trash2, Eye } from 'lucide-react'
+import { Upload, File as FileIcon, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FileUploader } from '@/features/tour-documents/components/FileUploader'
-import { FILE_FOLDERS, type FileCategory, type DbType, type FolderConfig } from '../constants/file-categories'
+import { FILE_FOLDERS, type FileCategory, type DbType } from '../constants/file-categories'
+import type { FolderConfig } from '../constants/file-categories'
 import { COMP_TOURS_LABELS } from '../constants/labels'
 import { cn } from '@/lib/utils'
 
@@ -207,18 +208,20 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
         // 實體檔案
         const { data } = await supabase
           .from('files')
-          .select('id, filename, file_path, content_type, file_size, created_at')
+          .select('id, filename, storage_path, content_type, size_bytes, created_at')
           .eq('tour_id', tourId)
           .eq('category', folder.category)
           .order('created_at', { ascending: false })
 
         if (data) {
           for (const f of data) {
-            const { data: urlData } = supabase.storage.from('documents').getPublicUrl(f.file_path)
+            const { data: urlData } = supabase.storage
+              .from(f.storage_path.startsWith('tour-documents') ? 'documents' : 'public')
+              .getPublicUrl(f.storage_path)
             fileItems.push({
               id: f.id,
               name: f.filename,
-              size: f.file_size || undefined,
+              size: f.size_bytes || undefined,
               mimeType: f.content_type || undefined,
               createdAt: f.created_at,
               url: urlData.publicUrl,
@@ -244,25 +247,40 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
     }
 
     try {
+      // 先查 workspace_id
+      const { data: tourData } = await supabase
+        .from('tours')
+        .select('workspace_id')
+        .eq('id', tourId)
+        .single()
+
+      if (!tourData?.workspace_id) {
+        throw new Error('無法取得 workspace_id')
+      }
+
       for (const file of uploadedFiles) {
-        const filePath = `tour-documents/${tourCode}/${selectedFolder.id}/${Date.now()}_${file.name}`
+        const timestamp = Date.now()
+        const storagePath = `tour-documents/${tourCode}/${selectedFolder.id}/${timestamp}_${file.name}`
 
         // 上傳到 Supabase Storage
-        const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, file)
+        const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file)
 
         if (uploadError) throw uploadError
 
         // 建立 files 記錄
         const { error: dbError } = await supabase.from('files').insert({
-          workspace_id: (await supabase.from('tours').select('workspace_id').eq('id', tourId).single()).data
-            ?.workspace_id,
+          workspace_id: tourData.workspace_id,
           tour_id: tourId,
           category: selectedFolder.category,
           filename: file.name,
-          file_path: filePath,
+          original_filename: file.name,
+          storage_path: storagePath,
+          storage_bucket: 'documents',
           content_type: file.type,
-          file_size: file.size,
-          created_by: 'user',
+          size_bytes: file.size,
+          is_starred: false,
+          is_archived: false,
+          is_deleted: false,
         })
 
         if (dbError) throw dbError
@@ -325,33 +343,36 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
       {/* 左側：資料夾列表 */}
       <div className="w-64 flex-shrink-0 border border-morandi-muted rounded-lg bg-morandi-container p-2 overflow-y-auto">
         <div className="space-y-1">
-          {folders.map(folder => (
-            <button
-              key={folder.id}
-              onClick={() => setSelectedFolder(folder)}
-              className={cn(
-                'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors',
-                selectedFolder?.id === folder.id
-                  ? 'bg-morandi-gold text-white'
-                  : 'hover:bg-morandi-gold/10 text-morandi-primary'
-              )}
-            >
-              <span className="text-base">{folder.icon}</span>
-              <span className="flex-1 text-left truncate">{folder.name}</span>
-              {folder.count > 0 && (
-                <span
-                  className={cn(
-                    'text-xs px-2 py-0.5 rounded-full',
-                    selectedFolder?.id === folder.id
-                      ? 'bg-white/20 text-white'
-                      : 'bg-morandi-gold/10 text-morandi-gold'
-                  )}
-                >
-                  {folder.count}
-                </span>
-              )}
-            </button>
-          ))}
+          {folders.map(folder => {
+            const Icon = folder.Icon
+            return (
+              <button
+                key={folder.id}
+                onClick={() => setSelectedFolder(folder)}
+                className={cn(
+                  'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors',
+                  selectedFolder?.id === folder.id
+                    ? 'bg-morandi-gold text-white'
+                    : 'hover:bg-morandi-gold/10 text-morandi-primary'
+                )}
+              >
+                <Icon size={16} className="flex-shrink-0" />
+                <span className="flex-1 text-left truncate">{folder.name}</span>
+                {folder.count > 0 && (
+                  <span
+                    className={cn(
+                      'text-xs px-2 py-0.5 rounded-full',
+                      selectedFolder?.id === folder.id
+                        ? 'bg-white/20 text-white'
+                        : 'bg-morandi-gold/10 text-morandi-gold'
+                    )}
+                  >
+                    {folder.count}
+                  </span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -360,9 +381,10 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
         {/* 標題列 */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-morandi-muted">
           <div>
-            <h3 className="text-lg font-medium text-morandi-primary">
-              {selectedFolder?.icon} {selectedFolder?.name}
-            </h3>
+            <div className="flex items-center gap-2">
+              {selectedFolder && <selectedFolder.Icon size={20} className="text-morandi-gold" />}
+              <h3 className="text-lg font-medium text-morandi-primary">{selectedFolder?.name}</h3>
+            </div>
             {selectedFolder?.description && (
               <p className="text-sm text-morandi-secondary mt-0.5">{selectedFolder.description}</p>
             )}
