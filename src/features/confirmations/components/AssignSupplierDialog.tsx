@@ -258,66 +258,83 @@ export function AssignSupplierDialog({
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [loadingGroups, setLoadingGroups] = useState(false)
 
-  // 重置 step
+  // 重置 step + 從 DB 讀房型
   useEffect(() => {
-    if (open) {
-      // 有住宿 → 先填房型，否則 → 直接預覽
-      const accItems = items.filter(({ category }) => category === 'accommodation')
-      const hasAcc = accItems.length > 0
+    if (!open) return
 
-      if (hasAcc) {
-        // 初始化房型（從 existingRequests 讀或預設）
-        const init: Record<string, { name: string; qty: number }[]> = {}
-        let allHaveRooms = true
+    setSendMethod(null)
+    setSelectedSupplier(null)
+    setSupplierSearch('')
+    setCustomName('')
 
-        accItems.forEach(({ item }) => {
+    const accItems = items.filter(({ category }) => category === 'accommodation')
+    const hasAcc = accItems.length > 0
+
+    if (!hasAcc) {
+      setRoomDetails({})
+      setStep('preview')
+      return
+    }
+
+    // 直接從 DB 讀這個團的已存房型資料
+    async function loadExistingRooms() {
+      const init: Record<string, { name: string; qty: number }[]> = {}
+      let allHaveRooms = true
+
+      try {
+        const { data: existingReqs } = await supabase
+          .from('tour_requests')
+          .select('supplier_name, request_type, items' as string & keyof never)
+          .eq('tour_id', tourId) as { data: Record<string, unknown>[] | null }
+
+        for (const accItem of accItems) {
+          const itemTitle = accItem.item.title || accItem.item.supplierName || ''
           let foundRooms = false
-          const itemTitle = item.title || item.supplierName || ''
 
-          for (const req of existingRequests) {
-            if (!req.items || !Array.isArray(req.items)) continue
+          for (const req of (existingReqs || [])) {
+            const reqItems = (req as Record<string, unknown>).items as Record<string, unknown>[]
+            if (!Array.isArray(reqItems)) continue
 
             // 格式 A: 混合需求 — items[].rooms[]
-            const matchItem = req.items.find((ri: Record<string, unknown>) =>
-              (ri.rooms as { room_type: string; quantity: number }[])?.length > 0 &&
-              itemTitle.includes(String(ri.title || ''))
-            )
-            if (matchItem?.rooms) {
-              init[item.key] = (matchItem.rooms as { room_type: string; quantity: number }[]).map(r => ({ name: r.room_type, qty: r.quantity }))
-              foundRooms = true
-              break
+            for (const ri of reqItems) {
+              const rooms = ri.rooms as { room_type: string; quantity: number }[] | undefined
+              if (rooms && rooms.length > 0 && String(ri.title || '').includes(itemTitle.slice(0, 4))) {
+                init[accItem.item.key] = rooms.map(r => ({ name: r.room_type, qty: r.quantity }))
+                foundRooms = true
+                break
+              }
             }
+            if (foundRooms) break
 
-            // 格式 B: 單獨住宿需求 — items[] = [{ room_type, quantity, nights }]
-            const roomItems = req.items.filter((ri: Record<string, unknown>) =>
-              ri.room_type && typeof ri.quantity === 'number'
-            )
-            if (roomItems.length > 0 && (req as Record<string, unknown>).supplier_name && itemTitle.includes(String((req as Record<string, unknown>).supplier_name || ''))) {
-              init[item.key] = roomItems.map((r: Record<string, unknown>) => ({ name: String(r.room_type), qty: Number(r.quantity) }))
+            // 格式 B: 單獨住宿需求 — items[] = [{ room_type, quantity }]
+            const roomItems = reqItems.filter(ri => ri.room_type && typeof ri.quantity === 'number')
+            const reqSupplierName = String((req as Record<string, unknown>).supplier_name || '')
+            if (roomItems.length > 0 && reqSupplierName && itemTitle.includes(reqSupplierName.slice(0, 4))) {
+              init[accItem.item.key] = roomItems.map(r => ({ name: String(r.room_type), qty: Number(r.quantity) }))
               foundRooms = true
               break
             }
           }
 
           if (!foundRooms) {
-            init[item.key] = [{ name: '雙人房', qty: 1 }]
+            init[accItem.item.key] = [{ name: '雙人房', qty: 1 }]
             allHaveRooms = false
           }
-        })
-
-        setRoomDetails(init)
-        setStep(allHaveRooms ? 'preview' : 'rooms')
-      } else {
-        setRoomDetails({})
-        setStep('preview')
+        }
+      } catch {
+        // DB 讀取失敗 → 全部預設
+        for (const accItem of accItems) {
+          init[accItem.item.key] = [{ name: '雙人房', qty: 1 }]
+        }
+        allHaveRooms = false
       }
 
-      setSendMethod(null)
-      setSelectedSupplier(null)
-      setSupplierSearch('')
-      setCustomName('')
+      setRoomDetails(init)
+      setStep(allHaveRooms ? 'preview' : 'rooms')
     }
-  }, [open])
+
+    loadExistingRooms()
+  }, [open, tourId])
 
   // 載入 LINE 群組列表
   useEffect(() => {
