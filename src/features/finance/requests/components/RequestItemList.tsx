@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
-import { Trash2, Plus, Link2, UserCheck } from 'lucide-react'
+import { Trash2, Plus, Link2, UserCheck, X } from 'lucide-react'
 import { RequestItem, categoryOptions } from '../types'
 import { CurrencyCell } from '@/components/table-cells'
 import {
@@ -157,31 +157,24 @@ export function EditableRequestItemList({
             </div>
 
             {/* Description */}
-            <div className="space-y-1">
+            <div className="flex items-center gap-1">
               <input
                 type="text"
                 value={item.description}
                 onChange={e => updateItem(item.id, { description: e.target.value })}
-                className={inputClass}
+                className={`${inputClass} flex-1`}
               />
-              <div className="flex items-center gap-2 px-1">
-                <label className="flex items-center gap-1.5 cursor-pointer text-xs text-morandi-secondary hover:text-morandi-primary">
-                  <input
-                    type="checkbox"
-                    checked={!!item.advanced_by}
-                    onChange={e => {
-                      if (!e.target.checked) {
-                        updateItem(item.id, { advanced_by: undefined, advanced_by_name: undefined })
-                      } else {
-                        updateItem(item.id, { advanced_by: '_pending' })
-                      }
-                    }}
-                    className="w-3.5 h-3.5 rounded"
-                  />
-                  <UserCheck size={12} />
-                  員工代墊
-                </label>
-                {item.advanced_by && (
+              {!item.advanced_by ? (
+                <button
+                  type="button"
+                  onClick={() => updateItem(item.id, { advanced_by: '_pending' })}
+                  className="shrink-0 p-1 rounded hover:bg-morandi-container/20 text-morandi-muted hover:text-morandi-primary transition-colors"
+                  title="員工代墊"
+                >
+                  <UserCheck size={14} />
+                </button>
+              ) : (
+                <div className="shrink-0 flex items-center gap-1">
                   <Combobox
                     options={suppliers.filter(s => s.type === 'employee').map(s => ({ value: s.id, label: s.name || '未命名' }))}
                     value={item.advanced_by === '_pending' ? '' : item.advanced_by}
@@ -190,11 +183,19 @@ export function EditableRequestItemList({
                       updateItem(item.id, { advanced_by: value, advanced_by_name: emp?.name || '' })
                     }}
                     placeholder="代墊人"
-                    className="[&_input]:h-6 [&_input]:text-xs [&_input]:px-1 [&_input]:bg-transparent flex-1 max-w-[160px]"
+                    className="[&_input]:h-7 [&_input]:text-xs [&_input]:px-1 [&_input]:bg-morandi-gold/10 w-[120px]"
                     showSearchIcon={false}
                   />
-                )}
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => updateItem(item.id, { advanced_by: undefined, advanced_by_name: undefined })}
+                    className="shrink-0 p-0.5 rounded hover:bg-morandi-red/10 text-morandi-muted hover:text-morandi-red"
+                    title="取消代墊"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Unit Price */}
