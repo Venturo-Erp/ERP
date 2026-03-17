@@ -7,8 +7,8 @@
  * 底部彙總估價 vs 實際成本差異，並可生成結案報告 PDF。
  */
 
-import { useMemo, useState } from 'react'
-import { FileDown, Loader2 } from 'lucide-react'
+import { useMemo, useState, useCallback } from 'react'
+import { FileDown, Loader2, Lock, Unlock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
@@ -27,9 +27,17 @@ import {
   useEmployeeDictionary,
   useMembers,
   useOrdersSlim,
+  updateTour,
 } from '@/data'
 import { calculateFullProfit } from '../services/profit-calculation.service'
 import { useAuthStore } from '@/stores'
+
+// === 結案狀態 ===
+const CLOSING_STATUS_MAP: Record<string, { label: string; color: string }> = {
+  open: { label: '進行中', color: 'bg-blue-100 text-blue-700' },
+  closing: { label: '結團中', color: 'bg-yellow-100 text-yellow-700' },
+  closed: { label: '已結團', color: 'bg-green-100 text-green-700' },
+}
 
 // === 類別標籤 ===
 const CATEGORY_LABELS: Record<string, string> = {
@@ -122,6 +130,28 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     }),
     [paymentRequests]
   )
+
+  // 結案狀態
+  const closingStatus = tour.closing_status ?? 'open'
+  const statusInfo = CLOSING_STATUS_MAP[closingStatus] ?? CLOSING_STATUS_MAP.open
+  const [statusUpdating, setStatusUpdating] = useState(false)
+
+  const handleToggleClosingStatus = useCallback(async () => {
+    const nextStatus = closingStatus === 'closed' ? 'open' : 'closed'
+    setStatusUpdating(true)
+    try {
+      await updateTour(tour.id, {
+        closing_status: nextStatus,
+        ...(nextStatus === 'closed' ? { closing_date: new Date().toISOString() } : { closing_date: null }),
+      })
+      toast.success(nextStatus === 'closed' ? '已標記為結團' : '已重新開啟團')
+    } catch (err) {
+      logger.error('更新結案狀態失敗', err)
+      toast.error('狀態更新失敗')
+    } finally {
+      setStatusUpdating(false)
+    }
+  }, [closingStatus, tour.id])
 
   // 按 category 分組
   const groups = useMemo<CategoryGroup[]>(() => {
@@ -324,16 +354,38 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
       <ProfitTab tour={tour} />
       <BonusSettingTab tour={tour} />
 
-      {/* PDF 按鈕 */}
-      <div className="flex justify-end">
-        <Button onClick={handleGeneratePDF} disabled={pdfLoading}>
-          {pdfLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          ) : (
-            <FileDown className="h-4 w-4 mr-2" />
-          )}
-          生成結案報告 PDF
-        </Button>
+      {/* 結案狀態 + PDF */}
+      <div className="flex items-center justify-between border rounded-lg px-4 py-3 bg-muted/10">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium">結案狀態</span>
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusInfo.color}`}>
+            {statusInfo.label}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleGeneratePDF} disabled={pdfLoading}>
+            {pdfLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <FileDown className="h-4 w-4 mr-2" />
+            )}
+            生成結案報告 PDF
+          </Button>
+          <Button
+            variant={closingStatus === 'closed' ? 'outline' : 'default'}
+            onClick={handleToggleClosingStatus}
+            disabled={statusUpdating}
+          >
+            {statusUpdating ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : closingStatus === 'closed' ? (
+              <Unlock className="h-4 w-4 mr-2" />
+            ) : (
+              <Lock className="h-4 w-4 mr-2" />
+            )}
+            {closingStatus === 'closed' ? '重新開啟' : '標記結團'}
+          </Button>
+        </div>
       </div>
     </div>
   )
