@@ -63,6 +63,24 @@ async function processGroupEvent(groupId: string) {
   }
 }
 
+/** 背景處理保險 PDF（不阻擋回應） */
+async function processInsurancePDF(event: any) {
+  try {
+    // 呼叫 insurance-auto-save API
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const res = await fetch(`${baseUrl}/api/line/insurance-auto-save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ events: [event] }),
+    })
+
+    const result = await res.json()
+    console.log('[LINE] Insurance result:', result)
+  } catch (err) {
+    console.error('[LINE] Insurance process error:', err)
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -80,6 +98,11 @@ export async function POST(req: NextRequest) {
         // Bot 加入群組 or 群組訊息 → 背景記錄 groupId
         if (event.type === 'join' || event.type === 'message') {
           bgTasks.push(processGroupEvent(groupId))
+        }
+
+        // 檔案訊息 → 檢查是否為保險 PDF
+        if (event.type === 'message' && event.message?.type === 'file') {
+          bgTasks.push(processInsurancePDF(event))
         }
       }
     }
