@@ -31,6 +31,8 @@ export interface RequestItem {
   confirmation_item_id?: string | null // 關聯的確認單項目 ID
   is_employee?: boolean // 標記此項目對象是員工（存檔時 supplier_id 設空避免 FK 衝突）
   selected_id?: string // Combobox 顯示用的選中 ID（員工或供應商皆存）
+  advanced_by?: string // 代墊員工 ID
+  advanced_by_name?: string // 代墊員工姓名
 }
 
 export interface NewItemFormData {

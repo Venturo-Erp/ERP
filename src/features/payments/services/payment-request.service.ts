@@ -157,6 +157,8 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
       notes: itemData.notes,
       sort_order: itemData.sort_order,
       tour_request_id: itemData.tour_request_id || null, // 關聯需求單
+      advanced_by: (itemData as Record<string, unknown>).advanced_by || null,
+      advanced_by_name: (itemData as Record<string, unknown>).advanced_by_name || null,
       // workspace_id auto-set by DB trigger
       created_at: now,
       updated_at: now,

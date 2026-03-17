@@ -151,6 +151,12 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
     label: s.name || REQUEST_DETAIL_DIALOG_LABELS.未命名,
   }))
 
+  // 員工選項（代墊款用）
+  const employeeOptions = suppliers.filter(s => s.type === 'employee').map(s => ({
+    value: s.id,
+    label: s.name || REQUEST_DETAIL_DIALOG_LABELS.未命名,
+  }))
+
   // 刪除請款單
   const handleDelete = async () => {
     if (is_submitting) return
@@ -515,7 +521,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
 
                       />
                     </div>
-                    <div>
+                    <div className="space-y-1">
                       <Input
                         value={newItem.description}
                         onChange={e => setNewItem({ ...newItem, description: e.target.value })}

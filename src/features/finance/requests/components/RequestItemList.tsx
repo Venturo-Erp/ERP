@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
-import { Trash2, Plus, Link2 } from 'lucide-react'
+import { Trash2, Plus, Link2, UserCheck } from 'lucide-react'
 import { RequestItem, categoryOptions } from '../types'
 import { CurrencyCell } from '@/components/table-cells'
 import {
@@ -153,18 +153,48 @@ export function EditableRequestItemList({
                 className="input-no-focus [&_input]:h-9 [&_input]:px-1 [&_input]:bg-transparent"
                 onCreate={onCreateSupplier}
                 showSearchIcon={false}
-                disablePortal={true}
               />
             </div>
 
             {/* Description */}
-            <div>
+            <div className="space-y-1">
               <input
                 type="text"
                 value={item.description}
                 onChange={e => updateItem(item.id, { description: e.target.value })}
                 className={inputClass}
               />
+              <div className="flex items-center gap-2 px-1">
+                <label className="flex items-center gap-1.5 cursor-pointer text-xs text-morandi-secondary hover:text-morandi-primary">
+                  <input
+                    type="checkbox"
+                    checked={!!item.advanced_by}
+                    onChange={e => {
+                      if (!e.target.checked) {
+                        updateItem(item.id, { advanced_by: undefined, advanced_by_name: undefined })
+                      } else {
+                        updateItem(item.id, { advanced_by: '_pending' })
+                      }
+                    }}
+                    className="w-3.5 h-3.5 rounded"
+                  />
+                  <UserCheck size={12} />
+                  員工代墊
+                </label>
+                {item.advanced_by && (
+                  <Combobox
+                    options={suppliers.filter(s => s.type === 'employee').map(s => ({ value: s.id, label: s.name || '未命名' }))}
+                    value={item.advanced_by === '_pending' ? '' : item.advanced_by}
+                    onChange={value => {
+                      const emp = suppliers.find(s => s.id === value)
+                      updateItem(item.id, { advanced_by: value, advanced_by_name: emp?.name || '' })
+                    }}
+                    placeholder="代墊人"
+                    className="[&_input]:h-6 [&_input]:text-xs [&_input]:px-1 [&_input]:bg-transparent flex-1 max-w-[160px]"
+                    showSearchIcon={false}
+                  />
+                )}
+              </div>
             </div>
 
             {/* Unit Price */}
