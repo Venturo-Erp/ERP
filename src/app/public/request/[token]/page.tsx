@@ -4,13 +4,19 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 
+interface RoomItem {
+  room_type: string
+  quantity: number
+  nights?: number
+}
+
 interface RequestItem {
   category: string
   title: string
   service_date?: string | null
   quantity?: number
   unit_cost?: number | null
-  rooms?: { room_type: string; quantity: number }[]
+  rooms?: RoomItem[]
   // 供應商回填
   quoted_cost?: number | null
   reply_note?: string
@@ -18,342 +24,310 @@ interface RequestItem {
   booking_ref?: string
 }
 
-interface RequestData {
-  id: string
-  code: string
-  tour_id: string
-  supplier_name: string
-  supplier_contact: string | null
-  items: RequestItem[]
-  status: string
-  note: string | null
-  created_at: string
-  // JOIN tour info
-  tour_code?: string
-  tour_name?: string
-  departure_date?: string
-  workspace_name?: string
-}
-
-const CATEGORY_EMOJI: Record<string, string> = {
-  accommodation: '🏨',
-  transport: '🚌',
-  meal: '🍽️',
-  activity: '🎫',
-  other: '📦',
-}
-
-const CATEGORY_LABEL: Record<string, string> = {
-  accommodation: '住宿',
-  transport: '交通',
-  meal: '餐食',
-  activity: '活動',
-  other: '其他',
-}
-
 export default function PublicRequestPage() {
   const { token } = useParams<{ token: string }>()
-  const [request, setRequest] = useState<RequestData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+
+  // 委託資料
+  const [requestId, setRequestId] = useState('')
+  const [supplierName, setSupplierName] = useState('')
+  const [tourCode, setTourCode] = useState('')
+  const [tourName, setTourName] = useState('')
+  const [departureDate, setDepartureDate] = useState('')
+  const [status, setStatus] = useState('')
   const [items, setItems] = useState<RequestItem[]>([])
   const [replyNote, setReplyNote] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
 
   const supabase = createSupabaseBrowserClient()
 
-  // 載入委託資料
   useEffect(() => {
     if (!token) return
-
-    async function loadRequest() {
+    async function load() {
       setLoading(true)
       try {
-        // token = tour_requests.id (UUID)
-        const { data, error: fetchError } = await supabase
+        const { data, error: e } = await supabase
           .from('tour_requests')
           .select('*')
           .eq('id', token)
           .single()
+        if (e || !data) { setError('找不到此委託單'); return }
 
-        if (fetchError || !data) {
-          setError('找不到此委託單，連結可能已失效')
-          return
-        }
+        const d = data as Record<string, unknown>
+        setRequestId(data.id)
+        setSupplierName(String(d.supplier_name || ''))
+        setStatus(String(data.status || ''))
 
-        // 取得 tour 資訊
+        const rawItems = d.items as RequestItem[] || []
+        setItems(rawItems.map(it => ({
+          ...it,
+          quoted_cost: it.quoted_cost ?? null,
+          reply_note: it.reply_note || '',
+          booking_confirmed: it.booking_confirmed || false,
+          booking_ref: it.booking_ref || '',
+        })))
+
+        if (data.status === 'replied' || data.status === 'confirmed') setSubmitted(true)
+
+        // tour info
         const tourId = data.tour_id as string
-        const { data: tourData } = await supabase
-          .from('tours')
-          .select('code, name, departure_date')
-          .eq('id', tourId)
-          .single()
-
-        const requestData: RequestData = {
-          id: data.id,
-          code: (data as Record<string, unknown>).code as string || '',
-          tour_id: tourId,
-          supplier_name: (data.supplier_name as string) || '',
-          supplier_contact: ((data as Record<string, unknown>).supplier_contact as string) || null,
-          items: ((data as Record<string, unknown>).items as RequestItem[]) || [],
-          status: (data.status as string) || 'draft',
-          note: (data.notes as string) || null,
-          created_at: data.created_at || '',
-          tour_code: tourData?.code || '',
-          tour_name: tourData?.name || '',
-          departure_date: tourData?.departure_date || '',
+        if (tourId) {
+          const { data: tour } = await supabase.from('tours').select('code, name, departure_date').eq('id', tourId).single()
+          if (tour) {
+            setTourCode(tour.code || '')
+            setTourName(tour.name || '')
+            setDepartureDate(tour.departure_date || '')
+          }
         }
-
-        setRequest(requestData)
-        setItems(requestData.items.map(item => ({ ...item, quoted_cost: item.quoted_cost || null, reply_note: '' })))
-
-        if (data.status === 'replied' || data.status === 'confirmed') {
-          setSubmitted(true)
-        }
-      } catch (err) {
-        setError('載入失敗：' + String(err))
-      } finally {
-        setLoading(false)
-      }
+      } catch { setError('載入失敗') }
+      finally { setLoading(false) }
     }
-
-    loadRequest()
+    load()
   }, [token])
 
-  // 更新項目報價
-  const updateItemCost = useCallback((idx: number, cost: string) => {
-    setItems(prev => prev.map((item, i) =>
-      i === idx ? { ...item, quoted_cost: cost ? parseFloat(cost) : null } : item
-    ))
-  }, [])
-
-  const updateItemNote = useCallback((idx: number, note: string) => {
-    setItems(prev => prev.map((item, i) =>
-      i === idx ? { ...item, reply_note: note } : item
-    ))
-  }, [])
-
-  // 送出回覆
   const handleSubmit = useCallback(async () => {
-    if (!request || submitting) return
+    if (!requestId || submitting) return
     setSubmitting(true)
-
     try {
-      const totalQuotedCost = items.reduce((sum, item) => sum + (item.quoted_cost || 0), 0)
-
-      const { error: updateError } = await supabase
-        .from('tour_requests')
-        .update({
-          status: 'replied',
-          replied_at: new Date().toISOString(),
-          items: items as never,
-          note: replyNote || null,
-        } as never)
-        .eq('id', request.id)
-
-      if (updateError) throw updateError
-
+      await supabase.from('tour_requests').update({
+        status: 'replied',
+        replied_at: new Date().toISOString(),
+        items: items as never,
+        note: replyNote || null,
+      } as never).eq('id', requestId)
       setSubmitted(true)
-    } catch (err) {
-      alert('送出失敗：' + String(err))
-    } finally {
-      setSubmitting(false)
-    }
-  }, [request, items, replyNote, submitting, supabase])
+    } catch { alert('送出失敗') }
+    finally { setSubmitting(false) }
+  }, [requestId, items, replyNote, submitting, supabase])
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-500">載入中...</div>
-      </div>
-    )
-  }
+  if (loading) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-gray-500">載入中...</div>
+    </div>
+  )
 
-  if (error || !request) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow p-8 max-w-md text-center">
-          <div className="text-4xl mb-4">😕</div>
-          <h1 className="text-xl font-bold mb-2">找不到委託單</h1>
-          <p className="text-gray-500">{error || '連結可能已失效'}</p>
-        </div>
+  if (error) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow p-8 max-w-md text-center">
+        <div className="text-4xl mb-4">😕</div>
+        <h1 className="text-xl font-bold mb-2">找不到委託單</h1>
+        <p className="text-gray-500">{error}</p>
       </div>
-    )
-  }
+    </div>
+  )
 
-  if (submitted) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow p-8 max-w-md text-center">
-          <div className="text-4xl mb-4">✅</div>
-          <h1 className="text-xl font-bold mb-2">報價已送出</h1>
-          <p className="text-gray-500">感謝您的回覆！旅行社會盡快確認。</p>
-          <div className="mt-4 text-sm text-gray-400">
-            委託編號：{request.code || request.id.slice(0, 8)}
-          </div>
-        </div>
+  if (submitted) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow p-8 max-w-md text-center">
+        <div className="text-4xl mb-4">✅</div>
+        <h1 className="text-xl font-bold mb-2">報價已送出</h1>
+        <p className="text-gray-500">感謝您的回覆！旅行社會盡快確認。</p>
       </div>
-    )
-  }
+    </div>
+  )
+
+  // 分類
+  const accItems = items.filter(i => i.category === 'accommodation')
+  const otherItems = items.filter(i => i.category !== 'accommodation')
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto px-4">
+    <div className="min-h-screen bg-gray-50 py-6">
+      <div className="max-w-3xl mx-auto px-4">
         {/* 標題 */}
-        <div className="bg-amber-700 text-white rounded-t-lg p-6">
-          <h1 className="text-2xl font-bold">📋 需求單</h1>
-          <p className="text-amber-100 mt-1">請確認以下項目並回覆報價</p>
+        <h1 className="text-center text-2xl font-bold mb-6 border-b-4 border-double border-gray-800 pb-3">
+          需求單
+        </h1>
+
+        {/* 基本資訊 — 兩欄 */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="border border-gray-300 rounded p-4">
+            <h3 className="font-bold mb-2 border-b border-gray-200 pb-1">我方資訊</h3>
+            <table className="text-sm">
+              <tbody>
+                <tr><td className="font-bold pr-3 py-0.5">公司：</td><td>角落旅行社</td></tr>
+                <tr><td className="font-bold pr-3 py-0.5">團號：</td><td>{tourCode}</td></tr>
+                <tr><td className="font-bold pr-3 py-0.5">團名：</td><td>{tourName}</td></tr>
+                <tr><td className="font-bold pr-3 py-0.5">出發日：</td><td>{departureDate}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div className="border border-gray-300 rounded p-4">
+            <h3 className="font-bold mb-2 border-b border-gray-200 pb-1">供應商資訊</h3>
+            <table className="text-sm">
+              <tbody>
+                <tr><td className="font-bold pr-3 py-0.5">名稱：</td><td>{supplierName}</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
-        <div className="bg-white shadow rounded-b-lg">
-          {/* 基本資訊 */}
-          <div className="p-6 border-b">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="font-bold text-gray-700 mb-2">旅行社資訊</h3>
-                <div className="text-sm space-y-1 text-gray-600">
-                  <div>公司：角落旅行社</div>
-                  <div>團號：{request.tour_code}</div>
-                  <div>團名：{request.tour_name}</div>
-                  <div>出發日：{request.departure_date}</div>
-                </div>
+        {/* 住宿需求 */}
+        {accItems.map((item, idx) => {
+          const rooms = item.rooms || []
+          const totalRooms = rooms.reduce((s, r) => s + r.quantity, 0)
+          const nights = rooms[0]?.nights || item.quantity || 1
+          const dates = (item.service_date || '').split('~')
+
+          return (
+            <div key={`acc-${idx}`} className="mb-6">
+              {/* 飯店資訊 */}
+              <div className="border border-gray-300 rounded p-4 mb-3">
+                <h3 className="font-bold mb-2 border-b border-gray-200 pb-1">飯店資訊</h3>
+                <table className="text-sm">
+                  <tbody>
+                    <tr><td className="font-bold pr-3 py-0.5">飯店：</td><td>{item.title}</td></tr>
+                    <tr><td className="font-bold pr-3 py-0.5">入住日：</td><td>{dates[0] || ''}</td></tr>
+                    <tr><td className="font-bold pr-3 py-0.5">退房日：</td><td>{dates[1] || ''}</td></tr>
+                    <tr><td className="font-bold pr-3 py-0.5">晚數：</td><td>{nights} 晚</td></tr>
+                  </tbody>
+                </table>
               </div>
-              <div>
-                <h3 className="font-bold text-gray-700 mb-2">供應商</h3>
-                <div className="text-sm space-y-1 text-gray-600">
-                  <div className="font-medium text-lg">{request.supplier_name}</div>
-                  {request.supplier_contact && <div>窗口：{request.supplier_contact}</div>}
+
+              {/* 房型表格 */}
+              <table className="w-full border-collapse text-sm">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-400 px-3 py-2">房型</th>
+                    <th className="border border-gray-400 px-3 py-2 w-20">間數</th>
+                    <th className="border border-gray-400 px-3 py-2 w-20">晚數</th>
+                    <th className="border border-gray-400 px-3 py-2">備註</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rooms.map((r, ri) => (
+                    <tr key={ri} className="text-center">
+                      <td className="border border-gray-400 px-3 py-2">{r.room_type}</td>
+                      <td className="border border-gray-400 px-3 py-2">{r.quantity}</td>
+                      <td className="border border-gray-400 px-3 py-2">{r.nights || nights}</td>
+                      <td className="border border-gray-400 px-3 py-2"></td>
+                    </tr>
+                  ))}
+                  <tr className="text-center bg-amber-50 font-bold">
+                    <td className="border border-gray-400 px-3 py-2">合計</td>
+                    <td className="border border-gray-400 px-3 py-2">{totalRooms} 間</td>
+                    <td className="border border-gray-400 px-3 py-2">{nights} 晚</td>
+                    <td className="border border-gray-400 px-3 py-2"></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {/* 住宿回填區 */}
+              <div className="mt-3 bg-white border border-amber-300 rounded p-4 space-y-3">
+                <h4 className="font-bold text-amber-800 text-sm">📝 供應商回填</h4>
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-medium w-16 shrink-0">報價</label>
+                  <div className="relative flex-1 max-w-48">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">NT$</span>
+                    <input
+                      type="number"
+                      value={item.quoted_cost ?? ''}
+                      onChange={e => setItems(prev => prev.map((it, i) =>
+                        it === item ? { ...it, quoted_cost: e.target.value ? parseFloat(e.target.value) : null } : it
+                      ))}
+                      placeholder="總金額"
+                      className="w-full border rounded pl-12 pr-3 py-2 text-sm focus:ring-2 focus:ring-amber-500"
+                    />
+                  </div>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={item.booking_confirmed || false}
+                    onChange={e => setItems(prev => prev.map((it) =>
+                      it === item ? { ...it, booking_confirmed: e.target.checked } : it
+                    ))}
+                    className="w-4 h-4 rounded border-amber-400 text-amber-600"
+                  />
+                  <span className="text-sm font-medium">✅ 確認訂房</span>
+                </label>
+                <div className="flex items-center gap-3">
+                  <label className="text-sm w-16 shrink-0">訂房代號</label>
+                  <input
+                    type="text"
+                    value={item.booking_ref || ''}
+                    onChange={e => setItems(prev => prev.map((it) =>
+                      it === item ? { ...it, booking_ref: e.target.value } : it
+                    ))}
+                    placeholder="選填"
+                    className="flex-1 border rounded px-3 py-1.5 text-sm focus:ring-2 focus:ring-amber-500"
+                  />
                 </div>
               </div>
             </div>
-          </div>
+          )
+        })}
 
-          {/* 項目列表 + 報價欄 */}
-          <div className="p-6">
-            <h3 className="font-bold text-gray-700 mb-4">需求項目</h3>
-            <div className="space-y-4">
-              {items.map((item, idx) => {
-                const emoji = CATEGORY_EMOJI[item.category] || '📦'
-                const catLabel = CATEGORY_LABEL[item.category] || item.category
-                return (
-                  <div key={idx} className="border rounded-lg p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">{emoji}</span>
-                          <span className="text-xs bg-gray-100 px-2 py-0.5 rounded">{catLabel}</span>
-                        </div>
-                        <div className="font-medium mt-1">{item.title}</div>
-                        {item.service_date && (
-                          <div className="text-sm text-gray-500">日期：{item.service_date}</div>
-                        )}
-                        {item.rooms && item.rooms.length > 0 && (
-                          <div className="text-sm text-gray-500">
-                            房型：{item.rooms.map(r => `${r.room_type} × ${r.quantity} 間`).join('、')}
-                          </div>
-                        )}
-                        {item.unit_cost && (
-                          <div className="text-sm text-gray-400">
-                            預算參考：NT$ {item.unit_cost.toLocaleString()}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 報價輸入 */}
-                    <div className="mt-3 flex items-center gap-3">
-                      <label className="text-sm font-medium text-gray-600 shrink-0">報價金額</label>
-                      <div className="relative flex-1 max-w-48">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">NT$</span>
-                        <input
-                          type="number"
-                          value={item.quoted_cost ?? ''}
-                          onChange={e => updateItemCost(idx, e.target.value)}
-                          placeholder="請輸入金額"
-                          className="w-full border rounded-md pl-12 pr-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                        />
-                      </div>
-                    </div>
-
-                    {/* 住宿：確認訂房 + 訂房代號 */}
-                    {item.category === 'accommodation' && (
-                      <div className="mt-3 space-y-2 bg-amber-50 rounded-md p-3">
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={item.booking_confirmed || false}
-                            onChange={e => {
-                              setItems(prev => prev.map((it, i) =>
-                                i === idx ? { ...it, booking_confirmed: e.target.checked } : it
-                              ))
-                            }}
-                            className="w-4 h-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
-                          />
-                          <span className="text-sm font-medium text-amber-800">✅ 確認訂房</span>
-                        </label>
-                        <div className="flex items-center gap-2">
-                          <label className="text-sm text-amber-700 shrink-0">訂房代號</label>
-                          <input
-                            type="text"
-                            value={item.booking_ref || ''}
-                            onChange={e => {
-                              setItems(prev => prev.map((it, i) =>
-                                i === idx ? { ...it, booking_ref: e.target.value } : it
-                              ))
-                            }}
-                            placeholder="選填（如 Booking Ref#）"
-                            className="flex-1 border rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* 備註 */}
-                    <div className="mt-2">
+        {/* 其他項目（活動/餐食/交通） */}
+        {otherItems.length > 0 && (
+          <div className="mb-6">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-400 px-3 py-2 w-24">日期</th>
+                  <th className="border border-gray-400 px-3 py-2">項目</th>
+                  <th className="border border-gray-400 px-3 py-2 w-28">報價金額</th>
+                  <th className="border border-gray-400 px-3 py-2">備註</th>
+                </tr>
+              </thead>
+              <tbody>
+                {otherItems.map((item, idx) => (
+                  <tr key={idx}>
+                    <td className="border border-gray-400 px-3 py-2 text-center text-xs">
+                      {item.service_date || ''}
+                    </td>
+                    <td className="border border-gray-400 px-3 py-2">{item.title}</td>
+                    <td className="border border-gray-400 px-2 py-1">
+                      <input
+                        type="number"
+                        value={item.quoted_cost ?? ''}
+                        onChange={e => {
+                          const val = e.target.value ? parseFloat(e.target.value) : null
+                          setItems(prev => prev.map(it => it === item ? { ...it, quoted_cost: val } : it))
+                        }}
+                        placeholder="NT$"
+                        className="w-full border rounded px-2 py-1 text-sm focus:ring-2 focus:ring-amber-500"
+                      />
+                    </td>
+                    <td className="border border-gray-400 px-2 py-1">
                       <input
                         type="text"
                         value={item.reply_note || ''}
-                        onChange={e => updateItemNote(idx, e.target.value)}
-                        placeholder="備註（選填）"
-                        className="w-full border rounded-md px-3 py-1.5 text-sm text-gray-600 focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
+                        onChange={e => setItems(prev => prev.map(it => it === item ? { ...it, reply_note: e.target.value } : it))}
+                        placeholder="選填"
+                        className="w-full border rounded px-2 py-1 text-sm focus:ring-2 focus:ring-amber-500"
                       />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
+        )}
 
-          {/* 總備註 + 送出 */}
-          <div className="p-6 border-t bg-gray-50 rounded-b-lg">
-            <div className="mb-4">
-              <label className="text-sm font-medium text-gray-600">整體備註</label>
-              <textarea
-                value={replyNote}
-                onChange={e => setReplyNote(e.target.value)}
-                placeholder="如有其他說明，請填寫在此..."
-                rows={3}
-                className="w-full mt-1 border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500 focus:border-amber-500"
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="text-sm text-gray-500">
-                報價合計：NT$ {items.reduce((sum, item) => sum + (item.quoted_cost || 0), 0).toLocaleString()}
-              </div>
-              <button
-                onClick={handleSubmit}
-                disabled={submitting || items.every(i => !i.quoted_cost)}
-                className="bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white font-medium px-8 py-2.5 rounded-md transition-colors"
-              >
-                {submitting ? '送出中...' : '✉️ 送出報價'}
-              </button>
-            </div>
-          </div>
+        {/* 整體備註 + 送出 */}
+        <div className="bg-white border border-gray-300 rounded p-4 mb-6">
+          <label className="text-sm font-bold">整體備註</label>
+          <textarea
+            value={replyNote}
+            onChange={e => setReplyNote(e.target.value)}
+            placeholder="如有其他說明，請填寫..."
+            rows={2}
+            className="w-full mt-1 border rounded px-3 py-2 text-sm focus:ring-2 focus:ring-amber-500"
+          />
         </div>
 
-        {/* 底部 */}
+        <div className="text-center">
+          <button
+            onClick={handleSubmit}
+            disabled={submitting}
+            className="bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white font-bold px-12 py-3 rounded-md text-lg transition-colors"
+          >
+            {submitting ? '送出中...' : '✉️ 送出報價'}
+          </button>
+        </div>
+
         <div className="text-center mt-6 text-xs text-gray-400">
           此頁面由 Venturo ERP 產生 · 角落旅行社
         </div>
