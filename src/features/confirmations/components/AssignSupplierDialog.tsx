@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Printer, Search, Building2, Loader2 } from 'lucide-react'
+import { Printer, Search, Building2, Loader2, Mail, MessageCircle } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -324,16 +324,42 @@ export function AssignSupplierDialog({
           </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>取消</Button>
-          <Button
-            onClick={handlePrintAndSave}
-            disabled={!canPrint || saving}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-          >
-            {saving ? <Loader2 size={14} className="animate-spin mr-1" /> : <Printer size={14} className="mr-1" />}
-            儲存並列印
-          </Button>
+        <DialogFooter className="flex-col sm:flex-row gap-2">
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              disabled={!canPrint || saving}
+              className="text-muted-foreground cursor-not-allowed opacity-60"
+              title="開發中 — Email 發送即將上線"
+              onClick={() => toast({ title: '📧 Email 發送', description: '功能開發中，敬請期待' })}
+            >
+              <Mail size={14} className="mr-1" />
+              Email 發送
+              <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!canPrint || saving}
+              className="text-muted-foreground cursor-not-allowed opacity-60"
+              title="開發中 — Line 群組發送即將上線"
+              onClick={() => toast({ title: '💬 Line 發送', description: '功能開發中，敬請期待' })}
+            >
+              <MessageCircle size={14} className="mr-1" />
+              Line 發送
+              <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
+            </Button>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>取消</Button>
+            <Button
+              onClick={handlePrintAndSave}
+              disabled={!canPrint || saving}
+              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            >
+              {saving ? <Loader2 size={14} className="animate-spin mr-1" /> : <Printer size={14} className="mr-1" />}
+              儲存並列印
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
