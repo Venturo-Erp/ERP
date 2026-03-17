@@ -96,16 +96,17 @@ export async function POST(request: Request) {
       .single()
 
     if (tourError || !tour) {
-      // Telegram 通知 William
-      await notifyError({
-        type: 'tour_not_found',
-        fileName,
+      // ERP 查不到 → 可能是舊團或台中的團
+      console.log(`[insurance] ⚠️  團號 ${parsed.tourCode} 不在 ERP（可能是舊團或台中）`)
+      
+      // 簡單記錄 log，不發 Telegram（避免太吵）
+      // William 可以從 Vercel logs 查看
+      return NextResponse.json({ 
+        ok: true, 
+        skipped: '團號不在 ERP',
         tourCode: parsed.tourCode,
-        userId,
-        messageId,
-        reason: `找不到團號 ${parsed.tourCode}`,
+        reason: '可能是舊團或台中的團'
       })
-      return NextResponse.json({ ok: true, error: '找不到團號' })
     }
 
     // 5. 下載 PDF
@@ -191,13 +192,12 @@ async function notifySuccess({ tourCode, fileName, size }: { tourCode: string; f
   }
 }
 
-// Telegram 通知（錯誤）
+// Telegram 通知（錯誤）— 只通知「無法解析團號」
 async function notifyError(params: {
   type: string
   fileName: string
   userId?: string
   messageId: string
-  tourCode?: string
   reason: string
 }) {
   try {
@@ -206,19 +206,10 @@ async function notifyError(params: {
 
     if (!telegramToken) return
 
-    let message = `❌ 保險 PDF 無法歸檔\n\n檔案：${params.fileName}\n原因：${params.reason}\n`
+    // 只通知無法解析團號（真的需要處理）
+    if (params.type !== 'parse_error') return
 
-    if (params.tourCode) {
-      message += `團號：${params.tourCode}\n`
-    }
-
-    if (params.type === 'parse_error') {
-      message += `\n💡 請確認檔名格式：TW260321A.pdf 或 TC260321A.pdf`
-    } else if (params.type === 'tour_not_found') {
-      message += `\n💡 可能原因：\n1. 團尚未建立\n2. 團號輸入錯誤`
-    }
-
-    message += `\n\n手動處理：\nnode scripts/manual-insurance-save.cjs ${params.messageId} "${params.fileName}"`
+    const message = `❌ 保險 PDF 無法歸檔\n\n檔案：${params.fileName}\n原因：${params.reason}\n\n💡 請確認檔名包含團號：TW260321A.pdf 或 TC260321A.pdf\n\n手動處理：\nnode scripts/manual-insurance-save.cjs ${params.messageId} "${params.fileName}"`
 
     await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
       method: 'POST',
