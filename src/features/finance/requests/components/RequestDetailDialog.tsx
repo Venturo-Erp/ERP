@@ -4,16 +4,9 @@ import { useEffect, useState, useMemo } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Combobox } from '@/components/ui/combobox'
-import { Trash2, Plus, Pencil, X, Save, Layers } from 'lucide-react'
+import { Trash2, Layers } from 'lucide-react'
+import { EditableRequestItemList } from './RequestItemList'
+import type { RequestItem } from '../types'
 import {
   useToursSlim,
   useSuppliersSlim,
@@ -52,18 +45,6 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
   const [batchRequests, setBatchRequests] = useState<PaymentRequest[]>([])
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null)
 
-  // 編輯模式狀態
-  const [editingItemId, setEditingItemId] = useState<string | null>(null)
-  const [isAddingItem, setIsAddingItem] = useState(false)
-  const [newItem, setNewItem] = useState({
-    category: '' as PaymentRequestItem['category'],
-    supplier_id: '',
-    supplier_name: '',
-    description: '',
-    unit_price: 0,
-    quantity: 1,
-  })
-  const [editItem, setEditItem] = useState<Partial<PaymentRequestItem>>({})
   const [is_submitting, setIsSubmitting] = useState(false)
 
   // 載入批次請款單（如果有 batch_id）
@@ -108,21 +89,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
     }
   }, [open, request, refreshRequestItems])
 
-  // 重置編輯狀態
-  useEffect(() => {
-    if (!open) {
-      setEditingItemId(null)
-      setIsAddingItem(false)
-      setNewItem({
-        category: '' as PaymentItemCategory,
-        supplier_id: '',
-        supplier_name: '',
-        description: '',
-        unit_price: 0,
-        quantity: 1,
-      })
-    }
-  }, [open])
+  // 重置編輯狀態（不再需要，統一使用 EditableRequestItemList）
 
   // 當前選中的請款單
   const currentRequest = useMemo(() => {
@@ -137,25 +104,93 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
     return batchRequests.reduce((sum, r) => sum + (r.amount || 0), 0)
   }, [batchRequests])
 
-  if (!request || !currentRequest) return null
-
   // 取得當前選中請款單的項目
-  const items = requestItems.filter(item => item.request_id === currentRequest.id)
+  const items = currentRequest ? requestItems.filter(item => item.request_id === currentRequest.id) : []
 
   // 取得關聯的團
-  const tour = currentRequest.tour_id ? tours.find(t => t.id === currentRequest.tour_id) : null
+  const tour = currentRequest?.tour_id ? tours.find(t => t.id === currentRequest.tour_id) : null
 
-  // 付款對象選項（給 Combobox 使用）
-  const supplierOptions = suppliers.map(s => ({
-    value: s.id,
-    label: s.name || REQUEST_DETAIL_DIALOG_LABELS.未命名,
-  }))
+  // 把 DB items 轉成 EditableRequestItemList 需要的格式
+  const editableItems: RequestItem[] = useMemo(() => 
+    items.map(item => ({
+      id: item.id,
+      category: item.category,
+      supplier_id: item.supplier_id || '',
+      supplierName: item.supplier_name,
+      selected_id: item.supplier_id || '',
+      description: item.description,
+      unit_price: item.unit_price ?? (item as unknown as { unitprice?: number }).unitprice ?? 0,
+      quantity: item.quantity,
+      tour_request_id: item.tour_request_id,
+      confirmation_item_id: (item as unknown as Record<string, unknown>).confirmation_item_id as string | undefined,
+      advanced_by: (item as unknown as Record<string, unknown>).advanced_by as string | undefined,
+      advanced_by_name: (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined,
+    })), [items])
 
-  // 員工選項（代墊款用）
-  const employeeOptions = suppliers.filter(s => s.type === 'employee').map(s => ({
-    value: s.id,
-    label: s.name || REQUEST_DETAIL_DIALOG_LABELS.未命名,
-  }))
+  if (!request || !currentRequest) return null
+
+  // Bridge: 更新項目 → 寫 DB
+  const handleUpdateEditableItem = async (itemId: string, updates: Partial<RequestItem>) => {
+    try {
+      const dbUpdates: Record<string, unknown> = {}
+      if (updates.category !== undefined) dbUpdates.category = updates.category
+      if (updates.supplier_id !== undefined) dbUpdates.supplier_id = updates.supplier_id || null
+      if (updates.supplierName !== undefined) dbUpdates.supplier_name = updates.supplierName
+      if (updates.description !== undefined) dbUpdates.description = updates.description
+      if (updates.unit_price !== undefined) {
+        dbUpdates.unitprice = updates.unit_price
+        dbUpdates.subtotal = (updates.unit_price ?? 0) * (updates.quantity ?? items.find(i => i.id === itemId)?.quantity ?? 1)
+      }
+      if (updates.quantity !== undefined) {
+        dbUpdates.quantity = updates.quantity
+        const price = updates.unit_price ?? items.find(i => i.id === itemId)?.unit_price ?? 0
+        dbUpdates.subtotal = price * updates.quantity
+      }
+      if (updates.advanced_by !== undefined) dbUpdates.advanced_by = updates.advanced_by || null
+      if (updates.advanced_by_name !== undefined) dbUpdates.advanced_by_name = updates.advanced_by_name || null
+
+      await supabase.from('payment_request_items').update(dbUpdates as never).eq('id', itemId)
+      await refreshRequestItems()
+
+      if (currentRequest.tour_id) {
+        await recalculateExpenseStats(currentRequest.tour_id)
+      }
+    } catch (error) {
+      logger.error('更新項目失敗:', error)
+    }
+  }
+
+  // Bridge: 刪除項目
+  const handleRemoveEditableItem = async (itemId: string) => {
+    try {
+      await paymentRequestService.deleteItem(currentRequest.id, itemId)
+      await refreshRequestItems()
+      if (currentRequest.tour_id) {
+        await recalculateExpenseStats(currentRequest.tour_id)
+      }
+    } catch (error) {
+      logger.error('刪除項目失敗:', error)
+    }
+  }
+
+  // Bridge: 新增空白項目
+  const handleAddEditableItem = async () => {
+    try {
+      await paymentRequestService.addItem(currentRequest.id, {
+        category: '' as PaymentItemCategory,
+        supplier_id: '',
+        supplier_name: '',
+        description: '',
+        unit_price: 0,
+        quantity: 1,
+        notes: '',
+        sort_order: items.length + 1,
+      })
+      await refreshRequestItems()
+    } catch (error) {
+      logger.error('新增項目失敗:', error)
+    }
+  }
 
   // 刪除請款單
   const handleDelete = async () => {
@@ -199,116 +234,11 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
     }
   }
 
-  // 新增項目
-  const handleAddItem = async () => {
-    if (is_submitting) return
-    if (!newItem.description || newItem.unit_price <= 0) {
-      await alert(REQUEST_DETAIL_DIALOG_LABELS.請填寫說明和單價, 'warning')
-      return
-    }
-
-    try {
-      const selectedSupplier = suppliers.find(s => s.id === newItem.supplier_id)
-      await paymentRequestService.addItem(currentRequest.id, {
-        category: newItem.category,
-        supplier_id: newItem.supplier_id || '',
-        supplier_name: selectedSupplier?.name || newItem.supplier_name || '',
-        description: newItem.description,
-        unit_price: newItem.unit_price,
-        quantity: newItem.quantity,
-        notes: '',
-        sort_order: items.length + 1,
-      })
-
-      await refreshRequestItems()
-
-      // 重算團成本
-      if (currentRequest.tour_id) {
-        await recalculateExpenseStats(currentRequest.tour_id)
-      }
-
-      setIsAddingItem(false)
-      setNewItem({
-        category: '' as PaymentItemCategory,
-        supplier_id: '',
-        supplier_name: '',
-        description: '',
-        unit_price: 0,
-        quantity: 1,
-      })
-    } catch (error) {
-      logger.error('新增項目失敗:', error)
-      await alert(REQUEST_DETAIL_DIALOG_LABELS.新增項目失敗, 'error')
-    }
-  }
-
-  // 開始編輯項目
-  const startEditItem = (item: PaymentRequestItem) => {
-    setEditingItemId(item.id)
-    // 處理資料庫欄位名稱 unitprice vs TypeScript 介面 unit_price
-    const unitPrice = (item as unknown as { unitprice?: number }).unitprice ?? item.unit_price ?? 0
-    setEditItem({
-      category: item.category,
-      supplier_id: item.supplier_id,
-      supplier_name: item.supplier_name,
-      description: item.description,
-      unit_price: unitPrice,
-      quantity: item.quantity,
-    })
-  }
-
-  // 儲存編輯
-  const handleSaveEdit = async (itemId: string) => {
-    if (is_submitting) return
-    setIsSubmitting(true)
-    try {
-      const selectedSupplier = suppliers.find(s => s.id === editItem.supplier_id)
-      await paymentRequestService.updateItem(currentRequest.id, itemId, {
-        ...editItem,
-        supplier_name: selectedSupplier?.name || editItem.supplier_name,
-      })
-      await refreshRequestItems()
-      setEditingItemId(null)
-
-      // 重算團成本
-      if (currentRequest.tour_id) {
-        await recalculateExpenseStats(currentRequest.tour_id)
-      }
-    } catch (error) {
-      logger.error('更新項目失敗:', error)
-      await alert(REQUEST_DETAIL_DIALOG_LABELS.更新項目失敗, 'error')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  // 刪除項目
-  const handleDeleteItem = async (itemId: string) => {
-    const confirmed = await confirm(REQUEST_DETAIL_DIALOG_LABELS.確定要刪除此項目嗎, {
-      title: REQUEST_DETAIL_DIALOG_LABELS.刪除項目,
-      type: 'warning',
-    })
-    if (!confirmed) return
-
-    try {
-      await paymentRequestService.deleteItem(currentRequest.id, itemId)
-      await refreshRequestItems()
-
-      // 重算團成本
-      if (currentRequest.tour_id) {
-        await recalculateExpenseStats(currentRequest.tour_id)
-      }
-    } catch (error) {
-      logger.error('刪除項目失敗:', error)
-      await alert(REQUEST_DETAIL_DIALOG_LABELS.刪除項目失敗, 'error')
-    }
-  }
-
   // 判斷是否可以編輯（只有待處理狀態可以編輯）
   const canEdit = currentRequest.status === 'pending'
 
   // 是否正在編輯中（新增或編輯項目）
-  const isEditing = isAddingItem || editingItemId !== null
+  const isEditing = false // 統一使用 EditableRequestItemList，不再有 inline 編輯
 
   // 處理關閉對話框（編輯中時阻止關閉）
   const handleOpenChange = async (newOpen: boolean) => {
@@ -431,341 +361,15 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
             </div>
           </div>
 
-          {/* 請款項目 */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-morandi-primary">
-                請款項目 ({items.length} 項)
-              </h3>
-              {canEdit && !isAddingItem && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIsAddingItem(true)}
-                  className="h-7"
-                >
-                  <Plus size={14} className="mr-1" />
-                  {REQUEST_DETAIL_FORM_LABELS.ADD_2089}
-                </Button>
-              )}
-            </div>
-
-            <div className="border border-morandi-container/20 rounded-lg overflow-hidden">
-              {/* 表頭 */}
-              <div className="bg-morandi-background/50 border-b border-morandi-container/20">
-                <div
-                  className={`grid ${canEdit ? 'grid-cols-[80px_1fr_1fr_96px_64px_96px_80px]' : 'grid-cols-[80px_1fr_1fr_96px_64px_96px]'} px-3 py-2.5`}
-                >
-                  <span className="text-xs font-medium text-morandi-muted">
-                    {REQUEST_DETAIL_FORM_LABELS.類別}
-                  </span>
-                  <span className="text-xs font-medium text-morandi-muted">
-                    {REQUEST_DETAIL_FORM_LABELS.付款對象}
-                  </span>
-                  <span className="text-xs font-medium text-morandi-muted">
-                    {REQUEST_DETAIL_FORM_LABELS.說明}
-                  </span>
-                  <span className="text-xs font-medium text-morandi-muted text-right">
-                    {REQUEST_DETAIL_FORM_LABELS.單價}
-                  </span>
-                  <span className="text-xs font-medium text-morandi-muted text-center">
-                    {REQUEST_DETAIL_FORM_LABELS.數量}
-                  </span>
-                  <span className="text-xs font-medium text-morandi-muted text-right">
-                    {REQUEST_DETAIL_FORM_LABELS.小計}
-                  </span>
-                  {canEdit && (
-                    <span className="text-xs font-medium text-morandi-muted text-center">
-                      {REQUEST_DETAIL_FORM_LABELS.操作}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* 項目區域 */}
-              <div className="max-h-[280px] overflow-y-auto">
-                {/* 新增項目表單 */}
-                {isAddingItem && (
-                  <div
-                    className={`grid ${canEdit ? 'grid-cols-[80px_1fr_1fr_96px_64px_96px_80px]' : 'grid-cols-[80px_1fr_1fr_96px_64px_96px]'} px-2 py-1.5 border-b border-morandi-container/10 bg-morandi-gold/5 items-center`}
-                  >
-                    <div>
-                      <Select
-                        value={newItem.category || undefined}
-                        onValueChange={value =>
-                          setNewItem({
-                            ...newItem,
-                            category: value as PaymentRequestItem['category'],
-                          })
-                        }
-                      >
-                        <SelectTrigger className="h-8 text-xs border-0 shadow-none bg-transparent">
-                          <SelectValue placeholder="類別" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categoryOptions.map(opt => (
-                            <SelectItem key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Combobox
-                        options={supplierOptions}
-                        value={newItem.supplier_id}
-                        onChange={value => setNewItem({ ...newItem, supplier_id: value })}
-                        placeholder={REQUEST_DETAIL_DIALOG_LABELS.選擇付款對象}
-                        className="[&_input]:h-8 [&_input]:text-xs [&_input]:bg-transparent"
-
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Input
-                        value={newItem.description}
-                        onChange={e => setNewItem({ ...newItem, description: e.target.value })}
-                        placeholder={REQUEST_DETAIL_DIALOG_LABELS.說明}
-                        className="h-8 text-xs border-0 shadow-none bg-transparent"
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        value={newItem.unit_price || ''}
-                        onChange={e => {
-                          const num = parseFloat(e.target.value) || 0
-                          setNewItem({ ...newItem, unit_price: num })
-                        }}
-                        className="h-8 text-xs text-right border-0 shadow-none bg-transparent"
-                      />
-                    </div>
-                    <div>
-                      <Input
-                        type="text"
-                        inputMode="numeric"
-                        value={newItem.quantity || ''}
-                        onChange={e => {
-                          const num = parseInt(e.target.value) || 0
-                          setNewItem({ ...newItem, quantity: num })
-                        }}
-                        className="h-8 text-xs text-center border-0 shadow-none bg-transparent"
-                      />
-                    </div>
-                    <div className="text-right pr-2">
-                      <CurrencyCell
-                        amount={newItem.unit_price * newItem.quantity}
-                        className="text-morandi-gold text-sm"
-                      />
-                    </div>
-                    {canEdit && (
-                      <div className="flex items-center justify-center gap-1">
-                        <Button
-                          size="icon"
-                          aria-label="Close"
-                          variant="ghost"
-                          className="h-6 w-6"
-                          onClick={handleAddItem}
-                        >
-                          <Save size={14} className="text-status-success" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          aria-label="Close"
-                          variant="ghost"
-                          className="h-6 w-6"
-                          onClick={() => setIsAddingItem(false)}
-                        >
-                          <X size={14} className="text-status-danger" />
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {items.length === 0 && !isAddingItem ? (
-                  <div className="text-center py-8 text-morandi-muted">
-                    {REQUEST_DETAIL_FORM_LABELS.EMPTY_9932}
-                  </div>
-                ) : (
-                  items.map(item => (
-                    <div
-                      key={item.id}
-                      className={`grid ${canEdit ? 'grid-cols-[80px_1fr_1fr_96px_64px_96px_80px]' : 'grid-cols-[80px_1fr_1fr_96px_64px_96px]'} px-2 py-1.5 border-b border-morandi-container/10 items-center hover:bg-morandi-container/5`}
-                    >
-                      {editingItemId === item.id ? (
-                        /* 編輯模式 */
-                        <>
-                          <div>
-                            <Select
-                              value={editItem.category || ''}
-                              onValueChange={value =>
-                                setEditItem({
-                                  ...editItem,
-                                  category: value as PaymentRequestItem['category'],
-                                })
-                              }
-                            >
-                              <SelectTrigger className="h-8 text-xs border-0 shadow-none bg-transparent">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {categoryOptions.map(opt => (
-                                  <SelectItem key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Combobox
-                              options={supplierOptions}
-                              value={editItem.supplier_id || ''}
-                              onChange={value => setEditItem({ ...editItem, supplier_id: value })}
-                              placeholder={REQUEST_DETAIL_DIALOG_LABELS.選擇付款對象}
-                              className="[&_input]:h-8 [&_input]:text-xs [&_input]:bg-transparent"
-                            />
-                          </div>
-                          <div>
-                            <Input
-                              value={editItem.description || ''}
-                              onChange={e =>
-                                setEditItem({ ...editItem, description: e.target.value })
-                              }
-                              className="h-8 text-xs border-0 shadow-none bg-transparent"
-                            />
-                          </div>
-                          <div>
-                            <Input
-                              type="text"
-                              inputMode="decimal"
-                              value={editItem.unit_price || ''}
-                              onChange={e => {
-                                const num = parseFloat(e.target.value) || 0
-                                setEditItem({ ...editItem, unit_price: num })
-                              }}
-                              className="h-8 text-xs text-right border-0 shadow-none bg-transparent"
-                            />
-                          </div>
-                          <div>
-                            <Input
-                              type="text"
-                              inputMode="numeric"
-                              value={editItem.quantity || ''}
-                              onChange={e => {
-                                const num = parseInt(e.target.value) || 0
-                                setEditItem({ ...editItem, quantity: num })
-                              }}
-                              className="h-8 text-xs text-center border-0 shadow-none bg-transparent"
-                            />
-                          </div>
-                          <div className="text-right pr-2">
-                            <CurrencyCell
-                              amount={(editItem.unit_price || 0) * (editItem.quantity || 0)}
-                              className="text-morandi-gold text-sm"
-                            />
-                          </div>
-                          <div className="flex items-center justify-center gap-1">
-                            <Button
-                              size="icon"
-                              aria-label="Close"
-                              variant="ghost"
-                              className="h-6 w-6"
-                              onClick={() => handleSaveEdit(item.id)}
-                            >
-                              <Save size={14} className="text-status-success" />
-                            </Button>
-                            <Button
-                              size="icon"
-                              aria-label="Close"
-                              variant="ghost"
-                              className="h-6 w-6"
-                              onClick={() => setEditingItemId(null)}
-                            >
-                              <X size={14} className="text-status-danger" />
-                            </Button>
-                          </div>
-                        </>
-                      ) : (
-                        /* 顯示模式 */
-                        <>
-                          <div className="text-sm px-1">
-                            {categoryOptions.find(c => c.value === item.category)?.label ||
-                              item.category}
-                          </div>
-                          <div className="text-sm px-1">{item.supplier_name || '-'}</div>
-                          <div className="text-sm px-1">{item.description || '-'}</div>
-                          <div className="text-right pr-2">
-                            <CurrencyCell
-                              amount={
-                                (item as unknown as { unitprice?: number }).unitprice ??
-                                item.unit_price ??
-                                0
-                              }
-                              className="text-sm"
-                            />
-                          </div>
-                          <div className="text-sm text-center">{item.quantity}</div>
-                          <div className="text-right pr-2">
-                            <CurrencyCell
-                              amount={item.subtotal || 0}
-                              className="text-morandi-gold text-sm"
-                            />
-                          </div>
-                          {canEdit && (
-                            <div className="flex items-center justify-center gap-1">
-                              <Button
-                                size="icon"
-                                aria-label="Delete"
-                                variant="ghost"
-                                className="h-6 w-6"
-                                onClick={() => startEditItem(item)}
-                              >
-                                <Pencil size={14} className="text-morandi-secondary" />
-                              </Button>
-                              <Button
-                                size="icon"
-                                aria-label="Delete"
-                                variant="ghost"
-                                className="h-6 w-6"
-                                onClick={() => handleDeleteItem(item.id)}
-                              >
-                                <Trash2 size={14} className="text-status-danger" />
-                              </Button>
-                            </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  ))
-                )}
-              </div>
-
-              {/* 合計 */}
-              <div className="bg-morandi-background/50 border-t border-morandi-container/20">
-                <div
-                  className={`grid ${canEdit ? 'grid-cols-[80px_1fr_1fr_96px_64px_96px_80px]' : 'grid-cols-[80px_1fr_1fr_96px_64px_96px]'} px-3 py-3`}
-                >
-                  <div></div>
-                  <div></div>
-                  <div></div>
-                  <div></div>
-                  <div className="text-right font-semibold text-sm">
-                    {REQUEST_DETAIL_FORM_LABELS.合計}
-                  </div>
-                  <div className="text-right pr-2">
-                    <CurrencyCell
-                      amount={currentRequest.amount || 0}
-                      className="font-bold text-morandi-gold"
-                    />
-                  </div>
-                  {canEdit && <div></div>}
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* 請款項目 — 統一使用 EditableRequestItemList */}
+          <EditableRequestItemList
+            items={editableItems}
+            suppliers={suppliers as unknown as { id: string; name: string | null; type: 'supplier' | 'employee'; group: string }[]}
+            updateItem={handleUpdateEditableItem}
+            removeItem={handleRemoveEditableItem}
+            addNewEmptyItem={handleAddEditableItem}
+            tourId={currentRequest.tour_id || null}
+          />
 
           {/* 備註 */}
           {currentRequest.notes && (
