@@ -78,6 +78,8 @@ export async function middleware(request: NextRequest) {
     '/api/itineraries', // 公開行程 API（給 /view 頁面使用）
     '/api/quotes/confirmation/customer', // 客戶報價確認 API（使用 token 驗證）
     '/api/my', // App API（使用 Bearer token 驗證）
+    '/public', // 供應商公開回覆頁面（用 token 驗證）
+    '/api/line', // LINE Webhook + API
     '/api/trips', // App API（使用 Bearer token 驗證）
     '/api/eyeline', // 旅人眼線 API（使用 Bearer token 驗證）
     '/api/join-trip', // 加入行程 API（使用 Bearer token 驗證）
