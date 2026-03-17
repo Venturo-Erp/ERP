@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Printer, Search, Building2, Loader2, Mail, MessageCircle } from 'lucide-react'
+import { Printer, Search, Building2, Loader2, Mail, MessageCircle, Globe } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -346,6 +346,17 @@ export function AssignSupplierDialog({
             >
               <MessageCircle size={14} className="mr-1" />
               Line 發送
+              <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!canPrint || saving}
+              className="text-muted-foreground cursor-not-allowed opacity-60"
+              title="開發中 — 發送至系統內附屬國（Local 租戶）"
+              onClick={() => toast({ title: '🌐 系統內發送', description: '功能開發中 — 需要先建立附屬國租戶' })}
+            >
+              <Globe size={14} className="mr-1" />
+              發給租戶
               <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
             </Button>
           </div>
