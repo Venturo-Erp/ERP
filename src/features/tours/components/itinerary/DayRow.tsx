@@ -18,6 +18,10 @@ import { DroppableZone } from './DroppableZone'
 import { MentionInput, type MentionInputHandle } from '../mention-input'
 import { SortableAttractionChip } from './SortableAttractionChip'
 
+export type ItineraryBlock = 
+  | { type: 'text'; content: string }
+  | { type: 'attraction'; id: string; name: string; verified?: boolean }
+
 export interface DailyScheduleItem {
   day: number
   route: string
@@ -28,6 +32,7 @@ export interface DailyScheduleItem {
   dinnerSelf?: boolean
   sameAsPrevious?: boolean
   attractions?: { id: string; name: string; verified?: boolean }[]
+  blocks?: ItineraryBlock[]
   note?: string
   accommodationId?: string
   mealIds?: {
@@ -46,6 +51,7 @@ interface DayRowProps {
   removeAttraction: (dayIdx: number, attractionId: string) => void
   reorderAttractions: (dayIdx: number, newOrder: { id: string; name: string; verified?: boolean }[]) => void
   handleMentionSelect: (dayIdx: number, attraction: { id: string; name: string }) => void
+  updateBlocks?: (dayIdx: number, blocks: ItineraryBlock[]) => void
   mentionInputRefs: React.MutableRefObject<Record<number, MentionInputHandle | null>>
   tourLocation: string
   getDateLabel: (idx: number) => string
@@ -61,11 +67,85 @@ export function DayRow({
   removeAttraction,
   reorderAttractions,
   handleMentionSelect,
+  updateBlocks,
   mentionInputRefs,
   tourLocation,
   getDateLabel,
   getPreviousAccommodation,
 }: DayRowProps) {
+  // === Block 模式邏輯 ===
+  // 從 attractions + route 轉成 blocks（向下相容）
+  const blocks: ItineraryBlock[] = React.useMemo(() => {
+    if (day.blocks && day.blocks.length > 0) return day.blocks
+    const result: ItineraryBlock[] = []
+    // 把 route 文字放前面
+    if (day.route?.trim()) result.push({ type: 'text', content: day.route })
+    // 把 attractions 放後面
+    if (day.attractions) {
+      for (const a of day.attractions) {
+        result.push({ type: 'attraction', id: a.id, name: a.name, verified: a.verified })
+      }
+    }
+    // 至少有一個空文字塊
+    if (result.length === 0) result.push({ type: 'text', content: '' })
+    return result
+  }, [day.blocks, day.route, day.attractions])
+
+  const syncBlocks = React.useCallback((newBlocks: ItineraryBlock[]) => {
+    if (updateBlocks) {
+      updateBlocks(idx, newBlocks)
+    }
+    // 同步到舊的 attractions 和 route（向下相容）
+    const newAttractions = newBlocks
+      .filter((b): b is ItineraryBlock & { type: 'attraction' } => b.type === 'attraction')
+      .map(b => ({ id: b.id, name: b.name, verified: b.verified }))
+    const routeParts = newBlocks
+      .filter((b): b is ItineraryBlock & { type: 'text' } => b.type === 'text')
+      .map(b => b.content)
+      .filter(Boolean)
+    updateDaySchedule(idx, 'route', routeParts.join(' '))
+    reorderAttractions(idx, newAttractions)
+  }, [idx, updateBlocks, updateDaySchedule, reorderAttractions])
+
+  const handleBlockTextChange = React.useCallback((blockIdx: number, value: string) => {
+    const newBlocks = [...blocks]
+    newBlocks[blockIdx] = { type: 'text', content: value }
+    syncBlocks(newBlocks)
+  }, [blocks, syncBlocks])
+
+  const handleBlockKeyDown = React.useCallback((blockIdx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      // 在當前 block 後面插入一個空文字塊
+      const newBlocks = [...blocks]
+      newBlocks.splice(blockIdx + 1, 0, { type: 'text', content: '' })
+      syncBlocks(newBlocks)
+      // Focus 新的 input（下一個 tick）
+      setTimeout(() => {
+        const el = document.querySelector(`[data-block-id="block-${idx}-${blockIdx + 1}"]`) as HTMLInputElement
+        el?.focus()
+      }, 50)
+    } else if (e.key === 'Backspace' && blocks[blockIdx].type === 'text' && (blocks[blockIdx] as { content: string }).content === '') {
+      // 空文字塊按 Backspace 刪除（但至少保留一個）
+      const textBlocks = blocks.filter(b => b.type === 'text')
+      if (textBlocks.length > 1 || blocks.length > 1) {
+        e.preventDefault()
+        const newBlocks = blocks.filter((_, i) => i !== blockIdx)
+        if (newBlocks.length === 0) newBlocks.push({ type: 'text', content: '' })
+        syncBlocks(newBlocks)
+      }
+    }
+  }, [blocks, idx, syncBlocks])
+
+  const handleRemoveBlock = React.useCallback((blockIdx: number) => {
+    const block = blocks[blockIdx]
+    if (block.type === 'attraction') {
+      removeAttraction(idx, block.id)
+    }
+    const newBlocks = blocks.filter((_, i) => i !== blockIdx)
+    if (newBlocks.length === 0) newBlocks.push({ type: 'text', content: '' })
+    syncBlocks(newBlocks)
+  }, [blocks, idx, removeAttraction, syncBlocks])
   return (
     <tbody>
       <tr className={`${idx % 2 === 1 ? 'bg-muted/5' : ''} group hover:bg-morandi-gold/5`}>
@@ -76,48 +156,66 @@ export function DayRow({
             <div className="text-[10px] text-muted-foreground">{getDateLabel(idx)}</div>
           )}
         </td>
-        {/* Route -- attraction drop zone */}
+        {/* Route -- block editor (text + attraction mixed) */}
         <td className="px-0 py-0 border border-border/20 align-middle">
           <DroppableZone id={`attraction-drop-${idx}`} acceptType="attraction">
-            {/* 景點卡片列（可拖曳排序 + 跨天拖曳）*/}
-            <div className="flex flex-wrap items-center gap-1 px-2 min-h-[32px]">
+            <div className="flex flex-wrap items-center gap-0.5 px-1.5 min-h-[32px]">
               <SortableContext
                 items={(day.attractions || []).map(a => a.id)}
                 strategy={horizontalListSortingStrategy}
               >
-                {(day.attractions || []).map((a, aIdx) => (
-                  <React.Fragment key={a.id}>
-                    {aIdx > 0 && <span className="text-muted-foreground text-xs select-none">→</span>}
-                    <SortableAttractionChip
-                      id={a.id}
-                      name={a.name}
-                      dayIndex={idx}
-                      verified={a.verified}
-                      onRemove={() => removeAttraction(idx, a.id)}
+                {blocks.map((block, bIdx) => {
+                  if (block.type === 'attraction') {
+                    return (
+                      <React.Fragment key={`a-${block.id}`}>
+                        <SortableAttractionChip
+                          id={block.id}
+                          name={block.name}
+                          dayIndex={idx}
+                          verified={block.verified}
+                          onRemove={() => handleRemoveBlock(bIdx)}
+                        />
+                      </React.Fragment>
+                    )
+                  }
+                  // text block
+                  return (
+                    <input
+                      key={`t-${bIdx}`}
+                      data-block-id={`block-${idx}-${bIdx}`}
+                      type="text"
+                      value={block.content}
+                      onChange={e => handleBlockTextChange(bIdx, e.target.value)}
+                      onKeyDown={e => handleBlockKeyDown(bIdx, e)}
+                      placeholder={
+                        blocks.length === 1 && !block.content
+                          ? isFirst
+                            ? COMP_TOURS_LABELS.抵達目的地
+                            : isLast
+                              ? COMP_TOURS_LABELS.返回台灣
+                              : COMP_TOURS_LABELS.今日行程標題
+                          : ''
+                      }
+                      className="h-8 text-sm border-0 shadow-none focus-visible:ring-1 focus-visible:ring-morandi-gold/30 rounded px-1.5 bg-transparent outline-none"
+                      style={{ width: Math.max(60, (block.content?.length || 0) * 14 + 30) }}
                     />
-                  </React.Fragment>
-                ))}
+                  )
+                })}
               </SortableContext>
-              {/* 手動輸入（沒有景點時顯示 placeholder，有景點時縮小） */}
+              {/* 最後的 mention input（用 @ 搜景點） */}
               <MentionInput
                 ref={el => { mentionInputRefs.current[idx] = el }}
-                value={day.route || ''}
-                onChange={val => updateDaySchedule(idx, 'route', val)}
-                onAttractionSelect={attraction => handleMentionSelect(idx, attraction)}
+                value=""
+                onChange={() => {}}
+                onAttractionSelect={attraction => {
+                  // 插入景點到 blocks 末尾（在最後一個文字塊後面）
+                  const newBlocks = [...blocks, { type: 'attraction' as const, id: attraction.id, name: attraction.name }]
+                  syncBlocks(newBlocks)
+                }}
                 countryName={tourLocation}
                 attractions={day.attractions}
-                placeholder={
-                  day.attractions && day.attractions.length > 0
-                    ? ''
-                    : isFirst
-                      ? COMP_TOURS_LABELS.抵達目的地
-                      : isLast
-                        ? COMP_TOURS_LABELS.返回台灣
-                        : COMP_TOURS_LABELS.今日行程標題
-                }
-                className={`text-sm border-0 shadow-none focus-visible:ring-0 rounded-none bg-transparent ${
-                  day.attractions && day.attractions.length > 0 ? 'h-8 w-24 px-2 flex-shrink' : 'h-8 w-full px-2'
-                }`}
+                placeholder={blocks.length <= 1 && !(blocks[0] as { content?: string })?.content ? '' : '+'}
+                className="h-8 w-8 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none bg-transparent px-1 flex-shrink-0"
               />
             </div>
           </DroppableZone>

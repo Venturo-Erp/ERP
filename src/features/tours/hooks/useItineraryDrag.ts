@@ -117,9 +117,12 @@ export function useItineraryDrag(
         if (!day) return prev
         const existing = day.attractions || []
         if (existing.some(a => a.id === resourceId)) return prev
-        const newAttractions = [...existing, { id: resourceId, name: resourceName, verified: dataVerified ?? true }]
-        // 不再 append 到 route 文字 — 景點以卡片顯示，route 留給手動備註
-        newSchedule[dayIndex] = { ...day, attractions: newAttractions }
+        const newAttraction = { id: resourceId, name: resourceName, verified: dataVerified ?? true }
+        const newAttractions = [...existing, newAttraction]
+        // 同時更新 blocks（混合模式）
+        const currentBlocks = day.blocks || []
+        const newBlocks = [...currentBlocks, { type: 'attraction' as const, ...newAttraction }]
+        newSchedule[dayIndex] = { ...day, attractions: newAttractions, blocks: newBlocks }
         return newSchedule
       })
     } else if (zoneType === 'hotel') {
