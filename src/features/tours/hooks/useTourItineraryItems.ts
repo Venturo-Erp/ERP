@@ -198,22 +198,19 @@ export function useSyncItineraryToCore() {
         if (fetch_error) throw fetch_error
 
         // 2. 分成「純行程項目」和「已有下游資料的項目」
+        // 只保護「已發委託」或「已確認」的項目，drafted 不算下游
         const items_with_downstream = (existing_items ?? []).filter(
           item =>
-            item.quote_status !== 'none' ||
             item.confirmation_status !== 'none' ||
             item.leader_status !== 'none' ||
-            item.request_id !== null ||
-            item.quote_item_id !== null
+            item.request_id !== null
         )
         const pure_itinerary_item_ids = (existing_items ?? [])
           .filter(
             item =>
-              item.quote_status === 'none' &&
               item.confirmation_status === 'none' &&
               item.leader_status === 'none' &&
-              item.request_id === null &&
-              item.quote_item_id === null
+              item.request_id === null
           )
           .map(item => item.id)
 

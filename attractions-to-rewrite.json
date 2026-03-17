@@ -1,0 +1,2413 @@
+{
+  "indonesia": [
+    {
+      "id": "40c00659-83f6-469b-9473-8664c79c11c7",
+      "name": "Capella Ubud",
+      "city": "bali",
+      "region": null,
+      "category": "住宿 / Accommodation",
+      "description": "Capella Ubud，印尼熱門景點。",
+      "description_length": 20,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "24小時服務"
+      }
+    },
+    {
+      "id": "a03a23a0-aa38-4fd8-b13d-e32ee4522618",
+      "name": "Waterbom水上樂園",
+      "city": "bali",
+      "region": null,
+      "category": "attraction",
+      "description": "Waterbom水上樂園，印尼熱門景點。",
+      "description_length": 20,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "ae9a205d-910d-4085-b0d7-288954a6c4d8",
+      "name": "京打馬尼火山",
+      "city": "bali",
+      "region": null,
+      "category": "nature",
+      "description": "京打馬尼火山，印尼熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "4df73d35-50f5-4b95-98ea-7a120af30611",
+      "name": "伊斯蒂克拉爾清真寺",
+      "city": "jakarta",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "伊斯蒂克拉爾清真寺，印尼佛教或印度教寺廟，展現爪哇建築藝術。",
+      "description_length": 30,
+      "ticket_price": "成人20,000-50,000印尼盾",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "427d7da5-ff98-44e2-a810-786c5b9ebe7e",
+      "name": "佩妮達島",
+      "city": "bali",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "佩妮達島，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "96e05b86-89c5-420c-ad04-040096890117",
+      "name": "佩尼達島",
+      "city": "bali",
+      "region": null,
+      "category": "island",
+      "description": "佩尼達島，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "a09b0f79-3630-46bd-8a47-c3592de93be2",
+      "name": "努沙杜瓦",
+      "city": "bali",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "努沙杜瓦，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "c0fa093c-ad6d-4f55-b641-522eb99cf980",
+      "name": "努沙杜瓦海灘",
+      "city": "bali",
+      "region": null,
+      "category": "beach",
+      "description": "努沙杜瓦海灘，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 24,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "d0c9b6f9-e744-4d9c-818f-89bcc58abbfe",
+      "name": "千島群島",
+      "city": "jakarta",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "千島群島，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "ec80dd6b-0342-4c9b-83a7-1765f471dbdf",
+      "name": "印尼國家博物館",
+      "city": "jakarta",
+      "region": null,
+      "category": "博物館 / Museum",
+      "description": "印尼國家博物館，印尼熱門景點。",
+      "description_length": 15,
+      "ticket_price": "成人50,000-100,000印尼盾",
+      "opening_hours": {
+        "closed": "週一",
+        "tue_sun": "08:00-16:00"
+      }
+    },
+    {
+      "id": "87b2f426-85a9-48cf-8000-9def43fa1498",
+      "name": "印尼炒飯",
+      "city": "bali",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "印尼炒飯，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "560249f8-ef47-466f-9878-35e73fe07d60",
+      "name": "吉利特拉旺安",
+      "city": "lombok",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "吉利特拉旺安，印尼熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "2125794e-7c82-4ed9-9c8b-a7a7866b26ac",
+      "name": "吉利群島",
+      "city": "lombok",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "吉利群島，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "cda75d56-ee84-463f-9aef-fd33e56efe61",
+      "name": "四季峇里烏布",
+      "city": "bali",
+      "region": null,
+      "category": null,
+      "description": "四季峇里烏布，印尼熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "05f7e213-6b50-4ab6-b01e-bbc36119883f",
+      "name": "四季峇里金巴蘭",
+      "city": "bali",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "四季峇里金巴蘭，印尼熱門景點。",
+      "description_length": 15,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "3334e51a-d73d-4f4e-aadc-d58f07090afe",
+      "name": "天空之門",
+      "city": "bali",
+      "region": null,
+      "category": "temple",
+      "description": "天空之門，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "5fd87f50-d7d3-4037-9161-00c6a0f5771a",
+      "name": "婆羅浮屠",
+      "city": "yogyakarta",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "婆羅浮屠，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "成人USD 25",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "f172b72a-e49c-456c-986f-93f00bff0983",
+      "name": "婆羅浮屠日出",
+      "city": "yogyakarta",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "婆羅浮屠日出，印尼熱門景點。",
+      "description_length": 14,
+      "ticket_price": "成人USD 25",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "ab30d39c-6544-419b-b576-ca19e470b36f",
+      "name": "安佐爾夢幻樂園",
+      "city": "jakarta",
+      "region": null,
+      "category": "主題樂園 / Theme Park",
+      "description": "安佐爾夢幻樂園，印尼熱門景點。",
+      "description_length": 15,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "8027f028-4f6a-44e6-826f-38af7a5b1712",
+      "name": "安縵吉沃",
+      "city": "bali",
+      "region": null,
+      "category": null,
+      "description": "安縵吉沃，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "0b586ca2-92fb-4fb7-b99e-076f428046b7",
+      "name": "安縵達里",
+      "city": "bali",
+      "region": null,
+      "category": "住宿 / Accommodation",
+      "description": "安縵達里，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "24小時服務"
+      }
+    },
+    {
+      "id": "a35377b3-5d61-4a0e-9517-cea6ab916bfc",
+      "name": "寶格麗峇里島",
+      "city": "bali",
+      "region": null,
+      "category": "住宿 / Accommodation",
+      "description": "寶格麗峇里島，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 24,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "29efdb27-c643-4ba8-ab44-e0e24dc7b392",
+      "name": "峇里島傳統舞蹈",
+      "city": "bali",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "峇里島傳統舞蹈，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 25,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "b91c876e-cc47-497f-b8f4-09e795b27b6b",
+      "name": "峇里島動物園",
+      "city": "bali",
+      "region": null,
+      "category": "attraction",
+      "description": "峇里島動物園，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 24,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "c871c353-79a3-41db-b479-00d6860f1baf",
+      "name": "峇里島野生動物園",
+      "city": "bali",
+      "region": null,
+      "category": "attraction",
+      "description": "峇里島野生動物園，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 26,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "40582d8f-125a-497f-803e-5e72d70afc3b",
+      "name": "巴杜爾火山",
+      "city": "bali",
+      "region": null,
+      "category": "nature",
+      "description": "巴杜爾火山，印尼熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "33ae53c4-6693-4f1e-af3b-1efc631cdfec",
+      "name": "庫塔海灘",
+      "city": "bali",
+      "region": null,
+      "category": "beach",
+      "description": "庫塔海灘，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 22,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "f91dd419-129e-4a5f-aa5a-919220c2b8ab",
+      "name": "庫塔龍目",
+      "city": "lombok",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "庫塔龍目，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "584a3e21-b7a7-4f2a-97c2-950799242f39",
+      "name": "德格拉朗梯田",
+      "city": "bali",
+      "region": null,
+      "category": "nature",
+      "description": "德格拉朗梯田，印尼熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "f917012e-8026-4fa6-a627-0e9d0c8494c4",
+      "name": "日惹蘇丹王宮",
+      "city": "yogyakarta",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "日惹蘇丹王宮，印尼熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "aedbc002-94b5-45f2-a7d5-e72a2a7c532b",
+      "name": "普蘭巴南",
+      "city": "yogyakarta",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "普蘭巴南，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "成人USD 25",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "56fd269c-b57c-4bdd-a870-963be515ca59",
+      "name": "林賈尼火山",
+      "city": "lombok",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "林賈尼火山，印尼熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "3877949a-87e1-44e2-8171-cf6076c60faa",
+      "name": "水之宮殿",
+      "city": "bali",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "水之宮殿，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "a39e7c47-8645-4503-8e52-e158c06e730f",
+      "name": "水宮",
+      "city": "bali",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "水宮，印尼熱門景點。",
+      "description_length": 10,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "e113178f-cd3f-4a80-812b-e480fb957018",
+      "name": "水明漾",
+      "city": "bali",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "水明漾，印尼熱門景點。",
+      "description_length": 11,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "0c0d45d4-5377-426e-83e3-10a021cb0c8b",
+      "name": "水明漾海灘",
+      "city": "bali",
+      "region": null,
+      "category": "beach",
+      "description": "水明漾海灘，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 23,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "99640e97-9ac6-4f9d-95da-03a371cb25e2",
+      "name": "法塔希拉廣場",
+      "city": "jakarta",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "法塔希拉廣場，印尼熱門景點。",
+      "description_length": 14,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "21cd6583-885a-4023-9237-755f8796e86e",
+      "name": "海神廟",
+      "city": "bali",
+      "region": null,
+      "category": "temple",
+      "description": "海神廟，印尼熱門景點。",
+      "description_length": 11,
+      "ticket_price": "成人20,000-50,000印尼盾",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "e8bcf34c-947d-4e11-8367-c1c82ec95485",
+      "name": "烏布SPA",
+      "city": "bali",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "烏布SPA，印尼熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "6a48f394-de44-4da4-a7ec-f8cb1a3dfe73",
+      "name": "烏布市場",
+      "city": "bali",
+      "region": null,
+      "category": "shopping",
+      "description": "烏布市場，印尼傳統市場，販售香料、手工藝品和美食。",
+      "description_length": 25,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "05:00-21:00"
+      }
+    },
+    {
+      "id": "d0b7f509-89e5-4def-a198-f8478ca2d2dd",
+      "name": "烏布猴林",
+      "city": "bali",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "烏布猴林，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "a330b2af-9456-4e0a-a75a-acc6f009b0df",
+      "name": "烏布皇宮",
+      "city": null,
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "烏布皇宮，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "29919dc1-8dba-4ad2-bfd3-428830206097",
+      "name": "烏布皇宮",
+      "city": "bali",
+      "region": null,
+      "category": "landmark",
+      "description": "烏布皇宮，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "c3f96128-7d5b-43a2-921d-a8a3b90d0b58",
+      "name": "烏布空中花園",
+      "city": "bali",
+      "region": null,
+      "category": "住宿 / Accommodation",
+      "description": "烏布空中花園，印尼熱門景點。",
+      "description_length": 14,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "24小時服務"
+      }
+    },
+    {
+      "id": "0cf97436-5850-45d1-88cd-c487ef11c285",
+      "name": "烏魯瓦圖廟",
+      "city": "bali",
+      "region": null,
+      "category": "temple",
+      "description": "烏魯瓦圖廟，印尼熱門景點。",
+      "description_length": 13,
+      "ticket_price": "成人20,000-50,000印尼盾",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "1709f54c-030b-4e05-8d5b-0939f17d967e",
+      "name": "烏魯瓦圖斷崖廟",
+      "city": "bali",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "烏魯瓦圖斷崖廟，印尼熱門景點。",
+      "description_length": 15,
+      "ticket_price": "成人20,000-50,000印尼盾",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "916aba98-e56b-486a-94ab-ba7068ab83b9",
+      "name": "烹飪課程",
+      "city": "bali",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "烹飪課程，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "95632ece-2464-4592-bf18-91344b267f79",
+      "name": "爪哇傳統蠟染",
+      "city": "yogyakarta",
+      "region": null,
+      "category": "體驗活動 / Activity",
+      "description": "爪哇傳統蠟染，印尼熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "3bffd2dc-caf6-4cf0-8d47-f6d2669263a9",
+      "name": "獨立紀念碑",
+      "city": "jakarta",
+      "region": null,
+      "category": "地標建築 / Landmark",
+      "description": "獨立紀念碑，印尼熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "f94040a7-7ded-447a-b533-73d01ac64466",
+      "name": "百沙基母廟",
+      "city": "bali",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "百沙基母廟，印尼熱門景點。",
+      "description_length": 13,
+      "ticket_price": "成人20,000-50,000印尼盾",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "67ed7be0-b775-473c-865d-8d664d2e5725",
+      "name": "皮影戲表演",
+      "city": "yogyakarta",
+      "region": null,
+      "category": "博物館 / Museum",
+      "description": "皮影戲表演，印尼熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "ac4ae302-0cb0-46d6-9c11-dee664cb1f59",
+      "name": "粉紅海灘",
+      "city": null,
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "粉紅海灘，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 22,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "7d4a1511-dcbe-4d0f-a4c7-1f0e47b35113",
+      "name": "聖泉寺",
+      "city": "bali",
+      "region": null,
+      "category": "temple",
+      "description": "聖泉寺，印尼佛教或印度教寺廟，展現爪哇建築藝術。",
+      "description_length": 24,
+      "ticket_price": "成人20,000-50,000印尼盾",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "144afc05-b4dc-42dd-a79c-6eb61d2f44f1",
+      "name": "聖猴森林",
+      "city": "bali",
+      "region": null,
+      "category": "nature",
+      "description": "聖猴森林，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "4bef4540-94a9-434c-a9e8-02169e2bcd62",
+      "name": "舊城區",
+      "city": "jakarta",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "舊城區，印尼熱門景點。",
+      "description_length": 11,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "6ecbe7c3-9fb3-447d-b379-2b40caf4b020",
+      "name": "薩薩克村",
+      "city": "lombok",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "薩薩克村，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "fbec6458-e917-45df-b842-785b38efb612",
+      "name": "藍夢島",
+      "city": "bali",
+      "region": null,
+      "category": "island",
+      "description": "藍夢島，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 21,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "d2d80092-ace4-48b6-a7de-45659e24e46a",
+      "name": "虹夕諾雅峇里",
+      "city": "bali",
+      "region": null,
+      "category": null,
+      "description": "虹夕諾雅峇里，印尼熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "a9938649-4b79-4440-8c8f-97823d242685",
+      "name": "象窟",
+      "city": "bali",
+      "region": null,
+      "category": "歷史古蹟",
+      "description": "象窟，印尼熱門景點。",
+      "description_length": 10,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "53a18b1e-345c-4369-81ce-8d6325bc2e46",
+      "name": "豬肋排",
+      "city": "bali",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "豬肋排，印尼熱門景點。",
+      "description_length": 11,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "ee58949c-5b39-4d2f-b578-b6b6a0e32dc3",
+      "name": "金巴蘭海灘",
+      "city": "bali",
+      "region": null,
+      "category": "beach",
+      "description": "金巴蘭海灘，印尼美麗海灘或島嶼，擁有熱帶風情。",
+      "description_length": 23,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "cf57e7dc-99d4-4c42-b802-12712a498593",
+      "name": "阿勇河泛舟",
+      "city": "bali",
+      "region": null,
+      "category": "activity",
+      "description": "阿勇河泛舟，印尼熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "50c49d57-3e5f-4d68-bb18-2763dad095bb",
+      "name": "阿貢火山",
+      "city": "bali",
+      "region": null,
+      "category": "自然風光",
+      "description": "阿貢火山，印尼熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "63f6dc3b-6841-40e9-a71a-2267f3019d51",
+      "name": "雅加達大教堂",
+      "city": "jakarta",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "雅加達大教堂，印尼熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    },
+    {
+      "id": "69634986-699c-48e0-bc01-28e963fdc9fe",
+      "name": "馬里奧波羅大街",
+      "city": "yogyakarta",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "馬里奧波羅大街，印尼熱門景點。",
+      "description_length": 15,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "cfa75751-06e8-48ff-bd8a-871841887117",
+      "name": "髒鴨飯",
+      "city": "bali",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "髒鴨飯，印尼熱門景點。",
+      "description_length": 11,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "9bc53758-838e-4815-ad1b-4c6ee2f79ea4",
+      "name": "默拉皮火山",
+      "city": "yogyakarta",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "默拉皮火山，印尼熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-17:00"
+      }
+    }
+  ],
+  "philippines": [
+    {
+      "id": "667da601-fc39-4cdf-abfa-ffddc5e9aa37",
+      "name": "Ayala Center Cebu",
+      "city": "bohol",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "Ayala Center Cebu，菲律賓熱門景點。",
+      "description_length": 26,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "6dfd3993-de19-483e-baa1-84aa5568dbf6",
+      "name": "AYALA購物廣場宿務",
+      "city": "bohol",
+      "region": null,
+      "category": "購物商圈 / Shopping",
+      "description": "AYALA購物廣場宿務，菲律賓熱門景點。",
+      "description_length": 20,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "4b561bbc-8795-401d-b4c9-b5d87f813033",
+      "name": "Crimson Boracay",
+      "city": "boracay",
+      "region": null,
+      "category": null,
+      "description": "Crimson Boracay，菲律賓熱門景點。",
+      "description_length": 24,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "7bc3cc66-88ad-4122-ae53-cc4ef5c34185",
+      "name": "D Mall",
+      "city": "boracay",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "D Mall，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "729edd5d-1413-4402-9943-2f9b47ecadec",
+      "name": "D'Mall",
+      "city": "boracay",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "D'Mall，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "40dc9eae-e1e0-4f8c-889e-834859411b36",
+      "name": "D'Mall購物區",
+      "city": "boracay",
+      "region": null,
+      "category": "shopping",
+      "description": "D'Mall購物區，菲律賓熱門景點。",
+      "description_length": 18,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "e38f234e-324d-49fb-9465-6e78b76d74bb",
+      "name": "Discovery Shores",
+      "city": "boracay",
+      "region": null,
+      "category": "住宿 / Accommodation",
+      "description": "Discovery Shores，菲律賓熱門景點。",
+      "description_length": 25,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "24小時服務"
+      }
+    },
+    {
+      "id": "b6d88344-302d-455f-ba91-715d2df14348",
+      "name": "Eskaya野奢度假村",
+      "city": "bohol",
+      "region": null,
+      "category": "住宿 / Accommodation",
+      "description": "Eskaya野奢度假村，菲律賓熱門景點。",
+      "description_length": 20,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "24小時服務"
+      }
+    },
+    {
+      "id": "50c95f58-c789-4826-8e14-0175ebb436fc",
+      "name": "Henann度假村",
+      "city": "bohol",
+      "region": null,
+      "category": "住宿 / Accommodation",
+      "description": "Henann度假村，菲律賓熱門景點。",
+      "description_length": 18,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "24小時服務"
+      }
+    },
+    {
+      "id": "b3fe27c8-88d7-4a25-bb60-18e10927ce4c",
+      "name": "IT Park",
+      "city": "bohol",
+      "region": null,
+      "category": "主題樂園 / Theme Park",
+      "description": "IT Park，菲律賓熱門景點。",
+      "description_length": 16,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "afd4da02-bde7-4401-9220-1a86313fe484",
+      "name": "Rico's Lechon",
+      "city": "bohol",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "Rico's Lechon，菲律賓熱門景點。",
+      "description_length": 22,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "48365a9a-a36c-49cd-9d18-e4d2cfcf5485",
+      "name": "SM Seaside City",
+      "city": "bohol",
+      "region": null,
+      "category": "購物商圈 / Shopping",
+      "description": "SM Seaside City，菲律賓熱門景點。",
+      "description_length": 24,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "8ac27cdf-11a2-4594-b891-c050fc1d086d",
+      "name": "SM亞洲商城",
+      "city": "manila",
+      "region": null,
+      "category": "shopping",
+      "description": "SM亞洲商城，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "89c3f59e-acfa-4dd2-ad87-6ae5aa9dc5d7",
+      "name": "The Lind",
+      "city": "boracay",
+      "region": null,
+      "category": null,
+      "description": "The Lind，菲律賓熱門景點。",
+      "description_length": 17,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "295ab77d-609a-4950-ac8d-9428bba3e24c",
+      "name": "Zubuchon",
+      "city": "bohol",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "Zubuchon，菲律賓熱門景點。",
+      "description_length": 17,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "56ec9258-2371-4c6a-b926-647755c2c71f",
+      "name": "七子島",
+      "city": "palawan",
+      "region": null,
+      "category": "海灘水上",
+      "description": "七子島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "26cdd06e-fb07-4a26-8832-9e3b799fc15e",
+      "name": "亞盧納海灘度假村",
+      "city": "bohol",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "亞盧納海灘度假村，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 27,
+      "ticket_price": "免費或50-100披索",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "c9f9adc2-b54f-43a0-96d5-d40a5a478f3f",
+      "name": "人造森林",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "人造森林，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "ca6899db-3f90-4975-9757-17e2722f765e",
+      "name": "克里姆森度假村",
+      "city": "bohol",
+      "region": null,
+      "category": "住宿 / Accommodation",
+      "description": "克里姆森度假村，菲律賓熱門景點。",
+      "description_length": 16,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "24小時服務"
+      }
+    },
+    {
+      "id": "1d8badb5-22ee-4a33-9f34-77c8e186cc91",
+      "name": "公主港地下河",
+      "city": "palawan",
+      "region": null,
+      "category": "自然風光",
+      "description": "公主港地下河，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "46a0b9df-c005-4fe4-b2ec-2eae6dc95ac7",
+      "name": "凱央根湖",
+      "city": "palawan",
+      "region": null,
+      "category": "自然景觀",
+      "description": "凱央根湖，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "05f2fcc4-d998-47dc-8ba6-79f44df9f38e",
+      "name": "卡瓦山瀑布",
+      "city": "bohol",
+      "region": null,
+      "category": "nature",
+      "description": "卡瓦山瀑布，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "8a7891ad-7bb4-4fb5-a9f6-4ebedb78c265",
+      "name": "嘉華山",
+      "city": null,
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "嘉華山，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "766e801a-d4de-43c3-8f2a-df99e6478c8a",
+      "name": "圖馬洛瀑布",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "圖馬洛瀑布，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "e520108e-8212-497d-adbf-cf0d2edea3fa",
+      "name": "大潟湖",
+      "city": "palawan",
+      "region": null,
+      "category": "自然景觀",
+      "description": "大潟湖，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "e3b730df-1b0d-4d5d-8250-38b1729dcddf",
+      "name": "奧斯洛布鯨鯊",
+      "city": "bohol",
+      "region": null,
+      "category": "activity",
+      "description": "奧斯洛布鯨鯊，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "03ae348e-8036-4cdd-afbf-3e73b6bc96a4",
+      "name": "奧斯洛布鯨鯊村",
+      "city": "bohol",
+      "region": null,
+      "category": "體驗活動 / Activity",
+      "description": "奧斯洛布鯨鯊村，菲律賓熱門景點。",
+      "description_length": 16,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "20e15374-e312-4cf2-84fe-2747c176f092",
+      "name": "安巴拉海灣度假村",
+      "city": "bohol",
+      "region": null,
+      "category": "住宿 / Accommodation",
+      "description": "安巴拉海灣度假村，菲律賓熱門景點。",
+      "description_length": 17,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "24小時服務"
+      }
+    },
+    {
+      "id": "faef09d0-0386-4743-abd9-a5f1ede5e5d6",
+      "name": "宿霧烤乳豬",
+      "city": "bohol",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "宿霧烤乳豬，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "cbfd238e-f949-4fae-8d43-2653796827ea",
+      "name": "宿霧鯨鯊",
+      "city": "bohol",
+      "region": null,
+      "category": "體驗活動",
+      "description": "宿霧鯨鯊，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "3cf111e6-19b1-4581-a8c5-39b48b546554",
+      "name": "小潟湖",
+      "city": "palawan",
+      "region": null,
+      "category": "自然景觀",
+      "description": "小潟湖，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "d4ba217b-c79f-46c3-8786-99afe2f91290",
+      "name": "川山瀑布",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "川山瀑布，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "391d9ee3-3d02-4d91-8f07-a277bbd4d50c",
+      "name": "巧克力山",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "位於薄荷島的《巧克力山》由1268座圓錐形山丘組成，每座高達120公尺。乾季時草地轉為棕色，遠看如同灑落大地的巧克力球，是菲律賓最獨特的地質奇觀。",
+      "description_length": 73,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "8c0ed3c6-7054-4c61-8918-e3b070f7395b",
+      "name": "巧克力山觀景台",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "巧克力山觀景台，菲律賓熱門景點。",
+      "description_length": 16,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "2e5f6157-ba63-43ff-a512-4bacc2b97f9d",
+      "name": "巴卡容教堂",
+      "city": "bohol",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "巴卡容教堂，菲律賓天主教堂，展現西班牙殖民時期建築特色。",
+      "description_length": 28,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "6beb3885-de60-4456-b6a8-a4a54d5aa569",
+      "name": "巴卡永教堂",
+      "city": "bohol",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "巴卡永教堂，菲律賓天主教堂，展現西班牙殖民時期建築特色。",
+      "description_length": 28,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "9e7929c2-562f-4dce-a0c0-dcfb57152b33",
+      "name": "巴拉庫達湖",
+      "city": "palawan",
+      "region": null,
+      "category": "自然景觀",
+      "description": "巴拉庫達湖，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "6bf8621e-3736-43e5-bcef-9949864a9bb2",
+      "name": "巴里卡薩島",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "巴里卡薩島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 24,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "511baf7e-a3cc-455d-b621-47397493dc0e",
+      "name": "希魯通岸礁",
+      "city": "bohol",
+      "region": null,
+      "category": "體驗活動 / Activity",
+      "description": "希魯通岸礁，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "e6188d81-a2be-4014-bff3-ceb836887132",
+      "name": "愛妮島",
+      "city": null,
+      "region": null,
+      "category": "自然風光",
+      "description": "愛妮島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "74318781-dc82-4a04-a05a-636cea128443",
+      "name": "星期五海灘",
+      "city": "boracay",
+      "region": null,
+      "category": "beach",
+      "description": "星期五海灘，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 24,
+      "ticket_price": "免費或50-100披索",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "91379d6d-6d03-4d88-98f4-d98aea354bca",
+      "name": "普卡海灘",
+      "city": "boracay",
+      "region": null,
+      "category": "beach",
+      "description": "普卡海灘，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 23,
+      "ticket_price": "免費或50-100披索",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "508c8507-2453-426c-9b51-7b21dc9bcc95",
+      "name": "本田灣",
+      "city": "palawan",
+      "region": null,
+      "category": "海灘水上",
+      "description": "本田灣，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "8e98f29f-6d52-438d-99b2-25ccf2334071",
+      "name": "水晶洞",
+      "city": "boracay",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "水晶洞，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "9ab3cf33-e7d6-4107-b685-cb5d7ba9b4ae",
+      "name": "沉船潛點",
+      "city": "palawan",
+      "region": null,
+      "category": "水上活動",
+      "description": "沉船潛點，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "289afb63-75d8-421a-8934-61348558c001",
+      "name": "漂流竹筏屋",
+      "city": "bohol",
+      "region": null,
+      "category": "體驗活動 / Activity",
+      "description": "漂流竹筏屋，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "369277ef-55f2-460b-804c-4ce387ca7120",
+      "name": "潘達農島",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "潘達農島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 23,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "325dc631-888c-4310-9cf4-17eb0f9db966",
+      "name": "王城區",
+      "city": "manila",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "王城區，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "0dcc95aa-9f78-4caf-b3a8-c68a1c5e0fef",
+      "name": "珊瑚花園",
+      "city": "palawan",
+      "region": null,
+      "category": "水上活動",
+      "description": "珊瑚花園，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "21d16adb-b62d-467d-b4a4-d93a8edf89f5",
+      "name": "班努爾島",
+      "city": "palawan",
+      "region": null,
+      "category": "海灘水上",
+      "description": "班努爾島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 23,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "573ba407-90b3-47e3-88b8-c064a5f87b25",
+      "name": "白沙灘",
+      "city": "boracay",
+      "region": null,
+      "category": "beach",
+      "description": "白沙灘，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "862b17f2-9a8c-4ce9-834f-ff2cdc078218",
+      "name": "盧霍山",
+      "city": "boracay",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "盧霍山，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "808d59d3-0fbb-470b-8afa-2d33845d7d51",
+      "name": "盧霍山觀景台",
+      "city": "boracay",
+      "region": null,
+      "category": "nature",
+      "description": "盧霍山觀景台，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "ec1c8b82-5e68-4634-a7ae-09564ae2d58e",
+      "name": "直升機島",
+      "city": "palawan",
+      "region": null,
+      "category": "海灘水上",
+      "description": "直升機島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 23,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "8cbe45f3-b63b-4eb7-9da7-23f0757f2a6a",
+      "name": "眼鏡猴",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "菲律賓特有種《眼鏡猴》體長僅10公分，卻擁有比身體還大的眼睛。在薄荷島保護區近距離觀察這些夜行性小精靈，牠們靈活轉動180度的頭部超級可愛。",
+      "description_length": 70,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "cd6e8a4b-445f-4235-a0ba-e98b0933a679",
+      "name": "眼鏡猴保護區",
+      "city": "bohol",
+      "region": null,
+      "category": null,
+      "description": "眼鏡猴保護區，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "446665bc-1bb8-4f61-a8a5-ac16946d4e60",
+      "name": "神秘海灘",
+      "city": "palawan",
+      "region": null,
+      "category": "海灘水上",
+      "description": "神秘海灘，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 23,
+      "ticket_price": "免費或50-100披索",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "b32bb80c-7b5e-4a0f-8407-ba54cda9ce05",
+      "name": "科隆島",
+      "city": null,
+      "region": null,
+      "category": "自然風光",
+      "description": "科隆島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "858320d9-09ea-4978-a43b-bdb97e889ed1",
+      "name": "科隆街",
+      "city": null,
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "科隆街，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "ca2bc4b1-044d-4df1-a20e-fa1caa4aa0cb",
+      "name": "米特拉牧場",
+      "city": "palawan",
+      "region": null,
+      "category": "自然景觀",
+      "description": "米特拉牧場，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "3f40d174-1c4f-42bb-a5e0-72a1babb5ad7",
+      "name": "納克潘海灘",
+      "city": "palawan",
+      "region": null,
+      "category": "海灘水上",
+      "description": "納克潘海灘，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 24,
+      "ticket_price": "免費或50-100披索",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "715b416e-275a-45ee-9050-ba4067a349f4",
+      "name": "納魯蘇安島",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "納魯蘇安島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 24,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "695f7b67-d36b-4aec-8e30-72ece9b6589d",
+      "name": "羅伯克河遊船",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "羅伯克河遊船，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "a33f0b43-021d-4484-8d02-27d382589ba2",
+      "name": "羅博河",
+      "city": "bohol",
+      "region": null,
+      "category": "體驗活動 / Activity",
+      "description": "乘坐傳統竹筏順著《羅博河》緩緩前行，兩岸熱帶雨林美景盡收眼底。船上提供菲律賓自助午餐，還有現場樂團演奏，在悠閒氛圍中享受2小時的河上時光。",
+      "description_length": 69,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "74007ef9-eee4-46db-afcd-2396d3aa8b43",
+      "name": "羅博河遊船",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "羅博河遊船，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "b8e45752-ee4e-4ffd-8547-6461d5e1a291",
+      "name": "聖佩德羅堡",
+      "city": "bohol",
+      "region": null,
+      "category": "landmark",
+      "description": "聖佩德羅堡，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "d56b5b19-26c9-4a3b-b523-9adb2e3ad8c3",
+      "name": "聖奧古斯丁教堂",
+      "city": "manila",
+      "region": null,
+      "category": "temple",
+      "description": "聖奧古斯丁教堂，菲律賓天主教堂，展現西班牙殖民時期建築特色。",
+      "description_length": 30,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "66c1d8ea-7e7c-4dfb-950c-19e2f17c5ac1",
+      "name": "聖嬰大教堂",
+      "city": "bohol",
+      "region": null,
+      "category": "宗教聖地",
+      "description": "聖嬰大教堂，菲律賓天主教堂，展現西班牙殖民時期建築特色。",
+      "description_length": 28,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "70464fb1-d479-4718-b5db-07e595aefddc",
+      "name": "聖嬰教堂",
+      "city": "bohol",
+      "region": null,
+      "category": "temple",
+      "description": "聖嬰教堂，菲律賓天主教堂，展現西班牙殖民時期建築特色。",
+      "description_length": 27,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "2e0f0add-cd27-4738-b00b-c5f44b13511b",
+      "name": "聖彼得堡",
+      "city": "bohol",
+      "region": null,
+      "category": null,
+      "description": "聖彼得堡，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "1bab40f9-8f12-4d3e-b58e-01cc2a17ab04",
+      "name": "與鯨鯊共游",
+      "city": "bohol",
+      "region": null,
+      "category": "體驗活動 / Activity",
+      "description": "來到歐斯陸（Oslob）與世界最大魚類鯨鯊近距離接觸。這些溫馴的巨型生物長達10公尺，在清澈海水中與牠們共游，感受震撼又安全的海洋奇遇。",
+      "description_length": 68,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "44bf31d7-5531-48e8-a408-30972be374ce",
+      "name": "芒果乾",
+      "city": "bohol",
+      "region": null,
+      "category": "購物商圈 / Shopping",
+      "description": "芒果乾，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "8a97ae94-377a-421c-89ca-ce69616110aa",
+      "name": "莫凡彼度假村",
+      "city": "bohol",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "莫凡彼度假村，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "b19e5b00-0c16-45f5-8262-aa104f733c86",
+      "name": "落日風帆",
+      "city": "boracay",
+      "region": null,
+      "category": "activity",
+      "description": "落日風帆，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "6cd086a9-806c-45f5-ad6b-f9df23b65c68",
+      "name": "薄荷島一日遊",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "薄荷島一日遊，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 25,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "c2494ec6-99a9-4ee3-be03-c88281d8700b",
+      "name": "薄荷島巧克力山",
+      "city": "bohol",
+      "region": null,
+      "category": "nature",
+      "description": "薄荷島巧克力山，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 26,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "414a8b14-d53c-40bd-bc72-137729ae3318",
+      "name": "薄荷島眼鏡猴",
+      "city": "bohol",
+      "region": null,
+      "category": "nature",
+      "description": "薄荷島眼鏡猴，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 25,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "54708f8f-0135-427c-9a9e-605ce471eda7",
+      "name": "薄荷島羅博河遊船",
+      "city": "bohol",
+      "region": null,
+      "category": "activity",
+      "description": "薄荷島羅博河遊船，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 27,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "f98367d9-6842-4a00-bba0-5e5dc19dc82e",
+      "name": "藍色大教堂",
+      "city": "palawan",
+      "region": null,
+      "category": "宗教聖地",
+      "description": "藍色大教堂，菲律賓天主教堂，展現西班牙殖民時期建築特色。",
+      "description_length": 28,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "7a0b5509-5c0f-400f-8bec-2eadb7404b19",
+      "name": "蘇米龍島",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "蘇米龍島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 23,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "80330287-4877-4387-b1aa-e2b0b3eb31fe",
+      "name": "處女島",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "處女島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "066df83f-005a-48f7-acda-fa97e47f350f",
+      "name": "蛇島沙洲",
+      "city": "palawan",
+      "region": null,
+      "category": "自然景觀",
+      "description": "蛇島沙洲，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 23,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "e6281b0e-1f47-4d60-b91d-066ce921453d",
+      "name": "蜜蜂農場",
+      "city": "bohol",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "蜜蜂農場，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "8fe64b16-23a0-4cca-8d55-469767b94eb7",
+      "name": "血盟紀念碑",
+      "city": "bohol",
+      "region": null,
+      "category": "地標建築 / Landmark",
+      "description": "血盟紀念碑，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "8987c4b5-5a22-4dde-ba4f-c93882702f46",
+      "name": "西堤區",
+      "city": "boracay",
+      "region": null,
+      "category": "歷史古蹟",
+      "description": "西堤區，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "9ec46f77-2c63-49a6-a463-195c57817b20",
+      "name": "西班牙王城",
+      "city": "manila",
+      "region": null,
+      "category": "landmark",
+      "description": "西班牙王城，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "1e837a41-e4d1-4323-80a4-aec8781855c4",
+      "name": "貝克海灘",
+      "city": "palawan",
+      "region": null,
+      "category": "海灘水上",
+      "description": "貝克海灘，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 23,
+      "ticket_price": "免費或50-100披索",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "5ba6bc31-1661-47d0-ae1e-c0f1386ab39d",
+      "name": "貝殼博物館",
+      "city": null,
+      "region": null,
+      "category": "博物館 / Museum",
+      "description": "貝殼博物館，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "成人100-200披索",
+      "opening_hours": {
+        "closed": "週一",
+        "tue_sun": "09:00-18:00"
+      }
+    },
+    {
+      "id": "a261255d-1f42-4729-9efd-c0a4e0bda7b6",
+      "name": "資生堂島跳島",
+      "city": "bohol",
+      "region": null,
+      "category": "體驗活動",
+      "description": "《資生堂島跳島》宿霧經典行程，螃蟹船穿梭娜魯蘇安島、希爾圖加島、帕格蘭島。浮潛看海龜珊瑚、沙洲淺灘踏浪、BBQ午餐椰子樹下，菲律賓碧海藍天度假體驗。",
+      "description_length": 74,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "527bc01e-93ba-4846-8894-b2e8d0264a32",
+      "name": "跳島遊",
+      "city": "boracay",
+      "region": null,
+      "category": "activity",
+      "description": "跳島遊，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "7810f7a1-249e-4d74-a4ee-26e6b071b846",
+      "name": "道教廟",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "道教廟，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "593a70ea-fc52-460d-9d79-dee2fb8d66ce",
+      "name": "邦勞島",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "邦勞島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "b363d4c3-bef5-4150-b053-53266e940c95",
+      "name": "邦勞島白沙灘",
+      "city": "boracay",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "《邦勞島白沙灘》薄荷島南端離島，阿羅娜海灘度假村林立、巴里卡薩島浮潛看海龜珊瑚、處女島沙洲退潮顯現。世界級潛水點巴里卡薩大斷層、海豚追逐、螃蟹船跳島一日遊。",
+      "description_length": 78,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "c7287bda-c2f8-42e1-a4bf-f57dfd74c8d8",
+      "name": "邦勞島跳島遊",
+      "city": "bohol",
+      "region": null,
+      "category": "activity",
+      "description": "邦勞島跳島遊，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 25,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "c609c0cc-48b7-4c98-83ea-7f963448ef04",
+      "name": "邦勞島阿羅娜海灘",
+      "city": "bohol",
+      "region": null,
+      "category": "beach",
+      "description": "邦勞島阿羅娜海灘，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 27,
+      "ticket_price": "免費或50-100披索",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "c87f5c74-2c14-4586-a8c0-6454f4532625",
+      "name": "長灘島日落帆船",
+      "city": "boracay",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "長灘島日落帆船，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 26,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "05c5e70c-34e7-45e0-a0e4-ee7aa5268ccd",
+      "name": "長灘島白沙灘",
+      "city": "boracay",
+      "region": null,
+      "category": "自然風光",
+      "description": "長灘島白沙灘，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 25,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "09a2cf18-4f48-467c-a799-67436c007ef8",
+      "name": "阿羅娜海灘",
+      "city": "bohol",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "阿羅娜海灘，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 24,
+      "ticket_price": "免費或50-100披索",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "3f7fca3a-6b64-4fb7-aefa-855b041aeaaf",
+      "name": "阿里兒海灘",
+      "city": "boracay",
+      "region": null,
+      "category": "activity",
+      "description": "阿里兒海灘，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 24,
+      "ticket_price": "免費或50-100披索",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "6e8aa401-aac7-43e0-995f-c54b331ce4cd",
+      "name": "阿里爾角",
+      "city": "boracay",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "阿里爾角，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "10:00-22:00"
+      }
+    },
+    {
+      "id": "59676482-fa44-427e-a9f1-941bd869c075",
+      "name": "雙子星度假村",
+      "city": "bohol",
+      "region": null,
+      "category": "住宿 / Accommodation",
+      "description": "雙子星度假村，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "24小時服務"
+      }
+    },
+    {
+      "id": "f4ff1ee1-3422-494c-b468-18617b1e8f74",
+      "name": "雙子潟湖",
+      "city": "palawan",
+      "region": null,
+      "category": "自然景觀",
+      "description": "雙子潟湖，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "1c50e325-81e2-4634-b3ad-37e443eb2ebf",
+      "name": "風帆日落",
+      "city": null,
+      "region": null,
+      "category": "體驗活動 / Activity",
+      "description": "乘坐傳統《Paraw風帆船》出海，在橘紅色夕陽下緩緩航行。360度無遮蔽海景配上海風輕拂，是長灘島最浪漫的活動，每年吸引數十萬遊客體驗。",
+      "description_length": 68,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "66bf6b24-1bca-488c-b7a3-b4809cf28f30",
+      "name": "風帆體驗",
+      "city": "boracay",
+      "region": null,
+      "category": "體驗活動 / Activity",
+      "description": "《風帆體驗》長灘島經典活動，傳統螃蟹船Paraw改裝風帆船優雅破浪。夕陽時分出海天空漸層色彩、海風吹拂浪漫滿分、船夫唱歌助興，蜜月情侶必體驗項目。",
+      "description_length": 73,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "14a1bc86-32ae-413f-b7da-8b252c3641e8",
+      "name": "飛魚體驗",
+      "city": "boracay",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "飛魚體驗，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "d1880130-2587-4dcf-a526-58b11de5011f",
+      "name": "香格里拉長灘島",
+      "city": "boracay",
+      "region": null,
+      "category": "餐廳 / Restaurant",
+      "description": "香格里拉長灘島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 26,
+      "ticket_price": "依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "2e07f43c-2571-4ab2-a2ea-3f130e357a2e",
+      "name": "香格里拉麥丹島",
+      "city": null,
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "香格里拉麥丹島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 26,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "4bb11bcd-2378-4d40-9f8e-41f6682a155e",
+      "name": "香蕉船",
+      "city": null,
+      "region": null,
+      "category": null,
+      "description": "香蕉船，菲律賓熱門景點。",
+      "description_length": 12,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "89f45212-b8b6-4100-b6cc-c04380811a33",
+      "name": "馬克坦神社",
+      "city": "bohol",
+      "region": null,
+      "category": "歷史古蹟 / Historical",
+      "description": "馬克坦神社，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "41fcd771-575b-46c9-b294-3e5ce28d5bd8",
+      "name": "馬奎特溫泉",
+      "city": "palawan",
+      "region": null,
+      "category": "溫泉",
+      "description": "馬奎特溫泉，菲律賓熱門景點。",
+      "description_length": 14,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "53274d42-7b91-4efb-8f31-7d34aaaae1ba",
+      "name": "馬尼拉大教堂",
+      "city": "manila",
+      "region": null,
+      "category": "宗教聖地",
+      "description": "馬尼拉大教堂，菲律賓天主教堂，展現西班牙殖民時期建築特色。",
+      "description_length": 29,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "06:00-18:00"
+      }
+    },
+    {
+      "id": "ec5329c3-603f-4efd-a74d-012a43e9aaa8",
+      "name": "馬尼拉海洋公園",
+      "city": "manila",
+      "region": null,
+      "category": "attraction",
+      "description": "馬尼拉海洋公園，菲律賓熱門景點。",
+      "description_length": 16,
+      "ticket_price": "免費",
+      "opening_hours": {
+        "daily": "06:00-22:00"
+      }
+    },
+    {
+      "id": "4285b4ee-1cef-4bc3-8c0b-7075a558315a",
+      "name": "魔術島",
+      "city": "bohol",
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "魔術島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "0cbe097c-e647-4fc3-a072-cad72c922e26",
+      "name": "鯨鯊共游體驗",
+      "city": "bohol",
+      "region": null,
+      "category": "體驗活動 / Activity",
+      "description": "鯨鯊共游體驗，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "677f064d-e2e3-4840-99ca-6eef787f7986",
+      "name": "鱷魚島",
+      "city": null,
+      "region": null,
+      "category": "自然風光 / Nature",
+      "description": "鱷魚島，菲律賓美麗海灘，擁有白沙和清澈海水。",
+      "description_length": 22,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "全天開放"
+      }
+    },
+    {
+      "id": "6194193a-9792-4ef3-8ff1-4a085f5ca9b8",
+      "name": "鱷魚農場",
+      "city": "palawan",
+      "region": null,
+      "category": "動物園區",
+      "description": "鱷魚農場，菲律賓熱門景點。",
+      "description_length": 13,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "56e54aff-cc7e-402a-974b-ac0a6e6aed7e",
+      "name": "麥哲倫十字架",
+      "city": "bohol",
+      "region": null,
+      "category": "landmark",
+      "description": "麥哲倫十字架，菲律賓熱門景點。",
+      "description_length": 15,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    },
+    {
+      "id": "a7a7995e-2b9f-42b6-88d2-40a49a58297d",
+      "name": "墨寶沙丁魚風暴",
+      "city": "bohol",
+      "region": null,
+      "category": "activity",
+      "description": "墨寶沙丁魚風暴，菲律賓熱門景點。",
+      "description_length": 16,
+      "ticket_price": "免費或依業者而異",
+      "opening_hours": {
+        "daily": "08:00-18:00"
+      }
+    }
+  ]
+}
