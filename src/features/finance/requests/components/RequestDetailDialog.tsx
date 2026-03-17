@@ -114,7 +114,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
       setEditingItemId(null)
       setIsAddingItem(false)
       setNewItem({
-        category: REQUEST_TYPE_LABELS.CAT_OTHER as PaymentItemCategory,
+        category: '' as PaymentItemCategory,
         supplier_id: '',
         supplier_name: '',
         description: '',
@@ -229,7 +229,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
 
       setIsAddingItem(false)
       setNewItem({
-        category: REQUEST_TYPE_LABELS.CAT_OTHER as PaymentItemCategory,
+        category: '' as PaymentItemCategory,
         supplier_id: '',
         supplier_name: '',
         description: '',
@@ -491,7 +491,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
                   >
                     <div>
                       <Select
-                        value={newItem.category}
+                        value={newItem.category || undefined}
                         onValueChange={value =>
                           setNewItem({
                             ...newItem,
@@ -500,7 +500,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
                         }
                       >
                         <SelectTrigger className="h-8 text-xs border-0 shadow-none bg-transparent">
-                          <SelectValue />
+                          <SelectValue placeholder="類別" />
                         </SelectTrigger>
                         <SelectContent>
                           {categoryOptions.map(opt => (
