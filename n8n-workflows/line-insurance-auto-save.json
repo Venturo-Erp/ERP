@@ -1,0 +1,275 @@
+{
+  "name": "LINE 保險 PDF 自動存檔",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "line-insurance-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-1",
+      "name": "Webhook (LINE)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.events[0].source.type}}",
+              "value2": "group"
+            },
+            {
+              "value1": "={{$json.events[0].source.groupId}}",
+              "value2": "C03f53517dc822913b394411981a100bf"
+            },
+            {
+              "value1": "={{$json.events[0].message.type}}",
+              "value2": "file"
+            },
+            {
+              "value1": "={{$json.events[0].message.fileName}}",
+              "operation": "contains",
+              "value2": ".pdf"
+            }
+          ]
+        }
+      },
+      "id": "if-1",
+      "name": "判斷：保險群組 + PDF",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// 從檔名解析團號\nconst fileName = $json.events[0].message.fileName;\nconst match = fileName.match(/^([A-Z]{2}\\d{6}[A-Z])/); // TW260321A 格式\n\nif (!match) {\n  throw new Error('無法從檔名解析團號：' + fileName);\n}\n\nconst tourCode = match[1];\n\nreturn {\n  tourCode,\n  fileName,\n  messageId: $json.events[0].message.id\n};"
+      },
+      "id": "code-1",
+      "name": "解析團號",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [650, 250]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id FROM tours WHERE code = '{{$json.tourCode}}' LIMIT 1"
+      },
+      "id": "postgres-1",
+      "name": "查詢 tour_id",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [850, 250],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-corner",
+          "name": "Supabase Corner"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api-data.line.me/v2/bot/message/={{$node['解析團號'].json.messageId}}/content",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "http-1",
+      "name": "下載 PDF (LINE API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1050, 250],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "line-bot-token",
+          "name": "LINE Bot Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upload",
+        "bucketName": "documents",
+        "fileName": "={{$node['解析團號'].json.fileName}}",
+        "options": {
+          "destinationPath": "tour-documents/{{$node['解析團號'].json.tourCode}}/"
+        }
+      },
+      "id": "supabase-storage-1",
+      "name": "上傳 Supabase Storage",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1250, 250],
+      "credentials": {
+        "supabaseApi": {
+          "id": "supabase-corner-api",
+          "name": "Supabase Corner API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO files (workspace_id, tour_id, category, filename, file_path, content_type, file_size, created_by)\nVALUES (\n  (SELECT workspace_id FROM tours WHERE id = '{{$node['查詢 tour_id'].json.id}}'),\n  '{{$node['查詢 tour_id'].json.id}}',\n  'insurance',\n  '{{$node['解析團號'].json.fileName}}',\n  'tour-documents/{{$node['解析團號'].json.tourCode}}/{{$node['解析團號'].json.fileName}}',\n  'application/pdf',\n  {{$node['下載 PDF (LINE API)'].binary.data.fileSize}},\n  'system'\n)"
+      },
+      "id": "postgres-2",
+      "name": "建立 files 記錄",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 1,
+      "position": [1450, 250],
+      "credentials": {
+        "postgres": {
+          "id": "supabase-corner",
+          "name": "Supabase Corner"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "8559214126",
+        "text": "✅ 保險 PDF 已自動存檔\\n\\n團號：{{$node['解析團號'].json.tourCode}}\\n檔案：{{$node['解析團號'].json.fileName}}\\n位置：檔案 > 🛡️ 保險"
+      },
+      "id": "telegram-1",
+      "name": "Telegram 通知",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [1650, 250],
+      "credentials": {
+        "telegramApi": {
+          "id": "william-bot",
+          "name": "William Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={ \"ok\": true }"
+      },
+      "id": "respond-1",
+      "name": "回覆 200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1850, 250]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={ \"ok\": true, \"skipped\": true }"
+      },
+      "id": "respond-2",
+      "name": "略過（非保險 PDF）",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [650, 400]
+    }
+  ],
+  "connections": {
+    "Webhook (LINE)": {
+      "main": [
+        [
+          {
+            "node": "判斷：保險群組 + PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "判斷：保險群組 + PDF": {
+      "main": [
+        [
+          {
+            "node": "解析團號",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "略過（非保險 PDF）",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析團號": {
+      "main": [
+        [
+          {
+            "node": "查詢 tour_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "查詢 tour_id": {
+      "main": [
+        [
+          {
+            "node": "下載 PDF (LINE API)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "下載 PDF (LINE API)": {
+      "main": [
+        [
+          {
+            "node": "上傳 Supabase Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "上傳 Supabase Storage": {
+      "main": [
+        [
+          {
+            "node": "建立 files 記錄",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "建立 files 記錄": {
+      "main": [
+        [
+          {
+            "node": "Telegram 通知",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram 通知": {
+      "main": [
+        [
+          {
+            "node": "回覆 200 OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}

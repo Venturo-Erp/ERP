@@ -1,711 +1,427 @@
 'use client'
 
 /**
- * TourFilesManager - 團檔案的 Finder 風格介面
+ * TourFilesManager - 團檔案管理介面
  *
- * 整合 FinderView 與團資料，支援：
- * - 巢狀資料夾結構
- * - DB 驅動的虛擬資料夾（報價單、確認單等）
- * - 實體檔案上傳
- * - 拖曳移動
+ * 設計：
+ * - 左側：資料夾列表（簡潔樹狀）
+ * - 右側：檔案列表 + 上傳按鈕
+ * - Morandi 色彩設計
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase/client'
-import { createFolder, updateFolder, deleteFolder } from '@/data/entities/folders'
-import { createFile, updateFile, deleteFile } from '@/data/entities/files'
-import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
-import { FinderView, type FinderItem } from '@/features/files/components'
 import { useRouter } from 'next/navigation'
-import type { Folder, VenturoFile } from '@/types/file-system.types'
+import { Upload, File as FileIcon, Download, Trash2, Eye } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { FileUploader } from '@/features/tour-documents/components/FileUploader'
+import { FILE_FOLDERS, type FileCategory, type DbType, type FolderConfig } from '../constants/file-categories'
 import { COMP_TOURS_LABELS } from '../constants/labels'
+import { cn } from '@/lib/utils'
 
 interface TourFilesManagerProps {
   tourId: string
   tourCode: string
-  /** 團關聯的報價單 ID（1:1） */
-  quoteId?: string | null
-  /** 團關聯的行程表 ID（1:1） */
-  itineraryId?: string | null
 }
 
-// 檔案分類類型（對應 DB enum）
-type FileCategory =
-  | 'quote'
-  | 'itinerary'
-  | 'confirmation'
-  | 'request'
-  | 'passport'
-  | 'visa'
-  | 'ticket'
-  | 'voucher'
-  | 'insurance'
-  | 'other'
-  | 'contract'
-  | 'invoice'
-  | 'photo'
-  | 'email_attachment'
-  | 'cancellation'
-type DbType = 'quote' | 'quick_quote' | 'itinerary' | 'confirmation' | 'request'
-
-interface TourFolder {
+interface FileItem {
+  id: string
   name: string
-  category: FileCategory | 'quick_quote' // quick_quote 是虛擬分類，不存在於 DB
-  icon: string
+  size?: number
+  mimeType?: string
+  createdAt: string
+  url?: string
   dbType?: DbType
+  dbId?: string
 }
 
-// 預設的團資料夾結構
-const DEFAULT_TOUR_FOLDERS: TourFolder[] = [
-  { name: COMP_TOURS_LABELS.團體報價單, category: 'quote', icon: '📋', dbType: 'quote' },
-  { name: COMP_TOURS_LABELS.快速報價, category: 'quick_quote', icon: '💰', dbType: 'quick_quote' },
-  { name: COMP_TOURS_LABELS.行程表, category: 'itinerary', icon: '🗺️', dbType: 'itinerary' },
-  { name: COMP_TOURS_LABELS.確認單, category: 'confirmation', icon: '✅', dbType: 'confirmation' },
-  { name: COMP_TOURS_LABELS.合約, category: 'contract', icon: '📝' },
-  { name: COMP_TOURS_LABELS.需求單, category: 'request', icon: '📨', dbType: 'request' },
-  { name: COMP_TOURS_LABELS.護照, category: 'passport', icon: '🛂' },
-  { name: COMP_TOURS_LABELS.簽證, category: 'visa', icon: '📄' },
-  { name: COMP_TOURS_LABELS.機票, category: 'ticket', icon: '✈️' },
-  { name: COMP_TOURS_LABELS.住宿憑證, category: 'voucher', icon: '🏨' },
-  { name: COMP_TOURS_LABELS.保險, category: 'insurance', icon: '🛡️' },
-  { name: COMP_TOURS_LABELS.其他, category: 'other', icon: '📁' },
-]
+interface FolderWithCount extends FolderConfig {
+  count: number
+}
 
-export function TourFilesManager({
-  tourId,
-  tourCode,
-  quoteId,
-  itineraryId,
-}: TourFilesManagerProps) {
+export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
   const router = useRouter()
-  const { user } = useAuthStore()
-  const workspaceId = user?.workspace_id
-
-  const [items, setItems] = useState<FinderItem[]>([])
-  const [currentPath, setCurrentPath] = useState<FinderItem[]>([])
+  const [folders, setFolders] = useState<FolderWithCount[]>([])
+  const [selectedFolder, setSelectedFolder] = useState<FolderWithCount | null>(null)
+  const [files, setFiles] = useState<FileItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [filesLoading, setFilesLoading] = useState(false)
+  const [showUploader, setShowUploader] = useState(false)
 
-  // 當前資料夾 ID（null = 根目錄）
-  const currentFolderId = currentPath.length > 0 ? currentPath[currentPath.length - 1].id : null
+  // 載入資料夾列表（含數量）
+  const loadFolders = useCallback(async () => {
+    setLoading(true)
+    try {
+      const foldersWithCount: FolderWithCount[] = []
 
-  // 載入資料夾內容
-  const loadFolderContent = useCallback(
-    async (folderId: string | null) => {
-      setLoading(true)
-      const newItems: FinderItem[] = []
+      for (const folder of FILE_FOLDERS) {
+        let count = 0
 
-      try {
-        if (folderId === null) {
-          // 根目錄：顯示預設資料夾 + 自訂資料夾
-          for (const folder of DEFAULT_TOUR_FOLDERS) {
-            let count = 0
-
-            // 計算數量
-            if (folder.dbType) {
-              // DB 驅動的資料夾
-              if (folder.dbType === 'quote') {
-                // 團體報價單：用 tour_id 查詢（排除快速報價）
-                const { count: c } = await supabase
-                  .from('quotes')
-                  .select('id', { count: 'exact', head: true })
-                  .eq('tour_id', tourId)
-                  .or('quote_type.is.null,quote_type.eq.standard')
-                count = c || 0
-              } else if (folder.dbType === 'quick_quote') {
-                // 快速報價：1:N，用 quotes.tour_id + quote_type 查
-                const { count: c } = await supabase
-                  .from('quotes')
-                  .select('id', { count: 'exact', head: true })
-                  .eq('tour_id', tourId)
-                  .eq('quote_type', 'quick')
-                count = c || 0
-              } else if (folder.dbType === 'itinerary') {
-                // 行程表：用 tour_id 查詢
-                const { count: c } = await supabase
-                  .from('itineraries')
-                  .select('id', { count: 'exact', head: true })
-                  .eq('tour_id', tourId)
-                count = c || 0
-              } else {
-                // 其他（1:N）：用 tour_id 查
-                const table =
-                  folder.dbType === 'confirmation' ? 'tour_confirmation_sheets' : 'tour_requests'
-
-                const { count: c } = await supabase
-                  .from(table)
-                  .select('id', { count: 'exact', head: true })
-                  .eq('tour_id', tourId)
-                count = c || 0
-              }
-            } else {
-              // 檔案資料夾（這裡的 folder.category 一定是有效的 FileCategory）
-              const { count: c } = await supabase
-                .from('files')
-                .select('id', { count: 'exact', head: true })
-                .eq('tour_id', tourId)
-                .eq('category', folder.category as FileCategory)
-              count = c || 0
-            }
-
-            newItems.push({
-              id: `folder-${folder.category}`,
-              name: folder.name,
-              type: 'folder',
-              icon: folder.icon,
-              parentId: null,
-              createdAt: new Date().toISOString(),
-              childCount: count,
-              dbType: folder.dbType,
-            })
-          }
-
-          // 載入自訂子資料夾
-          const { data: customFolders } = await supabase
-            .from('folders')
-            .select('*')
+        if (folder.dbType === 'quote') {
+          const { count: c } = await supabase
+            .from('quotes')
+            .select('id', { count: 'exact', head: true })
             .eq('tour_id', tourId)
-            .is('parent_id', null)
-            .order('sort_order')
-            .limit(500)
-
-          if (customFolders) {
-            for (const folder of customFolders) {
-              newItems.push({
-                id: folder.id,
-                name: folder.name,
-                type: 'folder',
-                icon: folder.icon || '📁',
-                color: folder.color || undefined,
-                parentId: null,
-                createdAt: folder.created_at,
-              })
-            }
-          }
-        } else if (folderId.startsWith('folder-')) {
-          // 預設資料夾內容
-          const category = folderId.replace('folder-', '')
-          const folderConfig = DEFAULT_TOUR_FOLDERS.find(f => f.category === category)
-
-          if (folderConfig?.dbType) {
-            // DB 驅動的資料夾
-            await loadDbFolderContent(folderConfig.dbType, newItems)
-          } else {
-            // 檔案資料夾
-            const { data: files } = await supabase
-              .from('files')
-              .select('*')
-              .eq('tour_id', tourId)
-              .eq('category', category as FileCategory)
-              .order('created_at', { ascending: false })
-              .limit(500)
-
-            if (files) {
-              for (const file of files) {
-                newItems.push({
-                  id: file.id,
-                  name: file.original_filename || file.filename,
-                  type: 'file',
-                  parentId: folderId,
-                  createdAt: file.created_at,
-                  size: file.size_bytes || undefined,
-                  mimeType: file.content_type || undefined,
-                  extension: file.extension || undefined,
-                })
-              }
-            }
-          }
-        } else {
-          // 自訂資料夾
-          // 載入子資料夾
-          const { data: subFolders } = await supabase
-            .from('folders')
-            .select('*')
-            .eq('parent_id', folderId)
-            .order('sort_order')
-            .limit(500)
-
-          if (subFolders) {
-            for (const folder of subFolders) {
-              newItems.push({
-                id: folder.id,
-                name: folder.name,
-                type: 'folder',
-                icon: folder.icon || '📁',
-                color: folder.color || undefined,
-                parentId: folderId,
-                createdAt: folder.created_at,
-              })
-            }
-          }
-
-          // 載入檔案
-          const { data: files } = await supabase
+            .or('quote_type.is.null,quote_type.neq.quick')
+          count = c || 0
+        } else if (folder.dbType === 'quick_quote') {
+          const { count: c } = await supabase
+            .from('quotes')
+            .select('id', { count: 'exact', head: true })
+            .eq('tour_id', tourId)
+            .eq('quote_type', 'quick')
+          count = c || 0
+        } else if (folder.dbType === 'itinerary') {
+          const { count: c } = await supabase
+            .from('itineraries')
+            .select('id', { count: 'exact', head: true })
+            .eq('tour_id', tourId)
+          count = c || 0
+        } else if (folder.dbType === 'confirmation') {
+          const { count: c } = await supabase
+            .from('tour_confirmation_sheets')
+            .select('id', { count: 'exact', head: true })
+            .eq('tour_id', tourId)
+          count = c || 0
+        } else if (folder.dbType === 'request') {
+          const { count: c } = await supabase
+            .from('tour_requests')
+            .select('id', { count: 'exact', head: true })
+            .eq('tour_id', tourId)
+          count = c || 0
+        } else if (folder.category) {
+          const { count: c } = await supabase
             .from('files')
-            .select('*')
-            .eq('folder_id', folderId)
-            .order('created_at', { ascending: false })
-            .limit(500)
+            .select('id', { count: 'exact', head: true })
+            .eq('tour_id', tourId)
+            .eq('category', folder.category)
+          count = c || 0
+        }
 
-          if (files) {
-            for (const file of files) {
-              newItems.push({
-                id: file.id,
-                name: file.original_filename || file.filename,
-                type: 'file',
-                parentId: folderId,
-                createdAt: file.created_at,
-                size: file.size_bytes || undefined,
-                mimeType: file.content_type || undefined,
-                extension: file.extension || undefined,
+        foldersWithCount.push({ ...folder, count })
+      }
+
+      setFolders(foldersWithCount)
+
+      // 預設選擇保險資料夾（最常用）
+      const insuranceFolder = foldersWithCount.find(f => f.id === 'insurance')
+      if (insuranceFolder) {
+        setSelectedFolder(insuranceFolder)
+      }
+    } catch (err) {
+      logger.error('載入資料夾失敗', err)
+      toast.error(COMP_TOURS_LABELS.載入失敗)
+    } finally {
+      setLoading(false)
+    }
+  }, [tourId])
+
+  // 載入檔案列表
+  const loadFiles = useCallback(async (folder: FolderWithCount) => {
+    setFilesLoading(true)
+    try {
+      const fileItems: FileItem[] = []
+
+      if (folder.dbType) {
+        // DB 記錄（報價單/行程表/需求單等）
+        let data: any[] = []
+
+        switch (folder.dbType) {
+          case 'quote':
+            const { data: quotes } = await supabase
+              .from('quotes')
+              .select('id, code, name, created_at')
+              .eq('tour_id', tourId)
+              .or('quote_type.is.null,quote_type.eq.standard')
+              .order('created_at', { ascending: false })
+            data = quotes || []
+            for (const q of data) {
+              fileItems.push({
+                id: q.id,
+                name: q.name || q.code || COMP_TOURS_LABELS.未命名報價單,
+                createdAt: q.created_at,
+                dbType: 'quote',
+                dbId: q.id,
               })
             }
-          }
+            break
+
+          case 'quick_quote':
+            const { data: quickQuotes } = await supabase
+              .from('quotes')
+              .select('id, code, name, created_at')
+              .eq('tour_id', tourId)
+              .eq('quote_type', 'quick')
+              .order('created_at', { ascending: false })
+            data = quickQuotes || []
+            for (const q of data) {
+              fileItems.push({
+                id: q.id,
+                name: q.name || q.code || COMP_TOURS_LABELS.未命名快速報價,
+                createdAt: q.created_at,
+                dbType: 'quick_quote',
+                dbId: q.id,
+              })
+            }
+            break
+
+          case 'itinerary':
+            const { data: itineraries } = await supabase
+              .from('itineraries')
+              .select('id, title, code, created_at')
+              .eq('tour_id', tourId)
+              .order('created_at', { ascending: false })
+            data = itineraries || []
+            for (const i of data) {
+              fileItems.push({
+                id: i.id,
+                name: i.title || i.code || COMP_TOURS_LABELS.未命名行程表,
+                createdAt: i.created_at,
+                dbType: 'itinerary',
+                dbId: i.id,
+              })
+            }
+            break
+
+          case 'request':
+            const { data: requests } = await supabase
+              .from('tour_requests')
+              .select('id, code, supplier_name, request_type, created_at')
+              .eq('tour_id', tourId)
+              .order('created_at', { ascending: false })
+            data = requests || []
+            for (const r of data) {
+              fileItems.push({
+                id: r.id,
+                name: `${r.request_type || COMP_TOURS_LABELS.需求} - ${r.supplier_name || r.code}`,
+                createdAt: r.created_at,
+                dbType: 'request',
+                dbId: r.id,
+              })
+            }
+            break
         }
-
-        setItems(newItems)
-      } catch (err) {
-        logger.error(COMP_TOURS_LABELS.載入資料夾失敗, err)
-        toast.error(COMP_TOURS_LABELS.載入失敗)
-      } finally {
-        setLoading(false)
-      }
-    },
-    [tourId, quoteId, itineraryId]
-  )
-
-  // 載入 DB 驅動的資料夾內容
-  const loadDbFolderContent = async (
-    dbType: 'quote' | 'quick_quote' | 'itinerary' | 'confirmation' | 'request',
-    items: FinderItem[]
-  ) => {
-    const folderId = `folder-${dbType}`
-
-    switch (dbType) {
-      case 'quote': {
-        // 團體報價單：用 tour_id 查詢（排除快速報價）
+      } else if (folder.category) {
+        // 實體檔案
         const { data } = await supabase
-          .from('quotes')
-          .select('id, code, name, status, created_at')
+          .from('files')
+          .select('id, filename, file_path, content_type, file_size, created_at')
           .eq('tour_id', tourId)
-          .or('quote_type.is.null,quote_type.eq.standard')
+          .eq('category', folder.category)
           .order('created_at', { ascending: false })
 
         if (data) {
-          for (const q of data) {
-            items.push({
-              id: q.id,
-              name: q.name || q.code || COMP_TOURS_LABELS.未命名報價單,
-              type: 'file',
-              icon: '📋',
-              parentId: folderId,
-              createdAt: q.created_at,
-              status: q.status,
-              dbType: 'quote',
-              dbId: q.id,
+          for (const f of data) {
+            const { data: urlData } = supabase.storage.from('documents').getPublicUrl(f.file_path)
+            fileItems.push({
+              id: f.id,
+              name: f.filename,
+              size: f.file_size || undefined,
+              mimeType: f.content_type || undefined,
+              createdAt: f.created_at,
+              url: urlData.publicUrl,
             })
           }
         }
-        break
       }
-      case 'quick_quote': {
-        // 快速報價：1:N 關聯，用 quotes.tour_id
-        const { data } = await supabase
-          .from('quotes')
-          .select('id, code, name, status, created_at')
-          .eq('tour_id', tourId)
-          .eq('quote_type', 'quick')
-          .order('created_at', { ascending: false })
 
-        if (data) {
-          for (const q of data) {
-            items.push({
-              id: q.id,
-              name: q.name || q.code || COMP_TOURS_LABELS.未命名快速報價,
-              type: 'file',
-              icon: '💰',
-              parentId: folderId,
-              createdAt: q.created_at,
-              status: q.status,
-              dbType: 'quick_quote',
-              dbId: q.id,
-            })
-          }
-        }
-        break
-      }
-      case 'itinerary': {
-        // 行程表：用 tour_id 查詢
-        const { data } = await supabase
-          .from('itineraries')
-          .select('id, title, code, created_at')
-          .eq('tour_id', tourId)
-          .order('created_at', { ascending: false })
+      setFiles(fileItems)
+    } catch (err) {
+      logger.error('載入檔案失敗', err)
+      toast.error(COMP_TOURS_LABELS.載入失敗)
+    } finally {
+      setFilesLoading(false)
+    }
+  }, [tourId])
 
-        if (data) {
-          for (const i of data) {
-            items.push({
-              id: i.id,
-              name: i.title || i.code || COMP_TOURS_LABELS.未命名行程表,
-              type: 'file',
-              icon: '🗺️',
-              parentId: folderId,
-              createdAt: i.created_at,
-              dbType: 'itinerary',
-              dbId: i.id,
-            })
-          }
-        }
-        break
-      }
-      case 'confirmation': {
-        const { data } = await supabase
-          .from('tour_confirmation_sheets')
-          .select('id, status, created_at')
-          .eq('tour_id', tourId)
-          .order('created_at', { ascending: false })
+  // 處理檔案上傳
+  const handleUpload = async (uploadedFiles: File[]) => {
+    if (!selectedFolder || !selectedFolder.category) {
+      toast.error('請選擇檔案分類')
+      return
+    }
 
-        if (data) {
-          for (const c of data) {
-            items.push({
-              id: c.id,
-              name: `確認單`,
-              type: 'file',
-              icon: '✅',
-              parentId: folderId,
-              createdAt: c.created_at,
-              status: c.status,
-              dbType: 'confirmation',
-              dbId: c.id,
-            })
-          }
-        }
-        break
-      }
-      case 'request': {
-        const { data } = await supabase
-          .from('tour_requests')
-          .select('id, category, supplier_name, status, created_at')
-          .eq('tour_id', tourId)
-          .order('created_at', { ascending: false })
+    try {
+      for (const file of uploadedFiles) {
+        const filePath = `tour-documents/${tourCode}/${selectedFolder.id}/${Date.now()}_${file.name}`
 
-        if (data) {
-          for (const r of data) {
-            items.push({
-              id: r.id,
-              name: `${r.category || COMP_TOURS_LABELS.需求} - ${r.supplier_name || COMP_TOURS_LABELS.未指定}`,
-              type: 'file',
-              icon: '📨',
-              parentId: folderId,
-              createdAt: r.created_at,
-              status: r.status,
-              dbType: 'request',
-              dbId: r.id,
-            })
-          }
-        }
-        break
+        // 上傳到 Supabase Storage
+        const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, file)
+
+        if (uploadError) throw uploadError
+
+        // 建立 files 記錄
+        const { error: dbError } = await supabase.from('files').insert({
+          workspace_id: (await supabase.from('tours').select('workspace_id').eq('id', tourId).single()).data
+            ?.workspace_id,
+          tour_id: tourId,
+          category: selectedFolder.category,
+          filename: file.name,
+          file_path: filePath,
+          content_type: file.type,
+          file_size: file.size,
+          created_by: 'user',
+        })
+
+        if (dbError) throw dbError
       }
+
+      toast.success(`✅ 已上傳 ${uploadedFiles.length} 個檔案`)
+      setShowUploader(false)
+      await loadFolders()
+      if (selectedFolder) await loadFiles(selectedFolder)
+    } catch (err) {
+      logger.error('上傳失敗', err)
+      toast.error('上傳失敗：' + (err as Error).message)
     }
   }
 
-  // 導航到資料夾
-  const handleNavigate = useCallback(
-    async (folderId: string | null) => {
-      setSelectedIds(new Set())
-
-      if (folderId === null) {
-        // 回到根目錄
-        setCurrentPath([])
-      } else {
-        // 檢查是否是返回上層
-        const existingIndex = currentPath.findIndex(p => p.id === folderId)
-        if (existingIndex >= 0) {
-          // 返回到該層
-          setCurrentPath(currentPath.slice(0, existingIndex + 1))
-        } else {
-          // 進入新資料夾
-          const folder = items.find(i => i.id === folderId && i.type === 'folder')
-          if (folder) {
-            setCurrentPath([...currentPath, folder])
-          }
-        }
+  // 處理檔案點擊
+  const handleFileClick = (file: FileItem) => {
+    if (file.dbType && file.dbId) {
+      switch (file.dbType) {
+        case 'quote':
+          router.push(`/quotes/${file.dbId}`)
+          break
+        case 'quick_quote':
+          router.push(`/quotes/quick/${file.dbId}`)
+          break
+        case 'itinerary':
+          router.push(`/itinerary/block-editor?itinerary_id=${file.dbId}`)
+          break
+        case 'request':
+          toast.info(COMP_TOURS_LABELS.需求單功能開發中)
+          break
       }
-
-      await loadFolderContent(folderId)
-    },
-    [currentPath, items, loadFolderContent]
-  )
-
-  // 開啟項目
-  const handleOpen = useCallback(
-    (item: FinderItem) => {
-      if (item.dbType && item.dbId) {
-        // DB 驅動的項目
-        switch (item.dbType) {
-          case 'quote':
-            router.push(`/quotes/${item.dbId}`)
-            break
-          case 'quick_quote':
-            router.push(`/quotes/quick/${item.dbId}`)
-            break
-          case 'itinerary':
-            router.push(`/itinerary/block-editor?itinerary_id=${item.dbId}`)
-            break
-          case 'confirmation':
-            router.push(`/tours/${tourId}/confirmation`)
-            break
-          case 'request':
-            toast.info(COMP_TOURS_LABELS.需求單功能開發中)
-            break
-        }
-      } else if (item.type === 'file') {
-        // 實體檔案 - 下載或預覽
-        handleDownload(item)
-      }
-    },
-    [router, tourId]
-  )
-
-  // 下載檔案
-  const handleDownload = useCallback(async (item: FinderItem) => {
-    try {
-      const { data: file } = await supabase
-        .from('files')
-        .select('storage_path, storage_bucket')
-        .eq('id', item.id)
-        .single()
-
-      if (file?.storage_path) {
-        const { data } = await supabase.storage
-          .from(file.storage_bucket || 'workspace-files')
-          .createSignedUrl(file.storage_path, 60)
-
-        if (data?.signedUrl) {
-          window.open(data.signedUrl, '_blank')
-        }
-      }
-    } catch (err) {
-      logger.error(COMP_TOURS_LABELS.下載失敗, err)
-      toast.error(COMP_TOURS_LABELS.下載失敗)
+    } else if (file.url) {
+      window.open(file.url, '_blank')
     }
-  }, [])
-
-  // 移動檔案
-  const handleMove = useCallback(
-    async (itemIds: string[], targetFolderId: string | null) => {
-      try {
-        // 只移動實體檔案，DB 項目不能移動
-        const fileIds = itemIds.filter(id => !id.startsWith('folder-'))
-
-        for (const fileId of fileIds) {
-          await supabase.from('files').update({ folder_id: targetFolderId }).eq('id', fileId)
-        }
-
-        toast.success(`已移動 ${fileIds.length} 個項目`)
-        await loadFolderContent(currentFolderId)
-      } catch (err) {
-        logger.error(COMP_TOURS_LABELS.移動失敗, err)
-        toast.error(COMP_TOURS_LABELS.移動失敗)
-      }
-    },
-    [currentFolderId, loadFolderContent]
-  )
-
-  // 刪除
-  const handleDelete = useCallback(
-    async (itemIds: string[]) => {
-      if (!confirm(`確定要刪除 ${itemIds.length} 個項目嗎？`)) return
-
-      try {
-        for (const id of itemIds) {
-          if (id.startsWith('folder-')) continue // 不能刪除預設資料夾
-
-          // 檢查是否是資料夾
-          const item = items.find(i => i.id === id)
-          if (item?.type === 'folder') {
-            await deleteFolder(id)
-          } else if (!item?.dbType) {
-            // 只能刪除實體檔案
-            await deleteFile(id)
-          }
-        }
-
-        toast.success(COMP_TOURS_LABELS.已刪除)
-        setSelectedIds(new Set())
-        await loadFolderContent(currentFolderId)
-      } catch (err) {
-        logger.error(COMP_TOURS_LABELS.刪除失敗, err)
-        toast.error(COMP_TOURS_LABELS.刪除失敗)
-      }
-    },
-    [currentFolderId, items, loadFolderContent]
-  )
-
-  // 建立資料夾
-  const handleCreateFolder = useCallback(
-    async (name: string, parentId: string | null) => {
-      if (!workspaceId) return
-
-      try {
-        const actualParentId = parentId?.startsWith('folder-') ? null : parentId
-
-        await createFolder({
-          tour_id: tourId,
-          name,
-          parent_id: actualParentId,
-          folder_type: 'tour',
-          path: `/${tourCode}/${name}`,
-          depth: currentPath.length + 1,
-          is_system: false,
-          sort_order: items.filter(i => i.type === 'folder').length,
-        })
-
-        toast.success(COMP_TOURS_LABELS.已建立資料夾)
-        await loadFolderContent(currentFolderId)
-      } catch (err) {
-        logger.error(COMP_TOURS_LABELS.建立資料夾失敗, err)
-        toast.error(COMP_TOURS_LABELS.建立失敗)
-      }
-    },
-    [workspaceId, tourId, tourCode, currentPath.length, items, currentFolderId, loadFolderContent]
-  )
-
-  // 上傳檔案
-  const handleUpload = useCallback(
-    async (files: FileList, folderId: string | null) => {
-      if (!workspaceId) return
-
-      const category = (
-        folderId?.startsWith('folder-') ? folderId.replace('folder-', '') : 'other'
-      ) as FileCategory
-      const actualFolderId = folderId?.startsWith('folder-') ? null : folderId
-
-      try {
-        for (const file of Array.from(files)) {
-          // 產生唯一檔名
-          const ext = file.name.split('.').pop() || ''
-          const filename = `${tourId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
-          // 上傳到 Storage
-          const { error: uploadError } = await supabase.storage
-            .from('workspace-files')
-            .upload(filename, file)
-
-          if (uploadError) throw uploadError
-
-          // 寫入 DB
-          await createFile({
-            tour_id: tourId,
-            folder_id: actualFolderId,
-            filename,
-            original_filename: file.name,
-            content_type: file.type,
-            size_bytes: file.size,
-            extension: ext,
-            storage_path: filename,
-            storage_bucket: 'workspace-files',
-            category: category as string,
-            source: 'upload',
-          })
-        }
-
-        toast.success(`已上傳 ${files.length} 個檔案`)
-        await loadFolderContent(currentFolderId)
-      } catch (err) {
-        logger.error(COMP_TOURS_LABELS.上傳失敗, err)
-        toast.error(COMP_TOURS_LABELS.上傳失敗)
-      }
-    },
-    [workspaceId, tourId, currentFolderId, loadFolderContent]
-  )
-
-  // 重新命名
-  const handleRename = useCallback(
-    async (itemId: string, newName: string) => {
-      try {
-        const item = items.find(i => i.id === itemId)
-        if (!item) return
-
-        if (item.type === 'folder' && !itemId.startsWith('folder-')) {
-          await updateFolder(itemId, { name: newName })
-        } else if (item.type === 'file' && !item.dbType) {
-          await updateFile(itemId, { original_filename: newName })
-        } else {
-          toast.error(COMP_TOURS_LABELS.此項目無法重新命名)
-          return
-        }
-
-        toast.success(COMP_TOURS_LABELS.已重新命名)
-        await loadFolderContent(currentFolderId)
-      } catch (err) {
-        logger.error(COMP_TOURS_LABELS.重新命名失敗, err)
-        toast.error(COMP_TOURS_LABELS.重新命名失敗)
-      }
-    },
-    [items, currentFolderId, loadFolderContent]
-  )
+  }
 
   // 初始載入
   useEffect(() => {
-    loadFolderContent(null)
-  }, [loadFolderContent])
+    loadFolders()
+  }, [loadFolders])
 
-  // 根據當前資料夾類型，決定空狀態的新增操作
-  const getEmptyStateAction = useCallback(() => {
-    if (!currentFolderId?.startsWith('folder-')) return undefined
-
-    const category = currentFolderId.replace('folder-', '')
-    const folderConfig = DEFAULT_TOUR_FOLDERS.find(f => f.category === category)
-
-    if (!folderConfig?.dbType) return undefined // 檔案資料夾用上傳
-
-    const actions: Record<string, { label: string; path: string }> = {
-      quote: { label: COMP_TOURS_LABELS.前往報價單, path: `/quotes` },
-      quick_quote: {
-        label: COMP_TOURS_LABELS.新增快速報價,
-        path: `/quotes/quick?tour_id=${tourId}`,
-      },
-      itinerary: {
-        label: COMP_TOURS_LABELS.新增行程表,
-        path: `/itinerary/block-editor?tour_id=${tourId}`,
-      },
-      confirmation: {
-        label: COMP_TOURS_LABELS.建立確認單,
-        path: `/tours/${tourCode}/confirmation`,
-      },
-      request: { label: COMP_TOURS_LABELS.新增需求單, path: `/tours/${tourCode}?tab=requirements` },
+  // 選擇資料夾時載入檔案
+  useEffect(() => {
+    if (selectedFolder) {
+      loadFiles(selectedFolder)
     }
+  }, [selectedFolder, loadFiles])
 
-    const action = actions[folderConfig.dbType]
-    if (!action) return undefined
-
-    return {
-      label: action.label,
-      onClick: () => router.push(action.path),
-    }
-  }, [currentFolderId, tourId, router])
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-morandi-gold" />
+      </div>
+    )
+  }
 
   return (
-    <div className="h-[600px] border rounded-lg overflow-hidden bg-background">
-      <FinderView
-        items={items}
-        currentPath={currentPath}
-        loading={loading}
-        selectedIds={selectedIds}
-        onNavigate={handleNavigate}
-        onSelect={setSelectedIds}
-        onOpen={handleOpen}
-        onMove={handleMove}
-        onDelete={handleDelete}
-        onRename={handleRename}
-        onCreateFolder={handleCreateFolder}
-        onUpload={handleUpload}
-        onDownload={handleDownload}
-        emptyStateAction={getEmptyStateAction()}
-      />
+    <div className="flex h-[calc(100vh-200px)] gap-4">
+      {/* 左側：資料夾列表 */}
+      <div className="w-64 flex-shrink-0 border border-morandi-muted rounded-lg bg-morandi-container p-2 overflow-y-auto">
+        <div className="space-y-1">
+          {folders.map(folder => (
+            <button
+              key={folder.id}
+              onClick={() => setSelectedFolder(folder)}
+              className={cn(
+                'w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors',
+                selectedFolder?.id === folder.id
+                  ? 'bg-morandi-gold text-white'
+                  : 'hover:bg-morandi-gold/10 text-morandi-primary'
+              )}
+            >
+              <span className="text-base">{folder.icon}</span>
+              <span className="flex-1 text-left truncate">{folder.name}</span>
+              {folder.count > 0 && (
+                <span
+                  className={cn(
+                    'text-xs px-2 py-0.5 rounded-full',
+                    selectedFolder?.id === folder.id
+                      ? 'bg-white/20 text-white'
+                      : 'bg-morandi-gold/10 text-morandi-gold'
+                  )}
+                >
+                  {folder.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 右側：檔案列表 */}
+      <div className="flex-1 flex flex-col border border-morandi-muted rounded-lg bg-white">
+        {/* 標題列 */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-morandi-muted">
+          <div>
+            <h3 className="text-lg font-medium text-morandi-primary">
+              {selectedFolder?.icon} {selectedFolder?.name}
+            </h3>
+            {selectedFolder?.description && (
+              <p className="text-sm text-morandi-secondary mt-0.5">{selectedFolder.description}</p>
+            )}
+          </div>
+
+          {selectedFolder?.category && (
+            <Button onClick={() => setShowUploader(!showUploader)} size="sm" className="gap-2">
+              <Upload size={16} />
+              上傳檔案
+            </Button>
+          )}
+        </div>
+
+        {/* 上傳區域 */}
+        {showUploader && selectedFolder?.category && (
+          <div className="p-4 border-b border-morandi-muted bg-morandi-container/30">
+            <FileUploader onUpload={handleUpload} maxSizeMB={50} />
+          </div>
+        )}
+
+        {/* 檔案列表 */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {filesLoading ? (
+            <div className="flex items-center justify-center h-40">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-morandi-gold" />
+            </div>
+          ) : files.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-40 text-morandi-muted">
+              <FileIcon size={48} className="mb-2 opacity-20" />
+              <p className="text-sm">此資料夾尚無檔案</p>
+              {selectedFolder?.category && (
+                <p className="text-xs mt-1">點擊上方「上傳檔案」按鈕開始上傳</p>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-2">
+              {files.map(file => (
+                <button
+                  key={file.id}
+                  onClick={() => handleFileClick(file)}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-morandi-muted hover:border-morandi-gold hover:bg-morandi-gold/5 transition-colors text-left"
+                >
+                  <FileIcon size={20} className="text-morandi-gold flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-morandi-primary truncate">{file.name}</p>
+                    <p className="text-xs text-morandi-secondary">
+                      {new Date(file.createdAt).toLocaleDateString('zh-TW')}
+                      {file.size && ` • ${(file.size / 1024).toFixed(0)} KB`}
+                    </p>
+                  </div>
+                  {file.url && (
+                    <Eye size={16} className="text-morandi-secondary flex-shrink-0" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

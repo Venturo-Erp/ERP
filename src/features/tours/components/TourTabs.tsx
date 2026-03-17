@@ -53,8 +53,8 @@ const TourRequirementsTab = dynamic(
   { loading: () => <TabLoading /> }
 )
 
-const TourFilesTree = dynamic(
-  () => import('@/features/tours/components/TourFilesTree').then(m => m.TourFilesTree),
+const TourFilesManager = dynamic(
+  () => import('@/features/tours/components/TourFilesManager').then(m => m.TourFilesManager),
   { loading: () => <TabLoading /> }
 )
 
@@ -195,14 +195,7 @@ export function TourTabContent({
     case 'itinerary':
       return <TourItineraryTab tour={tour} />
     case 'files':
-      return (
-        <TourFilesTree
-          tourId={tour.id}
-          tourCode={tour.code || ''}
-          quoteId={tour.quote_id}
-          itineraryId={tour.itinerary_id}
-        />
-      )
+      return <TourFilesManager tourId={tour.id} tourCode={tour.code || ''} />
     case 'overview':
       return (
         <div className="space-y-6">
