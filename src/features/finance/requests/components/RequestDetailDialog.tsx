@@ -56,7 +56,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [isAddingItem, setIsAddingItem] = useState(false)
   const [newItem, setNewItem] = useState({
-    category: ADD_REQUEST_DIALOG_LABELS.其他 as PaymentRequestItem['category'],
+    category: '' as PaymentRequestItem['category'],
     supplier_id: '',
     supplier_name: '',
     description: '',
@@ -512,7 +512,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
                         onChange={value => setNewItem({ ...newItem, supplier_id: value })}
                         placeholder={REQUEST_DETAIL_DIALOG_LABELS.選擇付款對象}
                         className="[&_input]:h-8 [&_input]:text-xs [&_input]:bg-transparent"
-                        disablePortal
+
                       />
                     </div>
                     <div>
@@ -620,7 +620,6 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
                               onChange={value => setEditItem({ ...editItem, supplier_id: value })}
                               placeholder={REQUEST_DETAIL_DIALOG_LABELS.選擇付款對象}
                               className="[&_input]:h-8 [&_input]:text-xs [&_input]:bg-transparent"
-                              disablePortal
                             />
                           </div>
                           <div>
