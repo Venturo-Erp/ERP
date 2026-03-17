@@ -24,7 +24,7 @@ interface SelectedItem {
   item: QuoteItem
 }
 
-interface AssignSupplierDialogProps {
+export interface AssignSupplierDialogProps {
   open: boolean
   onClose: () => void
   tour: Tour | null
@@ -34,6 +34,7 @@ interface AssignSupplierDialogProps {
   ageBreakdown: string
   formatDate: (d: string | null | undefined) => string
   onSave?: () => void
+  existingRequests?: { items?: { rooms?: { room_type: string; quantity: number }[] }[]; supplier_name?: string }[]
 }
 
 interface Supplier {
@@ -63,6 +64,7 @@ export function AssignSupplierDialog({
   ageBreakdown,
   formatDate,
   onSave,
+  existingRequests = [],
 }: AssignSupplierDialogProps) {
   const { user } = useAuthStore()
   const { toast } = useToast()
@@ -453,17 +455,42 @@ export function AssignSupplierDialog({
                 disabled={!canPrint}
                 onClick={() => {
                   if (hasAccommodation) {
-                    // 初始化房型（如果還沒填）
+                    // 檢查每個住宿項目是否已有房型資料（從 existingRequests 讀）
                     const init: Record<string, { name: string; qty: number }[]> = {}
+                    let allHaveRooms = true
+
                     accommodationItems.forEach(({ item }) => {
-                      if (!roomDetails[item.key]) {
-                        init[item.key] = [{ name: '雙人房', qty: 1 }]
+                      if (roomDetails[item.key]?.some(r => r.name.trim())) return // 已在本次填過
+
+                      // 從 existingRequests 找匹配的住宿委託
+                      const existing = existingRequests.find(req =>
+                        req.items?.some(ri =>
+                          ri.rooms && ri.rooms.length > 0
+                        )
+                      )
+                      if (existing?.items) {
+                        const withRooms = existing.items.find(ri => ri.rooms && ri.rooms.length > 0)
+                        if (withRooms?.rooms) {
+                          init[item.key] = withRooms.rooms.map(r => ({ name: r.room_type, qty: r.quantity }))
+                          return
+                        }
                       }
+                      // 沒有已存的房型 → 需要填
+                      init[item.key] = [{ name: '雙人房', qty: 1 }]
+                      allHaveRooms = false
                     })
+
                     if (Object.keys(init).length > 0) {
                       setRoomDetails(prev => ({ ...prev, ...init }))
                     }
-                    setStep('rooms')
+
+                    // 全部都有房型資料 → 跳過房型步驟
+                    if (allHaveRooms && Object.keys(init).length > 0) {
+                      setRoomDetails(prev => ({ ...prev, ...init }))
+                      setStep('preview')
+                    } else {
+                      setStep('rooms')
+                    }
                   } else {
                     setStep('preview')
                   }

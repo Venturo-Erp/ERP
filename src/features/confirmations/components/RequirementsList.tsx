@@ -28,7 +28,7 @@ import { useAuthStore } from '@/stores'
 import type { Tour } from '@/stores/types'
 import { RoomRequirementDialog } from './RoomRequirementDialog'
 import { TransportRequirementDialog } from './TransportRequirementDialog'
-import { AssignSupplierDialog } from './AssignSupplierDialog'
+import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSupplierDialog'
 // CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
@@ -1430,6 +1430,7 @@ export function RequirementsList({
         ageBreakdown={ageBreakdownText}
         formatDate={formatDate}
         onSave={() => loadData(false)}
+        existingRequests={existingRequests as AssignSupplierDialogProps['existingRequests']}
       />
 
       {/* 交通需求 Dialog */}
