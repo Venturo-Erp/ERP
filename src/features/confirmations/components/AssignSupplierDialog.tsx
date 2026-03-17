@@ -379,24 +379,81 @@ export function AssignSupplierDialog({
 
   // 生成 PDF HTML
   const generateHtml = useCallback(() => {
+    // 分類
+    const accItems = items.filter(({ category }) => category === 'accommodation')
+    const otherItems = items.filter(({ category }) => category !== 'accommodation')
+
+    // 住宿區塊 HTML
+    const accHtml = accItems.map(({ item }) => {
+      const rooms = roomDetails[item.key]?.filter(r => r.name.trim() && r.qty > 0) || []
+      const dates = (item.serviceDate || '').split('~')
+      const nights = item.quantity || rooms[0]?.qty || 1
+      const totalRooms = rooms.reduce((s, r) => s + r.qty, 0)
+
+      return `
+      <div style="margin-bottom:25px">
+        <div class="info-grid">
+          <div class="info-section">
+            <h3>飯店資訊</h3>
+            <div class="info-row"><span class="info-label">飯店：</span><span>${item.title || item.supplierName || ''}</span></div>
+            <div class="info-row"><span class="info-label">入住日：</span><span>${formatDate(dates[0]?.trim())}</span></div>
+            <div class="info-row"><span class="info-label">退房日：</span><span>${formatDate(dates[1]?.trim())}</span></div>
+            <div class="info-row"><span class="info-label">晚數：</span><span>${nights} 晚</span></div>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>房型</th><th style="width:80px">間數</th><th style="width:80px">晚數</th><th>備註</th></tr></thead>
+          <tbody>
+            ${rooms.map(r => `<tr>
+              <td style="text-align:center">${r.name}</td>
+              <td style="text-align:center">${r.qty}</td>
+              <td style="text-align:center">${nights}</td>
+              <td></td>
+            </tr>`).join('')}
+            <tr style="background:#fef3c7;font-weight:bold">
+              <td style="text-align:center">合計</td>
+              <td style="text-align:center">${totalRooms} 間</td>
+              <td style="text-align:center">${nights} 晚</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>`
+    }).join('')
+
+    // 其他項目表格
+    const otherHtml = otherItems.length > 0 ? `
+      <table>
+        <thead><tr><th style="width:80px">日期</th><th>類別</th><th>項目</th><th style="width:80px">成本</th><th style="width:100px">回覆金額</th><th style="width:60px">確認</th></tr></thead>
+        <tbody>
+          ${otherItems.map(({ category, item }) => `
+          <tr>
+            <td style="text-align:center">${formatDate(item.serviceDate)}</td>
+            <td style="text-align:center">${CATEGORY_LABELS[category] || category}</td>
+            <td>${item.title || item.supplierName || ''}</td>
+            <td style="text-align:right">${item.quotedPrice ? 'NT$ ' + item.quotedPrice.toLocaleString() : ''}</td>
+            <td></td>
+            <td></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>` : ''
+
     return `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
-<title>需求單 - ${supplierName}</title>
+<title>需求單 - ${supplierName || tour?.code || ''}</title>
 <style>
   @media print { @page { margin: 1.5cm; } body { margin: 0; } }
   body { font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif; font-size: 12pt; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
   h1 { text-align: center; font-size: 22pt; margin-bottom: 10px; border-bottom: 3px double #333; padding-bottom: 10px; }
-  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 15px; }
   .info-section { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
   .info-section h3 { margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
   .info-row { display: flex; margin-bottom: 5px; }
   .info-label { font-weight: bold; min-width: 80px; color: #666; }
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
   th, td { border: 1px solid #333; padding: 8px 10px; }
   th { background: #f0f0f0; font-weight: bold; text-align: center; }
   .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 10pt; color: #666; }
-  .confirm-section { margin-top: 30px; border: 1px solid #ddd; padding: 15px; }
-  .confirm-section h3 { margin-top: 0; }
   .sign-line { display: flex; justify-content: space-between; margin-top: 30px; }
   .sign-box { border-top: 1px solid #333; width: 200px; text-align: center; padding-top: 5px; }
 </style></head><body>
@@ -413,38 +470,16 @@ export function AssignSupplierDialog({
     </div>
     <div class="info-section">
       <h3>供應商資訊</h3>
-      <div class="info-row"><span class="info-label">名稱：</span><span>${supplierName}</span></div>
+      <div class="info-row"><span class="info-label">名稱：</span><span>${supplierName || '（待指定）'}</span></div>
       ${selectedSupplier?.contact_person ? `<div class="info-row"><span class="info-label">窗口：</span><span>${selectedSupplier.contact_person}</span></div>` : ''}
       ${selectedSupplier?.phone ? `<div class="info-row"><span class="info-label">電話：</span><span>${selectedSupplier.phone}</span></div>` : ''}
       ${selectedSupplier?.email ? `<div class="info-row"><span class="info-label">Email：</span><span>${selectedSupplier.email}</span></div>` : ''}
-      ${selectedSupplier?.address ? `<div class="info-row"><span class="info-label">地址：</span><span>${selectedSupplier.address}</span></div>` : ''}
     </div>
   </div>
-  <table>
-    <thead><tr><th style="width:60px">日期</th><th>類別</th><th>項目</th><th style="width:80px">預算</th><th style="width:100px">回覆金額</th><th style="width:60px">確認</th></tr></thead>
-    <tbody>
-      ${Object.entries(grouped).map(([catKey, catItems]) => {
-        const label = CATEGORY_LABELS[catKey] || catKey
-        return catItems.map(item => {
-          const rooms = roomDetails[item.key]?.filter(r => r.name.trim() && r.qty > 0) || []
-          const roomLine = rooms.length > 0
-            ? `<br/><span style="font-size:10pt;color:#666">房型：${rooms.map(r => `${r.name} × ${r.qty} 間`).join('、')}</span>`
-            : ''
-          return `
-          <tr>
-            <td style="text-align:center">${formatDate(item.serviceDate)}</td>
-            <td style="text-align:center">${label}</td>
-            <td>${item.title || item.supplierName || ''}${roomLine}</td>
-            <td style="text-align:right">${item.quotedPrice ? 'NT$ ' + item.quotedPrice.toLocaleString() : ''}</td>
-            <td></td>
-            <td></td>
-          </tr>`
-        }).join('')
-      }).join('')}
-    </tbody>
-  </table>
-  <div class="confirm-section">
-    <h3>供應商回覆</h3>
+  ${accHtml}
+  ${otherHtml}
+  <div style="margin-top:25px;border:1px solid #ddd;padding:15px;border-radius:5px">
+    <h3 style="margin-top:0">供應商回覆</h3>
     <p>備註：____________________________________________________________</p>
     <div class="sign-line">
       <div class="sign-box">供應商簽章</div>
@@ -456,7 +491,7 @@ export function AssignSupplierDialog({
     <p>此需求單由 Venturo ERP 產生</p>
   </div>
 </body></html>`
-  }, [supplierName, selectedSupplier, tour, totalPax, ageBreakdown, grouped, formatDate])
+  }, [supplierName, selectedSupplier, tour, totalPax, ageBreakdown, items, roomDetails, formatDate])
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
