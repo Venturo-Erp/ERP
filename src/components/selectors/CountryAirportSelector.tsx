@@ -192,13 +192,13 @@ export function CountryAirportSelector({
               value={airportCode}
               onChange={handleAirportChange}
               options={availableAirports}
-              placeholder={!country ? '請先選擇國家' : '搜尋城市或機場...'}
+              placeholder={!displayCountryName ? '請先選擇國家' : '搜尋城市或機場...'}
               emptyMessage={loading ? '載入中...' : '找不到符合的機場'}
               showSearchIcon
               showClearButton
-              disabled={!country}
+              disabled={!displayCountryName}
               disablePortal={disablePortal}
-              onCreate={country ? handleCreateAirport : undefined}
+              onCreate={displayCountryName ? handleCreateAirport : undefined}
             />
           </div>
         ) : (
