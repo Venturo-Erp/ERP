@@ -245,144 +245,267 @@ export function AssignSupplierDialog({
     onClose()
   }, [canPrint, supplierName, selectedSupplier, tour, totalPax, ageBreakdown, grouped, formatDate, onClose])
 
+  const [step, setStep] = useState<'supplier' | 'preview'>('supplier')
+
+  // 重置 step
+  useEffect(() => {
+    if (open) setStep('supplier')
+  }, [open])
+
+  // 生成 PDF HTML
+  const generateHtml = useCallback(() => {
+    return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<title>需求單 - ${supplierName}</title>
+<style>
+  @media print { @page { margin: 1.5cm; } body { margin: 0; } }
+  body { font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif; font-size: 12pt; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+  h1 { text-align: center; font-size: 22pt; margin-bottom: 10px; border-bottom: 3px double #333; padding-bottom: 10px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .info-section { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+  .info-section h3 { margin-top: 0; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+  .info-row { display: flex; margin-bottom: 5px; }
+  .info-label { font-weight: bold; min-width: 80px; color: #666; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+  th, td { border: 1px solid #333; padding: 8px 10px; }
+  th { background: #f0f0f0; font-weight: bold; text-align: center; }
+  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 10pt; color: #666; }
+  .confirm-section { margin-top: 30px; border: 1px solid #ddd; padding: 15px; }
+  .confirm-section h3 { margin-top: 0; }
+  .sign-line { display: flex; justify-content: space-between; margin-top: 30px; }
+  .sign-box { border-top: 1px solid #333; width: 200px; text-align: center; padding-top: 5px; }
+</style></head><body>
+  <h1>需求單</h1>
+  <div class="info-grid">
+    <div class="info-section">
+      <h3>我方資訊</h3>
+      <div class="info-row"><span class="info-label">公司：</span><span>角落旅行社</span></div>
+      <div class="info-row"><span class="info-label">團號：</span><span>${tour?.code || ''}</span></div>
+      <div class="info-row"><span class="info-label">團名：</span><span>${tour?.name || ''}</span></div>
+      <div class="info-row"><span class="info-label">出發日：</span><span>${tour?.departure_date || ''}</span></div>
+      <div class="info-row"><span class="info-label">總人數：</span><span>${totalPax || '-'} 人</span></div>
+      ${ageBreakdown ? `<div class="info-row"><span class="info-label">年齡分類：</span><span>${ageBreakdown}</span></div>` : ''}
+    </div>
+    <div class="info-section">
+      <h3>供應商資訊</h3>
+      <div class="info-row"><span class="info-label">名稱：</span><span>${supplierName}</span></div>
+      ${selectedSupplier?.contact_person ? `<div class="info-row"><span class="info-label">窗口：</span><span>${selectedSupplier.contact_person}</span></div>` : ''}
+      ${selectedSupplier?.phone ? `<div class="info-row"><span class="info-label">電話：</span><span>${selectedSupplier.phone}</span></div>` : ''}
+      ${selectedSupplier?.email ? `<div class="info-row"><span class="info-label">Email：</span><span>${selectedSupplier.email}</span></div>` : ''}
+      ${selectedSupplier?.address ? `<div class="info-row"><span class="info-label">地址：</span><span>${selectedSupplier.address}</span></div>` : ''}
+    </div>
+  </div>
+  <table>
+    <thead><tr><th style="width:60px">日期</th><th>類別</th><th>項目</th><th style="width:80px">預算</th><th style="width:100px">回覆金額</th><th style="width:60px">確認</th></tr></thead>
+    <tbody>
+      ${Object.entries(grouped).map(([catKey, catItems]) => {
+        const label = CATEGORY_LABELS[catKey] || catKey
+        return catItems.map(item => `
+          <tr>
+            <td style="text-align:center">${formatDate(item.serviceDate)}</td>
+            <td style="text-align:center">${label}</td>
+            <td>${item.title || item.supplierName || ''}</td>
+            <td style="text-align:right">${item.quotedPrice ? 'NT$ ' + item.quotedPrice.toLocaleString() : ''}</td>
+            <td></td>
+            <td></td>
+          </tr>`).join('')
+      }).join('')}
+    </tbody>
+  </table>
+  <div class="confirm-section">
+    <h3>供應商回覆</h3>
+    <p>備註：____________________________________________________________</p>
+    <div class="sign-line">
+      <div class="sign-box">供應商簽章</div>
+      <div class="sign-box">日期</div>
+    </div>
+  </div>
+  <div class="footer">
+    <p>列印時間：${new Date().toLocaleString('zh-TW')}</p>
+    <p>此需求單由 Venturo ERP 產生</p>
+  </div>
+</body></html>`
+  }, [supplierName, selectedSupplier, tour, totalPax, ageBreakdown, grouped, formatDate])
+
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Building2 size={18} className="text-morandi-gold" />
-            發給供應商 — {items.length} 個項目
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className={step === 'preview' ? 'max-w-4xl max-h-[90vh] overflow-hidden flex flex-col' : 'max-w-lg'}>
+        {step === 'supplier' ? (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Building2 size={18} className="text-morandi-gold" />
+                發給供應商 — {items.length} 個項目
+              </DialogTitle>
+            </DialogHeader>
 
-        <div className="space-y-4">
-          {/* 已選項目摘要 */}
-          <div className="bg-muted/50 rounded-md p-3 space-y-1">
-            {Object.entries(grouped).map(([catKey, catItems]) => (
-              <div key={catKey} className="flex items-center gap-2 text-sm">
-                <span className="font-medium text-morandi-primary w-12">
-                  {CATEGORY_LABELS[catKey] || catKey}
-                </span>
-                <span className="text-muted-foreground">
-                  {catItems.map(i => i.title || i.supplierName).join('、')}
-                </span>
+            <div className="space-y-4">
+              {/* 已選項目摘要 */}
+              <div className="bg-muted/50 rounded-md p-3 space-y-1">
+                {Object.entries(grouped).map(([catKey, catItems]) => (
+                  <div key={catKey} className="flex items-center gap-2 text-sm">
+                    <span className="font-medium text-morandi-primary w-12">
+                      {CATEGORY_LABELS[catKey] || catKey}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {catItems.map(i => i.title || i.supplierName).join('、')}
+                    </span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* 搜尋供應商 */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">供應商</Label>
-            <div className="relative">
-              <Search size={14} className="absolute left-2.5 top-2 text-muted-foreground" />
-              <Input
-                value={supplierSearch}
-                onChange={e => {
-                  setSupplierSearch(e.target.value)
-                  setSelectedSupplier(null)
-                  setCustomName(e.target.value)
-                }}
-                placeholder="搜尋或輸入供應商名稱..."
-                className="h-8 text-sm pl-8"
+              {/* 搜尋供應商 */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">供應商</Label>
+                <div className="relative">
+                  <Search size={14} className="absolute left-2.5 top-2 text-muted-foreground" />
+                  <Input
+                    value={supplierSearch}
+                    onChange={e => {
+                      setSupplierSearch(e.target.value)
+                      setSelectedSupplier(null)
+                      setCustomName(e.target.value)
+                    }}
+                    placeholder="搜尋或輸入供應商名稱..."
+                    className="h-8 text-sm pl-8"
+                  />
+                </div>
+
+                {suppliers.length > 0 && !selectedSupplier && (
+                  <div className="border rounded-md max-h-36 overflow-y-auto">
+                    {suppliers.map(s => (
+                      <button
+                        key={s.id}
+                        className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm border-b border-border/50 last:border-0"
+                        onClick={() => {
+                          setSelectedSupplier(s)
+                          setSupplierSearch(s.name)
+                          setCustomName('')
+                        }}
+                      >
+                        <span className="font-medium">{s.name}</span>
+                        {s.contact_person && (
+                          <span className="text-xs text-muted-foreground ml-2">
+                            窗口: {s.contact_person}
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {selectedSupplier && (
+                  <div className="bg-blue-50/50 border border-blue-200 rounded-md p-2 text-xs space-y-0.5">
+                    <div className="font-medium text-blue-700">{selectedSupplier.name}</div>
+                    {selectedSupplier.contact_person && <div>窗口: {selectedSupplier.contact_person}</div>}
+                    {selectedSupplier.phone && <div>電話: {selectedSupplier.phone}</div>}
+                    {selectedSupplier.email && <div>Email: {selectedSupplier.email}</div>}
+                  </div>
+                )}
+
+                {loading && <div className="text-xs text-muted-foreground">搜尋中...</div>}
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={onClose}>取消</Button>
+              <Button
+                disabled={!canPrint}
+                onClick={() => setStep('preview')}
+                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              >
+                下一步：預覽需求單
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Building2 size={18} className="text-morandi-gold" />
+                需求單預覽 — {supplierName}
+              </DialogTitle>
+            </DialogHeader>
+
+            {/* PDF 預覽 */}
+            <div className="flex-1 overflow-auto border rounded-md bg-white min-h-0">
+              <iframe
+                srcDoc={generateHtml()}
+                className="w-full h-[50vh] border-0"
+                title="需求單預覽"
               />
             </div>
 
-            {/* 搜尋結果 */}
-            {suppliers.length > 0 && !selectedSupplier && (
-              <div className="border rounded-md max-h-36 overflow-y-auto">
-                {suppliers.map(s => (
-                  <button
-                    key={s.id}
-                    className="w-full text-left px-3 py-2 hover:bg-muted/50 text-sm border-b border-border/50 last:border-0"
-                    onClick={() => {
-                      setSelectedSupplier(s)
-                      setSupplierSearch(s.name)
-                      setCustomName('')
-                    }}
-                  >
-                    <span className="font-medium">{s.name}</span>
-                    {s.contact_person && (
-                      <span className="text-xs text-muted-foreground ml-2">
-                        窗口: {s.contact_person}
-                      </span>
-                    )}
-                  </button>
-                ))}
+            {/* 發送管道 */}
+            <div className="border-t pt-3">
+              <p className="text-xs text-muted-foreground mb-2">選擇發送方式</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    const saved = await handleSaveRequest()
+                    if (saved === false) return
+                    const w = window.open('', '_blank', 'width=900,height=700')
+                    if (w) { w.document.write(generateHtml()); w.document.close() }
+                    onClose()
+                  }}
+                  disabled={saving}
+                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                >
+                  {saving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : <Printer size={14} className="mr-1.5" />}
+                  列印
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="opacity-60"
+                  onClick={() => toast({ title: '📠 傳真發送', description: '開發中 — 目前請先用列印後傳真' })}
+                >
+                  <Phone size={14} className="mr-1.5" />
+                  傳真
+                  <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="opacity-60"
+                  onClick={() => toast({ title: '📧 Email 發送', description: '功能開發中 — 將夾帶此 PDF 並自動撰寫信件內容' })}
+                >
+                  <Mail size={14} className="mr-1.5" />
+                  Email
+                  <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="opacity-60"
+                  onClick={() => toast({ title: '💬 Line 發送', description: '功能開發中 — 將發送摘要卡片至供應商群組' })}
+                >
+                  <MessageCircle size={14} className="mr-1.5" />
+                  Line
+                  <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
+                </Button>
               </div>
-            )}
-
-            {selectedSupplier && (
-              <div className="bg-blue-50/50 border border-blue-200 rounded-md p-2 text-xs space-y-0.5">
-                <div className="font-medium text-blue-700">{selectedSupplier.name}</div>
-                {selectedSupplier.contact_person && <div>窗口: {selectedSupplier.contact_person}</div>}
-                {selectedSupplier.phone && <div>電話: {selectedSupplier.phone}</div>}
-                {selectedSupplier.email && <div>Email: {selectedSupplier.email}</div>}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="opacity-60"
+                  onClick={() => toast({ title: '🌐 系統內發送', description: '功能開發中 — 需要先建立附屬國租戶' })}
+                >
+                  <Globe size={14} className="mr-1.5" />
+                  發給租戶
+                  <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
+                </Button>
               </div>
-            )}
+            </div>
 
-            {loading && <div className="text-xs text-muted-foreground">搜尋中...</div>}
-          </div>
-        </div>
-
-        <DialogFooter className="flex-col sm:flex-row gap-2">
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              disabled={!canPrint || saving}
-              className="text-muted-foreground cursor-not-allowed opacity-60"
-              title="開發中 — Email 發送即將上線"
-              onClick={() => toast({ title: '📧 Email 發送', description: '功能開發中，敬請期待' })}
-            >
-              <Mail size={14} className="mr-1" />
-              Email 發送
-              <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
-            </Button>
-            <Button
-              variant="outline"
-              disabled={!canPrint || saving}
-              className="text-muted-foreground cursor-not-allowed opacity-60"
-              title="開發中 — Line 群組發送即將上線"
-              onClick={() => toast({ title: '💬 Line 發送', description: '功能開發中，敬請期待' })}
-            >
-              <MessageCircle size={14} className="mr-1" />
-              Line 發送
-              <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
-            </Button>
-            <Button
-              variant="outline"
-              disabled={!canPrint || saving}
-              className="text-muted-foreground cursor-not-allowed opacity-60"
-              title="開發中 — 發送至系統內附屬國（Local 租戶）"
-              onClick={() => toast({ title: '🌐 系統內發送', description: '功能開發中 — 需要先建立附屬國租戶' })}
-            >
-              <Globe size={14} className="mr-1" />
-              發給租戶
-              <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
-            </Button>
-            <Button
-              variant="outline"
-              disabled={!canPrint || saving}
-              className="text-muted-foreground cursor-not-allowed opacity-60"
-              title="開發中 — 虛擬傳真發送（目前請用列印後傳真）"
-              onClick={() => toast({ title: '📠 傳真發送', description: '開發中 — 目前請先列印後使用傳真機發送' })}
-            >
-              <Phone size={14} className="mr-1" />
-              傳真
-              <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
-            </Button>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={onClose}>取消</Button>
-            <Button
-              onClick={handlePrintAndSave}
-              disabled={!canPrint || saving}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-            >
-              {saving ? <Loader2 size={14} className="animate-spin mr-1" /> : <Printer size={14} className="mr-1" />}
-              儲存並列印
-            </Button>
-          </div>
-        </DialogFooter>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setStep('supplier')}>← 返回</Button>
+              <Button variant="outline" onClick={onClose}>關閉</Button>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )
