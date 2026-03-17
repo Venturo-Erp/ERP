@@ -87,6 +87,25 @@ export default function PublicRequestPage() {
     load()
   }, [token])
 
+  const [saving, setSaving] = useState(false)
+  const [lastSaved, setLastSaved] = useState<string | null>(null)
+
+  // 暫存（不改狀態）
+  const handleSave = useCallback(async () => {
+    if (!requestId || saving) return
+    setSaving(true)
+    try {
+      await supabase.from('tour_requests').update({
+        items: items as never,
+        note: replyNote || null,
+        updated_at: new Date().toISOString(),
+      } as never).eq('id', requestId)
+      setLastSaved(new Date().toLocaleTimeString('zh-TW'))
+    } catch { alert('儲存失敗') }
+    finally { setSaving(false) }
+  }, [requestId, items, replyNote, saving, supabase])
+
+  // 正式送出
   const handleSubmit = useCallback(async () => {
     if (!requestId || submitting) return
     setSubmitting(true)
@@ -124,6 +143,12 @@ export default function PublicRequestPage() {
         <div className="text-4xl mb-4">✅</div>
         <h1 className="text-xl font-bold mb-2">報價已送出</h1>
         <p className="text-gray-500">感謝您的回覆！旅行社會盡快確認。</p>
+        <button
+          onClick={() => setSubmitted(false)}
+          className="mt-4 text-sm text-amber-700 underline hover:text-amber-900"
+        >
+          需要修改？點此重新編輯
+        </button>
       </div>
     </div>
   )
@@ -318,15 +343,27 @@ export default function PublicRequestPage() {
           />
         </div>
 
-        <div className="text-center">
+        <div className="flex items-center justify-center gap-4">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="border-2 border-gray-400 hover:border-gray-600 disabled:opacity-50 text-gray-700 font-bold px-8 py-3 rounded-md text-base transition-colors"
+          >
+            {saving ? '儲存中...' : '💾 暫時儲存'}
+          </button>
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white font-bold px-12 py-3 rounded-md text-lg transition-colors"
+            className="bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white font-bold px-8 py-3 rounded-md text-base transition-colors"
           >
-            {submitting ? '送出中...' : '✉️ 送出報價'}
+            {submitting ? '送出中...' : '✉️ 確認送出'}
           </button>
         </div>
+        {lastSaved && (
+          <div className="text-center mt-2 text-sm text-green-600">
+            ✅ 已暫存（{lastSaved}）— 可隨時回來繼續填寫
+          </div>
+        )}
 
         <div className="text-center mt-6 text-xs text-gray-400">
           此頁面由 Venturo ERP 產生 · 角落旅行社
