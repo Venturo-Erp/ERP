@@ -110,14 +110,18 @@ export function AssignSupplierDialog({
 
     setSaving(true)
     try {
-      const requestItems = items.map(({ category, item }) => ({
-        category,
-        title: item.title || item.supplierName || '',
-        service_date: item.serviceDate || null,
-        quantity: item.quantity,
-        unit_cost: item.quotedPrice || null,
-        itinerary_item_id: item.itinerary_item_id || null,
-      }))
+      const requestItems = items.map(({ category, item }) => {
+        const rooms = roomDetails[item.key]?.filter(r => r.name.trim() && r.qty > 0) || []
+        return {
+          category,
+          title: item.title || item.supplierName || '',
+          service_date: item.serviceDate || null,
+          quantity: item.quantity,
+          unit_cost: item.quotedPrice || null,
+          itinerary_item_id: item.itinerary_item_id || null,
+          ...(rooms.length > 0 ? { rooms: rooms.map(r => ({ room_type: r.name, quantity: r.qty })) } : {}),
+        }
+      })
 
       const { error } = await supabase.from('tour_requests').insert({
         workspace_id: user.workspace_id,
@@ -245,12 +249,42 @@ export function AssignSupplierDialog({
     onClose()
   }, [canPrint, supplierName, selectedSupplier, tour, totalPax, ageBreakdown, grouped, formatDate, onClose])
 
-  const [step, setStep] = useState<'supplier' | 'preview'>('supplier')
+  const [step, setStep] = useState<'supplier' | 'rooms' | 'preview'>('supplier')
+  const [roomDetails, setRoomDetails] = useState<Record<string, { name: string; qty: number }[]>>({})
 
   // 重置 step
   useEffect(() => {
-    if (open) setStep('supplier')
+    if (open) {
+      setStep('supplier')
+      setRoomDetails({})
+    }
   }, [open])
+
+  // 有沒有住宿項目
+  const accommodationItems = items.filter(({ category }) => category === 'accommodation')
+  const hasAccommodation = accommodationItems.length > 0
+
+  // 住宿房型編輯 helpers
+  const addRoom = (itemKey: string) => {
+    setRoomDetails(prev => ({
+      ...prev,
+      [itemKey]: [...(prev[itemKey] || [{ name: '雙人房', qty: 1 }]), { name: '', qty: 1 }],
+    }))
+  }
+  const updateRoom = (itemKey: string, idx: number, field: 'name' | 'qty', value: string | number) => {
+    setRoomDetails(prev => ({
+      ...prev,
+      [itemKey]: (prev[itemKey] || []).map((r, i) =>
+        i === idx ? { ...r, [field]: value } : r
+      ),
+    }))
+  }
+  const removeRoom = (itemKey: string, idx: number) => {
+    setRoomDetails(prev => ({
+      ...prev,
+      [itemKey]: (prev[itemKey] || []).filter((_, i) => i !== idx),
+    }))
+  }
 
   // 生成 PDF HTML
   const generateHtml = useCallback(() => {
@@ -300,15 +334,21 @@ export function AssignSupplierDialog({
     <tbody>
       ${Object.entries(grouped).map(([catKey, catItems]) => {
         const label = CATEGORY_LABELS[catKey] || catKey
-        return catItems.map(item => `
+        return catItems.map(item => {
+          const rooms = roomDetails[item.key]?.filter(r => r.name.trim() && r.qty > 0) || []
+          const roomLine = rooms.length > 0
+            ? `<br/><span style="font-size:10pt;color:#666">房型：${rooms.map(r => `${r.name} × ${r.qty} 間`).join('、')}</span>`
+            : ''
+          return `
           <tr>
             <td style="text-align:center">${formatDate(item.serviceDate)}</td>
             <td style="text-align:center">${label}</td>
-            <td>${item.title || item.supplierName || ''}</td>
+            <td>${item.title || item.supplierName || ''}${roomLine}</td>
             <td style="text-align:right">${item.quotedPrice ? 'NT$ ' + item.quotedPrice.toLocaleString() : ''}</td>
             <td></td>
             <td></td>
-          </tr>`).join('')
+          </tr>`
+        }).join('')
       }).join('')}
     </tbody>
   </table>
@@ -411,6 +451,98 @@ export function AssignSupplierDialog({
               <Button variant="outline" onClick={onClose}>取消</Button>
               <Button
                 disabled={!canPrint}
+                onClick={() => {
+                  if (hasAccommodation) {
+                    // 初始化房型（如果還沒填）
+                    const init: Record<string, { name: string; qty: number }[]> = {}
+                    accommodationItems.forEach(({ item }) => {
+                      if (!roomDetails[item.key]) {
+                        init[item.key] = [{ name: '雙人房', qty: 1 }]
+                      }
+                    })
+                    if (Object.keys(init).length > 0) {
+                      setRoomDetails(prev => ({ ...prev, ...init }))
+                    }
+                    setStep('rooms')
+                  } else {
+                    setStep('preview')
+                  }
+                }}
+                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              >
+                下一步{hasAccommodation ? '：填寫房型' : '：預覽需求單'}
+              </Button>
+            </DialogFooter>
+          </>
+        ) : step === 'rooms' ? (
+          <>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Building2 size={18} className="text-morandi-gold" />
+                填寫房型需求 — {accommodationItems.length} 間住宿
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4 max-h-[60vh] overflow-auto">
+              {accommodationItems.map(({ item }) => (
+                <div key={item.key} className="border rounded-md p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-medium text-sm">{item.title || item.supplierName}</span>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {formatDate(item.serviceDate)} · {item.quantity || 1} 晚
+                      </span>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs"
+                      onClick={() => addRoom(item.key)}
+                    >
+                      + 新增房型
+                    </Button>
+                  </div>
+                  {(roomDetails[item.key] || []).map((room, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Input
+                        value={room.name}
+                        onChange={e => updateRoom(item.key, idx, 'name', e.target.value)}
+                        placeholder="房型名稱（如：雙人房、三人房）"
+                        className="h-7 text-sm flex-1"
+                      />
+                      <span className="text-xs text-muted-foreground shrink-0">×</span>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={room.qty}
+                        onChange={e => updateRoom(item.key, idx, 'qty', parseInt(e.target.value) || 1)}
+                        className="h-7 text-sm w-16"
+                      />
+                      <span className="text-xs text-muted-foreground shrink-0">間</span>
+                      {(roomDetails[item.key] || []).length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-red-500"
+                          onClick={() => removeRoom(item.key, idx)}
+                        >
+                          ✕
+                        </Button>
+                      )}
+                    </div>
+                  ))}
+                  {(roomDetails[item.key] || []).filter(r => r.name.trim() && r.qty > 0).length > 0 && (
+                    <div className="text-xs text-muted-foreground border-t pt-1 mt-1">
+                      小計：{(roomDetails[item.key] || []).filter(r => r.name.trim() && r.qty > 0).map(r => `${r.name} × ${r.qty}`).join('、')}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setStep('supplier')}>← 返回</Button>
+              <Button
                 onClick={() => setStep('preview')}
                 className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
               >
