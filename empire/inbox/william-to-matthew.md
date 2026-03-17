@@ -51,4 +51,60 @@ python3 ~/.openclaw/empire-memory/citizen-memory.py store matthew \
 
 ---
 
+## [2026-03-17 13:47] AutoGen 整合任務
+
+**狀態**：🟢 準備完成，等你開始
+
+**背景**：
+- 創世神決定：用現成框架（不自己開發）
+- 選擇：AutoGen（Microsoft 出品）
+- 功能：開會、工作流、指派任務
+
+**我已準備好**：
+
+1. **完整指南**：`empire/guides/autogen-integration-guide.md`
+   - 為什麼用 AutoGen
+   - 安裝步驟
+   - 3 個測試範例
+   - OpenClaw 整合方案
+   - FAQ
+
+2. **測試代碼**：`scripts/autogen-tests/`
+   - `test_simple_chat.py`（2 agents 對話）
+   - `test_meeting.py`（3 agents 開會）
+   - `README.md`（測試說明）
+
+3. **時程規劃**：
+   - Week 1：測試 AutoGen（3 個測試）
+   - Week 2：OpenClaw 整合
+
+**你的第一步**：
+
+```bash
+# 1. 安裝
+cd ~/Projects/venturo-erp
+pip install autogen-agentchat autogen-ext
+
+# 2. 設定 API key
+export OPENAI_API_KEY="sk-..."
+
+# 3. 測試 1
+python scripts/autogen-tests/test_simple_chat.py
+
+# 4. 測試 2
+python scripts/autogen-tests/test_meeting.py
+```
+
+**遇到問題**：
+- 先查 `empire/guides/autogen-integration-guide.md` 的 FAQ
+- 再透過信箱找我
+
+**預期成果**：
+- 2 週後：agents 能開會、協作、指派任務
+- 不用自己寫通訊系統
+
+**加油！** 🔧
+
+---
+
 （後續回覆寫在下面）

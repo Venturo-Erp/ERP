@@ -691,133 +691,15 @@ export function AddRequestDialog({
                 </div>
               </div>
 
-              {formData.tour_id && (
-                <div className="flex items-center gap-2 p-3 bg-morandi-container/30 rounded-lg">
-                  <Checkbox
-                    id="import-from-requests"
-                    checked={importFromRequests}
-                    onCheckedChange={checked => setImportFromRequests(checked === true)}
-                  />
-                  <label
-                    htmlFor="import-from-requests"
-                    className="flex items-center gap-2 text-sm font-medium text-morandi-primary cursor-pointer"
-                  >
-                    <FileInput size={16} className="text-morandi-gold" />
-                    {ADD_REQUEST_FORM_LABELS.LABEL_4300}
-                  </label>
-                </div>
-              )}
-
-              {importFromRequests ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-medium text-morandi-primary">
-                      {ADD_REQUEST_FORM_LABELS.LABEL_6198}
-                      {loadingRequestItems && (
-                        <span className="ml-2 text-morandi-secondary">
-                          {ADD_REQUEST_FORM_LABELS.載入中}
-                        </span>
-                      )}
-                    </h3>
-                    {tourRequestItems.length > 0 && (
-                      <span className="text-sm text-morandi-secondary">
-                        {ADD_REQUEST_FORM_LABELS.已選N項(selectedRequestCount)}
-                      </span>
-                    )}
-                  </div>
-
-                  {tourRequestItems.length === 0 && !loadingRequestItems ? (
-                    <div className="text-center py-8 text-morandi-secondary">
-                      {ADD_REQUEST_FORM_LABELS.此旅遊團沒有有供應商的需求單項目}
-                    </div>
-                  ) : (
-                    <div className="border border-border rounded-lg overflow-hidden">
-                      <div className="max-h-[300px] overflow-y-auto">
-                        {tourRequestItems.map(item => {
-                          const categoryConfig = getCategoryConfig(item.category)
-                          const itemState = selectedRequestItems[item.id]
-                          const isSelected = itemState?.selected || false
-                          const amount = itemState?.amount || 0
-
-                          return (
-                            <div
-                              key={item.id}
-                              className={cn(
-                                'flex items-start gap-3 p-4 border-b border-border last:border-b-0',
-                                isSelected ? 'bg-morandi-gold/5' : 'bg-card'
-                              )}
-                            >
-                              <Checkbox
-                                checked={isSelected}
-                                onCheckedChange={() => toggleRequestItem(item.id)}
-                                className="mt-1"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-base">{categoryConfig.icon}</span>
-                                  <span className={cn('text-xs font-medium', categoryConfig.color)}>
-                                    {item.category}
-                                  </span>
-                                  <span className="text-sm font-medium text-morandi-primary truncate">
-                                    {item.title}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1 text-xs text-morandi-secondary">
-                                  <Building2 size={12} />
-                                  <span>{ADD_REQUEST_FORM_LABELS.供應商(item.supplierName)}</span>
-                                </div>
-                                {(item.estimatedCost > 0 || item.finalCost) && (
-                                  <div className="text-xs text-morandi-secondary mt-1">
-                                    {item.finalCost
-                                      ? ADD_REQUEST_EXTRA_LABELS.CONFIRMED_COST(
-                                          item.finalCost.toLocaleString()
-                                        )
-                                      : ADD_REQUEST_EXTRA_LABELS.ESTIMATED_COST(
-                                          item.estimatedCost.toLocaleString()
-                                        )}
-                                  </div>
-                                )}
-                              </div>
-                              <div className="w-32 flex-shrink-0">
-                                <div className="text-xs text-morandi-secondary mb-1">
-                                  {ADD_REQUEST_FORM_LABELS.請款金額}
-                                </div>
-                                <div className="relative">
-                                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs text-morandi-secondary">
-                                    NT$
-                                  </span>
-                                  <Input
-                                    type="text"
-                                    value={amount.toLocaleString()}
-                                    onChange={e =>
-                                      updateRequestItemAmount(
-                                        item.id,
-                                        parseFloat(e.target.value.replace(/,/g, '')) || 0
-                                      )
-                                    }
-                                    className="pl-8 text-right text-sm h-8"
-                                    disabled={!isSelected}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <EditableRequestItemList
-                  items={requestItems}
-                  suppliers={suppliers}
-                  updateItem={updateItem}
-                  removeItem={removeItem}
-                  addNewEmptyItem={addNewEmptyItem}
-                  onCreateSupplier={handleCreateSupplier}
-                  tourId={formData.tour_id || null}
-                />
-              )}
+              <EditableRequestItemList
+                items={requestItems}
+                suppliers={suppliers}
+                updateItem={updateItem}
+                removeItem={removeItem}
+                addNewEmptyItem={addNewEmptyItem}
+                onCreateSupplier={handleCreateSupplier}
+                tourId={formData.tour_id || null}
+              />
             </TabsContent>
 
             {/* 批量請款 */}
