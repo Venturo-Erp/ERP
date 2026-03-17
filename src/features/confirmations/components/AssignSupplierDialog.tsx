@@ -637,12 +637,54 @@ export function AssignSupplierDialog({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="opacity-60"
-                  onClick={() => toast({ title: '💬 Line 發送', description: '功能開發中 — 將發送摘要卡片至供應商群組' })}
+                  disabled={saving}
+                  onClick={async () => {
+                    // 先儲存委託
+                    const saved = await handleSaveRequest()
+                    if (saved === false) return
+
+                    // TODO: 從 supplier 表讀 line_group_id
+                    // 目前用測試群組
+                    const lineGroupId = 'Cef588e4998134cdb9313b80667924bdb'
+                    const senderName = user?.display_name || user?.chinese_name || '業務員'
+
+                    try {
+                      const res = await fetch('/api/line/send-requirement', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          lineGroupId,
+                          senderName,
+                          tourCode: tour?.code || '',
+                          tourName: tour?.name || '',
+                          departureDate: tour?.departure_date || '',
+                          totalPax,
+                          supplierName,
+                          items: items.map(({ category, item }) => ({
+                            category,
+                            title: item.title || item.supplierName || '',
+                            serviceDate: formatDate(item.serviceDate),
+                            rooms: roomDetails[item.key]?.filter(r => r.name.trim() && r.qty > 0).map(r => ({
+                              room_type: r.name,
+                              quantity: r.qty,
+                            })) || [],
+                          })),
+                        }),
+                      })
+                      if (res.ok) {
+                        toast({ title: '💬 Line 已發送', description: `需求單已發送到 ${supplierName} 群組` })
+                        onClose()
+                      } else {
+                        const err = await res.json()
+                        toast({ title: 'Line 發送失敗', description: err.error, variant: 'destructive' })
+                      }
+                    } catch (err) {
+                      toast({ title: 'Line 發送失敗', description: String(err), variant: 'destructive' })
+                    }
+                  }}
                 >
                   <MessageCircle size={14} className="mr-1.5" />
-                  Line
-                  <span className="ml-1 text-[10px] bg-muted px-1 rounded">開發中</span>
+                  Line 發送
                 </Button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
