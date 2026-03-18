@@ -64,7 +64,6 @@ export async function POST(
     }
     
     // 4. 產生 tour_request_items（協作確認單細項）
-    // @ts-expect-error - workspace_id exists in DB but not in generated types
     const requestItems = (coreItems || []).map((item, index) => ({
       workspace_id: request.workspace_id,
       request_id: requestId,
