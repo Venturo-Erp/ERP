@@ -291,10 +291,7 @@ export function TransportQuoteDialog({
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="text-lg">
-            給車行報價 — 遊覽車
-            {viewMode === 'traditional' && <span className="text-sm text-muted-foreground ml-2">(傳統樣式)</span>}
-          </DialogTitle>
+          <DialogTitle className="text-lg">給車行報價 — 遊覽車</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto pr-1 space-y-3">
@@ -315,6 +312,8 @@ export function TransportQuoteDialog({
               setSelectedSupplierId={setSelectedSupplierId}
               invoiceSealUrl=""
               onPrint={handleTraditionalPrint}
+              onBackToModern={() => setViewMode('modern')}
+              onClose={onClose}
             />
           ) : (
             <>
@@ -469,14 +468,11 @@ export function TransportQuoteDialog({
         </div>
 
         {/* 底部按鈕 */}
-        <div className="flex-shrink-0 flex justify-end gap-3 pt-3 border-t">
-          {viewMode === 'traditional' && (
-            <Button variant="outline" onClick={() => setViewMode('modern')}>
-              返回現代樣式
-            </Button>
-          )}
-          <Button variant="outline" onClick={onClose}>取消</Button>
-        </div>
+        {viewMode === 'modern' && (
+          <div className="flex-shrink-0 flex justify-end gap-3 pt-3 border-t">
+            <Button variant="outline" onClick={onClose}>取消</Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )

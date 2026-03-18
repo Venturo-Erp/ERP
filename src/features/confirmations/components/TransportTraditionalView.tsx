@@ -34,6 +34,8 @@ interface TransportTraditionalViewProps {
   setSelectedSupplierId: (id: string) => void
   invoiceSealUrl?: string
   onPrint: () => void
+  onBackToModern: () => void
+  onClose: () => void
 }
 
 export function TransportTraditionalView({
@@ -48,45 +50,50 @@ export function TransportTraditionalView({
   setSelectedSupplierId,
   invoiceSealUrl,
   onPrint,
+  onBackToModern,
+  onClose,
 }: TransportTraditionalViewProps) {
   const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId)
 
   return (
-    <div className="bg-white">
+    <div className="bg-white p-6">
       {/* 標題 */}
-      <div className="text-center mb-6">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">廠商需求單</h2>
-        <div className="text-right mt-2 text-sm text-gray-600">角落旅行社</div>
+        <div className="text-right text-sm text-gray-600">
+          <div className="font-semibold">角落旅行社</div>
+          <div className="text-xs">Corner Travel</div>
+        </div>
       </div>
 
       {/* 雙欄資訊 */}
       <div className="grid grid-cols-2 gap-6 mb-6 p-4 border-2 border-[#a8a29e] rounded-lg bg-gradient-to-br from-[#faf8f5] to-[#f5f1ea]">
         {/* 左欄 */}
-        <div className="space-y-2 text-sm">
-          <div className="flex gap-3">
-            <span className="font-semibold text-[#78716c] min-w-[4rem]">團號：</span>
+        <div className="space-y-3 text-sm">
+          <div className="grid grid-cols-[5rem_1fr] gap-2">
+            <span className="font-semibold text-[#78716c]">團號：</span>
             <span className="text-gray-800">{tour?.code || '—'}</span>
           </div>
-          <div className="flex gap-3">
-            <span className="font-semibold text-[#78716c] min-w-[4rem]">團名：</span>
+          <div className="grid grid-cols-[5rem_1fr] gap-2">
+            <span className="font-semibold text-[#78716c]">團名：</span>
             <span className="text-gray-800">{tour?.name || '—'}</span>
           </div>
-          <div className="flex gap-3">
-            <span className="font-semibold text-[#78716c] min-w-[4rem]">人數：</span>
+          <div className="grid grid-cols-[5rem_1fr] gap-2">
+            <span className="font-semibold text-[#78716c]">人數：</span>
             <span className="text-gray-800">{totalPax || '—'} 人</span>
           </div>
-          <div className="flex gap-3">
-            <span className="font-semibold text-[#78716c] min-w-[4rem]">出發日：</span>
+          <div className="grid grid-cols-[5rem_1fr] gap-2">
+            <span className="font-semibold text-[#78716c]">出發日：</span>
             <span className="text-gray-800">{tour?.departure_date || '—'}</span>
           </div>
         </div>
 
         {/* 右欄 - 供應商 */}
-        <div className="space-y-2 text-sm">
-          <div className="flex gap-3 items-center">
-            <span className="font-semibold text-[#78716c] min-w-[4rem]">供應商：</span>
+        <div className="space-y-3 text-sm">
+          <div className="grid grid-cols-[5rem_1fr] gap-2 items-center">
+            <span className="font-semibold text-[#78716c]">供應商：</span>
             <Select value={selectedSupplierId} onValueChange={setSelectedSupplierId}>
-              <SelectTrigger className="flex-1 h-8 bg-white">
+              <SelectTrigger className="h-8 bg-white">
                 <SelectValue placeholder="選擇供應商" />
               </SelectTrigger>
               <SelectContent>
@@ -98,16 +105,16 @@ export function TransportTraditionalView({
               </SelectContent>
             </Select>
           </div>
-          <div className="flex gap-3">
-            <span className="font-semibold text-[#78716c] min-w-[4rem]">聯絡人：</span>
+          <div className="grid grid-cols-[5rem_1fr] gap-2">
+            <span className="font-semibold text-[#78716c]">聯絡人：</span>
             <span className="text-gray-600">{selectedSupplier?.contact_person || '—'}</span>
           </div>
-          <div className="flex gap-3">
-            <span className="font-semibold text-[#78716c] min-w-[4rem]">電話：</span>
+          <div className="grid grid-cols-[5rem_1fr] gap-2">
+            <span className="font-semibold text-[#78716c]">電話：</span>
             <span className="text-gray-600">{selectedSupplier?.phone || '—'}</span>
           </div>
-          <div className="flex gap-3">
-            <span className="font-semibold text-[#78716c] min-w-[4rem]">傳真：</span>
+          <div className="grid grid-cols-[5rem_1fr] gap-2">
+            <span className="font-semibold text-[#78716c]">傳真：</span>
             <span className="text-gray-600">{selectedSupplier?.fax || '—'}</span>
           </div>
         </div>
@@ -176,12 +183,20 @@ export function TransportTraditionalView({
         )}
       </div>
 
-      {/* 列印按鈕 */}
-      <div className="mt-6 flex justify-center">
+      {/* 底部按鈕 */}
+      <div className="mt-6 flex justify-between items-center pt-4 border-t-2 border-[#a8a29e]">
         <Button onClick={onPrint} className="bg-[#a8a29e] hover:bg-[#78716c]">
           <Printer className="mr-2 h-4 w-4" />
           列印需求單
         </Button>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={onBackToModern}>
+            返回現代樣式
+          </Button>
+          <Button variant="outline" onClick={onClose}>
+            取消
+          </Button>
+        </div>
       </div>
     </div>
   )
