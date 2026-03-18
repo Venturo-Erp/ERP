@@ -1,10 +1,8 @@
 'use client';
 
 /**
- * 機器人管理中心視圖 - 列表式
+ * 機器人管理中心視圖 - 列表式（Grid）
  */
-
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 type Bot = {
   id: string;
@@ -57,62 +55,64 @@ export const BotManagementView: React.FC<BotManagementViewProps> = ({
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col p-4">
+      {/* 表頭 */}
+      <div className="border-b border-morandi-container/60">
+        <div className="grid grid-cols-[180px_100px_100px_120px_100px_1fr] px-2 py-2.5 gap-4">
+          <span className="text-xs font-medium text-morandi-secondary">機器人名稱</span>
+          <span className="text-xs font-medium text-morandi-secondary">平台</span>
+          <span className="text-xs font-medium text-morandi-secondary">狀態</span>
+          <span className="text-xs font-medium text-morandi-secondary">帳號</span>
+          <span className="text-xs font-medium text-morandi-secondary text-center">群組數</span>
+          <span className="text-xs font-medium text-morandi-secondary">Webhook URL</span>
+        </div>
+      </div>
+
+      {/* 項目列表 */}
       <div className="flex-1 overflow-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[180px]">機器人名稱</TableHead>
-              <TableHead className="w-[100px]">平台</TableHead>
-              <TableHead className="w-[100px]">狀態</TableHead>
-              <TableHead className="w-[120px]">帳號</TableHead>
-              <TableHead className="w-[100px] text-center">群組數</TableHead>
-              <TableHead className="w-[300px]">Webhook URL</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {bots.map((bot) => {
-              const newGroupsCount = bot.groups?.filter(g => g.is_new).length || 0;
-              return (
-                <TableRow key={bot.id} className="hover:bg-morandi-container/30">
-                  <TableCell className="font-medium">{bot.bot_name}</TableCell>
-                  <TableCell>
-                    <span className="px-2 py-1 bg-morandi-container text-morandi-primary rounded text-xs">
-                      {bot.platform.toUpperCase()}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded text-xs font-medium ${
-                        bot.status === 'active'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
-                      }`}
-                    >
-                      {bot.status === 'active' ? '運行中' : '離線'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-sm text-morandi-secondary">
-                    {bot.bot_username ? `@${bot.bot_username}` : '-'}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <span className="font-medium">{bot.groups?.length || 0}</span>
-                      {newGroupsCount > 0 && (
-                        <span className="px-1.5 py-0.5 bg-amber-500 text-white rounded text-xs">
-                          +{newGroupsCount}
-                        </span>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-xs text-morandi-secondary font-mono truncate max-w-[300px]">
-                    {bot.webhook_url || '-'}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+        {bots.map((bot) => {
+          const newGroupsCount = bot.groups?.filter(g => g.is_new).length || 0;
+          return (
+            <div
+              key={bot.id}
+              className="grid grid-cols-[180px_100px_100px_120px_100px_1fr] px-2 py-3 gap-4 border-b border-morandi-container/30 items-center hover:bg-morandi-container/5"
+            >
+              <div className="font-medium text-sm text-morandi-primary truncate" title={bot.bot_name}>
+                {bot.bot_name}
+              </div>
+              <div>
+                <span className="px-2 py-1 bg-morandi-container text-morandi-primary rounded text-xs">
+                  {bot.platform.toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <span
+                  className={`px-2 py-1 rounded text-xs font-medium ${
+                    bot.status === 'active'
+                      ? 'bg-green-100 text-green-700'
+                      : 'bg-red-100 text-red-700'
+                  }`}
+                >
+                  {bot.status === 'active' ? '運行中' : '離線'}
+                </span>
+              </div>
+              <div className="text-sm text-morandi-secondary">
+                {bot.bot_username ? `@${bot.bot_username}` : '-'}
+              </div>
+              <div className="flex items-center justify-center gap-1">
+                <span className="font-medium">{bot.groups?.length || 0}</span>
+                {newGroupsCount > 0 && (
+                  <span className="px-1.5 py-0.5 bg-amber-500 text-white rounded text-xs">
+                    +{newGroupsCount}
+                  </span>
+                )}
+              </div>
+              <div className="text-xs text-morandi-secondary font-mono truncate" title={bot.webhook_url || ''}>
+                {bot.webhook_url || '-'}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
