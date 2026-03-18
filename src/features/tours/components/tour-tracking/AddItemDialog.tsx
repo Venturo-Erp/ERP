@@ -66,6 +66,7 @@ export function AddItemDialog({
       const { error } = await supabase
         .from('tour_request_items')
         .insert({
+          // @ts-expect-error - workspace_id exists in DB but not in generated types
           workspace_id: request.workspace_id,
           request_id: requestId,
           tour_id: tourId,
