@@ -1,4 +1,10 @@
 #!/bin/bash
+ACCESS_TOKEN="${SUPABASE_ACCESS_TOKEN:-}"
+if [ -z "$ACCESS_TOKEN" ]; then
+  echo "❌ 錯誤：請設定 SUPABASE_ACCESS_TOKEN 環境變數"
+  exit 1
+fi
+
 # ============================================================================
 # Schema Integrity Verification Script
 # ============================================================================
@@ -67,7 +73,7 @@ for fk in "${FKS[@]}"; do
       {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+          'Authorization': "Bearer $ACCESS_TOKEN",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
@@ -111,7 +117,7 @@ CHECK_COUNT=$(node --input-type=module --eval "
     {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+        'Authorization': "Bearer $ACCESS_TOKEN",
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ 
@@ -160,7 +166,7 @@ for idx in "${INDEXES[@]}"; do
       {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+          'Authorization': "Bearer $ACCESS_TOKEN",
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ 
@@ -199,7 +205,7 @@ ORPHAN_ORDERS=$(node --input-type=module --eval "
     {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+        'Authorization': "Bearer $ACCESS_TOKEN",
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ 
@@ -229,7 +235,7 @@ ORPHAN_MEMBERS=$(node --input-type=module --eval "
     {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+        'Authorization': "Bearer $ACCESS_TOKEN",
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ 
@@ -349,7 +355,7 @@ node --input-type=module --eval "
     {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+        'Authorization': "Bearer $ACCESS_TOKEN",
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({ 

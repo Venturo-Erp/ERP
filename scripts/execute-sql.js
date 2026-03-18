@@ -8,7 +8,12 @@ const fs = require('fs')
 const https = require('https')
 
 const PROJECT_REF = 'pfqvdacxowpgfamuvnsn'
-const ACCESS_TOKEN = 'sbp_653aa28afea3e6a714e2acc536eed313bc7b85a0'
+const ACCESS_TOKEN = process.env.SUPABASE_ACCESS_TOKEN
+if (!ACCESS_TOKEN) {
+  console.error('❌ 錯誤：請設定 SUPABASE_ACCESS_TOKEN 環境變數')
+  console.error('   export SUPABASE_ACCESS_TOKEN="your-token-here"')
+  process.exit(1)
+}
 
 // 讀取 SQL 檔案
 const sqlFile = process.argv[2] || 'scripts/clear-test-data.sql'

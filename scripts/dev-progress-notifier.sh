@@ -1,8 +1,15 @@
 #!/bin/bash
 # 開發進度自動通知
 
-TOKEN="7946863178:AAFmvY3qyv8TdW0WHwPBqGvR9l8kvB7Ykaw"
-CHAT_ID="8559214126"
+TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+CHAT_ID="${TELEGRAM_CHAT_ID:-8559214126}"
+
+if [ -z "$TOKEN" ]; then
+  echo "❌ 錯誤：請設定 TELEGRAM_BOT_TOKEN 環境變數"
+  echo "   在 .env.local 設定或執行："
+  echo "   export TELEGRAM_BOT_TOKEN='your-token-here'"
+  exit 1
+fi
 TASK_NAME="$1"
 STATUS="$2"
 DETAIL="$3"

@@ -8,7 +8,11 @@ const https = require('https')
 const fs = require('fs')
 const path = require('path')
 
-const SUPABASE_ACCESS_TOKEN = 'sbp_94746ae5e9ecc9d270d27006ba5ed1d0da0bbaf0'
+const SUPABASE_ACCESS_TOKEN = process.env.SUPABASE_ACCESS_TOKEN
+if (!ACCESS_TOKEN && !SUPABASE_ACCESS_TOKEN) {
+  console.error('❌ 請設定 SUPABASE_ACCESS_TOKEN')
+  process.exit(1)
+}
 const PROJECT_REF = 'pfqvdacxowpgfamuvnsn'
 
 async function executeSQL(sql, description = 'SQL') {

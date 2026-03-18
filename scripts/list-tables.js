@@ -2,7 +2,11 @@
 const https = require('https')
 
 const PROJECT_REF = 'pfqvdacxowpgfamuvnsn'
-const ACCESS_TOKEN = 'sbp_653aa28afea3e6a714e2acc536eed313bc7b85a0'
+const ACCESS_TOKEN = process.env.SUPABASE_ACCESS_TOKEN || process.env.ACCESS_TOKEN
+if (!ACCESS_TOKEN && !SUPABASE_ACCESS_TOKEN) {
+  console.error('❌ 請設定 SUPABASE_ACCESS_TOKEN')
+  process.exit(1)
+}
 
 const sql = `
 SELECT table_name 

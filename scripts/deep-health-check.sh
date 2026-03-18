@@ -1,4 +1,10 @@
 #!/bin/bash
+ACCESS_TOKEN="${SUPABASE_ACCESS_TOKEN:-}"
+if [ -z "$ACCESS_TOKEN" ]; then
+  echo "❌ 錯誤：請設定 SUPABASE_ACCESS_TOKEN 環境變數"
+  exit 1
+fi
+
 # ============================================================================
 # Deep Health Check - 深度系統健康檢查
 # ============================================================================
@@ -53,7 +59,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+      'Authorization': "Bearer $ACCESS_TOKEN",
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
@@ -95,7 +101,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+      'Authorization': "Bearer $ACCESS_TOKEN",
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
@@ -135,7 +141,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+      'Authorization': "Bearer $ACCESS_TOKEN",
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
@@ -191,7 +197,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+      'Authorization': "Bearer $ACCESS_TOKEN",
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
@@ -232,7 +238,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+      'Authorization': "Bearer $ACCESS_TOKEN",
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
@@ -284,7 +290,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+      'Authorization': "Bearer $ACCESS_TOKEN",
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
@@ -337,7 +343,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+      'Authorization': "Bearer $ACCESS_TOKEN",
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
@@ -387,7 +393,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+      'Authorization': "Bearer $ACCESS_TOKEN",
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
@@ -429,7 +435,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+      'Authorization': "Bearer $ACCESS_TOKEN",
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
@@ -521,7 +527,7 @@ const response = await fetch(
   {
     method: 'POST',
     headers: {
-      'Authorization': 'Bearer sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02',
+      'Authorization': "Bearer $ACCESS_TOKEN",
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({ 
