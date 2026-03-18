@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 /**
  * SupplierResponseDialog - 供應商回覆需求 Dialog

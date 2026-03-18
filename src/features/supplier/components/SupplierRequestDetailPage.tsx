@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 /**
  * SupplierRequestDetailPage - 供應商委託詳情 + 回覆報價

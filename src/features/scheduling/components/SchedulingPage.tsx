@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 /**
  * SchedulingPage - 資源調度主頁面

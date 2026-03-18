@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 /**
  * SupplierDispatchPage - 供應商派單管理

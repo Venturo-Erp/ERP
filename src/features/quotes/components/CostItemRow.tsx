@@ -20,7 +20,7 @@ interface CostItemRowProps {
     value: unknown
   ) => void
   handleRemoveItem: (categoryId: string, itemId: string) => void
-  handleToggleVisibility: (categoryId: string, itemId: string) => void
+  handleToggleVisibility?: (categoryId: string, itemId: string) => void
 }
 
 export const CostItemRow: React.FC<CostItemRowProps> = ({

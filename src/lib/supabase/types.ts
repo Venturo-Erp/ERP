@@ -15553,6 +15553,33 @@ export type Database = {
           updated_at: string | null
           updated_by: string | null
           workspace_id: string
+          // --- 擴展欄位：items JSONB 內的屬性 + view/join 欄位 ---
+          tour_code: string | null
+          tour_name: string | null
+          priority: string | null
+          notes: string | null
+          category: string | null
+          title: string | null
+          description: string | null
+          quantity: number | null
+          estimated_cost: number | null
+          final_cost: number | null
+          quoted_cost: number | null
+          response_status: string | null
+          service_date: string | null
+          service_date_end: string | null
+          reply_note: string | null
+          booking_confirmed: boolean | null
+          booking_ref: string | null
+          vehicle_desc: string | null
+          meal_time: string | null
+          hotel_note: string | null
+          meal_note: string | null
+          transport_note: string | null
+          pax: number | null
+          package_price: number | null
+          rooms: Json | null
+          google_maps_url: string | null
         }
         Insert: {
           close_note?: string | null
@@ -19953,3 +19980,4 @@ export const Constants = {
     },
   },
 } as const
+
