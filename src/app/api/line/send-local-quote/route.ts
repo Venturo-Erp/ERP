@@ -18,9 +18,23 @@ export async function POST(req: NextRequest) {
       departureDate,
       totalPax,
       tourId,
+      note,
+      paxTiers, // [20, 30, 40]
     } = body
 
-    const viewUrl = `https://app.cornertravel.com.tw/public/itinerary/${tourId}`
+    // 把梯次和備註編碼到 URL
+    const params = new URLSearchParams()
+    if (paxTiers && Array.isArray(paxTiers)) {
+      params.set('tiers', paxTiers.join(','))
+    }
+    if (note) {
+      params.set('note', note)
+    }
+    if (totalPax) {
+      params.set('pax', totalPax.toString())
+    }
+
+    const viewUrl = `https://app.cornertravel.com.tw/public/itinerary/${tourId}?${params.toString()}`
 
     // 簡化版 Flex Message：團資訊 + 人數 + 查看按鈕（不顯示供應商、不列內容）
     const flexMessage = {

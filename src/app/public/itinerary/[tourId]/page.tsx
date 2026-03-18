@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
+import { QuoteForm } from './QuoteForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -113,8 +114,16 @@ function buildDays(items: ItineraryItem[], departureDate: string): DayData[] {
   return Array.from(dayMap.values()).sort((a, b) => a.dayNumber - b.dayNumber)
 }
 
-export default async function PublicItineraryPage({ params }: { params: Promise<{ tourId: string }> }) {
+export default async function PublicItineraryPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ tourId: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const { tourId } = await params
+  const query = await searchParams
+  
   const data = await getTourItinerary(tourId)
 
   if (!data) {
@@ -123,6 +132,13 @@ export default async function PublicItineraryPage({ params }: { params: Promise<
 
   const { tour, items } = data
   const days = buildDays(items, tour.departureDate)
+
+  // 讀取梯次和備註
+  const tiersStr = query.tiers as string | undefined
+  const noteFromUrl = query.note as string | undefined
+  const paxFromUrl = query.pax as string | undefined
+  
+  const paxTiers = tiersStr ? tiersStr.split(',').map(Number).filter(n => n > 0) : []
 
   return (
     <div style={{ minHeight: '100vh', background: '#fafaf9', padding: '24px 16px' }}>
@@ -212,27 +228,32 @@ export default async function PublicItineraryPage({ params }: { params: Promise<
           </tbody>
         </table>
 
-        {/* 備註 */}
-        <div style={{ marginBottom: 24 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>備註</label>
-          <textarea
-            placeholder="備註..."
-            rows={2}
-            style={{
-              width: '100%',
+        {/* 我們的備註 */}
+        {noteFromUrl && (
+          <div style={{ marginBottom: 24 }}>
+            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
+              我們的備註
+            </label>
+            <div style={{
               padding: '8px 12px',
-              border: '1px solid #ddd',
+              border: '1px solid #e8e5e0',
               borderRadius: 4,
               fontSize: 14,
-              resize: 'vertical',
-              boxSizing: 'border-box',
-            }}
-            readOnly
-          />
-        </div>
+              background: '#fafaf5',
+              whiteSpace: 'pre-wrap',
+            }}>
+              {noteFromUrl}
+            </div>
+          </div>
+        )}
+
+        {/* 供應商回填表單 */}
+        {paxTiers.length > 0 && (
+          <QuoteForm tourId={tourId} tourCode={tour.code} paxTiers={paxTiers} />
+        )}
 
         {/* 頁尾 */}
-        <div style={{ paddingTop: 16, borderTop: '1px solid #e8e5e0', textAlign: 'center', fontSize: 12, color: '#999' }}>
+        <div style={{ paddingTop: 16, borderTop: '1px solid #e8e5e0', textAlign: 'center', fontSize: 12, color: '#999', marginTop: 32 }}>
           <p>本行程表由 角落旅行社 提供</p>
         </div>
       </div>

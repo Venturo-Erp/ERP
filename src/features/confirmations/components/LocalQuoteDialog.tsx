@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Send, Loader2, Printer, Sun, Mail, Phone, Globe } from 'lucide-react'
+import { Send, Loader2, Printer, Sun, Mail, Phone, Globe, Plus, X } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
@@ -63,6 +63,8 @@ export function LocalQuoteDialog({
 }: LocalQuoteDialogProps) {
   const [note, setNote] = useState('')
   const [paxInput, setPaxInput] = useState<string>(totalPax?.toString() || '')
+  const [paxTiers, setPaxTiers] = useState<number[]>([20, 30, 40]) // 人數梯次
+  const [newTierInput, setNewTierInput] = useState('')
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string }[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [sending, setSending] = useState(false)
@@ -229,6 +231,25 @@ export function LocalQuoteDialog({
     }
   }
 
+  // 梯次管理
+  const handleAddTier = () => {
+    const num = parseInt(newTierInput)
+    if (!num || num <= 0) {
+      toast({ title: '請輸入有效的人數', variant: 'destructive' })
+      return
+    }
+    if (paxTiers.includes(num)) {
+      toast({ title: '此梯次已存在', variant: 'destructive' })
+      return
+    }
+    setPaxTiers([...paxTiers, num].sort((a, b) => a - b))
+    setNewTierInput('')
+  }
+
+  const handleRemoveTier = (num: number) => {
+    setPaxTiers(paxTiers.filter(t => t !== num))
+  }
+
   // LINE 發送
   const handleSendLine = async () => {
     if (!selectedGroupId || !tour) return
@@ -246,6 +267,7 @@ export function LocalQuoteDialog({
           totalPax: pax,
           tourId: tour.id,
           note,
+          paxTiers, // 加上梯次資料
         }),
       })
       const result = await res.json()
@@ -358,6 +380,48 @@ export function LocalQuoteDialog({
               </tbody>
             </table>
           )}
+
+          {/* 人數梯次設定 */}
+          <div className="pt-2">
+            <label className="text-sm font-medium mb-1.5 block">報價梯次（供應商會看到這些人數選項）</label>
+            <div className="flex flex-wrap items-center gap-2">
+              {paxTiers.map(num => (
+                <div
+                  key={num}
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-[#faf8f5] border border-[#c9a96e] rounded-full text-sm"
+                >
+                  <span className="font-semibold">{num} 人團</span>
+                  <button
+                    onClick={() => handleRemoveTier(num)}
+                    className="text-muted-foreground hover:text-destructive transition"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+              <div className="inline-flex items-center gap-1">
+                <Input
+                  type="number"
+                  value={newTierInput}
+                  onChange={e => setNewTierInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleAddTier()}
+                  placeholder="新增人數"
+                  className="h-8 w-24 text-sm"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleAddTier}
+                  className="h-8 px-2"
+                >
+                  <Plus size={14} />
+                </Button>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              供應商會看到這些梯次選項並填寫每人報價
+            </p>
+          </div>
 
           {/* 備註 */}
           <div className="pt-2">
