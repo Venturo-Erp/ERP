@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
@@ -137,6 +138,60 @@ export async function POST(req: NextRequest) {
     if (!res.ok) {
       const err = await res.text()
       return NextResponse.json({ error: `LINE API error: ${res.status} ${err}` }, { status: 500 })
+    }
+
+    // 建立 tour_requests 記錄（記錄發送）
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+
+    // 取得 workspace_id（從 tours 表）
+    const { data: tour } = await supabase
+      .from('tours')
+      .select('workspace_id')
+      .eq('id', tourId)
+      .single()
+
+    if (tour) {
+      // 檢查是否已有此團的整包報價需求單
+      const { data: existingRequest } = await supabase
+        .from('tour_requests')
+        .select('id')
+        .eq('tour_id', tourId)
+        .eq('request_scope', 'full_package')
+        .maybeSingle()
+
+      if (!existingRequest) {
+        // 建立新的需求單記錄
+        await supabase
+          .from('tour_requests')
+          .insert({
+            workspace_id: tour.workspace_id,
+            tour_id: tourId,
+            request_type: 'other',
+            request_scope: 'full_package',
+            supplier_name: 'Local 供應商',
+            status: '已發送',
+            sent_at: new Date().toISOString(),
+            sent_via: 'Line',
+            sent_to: lineGroupId,
+            line_group_id: lineGroupId,
+            note,
+          })
+      } else {
+        // 更新現有記錄
+        await supabase
+          .from('tour_requests')
+          .update({
+            sent_at: new Date().toISOString(),
+            sent_via: 'Line',
+            sent_to: lineGroupId,
+            line_group_id: lineGroupId,
+            note,
+          })
+          .eq('id', existingRequest.id)
+      }
     }
 
     return NextResponse.json({ success: true })

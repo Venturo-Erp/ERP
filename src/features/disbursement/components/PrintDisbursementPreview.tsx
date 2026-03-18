@@ -65,11 +65,12 @@ function processItems(
       ? request?.request_type || DISBURSEMENT_LABELS.公司
       : request?.tour_name || '-'
 
-    // 有代墊人時，付款對象是代墊人（公司要付錢給代墊的員工）
+    // 有代墊人時，付款對象是「代墊人（代墊 廠商）」
     const advancedBy = (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined
+    const supplierName = item.supplier_name || DISBURSEMENT_LABELS.未指定供應商
     const payFor = advancedBy
-      ? `${advancedBy}（代墊）`
-      : item.supplier_name || DISBURSEMENT_LABELS.未指定供應商
+      ? `${advancedBy}（代墊 ${supplierName}）`
+      : supplierName
 
     return {
       requestCode: request?.code || '-',

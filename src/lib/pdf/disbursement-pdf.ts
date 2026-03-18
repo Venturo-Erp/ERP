@@ -52,12 +52,18 @@ function processItems(
 
   return paymentRequestItems.map(item => {
     const request = requestMap.get(item.request_id)
+    const advancedBy = (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined
+    const supplierName = item.supplier_name || DISBURSEMENT_PDF_LABELS.UNSPECIFIED_SUPPLIER
+    const payFor = advancedBy
+      ? `${advancedBy}（代墊 ${supplierName}）`
+      : supplierName
+    
     return {
       requestCode: request?.code || '-',
       createdBy: request?.created_by_name || '-',
       tourName: request?.tour_name || '-',
       description: item.description || item.category || '-',
-      payFor: item.supplier_name || DISBURSEMENT_PDF_LABELS.UNSPECIFIED_SUPPLIER,
+      payFor,
       amount: item.subtotal || 0,
     }
   })

@@ -38,14 +38,12 @@ export async function POST(req: NextRequest) {
       .single()
 
     const quoteData = {
-      tour_id: tourId,
-      tour_code: tourCode,
-      contact_person: contact,
-      contact_phone: phone,
-      tier_prices: tierPrices,
-      single_room_supplement: singleRoomSupplement,
-      tip_note: tipNote,
-      supplier_note: supplierNote,
+      contact,
+      phone,
+      tierPrices,
+      singleRoomSupplement,
+      tipNote,
+      supplierNote,
       submitted_at: new Date().toISOString(),
     }
 
@@ -53,19 +51,26 @@ export async function POST(req: NextRequest) {
       // 更新現有需求單的 supplier_response
       await supabase
         .from('tour_requests')
-        .update({ supplier_response: quoteData })
+        .update({ 
+          supplier_response: quoteData,
+          replied_at: new Date().toISOString(),
+          package_status: 'quoted',
+        })
         .eq('id', existingRequest.id)
     } else {
-      // 建立新需求單（或存到專門的 local_quotes 表）
+      // 建立新需求單
       // 這裡簡單處理，先存到 tour_requests
       await supabase
         .from('tour_requests')
         .insert({
           tour_id: tourId,
           request_type: 'other',
+          request_scope: 'full_package', // 標記為整包報價
           supplier_name: 'Local 供應商',
-          status: 'confirmed',
+          status: '已回覆',
           supplier_response: quoteData,
+          replied_at: new Date().toISOString(),
+          package_status: 'quoted',
         })
     }
 
