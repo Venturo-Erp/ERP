@@ -132,8 +132,9 @@ export function TransportQuoteDialog({
       if (!dayMap.has(dn)) {
         let dateStr = ''
         let weekday = ''
-        if (startDate) {
-          const d = new Date(startDate)
+        const baseDate = startDate || tour?.departure_date
+        if (baseDate) {
+          const d = new Date(baseDate)
           d.setDate(d.getDate() + dn - 1)
           dateStr = `${d.getMonth() + 1}/${d.getDate()}`
           weekday = WEEKDAYS[d.getDay()]
