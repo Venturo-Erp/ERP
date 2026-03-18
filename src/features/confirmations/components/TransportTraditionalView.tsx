@@ -66,50 +66,90 @@ export function TransportTraditionalView({
         <div className="space-y-3 text-sm">
           <div className="grid grid-cols-[5rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">團號：</span>
-            <span className="text-gray-800">{tour?.code || '—'}</span>
+            <input
+              type="text"
+              value={tour?.code || ''}
+              readOnly
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+            />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">團名：</span>
-            <span className="text-gray-800">{tour?.name || '—'}</span>
+            <input
+              type="text"
+              value={tour?.name || ''}
+              readOnly
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+            />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">人數：</span>
-            <span className="text-gray-800">{totalPax || '—'} 人</span>
+            <input
+              type="text"
+              value={totalPax ? `${totalPax} 人` : ''}
+              readOnly
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+            />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
-            <span className="font-semibold text-[#78716c]">出發日：</span>
-            <span className="text-gray-800">{tour?.departure_date || '—'}</span>
+            <span className="font-semibold text-[#78716c]">業務：</span>
+            <input
+              type="text"
+              placeholder="業務人員"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+            />
           </div>
         </div>
 
         {/* 右欄 - 供應商 */}
         <div className="space-y-3 text-sm">
-          <div className="grid grid-cols-[5rem_1fr] gap-2 items-center">
+          <div className="grid grid-cols-[5rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">供應商：</span>
-            <Select value={selectedSupplierId} onValueChange={setSelectedSupplierId}>
-              <SelectTrigger className="h-8 bg-white">
-                <SelectValue placeholder="選擇供應商" />
-              </SelectTrigger>
-              <SelectContent>
-                {suppliers.map(s => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <input
+              type="text"
+              value={selectedSupplier?.name || ''}
+              onChange={(e) => {
+                // 允許手動輸入供應商名稱
+                const name = e.target.value
+                const match = suppliers.find(s => s.name === name)
+                if (match) setSelectedSupplierId(match.id)
+              }}
+              placeholder="選擇或輸入供應商"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+              list="suppliers-list"
+            />
+            <datalist id="suppliers-list">
+              {suppliers.map(s => (
+                <option key={s.id} value={s.name} />
+              ))}
+            </datalist>
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">聯絡人：</span>
-            <span className="text-gray-600">{selectedSupplier?.contact_person || '—'}</span>
+            <input
+              type="text"
+              value={selectedSupplier?.contact_person || ''}
+              readOnly
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-600"
+            />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">電話：</span>
-            <span className="text-gray-600">{selectedSupplier?.phone || '—'}</span>
+            <input
+              type="text"
+              value={selectedSupplier?.phone || ''}
+              readOnly
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-600"
+            />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">傳真：</span>
-            <span className="text-gray-600">{selectedSupplier?.fax || '—'}</span>
+            <input
+              type="text"
+              value={selectedSupplier?.fax || ''}
+              readOnly
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-600"
+            />
           </div>
         </div>
       </div>
