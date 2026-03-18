@@ -31,6 +31,9 @@ import { useAuthStore } from '@/stores'
 import type { Tour } from '@/stores/types'
 import { RoomRequirementDialog } from './RoomRequirementDialog'
 import { TransportQuoteDialog } from './TransportQuoteDialog'
+import { AccommodationQuoteDialog } from './AccommodationQuoteDialog'
+import { MealQuoteDialog } from './MealQuoteDialog'
+import { ActivityQuoteDialog } from './ActivityQuoteDialog'
 import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSupplierDialog'
 import { LocalQuoteDialog } from './LocalQuoteDialog'
 // CostCategory 已不需要 — 需求單直接讀核心表
@@ -98,6 +101,9 @@ export function RequirementsList({
     name: string
     resourceId: string | null
   } | null>(null)
+  const [showAccommodationDialog, setShowAccommodationDialog] = useState(false)
+  const [showMealDialog, setShowMealDialog] = useState(false)
+  const [showActivityDialog, setShowActivityDialog] = useState(false)
   // 勾選項目 + 發給供應商
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set())
   const [showAssignDialog, setShowAssignDialog] = useState(false)
@@ -1322,7 +1328,15 @@ export function RequirementsList({
                               if (draft) {
                                 return (
                                   <Button variant="outline" size="sm"
-                                    onClick={() => handlePrintRequest(draft, item)}
+                                    onClick={() => {
+                                      setSelectedHotel({
+                                        name: supplierName,
+                                        resourceId: item.resourceId ?? null,
+                                        serviceDate: item.serviceDate ?? null,
+                                        nights: item.quantity || 1,
+                                      })
+                                      setShowAccommodationDialog(true)
+                                    }}
                                     className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50">
                                     <Printer size={12} className="mr-1" />列印需求單
                                   </Button>
@@ -1396,11 +1410,28 @@ export function RequirementsList({
                               )
                             }
 
-                            // 餐廳/活動：直接列印（不需 Dialog）
-                            if (cat.key === 'meal' || cat.key === 'activity') {
+                            // 餐廳
+                            if (cat.key === 'meal') {
                               return (
                                 <Button variant="outline" size="sm"
-                                  onClick={() => handlePrintSimpleRequest(cat.key, cat.label, item)}
+                                  onClick={() => {
+                                    setSelectedTransport({ name: supplierName, resourceId: item.resourceId ?? null })
+                                    setShowMealDialog(true)
+                                  }}
+                                  className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50">
+                                  <Printer size={12} className="mr-1" />列印需求單
+                                </Button>
+                              )
+                            }
+
+                            // 活動
+                            if (cat.key === 'activity') {
+                              return (
+                                <Button variant="outline" size="sm"
+                                  onClick={() => {
+                                    setSelectedTransport({ name: supplierName, resourceId: item.resourceId ?? null })
+                                    setShowActivityDialog(true)
+                                  }}
                                   className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50">
                                   <Printer size={12} className="mr-1" />列印需求單
                                 </Button>
@@ -1754,7 +1785,81 @@ export function RequirementsList({
         />
       )}
 
-      {/* 住宿需求 Dialog */}
+      {/* 住宿報價 Dialog */}
+      {selectedHotel && tour && (
+        <AccommodationQuoteDialog
+          open={showAccommodationDialog}
+          onClose={() => { setShowAccommodationDialog(false); setSelectedHotel(null) }}
+          tour={{
+            id: tour.id,
+            code: tour.code,
+            name: tour.name,
+            departure_date: tour.departure_date,
+          }}
+          totalPax={totalPax}
+          accommodations={coreItems
+            .filter(it => it.item_category === 'accommodation' && it.supplier_name === selectedHotel.name)
+            .map(it => ({
+              checkIn: it.service_date || '',
+              roomType: it.item_name,
+              bedType: '',
+              quantity: it.quantity || 1,
+              note: it.note || '',
+            }))}
+          supplierName={selectedHotel.name}
+        />
+      )}
+
+      {/* 餐食報價 Dialog */}
+      {selectedTransport && tour && (
+        <MealQuoteDialog
+          open={showMealDialog}
+          onClose={() => { setShowMealDialog(false); setSelectedTransport(null) }}
+          tour={{
+            id: tour.id,
+            code: tour.code,
+            name: tour.name,
+            departure_date: tour.departure_date,
+          }}
+          totalPax={totalPax}
+          meals={coreItems
+            .filter(it => it.item_category === 'meal' && it.supplier_name === selectedTransport.name)
+            .map(it => ({
+              date: it.service_date || '',
+              time: it.meal_type || '',
+              price: '',
+              quantity: it.quantity || 1,
+              note: it.note || '',
+            }))}
+          supplierName={selectedTransport.name}
+        />
+      )}
+
+      {/* 活動報價 Dialog */}
+      {selectedTransport && tour && (
+        <ActivityQuoteDialog
+          open={showActivityDialog}
+          onClose={() => { setShowActivityDialog(false); setSelectedTransport(null) }}
+          tour={{
+            id: tour.id,
+            code: tour.code,
+            name: tour.name,
+            departure_date: tour.departure_date,
+          }}
+          totalPax={totalPax}
+          activities={coreItems
+            .filter(it => it.item_category === 'activity' && it.supplier_name === selectedTransport.name)
+            .map(it => ({
+              time: it.service_date || '',
+              venue: it.item_name,
+              quantity: it.quantity || 1,
+              note: it.note || '',
+            }))}
+          supplierName={selectedTransport.name}
+        />
+      )}
+
+      {/* 住宿需求 Dialog（新增用）*/}
       {selectedHotel && (
         <RoomRequirementDialog
           open={showRoomDialog}
