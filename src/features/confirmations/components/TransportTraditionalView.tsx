@@ -126,11 +126,9 @@ export function TransportTraditionalView({
         <table className="w-full border-collapse text-sm">
           <thead>
             <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-gray-800">
-              <th className="border border-[#a8a29e] px-3 py-2 text-left w-24">天數</th>
-              <th className="border border-[#a8a29e] px-3 py-2 text-left w-28">日期</th>
+              <th className="border border-[#a8a29e] px-3 py-2 text-left w-20">天數</th>
+              <th className="border border-[#a8a29e] px-3 py-2 text-left w-24">日期</th>
               <th className="border border-[#a8a29e] px-3 py-2 text-left">行程內容</th>
-              <th className="border border-[#a8a29e] px-3 py-2 text-left w-28">車資報價</th>
-              <th className="border border-[#a8a29e] px-3 py-2 text-left w-28">備註</th>
             </tr>
           </thead>
           <tbody>
@@ -139,18 +137,89 @@ export function TransportTraditionalView({
                 <td className="border border-[#a8a29e] px-3 py-2 font-medium">Day {day.dayNumber}</td>
                 <td className="border border-[#a8a29e] px-3 py-2 text-gray-600">{day.date}</td>
                 <td className="border border-[#a8a29e] px-3 py-2">{day.route}</td>
-                <td className="border border-[#a8a29e] px-3 py-2"></td>
-                <td className="border border-[#a8a29e] px-3 py-2"></td>
               </tr>
             ))}
             {vehicleDesc && (
               <tr>
-                <td colSpan={5} className="border border-[#a8a29e] px-3 py-2 bg-[#f5f1ea]">
+                <td colSpan={3} className="border border-[#a8a29e] px-3 py-2 bg-[#f5f1ea]">
                   <strong className="text-[#78716c]">車型需求：</strong>
                   <span className="ml-2">{vehicleDesc}</span>
                 </td>
               </tr>
             )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* 報價欄位 */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold text-[#78716c] mb-3">報價欄位</h3>
+        <table className="w-full border-collapse text-sm">
+          <tbody>
+            <tr className="bg-white">
+              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c] w-48">車資（總金額）</td>
+              <td className="border border-[#a8a29e] px-3 py-3">NT$ _________________</td>
+            </tr>
+            <tr className="bg-[#fafaf8]">
+              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">是否含停車費</td>
+              <td className="border border-[#a8a29e] px-3 py-3">
+                <span className="inline-flex items-center gap-4">
+                  <label className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
+                    是
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
+                    否
+                  </label>
+                </span>
+              </td>
+            </tr>
+            <tr className="bg-white">
+              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">是否含過路費</td>
+              <td className="border border-[#a8a29e] px-3 py-3">
+                <span className="inline-flex items-center gap-4">
+                  <label className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
+                    是
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
+                    否
+                  </label>
+                </span>
+              </td>
+            </tr>
+            <tr className="bg-[#fafaf8]">
+              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">是否含司機住宿</td>
+              <td className="border border-[#a8a29e] px-3 py-3">
+                <span className="inline-flex items-center gap-4">
+                  <label className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
+                    是
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
+                    否，住宿費：NT$ __________
+                  </label>
+                </span>
+              </td>
+            </tr>
+            <tr className="bg-white">
+              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">是否含小費</td>
+              <td className="border border-[#a8a29e] px-3 py-3">
+                <span className="inline-flex items-center gap-4">
+                  <label className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
+                    是
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
+                    否，小費：NT$ __________
+                  </label>
+                </span>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
