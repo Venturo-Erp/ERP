@@ -66,7 +66,7 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-2"></div>
-          <p className="text-sm text-gray-600">載入中...</p>
+          <p className="text-sm text-morandi-secondary">載入中...</p>
         </div>
       </div>
     );
@@ -76,7 +76,7 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <p className="text-gray-600">
+          <p className="text-morandi-primary">
             {taskType === 'individual' ? '暫無獨立任務' : '暫無工作流任務'}
           </p>
         </div>
@@ -90,18 +90,18 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
         {tasks.map((task) => (
           <div
             key={task.id}
-            className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer"
+            className="bg-white rounded-lg border border-border p-4 hover:shadow-md transition-shadow cursor-pointer"
           >
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <h3 className="font-semibold text-gray-900">{task.title}</h3>
+                  <h3 className="font-semibold text-morandi-primary">{task.title}</h3>
                   <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(task.priority)}`}>
                     {task.priority}
                   </span>
                 </div>
                 {task.description && (
-                  <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+                  <p className="text-sm text-morandi-secondary mt-1">{task.description}</p>
                 )}
               </div>
             </div>
@@ -109,10 +109,10 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
             <div className="flex items-center gap-6 text-sm">
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-gray-500">進度</span>
-                  <span className="text-gray-700 font-medium">{task.progress}%</span>
+                  <span className="text-morandi-secondary">進度</span>
+                  <span className="text-morandi-primary font-medium">{task.progress}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-morandi-container rounded-full h-2">
                   <div
                     className="bg-amber-600 h-2 rounded-full transition-all"
                     style={{ width: `${task.progress}%` }}
@@ -125,7 +125,7 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
                   {task.assignees.map((assignee) => (
                     <span
                       key={assignee}
-                      className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded text-xs"
+                      className="px-2 py-0.5 bg-morandi-container text-morandi-primary rounded text-xs"
                     >
                       {assignee}
                     </span>
@@ -133,7 +133,7 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
                 </div>
               )}
 
-              <div className="text-gray-500 text-xs">
+              <div className="text-morandi-secondary text-xs">
                 {new Date(task.created_at).toLocaleDateString('zh-TW')}
               </div>
             </div>

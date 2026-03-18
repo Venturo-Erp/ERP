@@ -1,8 +1,8 @@
 'use client';
 
 /**
- * 作战会议室 (War Room)
- * William 的中央控制台 - 魔法塔图书馆 + 机器人管理
+ * 作戰會議室 (War Room)
+ * William 的中央控制台 - 魔法圖書館 + 機器人管理
  */
 
 import { useState, useEffect } from 'react';
@@ -14,7 +14,6 @@ import { TasksView } from './TasksView';
 
 // War Room 用的表（magic_library, bot_registry, tasks）不在 generated types 中
 // 統一用 untyped client 避免 TS 無限遞迴
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const supabase = typedSupabase as any;
 
 type TabType = 'magic' | 'bots' | 'tasks-individual' | 'tasks-workflow';

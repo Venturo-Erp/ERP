@@ -46,7 +46,7 @@ export const WarRoomHeader: React.FC<WarRoomHeaderProps> = ({
       tabs={[
         { 
           value: 'magic', 
-          label: `魔法塔圖書館 (${magicCount})`, 
+          label: `魔法圖書館 (${magicCount})`, 
           icon: BookOpen 
         },
         { 

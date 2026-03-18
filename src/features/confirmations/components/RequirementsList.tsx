@@ -1772,6 +1772,8 @@ export function RequirementsList({
           tour={tour}
           transportDays={transportDays}
           totalPax={totalPax}
+          coreItems={coreItems}
+          startDate={startDate}
         />
       )}
     </>
