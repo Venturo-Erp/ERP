@@ -199,6 +199,9 @@ function splitLargeGroups(groups: PayForGroup[], maxSize = 5): PayForGroup[] {
       // 計算該收款人的所有行數
       const totalRows = pg.indices.reduce((sum, gIdx) => sum + result[gIdx].items.length, 0)
       ;(group as any).subtotalRowSpan = totalRows
+      // 強制設定 showTotal=true（確保顯示小計）
+      group.showTotal = true
+      group.total = pg.total
     } else {
       ;(group as any).subtotalRowSpan = 0 // 不顯示小計欄位
     }
@@ -434,6 +437,9 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                     const { payee: groupPayee, supplier: groupSupplier } = splitPayFor(group.payFor)
                     const subtotalRowSpan = (group as any).subtotalRowSpan || 0
                     const showSubtotalCell = subtotalRowSpan > 0 && isFirstInGroup
+                    if (isFirstInGroup) {
+                      console.log(`[Tour] Group ${groupIdx}: payFor=${group.payFor}, subtotalRowSpan=${subtotalRowSpan}, showSubtotalCell=${showSubtotalCell}, showTotal=${group.showTotal}, total=${group.total}`)
+                    }
                     return (
                       <tr key={`tour-${groupIdx}-${itemIdx}`}>
                         {isFirstInGroup && (

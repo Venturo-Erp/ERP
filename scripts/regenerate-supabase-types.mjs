@@ -26,8 +26,8 @@ async function getSchema() {
     throw new Error(`Failed to fetch types: ${response.status} ${error}`)
   }
   
-  const types = await response.text()
-  return types
+  const data = await response.json()
+  return data.types || data
 }
 
 async function writeTypes(types) {
