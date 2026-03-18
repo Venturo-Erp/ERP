@@ -25,6 +25,7 @@ import { useTourItineraryItemsByTour } from '@/features/tours/hooks/useTourItine
 import { coreItemsToCostCategories } from '@/features/quotes/utils/core-table-adapter'
 import { useAuthStore } from '@/stores'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/supabase/client'
 import type { QuoteConfirmationStatus } from '@/types/quote.types'
 import {
   QuoteHeader,
@@ -184,6 +185,32 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
     groupSize,
     groupSizeForGuide,
   })
+
+  // 切換項目在報價單/需求單的顯示狀態
+  const handleToggleVisibility = useCallback(async (categoryId: string, itemId: string) => {
+    const category = categories.find(c => c.id === categoryId)
+    if (!category) return
+
+    const item = category.items.find(i => i.id === itemId)
+    if (!item?.itinerary_item_id) return
+
+    const newVisibility = !item.show_on_quote
+    
+    // 更新資料庫
+    const { error } = await supabase
+      .from('tour_itinerary_items')
+      .update({ show_on_quote: newVisibility })
+      .eq('id', item.itinerary_item_id)
+
+    if (error) {
+      toast.error('更新顯示狀態失敗')
+      return
+    }
+
+    // 重新載入核心表
+    refreshCoreItems()
+    toast.success(newVisibility ? '已顯示' : '已隱藏')
+  }, [categories, refreshCoreItems])
 
   // Calculations hook
   const calculations = useQuoteCalculations({
@@ -512,6 +539,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
                         handleAddActivity={categoryOps.handleAddActivity}
                         handleUpdateItem={categoryOps.handleUpdateItem}
                         handleRemoveItem={categoryOps.handleRemoveItem}
+                        handleToggleVisibility={handleToggleVisibility}
                         onOpenLocalPricingDialog={
                           category.id === 'group-transport'
                             ? () => setShowLocalPricingDialog(true)

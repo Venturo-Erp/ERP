@@ -180,7 +180,7 @@ export function DisbursementItemList({
                       : request.tour_name || '-'}
                   </td>
                   <td className="py-3 px-4 text-morandi-secondary">
-                    {request.created_at?.split('T')[0] || '-'}
+                    {request.request_date || request.created_at?.split('T')[0] || '-'}
                   </td>
                   <td className="py-3 px-4 text-morandi-secondary">
                     {request.created_by_name || '-'}

@@ -89,6 +89,99 @@ function DeferredInput({
   )
 }
 
+/**
+ * 支援算式的數字輸入元件
+ * 可輸入 "1000+2000+3000"，blur 時自動計算為 6000
+ * 全形符號（＋－＊／）自動轉半形
+ */
+function CalcInput({
+  value,
+  onChange,
+  className,
+  placeholder,
+}: {
+  value: number
+  onChange: (value: number) => void
+  className?: string
+  placeholder?: string
+}) {
+  const [displayValue, setDisplayValue] = useState(value ? String(value) : '')
+  const focusedRef = useRef(false)
+
+  // 只在非聚焦時同步外部值（避免打字中被蓋掉）
+  useEffect(() => {
+    if (!focusedRef.current) {
+      setDisplayValue(value ? String(value) : '')
+    }
+  }, [value])
+
+  // 全形轉半形（數字 + 運算符號）
+  const normalize = (str: string) =>
+    str
+      // 全形數字 → 半形
+      .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+      // 全形運算符 → 半形
+      .replace(/＋/g, '+')
+      .replace(/－/g, '-')
+      .replace(/＊/g, '*')
+      .replace(/×/g, '*')
+      .replace(/／/g, '/')
+      .replace(/÷/g, '/')
+      // 全形小數點
+      .replace(/．/g, '.')
+      // 移除逗號（千分位）
+      .replace(/，/g, '')
+      .replace(/,/g, '')
+      // 只保留數字和運算符
+      .replace(/[^\d+\-*/.]/g, '')
+
+  // 安全計算算式（只允許數字和 +-*/）
+  const evaluate = (expr: string): number => {
+    const normalized = normalize(expr)
+    if (!normalized) return 0
+    try {
+      // 拆成加減項計算，避免 eval
+      const result = normalized
+        .split('+')
+        .reduce((sum, part) => {
+          if (part.includes('-')) {
+            const [first, ...rest] = part.split('-')
+            return sum + (parseFloat(first) || 0) - rest.reduce((s, v) => s + (parseFloat(v) || 0), 0)
+          }
+          return sum + (parseFloat(part) || 0)
+        }, 0)
+      return Math.round(result * 100) / 100
+    } catch {
+      return parseFloat(normalized) || 0
+    }
+  }
+
+  const handleBlur = () => {
+    const result = evaluate(displayValue)
+    setDisplayValue(result ? String(result) : '')
+    onChange(result)
+  }
+
+  return (
+    <input
+      type="text"
+      inputMode="decimal"
+      value={displayValue}
+      onChange={e => setDisplayValue(e.target.value)}
+      onFocus={() => { focusedRef.current = true }}
+      onBlur={() => { focusedRef.current = false; handleBlur() }}
+      onKeyDown={e => {
+        if (e.key === 'Enter') {
+          e.preventDefault()
+          e.currentTarget.blur()
+        }
+      }}
+      placeholder={placeholder}
+      className={className}
+    />
+  )
+}
+
 // 每列高度約 48px，固定顯示 4 列
 const ROW_HEIGHT = 48
 const VISIBLE_ROWS = 4
@@ -251,10 +344,9 @@ export function EditableRequestItemList({
 
             {/* Unit Price */}
             <div>
-              <input
-                type="number"
-                value={item.unit_price || ''}
-                onChange={e => updateItem(item.id, { unit_price: parseFloat(e.target.value) || 0 })}
+              <CalcInput
+                value={item.unit_price}
+                onChange={val => updateItem(item.id, { unit_price: val })}
                 placeholder="0"
                 className={`${inputClass} text-right placeholder:text-morandi-muted`}
               />
@@ -262,10 +354,9 @@ export function EditableRequestItemList({
 
             {/* Quantity */}
             <div>
-              <input
-                type="number"
-                value={item.quantity || ''}
-                onChange={e => updateItem(item.id, { quantity: parseInt(e.target.value) || 1 })}
+              <CalcInput
+                value={item.quantity}
+                onChange={val => updateItem(item.id, { quantity: val || 1 })}
                 placeholder="1"
                 className={`${inputClass} text-center placeholder:text-morandi-muted`}
               />

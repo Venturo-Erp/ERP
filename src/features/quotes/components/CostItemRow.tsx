@@ -2,6 +2,7 @@ import React from 'react'
 import { CostItem } from '../types'
 import { ResourceSelectButton } from './ResourceSelectButton'
 import { CalcInput } from '@/components/ui/calc-input'
+import { EyeOff } from 'lucide-react'
 import {
   ACCOMMODATION_ITEM_ROW_LABELS,
   CATEGORY_SECTION_LABELS,
@@ -19,6 +20,7 @@ interface CostItemRowProps {
     value: unknown
   ) => void
   handleRemoveItem: (categoryId: string, itemId: string) => void
+  handleToggleVisibility: (categoryId: string, itemId: string) => void
 }
 
 export const CostItemRow: React.FC<CostItemRowProps> = ({
@@ -26,6 +28,7 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
   categoryId,
   handleUpdateItem,
   handleRemoveItem,
+  handleToggleVisibility,
 }) => {
   // 判斷是否為兒童或嬰兒（顯示為灰色）
   const isChildOrInfantTicket =
@@ -162,6 +165,15 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
                 {COST_ITEM_ROW_LABELS.LABEL_2796}
               </button>
             )}
+            {/* 隱藏/顯示按鈕（眼睛圖示） */}
+            <button
+              onClick={() => handleToggleVisibility(categoryId, item.id)}
+              className="w-4 h-4 flex items-center justify-center text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 rounded transition-all"
+              title="在報價單和需求單隱藏此項目（免費景點等不需要報價的項目）"
+            >
+              <EyeOff size={14} />
+            </button>
+            {/* 刪除按鈕 */}
             <button
               onClick={() => handleRemoveItem(categoryId, item.id)}
               className="w-4 h-4 flex items-center justify-center text-xs text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 rounded transition-all"

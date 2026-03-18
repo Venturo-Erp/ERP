@@ -266,6 +266,15 @@ export function TourRequestFormDialog({
   const columns = CATEGORY_COLUMNS[category] || CATEGORY_COLUMNS.other
   const categoryName = CATEGORY_NAMES[category] || TOUR_REQUEST_FORM_DIALOG_LABELS.需求
 
+  // 各分類的 placeholder 提示
+  const titlePlaceholder: Record<string, string> = {
+    hotel: '例：標準雙人房',
+    restaurant: '例：午餐/晚餐',
+    transport: '例：43人座遊覽車',
+    activity: '例：門票/體驗活動',
+    other: '輸入項目說明',
+  }
+
   // 更新項目
   const updateItem = (id: string, field: keyof RequestItem, value: string | number) => {
     setItems(prev => prev.map(item => (item.id === id ? { ...item, [field]: value } : item)))
@@ -894,7 +903,8 @@ export function TourRequestFormDialog({
                       <input
                         value={item.title}
                         onChange={e => updateItem(item.id, 'title', e.target.value)}
-                        className="w-full h-9 px-3 text-sm bg-transparent border-0 focus:outline-none focus:bg-morandi-container/20"
+                        placeholder={titlePlaceholder[category] || '輸入項目說明'}
+                        className="w-full h-9 px-3 text-sm bg-transparent border-0 focus:outline-none focus:bg-morandi-container/20 placeholder:text-morandi-muted/50"
                       />
                     </td>
                     <td className="p-0">

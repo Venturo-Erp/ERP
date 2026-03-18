@@ -46,6 +46,8 @@ export function coreItemsToQuoteItems(
   calculateDate: (dayNum: number) => string | null
 ): QuoteItem[] {
   const filtered = items.filter(item => {
+    // 過濾在報價單隱藏的項目
+    if (item.show_on_quote === false) return false
     // 過濾自理餐食
     if (item.category === 'meals' && item.title?.includes('自理')) return false
     if (!item.title) return false

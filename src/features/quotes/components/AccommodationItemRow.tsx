@@ -2,6 +2,7 @@ import React from 'react'
 import { CostItem } from '../types'
 import { CalcInput } from '@/components/ui/calc-input'
 import { cn } from '@/lib/utils'
+import { EyeOff } from 'lucide-react'
 import { ACCOMMODATION_ITEM_ROW_LABELS } from '../constants/labels'
 
 interface AccommodationItemRowProps {
@@ -20,6 +21,7 @@ interface AccommodationItemRowProps {
     value: unknown
   ) => void
   handleRemoveItem: (categoryId: string, itemId: string) => void
+  handleToggleVisibility: (categoryId: string, itemId: string) => void
 }
 
 export const AccommodationItemRow: React.FC<AccommodationItemRowProps> = ({
@@ -33,6 +35,7 @@ export const AccommodationItemRow: React.FC<AccommodationItemRowProps> = ({
   isReadOnly,
   handleUpdateItem,
   handleRemoveItem,
+  handleToggleVisibility,
 }) => {
   // 簡潔輸入框樣式（右側多留空間避免被 table-divider 遮到）
   const inputClass = 'input-no-focus w-full pl-1 pr-3 py-1 text-sm bg-transparent'
@@ -119,15 +122,30 @@ export const AccommodationItemRow: React.FC<AccommodationItemRowProps> = ({
             placeholder={ACCOMMODATION_ITEM_ROW_LABELS.備註}
             disabled={isReadOnly || isSameAsPrevious}
           />
-          {!isReadOnly && roomIndex !== 0 && (
-            <button
-              onClick={() => handleRemoveItem(categoryId, item.id)}
-              className="ml-2 w-4 h-4 flex items-center justify-center text-xs text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 rounded transition-all flex-shrink-0"
-              title={ACCOMMODATION_ITEM_ROW_LABELS.刪除}
-            >
-              ×
-            </button>
-          )}
+          <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+            {!isReadOnly && (
+              <>
+                {/* 隱藏/顯示按鈕 */}
+                <button
+                  onClick={() => handleToggleVisibility(categoryId, item.id)}
+                  className="w-4 h-4 flex items-center justify-center text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 rounded transition-all"
+                  title="在報價單和需求單隱藏此項目"
+                >
+                  <EyeOff size={14} />
+                </button>
+                {/* 刪除按鈕（只有非第一個房型才顯示） */}
+                {roomIndex !== 0 && (
+                  <button
+                    onClick={() => handleRemoveItem(categoryId, item.id)}
+                    className="w-4 h-4 flex items-center justify-center text-xs text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 rounded transition-all"
+                    title={ACCOMMODATION_ITEM_ROW_LABELS.刪除}
+                  >
+                    ×
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </td>
     </tr>

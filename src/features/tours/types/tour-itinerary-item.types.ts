@@ -122,10 +122,16 @@ export interface TourItineraryItem {
   confirmation_status: string
   leader_status: string
 
+  // 顯示控制
+  show_on_web: boolean
+  show_on_brochure: boolean
+  show_on_quote: boolean
+
   // 元資料
   created_at: string
   updated_at: string
   created_by: string | null
+  updated_by: string | null
 }
 
 // === 建立/更新用的 Partial 型別 ===

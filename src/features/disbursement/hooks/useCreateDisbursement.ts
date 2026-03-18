@@ -10,11 +10,11 @@ import { useState, useMemo, useCallback, useEffect } from 'react'
 import { PaymentRequest, DisbursementOrder } from '@/stores/types'
 import {
   useDisbursementOrders,
-  updatePaymentRequest as updatePaymentRequestApi,
   updateDisbursementOrder as updateDisbursementOrderApi,
   invalidateDisbursementOrders,
   invalidatePaymentRequests,
 } from '@/data'
+import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { dynamicFrom } from '@/lib/supabase/typed-client'
 import { alert } from '@/lib/ui/alert-dialog'
@@ -103,9 +103,10 @@ export function useCreateDisbursement({
         if (!matchSearch) return false
       }
 
-      // 日期篩選
+      // 日期篩選（用請款日期，不是建立日期）
       if (dateFilter) {
-        if (!r.created_at || !r.created_at.startsWith(dateFilter)) return false
+        const reqDate = r.request_date || r.created_at
+        if (!reqDate || !reqDate.startsWith(dateFilter)) return false
       }
 
       // 狀態篩選
@@ -193,7 +194,7 @@ export function useCreateDisbursement({
       // 更新請款單狀態為 confirmed（已加入出納單，尚未出帳）
       const tour_ids_to_recalculate = new Set<string>()
       for (const id of selectedRequestIds) {
-        await updatePaymentRequestApi(id, { status: 'confirmed' })
+        await supabase.from('payment_requests').update({ status: 'confirmed' }).eq('id', id)
         const req = pendingRequests.find(r => r.id === id)
         if (req?.tour_id) {
           tour_ids_to_recalculate.add(req.tour_id)
@@ -252,7 +253,7 @@ export function useCreateDisbursement({
 
       // 新增的請款單：狀態改為 confirmed（加入出納單，尚未出帳）
       for (const id of addedIds) {
-        await updatePaymentRequestApi(id, { status: 'confirmed' })
+        await supabase.from('payment_requests').update({ status: 'confirmed' }).eq('id', id)
         const req = pendingRequests.find(r => r.id === id)
         if (req?.tour_id) {
           tour_ids_to_recalculate.add(req.tour_id)
@@ -261,7 +262,7 @@ export function useCreateDisbursement({
 
       // 移除的請款單：狀態改回 pending（從出納單移除，回到待處理）
       for (const id of removedIds) {
-        await updatePaymentRequestApi(id, { status: 'pending' })
+        await supabase.from('payment_requests').update({ status: 'pending' }).eq('id', id)
         const req = pendingRequests.find(r => r.id === id)
         if (req?.tour_id) {
           tour_ids_to_recalculate.add(req.tour_id)

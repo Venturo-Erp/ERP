@@ -84,6 +84,7 @@ interface CategorySectionProps {
     value: unknown
   ) => void
   handleRemoveItem: (categoryId: string, itemId: string) => void
+  handleToggleVisibility: (categoryId: string, itemId: string) => void
   // Local 報價相關
   onOpenLocalPricingDialog?: () => void
 }
@@ -106,6 +107,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   handleAddActivity,
   handleUpdateItem,
   handleRemoveItem,
+  handleToggleVisibility,
   onOpenLocalPricingDialog,
 }) => {
   const Icon = categoryIcons[category.id]
@@ -472,6 +474,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                       isReadOnly={isReadOnly}
                       handleUpdateItem={handleUpdateItem}
                       handleRemoveItem={handleRemoveItem}
+                      handleToggleVisibility={handleToggleVisibility}
                     />
                   ))
                 })
@@ -484,6 +487,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 categoryId={category.id}
                 handleUpdateItem={handleUpdateItem}
                 handleRemoveItem={handleRemoveItem}
+                handleToggleVisibility={handleToggleVisibility}
               />
             )))}
 

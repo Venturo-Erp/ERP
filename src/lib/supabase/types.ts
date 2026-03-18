@@ -6097,6 +6097,7 @@ export type Database = {
           created_at: string | null
           created_by: string | null
           currency: string | null
+          data_verified: boolean | null
           description: string | null
           description_en: string | null
           dining_options: string[] | null
@@ -6153,6 +6154,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
+          data_verified?: boolean | null
           description?: string | null
           description_en?: string | null
           dining_options?: string[] | null
@@ -6209,6 +6211,7 @@ export type Database = {
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
+          data_verified?: boolean | null
           description?: string | null
           description_en?: string | null
           dining_options?: string[] | null
@@ -12714,6 +12717,7 @@ export type Database = {
           created_by: string | null
           cuisine_type: string[] | null
           currency: string | null
+          data_verified: boolean | null
           description: string | null
           description_en: string | null
           dietary_options: string[] | null
@@ -12773,6 +12777,7 @@ export type Database = {
           created_by?: string | null
           cuisine_type?: string[] | null
           currency?: string | null
+          data_verified?: boolean | null
           description?: string | null
           description_en?: string | null
           dietary_options?: string[] | null
@@ -12832,6 +12837,7 @@ export type Database = {
           created_by?: string | null
           cuisine_type?: string[] | null
           currency?: string | null
+          data_verified?: boolean | null
           description?: string | null
           description_en?: string | null
           dietary_options?: string[] | null
@@ -14900,6 +14906,7 @@ export type Database = {
           service_date: string | null
           service_date_end: string | null
           show_on_brochure: boolean
+          show_on_quote: boolean | null
           show_on_web: boolean
           sort_order: number | null
           sub_category: string | null
@@ -14959,6 +14966,7 @@ export type Database = {
           service_date?: string | null
           service_date_end?: string | null
           show_on_brochure?: boolean
+          show_on_quote?: boolean | null
           show_on_web?: boolean
           sort_order?: number | null
           sub_category?: string | null
@@ -15018,6 +15026,7 @@ export type Database = {
           service_date?: string | null
           service_date_end?: string | null
           show_on_brochure?: boolean
+          show_on_quote?: boolean | null
           show_on_web?: boolean
           sort_order?: number | null
           sub_category?: string | null

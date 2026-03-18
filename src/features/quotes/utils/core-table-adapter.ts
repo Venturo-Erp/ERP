@@ -29,6 +29,8 @@ export function coreItemsToCostCategories(items: TourItineraryItem[]): CostCateg
 
   for (const item of dedupedItems) {
     if (!item.category) continue
+    // 過濾掉在報價單隱藏的項目
+    if (item.show_on_quote === false) continue
 
     const targetCategory = categories.find(c => c.id === item.category)
     if (!targetCategory) continue

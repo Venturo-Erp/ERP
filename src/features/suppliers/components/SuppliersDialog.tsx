@@ -44,7 +44,7 @@ export const SuppliersDialog: React.FC<SuppliersDialogProps> = ({
       subtitle={isEditMode ? LABELS.editSubtitle : LABELS.addSubtitle}
       onSubmit={onSubmit}
       submitLabel={isEditMode ? LABELS.saveChanges : LABELS.addSupplier}
-      submitDisabled={!formData.name || !formData.bank_name || !formData.bank_account}
+      submitDisabled={!formData.name}
       maxWidth="lg"
     >
       <div className="space-y-4">
@@ -65,7 +65,7 @@ export const SuppliersDialog: React.FC<SuppliersDialogProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="text-sm font-medium text-morandi-primary">
-              {LABELS.bankName} <span className="text-morandi-red">*</span>
+              {LABELS.bankName}
             </label>
             <Input
               value={formData.bank_name}
@@ -77,7 +77,7 @@ export const SuppliersDialog: React.FC<SuppliersDialogProps> = ({
 
           <div>
             <label className="text-sm font-medium text-morandi-primary">
-              {LABELS.bankAccount} <span className="text-morandi-red">*</span>
+              {LABELS.bankAccount}
             </label>
             <Input
               value={formData.bank_account}
