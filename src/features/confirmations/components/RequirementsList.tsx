@@ -285,27 +285,32 @@ export function RequirementsList({
   }, [coreItems, calculateDate, existingRequests])
   const itemsByCategory = useMemo(() => groupItemsByCategory(quoteItems), [quoteItems])
 
-  // 交通 Dialog 用：建立天數資訊
+  // 交通 Dialog 用：建立天數資訊（從行程項目組合路線）
   const transportDays = useMemo(() => {
     const dayMap = new Map<number, { dayNumber: number; date: string; route: string }>()
+    // 先建立每天的基礎資訊
     for (const item of coreItems) {
       const dn = item.day_number
-      if (!dn || dayMap.has(dn)) continue
-      const date = calculateDate(dn)
-      dayMap.set(dn, {
-        dayNumber: dn,
-        date: date ? new Date(date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }) : `Day ${dn}`,
-        route: item.category === 'activities' ? (item.title || '') : '',
-      })
-    }
-    // 補充每天的景點
-    for (const item of coreItems) {
-      if (item.category === 'activities' && item.day_number && dayMap.has(item.day_number)) {
-        const day = dayMap.get(item.day_number)!
-        if (!day.route.includes(item.title || '')) {
-          day.route = day.route ? `${day.route} → ${item.title}` : (item.title || '')
-        }
+      if (!dn) continue
+      if (!dayMap.has(dn)) {
+        const date = calculateDate(dn)
+        dayMap.set(dn, {
+          dayNumber: dn,
+          date: date ? new Date(date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }) : `Day ${dn}`,
+          route: '',
+        })
       }
+    }
+    // 從所有 item 組合路線（景點、餐廳名都算）
+    for (const item of coreItems) {
+      const dn = item.day_number
+      if (!dn || !dayMap.has(dn)) continue
+      const title = item.supplierName || item.title || ''
+      if (!title) continue
+      const day = dayMap.get(dn)!
+      // 避免重複（飯店早餐等跳過）
+      if (title === '飯店早餐' || day.route.includes(title)) continue
+      day.route = day.route ? `${day.route} → ${title}` : title
     }
     return Array.from(dayMap.values()).sort((a, b) => a.dayNumber - b.dayNumber)
   }, [coreItems, calculateDate])
