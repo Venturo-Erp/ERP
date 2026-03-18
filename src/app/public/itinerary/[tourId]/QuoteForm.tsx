@@ -16,6 +16,50 @@ export function QuoteForm({ tourId, tourCode, paxTiers }: QuoteFormProps) {
   const [tipNote, setTipNote] = useState('')
   const [supplierNote, setSupplierNote] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleDownload = () => {
+    const tierRows = paxTiers
+      .map(num => {
+        const price = tierPrices[num] || '-'
+        return `<tr><td style="padding:8px;border:1px solid #ddd">${num} 人團</td><td style="padding:8px;border:1px solid #ddd;text-align:right">${price} 元/人</td></tr>`
+      })
+      .join('')
+
+    const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>報價單 - ${tourCode}</title>
+<style>
+body { font-family: 'Microsoft JhengHei', sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+h1 { color: #c9a96e; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+th { background: #c9a96e; color: white; }
+.info { margin: 8px 0; }
+</style>
+</head>
+<body>
+<h1>供應商報價單</h1>
+<div class="info"><strong>團號：</strong>${tourCode}</div>
+<div class="info"><strong>聯絡人：</strong>${contact}</div>
+<div class="info"><strong>聯絡電話：</strong>${phone}</div>
+<h3>梯次報價</h3>
+<table>${tierRows}</table>
+<div class="info"><strong>單人房差：</strong>${singleRoomSupplement ? `${singleRoomSupplement} 元` : '-'}</div>
+<div class="info"><strong>小費說明：</strong>${tipNote || '-'}</div>
+<div class="info"><strong>備註：</strong><pre style="white-space:pre-wrap;margin:0">${supplierNote || '-'}</pre></div>
+<p style="margin-top:24px;color:#999;font-size:12px">提交時間：${new Date().toLocaleString('zh-TW')}</p>
+</body>
+</html>`
+
+    const blob = new Blob([html], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `報價單-${tourCode}-${contact}.html`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,14 +94,8 @@ export function QuoteForm({ tourId, tourCode, paxTiers }: QuoteFormProps) {
       })
 
       if (res.ok) {
+        setSubmitted(true)
         alert('✅ 報價已提交！感謝您的報價。')
-        // 清空表單
-        setContact('')
-        setPhone('')
-        setTierPrices({})
-        setSingleRoomSupplement('')
-        setTipNote('')
-        setSupplierNote('')
       } else {
         const err = await res.json()
         alert(`❌ 提交失敗：${err.error || '請稍後再試'}`)
@@ -75,44 +113,46 @@ export function QuoteForm({ tourId, tourCode, paxTiers }: QuoteFormProps) {
         📝 供應商報價回填
       </h2>
 
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
-          聯絡人 <span style={{ color: 'red' }}>*</span>
-        </label>
-        <input
-          type="text"
-          value={contact}
-          onChange={e => setContact(e.target.value)}
-          placeholder="您的姓名"
-          required
-          style={{
-            width: '100%',
-            padding: '8px 12px',
-            border: '1px solid #ddd',
-            borderRadius: 4,
-            fontSize: 14,
-          }}
-        />
-      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        <div>
+          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
+            聯絡人 <span style={{ color: 'red' }}>*</span>
+          </label>
+          <input
+            type="text"
+            value={contact}
+            onChange={e => setContact(e.target.value)}
+            placeholder="您的姓名"
+            required
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #ddd',
+              borderRadius: 4,
+              fontSize: 14,
+            }}
+          />
+        </div>
 
-      <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
-          聯絡電話 <span style={{ color: 'red' }}>*</span>
-        </label>
-        <input
-          type="tel"
-          value={phone}
-          onChange={e => setPhone(e.target.value)}
-          placeholder="您的電話"
-          required
-          style={{
-            width: '100%',
-            padding: '8px 12px',
-            border: '1px solid #ddd',
-            borderRadius: 4,
-            fontSize: 14,
-          }}
-        />
+        <div>
+          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
+            聯絡電話 <span style={{ color: 'red' }}>*</span>
+          </label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={e => setPhone(e.target.value)}
+            placeholder="您的電話"
+            required
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #ddd',
+              borderRadius: 4,
+              fontSize: 14,
+            }}
+          />
+        </div>
       </div>
 
       <div style={{ marginBottom: 16, paddingTop: 8, borderTop: '1px solid #e8e5e0' }}>
@@ -209,22 +249,46 @@ export function QuoteForm({ tourId, tourCode, paxTiers }: QuoteFormProps) {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-        <button
-          type="submit"
-          disabled={submitting}
-          style={{
-            padding: '10px 32px',
-            backgroundColor: submitting ? '#ccc' : '#c9a96e',
-            color: '#fff',
-            border: 'none',
-            borderRadius: 6,
-            fontSize: 15,
-            fontWeight: 600,
-            cursor: submitting ? 'not-allowed' : 'pointer',
-          }}
-        >
-          {submitting ? '提交中...' : '提交報價'}
-        </button>
+        {!submitted ? (
+          <button
+            type="submit"
+            disabled={submitting}
+            style={{
+              padding: '10px 32px',
+              backgroundColor: submitting ? '#ccc' : '#c9a96e',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+              fontSize: 15,
+              fontWeight: 600,
+              cursor: submitting ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {submitting ? '提交中...' : '提交報價'}
+          </button>
+        ) : (
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ marginBottom: 12, color: '#16a34a', fontWeight: 600 }}>
+              ✅ 報價已提交成功！
+            </p>
+            <button
+              type="button"
+              onClick={handleDownload}
+              style={{
+                padding: '10px 32px',
+                backgroundColor: '#16a34a',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                fontSize: 15,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              📥 下載報價單留底
+            </button>
+          </div>
+        )}
       </div>
     </form>
   )

@@ -158,7 +158,7 @@ export default async function PublicItineraryPage({
           </div>
 
           {/* 基本資訊 */}
-          <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 140px', gap: 16, fontSize: 14, alignItems: 'center' }}>
+          <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, fontSize: 14 }}>
             <div style={{ display: 'flex', gap: 8 }}>
               <span style={{ color: '#999' }}>目的地：</span>
               <span style={{ fontWeight: 500 }}>{tour.destination || '-'}</span>
@@ -171,22 +171,13 @@ export default async function PublicItineraryPage({
               <span style={{ color: '#999' }}>行程天數：</span>
               <span style={{ fontWeight: 500 }}>{days.length} 天</span>
             </div>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-              <span style={{ color: '#999', whiteSpace: 'nowrap' }}>人數：</span>
-              <input
-                type="number"
-                placeholder="人數"
-                style={{
-                  flex: 1,
-                  padding: '6px 10px',
-                  border: '1px solid #ddd',
-                  borderRadius: 4,
-                  fontSize: 14,
-                }}
-                readOnly
-              />
-            </div>
           </div>
+          {paxFromUrl && (
+            <div style={{ marginTop: 8, fontSize: 14, color: '#555' }}>
+              <span style={{ color: '#999' }}>預估人數：</span>
+              <span style={{ fontWeight: 500 }}>{paxFromUrl} 人</span>
+            </div>
+          )}
         </div>
 
         {/* 每日行程表格 */}
