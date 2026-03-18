@@ -509,6 +509,12 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
       icon: Clock,
       bgColor: 'bg-morandi-gold/10',
     },
+    draft: {
+      color: 'text-blue-600',
+      label: '作業中',
+      icon: Package,
+      bgColor: 'bg-blue-50',
+    },
     in_progress: {
       color: 'text-morandi-primary',
       label: '處理中',
