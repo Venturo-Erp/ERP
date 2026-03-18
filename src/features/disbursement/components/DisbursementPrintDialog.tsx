@@ -221,8 +221,8 @@ export function DisbursementPrintDialog({
           </div>
         </DialogHeader>
 
-        {/* 預覽區域 */}
-        <div className="flex-1 overflow-auto bg-morandi-container p-4">
+        {/* 預覽區域 - A4 比例容器 */}
+        <div className="flex-1 overflow-auto bg-morandi-container p-4 flex items-start justify-center">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <Loader2 className="w-8 h-8 animate-spin text-morandi-secondary" />
@@ -231,7 +231,14 @@ export function DisbursementPrintDialog({
               </span>
             </div>
           ) : (
-            <div className="shadow-lg">
+            <div 
+              className="shadow-lg bg-white"
+              style={{
+                width: '210mm',
+                minHeight: '297mm',
+                maxWidth: '100%',
+              }}
+            >
               <PrintDisbursementPreview
                 ref={printRef}
                 order={order}

@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores'
 import type { Tour } from '@/stores/types'
 import { RoomRequirementDialog } from './RoomRequirementDialog'
-import { TransportRequirementDialog } from './TransportRequirementDialog'
+import { TransportQuoteDialog } from './TransportQuoteDialog'
 import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSupplierDialog'
 import { LocalQuoteDialog } from './LocalQuoteDialog'
 // CostCategory 已不需要 — 需求單直接讀核心表
@@ -1735,18 +1735,22 @@ export function RequirementsList({
         existingRequests={existingRequests as AssignSupplierDialogProps['existingRequests']}
       />
 
-      {/* 交通需求 Dialog */}
-      {selectedTransport && (
-        <TransportRequirementDialog
+      {/* 交通報價 Dialog */}
+      {selectedTransport && tour && (
+        <TransportQuoteDialog
           open={showTransportDialog}
           onClose={() => { setShowTransportDialog(false); setSelectedTransport(null) }}
+          tour={{
+            id: tour.id,
+            code: tour.code,
+            name: tour.name,
+            departure_date: tour.departure_date,
+            return_date: tour.return_date,
+            current_participants: totalPax,
+          }}
+          coreItems={coreItems}
           supplierName={selectedTransport.name}
-          tour={tour}
-          tourId={tourId || ''}
-          days={transportDays}
-          totalPax={totalPax}
-          ageBreakdown={ageBreakdownText}
-          onSave={() => loadData(false)}
+          vehicleDesc=""
         />
       )}
 

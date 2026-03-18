@@ -94,7 +94,15 @@ function groupByPayFor(items: ProcessedItem[]): PayForGroup[] {
 }
 
 /**
- * 分割大型群組（每組最多 maxSize 筆）
+ * 提取實際收款人（去掉代墊部分）
+ */
+function extractPayee(payFor: string): string {
+  const match = payFor.match(/^([^（]+)/)
+  return match ? match[1].trim() : payFor
+}
+
+/**
+ * 分割大型群組 + 同收款人合併小計
  */
 function splitLargeGroups(groups: PayForGroup[], maxSize = 5): PayForGroup[] {
   const result: PayForGroup[] = []
@@ -115,6 +123,33 @@ function splitLargeGroups(groups: PayForGroup[], maxSize = 5): PayForGroup[] {
       }
     }
   }
+
+  // 計算每個收款人的總金額，並標記誰是最後一組
+  const payeeGroups = new Map<string, { total: number; indices: number[] }>()
+  
+  result.forEach((group, idx) => {
+    const payee = extractPayee(group.payFor)
+    if (!payeeGroups.has(payee)) {
+      payeeGroups.set(payee, { total: 0, indices: [] })
+    }
+    const pg = payeeGroups.get(payee)!
+    pg.total += group.total
+    pg.indices.push(idx)
+  })
+
+  // 如果同一個收款人有多個分組，只在最後一組顯示總金額
+  payeeGroups.forEach(pg => {
+    if (pg.indices.length > 1) {
+      // 前面的分組不顯示小計
+      pg.indices.slice(0, -1).forEach(idx => {
+        result[idx].hiddenTotal = true
+      })
+      // 最後一組顯示該收款人的總金額
+      const lastIdx = pg.indices[pg.indices.length - 1]
+      result[lastIdx].total = pg.total
+      result[lastIdx].hiddenTotal = false
+    }
+  })
 
   return result
 }
@@ -172,9 +207,14 @@ export async function generateDisbursementPDF(data: DisbursementPDFData): Promis
     group.items.forEach((item, idx) => {
       const row: (string | { content: string; rowSpan?: number })[] = []
 
-      // 付款對象（第一行使用 rowSpan）
+      // 付款對象（第一行使用 rowSpan）- 分兩行顯示
       if (idx === 0) {
-        row.push({ content: group.payFor, rowSpan: group.items.length })
+        const match = group.payFor.match(/^([^（]+)(（.+）)$/)
+        let payForContent = group.payFor
+        if (match) {
+          payForContent = `${match[1]}\n${match[2]}`
+        }
+        row.push({ content: payForContent, rowSpan: group.items.length })
       }
 
       row.push(item.requestCode)

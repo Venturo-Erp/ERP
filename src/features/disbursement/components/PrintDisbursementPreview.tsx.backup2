@@ -416,7 +416,6 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                 {tourGroups.map((group, groupIdx) =>
                   group.items.map((item, itemIdx) => {
                     const isFirstInGroup = itemIdx === 0
-                    const { payee: groupPayee, supplier: groupSupplier } = splitPayFor(group.payFor)
                     return (
                       <tr key={`tour-${groupIdx}-${itemIdx}`}>
                         {isFirstInGroup && (
@@ -431,12 +430,7 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                               borderTop: groupIdx > 0 ? `1px solid ${COLORS.gold}` : 'none',
                             }}
                           >
-                            <div>{groupPayee}</div>
-                            {groupSupplier && (
-                              <div style={{ fontSize: '9px', fontWeight: 'normal', color: COLORS.gray, marginTop: '2px' }}>
-                                {groupSupplier}
-                              </div>
-                            )}
+                            {group.payFor}
                           </td>
                         )}
                         <td
@@ -639,7 +633,6 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                 {companyGroups.map((group, groupIdx) =>
                   group.items.map((item, itemIdx) => {
                     const isFirstInGroup = itemIdx === 0
-                    const { payee: groupPayee, supplier: groupSupplier } = splitPayFor(group.payFor)
                     return (
                       <tr key={`company-${groupIdx}-${itemIdx}`}>
                         {isFirstInGroup && (
@@ -654,12 +647,7 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                               borderTop: groupIdx > 0 ? `1px solid ${COLORS.gold}` : 'none',
                             }}
                           >
-                            <div>{groupPayee}</div>
-                            {groupSupplier && (
-                              <div style={{ fontSize: '9px', fontWeight: 'normal', color: COLORS.gray, marginTop: '2px' }}>
-                                {groupSupplier}
-                              </div>
-                            )}
+                            {group.payFor}
                           </td>
                         )}
                         <td
