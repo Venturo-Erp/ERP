@@ -1823,10 +1823,10 @@ export function RequirementsList({
           }}
           totalPax={totalPax}
           meals={coreItems
-            .filter(it => it.item_category === 'meal' && it.supplier_name === selectedTransport.name)
+            .filter(it => it.supplier_name === selectedTransport.name)
             .map(it => ({
               date: it.service_date || '',
-              time: it.meal_type || '',
+              time: it.meal_type || it.time || '',
               price: '',
               quantity: it.quantity || 1,
               note: it.note || '',
@@ -1848,10 +1848,10 @@ export function RequirementsList({
           }}
           totalPax={totalPax}
           activities={coreItems
-            .filter(it => it.item_category === 'activity' && it.supplier_name === selectedTransport.name)
+            .filter(it => it.supplier_name === selectedTransport.name)
             .map(it => ({
               time: it.service_date || '',
-              venue: it.item_name,
+              venue: it.item_name || it.supplier_name || '',
               quantity: it.quantity || 1,
               note: it.note || '',
             }))}
