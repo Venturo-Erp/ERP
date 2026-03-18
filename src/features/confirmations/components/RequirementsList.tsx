@@ -1822,21 +1822,18 @@ export function RequirementsList({
             departure_date: tour.departure_date,
           }}
           totalPax={totalPax}
-          meals={(() => {
-            console.log('🍴 MealQuoteDialog Debug:')
-            console.log('  selectedTransport.name:', selectedTransport.name)
-            console.log('  coreItems (all):', coreItems.length)
-            console.log('  coreItems.supplier_name list:', [...new Set(coreItems.map(it => it.supplier_name))])
-            const filtered = coreItems.filter(it => it.supplier_name === selectedTransport.name)
-            console.log('  filtered coreItems:', filtered.length, filtered)
-            return filtered.map(it => ({
+          meals={coreItems
+            .filter(it => {
+              const itemSupplierName = (it.resource_name || it.title || '').trim()
+              return itemSupplierName === selectedTransport.name && it.category === 'meals'
+            })
+            .map(it => ({
               date: it.service_date || '',
-              time: it.meal_type || it.time || '',
+              time: it.sub_category ? ({ breakfast: '早餐', lunch: '午餐', dinner: '晚餐' }[it.sub_category] || it.sub_category) : '',
               price: '',
               quantity: it.quantity || 1,
-              note: it.note || '',
-            }))
-          })()}
+              note: it.quote_note || '',
+            }))}
           supplierName={selectedTransport.name}
         />
       )}
@@ -1853,20 +1850,17 @@ export function RequirementsList({
             departure_date: tour.departure_date,
           }}
           totalPax={totalPax}
-          activities={(() => {
-            console.log('🎯 ActivityQuoteDialog Debug:')
-            console.log('  selectedTransport.name:', selectedTransport.name)
-            console.log('  coreItems (all):', coreItems.length)
-            console.log('  coreItems.supplier_name list:', [...new Set(coreItems.map(it => it.supplier_name))])
-            const filtered = coreItems.filter(it => it.supplier_name === selectedTransport.name)
-            console.log('  filtered coreItems:', filtered.length, filtered)
-            return filtered.map(it => ({
+          activities={coreItems
+            .filter(it => {
+              const itemSupplierName = (it.resource_name || it.title || '').trim()
+              return itemSupplierName === selectedTransport.name && it.category === 'activities'
+            })
+            .map(it => ({
               time: it.service_date || '',
-              venue: it.item_name || it.supplier_name || '',
+              venue: it.title || '',
               quantity: it.quantity || 1,
-              note: it.note || '',
-            }))
-          })()}
+              note: it.quote_note || '',
+            }))}
           supplierName={selectedTransport.name}
         />
       )}
