@@ -1,10 +1,12 @@
 'use client';
 
 /**
- * 魔法圖書館視圖 - 列表式（Grid）
+ * 魔法圖書館視圖 - 使用 EnhancedTable
  */
 
 import { ExternalLink, Github } from 'lucide-react';
+import { EnhancedTable } from '@/components/ui/enhanced-table';
+import type { TableColumn } from '@/components/ui/enhanced-table';
 
 type MagicItem = {
   id: string;
@@ -38,102 +40,108 @@ export const MagicLibraryView: React.FC<MagicLibraryViewProps> = ({
   items,
   loading,
 }) => {
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-2"></div>
-          <p className="text-sm text-morandi-secondary">載入中...</p>
+  const columns: TableColumn<MagicItem>[] = [
+    {
+      key: 'name',
+      label: '名稱',
+      width: '180px',
+      render: (_value: unknown, row: MagicItem) => (
+        <span className="font-medium text-morandi-primary">{row.name}</span>
+      ),
+    },
+    {
+      key: 'category',
+      label: '分類',
+      width: '100px',
+      render: (_value: unknown, row: MagicItem) => (
+        <span className="px-2 py-1 bg-morandi-container text-morandi-primary rounded text-xs">
+          {row.category}
+        </span>
+      ),
+    },
+    {
+      key: 'current_version',
+      label: '當前版本',
+      width: '100px',
+      render: (_value: unknown, row: MagicItem) => (
+        <span className="text-sm text-morandi-secondary">{row.current_version || '-'}</span>
+      ),
+    },
+    {
+      key: 'latest_version',
+      label: '最新版本',
+      width: '100px',
+      render: (_value: unknown, row: MagicItem) => (
+        <span className="text-sm text-morandi-secondary">{row.latest_version || '-'}</span>
+      ),
+    },
+    {
+      key: 'update_status',
+      label: '狀態',
+      width: '100px',
+      render: (_value: unknown, row: MagicItem) => {
+        const badge = getStatusBadge(row.update_status);
+        return (
+          <span className={`px-2 py-1 rounded text-xs font-medium ${badge.class}`}>
+            {badge.text}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'description',
+      label: '說明',
+      render: (_value: unknown, row: MagicItem) => (
+        <span className="text-sm text-morandi-secondary truncate" title={row.description || ''}>
+          {row.description || '-'}
+        </span>
+      ),
+    },
+    {
+      key: 'links',
+      label: '連結',
+      width: '100px',
+      align: 'center',
+      render: (_value: unknown, row: MagicItem) => (
+        <div className="flex items-center justify-center gap-2">
+          {row.official_url && (
+            <a
+              href={row.official_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-700"
+              title="官網"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          )}
+          {row.github_url && (
+            <a
+              href={row.github_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-700"
+              title="GitHub"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Github className="h-4 w-4" />
+            </a>
+          )}
         </div>
-      </div>
-    );
-  }
-
-  if (items.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-morandi-primary">暫無魔法項目</p>
-          <p className="text-sm text-morandi-secondary mt-2">請執行初始化腳本</p>
-        </div>
-      </div>
-    );
-  }
+      ),
+    },
+  ];
 
   return (
-    <div className="h-full flex flex-col p-4">
-      {/* 表頭 */}
-      <div className="border-b border-morandi-container/60">
-        <div className="grid grid-cols-[180px_100px_100px_100px_100px_1fr_100px] px-2 py-2.5 gap-4">
-          <span className="text-xs font-medium text-morandi-secondary">名稱</span>
-          <span className="text-xs font-medium text-morandi-secondary">分類</span>
-          <span className="text-xs font-medium text-morandi-secondary">當前版本</span>
-          <span className="text-xs font-medium text-morandi-secondary">最新版本</span>
-          <span className="text-xs font-medium text-morandi-secondary">狀態</span>
-          <span className="text-xs font-medium text-morandi-secondary">說明</span>
-          <span className="text-xs font-medium text-morandi-secondary text-center">連結</span>
-        </div>
-      </div>
-
-      {/* 項目列表 */}
-      <div className="flex-1 overflow-auto">
-        {items.map((item) => {
-          const badge = getStatusBadge(item.update_status);
-          return (
-            <div
-              key={item.id}
-              className="grid grid-cols-[180px_100px_100px_100px_100px_1fr_100px] px-2 py-3 gap-4 border-b border-morandi-container/30 items-center hover:bg-morandi-container/5"
-            >
-              <div className="font-medium text-sm text-morandi-primary truncate" title={item.name}>
-                {item.name}
-              </div>
-              <div>
-                <span className="px-2 py-1 bg-morandi-container text-morandi-primary rounded text-xs">
-                  {item.category}
-                </span>
-              </div>
-              <div className="text-sm text-morandi-secondary">
-                {item.current_version || '-'}
-              </div>
-              <div className="text-sm text-morandi-secondary">
-                {item.latest_version || '-'}
-              </div>
-              <div>
-                <span className={`px-2 py-1 rounded text-xs font-medium ${badge.class}`}>
-                  {badge.text}
-                </span>
-              </div>
-              <div className="text-sm text-morandi-secondary truncate" title={item.description || ''}>
-                {item.description || '-'}
-              </div>
-              <div className="flex items-center justify-center gap-2">
-                {item.official_url && (
-                  <a
-                    href={item.official_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700"
-                    title="官網"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                )}
-                {item.github_url && (
-                  <a
-                    href={item.github_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700"
-                    title="GitHub"
-                  >
-                    <Github className="h-4 w-4" />
-                  </a>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+    <div className="h-full p-4">
+      <EnhancedTable
+        columns={columns}
+        data={items}
+        loading={loading}
+        emptyMessage="暫無魔法項目"
+        hoverable={true}
+      />
     </div>
   );
 };

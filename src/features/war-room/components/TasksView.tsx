@@ -1,11 +1,13 @@
 'use client';
 
 /**
- * 任务视图 - 简化版
+ * 任務視圖 - 使用 EnhancedTable
  */
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { EnhancedTable } from '@/components/ui/enhanced-table';
+import type { TableColumn } from '@/components/ui/enhanced-table';
 
 type TaskType = 'individual' | 'workflow';
 
@@ -24,6 +26,15 @@ type Task = {
 interface TasksViewProps {
   taskType: TaskType;
 }
+
+const getPriorityColor = (priority: string) => {
+  const colors = {
+    P0: 'bg-red-100 text-red-700',
+    P1: 'bg-amber-100 text-amber-700',
+    P2: 'bg-green-100 text-green-700',
+  };
+  return colors[priority as keyof typeof colors] || colors.P2;
+};
 
 export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -44,7 +55,7 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
         .order('priority')
         .order('created_at', { ascending: false });
 
-      if (data) setTasks(data as any);
+      if (data) setTasks(data as unknown as Task[]);
     } catch (err) {
       console.error('載入任務失敗:', err);
     } finally {
@@ -52,102 +63,90 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
     }
   };
 
-  const getPriorityColor = (priority: string) => {
-    const colors = {
-      P0: 'bg-red-100 text-red-700',
-      P1: 'bg-amber-100 text-amber-700',
-      P2: 'bg-green-100 text-green-700',
-    };
-    return colors[priority as keyof typeof colors] || colors.P2;
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600 mx-auto mb-2"></div>
-          <p className="text-sm text-morandi-secondary">載入中...</p>
+  const columns: TableColumn<Task>[] = [
+    {
+      key: 'title',
+      label: '任務名稱',
+      render: (_value: unknown, row: Task) => (
+        <div>
+          <div className="font-medium text-morandi-primary mb-1">{row.title}</div>
+          {row.description && (
+            <p className="text-xs text-morandi-secondary truncate">{row.description}</p>
+          )}
         </div>
-      </div>
-    );
-  }
-
-  if (tasks.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-morandi-primary">
-            {taskType === 'individual' ? '暫無獨立任務' : '暫無工作流任務'}
-          </p>
+      ),
+    },
+    {
+      key: 'priority',
+      label: '優先級',
+      width: '100px',
+      render: (_value: unknown, row: Task) => (
+        <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(row.priority)}`}>
+          {row.priority}
+        </span>
+      ),
+    },
+    {
+      key: 'progress',
+      label: '進度',
+      width: '150px',
+      align: 'center',
+      render: (_value: unknown, row: Task) => (
+        <div className="flex items-center gap-2">
+          <div className="flex-1 bg-morandi-container rounded-full h-2">
+            <div
+              className="bg-amber-600 h-2 rounded-full transition-all"
+              style={{ width: `${row.progress}%` }}
+            />
+          </div>
+          <span className="text-xs text-morandi-primary font-medium w-8 text-right">
+            {row.progress}%
+          </span>
         </div>
-      </div>
-    );
-  }
+      ),
+    },
+    {
+      key: 'assignees',
+      label: '負責人',
+      width: '200px',
+      render: (_value: unknown, row: Task) => (
+        <div className="flex flex-wrap gap-1">
+          {row.assignees.length > 0 ? (
+            row.assignees.map((assignee: string) => (
+              <span
+                key={assignee}
+                className="px-2 py-0.5 bg-morandi-container text-morandi-primary rounded text-xs"
+              >
+                {assignee}
+              </span>
+            ))
+          ) : (
+            <span className="text-xs text-morandi-secondary">-</span>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'created_at',
+      label: '創建日期',
+      width: '120px',
+      render: (_value: unknown, row: Task) => (
+        <span className="text-sm text-morandi-secondary">
+          {new Date(row.created_at).toLocaleDateString('zh-TW')}
+        </span>
+      ),
+    },
+  ];
 
   return (
-    <div className="h-full flex flex-col p-4">
-      {/* 表頭 */}
-      <div className="border-b border-morandi-container/60">
-        <div className="grid grid-cols-[1fr_100px_120px_200px_120px] px-2 py-2.5 gap-4">
-          <span className="text-xs font-medium text-morandi-secondary">任務名稱</span>
-          <span className="text-xs font-medium text-morandi-secondary">優先級</span>
-          <span className="text-xs font-medium text-morandi-secondary text-center">進度</span>
-          <span className="text-xs font-medium text-morandi-secondary">負責人</span>
-          <span className="text-xs font-medium text-morandi-secondary">創建日期</span>
-        </div>
-      </div>
-
-      {/* 任務列表 */}
-      <div className="flex-1 overflow-auto">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            className="grid grid-cols-[1fr_100px_120px_200px_120px] px-2 py-3 gap-4 border-b border-morandi-container/30 items-center hover:bg-morandi-container/5 cursor-pointer"
-          >
-            <div>
-              <div className="font-medium text-sm text-morandi-primary mb-1">{task.title}</div>
-              {task.description && (
-                <p className="text-xs text-morandi-secondary truncate">{task.description}</p>
-              )}
-            </div>
-            <div>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(task.priority)}`}>
-                {task.priority}
-              </span>
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 bg-morandi-container rounded-full h-2">
-                  <div
-                    className="bg-amber-600 h-2 rounded-full transition-all"
-                    style={{ width: `${task.progress}%` }}
-                  />
-                </div>
-                <span className="text-xs text-morandi-primary font-medium w-8 text-right">
-                  {task.progress}%
-                </span>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {task.assignees.length > 0 ? (
-                task.assignees.map((assignee) => (
-                  <span
-                    key={assignee}
-                    className="px-2 py-0.5 bg-morandi-container text-morandi-primary rounded text-xs"
-                  >
-                    {assignee}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-morandi-secondary">-</span>
-              )}
-            </div>
-            <div className="text-sm text-morandi-secondary">
-              {new Date(task.created_at).toLocaleDateString('zh-TW')}
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="h-full p-4">
+      <EnhancedTable
+        columns={columns}
+        data={tasks}
+        loading={loading}
+        emptyMessage={taskType === 'individual' ? '暫無獨立任務' : '暫無工作流任務'}
+        hoverable={true}
+      />
     </div>
   );
 };
