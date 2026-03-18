@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Send, Loader2, Printer, MapPin, Utensils, Hotel, Bus, Ticket, Sun } from 'lucide-react'
+import { Send, Loader2, Printer, Sun, Mail, Phone, Globe } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
@@ -25,32 +26,31 @@ interface DaySchedule {
   dayNumber: number
   date: string
   weekday: string
-  items: {
-    category: string
-    subCategory?: string
-    title: string
-    supplierName?: string
-    description?: string
-    time?: string
-  }[]
-  hotel?: string
+  route: string
+  breakfast: string
+  lunch: string
+  dinner: string
+  hotel: string
 }
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
-
-const CATEGORY_ICON: Record<string, { icon: typeof MapPin; color: string }> = {
-  activities: { icon: Ticket, color: 'text-purple-600' },
-  meals: { icon: Utensils, color: 'text-orange-600' },
-  accommodation: { icon: Hotel, color: 'text-blue-600' },
-  transport: { icon: Bus, color: 'text-emerald-600' },
-  'group-transport': { icon: Bus, color: 'text-emerald-600' },
-}
 
 const MEAL_LABELS: Record<string, string> = {
   breakfast: '早餐',
   lunch: '午餐',
   dinner: '晚餐',
 }
+
+// 發送方式
+type DeliveryMethod = 'print' | 'line' | 'email' | 'fax' | 'tenant'
+
+const DELIVERY_METHODS: { key: DeliveryMethod; label: string; icon: typeof Printer }[] = [
+  { key: 'print', label: '列印', icon: Printer },
+  { key: 'line', label: 'Line', icon: Send },
+  { key: 'email', label: 'Email', icon: Mail },
+  { key: 'fax', label: '傳真', icon: Phone },
+  { key: 'tenant', label: '租戶', icon: Globe },
+]
 
 export function LocalQuoteDialog({
   open,
@@ -62,12 +62,13 @@ export function LocalQuoteDialog({
   startDate,
 }: LocalQuoteDialogProps) {
   const [note, setNote] = useState('')
+  const [paxInput, setPaxInput] = useState<string>(totalPax?.toString() || '')
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string }[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [sending, setSending] = useState(false)
+  const [selectedMethod, setSelectedMethod] = useState<DeliveryMethod | null>(null)
   const { toast } = useToast()
   const supabase = createSupabaseBrowserClient()
-  const printRef = useRef<HTMLDivElement>(null)
 
   // 載入 LINE 群組
   useEffect(() => {
@@ -82,21 +83,28 @@ export function LocalQuoteDialog({
     load()
   }, [open])
 
+  // 重置 method
+  useEffect(() => {
+    if (open) setSelectedMethod(null)
+  }, [open])
+
   // 把核心表資料組成每天行程
   const daySchedules: DaySchedule[] = useMemo(() => {
     if (!coreItems.length) {
-      // fallback 用 transportDays
       return transportDays.map(d => ({
         dayNumber: d.dayNumber,
         date: d.date,
         weekday: '',
-        items: d.route ? d.route.split(' → ').map(r => ({ category: 'activities', title: r })) : [],
+        route: '',
+        breakfast: '',
+        lunch: '',
+        dinner: '',
+        hotel: '',
       }))
     }
 
     const dayMap = new Map<number, DaySchedule>()
 
-    // 建立每天的基礎
     for (const item of coreItems) {
       const dn = item.day_number
       if (!dn) continue
@@ -106,14 +114,22 @@ export function LocalQuoteDialog({
         if (startDate) {
           const d = new Date(startDate)
           d.setDate(d.getDate() + dn - 1)
-          dateStr = `${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getDate().toString().padStart(2, '0')}`
+          dateStr = `${d.getMonth() + 1}/${d.getDate()}`
           weekday = WEEKDAYS[d.getDay()]
         }
-        dayMap.set(dn, { dayNumber: dn, date: dateStr, weekday, items: [], hotel: undefined })
+        dayMap.set(dn, {
+          dayNumber: dn,
+          date: dateStr,
+          weekday,
+          route: '',
+          breakfast: '',
+          lunch: '',
+          dinner: '',
+          hotel: '',
+        })
       }
     }
 
-    // 填入項目
     const sorted = [...coreItems].sort((a, b) => {
       const da = a.day_number || 0
       const db = b.day_number || 0
@@ -127,24 +143,17 @@ export function LocalQuoteDialog({
       const day = dayMap.get(dn)!
 
       if (item.category === 'accommodation') {
-        day.hotel = item.resource_name || item.title || undefined
-        continue
+        day.hotel = item.resource_name || item.title || ''
+      } else if (item.category === 'meals') {
+        const name = item.title || ''
+        if (item.sub_category === 'breakfast') day.breakfast = name
+        else if (item.sub_category === 'lunch') day.lunch = name
+        else if (item.sub_category === 'dinner') day.dinner = name
+      } else if (item.category === 'activities' || item.category === 'transport' || item.category === 'group-transport') {
+        if (item.title) {
+          day.route = day.route ? `${day.route} → ${item.title}` : item.title
+        }
       }
-
-      // 跳過不需要顯示的
-      if (!item.title) continue
-
-      const title = item.category === 'meals' && item.sub_category
-        ? `${MEAL_LABELS[item.sub_category] || item.sub_category}：${item.title}`
-        : item.title
-
-      day.items.push({
-        category: item.category || 'others',
-        subCategory: item.sub_category || undefined,
-        title,
-        supplierName: item.resource_name || undefined,
-        description: item.description || undefined,
-      })
     }
 
     return Array.from(dayMap.values()).sort((a, b) => a.dayNumber - b.dayNumber)
@@ -152,122 +161,91 @@ export function LocalQuoteDialog({
 
   // 列印
   const handlePrint = () => {
-    const printWindow = window.open('', '_blank', 'width=900,height=700')
-    if (!printWindow) return
-
-    const daysHtml = daySchedules.map(day => `
-      <div class="day-card">
-        <div class="day-header">
-          <div class="day-number">DAY ${day.dayNumber}</div>
-          <div class="day-date">${day.date}${day.weekday ? `（${day.weekday}）` : ''}</div>
-        </div>
-        <div class="day-body">
-          ${day.items.map(item => {
-            const isBreakfast = item.subCategory === 'breakfast' || item.title.includes('早餐')
-            const isMeal = item.category === 'meals'
-            const isTransport = item.category === 'transport' || item.category === 'group-transport'
-            const icon = isTransport ? '🚌' : isMeal ? '🍽️' : '📍'
-            return `<div class="item ${isBreakfast ? 'item-light' : ''}">
-              <span class="item-icon">${icon}</span>
-              <span class="item-text">${item.title}</span>
-            </div>`
-          }).join('')}
-          ${day.hotel ? `<div class="hotel">
-            <span class="item-icon">🏨</span>
-            <span>住宿：${day.hotel}</span>
-          </div>` : ''}
-        </div>
-        <div class="quote-row">
-          <span>報價金額：</span>
-          <span class="quote-blank">NT$ _______________</span>
-          <span style="margin-left:auto">備註：_______________</span>
-        </div>
-      </div>
-    `).join('')
+    const pax = paxInput || totalPax || '-'
+    const tableRows = daySchedules.map((day, idx) => {
+      return `<tr style="background: ${idx % 2 === 0 ? '#fff' : '#fafaf5'}">
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px;">
+          <div style="font-weight: 600; color: #c9a96e;">Day ${day.dayNumber}</div>
+          <div style="font-size: 12px; color: #999;">${day.date}${day.weekday ? ` (${day.weekday})` : ''}</div>
+        </td>
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px; font-weight: 500;">${day.route || '—'}</td>
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px; text-align: center; font-size: 12px;">${day.breakfast || '-'}</td>
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px; text-align: center; font-size: 12px;">${day.lunch || '-'}</td>
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px; text-align: center; font-size: 12px;">${day.dinner || '-'}</td>
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px; font-size: 12px;">${day.hotel || '—'}</td>
+      </tr>`
+    }).join('')
 
     const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <title>建議行程表 - ${tour?.code || ''}</title>
 <style>
-  @media print { @page { margin: 1.5cm; } body { margin: 0; } .no-print { display: none; } }
+  @media print { @page { margin: 1.5cm; } body { margin: 0; } }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif; font-size: 11pt; line-height: 1.5; color: #333; max-width: 800px; margin: 0 auto; padding: 24px; }
-  .header { text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #c9a96e; }
-  .header h1 { font-size: 20pt; color: #333; margin-bottom: 4px; }
-  .header .subtitle { font-size: 11pt; color: #888; }
-  .info-bar { display: flex; gap: 24px; justify-content: center; margin-bottom: 20px; padding: 12px 20px; background: #faf8f5; border-radius: 8px; border: 1px solid #e8e0d4; }
-  .info-bar .info-item { font-size: 10pt; }
-  .info-bar .info-label { color: #999; margin-right: 4px; }
-  .info-bar .info-value { font-weight: 600; color: #333; }
-  .day-card { border: 1px solid #e0dcd6; border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
-  .day-header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: linear-gradient(135deg, #c9a96e, #b8956a); color: white; }
-  .day-number { font-weight: 700; font-size: 13pt; }
-  .day-date { font-size: 10pt; opacity: 0.9; }
-  .day-body { padding: 12px 16px; }
-  .item { display: flex; align-items: center; gap: 8px; padding: 5px 0; font-size: 10.5pt; }
-  .item-light { color: #999; font-size: 10pt; }
-  .item-icon { font-size: 12pt; width: 24px; text-align: center; flex-shrink: 0; }
-  .item-text { flex: 1; }
-  .hotel { display: flex; align-items: center; gap: 8px; padding: 8px 0 4px; margin-top: 4px; border-top: 1px dashed #e0dcd6; font-size: 10.5pt; color: #5b7db1; font-weight: 500; }
-  .quote-row { display: flex; align-items: center; gap: 12px; padding: 8px 16px; background: #fefcf9; border-top: 1px solid #e8e0d4; font-size: 10pt; color: #666; }
-  .quote-blank { border-bottom: 1px solid #ccc; min-width: 120px; display: inline-block; }
-  .note-section { margin-top: 20px; padding: 16px; border: 1px solid #e0dcd6; border-radius: 8px; }
-  .note-section h3 { font-size: 11pt; margin-bottom: 8px; color: #666; }
-  .note-section .note-content { font-size: 10pt; white-space: pre-line; min-height: 60px; }
-  .footer { margin-top: 24px; text-align: center; font-size: 9pt; color: #bbb; }
-  .total-row { margin-top: 16px; padding: 14px 20px; background: #f5f0ea; border-radius: 8px; border: 1px solid #d4c9b8; display: flex; align-items: center; justify-content: space-between; font-size: 12pt; font-weight: 600; }
-  .total-blank { border-bottom: 2px solid #999; min-width: 180px; display: inline-block; }
+  body { font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif; font-size: 14px; color: #333; max-width: 900px; margin: 0 auto; padding: 32px; }
+  .header { border-bottom: 2px solid #c9a96e; padding-bottom: 16px; margin-bottom: 24px; }
+  .header h1 { font-size: 20px; font-weight: bold; margin-bottom: 16px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; font-size: 14px; }
+  .info-item { display: flex; gap: 8px; }
+  .info-label { color: #999; }
+  .info-value { font-weight: 500; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+  .footer { padding-top: 16px; border-top: 1px solid #e8e5e0; text-align: center; font-size: 12px; color: #999; }
 </style></head><body>
   <div class="header">
-    <h1>建議行程表</h1>
-    <div class="subtitle">角落旅行社 CORNER TRAVEL</div>
+    <div style="display: flex; justify-content: space-between;">
+      <h1>${tour?.name || '行程表'}</h1>
+      <div style="font-weight: 600; color: #c9a96e;">角落旅行社</div>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">目的地：</span><span class="info-value">—</span></div>
+      <div class="info-item"><span class="info-label">出發日期：</span><span class="info-value">${tour?.departure_date || '-'}</span></div>
+      <div class="info-item"><span class="info-label">行程天數：</span><span class="info-value">${daySchedules.length} 天</span></div>
+    </div>
   </div>
-
-  <div class="info-bar">
-    <div class="info-item"><span class="info-label">團號</span><span class="info-value">${tour?.code || '-'}</span></div>
-    <div class="info-item"><span class="info-label">團名</span><span class="info-value">${tour?.name || '-'}</span></div>
-    <div class="info-item"><span class="info-label">出發日</span><span class="info-value">${tour?.departure_date || '-'}</span></div>
-    <div class="info-item"><span class="info-label">人數</span><span class="info-value">${totalPax || '-'} 位</span></div>
-  </div>
-
-  ${daysHtml}
-
-  <div class="total-row">
-    <span>合計報價</span>
-    <span>NT$ <span class="total-blank"></span></span>
-  </div>
-
-  ${note ? `<div class="note-section"><h3>備註</h3><div class="note-content">${note}</div></div>` : ''}
-
-  <div class="footer">
-    <p>此行程表由 Venturo ERP 產生 · ${new Date().toLocaleDateString('zh-TW')}</p>
-  </div>
+  <table>
+    <thead>
+      <tr style="background: #c9a96e; color: #fff;">
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: left; width: 80px;">日期</th>
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: left;">行程內容</th>
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: center; width: 64px;">早餐</th>
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: center; width: 64px;">午餐</th>
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: center; width: 64px;">晚餐</th>
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: left; width: 128px;">住宿</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${tableRows}
+    </tbody>
+  </table>
+  ${note ? `<div style="margin-bottom: 24px; font-size: 14px;"><b>備註：</b>${note}</div>` : ''}
+  <div class="footer"><p>本行程表由 角落旅行社 提供</p></div>
 </body></html>`
 
-    printWindow.document.write(html)
-    printWindow.document.close()
+    const printWindow = window.open('', '_blank', 'width=900,height=700')
+    if (printWindow) {
+      printWindow.document.write(html)
+      printWindow.document.close()
+    }
   }
 
-  const handleSend = async () => {
+  // LINE 發送
+  const handleSendLine = async () => {
     if (!selectedGroupId || !tour) return
     setSending(true)
     try {
-      const res = await fetch('/api/line/send-requirement', {
+      const pax = paxInput ? parseInt(paxInput) : totalPax
+      const res = await fetch('/api/line/send-local-quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           lineGroupId: selectedGroupId,
-          senderName: '角落旅行社',
           tourCode: tour.code || '',
           tourName: tour.name || '',
           departureDate: tour.departure_date || '',
-          totalPax,
-          supplierName: 'Local 地接',
-          items: transportDays.map(d => ({
-            category: 'activity',
-            title: `Day ${d.dayNumber}（${d.date}）${d.route || ''}`,
-          })),
-          replyUrl: `https://app.cornertravel.com.tw/public/request/${tour.id}`,
+          totalPax: pax,
+          tourId: tour.id,
+          note,
         }),
       })
       const result = await res.json()
@@ -285,25 +263,28 @@ export function LocalQuoteDialog({
     }
   }
 
+  // 發送方式處理
+  const handleDelivery = (method: DeliveryMethod) => {
+    if (method === 'print') {
+      handlePrint()
+      return
+    }
+    if (method === 'line') {
+      setSelectedMethod('line')
+      return
+    }
+    // email / fax / tenant 未來擴充
+    toast({ title: `${method} 功能開發中`, description: '目前支援列印和 LINE' })
+  }
+
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <DialogTitle className="text-lg">給 Local 報價 — 建議行程表</DialogTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrint}
-              className="h-8 px-3 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
-            >
-              <Printer size={14} className="mr-1" />
-              列印 / 另存 PDF
-            </Button>
-          </div>
+          <DialogTitle className="text-lg">給 Local 報價 — 建議行程表</DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto pr-1 space-y-3" ref={printRef}>
+        <div className="flex-1 overflow-y-auto pr-1 space-y-3">
           {/* 團資訊條 */}
           <div className="flex items-center gap-6 px-4 py-3 bg-[#faf8f5] rounded-lg border border-[#e8e0d4]">
             <div className="text-sm">
@@ -318,96 +299,131 @@ export function LocalQuoteDialog({
               <span className="text-muted-foreground mr-1">出發日</span>
               <span className="font-semibold">{tour?.departure_date || '-'}</span>
             </div>
-            <div className="text-sm">
-              <span className="text-muted-foreground mr-1">人數</span>
-              <span className="font-semibold">{totalPax || '-'} 位</span>
+            <div className="text-sm flex items-center gap-2">
+              <span className="text-muted-foreground">人數</span>
+              <Input
+                type="number"
+                value={paxInput}
+                onChange={e => setPaxInput(e.target.value)}
+                placeholder={totalPax?.toString() || ''}
+                className="h-7 w-20 text-sm"
+              />
             </div>
           </div>
 
-          {/* 每天行程卡片 */}
+          {/* 行程表格（跟公開頁面一樣） */}
           {daySchedules.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Sun size={40} className="mx-auto mb-3 opacity-30" />
               <p>尚無行程資料，請先到「行程」頁籤填寫</p>
             </div>
           ) : (
-            daySchedules.map(day => (
-              <div key={day.dayNumber} className="border border-[#e0dcd6] rounded-xl overflow-hidden">
-                {/* Day header */}
-                <div className="flex items-center gap-3 px-4 py-2.5 bg-gradient-to-r from-[#c9a96e] to-[#b8956a] text-white">
-                  <span className="font-bold text-base">DAY {day.dayNumber}</span>
-                  <span className="text-sm opacity-90">{day.date}{day.weekday ? `（${day.weekday}）` : ''}</span>
-                </div>
-                {/* Day body */}
-                <div className="px-4 py-3 space-y-1">
-                  {day.items.length === 0 && !day.hotel ? (
-                    <div className="text-sm text-muted-foreground py-2">待安排</div>
-                  ) : (
-                    <>
-                      {day.items.map((item, idx) => {
-                        const isBreakfast = item.subCategory === 'breakfast' || item.title.includes('早餐')
-                        const catInfo = CATEGORY_ICON[item.category]
-                        const IconComp = catInfo?.icon || MapPin
-                        const iconColor = catInfo?.color || 'text-gray-500'
-                        return (
-                          <div
-                            key={idx}
-                            className={`flex items-center gap-2.5 py-1 ${isBreakfast ? 'text-muted-foreground text-xs' : 'text-sm'}`}
-                          >
-                            <IconComp size={isBreakfast ? 12 : 15} className={`flex-shrink-0 ${iconColor}`} />
-                            <span>{item.title}</span>
-                          </div>
-                        )
-                      })}
-                      {day.hotel && (
-                        <div className="flex items-center gap-2.5 pt-2 mt-1 border-t border-dashed border-[#e0dcd6] text-sm text-blue-600 font-medium">
-                          <Hotel size={15} className="flex-shrink-0" />
-                          <span>住宿：{day.hotel}</span>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            ))
+            <table className="w-full border-collapse text-sm mb-3">
+              <thead>
+                <tr className="bg-[#c9a96e] text-white">
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-20">日期</th>
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left">行程內容</th>
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">早餐</th>
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">午餐</th>
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">晚餐</th>
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-32">住宿</th>
+                </tr>
+              </thead>
+              <tbody>
+                {daySchedules.map((day, idx) => (
+                  <tr key={day.dayNumber} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf5]'}>
+                    <td className="border border-[#e8e5e0] px-3 py-2">
+                      <div className="font-semibold text-[#c9a96e]">Day {day.dayNumber}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {day.date}{day.weekday ? ` (${day.weekday})` : ''}
+                      </div>
+                    </td>
+                    <td className="border border-[#e8e5e0] px-3 py-2 font-medium">
+                      {day.route || '—'}
+                    </td>
+                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                      {day.breakfast || '-'}
+                    </td>
+                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                      {day.lunch || '-'}
+                    </td>
+                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                      {day.dinner || '-'}
+                    </td>
+                    <td className="border border-[#e8e5e0] px-3 py-2 text-xs">
+                      {day.hotel || '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
 
           {/* 備註 */}
-          <div className="pt-1">
+          <div className="pt-2">
             <label className="text-sm font-medium mb-1.5 block">備註</label>
             <Textarea
               value={note}
               onChange={e => setNote(e.target.value)}
               placeholder="給 Local 的特殊需求、偏好、注意事項..."
-              rows={3}
+              rows={2}
+              className="resize-none"
             />
           </div>
 
-          {/* LINE 發送區 */}
-          <div className="border border-border rounded-lg p-4 bg-muted/20">
-            <label className="text-sm font-medium mb-2 block">發送到 LINE 群組</label>
+          {/* 選擇發送方式 */}
+          <div className="border-t border-[#c9a96e] pt-4 mt-2">
+            <label className="text-sm font-medium mb-3 block">選擇發送方式</label>
             <div className="flex items-center gap-3">
-              <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
-                <SelectTrigger className="flex-1">
-                  <SelectValue placeholder="選擇 LINE 群組" />
-                </SelectTrigger>
-                <SelectContent>
-                  {lineGroups.map(g => (
-                    <SelectItem key={g.group_id} value={g.group_id}>
-                      {g.group_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                onClick={handleSend}
-                disabled={!selectedGroupId || sending}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4"
-              >
-                {sending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Send size={14} className="mr-1" />}
-                發送
-              </Button>
+              {DELIVERY_METHODS.map(m => {
+                const Icon = m.icon
+                return (
+                  <button
+                    key={m.key}
+                    onClick={() => handleDelivery(m.key)}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium transition-all
+                      ${selectedMethod === m.key 
+                        ? 'border-[#c9a96e] bg-[#faf8f5] text-[#8B6914]' 
+                        : 'border-border hover:border-[#c9a96e] hover:bg-[#faf8f5] text-foreground'
+                      }`}
+                  >
+                    <Icon size={15} />
+                    {m.label}
+                  </button>
+                )
+              })}
             </div>
+
+            {/* LINE 群組選擇（選了 Line 才出現） */}
+            {selectedMethod === 'line' && (
+              <div className="mt-4 flex items-center gap-3 p-3 bg-muted/20 rounded-lg border border-border">
+                <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="選擇 LINE 群組" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lineGroups.map(g => (
+                      <SelectItem key={g.group_id} value={g.group_id}>
+                        {g.group_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={handleSendLine}
+                  disabled={!selectedGroupId || sending}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
+                >
+                  {sending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Send size={14} className="mr-1" />}
+                  發送
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* 底部按鈕 */}
+          <div className="flex justify-end gap-3 pt-2 pb-1">
+            <Button variant="outline" onClick={onClose}>取消</Button>
           </div>
         </div>
       </DialogContent>

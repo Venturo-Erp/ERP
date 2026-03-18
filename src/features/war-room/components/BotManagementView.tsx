@@ -111,7 +111,7 @@ export const BotManagementView: React.FC<BotManagementViewProps> = ({
   ];
 
   return (
-    <div className="h-full p-4">
+    <div className="h-full">
       <EnhancedTable
         columns={columns}
         data={bots}

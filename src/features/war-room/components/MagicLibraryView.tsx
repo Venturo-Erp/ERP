@@ -134,7 +134,7 @@ export const MagicLibraryView: React.FC<MagicLibraryViewProps> = ({
   ];
 
   return (
-    <div className="h-full p-4">
+    <div className="h-full">
       <EnhancedTable
         columns={columns}
         data={items}
