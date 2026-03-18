@@ -10,7 +10,7 @@ import { Send, Loader2, Printer, Sun, Mail, Phone, Globe, Plus, X } from 'lucide
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
-import { TransportTraditionalView } from './TransportTraditionalView'
+import { UnifiedTraditionalView } from './UnifiedTraditionalView'
 import { printTransportRequirement } from '../utils/printTransportRequirement'
 
 interface TransportQuoteDialogProps {
@@ -294,21 +294,22 @@ export function TransportQuoteDialog({
         {/* 中間可滾動內容 */}
         <div className="flex-1 overflow-y-auto pr-1 space-y-3">
           {viewMode === 'traditional' ? (
-            <TransportTraditionalView
+            <UnifiedTraditionalView
+              requestType="transport"
               tour={tour}
               totalPax={totalPax}
-              daySchedules={daySchedules.map(d => ({
-                dayNumber: d.dayNumber,
+              supplierName={supplierName}
+              contact={suppliers.find(s => s.id === selectedSupplierId)?.contact_person}
+              phone={suppliers.find(s => s.id === selectedSupplierId)?.phone}
+              fax={suppliers.find(s => s.id === selectedSupplierId)?.fax}
+              items={daySchedules.map(d => ({
                 date: d.date,
                 route: d.route,
+                quantity: '',
+                note: vehicleDesc || '',
               }))}
-              vehicleDesc={vehicleDesc}
               note={note}
               setNote={setNote}
-              suppliers={suppliers}
-              selectedSupplierId={selectedSupplierId}
-              setSelectedSupplierId={setSelectedSupplierId}
-              invoiceSealUrl=""
             />
           ) : (
             <>
