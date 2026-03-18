@@ -107,7 +107,7 @@ export function TransportRequirementDialog({
         vehicle_desc: vehicleDesc || null,
       }))
 
-      const { error } = await sb.from('tour_requests').insert({
+      const { data: newReq, error } = await sb.from('tour_requests').insert({
         workspace_id: user.workspace_id,
         tour_id: tourId,
         request_type: 'transport',
@@ -116,13 +116,13 @@ export function TransportRequirementDialog({
         status: 'draft',
         note: note.trim() || null,
         created_by: user.id,
-      } as never)
+      } as never).select('id').single()
 
       if (error) throw error
 
       toast({ title: `交通委託已儲存：${supplierName}（${selectedDaysList.length} 天）` })
       onSave?.()
-      return true
+      return (newReq as { id: string })?.id || true
     } catch (err) {
       logger.error('儲存交通委託失敗:', err)
       toast({ title: '儲存交通委託失敗', variant: 'destructive' })
@@ -133,7 +133,7 @@ export function TransportRequirementDialog({
   }, [selectedDaysList, tourId, user, supplierName, totalPax, note, toast, onSave])
 
   // LINE 發送
-  const handleSendLine = useCallback(async () => {
+  const handleSendLine = useCallback(async (reqId?: string) => {
     if (!selectedGroupId || selectedDaysList.length === 0) return
     setSending(true)
     try {
@@ -154,6 +154,7 @@ export function TransportRequirementDialog({
             route: d.route,
           })),
           note: note.trim() || null,
+          requestId: reqId || null,
         }),
       })
       const result = await res.json()
@@ -172,10 +173,13 @@ export function TransportRequirementDialog({
 
   const handlePrintAndSave = useCallback(async () => {
     if (selectedDaysList.length === 0) return
-    const saved = await handleSaveRequest()
-    if (saved === false) return
-    // 如果選了 LINE 群組，同時發送
-    if (selectedGroupId) await handleSendLine()
+    const result = await handleSaveRequest()
+    if (result === false) return
+    // 如果選了 LINE 群組，同時發送（帶 request ID 讓供應商可以線上報價）
+    if (selectedGroupId) {
+      const reqId = typeof result === 'string' ? result : undefined
+      await handleSendLine(reqId)
+    }
     handlePrint()
   }, [selectedDaysList, handleSaveRequest, selectedGroupId, handleSendLine])
 
