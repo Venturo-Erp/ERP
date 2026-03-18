@@ -62,12 +62,11 @@ export const WarRoomPage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // 加载魔法库
-      // @ts-expect-error -- Supabase generated types cause infinite recursion for this table
-      const { data: magic }: { data: MagicItem[] | null } = await supabase
+      // 加载魔法库（magic_library 不在 generated types 中，用 any 繞過）
+      const { data: magic } = await (supabase as any)
         .from('magic_library')
         .select('*')
-        .order('category');
+        .order('category') as { data: MagicItem[] | null };
 
       if (magic) setMagicItems(magic);
 
