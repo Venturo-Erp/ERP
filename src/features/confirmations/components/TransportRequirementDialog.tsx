@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
-import { Bus, Printer, Loader2 } from 'lucide-react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
+import { Bus, Printer, Loader2, Send } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -57,6 +57,23 @@ export function TransportRequirementDialog({
   const [saving, setSaving] = useState(false)
   // 統一車型說明（套用到所有勾選的天）
   const [vehicleDesc, setVehicleDesc] = useState('')
+  // LINE 群組
+  const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string | null }[]>([])
+  const [selectedGroupId, setSelectedGroupId] = useState('')
+  const [sending, setSending] = useState(false)
+
+  // 載入 LINE 群組
+  useEffect(() => {
+    if (!open) return
+    const sb = createSupabaseBrowserClient()
+    sb.from('line_groups')
+      .select('group_id, group_name')
+      .not('group_name', 'is', null)
+      .order('group_name')
+      .then(({ data }) => {
+        if (data) setLineGroups(data)
+      })
+  }, [open])
 
   const toggleDay = (dayNum: number) => {
     setSelectedDays(prev => {
@@ -115,12 +132,52 @@ export function TransportRequirementDialog({
     }
   }, [selectedDaysList, tourId, user, supplierName, totalPax, note, toast, onSave])
 
+  // LINE 發送
+  const handleSendLine = useCallback(async () => {
+    if (!selectedGroupId || selectedDaysList.length === 0) return
+    setSending(true)
+    try {
+      const res = await fetch('/api/line/send-transport', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          groupId: selectedGroupId,
+          tourCode: tour?.code || '',
+          tourName: tour?.name || '',
+          departureDate: tour?.departure_date || '',
+          totalPax,
+          supplierName,
+          vehicleDesc,
+          days: selectedDaysList.map(d => ({
+            dayNumber: d.dayNumber,
+            date: d.date,
+            route: d.route,
+          })),
+          note: note.trim() || null,
+        }),
+      })
+      const result = await res.json()
+      if (result.success) {
+        const groupName = lineGroups.find(g => g.group_id === selectedGroupId)?.group_name
+        toast({ title: `✅ 已發送到 LINE「${groupName}」` })
+      } else {
+        toast({ title: '❌ LINE 發送失敗', description: result.error, variant: 'destructive' })
+      }
+    } catch (err) {
+      toast({ title: '❌ 發送失敗', description: String(err), variant: 'destructive' })
+    } finally {
+      setSending(false)
+    }
+  }, [selectedGroupId, selectedDaysList, tour, totalPax, supplierName, vehicleDesc, note, lineGroups, toast])
+
   const handlePrintAndSave = useCallback(async () => {
     if (selectedDaysList.length === 0) return
     const saved = await handleSaveRequest()
     if (saved === false) return
+    // 如果選了 LINE 群組，同時發送
+    if (selectedGroupId) await handleSendLine()
     handlePrint()
-  }, [selectedDaysList, handleSaveRequest])
+  }, [selectedDaysList, handleSaveRequest, selectedGroupId, handleSendLine])
 
   const handlePrint = () => {
     if (selectedDaysList.length === 0) return
@@ -247,6 +304,25 @@ export function TransportRequirementDialog({
             />
           </div>
 
+          {/* LINE 發送群組選擇 */}
+          {lineGroups.length > 0 && (
+            <div className="space-y-1">
+              <Label className="text-sm font-medium">LINE 發送</Label>
+              <select
+                value={selectedGroupId}
+                onChange={e => setSelectedGroupId(e.target.value)}
+                className="w-full h-8 px-2 text-sm rounded-md border border-border bg-background focus:outline-none focus:ring-1 focus:ring-morandi-gold"
+              >
+                <option value="">不發送（僅儲存/列印）</option>
+                {lineGroups.map(g => (
+                  <option key={g.group_id} value={g.group_id}>
+                    {g.group_name || g.group_id}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {selectedDays.size > 0 && (
             <div className="bg-morandi-gold/5 border border-morandi-gold/20 rounded-md p-2 text-xs">
               <span className="font-medium text-morandi-primary">摘要：</span>
@@ -260,11 +336,11 @@ export function TransportRequirementDialog({
           <Button variant="outline" onClick={onClose}>取消</Button>
           <Button
             onClick={handlePrintAndSave}
-            disabled={selectedDays.size === 0 || saving}
+            disabled={selectedDays.size === 0 || saving || sending}
             className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
           >
-            {saving ? <Loader2 size={14} className="animate-spin mr-1" /> : <Printer size={14} className="mr-1" />}
-            儲存並列印
+            {(saving || sending) ? <Loader2 size={14} className="animate-spin mr-1" /> : <Printer size={14} className="mr-1" />}
+            {selectedGroupId ? '儲存、列印並發送 LINE' : '儲存並列印'}
           </Button>
         </DialogFooter>
       </DialogContent>
