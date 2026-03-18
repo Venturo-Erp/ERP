@@ -73,6 +73,10 @@ export function CreateSupplierDialog({
       void alert('請輸入供應商名稱', 'warning')
       return
     }
+    if (!formData.type) {
+      void alert('請選擇供應商類別', 'warning')
+      return
+    }
 
     setSubmitting(true)
     try {
@@ -127,122 +131,116 @@ export function CreateSupplierDialog({
           <DialogTitle>新增供應商</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4 overflow-y-auto flex-1">
-          {/* 供應商名稱（必填） */}
-          <div>
-            <Label>
-              供應商名稱 <span className="text-morandi-red">*</span>
-            </Label>
-            <Input
-              value={formData.name}
-              onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="例：台北君悅酒店"
-              autoFocus
-            />
+        <div className="py-4">
+          {/* 必填：名稱 + 類別 */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <Label>
+                供應商名稱 <span className="text-morandi-red">*</span>
+              </Label>
+              <Input
+                value={formData.name}
+                onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="例：台北君悅酒店"
+                autoFocus
+              />
+            </div>
+            <div>
+              <Label>
+                類別 <span className="text-morandi-red">*</span>
+              </Label>
+              <Select
+                value={formData.type}
+                onValueChange={value =>
+                  setFormData(prev => ({ ...prev, type: value as SupplierType }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="選擇類別" />
+                </SelectTrigger>
+                <SelectContent>
+                  {SUPPLIER_TYPE_OPTIONS.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* 類別 */}
-          <div>
-            <Label>類別</Label>
-            <Select
-              value={formData.type}
-              onValueChange={value =>
-                setFormData(prev => ({ ...prev, type: value as SupplierType }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="選擇類別" />
-              </SelectTrigger>
-              <SelectContent>
-                {SUPPLIER_TYPE_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* 聯絡人 */}
-          <div>
-            <Label>聯絡人</Label>
-            <Input
-              value={formData.contact_person}
-              onChange={e => setFormData(prev => ({ ...prev, contact_person: e.target.value }))}
-              placeholder="例：王小明"
-            />
-          </div>
-
-          {/* 電話 */}
-          <div>
-            <Label>電話</Label>
-            <Input
-              value={formData.phone}
-              onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-              placeholder="例：02-2345-6789"
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <Label>Email</Label>
-            <Input
-              type="email"
-              value={formData.email}
-              onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
-              placeholder="例：contact@hotel.com"
-            />
-          </div>
-
-          {/* 統編 */}
-          <div>
-            <Label>統編</Label>
-            <Input
-              value={formData.tax_id}
-              onChange={e => setFormData(prev => ({ ...prev, tax_id: e.target.value }))}
-              placeholder="例：12345678"
-              maxLength={8}
-            />
-          </div>
-
-          {/* 銀行名稱 */}
-          <div>
-            <Label>銀行名稱</Label>
-            <Input
-              value={formData.bank_name}
-              onChange={e => setFormData(prev => ({ ...prev, bank_name: e.target.value }))}
-              placeholder="例：台灣銀行"
-            />
-          </div>
-
-          {/* 戶名 */}
-          <div>
-            <Label>戶名</Label>
-            <Input
-              value={formData.bank_account_name}
-              onChange={e => setFormData(prev => ({ ...prev, bank_account_name: e.target.value }))}
-              placeholder="例：角落旅行社有限公司"
-            />
-          </div>
-
-          {/* 銀行帳號 */}
-          <div>
-            <Label>銀行帳號</Label>
-            <Input
-              value={formData.bank_account}
-              onChange={e => setFormData(prev => ({ ...prev, bank_account: e.target.value }))}
-              placeholder="例：1234-5678-9012-3456"
-            />
-          </div>
-
-          {/* 備註 */}
-          <div>
-            <Label>備註</Label>
-            <Input
-              value={formData.notes}
-              onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder="例：常用供應商"
-            />
+          {/* 選填：左右兩欄 */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div>
+                <Label className="text-morandi-muted">聯絡人</Label>
+                <Input
+                  value={formData.contact_person}
+                  onChange={e => setFormData(prev => ({ ...prev, contact_person: e.target.value }))}
+                  placeholder="例：王小明"
+                />
+              </div>
+              <div>
+                <Label className="text-morandi-muted">電話</Label>
+                <Input
+                  value={formData.phone}
+                  onChange={e => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="例：02-2345-6789"
+                />
+              </div>
+              <div>
+                <Label className="text-morandi-muted">Email</Label>
+                <Input
+                  type="email"
+                  value={formData.email}
+                  onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="例：contact@hotel.com"
+                />
+              </div>
+              <div>
+                <Label className="text-morandi-muted">統編</Label>
+                <Input
+                  value={formData.tax_id}
+                  onChange={e => setFormData(prev => ({ ...prev, tax_id: e.target.value }))}
+                  placeholder="例：12345678"
+                  maxLength={8}
+                />
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <Label className="text-morandi-muted">銀行名稱</Label>
+                <Input
+                  value={formData.bank_name}
+                  onChange={e => setFormData(prev => ({ ...prev, bank_name: e.target.value }))}
+                  placeholder="例：台灣銀行"
+                />
+              </div>
+              <div>
+                <Label className="text-morandi-muted">戶名</Label>
+                <Input
+                  value={formData.bank_account_name}
+                  onChange={e => setFormData(prev => ({ ...prev, bank_account_name: e.target.value }))}
+                  placeholder="例：角落旅行社有限公司"
+                />
+              </div>
+              <div>
+                <Label className="text-morandi-muted">銀行帳號</Label>
+                <Input
+                  value={formData.bank_account}
+                  onChange={e => setFormData(prev => ({ ...prev, bank_account: e.target.value }))}
+                  placeholder="例：1234-5678-9012-3456"
+                />
+              </div>
+              <div>
+                <Label className="text-morandi-muted">備註</Label>
+                <Input
+                  value={formData.notes}
+                  onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="例：常用供應商"
+                />
+              </div>
+            </div>
           </div>
         </div>
 

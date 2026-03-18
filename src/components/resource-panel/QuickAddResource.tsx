@@ -65,7 +65,8 @@ export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourc
       const insertData: Record<string, unknown> = {
         name: trimmed,
         country_id: countryId,
-        ...(type === 'attraction' ? { workspace_id: workspaceId, data_verified: false } : {}),
+        data_verified: false,
+        ...(type === 'attraction' ? { workspace_id: workspaceId } : {}),
       }
 
       // 酒店/餐廳需要 city_id — 自動抓該國第一個城市

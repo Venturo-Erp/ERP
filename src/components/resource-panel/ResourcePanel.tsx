@@ -276,8 +276,7 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
       type: ResourceType,
       extraSelect = ''
     ) => {
-      const hasVerified = table === 'attractions'
-      const selectStr = `id, name, category, thumbnail${hasVerified ? ', data_verified' : ''}${extraSelect}`
+      const selectStr = `id, name, category, thumbnail, data_verified${extraSelect}`
       let query = supabase
         .from(table)
         .select(selectStr as 'id, name, category, thumbnail')

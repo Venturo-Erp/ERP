@@ -1,22 +1,23 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Trash2, Layers } from 'lucide-react'
+import { Trash2, Layers, Save } from 'lucide-react'
 import { EditableRequestItemList } from './RequestItemList'
 import { CreateSupplierDialog } from './CreateSupplierDialog'
 import type { RequestItem } from '../types'
 import {
   useToursSlim,
   useSuppliersSlim,
+  useEmployeesSlim,
   usePaymentRequestItems,
   deletePaymentRequest as deletePaymentRequestApi,
 } from '@/data'
-import { PaymentRequest, PaymentRequestItem, PaymentItemCategory } from '@/stores/types'
+import { PaymentRequest, PaymentItemCategory } from '@/stores/types'
 import { DateCell, CurrencyCell } from '@/components/table-cells'
-import { statusLabels, statusColors, categoryOptions } from '../types'
+import { statusLabels, statusColors } from '../types'
 import { paymentRequestService } from '@/features/payments/services/payment-request.service'
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
 import { logger } from '@/lib/utils/logger'
@@ -24,11 +25,9 @@ import { confirm, alert } from '@/lib/ui/alert-dialog'
 import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import {
-  ADD_REQUEST_DIALOG_LABELS,
   REQUEST_DETAIL_DIALOG_LABELS,
   REQUEST_DETAIL_FORM_LABELS,
   REQUEST_LABELS,
-  REQUEST_TYPE_LABELS,
 } from '../../constants/labels'
 
 interface RequestDetailDialogProps {
@@ -41,17 +40,42 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
   const { items: requestItems, refresh: refreshRequestItems } = usePaymentRequestItems()
   const { items: tours } = useToursSlim()
   const { items: suppliers } = useSuppliersSlim()
+  const { items: employees } = useEmployeesSlim()
+
+  // 合併供應商和員工
+  const combinedSuppliers = useMemo(() => {
+    const supplierList = suppliers.map(s => ({
+      id: s.id,
+      name: s.name,
+      type: 'supplier' as const,
+      group: '供應商',
+    }))
+    const employeeList = employees
+      .filter(e => e.employee_number !== 'BOT001' && e.id !== '00000000-0000-0000-0000-000000000001')
+      .map(e => ({
+        id: e.id,
+        name: e.display_name,
+        type: 'employee' as const,
+        group: '員工',
+      }))
+    return [...supplierList, ...employeeList]
+  }, [suppliers, employees])
 
   // 批次請款單狀態
   const [batchRequests, setBatchRequests] = useState<PaymentRequest[]>([])
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null)
-
   const [is_submitting, setIsSubmitting] = useState(false)
 
   // 快速新增供應商
   const [createSupplierDialogOpen, setCreateSupplierDialogOpen] = useState(false)
   const [pendingSupplierName, setPendingSupplierName] = useState('')
   const [supplierCreateResolver, setSupplierCreateResolver] = useState<((id: string) => void) | null>(null)
+
+  // === 本地編輯狀態（不即時寫 DB，按存檔才寫） ===
+  const [localItems, setLocalItems] = useState<RequestItem[]>([])
+  const [isDirty, setIsDirty] = useState(false)
+  const [deletedItemIds, setDeletedItemIds] = useState<string[]>([])
+  const [newItemIds, setNewItemIds] = useState<string[]>([])
 
   const handleCreateSupplier = async (name: string): Promise<string | null> => {
     return new Promise(resolve => {
@@ -69,7 +93,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
     setPendingSupplierName('')
   }
 
-  // 載入批次請款單（如果有 batch_id）
+  // 載入批次請款單
   useEffect(() => {
     const loadBatchRequests = async () => {
       if (!open || !request) {
@@ -77,8 +101,6 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
         setSelectedRequestId(null)
         return
       }
-
-      // 如果有 batch_id，查詢同批次的所有請款單
       if (request.batch_id) {
         const { data, error } = await supabase
           .from('payment_requests')
@@ -86,7 +108,6 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
           .eq('batch_id', request.batch_id)
           .order('code', { ascending: true })
           .limit(500)
-
         if (error) {
           logger.error('載入批次請款單失敗:', error)
           setBatchRequests([request])
@@ -94,13 +115,10 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
           setBatchRequests(data as PaymentRequest[])
         }
       } else {
-        // 沒有 batch_id，只有單一請款單
         setBatchRequests([request])
       }
-
       setSelectedRequestId(request.id)
     }
-
     loadBatchRequests().catch(err => logger.error('[loadBatchRequests]', err))
   }, [open, request])
 
@@ -111,30 +129,23 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
     }
   }, [open, request, refreshRequestItems])
 
-  // 重置編輯狀態（不再需要，統一使用 EditableRequestItemList）
-
-  // 當前選中的請款單
   const currentRequest = useMemo(() => {
     return batchRequests.find(r => r.id === selectedRequestId) || request
   }, [batchRequests, selectedRequestId, request])
 
-  // 是否為批次請款單
   const isBatch = batchRequests.length > 1
-
-  // 批次總金額
   const batchTotalAmount = useMemo(() => {
     return batchRequests.reduce((sum, r) => sum + (r.amount || 0), 0)
   }, [batchRequests])
 
-  // 取得當前選中請款單的項目
-  const items = currentRequest ? requestItems.filter(item => item.request_id === currentRequest.id) : []
+  // 取得當前選中請款單的 DB 項目
+  const dbItems = currentRequest ? requestItems.filter(item => item.request_id === currentRequest.id) : []
 
-  // 取得關聯的團
   const tour = currentRequest?.tour_id ? tours.find(t => t.id === currentRequest.tour_id) : null
 
-  // 把 DB items 轉成 EditableRequestItemList 需要的格式
-  const editableItems: RequestItem[] = useMemo(() => 
-    items.map(item => ({
+  // DB items → 本地 editable 格式
+  const dbEditableItems: RequestItem[] = useMemo(() =>
+    dbItems.map(item => ({
       id: item.id,
       category: item.category,
       supplier_id: item.supplier_id || '',
@@ -147,76 +158,121 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
       confirmation_item_id: (item as unknown as Record<string, unknown>).confirmation_item_id as string | undefined,
       advanced_by: (item as unknown as Record<string, unknown>).advanced_by as string | undefined,
       advanced_by_name: (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined,
-    })), [items])
+    })), [dbItems])
 
-  if (!request || !currentRequest) return null
+  // 當 DB 資料載入/變更時，同步到本地（僅在非 dirty 時）
+  useEffect(() => {
+    if (!isDirty && dbEditableItems.length > 0) {
+      setLocalItems(dbEditableItems)
+    }
+  }, [dbEditableItems, isDirty])
 
-  // Bridge: 更新項目 → 寫 DB
-  const handleUpdateEditableItem = async (itemId: string, updates: Partial<RequestItem>) => {
+  // 切換請款單時重置 dirty 狀態
+  useEffect(() => {
+    setIsDirty(false)
+    setDeletedItemIds([])
+    setNewItemIds([])
+  }, [selectedRequestId])
+
+  // === 本地操作（不寫 DB） ===
+  const handleUpdateItem = useCallback((itemId: string, updates: Partial<RequestItem>) => {
+    setLocalItems(prev => prev.map(item => item.id === itemId ? { ...item, ...updates } : item))
+    setIsDirty(true)
+  }, [])
+
+  const handleRemoveItem = useCallback((itemId: string) => {
+    setLocalItems(prev => prev.filter(item => item.id !== itemId))
+    // 只有 DB 已存在的項目才需要刪除
+    if (!newItemIds.includes(itemId)) {
+      setDeletedItemIds(prev => [...prev, itemId])
+    }
+    setNewItemIds(prev => prev.filter(id => id !== itemId))
+    setIsDirty(true)
+  }, [newItemIds])
+
+  const handleAddItem = useCallback(() => {
+    const newId = `new_${Math.random().toString(36).substr(2, 9)}`
+    setLocalItems(prev => [...prev, {
+      id: newId,
+      category: '' as PaymentItemCategory,
+      supplier_id: '',
+      supplierName: '',
+      description: '',
+      unit_price: 0,
+      quantity: 1,
+    }])
+    setNewItemIds(prev => [...prev, newId])
+    setIsDirty(true)
+  }, [])
+
+  // === 存檔：一次寫入 DB ===
+  const handleSave = async () => {
+    if (!currentRequest || is_submitting) return
+    setIsSubmitting(true)
+
     try {
-      const dbUpdates: Record<string, unknown> = {}
-      if (updates.category !== undefined) dbUpdates.category = updates.category
-      if (updates.supplier_id !== undefined) dbUpdates.supplier_id = updates.supplier_id || null
-      if (updates.supplierName !== undefined) dbUpdates.supplier_name = updates.supplierName
-      if (updates.description !== undefined) dbUpdates.description = updates.description
-      if (updates.unit_price !== undefined) {
-        dbUpdates.unitprice = updates.unit_price
-        dbUpdates.subtotal = (updates.unit_price ?? 0) * (updates.quantity ?? items.find(i => i.id === itemId)?.quantity ?? 1)
+      // 1. 刪除被移除的項目
+      for (const id of deletedItemIds) {
+        await paymentRequestService.deleteItem(currentRequest.id, id)
       }
-      if (updates.quantity !== undefined) {
-        dbUpdates.quantity = updates.quantity
-        const price = updates.unit_price ?? items.find(i => i.id === itemId)?.unit_price ?? 0
-        dbUpdates.subtotal = price * updates.quantity
-      }
-      if (updates.advanced_by !== undefined) dbUpdates.advanced_by = updates.advanced_by || null
-      if (updates.advanced_by_name !== undefined) dbUpdates.advanced_by_name = updates.advanced_by_name || null
 
-      await supabase.from('payment_request_items').update(dbUpdates as never).eq('id', itemId)
+      // 2. 新增新項目（直接 insert，避免 service 的 getById 快取問題）
+      const newItems = localItems.filter(i => newItemIds.includes(i.id))
+      if (newItems.length > 0) {
+        const rows = newItems.map((item, idx) => ({
+          request_id: currentRequest.id,
+          category: item.category || null,
+          supplier_id: item.supplier_id || null,
+          supplier_name: item.supplierName || null,
+          description: item.description,
+          unitprice: item.unit_price,
+          quantity: item.quantity,
+          subtotal: item.unit_price * item.quantity,
+          sort_order: localItems.indexOf(item) + 1,
+          advanced_by: item.advanced_by === '_pending' ? null : (item.advanced_by || null),
+          advanced_by_name: item.advanced_by_name || null,
+          item_number: `${currentRequest.code}-${dbItems.length + idx + 1}`,
+        }))
+        await supabase.from('payment_request_items').insert(rows)
+      }
+
+      // 3. 更新既有項目
+      for (const item of localItems.filter(i => !newItemIds.includes(i.id))) {
+        const dbUpdates: Record<string, unknown> = {
+          category: item.category,
+          supplier_id: item.supplier_id || null,
+          supplier_name: item.supplierName || null,
+          description: item.description,
+          unitprice: item.unit_price,
+          quantity: item.quantity,
+          subtotal: item.unit_price * item.quantity,
+          advanced_by: item.advanced_by === '_pending' ? null : (item.advanced_by || null),
+          advanced_by_name: item.advanced_by_name || null,
+        }
+        await supabase.from('payment_request_items').update(dbUpdates as never).eq('id', item.id)
+      }
+
+      // 4. 重新整理
       await refreshRequestItems()
-
       if (currentRequest.tour_id) {
         await recalculateExpenseStats(currentRequest.tour_id)
       }
-    } catch (error) {
-      logger.error('更新項目失敗:', error)
-    }
-  }
 
-  // Bridge: 刪除項目
-  const handleRemoveEditableItem = async (itemId: string) => {
-    try {
-      await paymentRequestService.deleteItem(currentRequest.id, itemId)
-      await refreshRequestItems()
-      if (currentRequest.tour_id) {
-        await recalculateExpenseStats(currentRequest.tour_id)
-      }
+      setIsDirty(false)
+      setDeletedItemIds([])
+      setNewItemIds([])
+      void alert('儲存成功', 'success')
     } catch (error) {
-      logger.error('刪除項目失敗:', error)
-    }
-  }
-
-  // Bridge: 新增空白項目
-  const handleAddEditableItem = async () => {
-    try {
-      await paymentRequestService.addItem(currentRequest.id, {
-        category: '' as PaymentItemCategory,
-        supplier_id: '',
-        supplier_name: '',
-        description: '',
-        unit_price: 0,
-        quantity: 1,
-        notes: '',
-        sort_order: items.length + 1,
-      })
-      await refreshRequestItems()
-    } catch (error) {
-      logger.error('新增項目失敗:', error)
+      logger.error('儲存失敗:', error)
+      void alert('儲存失敗，請稍後再試', 'error')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   // 刪除請款單
   const handleDelete = async () => {
-    if (is_submitting) return
+    if (!currentRequest || is_submitting) return
     const deleteMessage = isBatch
       ? REQUEST_LABELS.確定要刪除此請款單(currentRequest.code)
       : REQUEST_DETAIL_DIALOG_LABELS.確定要刪除此請款單嗎_此操作無法復原
@@ -225,22 +281,16 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
       title: REQUEST_DETAIL_DIALOG_LABELS.刪除請款單,
       type: 'warning',
     })
-    if (!confirmed) {
-      return
-    }
+    if (!confirmed) return
 
     setIsSubmitting(true)
     try {
       await deletePaymentRequestApi(currentRequest.id)
-
-      // 重算團成本
       if (currentRequest.tour_id) {
         await recalculateExpenseStats(currentRequest.tour_id)
       }
-
       await alert(REQUEST_DETAIL_DIALOG_LABELS.請款單已刪除, 'success')
 
-      // 如果是批次且還有其他請款單，切換到下一個
       if (isBatch && batchRequests.length > 1) {
         const remainingRequests = batchRequests.filter(r => r.id !== currentRequest.id)
         setBatchRequests(remainingRequests)
@@ -256,21 +306,24 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
     }
   }
 
-  // 判斷是否可以編輯（只有待處理狀態可以編輯）
-  const canEdit = currentRequest.status === 'pending'
-
-  // 是否正在編輯中（新增或編輯項目）
-  const isEditing = false // 統一使用 EditableRequestItemList，不再有 inline 編輯
-
-  // 處理關閉對話框（編輯中時阻止關閉）
+  // 關閉時如果有未儲存的修改，提示
   const handleOpenChange = async (newOpen: boolean) => {
-    if (!newOpen && isEditing) {
-      // 正在編輯中，提示用戶
-      await alert(REQUEST_DETAIL_DIALOG_LABELS.請先儲存或取消目前的編輯, 'warning')
-      return
+    if (!newOpen && isDirty) {
+      const confirmed = await confirm('有未儲存的修改，確定要離開嗎？', {
+        title: '未儲存的修改',
+        type: 'warning',
+      })
+      if (!confirmed) return
+    }
+    if (!newOpen) {
+      setIsDirty(false)
+      setDeletedItemIds([])
+      setNewItemIds([])
     }
     onOpenChange(newOpen)
   }
+
+  if (!request || !currentRequest) return null
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -383,13 +436,13 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
             </div>
           </div>
 
-          {/* 請款項目 — 統一使用 EditableRequestItemList */}
+          {/* 請款項目 */}
           <EditableRequestItemList
-            items={editableItems}
-            suppliers={suppliers as unknown as { id: string; name: string | null; type: 'supplier' | 'employee'; group: string }[]}
-            updateItem={handleUpdateEditableItem}
-            removeItem={handleRemoveEditableItem}
-            addNewEmptyItem={handleAddEditableItem}
+            items={localItems}
+            suppliers={combinedSuppliers}
+            updateItem={handleUpdateItem}
+            removeItem={handleRemoveItem}
+            addNewEmptyItem={handleAddItem}
             onCreateSupplier={handleCreateSupplier}
             tourId={currentRequest.tour_id || null}
           />
@@ -407,7 +460,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
           )}
 
           {/* 操作按鈕 */}
-          <div className="flex items-center justify-end pt-4 border-t border-morandi-container/20">
+          <div className="flex items-center justify-between pt-4 border-t border-morandi-container/20">
             <Button
               variant="outline"
               size="sm"
@@ -418,6 +471,20 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
               <Trash2 size={16} className="mr-2" />
               {REQUEST_DETAIL_FORM_LABELS.DELETE}
             </Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={is_submitting || !isDirty}
+              className={cn(
+                'transition-all',
+                isDirty
+                  ? 'bg-morandi-gold hover:bg-morandi-gold/90 text-white'
+                  : 'bg-morandi-container/50 text-morandi-muted cursor-not-allowed'
+              )}
+            >
+              <Save size={16} className="mr-2" />
+              {is_submitting ? '儲存中...' : '儲存'}
+            </Button>
           </div>
         </div>
       </DialogContent>
@@ -425,9 +492,9 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
       {/* 快速新增供應商 Dialog */}
       <CreateSupplierDialog
         open={createSupplierDialogOpen}
-        onOpenChange={open => {
-          setCreateSupplierDialogOpen(open)
-          if (!open && supplierCreateResolver) {
+        onOpenChange={dialogOpen => {
+          setCreateSupplierDialogOpen(dialogOpen)
+          if (!dialogOpen && supplierCreateResolver) {
             supplierCreateResolver(null as unknown as string)
             setSupplierCreateResolver(null)
             setPendingSupplierName('')
