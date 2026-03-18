@@ -32,7 +32,7 @@ async function getTourItinerary(tourId: string) {
 
   const { data: tour } = await supabase
     .from('tours')
-    .select('code, name, departure_date, destination')
+    .select('code, name, departure_date, location')
     .eq('id', tourId)
     .single()
 
@@ -50,7 +50,7 @@ async function getTourItinerary(tourId: string) {
       code: tour.code || '',
       name: tour.name || '',
       departureDate: tour.departure_date || '',
-      destination: (tour as Record<string, unknown>).destination as string || '',
+      destination: (tour as Record<string, unknown>).location as string || '',
     },
     items: (items || []) as ItineraryItem[],
   }
