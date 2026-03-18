@@ -113,8 +113,9 @@ function buildDays(items: ItineraryItem[], departureDate: string): DayData[] {
   return Array.from(dayMap.values()).sort((a, b) => a.dayNumber - b.dayNumber)
 }
 
-export default async function PublicItineraryPage({ params }: { params: { tourId: string } }) {
-  const data = await getTourItinerary(params.tourId)
+export default async function PublicItineraryPage({ params }: { params: Promise<{ tourId: string }> }) {
+  const { tourId } = await params
+  const data = await getTourItinerary(tourId)
 
   if (!data) {
     notFound()
