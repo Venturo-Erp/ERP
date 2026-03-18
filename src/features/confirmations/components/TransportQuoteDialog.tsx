@@ -1,21 +1,39 @@
-/**
- * TransportQuoteDialog - 遊覽車報價請求（基於 LocalQuoteDialog 修改）
- */
-
 'use client'
 
-import { useState, useMemo } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { useState, useEffect, useMemo } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { X, Printer, Mail, Phone, Fax, Users } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Send, Loader2, Printer, Sun, Mail, Phone, Globe, Plus, X } from 'lucide-react'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import { useToast } from '@/components/ui/use-toast'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
+
+interface LocalQuoteDialogProps {
+  open: boolean
+  onClose: () => void
+  tour: { id: string; code: string; name: string; departure_date?: string; return_date?: string } | null
+  transportDays: { dayNumber: number; date: string; route: string }[]
+  totalPax: number | null
+  coreItems?: TourItineraryItem[]
+  startDate?: string | null
+}
+
+// 每天的行程結構
+interface DaySchedule {
+  dayNumber: number
+  date: string
+  weekday: string
+  route: string
+  breakfast: string
+  lunch: string
+  dinner: string
+  hotel: string
+}
+
+const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 
 const MEAL_LABELS: Record<string, string> = {
   breakfast: '早餐',
@@ -23,322 +41,423 @@ const MEAL_LABELS: Record<string, string> = {
   dinner: '晚餐',
 }
 
-interface TransportQuoteDialogProps {
-  open: boolean
-  onClose: () => void
-  tour: {
-    id: string
-    code: string
-    name: string
-    departure_date: string | null
-    return_date: string | null
-    current_participants: number | null
-  }
-  coreItems: TourItineraryItem[]
-  supplierName: string
-  vehicleDesc?: string
-}
+// 發送方式
+type DeliveryMethod = 'print' | 'line' | 'email' | 'fax' | 'tenant'
+
+const DELIVERY_METHODS: { key: DeliveryMethod; label: string; icon: typeof Printer }[] = [
+  { key: 'print', label: '列印', icon: Printer },
+  { key: 'line', label: 'Line', icon: Send },
+  { key: 'email', label: 'Email', icon: Mail },
+  { key: 'fax', label: '傳真', icon: Phone },
+  { key: 'tenant', label: '租戶', icon: Globe },
+]
 
 export function TransportQuoteDialog({
   open,
   onClose,
   tour,
-  coreItems,
-  supplierName,
-  vehicleDesc = '',
-}: TransportQuoteDialogProps) {
+  transportDays,
+  totalPax,
+  coreItems = [],
+  startDate,
+}: LocalQuoteDialogProps) {
   const [note, setNote] = useState('')
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null)
+  const [paxInput, setPaxInput] = useState<string>(totalPax?.toString() || '')
+  const [paxTiers, setPaxTiers] = useState<number[]>([20, 30, 40]) // 人數梯次
+  const [newTierInput, setNewTierInput] = useState('')
+  const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string }[]>([])
+  const [selectedGroupId, setSelectedGroupId] = useState<string>('')
+  const [sending, setSending] = useState(false)
+  const [selectedMethod, setSelectedMethod] = useState<DeliveryMethod | null>(null)
+  const { toast } = useToast()
+  const supabase = createSupabaseBrowserClient()
 
-  // 按天分組核心表項目
-  const daySchedule = useMemo(() => {
-    const grouped = new Map<number, {
-      date: string | null
-      weekday: string | null
-      items: TourItineraryItem[]
-      hotel: TourItineraryItem | null
-    }>()
+  // 載入 LINE 群組
+  useEffect(() => {
+    if (!open) return
+    const load = async () => {
+      const { data } = await supabase
+        .from('line_groups')
+        .select('group_id, group_name')
+        .not('group_name', 'is', null)
+      if (data) setLineGroups(data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name))
+    }
+    load()
+  }, [open])
+
+  // 重置 method
+  useEffect(() => {
+    if (open) setSelectedMethod(null)
+  }, [open])
+
+  // 把核心表資料組成每天行程
+  const daySchedules: DaySchedule[] = useMemo(() => {
+    if (!coreItems.length) {
+      return transportDays.map(d => ({
+        dayNumber: d.dayNumber,
+        date: d.date,
+        weekday: '',
+        route: '',
+        breakfast: '',
+        lunch: '',
+        dinner: '',
+        hotel: '',
+      }))
+    }
+
+    const dayMap = new Map<number, DaySchedule>()
 
     for (const item of coreItems) {
-      const day = item.day_number ?? 0
-      if (!grouped.has(day)) {
-        grouped.set(day, {
-          date: null,
-          weekday: null,
-          items: [],
-          hotel: null,
+      const dn = item.day_number
+      if (!dn) continue
+      if (!dayMap.has(dn)) {
+        let dateStr = ''
+        let weekday = ''
+        if (startDate) {
+          const d = new Date(startDate)
+          d.setDate(d.getDate() + dn - 1)
+          dateStr = `${d.getMonth() + 1}/${d.getDate()}`
+          weekday = WEEKDAYS[d.getDay()]
+        }
+        dayMap.set(dn, {
+          dayNumber: dn,
+          date: dateStr,
+          weekday,
+          route: '',
+          breakfast: '',
+          lunch: '',
+          dinner: '',
+          hotel: '',
         })
       }
-      const group = grouped.get(day)!
+    }
 
-      // 設定日期和星期
-      if (!group.date && item.service_date) {
-        group.date = item.service_date
-        const d = new Date(item.service_date)
-        const weekdays = ['日', '一', '二', '三', '四', '五', '六']
-        group.weekday = weekdays[d.getDay()]
-      }
+    const sorted = [...coreItems].sort((a, b) => {
+      const da = a.day_number || 0
+      const db = b.day_number || 0
+      if (da !== db) return da - db
+      return (a.sort_order || 0) - (b.sort_order || 0)
+    })
 
-      // 住宿單獨儲存
+    for (const item of sorted) {
+      const dn = item.day_number
+      if (!dn || !dayMap.has(dn)) continue
+      const day = dayMap.get(dn)!
+
       if (item.category === 'accommodation') {
-        group.hotel = item
-      } else {
-        group.items.push(item)
+        day.hotel = item.resource_name || item.title || ''
+      } else if (item.category === 'meals') {
+        const name = item.title || ''
+        if (item.sub_category === 'breakfast') day.breakfast = name
+        else if (item.sub_category === 'lunch') day.lunch = name
+        else if (item.sub_category === 'dinner') day.dinner = name
+      } else if (item.category === 'activities' || item.category === 'transport' || item.category === 'group-transport') {
+        if (item.title) {
+          day.route = day.route ? `${day.route} → ${item.title}` : item.title
+        }
       }
     }
 
-    return Array.from(grouped.entries())
-      .sort((a, b) => a[0] - b[0])
-      .map(([dayNumber, data]) => ({ dayNumber, ...data }))
-  }, [coreItems])
+    return Array.from(dayMap.values()).sort((a, b) => a.dayNumber - b.dayNumber)
+  }, [coreItems, startDate, transportDays])
 
-  const handleSend = () => {
-    if (!selectedMethod) {
-      alert('請選擇發送方式')
-      return
-    }
-
-    if (selectedMethod === '列印') {
-      handlePrint()
-      onClose()
-    } else {
-      // TODO: LINE/Email/傳真/租戶
-      alert(`${selectedMethod} 功能開發中...`)
-    }
-  }
-
+  // 列印
   const handlePrint = () => {
+    const pax = paxInput || totalPax || '-'
+    const tableRows = daySchedules.map((day, idx) => {
+      return `<tr style="background: ${idx % 2 === 0 ? '#fff' : '#fafaf5'}">
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px;">
+          <div style="font-weight: 600; color: #c9a96e;">Day ${day.dayNumber}</div>
+          <div style="font-size: 12px; color: #999;">${day.date}${day.weekday ? ` (${day.weekday})` : ''}</div>
+        </td>
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px; font-weight: 500;">${day.route || '—'}</td>
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px; text-align: center; font-size: 12px;">${day.breakfast || '-'}</td>
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px; text-align: center; font-size: 12px;">${day.lunch || '-'}</td>
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px; text-align: center; font-size: 12px;">${day.dinner || '-'}</td>
+        <td style="border: 1px solid #e8e5e0; padding: 8px 12px; font-size: 12px;">${day.hotel || '—'}</td>
+      </tr>`
+    }).join('')
+
     const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
-<title>遊覽車報價請求 - ${tour.code}</title>
+<title>建議行程表 - ${tour?.code || ''}</title>
 <style>
   @media print { @page { margin: 1.5cm; } body { margin: 0; } }
-  body { font-family: 'Microsoft JhengHei', sans-serif; font-size: 11pt; line-height: 1.5; max-width: 800px; margin: 0 auto; padding: 20px; }
-  h1 { text-align: center; font-size: 20pt; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-  .info-box { background: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
-  .info-row { display: flex; margin-bottom: 5px; }
-  .info-label { font-weight: bold; min-width: 100px; }
-  table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-  th, td { border: 1px solid #333; padding: 8px; text-align: left; }
-  th { background: #f0f0f0; font-weight: bold; text-align: center; }
-  .quote-section { background: #fffbf0; border: 2px solid #f59e0b; padding: 20px; margin-top: 30px; border-radius: 8px; }
-  .quote-section h3 { margin-top: 0; color: #f59e0b; border-bottom: 1px solid #f59e0b; padding-bottom: 10px; }
-  .quote-field { margin-bottom: 15px; }
-  .quote-field label { display: block; font-weight: bold; margin-bottom: 5px; }
-  .quote-field input[type="text"], .quote-field input[type="number"] { border: none; border-bottom: 1px solid #333; width: 200px; padding: 5px 0; font-size: 11pt; }
-  .quote-field input[type="checkbox"] { width: 18px; height: 18px; margin-right: 8px; vertical-align: middle; }
-  .conditional-field { margin-left: 30px; margin-top: 8px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif; font-size: 14px; color: #333; max-width: 900px; margin: 0 auto; padding: 32px; }
+  .header { border-bottom: 2px solid #c9a96e; padding-bottom: 16px; margin-bottom: 24px; }
+  .header h1 { font-size: 20px; font-weight: bold; margin-bottom: 16px; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; font-size: 14px; }
+  .info-item { display: flex; gap: 8px; }
+  .info-label { color: #999; }
+  .info-value { font-weight: 500; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+  .footer { padding-top: 16px; border-top: 1px solid #e8e5e0; text-align: center; font-size: 12px; color: #999; }
 </style></head><body>
-  <h1>遊覽車報價請求</h1>
-  <div class="info-box">
-    <div class="info-row"><span class="info-label">團號：</span><span>${tour.code}</span></div>
-    <div class="info-row"><span class="info-label">團名：</span><span>${tour.name}</span></div>
-    <div class="info-row"><span class="info-label">出發：</span><span>${tour.departure_date || '-'}</span></div>
-    <div class="info-row"><span class="info-label">人數：</span><span>${tour.current_participants || '-'} 人</span></div>
-    <div class="info-row"><span class="info-label">車型：</span><span>${vehicleDesc || '-'}</span></div>
-    <div class="info-row"><span class="info-label">車行：</span><span>${supplierName}</span></div>
+  <div class="header">
+    <div style="display: flex; justify-content: space-between;">
+      <h1>${tour?.name || '行程表'}</h1>
+      <div style="font-weight: 600; color: #c9a96e;">角落旅行社</div>
+    </div>
+    <div class="info-grid">
+      <div class="info-item"><span class="info-label">目的地：</span><span class="info-value">—</span></div>
+      <div class="info-item"><span class="info-label">出發日期：</span><span class="info-value">${tour?.departure_date || '-'}</span></div>
+      <div class="info-item"><span class="info-label">行程天數：</span><span class="info-value">${daySchedules.length} 天</span></div>
+    </div>
   </div>
   <table>
-    <thead><tr><th>日期</th><th>行程內容</th><th>早餐</th><th>午餐</th><th>晚餐</th><th>住宿</th></tr></thead>
+    <thead>
+      <tr style="background: #c9a96e; color: #fff;">
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: left; width: 80px;">日期</th>
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: left;">行程內容</th>
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: center; width: 64px;">早餐</th>
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: center; width: 64px;">午餐</th>
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: center; width: 64px;">晚餐</th>
+        <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: left; width: 128px;">住宿</th>
+      </tr>
+    </thead>
     <tbody>
-      ${daySchedule.map(day => {
-        const meals = { breakfast: '', lunch: '', dinner: '' }
-        day.items.filter(i => i.category === 'meals').forEach(m => {
-          const sub = m.sub_category as keyof typeof meals
-          if (sub && meals[sub] !== undefined) meals[sub] = m.title || '-'
-        })
-        const activities = day.items.filter(i => i.category === 'activities').map(a => a.title).join(' → ')
-        const content = activities || day.items.map(i => i.title).filter(Boolean).join('、')
-        return `<tr>
-          <td style="white-space:nowrap">Day ${day.dayNumber}<br/>${day.date || ''} (${day.weekday || ''})</td>
-          <td>${content || '-'}</td>
-          <td style="text-align:center">${meals.breakfast || '-'}</td>
-          <td style="text-align:center">${meals.lunch || '-'}</td>
-          <td style="text-align:center">${meals.dinner || '-'}</td>
-          <td>${day.hotel?.title || '-'}</td>
-        </tr>`
-      }).join('')}
+      ${tableRows}
     </tbody>
   </table>
-  ${note ? `<p><strong>備註：</strong>${note}</p>` : ''}
-  
-  <div class="quote-section">
-    <h3>📋 請填寫報價</h3>
-    
-    <div class="quote-field">
-      <label>車資（總金額）：</label>
-      <input type="number" placeholder="請填寫金額" /> 元
-    </div>
-    
-    <div class="quote-field">
-      <input type="checkbox" id="parking" />
-      <label for="parking" style="display: inline;">是否含停車費</label>
-    </div>
-    
-    <div class="quote-field">
-      <input type="checkbox" id="toll" />
-      <label for="toll" style="display: inline;">是否含過路費</label>
-    </div>
-    
-    <div class="quote-field">
-      <input type="checkbox" id="accommodation" />
-      <label for="accommodation" style="display: inline;">是否含司機住宿</label>
-      <div class="conditional-field">
-        如不含，請填寫住宿費：<input type="number" placeholder="金額" style="width:150px" /> 元
-      </div>
-    </div>
-    
-    <div class="quote-field">
-      <input type="checkbox" id="tip" />
-      <label for="tip" style="display: inline;">是否含小費</label>
-      <div class="conditional-field">
-        如不含，請填寫小費：<input type="number" placeholder="金額" style="width:150px" /> 元
-      </div>
-    </div>
-    
-    <div class="quote-field">
-      <label>聯絡人：</label>
-      <input type="text" placeholder="姓名" />
-    </div>
-    
-    <div class="quote-field">
-      <label>聯絡電話：</label>
-      <input type="text" placeholder="電話號碼" />
-    </div>
-  </div>
-  
-  <p style="margin-top:30px;font-size:10pt;color:#666;">列印時間：${new Date().toLocaleString('zh-TW')}</p>
-  <p style="font-size:9pt;color:#999;">請填寫完畢後回傳至角落旅行社</p>
+  ${note ? `<div style="margin-bottom: 24px; font-size: 14px;"><b>備註：</b>${note}</div>` : ''}
+  <div class="footer"><p>本行程表由 角落旅行社 提供</p></div>
 </body></html>`
 
     const printWindow = window.open('', '_blank', 'width=900,height=700')
     if (printWindow) {
       printWindow.document.write(html)
       printWindow.document.close()
-      printWindow.print()
     }
   }
 
+  // 梯次管理
+  const handleAddTier = () => {
+    const num = parseInt(newTierInput)
+    if (!num || num <= 0) {
+      toast({ title: '請輸入有效的人數', variant: 'destructive' })
+      return
+    }
+    if (paxTiers.includes(num)) {
+      toast({ title: '此梯次已存在', variant: 'destructive' })
+      return
+    }
+    setPaxTiers([...paxTiers, num].sort((a, b) => a - b))
+    setNewTierInput('')
+  }
+
+  const handleRemoveTier = (num: number) => {
+    setPaxTiers(paxTiers.filter(t => t !== num))
+  }
+
+  // LINE 發送
+  const handleSendLine = async () => {
+    if (!selectedGroupId || !tour) return
+    setSending(true)
+    try {
+      const pax = paxInput ? parseInt(paxInput) : totalPax
+      const res = await fetch('/api/line/send-local-quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lineGroupId: selectedGroupId,
+          tourCode: tour.code || '',
+          tourName: tour.name || '',
+          departureDate: tour.departure_date || '',
+          totalPax: pax,
+          tourId: tour.id,
+          note,
+          paxTiers, // 加上梯次資料
+        }),
+      })
+      const result = await res.json()
+      if (result.success || res.ok) {
+        const groupName = lineGroups.find(g => g.group_id === selectedGroupId)?.group_name
+        toast({ title: `✅ 已發送到 LINE「${groupName}」` })
+        onClose()
+      } else {
+        toast({ title: '❌ LINE 發送失敗', description: result.error, variant: 'destructive' })
+      }
+    } catch (err) {
+      toast({ title: '❌ 發送失敗', description: String(err), variant: 'destructive' })
+    } finally {
+      setSending(false)
+    }
+  }
+
+  // 發送方式處理
+  const handleDelivery = (method: DeliveryMethod) => {
+    if (method === 'print') {
+      handlePrint()
+      return
+    }
+    if (method === 'line') {
+      setSelectedMethod('line')
+      return
+    }
+    // email / fax / tenant 未來擴充
+    toast({ title: `${method} 功能開發中`, description: '目前支援列印和 LINE' })
+  }
+
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <div className="flex items-center justify-between pr-6">
-            <DialogTitle>給車行報價 — {supplierName}</DialogTitle>
-            <Button variant="ghost" size="sm" onClick={onClose}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
+    <Dialog open={open} onOpenChange={v => !v && onClose()}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="text-lg">給車行報價 — 遊覽車</DialogTitle>
         </DialogHeader>
 
-        {/* 團資訊 */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 flex items-center gap-4 text-sm">
-          <span><strong>團號：</strong>{tour.code}</span>
-          <span><strong>團名：</strong>{tour.name}</span>
-          <span><strong>出發：</strong>{tour.departure_date || '-'}</span>
-          <span><strong>人數：</strong>{tour.current_participants || '-'}</span>
-        </div>
+        <div className="flex-1 overflow-y-auto pr-1 space-y-3">
+          {/* 團資訊條 */}
+          <div className="flex items-center gap-6 px-4 py-3 bg-[#faf8f5] rounded-lg border border-[#e8e0d4]">
+            <div className="text-sm">
+              <span className="text-muted-foreground mr-1">團號</span>
+              <span className="font-semibold">{tour?.code || '-'}</span>
+            </div>
+            <div className="text-sm">
+              <span className="text-muted-foreground mr-1">團名</span>
+              <span className="font-semibold">{tour?.name || '-'}</span>
+            </div>
+            <div className="text-sm">
+              <span className="text-muted-foreground mr-1">出發日</span>
+              <span className="font-semibold">{tour?.departure_date || '-'}</span>
+            </div>
+            <div className="text-sm flex items-center gap-2">
+              <span className="text-muted-foreground">人數</span>
+              <Input
+                type="number"
+                value={paxInput}
+                onChange={e => setPaxInput(e.target.value)}
+                placeholder={totalPax?.toString() || ''}
+                className="h-7 w-20 text-sm"
+              />
+            </div>
+          </div>
 
-        {/* 行程表 */}
-        <div className="border rounded-lg overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-amber-100 border-b">
-                <th className="text-left px-3 py-2 font-semibold whitespace-nowrap">日期</th>
-                <th className="text-left px-3 py-2 font-semibold">行程內容</th>
-                <th className="text-center px-3 py-2 font-semibold whitespace-nowrap">早餐</th>
-                <th className="text-center px-3 py-2 font-semibold whitespace-nowrap">午餐</th>
-                <th className="text-center px-3 py-2 font-semibold whitespace-nowrap">晚餐</th>
-                <th className="text-center px-3 py-2 font-semibold whitespace-nowrap">住宿</th>
-              </tr>
-            </thead>
-            <tbody>
-              {daySchedule.map((day, idx) => {
-                const meals = { breakfast: '', lunch: '', dinner: '' }
-                day.items.filter(i => i.category === 'meals').forEach(m => {
-                  const sub = m.sub_category as keyof typeof meals
-                  if (sub && meals[sub] !== undefined) {
-                    meals[sub] = m.title || MEAL_LABELS[sub] || '-'
-                  }
-                })
-
-                const activities = day.items.filter(i => i.category === 'activities')
-                const content = activities.length > 0
-                  ? activities.map(a => a.title).filter(Boolean).join(' → ')
-                  : day.items.map(i => i.title).filter(Boolean).join('、')
-
-                return (
-                  <tr key={idx} className={`border-b ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
-                    <td className="px-3 py-2 whitespace-nowrap align-top">
-                      <div className="font-medium">Day {day.dayNumber}</div>
+          {/* 行程表格（跟公開頁面一樣） */}
+          {daySchedules.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <Sun size={40} className="mx-auto mb-3 opacity-30" />
+              <p>尚無行程資料，請先到「行程」頁籤填寫</p>
+            </div>
+          ) : (
+            <table className="w-full border-collapse text-sm mb-3">
+              <thead>
+                <tr className="bg-[#c9a96e] text-white">
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-20">日期</th>
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left">行程內容</th>
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">早餐</th>
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">午餐</th>
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">晚餐</th>
+                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-32">住宿</th>
+                </tr>
+              </thead>
+              <tbody>
+                {daySchedules.map((day, idx) => (
+                  <tr key={day.dayNumber} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf5]'}>
+                    <td className="border border-[#e8e5e0] px-3 py-2">
+                      <div className="font-semibold text-[#c9a96e]">Day {day.dayNumber}</div>
                       <div className="text-xs text-muted-foreground">
-                        {day.date} ({day.weekday})
+                        {day.date}{day.weekday ? ` (${day.weekday})` : ''}
                       </div>
                     </td>
-                    <td className="px-3 py-2">{content || '-'}</td>
-                    <td className="px-3 py-2 text-center">{meals.breakfast || '-'}</td>
-                    <td className="px-3 py-2 text-center">{meals.lunch || '-'}</td>
-                    <td className="px-3 py-2 text-center">{meals.dinner || '-'}</td>
-                    <td className="px-3 py-2">{day.hotel?.title || '-'}</td>
+                    <td className="border border-[#e8e5e0] px-3 py-2 font-medium">
+                      {day.route || '—'}
+                    </td>
+                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                      {day.breakfast || '-'}
+                    </td>
+                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                      {day.lunch || '-'}
+                    </td>
+                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                      {day.dinner || '-'}
+                    </td>
+                    <td className="border border-[#e8e5e0] px-3 py-2 text-xs">
+                      {day.hotel || '—'}
+                    </td>
                   </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
+          {/* 報價資訊提示（車行填寫） */}
+          <div className="pt-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <p className="text-sm font-medium mb-2">📋 供應商將填寫以下資訊：</p>
+            <ul className="text-xs text-muted-foreground space-y-1">
+              <li>• 車資（總金額）</li>
+              <li>• 是否含停車費、過路費</li>
+              <li>• 是否含司機住宿（如不含，填寫住宿費金額）</li>
+              <li>• 是否含小費（如不含，填寫小費金額）</li>
+            </ul>
+          </div>
+
+          {/* 備註 */}
+          <div className="pt-2">
+            <label className="text-sm font-medium mb-1.5 block">備註</label>
+            <Textarea
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder="給 Local 的特殊需求、偏好、注意事項..."
+              rows={2}
+              className="resize-none"
+            />
+          </div>
+
+          {/* 選擇發送方式 */}
+          <div className="border-t border-[#c9a96e] pt-4 mt-2">
+            <label className="text-sm font-medium mb-3 block">選擇發送方式</label>
+            <div className="flex items-center gap-3">
+              {DELIVERY_METHODS.map(m => {
+                const Icon = m.icon
+                return (
+                  <button
+                    key={m.key}
+                    onClick={() => handleDelivery(m.key)}
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium transition-all
+                      ${selectedMethod === m.key 
+                        ? 'border-[#c9a96e] bg-[#faf8f5] text-[#8B6914]' 
+                        : 'border-border hover:border-[#c9a96e] hover:bg-[#faf8f5] text-foreground'
+                      }`}
+                  >
+                    <Icon size={15} />
+                    {m.label}
+                  </button>
                 )
               })}
-            </tbody>
-          </table>
-        </div>
+            </div>
 
-        {/* 備註 */}
-        <div>
-          <Label htmlFor="note">備註</Label>
-          <Textarea
-            id="note"
-            placeholder="給車行的特殊需求、備註..."
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            className="mt-2"
-            rows={3}
-          />
-        </div>
-
-        {/* 選擇發送方式 */}
-        <div>
-          <Label>選擇發送方式</Label>
-          <div className="flex gap-2 mt-2">
-            {[
-              { id: '列印', icon: Printer, label: '列印' },
-              { id: 'Line', icon: Phone, label: 'Line' },
-              { id: 'Email', icon: Mail, label: 'Email' },
-              { id: '傳真', icon: Fax, label: '傳真' },
-              { id: '租戶', icon: Users, label: '租戶' },
-            ].map(({ id, icon: Icon, label }) => (
-              <button
-                key={id}
-                onClick={() => setSelectedMethod(id)}
-                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 border rounded-lg transition-colors ${
-                  selectedMethod === id
-                    ? 'border-amber-600 bg-amber-50 text-amber-700'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                <Icon className="w-4 h-4" />
-                <span>{label}</span>
-              </button>
-            ))}
+            {/* LINE 群組選擇（選了 Line 才出現） */}
+            {selectedMethod === 'line' && (
+              <div className="mt-4 flex items-center gap-3 p-3 bg-muted/20 rounded-lg border border-border">
+                <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="選擇 LINE 群組" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lineGroups.map(g => (
+                      <SelectItem key={g.group_id} value={g.group_id}>
+                        {g.group_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={handleSendLine}
+                  disabled={!selectedGroupId || sending}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
+                >
+                  {sending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Send size={14} className="mr-1" />}
+                  發送
+                </Button>
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* 取消 / 發送 */}
-        <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={onClose}>
-            取消
-          </Button>
-          <Button
-            onClick={handleSend}
-            disabled={!selectedMethod}
-            className="bg-amber-600 hover:bg-amber-700 text-white"
-          >
-            發送
-          </Button>
+          {/* 底部按鈕 */}
+          <div className="flex justify-end gap-3 pt-2 pb-1">
+            <Button variant="outline" onClick={onClose}>取消</Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
