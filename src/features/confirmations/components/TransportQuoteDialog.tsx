@@ -291,10 +291,7 @@ export function TransportQuoteDialog({
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="text-lg">給車行報價 — 遊覽車</DialogTitle>
-        </DialogHeader>
-
+        {/* 中間可滾動內容 */}
         <div className="flex-1 overflow-y-auto pr-1 space-y-3">
           {viewMode === 'traditional' ? (
             <TransportTraditionalView
@@ -312,9 +309,6 @@ export function TransportQuoteDialog({
               selectedSupplierId={selectedSupplierId}
               setSelectedSupplierId={setSelectedSupplierId}
               invoiceSealUrl=""
-              onPrint={handleTraditionalPrint}
-              onBackToModern={() => setViewMode('modern')}
-              onClose={onClose}
             />
           ) : (
             <>
@@ -415,9 +409,13 @@ export function TransportQuoteDialog({
             />
           </div>
 
-          {/* 選擇發送方式 */}
-          <div className="border-t border-[#c9a96e] pt-4 mt-2">
-            <label className="text-sm font-medium mb-3 block">選擇發送方式</label>
+            </>
+          )}
+        </div>
+
+        {/* 固定底部：發送方式按鈕 */}
+        <div className="flex-shrink-0 border-t border-[#c9a96e] pt-4 mt-2">
+          <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-3">
               {DELIVERY_METHODS.map(m => {
                 const Icon = m.icon
@@ -437,43 +435,35 @@ export function TransportQuoteDialog({
                 )
               })}
             </div>
-
-            {/* LINE 群組選擇（選了 Line 才出現） */}
-            {selectedMethod === 'line' && (
-              <div className="mt-4 flex items-center gap-3 p-3 bg-muted/20 rounded-lg border border-border">
-                <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="選擇 LINE 群組" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {lineGroups.map(g => (
-                      <SelectItem key={g.group_id} value={g.group_id}>
-                        {g.group_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  onClick={handleSendLine}
-                  disabled={!selectedGroupId || sending}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
-                >
-                  {sending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Send size={14} className="mr-1" />}
-                  發送
-                </Button>
-              </div>
-            )}
-          </div>
-            </>
-          )}
-        </div>
-
-        {/* 底部按鈕 */}
-        {viewMode === 'modern' && (
-          <div className="flex-shrink-0 flex justify-end gap-3 pt-3 border-t">
             <Button variant="outline" onClick={onClose}>取消</Button>
           </div>
-        )}
+
+          {/* LINE 群組選擇（選了 Line 才出現） */}
+          {selectedMethod === 'line' && (
+            <div className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg border border-border">
+              <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="選擇 LINE 群組" />
+                </SelectTrigger>
+                <SelectContent>
+                  {lineGroups.map(g => (
+                    <SelectItem key={g.group_id} value={g.group_id}>
+                      {g.group_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button
+                onClick={handleSendLine}
+                disabled={!selectedGroupId || sending}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
+              >
+                {sending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Send size={14} className="mr-1" />}
+                發送
+              </Button>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )

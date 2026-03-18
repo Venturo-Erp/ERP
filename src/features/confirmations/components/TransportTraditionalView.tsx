@@ -33,9 +33,6 @@ interface TransportTraditionalViewProps {
   selectedSupplierId: string
   setSelectedSupplierId: (id: string) => void
   invoiceSealUrl?: string
-  onPrint: () => void
-  onBackToModern: () => void
-  onClose: () => void
 }
 
 export function TransportTraditionalView({
@@ -49,9 +46,6 @@ export function TransportTraditionalView({
   selectedSupplierId,
   setSelectedSupplierId,
   invoiceSealUrl,
-  onPrint,
-  onBackToModern,
-  onClose,
 }: TransportTraditionalViewProps) {
   const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId)
 
@@ -252,21 +246,6 @@ export function TransportTraditionalView({
         )}
       </div>
 
-      {/* 底部按鈕 */}
-      <div className="mt-6 flex justify-between items-center pt-4 border-t-2 border-[#a8a29e]">
-        <Button onClick={onPrint} className="bg-[#a8a29e] hover:bg-[#78716c]">
-          <Printer className="mr-2 h-4 w-4" />
-          列印需求單
-        </Button>
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={onBackToModern}>
-            返回現代樣式
-          </Button>
-          <Button variant="outline" onClick={onClose}>
-            取消
-          </Button>
-        </div>
-      </div>
     </div>
   )
 }
