@@ -66,7 +66,7 @@ export const WarRoomPage: React.FC = () => {
       const { data: magic } = await supabase
         .from('magic_library')
         .select('*')
-        .order('category');
+        .order('category') as { data: MagicItem[] | null };
 
       if (magic) setMagicItems(magic);
 
