@@ -122,6 +122,7 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
   // 載入檔案列表
   const loadFiles = useCallback(async (folder: FolderWithCount) => {
     setFilesLoading(true)
+    console.log('[TourFilesManager] loadFiles', { folderId: folder.id, category: folder.category, tourId })
     try {
       const fileItems: FileItem[] = []
 

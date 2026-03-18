@@ -43,6 +43,7 @@ import {
   Route,
   Inbox,
   FolderOpen,
+  Target,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
@@ -245,6 +246,7 @@ const menuItems: MenuItem[] = [
     ],
   },
   { href: '/meeting', label: COMP_LAYOUT_LABELS.會議室, icon: MessagesSquare },
+  { href: '/war-room', label: '作戰會議室', icon: Target, requiredPermission: 'super_admin_only' },
   { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserCog, requiredPermission: 'hr' },
   {
     href: '/tenants',

@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     const lineToken = process.env.LINE_CHANNEL_ACCESS_TOKEN!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // 1. 查 LINE 群組（目前先用第一個群組，之後可改選擇）
+    // 1. 查 LINE 群組
     const { data: lineGroups } = await supabase
       .from('line_groups')
       .select('group_id, group_name')
@@ -28,7 +28,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: '找不到 LINE 群組' })
     }
 
-    // TODO: 之後改成讓使用者選群組，目前先發到第一個
     const targetGroup = lineGroups[0]
 
     // 2. 取團員（透過 order_members）
@@ -94,11 +93,39 @@ export async function POST(request: Request) {
         upsert: true,
       })
 
-    const { data: urlData } = supabase.storage.from('documents').getPublicUrl(storagePath)
-    const publicUrl = urlData?.publicUrl
+    // 4.5 取得公開 URL
+    const { data: publicData } = supabase.storage
+      .from('documents')
+      .getPublicUrl(storagePath)
 
-    // 5. 發 LINE
-    const textMsg = `📋 ${tourCode} ${tourName}\n📅 出發: ${departureDate || '-'}\n📅 回程: ${returnDate || '-'}\n👥 團員人數: ${members.length} 人\n🛡️ 旅遊責任險`
+    // 4.6 寫入 tour_documents 紀錄（供短網址查詢）
+    await supabase
+      .from('tour_documents')
+      .insert({
+        workspace_id: '8ef05a74-1f87-48ab-afd3-9bfeb423935d',
+        tour_id: tourId,
+        name: `${tourCode} 保險團員名單`,
+        description: '保險用團員名單 Excel',
+        file_path: storagePath,
+        public_url: publicData.publicUrl,
+        file_name: fileName,
+        file_size: (buffer as ArrayBuffer).byteLength,
+        mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+
+    // 5. 短網址（永久有效，每次點擊產生新的 24hr signed URL）
+    const excelUrl = `https://app.cornertravel.com.tw/api/d/${tourCode}`
+
+    // 6. 發 LINE — 純文字 + 短網址
+    const textMsg = `📋 ${tourCode} ${tourName}
+📅 出發: ${departureDate || '-'}
+📅 回程: ${returnDate || '-'}
+👥 團員人數: ${members.length} 人
+🛡️ 旅遊責任險
+
+📎 名單下載：${excelUrl}
+
+請協助報價，謝謝！`
 
     const lineRes = await fetch(LINE_API_URL, {
       method: 'POST',
@@ -108,10 +135,7 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         to: targetGroup.group_id,
-        messages: [
-          { type: 'text', text: textMsg },
-          { type: 'text', text: `📎 團員名單 Excel:\n${publicUrl}` },
-        ],
+        messages: [{ type: 'text', text: textMsg }],
       }),
     })
 
@@ -124,7 +148,7 @@ export async function POST(request: Request) {
       success: true,
       groupName: targetGroup.group_name,
       memberCount: members.length,
-      excelUrl: publicUrl,
+      excelUrl,
     })
   } catch (error) {
     console.error('[send-insurance]', error)

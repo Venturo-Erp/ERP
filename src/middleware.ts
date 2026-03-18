@@ -80,6 +80,7 @@ export async function middleware(request: NextRequest) {
     '/api/my', // App API（使用 Bearer token 驗證）
     '/public', // 供應商公開回覆頁面（用 token 驗證）
     '/api/line', // LINE Webhook + API
+    '/api/d', // 短網址下載（公開，24hr signed URL）
     '/api/trips', // App API（使用 Bearer token 驗證）
     '/api/eyeline', // 旅人眼線 API（使用 Bearer token 驗證）
     '/api/join-trip', // 加入行程 API（使用 Bearer token 驗證）

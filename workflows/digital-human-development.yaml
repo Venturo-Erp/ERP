@@ -1,0 +1,161 @@
+# 數字人開發工作流範本
+# 預計時間：5-7 天
+# 適用：開發新數字人角色
+
+name: 數字人開發
+code: digital-human-dev
+duration_days: 5-7
+priority: P1
+category: 技術開發
+
+# 工作流步驟
+steps:
+  - id: tech-discussion
+    name: 技術討論
+    description: 與技術團隊討論數字人技術方案
+    assignees:
+      - matthew  # IT Lead
+      - nova     # AI 工程師
+    duration_days: 1
+    outputs:
+      - 技術方案文件
+      - 技術可行性評估
+      - 工具/框架選擇
+    next_step: design-persona
+
+  - id: design-persona
+    name: 角色設計
+    description: 定義數字人的性格、外觀、聲音
+    assignees:
+      - caesar   # 產品經理
+      - designer # 設計師
+    duration_days: 2
+    outputs:
+      - 角色設定文件
+      - 外觀設計稿
+      - 聲音樣本
+    dependencies:
+      - tech-discussion
+    next_step: develop-prototype
+
+  - id: develop-prototype
+    name: 原型開發
+    description: 開發數字人原型（基礎功能）
+    assignees:
+      - nova      # AI 工程師
+      - matthew   # IT Lead
+    duration_days: 3
+    outputs:
+      - 可運行的原型
+      - 基礎對話功能
+      - 表情/動作系統
+    dependencies:
+      - design-persona
+    next_step: internal-testing
+
+  - id: internal-testing
+    name: 內部測試
+    description: 內部團隊測試數字人功能
+    assignees:
+      - caesar   # 產品經理
+      - tester   # 測試人員
+    duration_days: 1
+    outputs:
+      - 測試報告
+      - Bug 清單
+      - 改進建議
+    dependencies:
+      - develop-prototype
+    next_step: optimization
+
+  - id: optimization
+    name: 優化調整
+    description: 根據測試結果優化數字人
+    assignees:
+      - nova     # AI 工程師
+      - matthew  # IT Lead
+    duration_days: 1
+    outputs:
+      - 優化後的數字人
+      - Bug 修復
+      - 性能優化
+    dependencies:
+      - internal-testing
+    next_step: deployment
+
+  - id: deployment
+    name: 部署上線
+    description: 將數字人部署到生產環境
+    assignees:
+      - matthew  # IT Lead
+    duration_days: 0.5
+    outputs:
+      - 部署完成
+      - 監控設置
+      - 使用文檔
+    dependencies:
+      - optimization
+    next_step: done
+
+# 檢查點（Gate）
+checkpoints:
+  - after_step: tech-discussion
+    approval_required: true
+    approver: william
+    criteria:
+      - 技術方案可行
+      - 成本合理
+      - 時程可控
+
+  - after_step: develop-prototype
+    approval_required: true
+    approver: william
+    criteria:
+      - 原型符合預期
+      - 功能基本完整
+      - 無重大技術問題
+
+# 風險與對策
+risks:
+  - risk: 技術難度過高
+    mitigation: 簡化功能，分階段開發
+    owner: matthew
+
+  - risk: 設計與技術不匹配
+    mitigation: 技術討論階段就確認可行性
+    owner: caesar
+
+  - risk: 時程延誤
+    mitigation: 每日 standup，及時調整
+    owner: matthew
+
+# 資源需求
+resources:
+  - type: 人力
+    items:
+      - AI 工程師 x 1（全職 5 天）
+      - IT Lead x 1（兼職 3 天）
+      - 產品經理 x 1（兼職 3 天）
+      - 設計師 x 1（兼職 2 天）
+
+  - type: 工具
+    items:
+      - AI 語音合成服務
+      - 3D 建模工具
+      - 雲端運算資源
+
+  - type: 預算
+    estimated: NT$ 50,000 - 100,000
+
+# 成功標準
+success_criteria:
+  - 數字人能流暢對話
+  - 表情/動作自然
+  - 性能穩定（回應時間 < 2 秒）
+  - 內部測試滿意度 > 80%
+
+# 備註
+notes: |
+  - 這是標準流程，實際可根據需求調整
+  - 複雜數字人可能需要 10-14 天
+  - 簡單數字人（純語音）可縮短至 3-4 天
