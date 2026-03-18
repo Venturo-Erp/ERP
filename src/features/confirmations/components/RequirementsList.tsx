@@ -1192,6 +1192,19 @@ export function RequirementsList({
                               }}
                               className="h-7 w-full text-sm px-1.5 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30 rounded placeholder:text-muted-foreground/60"
                             />
+                          ) : cat.key === 'transport' ? (
+                            <input
+                              type="text"
+                              placeholder="例：43人座遊覽車"
+                              defaultValue={(() => {
+                                const req = findMatchingRequest(item)
+                                return (req?.items?.[0] as any)?.vehicle_desc as string || ''
+                              })()}
+                              onBlur={e => {
+                                handleInlineUpdate(item, cat.key, 'vehicle_desc', e.target.value, existingRequests)
+                              }}
+                              className="h-7 w-full text-sm px-1.5 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30 rounded placeholder:text-muted-foreground/60"
+                            />
                           ) : (
                             <span>{item.title}</span>
                           )}
@@ -1235,17 +1248,27 @@ export function RequirementsList({
                         </td>
                         {/* 欄位6: 備註 */}
                         <td className="px-3 py-2.5">
-                          {(cat.key === 'accommodation' || cat.key === 'meal') && (
+                          {(cat.key === 'accommodation' || cat.key === 'meal' || cat.key === 'transport') && (
                             <input
                               type="text"
                               placeholder="備註"
                               defaultValue={(() => {
                                 const req = findMatchingRequest(item)
-                                const noteField = cat.key === 'accommodation' ? 'hotel_note' : 'meal_note'
+                                const noteFieldMap: Record<string, string> = {
+                                  accommodation: 'hotel_note',
+                                  meal: 'meal_note',
+                                  transport: 'transport_note',
+                                }
+                                const noteField = noteFieldMap[cat.key] || 'note'
                                 return (req?.items?.[0] as any)?.[noteField] as string || req?.note || ''
                               })()}
                               onBlur={e => {
-                                const field = cat.key === 'accommodation' ? 'hotel_note' : 'meal_note'
+                                const noteFieldMap: Record<string, string> = {
+                                  accommodation: 'hotel_note',
+                                  meal: 'meal_note',
+                                  transport: 'transport_note',
+                                }
+                                const field = noteFieldMap[cat.key] || 'note'
                                 handleInlineUpdate(item, cat.key, field, e.target.value, existingRequests)
                               }}
                               className="w-full h-6 text-[11px] px-1.5 border border-border/50 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30"
