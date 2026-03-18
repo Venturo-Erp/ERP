@@ -6,11 +6,16 @@
  */
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase/client';
+import { supabase as typedSupabase } from '@/lib/supabase/client';
 import { WarRoomHeader } from './WarRoomHeader';
 import { MagicLibraryView } from './MagicLibraryView';
 import { BotManagementView } from './BotManagementView';
 import { TasksView } from './TasksView';
+
+// War Room 用的表（magic_library, bot_registry, tasks）不在 generated types 中
+// 統一用 untyped client 避免 TS 無限遞迴
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const supabase = typedSupabase as any;
 
 type TabType = 'magic' | 'bots' | 'tasks-individual' | 'tasks-workflow';
 
@@ -62,24 +67,21 @@ export const WarRoomPage: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      // 加载魔法库（magic_library 不在 generated types 中，用 any 繞過）
-      const { data: magic } = await (supabase as any)
+      // 加载魔法库
+      const { data: magic } = await supabase
         .from('magic_library')
         .select('*')
-        .order('category') as { data: MagicItem[] | null };
+        .order('category');
 
-      if (magic) setMagicItems(magic);
+      if (magic) setMagicItems(magic as MagicItem[]);
 
       // 加载机器人
       const { data: botData } = await supabase
         .from('bot_registry')
-        .select(`
-          *,
-          groups:bot_groups(*)
-        `)
+        .select('*, groups:bot_groups(*)')
         .order('platform');
 
-      if (botData) setBots(botData as any);
+      if (botData) setBots(botData as Bot[]);
 
       // 加载任务统计
       const { count: individualCount } = await supabase

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Trash2, Layers } from 'lucide-react'
 import { EditableRequestItemList } from './RequestItemList'
+import { CreateSupplierDialog } from './CreateSupplierDialog'
 import type { RequestItem } from '../types'
 import {
   useToursSlim,
@@ -46,6 +47,27 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null)
 
   const [is_submitting, setIsSubmitting] = useState(false)
+
+  // 快速新增供應商
+  const [createSupplierDialogOpen, setCreateSupplierDialogOpen] = useState(false)
+  const [pendingSupplierName, setPendingSupplierName] = useState('')
+  const [supplierCreateResolver, setSupplierCreateResolver] = useState<((id: string) => void) | null>(null)
+
+  const handleCreateSupplier = async (name: string): Promise<string | null> => {
+    return new Promise(resolve => {
+      setPendingSupplierName(name)
+      setSupplierCreateResolver(() => resolve)
+      setCreateSupplierDialogOpen(true)
+    })
+  }
+
+  const handleSupplierCreated = (supplierId: string) => {
+    if (supplierCreateResolver) {
+      supplierCreateResolver(supplierId)
+      setSupplierCreateResolver(null)
+    }
+    setPendingSupplierName('')
+  }
 
   // 載入批次請款單（如果有 batch_id）
   useEffect(() => {
@@ -368,6 +390,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
             updateItem={handleUpdateEditableItem}
             removeItem={handleRemoveEditableItem}
             addNewEmptyItem={handleAddEditableItem}
+            onCreateSupplier={handleCreateSupplier}
             tourId={currentRequest.tour_id || null}
           />
 
@@ -398,6 +421,21 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
           </div>
         </div>
       </DialogContent>
+
+      {/* 快速新增供應商 Dialog */}
+      <CreateSupplierDialog
+        open={createSupplierDialogOpen}
+        onOpenChange={open => {
+          setCreateSupplierDialogOpen(open)
+          if (!open && supplierCreateResolver) {
+            supplierCreateResolver(null as unknown as string)
+            setSupplierCreateResolver(null)
+            setPendingSupplierName('')
+          }
+        }}
+        defaultName={pendingSupplierName}
+        onSuccess={handleSupplierCreated}
+      />
     </Dialog>
   )
 }
