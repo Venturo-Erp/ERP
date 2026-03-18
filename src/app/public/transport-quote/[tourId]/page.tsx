@@ -16,10 +16,10 @@ export default async function TransportQuotePage({
   searchParams,
 }: {
   params: Promise<{ tourId: string }>
-  searchParams: Promise<{ note?: string; vehicleDesc?: string }>
+  searchParams: Promise<{ note?: string; vehicleDesc?: string; supplierName?: string }>
 }) {
   const { tourId } = await params
-  const { note, vehicleDesc } = await searchParams
+  const { note, vehicleDesc, supplierName = '車行' } = await searchParams
 
   // 查詢團資料
   const { data: tour } = await supabase
@@ -169,7 +169,7 @@ export default async function TransportQuotePage({
             {/* 我方備註 */}
             {note && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h3 className="font-semibold text-amber-900 mb-2">我方備註</h3>
+                <h3 className="font-semibold text-amber-900 mb-2">{supplierName}備註</h3>
                 <p className="text-sm text-gray-700">{note}</p>
               </div>
             )}
@@ -180,7 +180,7 @@ export default async function TransportQuotePage({
         </div>
 
         <div className="text-center text-xs text-gray-500 mt-4">
-          本行程表由角落旅行社提供
+          本行程表由{supplierName}提供
         </div>
       </div>
     </div>

@@ -11,14 +11,16 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
 
-interface LocalQuoteDialogProps {
+interface TransportQuoteDialogProps {
   open: boolean
   onClose: () => void
   tour: { id: string; code: string; name: string; departure_date?: string; return_date?: string } | null
-  transportDays: { dayNumber: number; date: string; route: string }[]
+  transportDays?: { dayNumber: number; date: string; route: string }[]
   totalPax: number | null
   coreItems?: TourItineraryItem[]
   startDate?: string | null
+  supplierName: string
+  vehicleDesc?: string
 }
 
 // 每天的行程結構
@@ -56,11 +58,13 @@ export function TransportQuoteDialog({
   open,
   onClose,
   tour,
-  transportDays,
+  transportDays = [],
   totalPax,
   coreItems = [],
   startDate,
-}: LocalQuoteDialogProps) {
+  supplierName,
+  vehicleDesc = '',
+}: TransportQuoteDialogProps) {
   const [note, setNote] = useState('')
   const [paxInput, setPaxInput] = useState<string>(totalPax?.toString() || '')
   const [paxTiers, setPaxTiers] = useState<number[]>([20, 30, 40]) // 人數梯次
@@ -163,6 +167,14 @@ export function TransportQuoteDialog({
 
   // 列印
   const handlePrint = () => {
+    // 產生公開頁面 URL
+    const publicUrl = `${window.location.origin}/public/transport-quote/${tour?.id}?supplierName=${encodeURIComponent(supplierName)}&note=${encodeURIComponent(note)}&vehicleDesc=${encodeURIComponent(vehicleDesc)}`
+    
+    // 開啟公開頁面讓供應商填寫
+    window.open(publicUrl, '_blank')
+    return
+    
+    // 以下是舊的列印程式碼（保留但不執行）
     const pax = paxInput || totalPax || '-'
     const tableRows = daySchedules.map((day, idx) => {
       return `<tr style="background: ${idx % 2 === 0 ? '#fff' : '#fafaf5'}">
