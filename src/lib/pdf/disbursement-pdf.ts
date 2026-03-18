@@ -55,7 +55,7 @@ function processItems(
     const advancedBy = (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined
     const supplierName = item.supplier_name || DISBURSEMENT_PDF_LABELS.UNSPECIFIED_SUPPLIER
     const payFor = advancedBy
-      ? `${advancedBy}（代墊 ${supplierName}）`
+      ? `${advancedBy}（${supplierName}）`
       : supplierName
     
     return {
@@ -94,7 +94,7 @@ function groupByPayFor(items: ProcessedItem[]): PayForGroup[] {
 }
 
 /**
- * 提取實際收款人（去掉代墊部分）
+ * 提取實際收款人（去掉括號部分）
  */
 function extractPayee(payFor: string): string {
   const match = payFor.match(/^([^（]+)/)
@@ -276,8 +276,8 @@ export async function generateDisbursementPDF(data: DisbursementPDFData): Promis
       0: { cellWidth: 40, halign: 'left', fontStyle: 'bold' },
       1: { cellWidth: 35, halign: 'left' },
       2: { cellWidth: 'auto', halign: 'left' },
-      3: { cellWidth: 28, halign: 'right' },
-      4: { cellWidth: 28, halign: 'right', fontStyle: 'bold' },
+      3: { cellWidth: 28, halign: 'center' },
+      4: { cellWidth: 28, halign: 'center', fontStyle: 'bold' },
     },
     margin: { left: 15, right: 15 },
     showFoot: 'lastPage',

@@ -509,14 +509,14 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                         >
                           {item.amount.toLocaleString()}
                         </td>
-                        {showSubtotalCell && (
+                        {isFirstInGroup && (
                           <td
-                            rowSpan={subtotalRowSpan}
+                            rowSpan={group.items.length}
                             style={{
                               padding: '6px',
                               verticalAlign: 'middle',
                               fontSize: '10px',
-                              textAlign: 'center',
+                              textAlign: 'right',
                               fontWeight: 600,
                               color: COLORS.brown,
                               borderTop: groupIdx > 0 ? `1px solid ${COLORS.gold}` : 'none',
@@ -725,14 +725,14 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                         >
                           {item.amount.toLocaleString()}
                         </td>
-                        {showSubtotalCell && (
+                        {isFirstInGroup && (
                           <td
-                            rowSpan={subtotalRowSpan}
+                            rowSpan={group.items.length}
                             style={{
                               padding: '6px',
                               verticalAlign: 'middle',
                               fontSize: '10px',
-                              textAlign: 'center',
+                              textAlign: 'right',
                               fontWeight: 600,
                               color: COLORS.brown,
                               borderTop: groupIdx > 0 ? `1px solid ${COLORS.gold}` : 'none',

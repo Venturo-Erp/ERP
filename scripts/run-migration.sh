@@ -1,68 +1,60 @@
 #!/bin/bash
-# scripts/run-migration.sh
-# 用法: ./scripts/run-migration.sh supabase/migrations/xxx.sql
-# 
-# 執行 Supabase migration 使用 Management API
-# 需要：SUPABASE_ACCESS_TOKEN 在 .env.local 或環境變數
+# Migration wrapper - 自動執行 migration 並更新 types
 
-set -e
+set -e  # 任何錯誤立即退出
 
-SQL_FILE=$1
+MIGRATION_FILE=$1
 
-if [ -z "$SQL_FILE" ]; then
-  echo "❌ 錯誤：請指定 migration 檔案"
-  echo "用法: ./scripts/run-migration.sh supabase/migrations/xxx.sql"
+if [ -z "$MIGRATION_FILE" ]; then
+  echo "❌ Usage: ./scripts/run-migration.sh <migration-file.sql>"
   exit 1
 fi
 
-if [ ! -f "$SQL_FILE" ]; then
-  echo "❌ 錯誤：檔案不存在 - $SQL_FILE"
+if [ ! -f "$MIGRATION_FILE" ]; then
+  echo "❌ Migration file not found: $MIGRATION_FILE"
   exit 1
 fi
 
-# 從 .env.local 讀取 SUPABASE_ACCESS_TOKEN
-if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
-  if [ -f .env.local ]; then
-    export $(grep SUPABASE_ACCESS_TOKEN .env.local | xargs)
-  fi
-fi
-
-if [ -z "$SUPABASE_ACCESS_TOKEN" ]; then
-  echo "❌ 錯誤：缺少 SUPABASE_ACCESS_TOKEN"
-  echo "請在 .env.local 設定或執行: SUPABASE_ACCESS_TOKEN=xxx ./scripts/run-migration.sh ..."
-  exit 1
-fi
-
-PROJECT_REF="pfqvdacxowpgfamuvnsn"
-
-echo "🔧 執行 migration: $SQL_FILE"
+echo "📋 Migration file: $MIGRATION_FILE"
 echo ""
 
-# 讀取 SQL 內容
-QUERY=$(cat "$SQL_FILE")
+# 1. 執行 migration
+echo "🔄 Step 1/2: Executing migration..."
+node -e "
+const fs = require('fs');
+const projectRef = 'pfqvdacxowpgfamuvnsn';
+const accessToken = 'sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02';
+const sql = fs.readFileSync('$MIGRATION_FILE', 'utf-8');
 
-# 執行 API 請求
-RESPONSE=$(curl -s -X POST \
-  "https://api.supabase.com/v1/projects/$PROJECT_REF/database/query" \
-  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d "{\"query\": $(echo "$QUERY" | jq -Rs .)}")
+fetch(\`https://api.supabase.com/v1/projects/\${projectRef}/database/query\`, {
+  method: 'POST',
+  headers: {
+    'Authorization': \`Bearer \${accessToken}\`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ query: sql })
+})
+.then(r => r.json())
+.then(d => {
+  if (d.message) {
+    console.error('❌ Migration failed:', d.message);
+    process.exit(1);
+  }
+  console.log('✅ Migration executed successfully');
+});
+" || exit 1
 
-echo "📊 回應:"
-echo "$RESPONSE" | jq .
+echo ""
 
-# 檢查是否成功（返回空陣列 [] 表示成功）
-if echo "$RESPONSE" | jq -e '. == []' > /dev/null 2>&1; then
-  echo ""
-  echo "✅ Migration 執行成功！"
-  exit 0
-elif echo "$RESPONSE" | jq -e '.message' > /dev/null 2>&1; then
-  echo ""
-  echo "❌ Migration 失敗："
-  echo "$RESPONSE" | jq -r '.message'
-  exit 1
-else
-  echo ""
-  echo "⚠️  無法判斷執行結果，請檢查回應"
-  exit 1
-fi
+# 2. 自動更新 types
+echo "🔄 Step 2/2: Regenerating Supabase types..."
+node scripts/regenerate-supabase-types.mjs || exit 1
+
+echo ""
+echo "🎉 Migration complete!"
+echo ""
+echo "📝 Next steps:"
+echo "  1. Review changes: git diff src/lib/supabase/types.ts"
+echo "  2. Run type check: npm run type-check"
+echo "  3. Commit if everything looks good"
+echo ""

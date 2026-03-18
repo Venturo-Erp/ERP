@@ -65,11 +65,11 @@ function processItems(
       ? request?.request_type || DISBURSEMENT_LABELS.公司
       : request?.tour_name || '-'
 
-    // 有代墊人時，付款對象是「代墊人（廠商）」
+    // 有代墊人時，付款對象是「代墊人（代墊 廠商）」
     const advancedBy = (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined
     const supplierName = item.supplier_name || DISBURSEMENT_LABELS.未指定供應商
     const payFor = advancedBy
-      ? `${advancedBy}（${supplierName}）`
+      ? `${advancedBy}（代墊 ${supplierName}）`
       : supplierName
 
     return {
@@ -107,8 +107,8 @@ function groupByPayFor(items: ProcessedItem[]): PayForGroup[] {
 }
 
 /**
- * 提取實際收款人（去掉括號部分）
- * 例如："William（XX）" → "William"
+ * 提取實際收款人（去掉代墊部分）
+ * 例如："William（代墊 XX）" → "William"
  */
 function extractPayee(payFor: string): string {
   const match = payFor.match(/^([^（]+)/)
@@ -117,14 +117,22 @@ function extractPayee(payFor: string): string {
 
 /**
  * 拆分付款對象為兩行顯示
- * 例如："William（XX）" → { payee: "William", supplier: "（XX）" }
+ * 例如："William（代墊 XX）" → { payee: "William", supplier: "（XX）" }
  */
 function splitPayFor(payFor: string): { payee: string; supplier: string | null } {
-  const match = payFor.match(/^([^（]+)(（.+）)$/)
+  const match = payFor.match(/^([^（]+)（代墊 (.+)）$/)
   if (match) {
     return {
       payee: match[1].trim(),
-      supplier: match[2],
+      supplier: `（${match[2]}）`,
+    }
+  }
+  // 如果不是代墊格式，維持原樣
+  const match2 = payFor.match(/^([^（]+)(（.+）)$/)
+  if (match2) {
+    return {
+      payee: match2[1].trim(),
+      supplier: match2[2],
     }
   }
   return {
@@ -509,14 +517,14 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                         >
                           {item.amount.toLocaleString()}
                         </td>
-                        {showSubtotalCell && (
+                        {isFirstInGroup && (
                           <td
-                            rowSpan={subtotalRowSpan}
+                            rowSpan={group.items.length}
                             style={{
                               padding: '6px',
                               verticalAlign: 'middle',
                               fontSize: '10px',
-                              textAlign: 'center',
+                              textAlign: 'right',
                               fontWeight: 600,
                               color: COLORS.brown,
                               borderTop: groupIdx > 0 ? `1px solid ${COLORS.gold}` : 'none',
@@ -673,7 +681,7 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                               borderTop: groupIdx > 0 ? `1px solid ${COLORS.gold}` : 'none',
                             }}
                           >
-                            <div>{groupPayee}</div>{groupSupplier && <div style={{ fontSize: '9px', fontWeight: 'normal', color: COLORS.gray, marginTop: '2px' }}>{groupSupplier}</div>}
+                            {group.payFor}
                           </td>
                         )}
                         <td
@@ -725,14 +733,14 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                         >
                           {item.amount.toLocaleString()}
                         </td>
-                        {showSubtotalCell && (
+                        {isFirstInGroup && (
                           <td
-                            rowSpan={subtotalRowSpan}
+                            rowSpan={group.items.length}
                             style={{
                               padding: '6px',
                               verticalAlign: 'middle',
                               fontSize: '10px',
-                              textAlign: 'center',
+                              textAlign: 'right',
                               fontWeight: 600,
                               color: COLORS.brown,
                               borderTop: groupIdx > 0 ? `1px solid ${COLORS.gold}` : 'none',

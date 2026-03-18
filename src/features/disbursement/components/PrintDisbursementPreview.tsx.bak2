@@ -65,11 +65,11 @@ function processItems(
       ? request?.request_type || DISBURSEMENT_LABELS.公司
       : request?.tour_name || '-'
 
-    // 有代墊人時，付款對象是「代墊人（廠商）」
+    // 有代墊人時，付款對象是「代墊人（代墊 廠商）」
     const advancedBy = (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined
     const supplierName = item.supplier_name || DISBURSEMENT_LABELS.未指定供應商
     const payFor = advancedBy
-      ? `${advancedBy}（${supplierName}）`
+      ? `${advancedBy}（代墊 ${supplierName}）`
       : supplierName
 
     return {
@@ -107,8 +107,8 @@ function groupByPayFor(items: ProcessedItem[]): PayForGroup[] {
 }
 
 /**
- * 提取實際收款人（去掉括號部分）
- * 例如："William（XX）" → "William"
+ * 提取實際收款人（去掉代墊部分）
+ * 例如："William（代墊 XX）" → "William"
  */
 function extractPayee(payFor: string): string {
   const match = payFor.match(/^([^（]+)/)
@@ -117,7 +117,7 @@ function extractPayee(payFor: string): string {
 
 /**
  * 拆分付款對象為兩行顯示
- * 例如："William（XX）" → { payee: "William", supplier: "（XX）" }
+ * 例如："William（代墊 XX）" → { payee: "William", supplier: "（代墊 XX）" }
  */
 function splitPayFor(payFor: string): { payee: string; supplier: string | null } {
   const match = payFor.match(/^([^（]+)(（.+）)$/)
@@ -186,21 +186,6 @@ function splitLargeGroups(groups: PayForGroup[], maxSize = 5): PayForGroup[] {
       const lastIdx = pg.indices[pg.indices.length - 1]
       result[lastIdx].total = pg.total
       result[lastIdx].showTotal = true
-    }
-  })
-
-  // 計算每個收款人的總行數（用於 rowSpan）
-  result.forEach((group, idx) => {
-    const payee = extractPayee(group.payFor)
-    const pg = payeeGroups.get(payee)!
-    const isFirstGroupOfPayee = pg.indices[0] === idx
-    
-    if (isFirstGroupOfPayee) {
-      // 計算該收款人的所有行數
-      const totalRows = pg.indices.reduce((sum, gIdx) => sum + result[gIdx].items.length, 0)
-      ;(group as any).subtotalRowSpan = totalRows
-    } else {
-      ;(group as any).subtotalRowSpan = 0 // 不顯示小計欄位
     }
   })
 
@@ -432,8 +417,6 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                   group.items.map((item, itemIdx) => {
                     const isFirstInGroup = itemIdx === 0
                     const { payee: groupPayee, supplier: groupSupplier } = splitPayFor(group.payFor)
-                    const subtotalRowSpan = (group as any).subtotalRowSpan || 0
-                    const showSubtotalCell = subtotalRowSpan > 0 && isFirstInGroup
                     return (
                       <tr key={`tour-${groupIdx}-${itemIdx}`}>
                         {isFirstInGroup && (
@@ -509,14 +492,14 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                         >
                           {item.amount.toLocaleString()}
                         </td>
-                        {showSubtotalCell && (
+                        {isFirstInGroup && (
                           <td
-                            rowSpan={subtotalRowSpan}
+                            rowSpan={group.items.length}
                             style={{
                               padding: '6px',
                               verticalAlign: 'middle',
                               fontSize: '10px',
-                              textAlign: 'center',
+                              textAlign: 'right',
                               fontWeight: 600,
                               color: COLORS.brown,
                               borderTop: groupIdx > 0 ? `1px solid ${COLORS.gold}` : 'none',
@@ -657,8 +640,6 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                   group.items.map((item, itemIdx) => {
                     const isFirstInGroup = itemIdx === 0
                     const { payee: groupPayee, supplier: groupSupplier } = splitPayFor(group.payFor)
-                    const subtotalRowSpan = (group as any).subtotalRowSpan || 0
-                    const showSubtotalCell = subtotalRowSpan > 0 && isFirstInGroup
                     return (
                       <tr key={`company-${groupIdx}-${itemIdx}`}>
                         {isFirstInGroup && (
@@ -673,7 +654,12 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                               borderTop: groupIdx > 0 ? `1px solid ${COLORS.gold}` : 'none',
                             }}
                           >
-                            <div>{groupPayee}</div>{groupSupplier && <div style={{ fontSize: '9px', fontWeight: 'normal', color: COLORS.gray, marginTop: '2px' }}>{groupSupplier}</div>}
+                            <div>{groupPayee}</div>
+                            {groupSupplier && (
+                              <div style={{ fontSize: '9px', fontWeight: 'normal', color: COLORS.gray, marginTop: '2px' }}>
+                                {groupSupplier}
+                              </div>
+                            )}
                           </td>
                         )}
                         <td
@@ -725,14 +711,14 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                         >
                           {item.amount.toLocaleString()}
                         </td>
-                        {showSubtotalCell && (
+                        {isFirstInGroup && (
                           <td
-                            rowSpan={subtotalRowSpan}
+                            rowSpan={group.items.length}
                             style={{
                               padding: '6px',
                               verticalAlign: 'middle',
                               fontSize: '10px',
-                              textAlign: 'center',
+                              textAlign: 'right',
                               fontWeight: 600,
                               color: COLORS.brown,
                               borderTop: groupIdx > 0 ? `1px solid ${COLORS.gold}` : 'none',
