@@ -64,9 +64,8 @@ export default function LocalRequestsPage() {
       const q = searchQuery.toLowerCase()
       filtered = filtered.filter(
         r =>
-          r.tour_code?.toLowerCase().includes(q) ||
-          r.tour_name?.toLowerCase().includes(q) ||
-          r.title?.toLowerCase().includes(q)
+          r.code?.toLowerCase().includes(q) ||
+          r.supplier_name?.toLowerCase().includes(q)
       )
     }
     return filtered
@@ -168,7 +167,7 @@ export default function LocalRequestsPage() {
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm text-morandi-primary">
-                        {req.tour_code ?? '—'}
+                        {req.code ?? '—'}
                       </span>
                       <span
                         className={`text-xs px-2 py-0.5 rounded-full ${badge.color}`}
@@ -180,24 +179,17 @@ export default function LocalRequestsPage() {
                       {req.created_at ? new Date(req.created_at).toLocaleDateString('zh-TW') : ''}
                     </span>
                   </div>
-                  <div className="text-sm text-morandi-primary">{req.title}</div>
+                  <div className="text-sm text-morandi-primary">{req.supplier_name ?? '—'}</div>
                   <div className="flex items-center gap-3 mt-1 text-xs text-morandi-secondary">
                     <span className="flex items-center gap-1">
-                      <Building2 size={12} />
-                      {req.tour_name ?? '—'}
-                    </span>
-                    <span className="flex items-center gap-1">
                       <Package size={12} />
-                      {req.category}
+                      {req.request_type}
                     </span>
-                    {req.service_date && (
+                    {req.sent_at && (
                       <span className="flex items-center gap-1">
                         <Calendar size={12} />
-                        {req.service_date}
+                        {new Date(req.sent_at).toLocaleDateString('zh-TW')}
                       </span>
-                    )}
-                    {req.estimated_cost != null && (
-                      <span>預估 {req.estimated_cost.toLocaleString()}</span>
                     )}
                   </div>
                 </div>
@@ -217,46 +209,39 @@ export default function LocalRequestsPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <span className="text-morandi-secondary">團號</span>
-                  <p className="font-medium">{selectedRequest.tour_code ?? '—'}</p>
+                  <span className="text-morandi-secondary">編號</span>
+                  <p className="font-medium">{selectedRequest.code ?? '—'}</p>
                 </div>
                 <div>
-                  <span className="text-morandi-secondary">旅行社</span>
-                  <p className="font-medium">{selectedRequest.tour_name ?? '—'}</p>
+                  <span className="text-morandi-secondary">供應商</span>
+                  <p className="font-medium">{selectedRequest.supplier_name ?? '—'}</p>
                 </div>
                 <div>
                   <span className="text-morandi-secondary">類別</span>
-                  <p className="font-medium">{selectedRequest.category}</p>
+                  <p className="font-medium">{selectedRequest.request_type}</p>
                 </div>
                 <div>
-                  <span className="text-morandi-secondary">服務日期</span>
-                  <p className="font-medium">{selectedRequest.service_date ?? '—'}</p>
-                </div>
-                <div>
-                  <span className="text-morandi-secondary">優先級</span>
-                  <p className="font-medium">{selectedRequest.priority ?? '一般'}</p>
-                </div>
-                <div>
-                  <span className="text-morandi-secondary">預估費用</span>
+                  <span className="text-morandi-secondary">建立日期</span>
                   <p className="font-medium">
-                    {selectedRequest.estimated_cost != null
-                      ? selectedRequest.estimated_cost.toLocaleString()
-                      : '—'}
+                    {selectedRequest.created_at ? new Date(selectedRequest.created_at).toLocaleDateString('zh-TW') : '—'}
                   </p>
+                </div>
+                <div>
+                  <span className="text-morandi-secondary">發送日期</span>
+                  <p className="font-medium">
+                    {selectedRequest.sent_at ? new Date(selectedRequest.sent_at).toLocaleDateString('zh-TW') : '—'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-morandi-secondary">發送方式</span>
+                  <p className="font-medium">{selectedRequest.sent_via ?? '—'}</p>
                 </div>
               </div>
 
-              {selectedRequest.description && (
-                <div className="text-sm">
-                  <span className="text-morandi-secondary">說明</span>
-                  <p className="mt-1 text-morandi-primary">{selectedRequest.description}</p>
-                </div>
-              )}
-
-              {selectedRequest.notes && (
+              {selectedRequest.note && (
                 <div className="text-sm">
                   <span className="text-morandi-secondary">備註</span>
-                  <p className="mt-1 text-morandi-primary">{selectedRequest.notes}</p>
+                  <p className="mt-1 text-morandi-primary">{selectedRequest.note}</p>
                 </div>
               )}
 

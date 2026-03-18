@@ -17,11 +17,11 @@ import { AddItemDialog } from './AddItemDialog'
 interface RequestItem {
   id: string
   item_name: string
-  item_category: string
+  item_category: string | null
   service_date: string | null
   day_number: number | null
   handled_by: string | null
-  local_status: string
+  local_status: string | null
   local_notes: string | null
   corner_notes: string | null
   local_confirmed_at: string | null
@@ -106,7 +106,7 @@ export function CollaborativeConfirmationSheet({
     if (!printWindow) return
     
     const response = request.supplier_response
-    const selectedPrice = response?.tierPrices?.[request.selected_tier]
+    const selectedPrice = request.selected_tier != null ? response?.tierPrices?.[request.selected_tier] : undefined
     
     const html = `
       <!DOCTYPE html>
@@ -199,8 +199,10 @@ export function CollaborativeConfirmationSheet({
         <div>
           <h3 className="text-lg font-semibold">協作確認單</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            供應商：{request.supplier_name || 'Local 供應商'} • 
-            {request.selected_tier} 人團 {Number(request.supplier_response?.tierPrices?.[request.selected_tier]).toLocaleString()} 元/人
+            供應商：{request.supplier_name || 'Local 供應商'}
+            {request.selected_tier != null && (
+              <> • {request.selected_tier} 人團 {Number(request.supplier_response?.tierPrices?.[request.selected_tier]).toLocaleString()} 元/人</>
+            )}
           </p>
         </div>
         <div className="flex gap-2">

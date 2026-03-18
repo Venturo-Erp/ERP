@@ -58,37 +58,18 @@ export function useTourHealth(tourId: string): TourHealthData {
       try {
         setData(prev => ({ ...prev, isLoading: true, error: null }))
 
-        // 1. 查詢需求單狀態（查 tour_request_items 中待回覆的項目）
-        // 先查詢該團的所有 tour_requests
+        // 1. 查詢需求單狀態
         const { data: tourRequests } = await supabase
           .from('tour_requests')
-          .select('id')
+          .select('id, status')
           .eq('tour_id', tourId)
 
         const requestIds = tourRequests?.map(req => req.id) || []
 
-        // 再查詢這些 request 的 items（如果有 request 的話）
-        let requestItems: Array<{ reply_status: string | null; request_id: string }> = []
-        let requestError = null
-
-        if (requestIds.length > 0) {
-          const result = await supabase
-            .from('tour_request_items')
-            .select('reply_status, request_id')
-            .in('request_id', requestIds)
-
-          requestItems = result.data || []
-          requestError = result.error
-        }
-
-        if (requestError) {
-          logger.error('查詢需求單失敗:', requestError)
-        }
-
         // 統計待回覆的需求單
-        const pendingRequests = requestItems.filter(
-          item => !item.reply_status || item.reply_status === 'pending'
-        )
+        const pendingRequests = tourRequests?.filter(
+          r => r.status === 'pending' || r.status === 'sent'
+        ) || []
 
         // 2. 查詢該團所有成員的護照和機票狀態
         // 先查詢該團的所有訂單
@@ -164,7 +145,7 @@ export function useTourHealth(tourId: string): TourHealthData {
           error: null,
           requirements: buildHealthStatus(
             pendingRequests.length,
-            requestItems.length,
+            tourRequests?.length || 0,
             TOUR_HEALTH_LABELS.項需回覆
           ),
           passports: buildHealthStatus(

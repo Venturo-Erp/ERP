@@ -62,9 +62,7 @@ export default function LocalPage() {
       const q = searchQuery.toLowerCase()
       filtered = filtered.filter(
         r =>
-          r.tour_code?.toLowerCase().includes(q) ||
-          r.tour_name?.toLowerCase().includes(q) ||
-          r.title?.toLowerCase().includes(q) ||
+          r.code?.toLowerCase().includes(q) ||
           r.supplier_name?.toLowerCase().includes(q)
       )
     }
@@ -118,15 +116,15 @@ export default function LocalPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm text-morandi-primary truncate">
-                        {req.tour_code ?? '—'}
+                        {req.code ?? '—'}
                       </span>
                       <span className="text-xs text-morandi-secondary truncate">
-                        {req.tour_name}
+                        {req.supplier_name ?? '—'}
                       </span>
                     </div>
                     <div className="text-xs text-morandi-secondary mt-0.5">
-                      {req.title} · {req.category}
-                      {req.service_date && ` · ${req.service_date}`}
+                      {req.request_type}
+                      {req.created_at && ` · ${new Date(req.created_at).toLocaleDateString('zh-TW')}`}
                     </div>
                   </div>
                   <span
@@ -134,11 +132,6 @@ export default function LocalPage() {
                   >
                     {statusInfo.label}
                   </span>
-                  {req.estimated_cost != null && (
-                    <span className="text-xs text-morandi-secondary whitespace-nowrap">
-                      預估 {req.estimated_cost.toLocaleString()}
-                    </span>
-                  )}
                 </div>
               )
             })}

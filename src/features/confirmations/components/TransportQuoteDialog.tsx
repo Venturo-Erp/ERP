@@ -282,7 +282,7 @@ export function TransportQuoteDialog({
         date: d.date,
         route: d.route,
       })),
-      vehicleDesc,
+      vehicleType: vehicleDesc,
       note,
       invoiceSealUrl: '', // TODO: 從 workspace 讀取
     })

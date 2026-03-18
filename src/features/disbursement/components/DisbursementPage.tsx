@@ -347,11 +347,11 @@ export function DisbursementPage() {
           <PrintDisbursementPreview
             order={printOrder}
             paymentRequests={payment_requests.filter(pr =>
-              pr.disbursement_id === printOrder.id
+              printOrder.payment_request_ids?.includes(pr.id)
             )}
             paymentRequestItems={payment_request_items.filter(item =>
               payment_requests.some(
-                pr => pr.id === item.request_id && pr.disbursement_id === printOrder.id
+                pr => pr.id === item.request_id && printOrder.payment_request_ids?.includes(pr.id)
               )
             )}
           />

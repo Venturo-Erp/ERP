@@ -55,9 +55,8 @@ export default function LocalCasesPage() {
       const q = searchQuery.toLowerCase()
       filtered = filtered.filter(
         r =>
-          r.tour_code?.toLowerCase().includes(q) ||
-          r.tour_name?.toLowerCase().includes(q) ||
-          r.title?.toLowerCase().includes(q)
+          r.code?.toLowerCase().includes(q) ||
+          r.supplier_name?.toLowerCase().includes(q)
       )
     }
     return filtered
@@ -115,24 +114,23 @@ export default function LocalCasesPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-sm text-morandi-primary truncate">
-                        {c.tour_code ?? '—'}
+                        {c.code ?? '—'}
                       </span>
                       <span className="text-xs text-morandi-secondary">
-                        {c.title}
+                        {c.supplier_name ?? '—'}
                       </span>
                     </div>
                     <div className="flex items-center gap-3 mt-0.5 text-xs text-morandi-secondary">
                       <span className="flex items-center gap-1">
                         <Package size={12} />
-                        {c.category}
+                        {c.request_type}
                       </span>
-                      {c.service_date && (
+                      {c.created_at && (
                         <span className="flex items-center gap-1">
                           <Calendar size={12} />
-                          {c.service_date}
+                          {new Date(c.created_at).toLocaleDateString('zh-TW')}
                         </span>
                       )}
-                      {c.tour_name && <span>{c.tour_name}</span>}
                     </div>
                   </div>
                   <div className="text-right shrink-0">
@@ -145,11 +143,6 @@ export default function LocalCasesPage() {
                     >
                       {isCompleted ? '已完成' : '進行中'}
                     </span>
-                    {c.quoted_cost != null && (
-                      <div className="text-xs text-morandi-secondary mt-0.5">
-                        報價 {c.quoted_cost.toLocaleString()}
-                      </div>
-                    )}
                   </div>
                 </div>
               )
