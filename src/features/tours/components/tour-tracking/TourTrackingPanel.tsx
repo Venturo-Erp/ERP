@@ -16,6 +16,7 @@ import { useTourItineraryItemsByTour } from '@/features/tours/hooks/useTourItine
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
 import { usePendingQuotes, useAcceptedQuotes, useRejectedQuotes } from '@/features/tours/hooks/useTourRequests'
 import { QuoteCard } from './QuoteCard'
+import { CollaborativeConfirmationSheet } from './CollaborativeConfirmationSheet'
 import { TOUR_TRACKING_LABELS } from './constants/labels'
 
 // === Category 對照 ===
@@ -180,6 +181,7 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
   const { rejectedQuotes } = useRejectedQuotes(tour.id)
   
   const [showRejected, setShowRejected] = useState(false)
+  const [selectedRequest, setSelectedRequest] = useState<any>(null)
 
   // Group by day
   const grouped_items = useMemo(() => {
@@ -198,6 +200,16 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
         <Loader2 className="animate-spin text-muted-foreground" size={24} />
         <span className="ml-2 text-muted-foreground">{TOUR_TRACKING_LABELS.LOADING}</span>
       </div>
+    )
+  }
+
+  // 如果選中了已成交的報價，顯示協作確認單
+  if (selectedRequest) {
+    return (
+      <CollaborativeConfirmationSheet
+        request={selectedRequest}
+        onClose={() => setSelectedRequest(null)}
+      />
     )
   }
 
@@ -259,7 +271,11 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
                         成交時間：{new Date(quote.accepted_at!).toLocaleString('zh-TW')}
                       </p>
                     </div>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setSelectedRequest(quote)}
+                    >
                       查看協作確認單
                     </Button>
                   </div>
