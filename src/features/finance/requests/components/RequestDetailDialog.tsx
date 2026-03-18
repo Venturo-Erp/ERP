@@ -344,6 +344,9 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
     onOpenChange(newOpen)
   }
 
+  // 只有待處理狀態才能編輯（已確認/已出帳的被出納單鎖定）
+  const canEdit = currentRequest?.status === 'pending'
+
   if (!request || !currentRequest) return null
 
   return (
@@ -482,30 +485,38 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
 
           {/* 操作按鈕 */}
           <div className="flex items-center justify-between pt-4 border-t border-morandi-container/20">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDelete}
-              disabled={is_submitting}
-              className="text-morandi-red border-morandi-red hover:bg-morandi-red/10"
-            >
-              <Trash2 size={16} className="mr-2" />
-              {REQUEST_DETAIL_FORM_LABELS.DELETE}
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={is_submitting || !isDirty}
-              className={cn(
-                'transition-all',
-                isDirty
-                  ? 'bg-morandi-gold hover:bg-morandi-gold/90 text-white'
-                  : 'bg-morandi-container/50 text-morandi-muted cursor-not-allowed'
-              )}
-            >
-              <Save size={16} className="mr-2" />
-              {is_submitting ? '儲存中...' : '儲存'}
-            </Button>
+            {canEdit ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDelete}
+                  disabled={is_submitting}
+                  className="text-morandi-red border-morandi-red hover:bg-morandi-red/10"
+                >
+                  <Trash2 size={16} className="mr-2" />
+                  {REQUEST_DETAIL_FORM_LABELS.DELETE}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={is_submitting || !isDirty}
+                  className={cn(
+                    'transition-all',
+                    isDirty
+                      ? 'bg-morandi-gold hover:bg-morandi-gold/90 text-white'
+                      : 'bg-morandi-container/50 text-morandi-muted cursor-not-allowed'
+                  )}
+                >
+                  <Save size={16} className="mr-2" />
+                  {is_submitting ? '儲存中...' : '儲存'}
+                </Button>
+              </>
+            ) : (
+              <p className="text-sm text-morandi-muted w-full text-center">
+                此請款單已加入出納單，如需修改請先從出納單移除
+              </p>
+            )}
           </div>
         </div>
       </DialogContent>

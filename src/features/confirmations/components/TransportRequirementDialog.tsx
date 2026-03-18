@@ -55,10 +55,8 @@ export function TransportRequirementDialog({
   )
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
-  // 每天的項目說明（可手動輸入，如「43人座遊覽車」）
-  const [dayDescriptions, setDayDescriptions] = useState<Record<number, string>>({})
-  // 每天的備註
-  const [dayNotes, setDayNotes] = useState<Record<number, string>>({})
+  // 統一車型說明（套用到所有勾選的天）
+  const [vehicleDesc, setVehicleDesc] = useState('')
 
   const toggleDay = (dayNum: number) => {
     setSelectedDays(prev => {
@@ -85,13 +83,11 @@ export function TransportRequirementDialog({
       const sb = createSupabaseBrowserClient()
       const requestItems = selectedDaysList.map(d => ({
         category: 'transport',
-        title: dayDescriptions[d.dayNumber]
-          ? `Day ${d.dayNumber} ${d.route}（${dayDescriptions[d.dayNumber]}）`
-          : `Day ${d.dayNumber} ${d.route}`,
+        title: `Day ${d.dayNumber} ${d.route}`,
         service_date: d.date || null,
         quantity: totalPax || null,
         day_number: d.dayNumber,
-        note: dayNotes[d.dayNumber] || null,
+        vehicle_desc: vehicleDesc || null,
       }))
 
       const { error } = await sb.from('tour_requests').insert({
@@ -161,6 +157,7 @@ export function TransportRequirementDialog({
       <h3>車行資訊</h3>
       <div class="info-row"><span class="info-label">車行：</span><span>${supplierName}</span></div>
       <div class="info-row"><span class="info-label">用車天數：</span><span>${selectedDaysList.length} 天</span></div>
+      ${vehicleDesc ? `<div class="info-row"><span class="info-label">車型：</span><span>${vehicleDesc}</span></div>` : ''}
     </div>
   </div>
   <table>
@@ -170,8 +167,8 @@ export function TransportRequirementDialog({
       <tr>
         <td style="text-align:center">Day ${d.dayNumber}</td>
         <td style="text-align:center">${d.date}</td>
-        <td>${d.route}${dayDescriptions[d.dayNumber] ? `<br/><small style="color:#666">${dayDescriptions[d.dayNumber]}</small>` : ''}</td>
-        <td>${dayNotes[d.dayNumber] || ''}</td>
+        <td>${d.route}</td>
+        <td></td>
       </tr>`).join('')}
     </tbody>
   </table>
@@ -215,34 +212,29 @@ export function TransportRequirementDialog({
               </div>
             </div>
             {days.map(day => (
-              <div key={day.dayNumber} className="rounded-md border border-border/50 px-3 py-2 space-y-1.5">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={selectedDays.has(day.dayNumber)}
-                    onCheckedChange={() => toggleDay(day.dayNumber)}
-                  />
-                  <span className="text-sm font-medium w-14">Day {day.dayNumber}</span>
-                  <span className="text-xs text-muted-foreground w-16">{day.date}</span>
-                  <span className="text-sm flex-1 truncate">{day.route}</span>
-                </label>
-                {selectedDays.has(day.dayNumber) && (
-                  <div className="pl-9 grid grid-cols-2 gap-2">
-                    <Input
-                      value={dayDescriptions[day.dayNumber] || ''}
-                      onChange={e => setDayDescriptions(prev => ({ ...prev, [day.dayNumber]: e.target.value }))}
-                      placeholder="例：43人座遊覽車"
-                      className="h-7 text-xs"
-                    />
-                    <Input
-                      value={dayNotes[day.dayNumber] || ''}
-                      onChange={e => setDayNotes(prev => ({ ...prev, [day.dayNumber]: e.target.value }))}
-                      placeholder="備註"
-                      className="h-7 text-xs"
-                    />
-                  </div>
-                )}
-              </div>
+              <label
+                key={day.dayNumber}
+                className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-muted/50 cursor-pointer"
+              >
+                <Checkbox
+                  checked={selectedDays.has(day.dayNumber)}
+                  onCheckedChange={() => toggleDay(day.dayNumber)}
+                />
+                <span className="text-sm font-medium w-14">Day {day.dayNumber}</span>
+                <span className="text-xs text-muted-foreground w-16">{day.date}</span>
+                <span className="text-sm flex-1 truncate">{day.route}</span>
+              </label>
             ))}
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-sm font-medium">車型</Label>
+            <Input
+              value={vehicleDesc}
+              onChange={e => setVehicleDesc(e.target.value)}
+              placeholder="例：43人座遊覽車"
+              className="h-8 text-sm"
+            />
           </div>
 
           <div className="space-y-1">
@@ -250,7 +242,7 @@ export function TransportRequirementDialog({
             <Input
               value={note}
               onChange={e => setNote(e.target.value)}
-              placeholder="特殊需求（如車型、座椅排數...）"
+              placeholder="特殊需求（如座椅排數、放行李空間...）"
               className="h-8 text-sm"
             />
           </div>
@@ -259,6 +251,7 @@ export function TransportRequirementDialog({
             <div className="bg-morandi-gold/5 border border-morandi-gold/20 rounded-md p-2 text-xs">
               <span className="font-medium text-morandi-primary">摘要：</span>
               {selectedDaysList.length} 天用車（Day {selectedDaysList.map(d => d.dayNumber).join('、')}）
+              {vehicleDesc && ` — ${vehicleDesc}`}
             </div>
           )}
         </div>
