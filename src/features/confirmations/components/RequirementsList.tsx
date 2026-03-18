@@ -32,6 +32,7 @@ import type { Tour } from '@/stores/types'
 import { RoomRequirementDialog } from './RoomRequirementDialog'
 import { TransportRequirementDialog } from './TransportRequirementDialog'
 import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSupplierDialog'
+import { LocalQuoteDialog } from './LocalQuoteDialog'
 // CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
@@ -114,6 +115,9 @@ export function RequirementsList({
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [coreItems, setCoreItems] = useState<TourItineraryItem[]>([])
 
+  // Local 報價 Dialog
+  const [showLocalQuoteDialog, setShowLocalQuoteDialog] = useState(false)
+  
   // 委託展開狀態
   const [expandedDelegation, setExpandedDelegation] = useState<string | null>(null)
   // 發送方式 state（draft→sent 用）
@@ -994,30 +998,40 @@ export function RequirementsList({
           </div>
         ) : (
           <>
-          {/* 勾選後的浮動操作列 */}
-          {checkedItems.size > 0 && (
-            <div className="mb-3 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5">
-              <span className="text-sm font-medium text-blue-700">
-                已選 {checkedItems.size} 項
-              </span>
-              <Button
-                size="sm"
-                onClick={() => setShowAssignDialog(true)}
-                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white h-7 px-3 text-xs"
-              >
-                <Printer size={12} className="mr-1" />
-                發給供應商
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setCheckedItems(new Set())}
-                className="h-7 px-2 text-xs text-muted-foreground"
-              >
-                取消選取
-              </Button>
-            </div>
-          )}
+          {/* 操作列：Local 報價（固定）+ 發給供應商（勾選後出現） */}
+          <div className="mb-3 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5">
+            <Button
+              size="sm"
+              onClick={() => setShowLocalQuoteDialog(true)}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white h-7 px-3 text-xs"
+            >
+              <Send size={12} className="mr-1" />
+              給 Local 報價
+            </Button>
+            {checkedItems.size > 0 && (
+              <>
+                <span className="text-sm font-medium text-blue-700 ml-2">
+                  已選 {checkedItems.size} 項
+                </span>
+                <Button
+                  size="sm"
+                  onClick={() => setShowAssignDialog(true)}
+                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white h-7 px-3 text-xs"
+                >
+                  <Printer size={12} className="mr-1" />
+                  發給供應商
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCheckedItems(new Set())}
+                  className="h-7 px-2 text-xs text-muted-foreground"
+                >
+                  取消選取
+                </Button>
+              </>
+            )}
+          </div>
           <div className="border border-border rounded-lg overflow-hidden bg-card">
             <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
               <thead>
@@ -1747,6 +1761,17 @@ export function RequirementsList({
           serviceDate={selectedHotel.serviceDate}
           nights={selectedHotel.nights}
           onSaved={() => loadData(false)}
+        />
+      )}
+
+      {/* Local 報價 Dialog */}
+      {showLocalQuoteDialog && (
+        <LocalQuoteDialog
+          open={showLocalQuoteDialog}
+          onClose={() => setShowLocalQuoteDialog(false)}
+          tour={tour}
+          transportDays={transportDays}
+          totalPax={totalPax}
         />
       )}
     </>
