@@ -1,110 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
-import { createCanvas } from 'canvas'
 import { NextResponse } from 'next/server'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
 // 喜多里保代群組
 const INSURANCE_GROUP_ID = 'C03f53517dc822913b394411981a100bf'
-
-function renderTableImage(
-  title: string,
-  subtitle: string,
-  headers: string[],
-  rows: (string | number)[][]
-): Buffer {
-  const colWidths = [40, 100, 140, 120]
-  const rowHeight = 32
-  const headerHeight = 36
-  const padding = 16
-  const titleHeight = 50
-  const subtitleHeight = 30
-  const tableWidth = colWidths.reduce((a, b) => a + b, 0)
-  const width = tableWidth + padding * 2
-  const height =
-    titleHeight + subtitleHeight + headerHeight + rowHeight * rows.length + padding * 2 + 10
-
-  const canvas = createCanvas(width, height)
-  const ctx = canvas.getContext('2d')
-
-  ctx.fillStyle = '#FFFFFF'
-  ctx.fillRect(0, 0, width, height)
-
-  ctx.fillStyle = '#333333'
-  ctx.font = 'bold 18px sans-serif'
-  ctx.textAlign = 'center'
-  ctx.fillText(title, width / 2, padding + 24)
-
-  ctx.font = '13px sans-serif'
-  ctx.fillStyle = '#666666'
-  ctx.fillText(subtitle, width / 2, padding + titleHeight + 14)
-
-  const tableTop = padding + titleHeight + subtitleHeight
-  const x = padding
-  let y = tableTop
-
-  ctx.fillStyle = '#E8DCC8'
-  ctx.fillRect(x, y, tableWidth, headerHeight)
-
-  ctx.fillStyle = '#333333'
-  ctx.font = 'bold 13px sans-serif'
-  ctx.textAlign = 'center'
-  let cx = padding
-  for (let i = 0; i < headers.length; i++) {
-    ctx.fillText(headers[i], cx + colWidths[i] / 2, y + headerHeight / 2 + 5)
-    cx += colWidths[i]
-  }
-
-  ctx.strokeStyle = '#CCBBAA'
-  ctx.lineWidth = 1
-  ctx.strokeRect(x, y, tableWidth, headerHeight)
-  cx = padding
-  for (let i = 0; i < colWidths.length - 1; i++) {
-    cx += colWidths[i]
-    ctx.beginPath()
-    ctx.moveTo(cx, y)
-    ctx.lineTo(cx, y + headerHeight)
-    ctx.stroke()
-  }
-
-  y += headerHeight
-  ctx.font = '12px sans-serif'
-
-  for (let r = 0; r < rows.length; r++) {
-    if (r % 2 === 1) {
-      ctx.fillStyle = '#F9F5F0'
-      ctx.fillRect(x, y, tableWidth, rowHeight)
-    }
-    ctx.fillStyle = '#333333'
-    cx = padding
-    for (let i = 0; i < rows[r].length; i++) {
-      ctx.textAlign = 'center'
-      ctx.fillText(String(rows[r][i] || ''), cx + colWidths[i] / 2, y + rowHeight / 2 + 5)
-      cx += colWidths[i]
-    }
-    ctx.strokeStyle = '#E0D5C8'
-    ctx.lineWidth = 0.5
-    ctx.beginPath()
-    ctx.moveTo(padding, y + rowHeight)
-    ctx.lineTo(padding + tableWidth, y + rowHeight)
-    ctx.stroke()
-    y += rowHeight
-  }
-
-  ctx.strokeStyle = '#CCBBAA'
-  ctx.lineWidth = 1
-  ctx.strokeRect(padding, tableTop, tableWidth, headerHeight + rowHeight * rows.length)
-  cx = padding
-  for (let i = 0; i < colWidths.length - 1; i++) {
-    cx += colWidths[i]
-    ctx.beginPath()
-    ctx.moveTo(cx, tableTop + headerHeight)
-    ctx.lineTo(cx, tableTop + headerHeight + rowHeight * rows.length)
-    ctx.stroke()
-  }
-
-  return canvas.toBuffer('image/png')
-}
 
 async function sendInsuranceForTour(
   supabase: any,
@@ -172,48 +72,38 @@ async function sendInsuranceForTour(
 
   const representative = leaderName || members[0]?.customer?.name || '-'
 
-  // 圖片
-  const title = `${tour.code} ${tour.name}`
-  const subtitle = `出發 ${tour.departure_date} ~ ${tour.return_date} | ${members.length}人`
-  const headers = ['序', '姓名', '身分證字號', '出生年月日']
-  const rows = members.map((m: any, i: number) => [
-    i + 1,
-    m.customer?.name || '',
-    m.customer?.national_id || '',
-    m.customer?.birth_date || '',
-  ])
-
-  const imgBuffer = renderTableImage(title, subtitle, headers, rows)
-
-  // 上傳圖片
-  const imgPath = `tour-documents/${tour.code}/insurance_${Date.now()}.png`
-  await supabase.storage.from('documents').upload(imgPath, imgBuffer, {
-    contentType: 'image/png',
-    upsert: true,
-  })
-  const { data: imgUrl } = supabase.storage.from('documents').getPublicUrl(imgPath)
-
-  // Excel signed URL (24hr)
+  // 產生 Excel
   const ExcelJS = (await import('exceljs')).default
   const wb = new ExcelJS.Workbook()
   const ws = wb.addWorksheet('團員名單')
+  
+  const title = `${tour.code} ${tour.name}`
   ws.mergeCells('A1:D1')
   ws.getCell('A1').value = title
   ws.getCell('A1').font = { bold: true, size: 14 }
   ws.getCell('A1').alignment = { horizontal: 'center' }
   ws.addRow([])
+  
+  const headers = ['序', '姓名', '身分證字號', '出生年月日']
   const hr = ws.addRow(headers)
   hr.font = { bold: true }
   hr.eachCell((c) => {
     c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8DCC8' } }
     c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }
   })
-  rows.forEach((r) => {
-    const row = ws.addRow(r)
+  
+  members.forEach((m: any, i: number) => {
+    const row = ws.addRow([
+      i + 1,
+      m.customer?.name || '',
+      m.customer?.national_id || '',
+      m.customer?.birth_date || '',
+    ])
     row.eachCell((c) => {
       c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }
     })
   })
+  
   ws.columns = [{ width: 5 }, { width: 12 }, { width: 14 }, { width: 14 }]
 
   const xlsxBuf = (await wb.xlsx.writeBuffer()) as unknown as Buffer
@@ -231,7 +121,7 @@ async function sendInsuranceForTour(
 
   const xlsxUrl = signedData?.signedUrl || ''
 
-  // LINE 訊息
+  // LINE 訊息（純文字 + Excel 連結）
   const remark = isChange ? '（人員異動）' : isManual ? '' : '（自動發送）'
   const textLines = [
     `旅遊責任險${remark}`,
@@ -246,7 +136,10 @@ async function sendInsuranceForTour(
     `地點：${location}`,
   ]
   if (flightInfo) textLines.push(`航班：${flightInfo}`)
-  if (xlsxUrl) textLines.push(``, `Excel（24小時有效）：`, xlsxUrl)
+  if (xlsxUrl) {
+    textLines.push(``, `Excel（24小時有效）：`)
+    textLines.push(xlsxUrl)
+  }
 
   const lineRes = await fetch(LINE_API_URL, {
     method: 'POST',
@@ -258,11 +151,6 @@ async function sendInsuranceForTour(
       to: INSURANCE_GROUP_ID,
       messages: [
         { type: 'text', text: textLines.join('\n') },
-        {
-          type: 'image',
-          originalContentUrl: imgUrl.publicUrl,
-          previewImageUrl: imgUrl.publicUrl,
-        },
       ],
     }),
   })
