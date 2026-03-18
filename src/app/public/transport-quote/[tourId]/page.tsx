@@ -171,10 +171,10 @@ export default async function TransportQuotePage({
               </tbody>
             </table>
 
-            {/* 我方備註 */}
+            {/* 角落旅行社備註 */}
             {note && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h3 className="font-semibold text-amber-900 mb-2">我方備註</h3>
+                <h3 className="font-semibold text-amber-900 mb-2">角落旅行社備註</h3>
                 <p className="text-sm text-gray-700">{note}</p>
               </div>
             )}
