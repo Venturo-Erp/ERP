@@ -18,6 +18,7 @@ import { Badge } from '@/components/ui/badge'
 import { FileText, Eye, Pencil, Trash2 } from 'lucide-react'
 import {
   usePaymentRequests,
+  usePaymentRequestItems,
   useDisbursementOrders,
   deleteDisbursementOrder as deleteDisbursementOrderApi,
   invalidatePaymentRequests,
@@ -28,7 +29,7 @@ import { DisbursementOrder, PaymentRequest } from '@/stores/types'
 import { cn } from '@/lib/utils'
 import { CreateDisbursementDialog } from './CreateDisbursementDialog'
 import { DisbursementDetailDialog } from './DisbursementDetailDialog'
-import { DisbursementPrintDialog } from './DisbursementPrintDialog'
+import { PrintDisbursementPreview } from './PrintDisbursementPreview'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { DISBURSEMENT_STATUS } from '../constants'
@@ -38,13 +39,13 @@ export function DisbursementPage() {
   // 使用 @/data hooks（SWR 自動載入）
   const { items: disbursement_orders } = useDisbursementOrders()
   const { items: payment_requests } = usePaymentRequests()
+  const { items: payment_request_items } = usePaymentRequestItems()
 
   // 狀態
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingOrder, setEditingOrder] = useState<DisbursementOrder | null>(null)
   const [selectedOrder, setSelectedOrder] = useState<DisbursementOrder | null>(null)
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
-  const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false)
   const [printOrder, setPrintOrder] = useState<DisbursementOrder | null>(null)
 
   // 取得待出帳的請款單（狀態為 pending，且尚未加入任何出納單）
@@ -163,10 +164,13 @@ export function DisbursementPage() {
     setIsDetailDialogOpen(true)
   }, [])
 
-  // 列印 PDF - 開啟預覽對話框
+  // 列印 - 直接觸發瀏覽器列印對話框
   const handlePrintPDF = useCallback((order: DisbursementOrder) => {
     setPrintOrder(order)
-    setIsPrintDialogOpen(true)
+    // 等待狀態更新後觸發列印
+    setTimeout(() => {
+      window.print()
+    }, 100)
   }, [])
 
   // 刪除出納單
@@ -337,12 +341,22 @@ export function DisbursementPage() {
         onOpenChange={setIsDetailDialogOpen}
       />
 
-      {/* 出納單列印預覽對話框 */}
-      <DisbursementPrintDialog
-        order={printOrder}
-        open={isPrintDialogOpen}
-        onOpenChange={setIsPrintDialogOpen}
-      />
+      {/* 隱藏的列印內容（@media print 時顯示） */}
+      {printOrder && (
+        <div className="hidden print:block">
+          <PrintDisbursementPreview
+            order={printOrder}
+            paymentRequests={payment_requests.filter(pr =>
+              pr.disbursement_id === printOrder.id
+            )}
+            paymentRequestItems={payment_request_items.filter(item =>
+              payment_requests.some(
+                pr => pr.id === item.request_id && pr.disbursement_id === printOrder.id
+              )
+            )}
+          />
+        </div>
+      )}
     </>
   )
 }
