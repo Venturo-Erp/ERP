@@ -49,7 +49,7 @@ export function CreateSupplierDialog({
   const workspaceId = useWorkspaceId()
   const [formData, setFormData] = useState({
     name: defaultName || '',
-    type: 'other' as SupplierType,
+    type: '' as SupplierType,
     contact_person: '',
     phone: '',
     email: '',
@@ -101,7 +101,7 @@ export function CreateSupplierDialog({
         // 重置表單
         setFormData({
           name: '',
-          type: 'other',
+          type: '',
           contact_person: '',
           phone: '',
           email: '',
@@ -151,7 +151,7 @@ export function CreateSupplierDialog({
               }
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder="選擇類別" />
               </SelectTrigger>
               <SelectContent>
                 {SUPPLIER_TYPE_OPTIONS.map(option => (

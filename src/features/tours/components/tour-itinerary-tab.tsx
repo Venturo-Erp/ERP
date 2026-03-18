@@ -701,6 +701,15 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         }
       }
 
+      // 同步航班資訊到 tours 表
+      if (tour.id && (itineraryData.outbound_flight || itineraryData.return_flight)) {
+        await updateTour(tour.id, {
+          outbound_flight: itineraryData.outbound_flight,
+          return_flight: itineraryData.return_flight,
+        })
+        logger.log('[TourItineraryTab] 航班資訊已同步到 tours 表')
+      }
+
       // Background sync: 只寫核心表（報價單/需求單直接讀核心表，不需要同步）
       if (savedItineraryId) {
         syncToCore({

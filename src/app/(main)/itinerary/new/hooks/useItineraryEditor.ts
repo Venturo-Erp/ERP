@@ -172,18 +172,32 @@ export function useItineraryEditor() {
 
         // 報價單直接讀核心表，不需要同步飯店
 
+        // 取得 tour_id（用於多處同步）
+        const { data: itinerary_record } = await supabase
+          .from('itineraries')
+          .select('tour_id')
+          .eq('id', currentItineraryId)
+          .maybeSingle()
+
+        const tourId = itinerary_record?.tour_id
+
+        // 同步航班資訊到 tours 表
+        if (tourId && (convertedData.outbound_flight || convertedData.return_flight)) {
+          await supabase
+            .from('tours')
+            .update({
+              outbound_flight: convertedData.outbound_flight,
+              return_flight: convertedData.return_flight,
+            })
+            .eq('id', tourId)
+          logger.log('[ItineraryEditor] 航班資訊已同步到 tours 表')
+        }
+
         // 同步行程項目到核心表 (tour_itinerary_items)
         if (convertedData.daily_itinerary && convertedData.daily_itinerary.length > 0) {
-          // 取得 tour_id（從 itinerary 記錄）
-          const { data: itinerary_record } = await supabase
-            .from('itineraries')
-            .select('tour_id')
-            .eq('id', currentItineraryId)
-            .maybeSingle()
-
           syncToCore({
             itinerary_id: currentItineraryId,
-            tour_id: itinerary_record?.tour_id ?? null,
+            tour_id: tourId ?? null,
             daily_itinerary: convertedData.daily_itinerary as DailyItinerary[],
           })
             .then(result => {

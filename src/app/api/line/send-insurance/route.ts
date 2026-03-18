@@ -6,7 +6,8 @@ const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
 export async function POST(request: Request) {
   try {
-    const { tourId, tourCode, tourName, departureDate, returnDate } = await request.json()
+    const body = await request.json()
+    const { tourId, tourCode, tourName, departureDate, returnDate, groupId: requestedGroupId } = body
 
     if (!tourId || !tourCode) {
       return NextResponse.json({ success: false, error: '缺少必要參數' }, { status: 400 })
@@ -16,19 +17,31 @@ export async function POST(request: Request) {
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
     const lineToken = process.env.LINE_CHANNEL_ACCESS_TOKEN!
     const supabase = createClient(supabaseUrl, supabaseKey)
+    
+    let targetGroup: { group_id: string; group_name: string | null }
 
-    // 1. 查 LINE 群組
-    const { data: lineGroups } = await supabase
-      .from('line_groups')
-      .select('group_id, group_name')
-      .order('joined_at', { ascending: false })
-      .limit(5)
-
-    if (!lineGroups?.length) {
-      return NextResponse.json({ success: false, error: '找不到 LINE 群組' })
+    if (requestedGroupId) {
+      const { data: group } = await supabase
+        .from('line_groups')
+        .select('group_id, group_name')
+        .eq('group_id', requestedGroupId)
+        .single()
+      if (!group) {
+        return NextResponse.json({ success: false, error: '指定的 LINE 群組不存在' })
+      }
+      targetGroup = group
+    } else {
+      // 預設發到 william筆記本
+      const { data: group } = await supabase
+        .from('line_groups')
+        .select('group_id, group_name')
+        .eq('group_name', 'william筆記本')
+        .single()
+      if (!group) {
+        return NextResponse.json({ success: false, error: '找不到 william筆記本群組' })
+      }
+      targetGroup = group
     }
-
-    const targetGroup = lineGroups[0]
 
     // 2. 取團員（透過 order_members）
     const { data: orders } = await supabase

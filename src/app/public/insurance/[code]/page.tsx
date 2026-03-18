@@ -15,14 +15,25 @@ async function getTourMembers(code: string) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
-  // 1. 查團
+  // 1. 查團（含 workspace 公司名稱）
   const { data: tour } = await supabase
     .from('tours')
-    .select('id, code, name, departure_date, return_date')
+    .select('id, code, name, departure_date, return_date, workspace_id')
     .eq('code', code)
     .single()
 
   if (!tour) return null
+
+  // 查公司名稱
+  let companyName = '角落旅行社'
+  if (tour.workspace_id) {
+    const { data: ws } = await supabase
+      .from('workspaces')
+      .select('name')
+      .eq('id', tour.workspace_id)
+      .single() as { data: { name: string } | null }
+    if (ws?.name) companyName = ws.name
+  }
 
   // 2. 查團員
   const { data: orders } = await supabase
@@ -62,7 +73,7 @@ async function getTourMembers(code: string) {
     excelUrl = signedData?.signedUrl || null
   }
 
-  return { tour, members, excelUrl }
+  return { tour, members, excelUrl, companyName }
 }
 
 function formatDate(dateStr: string | null): string {
@@ -94,7 +105,7 @@ export default async function InsuranceMemberPage({
     notFound()
   }
 
-  const { tour, members, excelUrl } = result
+  const { tour, members, excelUrl, companyName } = result
 
   return (
     <html lang="zh-TW">
@@ -205,7 +216,7 @@ export default async function InsuranceMemberPage({
           fontSize: '12px',
           color: '#bbb',
         }}>
-          隅角國際旅行社 Corner Travel
+          {companyName}
         </div>
       </body>
     </html>
