@@ -57,26 +57,31 @@ export default async function TransportQuotePage({
         ) + 1
       : null
 
-  // 按天分組
+  // 按天分組（自動計算日期）
   const grouped = new Map<number, any>()
+  const weekdays = ['日', '一', '二', '三', '四', '五', '六']
+  
   for (const item of coreItems) {
     const day = item.day_number ?? 0
     if (!grouped.has(day)) {
+      // 從 departure_date 自動計算日期
+      let dateStr = ''
+      let weekday = ''
+      if (tour.departure_date && day > 0) {
+        const d = new Date(tour.departure_date)
+        d.setDate(d.getDate() + day - 1) // Day 1 = 出發日，Day 2 = 出發日+1
+        dateStr = `${d.getMonth() + 1}/${d.getDate()}`
+        weekday = weekdays[d.getDay()]
+      }
+      
       grouped.set(day, {
-        date: null,
-        weekday: null,
+        date: dateStr,
+        weekday: weekday,
         items: [],
         hotel: null,
       })
     }
     const group = grouped.get(day)!
-
-    if (!group.date && item.service_date) {
-      group.date = item.service_date
-      const d = new Date(item.service_date)
-      const weekdays = ['日', '一', '二', '三', '四', '五', '六']
-      group.weekday = weekdays[d.getDay()]
-    }
 
     if (item.category === 'accommodation') {
       group.hotel = item
