@@ -10,6 +10,8 @@ import { Send, Loader2, Printer, Sun, Mail, Phone, Globe, Plus, X } from 'lucide
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
+import { TransportTraditionalView } from './TransportTraditionalView'
+import { printTransportRequirement } from '../utils/printTransportRequirement'
 
 interface TransportQuoteDialogProps {
   open: boolean
@@ -259,14 +261,63 @@ export function TransportQuoteDialog({
     toast({ title: `${method} 功能開發中`, description: '目前支援列印、傳真和 LINE' })
   }
 
+  // 列印功能（傳統樣式）
+  const handleTraditionalPrint = () => {
+    const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId)
+    if (!selectedSupplier) {
+      toast({ title: '請先選擇供應商', variant: 'destructive' })
+      return
+    }
+
+    printTransportRequirement({
+      supplierName: selectedSupplier.name,
+      tourCode: tour?.code || '',
+      tourName: tour?.name || '',
+      totalPax: totalPax || 0,
+      departureDate: tour?.departure_date,
+      returnDate: tour?.return_date,
+      transportDays: daySchedules.map(d => ({
+        dayNumber: d.dayNumber,
+        date: d.date,
+        route: d.route,
+      })),
+      vehicleDesc,
+      note,
+      invoiceSealUrl: '', // TODO: 從 workspace 讀取
+    })
+  }
+
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="text-lg">給車行報價 — 遊覽車</DialogTitle>
+          <DialogTitle className="text-lg">
+            給車行報價 — 遊覽車
+            {viewMode === 'traditional' && <span className="text-sm text-muted-foreground ml-2">(傳統樣式)</span>}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto pr-1 space-y-3">
+          {viewMode === 'traditional' ? (
+            <TransportTraditionalView
+              tour={tour}
+              totalPax={totalPax}
+              daySchedules={daySchedules.map(d => ({
+                dayNumber: d.dayNumber,
+                date: d.date,
+                route: d.route,
+              }))}
+              vehicleDesc={vehicleDesc}
+              note={note}
+              setNote={setNote}
+              suppliers={suppliers}
+              selectedSupplierId={selectedSupplierId}
+              setSelectedSupplierId={setSelectedSupplierId}
+              invoiceSealUrl=""
+              onPrint={handleTraditionalPrint}
+            />
+          ) : (
+            <>
           {/* 團資訊條 */}
           <div className="flex items-center gap-6 px-4 py-3 bg-[#faf8f5] rounded-lg border border-[#e8e0d4]">
             <div className="text-sm">
@@ -413,11 +464,18 @@ export function TransportQuoteDialog({
               </div>
             )}
           </div>
+            </>
+          )}
+        </div>
 
-          {/* 底部按鈕 */}
-          <div className="flex justify-end gap-3 pt-2 pb-1">
-            <Button variant="outline" onClick={onClose}>取消</Button>
-          </div>
+        {/* 底部按鈕 */}
+        <div className="flex-shrink-0 flex justify-end gap-3 pt-3 border-t">
+          {viewMode === 'traditional' && (
+            <Button variant="outline" onClick={() => setViewMode('modern')}>
+              返回現代樣式
+            </Button>
+          )}
+          <Button variant="outline" onClick={onClose}>取消</Button>
         </div>
       </DialogContent>
     </Dialog>
