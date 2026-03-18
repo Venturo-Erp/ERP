@@ -8,11 +8,11 @@ import { createClient } from '@supabase/supabase-js'
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { tourId: string; requestId: string } }
+  { params }: { params: Promise<{ tourId: string; requestId: string }> }
 ) {
   try {
     const { selectedTier } = await req.json()
-    const { tourId, requestId } = params
+    const { tourId, requestId } = await params
     
     if (!selectedTier) {
       return NextResponse.json({ error: '缺少人數梯次' }, { status: 400 })

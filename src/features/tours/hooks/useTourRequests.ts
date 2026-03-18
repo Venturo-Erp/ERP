@@ -56,7 +56,7 @@ async function fetchTourRequests(tourId: string): Promise<TourRequest[]> {
     .order('created_at', { ascending: false })
   
   if (error) throw error
-  return data || []
+  return (data || []) as unknown as TourRequest[]
 }
 
 export function useTourRequests(tourId: string) {
