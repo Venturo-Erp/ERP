@@ -5,7 +5,7 @@ import { LABELS } from './constants/labels'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/stores/auth-store'
-import { User, Lock, AlertCircle, Eye, EyeOff, Building2, Play } from 'lucide-react'
+import { User, Lock, AlertCircle, Eye, EyeOff, Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { logger } from '@/lib/utils/logger'
@@ -21,7 +21,6 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
-  const [isDemoLoading, setIsDemoLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -55,31 +54,7 @@ export default function LoginPage() {
     return '/dashboard'
   }
 
-  const demoCompanyCode = process.env.NEXT_PUBLIC_DEMO_COMPANY_CODE
-  const demoEmployeeId = process.env.NEXT_PUBLIC_DEMO_EMPLOYEE_ID
-  const demoPassword = process.env.NEXT_PUBLIC_DEMO_PASSWORD
-  const isDemoConfigured = !!(demoCompanyCode && demoEmployeeId && demoPassword)
 
-  const handleDemoLogin = async () => {
-    if (!isDemoConfigured) return
-    setError('')
-    setIsDemoLoading(true)
-
-    try {
-      const result = await validateLogin(demoEmployeeId, demoPassword, demoCompanyCode, true)
-
-      if (result.success) {
-        router.push('/dashboard')
-      } else {
-        setError(result.message || '體驗帳號登入失敗')
-      }
-    } catch (err) {
-      logger.error('Demo login error:', err)
-      setError('系統錯誤，請稍後再試')
-    } finally {
-      setIsDemoLoading(false)
-    }
-  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -242,28 +217,7 @@ export default function LoginPage() {
         </form>
 
         {/* Demo 體驗按鈕 */}
-        {isDemoConfigured && (
-          <div className="mt-6">
-            <div className="relative flex items-center justify-center">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border" />
-              </div>
-              <span className="relative bg-card px-3 text-sm text-morandi-secondary">
-                {LABELS.DEMO_DIVIDER}
-              </span>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full mt-4 border-morandi-gold/40 text-morandi-gold hover:bg-morandi-gold/10"
-              disabled={isLoading || isDemoLoading}
-              onClick={handleDemoLogin}
-            >
-              <Play size={16} className="mr-2" />
-              {isDemoLoading ? LABELS.DEMO_LOADING : LABELS.DEMO_BUTTON}
-            </Button>
-          </div>
-        )}
+
       </div>
     </div>
   )

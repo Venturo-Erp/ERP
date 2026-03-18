@@ -113,8 +113,8 @@ export async function POST(request: Request) {
         mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       })
 
-    // 5. 短網址（永久有效，每次點擊產生新的 24hr signed URL）
-    const excelUrl = `https://app.cornertravel.com.tw/api/d/${tourCode}`
+    // 5. 公開名單頁面（網頁版，手機可直接看）
+    const memberPageUrl = `https://app.cornertravel.com.tw/public/insurance/${tourCode}`
 
     // 6. 發 LINE — 純文字 + 短網址
     const textMsg = `📋 ${tourCode} ${tourName}
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
 👥 團員人數: ${members.length} 人
 🛡️ 旅遊責任險
 
-📎 名單下載：${excelUrl}
+📎 團員名單：${memberPageUrl}
 
 請協助報價，謝謝！`
 
@@ -148,7 +148,7 @@ export async function POST(request: Request) {
       success: true,
       groupName: targetGroup.group_name,
       memberCount: members.length,
-      excelUrl,
+      memberPageUrl,
     })
   } catch (error) {
     console.error('[send-insurance]', error)
