@@ -19,6 +19,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/finance': COMP_LAYOUT_LABELS.財務系統,
   '/finance/payments': COMP_LAYOUT_LABELS.請款管理,
   '/finance/cashier': COMP_LAYOUT_LABELS.出納管理,
+  '/finance/treasury/disbursement': COMP_LAYOUT_LABELS.出納管理,
   '/finance/vouchers': COMP_LAYOUT_LABELS.會計傳票,
   '/finance/travel-invoices': COMP_LAYOUT_LABELS.代轉發票,
   '/settings': COMP_LAYOUT_LABELS.設定,

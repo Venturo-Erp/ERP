@@ -44,6 +44,7 @@ import {
   Inbox,
   FolderOpen,
   Target,
+  Landmark,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
@@ -116,6 +117,12 @@ const menuItems: MenuItem[] = [
       },
       {
         href: '/finance/treasury',
+        label: COMP_LAYOUT_LABELS.金庫總覽,
+        icon: Landmark,
+        requiredPermission: 'disbursement',
+      },
+      {
+        href: '/finance/treasury/disbursement',
         label: COMP_LAYOUT_LABELS.出納管理,
         icon: Wallet,
         requiredPermission: 'disbursement',

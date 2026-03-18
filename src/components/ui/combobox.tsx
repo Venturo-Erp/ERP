@@ -430,11 +430,11 @@ export function Combobox<T = unknown>({
                       onClick={async () => {
                         if (isCreating) return
                         setIsCreating(true)
+                        setIsOpen(false)
                         try {
                           const newId = await onCreate(searchValue.trim())
                           if (newId) {
                             onChange(newId)
-                            setIsOpen(false)
                           }
                         } finally {
                           setIsCreating(false)

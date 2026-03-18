@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +13,7 @@ import {
   useSuppliersSlim,
   useEmployeesSlim,
   usePaymentRequestItems,
+  invalidatePaymentRequests,
   deletePaymentRequest as deletePaymentRequestApi,
 } from '@/data'
 import { PaymentRequest, PaymentItemCategory } from '@/stores/types'
@@ -138,34 +139,42 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
     return batchRequests.reduce((sum, r) => sum + (r.amount || 0), 0)
   }, [batchRequests])
 
-  // 取得當前選中請款單的 DB 項目
-  const dbItems = currentRequest ? requestItems.filter(item => item.request_id === currentRequest.id) : []
-
   const tour = currentRequest?.tour_id ? tours.find(t => t.id === currentRequest.tour_id) : null
 
-  // DB items → 本地 editable 格式
-  const dbEditableItems: RequestItem[] = useMemo(() =>
-    dbItems.map(item => ({
-      id: item.id,
-      category: item.category,
-      supplier_id: item.supplier_id || '',
-      supplierName: item.supplier_name,
-      selected_id: item.supplier_id || '',
-      description: item.description,
-      unit_price: item.unit_price ?? (item as unknown as { unitprice?: number }).unitprice ?? 0,
-      quantity: item.quantity,
-      tour_request_id: item.tour_request_id,
-      confirmation_item_id: (item as unknown as Record<string, unknown>).confirmation_item_id as string | undefined,
-      advanced_by: (item as unknown as Record<string, unknown>).advanced_by as string | undefined,
-      advanced_by_name: (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined,
-    })), [dbItems])
+  // DB items → 本地 editable 格式（依賴穩定的 requestItems + currentRequest.id）
+  const currentRequestId = currentRequest?.id
+  const dbEditableItems: RequestItem[] = useMemo(() => {
+    if (!currentRequestId) return []
+    return requestItems
+      .filter(item => item.request_id === currentRequestId)
+      .map(item => ({
+        id: item.id,
+        category: item.category,
+        supplier_id: item.supplier_id || '',
+        supplierName: item.supplier_name,
+        selected_id: item.supplier_id || '',
+        description: item.description,
+        unit_price: item.unit_price ?? (item as unknown as { unitprice?: number }).unitprice ?? 0,
+        quantity: item.quantity,
+        tour_request_id: item.tour_request_id,
+        confirmation_item_id: (item as unknown as Record<string, unknown>).confirmation_item_id as string | undefined,
+        advanced_by: (item as unknown as Record<string, unknown>).advanced_by as string | undefined,
+        advanced_by_name: (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined,
+      }))
+  }, [requestItems, currentRequestId])
 
   // 當 DB 資料載入/變更時，同步到本地（僅在非 dirty 時）
+  // 用 JSON 序列化比對避免物件參考不同導致無限迴圈
+  const dbItemsJson = JSON.stringify(dbEditableItems)
+  const prevDbItemsJsonRef = useRef('')
   useEffect(() => {
-    if (!isDirty && dbEditableItems.length > 0) {
-      setLocalItems(dbEditableItems)
+    if (dbItemsJson !== prevDbItemsJsonRef.current) {
+      prevDbItemsJsonRef.current = dbItemsJson
+      if (!isDirty) {
+        setLocalItems(JSON.parse(dbItemsJson))
+      }
     }
-  }, [dbEditableItems, isDirty])
+  }, [dbItemsJson, isDirty])
 
   // 切換請款單時重置 dirty 狀態
   useEffect(() => {
@@ -231,7 +240,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
           sort_order: localItems.indexOf(item) + 1,
           advanced_by: item.advanced_by === '_pending' ? null : (item.advanced_by || null),
           advanced_by_name: item.advanced_by_name || null,
-          item_number: `${currentRequest.code}-${dbItems.length + idx + 1}`,
+          item_number: `${currentRequest.code}-${dbEditableItems.length + idx + 1}`,
         }))
         await supabase.from('payment_request_items').insert(rows)
       }
@@ -252,8 +261,19 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
         await supabase.from('payment_request_items').update(dbUpdates as never).eq('id', item.id)
       }
 
-      // 4. 重新整理
+      // 4. 更新請款單總金額
+      const newTotal = localItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0)
+      const { error: amountError } = await supabase
+        .from('payment_requests')
+        .update({ amount: newTotal })
+        .eq('id', currentRequest.id)
+      if (amountError) {
+        logger.error('更新請款單金額失敗:', amountError)
+      }
+
+      // 5. 重新整理快取（items + 列表）
       await refreshRequestItems()
+      await invalidatePaymentRequests()
       if (currentRequest.tour_id) {
         await recalculateExpenseStats(currentRequest.tour_id)
       }
@@ -261,7 +281,8 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
       setIsDirty(false)
       setDeletedItemIds([])
       setNewItemIds([])
-      void alert('儲存成功', 'success')
+      await alert('儲存成功', 'success')
+      onOpenChange(false)
     } catch (error) {
       logger.error('儲存失敗:', error)
       void alert('儲存失敗，請稍後再試', 'error')
