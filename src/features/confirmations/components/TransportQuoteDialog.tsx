@@ -73,18 +73,31 @@ export function TransportQuoteDialog({
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [sending, setSending] = useState(false)
   const [selectedMethod, setSelectedMethod] = useState<DeliveryMethod | null>(null)
+  const [viewMode, setViewMode] = useState<'modern' | 'traditional'>('modern')
+  const [suppliers, setSuppliers] = useState<any[]>([])
+  const [selectedSupplierId, setSelectedSupplierId] = useState<string>('')
   const { toast } = useToast()
   const supabase = createSupabaseBrowserClient()
 
-  // 載入 LINE 群組
+  // 載入 LINE 群組和供應商
   useEffect(() => {
     if (!open) return
     const load = async () => {
-      const { data } = await supabase
+      // LINE 群組
+      const { data: lineData } = await supabase
         .from('line_groups')
         .select('group_id, group_name')
         .not('group_name', 'is', null)
-      if (data) setLineGroups(data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name))
+      if (lineData) setLineGroups(lineData.filter((g): g is { group_id: string; group_name: string } => !!g.group_name))
+      
+      // 供應商（transport 類型）
+      const { data: supplierData } = await supabase
+        .from('suppliers')
+        .select('id, name, contact_person, phone, fax')
+        .eq('type', 'transport')
+        .eq('is_active', true)
+        .order('name')
+      if (supplierData) setSuppliers(supplierData)
     }
     load()
   }, [open])
@@ -230,16 +243,20 @@ export function TransportQuoteDialog({
 
   // 發送方式處理
   const handleDelivery = (method: DeliveryMethod) => {
-    if (method === 'print') {
-      handlePrint()
+    if (method === 'print' || method === 'fax') {
+      // 切換到傳統樣式
+      setViewMode('traditional')
+      setSelectedMethod(method)
       return
     }
     if (method === 'line') {
+      // 保持現代樣式
+      setViewMode('modern')
       setSelectedMethod('line')
       return
     }
-    // email / fax / tenant 未來擴充
-    toast({ title: `${method} 功能開發中`, description: '目前支援列印和 LINE' })
+    // email / tenant 未來擴充
+    toast({ title: `${method} 功能開發中`, description: '目前支援列印、傳真和 LINE' })
   }
 
   return (
