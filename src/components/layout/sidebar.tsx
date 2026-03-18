@@ -245,7 +245,6 @@ const menuItems: MenuItem[] = [
       { href: '/local/cases', label: COMP_LAYOUT_LABELS.案件列表, icon: FolderOpen },
     ],
   },
-  { href: '/meeting', label: COMP_LAYOUT_LABELS.會議室, icon: MessagesSquare },
   { href: '/war-room', label: '作戰會議室', icon: Target, requiredPermission: 'super_admin_only' },
   { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserCog, requiredPermission: 'hr' },
   {

@@ -68,10 +68,8 @@ export async function middleware(request: NextRequest) {
   const publicPaths = [
     '/landing',
     '/login',
-    '/meeting', // 會議室（暫時開放測試）
     '/confirm', // 報價確認頁面（客戶公開連結）
     '/api/auth',
-    '/api/meeting', // 會議室 API（暫時開放測試）
     '/api/health',
     '/api/linkpay', // Webhook 回調
     '/api/gemini', // AI 圖片生成 API

@@ -183,13 +183,6 @@ export const MENU_ITEMS: MenuItem[] = [
     category: 'business',
     canHide: true,
   },
-  {
-    id: 'meeting',
-    label: '會議室',
-    description: 'AI 會議室',
-    category: 'business',
-    canHide: true,
-  },
 ]
 
 /**
@@ -252,7 +245,6 @@ export const MENU_HREF_TO_ID_MAP: Record<string, string> = {
   '/attractions': 'attractions',
   '/database': 'database',
   '/office': 'office',
-  '/meeting': 'meeting',
 }
 
 /**
