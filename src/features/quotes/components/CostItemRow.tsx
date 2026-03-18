@@ -167,7 +167,7 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
             )}
             {/* 隱藏/顯示按鈕（眼睛圖示） */}
             <button
-              onClick={() => handleToggleVisibility(categoryId, item.id)}
+              onClick={() => handleToggleVisibility?.(categoryId, item.id)}
               className="w-4 h-4 flex items-center justify-center text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 rounded transition-all"
               title="在報價單和需求單隱藏此項目（免費景點等不需要報價的項目）"
             >
