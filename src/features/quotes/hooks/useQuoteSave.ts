@@ -64,7 +64,7 @@ export const useQuoteSave = ({
   const { user } = useAuthStore()
 
   // 直接儲存到報價單主欄位
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if (!quote) {
       logger.error('[handleSave] quote 為 undefined，無法儲存')
       return
@@ -96,17 +96,20 @@ export const useQuoteSave = ({
         group_size: groupSize,
         ...quickQuoteData,
       }
-      updateQuote(quote.id, quoteHeaderData)
+      
+      // ✅ 等待存檔完成，捕獲錯誤
+      await updateQuote(quote.id, quoteHeaderData)
 
       // 定價欄位寫到 tour（只寫 tours 表實際存在的欄位）
       if (quote.tour_id) {
-        updateTour(quote.tour_id, {
+        await updateTour(quote.tour_id, {
           total_cost,
           max_participants: groupSize,
           selling_price_per_person: sellingPrices.adult,
         })
       }
 
+      // ✅ 確認存檔成功後才顯示「已儲存」
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), UI_DELAYS.SUCCESS_MESSAGE)
 
@@ -136,6 +139,9 @@ export const useQuoteSave = ({
       }
     } catch (error) {
       logger.error('儲存失敗:', error)
+      // ✅ 顯示錯誤提示
+      const { toast } = await import('sonner')
+      toast.error('儲存失敗，請稍後再試')
     }
   }, [
     quote,
