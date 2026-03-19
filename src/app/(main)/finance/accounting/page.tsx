@@ -42,7 +42,7 @@ const quickLinks = [
     href: '/finance/accounting/period-closing',
     icon: Calendar,
     title: '期末結轉',
-    description: '月結、季結、年結',
+    description: '月結、季結、年結（含保留盈餘）',
     color: 'text-red-600',
     bg: 'bg-red-50',
   },
