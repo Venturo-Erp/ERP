@@ -83,10 +83,14 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      const accountsToInsert = DEFAULT_ACCOUNTS.map(account => ({
-        ...account,
-        workspace_id: workspaceId,
-      }))
+      const accountsToInsert = DEFAULT_ACCOUNTS.map(account => {
+        // 移除 type 欄位（資料庫只有 account_type）
+        const { type, ...accountData } = account
+        return {
+          ...accountData,
+          workspace_id: workspaceId,
+        }
+      })
 
       console.log(`準備插入 ${accountsToInsert.length} 個科目到 workspace ${workspaceId}`)
 
