@@ -44,6 +44,9 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
   // 判斷是否為 Local 報價（禁止直接編輯單價，只能透過視窗修改）
   const isLocalPricing = item.name?.includes('Local 報價')
 
+  // 判斷是否為飯店（不顯示預估成本，避免影響報價）
+  const isAccommodation = categoryId === 'accommodation'
+
   // 簡潔輸入框樣式（右側多留空間避免被 table-divider 遮到）
   const inputClass = 'input-no-focus w-full pl-1 pr-3 py-1 text-sm bg-transparent'
 
@@ -83,7 +86,10 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
         </td>
       )}
       <td className="py-3 px-4 text-sm text-morandi-secondary text-center table-divider">
-        {item.name === CATEGORY_SECTION_LABELS.成人 ? (
+        {isAccommodation ? (
+          // 飯店：不顯示預估成本（避免影響報價）
+          <span className="text-muted-foreground">-</span>
+        ) : item.name === CATEGORY_SECTION_LABELS.成人 ? (
           <CalcInput
             value={item.adult_price}
             onChange={val => handleUpdateItem(categoryId, item.id, 'adult_price', val)}
