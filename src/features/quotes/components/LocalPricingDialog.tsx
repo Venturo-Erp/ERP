@@ -43,8 +43,12 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
 
   // 當對話框開啟時，同步 tiers 狀態
   useEffect(() => {
-    if (isOpen && initialTiers && initialTiers.length > 0) {
-      setTiers(initialTiers)
+    if (isOpen) {
+      if (initialTiers && initialTiers.length > 0) {
+        setTiers(initialTiers)
+      } else {
+        setTiers([{ id: `tier-${Date.now()}`, participants: 0, unitPrice: 0 }])
+      }
     }
   }, [isOpen, initialTiers])
 

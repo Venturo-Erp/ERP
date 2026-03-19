@@ -5,7 +5,7 @@ import { FileText, BookOpen, BarChart3, TrendingUp, Calendar } from 'lucide-reac
 import Link from 'next/link'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 const quickLinks = [
@@ -58,7 +58,6 @@ export default function AccountingPage() {
     // 自動檢查並初始化科目表
     const checkAndInitialize = async () => {
       try {
-        const supabase = createClient()
         
         // 檢查科目表是否為空
         const { data: accounts, error } = await supabase

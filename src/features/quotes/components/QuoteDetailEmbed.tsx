@@ -393,18 +393,23 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
         const newCategories = [...prev]
         const groupTransportCategory = newCategories.find(cat => cat.id === 'group-transport')
         if (groupTransportCategory) {
+          // 移除舊的 Local 報價項目
           groupTransportCategory.items = groupTransportCategory.items.filter(
             item => !item.name.startsWith(QUOTE_DETAIL_EMBED_LABELS.Local_報價)
           )
-          const newItem: CostItem = {
-            id: `local-${Date.now()}`,
-            name: 'Local 報價',
-            quantity: 1,
-            unit_price: currentLocalPrice,
-            total: 0,
-            note: `目前適用: $${currentLocalPrice.toLocaleString()}/人 | ${sortedTiers.map(t => `${t.participants}人=$${t.unitPrice.toLocaleString()}`).join(' / ')}`,
-          }
-          groupTransportCategory.items.push(newItem)
+          
+          // 每個砍次新增一列
+          sortedTiers.forEach((tier, index) => {
+            const newItem: CostItem = {
+              id: `local-${tier.participants}-${Date.now()}-${index}`,
+              name: `Local 報價 (${tier.participants}人)`,
+              quantity: 1,
+              unit_price: tier.unitPrice,
+              total: 0,
+              note: `$${tier.unitPrice.toLocaleString()}/人`,
+            }
+            groupTransportCategory.items.push(newItem)
+          })
         }
         return newCategories
       })
