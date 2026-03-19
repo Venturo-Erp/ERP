@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 
 interface AccountBalance {
@@ -52,7 +52,7 @@ export default function IncomeStatementPage() {
     setIsLoading(true)
 
     try {
-      const supabase = createClient()
+      
 
       // 1. 取得收入、成本、費用科目
       const { data: accounts, error: accountsError } = await supabase

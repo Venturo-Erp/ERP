@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'sonner'
 
@@ -54,7 +54,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
     setIsSubmitting(true)
 
     try {
-      const supabase = createClient()
+      
       
       const { error } = await supabase
         .from('chart_of_accounts')

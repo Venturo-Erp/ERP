@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 
 interface Account {
@@ -57,7 +57,7 @@ export default function GeneralLedgerPage() {
     if (!user?.workspace_id) return
 
     try {
-      const supabase = createClient()
+      
       const { data, error } = await supabase
         .from('chart_of_accounts')
         .select('id, code, name, account_type')
@@ -86,7 +86,7 @@ export default function GeneralLedgerPage() {
     setIsLoading(true)
 
     try {
-      const supabase = createClient()
+      
       
       const { data, error } = await supabase
         .from('journal_lines')

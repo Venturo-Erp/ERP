@@ -82,7 +82,26 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
 
   const handlePriceChange = (identity: keyof SellingPrices, value: string) => {
     const normalized = normalizeNumber(value)
-    setSellingPrices(prev => ({ ...prev, [identity]: Number(normalized) || 0 }))
+    const newPrice = Number(normalized) || 0
+    
+    setSellingPrices(prev => ({ ...prev, [identity]: newPrice }))
+    
+    // 同步更新第一個砍次的售價（確保存檔時不丟失）
+    if (tierPricings.length > 0) {
+      setTierPricings(prev =>
+        prev.map((tier, index) => {
+          if (index !== 0) return tier
+          return {
+            ...tier,
+            selling_prices: { ...tier.selling_prices, [identity]: newPrice },
+            identity_profits: {
+              ...tier.identity_profits,
+              [identity]: newPrice - tier.identity_costs[identity as keyof IdentityCosts],
+            },
+          }
+        })
+      )
+    }
   }
 
   const handleRoomTypePriceChange = (roomName: string, type: 'adult' | 'child', value: string) => {
