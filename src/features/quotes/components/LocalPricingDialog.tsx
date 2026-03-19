@@ -40,8 +40,6 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
       ? initialTiers
       : [{ id: `tier-${Date.now()}`, participants: totalParticipants, unitPrice: 0 }]  // 預設人數 = 總人數
   )
-  const [showConfirmation, setShowConfirmation] = useState(false)
-  const [matchedTierIndex, setMatchedTierIndex] = useState(0)
 
   // 當對話框開啟時，同步 tiers 狀態
   useEffect(() => {
@@ -114,28 +112,14 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
     }
 
     const matched = findMatchedTierIndex()
-    setMatchedTierIndex(matched)
-
-    // 如果第一個檻次人數與總人數不同，顯示確認提醒
-    const firstTier = tiers[0]
-    if (firstTier.participants !== totalParticipants) {
-      setShowConfirmation(true)
-    } else {
-      // 直接確認
-      onConfirm(tiers, matched)
-      handleClose()
-    }
-  }
-
-  // 確認更新
-  const handleFinalConfirm = () => {
-    onConfirm(tiers, matchedTierIndex)
+    
+    // 直接確認（第一個砍次已自動綁定總人數，不需要提醒）
+    onConfirm(tiers, matched)
     handleClose()
   }
 
   // 關閉對話框
   const handleClose = () => {
-    setShowConfirmation(false)
     onClose()
   }
 
@@ -158,9 +142,7 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
           </DialogTitle>
         </DialogHeader>
 
-        {!showConfirmation ? (
-          <>
-            {/* 目前總人數提示 */}
+        {/* 目前總人數提示 */}
             <div className="bg-morandi-container/30 rounded-lg px-4 py-3 text-sm">
               <span className="text-morandi-secondary">
                 {LOCAL_PRICING_DIALOG_LABELS.目前總人數}
@@ -258,49 +240,6 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
                 {LOCAL_PRICING_DIALOG_LABELS.確認}
               </Button>
             </DialogFooter>
-          </>
-        ) : (
-          <>
-            {/* 確認提醒畫面 */}
-            <div className="space-y-4 py-4">
-              <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
-                <AlertTriangle size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-amber-800">
-                    {LOCAL_PRICING_DIALOG_LABELS.人數變更提醒}
-                  </p>
-                  <p className="text-amber-700 mt-1">
-                    {LOCAL_PRICING_DIALOG_LABELS.人數變更提醒內容1
-                      .replace('{totalParticipants}', totalParticipants.toString())
-                      .replace(
-                        '{matchedParticipants}',
-                        (matchedTier?.participants || 0).toString()
-                      )}
-                  </p>
-                  <p className="text-amber-700 mt-1">
-                    {LOCAL_PRICING_DIALOG_LABELS.人數變更提醒內容2前}
-                    <strong>{totalParticipants} 人</strong>
-                    {LOCAL_PRICING_DIALOG_LABELS.人數變更提醒內容2後}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowConfirmation(false)}>
-                <X className="w-4 h-4 mr-2" />
-                {LOCAL_PRICING_DIALOG_LABELS.返回修改}
-              </Button>
-              <Button
-                onClick={handleFinalConfirm}
-                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-              >
-                <Check className="w-4 h-4 mr-2" />
-                {LOCAL_PRICING_DIALOG_LABELS.確認更新}
-              </Button>
-            </DialogFooter>
-          </>
-        )}
       </DialogContent>
     </Dialog>
   )
