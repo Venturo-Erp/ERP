@@ -238,9 +238,49 @@ export function TransportQuoteDialog({
       })
       
       const createResult = await createRes.json()
-      if (!createResult.success || !createResult.requestId) {
+      
+      // 處理已存在的情況
+      if (createResult.alreadyExists && createResult.hasReplied) {
+        const confirmed = window.confirm(
+          `此廠商「${supplierName}」已報價，是否重新發送需求？\n\n` +
+          `選擇「確定」→ 建立新的需求單\n` +
+          `選擇「取消」→ 不發送`
+        )
+        
+        if (!confirmed) {
+          setSending(false)
+          return
+        }
+        
+        // 使用者確認重新發送 → 強制建立新需求單
+        const forceCreateRes = await fetch('/api/create-transport-request', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tourId: tour.id,
+            supplierName: `${supplierName} (重送)`,
+            vehicleDesc: vehicleDesc || '',
+            note: note,
+            totalPax: pax,
+            workspaceId: user.workspace_id,
+          }),
+        })
+        
+        const forceResult = await forceCreateRes.json()
+        if (!forceResult.success || !forceResult.requestId) {
+          toast({ title: '❌ 建立需求單失敗', description: forceResult.error, variant: 'destructive' })
+          return
+        }
+        
+        createResult.requestId = forceResult.requestId
+      } else if (!createResult.success || !createResult.requestId) {
         toast({ title: '❌ 建立需求單失敗', description: createResult.error, variant: 'destructive' })
         return
+      }
+      
+      // 如果是更新現有需求單，顯示提示
+      if (createResult.updated) {
+        toast({ title: '✓ 更新需求單內容' })
       }
       
       // 2. 發送 LINE（帶 requestId）
