@@ -111,6 +111,14 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
           }
         })
       )
+      
+      // 提醒：如果有多個砍次，售價需要各自設定
+      if (tierPricings.length > 1) {
+        toast.info(
+          '💡 不同人數的售價已分開設定，記得檢查其他砍次',
+          { duration: 3000 }
+        )
+      }
     }
   }
 
@@ -144,6 +152,14 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
         }
       })
     )
+    
+    // 提醒：修改砍次售價時，提醒檢查其他砍次
+    if (tierPricings.length > 1) {
+      toast.info(
+        '💡 不同人數的售價已分開設定，記得檢查其他砍次',
+        { duration: 3000 }
+      )
+    }
   }
 
   const handleRemoveTier = (id: string) => {
