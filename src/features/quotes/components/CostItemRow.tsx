@@ -59,7 +59,7 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
         className={`py-3 px-4 text-sm text-morandi-primary text-center ${item.quantity && item.quantity !== 1 ? 'table-divider' : ''}`}
       >
         <div className="flex items-center gap-1">
-          {item.day && (
+          {item.day && categoryId !== 'activities' && (
             <span className="text-xs text-morandi-secondary/70 whitespace-nowrap shrink-0">
               D{item.day}
               {item.sub_category === 'breakfast' ? ' 早' : item.sub_category === 'lunch' ? ' 午' : item.sub_category === 'dinner' ? ' 晚' : ''}
