@@ -187,7 +187,45 @@ export function useSyncItineraryToCore() {
       logger.log(SYNC_LABELS.SYNC_START, { itinerary_id, tour_id, days: daily_itinerary.length })
 
       try {
-        // 1. 刪除所有舊的行程項目（行程是 SSOT，不保護下游資料）
+        // 1. 在刪除前，檢查哪些項目有需求單（需要產生取消單）
+        const { data: items_with_requests, error: fetch_error } = await supabase
+          .from('tour_itinerary_items')
+          .select('id,title,category,request_id,supplier_name,service_date')
+          .eq('itinerary_id', itinerary_id)
+          .not('request_id', 'is', null)
+
+        if (fetch_error) throw fetch_error
+
+        // 記錄需要取消的需求單資訊（按 request_id 分組）
+        const cancellationsByRequestId = new Map<string, {
+          request_id: string
+          supplier_name: string
+          category: string
+          items: Array<{ title: string; service_date: string | null }>
+        }>()
+
+        if (items_with_requests && items_with_requests.length > 0) {
+          for (const item of items_with_requests) {
+            if (!item.request_id) continue
+
+            if (!cancellationsByRequestId.has(item.request_id)) {
+              cancellationsByRequestId.set(item.request_id, {
+                request_id: item.request_id,
+                supplier_name: item.supplier_name || '',
+                category: item.category || '',
+                items: [],
+              })
+            }
+
+            const group = cancellationsByRequestId.get(item.request_id)!
+            group.items.push({
+              title: item.title || '',
+              service_date: item.service_date,
+            })
+          }
+        }
+
+        // 2. 刪除所有舊的行程項目（行程是 SSOT，不保護下游資料）
         // 根據 William 決策：不管有沒有報價/需求/確認，行程刪除就是刪除
         const { error: delete_error } = await supabase
           .from('tour_itinerary_items')
@@ -195,6 +233,19 @@ export function useSyncItineraryToCore() {
           .eq('itinerary_id', itinerary_id)
 
         if (delete_error) throw delete_error
+
+        // 3. 為每個需求單產生取消通知（更新原需求單狀態為 cancelled）
+        for (const [request_id, cancellation] of cancellationsByRequestId) {
+          const cancellationNote = `取消項目：\n${cancellation.items.map(i => `- ${i.service_date || ''} ${i.title}`).join('\n')}`
+          
+          await supabase
+            .from('tour_requests')
+            .update({
+              status: 'cancelled',
+              note: cancellationNote,
+            })
+            .eq('id', request_id)
+        }
 
         // 4. 建立新的行程項目
         const new_items: TourItineraryItemInsert[] = []
