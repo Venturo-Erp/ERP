@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Send, Loader2, Printer, Sun, Mail, Phone, Globe, Plus, X } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
+import { useAuthStore } from '@/stores'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
 import { UnifiedTraditionalView } from './UnifiedTraditionalView'
 import { printTransportRequirement } from '../utils/printTransportRequirement'
@@ -67,6 +68,7 @@ export function TransportQuoteDialog({
   supplierName,
   vehicleDesc = '',
 }: TransportQuoteDialogProps) {
+  const { user } = useAuthStore()
   const [note, setNote] = useState('')
   const [paxInput, setPaxInput] = useState<string>(totalPax?.toString() || '')
   const [paxTiers, setPaxTiers] = useState<number[]>([20, 30, 40]) // 人數梯次
@@ -215,6 +217,33 @@ export function TransportQuoteDialog({
     setSending(true)
     try {
       const pax = paxInput ? parseInt(paxInput) : totalPax
+      
+      // 1. 先建立需求單，取得 request_id
+      if (!user?.workspace_id) {
+        toast({ title: '❌ 缺少 workspace_id', variant: 'destructive' })
+        return
+      }
+      
+      const createRes = await fetch('/api/create-transport-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tourId: tour.id,
+          supplierName: supplierName,
+          vehicleDesc: vehicleDesc || '',
+          note: note,
+          totalPax: pax,
+          workspaceId: user.workspace_id,
+        }),
+      })
+      
+      const createResult = await createRes.json()
+      if (!createResult.success || !createResult.requestId) {
+        toast({ title: '❌ 建立需求單失敗', description: createResult.error, variant: 'destructive' })
+        return
+      }
+      
+      // 2. 發送 LINE（帶 requestId）
       const res = await fetch('/api/line/send-transport-quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -225,6 +254,7 @@ export function TransportQuoteDialog({
           departureDate: tour.departure_date || '',
           totalPax: pax,
           tourId: tour.id,
+          requestId: createResult.requestId, // 傳遞 requestId
           vehicleDesc: vehicleDesc || '',
           note: supplierName || note,
         }),

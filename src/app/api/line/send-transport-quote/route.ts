@@ -18,12 +18,13 @@ export async function POST(req: NextRequest) {
       departureDate,
       totalPax,
       tourId,
+      requestId,
       vehicleDesc,
       note,
     } = body
 
-    // 遊覽車報價連結（不同於 Local 報價）
-    const viewUrl = `https://app.cornertravel.com.tw/public/transport-quote/${tourId}`
+    // 遊覽車報價連結（帶 requestId，單一性）
+    const viewUrl = `https://app.cornertravel.com.tw/public/transport-quote/${tourId}/${requestId}`
 
     // Flex Message：遊覽車需求單
     const flexMessage = {

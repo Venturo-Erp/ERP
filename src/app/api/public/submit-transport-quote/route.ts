@@ -6,6 +6,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const {
       tourId,
+      requestId, // 單一性：綁定到特定需求單
       contact,
       phone,
       totalFare,
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
       supplierNote,
     } = body
 
-    if (!tourId || !contact || !phone || !totalFare) {
+    if (!requestId || !tourId || !contact || !phone || !totalFare) {
       return NextResponse.json({ error: '缺少必填欄位' }, { status: 400 })
     }
 
@@ -26,14 +27,6 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-
-    // 查找現有的遊覽車需求單
-    const { data: existingRequest } = await supabase
-      .from('tour_requests')
-      .select('id')
-      .eq('tour_id', tourId)
-      .eq('request_type', 'transport')
-      .maybeSingle()
 
     const quoteData = {
       contact,
@@ -49,27 +42,20 @@ export async function POST(req: NextRequest) {
       submitted_at: new Date().toISOString(),
     }
 
-    if (existingRequest) {
-      // 更新現有需求單的 supplier_response
-      await supabase
-        .from('tour_requests')
-        .update({
-          supplier_response: quoteData,
-          replied_at: new Date().toISOString(),
-          status: '已回覆',
-        })
-        .eq('id', existingRequest.id)
-    } else {
-      // 建立新需求單
-      await supabase.from('tour_requests').insert({
-        tour_id: tourId,
-        request_type: 'transport',
-        request_scope: 'individual_item',
-        supplier_name: '車行',
-        status: '已回覆',
+    // 更新指定的需求單（單一性：不覆蓋，固定在這個 requestId）
+    const { error } = await supabase
+      .from('tour_requests')
+      .update({
         supplier_response: quoteData,
         replied_at: new Date().toISOString(),
+        status: 'replied',
       })
+      .eq('id', requestId)
+      .eq('tour_id', tourId)
+
+    if (error) {
+      console.error('更新需求單失敗:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
