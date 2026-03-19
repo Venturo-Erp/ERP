@@ -191,7 +191,7 @@ export function useSyncItineraryToCore() {
         const { data: existing_items, error: fetch_error } = await supabase
           .from('tour_itinerary_items')
           .select(
-            'id,category,sub_category,day_number,sort_order,title,quote_status,confirmation_status,leader_status,request_id,quote_item_id'
+            'id,category,sub_category,day_number,sort_order,title,unit_price,quote_status,confirmation_status,leader_status,request_id,quote_item_id'
           )
           .eq('itinerary_id', itinerary_id)
 
@@ -205,16 +205,34 @@ export function useSyncItineraryToCore() {
             item.leader_status !== 'none' ||
             item.request_id !== null
         )
-        const pure_itinerary_item_ids = (existing_items ?? [])
-          .filter(
-            item =>
-              item.confirmation_status === 'none' &&
-              item.leader_status === 'none' &&
-              item.request_id === null
-          )
-          .map(item => item.id)
+        const pure_itinerary_items = (existing_items ?? []).filter(
+          item =>
+            item.confirmation_status === 'none' &&
+            item.leader_status === 'none' &&
+            item.request_id === null
+        )
+
+        // 2.5. ⚠️ 檢查「已估價的純行程項目」是否被刪除/改名
+        const priced_items_to_delete = pure_itinerary_items.filter(
+          item => item.unit_price != null && item.unit_price > 0
+        )
+        const warnings: string[] = []
+        
+        if (priced_items_to_delete.length > 0) {
+          for (const item of priced_items_to_delete) {
+            const category_label = 
+              item.category === 'accommodation' ? '住宿' :
+              item.category === 'meal' ? '餐食' :
+              item.category === 'transportation' ? '交通' :
+              item.category === 'activity' ? '活動' : item.category
+            warnings.push(
+              `${category_label}「${item.title}」已估價 ${item.unit_price!.toLocaleString()} 元，改動後記得重新估價`
+            )
+          }
+        }
 
         // 3. 刪除純行程項目（沒有下游資料的）
+        const pure_itinerary_item_ids = pure_itinerary_items.map(item => item.id)
         if (pure_itinerary_item_ids.length > 0) {
           const { error: delete_error } = await supabase
             .from('tour_itinerary_items')
@@ -423,6 +441,7 @@ export function useSyncItineraryToCore() {
           success: true,
           inserted: new_items.length,
           preserved: items_with_downstream.length,
+          warnings: warnings.length > 0 ? warnings : undefined,
         }
       } catch (error) {
         logger.error(SYNC_LABELS.SYNC_ERROR, error)
