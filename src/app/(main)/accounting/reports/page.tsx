@@ -7,7 +7,7 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 
 const reports = [
   {
-    href: '/finance/accounting/reports/general-ledger',
+    href: '/accounting/reports/general-ledger',
     icon: BookOpen,
     title: '總帳',
     description: '查看科目明細帳',
@@ -15,7 +15,7 @@ const reports = [
     bg: 'bg-blue-50',
   },
   {
-    href: '/finance/accounting/reports/trial-balance',
+    href: '/accounting/reports/trial-balance',
     icon: BarChart3,
     title: '試算表',
     description: '查看所有科目餘額',
@@ -23,7 +23,7 @@ const reports = [
     bg: 'bg-green-50',
   },
   {
-    href: '/finance/accounting/reports/income-statement',
+    href: '/accounting/reports/income-statement',
     icon: TrendingUp,
     title: '損益表',
     description: '查看收入與支出',
@@ -31,7 +31,7 @@ const reports = [
     bg: 'bg-purple-50',
   },
   {
-    href: '/finance/accounting/reports/balance-sheet',
+    href: '/accounting/reports/balance-sheet',
     icon: DollarSign,
     title: '資產負債表',
     description: '查看資產、負債、權益',

@@ -7,7 +7,7 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 
 const quickLinks = [
   {
-    href: '/finance/accounting/vouchers',
+    href: '/accounting/vouchers',
     icon: FileText,
     title: '傳票管理',
     description: '查看和管理會計傳票',
@@ -15,7 +15,7 @@ const quickLinks = [
     bg: 'bg-blue-50',
   },
   {
-    href: '/finance/accounting/accounts',
+    href: '/accounting/accounts',
     icon: BookOpen,
     title: '科目管理',
     description: '管理會計科目表',
@@ -23,7 +23,7 @@ const quickLinks = [
     bg: 'bg-green-50',
   },
   {
-    href: '/finance/accounting/reports',
+    href: '/accounting/reports',
     icon: BarChart3,
     title: '會計報表',
     description: '總帳、試算表、損益表',
@@ -31,7 +31,7 @@ const quickLinks = [
     bg: 'bg-purple-50',
   },
   {
-    href: '/finance/checks',
+    href: '/accounting/checks',
     icon: TrendingUp,
     title: '票據管理',
     description: '管理支票和票據',
@@ -39,7 +39,7 @@ const quickLinks = [
     bg: 'bg-orange-50',
   },
   {
-    href: '/finance/accounting/period-closing',
+    href: '/accounting/period-closing',
     icon: Calendar,
     title: '期末結轉',
     description: '月結、季結、年結（含保留盈餘）',

@@ -127,18 +127,7 @@ const menuItems: MenuItem[] = [
         icon: Wallet,
         requiredPermission: 'disbursement',
       },
-      {
-        href: '/finance/accounting',
-        label: COMP_LAYOUT_LABELS.會計系統,
-        icon: FileText,
-        requiredPermission: 'accounting',
-      },
-      {
-        href: '/finance/checks',
-        label: COMP_LAYOUT_LABELS.票據管理,
-        icon: FileCheck,
-        requiredPermission: 'accounting',
-      },
+
       {
         href: '/finance/travel-invoice',
         label: COMP_LAYOUT_LABELS.代轉發票,
@@ -151,6 +140,44 @@ const menuItems: MenuItem[] = [
         label: COMP_LAYOUT_LABELS.報表管理,
         icon: BarChart3,
         requiredPermission: 'reports',
+      },
+    ],
+  },
+  {
+    href: '/accounting',
+    label: COMP_LAYOUT_LABELS.會計系統,
+    icon: FileText,
+    requiredPermission: 'accounting',
+    children: [
+      {
+        href: '/accounting/vouchers',
+        label: COMP_LAYOUT_LABELS.傳票管理,
+        icon: FileText,
+        requiredPermission: 'accounting',
+      },
+      {
+        href: '/accounting/accounts',
+        label: COMP_LAYOUT_LABELS.科目管理,
+        icon: BookOpen,
+        requiredPermission: 'accounting',
+      },
+      {
+        href: '/accounting/period-closing',
+        label: COMP_LAYOUT_LABELS.期末結轉,
+        icon: Calendar,
+        requiredPermission: 'accounting',
+      },
+      {
+        href: '/accounting/checks',
+        label: COMP_LAYOUT_LABELS.票據管理,
+        icon: FileCheck,
+        requiredPermission: 'accounting',
+      },
+      {
+        href: '/accounting/reports',
+        label: COMP_LAYOUT_LABELS.會計報表,
+        icon: BarChart3,
+        requiredPermission: 'accounting',
       },
     ],
   },
