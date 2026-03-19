@@ -66,9 +66,11 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
     setTiers(tiers.filter(t => t.id !== id))
   }
 
-  // 更新檻次
+  // 更新檻次（支援全形轉半形）
   const handleUpdateTier = (id: string, field: 'participants' | 'unitPrice', value: string) => {
-    const numValue = parseInt(value) || 0
+    // 全形數字 → 半形
+    const normalized = value.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+    const numValue = parseInt(normalized) || 0
     setTiers(tiers.map(t => (t.id === id ? { ...t, [field]: numValue } : t)))
   }
 
