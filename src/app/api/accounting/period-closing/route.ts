@@ -124,15 +124,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 取得 user 資料
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('workspace_id')
-      .eq('id', session.user.id)
-      .single()
+    // 取得 workspace_id（從 user metadata 或 RPC）
+    let workspaceId = session.user.user_metadata?.workspace_id
 
-    if (userError || !userData?.workspace_id) {
-      return NextResponse.json({ error: 'User workspace not found' }, { status: 400 })
+    if (!workspaceId) {
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('workspace_id')
+        .eq('id', session.user.id)
+        .single()
+
+      if (userError || !userData?.workspace_id) {
+        return NextResponse.json({ error: 'User workspace not found' }, { status: 400 })
+      }
+      workspaceId = userData.workspace_id
     }
 
     // 解析 body
@@ -143,7 +148,7 @@ export async function POST(request: NextRequest) {
     const { data: existingClosing } = await supabase
       .from('accounting_period_closings')
       .select('id')
-      .eq('workspace_id', userData.workspace_id)
+      .eq('workspace_id', workspaceId)
       .eq('period_type', validated.period_type)
       .eq('period_start', validated.period_start)
       .eq('period_end', validated.period_end)
@@ -156,7 +161,7 @@ export async function POST(request: NextRequest) {
     // 計算損益科目餘額
     const balances = await calculateProfitLossBalances(
       supabase,
-      userData.workspace_id,
+      workspaceId,
       validated.period_start,
       validated.period_end
     )
@@ -174,7 +179,7 @@ export async function POST(request: NextRequest) {
     const { data: currentProfitAccount, error: profitAccountError } = await supabase
       .from('chart_of_accounts')
       .select('id')
-      .eq('workspace_id', userData.workspace_id)
+      .eq('workspace_id', workspaceId)
       .eq('code', '3200')
       .single()
 
@@ -188,7 +193,7 @@ export async function POST(request: NextRequest) {
       const { data, error } = await supabase
         .from('chart_of_accounts')
         .select('id')
-        .eq('workspace_id', userData.workspace_id)
+        .eq('workspace_id', workspaceId)
         .eq('code', '3300')
         .single()
 
@@ -199,12 +204,12 @@ export async function POST(request: NextRequest) {
     }
 
     // 生成結轉傳票
-    const voucherNo = await generateVoucherNo(supabase, userData.workspace_id, validated.period_end)
+    const voucherNo = await generateVoucherNo(supabase, workspaceId, validated.period_end)
 
     const { data: voucher, error: voucherError } = await supabase
       .from('journal_vouchers')
       .insert({
-        workspace_id: userData.workspace_id,
+        workspace_id: workspaceId,
         voucher_no: voucherNo,
         voucher_date: validated.period_end,
         memo: `${validated.period_type === 'month' ? '月結' : validated.period_type === 'quarter' ? '季結' : '年結'}結轉（${validated.period_start} ~ ${validated.period_end}）`,
@@ -319,7 +324,7 @@ export async function POST(request: NextRequest) {
     const { error: closingError } = await supabase
       .from('accounting_period_closings')
       .insert({
-        workspace_id: userData.workspace_id,
+        workspace_id: workspaceId,
         period_type: validated.period_type,
         period_start: validated.period_start,
         period_end: validated.period_end,

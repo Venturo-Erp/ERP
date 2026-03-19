@@ -56,15 +56,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 取得 user 資料
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('workspace_id')
-      .eq('id', session.user.id)
-      .single()
+    // 取得 workspace_id（從 user metadata 或 RPC）
+    let workspaceId = session.user.user_metadata?.workspace_id
 
-    if (userError || !userData?.workspace_id) {
-      return NextResponse.json({ error: 'User workspace not found' }, { status: 400 })
+    if (!workspaceId) {
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('workspace_id')
+        .eq('id', session.user.id)
+        .single()
+
+      if (userError || !userData?.workspace_id) {
+        return NextResponse.json({ error: 'User workspace not found' }, { status: 400 })
+      }
+      workspaceId = workspaceId
     }
 
     // 解析 body
@@ -87,13 +92,13 @@ export async function POST(request: NextRequest) {
     }
 
     // 生成傳票編號
-    const voucherNo = await generateVoucherNo(supabase, userData.workspace_id, validated.voucher_date)
+    const voucherNo = await generateVoucherNo(supabase, workspaceId, validated.voucher_date)
 
     // 插入傳票
     const { data: voucher, error: voucherError } = await supabase
       .from('journal_vouchers')
       .insert({
-        workspace_id: userData.workspace_id,
+        workspace_id: workspaceId,
         voucher_no: voucherNo,
         voucher_date: validated.voucher_date,
         memo: validated.memo,

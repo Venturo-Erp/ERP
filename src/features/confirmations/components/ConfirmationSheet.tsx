@@ -258,7 +258,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           unit_price: item.unit_price || null,
           quantity: item.quantity || null,
           subtotal: item.total_cost || null,
-          expected_cost: item.confirmed_cost || item.estimated_cost || null,
+          expected_cost: item.unit_price || null,  // 統一用 unit_price（覆蓋式管理）
           actual_cost: item.actual_expense || null,
           leader_expense: item.actual_expense || null,
           booking_reference: item.booking_reference || null,
@@ -558,10 +558,10 @@ function ConfirmationItemRow({ item }: { item: TourItineraryItem }) {
 
       {/* 金額 */}
       <div className="shrink-0 text-xs font-mono text-right">
-        {item.confirmed_cost != null && (
+        {item.booking_status === 'confirmed' && item.unit_price != null && (
           <div>
             {item.currency && item.currency !== 'TWD' ? `${item.currency} ` : ''}
-            {item.confirmed_cost.toLocaleString()}
+            {item.unit_price.toLocaleString()}
           </div>
         )}
         {item.actual_expense != null && item.actual_expense > 0 && (

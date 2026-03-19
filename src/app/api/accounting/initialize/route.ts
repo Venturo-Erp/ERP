@@ -41,15 +41,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 取得 user 資料
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('workspace_id, id')
-      .eq('id', session.user.id)
-      .single()
+    // 取得 workspace_id（從 user metadata 或 RPC）
+    let workspaceId = session.user.user_metadata?.workspace_id
 
-    if (userError || !userData?.workspace_id) {
-      return NextResponse.json({ error: 'User workspace not found' }, { status: 400 })
+    if (!workspaceId) {
+      // 備用方案：從資料庫查詢
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('workspace_id')
+        .eq('id', session.user.id)
+        .single()
+
+      if (userError || !userData?.workspace_id) {
+        return NextResponse.json({ error: 'User workspace not found' }, { status: 400 })
+      }
+      workspaceId = userData.workspace_id
     }
 
     const stats = {
@@ -65,14 +71,14 @@ export async function POST(request: NextRequest) {
     const { data: existingAccounts } = await supabase
       .from('chart_of_accounts')
       .select('id')
-      .eq('workspace_id', userData.workspace_id)
+      .eq('workspace_id', workspaceId)
       .limit(1)
 
     if (!existingAccounts || existingAccounts.length === 0) {
       // 插入預設科目
       const accountsToInsert = DEFAULT_ACCOUNTS.map(account => ({
         ...account,
-        workspace_id: userData.workspace_id,
+        workspace_id: workspaceId,
       }))
 
       const { error: accountsError } = await supabase
@@ -90,7 +96,7 @@ export async function POST(request: NextRequest) {
     const { data: accounts } = await supabase
       .from('chart_of_accounts')
       .select('id, code')
-      .eq('workspace_id', userData.workspace_id)
+      .eq('workspace_id', workspaceId)
 
     if (!accounts || accounts.length === 0) {
       return NextResponse.json({ error: '科目表為空，無法生成傳票' }, { status: 400 })
@@ -104,7 +110,7 @@ export async function POST(request: NextRequest) {
     const { data: payments } = await supabase
       .from('payments')
       .select('id, order_id, payment_date, amount, payment_method, notes')
-      .eq('workspace_id', userData.workspace_id)
+      .eq('workspace_id', workspaceId)
       .is('accounting_voucher_id', null) // 只處理未生成傳票的
       .order('payment_date', { ascending: true })
 
@@ -113,7 +119,7 @@ export async function POST(request: NextRequest) {
         try {
           const voucherNo = await generateVoucherNo(
             supabase,
-            userData.workspace_id,
+            workspaceId,
             payment.payment_date
           )
 
@@ -131,14 +137,14 @@ export async function POST(request: NextRequest) {
           const { data: voucher, error: voucherError } = await supabase
             .from('journal_vouchers')
             .insert({
-              workspace_id: userData.workspace_id,
+              workspace_id: workspaceId,
               voucher_no: voucherNo,
               voucher_date: payment.payment_date,
               memo: `收款 - ${payment.notes || ''}`,
               status: 'posted',
               total_debit: payment.amount,
               total_credit: payment.amount,
-              created_by: userData.id,
+              created_by: session.user.id,
             })
             .select()
             .single()
@@ -196,7 +202,7 @@ export async function POST(request: NextRequest) {
     const { data: requests } = await supabase
       .from('payment_requests')
       .select('id, created_at, amount, description')
-      .eq('workspace_id', userData.workspace_id)
+      .eq('workspace_id', workspaceId)
       .eq('status', 'approved')
       .is('accounting_voucher_id', null)
       .order('created_at', { ascending: true })
@@ -205,7 +211,7 @@ export async function POST(request: NextRequest) {
       for (const request of requests) {
         try {
           const requestDate = new Date(request.created_at).toISOString().split('T')[0]
-          const voucherNo = await generateVoucherNo(supabase, userData.workspace_id, requestDate)
+          const voucherNo = await generateVoucherNo(supabase, workspaceId, requestDate)
 
           const debitAccountId = accountMap.get('1200') // 預付團務成本
           const creditAccountId = accountMap.get('1100') // 銀行存款
@@ -219,14 +225,14 @@ export async function POST(request: NextRequest) {
           const { data: voucher, error: voucherError } = await supabase
             .from('journal_vouchers')
             .insert({
-              workspace_id: userData.workspace_id,
+              workspace_id: workspaceId,
               voucher_no: voucherNo,
               voucher_date: requestDate,
               memo: `請款 - ${request.description || ''}`,
               status: 'posted',
               total_debit: request.amount,
               total_credit: request.amount,
-              created_by: userData.id,
+              created_by: session.user.id,
             })
             .select()
             .single()
