@@ -47,7 +47,11 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
   useEffect(() => {
     if (isOpen) {
       if (initialTiers && initialTiers.length > 0) {
-        setTiers(initialTiers)
+        // 有 initialTiers 時，強制第一個砍次的人數 = 總人數
+        const updatedTiers = initialTiers.map((tier, index) =>
+          index === 0 ? { ...tier, participants: totalParticipants } : tier
+        )
+        setTiers(updatedTiers)
       } else {
         // 沒有 initialTiers 時，重置為預設值（總人數）
         setTiers([{ id: `tier-${Date.now()}`, participants: totalParticipants, unitPrice: 0 }])
@@ -190,6 +194,8 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
                     onChange={e => handleUpdateTier(tier.id, 'participants', e.target.value)}
                     placeholder={LOCAL_PRICING_DIALOG_LABELS.人數}
                     className="h-9 text-sm"
+                    disabled={index === 0}
+                    title={index === 0 ? '第一個檻次人數 = 總人數（自動綁定）' : ''}
                   />
                   <Input
                     type="number"
