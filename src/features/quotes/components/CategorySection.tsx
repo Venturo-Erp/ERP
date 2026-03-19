@@ -510,6 +510,24 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   .filter(item => item.name === CATEGORY_SECTION_LABELS.成人)
                   .reduce((sum, item) => sum + (item.total || 0), 0)
                 return adultTicketTotal.toLocaleString()
+              } else if (category.id === 'group-transport') {
+                // 團體分攤：Local 報價只計算第一個砍次（最便宜的）
+                let total = 0
+                let hasSeenLocalPricing = false
+                for (const item of category.items) {
+                  if (item.name?.startsWith('Local 報價')) {
+                    // Local 報價：只計算第一個（最小單位砍次）
+                    if (!hasSeenLocalPricing) {
+                      total += item.total || 0
+                      hasSeenLocalPricing = true
+                    }
+                    // 其他 Local 砍次不計入小計
+                  } else {
+                    // 非 Local 報價：正常計算
+                    total += item.total || 0
+                  }
+                }
+                return total.toLocaleString()
               } else {
                 return category.items
                   .reduce((sum, item) => sum + (item.total || 0), 0)
