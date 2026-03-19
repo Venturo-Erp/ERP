@@ -63,13 +63,13 @@ interface CategoryGroup {
 }
 
 function getEstimatedCost(item: TourItineraryItem): number {
-  return item.estimated_cost ?? item.unit_price ?? item.total_cost ?? 0
+  // 統一邏輯：unit_price = 當前真實成本（覆蓋式管理）
+  return item.unit_price ?? item.total_cost ?? 0
 }
 
 function getActualCost(item: TourItineraryItem): number | null {
-  if (item.confirmed_cost != null) return item.confirmed_cost
-  if (item.actual_expense != null) return item.actual_expense
-  return null
+  // 統一邏輯：actual_expense = 領隊實際支出
+  return item.actual_expense ?? null
 }
 
 export function TourClosingTab({ tour }: TourClosingTabProps) {

@@ -127,7 +127,18 @@ const menuItems: MenuItem[] = [
         icon: Wallet,
         requiredPermission: 'disbursement',
       },
-      // { href: '/erp-accounting/vouchers', label: COMP_LAYOUT_LABELS.會計傳票, icon: FileText, requiredPermission: 'vouchers' }, // V2: 會計模組已移除
+      {
+        href: '/finance/accounting',
+        label: COMP_LAYOUT_LABELS.會計系統,
+        icon: FileText,
+        requiredPermission: 'accounting',
+      },
+      {
+        href: '/finance/checks',
+        label: COMP_LAYOUT_LABELS.票據管理,
+        icon: FileCheck,
+        requiredPermission: 'accounting',
+      },
       {
         href: '/finance/travel-invoice',
         label: COMP_LAYOUT_LABELS.代轉發票,

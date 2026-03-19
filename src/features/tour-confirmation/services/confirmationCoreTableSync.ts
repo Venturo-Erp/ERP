@@ -95,7 +95,8 @@ export async function syncConfirmationUpdateToCore(params: {
       }
     }
 
-    if (confirmed_cost !== undefined) update_data.confirmed_cost = confirmed_cost
+    // 統一邏輯：確認價格直接覆蓋 unit_price（覆蓋式管理）
+    if (confirmed_cost !== undefined) update_data.unit_price = confirmed_cost
     if (booking_reference !== undefined) update_data.booking_reference = booking_reference
     if (confirmation_note !== undefined) update_data.confirmation_note = confirmation_note
 

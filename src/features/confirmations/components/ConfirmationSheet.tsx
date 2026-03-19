@@ -42,8 +42,8 @@ type PaymentStatus = 'paid' | 'unpaid' | 'leader_pay'
 function getPaymentStatus(item: TourItineraryItem): PaymentStatus {
   // 領隊已回填實際支出 → 已付
   if (item.actual_expense != null && item.actual_expense > 0) return 'paid'
-  // 有確認金額且 booking_status = confirmed → 已付（供應商預付）
-  if (item.confirmed_cost != null && item.booking_status === 'confirmed') return 'paid'
+  // booking_status = confirmed → 已付（供應商預付，價格已覆蓋到 unit_price）
+  if (item.booking_status === 'confirmed') return 'paid'
   // 沒有 request_id 代表不走需求單流程 → 領隊現付
   if (!item.request_id) return 'leader_pay'
   return 'unpaid'
@@ -149,7 +149,10 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
     let leaderPayCount = 0
 
     for (const item of confirmedItems) {
-      if (item.confirmed_cost != null) totalConfirmed += item.confirmed_cost
+      // 統一邏輯：確認後的價格在 unit_price（覆蓋式管理）
+      if (item.booking_status === 'confirmed' && item.unit_price != null) {
+        totalConfirmed += item.unit_price
+      }
       if (item.actual_expense != null) totalActual += item.actual_expense
       if (getPaymentStatus(item) === 'leader_pay') leaderPayCount++
     }
