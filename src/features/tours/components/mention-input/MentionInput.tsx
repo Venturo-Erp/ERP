@@ -16,6 +16,7 @@ export interface MentionInputProps {
   attractions?: { id: string; name: string }[]
   placeholder?: string
   className?: string
+  disabledAttractionIds?: string[]  // 已排入行程的景點 ID（不可再選）
 }
 
 export interface MentionInputHandle {
@@ -160,6 +161,7 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
   attractions = [],
   placeholder,
   className,
+  disabledAttractionIds = [],
 }, ref) {
   const [isOpen, setIsOpen] = useState(false)
   const [mentionQuery, setMentionQuery] = useState('')
@@ -398,25 +400,34 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
                   搜尋中...
                 </div>
               ) : results.length > 0 ? (
-                results.map((item, i) => (
-                  <button
-                    key={item.id}
-                    ref={el => { optionRefs.current[i] = el }}
-                    type="button"
-                    className={cn(
-                      'w-full px-3 py-1.5 text-left text-xs flex items-center gap-2 transition-colors',
-                      'hover:bg-morandi-container/30',
-                      highlightedIndex === i && 'bg-morandi-container/50'
-                    )}
-                    onClick={() => selectAttraction(item)}
-                  >
-                    <MapPin size={12} className="text-blue-500 shrink-0" />
-                    <span className="truncate">{item.name}</span>
-                    {item.city_name && (
-                      <span className="text-[10px] text-muted-foreground shrink-0">{item.city_name}</span>
-                    )}
-                  </button>
-                ))
+                results.map((item, i) => {
+                  const isDisabled = disabledAttractionIds.includes(item.id)
+                  return (
+                    <button
+                      key={item.id}
+                      ref={el => { optionRefs.current[i] = el }}
+                      type="button"
+                      disabled={isDisabled}
+                      title={isDisabled ? '此景點已在行程中' : ''}
+                      className={cn(
+                        'w-full px-3 py-1.5 text-left text-xs flex items-center gap-2 transition-colors',
+                        !isDisabled && 'hover:bg-morandi-container/30',
+                        highlightedIndex === i && !isDisabled && 'bg-morandi-container/50',
+                        isDisabled && 'opacity-50 cursor-not-allowed'
+                      )}
+                      onClick={() => !isDisabled && selectAttraction(item)}
+                    >
+                      <MapPin size={12} className={cn('shrink-0', isDisabled ? 'text-gray-400' : 'text-blue-500')} />
+                      <span className="truncate">{item.name}</span>
+                      {item.city_name && (
+                        <span className="text-[10px] text-muted-foreground shrink-0">{item.city_name}</span>
+                      )}
+                      {isDisabled && (
+                        <span className="text-[10px] text-muted-foreground shrink-0">✓ 已排入</span>
+                      )}
+                    </button>
+                  )
+                })
               ) : (
                 <div className="px-3 py-3 text-center text-xs text-muted-foreground">找不到景點</div>
               )}

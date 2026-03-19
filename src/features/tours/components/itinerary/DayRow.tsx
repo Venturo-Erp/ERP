@@ -50,6 +50,7 @@ interface DayRowProps {
   tourLocation: string
   getDateLabel: (idx: number) => string
   getPreviousAccommodation: (index: number) => string
+  disabledAttractionIds?: string[]
 }
 
 export function DayRow({
@@ -66,6 +67,7 @@ export function DayRow({
   tourLocation,
   getDateLabel,
   getPreviousAccommodation,
+  disabledAttractionIds = [],
 }: DayRowProps) {
   const routeInputRef = React.useRef<HTMLInputElement>(null)
 
@@ -175,6 +177,7 @@ export function DayRow({
                   attractions={day.attractions}
                   placeholder="@"
                   className="h-8 w-8 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none bg-transparent px-1 flex-shrink-0"
+                  disabledAttractionIds={disabledAttractionIds}
                 />
               </div>
               {/* 景點標籤列 */}

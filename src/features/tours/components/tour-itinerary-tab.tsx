@@ -502,18 +502,44 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   // Drag hook (extracted)
   const { activeDragName, handleDragStart, handleDragEnd } = useItineraryDrag(setDailySchedule)
 
+  // 計算已排入的景點 ID 列表（用於 UI 層阻擋）
+  const disabledAttractionIds = useMemo(() => {
+    const ids: string[] = []
+    for (const day of dailySchedule) {
+      if (day.attractions) {
+        for (const attraction of day.attractions) {
+          ids.push(attraction.id)
+        }
+      }
+    }
+    return ids
+  }, [dailySchedule])
+
   // Handle mention (@) attraction selection
   const handleMentionSelect = useCallback((dayIdx: number, attraction: { id: string; name: string }) => {
+    // 檢查整個行程是否已有這個景點（景點唯一性）
+    const existingDay = dailySchedule.findIndex((day, idx) =>
+      day.attractions?.some(a => a.id === attraction.id)
+    )
+    
+    if (existingDay !== -1) {
+      // 景點已存在於其他天
+      toast.error(
+        `此景點已在 Day ${existingDay + 1} 排入行程，無法重複新增`,
+        { duration: 5000 }
+      )
+      return
+    }
+    
     setDailySchedule(prev => {
       const newSchedule = [...prev]
       const day = newSchedule[dayIdx]
       if (!day) return prev
       const existing = day.attractions || []
-      if (existing.some(a => a.id === attraction.id)) return prev
       newSchedule[dayIdx] = { ...day, attractions: [...existing, attraction] }
       return newSchedule
     })
-  }, [])
+  }, [dailySchedule])
 
   // Preview data
   const getPreviewDailyData = useCallback(() => {
@@ -1591,6 +1617,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 tourLocation={tour.location || ''}
                 getDateLabel={getDateLabel}
                 getPreviousAccommodation={getPreviousAccommodation}
+                disabledAttractionIds={disabledAttractionIds}
               />
             ))}
         </table>
