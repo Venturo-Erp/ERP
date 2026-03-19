@@ -35,11 +35,12 @@ export const useActivityOperations = ({
       const actualDay = day ?? getNextActivityDay()
       const newItem: CostItem = {
         id: Date.now().toString(),
-        name: `Day ${actualDay} - `,
+        name: '',  // 空白，讓使用者自己輸入
         quantity: 1,
         unit_price: null,
         total: 0,
         note: '',
+        day: actualDay,  // 記錄日期
       }
 
       setCategories(prev =>
