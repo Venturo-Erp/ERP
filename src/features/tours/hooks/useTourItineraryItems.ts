@@ -362,6 +362,7 @@ export function useSyncItineraryToCore() {
         return {
           success: true,
           inserted: new_items.length,
+          cancellations: Array.from(cancellationsByRequestId.values()),
         }
       } catch (error) {
         logger.error(SYNC_LABELS.SYNC_ERROR, error)

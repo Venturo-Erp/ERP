@@ -799,6 +799,24 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
             toast.error(`核心表同步失敗：${result.message}`)
           } else {
             refreshCoreItems()
+            
+            // 顯示取消摘要（如果有）
+            if (result && 'cancellations' in result && result.cancellations && result.cancellations.length > 0) {
+              const cancelList = result.cancellations.map((c: any) => 
+                c.items.map((i: any) => `${i.service_date || ''} ${i.title}`).join('、')
+              ).join('\n')
+              
+              toast.warning(
+                `📋 行程變更摘要\n\n已產生 ${result.cancellations.length} 個取消通知：\n${cancelList}\n\n請前往需求單頁面發送取消通知給供應商`,
+                {
+                  duration: 10000,
+                  style: {
+                    whiteSpace: 'pre-line',
+                    maxWidth: '600px',
+                  },
+                }
+              )
+            }
           }
         }).catch(err => {
           logger.error('syncToCore error (background):', err)
