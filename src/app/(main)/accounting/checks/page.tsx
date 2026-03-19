@@ -8,6 +8,7 @@ import { Eye, Plus, CheckCircle, XCircle } from 'lucide-react'
 import type { TableColumn } from '@/components/ui/enhanced-table'
 import { createBrowserClient } from '@supabase/ssr'
 import { useAuthStore } from '@/stores/auth-store'
+import { CreateCheckDialog } from './components/CreateCheckDialog'
 
 interface Check {
   id: string
@@ -32,6 +33,7 @@ export default function ChecksPage() {
   const { user } = useAuthStore()
   const [checks, setChecks] = useState<Check[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
   useEffect(() => {
     loadChecks()
@@ -208,8 +210,7 @@ export default function ChecksPage() {
   }
 
   const handleCreate = () => {
-    // TODO: 開啟新增對話框
-    console.log('新增票據')
+    setCreateDialogOpen(true)
   }
 
   // 統計資料
@@ -224,40 +225,48 @@ export default function ChecksPage() {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* 統計卡片 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border-b">
-        <div className="bg-yellow-50 p-4 rounded-lg">
-          <div className="text-sm text-yellow-700 mb-1">未兌現支票</div>
-          <div className="text-2xl font-bold text-yellow-900">{stats.pending} 張</div>
-        </div>
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <div className="text-sm text-blue-700 mb-1">未兌現金額</div>
-          <div className="text-2xl font-bold text-blue-900">
-            ${stats.pendingAmount.toLocaleString()}
+    <>
+      <div className="h-full flex flex-col">
+        {/* 統計卡片 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border-b">
+          <div className="bg-yellow-50 p-4 rounded-lg">
+            <div className="text-sm text-yellow-700 mb-1">未兌現支票</div>
+            <div className="text-2xl font-bold text-yellow-900">{stats.pending} 張</div>
+          </div>
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="text-sm text-blue-700 mb-1">未兌現金額</div>
+            <div className="text-2xl font-bold text-blue-900">
+              ${stats.pendingAmount.toLocaleString()}
+            </div>
+          </div>
+          <div className="bg-red-50 p-4 rounded-lg">
+            <div className="text-sm text-red-700 mb-1">逾期支票</div>
+            <div className="text-2xl font-bold text-red-900">{stats.overdue} 張</div>
           </div>
         </div>
-        <div className="bg-red-50 p-4 rounded-lg">
-          <div className="text-sm text-red-700 mb-1">逾期支票</div>
-          <div className="text-2xl font-bold text-red-900">{stats.overdue} 張</div>
+
+        <div className="flex-1">
+          <ListPageLayout
+            title="票據管理"
+            data={checks}
+            columns={columns}
+            loading={isLoading}
+            searchable={false}
+            headerActions={
+              <Button onClick={handleCreate} className="gap-2">
+                <Plus size={16} />
+                新增票據
+              </Button>
+            }
+          />
         </div>
       </div>
-
-      <div className="flex-1">
-        <ListPageLayout
-          title="票據管理"
-          data={checks}
-          columns={columns}
-          loading={isLoading}
-          searchable={false}
-          headerActions={
-            <Button onClick={handleCreate} className="gap-2">
-              <Plus size={16} />
-              新增票據
-            </Button>
-          }
-        />
-      </div>
-    </div>
+      
+      <CreateCheckDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onSuccess={loadChecks}
+      />
+    </>
   )
 }

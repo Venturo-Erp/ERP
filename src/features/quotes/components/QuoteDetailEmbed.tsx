@@ -261,6 +261,32 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
   const [showLocalPricingDialog, setShowLocalPricingDialog] = useState(false)
   const [localTiers, setLocalTiers] = useState<LocalTier[]>([])
 
+  // 從 categories 還原 Local 砍次（用於對話框顯示）
+  useEffect(() => {
+    const groupTransportCategory = categories.find(cat => cat.id === 'group-transport')
+    if (groupTransportCategory) {
+      const localItems = groupTransportCategory.items.filter(item =>
+        item.name.startsWith(QUOTE_DETAIL_EMBED_LABELS.Local_報價)
+      )
+      
+      if (localItems.length > 0) {
+        const restoredTiers: LocalTier[] = localItems.map(item => {
+          // 從名稱提取人數：Local 報價 (15人) → 15
+          const match = item.name.match(/\((\d+)人\)/)
+          const participants = match ? parseInt(match[1]) : 0
+          
+          return {
+            id: item.id,
+            participants,
+            unitPrice: item.unit_price || 0,
+          }
+        })
+        
+        setLocalTiers(restoredTiers)
+      }
+    }
+  }, [categories])
+
   const [previewParticipantCounts, setPreviewParticipantCounts] =
     useState<ParticipantCounts | null>(null)
   const [previewSellingPrices, setPreviewSellingPrices] = useState<SellingPrices | null>(null)

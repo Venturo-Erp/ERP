@@ -1,0 +1,183 @@
+'use client'
+
+import { useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/stores/auth-store'
+import { toast } from 'sonner'
+
+interface CreateAccountDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSuccess: () => void
+}
+
+const accountTypes = [
+  { value: 'asset', label: '資產' },
+  { value: 'liability', label: '負債' },
+  { value: 'equity', label: '權益' },
+  { value: 'revenue', label: '收入' },
+  { value: 'expense', label: '費用' },
+  { value: 'cost', label: '成本' },
+]
+
+export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAccountDialogProps) {
+  const { user } = useAuthStore()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState({
+    code: '',
+    name: '',
+    account_type: 'asset',
+    description: '',
+    is_active: true,
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!user?.workspace_id) {
+      toast.error('無法取得 workspace_id')
+      return
+    }
+
+    if (!formData.code || !formData.name) {
+      toast.error('請填寫科目代號和名稱')
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const supabase = createClient()
+      
+      const { error } = await supabase
+        .from('chart_of_accounts')
+        .insert({
+          workspace_id: user.workspace_id,
+          code: formData.code,
+          name: formData.name,
+          account_type: formData.account_type,
+          description: formData.description || null,
+          is_active: formData.is_active,
+          is_system_locked: false,
+        })
+
+      if (error) throw error
+
+      toast.success('科目新增成功')
+      onOpenChange(false)
+      onSuccess()
+      
+      // 重置表單
+      setFormData({
+        code: '',
+        name: '',
+        account_type: 'asset',
+        description: '',
+        is_active: true,
+      })
+    } catch (error: any) {
+      console.error('新增科目失敗:', error)
+      if (error.code === '23505') {
+        toast.error('科目代號已存在')
+      } else {
+        toast.error('新增失敗：' + error.message)
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>新增會計科目</DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="code">科目代號 *</Label>
+            <Input
+              id="code"
+              placeholder="例如：1100"
+              value={formData.code}
+              onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="name">科目名稱 *</Label>
+            <Input
+              id="name"
+              placeholder="例如：銀行存款"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="account_type">科目類型 *</Label>
+            <Select
+              value={formData.account_type}
+              onValueChange={(value) => setFormData({ ...formData, account_type: value })}
+            >
+              <SelectTrigger id="account_type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {accountTypes.map(type => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">說明</Label>
+            <Textarea
+              id="description"
+              placeholder="科目說明（選填）"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={3}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="is_active">啟用狀態</Label>
+            <Switch
+              id="is_active"
+              checked={formData.is_active}
+              onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
+              取消
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? '新增中...' : '確認新增'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  )
+}

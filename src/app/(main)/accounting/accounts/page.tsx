@@ -8,6 +8,7 @@ import { Plus } from 'lucide-react'
 import type { TableColumn } from '@/components/ui/enhanced-table'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
+import { CreateAccountDialog } from './components/CreateAccountDialog'
 
 interface Account {
   id: string
@@ -32,6 +33,7 @@ export default function AccountsPage() {
   const { user } = useAuthStore()
   const [accounts, setAccounts] = useState<Account[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
 
   useEffect(() => {
     loadAccounts()
@@ -119,23 +121,30 @@ export default function AccountsPage() {
   ]
 
   const handleCreate = () => {
-    // TODO: 開啟新增對話框
-    console.log('新增科目')
+    setCreateDialogOpen(true)
   }
 
   return (
-    <ListPageLayout
-      title="會計科目管理"
-      data={accounts}
-      columns={columns}
-      loading={isLoading}
-      searchable={false}
-      headerActions={
-        <Button onClick={handleCreate} className="gap-2">
-          <Plus size={16} />
-          新增科目
-        </Button>
-      }
-    />
+    <>
+      <ListPageLayout
+        title="會計科目管理"
+        data={accounts}
+        columns={columns}
+        loading={isLoading}
+        searchable={false}
+        headerActions={
+          <Button onClick={handleCreate} className="gap-2">
+            <Plus size={16} />
+            新增科目
+          </Button>
+        }
+      />
+      
+      <CreateAccountDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onSuccess={loadAccounts}
+      />
+    </>
   )
 }

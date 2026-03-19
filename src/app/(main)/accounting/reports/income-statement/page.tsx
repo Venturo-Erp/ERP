@@ -1,0 +1,284 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { Card } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Search } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import { useAuthStore } from '@/stores/auth-store'
+
+interface AccountBalance {
+  code: string
+  name: string
+  balance: number
+}
+
+interface IncomeStatementData {
+  revenue: AccountBalance[]
+  cost: AccountBalance[]
+  expense: AccountBalance[]
+  totalRevenue: number
+  totalCost: number
+  totalExpense: number
+  grossProfit: number
+  netIncome: number
+}
+
+export default function IncomeStatementPage() {
+  const { user } = useAuthStore()
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [data, setData] = useState<IncomeStatementData | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    // 預設本月
+    const now = new Date()
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0)
+    setStartDate(firstDay.toISOString().split('T')[0])
+    setEndDate(lastDay.toISOString().split('T')[0])
+  }, [])
+
+  const loadIncomeStatement = async () => {
+    if (!startDate || !endDate || !user?.workspace_id) {
+      alert('請選擇日期範圍')
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const supabase = createClient()
+
+      // 1. 取得收入、成本、費用科目
+      const { data: accounts, error: accountsError } = await supabase
+        .from('chart_of_accounts')
+        .select('id, code, name, account_type')
+        .eq('workspace_id', user.workspace_id)
+        .in('account_type', ['revenue', 'cost', 'expense'])
+        .order('code', { ascending: true })
+
+      if (accountsError) throw accountsError
+
+      // 2. 取得期間內的分錄
+      const { data: lines, error: linesError } = await supabase
+        .from('journal_lines')
+        .select(`
+          account_id,
+          debit_amount,
+          credit_amount,
+          voucher:journal_vouchers!inner(
+            voucher_date,
+            workspace_id
+          )
+        `)
+        .eq('voucher.workspace_id', user.workspace_id)
+        .gte('voucher.voucher_date', startDate)
+        .lte('voucher.voucher_date', endDate)
+
+      if (linesError) throw linesError
+
+      // 3. 計算各科目餘額
+      const balanceMap = new Map<string, number>()
+      
+      lines.forEach((line: any) => {
+        const existing = balanceMap.get(line.account_id) || 0
+        // 收入：貸方增加（credit - debit）
+        // 成本/費用：借方增加（debit - credit）
+        balanceMap.set(line.account_id, existing + (line.credit_amount - line.debit_amount))
+      })
+
+      // 4. 整理數據
+      const revenue: AccountBalance[] = []
+      const cost: AccountBalance[] = []
+      const expense: AccountBalance[] = []
+
+      accounts.forEach(account => {
+        const balance = balanceMap.get(account.id) || 0
+        if (balance === 0) return // 跳過無交易科目
+
+        const item = {
+          code: account.code,
+          name: account.name,
+          balance: Math.abs(balance), // 取絕對值顯示
+        }
+
+        if (account.account_type === 'revenue') {
+          revenue.push(item)
+        } else if (account.account_type === 'cost') {
+          cost.push(item)
+        } else if (account.account_type === 'expense') {
+          expense.push(item)
+        }
+      })
+
+      // 5. 計算總計
+      const totalRevenue = revenue.reduce((sum, item) => sum + item.balance, 0)
+      const totalCost = cost.reduce((sum, item) => sum + item.balance, 0)
+      const totalExpense = expense.reduce((sum, item) => sum + item.balance, 0)
+      const grossProfit = totalRevenue - totalCost
+      const netIncome = grossProfit - totalExpense
+
+      setData({
+        revenue,
+        cost,
+        expense,
+        totalRevenue,
+        totalCost,
+        totalExpense,
+        grossProfit,
+        netIncome,
+      })
+
+    } catch (error) {
+      console.error('載入損益表失敗:', error)
+      alert('載入失敗')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <ContentPageLayout title="損益表">
+      <div className="p-6 space-y-4">
+        {/* 查詢條件 */}
+        <Card className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>開始日期</Label>
+              <Input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>結束日期</Label>
+              <Input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
+
+            <div className="flex items-end">
+              <Button onClick={loadIncomeStatement} disabled={isLoading} className="w-full gap-2">
+                <Search size={16} />
+                {isLoading ? '查詢中...' : '查詢'}
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        {/* 損益表 */}
+        {data && (
+          <Card className="p-6">
+            <div className="space-y-6">
+              {/* 標題 */}
+              <div className="text-center border-b pb-4">
+                <h2 className="text-xl font-bold">損益表</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {startDate} ~ {endDate}
+                </p>
+              </div>
+
+              {/* 收入 */}
+              <div>
+                <div className="font-semibold mb-2 text-green-700">營業收入</div>
+                {data.revenue.map(item => (
+                  <div key={item.code} className="flex justify-between py-1 pl-4">
+                    <span className="text-sm">{item.code} {item.name}</span>
+                    <span className="text-sm font-mono">${item.balance.toLocaleString()}</span>
+                  </div>
+                ))}
+                {data.revenue.length === 0 && (
+                  <div className="text-sm text-muted-foreground pl-4">無收入記錄</div>
+                )}
+                <div className="flex justify-between py-2 border-t mt-2 font-semibold">
+                  <span>收入合計</span>
+                  <span className="font-mono">${data.totalRevenue.toLocaleString()}</span>
+                </div>
+              </div>
+
+              {/* 成本 */}
+              <div>
+                <div className="font-semibold mb-2 text-orange-700">營業成本</div>
+                {data.cost.map(item => (
+                  <div key={item.code} className="flex justify-between py-1 pl-4">
+                    <span className="text-sm">{item.code} {item.name}</span>
+                    <span className="text-sm font-mono">(${ item.balance.toLocaleString()})</span>
+                  </div>
+                ))}
+                {data.cost.length === 0 && (
+                  <div className="text-sm text-muted-foreground pl-4">無成本記錄</div>
+                )}
+                <div className="flex justify-between py-2 border-t mt-2 font-semibold">
+                  <span>成本合計</span>
+                  <span className="font-mono text-red-600">(${ data.totalCost.toLocaleString()})</span>
+                </div>
+              </div>
+
+              {/* 毛利 */}
+              <div className={`flex justify-between py-3 border-y-2 font-bold text-lg ${
+                data.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                <span>毛利</span>
+                <span className="font-mono">${data.grossProfit.toLocaleString()}</span>
+              </div>
+
+              {/* 費用 */}
+              <div>
+                <div className="font-semibold mb-2 text-purple-700">營業費用</div>
+                {data.expense.map(item => (
+                  <div key={item.code} className="flex justify-between py-1 pl-4">
+                    <span className="text-sm">{item.code} {item.name}</span>
+                    <span className="text-sm font-mono">(${item.balance.toLocaleString()})</span>
+                  </div>
+                ))}
+                {data.expense.length === 0 && (
+                  <div className="text-sm text-muted-foreground pl-4">無費用記錄</div>
+                )}
+                <div className="flex justify-between py-2 border-t mt-2 font-semibold">
+                  <span>費用合計</span>
+                  <span className="font-mono text-red-600">(${data.totalExpense.toLocaleString()})</span>
+                </div>
+              </div>
+
+              {/* 淨利 */}
+              <div className={`flex justify-between py-4 border-y-2 font-bold text-xl ${
+                data.netIncome >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                <span>本期損益（淨利）</span>
+                <span className="font-mono">${data.netIncome.toLocaleString()}</span>
+              </div>
+
+              {/* 說明 */}
+              <div className="bg-blue-50 p-4 rounded text-sm text-blue-800">
+                <div className="font-semibold mb-2">損益表公式</div>
+                <ul className="list-disc list-inside space-y-1">
+                  <li>毛利 = 營業收入 - 營業成本 = ${data.grossProfit.toLocaleString()}</li>
+                  <li>淨利 = 毛利 - 營業費用 = ${data.netIncome.toLocaleString()}</li>
+                  <li>毛利率 = {data.totalRevenue > 0 ? ((data.grossProfit / data.totalRevenue) * 100).toFixed(2) : 0}%</li>
+                  <li>淨利率 = {data.totalRevenue > 0 ? ((data.netIncome / data.totalRevenue) * 100).toFixed(2) : 0}%</li>
+                </ul>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {!data && !isLoading && (
+          <Card className="p-8">
+            <div className="text-center text-muted-foreground">
+              請選擇日期範圍並查詢
+            </div>
+          </Card>
+        )}
+      </div>
+    </ContentPageLayout>
+  )
+}

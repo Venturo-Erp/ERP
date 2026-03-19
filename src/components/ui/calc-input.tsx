@@ -90,7 +90,13 @@ export const CalcInput: React.FC<CalcInputProps> = ({
 
   // 處理輸入變更
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value
+    // 全形數字 + 全形符號 → 半形
+    let newValue = e.target.value
+      .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))  // 全形數字
+      .replace(/[＋－＊／]/g, c => {  // 全形符號
+        const map: Record<string, string> = { '＋': '+', '－': '-', '＊': '*', '／': '/' }
+        return map[c] || c
+      })
     setDisplayValue(newValue)
 
     const hasOperator = /[+\-*/]/.test(newValue.slice(1))
