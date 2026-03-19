@@ -451,7 +451,7 @@ export function useSheetItemActions({
             quantity: req.quantity || null,
             subtotal: null,
             expected_cost: req.quoted_cost || req.estimated_cost || null,
-            actual_cost: req.final_cost || null,
+            actual_cost: req.quoted_cost || null,  // 供應商回報價格
             contact_info: null,
             booking_reference: null,
             booking_status: req.status === 'confirmed' ? 'confirmed' : 'pending',

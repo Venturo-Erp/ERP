@@ -500,10 +500,10 @@ export function TourConfirmationSheet({ tourId }: TourConfirmationSheetProps) {
                         </span>
                       )}
                     </div>
-                    {(request.estimated_cost || request.final_cost) && (
+                    {(request.estimated_cost || request.quoted_cost) && (
                       <div className="text-xs text-morandi-secondary mt-1">
-                        {request.final_cost
-                          ? COMP_TOURS_LABELS.CONFIRMED_COST(request.final_cost.toLocaleString())
+                        {request.quoted_cost
+                          ? `供應商報價 $${request.quoted_cost.toLocaleString()}`
                           : COMP_TOURS_LABELS.ESTIMATED_COST(
                               (request.estimated_cost || 0).toLocaleString()
                             )}

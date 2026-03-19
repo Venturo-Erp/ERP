@@ -76,30 +76,66 @@ export async function POST(request: NextRequest) {
 
     if (!existingAccounts || existingAccounts.length === 0) {
       // 插入預設科目
+      if (!DEFAULT_ACCOUNTS || DEFAULT_ACCOUNTS.length === 0) {
+        return NextResponse.json(
+          { error: 'DEFAULT_ACCOUNTS 未定義或為空' },
+          { status: 500 }
+        )
+      }
+
       const accountsToInsert = DEFAULT_ACCOUNTS.map(account => ({
         ...account,
         workspace_id: workspaceId,
       }))
 
-      const { error: accountsError } = await supabase
+      console.log(`準備插入 ${accountsToInsert.length} 個科目到 workspace ${workspaceId}`)
+
+      const { error: accountsError, data: insertedAccounts } = await supabase
         .from('chart_of_accounts')
         .insert(accountsToInsert)
+        .select()
 
       if (accountsError) {
-        stats.errors.push(`科目表初始化失敗: ${accountsError.message}`)
-      } else {
-        stats.accounts_created = accountsToInsert.length
+        console.error('科目表插入失敗:', accountsError)
+        return NextResponse.json(
+          { 
+            error: `科目表初始化失敗: ${accountsError.message}`,
+            details: accountsError,
+            hint: '請檢查 chart_of_accounts 表是否存在，以及 RLS 政策是否正確',
+            workspace_id: workspaceId,
+            accounts_count: accountsToInsert.length
+          },
+          { status: 500 }
+        )
       }
+      
+      console.log(`成功插入 ${insertedAccounts?.length || 0} 個科目`)
+      stats.accounts_created = insertedAccounts?.length || accountsToInsert.length
     }
 
     // 查詢科目 ID（用於生成傳票）
-    const { data: accounts } = await supabase
+    const { data: accounts, error: accountsQueryError } = await supabase
       .from('chart_of_accounts')
       .select('id, code')
       .eq('workspace_id', workspaceId)
 
+    if (accountsQueryError) {
+      console.error('查詢科目表失敗:', accountsQueryError)
+      return NextResponse.json(
+        { 
+          error: `查詢科目表失敗: ${accountsQueryError.message}`,
+          details: accountsQueryError
+        },
+        { status: 500 }
+      )
+    }
+
     if (!accounts || accounts.length === 0) {
-      return NextResponse.json({ error: '科目表為空，無法生成傳票' }, { status: 400 })
+      return NextResponse.json({ 
+        error: '科目表為空，無法生成傳票',
+        hint: '請檢查科目表是否正確插入',
+        stats
+      }, { status: 400 })
     }
 
     const accountMap = new Map(accounts.map(a => [a.code, a.id]))

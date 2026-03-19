@@ -22,7 +22,7 @@ export interface TourRequestItem {
   supplierName: string
   supplierId: string
   estimatedCost: number
-  finalCost: number | null
+  quotedCost: number | null  // 供應商報價（覆蓋式管理）
   serviceDate: string | null
   serviceDateEnd: string | null
   status: string | null
@@ -52,13 +52,13 @@ function transformToRequestItem(request: TourRequest): TourRequestItem | null {
     supplierName: request.supplier_name || TOUR_REQUEST_ITEMS_LABELS.UNKNOWN_SUPPLIER,
     supplierId: request.supplier_id,
     estimatedCost: request.estimated_cost || 0,
-    finalCost: request.final_cost,
+    quotedCost: request.quoted_cost,  // 供應商報價（覆蓋式管理）
     serviceDate: request.service_date,
     serviceDateEnd: request.service_date_end,
     status: request.status,
     // UI 預設值
     selected: false,
-    amount: request.final_cost || request.estimated_cost || 0,
+    amount: request.quoted_cost || request.estimated_cost || 0,
   }
 }
 

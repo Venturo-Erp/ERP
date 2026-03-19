@@ -177,7 +177,7 @@ export function AddRequestDialog({
       tourRequestItems.forEach(item => {
         initialState[item.id] = {
           selected: false,
-          amount: item.finalCost || item.estimatedCost || 0,
+          amount: item.quotedCost || item.estimatedCost || 0,  // 供應商報價 or 業務預估
         }
       })
       setSelectedRequestItems(initialState)
