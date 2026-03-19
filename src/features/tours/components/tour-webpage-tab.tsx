@@ -346,23 +346,6 @@ export function TourWebpageTab({ tour }: TourWebpageTabProps) {
             daily_itinerary: convertedData.daily_itinerary as DailyItinerary[],
           }).then(result => {
             logger.log('✅ syncToCore result:', result)
-            
-            // ⚠️ 顯示已估價項目變更警告
-            if (result && 'warnings' in result && result.warnings && result.warnings.length > 0) {
-              const warningMessage = [
-                '⚠️ 以下項目已估價，改動後記得重新估價：',
-                '',
-                ...result.warnings,
-              ].join('\n')
-              
-              toast.warning(warningMessage, {
-                duration: 8000,
-                style: {
-                  whiteSpace: 'pre-line',
-                  maxWidth: '500px',
-                },
-              })
-            }
           })
             .catch(err => logger.error('❌ syncToCore error:', err))
         }

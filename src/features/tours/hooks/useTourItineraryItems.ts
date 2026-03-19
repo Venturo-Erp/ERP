@@ -187,60 +187,14 @@ export function useSyncItineraryToCore() {
       logger.log(SYNC_LABELS.SYNC_START, { itinerary_id, tour_id, days: daily_itinerary.length })
 
       try {
-        // 1. 取得現有的核心表項目（保留有報價/需求/確認資料的）
-        const { data: existing_items, error: fetch_error } = await supabase
+        // 1. 刪除所有舊的行程項目（行程是 SSOT，不保護下游資料）
+        // 根據 William 決策：不管有沒有報價/需求/確認，行程刪除就是刪除
+        const { error: delete_error } = await supabase
           .from('tour_itinerary_items')
-          .select(
-            'id,category,sub_category,day_number,sort_order,title,unit_price,quote_status,confirmation_status,leader_status,request_id,quote_item_id'
-          )
+          .delete()
           .eq('itinerary_id', itinerary_id)
 
-        if (fetch_error) throw fetch_error
-
-        // 2. 分成「純行程項目」和「已有下游資料的項目」
-        // 只保護「已發委託」或「已確認」的項目，drafted 不算下游
-        const items_with_downstream = (existing_items ?? []).filter(
-          item =>
-            item.confirmation_status !== 'none' ||
-            item.leader_status !== 'none' ||
-            item.request_id !== null
-        )
-        const pure_itinerary_items = (existing_items ?? []).filter(
-          item =>
-            item.confirmation_status === 'none' &&
-            item.leader_status === 'none' &&
-            item.request_id === null
-        )
-
-        // 2.5. ⚠️ 檢查「已估價的純行程項目」是否被刪除/改名
-        const priced_items_to_delete = pure_itinerary_items.filter(
-          item => item.unit_price != null && item.unit_price > 0
-        )
-        const warnings: string[] = []
-        
-        if (priced_items_to_delete.length > 0) {
-          for (const item of priced_items_to_delete) {
-            const category_label = 
-              item.category === 'accommodation' ? '住宿' :
-              item.category === 'meal' ? '餐食' :
-              item.category === 'transportation' ? '交通' :
-              item.category === 'activity' ? '活動' : item.category
-            warnings.push(
-              `${category_label}「${item.title}」已估價 ${item.unit_price!.toLocaleString()} 元，改動後記得重新估價`
-            )
-          }
-        }
-
-        // 3. 刪除純行程項目（沒有下游資料的）
-        const pure_itinerary_item_ids = pure_itinerary_items.map(item => item.id)
-        if (pure_itinerary_item_ids.length > 0) {
-          const { error: delete_error } = await supabase
-            .from('tour_itinerary_items')
-            .delete()
-            .in('id', pure_itinerary_item_ids)
-
-          if (delete_error) throw delete_error
-        }
+        if (delete_error) throw delete_error
 
         // 4. 建立新的行程項目
         const new_items: TourItineraryItemInsert[] = []
@@ -254,27 +208,18 @@ export function useSyncItineraryToCore() {
           // Activities（從景點資料庫）
           if (day.activities && day.activities.length > 0) {
             for (const activity of day.activities) {
-              // 活動：檢查同一天同一活動是否已有項目（用 title 比對）
-              const already_exists = items_with_downstream.some(
-                item =>
-                  item.day_number === day_number &&
-                  item.category === ITINERARY_ITEM_CATEGORIES.ACTIVITIES &&
-                  item.title === activity.title
-              )
-              
-              if (!already_exists) {
-                new_items.push(
-                  activityToItem(
-                    activity,
-                    day_number,
-                    sort,
-                    service_date,
-                    itinerary_id,
-                    tour_id,
-                    workspace_id
-                  )
+              // 直接插入（舊項目已全部刪除）
+              new_items.push(
+                activityToItem(
+                  activity,
+                  day_number,
+                  sort,
+                  service_date,
+                  itinerary_id,
+                  tour_id,
+                  workspace_id
                 )
-              }
+              )
               sort++
             }
           }
@@ -289,28 +234,19 @@ export function useSyncItineraryToCore() {
               [meals.dinner, MEAL_SUB_CATEGORIES.DINNER, mealIds?.dinner],
             ]
             for (const [meal_name, sub_cat, meal_resource_id] of meal_entries) {
-              // 餐食：檢查同一天同一餐是否已有項目（不管狀態）
-              const already_exists = items_with_downstream.some(
-                item =>
-                  item.day_number === day_number &&
-                  item.category === ITINERARY_ITEM_CATEGORIES.MEALS &&
-                  item.sub_category === sub_cat
+              // 直接插入（舊項目已全部刪除）
+              const item = mealToItem(
+                meal_name,
+                sub_cat,
+                day_number,
+                sort,
+                service_date,
+                itinerary_id,
+                tour_id,
+                workspace_id,
+                meal_resource_id
               )
-
-              if (!already_exists) {
-                const item = mealToItem(
-                  meal_name,
-                  sub_cat,
-                  day_number,
-                  sort,
-                  service_date,
-                  itinerary_id,
-                  tour_id,
-                  workspace_id,
-                  meal_resource_id
-                )
-                if (item) new_items.push(item)
-              }
+              if (item) new_items.push(item)
               sort++
             }
           }
@@ -341,31 +277,23 @@ export function useSyncItineraryToCore() {
               }
             }
 
-            // 住宿：檢查同一天是否已有任何住宿項目（不管狀態）
-            const already_exists = items_with_downstream.some(
-              item =>
-                item.day_number === day_number &&
-                item.category === ITINERARY_ITEM_CATEGORIES.ACCOMMODATION
+            // 直接插入（舊項目已全部刪除）
+            const item = accommodationToItem(
+              resolvedAccommodation,
+              day_number,
+              sort,
+              service_date,
+              itinerary_id,
+              tour_id,
+              workspace_id,
+              resolvedAccommodationId
             )
-            
-            if (!already_exists) {
-              const item = accommodationToItem(
-                resolvedAccommodation,
-                day_number,
-                sort,
-                service_date,
-                itinerary_id,
-                tour_id,
-                workspace_id,
-                resolvedAccommodationId
-              )
-              if (item) new_items.push(item)
-            }
+            if (item) new_items.push(item)
             sort++
           }
         }
 
-        // 5. 批次插入
+        // 2. 批次插入新項目
         if (new_items.length > 0) {
           const { error: insert_error } = await supabase
             .from('tour_itinerary_items')
@@ -374,49 +302,15 @@ export function useSyncItineraryToCore() {
           if (insert_error) throw insert_error
         }
 
-        // 6. 更新已有下游資料的項目（只更新行程欄位，不動報價/需求/確認欄位）
-        for (const downstream_item of items_with_downstream) {
-          // 在新的 daily_itinerary 裡找對應的項目
-          const day = daily_itinerary[(downstream_item.day_number ?? 1) - 1]
-          if (!day) continue
-
-          const service_date = day.date && /^\d{4}-\d{2}-\d{2}/.test(day.date) ? day.date : null
-          let updated_title: string | null = null
-
-          if (downstream_item.category === ITINERARY_ITEM_CATEGORIES.ACTIVITIES) {
-            const matching = day.activities?.find(a => a.title === downstream_item.title)
-            if (matching) {
-              updated_title = matching.title
-            }
-          } else if (downstream_item.category === ITINERARY_ITEM_CATEGORIES.MEALS) {
-            const meals = day.meals as Meals | undefined
-            if (meals && downstream_item.sub_category) {
-              updated_title = meals[downstream_item.sub_category as keyof Meals] || null
-            }
-          } else if (downstream_item.category === ITINERARY_ITEM_CATEGORIES.ACCOMMODATION) {
-            updated_title = day.accommodation || null
-          }
-
-          if (updated_title !== null) {
-            await supabase
-              .from('tour_itinerary_items')
-              .update({ title: updated_title, service_date })
-              .eq('id', downstream_item.id)
-          }
-        }
-
         await invalidateTourItineraryItems()
         logger.log(SYNC_LABELS.SYNC_COMPLETE, {
-          deleted: pure_itinerary_item_ids.length,
+          deleted: '所有舊項目（行程是 SSOT）',
           inserted: new_items.length,
-          preserved: items_with_downstream.length,
         })
 
         return {
           success: true,
           inserted: new_items.length,
-          preserved: items_with_downstream.length,
-          warnings: warnings.length > 0 ? warnings : undefined,
         }
       } catch (error) {
         logger.error(SYNC_LABELS.SYNC_ERROR, error)
