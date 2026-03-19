@@ -38,17 +38,22 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
   const [tiers, setTiers] = useState<LocalTier[]>(
     initialTiers && initialTiers.length > 0
       ? initialTiers
-      : [{ id: `tier-${Date.now()}`, participants: 0, unitPrice: 0 }]
+      : [{ id: `tier-${Date.now()}`, participants: totalParticipants, unitPrice: 0 }]  // 預設人數 = 總人數
   )
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [matchedTierIndex, setMatchedTierIndex] = useState(0)
 
-  // 當對話框開啟且有 initialTiers 時，同步 tiers 狀態
+  // 當對話框開啟時，同步 tiers 狀態
   useEffect(() => {
-    if (isOpen && initialTiers && initialTiers.length > 0) {
-      setTiers(initialTiers)
+    if (isOpen) {
+      if (initialTiers && initialTiers.length > 0) {
+        setTiers(initialTiers)
+      } else {
+        // 沒有 initialTiers 時，重置為預設值（總人數）
+        setTiers([{ id: `tier-${Date.now()}`, participants: totalParticipants, unitPrice: 0 }])
+      }
     }
-  }, [isOpen, initialTiers])
+  }, [isOpen, initialTiers, totalParticipants])
 
   // 新增檻次
   const handleAddTier = () => {
