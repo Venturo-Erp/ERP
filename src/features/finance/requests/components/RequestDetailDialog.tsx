@@ -469,6 +469,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
             addNewEmptyItem={handleAddItem}
             onCreateSupplier={handleCreateSupplier}
             tourId={currentRequest.tour_id || null}
+            disabled={!canEdit}
           />
 
           {/* 備註 */}

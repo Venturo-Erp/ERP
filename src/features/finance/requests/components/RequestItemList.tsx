@@ -35,6 +35,7 @@ interface EditableRequestItemListProps {
   addNewEmptyItem: () => void
   onCreateSupplier?: (name: string) => Promise<string | null>
   tourId?: string | null
+  disabled?: boolean
 }
 
 /**
@@ -46,10 +47,12 @@ function DeferredInput({
   value,
   onChange,
   className,
+  disabled,
 }: {
   value: string
   onChange: (value: string) => void
   className?: string
+  disabled?: boolean
 }) {
   const [localValue, setLocalValue] = useState(value)
   const composingRef = useRef(false)
@@ -84,6 +87,7 @@ function DeferredInput({
           onChange(localValue)
         }
       }}
+      disabled={disabled}
       className={className}
     />
   )
@@ -99,11 +103,13 @@ function CalcInput({
   onChange,
   className,
   placeholder,
+  disabled,
 }: {
   value: number
   onChange: (value: number) => void
   className?: string
   placeholder?: string
+  disabled?: boolean
 }) {
   const [displayValue, setDisplayValue] = useState(value ? String(value) : '')
   const focusedRef = useRef(false)
@@ -176,6 +182,7 @@ function CalcInput({
           e.currentTarget.blur()
         }
       }}
+      disabled={disabled}
       placeholder={placeholder}
       className={className}
     />
@@ -195,6 +202,7 @@ export function EditableRequestItemList({
   addNewEmptyItem,
   onCreateSupplier,
   tourId,
+  disabled = false,
 }: EditableRequestItemListProps) {
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [linkingItemId, setLinkingItemId] = useState<string | null>(null)
@@ -264,6 +272,7 @@ export function EditableRequestItemList({
                 onValueChange={value =>
                   updateItem(item.id, { category: value as RequestItem['category'] })
                 }
+                disabled={disabled}
               >
                 <SelectTrigger className="input-no-focus h-9 border-0 shadow-none bg-transparent text-sm px-1">
                   <SelectValue placeholder="類別" />
@@ -298,6 +307,7 @@ export function EditableRequestItemList({
                 className="input-no-focus [&_input]:h-9 [&_input]:px-1 [&_input]:bg-transparent"
                 onCreate={onCreateSupplier}
                 showSearchIcon={false}
+                disabled={disabled}
               />
             </div>
 
@@ -306,14 +316,16 @@ export function EditableRequestItemList({
               <DeferredInput
                 value={item.description}
                 onChange={val => updateItem(item.id, { description: val })}
-                className={`${inputClass} flex-1`}
+                className={`${inputClass} flex-1 disabled:opacity-50 disabled:cursor-not-allowed`}
+                disabled={disabled}
               />
               {!item.advanced_by ? (
                 <button
                   type="button"
                   onClick={() => updateItem(item.id, { advanced_by: '_pending' })}
-                  className="shrink-0 p-1 rounded hover:bg-morandi-container/20 text-morandi-muted hover:text-morandi-primary transition-colors"
-                  title="員工代墊"
+                  disabled={disabled}
+                  className="shrink-0 p-1 rounded hover:bg-morandi-container/20 text-morandi-muted hover:text-morandi-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={disabled ? '此請款單已加入出納單，無法修改' : '員工代墊'}
                 >
                   <UserCheck size={14} />
                 </button>
@@ -329,12 +341,14 @@ export function EditableRequestItemList({
                     placeholder="代墊人"
                     className="[&_input]:h-7 [&_input]:text-xs [&_input]:px-1 [&_input]:bg-morandi-gold/10 w-[120px]"
                     showSearchIcon={false}
+                    disabled={disabled}
                   />
                   <button
                     type="button"
                     onClick={() => updateItem(item.id, { advanced_by: undefined, advanced_by_name: undefined })}
-                    className="shrink-0 p-0.5 rounded hover:bg-morandi-red/10 text-morandi-muted hover:text-morandi-red"
-                    title="取消代墊"
+                    disabled={disabled}
+                    className="shrink-0 p-0.5 rounded hover:bg-morandi-red/10 text-morandi-muted hover:text-morandi-red disabled:opacity-50 disabled:cursor-not-allowed"
+                    title={disabled ? '此請款單已加入出納單，無法修改' : '取消代墊'}
                   >
                     <X size={12} />
                   </button>
@@ -349,6 +363,7 @@ export function EditableRequestItemList({
                 onChange={val => updateItem(item.id, { unit_price: val })}
                 placeholder="0"
                 className={`${inputClass} text-right placeholder:text-morandi-muted`}
+                disabled={disabled}
               />
             </div>
 
@@ -359,6 +374,7 @@ export function EditableRequestItemList({
                 onChange={val => updateItem(item.id, { quantity: val || 1 })}
                 placeholder="1"
                 className={`${inputClass} text-center placeholder:text-morandi-muted`}
+                disabled={disabled}
               />
             </div>
 
@@ -381,11 +397,14 @@ export function EditableRequestItemList({
                     setLinkingItemId(item.id)
                     setLinkDialogOpen(true)
                   }}
-                  className={`h-7 w-7 ${item.confirmation_item_id ? 'text-morandi-green' : 'text-morandi-muted hover:text-morandi-secondary'}`}
+                  disabled={disabled}
+                  className={`h-7 w-7 ${item.confirmation_item_id ? 'text-morandi-green' : 'text-morandi-muted hover:text-morandi-secondary'} disabled:opacity-50 disabled:cursor-not-allowed`}
                   title={
-                    item.confirmation_item_id
-                      ? LINK_CONFIRMATION_LABELS.LINKED
-                      : LINK_CONFIRMATION_LABELS.LINK_BUTTON
+                    disabled
+                      ? '此請款單已加入出納單，無法連結確認單'
+                      : item.confirmation_item_id
+                        ? LINK_CONFIRMATION_LABELS.LINKED
+                        : LINK_CONFIRMATION_LABELS.LINK_BUTTON
                   }
                 >
                   <Link2 size={14} />
@@ -403,8 +422,9 @@ export function EditableRequestItemList({
                   size="icon"
                   aria-label="Button"
                   onClick={addNewEmptyItem}
-                  className="h-8 w-8 text-morandi-gold hover:bg-morandi-gold/10"
-                  title={REQUEST_ITEM_LIST_LABELS.新增項目}
+                  disabled={disabled}
+                  className="h-8 w-8 text-morandi-gold hover:bg-morandi-gold/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={disabled ? '此請款單已加入出納單，無法新增項目' : REQUEST_ITEM_LIST_LABELS.新增項目}
                 >
                   <Plus size={16} />
                 </Button>
@@ -414,8 +434,9 @@ export function EditableRequestItemList({
                   size="icon"
                   aria-label="Delete"
                   onClick={() => removeItem(item.id)}
-                  className="h-8 w-8 text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10"
-                  title={REQUEST_DETAIL_DIALOG_LABELS.刪除項目}
+                  disabled={disabled}
+                  className="h-8 w-8 text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={disabled ? '此請款單已加入出納單，無法刪除項目' : REQUEST_DETAIL_DIALOG_LABELS.刪除項目}
                 >
                   <Trash2 size={16} />
                 </Button>

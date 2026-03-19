@@ -15,7 +15,7 @@ import { useCallback, useState, useMemo } from 'react'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { FileText, Eye, Pencil, Trash2 } from 'lucide-react'
+import { Eye, Pencil, Trash2 } from 'lucide-react'
 import {
   usePaymentRequests,
   usePaymentRequestItems,
@@ -29,7 +29,6 @@ import { DisbursementOrder, PaymentRequest } from '@/stores/types'
 import { cn } from '@/lib/utils'
 import { CreateDisbursementDialog } from './CreateDisbursementDialog'
 import { DisbursementDetailDialog } from './DisbursementDetailDialog'
-import { PrintDisbursementPreview } from './PrintDisbursementPreview'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { DISBURSEMENT_STATUS } from '../constants'
@@ -46,7 +45,6 @@ export function DisbursementPage() {
   const [editingOrder, setEditingOrder] = useState<DisbursementOrder | null>(null)
   const [selectedOrder, setSelectedOrder] = useState<DisbursementOrder | null>(null)
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
-  const [printOrder, setPrintOrder] = useState<DisbursementOrder | null>(null)
 
   // 取得待出帳的請款單（狀態為 pending，且尚未加入任何出納單）
   const pendingRequests = useMemo(() => {
@@ -162,15 +160,6 @@ export function DisbursementPage() {
   const handleViewDetail = useCallback((order: DisbursementOrder) => {
     setSelectedOrder(order)
     setIsDetailDialogOpen(true)
-  }, [])
-
-  // 列印 - 直接觸發瀏覽器列印對話框
-  const handlePrintPDF = useCallback((order: DisbursementOrder) => {
-    setPrintOrder(order)
-    // 等待狀態更新後觸發列印
-    setTimeout(() => {
-      window.print()
-    }, 100)
   }, [])
 
   // 刪除出納單
@@ -297,17 +286,6 @@ export function DisbursementPage() {
             >
               <Eye size={16} className="text-morandi-secondary" />
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={e => {
-                e.stopPropagation()
-                handlePrintPDF(row)
-              }}
-              className="h-8 w-8 p-0"
-            >
-              <FileText size={16} className="text-morandi-gold" />
-            </Button>
             {row.status === 'pending' && (
               <Button
                 variant="ghost"
@@ -340,23 +318,6 @@ export function DisbursementPage() {
         open={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
       />
-
-      {/* 隱藏的列印內容（@media print 時顯示） */}
-      {printOrder && (
-        <div className="hidden print:block">
-          <PrintDisbursementPreview
-            order={printOrder}
-            paymentRequests={payment_requests.filter(pr =>
-              printOrder.payment_request_ids?.includes(pr.id)
-            )}
-            paymentRequestItems={payment_request_items.filter(item =>
-              payment_requests.some(
-                pr => pr.id === item.request_id && printOrder.payment_request_ids?.includes(pr.id)
-              )
-            )}
-          />
-        </div>
-      )}
     </>
   )
 }
