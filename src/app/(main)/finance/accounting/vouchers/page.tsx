@@ -8,6 +8,7 @@ import { Eye, RotateCcw, Plus } from 'lucide-react'
 import type { TableColumn } from '@/components/ui/enhanced-table'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
+import { CreateVoucherDialog } from './components/CreateVoucherDialog'
 
 interface JournalVoucher {
   id: string
@@ -31,6 +32,7 @@ export default function VouchersPage() {
   const { user } = useAuthStore()
   const [vouchers, setVouchers] = useState<JournalVoucher[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
   useEffect(() => {
     loadVouchers()
@@ -153,23 +155,34 @@ export default function VouchersPage() {
   }
 
   const handleCreate = () => {
-    // TODO: 開啟新增對話框
-    console.log('新增傳票')
+    setIsCreateDialogOpen(true)
+  }
+
+  const handleCreateSuccess = () => {
+    loadVouchers()
   }
 
   return (
-    <ListPageLayout
-      title="傳票管理"
-      data={vouchers}
-      columns={columns}
-      loading={isLoading}
-      searchable={false}
-      headerActions={
-        <Button onClick={handleCreate} className="gap-2">
-          <Plus size={16} />
-          新增傳票
-        </Button>
-      }
-    />
+    <>
+      <ListPageLayout
+        title="傳票管理"
+        data={vouchers}
+        columns={columns}
+        loading={isLoading}
+        searchable={false}
+        headerActions={
+          <Button onClick={handleCreate} className="gap-2">
+            <Plus size={16} />
+            新增傳票
+          </Button>
+        }
+      />
+
+      <CreateVoucherDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onSuccess={handleCreateSuccess}
+      />
+    </>
   )
 }
