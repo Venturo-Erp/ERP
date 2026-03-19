@@ -45,6 +45,7 @@ import {
   FolderOpen,
   Target,
   Landmark,
+  Zap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
@@ -149,6 +150,12 @@ const menuItems: MenuItem[] = [
     icon: FileText,
     requiredPermission: 'accounting',
     children: [
+      {
+        href: '/accounting/initialize',
+        label: COMP_LAYOUT_LABELS.系統初始化,
+        icon: Zap,
+        requiredPermission: 'accounting',
+      },
       {
         href: '/accounting/vouchers',
         label: COMP_LAYOUT_LABELS.傳票管理,

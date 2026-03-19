@@ -1,11 +1,19 @@
 'use client'
 
 import { Card } from '@/components/ui/card'
-import { FileText, BookOpen, BarChart3, TrendingUp, Calendar } from 'lucide-react'
+import { FileText, BookOpen, BarChart3, TrendingUp, Calendar, Zap } from 'lucide-react'
 import Link from 'next/link'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 
 const quickLinks = [
+  {
+    href: '/accounting/initialize',
+    icon: Zap,
+    title: '系統初始化',
+    description: '首次使用必須執行（只能執行一次）',
+    color: 'text-orange-600',
+    bg: 'bg-orange-50',
+  },
   {
     href: '/accounting/vouchers',
     icon: FileText,

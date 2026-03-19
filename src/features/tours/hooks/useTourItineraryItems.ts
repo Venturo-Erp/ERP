@@ -277,31 +277,6 @@ export function useSyncItineraryToCore() {
               }
               sort++
             }
-          } else if (day.title && day.title.trim()) {
-            // 如果沒有景點資料庫項目，但有 title 文字（全文字模式）
-            // 把整條路線當成一個活動項目
-            const already_exists = items_with_downstream.some(
-              item =>
-                item.day_number === day_number &&
-                item.category === ITINERARY_ITEM_CATEGORIES.ACTIVITIES
-            )
-            
-            if (!already_exists) {
-              new_items.push({
-                itinerary_id,
-                tour_id,
-                workspace_id,
-                day_number,
-                sort_order: sort,
-                category: ITINERARY_ITEM_CATEGORIES.ACTIVITIES,
-                title: day.title.trim(),
-                description: null,
-                service_date: service_date || null,
-                resource_type: null,
-                resource_id: null,
-              })
-            }
-            sort++
           }
 
           // Meals
