@@ -345,6 +345,17 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
     (tiers: LocalTier[], _matchedTierIndex: number) => {
       // 儲存檔次資料（持久化）
       setLocalTiers(tiers)
+      
+      // 把第一個砍次的人數同步到報價單總人數（全部設為成人）
+      if (tiers.length > 0 && tiers[0].participants > 0) {
+        setParticipantCounts({
+          adult: tiers[0].participants,
+          child_with_bed: 0,
+          child_no_bed: 0,
+          single_room: 0,
+          infant: 0,
+        })
+      }
 
       const sortedTiers = [...tiers].sort((a, b) => a.participants - b.participants)
       let currentTierIdx = 0

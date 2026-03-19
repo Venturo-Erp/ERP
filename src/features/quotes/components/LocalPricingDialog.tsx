@@ -38,24 +38,15 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
   const [tiers, setTiers] = useState<LocalTier[]>(
     initialTiers && initialTiers.length > 0
       ? initialTiers
-      : [{ id: `tier-${Date.now()}`, participants: totalParticipants, unitPrice: 0 }]  // 預設人數 = 總人數
+      : [{ id: `tier-${Date.now()}`, participants: 0, unitPrice: 0 }]  // 預設空白，使用者手動輸入
   )
 
   // 當對話框開啟時，同步 tiers 狀態
   useEffect(() => {
-    if (isOpen) {
-      if (initialTiers && initialTiers.length > 0) {
-        // 有 initialTiers 時，強制第一個砍次的人數 = 總人數
-        const updatedTiers = initialTiers.map((tier, index) =>
-          index === 0 ? { ...tier, participants: totalParticipants } : tier
-        )
-        setTiers(updatedTiers)
-      } else {
-        // 沒有 initialTiers 時，重置為預設值（總人數）
-        setTiers([{ id: `tier-${Date.now()}`, participants: totalParticipants, unitPrice: 0 }])
-      }
+    if (isOpen && initialTiers && initialTiers.length > 0) {
+      setTiers(initialTiers)
     }
-  }, [isOpen, initialTiers, totalParticipants])
+  }, [isOpen, initialTiers])
 
   // 新增檻次
   const handleAddTier = () => {
@@ -162,27 +153,21 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
                 <span></span>
               </div>
 
-              {tiers.map((tier, index) => {
-                // 第一個砍次的人數 = 強制使用總人數
-                const displayParticipants = index === 0 ? totalParticipants : tier.participants
-                
-                return (
-                  <div
-                    key={tier.id}
-                    className="grid grid-cols-[80px_1fr_1fr_40px] gap-2 items-center"
-                  >
-                    <span className="text-sm text-morandi-secondary px-1">
-                      {LOCAL_PRICING_DIALOG_LABELS.檻次編號.replace('{index}', `${index + 1}`)}
-                    </span>
-                    <Input
-                      type="number"
-                      value={displayParticipants || ''}
-                      onChange={e => handleUpdateTier(tier.id, 'participants', e.target.value)}
-                      placeholder={LOCAL_PRICING_DIALOG_LABELS.人數}
-                      className="h-9 text-sm"
-                      disabled={index === 0}
-                      title={index === 0 ? '第一個檻次人數 = 總人數（自動綁定）' : ''}
-                    />
+              {tiers.map((tier, index) => (
+                <div
+                  key={tier.id}
+                  className="grid grid-cols-[80px_1fr_1fr_40px] gap-2 items-center"
+                >
+                  <span className="text-sm text-morandi-secondary px-1">
+                    {LOCAL_PRICING_DIALOG_LABELS.檻次編號.replace('{index}', `${index + 1}`)}
+                  </span>
+                  <Input
+                    type="number"
+                    value={tier.participants || ''}
+                    onChange={e => handleUpdateTier(tier.id, 'participants', e.target.value)}
+                    placeholder={LOCAL_PRICING_DIALOG_LABELS.人數}
+                    className="h-9 text-sm"
+                  />
                   <Input
                     type="number"
                     value={tier.unitPrice || ''}
