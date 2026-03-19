@@ -215,7 +215,7 @@ export function TransportQuoteDialog({
     setSending(true)
     try {
       const pax = paxInput ? parseInt(paxInput) : totalPax
-      const res = await fetch('/api/line/send-local-quote', {
+      const res = await fetch('/api/line/send-transport-quote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -225,8 +225,8 @@ export function TransportQuoteDialog({
           departureDate: tour.departure_date || '',
           totalPax: pax,
           tourId: tour.id,
-          note,
-          paxTiers, // 加上梯次資料
+          vehicleDesc: vehicleDesc || '',
+          note: supplierName || note,
         }),
       })
       const result = await res.json()
