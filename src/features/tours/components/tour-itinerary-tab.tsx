@@ -428,6 +428,57 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
 
   // Remove an attraction from a day
   const removeAttraction = useCallback((dayIdx: number, attractionId: string) => {
+    // 找到要刪除的景點名稱（用於通知）
+    const day = dailySchedule[dayIdx]
+    const attraction = day?.attractions?.find(a => a.id === attractionId)
+    const attractionName = attraction?.name || '景點'
+    
+    // 檢查核心表是否有下游資料（需求單、確認單、Local 報價確認）
+    const dayNumber = dayIdx + 1
+    const relatedCoreItem = coreItems.find(
+      item =>
+        item.day_number === dayNumber &&
+        item.category === 'activities' &&
+        item.resource_id === attractionId
+    )
+    
+    // 判斷是否有下游資料
+    const hasDownstream =
+      relatedCoreItem &&
+      (relatedCoreItem.request_id != null ||  // 已發需求單
+        relatedCoreItem.confirmation_status !== 'none' ||  // 已確認
+        relatedCoreItem.leader_status !== 'none' ||  // 領隊已填寫
+        (relatedCoreItem.unit_price != null &&
+          relatedCoreItem.unit_price > 0 &&
+          relatedCoreItem.quote_status === 'confirmed'))  // Local 報價已確認
+    
+    // 如果有下游資料，顯示通知提醒
+    if (hasDownstream) {
+      const warnings = []
+      if (relatedCoreItem.request_id) warnings.push('已發需求單')
+      if (relatedCoreItem.confirmation_status !== 'none') warnings.push('已確認訂位')
+      if (relatedCoreItem.leader_status !== 'none') warnings.push('領隊已填寫')
+      if (
+        relatedCoreItem.unit_price != null &&
+        relatedCoreItem.unit_price > 0 &&
+        relatedCoreItem.quote_status === 'confirmed'
+      ) {
+        warnings.push(`已確認報價 ${relatedCoreItem.unit_price.toLocaleString()} 元`)
+      }
+      
+      toast.warning(
+        `⚠️ 刪除景點「${attractionName}」\n\n此景點${warnings.join('、')}，請記得通知廠商取消預訂。\n\n（可能是替換、追加或調整）`,
+        {
+          duration: 8000,
+          style: {
+            whiteSpace: 'pre-line',
+            maxWidth: '500px',
+          },
+        }
+      )
+    }
+    
+    // 不管有沒有下游資料，都刪除（行程是 SSOT）
     setDailySchedule(prev => {
       const newSchedule = [...prev]
       const day = newSchedule[dayIdx]
@@ -436,7 +487,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
       newSchedule[dayIdx] = { ...day, attractions: updated }
       return newSchedule
     })
-  }, [])
+  }, [dailySchedule, coreItems])
 
   const reorderAttractions = useCallback((dayIdx: number, newOrder: { id: string; name: string }[]) => {
     setDailySchedule(prev => {
