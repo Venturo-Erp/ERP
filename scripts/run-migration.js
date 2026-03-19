@@ -1,104 +1,127 @@
 #!/usr/bin/env node
+
 /**
- * 直接執行 Migration SQL
- * 繞過 Supabase CLI 的 SSL 問題
+ * Supabase Migration Runner
+ * 執行 migration 檔案到 Supabase
  */
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
 
-// 讀取環境變數
-require('dotenv').config({ path: '.env.local' })
+// 從 .env.local 讀取
+require('dotenv').config({ path: path.join(__dirname, '../.env.local') });
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SUPABASE_SERVICE_ROLE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('❌ 缺少環境變數：NEXT_PUBLIC_SUPABASE_URL 或 SUPABASE_SERVICE_ROLE_KEY')
-  process.exit(1)
+if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+  console.error('❌ 缺少 Supabase 環境變數');
+  process.exit(1);
 }
 
-// 讀取 migration SQL
-const migrationPath = path.join(
-  __dirname,
-  '../supabase/migrations/20251117122000_update_payment_requests_structure.sql'
-)
-const sql = fs.readFileSync(migrationPath, 'utf8')
-
-console.log('📋 讀取 migration 檔案：', migrationPath)
-console.log('🔗 連接到：', SUPABASE_URL)
-console.log('')
-
-// 使用 fetch 執行 SQL（透過 Supabase REST API）
-async function runMigration() {
-  try {
-    // 分割 SQL 語句（按 ; 分隔，但保留 function 內的分號）
-    const statements = sql.split(/;\s*(?=\n|$)/).filter(s => {
-      const trimmed = s.trim()
-      return (
-        trimmed &&
-        !trimmed.startsWith('--') &&
-        !trimmed.startsWith('BEGIN') &&
-        !trimmed.startsWith('COMMIT') &&
-        !trimmed.startsWith('DO $$')
-      )
-    })
-
-    console.log(`📊 共有 ${statements.length} 個 SQL 語句待執行\n`)
-
-    let successCount = 0
-    let errorCount = 0
-
-    for (let i = 0; i < statements.length; i++) {
-      const statement = statements[i].trim()
-      if (!statement) continue
-
-      // 顯示正在執行的語句（前 80 個字元）
-      const preview = statement.substring(0, 80).replace(/\n/g, ' ')
-      console.log(`[${i + 1}/${statements.length}] ${preview}...`)
-
-      try {
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/exec_sql`, {
-          method: 'POST',
-          headers: {
-            apikey: SUPABASE_SERVICE_ROLE_KEY,
-            Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query: statement }),
-        })
-
-        if (!response.ok) {
-          const error = await response.text()
-          console.error(`  ❌ 執行失敗：${error}`)
-          errorCount++
-        } else {
-          console.log(`  ✅ 執行成功`)
-          successCount++
-        }
-      } catch (error) {
-        console.error(`  ❌ 執行錯誤：${error.message}`)
-        errorCount++
+// 執行 SQL
+async function executeSQL(sql) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(`${SUPABASE_URL}/rest/v1/rpc/exec_sql`);
+    
+    const postData = JSON.stringify({ query: sql });
+    
+    const options = {
+      hostname: url.hostname,
+      path: url.pathname,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData),
+        'apikey': SERVICE_ROLE_KEY,
+        'Authorization': `Bearer ${SERVICE_ROLE_KEY}`,
+        'Prefer': 'return=representation'
       }
-    }
+    };
 
-    console.log('\n' + '='.repeat(50))
-    console.log(`✅ 成功：${successCount} 個語句`)
-    console.log(`❌ 失敗：${errorCount} 個語句`)
-    console.log('='.repeat(50))
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => { data += chunk; });
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve({ success: true, data });
+        } else {
+          reject(new Error(`HTTP ${res.statusCode}: ${data}`));
+        }
+      });
+    });
 
-    if (errorCount > 0) {
-      console.log('\n⚠️  部分語句執行失敗，請檢查錯誤訊息')
-      process.exit(1)
-    } else {
-      console.log('\n🎉 Migration 執行完成！')
-    }
+    req.on('error', reject);
+    req.write(postData);
+    req.end();
+  });
+}
+
+// 直接用 psql wire protocol（更簡單的方式）
+async function runMigration(filePath) {
+  const sql = fs.readFileSync(filePath, 'utf8');
+  const fileName = path.basename(filePath);
+  
+  console.log(`\n📄 執行: ${fileName}`);
+  
+  try {
+    // 使用 pg 套件執行 SQL
+    const { Client } = require('pg');
+    
+    // 從 Supabase URL 提取 connection string
+    const projectRef = SUPABASE_URL.match(/https:\/\/(.+)\.supabase\.co/)[1];
+    const connectionString = `postgresql://postgres.${projectRef}:${SERVICE_ROLE_KEY.split('.')[2]}@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres`;
+    
+    const client = new Client({ connectionString });
+    await client.connect();
+    await client.query(sql);
+    await client.end();
+    
+    console.log(`✅ ${fileName} 執行成功`);
+    return true;
   } catch (error) {
-    console.error('❌ 執行失敗：', error)
-    process.exit(1)
+    console.error(`❌ ${fileName} 執行失敗:`, error.message);
+    return false;
   }
 }
 
-// 執行
-runMigration()
+// 主函數
+async function main() {
+  const migrations = process.argv.slice(2);
+  
+  if (migrations.length === 0) {
+    console.log('Usage: node run-migration.js <migration-file-1> [migration-file-2] ...');
+    process.exit(1);
+  }
+
+  console.log('🚀 開始執行 Supabase Migrations...\n');
+  
+  let successCount = 0;
+  let failCount = 0;
+  
+  for (const migrationPath of migrations) {
+    const fullPath = path.resolve(migrationPath);
+    
+    if (!fs.existsSync(fullPath)) {
+      console.error(`❌ 檔案不存在: ${fullPath}`);
+      failCount++;
+      continue;
+    }
+    
+    const success = await runMigration(fullPath);
+    if (success) {
+      successCount++;
+    } else {
+      failCount++;
+    }
+  }
+  
+  console.log(`\n📊 執行完成: ${successCount} 成功, ${failCount} 失敗`);
+  process.exit(failCount > 0 ? 1 : 0);
+}
+
+main().catch(error => {
+  console.error('💥 執行失敗:', error);
+  process.exit(1);
+});

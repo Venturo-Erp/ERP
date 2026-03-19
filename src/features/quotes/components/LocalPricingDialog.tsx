@@ -162,23 +162,27 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
                 <span></span>
               </div>
 
-              {tiers.map((tier, index) => (
-                <div
-                  key={tier.id}
-                  className="grid grid-cols-[80px_1fr_1fr_40px] gap-2 items-center"
-                >
-                  <span className="text-sm text-morandi-secondary px-1">
-                    {LOCAL_PRICING_DIALOG_LABELS.檻次編號.replace('{index}', `${index + 1}`)}
-                  </span>
-                  <Input
-                    type="number"
-                    value={tier.participants || ''}
-                    onChange={e => handleUpdateTier(tier.id, 'participants', e.target.value)}
-                    placeholder={LOCAL_PRICING_DIALOG_LABELS.人數}
-                    className="h-9 text-sm"
-                    disabled={index === 0}
-                    title={index === 0 ? '第一個檻次人數 = 總人數（自動綁定）' : ''}
-                  />
+              {tiers.map((tier, index) => {
+                // 第一個砍次的人數 = 強制使用總人數
+                const displayParticipants = index === 0 ? totalParticipants : tier.participants
+                
+                return (
+                  <div
+                    key={tier.id}
+                    className="grid grid-cols-[80px_1fr_1fr_40px] gap-2 items-center"
+                  >
+                    <span className="text-sm text-morandi-secondary px-1">
+                      {LOCAL_PRICING_DIALOG_LABELS.檻次編號.replace('{index}', `${index + 1}`)}
+                    </span>
+                    <Input
+                      type="number"
+                      value={displayParticipants || ''}
+                      onChange={e => handleUpdateTier(tier.id, 'participants', e.target.value)}
+                      placeholder={LOCAL_PRICING_DIALOG_LABELS.人數}
+                      className="h-9 text-sm"
+                      disabled={index === 0}
+                      title={index === 0 ? '第一個檻次人數 = 總人數（自動綁定）' : ''}
+                    />
                   <Input
                     type="number"
                     value={tier.unitPrice || ''}
