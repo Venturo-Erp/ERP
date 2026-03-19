@@ -611,6 +611,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
             categories={categories}
             tierPricings={tierPricings}
             setTierPricings={setTierPricings}
+            localTiers={localTiers}
           />
         </div>
       </div>

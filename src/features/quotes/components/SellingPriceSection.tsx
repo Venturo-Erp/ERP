@@ -31,6 +31,12 @@ import {
   SELLING_PRICE_SECTION_LABELS,
 } from '../constants/labels'
 
+interface LocalTier {
+  id: string
+  participants: number
+  unitPrice: number
+}
+
 interface SellingPriceSectionProps {
   participantCounts: ParticipantCounts
   setParticipantCounts: React.Dispatch<React.SetStateAction<ParticipantCounts>>
@@ -59,6 +65,7 @@ interface SellingPriceSectionProps {
   categories: CostCategory[]
   tierPricings?: TierPricing[]
   setTierPricings?: React.Dispatch<React.SetStateAction<TierPricing[]>>
+  localTiers?: LocalTier[]
 }
 
 export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
@@ -75,7 +82,10 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
   categories,
   tierPricings: externalTierPricings,
   setTierPricings: externalSetTierPricings,
+  localTiers,
 }) => {
+  // 檢查是否有 Local 報價（人數欄位鎖定）
+  const hasLocalPricing = localTiers && localTiers.length > 0
   const [localTierPricings, setLocalTierPricings] = useState<TierPricing[]>([])
   const tierPricings = externalTierPricings ?? localTierPricings
   const setTierPricings = externalSetTierPricings ?? setLocalTierPricings
@@ -252,10 +262,11 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                   infant: 0,
                 })
               }}
-              disabled={isReadOnly}
+              disabled={isReadOnly || hasLocalPricing}
+              title={hasLocalPricing ? '人數由 Local 報價控制，請修改 Local 報價' : ''}
               className={cn(
                 'w-12 h-7 px-1 text-sm font-semibold text-center text-morandi-primary bg-white/50 border border-morandi-gold/30 rounded focus:outline-none focus:ring-1 focus:ring-morandi-gold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
-                isReadOnly && 'cursor-not-allowed opacity-60'
+                (isReadOnly || hasLocalPricing) && 'cursor-not-allowed opacity-60'
               )}
             />
             <span className="text-sm font-semibold text-morandi-primary">
