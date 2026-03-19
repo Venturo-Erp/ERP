@@ -151,12 +151,6 @@ const menuItems: MenuItem[] = [
     requiredPermission: 'accounting',
     children: [
       {
-        href: '/accounting/initialize',
-        label: COMP_LAYOUT_LABELS.系統初始化,
-        icon: Zap,
-        requiredPermission: 'accounting',
-      },
-      {
         href: '/accounting/vouchers',
         label: COMP_LAYOUT_LABELS.傳票管理,
         icon: FileText,

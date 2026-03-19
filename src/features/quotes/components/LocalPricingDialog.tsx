@@ -105,8 +105,6 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
     }
 
     const matched = findMatchedTierIndex()
-    
-    // 直接確認（第一個砍次已自動綁定總人數，不需要提醒）
     onConfirm(tiers, matched)
     handleClose()
   }

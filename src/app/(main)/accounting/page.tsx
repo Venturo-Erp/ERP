@@ -1,19 +1,14 @@
 'use client'
 
 import { Card } from '@/components/ui/card'
-import { FileText, BookOpen, BarChart3, TrendingUp, Calendar, Zap } from 'lucide-react'
+import { FileText, BookOpen, BarChart3, TrendingUp, Calendar } from 'lucide-react'
 import Link from 'next/link'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 const quickLinks = [
-  {
-    href: '/accounting/initialize',
-    icon: Zap,
-    title: '系統初始化',
-    description: '首次使用必須執行（只能執行一次）',
-    color: 'text-orange-600',
-    bg: 'bg-orange-50',
-  },
   {
     href: '/accounting/vouchers',
     icon: FileText,
@@ -57,6 +52,52 @@ const quickLinks = [
 ]
 
 export default function AccountingPage() {
+  const [isInitializing, setIsInitializing] = useState(false)
+
+  useEffect(() => {
+    // 自動檢查並初始化科目表
+    const checkAndInitialize = async () => {
+      try {
+        const supabase = createClient()
+        
+        // 檢查科目表是否為空
+        const { data: accounts, error } = await supabase
+          .from('chart_of_accounts')
+          .select('id')
+          .limit(1)
+        
+        if (error) {
+          console.error('檢查科目表失敗:', error)
+          return
+        }
+        
+        // 如果科目表為空，自動初始化
+        if (!accounts || accounts.length === 0) {
+          setIsInitializing(true)
+          
+          const response = await fetch('/api/accounting/initialize', {
+            method: 'POST',
+          })
+          
+          if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.error || '初始化失敗')
+          }
+          
+          const result = await response.json()
+          console.log('自動初始化完成:', result)
+          
+          setIsInitializing(false)
+        }
+      } catch (error) {
+        console.error('自動初始化失敗:', error)
+        setIsInitializing(false)
+      }
+    }
+    
+    checkAndInitialize()
+  }, [])
+
   return (
     <ContentPageLayout
       title="會計系統"
