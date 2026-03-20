@@ -74,8 +74,24 @@ export function QuoteComparisonCard({
       // 3. 覆蓋核心表的 unit_price（選中的報價）
       const selectedQuote = quotes.find(q => q.requestId === requestId)
       if (selectedQuote && selectedQuote.quotedCost) {
-        // TODO: 從 tour_requests.source_id 取得 itinerary_item_id
-        // 然後更新 tour_itinerary_items.unit_price
+        // 從 tour_requests 取得 source_id（關聯 tour_itinerary_items.id）
+        const { data: request } = await supabase
+          .from('tour_requests')
+          .select('source_id')
+          .eq('id', requestId)
+          .single()
+        
+        if (request?.source_id) {
+          // 更新核心表 unit_price（覆蓋）
+          await supabase
+            .from('tour_itinerary_items')
+            .update({
+              unit_price: selectedQuote.quotedCost,
+              quoted_cost: selectedQuote.quotedCost,
+              supplier_name: selectedQuote.supplierName,
+            })
+            .eq('id', request.source_id)
+        }
       }
 
       toast.success(`已選擇「${selectedQuote?.supplierName}」`)
