@@ -6,6 +6,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Search, MapPin, Building2, UtensilsCrossed, Loader2 } from 'lucide-react'
 import { QuickAddResource } from './QuickAddResource'
+import { ResourceEditDialog } from './ResourceEditDialog'
 import { Input } from '@/components/ui/input'
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox'
 import { cn } from '@/lib/utils'
@@ -33,9 +34,10 @@ interface ResourceItem {
 
 interface DraggableResourceCardProps {
   resource: ResourceItem
+  onEdit?: (resource: ResourceItem) => void
 }
 
-function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
+function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `resource-${resource.type}-${resource.id}`,
     data: {
@@ -94,7 +96,17 @@ function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
           {isUnverified ? '⚠ 待驗證' : resource.category || resource.city_name || ''}
         </p>
       </div>
-      <MapPin size={10} className="text-emerald-500 flex-shrink-0 opacity-60" />
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation()
+          onEdit?.(resource)
+        }}
+        className="p-0.5 rounded hover:bg-emerald-100 transition-colors flex-shrink-0"
+        title="查看/編輯"
+      >
+        <MapPin size={10} className="text-emerald-500" />
+      </button>
     </div>
   )
 }
@@ -114,6 +126,10 @@ interface ResourcePanelProps {
 export function ResourcePanel({ className, countryId, cityId, locationName, onAddNew }: ResourcePanelProps) {
   const [activeTab, setActiveTab] = useState<ResourceType>('attraction')
   const [searchQuery, setSearchQuery] = useState('')
+
+  // 編輯 Dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editingResource, setEditingResource] = useState<ResourceItem | null>(null)
 
   // 階層式篩選：國家 → 地區 → 城市
   const [resolvedCountryId, setResolvedCountryId] = useState<string | undefined>(undefined)
@@ -476,11 +492,31 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
         ) : (
           <div className="grid grid-cols-2 gap-1.5">
             {filteredResources.map(resource => (
-              <DraggableResourceCard key={`${resource.type}-${resource.id}`} resource={resource} />
+              <DraggableResourceCard 
+                key={`${resource.type}-${resource.id}`} 
+                resource={resource}
+                onEdit={(r) => {
+                  setEditingResource(r)
+                  setEditDialogOpen(true)
+                }}
+              />
             ))}
           </div>
         )}
       </div>
+
+      {/* 編輯 Dialog */}
+      <ResourceEditDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        resourceId={editingResource?.id || null}
+        resourceType={editingResource?.type || 'attraction'}
+        onSaved={() => {
+          // 重新載入資源列表
+          // 簡單做法：標記需要刷新
+          setResources(prev => ({ ...prev }))
+        }}
+      />
     </div>
   )
 }
