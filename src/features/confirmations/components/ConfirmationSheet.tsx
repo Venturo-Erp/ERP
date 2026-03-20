@@ -40,7 +40,7 @@ interface TourHeaderInfo {
 // === 主組件 ===
 
 export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
-  const { items, loading } = useTourItineraryItemsByTour(tourId)
+  const { items, loading, refresh } = useTourItineraryItemsByTour(tourId)
   const [headerInfo, setHeaderInfo] = useState<TourHeaderInfo | null>(null)
   const [headerLoading, setHeaderLoading] = useState(true)
 
@@ -233,6 +233,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         title="交通"
         items={groupedByCategory.transport}
         showUnitPriceColumns={false}
+        onActualExpenseUpdate={refresh}
       />
 
       {/* === 餐食表 === */}
@@ -240,6 +241,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         title="餐食"
         items={groupedByCategory.meals}
         showUnitPriceColumns={true}
+        onActualExpenseUpdate={refresh}
       />
 
       {/* === 住宿表 === */}
@@ -247,6 +249,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         title="住宿"
         items={groupedByCategory.accommodation}
         showUnitPriceColumns={true}
+        onActualExpenseUpdate={refresh}
       />
 
       {/* === 活動表 === */}
@@ -254,6 +257,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         title="活動"
         items={groupedByCategory.activities}
         showUnitPriceColumns={true}
+        onActualExpenseUpdate={refresh}
       />
 
       {/* === 其他 === */}
@@ -261,6 +265,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         title="其他"
         items={groupedByCategory.others}
         showUnitPriceColumns={true}
+        onActualExpenseUpdate={refresh}
       />
 
       {/* === 財務彙總 === */}
@@ -297,9 +302,10 @@ interface CategoryTableProps {
   title: string
   items: TourItineraryItem[]
   showUnitPriceColumns: boolean
+  onActualExpenseUpdate?: () => void
 }
 
-function CategoryTable({ title, items, showUnitPriceColumns }: CategoryTableProps) {
+function CategoryTable({ title, items, showUnitPriceColumns, onActualExpenseUpdate }: CategoryTableProps) {
   if (items.length === 0) {
     return null // 沒有項目就不顯示表格
   }
@@ -340,6 +346,7 @@ function CategoryTable({ title, items, showUnitPriceColumns }: CategoryTableProp
                 item={item}
                 showUnitPriceColumns={showUnitPriceColumns}
                 isLast={index === items.length - 1}
+                onActualExpenseUpdate={onActualExpenseUpdate}
               />
             ))}
           </tbody>
@@ -355,9 +362,15 @@ interface TableRowProps {
   item: TourItineraryItem
   showUnitPriceColumns: boolean
   isLast: boolean
+  onActualExpenseUpdate?: () => void
 }
 
-function TableRow({ item, showUnitPriceColumns, isLast }: TableRowProps) {
+function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate }: TableRowProps) {
+  const [actualExpense, setActualExpense] = useState<string>(
+    item.actual_expense != null ? String(item.actual_expense) : ''
+  )
+  const [isSaving, setIsSaving] = useState(false)
+
   // 預計支出 = confirmed_cost || reply_cost || (unit_price × quantity)
   const expectedCost =
     item.confirmed_cost ??
@@ -370,6 +383,34 @@ function TableRow({ item, showUnitPriceColumns, isLast }: TableRowProps) {
 
   // 說明 = expense_note || confirmation_note || quote_note
   const notes = item.expense_note || item.confirmation_note || item.quote_note || ''
+
+  // 儲存實際支出
+  const handleSaveActualExpense = async () => {
+    const newValue = actualExpense.trim() === '' ? null : parseFloat(actualExpense)
+    
+    // 沒有變化就不更新
+    if (newValue === item.actual_expense) return
+
+    setIsSaving(true)
+    try {
+      const { error } = await supabase
+        .from('tour_itinerary_items')
+        .update({ 
+          actual_expense: newValue,
+          expense_at: newValue != null ? new Date().toISOString() : null
+        } as any)
+        .eq('id', item.id)
+
+      if (error) throw error
+      onActualExpenseUpdate?.()
+    } catch (err) {
+      logger.error('儲存實際支出失敗:', err)
+      // 還原
+      setActualExpense(item.actual_expense != null ? String(item.actual_expense) : '')
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   return (
     <tr className={!isLast ? 'border-b' : ''}>
@@ -411,9 +452,18 @@ function TableRow({ item, showUnitPriceColumns, isLast }: TableRowProps) {
         {expectedCost != null ? expectedCost.toLocaleString() : '-'}
       </td>
 
-      {/* 實際支出 */}
-      <td className="px-3 py-2 text-right font-mono font-medium text-green-600">
-        {item.actual_expense != null ? item.actual_expense.toLocaleString() : '-'}
+      {/* 實際支出（可編輯）*/}
+      <td className="px-3 py-2">
+        <input
+          type="number"
+          value={actualExpense}
+          onChange={(e) => setActualExpense(e.target.value)}
+          onBlur={handleSaveActualExpense}
+          onKeyDown={(e) => e.key === 'Enter' && handleSaveActualExpense()}
+          placeholder="-"
+          disabled={isSaving}
+          className="w-24 px-2 py-1 text-right font-mono font-medium text-green-600 border border-gray-200 rounded focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e] outline-none disabled:opacity-50 print:border-0 print:p-0"
+        />
       </td>
 
       {/* 付款狀態 */}
