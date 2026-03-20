@@ -46,6 +46,7 @@ import {
   Target,
   Landmark,
   Zap,
+  FileEdit,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
@@ -166,6 +167,12 @@ const menuItems: MenuItem[] = [
         href: '/accounting/period-closing',
         label: COMP_LAYOUT_LABELS.期末結轉,
         icon: Calendar,
+        requiredPermission: 'accounting',
+      },
+      {
+        href: '/accounting/opening-balances',
+        label: '期初餘額',
+        icon: FileEdit,
         requiredPermission: 'accounting',
       },
       {
