@@ -167,18 +167,7 @@ export function DayRow({
                   }
                   className="h-8 flex-1 text-sm border-0 shadow-none focus-visible:ring-1 focus-visible:ring-morandi-gold/30 rounded px-2 bg-transparent outline-none min-w-0"
                 />
-                {/* @ mention 搜景點 */}
-                <MentionInput
-                  ref={el => { mentionInputRefs.current[idx] = el }}
-                  value=""
-                  onChange={() => {}}
-                  onAttractionSelect={handleInsertAttraction}
-                  countryName={tourLocation}
-                  attractions={day.attractions}
-                  placeholder="@"
-                  className="h-8 w-8 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none bg-transparent px-1 flex-shrink-0"
-                  disabledAttractionIds={disabledAttractionIds}
-                />
+                {/* @ mention 搜景點 - 已移除，改用右側資源庫拖拉 */}
               </div>
               {/* 景點標籤列 */}
               {(day.attractions?.length ?? 0) > 0 && (
