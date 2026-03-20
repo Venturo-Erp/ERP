@@ -17,19 +17,38 @@ export async function callOcrSpace(base64Image: string, apiKey: string): Promise
   ocrFormData.append('scale', 'true')
   ocrFormData.append('OCREngine', '2')
 
-  const response = await fetch('https://api.ocr.space/parse/image', {
-    method: 'POST',
-    headers: { apikey: apiKey },
-    body: ocrFormData,
-  })
+  // 🆕 加入 30 秒 timeout
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 30000)
 
-  const data = await response.json()
+  try {
+    const response = await fetch('https://api.ocr.space/parse/image', {
+      method: 'POST',
+      headers: { apikey: apiKey },
+      body: ocrFormData,
+      signal: controller.signal,
+    })
 
-  if (data.IsErroredOnProcessing) {
-    throw new Error(data.ErrorMessage?.[0] || 'OCR.space 辨識失敗')
+    clearTimeout(timeoutId)
+
+    const data = await response.json()
+
+    if (data.IsErroredOnProcessing) {
+      throw new Error(data.ErrorMessage?.[0] || 'OCR.space 辨識失敗')
+    }
+
+    return data.ParsedResults?.[0]?.ParsedText || ''
+  } catch (error: any) {
+    clearTimeout(timeoutId)
+    
+    if (error.name === 'AbortError') {
+      // Timeout: 直接返回空字串，讓 Google Vision 接手
+      logger.warn('OCR.space timeout (30s), 改用 Google Vision')
+      return ''
+    }
+    
+    throw error
   }
-
-  return data.ParsedResults?.[0]?.ParsedText || ''
 }
 
 export interface GoogleVisionResult {

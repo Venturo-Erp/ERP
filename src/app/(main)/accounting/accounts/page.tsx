@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, Star, Edit } from 'lucide-react'
 import type { TableColumn } from '@/components/ui/enhanced-table'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { CreateAccountDialog } from './components/CreateAccountDialog'
+import { EditAccountDialog } from './components/EditAccountDialog'
+import { toast } from 'sonner'
 
 interface Account {
   id: string
@@ -17,6 +19,7 @@ interface Account {
   account_type: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense' | 'cost' | string
   is_active: boolean | null
   is_system_locked: boolean | null
+  is_favorite: boolean | null
   description: string | null
 }
 
@@ -34,6 +37,8 @@ export default function AccountsPage() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
 
   useEffect(() => {
     loadAccounts()
@@ -59,7 +64,51 @@ export default function AccountsPage() {
     }
   }
 
+  const toggleFavorite = async (accountId: string, currentFavorite: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('chart_of_accounts')
+        .update({ is_favorite: !currentFavorite })
+        .eq('id', accountId)
+
+      if (error) throw error
+
+      // 更新本地状态
+      setAccounts(prev => 
+        prev.map(acc => 
+          acc.id === accountId ? { ...acc, is_favorite: !currentFavorite } : acc
+        )
+      )
+
+      toast.success(currentFavorite ? '已取消常用' : '已標記為常用')
+    } catch (error) {
+      console.error('更新常用狀態失敗:', error)
+      toast.error('更新失敗')
+    }
+  }
+
+  const handleEdit = (account: Account) => {
+    setSelectedAccount(account)
+    setEditDialogOpen(true)
+  }
+
   const columns: TableColumn<Account>[] = [
+    {
+      key: 'favorite',
+      label: '常用',
+      width: "60px",
+      render: (_: unknown, row: Account) => (
+        <button
+          onClick={() => toggleFavorite(row.id, row.is_favorite || false)}
+          className="hover:scale-110 transition-transform"
+        >
+          <Star
+            size={18}
+            className={row.is_favorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+          />
+        </button>
+      ),
+    },
     {
       key: 'code',
       label: '科目代號',
@@ -118,6 +167,22 @@ export default function AccountsPage() {
         </Badge>
       ),
     },
+    {
+      key: 'actions',
+      label: '操作',
+      width: "80px",
+      render: (_: unknown, row: Account) => (
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => handleEdit(row)}
+          className="gap-1"
+        >
+          <Edit size={14} />
+          編輯
+        </Button>
+      ),
+    },
   ]
 
   const handleCreate = () => {
@@ -128,6 +193,7 @@ export default function AccountsPage() {
     <>
       <ListPageLayout
         title="會計科目管理"
+        description={`共 ${accounts.length} 個科目`}
         data={accounts}
         columns={columns}
         loading={isLoading}
@@ -144,6 +210,13 @@ export default function AccountsPage() {
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
         onSuccess={loadAccounts}
+      />
+
+      <EditAccountDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onSuccess={loadAccounts}
+        account={selectedAccount}
       />
     </>
   )
