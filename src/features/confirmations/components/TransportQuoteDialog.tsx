@@ -361,6 +361,9 @@ export function TransportQuoteDialog({
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader>
+          <DialogTitle>遊覽車報價</DialogTitle>
+        </DialogHeader>
         {/* 中間可滾動內容 */}
         <div className="flex-1 overflow-y-auto pr-1 space-y-3">
           {viewMode === 'traditional' ? (
