@@ -69,11 +69,9 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
     <div
       ref={setNodeRef}
       style={style}
-      {...listeners}
-      {...attributes}
       className={cn(
         'flex items-center gap-1.5 px-2 py-1.5 rounded-md border bg-card',
-        'cursor-grab active:cursor-grabbing hover:bg-accent/50 transition-colors',
+        'hover:bg-accent/50 transition-colors',
         isDragging && 'opacity-50 shadow-lg z-50',
         // 未驗證 = 橘色警示邊框
         isUnverified
@@ -81,32 +79,43 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
           : 'border-border'
       )}
     >
-      {resource.thumbnail ? (
-        <img
-          src={resource.thumbnail}
-          alt={resource.name}
-          className="w-6 h-6 rounded object-cover flex-shrink-0"
-        />
-      ) : (
-        <div className={cn(
-          'w-6 h-6 rounded flex items-center justify-center flex-shrink-0',
-          isUnverified ? 'bg-amber-100' : 'bg-muted'
-        )}>
-          {iconMap[resource.type]}
+      {/* 拖拉區域 - 只有這部分可以拖拉 */}
+      <div
+        {...listeners}
+        {...attributes}
+        className="flex items-center gap-1.5 flex-1 min-w-0 cursor-grab active:cursor-grabbing"
+      >
+        {resource.thumbnail ? (
+          <img
+            src={resource.thumbnail}
+            alt={resource.name}
+            className="w-6 h-6 rounded object-cover flex-shrink-0"
+          />
+        ) : (
+          <div className={cn(
+            'w-6 h-6 rounded flex items-center justify-center flex-shrink-0',
+            isUnverified ? 'bg-amber-100' : 'bg-muted'
+          )}>
+            {iconMap[resource.type]}
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium truncate">{resource.name}</p>
+          <p className="text-[10px] text-muted-foreground truncate">
+            {isUnverified ? '⚠ 待驗證' : resource.category || resource.city_name || ''}
+          </p>
         </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium truncate">{resource.name}</p>
-        <p className="text-[10px] text-muted-foreground truncate">
-          {isUnverified ? '⚠ 待驗證' : resource.category || resource.city_name || ''}
-        </p>
       </div>
+      {/* 按鈕區域 - 不在 listeners 範圍內，可以正常點擊 */}
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation()
+          e.preventDefault()
+          console.log('🗺️ 點擊編輯按鈕:', resource.name, '座標:', resource.latitude, resource.longitude)
           onEdit?.(resource)
         }}
+        onPointerDown={(e) => e.stopPropagation()}
         className="p-0.5 rounded hover:bg-emerald-100 transition-colors flex-shrink-0"
         title="查看/編輯"
       >
