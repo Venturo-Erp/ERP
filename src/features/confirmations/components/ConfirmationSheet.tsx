@@ -96,13 +96,18 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
     fetchHeader()
   }, [tourId])
 
-  // 按類別分組（不篩選狀態，顯示所有行程項目）
+  // 只顯示已確認的項目
+  const confirmedItems = useMemo(() => {
+    return items.filter(item => item.confirmation_status === 'confirmed')
+  }, [items])
+
+  // 按類別分組
   const groupedByCategory = useMemo(() => {
-    const transport = items.filter(i => i.category === 'transport' || i.category === 'group-transport')
-    const meals = items.filter(i => i.category === 'meals')
-    const accommodation = items.filter(i => i.category === 'accommodation')
-    const activities = items.filter(i => i.category === 'activities')
-    const others = items.filter(
+    const transport = confirmedItems.filter(i => i.category === 'transport' || i.category === 'group-transport')
+    const meals = confirmedItems.filter(i => i.category === 'meals')
+    const accommodation = confirmedItems.filter(i => i.category === 'accommodation')
+    const activities = confirmedItems.filter(i => i.category === 'activities')
+    const others = confirmedItems.filter(
       i =>
         i.category !== 'transport' &&
         i.category !== 'group-transport' &&
@@ -112,14 +117,14 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
     )
 
     return { transport, meals, accommodation, activities, others }
-  }, [items])
+  }, [confirmedItems])
 
   // 財務彙總
   const financialSummary = useMemo(() => {
     let totalExpected = 0
     let totalActual = 0
 
-    items.forEach(item => {
+    confirmedItems.forEach(item => {
       // 預計支出 = confirmed_cost || reply_cost || (unit_price × quantity)
       const expected =
         item.confirmed_cost ??
@@ -135,7 +140,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
     })
 
     return { totalExpected, totalActual }
-  }, [items])
+  }, [confirmedItems])
 
   const handlePrint = () => {
     window.print()

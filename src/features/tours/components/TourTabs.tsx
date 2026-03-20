@@ -113,7 +113,6 @@ export const TOUR_TABS = [
   { value: 'quote', label: COMP_TOURS_LABELS.報價 },
   { value: 'quick-quote', label: COMP_TOURS_LABELS.快速報價 },
   { value: 'requirements', label: COMP_TOURS_LABELS.需求 },
-  { value: 'tracking', label: COMP_TOURS_LABELS.追蹤 },
   { value: 'confirmation-sheet', label: COMP_TOURS_LABELS.團確單 },
   { value: 'checkin', label: COMP_TOURS_LABELS.報到 },
   { value: 'files', label: COMP_TOURS_LABELS.檔案 },
@@ -173,8 +172,6 @@ export function TourTabContent({
       )
     case 'orders':
       return <TourOrders tour={tour} />
-    case 'tracking':
-      return <TourTrackingPanel tour={tour} />
     case 'confirmation-sheet':
       return <ConfirmationSheet tourId={tour.id} />
     case 'checkin':

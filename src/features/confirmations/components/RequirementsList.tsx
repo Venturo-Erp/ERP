@@ -846,10 +846,15 @@ export function RequirementsList({
 
         const oldCost = matchingCoreItem.unit_price
         if (oldCost !== quotedCost) {
-          // 更新 tour_itinerary_items
+          // 更新 tour_itinerary_items（覆蓋價格 + 標記已確認）
           const { error: updateError } = await supabase
             .from('tour_itinerary_items')
-            .update({ unit_price: quotedCost, updated_by: user.id } as never)
+            .update({ 
+              unit_price: quotedCost, 
+              confirmation_status: 'confirmed',
+              confirmed_cost: quotedCost,
+              updated_by: user.id 
+            } as never)
             .eq('id', matchingCoreItem.id)
           if (updateError) {
             logger.error('回填成本失敗', updateError)
