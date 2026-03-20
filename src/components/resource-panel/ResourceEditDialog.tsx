@@ -52,6 +52,8 @@ export function ResourceEditDialog({
     if (!open || !resourceId) return
 
     async function fetchData() {
+      if (!resourceId) return
+      
       setLoading(true)
       try {
         const tableName = resourceType === 'attraction' ? 'attractions' 
