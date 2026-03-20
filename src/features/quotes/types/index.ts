@@ -39,6 +39,10 @@ export interface CostItem {
   itinerary_item_id?: string // 對應 tour_itinerary_items.id
   sub_category?: string // 餐飲: breakfast/lunch/dinner；住宿: 房型
 
+  // === 價格追蹤（視覺提示用）===
+  estimated_cost?: number | null // 業務預估（初始值，不變）
+  quoted_cost?: number | null    // 廠商報價（待確認）
+
   // === 資源關聯（餐廳/飯店/景點）===
   resource_type?: CostItemResourceType // 資源類型
   resource_id?: string // 關聯的資源 ID（指向對應表格）

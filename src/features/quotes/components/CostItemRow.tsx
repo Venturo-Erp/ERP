@@ -117,15 +117,36 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
             placeholder={COST_ITEM_ROW_LABELS.嬰兒票價}
           />
         ) : (
-          <CalcInput
-            value={item.unit_price}
-            onChange={val => handleUpdateItem(categoryId, item.id, 'unit_price', val)}
-            formula={item.unit_price_formula}
-            onFormulaChange={f => handleUpdateItem(categoryId, item.id, 'unit_price_formula', f)}
-            className={`${inputClass} text-center ${isLocalPricing ? 'cursor-not-allowed opacity-60' : ''}`}
-            disabled={isLocalPricing}
-            title={isLocalPricing ? '請點擊「Local 報價」按鈕修改' : undefined}
-          />
+          <div className="relative">
+            <CalcInput
+              value={item.unit_price}
+              onChange={val => handleUpdateItem(categoryId, item.id, 'unit_price', val)}
+              formula={item.unit_price_formula}
+              onFormulaChange={f => handleUpdateItem(categoryId, item.id, 'unit_price_formula', f)}
+              className={`${inputClass} text-center ${isLocalPricing ? 'cursor-not-allowed opacity-60' : ''} ${
+                // 價格變動顏色
+                item.estimated_cost && item.unit_price
+                  ? item.unit_price < item.estimated_cost
+                    ? 'text-blue-600 font-semibold'    // 降價 → 藍色
+                    : item.unit_price > item.estimated_cost
+                    ? 'text-red-600 font-semibold'     // 漲價 → 紅色
+                    : ''
+                  : ''
+              }`}
+              disabled={isLocalPricing}
+              title={
+                isLocalPricing
+                  ? '請點擊「Local 報價」按鈕修改'
+                  : item.estimated_cost && item.unit_price && item.estimated_cost !== item.unit_price
+                  ? `預估 ${item.estimated_cost.toLocaleString()} → 當前 ${item.unit_price.toLocaleString()} (${
+                      item.unit_price > item.estimated_cost
+                        ? `↑${(item.unit_price - item.estimated_cost).toLocaleString()}`
+                        : `↓${(item.estimated_cost - item.unit_price).toLocaleString()}`
+                    })`
+                  : undefined
+              }
+            />
+          </div>
         )}
       </td>
       <td className="py-3 px-4 text-sm text-morandi-primary text-center font-medium table-divider whitespace-nowrap">

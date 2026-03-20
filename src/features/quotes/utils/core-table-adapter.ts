@@ -49,6 +49,8 @@ export function coreItemsToCostCategories(items: TourItineraryItem[]): CostCateg
       adult_price: item.adult_price ?? undefined,
       child_price: item.child_price ?? undefined,
       infant_price: item.infant_price ?? undefined,
+      estimated_cost: item.estimated_cost ?? null,
+      quoted_cost: item.quoted_cost ?? null,
       resource_type: item.resource_type as CostItem['resource_type'],
       resource_id: item.resource_id || undefined,
       resource_latitude: item.latitude ?? undefined,
