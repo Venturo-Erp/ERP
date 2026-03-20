@@ -1,7 +1,7 @@
 import { Textarea } from '@/components/ui/textarea'
 
 interface UnifiedTraditionalViewProps {
-  requestType: 'accommodation' | 'meal' | 'transport' | 'activity'
+  requestType: 'accommodation' | 'meal' | 'transport' | 'activity' | 'cancellation'
   tour: { code: string; name: string; departure_date?: string } | null
   totalPax: number | null
   supplierName: string
@@ -25,11 +25,15 @@ export function UnifiedTraditionalView({
   note,
   setNote,
 }: UnifiedTraditionalViewProps) {
+  const isCancellation = requestType === 'cancellation'
+
   return (
     <div className="bg-white p-6">
       {/* 標題區 */}
       <div className="flex justify-between items-start mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">廠商需求單</h2>
+        <h2 className={`text-2xl font-bold ${isCancellation ? 'text-red-700' : 'text-gray-800'}`}>
+          {isCancellation ? '⚠️ 取消通知單' : '廠商需求單'}
+        </h2>
         <div className="text-right text-sm text-gray-600">
           <div className="font-semibold">角落旅行社</div>
           <div className="text-xs">Corner Travel</div>
@@ -113,6 +117,9 @@ export function UnifiedTraditionalView({
       )}
       {requestType === 'activity' && (
         <ActivityTable items={items} />
+      )}
+      {requestType === 'cancellation' && (
+        <CancellationTable items={items} />
       )}
 
       {/* 備註 */}
@@ -263,6 +270,43 @@ function ActivityTable({ items }: { items: any[] }) {
           ))}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+// 取消單表
+function CancellationTable({ items }: { items: any[] }) {
+  return (
+    <div className="mb-6">
+      <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mb-4">
+        <h3 className="text-lg font-semibold text-red-700 mb-2">⚠️ 取消項目</h3>
+        <p className="text-sm text-red-600">因行程異動，需取消以下預訂項目：</p>
+      </div>
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="bg-gradient-to-r from-red-200 to-red-300 text-red-900">
+            <th className="border border-red-400 px-3 py-2 text-left">項目名稱</th>
+            <th className="border border-red-400 px-3 py-2 text-left">日期</th>
+            <th className="border border-red-400 px-3 py-2 text-left w-20">數量</th>
+            <th className="border border-red-400 px-3 py-2 text-left">原備註</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item, idx) => (
+            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-red-50'}>
+              <td className="border border-red-300 px-3 py-2 font-medium">{item.name || '—'}</td>
+              <td className="border border-red-300 px-3 py-2">{item.date || '—'}</td>
+              <td className="border border-red-300 px-3 py-2">{item.quantity || '—'}</td>
+              <td className="border border-red-300 px-3 py-2 text-gray-600">{item.note || ''}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <p className="text-sm text-yellow-800">
+          🙏 造成不便，敬請見諒。如有任何問題，請隨時與我們聯繫。
+        </p>
+      </div>
     </div>
   )
 }

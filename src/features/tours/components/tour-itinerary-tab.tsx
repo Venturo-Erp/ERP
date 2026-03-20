@@ -427,7 +427,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   )
 
   // Remove an attraction from a day
-  const removeAttraction = useCallback((dayIdx: number, attractionId: string) => {
+  const removeAttraction = useCallback(async (dayIdx: number, attractionId: string) => {
     // 找到要刪除的景點名稱（用於通知）
     const day = dailySchedule[dayIdx]
     const attraction = day?.attractions?.find(a => a.id === attractionId)
@@ -452,10 +452,53 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           relatedCoreItem.unit_price > 0 &&
           relatedCoreItem.quote_status === 'confirmed'))  // Local 報價已確認
     
-    // 如果有下游資料，顯示通知提醒
+    // 🆕 如果已發需求單，自動產生取消單
+    if (relatedCoreItem?.request_id) {
+      try {
+        const sb = createSupabaseBrowserClient()
+        const { data: originalRequest } = await sb
+          .from('tour_requests')
+          .select('*')
+          .eq('id', relatedCoreItem.request_id)
+          .single()
+        
+        if (originalRequest && originalRequest.status !== 'draft') {
+          // 產生取消單
+          await sb.from('tour_requests').insert({
+            tour_id: originalRequest.tour_id,
+            workspace_id: originalRequest.workspace_id,
+            request_type: 'cancellation',
+            supplier_name: originalRequest.supplier_name,
+            supplier_id: originalRequest.supplier_id,
+            supplier_contact: originalRequest.supplier_contact,
+            source_type: originalRequest.source_type,
+            source_id: originalRequest.source_id,
+            status: 'draft',
+            note: `行程異動，取消「${attractionName}」，煩請協助取消預訂`,
+            items: originalRequest.items,
+            created_by: currentUser?.id || '',
+          })
+          
+          toast.success(
+            `✅ 已自動產生取消單\n\n景點「${attractionName}」已刪除，取消單已建立（待發送）`,
+            {
+              duration: 6000,
+              style: {
+                whiteSpace: 'pre-line',
+                maxWidth: '500px',
+              },
+            }
+          )
+        }
+      } catch (error) {
+        logger.error('Failed to create cancellation request', error)
+      }
+    }
+    
+    // 如果有其他下游資料，顯示警告
     if (hasDownstream) {
       const warnings = []
-      if (relatedCoreItem.request_id) warnings.push('已發需求單')
+      if (relatedCoreItem.request_id) warnings.push('已發需求單（已產生取消單）')
       if (relatedCoreItem.confirmation_status !== 'none') warnings.push('已確認訂位')
       if (relatedCoreItem.leader_status !== 'none') warnings.push('領隊已填寫')
       if (
@@ -466,16 +509,18 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         warnings.push(`已確認報價 ${relatedCoreItem.unit_price.toLocaleString()} 元`)
       }
       
-      toast.warning(
-        `⚠️ 刪除景點「${attractionName}」\n\n此景點${warnings.join('、')}，請記得通知廠商取消預訂。\n\n（可能是替換、追加或調整）`,
-        {
-          duration: 8000,
-          style: {
-            whiteSpace: 'pre-line',
-            maxWidth: '500px',
-          },
-        }
-      )
+      if (warnings.length > 0) {
+        toast.warning(
+          `⚠️ 刪除景點「${attractionName}」\n\n此景點${warnings.join('、')}`,
+          {
+            duration: 6000,
+            style: {
+              whiteSpace: 'pre-line',
+              maxWidth: '500px',
+            },
+          }
+        )
+      }
     }
     
     // 不管有沒有下游資料，都刪除（行程是 SSOT）
