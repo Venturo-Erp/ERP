@@ -187,16 +187,74 @@ export function useSyncItineraryToCore() {
       logger.log(SYNC_LABELS.SYNC_START, { itinerary_id, tour_id, days: daily_itinerary.length })
 
       try {
-        // 1. 在刪除前，檢查哪些項目有需求單（需要產生取消單）
-        const { data: items_with_requests, error: fetch_error } = await supabase
+        // 1. 取得所有舊項目（檢查需求單狀態）
+        const { data: old_items, error: fetch_error } = await supabase
           .from('tour_itinerary_items')
-          .select('id,title,category,request_id,supplier_name,service_date')
+          .select('id,title,category,request_id,supplier_name,service_date,resource_id')
           .eq('itinerary_id', itinerary_id)
-          .not('request_id', 'is', null)
 
         if (fetch_error) throw fetch_error
 
-        // 記錄需要取消的需求單資訊（按 request_id 分組）
+        // 2. 建立新項目的指紋集合（用於比對是否「還存在」）
+        const newItemFingerprints = new Set<string>()
+        
+        for (let day_index = 0; day_index < daily_itinerary.length; day_index++) {
+          const day = daily_itinerary[day_index]
+          
+          // 景點
+          if (day.activities) {
+            for (const activity of day.activities) {
+              const fingerprint = `activities:${activity.id}` // 用 resource_id 匹配
+              newItemFingerprints.add(fingerprint)
+            }
+          }
+          
+          // 住宿
+          if (day.accommodation) {
+            const fingerprint = `accommodation:${day.accommodation}` // 用 title 匹配
+            newItemFingerprints.add(fingerprint)
+          }
+          
+          // 餐食（Meals 是 { breakfast: string, lunch: string, dinner: string }）
+          if (day.meals) {
+            const mealTypes: Array<'breakfast' | 'lunch' | 'dinner'> = ['breakfast', 'lunch', 'dinner']
+            for (const mealType of mealTypes) {
+              const meal = day.meals[mealType]
+              if (meal && typeof meal === 'string' && meal.trim()) {
+                const fingerprint = `meal:${meal.trim()}` // 用 title 匹配
+                newItemFingerprints.add(fingerprint)
+              }
+            }
+          }
+        }
+
+        // 3. 分類舊項目：刪除 vs 修改
+        const deletedItems: typeof old_items = []
+        const modifiedRequestIds = new Set<string>()
+
+        if (old_items) {
+          for (const oldItem of old_items) {
+            let fingerprint = ''
+            
+            if (oldItem.category === 'activities' && oldItem.resource_id) {
+              fingerprint = `activities:${oldItem.resource_id}`
+            } else if (oldItem.category === 'accommodation') {
+              fingerprint = `accommodation:${oldItem.title}`
+            } else if (oldItem.category === 'meals') {
+              fingerprint = `meal:${oldItem.title}`
+            }
+            
+            if (!newItemFingerprints.has(fingerprint)) {
+              // 不在新行程中 → 刪除
+              deletedItems.push(oldItem)
+            } else if (oldItem.request_id) {
+              // 還在新行程中，但有需求單 → 修改（標記 outdated）
+              modifiedRequestIds.add(oldItem.request_id)
+            }
+          }
+        }
+
+        // 4. 處理刪除項目（產生取消單）
         const cancellationsByRequestId = new Map<string, {
           request_id: string
           supplier_name: string
@@ -204,39 +262,36 @@ export function useSyncItineraryToCore() {
           items: Array<{ title: string; service_date: string | null }>
         }>()
 
-        if (items_with_requests && items_with_requests.length > 0) {
-          for (const item of items_with_requests) {
-            if (!item.request_id) continue
+        for (const item of deletedItems) {
+          if (!item.request_id) continue
 
-            if (!cancellationsByRequestId.has(item.request_id)) {
-              cancellationsByRequestId.set(item.request_id, {
-                request_id: item.request_id,
-                supplier_name: item.supplier_name || '',
-                category: item.category || '',
-                items: [],
-              })
-            }
-
-            const group = cancellationsByRequestId.get(item.request_id)!
-            group.items.push({
-              title: item.title || '',
-              service_date: item.service_date,
+          if (!cancellationsByRequestId.has(item.request_id)) {
+            cancellationsByRequestId.set(item.request_id, {
+              request_id: item.request_id,
+              supplier_name: item.supplier_name || '',
+              category: item.category || '',
+              items: [],
             })
           }
+
+          const group = cancellationsByRequestId.get(item.request_id)!
+          group.items.push({
+            title: item.title || '',
+            service_date: item.service_date,
+          })
         }
 
-        // 2. 刪除所有舊的行程項目（行程是 SSOT，不保護下游資料）
-        // 根據 William 決策：不管有沒有報價/需求/確認，行程刪除就是刪除
-        const { error: delete_error } = await supabase
-          .from('tour_itinerary_items')
-          .delete()
-          .eq('itinerary_id', itinerary_id)
+        // 5. 標記修改項目的需求單為 outdated
+        if (modifiedRequestIds.size > 0) {
+          await supabase
+            .from('tour_requests')
+            .update({ status: 'outdated' })
+            .in('id', Array.from(modifiedRequestIds))
+        }
 
-        if (delete_error) throw delete_error
-
-        // 3. 為每個需求單產生取消通知（更新原需求單狀態為 cancelled）
+        // 6. 標記刪除項目的需求單為 cancelled
         for (const [request_id, cancellation] of cancellationsByRequestId) {
-          const cancellationNote = `取消項目：\n${cancellation.items.map(i => `- ${i.service_date || ''} ${i.title}`).join('\n')}`
+          const cancellationNote = `行程刪除，取消項目：\n${cancellation.items.map(i => `- ${i.service_date || ''} ${i.title}`).join('\n')}`
           
           await supabase
             .from('tour_requests')
@@ -247,7 +302,15 @@ export function useSyncItineraryToCore() {
             .eq('id', request_id)
         }
 
-        // 4. 建立新的行程項目
+        // 7. 刪除所有舊的行程項目（行程是 SSOT，不保護下游資料）
+        const { error: delete_error } = await supabase
+          .from('tour_itinerary_items')
+          .delete()
+          .eq('itinerary_id', itinerary_id)
+
+        if (delete_error) throw delete_error
+
+        // 8. 建立新的行程項目
         const new_items: TourItineraryItemInsert[] = []
 
         for (let day_index = 0; day_index < daily_itinerary.length; day_index++) {
