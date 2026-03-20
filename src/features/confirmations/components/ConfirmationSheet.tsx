@@ -51,7 +51,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
       try {
         const { data: tour, error: tourError } = await supabase
           .from('tours')
-          .select('code, name, departure_date, return_date, current_participants')
+          .select('code, name, departure_date, return_date, current_participants, tour_leader, flight_info')
           .eq('id', tourId)
           .single()
 
@@ -80,10 +80,10 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           departure_date: tour.departure_date,
           return_date: tour.return_date,
           current_participants: tour.current_participants,
-          leader_name: null, // TODO: 之後加到 tours 表
+          leader_name: (tour as any).tour_leader ?? null,
           sales_person: firstOrder?.sales_person ?? null,
           assistant: firstOrder?.assistant ?? null,
-          flight_info: null, // TODO: 之後加到 tours 表
+          flight_info: (tour as any).flight_info ?? null,
         })
       } catch (err) {
         logger.error('讀取團確單標頭失敗:', err)

@@ -56,7 +56,8 @@ export default function AccountsPage() {
         .order('code', { ascending: true })
 
       if (error) throw error
-      setAccounts(data || [])
+      // 補上 is_favorite 預設值（DB 可能沒有這個欄位）
+      setAccounts((data || []).map(d => ({ ...d, is_favorite: (d as any).is_favorite ?? false })))
     } catch (error) {
       console.error('載入科目失敗:', error)
     } finally {
@@ -68,7 +69,7 @@ export default function AccountsPage() {
     try {
       const { error } = await supabase
         .from('chart_of_accounts')
-        .update({ is_favorite: !currentFavorite })
+        .update({ is_favorite: !currentFavorite } as any)
         .eq('id', accountId)
 
       if (error) throw error
