@@ -1,0 +1,184 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
+import { supabase } from '@/lib/supabase/client'
+
+interface JournalVoucher {
+  id: string
+  voucher_no: string
+  voucher_date: string
+  memo: string | null
+  status: string
+  total_debit: number
+  total_credit: number
+}
+
+interface JournalLine {
+  id: string
+  line_no: number
+  account_id: string
+  description: string | null
+  debit_amount: number
+  credit_amount: number
+  account?: {
+    code: string
+    name: string
+  }
+}
+
+interface VoucherDetailDialogProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  voucher: JournalVoucher | null
+}
+
+const statusConfig = {
+  draft: { label: '草稿', variant: 'secondary' as const },
+  posted: { label: '已過帳', variant: 'default' as const },
+  reversed: { label: '已反沖', variant: 'destructive' as const },
+  locked: { label: '已鎖定', variant: 'outline' as const },
+}
+
+export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDetailDialogProps) {
+  const [lines, setLines] = useState<JournalLine[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    if (open && voucher) {
+      loadLines()
+    }
+  }, [open, voucher])
+
+  const loadLines = async () => {
+    if (!voucher) return
+
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('journal_lines')
+        .select(`
+          *,
+          account:chart_of_accounts(code, name)
+        `)
+        .eq('voucher_id', voucher.id)
+        .order('line_no')
+
+      if (error) throw error
+      setLines(data || [])
+    } catch (error) {
+      console.error('載入分錄失敗:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (!voucher) return null
+
+  const config = statusConfig[voucher.status as keyof typeof statusConfig]
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl">
+        <DialogHeader>
+          <DialogTitle>傳票明細</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* 傳票資訊 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
+            <div>
+              <div className="text-sm text-muted-foreground">傳票編號</div>
+              <div className="font-mono font-semibold">{voucher.voucher_no}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">日期</div>
+              <div className="font-medium">{voucher.voucher_date}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">金額</div>
+              <div className="font-mono">{voucher.total_debit.toLocaleString()}</div>
+            </div>
+            <div>
+              <div className="text-sm text-muted-foreground">狀態</div>
+              <Badge variant={config.variant}>{config.label}</Badge>
+            </div>
+          </div>
+
+          {/* 說明 */}
+          {voucher.memo && (
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <div className="text-sm text-muted-foreground mb-1">說明</div>
+              <div className="text-sm">{voucher.memo}</div>
+            </div>
+          )}
+
+          {/* 分錄明細 */}
+          <div className="border rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-muted">
+                <tr>
+                  <th className="px-4 py-2 text-left text-sm font-medium w-20">項次</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium w-32">科目代號</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium">科目名稱</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium">摘要</th>
+                  <th className="px-4 py-2 text-right text-sm font-medium w-32">借方</th>
+                  <th className="px-4 py-2 text-right text-sm font-medium w-32">貸方</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                      載入中...
+                    </td>
+                  </tr>
+                ) : lines.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                      無分錄資料
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {lines.map((line) => (
+                      <tr key={line.id} className="border-t">
+                        <td className="px-4 py-2 text-sm">{line.line_no}</td>
+                        <td className="px-4 py-2 font-mono text-sm">
+                          {line.account?.code || '-'}
+                        </td>
+                        <td className="px-4 py-2 text-sm">
+                          {line.account?.name || '-'}
+                        </td>
+                        <td className="px-4 py-2 text-sm text-muted-foreground">
+                          {line.description || '-'}
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono text-sm">
+                          {line.debit_amount > 0 ? line.debit_amount.toLocaleString() : '-'}
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono text-sm">
+                          {line.credit_amount > 0 ? line.credit_amount.toLocaleString() : '-'}
+                        </td>
+                      </tr>
+                    ))}
+                    {/* 合計 */}
+                    <tr className="border-t-2 bg-muted font-semibold">
+                      <td colSpan={4} className="px-4 py-2 text-right">合計</td>
+                      <td className="px-4 py-2 text-right font-mono">
+                        {voucher.total_debit.toLocaleString()}
+                      </td>
+                      <td className="px-4 py-2 text-right font-mono">
+                        {voucher.total_credit.toLocaleString()}
+                      </td>
+                    </tr>
+                  </>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

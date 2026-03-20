@@ -4,11 +4,15 @@ import { useState, useEffect } from 'react'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Eye, RotateCcw, Plus } from 'lucide-react'
+import { Eye, RotateCcw, Plus, Filter } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { TableColumn } from '@/components/ui/enhanced-table'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { CreateVoucherDialog } from './components/CreateVoucherDialog'
+import { VoucherDetailDialog } from './components/VoucherDetailDialog'
 
 interface JournalVoucher {
   id: string
@@ -33,6 +37,13 @@ export default function VouchersPage() {
   const [vouchers, setVouchers] = useState<JournalVoucher[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
+  const [selectedVoucher, setSelectedVoucher] = useState<JournalVoucher | null>(null)
+  const [filters, setFilters] = useState({
+    startDate: '',
+    endDate: '',
+    status: 'all',
+  })
 
   useEffect(() => {
     loadVouchers()
@@ -43,13 +54,28 @@ export default function VouchersPage() {
 
     setIsLoading(true)
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('journal_vouchers')
         .select('*')
         .eq('workspace_id', user.workspace_id)
-        .order('voucher_date', { ascending: false })
+
+      // 應用日期範圍篩選
+      if (filters.startDate) {
+        query = query.gte('voucher_date', filters.startDate)
+      }
+      if (filters.endDate) {
+        query = query.lte('voucher_date', filters.endDate)
+      }
+      
+      // 應用狀態篩選
+      if (filters.status !== 'all') {
+        query = query.eq('status', filters.status)
+      }
+
+      query = query.order('voucher_date', { ascending: false })
         .order('voucher_no', { ascending: false })
 
+      const { data, error } = await query
       if (error) throw error
       setVouchers(data || [])
     } catch (error) {
@@ -58,6 +84,13 @@ export default function VouchersPage() {
       setIsLoading(false)
     }
   }
+
+  // 當篩選條件改變時重新載入
+  useEffect(() => {
+    if (user?.workspace_id) {
+      loadVouchers()
+    }
+  }, [filters])
 
   const columns: TableColumn<JournalVoucher>[] = [
     {
@@ -71,7 +104,7 @@ export default function VouchersPage() {
     {
       key: 'voucher_date',
       label: '日期',
-      width: "100px",
+      width: "120px",
     },
     {
       key: 'memo',
@@ -145,8 +178,8 @@ export default function VouchersPage() {
   ]
 
   const handleViewDetail = (voucher: JournalVoucher) => {
-    // TODO: 開啟詳細對話框
-    console.log('查看傳票:', voucher)
+    setSelectedVoucher(voucher)
+    setIsDetailDialogOpen(true)
   }
 
   const handleReverse = (voucher: JournalVoucher) => {
@@ -163,26 +196,92 @@ export default function VouchersPage() {
   }
 
   return (
-    <>
-      <ListPageLayout
-        title="傳票管理"
-        data={vouchers}
-        columns={columns}
-        loading={isLoading}
-        searchable={false}
-        headerActions={
+    <div className="h-full flex flex-col">
+      {/* 標題列 + 篩選 */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h1 className="text-2xl font-bold">傳票管理</h1>
+            <p className="text-sm text-muted-foreground">共 {vouchers.length} 筆傳票</p>
+          </div>
           <Button onClick={handleCreate} className="gap-2">
             <Plus size={16} />
             新增傳票
           </Button>
-        }
-      />
+        </div>
+
+        {/* 篩選區域 */}
+        <div className="flex gap-3 items-end">
+          <div className="flex-1">
+            <Label htmlFor="startDate" className="text-xs">開始日期</Label>
+            <Input
+              id="startDate"
+              type="date"
+              value={filters.startDate}
+              onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+              className="h-9"
+            />
+          </div>
+          <div className="flex-1">
+            <Label htmlFor="endDate" className="text-xs">結束日期</Label>
+            <Input
+              id="endDate"
+              type="date"
+              value={filters.endDate}
+              onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+              className="h-9"
+            />
+          </div>
+          <div className="flex-1">
+            <Label htmlFor="status" className="text-xs">狀態</Label>
+            <Select
+              value={filters.status}
+              onValueChange={(value) => setFilters({ ...filters, status: value })}
+            >
+              <SelectTrigger id="status" className="h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">全部</SelectItem>
+                <SelectItem value="draft">草稿</SelectItem>
+                <SelectItem value="posted">已過帳</SelectItem>
+                <SelectItem value="reversed">已反沖</SelectItem>
+                <SelectItem value="locked">已鎖定</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => setFilters({ startDate: '', endDate: '', status: 'all' })}
+            className="h-9"
+          >
+            清除
+          </Button>
+        </div>
+      </div>
+
+      {/* 表格區域 */}
+      <div className="flex-1 border rounded-lg overflow-hidden bg-card">
+        <ListPageLayout
+          title=""
+          data={vouchers}
+          columns={columns}
+          loading={isLoading}
+          searchable={false}
+        />
+      </div>
 
       <CreateVoucherDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         onSuccess={handleCreateSuccess}
       />
-    </>
+
+      <VoucherDetailDialog
+        open={isDetailDialogOpen}
+        onOpenChange={setIsDetailDialogOpen}
+        voucher={selectedVoucher}
+      />
+    </div>
   )
 }
