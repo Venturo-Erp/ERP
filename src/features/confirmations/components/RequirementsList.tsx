@@ -36,6 +36,7 @@ import { MealQuoteDialog } from './MealQuoteDialog'
 import { ActivityQuoteDialog } from './ActivityQuoteDialog'
 import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSupplierDialog'
 import { LocalQuoteDialog } from './LocalQuoteDialog'
+import { RequirementsDrawer } from './RequirementsDrawer'
 // CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
@@ -1495,7 +1496,7 @@ export function RequirementsList({
                                 </div>
                               </div>
 
-                              {/* 已發送需求單 */}
+                              {/* 已發送需求單（使用 RequirementsDrawer）*/}
                               {(() => {
                                 const relatedRequests = existingRequests.filter(r => {
                                   if (item.resourceId) {
@@ -1512,54 +1513,47 @@ export function RequirementsList({
                                   )
                                 }
 
+                                // 🆕 處理多廠商比價分組
+                                const quoteGroups = new Map<string, TourRequest[]>()
+                                const standaloneRequests: TourRequest[] = []
+                                
+                                for (const req of relatedRequests) {
+                                  const sourceId = req.source_id
+                                  if (sourceId && req.status !== 'draft') {
+                                    if (!quoteGroups.has(sourceId)) {
+                                      quoteGroups.set(sourceId, [])
+                                    }
+                                    quoteGroups.get(sourceId)!.push(req)
+                                  } else {
+                                    standaloneRequests.push(req)
+                                  }
+                                }
+                                
+                                // 合併比價組到列表
+                                const allRequests = [...standaloneRequests]
+                                for (const [sourceId, requests] of quoteGroups) {
+                                  if (requests.length >= 2) {
+                                    // 標記為比價組
+                                    allRequests.push({
+                                      ...requests[0],
+                                      _isComparisonGroup: true,
+                                      _comparisonRequests: requests,
+                                      _sourceId: sourceId,
+                                    } as any)
+                                  } else {
+                                    allRequests.push(...requests)
+                                  }
+                                }
+
                                 return (
                                   <div>
-                                    <h4 className="text-sm font-semibold text-morandi-primary mb-2">
+                                    <h4 className="text-sm font-semibold text-morandi-primary mb-3">
                                       📤 已發送需求單 ({relatedRequests.length})
                                     </h4>
-                                    <div className="space-y-2">
-                                      {relatedRequests.map(req => {
-                                        const statusConfig = getStatusConfig('tour_request', req.status || 'draft')
-                                        return (
-                                          <div key={req.id} className="bg-white border border-morandi-gold/20 rounded-lg p-3">
-                                            <div className="flex items-center justify-between mb-2">
-                                              <div className="flex items-center gap-2">
-                                                <span className="font-medium">{req.supplier_name}</span>
-                                                <span className={cn(
-                                                  'px-2 py-0.5 rounded text-xs',
-                                                  statusConfig.bgColor,
-                                                  statusConfig.color
-                                                )}>
-                                                  {statusConfig.label}
-                                                </span>
-                                              </div>
-                                              <span className="text-xs text-morandi-secondary">
-                                                {req.created_at ? new Date(req.created_at).toLocaleDateString('zh-TW') : ''}
-                                              </span>
-                                            </div>
-                                            {req.sent_at && (
-                                              <div className="text-xs text-morandi-secondary">
-                                                發送時間：{new Date(req.sent_at).toLocaleString('zh-TW')}
-                                                {req.sent_via && ` (${req.sent_via.toUpperCase()})`}
-                                              </div>
-                                            )}
-                                            {req.replied_at && (
-                                              <div className="text-xs text-morandi-secondary">
-                                                回覆時間：{new Date(req.replied_at).toLocaleString('zh-TW')}
-                                              </div>
-                                            )}
-                                            {req.supplier_response && (
-                                              <div className="mt-2 text-sm">
-                                                <span className="text-morandi-secondary">報價：</span>
-                                                <span className="font-semibold text-morandi-gold">
-                                                  ${((req.supplier_response as any)?.quotedCost || 0).toLocaleString()}
-                                                </span>
-                                              </div>
-                                            )}
-                                          </div>
-                                        )
-                                      })}
-                                    </div>
+                                    <RequirementsDrawer
+                                      requests={allRequests as any}
+                                      onRefresh={() => loadData(false)}
+                                    />
                                   </div>
                                 )
                               })()}
