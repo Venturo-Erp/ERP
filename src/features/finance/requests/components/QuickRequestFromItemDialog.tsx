@@ -122,6 +122,7 @@ export function QuickRequestFromItemDialog({
             description: item.title,
             unit_price: numAmount,
             quantity: 1,
+            tour_request_id: item.id, // 連結需求單
           },
         ],
         item.tourName,

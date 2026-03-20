@@ -80,28 +80,28 @@ export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDeta
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-5xl">
         <DialogHeader>
           <DialogTitle>傳票明細</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* 傳票資訊 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted rounded-lg">
+          <div className="grid grid-cols-4 gap-6 p-4 bg-muted/50 rounded-lg">
             <div>
-              <div className="text-sm text-muted-foreground">傳票編號</div>
-              <div className="font-mono font-semibold">{voucher.voucher_no}</div>
+              <div className="text-xs text-muted-foreground mb-1">傳票編號</div>
+              <div className="font-mono font-semibold text-base">{voucher.voucher_no}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">日期</div>
-              <div className="font-medium">{voucher.voucher_date}</div>
+              <div className="text-xs text-muted-foreground mb-1">日期</div>
+              <div className="font-medium text-base">{voucher.voucher_date}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">金額</div>
-              <div className="font-mono">{voucher.total_debit.toLocaleString()}</div>
+              <div className="text-xs text-muted-foreground mb-1">金額</div>
+              <div className="font-mono text-base">{voucher.total_debit.toLocaleString()}</div>
             </div>
             <div>
-              <div className="text-sm text-muted-foreground">狀態</div>
+              <div className="text-xs text-muted-foreground mb-1">狀態</div>
               <Badge variant={config.variant}>{config.label}</Badge>
             </div>
           </div>
@@ -109,22 +109,22 @@ export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDeta
           {/* 說明 */}
           {voucher.memo && (
             <div className="p-3 bg-blue-50 rounded-lg">
-              <div className="text-sm text-muted-foreground mb-1">說明</div>
-              <div className="text-sm">{voucher.memo}</div>
+              <div className="text-xs text-muted-foreground mb-1">說明</div>
+              <div className="text-sm leading-relaxed">{voucher.memo}</div>
             </div>
           )}
 
           {/* 分錄明細 */}
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full">
-              <thead className="bg-muted">
+              <thead className="bg-muted/50">
                 <tr>
-                  <th className="px-4 py-2 text-left text-sm font-medium w-20">項次</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium w-32">科目代號</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium">科目名稱</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium">摘要</th>
-                  <th className="px-4 py-2 text-right text-sm font-medium w-32">借方</th>
-                  <th className="px-4 py-2 text-right text-sm font-medium w-32">貸方</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground w-16">項次</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground w-24">科目代號</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground w-40">科目名稱</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground">摘要</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-muted-foreground w-32">借方</th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-muted-foreground w-32">貸方</th>
                 </tr>
               </thead>
               <tbody>

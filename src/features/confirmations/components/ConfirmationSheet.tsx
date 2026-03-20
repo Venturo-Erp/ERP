@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import { useTourItineraryItemsByTour } from '@/features/tours/hooks/useTourItineraryItems'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
+import { usePaymentStatus } from '../hooks/usePaymentStatus'
 
 // === 類型定義 ===
 
@@ -306,6 +307,7 @@ function CategoryTable({ title, items, showUnitPriceColumns }: CategoryTableProp
               )}
               <th className="px-3 py-2 text-right font-medium w-24">預計支出</th>
               <th className="px-3 py-2 text-right font-medium w-24">實際支出</th>
+              <th className="px-3 py-2 text-left font-medium w-32">付款狀態</th>
               <th className="px-3 py-2 text-left font-medium">說明</th>
             </tr>
           </thead>
@@ -392,11 +394,42 @@ function TableRow({ item, showUnitPriceColumns, isLast }: TableRowProps) {
         {item.actual_expense != null ? item.actual_expense.toLocaleString() : '-'}
       </td>
 
+      {/* 付款狀態 */}
+      <td className="px-3 py-2">
+        <PaymentStatusCell requestId={item.request_id} />
+      </td>
+
       {/* 說明 */}
       <td className="px-3 py-2 text-gray-600 text-xs">
         {notes || '-'}
       </td>
     </tr>
+  )
+}
+
+// === 子組件：付款狀態 ===
+
+function PaymentStatusCell({ requestId }: { requestId: string | null }) {
+  const { amounts } = usePaymentStatus(requestId)
+  
+  // 沒有付款金額 → 顯示空白
+  if (amounts.totalAmount === 0) {
+    return null
+  }
+
+  return (
+    <div className="space-y-0.5 text-xs">
+      {amounts.paidAmount > 0 && (
+        <div className="text-green-600 font-medium">
+          ✓ 已付款 ${amounts.paidAmount.toLocaleString()}
+        </div>
+      )}
+      {amounts.pendingAmount > 0 && (
+        <div className="text-yellow-600 font-medium">
+          ⏳ 待付款 ${amounts.pendingAmount.toLocaleString()}
+        </div>
+      )}
+    </div>
   )
 }
 

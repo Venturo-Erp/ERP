@@ -196,49 +196,34 @@ export default function VouchersPage() {
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* 標題列 + 篩選 */}
-      <div className="mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <div>
-            <h1 className="text-2xl font-bold">傳票管理</h1>
-            <p className="text-sm text-muted-foreground">共 {vouchers.length} 筆傳票</p>
-          </div>
-          <Button onClick={handleCreate} className="gap-2">
-            <Plus size={16} />
-            新增傳票
-          </Button>
-        </div>
-
-        {/* 篩選區域 */}
-        <div className="flex gap-3 items-end">
-          <div className="flex-1">
-            <Label htmlFor="startDate" className="text-xs">開始日期</Label>
+    <>
+      <ListPageLayout
+        title="傳票管理"
+        data={vouchers}
+        columns={columns}
+        loading={isLoading}
+        searchable={false}
+        headerActions={
+          <div className="flex gap-2 items-center flex-wrap">
             <Input
-              id="startDate"
               type="date"
+              placeholder="開始日期"
               value={filters.startDate}
               onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-              className="h-9"
+              className="w-40"
             />
-          </div>
-          <div className="flex-1">
-            <Label htmlFor="endDate" className="text-xs">結束日期</Label>
             <Input
-              id="endDate"
               type="date"
+              placeholder="結束日期"
               value={filters.endDate}
               onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-              className="h-9"
+              className="w-40"
             />
-          </div>
-          <div className="flex-1">
-            <Label htmlFor="status" className="text-xs">狀態</Label>
             <Select
               value={filters.status}
               onValueChange={(value) => setFilters({ ...filters, status: value })}
             >
-              <SelectTrigger id="status" className="h-9">
+              <SelectTrigger className="w-32">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -249,27 +234,22 @@ export default function VouchersPage() {
                 <SelectItem value="locked">已鎖定</SelectItem>
               </SelectContent>
             </Select>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setFilters({ startDate: '', endDate: '', status: 'all' })}
+            >
+              清除
+            </Button>
+            <div className="ml-2 border-l pl-2">
+              <Button onClick={handleCreate} className="gap-2">
+                <Plus size={16} />
+                新增傳票
+              </Button>
+            </div>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setFilters({ startDate: '', endDate: '', status: 'all' })}
-            className="h-9"
-          >
-            清除
-          </Button>
-        </div>
-      </div>
-
-      {/* 表格區域 */}
-      <div className="flex-1 border rounded-lg overflow-hidden bg-card">
-        <ListPageLayout
-          title=""
-          data={vouchers}
-          columns={columns}
-          loading={isLoading}
-          searchable={false}
-        />
-      </div>
+        }
+      />
 
       <CreateVoucherDialog
         open={isCreateDialogOpen}
@@ -282,6 +262,6 @@ export default function VouchersPage() {
         onOpenChange={setIsDetailDialogOpen}
         voucher={selectedVoucher}
       />
-    </div>
+    </>
   )
 }
