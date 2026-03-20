@@ -88,11 +88,6 @@ const TourClosingTab = dynamic(
   { loading: () => <TabLoading /> }
 )
 
-const TourTrackingPanel = dynamic(
-  () => import('@/features/tours/components/tour-tracking').then(m => m.TourTrackingPanel),
-  { loading: () => <TabLoading /> }
-)
-
 const ConfirmationSheet = dynamic(
   () =>
     import('@/features/confirmations/components/ConfirmationSheet').then(
