@@ -35,7 +35,7 @@ export function usePaymentStatus(requestId: string | null | undefined) {
         const { data: items, error } = await supabase
           .from('payment_request_items')
           .select('subtotal, payment_requests!inner(paid_at)')
-          .eq('tour_request_id', requestId)
+          .eq('tour_request_id', requestId as string)
 
         if (error) throw error
 

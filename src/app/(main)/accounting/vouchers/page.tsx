@@ -69,7 +69,7 @@ export default function VouchersPage() {
       
       // 應用狀態篩選
       if (filters.status !== 'all') {
-        query = query.eq('status', filters.status)
+        query = query.eq('status', filters.status as any)
       }
 
       query = query.order('voucher_date', { ascending: false })
@@ -258,7 +258,7 @@ export default function VouchersPage() {
       <VoucherDetailDialog
         open={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
-        voucher={selectedVoucher}
+        voucher={selectedVoucher as any}
       />
     </>
   )

@@ -36,21 +36,21 @@ export async function POST(request: NextRequest) {
     }
 
     // 同步核心表：更新 reply_cost 和 request_status
-    const { data: request } = await supabase
+    const { data: reqData } = await supabase
       .from('tour_requests')
       .select('supplier_name')
       .eq('id', requestId)
       .single()
 
-    if (request) {
+    if (reqData) {
       await supabase
         .from('tour_itinerary_items')
         .update({
           request_status: 'replied',
           reply_cost: unitPrice || totalCost,
-        })
+        } as any)
         .eq('tour_id', tourId)
-        .eq('supplier_name', request.supplier_name)
+        .eq('supplier_name', reqData.supplier_name)
         .eq('category', 'meals')
     }
 

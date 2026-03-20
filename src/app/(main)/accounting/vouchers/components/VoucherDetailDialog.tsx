@@ -66,7 +66,7 @@ export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDeta
         .order('line_no')
 
       if (error) throw error
-      setLines(data || [])
+      setLines((data || []) as any)
     } catch (error) {
       console.error('載入分錄失敗:', error)
     } finally {

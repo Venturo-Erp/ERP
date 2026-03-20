@@ -193,8 +193,7 @@ export default function AccountsPage() {
   return (
     <>
       <ListPageLayout
-        title="會計科目管理"
-        description={`共 ${accounts.length} 個科目`}
+        title={`會計科目管理（共 ${accounts.length} 個科目）`}
         data={accounts}
         columns={columns}
         loading={isLoading}
@@ -217,7 +216,7 @@ export default function AccountsPage() {
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         onSuccess={loadAccounts}
-        account={selectedAccount}
+        account={selectedAccount as any}
       />
     </>
   )

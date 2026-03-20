@@ -51,7 +51,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
       try {
         const { data: tour, error: tourError } = await supabase
           .from('tours')
-          .select('code, name, departure_date, return_date, current_participants, tour_leader, flight_info')
+          .select('code, name, departure_date, return_date, current_participants')
           .eq('id', tourId)
           .single()
 
@@ -74,16 +74,28 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           .limit(1)
           .maybeSingle()
 
+        // 讀取領隊（從團員名單中 identity = '領隊' 的成員）
+        // order_members 沒有 tour_id，需要透過 orders 表關聯
+        const { data: leaderMember } = await supabase
+          .from('order_members')
+          .select('chinese_name, orders!inner(tour_id)')
+          .eq('orders.tour_id', tourId)
+          .eq('identity', '領隊')
+          .limit(1)
+          .maybeSingle()
+
+        const leaderName = (leaderMember as any)?.chinese_name || null
+
         setHeaderInfo({
           code: tour.code,
           name: tour.name,
           departure_date: tour.departure_date,
           return_date: tour.return_date,
           current_participants: tour.current_participants,
-          leader_name: (tour as any).tour_leader ?? null,
+          leader_name: leaderName,
           sales_person: firstOrder?.sales_person ?? null,
           assistant: firstOrder?.assistant ?? null,
-          flight_info: (tour as any).flight_info ?? null,
+          flight_info: null, // TODO: 之後可加航班資訊
         })
       } catch (err) {
         logger.error('讀取團確單標頭失敗:', err)
@@ -96,18 +108,13 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
     fetchHeader()
   }, [tourId])
 
-  // 只顯示已確認的項目
-  const confirmedItems = useMemo(() => {
-    return items.filter(item => item.confirmation_status === 'confirmed')
-  }, [items])
-
-  // 按類別分組
+  // 按類別分組（顯示所有項目，不篩選狀態）
   const groupedByCategory = useMemo(() => {
-    const transport = confirmedItems.filter(i => i.category === 'transport' || i.category === 'group-transport')
-    const meals = confirmedItems.filter(i => i.category === 'meals')
-    const accommodation = confirmedItems.filter(i => i.category === 'accommodation')
-    const activities = confirmedItems.filter(i => i.category === 'activities')
-    const others = confirmedItems.filter(
+    const transport = items.filter(i => i.category === 'transport' || i.category === 'group-transport')
+    const meals = items.filter(i => i.category === 'meals')
+    const accommodation = items.filter(i => i.category === 'accommodation')
+    const activities = items.filter(i => i.category === 'activities')
+    const others = items.filter(
       i =>
         i.category !== 'transport' &&
         i.category !== 'group-transport' &&
@@ -117,14 +124,14 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
     )
 
     return { transport, meals, accommodation, activities, others }
-  }, [confirmedItems])
+  }, [items])
 
   // 財務彙總
   const financialSummary = useMemo(() => {
     let totalExpected = 0
     let totalActual = 0
 
-    confirmedItems.forEach(item => {
+    items.forEach(item => {
       // 預計支出 = confirmed_cost || reply_cost || (unit_price × quantity)
       const expected =
         item.confirmed_cost ??
@@ -140,7 +147,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
     })
 
     return { totalExpected, totalActual }
-  }, [confirmedItems])
+  }, [items])
 
   const handlePrint = () => {
     window.print()
