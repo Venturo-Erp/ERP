@@ -1517,9 +1517,9 @@ export function RequirementsList({
         {/* 已發委託區塊 */}
         {/* ============================================ */}
         {(() => {
-          // 篩選有 request_type + items 的委託記錄
+          // 篩選有 request_type 的委託記錄（items 可以是空陣列，如遊覽車需求單）
           const delegations = existingRequests.filter(
-            r => r.request_type && r.items && Array.isArray(r.items) && r.items.length > 0
+            r => r.request_type
               // 排除已在主表格顯示的「其他」草稿（如保險）
               && !(r.request_type === 'other' && r.status === 'draft')
           )
