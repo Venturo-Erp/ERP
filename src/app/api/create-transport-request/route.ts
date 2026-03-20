@@ -50,10 +50,6 @@ export async function POST(req: NextRequest) {
           .from('tour_requests')
           .update({
             note: `${vehicleDesc ? vehicleDesc + '\n' : ''}${note || ''}`.trim(),
-            metadata: {
-              vehicleDesc,
-              totalPax,
-            },
           })
           .eq('id', existingRequest.id)
 
@@ -82,10 +78,6 @@ export async function POST(req: NextRequest) {
         status: 'draft',
         note: `${vehicleDesc ? vehicleDesc + '\n' : ''}${note || ''}`.trim(),
         items: [],
-        metadata: {
-          vehicleDesc,
-          totalPax,
-        },
       })
       .select('id')
       .single()
