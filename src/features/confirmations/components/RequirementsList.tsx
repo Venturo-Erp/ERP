@@ -36,6 +36,7 @@ import { MealQuoteDialog } from './MealQuoteDialog'
 import { ActivityQuoteDialog } from './ActivityQuoteDialog'
 import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSupplierDialog'
 import { LocalQuoteDialog } from './LocalQuoteDialog'
+import { QuoteComparisonCard } from './QuoteComparisonCard'
 // CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
@@ -1521,6 +1522,35 @@ export function RequirementsList({
               // 排除已在主表格顯示的「其他」草稿（如保險）
               && !(r.request_type === 'other' && r.status === 'draft')
           )
+          
+          // 🆕 比價分組：按 source_id 分組（同一個 tour_itinerary_items 項目）
+          const quoteGroups = new Map<string, TourRequest[]>()
+          const standaloneRequests: TourRequest[] = []
+          
+          for (const req of delegations) {
+            const sourceId = req.source_id
+            if (sourceId && req.status !== 'draft') {
+              if (!quoteGroups.has(sourceId)) {
+                quoteGroups.set(sourceId, [])
+              }
+              quoteGroups.get(sourceId)!.push(req)
+            } else {
+              standaloneRequests.push(req)
+            }
+          }
+          
+          // 分離：多廠商比價 vs 單一需求
+          const comparisonGroups: Array<{ sourceId: string; requests: TourRequest[] }> = []
+          for (const [sourceId, requests] of quoteGroups) {
+            if (requests.length >= 2) {
+              // 2 個以上 → 比價
+              comparisonGroups.push({ sourceId, requests })
+            } else {
+              // 只有 1 個 → 正常顯示
+              standaloneRequests.push(...requests)
+            }
+          }
+          
           if (delegations.length === 0) return null
 
           const STATUS_BADGE: Record<string, { label: string; className: string }> = {
@@ -1540,12 +1570,50 @@ export function RequirementsList({
           }
 
           return (
-            <div className="mt-6">
-              <div className="flex items-center gap-2 mb-3">
+            <div className="mt-6 space-y-4">
+              {/* 標題 */}
+              <div className="flex items-center gap-2">
                 <Send size={16} className="text-morandi-gold" />
                 <span className="font-medium text-morandi-primary">已發委託</span>
                 <span className="text-xs text-morandi-secondary">({delegations.length})</span>
               </div>
+
+              {/* 🆕 多廠商比價卡片 */}
+              {comparisonGroups.length > 0 && (
+                <div className="space-y-3">
+                  <div className="text-sm font-medium text-morandi-secondary">
+                    多廠商比價（{comparisonGroups.length} 個項目）
+                  </div>
+                  {comparisonGroups.map(({ sourceId, requests }) => {
+                    // 從核心表找項目標題
+                    const coreItem = coreItems.find(i => i.id === sourceId)
+                    const itemTitle = coreItem?.title || '未知項目'
+                    
+                    return (
+                      <QuoteComparisonCard
+                        key={sourceId}
+                        itemTitle={itemTitle}
+                        quotes={requests.map(r => ({
+                          requestId: r.id,
+                          supplierName: r.supplier_name || '',
+                          quotedCost: (r.supplier_response as any)?.quotedCost || null,
+                          status: r.status || 'draft',
+                          suppliedAt: r.replied_at,
+                          note: r.note,
+                        }))}
+                        onSelect={() => loadData(false)}
+                      />
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* 單一需求單列表 */}
+              {standaloneRequests.length > 0 && (
+                <>
+                  <div className="text-sm font-medium text-morandi-secondary">
+                    需求單列表（{standaloneRequests.length}）
+                  </div>
               <div className="border border-border rounded-lg overflow-hidden bg-card">
                 <table className="w-full text-sm">
                   <thead>
@@ -1559,7 +1627,7 @@ export function RequirementsList({
                     </tr>
                   </thead>
                   <tbody>
-                    {delegations.map(d => {
+                    {standaloneRequests.map(d => {
                       const badge = STATUS_BADGE[d.status || 'draft'] || STATUS_BADGE.draft
                       const itemCount = Array.isArray(d.items) ? d.items.length : 0
                       const typeLabel = TYPE_LABELS[d.request_type || ''] || d.request_type || '-'
@@ -1734,6 +1802,8 @@ export function RequirementsList({
                   </tbody>
                 </table>
               </div>
+                </>
+              )}
             </div>
           )
         })()}
