@@ -1569,7 +1569,7 @@ export function RequirementsList({
                   return (
                     <React.Fragment key={cat.key}>
                       <tr className="bg-morandi-container/30 border-t border-border">
-                        <td colSpan={9} className="px-3 py-2">
+                        <td colSpan={10} className="px-3 py-2">
                           <div className="flex items-center gap-3">
                             <span className="font-medium text-morandi-primary">{cat.label}</span>
                             <span className="text-xs text-morandi-secondary">
@@ -1600,7 +1600,7 @@ export function RequirementsList({
                       {isHiddenExpanded && hiddenItems.length > 0 && (
                         <>
                           <tr className="bg-morandi-muted/10 border-t border-dashed border-morandi-muted/30">
-                            <td colSpan={9} className="px-3 py-1.5 text-xs text-morandi-muted">
+                            <td colSpan={10} className="px-3 py-1.5 text-xs text-morandi-muted">
                               <div className="flex items-center gap-1">
                                 <EyeOff size={12} />
                                 <span>{COMP_REQUIREMENTS_LABELS.已隱藏的項目}</span>
