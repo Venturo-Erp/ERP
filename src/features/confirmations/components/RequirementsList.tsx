@@ -1496,7 +1496,7 @@ export function RequirementsList({
                                 </div>
                               </div>
 
-                              {/* 已發送需求單（使用 RequirementsDrawer）*/}
+                              {/* 已發送需求單（最新報價 + 歷史）*/}
                               {(() => {
                                 const relatedRequests = existingRequests.filter(r => {
                                   if (item.resourceId) {
@@ -1513,11 +1513,21 @@ export function RequirementsList({
                                   )
                                 }
 
-                                // 🆕 處理多廠商比價分組
+                                // 🆕 按時間排序（最新在前）
+                                const sortedRequests = [...relatedRequests].sort((a, b) => {
+                                  const timeA = a.replied_at || a.sent_at || a.created_at || ''
+                                  const timeB = b.replied_at || b.sent_at || b.created_at || ''
+                                  return timeB.localeCompare(timeA)
+                                })
+
+                                const latestRequest = sortedRequests[0]
+                                const historyRequests = sortedRequests.slice(1)
+
+                                // 🆕 處理多廠商比價分組（只用於最新報價）
                                 const quoteGroups = new Map<string, TourRequest[]>()
                                 const standaloneRequests: TourRequest[] = []
                                 
-                                for (const req of relatedRequests) {
+                                for (const req of [latestRequest]) {
                                   const sourceId = req.source_id
                                   if (sourceId && req.status !== 'draft') {
                                     if (!quoteGroups.has(sourceId)) {
@@ -1529,31 +1539,94 @@ export function RequirementsList({
                                   }
                                 }
                                 
-                                // 合併比價組到列表
-                                const allRequests = [...standaloneRequests]
-                                for (const [sourceId, requests] of quoteGroups) {
-                                  if (requests.length >= 2) {
-                                    // 標記為比價組
-                                    allRequests.push({
-                                      ...requests[0],
-                                      _isComparisonGroup: true,
-                                      _comparisonRequests: requests,
-                                      _sourceId: sourceId,
-                                    } as any)
-                                  } else {
-                                    allRequests.push(...requests)
-                                  }
-                                }
+                                // 合併比價組
+                                const latestRequestDisplay = standaloneRequests.length > 0 
+                                  ? standaloneRequests 
+                                  : Array.from(quoteGroups.values()).flatMap(requests => {
+                                      if (requests.length >= 2) {
+                                        return [{
+                                          ...requests[0],
+                                          _isComparisonGroup: true,
+                                          _comparisonRequests: requests,
+                                          _sourceId: requests[0].source_id,
+                                        } as any]
+                                      }
+                                      return requests
+                                    })
 
                                 return (
-                                  <div>
-                                    <h4 className="text-sm font-semibold text-morandi-primary mb-3">
-                                      📤 已發送需求單 ({relatedRequests.length})
-                                    </h4>
-                                    <RequirementsDrawer
-                                      requests={allRequests as any}
-                                      onRefresh={() => loadData(false)}
-                                    />
+                                  <div className="space-y-4">
+                                    {/* 最新報價 */}
+                                    <div>
+                                      <h4 className="text-sm font-semibold text-morandi-primary mb-2 flex items-center gap-2">
+                                        <Send size={14} />
+                                        最新報價
+                                      </h4>
+                                      <RequirementsDrawer
+                                        requests={latestRequestDisplay as any}
+                                        onRefresh={() => loadData(false)}
+                                      />
+                                    </div>
+
+                                    {/* 報價歷程 */}
+                                    {historyRequests.length > 0 && (
+                                      <div>
+                                        <button
+                                          onClick={() => {
+                                            const historyKey = `history-${itemKey}`
+                                            const newExpanded = new Set(expandedMainItems)
+                                            if (newExpanded.has(historyKey)) {
+                                              newExpanded.delete(historyKey)
+                                            } else {
+                                              newExpanded.add(historyKey)
+                                            }
+                                            setExpandedMainItems(newExpanded)
+                                          }}
+                                          className="flex items-center gap-2 text-sm font-medium text-morandi-secondary hover:text-morandi-primary transition-colors mb-2"
+                                        >
+                                          {expandedMainItems.has(`history-${itemKey}`) ? (
+                                            <ChevronDown size={14} />
+                                          ) : (
+                                            <ChevronRight size={14} />
+                                          )}
+                                          📜 報價歷程 ({historyRequests.length})
+                                        </button>
+                                        
+                                        {expandedMainItems.has(`history-${itemKey}`) && (
+                                          <div className="space-y-2 pl-6">
+                                            {historyRequests.map(req => {
+                                              const statusConfig = getStatusConfig('tour_request', req.status || 'draft')
+                                              const quotedCost = (req.supplier_response as any)?.quotedCost
+                                              const time = req.replied_at || req.sent_at || req.created_at
+                                              
+                                              return (
+                                                <div key={req.id} className="bg-white border border-morandi-gold/20 rounded-lg p-3 text-sm">
+                                                  <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                      <span className="text-morandi-secondary">
+                                                        {time ? new Date(time).toLocaleDateString('zh-TW') : '—'}
+                                                      </span>
+                                                      <span className={cn(
+                                                        'px-2 py-0.5 rounded text-xs',
+                                                        statusConfig.bgColor,
+                                                        statusConfig.color
+                                                      )}>
+                                                        {statusConfig.label}
+                                                      </span>
+                                                    </div>
+                                                    {quotedCost && (
+                                                      <span className="font-semibold text-morandi-gold">
+                                                        ${quotedCost.toLocaleString()}
+                                                      </span>
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              )
+                                            })}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
                                 )
                               })()}

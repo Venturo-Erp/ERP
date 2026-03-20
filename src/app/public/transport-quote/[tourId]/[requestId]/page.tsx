@@ -37,6 +37,19 @@ export default async function TransportQuoteWithRequestPage({
     )
   }
 
+  // 🆕 查詢該供應商的歷史報價（排除當前這筆）
+  const { data: historyRequests } = await supabase
+    .from('tour_requests')
+    .select('*')
+    .eq('tour_id', tourId)
+    .eq('supplier_name', request.supplier_name)
+    .eq('request_type', 'transport')
+    .neq('id', requestId)
+    .order('replied_at', { ascending: false })
+    .order('created_at', { ascending: false })
+
+  const history = (historyRequests || []).filter(r => r.supplier_response && r.replied_at)
+
   // 查詢團資料
   const { data: tour } = await supabase
     .from('tours')
@@ -199,6 +212,47 @@ export default async function TransportQuoteWithRequestPage({
                 <h3 className="font-semibold text-amber-900 mb-2">角落旅行社備註</h3>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{request.note}</p>
               </div>
+            )}
+
+            {/* 🆕 報價歷程 */}
+            {history.length > 0 && (
+              <details className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
+                <summary className="px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors select-none">
+                  <span className="font-semibold text-gray-700">📜 報價歷程 ({history.length})</span>
+                  <span className="text-xs text-gray-500 ml-2">（點擊展開）</span>
+                </summary>
+                <div className="p-4 space-y-3 border-t border-gray-200">
+                  {history.map((h: any) => {
+                    const quoteData = h.supplier_response as any
+                    return (
+                      <div key={h.id} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-gray-500 text-xs">
+                            {new Date(h.replied_at).toLocaleString('zh-TW')}
+                          </span>
+                          <span className="font-bold text-lg text-[#c9a96e]">
+                            ${quoteData?.totalFare?.toLocaleString() || '—'}
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-600 space-y-1">
+                          <div>聯絡人：{quoteData?.contact || '—'}</div>
+                          <div className="flex gap-2 flex-wrap">
+                            {quoteData?.includesParking && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">✓ 停車費</span>}
+                            {quoteData?.includesToll && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">✓ 過路費</span>}
+                            {quoteData?.includesAccommodation && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">✓ 司機住宿</span>}
+                            {quoteData?.includesTip && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">✓ 小費</span>}
+                          </div>
+                          {quoteData?.supplierNote && (
+                            <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                              備註：{quoteData.supplierNote}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </details>
             )}
 
             {/* 已提交：顯示報價結果 */}
