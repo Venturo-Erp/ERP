@@ -6,7 +6,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Search, MapPin, Building2, UtensilsCrossed, Loader2 } from 'lucide-react'
 import { QuickAddResource } from './QuickAddResource'
-import { ResourceEditDialog } from './ResourceEditDialog'
+import { MapExplorerDialog } from './MapExplorerDialog'
 import { Input } from '@/components/ui/input'
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox'
 import { cn } from '@/lib/utils'
@@ -26,6 +26,11 @@ interface ResourceItem {
   thumbnail?: string | null
   city_name?: string | null
   data_verified?: boolean
+  latitude?: number | null
+  longitude?: number | null
+  address?: string | null
+  description?: string | null
+  region_id?: string | null
 }
 
 // ============================================
@@ -292,7 +297,7 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
       type: ResourceType,
       extraSelect = ''
     ) => {
-      const selectStr = `id, name, category, thumbnail, data_verified${extraSelect}`
+      const selectStr = `id, name, category, thumbnail, data_verified, latitude, longitude, address, description, region_id${extraSelect}`
       let query = supabase
         .from(table)
         .select(selectStr as 'id, name, category, thumbnail')
@@ -332,6 +337,11 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
             ? `${item.star_rating}星`
             : (item.category as string | null),
           thumbnail: item.thumbnail as string | null,
+          latitude: item.latitude as number | null,
+          longitude: item.longitude as number | null,
+          address: item.address as string | null,
+          description: item.description as string | null,
+          region_id: item.region_id as string | null,
         })),
       }))
       setLoading(prev => ({ ...prev, [type]: false }))
@@ -505,17 +515,12 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
         )}
       </div>
 
-      {/* 編輯 Dialog */}
-      <ResourceEditDialog
+      {/* 地圖探索 Dialog */}
+      <MapExplorerDialog
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
-        resourceId={editingResource?.id || null}
-        resourceType={editingResource?.type || 'attraction'}
-        onSaved={() => {
-          // 重新載入資源列表
-          // 簡單做法：標記需要刷新
-          setResources(prev => ({ ...prev }))
-        }}
+        resource={editingResource}
+        allResources={filteredResources}
       />
     </div>
   )
