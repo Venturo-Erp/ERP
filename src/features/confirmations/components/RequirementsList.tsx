@@ -37,6 +37,7 @@ import { ActivityQuoteDialog } from './ActivityQuoteDialog'
 import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSupplierDialog'
 import { LocalQuoteDialog } from './LocalQuoteDialog'
 import { QuoteComparisonCard } from './QuoteComparisonCard'
+import { RequirementsDrawer } from './RequirementsDrawer'
 // CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
@@ -1608,201 +1609,17 @@ export function RequirementsList({
                 </div>
               )}
 
-              {/* 單一需求單列表 */}
+              {/* 🆕 單一需求單列表（Morandi 抽屜設計）*/}
               {standaloneRequests.length > 0 && (
-                <>
-                  <div className="text-sm font-medium text-morandi-secondary">
+                <div>
+                  <div className="text-sm font-medium text-morandi-secondary mb-3">
                     需求單列表（{standaloneRequests.length}）
                   </div>
-              <div className="border border-border rounded-lg overflow-hidden bg-card">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="bg-morandi-container/50 border-b border-border">
-                      <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[32px]"></th>
-                      <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[100px]">類型</th>
-                      <th className="px-3 py-2.5 text-left font-medium text-morandi-primary">供應商</th>
-                      <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[80px]">項目數</th>
-                      <th className="px-3 py-2.5 text-center font-medium text-morandi-primary w-[90px]">狀態</th>
-                      <th className="px-3 py-2.5 text-left font-medium text-morandi-primary w-[100px]">建立日期</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {standaloneRequests.map(d => {
-                      const badge = STATUS_BADGE[d.status || 'draft'] || STATUS_BADGE.draft
-                      const itemCount = Array.isArray(d.items) ? d.items.length : 0
-                      const typeLabel = TYPE_LABELS[d.request_type || ''] || d.request_type || '-'
-                      const isExpanded = expandedDelegation === d.id
-                      return (
-                        <React.Fragment key={d.id}>
-                        <tr
-                          className={cn(
-                            'border-t border-border/50 hover:bg-morandi-container/20 cursor-pointer',
-                            isExpanded && 'bg-morandi-container/30'
-                          )}
-                          onClick={() => {
-                            setExpandedDelegation(isExpanded ? null : d.id)
-                            setEditingItemCosts({})
-                            setSentViaInput('line')
-                            setSentToInput('')
-                          }}
-                        >
-                          <td className="px-3 py-2.5 text-center">
-                            {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                          </td>
-                          <td className="px-3 py-2.5">
-                            <span className="text-xs bg-morandi-container/50 px-2 py-0.5 rounded">
-                              {typeLabel}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2.5 font-medium">{d.supplier_name || '-'}</td>
-                          <td className="px-3 py-2.5 text-center">{itemCount}</td>
-                          <td className="px-3 py-2.5 text-center">
-                            <span className={cn('inline-flex items-center px-2 py-0.5 rounded text-xs font-medium', badge.className)}>
-                              {badge.label}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2.5 text-xs text-muted-foreground">
-                            {d.created_at ? new Date(d.created_at).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }) : '-'}
-                          </td>
-                        </tr>
-                        {/* 展開詳情 */}
-                        {isExpanded && (
-                          <tr>
-                            <td colSpan={9} className="px-4 py-3 bg-morandi-container/10 border-t border-border/30">
-                              {/* items 明細 */}
-                              <div className="mb-3">
-                                <table className="w-full text-xs border border-border/50 rounded">
-                                  <thead>
-                                    <tr className="bg-morandi-container/30">
-                                      <th className="px-2 py-1.5 text-left">項目</th>
-                                      <th className="px-2 py-1.5 text-left">日期</th>
-                                      <th className="px-2 py-1.5 text-center">數量</th>
-                                      <th className="px-2 py-1.5 text-right">
-                                        {d.status === 'sent' ? '報價成本（可編輯）' : '報價成本'}
-                                      </th>
-                                      <th className="px-2 py-1.5 text-left">備註</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {(d.items || []).map((item, idx) => (
-                                      <tr key={idx} className="border-t border-border/30">
-                                        <td className="px-2 py-1.5">
-                                          {item.title || item.room_type || '-'}
-                                        </td>
-                                        <td className="px-2 py-1.5">
-                                          {item.service_date ? formatDate(item.service_date) : (item.day_number ? `Day ${item.day_number}` : '-')}
-                                        </td>
-                                        <td className="px-2 py-1.5 text-center">{item.quantity || '-'}</td>
-                                        <td className="px-2 py-1.5 text-right">
-                                          {d.status === 'sent' ? (
-                                            <input
-                                              type="number"
-                                              className="w-24 px-1.5 py-0.5 border border-border rounded text-right text-xs"
-                                              placeholder="報價"
-                                              value={editingItemCosts[idx] !== undefined ? (editingItemCosts[idx] ?? '') : (item.quoted_cost ?? '')}
-                                              onClick={(e) => e.stopPropagation()}
-                                              onChange={(e) => {
-                                                const val = e.target.value ? Number(e.target.value) : null
-                                                setEditingItemCosts(prev => ({ ...prev, [idx]: val }))
-                                              }}
-                                            />
-                                          ) : (
-                                            item.quoted_cost ? `$${item.quoted_cost.toLocaleString()}` : '-'
-                                          )}
-                                        </td>
-                                        <td className="px-2 py-1.5 text-muted-foreground">
-                                          {item.note || '-'}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-
-                              {/* 時間軸資訊 */}
-                              <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
-                                {d.sent_at && <span>發出：{new Date(d.sent_at).toLocaleString('zh-TW')} {d.sent_via && `(${d.sent_via})`}</span>}
-                                {d.replied_at && <span>回覆：{new Date(d.replied_at).toLocaleString('zh-TW')}</span>}
-                                {d.confirmed_at && <span>確認：{new Date(d.confirmed_at).toLocaleString('zh-TW')}</span>}
-                              </div>
-
-                              {/* 狀態操作按鈕 */}
-                              <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
-                                {d.status === 'draft' && (
-                                  <>
-                                    <select
-                                      value={sentViaInput}
-                                      onChange={(e) => setSentViaInput(e.target.value)}
-                                      className="text-xs border border-border rounded px-2 py-1"
-                                    >
-                                      <option value="line">LINE</option>
-                                      <option value="email">Email</option>
-                                      <option value="fax">傳真</option>
-                                      <option value="phone">電話</option>
-                                    </select>
-                                    <input
-                                      type="text"
-                                      placeholder="發送對象"
-                                      value={sentToInput}
-                                      onChange={(e) => setSentToInput(e.target.value)}
-                                      className="text-xs border border-border rounded px-2 py-1 w-32"
-                                    />
-                                    <Button
-                                      size="sm"
-                                      disabled={statusUpdating}
-                                      onClick={() => handleMarkSent(d)}
-                                      className="h-7 px-3 text-xs bg-blue-600 hover:bg-blue-700 text-white"
-                                    >
-                                      {statusUpdating ? <Loader2 size={12} className="animate-spin mr-1" /> : <Send size={12} className="mr-1" />}
-                                      標記已發出
-                                    </Button>
-                                  </>
-                                )}
-                                {d.status === 'sent' && (
-                                  <Button
-                                    size="sm"
-                                    disabled={statusUpdating}
-                                    onClick={() => handleMarkReplied(d)}
-                                    className="h-7 px-3 text-xs bg-yellow-600 hover:bg-yellow-700 text-white"
-                                  >
-                                    {statusUpdating && <Loader2 size={12} className="animate-spin mr-1" />}
-                                    供應商已回覆
-                                  </Button>
-                                )}
-                                {d.status === 'replied' && (
-                                  <Button
-                                    size="sm"
-                                    disabled={statusUpdating}
-                                    onClick={() => handleMarkConfirmed(d)}
-                                    className="h-7 px-3 text-xs bg-green-600 hover:bg-green-700 text-white"
-                                  >
-                                    {statusUpdating && <Loader2 size={12} className="animate-spin mr-1" />}
-                                    確認預訂
-                                  </Button>
-                                )}
-                                {d.status === 'confirmed' && (
-                                  <span className="text-xs text-green-600 font-medium">已確認預訂</span>
-                                )}
-                                {/* 刪除按鈕 */}
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-7 px-2 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 ml-auto"
-                                  onClick={() => handleDeleteRequest(d.id)}
-                                >
-                                  刪除
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                        </React.Fragment>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-                </>
+                  <RequirementsDrawer
+                    requests={standaloneRequests as any}
+                    onRefresh={() => loadData(false)}
+                  />
+                </div>
               )}
             </div>
           )
