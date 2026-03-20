@@ -36,8 +36,6 @@ import { MealQuoteDialog } from './MealQuoteDialog'
 import { ActivityQuoteDialog } from './ActivityQuoteDialog'
 import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSupplierDialog'
 import { LocalQuoteDialog } from './LocalQuoteDialog'
-import { QuoteComparisonCard } from './QuoteComparisonCard'
-import { RequirementsDrawer } from './RequirementsDrawer'
 // CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
@@ -135,6 +133,8 @@ export function RequirementsList({
   const [editingItemCosts, setEditingItemCosts] = useState<Record<number, number | null>>({})
   // 狀態操作 loading
   const [statusUpdating, setStatusUpdating] = useState(false)
+  // 🆕 主表格項目展開狀態（用於顯示需求單詳情）
+  const [expandedMainItems, setExpandedMainItems] = useState<Set<string>>(new Set())
 
   // ============================================
   // 載入資料
@@ -1044,6 +1044,7 @@ export function RequirementsList({
             <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
               <thead>
                 <tr className="bg-morandi-container/50 border-b border-border">
+                  <th className="px-2 py-2.5 text-center" style={{ width: '32px' }}></th>
                   <th className="px-2 py-2.5 text-center" style={{ width: '36px' }}>
                     <Checkbox
                       checked={checkedItems.size > 0 && checkedItems.size === Object.values(itemsByCategory).flat().length}
@@ -1153,19 +1154,39 @@ export function RequirementsList({
                       statusClass = `${config.bgColor} ${config.color}`
                     }
 
+                    const itemKey = getItemKey(cat.key, item, idx)
+                    const isExpanded = expandedMainItems.has(itemKey)
+                    
                     return (
                       <React.Fragment key={`${cat.key}-${isHidden ? 'hidden' : 'visible'}-${idx}`}>
                       <tr
                         className={cn(
                           'border-t border-border/50 hover:bg-morandi-container/20',
                           isHidden && 'bg-morandi-muted/5',
-                          checkedItems.has(getItemKey(cat.key, item, idx)) && 'bg-blue-50/50'
+                          checkedItems.has(itemKey) && 'bg-blue-50/50',
+                          isExpanded && 'bg-morandi-container/30'
                         )}
                       >
                         <td className="px-2 py-2.5 text-center">
+                          <button
+                            onClick={() => {
+                              const newExpanded = new Set(expandedMainItems)
+                              if (isExpanded) {
+                                newExpanded.delete(itemKey)
+                              } else {
+                                newExpanded.add(itemKey)
+                              }
+                              setExpandedMainItems(newExpanded)
+                            }}
+                            className="p-1 hover:bg-morandi-container/50 rounded"
+                          >
+                            {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                          </button>
+                        </td>
+                        <td className="px-2 py-2.5 text-center">
                           <Checkbox
-                            checked={checkedItems.has(getItemKey(cat.key, item, idx))}
-                            onCheckedChange={() => toggleItem(getItemKey(cat.key, item, idx))}
+                            checked={checkedItems.has(itemKey)}
+                            onCheckedChange={() => toggleItem(itemKey)}
                           />
                         </td>
                         <td className="px-3 py-2.5">{formatDate(item.serviceDate)}</td>
@@ -1456,6 +1477,97 @@ export function RequirementsList({
                         </td>
                       </tr>
 
+                      {/* 🆕 展開抽屜：顯示需求單詳情 */}
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan={10} className="p-0">
+                            <div className="bg-morandi-container/10 border-t border-morandi-gold/10 p-6 space-y-4">
+                              {/* 需求內容 */}
+                              <div>
+                                <h4 className="text-sm font-semibold text-morandi-primary mb-2">📋 需求內容</h4>
+                                <div className="bg-white border border-morandi-gold/20 rounded-lg p-3 text-sm">
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div><span className="text-morandi-secondary">日期：</span>{formatDate(item.serviceDate)}</div>
+                                    <div><span className="text-morandi-secondary">供應商：</span>{item.supplierName || '—'}</div>
+                                    <div><span className="text-morandi-secondary">項目：</span>{item.title}</div>
+                                    <div><span className="text-morandi-secondary">數量：</span>{item.quantity || '—'}</div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* 已發送需求單 */}
+                              {(() => {
+                                const relatedRequests = existingRequests.filter(r => {
+                                  if (item.resourceId) {
+                                    return r.request_type === cat.key && r.resource_id === item.resourceId
+                                  }
+                                  return r.request_type === cat.key && r.supplier_name?.trim() === item.supplierName?.trim()
+                                })
+
+                                if (relatedRequests.length === 0) {
+                                  return (
+                                    <div className="text-sm text-morandi-muted">
+                                      尚未發送需求單
+                                    </div>
+                                  )
+                                }
+
+                                return (
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-morandi-primary mb-2">
+                                      📤 已發送需求單 ({relatedRequests.length})
+                                    </h4>
+                                    <div className="space-y-2">
+                                      {relatedRequests.map(req => {
+                                        const statusConfig = getStatusConfig('tour_request', req.status || 'draft')
+                                        return (
+                                          <div key={req.id} className="bg-white border border-morandi-gold/20 rounded-lg p-3">
+                                            <div className="flex items-center justify-between mb-2">
+                                              <div className="flex items-center gap-2">
+                                                <span className="font-medium">{req.supplier_name}</span>
+                                                <span className={cn(
+                                                  'px-2 py-0.5 rounded text-xs',
+                                                  statusConfig.bgColor,
+                                                  statusConfig.color
+                                                )}>
+                                                  {statusConfig.label}
+                                                </span>
+                                              </div>
+                                              <span className="text-xs text-morandi-secondary">
+                                                {req.created_at ? new Date(req.created_at).toLocaleDateString('zh-TW') : ''}
+                                              </span>
+                                            </div>
+                                            {req.sent_at && (
+                                              <div className="text-xs text-morandi-secondary">
+                                                發送時間：{new Date(req.sent_at).toLocaleString('zh-TW')}
+                                                {req.sent_via && ` (${req.sent_via.toUpperCase()})`}
+                                              </div>
+                                            )}
+                                            {req.replied_at && (
+                                              <div className="text-xs text-morandi-secondary">
+                                                回覆時間：{new Date(req.replied_at).toLocaleString('zh-TW')}
+                                              </div>
+                                            )}
+                                            {req.supplier_response && (
+                                              <div className="mt-2 text-sm">
+                                                <span className="text-morandi-secondary">報價：</span>
+                                                <span className="font-semibold text-morandi-gold">
+                                                  ${((req.supplier_response as any)?.quotedCost || 0).toLocaleString()}
+                                                </span>
+                                              </div>
+                                            )}
+                                          </div>
+                                        )
+                                      })}
+                                    </div>
+                                  </div>
+                                )
+                              })()}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+
                       </React.Fragment>
                     )
                   }
@@ -1513,100 +1625,7 @@ export function RequirementsList({
           </>
         )}
 
-        {/* ============================================ */}
-        {/* 已發委託區塊 */}
-        {/* ============================================ */}
-        {(() => {
-          // 篩選有 request_type 的委託記錄（items 可以是空陣列，如遊覽車需求單）
-          const delegations = existingRequests.filter(
-            r => r.request_type
-              // 排除已在主表格顯示的「其他」草稿（如保險）
-              && !(r.request_type === 'other' && r.status === 'draft')
-          )
-          
-          // 🆕 比價分組：按 source_id 分組（同一個 tour_itinerary_items 項目）
-          const quoteGroups = new Map<string, TourRequest[]>()
-          const standaloneRequests: TourRequest[] = []
-          
-          for (const req of delegations) {
-            const sourceId = req.source_id
-            if (sourceId && req.status !== 'draft') {
-              if (!quoteGroups.has(sourceId)) {
-                quoteGroups.set(sourceId, [])
-              }
-              quoteGroups.get(sourceId)!.push(req)
-            } else {
-              standaloneRequests.push(req)
-            }
-          }
-          
-          // 分離：多廠商比價 vs 單一需求
-          const comparisonGroups: Array<{ sourceId: string; requests: TourRequest[] }> = []
-          for (const [sourceId, requests] of quoteGroups) {
-            if (requests.length >= 2) {
-              // 2 個以上 → 比價
-              comparisonGroups.push({ sourceId, requests })
-            } else {
-              // 只有 1 個 → 正常顯示
-              standaloneRequests.push(...requests)
-            }
-          }
-          
-          if (delegations.length === 0) return null
 
-          const STATUS_BADGE: Record<string, { label: string; className: string }> = {
-            draft: { label: '草稿', className: 'bg-gray-100 text-gray-600' },
-            sent: { label: '已發出', className: 'bg-blue-100 text-blue-700' },
-            replied: { label: '已回覆', className: 'bg-yellow-100 text-yellow-700' },
-            confirmed: { label: '已確認', className: 'bg-green-100 text-green-700' },
-            closed: { label: '已結案', className: 'bg-purple-100 text-purple-700' },
-          }
-
-          const TYPE_LABELS: Record<string, string> = {
-            mixed: '綜合',
-            transport: '交通',
-            accommodation: '住宿',
-            meal: '餐食',
-            activity: '活動',
-          }
-
-          // 🆕 合併所有需求單（包含比價組）到同一個列表
-          const allRequests = [...standaloneRequests]
-          
-          // 把比價組展平：每個 sourceId 的多個 requests 合併顯示
-          for (const { sourceId, requests } of comparisonGroups) {
-            // 找第一個 request 作為主項目
-            const firstRequest = requests[0]
-            if (firstRequest) {
-              // 標記為比價組（抽屜展開時顯示多個報價）
-              allRequests.push({
-                ...firstRequest,
-                _isComparisonGroup: true,
-                _comparisonRequests: requests,
-                _sourceId: sourceId,
-              } as any)
-            }
-          }
-
-          return (
-            <div className="mt-6 space-y-4">
-              {/* 標題 */}
-              <div className="flex items-center gap-2">
-                <Send size={16} className="text-morandi-gold" />
-                <span className="font-medium text-morandi-primary">已發委託</span>
-                <span className="text-xs text-morandi-secondary">({allRequests.length})</span>
-              </div>
-
-              {/* 🆕 統一表格（包含單一需求單 + 多廠商比價）*/}
-              {allRequests.length > 0 && (
-                <RequirementsDrawer
-                  requests={allRequests as any}
-                  onRefresh={() => loadData(false)}
-                />
-              )}
-            </div>
-          )
-        })()}
       </div>
 
       {/* 從核心表產生需求單 Dialog */}
