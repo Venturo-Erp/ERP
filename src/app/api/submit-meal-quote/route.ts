@@ -35,6 +35,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // 同步核心表：更新 reply_cost 和 request_status
+    const { data: request } = await supabase
+      .from('tour_requests')
+      .select('supplier_name')
+      .eq('id', requestId)
+      .single()
+
+    if (request) {
+      await supabase
+        .from('tour_itinerary_items')
+        .update({
+          request_status: 'replied',
+          reply_cost: unitPrice || totalCost,
+        })
+        .eq('tour_id', tourId)
+        .eq('supplier_name', request.supplier_name)
+        .eq('category', 'meals')
+    }
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('提交餐食報價失敗:', error)
