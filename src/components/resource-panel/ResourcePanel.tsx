@@ -7,6 +7,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Search, MapPin, Building2, UtensilsCrossed, Loader2 } from 'lucide-react'
 import { QuickAddResource } from './QuickAddResource'
 import { MapExplorerDialog } from './MapExplorerDialog'
+import { ResourceMapPanel } from './ResourceMapPanel'
 import { Input } from '@/components/ui/input'
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox'
 import { cn } from '@/lib/utils'
@@ -134,10 +135,12 @@ interface ResourcePanelProps {
   countryId?: string    // 行程目的地國家 ID 或名稱
   cityId?: string       // 行程目的地城市
   locationName?: string // 團的目的地名稱（用於反查地區，如「名古屋」）
+  tourId?: string       // 團 ID（用於地圖偏好儲存）
+  tourCode?: string     // 團代碼（用於推斷機場座標，如 FUK260702A）
   onAddNew?: (type: ResourceType) => void // 新增資源回調，帶類型
 }
 
-export function ResourcePanel({ className, countryId, cityId, locationName, onAddNew }: ResourcePanelProps) {
+export function ResourcePanel({ className, countryId, cityId, locationName, tourId, tourCode, onAddNew }: ResourcePanelProps) {
   const [activeTab, setActiveTab] = useState<ResourceType>('attraction')
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -523,6 +526,13 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
           </div>
         )}
       </div>
+
+      {/* 地圖面板（可收合） */}
+      <ResourceMapPanel
+        tourId={tourId || null}
+        tourCode={tourCode || null}
+        regionId={selectedRegion || null}
+      />
 
       {/* 地圖探索 Dialog */}
       <MapExplorerDialog

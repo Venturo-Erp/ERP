@@ -1692,12 +1692,9 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           className="flex-1 overflow-hidden"
           countryId={tour.country_id || ''}
           locationName={tour.location || ''}
-
+          tourId={tour.id}
+          tourCode={tour.code || ''}
         />
-        <div className="h-48 border-t border-border bg-muted/30 flex flex-col items-center justify-center text-muted-foreground">
-          <Map size={24} className="mb-2 opacity-40" />
-          <span className="text-xs">地圖（開發中）</span>
-        </div>
       </div>
 
       </div>{/* 左右分割結束 */}
