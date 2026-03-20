@@ -519,8 +519,15 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
       <MapExplorerDialog
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
-        resource={editingResource}
-        allResources={filteredResources}
+        centerAttraction={editingResource ? {
+          id: editingResource.id,
+          name: editingResource.name,
+          latitude: editingResource.latitude ?? null,
+          longitude: editingResource.longitude ?? null,
+          category: editingResource.category,
+          address: editingResource.address
+        } : null}
+        regionId={selectedRegion || undefined}
       />
     </div>
   )
