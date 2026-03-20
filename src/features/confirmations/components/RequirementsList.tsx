@@ -37,6 +37,7 @@ import { ActivityQuoteDialog } from './ActivityQuoteDialog'
 import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSupplierDialog'
 import { LocalQuoteDialog } from './LocalQuoteDialog'
 import { RequirementsDrawer } from './RequirementsDrawer'
+import { TeamConfirmationSheet } from './TeamConfirmationSheet'
 // CostCategory 已不需要 — 需求單直接讀核心表
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
@@ -124,6 +125,9 @@ export function RequirementsList({
 
   // Local 報價 Dialog
   const [showLocalQuoteDialog, setShowLocalQuoteDialog] = useState(false)
+  
+  // 🆕 團確單 Dialog
+  const [showTeamConfirmationSheet, setShowTeamConfirmationSheet] = useState(false)
   
   // 委託展開狀態
   const [expandedDelegation, setExpandedDelegation] = useState<string | null>(null)
@@ -1007,7 +1011,7 @@ export function RequirementsList({
           </div>
         ) : (
           <>
-          {/* 操作列：Local 報價（固定）+ 發給供應商（勾選後出現） */}
+          {/* 操作列：Local 報價 + 團確單（固定）+ 發給供應商（勾選後出現） */}
           <div className="mb-3 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5">
             <Button
               size="sm"
@@ -1016,6 +1020,14 @@ export function RequirementsList({
             >
               <Send size={12} className="mr-1" />
               給 Local 報價
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setShowTeamConfirmationSheet(true)}
+              className="bg-[#c9a96e] hover:bg-[#b8960e] text-white h-7 px-3 text-xs"
+            >
+              <FileText size={12} className="mr-1" />
+              產生團確單
             </Button>
             {checkedItems.size > 0 && (
               <>
@@ -1845,6 +1857,22 @@ export function RequirementsList({
           totalPax={totalPax}
           coreItems={coreItems}
           startDate={startDate}
+        />
+      )}
+
+      {/* 🆕 團確單 Dialog */}
+      {showTeamConfirmationSheet && tour && (
+        <TeamConfirmationSheet
+          open={showTeamConfirmationSheet}
+          onClose={() => setShowTeamConfirmationSheet(false)}
+          tour={{
+            code: tour.code || '',
+            name: tour.name || '',
+            departure_date: tour.departure_date || '',
+            return_date: tour.return_date || '',
+            current_participants: totalPax || 0,
+          }}
+          confirmedRequests={existingRequests.filter(r => r.status === 'confirmed')}
         />
       )}
     </>
