@@ -1570,56 +1570,39 @@ export function RequirementsList({
             activity: '活動',
           }
 
+          // 🆕 合併所有需求單（包含比價組）到同一個列表
+          const allRequests = [...standaloneRequests]
+          
+          // 把比價組展平：每個 sourceId 的多個 requests 合併顯示
+          for (const { sourceId, requests } of comparisonGroups) {
+            // 找第一個 request 作為主項目
+            const firstRequest = requests[0]
+            if (firstRequest) {
+              // 標記為比價組（抽屜展開時顯示多個報價）
+              allRequests.push({
+                ...firstRequest,
+                _isComparisonGroup: true,
+                _comparisonRequests: requests,
+                _sourceId: sourceId,
+              } as any)
+            }
+          }
+
           return (
             <div className="mt-6 space-y-4">
               {/* 標題 */}
               <div className="flex items-center gap-2">
                 <Send size={16} className="text-morandi-gold" />
                 <span className="font-medium text-morandi-primary">已發委託</span>
-                <span className="text-xs text-morandi-secondary">({delegations.length})</span>
+                <span className="text-xs text-morandi-secondary">({allRequests.length})</span>
               </div>
 
-              {/* 🆕 多廠商比價卡片 */}
-              {comparisonGroups.length > 0 && (
-                <div className="space-y-3">
-                  <div className="text-sm font-medium text-morandi-secondary">
-                    多廠商比價（{comparisonGroups.length} 個項目）
-                  </div>
-                  {comparisonGroups.map(({ sourceId, requests }) => {
-                    // 從核心表找項目標題
-                    const coreItem = coreItems.find(i => i.id === sourceId)
-                    const itemTitle = coreItem?.title || '未知項目'
-                    
-                    return (
-                      <QuoteComparisonCard
-                        key={sourceId}
-                        itemTitle={itemTitle}
-                        quotes={requests.map(r => ({
-                          requestId: r.id,
-                          supplierName: r.supplier_name || '',
-                          quotedCost: (r.supplier_response as any)?.quotedCost || null,
-                          status: r.status || 'draft',
-                          suppliedAt: r.replied_at,
-                          note: r.note,
-                        }))}
-                        onSelect={() => loadData(false)}
-                      />
-                    )
-                  })}
-                </div>
-              )}
-
-              {/* 🆕 單一需求單列表（Morandi 抽屜設計）*/}
-              {standaloneRequests.length > 0 && (
-                <div>
-                  <div className="text-sm font-medium text-morandi-secondary mb-3">
-                    需求單列表（{standaloneRequests.length}）
-                  </div>
-                  <RequirementsDrawer
-                    requests={standaloneRequests as any}
-                    onRefresh={() => loadData(false)}
-                  />
-                </div>
+              {/* 🆕 統一表格（包含單一需求單 + 多廠商比價）*/}
+              {allRequests.length > 0 && (
+                <RequirementsDrawer
+                  requests={allRequests as any}
+                  onRefresh={() => loadData(false)}
+                />
               )}
             </div>
           )

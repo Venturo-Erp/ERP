@@ -24,6 +24,10 @@ interface RequestItem {
   supplier_response?: any
   confirmed_at?: string | null
   note?: string | null
+  // 比價組專用
+  _isComparisonGroup?: boolean
+  _comparisonRequests?: RequestItem[]
+  _sourceId?: string
 }
 
 interface RequirementsDrawerProps {
@@ -137,7 +141,16 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                     </span>
                   </td>
                   <td className="px-3 py-3 font-medium text-morandi-primary">
-                    {req.supplier_name || '—'}
+                    {req._isComparisonGroup ? (
+                      <div>
+                        <span className="font-semibold text-morandi-gold">{req._comparisonRequests?.length || 0} 家比價</span>
+                        <div className="text-xs text-morandi-secondary mt-0.5">
+                          {req._comparisonRequests?.map(r => r.supplier_name).join('、')}
+                        </div>
+                      </div>
+                    ) : (
+                      req.supplier_name || '—'
+                    )}
                   </td>
                   <td className="px-3 py-3 text-center text-morandi-secondary">
                     {Array.isArray(req.items) ? req.items.length : 0}
@@ -165,7 +178,76 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                     <td colSpan={6} className="p-0">
                       <div className="bg-morandi-container/10 border-t border-morandi-gold/10">
                         <div className="p-6 space-y-6">
+                          {/* 🆕 多廠商比價 */}
+                          {req._isComparisonGroup && req._comparisonRequests && (
+                            <div>
+                              <h4 className="text-sm font-semibold text-morandi-primary mb-3 flex items-center gap-2">
+                                <MessageSquare size={16} />
+                                多廠商比價
+                              </h4>
+                              <div className="bg-white border border-morandi-gold/20 rounded-lg overflow-hidden">
+                                <table className="w-full text-sm">
+                                  <thead className="bg-morandi-container/30">
+                                    <tr>
+                                      <th className="px-3 py-2 text-left font-medium">供應商</th>
+                                      <th className="px-3 py-2 text-center font-medium">報價</th>
+                                      <th className="px-3 py-2 text-center font-medium">狀態</th>
+                                      <th className="px-3 py-2 text-left font-medium">備註</th>
+                                      <th className="px-3 py-2 text-center font-medium w-32">操作</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {req._comparisonRequests.map((compReq, idx) => {
+                                      const quotedCost = (compReq.supplier_response as any)?.quotedCost
+                                      const compStatus = STATUS_CONFIG[compReq.status] || STATUS_CONFIG.draft
+                                      const CompStatusIcon = compStatus.icon
+                                      
+                                      return (
+                                        <tr key={compReq.id} className={cn(
+                                          'border-t border-morandi-gold/10',
+                                          idx % 2 === 0 ? 'bg-white' : 'bg-morandi-container/5'
+                                        )}>
+                                          <td className="px-3 py-2 font-medium">{compReq.supplier_name}</td>
+                                          <td className="px-3 py-2 text-center">
+                                            {quotedCost ? (
+                                              <span className="font-semibold text-morandi-primary">
+                                                ${quotedCost.toLocaleString()}
+                                              </span>
+                                            ) : (
+                                              <span className="text-morandi-muted">—</span>
+                                            )}
+                                          </td>
+                                          <td className="px-3 py-2 text-center">
+                                            <span className={cn(
+                                              'inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs',
+                                              compStatus.bgClass,
+                                              compStatus.textClass
+                                            )}>
+                                              <CompStatusIcon size={10} />
+                                              {compStatus.label}
+                                            </span>
+                                          </td>
+                                          <td className="px-3 py-2 text-xs text-morandi-secondary">
+                                            {compReq.note || '—'}
+                                          </td>
+                                          <td className="px-3 py-2 text-center">
+                                            {compReq.status === 'replied' && (
+                                              <button className="px-3 py-1 rounded bg-green-600 text-white text-xs hover:bg-green-700">
+                                                選擇
+                                              </button>
+                                            )}
+                                          </td>
+                                        </tr>
+                                      )
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          )}
+
                           {/* 需求內容 */}
+                          {!req._isComparisonGroup && (
                           <div>
                             <h4 className="text-sm font-semibold text-morandi-primary mb-3 flex items-center gap-2">
                               <FileText size={16} />
@@ -189,9 +271,10 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                               )}
                             </div>
                           </div>
+                          )}
 
                           {/* 追蹤狀態 */}
-                          {req.sent_at && (
+                          {!req._isComparisonGroup && req.sent_at && (
                             <div>
                               <h4 className="text-sm font-semibold text-morandi-primary mb-3 flex items-center gap-2">
                                 <Send size={16} />
@@ -221,7 +304,7 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                           )}
 
                           {/* 廠商回覆 */}
-                          {req.replied_at && (
+                          {!req._isComparisonGroup && req.replied_at && (
                             <div>
                               <h4 className="text-sm font-semibold text-morandi-primary mb-3 flex items-center gap-2">
                                 <MessageSquare size={16} />
@@ -247,7 +330,7 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                           )}
 
                           {/* 確認狀態 */}
-                          {req.confirmed_at && (
+                          {!req._isComparisonGroup && req.confirmed_at && (
                             <div>
                               <h4 className="text-sm font-semibold text-morandi-primary mb-3 flex items-center gap-2">
                                 <CheckCircle size={16} />
@@ -265,7 +348,7 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                           )}
 
                           {/* 備註 */}
-                          {req.note && (
+                          {!req._isComparisonGroup && req.note && (
                             <div>
                               <h4 className="text-sm font-semibold text-morandi-secondary mb-2">備註</h4>
                               <p className="text-sm text-morandi-primary bg-white border border-morandi-gold/20 rounded-lg p-3">
