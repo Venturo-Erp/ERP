@@ -241,12 +241,10 @@ export default function VouchersPage() {
             >
               清除
             </Button>
-            <div className="ml-2 border-l pl-2">
-              <Button onClick={handleCreate} className="gap-2">
-                <Plus size={16} />
-                新增傳票
-              </Button>
-            </div>
+            <Button onClick={handleCreate} className="gap-2 ml-2">
+              <Plus size={16} />
+              新增傳票
+            </Button>
           </div>
         }
       />

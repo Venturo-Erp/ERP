@@ -49,13 +49,22 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
     async function fetchHeader() {
       setHeaderLoading(true)
       try {
-        const { data: tour } = await supabase
+        const { data: tour, error: tourError } = await supabase
           .from('tours')
-          .select('code, name, departure_date, return_date, current_participants, leader_name, flight_info')
+          .select('code, name, departure_date, return_date, current_participants')
           .eq('id', tourId)
           .single()
 
-        if (!tour) return
+        if (tourError) {
+          logger.error('讀取團資訊失敗:', tourError)
+          setHeaderInfo(null)
+          return
+        }
+
+        if (!tour) {
+          setHeaderInfo(null)
+          return
+        }
 
         // 讀取第一筆訂單的業務/助理
         const { data: firstOrder } = await supabase
@@ -71,13 +80,14 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           departure_date: tour.departure_date,
           return_date: tour.return_date,
           current_participants: tour.current_participants,
-          leader_name: tour.leader_name,
+          leader_name: null, // TODO: 之後加到 tours 表
           sales_person: firstOrder?.sales_person ?? null,
           assistant: firstOrder?.assistant ?? null,
-          flight_info: tour.flight_info,
+          flight_info: null, // TODO: 之後加到 tours 表
         })
       } catch (err) {
         logger.error('讀取團確單標頭失敗:', err)
+        setHeaderInfo(null)
       } finally {
         setHeaderLoading(false)
       }

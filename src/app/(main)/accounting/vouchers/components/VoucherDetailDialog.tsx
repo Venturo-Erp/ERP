@@ -130,45 +130,47 @@ export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDeta
               <tbody>
                 {isLoading ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <td colSpan={6} className="text-center py-12 text-sm text-muted-foreground">
                       載入中...
                     </td>
                   </tr>
                 ) : lines.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <td colSpan={6} className="text-center py-12 text-sm text-muted-foreground">
                       無分錄資料
                     </td>
                   </tr>
                 ) : (
                   <>
                     {lines.map((line) => (
-                      <tr key={line.id} className="border-t">
-                        <td className="px-4 py-2 text-sm">{line.line_no}</td>
-                        <td className="px-4 py-2 font-mono text-sm">
+                      <tr key={line.id} className="border-t hover:bg-muted/30">
+                        <td className="px-3 py-3 text-sm text-center">{line.line_no}</td>
+                        <td className="px-3 py-3 font-mono text-sm">
                           {line.account?.code || '-'}
                         </td>
-                        <td className="px-4 py-2 text-sm">
+                        <td className="px-3 py-3 text-sm font-medium">
                           {line.account?.name || '-'}
                         </td>
-                        <td className="px-4 py-2 text-sm text-muted-foreground">
-                          {line.description || '-'}
+                        <td className="px-3 py-3 text-sm text-muted-foreground">
+                          <div className="line-clamp-2" title={line.description || '-'}>
+                            {line.description || '-'}
+                          </div>
                         </td>
-                        <td className="px-4 py-2 text-right font-mono text-sm">
+                        <td className="px-3 py-3 text-right font-mono text-sm tabular-nums">
                           {line.debit_amount > 0 ? line.debit_amount.toLocaleString() : '-'}
                         </td>
-                        <td className="px-4 py-2 text-right font-mono text-sm">
+                        <td className="px-3 py-3 text-right font-mono text-sm tabular-nums">
                           {line.credit_amount > 0 ? line.credit_amount.toLocaleString() : '-'}
                         </td>
                       </tr>
                     ))}
                     {/* 合計 */}
-                    <tr className="border-t-2 bg-muted font-semibold">
-                      <td colSpan={4} className="px-4 py-2 text-right">合計</td>
-                      <td className="px-4 py-2 text-right font-mono">
+                    <tr className="border-t-2 bg-muted/50">
+                      <td colSpan={4} className="px-3 py-3 text-right font-semibold text-sm">合計</td>
+                      <td className="px-3 py-3 text-right font-mono font-semibold text-sm tabular-nums">
                         {voucher.total_debit.toLocaleString()}
                       </td>
-                      <td className="px-4 py-2 text-right font-mono">
+                      <td className="px-3 py-3 text-right font-mono font-semibold text-sm tabular-nums">
                         {voucher.total_credit.toLocaleString()}
                       </td>
                     </tr>
