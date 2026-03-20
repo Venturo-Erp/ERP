@@ -65,7 +65,7 @@ function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
       {...listeners}
       {...attributes}
       className={cn(
-        'flex items-center gap-2 px-3 py-2 rounded-md border bg-card',
+        'flex items-center gap-1.5 px-2 py-1.5 rounded-md border bg-card',
         'cursor-grab active:cursor-grabbing hover:bg-accent/50 transition-colors',
         isDragging && 'opacity-50 shadow-lg z-50',
         // 未驗證 = 橘色警示邊框
@@ -78,23 +78,23 @@ function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
         <img
           src={resource.thumbnail}
           alt={resource.name}
-          className="w-8 h-8 rounded object-cover flex-shrink-0"
+          className="w-6 h-6 rounded object-cover flex-shrink-0"
         />
       ) : (
         <div className={cn(
-          'w-8 h-8 rounded flex items-center justify-center flex-shrink-0',
+          'w-6 h-6 rounded flex items-center justify-center flex-shrink-0',
           isUnverified ? 'bg-amber-100' : 'bg-muted'
         )}>
           {iconMap[resource.type]}
         </div>
       )}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{resource.name}</p>
-        <p className="text-xs text-muted-foreground truncate">
+        <p className="text-xs font-medium truncate">{resource.name}</p>
+        <p className="text-[10px] text-muted-foreground truncate">
           {isUnverified ? '⚠ 待驗證' : resource.category || resource.city_name || ''}
         </p>
       </div>
-      {iconMap[resource.type]}
+      <MapPin size={10} className="text-emerald-500 flex-shrink-0 opacity-60" />
     </div>
   )
 }
@@ -463,8 +463,8 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
         </div>
       </div>
 
-      {/* 資源列表 */}
-      <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
+      {/* 資源列表（雙欄佈局）*/}
+      <div className="flex-1 overflow-y-auto p-2">
         {loading[activeTab] ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 size={20} className="animate-spin text-muted-foreground" />
@@ -474,9 +474,11 @@ export function ResourcePanel({ className, countryId, cityId, locationName, onAd
             {searchQuery ? '找不到符合的結果' : '尚無資料'}
           </div>
         ) : (
-          filteredResources.map(resource => (
-            <DraggableResourceCard key={`${resource.type}-${resource.id}`} resource={resource} />
-          ))
+          <div className="grid grid-cols-2 gap-1.5">
+            {filteredResources.map(resource => (
+              <DraggableResourceCard key={`${resource.type}-${resource.id}`} resource={resource} />
+            ))}
+          </div>
         )}
       </div>
     </div>
