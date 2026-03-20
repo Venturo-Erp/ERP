@@ -1872,7 +1872,7 @@ export function RequirementsList({
             return_date: tour.return_date || '',
             current_participants: totalPax || 0,
           }}
-          confirmedRequests={existingRequests.filter(r => r.status === 'confirmed')}
+          confirmedRequests={existingRequests}
         />
       )}
     </>

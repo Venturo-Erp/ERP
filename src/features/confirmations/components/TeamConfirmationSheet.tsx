@@ -23,6 +23,7 @@ interface TeamConfirmationSheetProps {
     sent_to?: string
     supplier_response?: any
     metadata?: any
+    status?: string
   }>
 }
 
@@ -86,11 +87,28 @@ export function TeamConfirmationSheet({
 
   const TYPE_ORDER = ['accommodation', 'meal', 'transport', 'activity', 'other']
 
+  // 狀態配置
+  const STATUS_CONFIG: Record<string, { label: string; bgClass: string; textClass: string }> = {
+    draft: { label: '草稿', bgClass: 'bg-gray-100', textClass: 'text-gray-700' },
+    sent: { label: '已發送', bgClass: 'bg-blue-100', textClass: 'text-blue-700' },
+    replied: { label: '已回覆', bgClass: 'bg-orange-100', textClass: 'text-orange-700' },
+    confirmed: { label: '✓ 已確認', bgClass: 'bg-green-100', textClass: 'text-green-700' },
+    cancelled: { label: '已取消', bgClass: 'bg-red-100', textClass: 'text-red-700' },
+    outdated: { label: '需更新', bgClass: 'bg-yellow-100', textClass: 'text-yellow-700' },
+  }
+
+  // 統計各狀態數量
+  const statusCounts = confirmedRequests.reduce((acc, req) => {
+    const status = req.status || 'draft'
+    acc[status] = (acc[status] || 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col print:max-w-none print:h-auto">
         <DialogHeader className="print:hidden">
-          <DialogTitle>團確單（領隊核對表）</DialogTitle>
+          <DialogTitle>需求追蹤表（領隊核對用）</DialogTitle>
         </DialogHeader>
 
         {/* 可列印內容 */}
@@ -98,13 +116,25 @@ export function TeamConfirmationSheet({
           <div className="print:p-8">
             {/* 標頭 */}
             <div className="mb-6 pb-4 border-b-2 border-[#c9a96e]">
-              <h1 className="text-2xl font-bold text-[#c9a96e] mb-2">團確單（領隊核對表）</h1>
+              <h1 className="text-2xl font-bold text-[#c9a96e] mb-2">需求追蹤表（領隊核對用）</h1>
               <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
                 <div><span className="font-medium">團號：</span>{tour.code}</div>
                 <div><span className="font-medium">人數：</span>{tour.current_participants} 人</div>
                 <div><span className="font-medium">團名：</span>{tour.name}</div>
                 <div><span className="font-medium">天數：</span>{totalDays} 天</div>
                 <div className="col-span-2"><span className="font-medium">出發日期：</span>{tour.departure_date} ~ {tour.return_date}</div>
+              </div>
+              {/* 狀態統計 */}
+              <div className="mt-3 flex items-center gap-2 text-xs">
+                <span className="font-medium">狀態統計：</span>
+                {Object.entries(statusCounts).map(([status, count]) => {
+                  const config = STATUS_CONFIG[status] || STATUS_CONFIG.draft
+                  return (
+                    <span key={status} className={`px-2 py-0.5 rounded ${config.bgClass} ${config.textClass}`}>
+                      {config.label} {count}
+                    </span>
+                  )
+                })}
               </div>
             </div>
 
@@ -126,7 +156,11 @@ export function TeamConfirmationSheet({
                   </h2>
                   
                   <div className="border border-[#c9a96e] border-t-0 rounded-b p-4 space-y-4">
-                    {sortedRequests.map(req => (
+                    {sortedRequests.map(req => {
+                      const status = req.status || 'draft'
+                      const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.draft
+                      
+                      return (
                       <div key={req.id} className="border-l-4 border-[#c9a96e]/30 pl-4">
                         <div className="flex items-start justify-between mb-2">
                           <div>
@@ -135,8 +169,8 @@ export function TeamConfirmationSheet({
                             </span>
                             <span className="ml-3 font-medium">{req.supplier_name}</span>
                           </div>
-                          <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700">
-                            ✓ 已確認
+                          <span className={`px-2 py-0.5 rounded text-xs ${statusConfig.bgClass} ${statusConfig.textClass}`}>
+                            {statusConfig.label}
                           </span>
                         </div>
 
@@ -200,10 +234,11 @@ export function TeamConfirmationSheet({
                           </div>
                         )}
                       </div>
-                    ))}
+                      )
+                    })}
 
                     {sortedRequests.length === 0 && (
-                      <p className="text-sm text-gray-500">本日無確認項目</p>
+                      <p className="text-sm text-gray-500">本日無需求項目</p>
                     )}
                   </div>
                 </div>
@@ -212,8 +247,8 @@ export function TeamConfirmationSheet({
 
             {confirmedRequests.length === 0 && (
               <div className="text-center py-12 text-gray-500">
-                <p>尚無已確認的需求單</p>
-                <p className="text-sm mt-2">請先確認供應商回覆後再產生團確單</p>
+                <p>尚無需求單</p>
+                <p className="text-sm mt-2">請先在需求總覽發送需求單給供應商</p>
               </div>
             )}
           </div>
@@ -222,7 +257,12 @@ export function TeamConfirmationSheet({
         {/* 底部按鈕 */}
         <div className="flex-shrink-0 border-t pt-4 mt-2 flex items-center justify-between print:hidden">
           <div className="text-sm text-gray-500">
-            已確認項目：{confirmedRequests.length} 筆
+            總需求單：{confirmedRequests.length} 筆
+            {statusCounts.confirmed && (
+              <span className="ml-3 text-green-600 font-medium">
+                已確認 {statusCounts.confirmed} 筆
+              </span>
+            )}
           </div>
           <div className="flex gap-3">
             <Button onClick={handlePrint} variant="default" className="bg-[#c9a96e] hover:bg-[#b8960e]">
