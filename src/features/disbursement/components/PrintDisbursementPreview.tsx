@@ -18,6 +18,7 @@ import type { DisbursementOrder, PaymentRequest, PaymentRequestItem } from '@/st
 import { formatDate } from '@/lib/utils'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
 import { useAuthStore } from '@/stores/auth-store'
+import { useWorkspaceSettings, getLogoStyle } from '@/hooks/useWorkspaceSettings'
 
 // Morandi 色系
 const COLORS = {
@@ -212,8 +213,10 @@ function splitLargeGroups(groups: PayForGroup[], maxSize = 5): PayForGroup[] {
 
 export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisbursementPreviewProps>(
   function PrintDisbursementPreview({ order, paymentRequests, paymentRequestItems }, ref) {
-    const workspaceName = useAuthStore(state => state.user?.workspace_name) || ''
-    const companyFullName = workspaceName ? `${workspaceName}股份有限公司` : ''
+    const ws = useWorkspaceSettings()
+    const workspaceName = ws.name || useAuthStore.getState().user?.workspace_name || ''
+    const companyFullName = ws.legal_name || (workspaceName ? `${workspaceName}股份有限公司` : '')
+    const logoUrl = ws.logo_url || '/corner-logo.png' // fallback
 
     const processedItems = useMemo(
       () => processItems(paymentRequests, paymentRequestItems),
@@ -277,13 +280,9 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
             }}
           >
             <img
-              src="/corner-logo.png"
+              src={logoUrl}
               alt={DISBURSEMENT_LABELS.公司Logo_Alt}
-              style={{
-                height: '36px',
-                width: 'auto',
-                objectFit: 'contain',
-              }}
+              style={getLogoStyle('print')}
             />
           </div>
 

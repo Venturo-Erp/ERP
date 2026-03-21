@@ -11,6 +11,16 @@ interface WorkspaceSettings {
   bank_branch: string
   bank_account: string
   bank_account_name: string
+  // 新增欄位
+  legal_name: string
+  subtitle: string
+  logo_url: string
+  fax: string
+  email: string
+  website: string
+  tax_id: string
+  seal_image_url: string
+  invoice_seal_image_url: string
 }
 
 const EMPTY_SETTINGS: WorkspaceSettings = {
@@ -21,13 +31,53 @@ const EMPTY_SETTINGS: WorkspaceSettings = {
   bank_branch: '',
   bank_account: '',
   bank_account_name: '',
+  // 新增欄位
+  legal_name: '',
+  subtitle: '',
+  logo_url: '',
+  fax: '',
+  email: '',
+  website: '',
+  tax_id: '',
+  seal_image_url: '',
+  invoice_seal_image_url: '',
 }
 
 const SELECT_FIELDS =
-  'name, phone, address, bank_name, bank_branch, bank_account, bank_account_name' as const
+  'name, phone, address, bank_name, bank_branch, bank_account, bank_account_name, legal_name, subtitle, logo_url, fax, email, website, tax_id, seal_image_url, invoice_seal_image_url' as const
 
 /**
- * 取得目前 workspace 的公司設定（銀行資訊、電話、地址等）
+ * Logo 規範
+ * - 列印文件：max-width: 150px, max-height: 40px
+ * - 網頁 Header：max-width: 120px, max-height: 36px
+ */
+export const LOGO_CONSTRAINTS = {
+  print: {
+    maxWidth: 150,
+    maxHeight: 40,
+  },
+  header: {
+    maxWidth: 120,
+    maxHeight: 36,
+  },
+} as const
+
+/**
+ * 取得 logo 樣式（根據用途）
+ */
+export function getLogoStyle(usage: 'print' | 'header' = 'print') {
+  const constraints = LOGO_CONSTRAINTS[usage]
+  return {
+    maxWidth: `${constraints.maxWidth}px`,
+    maxHeight: `${constraints.maxHeight}px`,
+    width: 'auto',
+    height: 'auto',
+    objectFit: 'contain' as const,
+  }
+}
+
+/**
+ * 取得目前 workspace 的公司設定（銀行資訊、電話、地址、logo 等）
  * 用於列印模板、信封等需要動態讀取公司資訊的場景
  */
 export function useWorkspaceSettings(): WorkspaceSettings {
@@ -61,6 +111,16 @@ export function useWorkspaceSettings(): WorkspaceSettings {
             bank_branch: data.bank_branch ?? '',
             bank_account: data.bank_account ?? '',
             bank_account_name: data.bank_account_name ?? '',
+            // 新增欄位
+            legal_name: data.legal_name ?? '',
+            subtitle: data.subtitle ?? '',
+            logo_url: data.logo_url ?? '',
+            fax: data.fax ?? '',
+            email: data.email ?? '',
+            website: data.website ?? '',
+            tax_id: data.tax_id ?? '',
+            seal_image_url: data.seal_image_url ?? '',
+            invoice_seal_image_url: data.invoice_seal_image_url ?? '',
           })
         }
       } catch (err) {
