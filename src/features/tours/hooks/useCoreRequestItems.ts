@@ -104,7 +104,7 @@ async function fetchCoreRequestItems(
       throw error
     }
 
-    return (data as CoreRequestItem[]) || []
+    return (data as unknown as CoreRequestItem[]) || []
   } catch (err) {
     logger.error('fetchCoreRequestItems 錯誤:', err)
     throw err

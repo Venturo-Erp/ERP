@@ -111,6 +111,13 @@ export interface TourItineraryItem {
   confirmation_date: string | null
   confirmation_note: string | null
 
+  // 交通（司機資訊）
+  driver_name: string | null
+  driver_phone: string | null
+  vehicle_plate: string | null
+  vehicle_type: string | null
+  booking_confirmed_at: string | null
+
   // 領隊回填欄位
   actual_expense: number | null
   expense_note: string | null

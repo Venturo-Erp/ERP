@@ -737,13 +737,23 @@ function DailyItineraryTable({ dailyItinerary, accommodationItems, transportItem
               </td>
               <td className="px-3 py-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">{item.supplier_name || '-'}</span>
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="font-medium">{item.supplier_name || '-'}</span>
+                    {item.driver_name && (
+                      <span className="text-gray-600">
+                        司機: {item.driver_name} {item.driver_phone}
+                      </span>
+                    )}
+                    {item.vehicle_plate && (
+                      <span className="text-gray-500">車牌: {item.vehicle_plate}</span>
+                    )}
+                    {item.vehicle_type && (
+                      <span className="text-gray-500">{item.vehicle_type}</span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-4 text-sm font-mono">
                     <span className="text-gray-600">
-                      預計: {item.estimated_cost?.toLocaleString() || '-'}
-                    </span>
-                    <span className="text-green-600">
-                      實際: {item.actual_expense?.toLocaleString() || '-'}
+                      {item.estimated_cost?.toLocaleString() || '-'}
                     </span>
                   </div>
                 </div>
