@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, Send, MessageSquare, CheckCircle, FileText, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { TransportQuoteActions } from './TransportQuoteActions'
 
 interface RequestItem {
   id: string
@@ -320,9 +321,26 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                                 {req.supplier_response && (
                                   <div>
                                     <span className="text-morandi-secondary">報價內容：</span>
-                                    <pre className="mt-2 p-3 bg-morandi-container/20 rounded text-xs text-morandi-primary overflow-auto">
-                                      {JSON.stringify(req.supplier_response, null, 2)}
-                                    </pre>
+                                    {/* 交通報價：顯示專用確認組件 */}
+                                    {(req.request_type === 'transport' || req.request_type === 'group-transport') ? (
+                                      <div className="mt-3">
+                                        <TransportQuoteActions 
+                                          quote={{
+                                            id: req.id,
+                                            tour_id: '',
+                                            supplier_name: req.supplier_name,
+                                            status: req.status,
+                                            supplier_response: req.supplier_response,
+                                            replied_at: req.replied_at || undefined,
+                                          }}
+                                          onUpdate={onRefresh}
+                                        />
+                                      </div>
+                                    ) : (
+                                      <pre className="mt-2 p-3 bg-morandi-container/20 rounded text-xs text-morandi-primary overflow-auto">
+                                        {JSON.stringify(req.supplier_response, null, 2)}
+                                      </pre>
+                                    )}
                                   </div>
                                 )}
                               </div>
