@@ -1,11 +1,106 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
+
+// 內嵌司機資訊表單
+function DriverInfoFormInline({ itemId }: { itemId: string }) {
+  const router = useRouter()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState('')
+  
+  const [form, setForm] = useState({
+    driver_name: '',
+    driver_phone: '',
+    vehicle_plate: '',
+    vehicle_type: '',
+  })
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!form.driver_name.trim() || !form.driver_phone.trim()) {
+      setError('請填寫司機姓名和電話')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const res = await fetch(`/api/transport/${itemId}/confirm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      })
+      if (!res.ok) throw new Error('提交失敗')
+      setSubmitted(true)
+    } catch {
+      setError('提交失敗，請稍後再試')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  if (submitted) {
+    return (
+      <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+        <div className="text-4xl mb-2">✅</div>
+        <h3 className="text-lg font-semibold text-green-900">預訂完成！</h3>
+        <p className="text-green-700 text-sm mt-1">感謝您的配合</p>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>司機姓名 <span className="text-red-500">*</span></Label>
+          <Input
+            value={form.driver_name}
+            onChange={(e) => setForm({ ...form, driver_name: e.target.value })}
+            placeholder="例：田中太郎"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>司機電話 <span className="text-red-500">*</span></Label>
+          <Input
+            value={form.driver_phone}
+            onChange={(e) => setForm({ ...form, driver_phone: e.target.value })}
+            placeholder="例：090-1234-5678"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>車牌號碼</Label>
+          <Input
+            value={form.vehicle_plate}
+            onChange={(e) => setForm({ ...form, vehicle_plate: e.target.value })}
+            placeholder="例：福岡 200 あ 1234"
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label>車款</Label>
+          <Input
+            value={form.vehicle_type}
+            onChange={(e) => setForm({ ...form, vehicle_type: e.target.value })}
+            placeholder="例：45人座大巴"
+            className="mt-1"
+          />
+        </div>
+      </div>
+      {error && <div className="text-red-600 text-sm">{error}</div>}
+      <Button type="submit" disabled={isSubmitting} className="w-full bg-blue-600 hover:bg-blue-700">
+        {isSubmitting ? '提交中...' : '✓ 確認提交司機資訊'}
+      </Button>
+    </form>
+  )
+}
 
 export function TransportQuoteForm({
   tourId,
@@ -31,9 +126,9 @@ export function TransportQuoteForm({
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+  const [submittedStatus, setSubmittedStatus] = useState<'quoted' | 'confirmed' | null>(null)
+
+  const handleSubmitWithStatus = async (status: 'quoted' | 'confirmed') => {
     if (!totalFare) {
       alert('請填寫車資')
       return
@@ -59,6 +154,7 @@ export function TransportQuoteForm({
           includesTip,
           tipAmount: includesTip ? 0 : parseFloat(tipAmount || '0'),
           supplierNote,
+          status, // 新增：quoted 或 confirmed
         }),
       })
 
@@ -66,6 +162,7 @@ export function TransportQuoteForm({
         throw new Error('提交失敗')
       }
 
+      setSubmittedStatus(status)
       setSubmitted(true)
     } catch (error) {
       alert('提交失敗，請稍後再試')
@@ -74,19 +171,32 @@ export function TransportQuoteForm({
     }
   }
 
+  // 保留舊的 handleSubmit 給 form onSubmit（防止 Enter 鍵提交）
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+  }
+
   if (submitted) {
+    if (submittedStatus === 'confirmed') {
+      // 報價+留車 → 顯示填司機資訊
+      return (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+          <div className="text-center mb-6">
+            <div className="text-4xl mb-2">🎉</div>
+            <h3 className="text-xl font-semibold text-blue-900">報價+留車已提交</h3>
+            <p className="text-blue-700 mt-1">請填寫司機資訊以完成預訂</p>
+          </div>
+          <DriverInfoFormInline itemId={itemId || ''} />
+        </div>
+      )
+    }
+    
+    // 僅報價
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
-        <div className="text-4xl mb-4">✅</div>
-        <h3 className="text-xl font-semibold text-green-900 mb-2">報價已提交</h3>
-        <p className="text-green-700 mb-4">感謝您的報價，我們會盡快與您聯繫</p>
-        <Button
-          onClick={() => window.print()}
-          variant="outline"
-          className="border-green-600 text-green-700"
-        >
-          下載此報價
-        </Button>
+      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+        <div className="text-4xl mb-4">📋</div>
+        <h3 className="text-xl font-semibold text-yellow-900 mb-2">報價已提交</h3>
+        <p className="text-yellow-700 mb-4">等待旅行社確認，確認後會通知您留車</p>
       </div>
     )
   }
@@ -240,14 +350,35 @@ export function TransportQuoteForm({
           />
         </div>
 
-        {/* 提交按鈕 */}
-        <Button
-          type="submit"
-          disabled={submitting}
-          className="w-full bg-gradient-to-r from-[#c9a96e] to-[#b89960] hover:from-[#b89960] hover:to-[#a88850] text-white font-semibold py-3"
-        >
-          {submitting ? '提交中...' : '提交報價'}
-        </Button>
+        {/* 提交按鈕 - 兩個選項 */}
+        <div className="grid grid-cols-2 gap-4 pt-4">
+          <Button
+            type="button"
+            disabled={submitting}
+            onClick={() => handleSubmitWithStatus('quoted')}
+            variant="outline"
+            className="py-6 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold"
+          >
+            <div className="text-center">
+              <div className="text-lg">📋 僅報價</div>
+              <div className="text-xs text-gray-500 mt-1">（未留車）</div>
+            </div>
+          </Button>
+          <Button
+            type="button"
+            disabled={submitting}
+            onClick={() => handleSubmitWithStatus('confirmed')}
+            className="py-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold"
+          >
+            <div className="text-center">
+              <div className="text-lg">✅ 報價+留車</div>
+              <div className="text-xs text-green-100 mt-1">（已預訂）</div>
+            </div>
+          </Button>
+        </div>
+        {submitting && (
+          <div className="text-center text-gray-500 text-sm mt-2">提交中...</div>
+        )}
       </form>
     </div>
   )
