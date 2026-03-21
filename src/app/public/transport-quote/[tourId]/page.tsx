@@ -5,6 +5,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { TransportQuoteForm } from './TransportQuoteForm'
+import { DriverInfoForm } from './DriverInfoForm'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,10 +17,38 @@ export default async function TransportQuotePage({
   searchParams,
 }: {
   params: Promise<{ tourId: string }>
-  searchParams: Promise<{ note?: string; vehicleDesc?: string; supplierName?: string }>
+  searchParams: Promise<{ note?: string; vehicleDesc?: string; supplierName?: string; requestId?: string; itemId?: string }>
 }) {
   const { tourId } = await params
-  const { note, vehicleDesc, supplierName = '車行' } = await searchParams
+  const { note, vehicleDesc, supplierName = '車行', requestId, itemId } = await searchParams
+  
+  // 查詢需求單狀態（如果有 requestId 或 itemId）
+  let requestStatus: string | null = null
+  let transportItem: Record<string, unknown> | null = null
+  
+  if (requestId) {
+    const { data: request } = await supabase
+      .from('tour_requests')
+      .select('status, supplier_response')
+      .eq('id', requestId)
+      .single()
+    requestStatus = request?.status || null
+  }
+  
+  if (itemId) {
+    const { data: item } = await supabase
+      .from('tour_itinerary_items')
+      .select('id, booking_confirmed_at, driver_name, driver_phone, vehicle_plate, vehicle_type, estimated_cost, request_status')
+      .eq('id', itemId)
+      .single()
+    transportItem = item
+    // 如果已經有司機資訊，狀態是「已確認」
+    if (item?.booking_confirmed_at) {
+      requestStatus = 'driver_confirmed'
+    } else if (item?.request_status === 'accepted') {
+      requestStatus = 'accepted'
+    }
+  }
 
   // 查詢團資料
   const { data: tour } = await supabase
@@ -179,8 +208,52 @@ export default async function TransportQuotePage({
               </div>
             )}
 
-            {/* 報價表單 */}
-            <TransportQuoteForm tourId={tourId} vehicleDesc={vehicleDesc} />
+            {/* 根據狀態顯示不同內容 */}
+            {requestStatus === 'driver_confirmed' ? (
+              // 已確認司機資訊
+              <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
+                <div className="text-4xl mb-4">✅</div>
+                <h3 className="text-xl font-semibold text-green-900 mb-2">預訂已確認</h3>
+                <p className="text-green-700 mb-4">司機資訊已提交完成</p>
+                <div className="bg-white rounded-lg p-4 text-left text-sm max-w-xs mx-auto">
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="text-gray-500">司機姓名</span>
+                    <span className="font-medium">{(transportItem as Record<string, unknown>)?.driver_name as string || '-'}</span>
+                    <span className="text-gray-500">司機電話</span>
+                    <span className="font-medium">{(transportItem as Record<string, unknown>)?.driver_phone as string || '-'}</span>
+                    <span className="text-gray-500">車牌號碼</span>
+                    <span className="font-medium">{(transportItem as Record<string, unknown>)?.vehicle_plate as string || '-'}</span>
+                  </div>
+                </div>
+              </div>
+            ) : requestStatus === 'accepted' ? (
+              // 已成交，等待填寫司機資訊
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <div className="text-center mb-6">
+                  <div className="text-4xl mb-2">🎉</div>
+                  <h3 className="text-xl font-semibold text-blue-900">恭喜！您的報價已被選用</h3>
+                  <p className="text-blue-700 mt-1">請填寫司機資訊以完成預訂</p>
+                </div>
+                <DriverInfoForm itemId={itemId || ''} />
+              </div>
+            ) : requestStatus === 'quoted' ? (
+              // 已報價，等待確認
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+                <div className="text-4xl mb-4">⏳</div>
+                <h3 className="text-xl font-semibold text-yellow-900 mb-2">報價已提交</h3>
+                <p className="text-yellow-700">等待旅行社確認中，請耐心等候</p>
+              </div>
+            ) : requestStatus === 'rejected' ? (
+              // 未選用
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+                <div className="text-4xl mb-4">😔</div>
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">感謝您的報價</h3>
+                <p className="text-gray-500">本次未選用，期待下次合作</p>
+              </div>
+            ) : (
+              // 未報價，顯示報價表單
+              <TransportQuoteForm tourId={tourId} requestId={requestId} itemId={itemId} vehicleDesc={vehicleDesc} />
+            )}
           </div>
         </div>
 

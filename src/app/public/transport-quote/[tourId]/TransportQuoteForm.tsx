@@ -10,10 +10,12 @@ import { Checkbox } from '@/components/ui/checkbox'
 export function TransportQuoteForm({
   tourId,
   requestId,
+  itemId,
   vehicleDesc,
 }: {
   tourId: string
   requestId?: string
+  itemId?: string
   vehicleDesc?: string
 }) {
   const [contact, setContact] = useState('')
@@ -45,7 +47,8 @@ export function TransportQuoteForm({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tourId,
-          requestId, // 單一性：綁定到特定需求單
+          requestId,
+          itemId,
           contact,
           phone,
           totalFare: parseFloat(totalFare),
