@@ -6,7 +6,7 @@ import { CSS } from '@dnd-kit/utilities'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Search, MapPin, Building2, UtensilsCrossed, Loader2 } from 'lucide-react'
 import { QuickAddResource } from './QuickAddResource'
-import { MapExplorerDialog } from './MapExplorerDialog'
+import { ResourceDetailDialog } from './ResourceDetailDialog'
 import { ResourceMapPanel } from './ResourceMapPanel'
 import { Input } from '@/components/ui/input'
 import { Combobox, type ComboboxOption } from '@/components/ui/combobox'
@@ -44,6 +44,8 @@ interface DraggableResourceCardProps {
 }
 
 function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps) {
+  const [hasDragged, setHasDragged] = useState(false)
+  
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `resource-${resource.type}-${resource.id}`,
     data: {
@@ -53,6 +55,13 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
       dataVerified: resource.data_verified ?? true,
     },
   })
+
+  // 追蹤是否真的拖曳了
+  useEffect(() => {
+    if (isDragging) {
+      setHasDragged(true)
+    }
+  }, [isDragging])
 
   const isUnverified = resource.data_verified === false
 
@@ -66,62 +75,53 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
     restaurant: <UtensilsCrossed size={14} className="text-orange-600" />,
   }
 
+  // 處理點擊：只有沒拖曳過才觸發編輯
+  const handleClick = () => {
+    if (!hasDragged) {
+      onEdit?.(resource)
+    }
+    setHasDragged(false)
+  }
+
   return (
     <div
       ref={setNodeRef}
       style={style}
+      {...listeners}
+      {...attributes}
+      onClick={handleClick}
       className={cn(
-        'flex items-center gap-1.5 px-2 py-1.5 rounded-md border bg-card',
+        'flex items-center gap-1.5 px-2 py-1.5 rounded-md border bg-card cursor-pointer',
         'hover:bg-accent/50 transition-colors',
-        isDragging && 'opacity-50 shadow-lg z-50',
+        isDragging && 'opacity-50 shadow-lg z-50 cursor-grabbing',
         // 未驗證 = 橘色警示邊框
         isUnverified
           ? 'border-amber-400/60 bg-amber-50/50'
           : 'border-border'
       )}
     >
-      {/* 拖拉區域 - 只有這部分可以拖拉 */}
-      <div
-        {...listeners}
-        {...attributes}
-        className="flex items-center gap-1.5 flex-1 min-w-0 cursor-grab active:cursor-grabbing"
-      >
-        {resource.thumbnail ? (
-          <img
-            src={resource.thumbnail}
-            alt={resource.name}
-            className="w-6 h-6 rounded object-cover flex-shrink-0"
-          />
-        ) : (
-          <div className={cn(
-            'w-6 h-6 rounded flex items-center justify-center flex-shrink-0',
-            isUnverified ? 'bg-amber-100' : 'bg-muted'
-          )}>
-            {iconMap[resource.type]}
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium truncate">{resource.name}</p>
-          <p className="text-[10px] text-muted-foreground truncate">
-            {isUnverified ? '⚠ 待驗證' : resource.category || resource.city_name || ''}
-          </p>
+      {/* 縮圖 */}
+      {resource.thumbnail ? (
+        <img
+          src={resource.thumbnail}
+          alt={resource.name}
+          className="w-8 h-8 rounded object-cover flex-shrink-0"
+        />
+      ) : (
+        <div className={cn(
+          'w-8 h-8 rounded flex items-center justify-center flex-shrink-0',
+          isUnverified ? 'bg-amber-100' : 'bg-muted'
+        )}>
+          {iconMap[resource.type]}
         </div>
+      )}
+      {/* 名稱和分類 */}
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium truncate">{resource.name}</p>
+        <p className="text-[10px] text-muted-foreground truncate">
+          {isUnverified ? '⚠ 待驗證' : resource.category || resource.city_name || ''}
+        </p>
       </div>
-      {/* 按鈕區域 - 不在 listeners 範圍內，可以正常點擊 */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation()
-          e.preventDefault()
-          console.log('🗺️ 點擊編輯按鈕:', resource.name, '座標:', resource.latitude, resource.longitude)
-          onEdit?.(resource)
-        }}
-        onPointerDown={(e) => e.stopPropagation()}
-        className="p-0.5 rounded hover:bg-emerald-100 transition-colors flex-shrink-0"
-        title="查看/編輯"
-      >
-        <MapPin size={10} className="text-emerald-500" />
-      </button>
     </div>
   )
 }
@@ -426,19 +426,20 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
         countryId={resolvedCountryId || null}
       />
 
-      {/* 地圖探索 Dialog */}
-      <MapExplorerDialog
+      {/* 資源詳情 Dialog */}
+      <ResourceDetailDialog
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
-        centerAttraction={editingResource ? {
-          id: editingResource.id,
-          name: editingResource.name,
-          latitude: editingResource.latitude ?? null,
-          longitude: editingResource.longitude ?? null,
-          category: editingResource.category,
-          address: editingResource.address
-        } : null}
-        countryId={resolvedCountryId || undefined}
+        resource={editingResource}
+        onSave={(updated) => {
+          // 更新列表中的資源名稱
+          setResources(prev => ({
+            ...prev,
+            [activeTab]: prev[activeTab].map(r =>
+              r.id === updated.id ? { ...r, name: updated.name } : r
+            ),
+          }))
+        }}
       />
     </div>
   )
