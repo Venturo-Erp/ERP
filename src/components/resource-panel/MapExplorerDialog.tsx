@@ -26,7 +26,7 @@ interface MapExplorerDialogProps {
     category?: string | null
     address?: string | null
   } | null
-  regionId?: string
+  countryId?: string
   onAddToItinerary?: (attraction: Attraction) => void
 }
 
@@ -47,7 +47,7 @@ export function MapExplorerDialog({
   open,
   onOpenChange,
   centerAttraction,
-  regionId,
+  countryId,
 }: MapExplorerDialogProps) {
   const [allAttractions, setAllAttractions] = useState<Attraction[]>([])
   const [selectedAttraction, setSelectedAttraction] = useState<Attraction | null>(null)
@@ -69,8 +69,8 @@ export function MapExplorerDialog({
           .not('latitude', 'is', null)
           .not('longitude', 'is', null)
 
-        if (regionId) {
-          query = query.eq('region_id', regionId)
+        if (countryId) {
+          query = query.eq('country_id', countryId)
         }
 
         const { data, error } = await query.limit(200)
@@ -121,7 +121,7 @@ export function MapExplorerDialog({
     }
 
     fetchAttractions()
-  }, [open, centerAttraction, regionId])
+  }, [open, centerAttraction, countryId])
 
   // 計算周邊景點（5km 內）
   const nearbyAttractions = selectedAttraction?.latitude && selectedAttraction?.longitude

@@ -148,15 +148,11 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [editingResource, setEditingResource] = useState<ResourceItem | null>(null)
 
-  // 階層式篩選：國家 → 地區 → 城市
+  // 篩選：只用國家（簡化版）
   const [resolvedCountryId, setResolvedCountryId] = useState<string | undefined>(undefined)
-  const [selectedRegion, setSelectedRegion] = useState<string>('')
-  const [selectedCity, setSelectedCity] = useState<string>('')
 
   // 選項列表
   const [countries, setCountries] = useState<{ id: string; name: string }[]>([])
-  const [regions, setRegions] = useState<{ id: string; name: string }[]>([])
-  const [cities, setCities] = useState<{ id: string; name: string }[]>([])
 
   const [resources, setResources] = useState<Record<ResourceType, ResourceItem[]>>({
     attraction: [],
@@ -221,10 +217,6 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
       if (byCity && byCity.length > 0) {
         const cid = byCity[0].country_id
         setResolvedCountryId(cid)
-        // 同時預設地區
-        if (byCity[0].region_id) {
-          setSelectedRegion(byCity[0].region_id)
-        }
         // 載入國家名
         const { data: cData } = await supabase
           .from('countries')
@@ -244,57 +236,7 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
     }
     void resolve()
 
-    // 用 locationName 反查預設地區（如「名古屋」→ jp_chubu）
-    const resolveRegion = async () => {
-      if (!locationName || selectedRegion) return
-      const { data } = await supabase
-        .from('cities')
-        .select('region_id')
-        .or(`name.eq.${locationName},id.eq.${locationName}`)
-        .limit(1)
-      if (data && data.length > 0 && data[0].region_id) {
-        setSelectedRegion(data[0].region_id)
-      }
-    }
-    void resolveRegion()
   }, [countryId, locationName])
-
-  // ── 第二步：國家變更 → 載入地區 ──
-  useEffect(() => {
-    if (!resolvedCountryId) {
-      setRegions([])
-      return
-    }
-    const supabase = createSupabaseBrowserClient()
-    const fetch = async () => {
-      const { data } = await supabase
-        .from('regions')
-        .select('id, name')
-        .eq('country_id', resolvedCountryId)
-        .order('display_order, name')
-      if (data) setRegions(data)
-    }
-    void fetch()
-  }, [resolvedCountryId])
-
-  // ── 第三步：地區變更 → 載入城市 ──
-  useEffect(() => {
-    if (!resolvedCountryId) {
-      setCities([])
-      return
-    }
-    const supabase = createSupabaseBrowserClient()
-    const fetch = async () => {
-      let query = supabase
-        .from('cities')
-        .select('id, name')
-        .eq('country_id', resolvedCountryId)
-      if (selectedRegion) query = query.eq('region_id', selectedRegion)
-      const { data } = await query.order('name')
-      if (data) setCities(data)
-    }
-    void fetch()
-  }, [resolvedCountryId, selectedRegion])
 
   // ── 第四步：載入資源 ──
   // 🔧 如果有 countryId prop 但 resolvedCountryId 還沒解析完，不要先載全部
@@ -315,23 +257,8 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
         .select(selectStr as 'id, name, category, thumbnail')
         .eq('is_active', true)
 
+      // 簡化版：只用國家篩選
       if (resolvedCountryId) query = query.eq('country_id', resolvedCountryId)
-      if (selectedCity) {
-        query = query.eq('city_id', selectedCity)
-      } else if (selectedRegion) {
-        // 用地區篩選：直接用 cities 表的 region_id join
-        // 先查該地區的城市 ID（獨立查詢，避免 N+1 依賴）
-        const supabase2 = createSupabaseBrowserClient()
-        const { data: regionCities } = await supabase2
-          .from('cities')
-          .select('id')
-          .eq('country_id', resolvedCountryId || '')
-          .eq('region_id', selectedRegion)
-        const regionCityIds = (regionCities || []).map(c => c.id)
-        if (regionCityIds.length > 0) {
-          query = query.in('city_id', regionCityIds)
-        }
-      }
 
       const { data, error } = await query.order('name').limit(200)
 
@@ -363,7 +290,7 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
     void fetchResources('attractions', 'attraction')
     void fetchResources('hotels', 'hotel', ', star_rating')
     void fetchResources('restaurants', 'restaurant')
-  }, [resolvedCountryId, selectedRegion, selectedCity, isResolving])
+  }, [resolvedCountryId, isResolving])
 
   // 搜尋過濾
   const filteredResources = useMemo(() => {
@@ -391,55 +318,20 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
         <span className="ml-auto text-xs opacity-75">拖拽至行程</span>
       </div>
 
-      {/* 階層式篩選：國家 → 地區 → 城市（ComboBox 可搜尋） */}
+      {/* 篩選：只用國家（簡化版） */}
       <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border">
         {/* 國家 */}
         <Combobox
           value={resolvedCountryId || ''}
           onChange={v => {
             setResolvedCountryId(v || undefined)
-            setSelectedRegion('')
-            setSelectedCity('')
           }}
           options={countries.map(c => ({ value: c.id, label: c.name }))}
-          placeholder="國家"
-          className="w-[120px]"
+          placeholder="選擇國家"
+          className="w-[140px]"
           showClearButton={false}
           disablePortal
         />
-        {/* 地區 */}
-        {regions.length > 0 && (
-          <Combobox
-            value={selectedRegion}
-            onChange={v => {
-              setSelectedRegion(v)
-              setSelectedCity('')
-            }}
-            options={[
-              { value: '', label: '全部地區' },
-              ...regions.map(r => ({ value: r.id, label: r.name })),
-            ]}
-            placeholder="地區"
-            className="w-[120px]"
-            showClearButton={false}
-            disablePortal
-          />
-        )}
-        {/* 城市 */}
-        {cities.length > 0 && (
-          <Combobox
-            value={selectedCity}
-            onChange={setSelectedCity}
-            options={[
-              { value: '', label: '全部城市' },
-              ...cities.map(c => ({ value: c.id, label: c.name })),
-            ]}
-            placeholder="城市"
-            className="w-[120px]"
-            showClearButton={false}
-            disablePortal
-          />
-        )}
         {/* 快速新增資源 */}
         <div className="ml-auto">
           <QuickAddResource
@@ -531,7 +423,7 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
       <ResourceMapPanel
         tourId={tourId || null}
         tourCode={tourCode || null}
-        regionId={selectedRegion || null}
+        countryId={resolvedCountryId || null}
       />
 
       {/* 地圖探索 Dialog */}
@@ -546,7 +438,7 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
           category: editingResource.category,
           address: editingResource.address
         } : null}
-        regionId={selectedRegion || undefined}
+        countryId={resolvedCountryId || undefined}
       />
     </div>
   )

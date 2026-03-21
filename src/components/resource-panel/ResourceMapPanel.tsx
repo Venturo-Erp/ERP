@@ -25,14 +25,14 @@ const AttractionsMap = dynamic(
 interface ResourceMapPanelProps {
   tourId: string | null
   tourCode: string | null
-  regionId: string | null
+  countryId: string | null
   className?: string
 }
 
 export function ResourceMapPanel({
   tourId,
   tourCode,
-  regionId,
+  countryId,
   className = '',
 }: ResourceMapPanelProps) {
   const [attractions, setAttractions] = useState<Attraction[]>([])
@@ -75,9 +75,9 @@ export function ResourceMapPanel({
     } as Attraction
   }, [tourCode])
 
-  // 載入景點
+  // 載入景點（簡化版：按國家）
   useEffect(() => {
-    if (!expanded || !regionId) return
+    if (!expanded || !countryId) return
 
     const fetchAttractions = async () => {
       setLoading(true)
@@ -85,7 +85,7 @@ export function ResourceMapPanel({
         const { data, error } = await supabase
           .from('attractions')
           .select('*')
-          .eq('region_id', regionId)
+          .eq('country_id', countryId)
           .not('latitude', 'is', null)
           .not('longitude', 'is', null)
           .limit(200)
@@ -149,7 +149,7 @@ export function ResourceMapPanel({
     }
 
     fetchAttractions()
-  }, [expanded, regionId, savedCenter, defaultCenter])
+  }, [expanded, countryId, savedCenter, defaultCenter])
 
   // 處理地圖中心變更（當用戶點擊景點時）
   const handleSelectAttraction = (attraction: Attraction) => {
@@ -230,7 +230,7 @@ export function ResourceMapPanel({
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground bg-muted/30">
-                {regionId ? '此地區沒有景點座標' : '請選擇地區'}
+                {countryId ? '此國家沒有景點座標' : '請選擇國家'}
               </div>
             )}
           </div>
