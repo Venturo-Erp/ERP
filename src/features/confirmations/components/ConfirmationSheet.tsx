@@ -20,12 +20,13 @@ import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-it
 import { usePaymentStatus } from '../hooks/usePaymentStatus'
 import { useWorkspaceSettings, getLogoStyle } from '@/hooks/useWorkspaceSettings'
 
-// 配色 - 有質感的灰棕色系
+// 配色 - 參考出納單
 const COLORS = {
-  primary: '#3a3633',      // 深棕灰（標題、文字）
-  border: '#B8A99A',       // Morandi gold（邊框）
-  headerBg: '#E8E4DD',     // 淺棕米（表頭背景）
-  accent: '#8B7355',       // 棕色（重點）
+  primary: '#3a3633',      // 深棕灰（標題、文字、主邊框）
+  gold: '#B8A99A',         // Morandi gold（細分隔線）
+  lightBrown: '#FAF7F2',   // 淺米（背景）
+  gray: '#4B5563',         // 灰（次要文字）
+  lightGray: '#9CA3AF',    // 淺灰
 }
 
 // === 類型定義 ===
@@ -197,12 +198,9 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
       </div>
 
       {/* === 標頭 === */}
-      <div 
-        className="rounded-lg p-6 bg-white"
-        style={{ border: `2px solid ${COLORS.border}` }}
-      >
+      <div className="p-6 bg-white">
         {/* Logo + 標題 */}
-        <div className="flex items-center justify-between mb-6 pb-4" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
+        <div className="flex items-center justify-between mb-6 pb-4" style={{ borderBottom: `1px solid ${COLORS.gold}` }}>
           {/* Logo */}
           <div>
             <img
@@ -214,7 +212,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           
           {/* 標題 */}
           <div className="text-center flex-1">
-            <div className="text-xs tracking-widest mb-1" style={{ color: COLORS.border }}>
+            <div className="text-xs tracking-widest mb-1" style={{ color: COLORS.gold }}>
               TOUR CONFIRMATION
             </div>
             <h1 className="text-xl font-bold" style={{ color: COLORS.primary }}>
@@ -223,9 +221,9 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           </div>
           
           {/* 團號 */}
-          <div className="text-right text-sm" style={{ color: COLORS.accent }}>
+          <div className="text-right text-sm" style={{ color: COLORS.gray }}>
             <div>{headerInfo.code}</div>
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs" style={{ color: COLORS.lightGray }}>
               {headerInfo.departure_date ? formatDate(headerInfo.departure_date) : ''}
             </div>
           </div>
@@ -312,18 +310,18 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
 
       {/* === 財務彙總 === */}
       <div 
-        className="rounded-lg p-6 bg-white"
-        style={{ border: `2px solid ${COLORS.border}` }}
+        className="p-6 bg-white"
+        style={{ borderTop: `2px solid ${COLORS.primary}` }}
       >
         <div className="flex items-center justify-between text-lg font-bold">
           <div className="flex items-center gap-8">
-            <span style={{ color: COLORS.accent }}>預計支出總金額：</span>
+            <span style={{ color: COLORS.primary }}>預計支出總金額：</span>
             <span className="font-mono">
               ${financialSummary.totalExpected.toLocaleString()}
             </span>
           </div>
           <div className="flex items-center gap-8">
-            <span style={{ color: COLORS.accent }}>實際支出總金額：</span>
+            <span style={{ color: COLORS.primary }}>實際支出總金額：</span>
             <span className="font-mono">
               {financialSummary.totalActual > 0
                 ? `$${financialSummary.totalActual.toLocaleString()}`
@@ -360,7 +358,7 @@ function CategoryTable({ title, items, showUnitPriceColumns, onActualExpenseUpda
       {/* 表頭 */}
       <div 
         className="px-4 py-2 font-bold"
-        style={{ backgroundColor: COLORS.headerBg, color: COLORS.primary }}
+        style={{ backgroundColor: COLORS.lightBrown, color: COLORS.primary, borderBottom: `2px solid ${COLORS.primary}` }}
       >
         {title}
       </div>
