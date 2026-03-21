@@ -20,11 +20,12 @@ import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-it
 import { usePaymentStatus } from '../hooks/usePaymentStatus'
 import { useWorkspaceSettings, getLogoStyle } from '@/hooks/useWorkspaceSettings'
 
-// 配色 - 參考出納單
+// 配色 - Morandi 色系
 const COLORS = {
-  primary: '#3a3633',      // 深棕灰（標題、文字、主邊框）
-  gold: '#B8A99A',         // Morandi gold（細分隔線）
-  lightBrown: '#FAF7F2',   // 淺米（背景）
+  primary: '#3a3633',      // 深棕灰（標題、文字）
+  secondary: '#8b8680',    // Morandi secondary
+  green: '#9fa68f',        // Morandi 綠（區塊標題背景）
+  border: '#d1ccc4',       // 淺灰邊框（低對比）
   gray: '#4B5563',         // 灰（次要文字）
   lightGray: '#9CA3AF',    // 淺灰
 }
@@ -188,19 +189,31 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
   const maxDay = Math.max(...items.map(i => i.day_number ?? 0))
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 py-6">
+    <div className="mx-auto py-6 print:py-0">
       {/* === 操作列 === */}
-      <div className="flex items-center justify-end gap-2 print:hidden">
+      <div className="flex items-center justify-end gap-2 print:hidden mb-4">
         <Button size="sm" onClick={handlePrint} className="gap-1.5">
           <Printer size={14} />
           列印
         </Button>
       </div>
+      
+      {/* A4 等比例容器 */}
+      <div 
+        className="bg-white mx-auto shadow-sm print:shadow-none"
+        style={{ 
+          width: '210mm', 
+          minHeight: '297mm',
+          maxWidth: '100%',
+          border: `1px solid ${COLORS.border}`,
+          padding: '15mm',  /* 留白 */
+        }}
+      >
 
       {/* === 標頭 === */}
-      <div className="p-6 bg-white">
+      <div className="p-6">
         {/* Logo + 標題 */}
-        <div className="flex items-center justify-between mb-6 pb-4" style={{ borderBottom: `1px solid ${COLORS.gold}` }}>
+        <div className="flex items-center justify-between mb-6 pb-4" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
           {/* Logo */}
           <div>
             <img
@@ -212,7 +225,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           
           {/* 標題 */}
           <div className="text-center flex-1">
-            <div className="text-xs tracking-widest mb-1" style={{ color: COLORS.gold }}>
+            <div className="text-xs tracking-widest mb-1" style={{ color: COLORS.secondary }}>
               TOUR CONFIRMATION
             </div>
             <h1 className="text-xl font-bold" style={{ color: COLORS.primary }}>
@@ -274,6 +287,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         items={groupedByCategory.transport}
         showUnitPriceColumns={false}
         onActualExpenseUpdate={refresh}
+        departureDate={headerInfo.departure_date}
       />
 
       {/* === 餐食表 === */}
@@ -282,6 +296,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         items={groupedByCategory.meals}
         showUnitPriceColumns={true}
         onActualExpenseUpdate={refresh}
+        departureDate={headerInfo.departure_date}
       />
 
       {/* === 住宿表 === */}
@@ -290,6 +305,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         items={groupedByCategory.accommodation}
         showUnitPriceColumns={true}
         onActualExpenseUpdate={refresh}
+        departureDate={headerInfo.departure_date}
       />
 
       {/* === 活動表 === */}
@@ -298,6 +314,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         items={groupedByCategory.activities}
         showUnitPriceColumns={true}
         onActualExpenseUpdate={refresh}
+        departureDate={headerInfo.departure_date}
       />
 
       {/* === 其他 === */}
@@ -306,12 +323,13 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         items={groupedByCategory.others}
         showUnitPriceColumns={true}
         onActualExpenseUpdate={refresh}
+        departureDate={headerInfo.departure_date}
       />
 
       {/* === 財務彙總 === */}
       <div 
-        className="p-6 bg-white"
-        style={{ borderTop: `2px solid ${COLORS.primary}` }}
+        className="p-6"
+        style={{ borderTop: `1px solid ${COLORS.border}` }}
       >
         <div className="flex items-center justify-between text-lg font-bold">
           <div className="flex items-center gap-8">
@@ -335,6 +353,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
       <div className="hidden print:block text-xs text-muted-foreground text-center pt-4 border-t">
         列印日期：{formatDate(new Date().toISOString())}
       </div>
+      </div>{/* A4 容器結束 */}
     </div>
   )
 }
@@ -346,43 +365,57 @@ interface CategoryTableProps {
   items: TourItineraryItem[]
   showUnitPriceColumns: boolean
   onActualExpenseUpdate?: () => void
+  departureDate?: string | null
 }
 
-function CategoryTable({ title, items, showUnitPriceColumns, onActualExpenseUpdate }: CategoryTableProps) {
+function CategoryTable({ title, items, showUnitPriceColumns, onActualExpenseUpdate, departureDate }: CategoryTableProps) {
   if (items.length === 0) {
     return null // 沒有項目就不顯示表格
   }
 
   return (
-    <div className="border rounded-lg overflow-hidden bg-white">
+    <div className="overflow-hidden" style={{ borderTop: `1px solid ${COLORS.border}` }}>
       {/* 表頭 */}
       <div 
-        className="px-4 py-2 font-bold"
-        style={{ backgroundColor: COLORS.lightBrown, color: COLORS.primary, borderBottom: `2px solid ${COLORS.primary}` }}
+        className="px-4 py-2 font-bold text-white"
+        style={{ backgroundColor: COLORS.green }}
       >
         {title}
       </div>
 
       {/* 表格 */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+          <colgroup>
+            <col style={{ width: '10%' }} /> {/* 日期 */}
+            <col style={{ width: showUnitPriceColumns ? '22%' : '35%' }} /> {/* 名稱 */}
+            {showUnitPriceColumns && (
+              <>
+                <col style={{ width: '12%' }} /> {/* 商品單價 */}
+                <col style={{ width: '8%' }} />  {/* 數量 */}
+                <col style={{ width: '12%' }} /> {/* 小計 */}
+              </>
+            )}
+            <col style={{ width: '12%' }} /> {/* 預計支出 */}
+            <col style={{ width: '12%' }} /> {/* 實際支出 */}
+            <col style={{ width: showUnitPriceColumns ? '12%' : '19%' }} /> {/* 說明（含付款狀態）*/}
+          </colgroup>
           <thead>
             <tr className="bg-gray-50 border-b">
-              <th className="px-3 py-2 text-left font-medium w-20">日期</th>
-              <th className="px-3 py-2 text-left font-medium">
+              <th className="px-2 py-2 text-left font-medium">日期</th>
+              <th className="px-2 py-2 text-left font-medium">
                 {title === '交通' ? '接駁地點' : title === '餐食' ? '餐廳名稱' : '名稱'}
               </th>
               {showUnitPriceColumns && (
                 <>
-                  <th className="px-3 py-2 text-right font-medium w-24">商品單價</th>
-                  <th className="px-3 py-2 text-right font-medium w-20">數量</th>
-                  <th className="px-3 py-2 text-right font-medium w-24">小計</th>
+                  <th className="px-2 py-2 text-right font-medium">商品單價</th>
+                  <th className="px-2 py-2 text-right font-medium">數量</th>
+                  <th className="px-2 py-2 text-right font-medium">小計</th>
                 </>
               )}
-              <th className="px-3 py-2 text-right font-medium w-24">預計支出</th>
-              <th className="px-3 py-2 text-right font-medium w-24">實際支出</th>
-              <th className="px-3 py-2 text-left font-medium w-32">付款狀態</th>
-              <th className="px-3 py-2 text-left font-medium">說明</th>
+              <th className="px-2 py-2 text-right font-medium">預計支出</th>
+              <th className="px-2 py-2 text-right font-medium">實際支出</th>
+              <th className="px-2 py-2 text-left font-medium">說明</th>
             </tr>
           </thead>
           <tbody>
@@ -393,6 +426,7 @@ function CategoryTable({ title, items, showUnitPriceColumns, onActualExpenseUpda
                 showUnitPriceColumns={showUnitPriceColumns}
                 isLast={index === items.length - 1}
                 onActualExpenseUpdate={onActualExpenseUpdate}
+                departureDate={departureDate}
               />
             ))}
           </tbody>
@@ -409,9 +443,18 @@ interface TableRowProps {
   showUnitPriceColumns: boolean
   isLast: boolean
   onActualExpenseUpdate?: () => void
+  departureDate?: string | null
 }
 
-function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate }: TableRowProps) {
+// 計算實際日期（出發日期 + day_number - 1）
+function calculateServiceDate(departureDate: string | null | undefined, dayNumber: number | null | undefined): string | null {
+  if (!departureDate || !dayNumber) return null
+  const date = new Date(departureDate)
+  date.setDate(date.getDate() + dayNumber - 1)
+  return date.toISOString().split('T')[0]
+}
+
+function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate, departureDate }: TableRowProps) {
   const [actualExpense, setActualExpense] = useState<string>(
     item.actual_expense != null ? String(item.actual_expense) : ''
   )
@@ -461,8 +504,13 @@ function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate }:
   return (
     <tr className={!isLast ? 'border-b' : ''}>
       {/* 日期 */}
-      <td className="px-3 py-2 text-gray-600">
-        {item.service_date ? formatDateShort(item.service_date) : '-'}
+      <td className="px-2 py-2 text-gray-600">
+        {(() => {
+          if (item.service_date) return formatDateShort(item.service_date)
+          const calculated = calculateServiceDate(departureDate, item.day_number)
+          if (calculated) return formatDateShort(calculated)
+          return '-'
+        })()}
       </td>
 
       {/* 名稱（含供應商、描述） */}
@@ -512,14 +560,12 @@ function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate }:
         />
       </td>
 
-      {/* 付款狀態 */}
-      <td className="px-3 py-2">
-        <PaymentStatusCell requestId={item.request_id} />
-      </td>
-
-      {/* 說明 */}
-      <td className="px-3 py-2 text-gray-600 text-xs">
-        {notes || '-'}
+      {/* 說明（含付款狀態）*/}
+      <td className="px-2 py-2 text-xs">
+        <div className="space-y-0.5">
+          {notes && <div className="text-gray-600">{notes}</div>}
+          <PaymentStatusCell requestId={item.request_id} />
+        </div>
       </td>
     </tr>
   )
