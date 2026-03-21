@@ -733,7 +733,6 @@ function DailyItineraryTable({ dailyItinerary, accommodationItems, transportItem
           {transportItems.map((item, idx) => (
             <tr key={item.id || idx} className="border-b bg-gray-50">
               <td className="px-3 py-2 text-gray-500 align-top text-xs">
-                交通
               </td>
               <td className="px-3 py-2">
                 <div className="flex items-center justify-between">
