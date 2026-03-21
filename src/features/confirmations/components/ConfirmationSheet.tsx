@@ -18,6 +18,15 @@ import { logger } from '@/lib/utils/logger'
 import { useTourItineraryItemsByTour } from '@/features/tours/hooks/useTourItineraryItems'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
 import { usePaymentStatus } from '../hooks/usePaymentStatus'
+import { useWorkspaceSettings, getLogoStyle } from '@/hooks/useWorkspaceSettings'
+
+// 配色 - 有質感的灰棕色系
+const COLORS = {
+  primary: '#3a3633',      // 深棕灰（標題、文字）
+  border: '#B8A99A',       // Morandi gold（邊框）
+  headerBg: '#E8E4DD',     // 淺棕米（表頭背景）
+  accent: '#8B7355',       // 棕色（重點）
+}
 
 // === 類型定義 ===
 
@@ -43,6 +52,10 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
   const { items, loading, refresh } = useTourItineraryItemsByTour(tourId)
   const [headerInfo, setHeaderInfo] = useState<TourHeaderInfo | null>(null)
   const [headerLoading, setHeaderLoading] = useState(true)
+  const ws = useWorkspaceSettings()
+  const logoUrl = ws.logo_url || '/corner-logo.png'
+  const companyName = ws.legal_name || ws.name || ''
+  const companySubtitle = ws.subtitle || ''
 
   // 讀取團基本資訊
   useEffect(() => {
@@ -184,10 +197,39 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
       </div>
 
       {/* === 標頭 === */}
-      <div className="border-2 border-[#c9a96e] rounded-lg p-6 bg-white">
-        <h1 className="text-2xl font-bold text-center text-[#c9a96e] mb-6">
-          團確單（出團確認單）
-        </h1>
+      <div 
+        className="rounded-lg p-6 bg-white"
+        style={{ border: `2px solid ${COLORS.border}` }}
+      >
+        {/* Logo + 標題 */}
+        <div className="flex items-center justify-between mb-6 pb-4" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
+          {/* Logo */}
+          <div>
+            <img
+              src={logoUrl}
+              alt="公司 Logo"
+              style={getLogoStyle('print')}
+            />
+          </div>
+          
+          {/* 標題 */}
+          <div className="text-center flex-1">
+            <div className="text-xs tracking-widest mb-1" style={{ color: COLORS.border }}>
+              TOUR CONFIRMATION
+            </div>
+            <h1 className="text-xl font-bold" style={{ color: COLORS.primary }}>
+              團確單
+            </h1>
+          </div>
+          
+          {/* 團號 */}
+          <div className="text-right text-sm" style={{ color: COLORS.accent }}>
+            <div>{headerInfo.code}</div>
+            <div className="text-xs text-muted-foreground">
+              {headerInfo.departure_date ? formatDate(headerInfo.departure_date) : ''}
+            </div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-sm">
           <div className="flex">
@@ -269,16 +311,19 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
       />
 
       {/* === 財務彙總 === */}
-      <div className="border-2 border-[#c9a96e] rounded-lg p-6 bg-white">
+      <div 
+        className="rounded-lg p-6 bg-white"
+        style={{ border: `2px solid ${COLORS.border}` }}
+      >
         <div className="flex items-center justify-between text-lg font-bold">
           <div className="flex items-center gap-8">
-            <span className="text-[#c9a96e]">預計支出總金額：</span>
+            <span style={{ color: COLORS.accent }}>預計支出總金額：</span>
             <span className="font-mono">
               ${financialSummary.totalExpected.toLocaleString()}
             </span>
           </div>
           <div className="flex items-center gap-8">
-            <span className="text-[#c9a96e]">實際支出總金額：</span>
+            <span style={{ color: COLORS.accent }}>實際支出總金額：</span>
             <span className="font-mono">
               {financialSummary.totalActual > 0
                 ? `$${financialSummary.totalActual.toLocaleString()}`
@@ -313,7 +358,10 @@ function CategoryTable({ title, items, showUnitPriceColumns, onActualExpenseUpda
   return (
     <div className="border rounded-lg overflow-hidden bg-white">
       {/* 表頭 */}
-      <div className="bg-[#c9a96e] text-white px-4 py-2 font-bold">
+      <div 
+        className="px-4 py-2 font-bold"
+        style={{ backgroundColor: COLORS.headerBg, color: COLORS.primary }}
+      >
         {title}
       </div>
 
