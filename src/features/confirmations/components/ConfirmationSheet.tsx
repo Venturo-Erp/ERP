@@ -316,11 +316,13 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         </div>
       </div>
 
-      {/* === 每日行程 + 飯店 === */}
+      {/* === 每日行程 + 飯店 + 交通 === */}
       <DailyItineraryTable 
         dailyItinerary={dailyItinerary} 
         accommodationItems={groupedByCategory.accommodation}
+        transportItems={groupedByCategory.transport}
         departureDate={headerInfo.departure_date}
+        onActualExpenseUpdate={refresh}
       />
 
       {/* === 餐食表 === */}
@@ -649,10 +651,12 @@ function formatDateShort(dateStr: string): string {
 interface DailyItineraryTableProps {
   dailyItinerary: DailyItineraryItem[]
   accommodationItems: TourItineraryItem[]
+  transportItems: TourItineraryItem[]
   departureDate?: string | null
+  onActualExpenseUpdate?: () => void
 }
 
-function DailyItineraryTable({ dailyItinerary, accommodationItems, departureDate }: DailyItineraryTableProps) {
+function DailyItineraryTable({ dailyItinerary, accommodationItems, transportItems, departureDate, onActualExpenseUpdate }: DailyItineraryTableProps) {
   if (dailyItinerary.length === 0) {
     return null
   }
@@ -725,6 +729,39 @@ function DailyItineraryTable({ dailyItinerary, accommodationItems, departureDate
               </React.Fragment>
             )
           })}
+          {/* 交通區塊（在最後一天後面）*/}
+          {transportItems.length > 0 && (
+            <>
+              <tr className="border-b bg-gray-100">
+                <td colSpan={2} className="px-3 py-2 font-bold" style={{ color: COLORS.primary }}>
+                  交通
+                </td>
+              </tr>
+              {transportItems.map((item, idx) => (
+                <tr key={item.id || idx} className="border-b">
+                  <td className="px-3 py-2 text-gray-600 align-top text-xs">
+                    {item.supplier_name || '-'}
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-medium">{item.title || '-'}</span>
+                        {item.description && <span className="text-xs text-gray-500 ml-2">{item.description}</span>}
+                      </div>
+                      <div className="flex items-center gap-4 text-sm font-mono">
+                        <span className="text-gray-600">
+                          預計: {item.estimated_cost?.toLocaleString() || '-'}
+                        </span>
+                        <span className="text-green-600">
+                          實際: {item.actual_expense?.toLocaleString() || '-'}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </>
+          )}
         </tbody>
       </table>
     </div>
