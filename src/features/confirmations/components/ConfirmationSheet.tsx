@@ -10,7 +10,7 @@
  * - 財務彙總：預計支出總金額 / 實際支出總金額
  */
 
-import { useMemo, useState, useEffect } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { Loader2, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase/client'
@@ -48,12 +48,33 @@ interface TourHeaderInfo {
   flight_info: string | null
 }
 
+// 每日行程資料結構
+interface DailyItineraryItem {
+  date: string        // "7/2 (四)"
+  title: string       // "抵達福岡機場 ⇀ 博多 ⇀ ..."
+  dayLabel: string    // "Day 1"
+  description?: string
+  highlight?: string
+}
+
+// 飯店資料結構
+interface HotelInfo {
+  name: string
+  address?: string
+  checkIn?: string
+  checkOut?: string
+  nights?: number
+  dayNumber?: number
+}
+
 // === 主組件 ===
 
 export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
   const { items, loading, refresh } = useTourItineraryItemsByTour(tourId)
   const [headerInfo, setHeaderInfo] = useState<TourHeaderInfo | null>(null)
   const [headerLoading, setHeaderLoading] = useState(true)
+  const [dailyItinerary, setDailyItinerary] = useState<DailyItineraryItem[]>([])
+  const [hotels, setHotels] = useState<HotelInfo[]>([])
   const ws = useWorkspaceSettings()
   const logoUrl = ws.logo_url || '/corner-logo.png'
   const companyName = ws.legal_name || ws.name || ''
@@ -112,6 +133,20 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           assistant: firstOrder?.assistant ?? null,
           flight_info: null, // TODO: 之後可加航班資訊
         })
+
+        // 讀取行程資料（daily_itinerary + hotels）
+        const { data: itinerary } = await supabase
+          .from('itineraries')
+          .select('daily_itinerary, hotels')
+          .eq('tour_id', tourId)
+          .maybeSingle()
+
+        if (itinerary?.daily_itinerary) {
+          setDailyItinerary(itinerary.daily_itinerary as unknown as DailyItineraryItem[])
+        }
+        if (itinerary?.hotels) {
+          setHotels(itinerary.hotels as unknown as HotelInfo[])
+        }
       } catch (err) {
         logger.error('讀取團確單標頭失敗:', err)
         setHeaderInfo(null)
@@ -281,30 +316,10 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         </div>
       </div>
 
-      {/* === 交通表 === */}
-      <CategoryTable
-        title="交通"
-        items={groupedByCategory.transport}
-        showUnitPriceColumns={false}
-        onActualExpenseUpdate={refresh}
-        departureDate={headerInfo.departure_date}
-      />
-
-      {/* === 餐食表 === */}
-      <CategoryTable
-        title="餐食"
-        items={groupedByCategory.meals}
-        showUnitPriceColumns={true}
-        onActualExpenseUpdate={refresh}
-        departureDate={headerInfo.departure_date}
-      />
-
-      {/* === 住宿表 === */}
-      <CategoryTable
-        title="住宿"
-        items={groupedByCategory.accommodation}
-        showUnitPriceColumns={true}
-        onActualExpenseUpdate={refresh}
+      {/* === 每日行程 + 飯店 === */}
+      <DailyItineraryTable 
+        dailyItinerary={dailyItinerary} 
+        hotels={hotels}
         departureDate={headerInfo.departure_date}
       />
 
@@ -609,4 +624,81 @@ function formatDateShort(dateStr: string): string {
   const d = new Date(dateStr)
   if (isNaN(d.getTime())) return dateStr
   return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}`
+}
+
+// === 子組件：每日行程 + 飯店表 ===
+
+interface DailyItineraryTableProps {
+  dailyItinerary: DailyItineraryItem[]
+  hotels: HotelInfo[]
+  departureDate?: string | null
+}
+
+function DailyItineraryTable({ dailyItinerary, hotels, departureDate }: DailyItineraryTableProps) {
+  if (dailyItinerary.length === 0) {
+    return null
+  }
+
+  // 根據 dayNumber 找飯店
+  const getHotelForDay = (dayIndex: number): HotelInfo | undefined => {
+    return hotels.find(h => h.dayNumber === dayIndex + 1)
+  }
+
+  return (
+    <div className="overflow-hidden" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+      {/* 表頭 */}
+      <div 
+        className="px-4 py-2 font-bold text-white"
+        style={{ backgroundColor: COLORS.green }}
+      >
+        每日行程
+      </div>
+
+      {/* 表格 */}
+      <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+        <colgroup>
+          <col style={{ width: '12%' }} /> {/* 日期 */}
+          <col style={{ width: '88%' }} /> {/* 行程 */}
+        </colgroup>
+        <thead>
+          <tr className="bg-gray-50 border-b">
+            <th className="px-3 py-2 text-left font-medium">日期</th>
+            <th className="px-3 py-2 text-left font-medium">行程</th>
+          </tr>
+        </thead>
+        <tbody>
+          {dailyItinerary.map((day, index) => {
+            const hotel = getHotelForDay(index)
+            return (
+              <React.Fragment key={index}>
+                {/* 行程列 */}
+                <tr className="border-b">
+                  <td className="px-3 py-2 text-gray-600 align-top">
+                    {day.date || `Day ${index + 1}`}
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="font-medium">{day.title}</div>
+                    {day.description && (
+                      <div className="text-xs text-gray-500 mt-1">{day.description}</div>
+                    )}
+                  </td>
+                </tr>
+                {/* 飯店列（如果有）*/}
+                {hotel && (
+                  <tr className="border-b bg-gray-50">
+                    <td className="px-3 py-1"></td>
+                    <td className="px-3 py-1 text-xs">
+                      <span className="text-gray-500">🏨</span>{' '}
+                      <span className="font-medium">{hotel.name}</span>
+                      {hotel.address && <span className="text-gray-500 ml-2">{hotel.address}</span>}
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
 }
