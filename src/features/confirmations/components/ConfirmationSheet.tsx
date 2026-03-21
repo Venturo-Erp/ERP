@@ -246,7 +246,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
       >
 
       {/* === 標頭 === */}
-      <div className="p-6">
+      <div className="px-6 pt-2 pb-4">
         {/* Logo + 標題 */}
         <div className="flex items-center justify-between mb-6 pb-4" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
           {/* Logo */}
@@ -319,7 +319,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
       {/* === 每日行程 + 飯店 === */}
       <DailyItineraryTable 
         dailyItinerary={dailyItinerary} 
-        hotels={hotels}
+        accommodationItems={groupedByCategory.accommodation}
         departureDate={headerInfo.departure_date}
       />
 
@@ -630,18 +630,30 @@ function formatDateShort(dateStr: string): string {
 
 interface DailyItineraryTableProps {
   dailyItinerary: DailyItineraryItem[]
-  hotels: HotelInfo[]
+  accommodationItems: TourItineraryItem[]
   departureDate?: string | null
 }
 
-function DailyItineraryTable({ dailyItinerary, hotels, departureDate }: DailyItineraryTableProps) {
+function DailyItineraryTable({ dailyItinerary, accommodationItems, departureDate }: DailyItineraryTableProps) {
   if (dailyItinerary.length === 0) {
     return null
   }
 
-  // 根據 dayNumber 找飯店
-  const getHotelForDay = (dayIndex: number): HotelInfo | undefined => {
-    return hotels.find(h => h.dayNumber === dayIndex + 1)
+  // 根據 dayNumber 找飯店（從 tour_itinerary_items）
+  // 處理「同上 (飯店名)」→ 提取實際飯店名
+  const getHotelForDay = (dayIndex: number): { title: string } | undefined => {
+    const dayNumber = dayIndex + 1
+    const hotel = accommodationItems.find(item => item.day_number === dayNumber)
+    if (!hotel?.title) return undefined
+    
+    // 提取「同上 (xxx)」裡的實際飯店名
+    let title = hotel.title
+    const match = title.match(/同上\s*[（(](.+?)[）)]/)
+    if (match) {
+      title = match[1] // 取括號裡的內容
+    }
+    
+    return { title }
   }
 
   return (
@@ -688,9 +700,8 @@ function DailyItineraryTable({ dailyItinerary, hotels, departureDate }: DailyIti
                   <tr className="border-b bg-gray-50">
                     <td className="px-3 py-1"></td>
                     <td className="px-3 py-1 text-xs">
-                      <span className="text-gray-500">🏨</span>{' '}
-                      <span className="font-medium">{hotel.name}</span>
-                      {hotel.address && <span className="text-gray-500 ml-2">{hotel.address}</span>}
+                      <span className="font-medium">{hotel.title}</span>
+                      {hotel.supplier_name && <span className="text-gray-500 ml-2">({hotel.supplier_name})</span>}
                     </td>
                   </tr>
                 )}
