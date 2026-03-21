@@ -52,42 +52,13 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
     setIsMounted(true)
   }, [])
 
-  // 載入 Logo
+  // 從 workspace 設定讀取 Logo（統一來源）
   useEffect(() => {
-    const loadLogo = async () => {
-      try {
-        // 查詢 file_path 包含 logos/ 的資產（公司 LOGO 存放在 logos/ 資料夾）
-        const { data, error } = await supabase
-          .from('company_assets')
-          .select('file_path')
-          .like('file_path', 'logos/%')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single()
-
-        if (error) {
-          logger.error('載入 Logo 失敗:', error)
-          return
-        }
-
-        if (data?.file_path) {
-          // 取得公開 URL，加上時間戳避免快取
-          const { data: urlData } = supabase.storage
-            .from('company-assets')
-            .getPublicUrl(data.file_path)
-
-          // 加上時間戳避免瀏覽器快取舊圖片
-          setLogoUrl(`${urlData.publicUrl}?t=${Date.now()}`)
-        }
-      } catch (error) {
-        logger.error('載入 Logo 錯誤:', error)
-      }
+    if (isOpen && ws.logo_url) {
+      // 加上時間戳避免瀏覽器快取舊圖片
+      setLogoUrl(`${ws.logo_url}?t=${Date.now()}`)
     }
-
-    if (isOpen) {
-      loadLogo()
-    }
-  }, [isOpen])
+  }, [isOpen, ws.logo_url])
 
   const totalAmount = items.reduce((sum, item) => sum + item.amount, 0)
   const balanceAmount = totalAmount - (quote.received_amount || 0)
