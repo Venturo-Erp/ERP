@@ -241,7 +241,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           minHeight: '297mm',
           maxWidth: '100%',
           border: `1px solid ${COLORS.border}`,
-          padding: '15mm',  /* 留白 */
+          padding: '8mm 10mm',  /* 留白：上下8mm 左右10mm */
         }}
       >
 
@@ -701,7 +701,6 @@ function DailyItineraryTable({ dailyItinerary, accommodationItems, departureDate
                     <td className="px-3 py-1"></td>
                     <td className="px-3 py-1 text-xs">
                       <span className="font-medium">{hotel.title}</span>
-                      {hotel.supplier_name && <span className="text-gray-500 ml-2">({hotel.supplier_name})</span>}
                     </td>
                   </tr>
                 )}

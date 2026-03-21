@@ -369,9 +369,9 @@ export function useSyncItineraryToCore() {
           if (day.accommodation) {
             let resolvedAccommodation = day.accommodation
             let resolvedAccommodationId = (day as unknown as Record<string, unknown>).accommodation_id as string | undefined
-            if (day.isSameAccommodation || resolvedAccommodation.startsWith('續住')) {
-              // 從「續住 (XXX)」提取飯店名，或往前找上一天的住宿
-              const match = resolvedAccommodation.match(/續住\s*[（(](.+?)[）)]/)
+            if (day.isSameAccommodation || resolvedAccommodation.startsWith('續住') || resolvedAccommodation.startsWith('同上')) {
+              // 從「續住 (XXX)」或「同上 (XXX)」提取飯店名，或往前找上一天的住宿
+              const match = resolvedAccommodation.match(/(?:續住|同上)\s*[（(](.+?)[）)]/)
               if (match) {
                 resolvedAccommodation = match[1]
               }
@@ -379,7 +379,7 @@ export function useSyncItineraryToCore() {
               if (day_index > 0) {
                 for (let prev = day_index - 1; prev >= 0; prev--) {
                   const prevAcc = daily_itinerary[prev].accommodation
-                  if (prevAcc && !prevAcc.startsWith('續住')) {
+                  if (prevAcc && !prevAcc.startsWith('續住') && !prevAcc.startsWith('同上')) {
                     if (!match) resolvedAccommodation = prevAcc
                     // 續住也帶上前一天的 accommodation_id
                     if (!resolvedAccommodationId) {
