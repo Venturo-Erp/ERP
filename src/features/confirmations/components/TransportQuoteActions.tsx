@@ -135,8 +135,67 @@ export function TransportQuoteActions({
     }
   }
 
-  // 如果不是已報價狀態，不顯示
-  if (quote.status !== 'quoted' && quote.status !== 'replied') {
+  const [showCancel, setShowCancel] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+
+  // 取消預訂
+  const handleCancel = async () => {
+    setIsProcessing(true)
+    try {
+      const { error } = await supabase
+        .from('tour_requests')
+        .update({ 
+          status: 'cancelled',
+          note: cancelReason ? `取消原因：${cancelReason}` : '已取消預訂',
+        })
+        .eq('id', quote.id)
+      
+      if (error) throw error
+      
+      // 更新核心表
+      if (itemId) {
+        await supabase
+          .from('tour_itinerary_items')
+          .update({ request_status: 'cancelled' })
+          .eq('id', itemId)
+      }
+      
+      // LINE 通知車行（如果有 groupId）
+      if (sentVia === 'line' && groupId) {
+        try {
+          await fetch('/api/line/send-cancel', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              group_id: groupId,
+              tour_code: tourCode,
+              tour_name: tourName,
+              supplier_name: quote.supplier_name,
+              reason: cancelReason,
+            }),
+          })
+        } catch {
+          // 忽略發送失敗
+        }
+      }
+      
+      toast.success('已取消預訂')
+      setOpen(false)
+      setShowCancel(false)
+      onUpdate?.()
+    } catch (error) {
+      console.error('Cancel failed:', error)
+      toast.error('取消失敗')
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // 根據狀態決定顯示內容
+  const isAccepted = quote.status === 'accepted'
+  const isQuoted = quote.status === 'quoted' || quote.status === 'replied'
+  
+  if (!isQuoted && !isAccepted) {
     return null
   }
 
@@ -213,25 +272,90 @@ export function TransportQuoteActions({
           </div>
           
           {/* 操作按鈕 */}
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
-              onClick={() => handleAction('reject')}
-              disabled={isProcessing}
-            >
-              <X size={16} className="mr-1" />
-              拒絕
-            </Button>
-            <Button
-              className="flex-1 bg-green-600 hover:bg-green-700"
-              onClick={() => handleAction('accept')}
-              disabled={isProcessing}
-            >
-              <Check size={16} className="mr-1" />
-              確認成交
-            </Button>
-          </div>
+          {showCancel ? (
+            // 取消確認
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm text-gray-600">取消原因（選填）</label>
+                <input
+                  type="text"
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="例：行程取消、改用其他車行"
+                  className="w-full mt-1 px-3 py-2 border rounded-lg text-sm"
+                />
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowCancel(false)}
+                  disabled={isProcessing}
+                >
+                  返回
+                </Button>
+                <Button
+                  className="flex-1 bg-red-600 hover:bg-red-700"
+                  onClick={handleCancel}
+                  disabled={isProcessing}
+                >
+                  確認取消
+                </Button>
+              </div>
+            </div>
+          ) : isAccepted ? (
+            // 已成交：顯示取消按鈕 + 發預訂確認（列印用）
+            <div className="space-y-3">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                <span className="text-green-700 font-medium">✅ 已成交</span>
+              </div>
+              <div className="flex gap-3">
+                {sentVia !== 'line' && (
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      // TODO: 手動發預訂確認（列印/傳真用）
+                      toast.info('請手動聯繫車行確認預訂')
+                    }}
+                    disabled={isProcessing}
+                  >
+                    📄 發預訂確認
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
+                  onClick={() => setShowCancel(true)}
+                  disabled={isProcessing}
+                >
+                  <X size={16} className="mr-1" />
+                  取消預訂
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // 未成交：確認/拒絕
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
+                onClick={() => handleAction('reject')}
+                disabled={isProcessing}
+              >
+                <X size={16} className="mr-1" />
+                拒絕
+              </Button>
+              <Button
+                className="flex-1 bg-green-600 hover:bg-green-700"
+                onClick={() => handleAction('accept')}
+                disabled={isProcessing}
+              >
+                <Check size={16} className="mr-1" />
+                確認成交
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
