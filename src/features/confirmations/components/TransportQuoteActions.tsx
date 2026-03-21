@@ -36,9 +36,26 @@ interface Props {
   quote: TransportQuote
   itemId?: string  // 對應的 tour_itinerary_items.id
   onUpdate?: () => void
+  // 發預訂確認用
+  sentVia?: string  // 'line' | 'fax' | 'email'
+  groupId?: string  // LINE 群組 ID
+  tourCode?: string
+  tourName?: string
+  departureDate?: string
+  participants?: number
 }
 
-export function TransportQuoteActions({ quote, itemId, onUpdate }: Props) {
+export function TransportQuoteActions({ 
+  quote, 
+  itemId, 
+  onUpdate,
+  sentVia,
+  groupId,
+  tourCode,
+  tourName,
+  departureDate,
+  participants,
+}: Props) {
   const [open, setOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   
@@ -73,7 +90,40 @@ export function TransportQuoteActions({ quote, itemId, onUpdate }: Props) {
         if (itemError) throw itemError
       }
       
-      toast.success(action === 'accept' ? '已確認成交' : '已拒絕報價')
+      // 成交後：檢查是否需要發預訂確認
+      if (action === 'accept') {
+        const wasAlreadyReserved = quote.status === 'confirmed' // 車行選了「報價+留車」
+        
+        if (!wasAlreadyReserved && sentVia === 'line' && groupId) {
+          // LINE 且是「僅報價」→ 自動發預訂確認
+          try {
+            await fetch('/api/transport/send-booking', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                item_id: itemId,
+                group_id: groupId,
+                tour_code: tourCode,
+                tour_name: tourName,
+                departure_date: departureDate,
+                participants: participants,
+                supplier_name: quote.supplier_name,
+                total_cost: response?.totalFare,
+              }),
+            })
+            toast.success('已確認成交，預訂確認已發送')
+          } catch {
+            toast.success('已確認成交（預訂確認發送失敗，請手動發送）')
+          }
+        } else if (wasAlreadyReserved) {
+          toast.success('已確認成交（車行已留車）')
+        } else {
+          toast.success('已確認成交')
+        }
+      } else {
+        toast.success('已拒絕報價')
+      }
+      
       setOpen(false)
       onUpdate?.()
       
