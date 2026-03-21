@@ -323,6 +323,24 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
         departureDate={headerInfo.departure_date}
       />
 
+      {/* === 餐食表 === */}
+      <CategoryTable
+        title="餐食"
+        items={groupedByCategory.meals}
+        showUnitPriceColumns={true}
+        onActualExpenseUpdate={refresh}
+        departureDate={headerInfo.departure_date}
+      />
+
+      {/* === 住宿表 === */}
+      <CategoryTable
+        title="住宿"
+        items={groupedByCategory.accommodation}
+        showUnitPriceColumns={true}
+        onActualExpenseUpdate={refresh}
+        departureDate={headerInfo.departure_date}
+      />
+
       {/* === 活動表 === */}
       <CategoryTable
         title="活動"
