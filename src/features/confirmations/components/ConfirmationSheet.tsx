@@ -25,7 +25,7 @@ const COLORS = {
   primary: '#3a3633',      // 深棕灰（標題、文字）
   secondary: '#8b8680',    // Morandi secondary
   green: '#9fa68f',        // Morandi 綠（區塊標題背景）
-  border: '#d1ccc4',       // 淺灰邊框（低對比）
+  border: '#e8e5e0',       // 更淺邊框
   gray: '#4B5563',         // 灰（次要文字）
   lightGray: '#9CA3AF',    // 淺灰
 }
