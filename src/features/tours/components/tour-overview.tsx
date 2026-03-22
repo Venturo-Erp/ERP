@@ -226,7 +226,6 @@ export const TourOverview = React.memo(function TourOverview({
         <div className="flex items-stretch">
           {overviewCards.map((card, index) => (
             <React.Fragment key={index}>
-              {index > 0 && <div className="w-px bg-border/60 my-1" />}
               <div className="flex-1 flex items-center gap-2.5 px-3">
                 <div className={cn('shrink-0', card.color)}>
                   <card.icon size={16} />
