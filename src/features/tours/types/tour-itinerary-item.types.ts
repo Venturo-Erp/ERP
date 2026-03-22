@@ -134,6 +134,11 @@ export interface TourItineraryItem {
   show_on_brochure: boolean
   show_on_quote: boolean
 
+  // 指派欄位
+  assignee_id: string | null
+  assigned_at: string | null
+  assigned_by: string | null
+
   // 元資料
   created_at: string
   updated_at: string

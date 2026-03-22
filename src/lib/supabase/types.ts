@@ -14888,6 +14888,9 @@ export type Database = {
           updated_at: string | null
           updated_by: string | null
           workspace_id: string
+          assignee_id: string | null
+          assigned_at: string | null
+          assigned_by: string | null
         }
         Insert: {
           actual_expense?: number | null
@@ -14898,6 +14901,9 @@ export type Database = {
           child_price?: number | null
           confirmation_date?: string | null
           confirmation_item_id?: string | null
+          assignee_id?: string | null
+          assigned_at?: string | null
+          assigned_by?: string | null
           confirmation_note?: string | null
           confirmation_status?: string | null
           confirmed_cost?: number | null
@@ -15008,6 +15014,9 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
           workspace_id?: string
+          assignee_id?: string | null
+          assigned_at?: string | null
+          assigned_by?: string | null
         }
         Relationships: [
           {
