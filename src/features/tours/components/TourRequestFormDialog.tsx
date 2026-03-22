@@ -591,6 +591,22 @@ export function TourRequestFormDialog({
         title: TOUR_REQUEST_FORM_DIALOG_LABELS.需求單已發送,
         description: `${TOUR_REQUEST_FORM_DIALOG_LABELS.已發送至供應商}${targetWs?.name || ''}`,
       })
+
+      // 發送頻道通知（fire-and-forget）
+      if (tour?.id && user?.workspace_id) {
+        fetch('/api/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'request_sent',
+            tourId: tour.id,
+            workspaceId: user.workspace_id,
+            requestType: categoryName,
+            supplierName: targetWs?.name || supplierInfo.name
+          })
+        }).catch(() => {}) // 忽略錯誤，不影響主流程
+      }
+
       onClose()
     } catch (err) {
       logger.error('發送需求單錯誤:', err)
