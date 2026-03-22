@@ -25,6 +25,10 @@ export interface TourRequest {
   supplier_name?: string
   supplier_contact?: string
   
+  // 指派同事（內部任務）
+  assigned_employee_id?: string
+  assigned_employee_name?: string
+  
   // 需求項目
   items: RequestItem[]
   

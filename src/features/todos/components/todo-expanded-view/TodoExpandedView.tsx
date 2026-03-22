@@ -14,6 +14,7 @@ import { useTodoExpandedView } from './useTodoExpandedView'
 import { NotesSection } from './NotesSection'
 import { AssignmentSection } from './AssignmentSection'
 import { QuickActionsSection, QuickActionContent } from './QuickActionsSection'
+import { TaskTypeForm } from './TaskTypeForm'
 import { useAuthStore } from '@/stores/auth-store'
 import {
   DIALOG_LABELS,
@@ -58,8 +59,8 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
 
         {/* 主要內容區 */}
         <div className="flex flex-col lg:flex-row flex-1 overflow-hidden pt-2">
-          {/* 詳情資料（快速功能區暫時關閉，改為全寬） */}
-          <div className="w-full px-4 sm:px-6 py-3 sm:py-4 flex flex-col overflow-y-auto">
+          {/* 左半部：待辦詳情 */}
+          <div className={`${todo.task_type ? 'w-full lg:w-1/2' : 'w-full'} px-4 sm:px-6 py-3 sm:py-4 flex flex-col overflow-y-auto`}>
             {/* 標題與星級 */}
             <div className="mb-4 bg-card border border-border rounded-xl p-4 shadow-sm">
               <div className="flex items-center justify-between gap-4">
@@ -133,51 +134,30 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
             )}
           </div>
 
-          {/* 右半部：快速功能（暫時關閉）
-          <div className="w-full lg:w-1/2 px-4 sm:px-6 py-3 sm:py-4 flex flex-col overflow-y-auto">
-            {canEdit && (
-              <>
-                <QuickActionsSection activeTab={activeTab} onTabChange={setActiveTab} />
-                <div className="flex-1 bg-card border border-border rounded-xl p-4 overflow-y-auto shadow-sm">
-                  <QuickActionContent activeTab={activeTab} todo={todo} onUpdate={onUpdate} />
+          {/* 右半部：任務專屬表單（根據 task_type 自動顯示）*/}
+          {todo.task_type && (
+            <div className="w-full lg:w-1/2 px-4 sm:px-6 py-3 sm:py-4 flex flex-col overflow-y-auto border-l border-border/40">
+              {canEdit ? (
+                <>
+                  <div className="flex-1 bg-card border border-border rounded-xl p-4 overflow-y-auto shadow-sm">
+                    <TaskTypeForm 
+                      taskType={todo.task_type} 
+                      todo={todo} 
+                      onUpdate={onUpdate}
+                      onClose={onClose}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center text-morandi-secondary">
+                    <Eye size={32} className="mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">{COMMON_LABELS.readOnlyMode}</p>
+                  </div>
                 </div>
-                <div className="flex gap-2 mt-4">
-                  <Button
-                    onClick={() => {
-                      onUpdate({ status: 'completed', completed: true })
-                      onClose()
-                    }}
-                    className="flex-1 bg-gradient-to-r from-morandi-gold to-status-warning hover:from-morandi-gold/90 hover:to-status-warning/90 text-white shadow-md hover:shadow-lg transition-all gap-2"
-                  >
-                    <Check size={16} />
-                    標記完成
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      const newDeadline = new Date()
-                      newDeadline.setDate(newDeadline.getDate() + 7)
-                      onUpdate({ deadline: formatDate(newDeadline) })
-                    }}
-                    className="flex-1 border-morandi-container/50 hover:bg-morandi-container/20 hover:border-morandi-gold/20 shadow-sm transition-all gap-2"
-                  >
-                    <Calendar size={16} />
-                    延期一週
-                  </Button>
-                </div>
-              </>
-            )}
-            {!canEdit && (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center text-morandi-secondary">
-                  <Eye size={32} className="mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">這是公開的待辦事項</p>
-                  <p className="text-xs mt-1">只有建立者和共享者可以編輯</p>
-                </div>
-              </div>
-            )}
-          </div>
-          */}
+              )}
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
