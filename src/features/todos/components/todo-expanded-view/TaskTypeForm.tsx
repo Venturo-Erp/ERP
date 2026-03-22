@@ -258,16 +258,28 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
       {formData.paymentStatus !== 'unpaid' && (
         <div className="space-y-3 pt-2 border-t border-border/40">
           <p className="text-xs text-morandi-secondary font-medium">請款資訊</p>
-          <div>
-            <Label className="text-xs">選擇團</Label>
-            <Combobox
-              options={tourOptions}
-              value={formData.tourId}
-              onChange={value => setFormData(prev => ({ ...prev, tourId: value, orderId: '' }))}
-              placeholder="選擇團..."
-              className="h-9"
-            />
-          </div>
+          
+          {/* 如果待辦已帶團號，顯示團號資訊；否則顯示選擇 */}
+          {todo.tour_id ? (
+            <div className="bg-morandi-container/50 rounded-md p-2">
+              <Label className="text-xs text-morandi-secondary">團號</Label>
+              <p className="text-sm font-medium text-morandi-primary">
+                {tours.find(t => t.id === todo.tour_id)?.code || ''} {tours.find(t => t.id === todo.tour_id)?.name || ''}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <Label className="text-xs">選擇團</Label>
+              <Combobox
+                options={tourOptions}
+                value={formData.tourId}
+                onChange={value => setFormData(prev => ({ ...prev, tourId: value, orderId: '' }))}
+                placeholder="選擇團..."
+                className="h-9"
+              />
+            </div>
+          )}
+          
           {formData.tourId && (
             <div>
               <Label className="text-xs">選擇訂單</Label>
