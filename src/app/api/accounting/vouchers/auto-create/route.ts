@@ -1,11 +1,19 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAccountMapping } from '@/features/finance/constants/account-mapping'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+// Lazy initialization to avoid build-time errors
+let supabase: SupabaseClient
+
+function getSupabase() {
+  if (!supabase) {
+    supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+  }
+  return supabase
+}
 
 /**
  * 自動產生傳票 API
@@ -59,7 +67,7 @@ export async function POST(request: NextRequest) {
  * 根據科目代碼取得 subject_id
  */
 async function getSubjectId(code: string): Promise<string | null> {
-  const { data } = await supabase.from('accounting_subjects').select('id').eq('code', code).single()
+  const { data } = await getSupabase().from('accounting_subjects').select('id').eq('code', code).single()
   return data?.id || null
 }
 
@@ -153,11 +161,11 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
 
   // 插入分錄
   if (entries.length > 0) {
-    const { error: entriesError } = await supabase.from('voucher_entries').insert(entries)
+    const { error: entriesError } = await getSupabase().from('voucher_entries').insert(entries)
 
     if (entriesError) {
       // Rollback: 刪除傳票
-      await supabase.from('vouchers').delete().eq('id', voucher.id)
+      await getSupabase().from('vouchers').delete().eq('id', voucher.id)
       throw new Error(`建立傳票分錄失敗：${entriesError.message}`)
     }
   }
@@ -234,10 +242,10 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
   }
 
   if (entries.length > 0) {
-    const { error: entriesError } = await supabase.from('voucher_entries').insert(entries)
+    const { error: entriesError } = await getSupabase().from('voucher_entries').insert(entries)
 
     if (entriesError) {
-      await supabase.from('vouchers').delete().eq('id', voucher.id)
+      await getSupabase().from('vouchers').delete().eq('id', voucher.id)
       throw new Error(`建立傳票分錄失敗：${entriesError.message}`)
     }
   }
