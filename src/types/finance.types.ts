@@ -98,6 +98,8 @@ export interface PaymentRequestItem {
   subtotal: number
   notes?: string // 項目備註
   sort_order: number // 排序
+  accounting_subject_id?: string | null // 會計科目 ID（關聯 accounting_subjects）
+  accounting_subject_name?: string | null // 會計科目名稱（顯示用）
   created_at: string
   updated_at: string
 }

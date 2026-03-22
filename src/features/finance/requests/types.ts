@@ -33,6 +33,8 @@ export interface RequestItem {
   selected_id?: string // Combobox 顯示用的選中 ID（員工或供應商皆存）
   advanced_by?: string // 代墊員工 ID
   advanced_by_name?: string // 代墊員工姓名
+  accounting_subject_id?: string | null // 會計科目 ID
+  accounting_subject_name?: string | null // 會計科目名稱（顯示用）
 }
 
 export interface NewItemFormData {

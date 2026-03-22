@@ -258,6 +258,22 @@ export function useReceiptMutations() {
       // 3. 重算訂單付款狀態 + 團財務數據 + 刷新快取
       await recalculateReceiptStats(formData.order_id, tourId || null)
 
+      // 4. 自動產生傳票
+      try {
+        await fetch('/api/accounting/vouchers/auto-create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source_type: 'receipt',
+            source_id: createdReceipt.id,
+            workspace_id: workspaceId,
+          }),
+        })
+      } catch (error) {
+        console.error('自動產生收款傳票失敗:', error)
+        // 不中斷流程，傳票可手動補建
+      }
+
       return {
         success: true,
         receiptId: createdReceipt.id,

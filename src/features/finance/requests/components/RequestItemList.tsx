@@ -10,8 +10,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
-import { Trash2, Plus, Link2, UserCheck, X } from 'lucide-react'
+import { Trash2, Plus, Link2, UserCheck, X, BookOpen } from 'lucide-react'
 import { RequestItem, categoryOptions } from '../types'
+import { useAccountingSubjects, getDefaultSubjectByCategory } from '../../hooks/useAccountingSubjects'
 import { CurrencyCell } from '@/components/table-cells'
 import {
   REQUEST_DETAIL_DIALOG_LABELS,
@@ -209,6 +210,9 @@ export function EditableRequestItemList({
   const linkingItem = items.find(i => i.id === linkingItemId)
   const total_amount = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
 
+  // 會計科目選項
+  const { subjects, costOptions } = useAccountingSubjects()
+
   const supplierOptions = suppliers.map(s => ({
     value: s.id,
     label: s.name || REQUEST_DETAIL_DIALOG_LABELS.未命名,
@@ -265,13 +269,19 @@ export function EditableRequestItemList({
             key={item.id}
             className="grid grid-cols-[80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-1.5 border-b border-morandi-container/30 items-center bg-card hover:bg-morandi-container/5"
           >
-            {/* Category */}
+            {/* Category - 選擇時自動帶入會計科目 */}
             <div>
               <Select
                 value={item.category}
-                onValueChange={value =>
-                  updateItem(item.id, { category: value as RequestItem['category'] })
-                }
+                onValueChange={value => {
+                  // 自動帶入對應的會計科目
+                  const defaultSubject = getDefaultSubjectByCategory(value, subjects)
+                  updateItem(item.id, {
+                    category: value as RequestItem['category'],
+                    accounting_subject_id: defaultSubject?.id || null,
+                    accounting_subject_name: defaultSubject ? `${defaultSubject.code} ${defaultSubject.name}` : null,
+                  })
+                }}
                 disabled={disabled}
               >
                 <SelectTrigger className="input-no-focus h-9 border-0 shadow-none bg-transparent text-sm px-1">

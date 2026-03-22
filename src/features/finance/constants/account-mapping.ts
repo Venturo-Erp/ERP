@@ -85,3 +85,81 @@ export const PAYMENT_CATEGORY_ACCOUNT_MAP: Record<
 export function getAccountMapping(category: string) {
   return PAYMENT_CATEGORY_ACCOUNT_MAP[category] || PAYMENT_CATEGORY_ACCOUNT_MAP['其他']
 }
+
+/**
+ * 公司請款費用類型 → 會計科目對應表
+ *
+ * 公司請款出帳時，根據費用類型對應到營業費用科目
+ */
+export const COMPANY_EXPENSE_ACCOUNT_MAP: Record<
+  string,
+  { debitCode: string; debitName: string; creditCode: string; creditName: string }
+> = {
+  SAL: {
+    debitCode: '6101',
+    debitName: '薪資支出',
+    creditCode: '2101',
+    creditName: '應付帳款',
+  },
+  ENT: {
+    debitCode: '6106',
+    debitName: '公關費用',
+    creditCode: '2101',
+    creditName: '應付帳款',
+  },
+  TRV: {
+    debitCode: '6107',
+    debitName: '差旅費用',
+    creditCode: '2101',
+    creditName: '應付帳款',
+  },
+  OFC: {
+    debitCode: '6108',
+    debitName: '辦公費用',
+    creditCode: '2101',
+    creditName: '應付帳款',
+  },
+  UTL: {
+    debitCode: '6103',
+    debitName: '水電費',
+    creditCode: '2101',
+    creditName: '應付帳款',
+  },
+  RNT: {
+    debitCode: '6102',
+    debitName: '租金支出',
+    creditCode: '2101',
+    creditName: '應付帳款',
+  },
+  EQP: {
+    debitCode: '6109',
+    debitName: '設備費用',
+    creditCode: '2101',
+    creditName: '應付帳款',
+  },
+  MKT: {
+    debitCode: '6104',
+    debitName: '行銷費用',
+    creditCode: '2101',
+    creditName: '應付帳款',
+  },
+  ADV: {
+    debitCode: '6110',
+    debitName: '廣告費用',
+    creditCode: '2101',
+    creditName: '應付帳款',
+  },
+  TRN: {
+    debitCode: '6111',
+    debitName: '培訓費用',
+    creditCode: '2101',
+    creditName: '應付帳款',
+  },
+}
+
+/**
+ * 根據公司費用類型取得會計科目對應
+ */
+export function getCompanyExpenseMapping(expenseType: string) {
+  return COMPANY_EXPENSE_ACCOUNT_MAP[expenseType] || COMPANY_EXPENSE_ACCOUNT_MAP['OFC']
+}
