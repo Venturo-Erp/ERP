@@ -105,6 +105,10 @@ export function TourContractTab({ tour }: TourContractTabProps) {
   const [gatherTime, setGatherTime] = useState('06:00')
   const [depositAmount, setDepositAmount] = useState('')
   const [balanceAmount, setBalanceAmount] = useState('')
+  
+  // 附件勾選
+  const [includeItinerary, setIncludeItinerary] = useState(true)
+  const [includeQuote, setIncludeQuote] = useState(false)
 
   // 載入訂單和團員
   const loadData = useCallback(async () => {
@@ -236,6 +240,8 @@ export function TourContractTab({ tour }: TourContractTabProps) {
             gatherTime,
             depositAmount: depositAmount || '0',
             balanceAmount: balanceAmount || '0',
+            includeItinerary,
+            includeQuote,
           },
         }),
       })
@@ -568,6 +574,31 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   onChange={e => setBalanceAmount(e.target.value)}
                   placeholder="輸入尾款"
                 />
+              </div>
+            </div>
+
+            {/* 附件勾選 */}
+            <div className="space-y-3 border-t pt-4">
+              <div className="text-sm font-medium text-morandi-primary">合約附件</div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="include-itinerary"
+                  checked={includeItinerary}
+                  onCheckedChange={(checked) => setIncludeItinerary(!!checked)}
+                />
+                <label htmlFor="include-itinerary" className="text-sm cursor-pointer">
+                  附上行程表
+                </label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="include-quote"
+                  checked={includeQuote}
+                  onCheckedChange={(checked) => setIncludeQuote(!!checked)}
+                />
+                <label htmlFor="include-quote" className="text-sm cursor-pointer">
+                  附上報價單
+                </label>
               </div>
             </div>
 
