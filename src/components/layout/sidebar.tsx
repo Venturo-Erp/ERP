@@ -414,12 +414,9 @@ export function Sidebar() {
     userPermissions.includes('*') ||
     userRoles.includes('super_admin')
 
-  // 檢查是否為供應商 workspace
-  const isSupplierWorkspace =
-    user?.workspace_type === 'vehicle_supplier' || 
-    user?.workspace_type === 'guide_supplier' ||
-    user?.workspace_type === 'transportation' ||
-    user?.workspace_type === 'dmc'
+  // 所有租戶都使用相同的完整選單
+  // 商業基石：統一表格制度，同一套系統
+  const isSupplierWorkspace = false // 不再區分，所有租戶看到相同介面
   const isVehicleSupplier = 
     user?.workspace_type === 'vehicle_supplier' || 
     user?.workspace_type === 'transportation'
