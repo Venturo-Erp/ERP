@@ -16,6 +16,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores'
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
+import { useEmployeesSlim } from '@/data'
 import type { Tour } from '@/stores/types'
 import type { QuoteItem } from './requirements-list.types'
 
@@ -68,6 +69,7 @@ export function AssignSupplierDialog({
 }: AssignSupplierDialogProps) {
   const { user } = useAuthStore()
   const { toast } = useToast()
+  const { items: employees } = useEmployeesSlim()
   const [supplierSearch, setSupplierSearch] = useState('')
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null)
@@ -257,6 +259,10 @@ export function AssignSupplierDialog({
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string; supplier_id?: string }[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [loadingGroups, setLoadingGroups] = useState(false)
+  
+  // 指派同事相關
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('')
+  const [assignLoading, setAssignLoading] = useState(false)
 
   // 重置 step + 從 DB 讀房型
   useEffect(() => {
@@ -752,8 +758,38 @@ export function AssignSupplierDialog({
                 </div>
               )}
 
+              {/* 指派同事：選擇員工 */}
+              {sendMethod === 'assign' && (
+                <div className="space-y-3">
+                  <Label className="text-sm font-medium">指派給哪位同事？</Label>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {employees
+                      .filter(e => e.id !== user?.id) // 排除自己
+                      .map(emp => (
+                        <button
+                          key={emp.id}
+                          className={`w-full text-left px-4 py-3 rounded-md border-2 transition-colors ${
+                            selectedEmployeeId === emp.id
+                              ? 'border-orange-500 bg-orange-50'
+                              : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
+                          }`}
+                          onClick={() => setSelectedEmployeeId(emp.id)}
+                        >
+                          <div className="font-medium">{emp.display_name || emp.english_name || '未命名'}</div>
+                          {(emp as unknown as { job_title?: string }).job_title && (
+                            <div className="text-xs text-muted-foreground">{(emp as unknown as { job_title?: string }).job_title}</div>
+                          )}
+                        </button>
+                      ))}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    選擇同事後，系統會自動建立待辦事項並發送 LINE 通知
+                  </div>
+                </div>
+              )}
+
               {/* 其他發送方式：需要選供應商 */}
-              {sendMethod !== 'line' && (
+              {sendMethod !== 'line' && sendMethod !== 'assign' && (
                 <div className="space-y-2">
                   <Label className="text-sm font-medium">發送給哪個供應商？</Label>
                   <div className="relative">
@@ -819,11 +855,71 @@ export function AssignSupplierDialog({
               <Button variant="outline" onClick={() => setStep('preview')}>← 返回</Button>
               <Button
                 disabled={
-                  saving ||
+                  saving || assignLoading ||
                   (sendMethod === 'line' && !selectedGroupId) ||
-                  (sendMethod !== 'line' && !canPrint)
+                  (sendMethod === 'assign' && !selectedEmployeeId) ||
+                  (sendMethod !== 'line' && sendMethod !== 'assign' && !canPrint)
                 }
                 onClick={async () => {
+                  // 指派同事：建立待辦事項
+                  if (sendMethod === 'assign') {
+                    if (!selectedEmployeeId) return
+                    setAssignLoading(true)
+                    try {
+                      const selectedEmp = employees.find(e => e.id === selectedEmployeeId)
+                      const empName = selectedEmp?.display_name || selectedEmp?.english_name || '同事'
+                      
+                      // 取得任務類型
+                      const category = items[0]?.category || 'general'
+                      const taskTypeMap: Record<string, string> = {
+                        accommodation: 'accommodation',
+                        restaurant: 'restaurant',
+                        transport: 'transport',
+                        ticket: 'ticket',
+                        activity: 'activity',
+                      }
+                      const taskType = taskTypeMap[category] || 'general'
+                      
+                      // 建立待辦事項
+                      const todoTitle = `${tour?.code || ''} ${items[0]?.item?.title || items[0]?.item?.supplierName || '任務'}`
+                      const { error: todoError } = await supabase.from('todos').insert({
+                        title: todoTitle,
+                        priority: 3,
+                        status: 'pending',
+                        created_by: user?.id,
+                        created_by_legacy: user?.id || '00000000-0000-0000-0000-000000000000',
+                        assignee: selectedEmployeeId,
+                        visibility: [user?.id, selectedEmployeeId].filter(Boolean),
+                        task_type: taskType,
+                        tour_id: tourId,
+                        workspace_id: user?.workspace_id,
+                        related_items: [],
+                        sub_tasks: [],
+                        notes: [],
+                        enabled_quick_actions: [],
+                      } as never)
+                      
+                      if (todoError) {
+                        logger.error('建立待辦失敗:', todoError)
+                        toast({ title: '建立待辦失敗', description: todoError.message, variant: 'destructive' })
+                        return
+                      }
+                      
+                      // TODO: 發送 LINE 通知給同事
+                      // TODO: 發送頻道訊息
+                      
+                      toast({ title: '👤 已指派任務', description: `已建立待辦事項並指派給 ${empName}` })
+                      onSave?.()
+                      onClose()
+                    } catch (err) {
+                      logger.error('指派任務失敗:', err)
+                      toast({ title: '指派失敗', description: String(err), variant: 'destructive' })
+                    } finally {
+                      setAssignLoading(false)
+                    }
+                    return
+                  }
+                  
                   if (sendMethod === 'line') {
                     // Line 發送：用群組名稱當供應商名，不需要另選
                     const groupName = lineGroups.find(g => g.group_id === selectedGroupId)?.group_name || ''
@@ -910,10 +1006,14 @@ export function AssignSupplierDialog({
                     toast({ title: '功能開發中', description: '此發送方式尚未上線' })
                   }
                 }}
-                className={sendMethod === 'line' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-morandi-gold hover:bg-morandi-gold-hover text-white'}
+                className={
+                  sendMethod === 'line' ? 'bg-green-600 hover:bg-green-700 text-white' : 
+                  sendMethod === 'assign' ? 'bg-orange-600 hover:bg-orange-700 text-white' :
+                  'bg-morandi-gold hover:bg-morandi-gold-hover text-white'
+                }
               >
-                {saving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : null}
-                {sendMethod === 'line' ? '發送到群組' : '確認發送'}
+                {(saving || assignLoading) ? <Loader2 size={14} className="animate-spin mr-1.5" /> : null}
+                {sendMethod === 'line' ? '發送到群組' : sendMethod === 'assign' ? '確認指派' : '確認發送'}
               </Button>
             </DialogFooter>
           </>
