@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus, Building2, Users, Shield, X, Copy, Check } from 'lucide-react'
+import { Plus, Building2, Users, Shield, X, Copy, Check, Upload, Stamp } from 'lucide-react'
 import { toast } from 'sonner'
 import { alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
@@ -75,6 +75,41 @@ export default function WorkspacesPage() {
   const [showLoginInfo, setShowLoginInfo] = useState(false)
   const [loginInfo, setLoginInfo] = useState<LoginInfo | null>(null)
   const [copied, setCopied] = useState(false)
+
+  // 大小章上傳
+  const [uploadingSeal, setUploadingSeal] = useState<string | null>(null)
+
+  // 上傳大小章
+  const handleSealUpload = async (workspaceId: string, file: File) => {
+    if (!file) return
+    
+    setUploadingSeal(workspaceId)
+    try {
+      // 上傳到 Supabase Storage
+      const fileName = `seals/${workspaceId}/${Date.now()}-${file.name}`
+      const { error: uploadError } = await supabase.storage
+        .from('workspace-assets')
+        .upload(fileName, file, { upsert: true })
+      
+      if (uploadError) throw uploadError
+      
+      // 取得公開 URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('workspace-assets')
+        .getPublicUrl(fileName)
+      
+      // 更新 workspace
+      await updateWorkspace(workspaceId, { seal_image_url: publicUrl })
+      
+      toast.success('大小章上傳成功')
+      loadWorkspaces()
+    } catch (error) {
+      logger.error('上傳大小章失敗:', error)
+      toast.error('上傳失敗，請稍後再試')
+    } finally {
+      setUploadingSeal(null)
+    }
+  }
 
   // 載入 workspaces 資料（employees 由 SWR 自動載入）
   useEffect(() => {
@@ -384,6 +419,25 @@ export default function WorkspacesPage() {
               </span>
             </div>
 
+            {/* 大小章顯示 */}
+            <div className="flex items-center gap-2 text-sm text-morandi-secondary mb-4">
+              <Stamp size={16} />
+              <span>
+                {workspace.seal_image_url ? (
+                  <span className="text-morandi-green">大小章已上傳</span>
+                ) : (
+                  <span className="text-morandi-muted">尚未上傳大小章</span>
+                )}
+              </span>
+              {workspace.seal_image_url && (
+                <img 
+                  src={workspace.seal_image_url} 
+                  alt="大小章" 
+                  className="w-8 h-8 object-contain ml-2"
+                />
+              )}
+            </div>
+
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -396,10 +450,27 @@ export default function WorkspacesPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => void alert(LABELS.EDIT_FEATURE_COMING, 'info')}
                 className="flex-1"
+                disabled={uploadingSeal === workspace.id}
+                onClick={() => {
+                  const input = document.createElement('input')
+                  input.type = 'file'
+                  input.accept = 'image/*'
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0]
+                    if (file) handleSealUpload(workspace.id, file)
+                  }
+                  input.click()
+                }}
               >
-                {LABELS.EDIT}
+                {uploadingSeal === workspace.id ? (
+                  '上傳中...'
+                ) : (
+                  <>
+                    <Upload size={14} className="mr-1" />
+                    上傳大小章
+                  </>
+                )}
               </Button>
             </div>
           </Card>

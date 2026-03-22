@@ -59,6 +59,7 @@ export interface Workspace {
   owner_id: ID
   member_ids: ID[]
   settings: WorkspaceSettings
+  seal_image_url?: string // 公司大小章圖片 URL
   created_at: ISODateTime
   updated_at: ISODateTime
 }

@@ -8,6 +8,7 @@ export interface Workspace {
   description?: string | null
   icon?: string | null
   is_active: boolean | null
+  seal_image_url?: string | null // 公司大小章圖片 URL
   created_by?: string | null
   created_at?: string | null
   updated_at?: string | null

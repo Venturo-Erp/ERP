@@ -11,6 +11,7 @@ import {
   Copy,
   ExternalLink,
   Mail,
+  FileText,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -257,6 +258,22 @@ export function TourContractTab({ tour }: TourContractTabProps) {
     toast({ title: '已複製連結' })
   }
 
+  // 標記為紙本簽署
+  const markAsPaperSigned = async (contract: Contract) => {
+    try {
+      const res = await fetch('/api/contracts/paper-sign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contractId: contract.id }),
+      })
+      if (!res.ok) throw new Error('標記失敗')
+      toast({ title: '已標記為紙本簽署' })
+      loadData()
+    } catch {
+      toast({ title: '標記失敗', variant: 'destructive' })
+    }
+  }
+
   // 自動判斷的合約類型
   const autoContractType = getContractTemplate(tour)
 
@@ -327,6 +344,16 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                     <span className="text-xs text-green-600">
                       ✓ 簽於 {new Date(contract.signed_at).toLocaleDateString('zh-TW')}
                     </span>
+                  )}
+                  {contract.status !== 'signed' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => markAsPaperSigned(contract)}
+                      title="標記為紙本簽署"
+                    >
+                      <FileText className="w-4 h-4" />
+                    </Button>
                   )}
                   <Button variant="ghost" size="sm" onClick={() => copyLink(contract)}>
                     <Copy className="w-4 h-4" />
