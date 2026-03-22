@@ -54,6 +54,7 @@ interface CompanyFormData {
   bank_account_name: string
   seal_image_url: string
   invoice_seal_image_url: string
+  contract_seal_image_url: string
 }
 
 const INITIAL_FORM: CompanyFormData = {
@@ -74,6 +75,7 @@ const INITIAL_FORM: CompanyFormData = {
   bank_account_name: '',
   seal_image_url: '',
   invoice_seal_image_url: '',
+  contract_seal_image_url: '',
 }
 
 function ImageUploadField({
@@ -215,31 +217,34 @@ export default function CompanySettingsPage() {
       const { data, error } = await supabase
         .from('workspaces')
         .select(
-          'name, description, logo_url, legal_name, subtitle, address, phone, fax, email, website, tax_id, bank_name, bank_branch, bank_account, bank_account_name, seal_image_url, invoice_seal_image_url'
+          'name, description, logo_url, legal_name, subtitle, address, phone, fax, email, website, tax_id, bank_name, bank_branch, bank_account, bank_account_name, seal_image_url, invoice_seal_image_url, contract_seal_image_url'
         )
         .eq('id', workspaceId)
         .single()
 
       if (error) throw error
       if (data) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const d = data as any
         setForm({
-          name: data.name ?? '',
-          description: data.description ?? '',
-          logo_url: data.logo_url ?? '',
-          legal_name: data.legal_name ?? '',
-          subtitle: data.subtitle ?? '',
-          address: data.address ?? '',
-          phone: data.phone ?? '',
-          fax: data.fax ?? '',
-          email: data.email ?? '',
-          website: data.website ?? '',
-          tax_id: data.tax_id ?? '',
-          bank_name: data.bank_name ?? '',
-          bank_branch: data.bank_branch ?? '',
-          bank_account: data.bank_account ?? '',
-          bank_account_name: data.bank_account_name ?? '',
-          seal_image_url: data.seal_image_url ?? '',
-          invoice_seal_image_url: data.invoice_seal_image_url ?? '',
+          name: d.name ?? '',
+          description: d.description ?? '',
+          logo_url: d.logo_url ?? '',
+          legal_name: d.legal_name ?? '',
+          subtitle: d.subtitle ?? '',
+          address: d.address ?? '',
+          phone: d.phone ?? '',
+          fax: d.fax ?? '',
+          email: d.email ?? '',
+          website: d.website ?? '',
+          tax_id: d.tax_id ?? '',
+          bank_name: d.bank_name ?? '',
+          bank_branch: d.bank_branch ?? '',
+          bank_account: d.bank_account ?? '',
+          bank_account_name: d.bank_account_name ?? '',
+          seal_image_url: d.seal_image_url ?? '',
+          invoice_seal_image_url: d.invoice_seal_image_url ?? '',
+          contract_seal_image_url: d.contract_seal_image_url ?? '',
         })
       }
     } catch (error) {
@@ -567,6 +572,14 @@ export default function CompanySettingsPage() {
               value={form.invoice_seal_image_url}
               onChange={url => updateField('invoice_seal_image_url', url)}
               fieldName="invoice-seal"
+              workspaceId={workspaceId}
+            />
+            <ImageUploadField
+              label="合約專用章"
+              hint="用於電子合約，優先於大小章顯示（建議 PNG 透明背景）"
+              value={form.contract_seal_image_url}
+              onChange={url => updateField('contract_seal_image_url', url)}
+              fieldName="contract-seal"
               workspaceId={workspaceId}
             />
           </div>

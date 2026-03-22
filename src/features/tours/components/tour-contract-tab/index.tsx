@@ -258,19 +258,40 @@ export function TourContractTab({ tour }: TourContractTabProps) {
     toast({ title: '已複製連結' })
   }
 
-  // 標記為紙本簽署
-  const markAsPaperSigned = async (contract: Contract) => {
+  // 紙本簽署狀態
+  const [paperSignDialogOpen, setPaperSignDialogOpen] = useState(false)
+  const [paperSignContract, setPaperSignContract] = useState<Contract | null>(null)
+  const [paperSignDate, setPaperSignDate] = useState('')
+  const [paperSigning, setPaperSigning] = useState(false)
+
+  // 打開紙本簽署對話框
+  const openPaperSignDialog = (contract: Contract) => {
+    setPaperSignContract(contract)
+    setPaperSignDate(new Date().toISOString().split('T')[0]) // 預設今天
+    setPaperSignDialogOpen(true)
+  }
+
+  // 確認紙本簽署
+  const confirmPaperSign = async () => {
+    if (!paperSignContract || !paperSignDate) return
+    setPaperSigning(true)
     try {
       const res = await fetch('/api/contracts/paper-sign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contractId: contract.id }),
+        body: JSON.stringify({ 
+          contractId: paperSignContract.id,
+          signedDate: paperSignDate,
+        }),
       })
       if (!res.ok) throw new Error('標記失敗')
       toast({ title: '已標記為紙本簽署' })
+      setPaperSignDialogOpen(false)
       loadData()
     } catch {
       toast({ title: '標記失敗', variant: 'destructive' })
+    } finally {
+      setPaperSigning(false)
     }
   }
 
@@ -349,7 +370,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => markAsPaperSigned(contract)}
+                      onClick={() => openPaperSignDialog(contract)}
                       title="標記為紙本簽署"
                     >
                       <FileText className="w-4 h-4" />
@@ -554,6 +575,51 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
           <DialogFooter>
             <Button onClick={() => setSendDialogOpen(false)}>完成</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 紙本簽署對話框 */}
+      <Dialog open={paperSignDialogOpen} onOpenChange={setPaperSignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-morandi-gold" />
+              標記為紙本簽署
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>合約編號</Label>
+              <div className="text-sm text-morandi-secondary">{paperSignContract?.code}</div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>收到日期</Label>
+              <Input
+                type="date"
+                value={paperSignDate}
+                onChange={(e) => setPaperSignDate(e.target.value)}
+              />
+              <p className="text-xs text-morandi-secondary">紙本合約收到的日期</p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPaperSignDialogOpen(false)}>
+              取消
+            </Button>
+            <Button onClick={confirmPaperSign} disabled={paperSigning || !paperSignDate}>
+              {paperSigning ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  處理中...
+                </>
+              ) : (
+                '確認標記'
+              )}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

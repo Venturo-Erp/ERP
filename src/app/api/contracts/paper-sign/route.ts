@@ -8,11 +8,16 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const { contractId } = await request.json()
+    const { contractId, signedDate } = await request.json()
 
     if (!contractId) {
       return NextResponse.json({ error: '缺少合約 ID' }, { status: 400 })
     }
+
+    // 使用傳入的日期，或預設今天
+    const signedAt = signedDate 
+      ? new Date(signedDate).toISOString()
+      : new Date().toISOString()
 
     // 更新合約狀態為已簽署（紙本）
     // 用 signature_ip = 'paper' 標記為紙本簽署
@@ -20,7 +25,7 @@ export async function POST(request: NextRequest) {
       .from('contracts')
       .update({
         status: 'signed',
-        signed_at: new Date().toISOString(),
+        signed_at: signedAt,
         signature_ip: 'paper',
         signature_user_agent: '紙本簽署',
       })
