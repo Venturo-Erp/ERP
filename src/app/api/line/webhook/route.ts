@@ -63,6 +63,89 @@ async function processGroupEvent(groupId: string) {
   }
 }
 
+/** 處理員工 LINE 綁定 */
+async function processEmployeeBinding(event: any) {
+  const userId = event.source?.userId
+  const text = event.message?.text?.trim() || ''
+  
+  // 檢查是否為綁定指令：「綁定 E001」或「綁定:E001」
+  const bindMatch = text.match(/^綁定[:\s]*([A-Za-z0-9]+)$/i)
+  if (!bindMatch || !userId) return false
+  
+  const employeeCode = bindMatch[1].toUpperCase()
+  
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!supabaseUrl || !supabaseKey) return false
+  
+  try {
+    // 查找員工
+    const findRes = await fetch(
+      `${supabaseUrl}/rest/v1/employees?code=eq.${employeeCode}&select=id,display_name,english_name`,
+      {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+        },
+      }
+    )
+    const employees = await findRes.json()
+    
+    if (!employees || employees.length === 0) {
+      // 員工不存在，回覆錯誤
+      await fetch('https://api.line.me/v2/bot/message/reply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${LINE_TOKEN}`,
+        },
+        body: JSON.stringify({
+          replyToken: event.replyToken,
+          messages: [{ type: 'text', text: `❌ 找不到員工編號 ${employeeCode}，請確認後重試` }],
+        }),
+      })
+      return true
+    }
+    
+    const employee = employees[0]
+    
+    // 更新員工的 LINE User ID
+    await fetch(
+      `${supabaseUrl}/rest/v1/employees?id=eq.${employee.id}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+        },
+        body: JSON.stringify({ line_user_id: userId }),
+      }
+    )
+    
+    const empName = employee.display_name || employee.english_name || employeeCode
+    
+    // 回覆成功
+    await fetch('https://api.line.me/v2/bot/message/reply', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${LINE_TOKEN}`,
+      },
+      body: JSON.stringify({
+        replyToken: event.replyToken,
+        messages: [{ type: 'text', text: `✅ ${empName}，LINE 綁定成功！\n\n之後指派給你的任務會透過這裡通知你 📱` }],
+      }),
+    })
+    
+    console.log(`[LINE] Employee binding: ${employeeCode} -> ${userId}`)
+    return true
+  } catch (err) {
+    console.error('[LINE] Employee binding error:', err)
+    return false
+  }
+}
+
 /** 背景處理保險 PDF（不阻擋回應） */
 async function processInsurancePDF(event: any) {
   try {
@@ -91,6 +174,11 @@ export async function POST(req: NextRequest) {
 
     for (const event of events) {
       const source = event.source || {}
+
+      // 私人訊息 → 檢查員工綁定指令
+      if (source.type === 'user' && event.type === 'message' && event.message?.type === 'text') {
+        bgTasks.push(processEmployeeBinding(event).then(() => {}))
+      }
 
       if (source.type === 'group') {
         const groupId = source.groupId

@@ -22,7 +22,8 @@ import {
   SalaryPaymentDialog,
   SalaryPaymentData,
 } from '@/features/hr/components/salary-payment-dialog'
-import { Users, Edit2, Trash2, UserX, DollarSign, Bot } from 'lucide-react'
+import { Users, Edit2, Trash2, UserX, DollarSign, Bot, Copy, Download } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 import { getRoleConfig, type UserRole } from '@/lib/rbac-config'
 import { TableColumn } from '@/components/ui/enhanced-table'
 import { DateCell, ActionCell } from '@/components/table-cells'
@@ -43,6 +44,7 @@ export default function HRPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isSalaryPaymentDialogOpen, setIsSalaryPaymentDialogOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<EmployeeTab>('active')
+  const [lineBindingEmployee, setLineBindingEmployee] = useState<Employee | null>(null)
   const { confirm, confirmDialogProps } = useConfirmDialog()
 
   const isSuperAdmin = useMemo(() => {
@@ -297,6 +299,34 @@ export default function HRPage() {
           return <DateCell date={employee.job_info.hire_date} />
         },
       },
+      {
+        key: 'line_user_id',
+        label: 'LINE',
+        sortable: false,
+        render: (_value, employee: Employee) => {
+          const lineUserId = (employee as unknown as { line_user_id?: string }).line_user_id
+          if (lineUserId) {
+            return (
+              <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
+                ✅ 已綁定
+              </span>
+            )
+          }
+          return (
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 text-xs"
+              onClick={(e) => {
+                e.stopPropagation()
+                setLineBindingEmployee(employee)
+              }}
+            >
+              綁定
+            </Button>
+          )
+        },
+      },
     ],
     [getWorkspaceName]
   )
@@ -493,6 +523,55 @@ export default function HRPage() {
       />
 
       <ConfirmDialog {...confirmDialogProps} />
+
+      {/* LINE 綁定 Dialog */}
+      <Dialog open={!!lineBindingEmployee} onOpenChange={() => setLineBindingEmployee(null)}>
+        <DialogContent level={1} className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="text-green-600">📱</span> LINE 綁定
+            </DialogTitle>
+          </DialogHeader>
+          {lineBindingEmployee && (
+            <div className="flex flex-col items-center gap-4 py-4">
+              <div className="bg-white p-4 rounded-lg shadow-sm">
+                <QRCodeSVG
+                  value={`https://line.me/R/oaMessage/@745gftqd?綁定 ${lineBindingEmployee.employee_number || lineBindingEmployee.id.slice(0, 8)}`}
+                  size={180}
+                  level="M"
+                />
+              </div>
+              <div className="text-center">
+                <p className="font-medium text-morandi-primary">
+                  {lineBindingEmployee.display_name || lineBindingEmployee.chinese_name || '員工'}
+                </p>
+                <p className="text-sm text-morandi-secondary mt-1">
+                  請掃描 QR Code 完成綁定
+                </p>
+              </div>
+              <div className="flex gap-2 w-full">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    const empCode = lineBindingEmployee.employee_number || lineBindingEmployee.id.slice(0, 8)
+                    const url = `https://line.me/R/oaMessage/@745gftqd?綁定 ${empCode}`
+                    navigator.clipboard.writeText(url)
+                    toast.success('連結已複製')
+                  }}
+                >
+                  <Copy className="w-4 h-4 mr-1" />
+                  複製連結
+                </Button>
+              </div>
+              <p className="text-xs text-morandi-muted text-center">
+                掃碼後會打開 LINE 對話<br/>
+                自動傳送綁定指令完成綁定
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
