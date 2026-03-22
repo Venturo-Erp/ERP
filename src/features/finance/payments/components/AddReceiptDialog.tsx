@@ -9,6 +9,7 @@ import { getTodayString } from '@/lib/utils/format-date'
 import { useEffect, useState } from 'react'
 import { Plus, Save, X, Copy, ExternalLink, Check, Trash2, Lock } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Combobox } from '@/components/ui/combobox'
@@ -19,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Users, Building2 } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 import { confirm } from '@/lib/ui/alert-dialog'
 import { usePaymentForm } from '../hooks/usePaymentForm'
@@ -406,8 +408,23 @@ export function AddReceiptDialog({
           </p>
         </DialogHeader>
 
-        {/* 基本資訊 */}
-        <div className="flex items-end gap-4">
+        {/* 收款類型 Tab */}
+        <Tabs defaultValue="tour" className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="w-fit">
+            <TabsTrigger value="tour" className="gap-2">
+              <Users size={14} />
+              團體收款
+            </TabsTrigger>
+            <TabsTrigger value="company" className="gap-2">
+              <Building2 size={14} />
+              公司收款
+            </TabsTrigger>
+          </TabsList>
+
+          {/* 團體收款 */}
+          <TabsContent value="tour" className="flex-1 flex flex-col overflow-hidden mt-4">
+            {/* 基本資訊 */}
+            <div className="flex items-end gap-4">
           {/* 選擇團體 */}
           <div className="w-[300px]">
             <Label className="text-sm font-medium text-muted-foreground">
@@ -608,6 +625,23 @@ export function AddReceiptDialog({
             </div>
           </div>
         )}
+
+          </TabsContent>
+
+          {/* 公司收款 */}
+          <TabsContent value="company" className="flex-1 flex flex-col overflow-hidden mt-4">
+            <div className="flex-1 flex items-center justify-center text-morandi-secondary">
+              <div className="text-center space-y-4">
+                <Building2 size={48} className="mx-auto text-morandi-container" />
+                <div>
+                  <p className="text-lg font-medium">公司收款</p>
+                  <p className="text-sm">非旅遊團的收入（顧問費、利息收入等）</p>
+                  <p className="text-sm text-morandi-gold mt-2">功能開發中...</p>
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* 操作按鈕 */}
         <div className="flex justify-between items-center pt-4 border-t border-border">
