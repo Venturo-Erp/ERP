@@ -21,35 +21,36 @@ export default async function Page({ params }: PageProps) {
     .eq('code', code)
     .single()
 
+  console.log('[簽約頁面] 查詢合約:', { code, contract: !!contract, error: error?.message })
+
   if (error || !contract) {
-    console.error('查詢合約失敗:', error)
+    console.error('[簽約頁面] 查詢合約失敗:', error)
     notFound()
   }
 
   // 查詢團資料
-  const { data: tour } = await supabase
+  const { data: tour, error: tourError } = await supabase
     .from('tours')
     .select('id, code, name, location, departure_date, return_date')
     .eq('id', contract.tour_id)
     .single()
 
+  console.log('[簽約頁面] 查詢團:', { tourId: contract.tour_id, tour: !!tour, error: tourError?.message })
+
   // 查詢公司資料
-  const { data: workspace } = await supabase
+  const { data: workspace, error: workspaceError } = await supabase
     .from('workspaces')
     .select('id, name, seal_image_url')
     .eq('id', contract.workspace_id)
     .single()
 
+  console.log('[簽約頁面] 查詢公司:', { workspaceId: contract.workspace_id, workspace: !!workspace, error: workspaceError?.message })
+
   // 組合資料
   const contractWithRelations = {
     ...contract,
-    tours: tour,
-    workspaces: workspace,
-  }
-
-  if (!tour) {
-    console.error('找不到團資料:', contract.tour_id)
-    notFound()
+    tours: tour || { id: '', code: '', name: '未知', location: '', departure_date: '', return_date: '' },
+    workspaces: workspace || { id: '', name: '未知', seal_image_url: '' },
   }
 
   // 已簽署的合約顯示完成頁面
