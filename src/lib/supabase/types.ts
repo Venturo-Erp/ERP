@@ -15586,6 +15586,8 @@ export type Database = {
           updated_at: string | null
           updated_by: string | null
           workspace_id: string
+          recipient_workspace_id: string | null
+          target_workspace_id: string | null
         }
         Insert: {
           accepted_at?: string | null
@@ -15604,6 +15606,8 @@ export type Database = {
           items?: Json
           line_group_id?: string | null
           line_group_name?: string | null
+          recipient_workspace_id?: string | null
+          target_workspace_id?: string | null
           note?: string | null
           package_status?: string | null
           rejected_at?: string | null
@@ -15670,6 +15674,8 @@ export type Database = {
           updated_at?: string | null
           updated_by?: string | null
           workspace_id?: string
+          recipient_workspace_id?: string | null
+          target_workspace_id?: string | null
         }
         Relationships: [
           {
