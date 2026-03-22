@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { isHtmlString, cleanTiptapHtml } from '@/lib/utils/rich-text'
+import { getBrandTagline } from '@/lib/tenant'
 import type { TourPageData } from '@/features/tours/types/tour-display.types'
 import { TOURS_LABELS } from './constants/labels'
 
@@ -66,7 +67,7 @@ export function TourHeroSection({ data, viewMode }: TourHeroSectionProps) {
             }
           >
             <RichText
-              html={data.tagline || `Venturo Travel ${new Date().getFullYear()} 秋季精選`}
+              html={data.tagline || getBrandTagline('秋季精選')}
             />
           </motion.span>
 

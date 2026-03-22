@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { getCompanyName, getCompanyNameEn } from '@/lib/tenant'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -35,6 +36,8 @@ export default function DialogModesTestPage() {
 
 // 現代樣式（金色行程表）
 function ModernView() {
+  const companyName = getCompanyName()
+  const companyNameEn = getCompanyNameEn()
   return (
     <div>
       {/* 金色標頭 */}
@@ -45,8 +48,8 @@ function ModernView() {
             <div className="text-sm opacity-90 mt-1">團號：TW260321A</div>
           </div>
           <div className="text-right">
-            <div className="font-semibold text-lg">角落旅行社</div>
-            <div className="text-xs opacity-80 mt-1">Corner Travel</div>
+            <div className="font-semibold text-lg">{companyName}</div>
+            <div className="text-xs opacity-80 mt-1">{companyNameEn}</div>
           </div>
         </div>
         <div className="mt-4 flex items-center gap-6 text-sm opacity-90">
@@ -118,6 +121,7 @@ function ModernView() {
 
 // 傳統樣式（A4 列印格式）
 function TraditionalView() {
+  const companyName = getCompanyName()
   return (
     <div className="p-8 max-w-[21cm] mx-auto bg-white">
       {/* 標題 */}
@@ -207,7 +211,7 @@ function TraditionalView() {
       {/* 頁尾 */}
       <div className="border-t-2 border-black pt-4 mt-8 text-sm">
         <div className="font-bold mb-2">敬請確認回傳資訊</div>
-        <div>角落旅行社</div>
+        <div>{companyName}</div>
         <div>電話：02-2345-6789</div>
         <div>傳真：02-2345-6788</div>
       </div>

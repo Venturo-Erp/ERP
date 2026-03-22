@@ -175,15 +175,18 @@ export const TourOverview = React.memo(function TourOverview({
     return badges[status || ''] || 'bg-morandi-container text-morandi-secondary'
   }
 
-  // 健康度項目
+  // 健康度項目（只保留最重要的 2 個）
   const healthItems =
     !healthData.isLoading && !healthData.error
       ? [
-          { emoji: '📋', label: TOUR_HEALTH_LABELS.需求單狀態, data: healthData.requirements },
-          { emoji: '🛂', label: TOUR_HEALTH_LABELS.護照資料, data: healthData.passports },
-          { emoji: '✈️', label: TOUR_HEALTH_LABELS.機票狀態, data: healthData.tickets },
-          { emoji: '🏨', label: TOUR_HEALTH_LABELS.飯店確認, data: healthData.hotels },
-          { emoji: '👥', label: TOUR_HEALTH_LABELS.團員人數, data: healthData.participants },
+          { label: TOUR_HEALTH_LABELS.需求單狀態, data: healthData.requirements },
+          { 
+            label: TOUR_HEALTH_LABELS.團員人數, 
+            data: {
+              status: 'good' as const, // 團員人數只是資訊，不是警告
+              message: `${healthData.participants.current || 0} 人`
+            }
+          },
         ]
       : []
 
@@ -233,18 +236,7 @@ export const TourOverview = React.memo(function TourOverview({
           </Button>
         )}
         <Button size="sm" variant="outline" className="h-7 text-xs" onClick={onOpenContractDialog}>
-          {TOUR_OVERVIEW.action_contract}
-        </Button>
-        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={handleChannelClick}>
-          {existingChannel
-            ? TOUR_OVERVIEW.action_enter_channel
-            : TOUR_OVERVIEW.action_create_channel}
-        </Button>
-        <Button onClick={onEdit} size="sm" variant="outline" className="h-7 text-xs">
-          {COMP_TOURS_LABELS.EDIT}
-        </Button>
-        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={onArchive}>
-          {TOUR_OVERVIEW.action_archive}
+          產出合約
         </Button>
       </div>
 
@@ -291,7 +283,7 @@ export const TourOverview = React.memo(function TourOverview({
               <div key={index} className="flex items-center gap-2">
                 <span className="text-sm">{getHealthStatusEmoji(item.data.status)}</span>
                 <span className="text-xs text-morandi-secondary">
-                  {item.emoji} {item.label}
+                  {item.label}
                 </span>
                 <span
                   className={cn(

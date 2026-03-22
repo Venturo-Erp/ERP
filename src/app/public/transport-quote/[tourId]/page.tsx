@@ -21,6 +21,7 @@ export default async function TransportQuotePage({
 }) {
   const { tourId } = await params
   const { note, vehicleDesc, supplierName = '車行', requestId, itemId } = await searchParams
+  const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || '角落旅行社'
   
   // 查詢需求單狀態（如果有 requestId 或 itemId）
   let requestStatus: string | null = null
@@ -200,10 +201,10 @@ export default async function TransportQuotePage({
               </tbody>
             </table>
 
-            {/* 角落旅行社備註 */}
+            {/* 旅行社備註 */}
             {note && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h3 className="font-semibold text-amber-900 mb-2">角落旅行社備註</h3>
+                <h3 className="font-semibold text-amber-900 mb-2">{companyName}備註</h3>
                 <p className="text-sm text-gray-700">{note}</p>
               </div>
             )}
@@ -258,7 +259,7 @@ export default async function TransportQuotePage({
         </div>
 
         <div className="text-center text-xs text-gray-500 mt-4">
-          本行程表由角落旅行社提供
+          本行程表由{companyName}提供
         </div>
       </div>
     </div>

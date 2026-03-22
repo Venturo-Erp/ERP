@@ -17,7 +17,7 @@ export const COMP_EDITOR_LABELS = {
   CORS_錯誤_無法下載此圖片: 'CORS 錯誤，無法下載此圖片:',
   FAQ_問答: 'FAQ 問答',
   Supabase_上傳失敗: 'Supabase 上傳失敗:',
-  Venturo_Travel_2025_秋季精選: 'Venturo Travel 2025 秋季精選',
+  BRAND_TAGLINE_PLACEHOLDER: '{company} {year} 秋季精選',  // 動態替換
   DailyImagesUploader_上傳失敗: '[DailyImagesUploader] 上傳失敗:',
   DailyImagesUploader_意外錯誤: '[DailyImagesUploader] 意外錯誤:',
   useRegionData_selectedCountryCode_為空_返回空城市列表:

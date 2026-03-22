@@ -215,10 +215,10 @@ export const TOUR_OVERVIEW = {
   note_red: '紅色數字表示超出預算',
   note_threshold: '差額率超過20%會特別標示',
   // Quick actions
-  action_contract: '📄 產出合約',
-  action_create_channel: '📢 建立頻道',
-  action_enter_channel: '📢 進入頻道',
-  action_archive: '🗄️ 封存',
+  action_contract: '產出合約',
+  action_create_channel: '建立頻道',
+  action_enter_channel: '進入頻道',
+  action_archive: '封存',
 } as const
 
 // ============================================================

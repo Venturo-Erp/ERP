@@ -58,7 +58,7 @@ export const LANDING_LABELS = {
   FOOTER_DESCRIPTION: '專為台灣旅行社打造的營運管理系統。從報價到收款，讓繁瑣的日常作業變得簡單。',
   FOOTER_CONTACT_TITLE: '聯繫我們',
   FOOTER_EMAIL: 'hello@venturo.app',
-  FOOTER_COPYRIGHT: '© 2025 Venturo. All rights reserved.',
+  FOOTER_COPYRIGHT: '© {year} Venturo. All rights reserved.',  // 需在頁面動態替換年份
 
   LABEL_3045: '截圖預留區',
 } as const

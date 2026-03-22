@@ -1,5 +1,6 @@
 'use client'
 import React from 'react'
+import { getBrandTagline } from '@/lib/tenant'
 import { TourFormData, CityOption, CoverStyleType } from '../../types'
 import { Combobox } from '@/components/ui/combobox'
 import { Input } from '@/components/ui/input'
@@ -98,7 +99,7 @@ export function CoverInfoForm({
           <RichTextInput
             value={data.tagline || ''}
             onChange={value => updateField('tagline', value)}
-            placeholder={COMP_EDITOR_LABELS.Venturo_Travel_2025_秋季精選}
+            placeholder={getBrandTagline('秋季精選')}
           />
         </div>
 

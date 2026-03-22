@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { getCompanyName, getCompanyNameEn } from '@/lib/tenant'
 
 interface QuotePageLayoutProps {
   // 標題區
@@ -15,7 +16,7 @@ interface QuotePageLayoutProps {
   
   // 備註
   note?: string
-  noteTitle?: string  // 預設「我方備註」或「角落旅行社備註」
+  noteTitle?: string  // 預設「我方備註」或「{公司名稱}備註」
   
   // 報價表單
   quoteForm: ReactNode
@@ -31,9 +32,13 @@ export function QuotePageLayout({
   currentParticipants,
   itineraryTable,
   note,
-  noteTitle = '角落旅行社備註',
+  noteTitle,
   quoteForm,
 }: QuotePageLayoutProps) {
+  const companyName = getCompanyName()
+  const companyNameEn = getCompanyNameEn()
+  const finalNoteTitle = noteTitle || `${companyName}備註`
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#faf8f5] to-[#f5f1ea] py-8">
       <div className="max-w-4xl mx-auto px-4">
@@ -49,8 +54,8 @@ export function QuotePageLayout({
                 )}
               </div>
               <div className="text-right">
-                <div className="font-semibold text-lg">角落旅行社</div>
-                <div className="text-xs opacity-80 mt-1">Corner Travel</div>
+                <div className="font-semibold text-lg">{companyName}</div>
+                <div className="text-xs opacity-80 mt-1">{companyNameEn}</div>
               </div>
             </div>
 
@@ -70,7 +75,7 @@ export function QuotePageLayout({
             {/* 備註區（統一樣式） */}
             {note && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h3 className="font-semibold text-amber-900 mb-2">{noteTitle}</h3>
+                <h3 className="font-semibold text-amber-900 mb-2">{finalNoteTitle}</h3>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{note}</p>
               </div>
             )}
@@ -82,7 +87,7 @@ export function QuotePageLayout({
 
         {/* 頁尾（統一） */}
         <div className="text-center text-xs text-gray-500 mt-4">
-          本行程表由角落旅行社提供
+          本行程表由{companyName}提供
         </div>
       </div>
     </div>

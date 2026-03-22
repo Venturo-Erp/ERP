@@ -1,6 +1,6 @@
 export const QUOTE_CONFIRM_PAGE_LABELS = {
   // 頁面 Metadata
-  METADATA_TITLE: '報價確認 | Venturo Travel',
+  METADATA_TITLE: '報價確認 | {company}',  // 需在頁面動態替換
   METADATA_DESCRIPTION: '確認您的旅遊報價單',
 
   // 頁面標題
@@ -57,5 +57,5 @@ export const QUOTE_CONFIRM_PAGE_LABELS = {
   CONFIRM_ERROR_DEFAULT: '確認失敗',
 
   // 版權
-  COPYRIGHT: '© {year} Venturo Travel',
+  COPYRIGHT: '© {year} {company}',
 }

@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react'
+import { getBrandTagline } from '@/lib/tenant'
 import { Input } from '@/components/ui/input'
 import { RichTextInput } from '@/components/ui/rich-text-input'
 import { ImageUploader } from '@/components/ui/image-uploader'
@@ -45,7 +46,7 @@ export function CoverBlockEditor({ data, onChange }: CoverBlockEditorProps) {
           <RichTextInput
             value={data.tagline || ''}
             onChange={value => updateField('tagline', value)}
-            placeholder="Venturo Travel 2025"
+            placeholder={getBrandTagline()}
           />
         </div>
 

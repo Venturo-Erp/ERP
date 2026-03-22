@@ -12,6 +12,7 @@ import {
   Mail,
   ChevronRight,
 } from 'lucide-react'
+import { getCurrentYear } from '@/lib/tenant'
 import { LANDING_LABELS } from './constants/labels'
 
 function HeroSection() {
@@ -266,7 +267,7 @@ function Footer() {
           </div>
         </div>
         <div className="mt-10 border-t border-slate-200 pt-6 text-center text-xs text-slate-400">
-          {LANDING_LABELS.FOOTER_COPYRIGHT}
+          {LANDING_LABELS.FOOTER_COPYRIGHT.replace('{year}', getCurrentYear().toString())}
         </div>
       </div>
     </footer>
