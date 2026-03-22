@@ -343,6 +343,11 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {contract.signed_at && (
+                    <span className="text-xs text-green-600">
+                      ✓ 簽於 {new Date(contract.signed_at).toLocaleDateString('zh-TW')}
+                    </span>
+                  )}
                   <Button variant="ghost" size="sm" onClick={() => copyLink(contract)}>
                     <Copy className="w-4 h-4" />
                   </Button>
