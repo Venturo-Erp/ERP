@@ -284,14 +284,14 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
       {/* 已建立的合約 */}
       {contracts.length > 0 && (
-        <div className="border border-border rounded-lg">
-          <div className="px-4 py-3 border-b border-border bg-morandi-container/30">
+        <div className="bg-white border border-border rounded-lg">
+          <div className="px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
               <FileSignature className="w-4 h-4 text-morandi-gold" />
               <span className="font-medium text-morandi-primary">已建立合約 ({contracts.length})</span>
             </div>
           </div>
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border bg-white">
             {contracts.map(contract => (
               <div key={contract.id} className="px-4 py-3 flex items-center justify-between">
                 <div>
@@ -347,8 +347,8 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
       {/* 未簽約團員 */}
       {membersWithoutContract.length > 0 && (
-        <div className="border border-border rounded-lg">
-          <div className="px-4 py-3 border-b border-border bg-morandi-container/30 flex items-center justify-between">
+        <div className="bg-white border border-border rounded-lg">
+          <div className="px-4 py-3 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-morandi-secondary" />
               <span className="font-medium text-morandi-primary">
@@ -371,11 +371,11 @@ export function TourContractTab({ tour }: TourContractTabProps) {
               )}
             </div>
           </div>
-          <div className="divide-y divide-border">
+          <div className="divide-y divide-border bg-white">
             {membersWithoutContract.map(member => (
               <div
                 key={member.id}
-                className="px-4 py-3 flex items-center gap-3 hover:bg-morandi-container/20 cursor-pointer"
+                className="px-4 py-3 flex items-center gap-3 hover:bg-morandi-primary/5 cursor-pointer"
                 onClick={() => toggleMember(member.id)}
               >
                 <Checkbox
@@ -384,7 +384,11 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                 />
                 <div className="flex-1">
                   <span className="font-medium text-morandi-primary">{member.name}</span>
-                  <span className="text-sm text-morandi-secondary ml-2">{member.order_code}</span>
+                  {member.id_number && (
+                    <span className="text-sm text-morandi-secondary ml-2">
+                      {member.id_number.slice(0, 4)}****
+                    </span>
+                  )}
                 </div>
               </div>
             ))}

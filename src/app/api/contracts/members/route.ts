@@ -29,8 +29,7 @@ export async function GET(request: NextRequest) {
         order_members (
           id,
           chinese_name,
-          id_number,
-          phone
+          id_number
         )
       `)
       .eq('tour_id', tourId)
