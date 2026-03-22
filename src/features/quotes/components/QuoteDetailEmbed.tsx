@@ -89,7 +89,12 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
   // 檢查是否為特殊團報價單
   const relatedTour = quote?.tour_id ? tours.find(t => t.id === quote.tour_id) : null
   const isSpecialTour = relatedTour?.status === QUOTE_DETAIL_EMBED_LABELS.特殊團
-  const isReadOnly = isSpecialTour
+  
+  // 定案後鎖定編輯（業務確認、客戶確認、已成交）
+  const isConfirmed = quote?.confirmation_status === 'staff_confirmed' 
+    || quote?.confirmation_status === 'customer_confirmed'
+    || quote?.confirmation_status === 'closed'
+  const isReadOnly = isSpecialTour || isConfirmed
 
   // State
   const [categories, setCategories] = useState<CostCategory[]>([])
