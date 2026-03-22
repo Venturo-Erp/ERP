@@ -1300,7 +1300,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                   if (!currentIt) return
                   
                   try {
-                    // 複製行程
+                    // 1. 複製行程
                     const { id: _id, created_at: _ca, updated_at: _ua, ...itData } = currentIt
                     const newItinerary = await createItinerary({
                       ...itData,
@@ -1308,7 +1308,35 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                     })
                     
                     if (newItinerary?.id) {
-                      toast.success('已建立行程副本')
+                      // 2. 複製報價單（如果有）
+                      const supabase = createSupabaseBrowserClient()
+                      const { data: existingQuote } = await supabase
+                        .from('quotes')
+                        .select('*')
+                        .eq('itinerary_id', currentItineraryId)
+                        .eq('quote_type', 'standard')
+                        .maybeSingle()
+                      
+                      if (existingQuote) {
+                        const newCode = `Q${Date.now().toString(36).toUpperCase()}`
+                        // 複製報價單（使用 RPC 或直接 insert）
+                        const newQuoteData = {
+                          id: crypto.randomUUID(),
+                          code: newCode,
+                          workspace_id: existingQuote.workspace_id,
+                          tour_id: existingQuote.tour_id,
+                          tour_code: existingQuote.tour_code,
+                          itinerary_id: newItinerary.id,
+                          name: `${existingQuote.name || '報價單'} (副本)`,
+                          quote_type: existingQuote.quote_type,
+                          customer_name: existingQuote.customer_name,
+                          categories: existingQuote.categories,
+                          status: 'draft',
+                        }
+                        await supabase.from('quotes').insert(newQuoteData as never)
+                      }
+                      
+                      toast.success('已建立行程副本（含報價單）')
                       refresh()
                       setCurrentItineraryId(newItinerary.id)
                     }
