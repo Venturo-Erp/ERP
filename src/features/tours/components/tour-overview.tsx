@@ -219,26 +219,7 @@ export const TourOverview = React.memo(function TourOverview({
         </div>
       </div>
 
-      {/* 動作列 */}
-      <div className="px-5 py-2.5 border-b border-border/40 bg-morandi-container/30 flex items-center gap-2 flex-wrap">
-        <Button
-          onClick={onManageQuote}
-          size="sm"
-          className="h-7 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-        >
-          <Calculator size={12} className="mr-1" />
-          {COMP_TOURS_LABELS.LABEL_4601}
-        </Button>
-        {onManageItinerary && (
-          <Button onClick={onManageItinerary} size="sm" variant="outline" className="h-7 text-xs">
-            <FileText size={12} className="mr-1" />
-            {COMP_TOURS_LABELS.行程表}
-          </Button>
-        )}
-        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={onOpenContractDialog}>
-          產出合約
-        </Button>
-      </div>
+
 
       {/* 財務概況 — 橫排緊湊 */}
       <div className="px-5 py-3 border-b border-border/40">
