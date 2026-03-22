@@ -109,6 +109,10 @@ export function TourContractTab({ tour }: TourContractTabProps) {
   // 附件勾選
   const [includeItinerary, setIncludeItinerary] = useState(true)
   const [includeQuote, setIncludeQuote] = useState(false)
+  const [includeMemberList, setIncludeMemberList] = useState(true)
+  
+  // 代表人（多人簽約時）
+  const [representativeId, setRepresentativeId] = useState<string>('')
 
   // 載入訂單和團員
   const loadData = useCallback(async () => {
@@ -233,8 +237,11 @@ export function TourContractTab({ tour }: TourContractTabProps) {
           workspaceId: tour.workspace_id,
           memberIds: selectedMemberIds,
           signerType,
-          signerName: signerName.trim(),
+          signerName: selectedMemberIds.length > 1 && signerType === 'individual'
+            ? allMembers.find(m => m.id === representativeId)?.name || ''
+            : signerName.trim(),
           signerPhone: signerPhone.trim(),
+          representativeId: selectedMemberIds.length > 1 ? representativeId : undefined,
           contractData: {
             gatherLocation,
             gatherTime,
@@ -242,6 +249,14 @@ export function TourContractTab({ tour }: TourContractTabProps) {
             balanceAmount: balanceAmount || '0',
             includeItinerary,
             includeQuote,
+            includeMemberList: selectedMemberIds.length > 1 ? includeMemberList : false,
+            // 多人簽約時，顯示「XXX等N人」
+            travelerDisplayName: selectedMemberIds.length > 1 && signerType === 'individual'
+              ? `${allMembers.find(m => m.id === representativeId)?.name || ''}等${selectedMemberIds.length}人`
+              : undefined,
+            memberNames: selectedMemberIds.length > 1
+              ? allMembers.filter(m => selectedMemberIds.includes(m.id)).map(m => m.name)
+              : undefined,
           },
         }),
       })
@@ -498,14 +513,46 @@ export function TourContractTab({ tour }: TourContractTabProps) {
               </Select>
             </div>
 
-            <div>
-              <Label>{signerType === 'company' ? '公司名稱' : '簽約人姓名'}</Label>
-              <Input
-                value={signerName}
-                onChange={e => setSignerName(e.target.value)}
-                placeholder={signerType === 'company' ? '公司名稱' : '姓名'}
-              />
-            </div>
+            {signerType === 'company' ? (
+              <div>
+                <Label>公司名稱</Label>
+                <Input
+                  value={signerName}
+                  onChange={e => setSignerName(e.target.value)}
+                  placeholder="公司名稱"
+                />
+              </div>
+            ) : selectedMemberIds.length > 1 ? (
+              <div>
+                <Label>代表人（合約顯示「XXX 等 {selectedMemberIds.length} 人」）</Label>
+                <Select
+                  value={representativeId}
+                  onValueChange={setRepresentativeId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="選擇代表人" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allMembers
+                      .filter(m => selectedMemberIds.includes(m.id))
+                      .map(member => (
+                        <SelectItem key={member.id} value={member.id}>
+                          {member.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div>
+                <Label>簽約人姓名</Label>
+                <Input
+                  value={signerName}
+                  onChange={e => setSignerName(e.target.value)}
+                  placeholder="姓名"
+                />
+              </div>
+            )}
 
             <div>
               <Label>聯絡電話</Label>
@@ -600,6 +647,18 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   附上報價單
                 </label>
               </div>
+              {selectedMemberIds.length > 1 && (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="include-member-list"
+                    checked={includeMemberList}
+                    onCheckedChange={(checked) => setIncludeMemberList(!!checked)}
+                  />
+                  <label htmlFor="include-member-list" className="text-sm cursor-pointer">
+                    附上簽約團員名單（{selectedMemberIds.length} 人）
+                  </label>
+                </div>
+              )}
             </div>
 
             <div className="bg-morandi-container/50 rounded-lg p-3 text-sm">
