@@ -109,6 +109,7 @@ export const TOUR_TABS = [
   { value: 'quick-quote', label: COMP_TOURS_LABELS.快速報價 },
   { value: 'requirements', label: COMP_TOURS_LABELS.需求 },
   { value: 'confirmation-sheet', label: COMP_TOURS_LABELS.團確單 },
+  { value: 'contract', label: '合約' },
   { value: 'checkin', label: COMP_TOURS_LABELS.報到 },
   { value: 'files', label: COMP_TOURS_LABELS.檔案 },
   { value: 'closing', label: COMP_TOURS_LABELS.結案 },
@@ -198,6 +199,12 @@ export function TourTabContent({
       )
     case 'closing':
       return <TourClosingTab tour={tour} />
+    case 'contract':
+      return (
+        <div className="p-6 text-center text-morandi-secondary">
+          <p>合約功能開發中...</p>
+        </div>
+      )
     default:
       return <TourOverview tour={tour} />
   }

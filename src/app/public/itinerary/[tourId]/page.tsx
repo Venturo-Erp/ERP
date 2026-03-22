@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { notFound } from 'next/navigation'
 import { QuoteForm } from './QuoteForm'
 
@@ -245,7 +246,7 @@ export default async function PublicItineraryPage({
 
         {/* 頁尾 */}
         <div style={{ paddingTop: 16, borderTop: '1px solid #e8e5e0', textAlign: 'center', fontSize: 12, color: '#999', marginTop: 32 }}>
-          <p>本行程表由 角落旅行社 提供</p>
+          <p>本行程表由 {COMPANY_NAME} 提供</p>
         </div>
       </div>
     </div>

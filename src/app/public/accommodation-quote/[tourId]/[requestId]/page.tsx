@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { AccommodationQuoteForm } from '../AccommodationQuoteForm'
 
 const supabase = createClient(
@@ -130,10 +131,10 @@ export default async function AccommodationQuotePage({
               </div>
             </div>
 
-            {/* 角落旅行社備註 */}
+            {/* {COMPANY_NAME}備註 */}
             {request.note && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h3 className="font-semibold text-amber-900 mb-2">角落旅行社備註</h3>
+                <h3 className="font-semibold text-amber-900 mb-2">{COMPANY_NAME}備註</h3>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{request.note}</p>
               </div>
             )}
@@ -240,7 +241,7 @@ export default async function AccommodationQuotePage({
         </div>
 
         <div className="text-center text-xs text-gray-500 mt-4">
-          本報價單由角落旅行社提供
+          本報價單由{COMPANY_NAME}提供
         </div>
       </div>
     </div>
