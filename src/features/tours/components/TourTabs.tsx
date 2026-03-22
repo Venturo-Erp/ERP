@@ -83,6 +83,11 @@ const TourClosingTab = dynamic(
   { loading: () => <TabLoading /> }
 )
 
+const TourContractTab = dynamic(
+  () => import('@/features/tours/components/tour-contract-tab').then(m => m.TourContractTab),
+  { loading: () => <TabLoading /> }
+)
+
 const ConfirmationSheet = dynamic(
   () =>
     import('@/features/confirmations/components/ConfirmationSheet').then(m => m.ConfirmationSheet),
@@ -190,11 +195,7 @@ export function TourTabContent({
     case 'closing':
       return <TourClosingTab tour={tour} />
     case 'contract':
-      return (
-        <div className="p-6 text-center text-morandi-secondary">
-          <p>合約功能開發中...</p>
-        </div>
-      )
+      return <TourContractTab tour={tour} />
     default:
       return <TourOverview tour={tour} />
   }
