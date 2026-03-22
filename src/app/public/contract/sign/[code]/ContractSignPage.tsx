@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { FileSignature, Printer, Download, Check, Loader2 } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { FileSignature, Check, Loader2, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SignaturePad } from '@/components/ui/signature-pad'
+import DOMPurify from 'dompurify'
 
 interface Contract {
   id: string
@@ -34,6 +35,12 @@ interface ContractSignPageProps {
   contract: Contract
 }
 
+const TEMPLATE_FILES: Record<string, string> = {
+  domestic: 'domestic.html',
+  international: 'international.html',
+  individual_international: 'individual_international_full.html',
+}
+
 const TEMPLATE_LABELS: Record<string, string> = {
   domestic: '國內旅遊定型化契約',
   international: '國外旅遊定型化契約',
@@ -41,9 +48,77 @@ const TEMPLATE_LABELS: Record<string, string> = {
 }
 
 export function ContractSignPage({ contract }: ContractSignPageProps) {
-  const [mode, setMode] = useState<'choose' | 'sign' | 'print' | 'success'>('choose')
+  const [step, setStep] = useState<'preview' | 'sign' | 'success'>('preview')
+  const [contractHtml, setContractHtml] = useState<string>('')
+  const [loading, setLoading] = useState(true)
+  const [canSign, setCanSign] = useState(false)
   const [signing, setSigning] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // 載入合約範本
+  useEffect(() => {
+    const loadContract = async () => {
+      try {
+        setLoading(true)
+        
+        const templateFile = TEMPLATE_FILES[contract.template] || 'international.html'
+        const response = await fetch(`/contract-templates/${templateFile}`)
+        
+        if (!response.ok) {
+          throw new Error('無法載入合約範本')
+        }
+        
+        let template = await response.text()
+        
+        // 替換變數
+        const data = contract.contract_data || {}
+        Object.entries(data).forEach(([key, value]) => {
+          const regex = new RegExp(`{{${key}}}`, 'g')
+          const safeValue = String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+          template = template.replace(regex, safeValue)
+        })
+        
+        // 清理 HTML
+        const sanitizedHtml = DOMPurify.sanitize(template, {
+          ALLOWED_TAGS: [
+            'html', 'head', 'body', 'style', 'title', 'div', 'span', 'p', 'br', 'hr',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+            'ul', 'ol', 'li', 'strong', 'em', 'b', 'i', 'u', 'a', 'img', 'header', 'footer',
+            'section', 'article',
+          ],
+          ALLOWED_ATTR: ['class', 'id', 'style', 'src', 'alt', 'href', 'target', 'colspan', 'rowspan', 'width', 'height'],
+        })
+        
+        setContractHtml(sanitizedHtml)
+      } catch (err) {
+        setError((err as Error).message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadContract()
+  }, [contract])
+
+  // 監聽滾動，滾到底部才能簽名
+  const handleScroll = () => {
+    const container = scrollContainerRef.current
+    if (!container) return
+    
+    const { scrollTop, scrollHeight, clientHeight } = container
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50
+    
+    if (isAtBottom && !canSign) {
+      setCanSign(true)
+    }
+  }
 
   // 處理電子簽名
   const handleSign = async (signatureDataUrl: string) => {
@@ -65,7 +140,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
         throw new Error(data.error || '簽署失敗')
       }
 
-      setMode('success')
+      setStep('success')
     } catch (err) {
       setError((err as Error).message)
     } finally {
@@ -73,123 +148,119 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     }
   }
 
-  // 處理列印/下載
-  const handlePrint = () => {
-    // TODO: 產生 PDF 並下載
-    window.print()
-  }
-
-  // 選擇模式頁面
-  if (mode === 'choose') {
+  // 預覽頁面
+  if (step === 'preview') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-        {/* Header */}
-        <div className="bg-white border-b border-amber-100 px-4 py-6">
-          <div className="max-w-lg mx-auto text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-100 rounded-full mb-4">
-              <FileSignature className="w-8 h-8 text-amber-600" />
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        {/* 頂部資訊列 */}
+        <div className="bg-white border-b shadow-sm px-4 py-3 sticky top-0 z-10">
+          <div className="max-w-4xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <FileSignature className="w-5 h-5 text-amber-600" />
+              <div>
+                <div className="font-medium text-gray-900">
+                  {TEMPLATE_LABELS[contract.template] || '旅遊合約'}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {contract.tours.name} · {contract.code}
+                </div>
+              </div>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {TEMPLATE_LABELS[contract.template] || '旅遊合約'}
-            </h1>
-            <p className="text-gray-600 mt-1">{contract.workspaces.name}</p>
+            <div className="text-sm text-gray-500">
+              {contract.workspaces.name}
+            </div>
           </div>
         </div>
 
-        {/* 合約資訊 */}
-        <div className="max-w-lg mx-auto p-4">
-          <div className="bg-white rounded-xl shadow-sm border border-amber-100 p-6 mb-6">
-            <h2 className="font-semibold text-gray-900 mb-4">旅遊資訊</h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">團號</span>
-                <span className="font-medium">{contract.tours.code}</span>
+        {/* 合約內容區（可滾動，像 Word 文件） */}
+        <div className="flex-1 overflow-hidden p-4">
+          <div className="max-w-4xl mx-auto h-full">
+            {loading ? (
+              <div className="bg-white rounded-lg shadow-lg h-full flex items-center justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">行程名稱</span>
-                <span className="font-medium">{contract.tours.name}</span>
+            ) : error ? (
+              <div className="bg-white rounded-lg shadow-lg h-full flex items-center justify-center">
+                <div className="text-center text-red-500">
+                  <p>{error}</p>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">目的地</span>
-                <span className="font-medium">{contract.tours.location || '-'}</span>
+            ) : (
+              <div
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
+                className="bg-white rounded-lg shadow-lg h-full overflow-y-auto"
+                style={{ maxHeight: 'calc(100vh - 200px)' }}
+              >
+                {/* 合約 HTML 內容 */}
+                <div
+                  className="p-8"
+                  dangerouslySetInnerHTML={{ __html: contractHtml }}
+                />
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">出發日期</span>
-                <span className="font-medium">
-                  {contract.tours.departure_date
-                    ? new Date(contract.tours.departure_date).toLocaleDateString('zh-TW')
-                    : '-'}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">簽約人</span>
-                <span className="font-medium">
-                  {contract.signer_type === 'company'
-                    ? contract.company_name
-                    : contract.signer_name}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">團員人數</span>
-                <span className="font-medium">{contract.member_ids?.length || 0} 人</span>
-              </div>
-            </div>
+            )}
           </div>
+        </div>
 
-          {/* 選擇簽約方式 */}
-          <div className="bg-white rounded-xl shadow-sm border border-amber-100 p-6">
-            <h2 className="font-semibold text-gray-900 mb-4">請選擇簽約方式</h2>
-            <p className="text-sm text-gray-500 mb-6">
-              依據電子簽章法，電子簽名與紙本簽名具有同等法律效力。
-            </p>
-
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                onClick={() => setMode('sign')}
-                className="flex flex-col items-center justify-center p-6 border-2 border-amber-200 rounded-xl hover:border-amber-400 hover:bg-amber-50 transition-colors"
-              >
-                <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mb-3">
-                  <FileSignature className="w-6 h-6 text-amber-600" />
+        {/* 底部按鈕區 */}
+        <div className="bg-white border-t shadow-lg px-4 py-4 sticky bottom-0">
+          <div className="max-w-4xl mx-auto">
+            {!canSign ? (
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2 text-gray-500 mb-2">
+                  <ChevronDown className="w-4 h-4 animate-bounce" />
+                  <span>請閱讀完整合約內容</span>
+                  <ChevronDown className="w-4 h-4 animate-bounce" />
                 </div>
-                <span className="font-medium text-gray-900">電子簽約</span>
-                <span className="text-xs text-gray-500 mt-1">手寫簽名</span>
-              </button>
-
-              <button
-                onClick={() => setMode('print')}
-                className="flex flex-col items-center justify-center p-6 border-2 border-gray-200 rounded-xl hover:border-gray-400 hover:bg-gray-50 transition-colors"
-              >
-                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                  <Printer className="w-6 h-6 text-gray-600" />
-                </div>
-                <span className="font-medium text-gray-900">列印紙本</span>
-                <span className="text-xs text-gray-500 mt-1">下載 PDF</span>
-              </button>
-            </div>
+                <p className="text-xs text-gray-400">
+                  滾動至合約底部後即可簽署
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  size="lg"
+                  onClick={() => setStep('sign')}
+                  className="bg-amber-500 hover:bg-amber-600"
+                >
+                  <FileSignature className="w-5 h-5 mr-2" />
+                  我已閱讀，進行電子簽署
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => window.print()}
+                >
+                  列印合約
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
     )
   }
 
-  // 電子簽名頁面
-  if (mode === 'sign') {
+  // 簽名頁面
+  if (step === 'sign') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white">
-        <div className="bg-white border-b border-amber-100 px-4 py-4">
-          <div className="max-w-lg mx-auto flex items-center">
+      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex flex-col">
+        {/* 頂部 */}
+        <div className="bg-white border-b px-4 py-4">
+          <div className="max-w-md mx-auto flex items-center">
             <button
-              onClick={() => setMode('choose')}
+              onClick={() => setStep('preview')}
               className="text-gray-500 hover:text-gray-700 mr-4"
             >
-              ← 返回
+              ← 返回合約
             </button>
-            <h1 className="text-lg font-semibold text-gray-900">電子簽約</h1>
+            <h1 className="text-lg font-semibold text-gray-900">電子簽署</h1>
           </div>
         </div>
 
-        <div className="max-w-lg mx-auto p-4">
-          <div className="bg-white rounded-xl shadow-sm border border-amber-100 p-6">
+        {/* 簽名區 */}
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
             {/* 合約摘要 */}
             <div className="mb-6 pb-6 border-b border-gray-100">
               <div className="text-sm text-gray-500 mb-1">
@@ -235,43 +306,8 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     )
   }
 
-  // 列印頁面
-  if (mode === 'print') {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-        <div className="bg-white border-b border-gray-100 px-4 py-4">
-          <div className="max-w-lg mx-auto flex items-center">
-            <button
-              onClick={() => setMode('choose')}
-              className="text-gray-500 hover:text-gray-700 mr-4"
-            >
-              ← 返回
-            </button>
-            <h1 className="text-lg font-semibold text-gray-900">列印合約</h1>
-          </div>
-        </div>
-
-        <div className="max-w-lg mx-auto p-4">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Download className="w-8 h-8 text-gray-600" />
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">下載合約 PDF</h2>
-            <p className="text-gray-600 mb-6">
-              下載後請列印、簽名，並寄回或掃描回傳給旅行社。
-            </p>
-            <Button onClick={handlePrint} className="w-full">
-              <Download className="w-4 h-4 mr-2" />
-              下載 PDF
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   // 成功頁面
-  if (mode === 'success') {
+  if (step === 'success') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
