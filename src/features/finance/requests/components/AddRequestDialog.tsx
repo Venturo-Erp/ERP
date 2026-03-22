@@ -588,21 +588,6 @@ export function AddRequestDialog({
           level={2}
           className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col overflow-hidden"
         >
-          <DialogHeader>
-            <DialogTitle>{ADD_REQUEST_FORM_LABELS.新增請款單}</DialogTitle>
-            <p className="text-sm text-morandi-secondary">
-              {activeTab === 'batch' ? (
-                previewCode
-              ) : (
-                <>
-                  {ADD_REQUEST_FORM_LABELS.請款單號}
-                  <span className="font-medium text-morandi-primary">{previewCode}</span>{' '}
-                  {ADD_REQUEST_FORM_LABELS.自動生成}
-                </>
-              )}
-            </p>
-          </DialogHeader>
-
           <Tabs
             value={activeTab}
             onValueChange={v => {
@@ -617,22 +602,39 @@ export function AddRequestDialog({
             }}
             className="flex-1 flex flex-col overflow-hidden"
           >
-            <TabsList className="w-fit">
-              <TabsTrigger value="tour" className="gap-2">
-                <Users size={16} />
-                {ADD_REQUEST_FORM_LABELS.LABEL_7551}
-              </TabsTrigger>
-              <TabsTrigger value="batch" className="gap-2">
-                <Layers size={16} />
-                {ADD_REQUEST_FORM_LABELS.LABEL_163}
-              </TabsTrigger>
-              {canCreateCompanyPayment && (
-                <TabsTrigger value="company" className="gap-2">
-                  <Briefcase size={16} />
-                  {ADD_REQUEST_FORM_LABELS.LABEL_9152}
+            {/* Header: 左邊 Tab，右邊標題 */}
+            <DialogHeader className="flex-row items-center justify-between pb-4">
+              <TabsList className="w-fit">
+                <TabsTrigger value="tour" className="gap-2">
+                  <Users size={16} />
+                  {ADD_REQUEST_FORM_LABELS.LABEL_7551}
                 </TabsTrigger>
-              )}
-            </TabsList>
+                <TabsTrigger value="batch" className="gap-2">
+                  <Layers size={16} />
+                  {ADD_REQUEST_FORM_LABELS.LABEL_163}
+                </TabsTrigger>
+                {canCreateCompanyPayment && (
+                  <TabsTrigger value="company" className="gap-2">
+                    <Briefcase size={16} />
+                    {ADD_REQUEST_FORM_LABELS.LABEL_9152}
+                  </TabsTrigger>
+                )}
+              </TabsList>
+              <div className="text-right">
+                <DialogTitle>{ADD_REQUEST_FORM_LABELS.新增請款單}</DialogTitle>
+                <p className="text-sm text-morandi-secondary">
+                  {activeTab === 'batch' ? (
+                    previewCode
+                  ) : (
+                    <>
+                      {ADD_REQUEST_FORM_LABELS.請款單號}
+                      <span className="font-medium text-morandi-primary">{previewCode}</span>{' '}
+                      {ADD_REQUEST_FORM_LABELS.自動生成}
+                    </>
+                  )}
+                </p>
+              </div>
+            </DialogHeader>
 
             {/* 團體請款 */}
             <TabsContent value="tour" className="flex-1 overflow-y-auto mt-4 space-y-6">

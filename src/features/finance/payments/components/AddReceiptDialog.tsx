@@ -387,39 +387,41 @@ export function AddReceiptDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent level={2} className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {isEditMode
-              ? ADD_RECEIPT_DIALOG_LABELS.編輯收款單
-              : ADD_RECEIPT_DIALOG_LABELS.新增收款單}
-            {isConfirmed && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-morandi-green/20 text-morandi-green text-xs font-medium">
-                <Lock size={12} />
-                {ADD_RECEIPT_DIALOG_LABELS.CONFIRM_469}
-              </span>
-            )}
-          </DialogTitle>
-          <p className="text-sm text-muted-foreground">
-            {isConfirmed
-              ? ADD_RECEIPT_TOAST_LABELS.CONFIRMED_READONLY(editingReceipt?.receipt_number || '')
-              : isEditMode
-                ? ADD_RECEIPT_TOAST_LABELS.EDIT_TITLE(editingReceipt?.receipt_number || '')
-                : ADD_RECEIPT_DIALOG_LABELS.收款單號將自動產生}
-          </p>
-        </DialogHeader>
-
-        {/* 收款類型 Tab */}
+        {/* 收款類型 Tab - 包住整個 header 和內容 */}
         <Tabs defaultValue="tour" className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="w-fit">
-            <TabsTrigger value="tour" className="gap-2">
-              <Users size={14} />
-              團體收款
-            </TabsTrigger>
-            <TabsTrigger value="company" className="gap-2">
-              <Building2 size={14} />
-              公司收款
-            </TabsTrigger>
-          </TabsList>
+          {/* Header: 左邊 Tab，右邊標題 */}
+          <DialogHeader className="flex-row items-center justify-between pb-4">
+            <TabsList className="w-fit">
+              <TabsTrigger value="tour" className="gap-2">
+                <Users size={14} />
+                團體收款
+              </TabsTrigger>
+              <TabsTrigger value="company" className="gap-2">
+                <Building2 size={14} />
+                公司收款
+              </TabsTrigger>
+            </TabsList>
+            <div className="text-right">
+              <DialogTitle className="flex items-center justify-end gap-2">
+                {isEditMode
+                  ? ADD_RECEIPT_DIALOG_LABELS.編輯收款單
+                  : ADD_RECEIPT_DIALOG_LABELS.新增收款單}
+                {isConfirmed && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-morandi-green/20 text-morandi-green text-xs font-medium">
+                    <Lock size={12} />
+                    {ADD_RECEIPT_DIALOG_LABELS.CONFIRM_469}
+                  </span>
+                )}
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground">
+                {isConfirmed
+                  ? ADD_RECEIPT_TOAST_LABELS.CONFIRMED_READONLY(editingReceipt?.receipt_number || '')
+                  : isEditMode
+                    ? ADD_RECEIPT_TOAST_LABELS.EDIT_TITLE(editingReceipt?.receipt_number || '')
+                    : ADD_RECEIPT_DIALOG_LABELS.收款單號將自動產生}
+              </p>
+            </div>
+          </DialogHeader>
 
           {/* 團體收款 */}
           <TabsContent value="tour" className="flex-1 flex flex-col overflow-hidden mt-4">
