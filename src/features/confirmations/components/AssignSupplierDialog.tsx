@@ -905,8 +905,63 @@ export function AssignSupplierDialog({
                         return
                       }
                       
-                      // TODO: 發送 LINE 通知給同事
-                      // TODO: 發送頻道訊息
+                      // 2. 查員工的 LINE User ID
+                      const { data: empData } = await supabase
+                        .from('employees')
+                        .select('*')
+                        .eq('id', selectedEmployeeId)
+                        .single()
+                      
+                      const lineUserId = (empData as { line_user_id?: string } | null)?.line_user_id
+                      const senderName = user?.display_name || user?.chinese_name || '同事'
+                      const itemTitle = items[0]?.item?.title || items[0]?.item?.supplierName || '任務'
+                      
+                      // 3. 發送 LINE 通知給同事（如果有綁定）
+                      if (lineUserId) {
+                        try {
+                          await fetch('/api/line/push', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              to: lineUserId,
+                              messages: [{
+                                type: 'text',
+                                text: `📋 ${senderName} 指派了一項任務給你\n\n` +
+                                      `團號：${tour?.code || ''}\n` +
+                                      `項目：${itemTitle}\n\n` +
+                                      `請到 ERP 查看待辦事項`,
+                              }],
+                            }),
+                          })
+                        } catch (lineErr) {
+                          logger.warn('LINE 通知失敗:', lineErr)
+                          // 不中斷流程
+                        }
+                      }
+                      
+                      // 4. 發送頻道訊息
+                      if (tourId) {
+                        try {
+                          // 用 tour_id 找頻道
+                          const { data: channelData } = await supabase
+                            .from('channels')
+                            .select('id')
+                            .eq('tour_id', tourId)
+                            .single()
+                          
+                          if (channelData?.id) {
+                            await supabase.from('messages').insert({
+                              channel_id: channelData.id,
+                              content: `📤 ${senderName} 發送了「${itemTitle}」需求，已指派給 ${empName}`,
+                              created_by: user?.id,
+                              workspace_id: user?.workspace_id,
+                            } as never)
+                          }
+                        } catch (channelErr) {
+                          logger.warn('頻道訊息失敗:', channelErr)
+                          // 不中斷流程
+                        }
+                      }
                       
                       toast({ title: '👤 已指派任務', description: `已建立待辦事項並指派給 ${empName}` })
                       onSave?.()
