@@ -213,12 +213,22 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
     })
   }, [numDays])
 
+  // 所有關聯到這個團的行程副本
+  const tourItineraries = useMemo(() => {
+    return itineraries.filter(i => i.tour_id === tour.id).sort((a, b) => 
+      new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
+    )
+  }, [itineraries, tour.id])
+
   // Load itinerary
   useEffect(() => {
     const loadItinerary = async () => {
       setLoading(true)
       try {
-        const itinerary = itineraries.find(i => i.tour_id === tour.id)
+        // 找當前選中的行程，如果沒有則用第一個
+        const itinerary = currentItineraryId 
+          ? itineraries.find(i => i.id === currentItineraryId)
+          : tourItineraries[0]
 
         if (itinerary) {
           setCurrentItineraryId(itinerary.id)
@@ -1255,13 +1265,65 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
       <div className="flex flex-col h-full overflow-hidden">
         {/* -- Header -- */}
         <div className="px-4 py-2 flex items-center justify-between">
-          <h3 className="flex items-center gap-2 text-sm font-bold text-morandi-primary">
-            <FileText className="w-4 h-4 text-morandi-gold" />
-            {currentItineraryId ? COMP_TOURS_LABELS.編輯行程表 : COMP_TOURS_LABELS.建立行程表}
-            <span className="font-normal text-xs text-muted-foreground ml-1">
-              — {tour.name || COMP_TOURS_LABELS.未設定}
-            </span>
-          </h3>
+          <div className="flex items-center gap-3">
+            <h3 className="flex items-center gap-2 text-sm font-bold text-morandi-primary">
+              <FileText className="w-4 h-4 text-morandi-gold" />
+              {currentItineraryId ? COMP_TOURS_LABELS.編輯行程表 : COMP_TOURS_LABELS.建立行程表}
+            </h3>
+            {/* 行程副本選擇器 */}
+            {tourItineraries.length > 0 && (
+              <select
+                value={currentItineraryId || ''}
+                onChange={(e) => {
+                  const newId = e.target.value
+                  if (newId) {
+                    setCurrentItineraryId(newId)
+                  }
+                }}
+                className="h-7 px-2 text-xs border rounded-md bg-white"
+              >
+                {tourItineraries.map((it, idx) => (
+                  <option key={it.id} value={it.id}>
+                    {it.title || `行程 ${idx + 1}`}
+                  </option>
+                ))}
+              </select>
+            )}
+            {/* 建立副本按鈕 */}
+            {currentItineraryId && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  if (!currentItineraryId) return
+                  const currentIt = itineraries.find(i => i.id === currentItineraryId)
+                  if (!currentIt) return
+                  
+                  try {
+                    // 複製行程
+                    const { id: _id, created_at: _ca, updated_at: _ua, ...itData } = currentIt
+                    const newItinerary = await createItinerary({
+                      ...itData,
+                      title: `${currentIt.title || '行程'} (副本)`,
+                    })
+                    
+                    if (newItinerary?.id) {
+                      toast.success('已建立行程副本')
+                      refresh()
+                      setCurrentItineraryId(newItinerary.id)
+                    }
+                  } catch (error) {
+                    logger.error('建立副本失敗:', error)
+                    toast.error('建立副本失敗')
+                  }
+                }}
+                className="h-7 px-2 text-xs gap-1"
+              >
+                <Plus size={12} />
+                建立副本
+              </Button>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
