@@ -135,6 +135,6 @@ export const config = {
      * - favicon.ico (網站圖標)
      * - public 資料夾內的檔案
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|contract-templates|.*\\.(?:svg|png|jpg|jpeg|gif|webp|html)$).*)',
   ],
 }
