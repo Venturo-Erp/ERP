@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Printer, Search, Building2, Loader2, Mail, MessageCircle, Globe, Phone } from 'lucide-react'
+import { Printer, Search, Building2, Loader2, Mail, MessageCircle, Globe, Phone, Users } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -253,7 +253,7 @@ export function AssignSupplierDialog({
 
   const [step, setStep] = useState<'rooms' | 'preview' | 'send'>('preview')
   const [roomDetails, setRoomDetails] = useState<Record<string, { name: string; qty: number }[]>>({})
-  const [sendMethod, setSendMethod] = useState<'print' | 'line' | 'email' | 'fax' | 'tenant' | null>(null)
+  const [sendMethod, setSendMethod] = useState<'print' | 'line' | 'email' | 'fax' | 'tenant' | 'assign' | null>(null)
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string; supplier_id?: string }[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [loadingGroups, setLoadingGroups] = useState(false)
@@ -643,6 +643,15 @@ export function AssignSupplierDialog({
                   <Globe size={14} className="mr-1.5" />
                   租戶
                 </Button>
+                <Button
+                  size="sm"
+                  variant={sendMethod === 'assign' ? 'default' : 'outline'}
+                  onClick={() => setSendMethod('assign')}
+                  className={sendMethod === 'assign' ? 'bg-orange-600 hover:bg-orange-700 text-white' : ''}
+                >
+                  <Users size={14} className="mr-1.5" />
+                  指派同事
+                </Button>
               </div>
             </div>
 
@@ -670,6 +679,14 @@ export function AssignSupplierDialog({
                   <MessageCircle size={14} className="mr-1.5" />
                   下一步：選群組發送
                 </Button>
+              ) : sendMethod === 'assign' ? (
+                <Button
+                  onClick={() => setStep('send')}
+                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                >
+                  <Users size={14} className="mr-1.5" />
+                  下一步：選擇同事
+                </Button>
               ) : sendMethod ? (
                 <Button
                   onClick={() => setStep('send')}
@@ -691,6 +708,8 @@ export function AssignSupplierDialog({
                   <><Mail size={18} className="text-blue-600" /> 📧 Email 發送</>
                 ) : sendMethod === 'fax' ? (
                   <><Phone size={18} className="text-gray-600" /> 📠 傳真發送</>
+                ) : sendMethod === 'assign' ? (
+                  <><Users size={18} className="text-orange-600" /> 👤 指派同事</>
                 ) : (
                   <><Globe size={18} className="text-purple-600" /> 🌐 發給租戶</>
                 )}
