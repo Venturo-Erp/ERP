@@ -321,7 +321,7 @@ export const TourCosts = React.memo(function TourCosts({
       )}
 
       {/* 成本列表 - 直接表格 */}
-      <div className="border border-border rounded-lg overflow-hidden">
+      <div className="border border-border rounded-lg overflow-hidden bg-card">
         {/* 區塊標題行 */}
         <div className="bg-morandi-container/50 border-b border-border/60 px-4 py-2">
           <span className="text-sm font-medium text-morandi-primary">

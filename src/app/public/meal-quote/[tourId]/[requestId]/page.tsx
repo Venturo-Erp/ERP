@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { COMPANY_NAME } from '@/lib/tenant'
 import { MealQuoteForm } from '../MealQuoteForm'
 
 const supabase = createClient(
@@ -16,7 +17,6 @@ export default async function MealQuotePage({
   params: Promise<{ tourId: string; requestId: string }>
 }) {
   const { tourId, requestId } = await params
-  const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME || '角落旅行社'
 
   // 查詢需求單
   const { data: request } = await supabase
@@ -132,7 +132,7 @@ export default async function MealQuotePage({
             {/* 旅行社備註 */}
             {request.note && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h3 className="font-semibold text-amber-900 mb-2">{companyName}備註</h3>
+                <h3 className="font-semibold text-amber-900 mb-2">{COMPANY_NAME}備註</h3>
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">{request.note}</p>
               </div>
             )}
@@ -228,7 +228,7 @@ export default async function MealQuotePage({
         </div>
 
         <div className="text-center text-xs text-gray-500 mt-4">
-          本報價單由{companyName}提供
+          本報價單由{COMPANY_NAME}提供
         </div>
       </div>
     </div>

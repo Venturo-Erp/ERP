@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getCompanyName } from '@/lib/tenant'
+import { COMPANY_NAME } from '@/lib/tenant'
 
 interface Props {
   itemId: string
@@ -16,7 +16,6 @@ interface Props {
 
 export function TransportConfirmForm({ itemId, defaultValues }: Props) {
   const router = useRouter()
-  const companyName = getCompanyName()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   
@@ -144,7 +143,7 @@ export function TransportConfirmForm({ itemId, defaultValues }: Props) {
       </button>
 
       <p className="mt-4 text-xs text-gray-500 text-center">
-        提交後如需修改，請聯繫{companyName}
+        提交後如需修改，請聯繫{COMPANY_NAME}
       </p>
     </form>
   )

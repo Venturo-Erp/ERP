@@ -1,9 +1,8 @@
 'use client'
 
-import { getCompanyName } from '@/lib/tenant'
+import { COMPANY_NAME } from '@/lib/tenant'
 
 export default function DialogComparePage() {
-  const companyName = getCompanyName()
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <h1 className="text-3xl font-bold text-center mb-8">Dialog 兩種樣式對比</h1>
@@ -31,7 +30,6 @@ export default function DialogComparePage() {
 
 // 現代樣式
 function ModernView() {
-  const companyName = getCompanyName()
   return (
     <div>
       <div className="bg-gradient-to-r from-[#c9a96e] to-[#b89960] px-6 py-4 text-white">
@@ -41,7 +39,7 @@ function ModernView() {
             <div className="text-sm opacity-90">團號：TW260321A</div>
           </div>
           <div className="text-right">
-            <div className="font-semibold">{companyName}</div>
+            <div className="font-semibold">{COMPANY_NAME}</div>
           </div>
         </div>
       </div>
@@ -79,7 +77,6 @@ function ModernView() {
 
 // 傳統樣式
 function TraditionalView() {
-  const companyName = getCompanyName()
   return (
     <div className="p-6">
       <h1 className="text-center text-xl font-bold mb-4">廠商需求單</h1>
@@ -115,7 +112,7 @@ function TraditionalView() {
       </table>
 
       <div className="border-t-2 border-black pt-2 text-xs">
-        <div>{companyName}</div>
+        <div>{COMPANY_NAME}</div>
         <div>電話：02-2345-6789</div>
       </div>
     </div>

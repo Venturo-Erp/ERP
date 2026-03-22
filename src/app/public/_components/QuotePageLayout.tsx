@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { getCompanyName, getCompanyNameEn } from '@/lib/tenant'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 interface QuotePageLayoutProps {
   // 標題區
@@ -35,9 +35,7 @@ export function QuotePageLayout({
   noteTitle,
   quoteForm,
 }: QuotePageLayoutProps) {
-  const companyName = getCompanyName()
-  const companyNameEn = getCompanyNameEn()
-  const finalNoteTitle = noteTitle || `${companyName}備註`
+  const finalNoteTitle = noteTitle || `${COMPANY_NAME}備註`
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#faf8f5] to-[#f5f1ea] py-8">
@@ -54,8 +52,8 @@ export function QuotePageLayout({
                 )}
               </div>
               <div className="text-right">
-                <div className="font-semibold text-lg">{companyName}</div>
-                <div className="text-xs opacity-80 mt-1">{companyNameEn}</div>
+                <div className="font-semibold text-lg">{COMPANY_NAME}</div>
+                <div className="text-xs opacity-80 mt-1">{COMPANY_NAME_EN}</div>
               </div>
             </div>
 
@@ -87,7 +85,7 @@ export function QuotePageLayout({
 
         {/* 頁尾（統一） */}
         <div className="text-center text-xs text-gray-500 mt-4">
-          本行程表由{companyName}提供
+          本行程表由{COMPANY_NAME}提供
         </div>
       </div>
     </div>

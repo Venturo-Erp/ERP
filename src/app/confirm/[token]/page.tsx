@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { logger } from '@/lib/utils/logger'
 import { formatDateChinese } from '@/lib/utils/format-date'
 import { formatCurrency } from '@/lib/utils/format-currency'
-import { getCompanyName } from '@/lib/tenant'
+import { COMPANY_NAME } from '@/lib/tenant'
 import { QUOTE_CONFIRM_PAGE_LABELS } from './constants/labels'
 
 interface QuoteInfo {
@@ -369,7 +369,7 @@ export default function QuoteConfirmPage() {
         <p className="text-center text-xs text-morandi-muted mt-6">
           {QUOTE_CONFIRM_PAGE_LABELS.COPYRIGHT
             .replace('{year}', new Date().getFullYear().toString())
-            .replace('{company}', getCompanyName())}
+            .replace('{company}', COMPANY_NAME)}
         </p>
       </div>
     </div>
