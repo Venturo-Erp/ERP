@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
     // 取得團資訊
     const { data: tour, error: tourError } = await supabase
       .from('tours')
-      .select('code, location')
+      .select('id, code, name, location, departure_date, return_date')
       .eq('id', tourId)
       .single()
 
@@ -78,9 +78,70 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 產生合約
+    // 取得第一個團員的資訊（作為簽約人）
+    const { data: members } = await supabase
+      .from('order_members')
+      .select('id, chinese_name, id_number')
+      .in('id', memberIds)
+      .limit(1)
+
+    const firstMember = members?.[0]
+
+    // 產生合約編號和類型
     const contractCode = generateContractCode(tour.code)
     const template = getContractTemplate(tour.location)
+
+    // 組合 contract_data（合約變數）
+    const today = new Date()
+    const departureDate = tour.departure_date ? new Date(tour.departure_date) : today
+    
+    const generatedContractData = {
+      // 審閱日期（今天）
+      reviewYear: (today.getFullYear() - 1911).toString(),
+      reviewMonth: (today.getMonth() + 1).toString(),
+      reviewDay: today.getDate().toString(),
+      
+      // 旅客資訊
+      travelerName: signerName || firstMember?.chinese_name || '',
+      travelerIdNumber: signerIdNumber || firstMember?.id_number || '',
+      travelerPhone: signerPhone || '',
+      travelerAddress: signerAddress || '',
+      
+      // 緊急聯絡人
+      emergencyContactName: emergencyContactName || '',
+      emergencyContactRelation: emergencyContactRelation || '',
+      emergencyContactPhone: emergencyContactPhone || '',
+      
+      // 旅遊團資訊
+      tourName: tour.name || '',
+      tourDestination: tour.location || '',
+      tourCode: tour.code || '',
+      
+      // 集合資訊（出發日期）
+      gatherYear: (departureDate.getFullYear() - 1911).toString(),
+      gatherMonth: (departureDate.getMonth() + 1).toString(),
+      gatherDay: departureDate.getDate().toString(),
+      gatherHour: '06',
+      gatherMinute: '00',
+      gatherLocation: '桃園國際機場第一航廈',
+      
+      // 費用資訊（需從訂單取得）
+      totalAmount: '0',
+      depositAmount: '0',
+      paymentMethod: '匯款',
+      finalPaymentMethod: '匯款',
+      
+      // 保險
+      deathInsurance: '500萬',
+      medicalInsurance: '20萬',
+      
+      // 其他
+      minParticipants: '16',
+      companyExtension: '',
+      
+      // 合併傳入的 contractData
+      ...contractData,
+    }
 
     const { data: contract, error: createError } = await supabase
       .from('contracts')
@@ -102,7 +163,7 @@ export async function POST(request: NextRequest) {
         emergency_contact_relation: emergencyContactRelation,
         emergency_contact_phone: emergencyContactPhone,
         member_ids: memberIds,
-        contract_data: contractData || {},
+        contract_data: generatedContractData,
         status: 'draft',
         created_by: createdBy,
       })
