@@ -1,7 +1,5 @@
 import {
   Home,
-import { COMPANY_NAME } from '@/lib/tenant'
-
   Plane,
   MapPin,
   Phone,
@@ -13,6 +11,7 @@ import { COMPANY_NAME } from '@/lib/tenant'
   AlertCircle,
   type LucideIcon,
 } from 'lucide-react'
+import { COMPANY_NAME } from '@/lib/tenant'
 import { FloatingDock } from '@/components/ui/floating-dock'
 import { useMemo } from 'react'
 import type { TourPageData } from '@/features/tours/types/tour-display.types'

@@ -26,7 +26,7 @@ async function getTourMembers(code: string) {
   if (!tour) return null
 
   // 查公司名稱
-  let companyName = {COMPANY_NAME}
+  let companyName = COMPANY_NAME
   if (tour.workspace_id) {
     const { data: ws } = await supabase
       .from('workspaces')

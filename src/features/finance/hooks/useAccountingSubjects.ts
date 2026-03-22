@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 
 interface AccountingSubject {
   id: string
@@ -19,8 +19,6 @@ export function useAccountingSubjects(filterType?: 'expense' | 'cost' | 'asset' 
 
   useEffect(() => {
     const fetchSubjects = async () => {
-      const supabase = createClient()
-      
       let query = supabase
         .from('accounting_subjects')
         .select('id, code, name, type')

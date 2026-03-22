@@ -599,7 +599,7 @@ export function itineraryToTemplateData(itinerary: {
     mainTitle: itinerary.title,
     subtitle: itinerary.subtitle,
     travelDates: travelDates || undefined,
-    companyName: {COMPANY_NAME_EN},
+    companyName: COMPANY_NAME_EN,
     tourCode: itinerary.tour_code || itinerary.code,
     leaderName: leader?.name,
     leaderPhone: leader?.domesticPhone || leader?.phone,
@@ -746,7 +746,7 @@ export function timelineToTemplateData(timeline: TimelineItineraryData): Templat
     mainTitle: timeline.title,
     subtitle: timeline.subtitle,
     travelDates: travelDates || undefined,
-    companyName: {COMPANY_NAME_EN},
+    companyName: COMPANY_NAME_EN,
     dailyItineraries: dailyItineraries.length > 0 ? dailyItineraries : undefined,
     dailyDetails: dailyDetails.length > 0 ? dailyDetails : undefined,
   }
@@ -795,7 +795,7 @@ export function proposalToTemplateData(proposal: {
     destination: destination || undefined,
     mainTitle: mainTitle || undefined,
     travelDates: travelDates || undefined,
-    companyName: {COMPANY_NAME_EN},
+    companyName: COMPANY_NAME_EN,
     tourCode: proposal.code,
   }
 }

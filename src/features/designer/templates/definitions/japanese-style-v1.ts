@@ -40,7 +40,7 @@ export const japaneseStyleV1: PageTemplate = {
       opacity: 1,
       locked: false,
       visible: true,
-      content: data.companyName || {COMPANY_NAME_EN},
+      content: data.companyName || COMPANY_NAME_EN,
       style: {
         fontFamily: 'Noto Sans TC',
         fontSize: 10,
