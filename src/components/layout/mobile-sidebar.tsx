@@ -1,5 +1,7 @@
 'use client'
 
+import { COMPANY_NAME } from '@/lib/tenant'
+
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -335,7 +337,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
       >
         {/* 頂部標題 */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-border">
-          <DialogTitle className="text-lg font-bold text-morandi-gold">Venturo</DialogTitle>
+          <DialogTitle className="text-lg font-bold text-morandi-gold">{COMPANY_NAME}</DialogTitle>
         </div>
 
         {/* 選單內容 */}

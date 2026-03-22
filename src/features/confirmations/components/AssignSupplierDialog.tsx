@@ -242,7 +242,7 @@ export function AssignSupplierDialog({
 
   <div class="footer">
     <p>列印時間：${new Date().toLocaleString('zh-TW')}</p>
-    <p>此需求單由 Venturo ERP 產生</p>
+    <p>此需求單由 {COMPANY_NAME} 產生</p>
   </div>
 </body></html>`
 
@@ -499,7 +499,7 @@ export function AssignSupplierDialog({
   </div>
   <div class="footer">
     <p>列印時間：${new Date().toLocaleString('zh-TW')}</p>
-    <p>此需求單由 Venturo ERP 產生</p>
+    <p>此需求單由 {COMPANY_NAME} 產生</p>
   </div>
 </body></html>`
   }, [supplierName, selectedSupplier, tour, totalPax, ageBreakdown, items, roomDetails, formatDate])

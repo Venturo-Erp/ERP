@@ -1,5 +1,7 @@
 import {
   Home,
+import { COMPANY_NAME } from '@/lib/tenant'
+
   Plane,
   MapPin,
   Phone,
@@ -105,7 +107,7 @@ export function TourNavigation({ data, scrollOpacity, isPreview, viewMode }: Tou
         >
           <div className="max-w-7xl mx-auto px-4">
             <div className="flex items-center justify-between h-16">
-              <div className="text-xl font-bold text-white">Venturo</div>
+              <div className="text-xl font-bold text-white">{COMPANY_NAME}</div>
               <div className="flex items-center gap-6">
                 {navLinks.map(link => {
                   const IconComponent = link.icon || Home

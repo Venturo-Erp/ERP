@@ -1,5 +1,7 @@
 'use client'
 
+import { COMPANY_NAME } from '@/lib/tenant'
+
 /**
  * DesignTypeSelector - 設計類型選擇器
  * 整合團、行程、模板選擇功能
@@ -236,7 +238,7 @@ export function DesignTypeSelector({
       <div className="h-[72px] bg-background border-b border-border flex items-center px-6">
         <div className="flex items-center gap-3">
           <Palette size={24} className="text-morandi-gold" />
-          <h1 className="text-xl font-semibold text-morandi-primary">Venturo 設計工具</h1>
+          <h1 className="text-xl font-semibold text-morandi-primary">{COMPANY_NAME} 設計工具</h1>
         </div>
       </div>
 

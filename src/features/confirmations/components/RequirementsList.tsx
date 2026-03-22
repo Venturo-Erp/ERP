@@ -583,7 +583,7 @@ export function RequirementsList({
   ${draft.notes || draft.note ? `<p style="margin-top:15px"><strong>備註：</strong>${draft.notes || draft.note}</p>` : ''}
   <div class="footer">
     <p>列印時間：${new Date().toLocaleString('zh-TW')}</p>
-    <p>此需求單由 Venturo ERP 產生</p>
+    <p>此需求單由 {COMPANY_NAME} 產生</p>
   </div>
 </body></html>`
 
@@ -682,7 +682,7 @@ export function RequirementsList({
   </table>
   <div class="footer">
     <p>列印時間：${new Date().toLocaleString('zh-TW')}</p>
-    <p>此需求單由 Venturo ERP 產生</p>
+    <p>此需求單由 {COMPANY_NAME} 產生</p>
   </div>
 </body></html>`
 

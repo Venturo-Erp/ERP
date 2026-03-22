@@ -292,7 +292,7 @@ export function CoreTableRequestDialog({
   
   <div class="footer">
     <p>列印時間：${new Date().toLocaleString('zh-TW')}</p>
-    <p>此需求單由 Venturo ERP 自動產生</p>
+    <p>此需求單由 {COMPANY_NAME} 自動產生</p>
   </div>
 </body>
 </html>

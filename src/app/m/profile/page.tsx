@@ -1,5 +1,7 @@
 'use client'
 
+import { COMPANY_NAME } from '@/lib/tenant'
+
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -141,7 +143,7 @@ export default function MobileProfilePage() {
       </div>
 
       {/* 版本資訊 */}
-      <div className="text-center py-4 text-xs text-morandi-muted">Venturo ERP v1.0.0</div>
+      <div className="text-center py-4 text-xs text-morandi-muted">{COMPANY_NAME} 管理系統 v1.0.0</div>
     </div>
   )
 }

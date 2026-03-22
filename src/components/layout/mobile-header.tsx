@@ -1,5 +1,7 @@
 'use client'
 
+import { COMPANY_NAME } from '@/lib/tenant'
+
 import { Menu } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import { COMP_LAYOUT_LABELS } from './constants/labels'
@@ -48,7 +50,7 @@ export function MobileHeader({ onMenuClick }: MobileHeaderProps) {
     const matchedPath = Object.keys(PAGE_TITLES).find(
       path => path !== '/' && pathname.startsWith(path)
     )
-    return matchedPath ? PAGE_TITLES[matchedPath] : 'Venturo'
+    return matchedPath ? PAGE_TITLES[matchedPath] : COMPANY_NAME
   }
 
   return (

@@ -1,5 +1,7 @@
 'use client'
 
+import { COMPANY_NAME } from '@/lib/tenant'
+
 /**
  * LoadingOverlay - 文件載入進度覆蓋層
  *
@@ -53,7 +55,7 @@ export function LoadingOverlay({
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-morandi-gold/10 mb-4">
             <Palette className="w-8 h-8 text-morandi-gold" />
           </div>
-          <h2 className="text-xl font-semibold text-morandi-primary">Venturo Designer</h2>
+          <h2 className="text-xl font-semibold text-morandi-primary">{COMPANY_NAME} Designer</h2>
           {documentName && (
             <p className="text-sm text-morandi-secondary mt-1 truncate">{documentName}</p>
           )}

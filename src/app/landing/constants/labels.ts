@@ -1,3 +1,5 @@
+import { COMPANY_NAME } from '@/lib/tenant'
+
 export const LANDING_LABELS = {
   // Hero
   HERO_TITLE: '旅行社的防錯系統',
@@ -54,11 +56,11 @@ export const LANDING_LABELS = {
   PLAN_POPULAR: '最受歡迎',
 
   // Footer
-  FOOTER_BRAND: 'Venturo',
+  FOOTER_BRAND: COMPANY_NAME,
   FOOTER_DESCRIPTION: '專為台灣旅行社打造的營運管理系統。從報價到收款，讓繁瑣的日常作業變得簡單。',
   FOOTER_CONTACT_TITLE: '聯繫我們',
   FOOTER_EMAIL: 'hello@venturo.app',
-  FOOTER_COPYRIGHT: '© {year} Venturo. All rights reserved.',  // 需在頁面動態替換年份
+  FOOTER_COPYRIGHT: '© {year} ' + COMPANY_NAME + '. All rights reserved.',  // 需在頁面動態替換年份
 
   LABEL_3045: '截圖預留區',
 } as const
