@@ -53,7 +53,8 @@ function buildSwrKey(params: UseToursPaginatedParams): string {
 
 export function useToursPaginated(params: UseToursPaginatedParams): UseToursPaginatedResult {
   const { page, pageSize, status, search, sortOrder = 'desc' } = params
-  const defaultSort = (status === 'proposal' || status === 'template') ? 'created_at' : 'departure_date'
+  const defaultSort =
+    status === 'proposal' || status === 'template' ? 'created_at' : 'departure_date'
   const sortBy = params.sortBy || defaultSort
 
   // Auth check - 只用於寫入操作，讀取不需要等待 hydration
@@ -201,11 +202,14 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
       // 封存/解封時：立即從列表移除（不等 refetch）
       if ('archived' in updates) {
         await mutateSelf(
-          prev => prev ? {
-            ...prev,
-            tours: prev.tours.filter(t => t.id !== id),
-            count: prev.count - 1,
-          } : prev,
+          prev =>
+            prev
+              ? {
+                  ...prev,
+                  tours: prev.tours.filter(t => t.id !== id),
+                  count: prev.count - 1,
+                }
+              : prev,
           { revalidate: true }
         )
         await mutate('tours')

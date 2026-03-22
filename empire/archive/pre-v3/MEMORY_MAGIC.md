@@ -7,6 +7,7 @@
 ## 📖 兩大魔法
 
 ### 🔮 魔法一：claude-mem
+
 **單個 Agent 的極致漸進式外腦**
 
 **作者**：WhenMoon-afk  
@@ -15,6 +16,7 @@
 **授權**：MIT
 
 **核心能力**：
+
 - ✅ 本地持久記憶（SQLite + FTS5）
 - ✅ 跨 session 保留 context
 - ✅ 自動摘要和實體提取
@@ -22,12 +24,14 @@
 - ✅ 混合相關性評分（時間 + 重要性 + 頻率）
 
 **優勢**：
+
 - 完全本地（不需要外部 API）
 - 輕量（不需要向量 embedding）
 - 快速（原生 SQLite）
 - 零成本
 
 **三個工具**：
+
 ```
 memory_store   — 儲存記憶（自動摘要和實體提取）
 memory_recall  — 搜尋記憶（Token 感知載入）
@@ -37,6 +41,7 @@ memory_forget  — 軟刪除記憶（保留稽核軌跡）
 ---
 
 ### 🏰 魔法二：OpenViking
+
 **一群 Agent 的協同系統**
 
 **作者**：Volcengine（字節跳動/火山引擎）  
@@ -45,6 +50,7 @@ memory_forget  — 軟刪除記憶（保留稽核軌跡）
 **授權**：Apache 2.0
 
 **核心能力**：
+
 - ✅ 檔案系統範式（viking:// URI）
 - ✅ 三層架構（L0/L1/L2）
 - ✅ 目錄遞迴檢索
@@ -52,12 +58,14 @@ memory_forget  — 軟刪除記憶（保留稽核軌跡）
 - ✅ 自動 Session 管理
 
 **優勢**：
+
 - 統一管理 memories/resources/skills
 - 節省 60-98% token
 - 任務完成率 +43%
 - 完全可追蹤
 
 **架構**：
+
 ```
 viking://
 ├── resources/          # 帝國文檔
@@ -70,13 +78,16 @@ viking://
 ## 🎯 雙魔法的分工
 
 ### claude-mem（單兵作戰）
+
 **適合**：
+
 - 單個 Agent 的日常工作記憶
 - 對話歷史和 context 保留
 - 快速回憶（「上次討論了什麼？」）
 - 個人學習和經驗累積
 
 **範例**：
+
 ```
 Matthew 🔧 今天修了一個 Bug
   ↓
@@ -92,13 +103,16 @@ memory_recall — 回憶「上次怎麼修的」
 ---
 
 ### OpenViking（團隊協作）
+
 **適合**：
+
 - 跨 Agent 的知識共享
 - 帝國文檔管理
 - 長期知識累積
 - 結構化資源組織
 
 **範例**：
+
 ```
 William 🔱 建立帝國文檔（empire/*.md）
   ↓
@@ -235,6 +249,7 @@ npm root -g
 ```
 
 **為每個 Agent 建立獨立 DB**：
+
 ```bash
 # William workspace
 MEMORY_DB_PATH: ~/.memory-mcp/william.db
@@ -292,13 +307,13 @@ AGENTS=("matthew" "leon" "ben" "eddie" "caesar" "frontend" "ui-designer" "ig-cur
 
 for agent in "${AGENTS[@]}"; do
   echo "提煉 $agent 的記憶..."
-  
+
   # 1. 從 claude-mem 讀取今天的記憶
   memories=$(claude-mem-export --agent $agent --since "1 day ago")
-  
+
   # 2. 用 Claude 提取重要經驗和決策
   important=$(echo "$memories" | claude analyze --prompt "提取重要的經驗和決策")
-  
+
   # 3. 儲存到 OpenViking
   ov add-memory \
     --type agent \
@@ -332,6 +347,7 @@ echo "記憶提煉完成！"
 ### 場景 1：Matthew 修 Bug
 
 **Day 1（claude-mem）**：
+
 ```
 1. 收到任務：「ERP 報價單功能有 Bug」
 2. memory_recall("報價單 Bug") — 回憶上次經驗
@@ -340,6 +356,7 @@ echo "記憶提煉完成！"
 ```
 
 **Night 1（自動提煉 → OpenViking）**：
+
 ```
 1. William AI 巡邏 matthew.db
 2. 提取「重要經驗」：「報價單 Bug 根因是...」
@@ -348,6 +365,7 @@ echo "記憶提煉完成！"
 ```
 
 **Day 2（團隊受益）**：
+
 ```
 1. 前端工程師遇到類似 Bug
 2. 查詢 OpenViking：「報價單 Bug」
@@ -360,6 +378,7 @@ echo "記憶提煉完成！"
 ### 場景 2：Leon 優化流程
 
 **Week 1（claude-mem）**：
+
 ```
 1. Leon 每天處理供應商問題
 2. memory_store("供應商 A 付款慢，要提前催")
@@ -368,6 +387,7 @@ echo "記憶提煉完成！"
 ```
 
 **Weekend（自動提煉 → OpenViking）**：
+
 ```
 1. William AI 提煉 leon.db
 2. 歸納「供應商管理最佳實踐」
@@ -376,6 +396,7 @@ echo "記憶提煉完成！"
 ```
 
 **Week 2（新人受益）**：
+
 ```
 1. 新的營運 Agent 加入
 2. 閱讀 viking://agent/leon/memories/
@@ -388,6 +409,7 @@ echo "記憶提煉完成！"
 ### 場景 3：William 決策
 
 **Before（問題）**：
+
 ```
 William: 「我們上次為什麼選擇 Supabase？」
 William AI: 「讓我搜尋一下...」
@@ -395,6 +417,7 @@ William AI: 「讓我搜尋一下...」
 ```
 
 **After（解決）**：
+
 ```
 William: 「我們上次為什麼選擇 Supabase？」
 William AI: memory_recall("Supabase 決策")
@@ -406,18 +429,21 @@ William AI: memory_recall("Supabase 決策")
 ## 🎯 預期效益
 
 ### claude-mem
+
 - **回憶速度**：5 分鐘 → 1 秒
 - **記憶持久**：跨 session 保留
 - **零成本**：本地 SQLite
 - **自動整理**：FTS5 全文檢索
 
 ### OpenViking
+
 - **團隊協作**：知識共享
 - **Token 節省**：60-98%
 - **任務完成率**：+43%
 - **可追蹤性**：完全透明
 
 ### 雙魔法協同
+
 - **個人記憶** + **團隊知識** = 完整記憶系統
 - **短期工作記憶** + **長期經驗累積** = 持續進化
 - **快速回憶** + **結構化組織** = 高效決策
@@ -427,16 +453,19 @@ William AI: memory_recall("Supabase 決策")
 ## 🚧 挑戰和風險
 
 ### claude-mem
+
 - 每個 Agent 需要獨立設定
 - Claude Desktop 設定檔維護
 - 記憶提煉需要自動化
 
 ### OpenViking
+
 - 需要 API 費用（Embedding + VLM）
 - 系統複雜度提升
 - 遷移現有記憶需要時間
 
 ### 雙魔法
+
 - 需要明確分工（哪些存 claude-mem，哪些存 OpenViking）
 - 自動提煉機制需要測試和優化
 - 記憶同步可能有延遲
@@ -446,20 +475,24 @@ William AI: memory_recall("Supabase 決策")
 ## 🎯 行動計畫
 
 ### 立刻做（今天）
+
 - [ ] 決定：要不要整合雙魔法？
 - [ ] 如果要：先做哪個？（建議：claude-mem → 簡單，零成本）
 
 ### 短期（本週）
+
 - [ ] Phase 1：部署 claude-mem（所有 Agent）
 - [ ] 測試 memory_store / memory_recall
 - [ ] 觀察效果（1 週）
 
 ### 中期（本月）
+
 - [ ] Phase 2：部署 OpenViking
 - [ ] 遷移現有記憶（MEMORY.md + mem0）
 - [ ] Phase 3：建立自動提煉機制
 
 ### 長期（Q2）
+
 - [ ] 優化記憶分工（claude-mem vs OpenViking）
 - [ ] 觀察 Token 節省效益
 - [ ] 擴展到所有 17 位 Agent
@@ -469,11 +502,13 @@ William AI: memory_recall("Supabase 決策")
 ## 📖 參考資源
 
 ### claude-mem
+
 - **GitHub**：https://github.com/WhenMoon-afk/claude-memory-mcp
 - **npm**：https://www.npmjs.com/package/@whenmoon-afk/memory-mcp
 - **教學影片**：https://www.youtube.com/watch?v=qeru0ZdudD4
 
 ### OpenViking
+
 - **GitHub**：https://github.com/volcengine/OpenViking
 - **官網**：https://openviking.ai
 - **文檔**：https://www.openviking.ai/docs

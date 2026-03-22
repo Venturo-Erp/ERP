@@ -45,7 +45,7 @@ interface DraggableResourceCardProps {
 
 function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps) {
   const [hasDragged, setHasDragged] = useState(false)
-  
+
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `resource-${resource.type}-${resource.id}`,
     data: {
@@ -65,9 +65,7 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
 
   const isUnverified = resource.data_verified === false
 
-  const style = transform
-    ? { transform: CSS.Translate.toString(transform) }
-    : undefined
+  const style = transform ? { transform: CSS.Translate.toString(transform) } : undefined
 
   const iconMap: Record<ResourceType, React.ReactNode> = {
     attraction: <MapPin size={14} className="text-emerald-600" />,
@@ -95,9 +93,7 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
         'hover:bg-accent/50 transition-colors',
         isDragging && 'opacity-50 shadow-lg z-50 cursor-grabbing',
         // 未驗證 = 橘色警示邊框
-        isUnverified
-          ? 'border-amber-400/60 bg-amber-50/50'
-          : 'border-border'
+        isUnverified ? 'border-amber-400/60 bg-amber-50/50' : 'border-border'
       )}
     >
       {/* 縮圖 */}
@@ -108,10 +104,12 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
           className="w-8 h-8 rounded object-cover flex-shrink-0"
         />
       ) : (
-        <div className={cn(
-          'w-8 h-8 rounded flex items-center justify-center flex-shrink-0',
-          isUnverified ? 'bg-amber-100' : 'bg-muted'
-        )}>
+        <div
+          className={cn(
+            'w-8 h-8 rounded flex items-center justify-center flex-shrink-0',
+            isUnverified ? 'bg-amber-100' : 'bg-muted'
+          )}
+        >
           {iconMap[resource.type]}
         </div>
       )}
@@ -132,15 +130,23 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
 
 interface ResourcePanelProps {
   className?: string
-  countryId?: string    // 行程目的地國家 ID 或名稱
-  cityId?: string       // 行程目的地城市
+  countryId?: string // 行程目的地國家 ID 或名稱
+  cityId?: string // 行程目的地城市
   locationName?: string // 團的目的地名稱（用於反查地區，如「名古屋」）
-  tourId?: string       // 團 ID（用於地圖偏好儲存）
-  tourCode?: string     // 團代碼（用於推斷機場座標，如 FUK260702A）
+  tourId?: string // 團 ID（用於地圖偏好儲存）
+  tourCode?: string // 團代碼（用於推斷機場座標，如 FUK260702A）
   onAddNew?: (type: ResourceType) => void // 新增資源回調，帶類型
 }
 
-export function ResourcePanel({ className, countryId, cityId, locationName, tourId, tourCode, onAddNew }: ResourcePanelProps) {
+export function ResourcePanel({
+  className,
+  countryId,
+  cityId,
+  locationName,
+  tourId,
+  tourCode,
+  onAddNew,
+}: ResourcePanelProps) {
   const [activeTab, setActiveTab] = useState<ResourceType>('attraction')
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -218,10 +224,7 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
         const cid = byCity[0].country_id
         setResolvedCountryId(cid)
         // 載入國家名
-        const { data: cData } = await supabase
-          .from('countries')
-          .select('id, name')
-          .eq('id', cid)
+        const { data: cData } = await supabase.from('countries').select('id, name').eq('id', cid)
         if (cData) setCountries(cData)
         return
       }
@@ -235,14 +238,13 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
       if (all) setCountries(all)
     }
     void resolve()
-
   }, [countryId, locationName])
 
   // ── 第四步：載入資源 ──
   // 🔧 如果有 countryId prop 但 resolvedCountryId 還沒解析完，不要先載全部
   const isResolving = !!countryId && !resolvedCountryId
   useEffect(() => {
-    if (isResolving) return  // 等待國家解析完成
+    if (isResolving) return // 等待國家解析完成
 
     const supabase = createSupabaseBrowserClient()
 
@@ -272,9 +274,10 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
           id: item.id as string,
           name: item.name as string,
           type,
-          category: type === 'hotel' && item.star_rating
-            ? `${item.star_rating}星`
-            : (item.category as string | null),
+          category:
+            type === 'hotel' && item.star_rating
+              ? `${item.star_rating}星`
+              : (item.category as string | null),
           thumbnail: item.thumbnail as string | null,
           latitude: item.latitude as number | null,
           longitude: item.longitude as number | null,
@@ -337,7 +340,7 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
           <QuickAddResource
             type={activeTab}
             countryId={resolvedCountryId || countryId}
-            onCreated={(resource) => {
+            onCreated={resource => {
               // 新增到當前 tab 的資源列表頂部
               const newItem: ResourceItem = {
                 id: resource.id,
@@ -383,7 +386,10 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
       {/* 搜尋框 */}
       <div className="p-2 border-b border-border">
         <div className="relative">
-          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
@@ -406,10 +412,10 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
         ) : (
           <div className="grid grid-cols-2 gap-1.5">
             {filteredResources.map(resource => (
-              <DraggableResourceCard 
-                key={`${resource.type}-${resource.id}`} 
+              <DraggableResourceCard
+                key={`${resource.type}-${resource.id}`}
                 resource={resource}
-                onEdit={(r) => {
+                onEdit={r => {
                   setEditingResource(r)
                   setEditDialogOpen(true)
                 }}
@@ -431,7 +437,7 @@ export function ResourcePanel({ className, countryId, cityId, locationName, tour
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         resource={editingResource}
-        onSave={(updated) => {
+        onSave={updated => {
           // 更新列表中的資源名稱
           setResources(prev => ({
             ...prev,

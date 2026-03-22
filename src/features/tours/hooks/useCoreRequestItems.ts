@@ -1,8 +1,8 @@
 /**
  * useCoreRequestItems - 從核心表讀取需求單資料
- * 
+ *
  * 用途：產生需求單時，從 tour_itinerary_items 讀取已報價的項目
- * 
+ *
  * 資料來源：
  * - tour_itinerary_items（核心表）
  * - restaurants（餐廳資料）
@@ -61,7 +61,8 @@ async function fetchCoreRequestItems(
   try {
     const { data, error } = await supabase
       .from('tour_itinerary_items')
-      .select(`
+      .select(
+        `
         *,
         restaurants:resource_id (
           id,
@@ -92,7 +93,8 @@ async function fetchCoreRequestItems(
           longitude,
           google_maps_url
         )
-      `)
+      `
+      )
       .eq('tour_id', tourId)
       .eq('supplier_id', supplierId)
       .eq('quote_status', 'quoted') // 只抓有報價的項目

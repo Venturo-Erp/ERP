@@ -1,11 +1,11 @@
 /**
  * useTourDailyData - 從核心表 JOIN 組合每日行程資料
- * 
+ *
  * 用途：
  * - 行程表展示頁面
  * - 手冊打印
  * - 網頁展示
- * 
+ *
  * 資料來源：
  * - daily_itinerary（展示設定：title, description, images）
  * - tour_itinerary_items（實際資料：meals, accommodation, activities）
@@ -22,7 +22,7 @@ interface EnrichedDailyItinerary extends DailyItinerary {
 
 /**
  * 從核心表組合每日行程資料
- * 
+ *
  * @param tourId - 旅遊團 ID
  * @param dailyItinerary - 行程表展示設定（來自 itineraries.daily_itinerary）
  * @param options - 選項

@@ -11,12 +11,14 @@
 ### 1. Bug 修復
 
 #### 登入大小寫錯誤 (Commit: d4c0ff9e)
+
 - **問題**：登入頁面將公司代號轉成小寫，但資料庫為大寫
 - **影響**：所有新用戶（包括會計）無法登入
 - **修復**：`src/app/(main)/login/page.tsx` Line 88，改為 `.toUpperCase()`
 - **狀態**：✅ 已部署
 
 #### Hydration Mismatch (Commit: 之前已部署)
+
 - **問題**：tours 頁面因 localStorage 導致 SSR/CSR 不一致
 - **修復**：禁用 localStorage 功能
 - **狀態**：✅ 已部署
@@ -24,16 +26,19 @@
 ### 2. 資料庫 Schema 變更
 
 #### 新增 employees.created_by 欄位 (Migration: 20260310090500)
+
 ```sql
-ALTER TABLE public.employees 
+ALTER TABLE public.employees
 ADD COLUMN created_by UUID REFERENCES public.employees(id) ON DELETE SET NULL;
 
 COMMENT ON COLUMN public.employees.created_by IS '建立此員工記錄的員工 ID';
 ```
+
 - **狀態**：✅ 已執行（Production）
 - **驗證**：✅ 欄位存在，API 可讀取
 
 #### 清理廢棄欄位 (Migration: 20260310063900)
+
 ```sql
 -- 移除 tours.op_staff_id（已改用 assigned_employees）
 ALTER TABLE public.tours DROP COLUMN IF EXISTS op_staff_id;
@@ -41,12 +46,14 @@ ALTER TABLE public.tours DROP COLUMN IF EXISTS op_staff_id;
 -- 移除 employees.last_login_at（未使用）
 ALTER TABLE public.employees DROP COLUMN IF EXISTS last_login_at;
 ```
+
 - **狀態**：✅ 已執行（Production）
 - **驗證**：✅ 欄位已移除
 
 ### 3. 程式碼優化
 
 #### 移除 created_by 自動注入 (Commit: 892ea0d2)
+
 - **檔案**：`src/stores/core/create-store.ts`
 - **變更**：註釋自動注入邏輯，避免強制所有表都要有此欄位
 - **狀態**：✅ 已部署
@@ -100,6 +107,7 @@ npx tsx tmp-verify-prod.ts
 ## ✅ 部署驗證結果
 
 ### Production 環境檢查
+
 ```
 📋 employees 表欄位檢查：
   ✅ created_by 欄位
@@ -111,19 +119,21 @@ npx tsx tmp-verify-prod.ts
 ```
 
 ### 功能驗證
-| 功能 | 狀態 | 說明 |
-|------|------|------|
-| 登入（大寫代號） | ✅ | CORNER / SUCCESS / TEST 都能正常登入 |
-| 登入（會計帳號） | ✅ | 會計現在可以登入了 |
-| Tours 頁面按鈕 | ✅ | Hydration mismatch 已修復 |
-| 人資管理頁面 | ✅ | 正常載入 |
-| 新增員工功能 | ⏳ | Schema cache 更新中（5-15 分鐘） |
+
+| 功能             | 狀態 | 說明                                 |
+| ---------------- | ---- | ------------------------------------ |
+| 登入（大寫代號） | ✅   | CORNER / SUCCESS / TEST 都能正常登入 |
+| 登入（會計帳號） | ✅   | 會計現在可以登入了                   |
+| Tours 頁面按鈕   | ✅   | Hydration mismatch 已修復            |
+| 人資管理頁面     | ✅   | 正常載入                             |
+| 新增員工功能     | ⏳   | Schema cache 更新中（5-15 分鐘）     |
 
 ---
 
 ## 📝 提交記錄
 
 ### Commit 列表
+
 ```
 0af7a34e - docs(memory): 新增測試報告和記錄
 c2ca96c7 - chore(db): 清理廢棄欄位
@@ -133,6 +143,7 @@ d4c0ff9e - fix(auth): 修復登入公司代號大小寫錯誤 (之前已提交)
 ```
 
 ### GitHub Push
+
 ```
 To github.com:Corner-venturo/Corner.git
    8b633fff..0af7a34e  main -> main
@@ -143,11 +154,13 @@ To github.com:Corner-venturo/Corner.git
 ## ⏰ 預計恢復時間
 
 ### 新增員工功能
+
 - **預計**：5-15 分鐘後 Supabase PostgREST schema cache 自動更新
 - **狀態**：資料庫欄位已加入，API 更新中
 - **驗證方式**：手動測試「新增員工」功能
 
 ### 立即可用功能
+
 - ✅ **登入功能**：所有用戶都能正常登入（含會計）
 - ✅ **人資管理**：頁面正常載入
 - ✅ **Tours 頁面**：按鈕可正常點擊
@@ -157,18 +170,21 @@ To github.com:Corner-venturo/Corner.git
 ## 🎓 經驗教訓
 
 ### 1. Schema Cache 問題
+
 - **現象**：資料庫欄位已加入，但 PostgREST API 還看不到
 - **原因**：PostgREST 會快取 schema，需要時間或手動刷新
 - **解決**：執行 `NOTIFY pgrst, 'reload schema';`
 - **預防**：Production 部署後要等待 cache 更新或手動觸發
 
 ### 2. 開發環境 = Production
+
 - **現況**：開發環境直接連接 production database
 - **風險**：測試時的 migration 會直接影響 production
 - **好處**：開發和部署同步，不會有環境差異
 - **注意**：測試時要特別小心，migration 執行前要確認
 
 ### 3. Browser Automation 限制
+
 - **問題**：自動化工具無法完整模擬真實用戶操作
 - **表現**：按鈕點擊無反應，但手動測試正常
 - **解決**：重要功能用手動測試驗證
@@ -178,15 +194,18 @@ To github.com:Corner-venturo/Corner.git
 ## 📌 後續工作
 
 ### 立即
+
 - [ ] 等待 5-15 分鐘讓 schema cache 更新
 - [ ] 手動測試「新增員工」功能確認可用
 
 ### 短期
+
 - [ ] 建立正式的 development/staging 環境
 - [ ] 設置自動化測試流程
 - [ ] 完善 CI/CD pipeline
 
 ### 長期
+
 - [ ] 考慮使用 Supabase CLI 管理 migrations
 - [ ] 建立資料庫回滾機制
 - [ ] 記錄所有 schema 變更的影響範圍

@@ -14,17 +14,17 @@ export interface TourRequest {
   supplier_name: string | null
   supplier_contact: string | null
   status: string
-  
+
   // 發送資訊
   sent_at: string | null
   sent_via: string | null
   sent_to: string | null
-  
+
   // 報價回覆
   supplier_response: any | null
   replied_at: string | null
   replied_by: string | null
-  
+
   // 成交狀態
   accepted_at: string | null
   accepted_by: string | null
@@ -32,18 +32,18 @@ export interface TourRequest {
   rejected_by: string | null
   rejection_reason: string | null
   selected_tier: number | null
-  
+
   // LINE 資訊
   line_group_id: string | null
   line_group_name: string | null
-  
+
   // 整包狀態
   package_status: string | null
   covered_item_ids: string[] | null
-  
+
   // 備註
   note: string | null
-  
+
   created_at: string
   updated_at: string
 }
@@ -54,17 +54,16 @@ async function fetchTourRequests(tourId: string): Promise<TourRequest[]> {
     .select('*')
     .eq('tour_id', tourId)
     .order('created_at', { ascending: false })
-  
+
   if (error) throw error
   return (data || []) as unknown as TourRequest[]
 }
 
 export function useTourRequests(tourId: string) {
-  const { data, error, mutate } = useSWR(
-    tourId ? `tour-requests-${tourId}` : null,
-    () => fetchTourRequests(tourId)
+  const { data, error, mutate } = useSWR(tourId ? `tour-requests-${tourId}` : null, () =>
+    fetchTourRequests(tourId)
   )
-  
+
   return {
     requests: data || [],
     loading: !data && !error,
@@ -78,13 +77,11 @@ export function useTourRequests(tourId: string) {
  */
 export function usePendingQuotes(tourId: string) {
   const { requests, loading, error, refresh } = useTourRequests(tourId)
-  
-  const pendingQuotes = requests.filter(req => 
-    req.supplier_response && 
-    !req.accepted_at && 
-    !req.rejected_at
+
+  const pendingQuotes = requests.filter(
+    req => req.supplier_response && !req.accepted_at && !req.rejected_at
   )
-  
+
   return {
     pendingQuotes,
     loading,
@@ -98,9 +95,9 @@ export function usePendingQuotes(tourId: string) {
  */
 export function useAcceptedQuotes(tourId: string) {
   const { requests, loading, error, refresh } = useTourRequests(tourId)
-  
+
   const acceptedQuotes = requests.filter(req => req.accepted_at)
-  
+
   return {
     acceptedQuotes,
     loading,
@@ -114,9 +111,9 @@ export function useAcceptedQuotes(tourId: string) {
  */
 export function useRejectedQuotes(tourId: string) {
   const { requests, loading, error, refresh } = useTourRequests(tourId)
-  
+
   const rejectedQuotes = requests.filter(req => req.rejected_at)
-  
+
   return {
     rejectedQuotes,
     loading,

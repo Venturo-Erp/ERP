@@ -98,9 +98,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
           <div className="space-y-4 py-4">
             {/* 旅遊團名稱 */}
             <div>
-              <label className="text-sm font-medium text-morandi-primary">
-                旅遊團名稱
-              </label>
+              <label className="text-sm font-medium text-morandi-primary">旅遊團名稱</label>
               <Input
                 value={formData.name}
                 onChange={e => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -159,17 +157,23 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
                   onChange={e => setFormData(prev => ({ ...prev, isSpecial: e.target.checked }))}
                   className="rounded"
                 />
-                <label htmlFor="edit-isSpecial" className="text-sm text-morandi-primary">特殊團</label>
+                <label htmlFor="edit-isSpecial" className="text-sm text-morandi-primary">
+                  特殊團
+                </label>
               </div>
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   id="edit-enableCheckin"
                   checked={formData.enable_checkin}
-                  onChange={e => setFormData(prev => ({ ...prev, enable_checkin: e.target.checked }))}
+                  onChange={e =>
+                    setFormData(prev => ({ ...prev, enable_checkin: e.target.checked }))
+                  }
                   className="rounded"
                 />
-                <label htmlFor="edit-enableCheckin" className="text-sm text-morandi-primary">開啟報到功能</label>
+                <label htmlFor="edit-enableCheckin" className="text-sm text-morandi-primary">
+                  開啟報到功能
+                </label>
               </div>
             </div>
 

@@ -10,28 +10,29 @@
 
 ### 五面都從核心表讀取
 
-| 面 | 視角 | 讀取方式 | 狀態 |
-|----|------|---------|------|
-| 東面 | 行程 | `useTourDailyData` → core table | ✅ |
-| 南面 | 報價 | `core-table-adapter` → core table | ✅ |
-| 西面 | 需求 | `RequirementsList` → core table | ✅ |
-| 北面 | 確認 | `ConfirmationSheet` + `useCoreRequestItems` → core table | ✅ |
-| 落葉 | 結團 | `tour-closing-tab` → core table | ✅ |
+| 面   | 視角 | 讀取方式                                                 | 狀態 |
+| ---- | ---- | -------------------------------------------------------- | ---- |
+| 東面 | 行程 | `useTourDailyData` → core table                          | ✅   |
+| 南面 | 報價 | `core-table-adapter` → core table                        | ✅   |
+| 西面 | 需求 | `RequirementsList` → core table                          | ✅   |
+| 北面 | 確認 | `ConfirmationSheet` + `useCoreRequestItems` → core table | ✅   |
+| 落葉 | 結團 | `tour-closing-tab` → core table                          | ✅   |
 
 ### 寫入核心表的 6 個入口（全部識別）
 
-| 入口 | 檔案 | 寫什麼 |
-|------|------|--------|
-| 行程編輯 | `useTourItineraryItems.ts` | INSERT/DELETE 行程項目 |
-| 報價填寫 | `core-table-adapter.ts` | UPDATE 價格 / INSERT 非行程成本 |
-| 確認單同步 | `confirmationCoreTableSync.ts` | UPDATE 確認狀態、confirmed_cost |
-| 需求單同步 | `requestCoreTableSync.ts` | UPDATE 需求狀態、request_id |
-| 回填成本 | `RequirementsList.tsx:686` | UPDATE unit_price from quoted_cost |
-| 需求 Dialog | `CoreTableRequestDialog.tsx` | UPDATE 需求相關欄位 |
+| 入口        | 檔案                           | 寫什麼                             |
+| ----------- | ------------------------------ | ---------------------------------- |
+| 行程編輯    | `useTourItineraryItems.ts`     | INSERT/DELETE 行程項目             |
+| 報價填寫    | `core-table-adapter.ts`        | UPDATE 價格 / INSERT 非行程成本    |
+| 確認單同步  | `confirmationCoreTableSync.ts` | UPDATE 確認狀態、confirmed_cost    |
+| 需求單同步  | `requestCoreTableSync.ts`      | UPDATE 需求狀態、request_id        |
+| 回填成本    | `RequirementsList.tsx:686`     | UPDATE unit_price from quoted_cost |
+| 需求 Dialog | `CoreTableRequestDialog.tsx`   | UPDATE 需求相關欄位                |
 
 ### 核心表欄位完整性
 
 57 個欄位，涵蓋完整生命週期：
+
 - 身份（id, tour_id, day_number, sort_order）
 - 內容（category, title, description, resource_id）
 - 定價（unit_price, adult/child/infant_price, estimated_cost, quoted_cost）
@@ -52,7 +53,7 @@
 問題：
   tour-pnl 報表讀 tours.total_cost 計算損益
   但 tours.total_cost 沒有自動從核心表 SUM(unit_price) 更新
-  
+
   核心表 unit_price 被修改 → tours.total_cost 不會變
   → 損益報表不準確
 
@@ -128,7 +129,7 @@ HR 系統（出勤、請假、薪資）是獨立模組
 報表準確性：60/100 ⚠️
   tour-pnl 依賴 tours.total_cost（來源有問題）
   useTours-advanced 硬編碼 0.7 毛利率
-  
+
 HR / 租戶：不適用（獨立模組）
 
 整體統一性：75/100
@@ -138,12 +139,12 @@ HR / 租戶：不適用（獨立模組）
 
 ## 🎯 修復優先順序
 
-| 優先 | 問題 | 影響 | 工時 |
-|------|------|------|------|
-| P0 | tours.total_cost 從核心表同步 | 所有損益報表失準 | 1h |
-| P0 | useTours-advanced 硬編碼 0.7 | 團列表利潤是假的 | 30min |
-| P1 | 請款→回填核心表 actual_expense | 結團損益算不出 | 2h |
-| P2 | 金庫/出納頁面填充 | 功能缺失但不影響準確性 | 2h |
+| 優先 | 問題                           | 影響                   | 工時  |
+| ---- | ------------------------------ | ---------------------- | ----- |
+| P0   | tours.total_cost 從核心表同步  | 所有損益報表失準       | 1h    |
+| P0   | useTours-advanced 硬編碼 0.7   | 團列表利潤是假的       | 30min |
+| P1   | 請款→回填核心表 actual_expense | 結團損益算不出         | 2h    |
+| P2   | 金庫/出納頁面填充              | 功能缺失但不影響準確性 | 2h    |
 
 ---
 
@@ -171,7 +172,7 @@ tour-pnl 報表
 > **建築師結論**：
 >
 > 核心流程本身是統一的——五面都從世界樹讀，寫入有 6 個明確入口。
-> 
+>
 > **但世界樹和金庫之間有一道裂縫**：
 > 核心表的成本加總沒有同步到 tours.total_cost，
 > 導致所有損益報表的數字來源有問題。

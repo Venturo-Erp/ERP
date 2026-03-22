@@ -76,7 +76,7 @@ export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourc
           .select('id')
           .eq('country_id', countryId)
           .limit(1)
-        
+
         if (!cities || cities.length === 0) {
           setError('該國家尚無城市資料，請先建立城市')
           setSaving(false)
@@ -92,7 +92,12 @@ export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourc
         .single()
 
       if (dbError) {
-        logger.error('DB error detail:', JSON.stringify(dbError), 'insertData:', JSON.stringify(insertData))
+        logger.error(
+          'DB error detail:',
+          JSON.stringify(dbError),
+          'insertData:',
+          JSON.stringify(insertData)
+        )
         throw new Error(dbError.message || dbError.code || JSON.stringify(dbError))
       }
       const result = data as { id: string; name: string }
@@ -129,10 +134,16 @@ export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourc
         <Input
           ref={inputRef}
           value={name}
-          onChange={e => { setName(e.target.value); setError('') }}
+          onChange={e => {
+            setName(e.target.value)
+            setError('')
+          }}
           onKeyDown={e => {
             if (e.key === 'Enter') handleSubmit()
-            if (e.key === 'Escape') { setIsOpen(false); setName('') }
+            if (e.key === 'Escape') {
+              setIsOpen(false)
+              setName('')
+            }
           }}
           placeholder={`輸入${TYPE_LABELS[type]}名稱...`}
           className="h-7 text-xs pr-2"
@@ -156,7 +167,11 @@ export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourc
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => { setIsOpen(false); setName(''); setError('') }}
+        onClick={() => {
+          setIsOpen(false)
+          setName('')
+          setError('')
+        }}
         className="h-7 px-1.5 text-xs"
       >
         ✕

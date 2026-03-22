@@ -22,13 +22,14 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
   const [showAcceptDialog, setShowAcceptDialog] = useState(false)
   const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
-  
+
   const response = request.supplier_response
-  
+
   if (!response) return null
-  
-  const { contact, phone, tierPrices, singleRoomSupplement, tipNote, supplierNote, submitted_at } = response
-  
+
+  const { contact, phone, tierPrices, singleRoomSupplement, tipNote, supplierNote, submitted_at } =
+    response
+
   // 格式化日期
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
@@ -40,7 +41,7 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
       minute: '2-digit',
     })
   }
-  
+
   return (
     <>
       <div className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
@@ -49,9 +50,7 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
           <div className="flex items-center gap-2">
             <span className="text-2xl">🌏</span>
             <div>
-              <h4 className="font-semibold text-lg">
-                {request.supplier_name || 'Local 供應商'}
-              </h4>
+              <h4 className="font-semibold text-lg">{request.supplier_name || 'Local 供應商'}</h4>
               {request.line_group_name && (
                 <p className="text-sm text-muted-foreground">
                   LINE 群組：{request.line_group_name}
@@ -64,21 +63,24 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
             <p>回覆時間：{submitted_at ? formatDate(submitted_at) : '-'}</p>
           </div>
         </div>
-        
+
         {/* 報價摘要 */}
         <div className="bg-muted/30 rounded-lg p-3 mb-3">
           <p className="text-sm font-medium mb-2">報價摘要</p>
           <div className="grid grid-cols-2 gap-2 text-sm">
-            {tierPrices && Object.entries(tierPrices).map(([tier, price]) => (
-              <div key={tier} className="flex justify-between">
-                <span className="text-muted-foreground">{tier} 人團：</span>
-                <span className="font-medium">{Number(price).toLocaleString()} 元/人</span>
-              </div>
-            ))}
+            {tierPrices &&
+              Object.entries(tierPrices).map(([tier, price]) => (
+                <div key={tier} className="flex justify-between">
+                  <span className="text-muted-foreground">{tier} 人團：</span>
+                  <span className="font-medium">{Number(price).toLocaleString()} 元/人</span>
+                </div>
+              ))}
             {singleRoomSupplement && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">單人房差：</span>
-                <span className="font-medium">{Number(singleRoomSupplement).toLocaleString()} 元</span>
+                <span className="font-medium">
+                  {Number(singleRoomSupplement).toLocaleString()} 元
+                </span>
               </div>
             )}
             {tipNote && (
@@ -89,7 +91,7 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
             )}
           </div>
         </div>
-        
+
         {/* 聯絡資訊 */}
         <div className="flex gap-4 text-sm mb-3">
           <div>
@@ -101,7 +103,7 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
             <span className="font-medium">{phone}</span>
           </div>
         </div>
-        
+
         {/* 供應商備註 */}
         {supplierNote && (
           <div className="text-sm mb-3">
@@ -109,7 +111,7 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
             <span>{supplierNote}</span>
           </div>
         )}
-        
+
         {/* 操作按鈕 */}
         <div className="flex gap-2">
           <Button
@@ -130,16 +132,12 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
             <XCircle className="w-4 h-4 mr-1" />
             不成交
           </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => setShowDetails(!showDetails)}
-          >
+          <Button size="sm" variant="ghost" onClick={() => setShowDetails(!showDetails)}>
             <FileText className="w-4 h-4 mr-1" />
             {showDetails ? '隱藏' : '詳細'}
           </Button>
         </div>
-        
+
         {/* 詳細資訊（展開） */}
         {showDetails && (
           <div className="mt-3 pt-3 border-t text-sm">
@@ -150,7 +148,7 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
           </div>
         )}
       </div>
-      
+
       {/* 成交確認 Dialog */}
       <AcceptQuoteDialog
         open={showAcceptDialog}
@@ -158,7 +156,7 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
         request={request}
         onSuccess={onAccept}
       />
-      
+
       {/* 拒絕確認 Dialog */}
       <RejectQuoteDialog
         open={showRejectDialog}

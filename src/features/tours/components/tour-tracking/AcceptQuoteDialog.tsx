@@ -15,7 +15,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Loader2 } from 'lucide-react'
+import { Loader2, X, Check } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 import type { TourRequest } from '@/features/tours/hooks/useTourRequests'
 
@@ -35,10 +35,10 @@ export function AcceptQuoteDialog({
   const [selectedTier, setSelectedTier] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
-  
+
   const response = request.supplier_response
   const tierPrices = response?.tierPrices || {}
-  
+
   const handleAccept = async () => {
     if (!selectedTier) {
       toast({
@@ -47,9 +47,9 @@ export function AcceptQuoteDialog({
       })
       return
     }
-    
+
     setLoading(true)
-    
+
     try {
       const res = await fetch(`/api/tours/${request.tour_id}/requests/${request.id}/accept`, {
         method: 'POST',
@@ -58,17 +58,17 @@ export function AcceptQuoteDialog({
           selectedTier: Number(selectedTier),
         }),
       })
-      
+
       if (!res.ok) {
         const error = await res.json()
         throw new Error(error.error || '成交失敗')
       }
-      
+
       toast({
         title: '✅ 成交成功',
         description: '已自動產生協作確認單',
       })
-      
+
       onOpenChange(false)
       onSuccess()
     } catch (error: any) {
@@ -81,27 +81,27 @@ export function AcceptQuoteDialog({
       setLoading(false)
     }
   }
-  
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>✅ 確認成交</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4 py-4">
           <div>
             <p className="text-sm text-muted-foreground mb-2">供應商</p>
             <p className="font-medium">{request.supplier_name || 'Local 供應商'}</p>
           </div>
-          
+
           <div>
             <p className="text-sm text-muted-foreground mb-2">聯絡人</p>
             <p className="font-medium">
               {response?.contact} / {response?.phone}
             </p>
           </div>
-          
+
           <div className="border-t pt-4">
             <Label className="mb-3 block">選擇人數梯次</Label>
             <RadioGroup value={selectedTier} onValueChange={setSelectedTier}>
@@ -119,7 +119,7 @@ export function AcceptQuoteDialog({
               ))}
             </RadioGroup>
           </div>
-          
+
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
             <p className="font-medium text-blue-900 mb-1">確認後將：</p>
             <ul className="list-disc list-inside text-blue-700 space-y-1">
@@ -129,20 +129,18 @@ export function AcceptQuoteDialog({
             </ul>
           </div>
         </div>
-        
+
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={loading}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
+            <X className="h-4 w-4 mr-1" />
             取消
           </Button>
-          <Button
-            onClick={handleAccept}
-            disabled={loading || !selectedTier}
-          >
-            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+          <Button onClick={handleAccept} disabled={loading || !selectedTier}>
+            {loading ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Check className="h-4 w-4 mr-1" />
+            )}
             確認成交
           </Button>
         </DialogFooter>

@@ -7,6 +7,7 @@
 ## ✅ 現狀（2026-03-18）
 
 **已完成**：
+
 - ✅ Webhook 整合（自動觸發）
 - ✅ 發送者過濾機制
 - ✅ 團號自動解析
@@ -14,6 +15,7 @@
 - ✅ Telegram 通知
 
 **待設定**：
+
 - 🔜 保險公司 userId（目前：允許所有人）
 
 ---
@@ -37,6 +39,7 @@ Telegram 通知你
 ## 📝 檔名規範（重要！）
 
 **正確**：
+
 ```
 TW260321A.pdf               ✅
 TC260322B 保險單.pdf         ✅
@@ -44,6 +47,7 @@ TW260323C-0115BL008290.pdf  ✅
 ```
 
 **錯誤**：
+
 ```
 保險單.pdf                  ❌ 缺團號
 TW2603.pdf                  ❌ 團號格式錯
@@ -51,6 +55,7 @@ TW2603.pdf                  ❌ 團號格式錯
 ```
 
 **規則**：
+
 - **台北**：`TW` + 6位數字 + 1位英文
 - **台中**：`TC` + 6位數字 + 1位英文
 - 後綴可以有（保險單、保單號等）
@@ -79,10 +84,11 @@ Vercel Dashboard → Functions → line/webhook
 ```
 
 會看到：
+
 ```json
 {
   "source": {
-    "userId": "U1234567890abcdef",  // ← 這個
+    "userId": "U1234567890abcdef", // ← 這個
     "groupId": "C03f53517dc822913b394411981a100bf"
   }
 }
@@ -94,7 +100,7 @@ Vercel Dashboard → Functions → line/webhook
 
 ```typescript
 const TRUSTED_SENDERS = [
-  'U1234567890abcdef',  // 喜多里保代
+  'U1234567890abcdef', // 喜多里保代
 ]
 ```
 
@@ -125,6 +131,7 @@ git push
 ### 成功
 
 **Telegram 通知**：
+
 ```
 ✅ 保險 PDF 已自動歸檔
 
@@ -136,6 +143,7 @@ git push
 ```
 
 **ERP 查看**：
+
 ```
 團詳細頁 → 檔案 tab → 🛡️ 保險 → 看到新 PDF
 ```
@@ -148,11 +156,13 @@ git push
 - **台中的團**：在 Corner-TC workspace（暫不處理）
 
 **處理方式**：
+
 - ✅ 自動略過（不歸檔）
 - ✅ 記錄 log（Vercel logs 可查）
 - ❌ 不發 Telegram（避免太吵）
 
 **查看方式**：
+
 ```
 Vercel Dashboard → Functions → line/insurance-auto-save
 → 搜尋「團號不在 ERP」
@@ -182,9 +192,11 @@ Vercel Dashboard → Functions → line/insurance-auto-save
 **問題**：檔名不是團號
 
 **處理**：
+
 1. 收到 Telegram 通知
 2. 詢問保險公司正確團號
 3. 手動歸檔：
+
 ```bash
 node scripts/manual-insurance-save.cjs <messageId> "TW260321A"
 ```
@@ -194,6 +206,7 @@ node scripts/manual-insurance-save.cjs <messageId> "TW260321A"
 **問題**：ERP 還沒建這個團
 
 **處理**：
+
 1. 先建團
 2. 再請保險公司重傳檔案
 3. 或手動歸檔

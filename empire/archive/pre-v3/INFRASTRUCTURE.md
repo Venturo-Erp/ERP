@@ -35,26 +35,29 @@
 
 ### 專案資訊
 
-| 項目 | 內容 |
-|------|------|
-| **專案 ID** | `pfqvdacxowpgfamuvnsn` |
-| **專案名稱** | Venturo Production |
-| **Region** | Northeast Asia (Tokyo) |
-| **PostgreSQL 版本** | 15.1 |
-| **Dashboard** | https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn |
+| 項目                | 內容                                                        |
+| ------------------- | ----------------------------------------------------------- |
+| **專案 ID**         | `pfqvdacxowpgfamuvnsn`                                      |
+| **專案名稱**        | Venturo Production                                          |
+| **Region**          | Northeast Asia (Tokyo)                                      |
+| **PostgreSQL 版本** | 15.1                                                        |
+| **Dashboard**       | https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn |
 
 ### 連線資訊
 
 **API URL**：
+
 ```
 https://pfqvdacxowpgfamuvnsn.supabase.co
 ```
 
 **Database URL** _(敏感資訊，不記錄在此)_：
+
 - 存放位置：`~/Projects/venturo-erp/.env.local`
 - 格式：`postgresql://postgres:[PASSWORD]@[HOST]:5432/postgres`
 
 **Service Role Key** _(敏感資訊)_：
+
 - 存放位置：`~/Projects/venturo-erp/.env.local`
 - 用途：Server-side API 呼叫（繞過 RLS）
 
@@ -62,16 +65,17 @@ https://pfqvdacxowpgfamuvnsn.supabase.co
 
 ### 核心資料表
 
-| 表名 | 說明 | 行數（估計） | 索引 |
-|------|------|--------------|------|
-| **tour_itinerary_items** | 核心表（唯一真相來源） | 54 欄位 | id, tour_id |
-| **tour_quotes** | 報價單 | 關聯表 | id, tour_id |
-| **tour_requests** | 需求單 | 關聯表 | id, tour_id |
-| **suppliers** | 供應商 | 關聯表 | id, company_id |
-| **hotels** | 飯店 | 關聯表 | id |
-| **customers** | 客戶 | 關聯表 | id, company_id |
+| 表名                     | 說明                   | 行數（估計） | 索引           |
+| ------------------------ | ---------------------- | ------------ | -------------- |
+| **tour_itinerary_items** | 核心表（唯一真相來源） | 54 欄位      | id, tour_id    |
+| **tour_quotes**          | 報價單                 | 關聯表       | id, tour_id    |
+| **tour_requests**        | 需求單                 | 關聯表       | id, tour_id    |
+| **suppliers**            | 供應商                 | 關聯表       | id, company_id |
+| **hotels**               | 飯店                   | 關聯表       | id             |
+| **customers**            | 客戶                   | 關聯表       | id, company_id |
 
 **查看 Schema**：
+
 ```sql
 SELECT table_name, column_name, data_type
 FROM information_schema.columns
@@ -86,6 +90,7 @@ ORDER BY ordinal_position;
 **狀態**：✅ 所有表都已啟用 RLS
 
 **政策範例**：
+
 ```sql
 -- 使用者只能看自己公司的資料
 CREATE POLICY "company_isolation"
@@ -94,6 +99,7 @@ USING (company_id = auth.jwt() ->> 'company_id');
 ```
 
 **檢查 RLS**：
+
 ```sql
 SELECT schemaname, tablename, rowsecurity
 FROM pg_tables
@@ -105,10 +111,12 @@ WHERE schemaname = 'public';
 ### 備份策略
 
 **自動備份**：
+
 - Supabase 每日自動備份
 - 保留 7 天
 
 **手動備份**：
+
 ```bash
 # 匯出整個資料庫
 pg_dump -h pfqvdacxowpgfamuvnsn.supabase.co -U postgres -d postgres > backup.sql
@@ -137,12 +145,13 @@ ERP Dev Server
 
 ### 網路資訊
 
-| 設備 | Tailscale IP | 用途 |
-|------|--------------|------|
+| 設備         | Tailscale IP   | 用途            |
+| ------------ | -------------- | --------------- |
 | **Mac mini** | `100.89.92.46` | Dev Server 主機 |
-| **MacBook** | _(動態)_ | William 的電腦 |
+| **MacBook**  | _(動態)_       | William 的電腦  |
 
 **Dev Server 位置**：
+
 - **ERP**：http://100.89.92.46:3000
 - **Online**：http://100.89.92.46:3001
 
@@ -164,13 +173,13 @@ curl http://100.89.92.46:3000
 
 ### 系統資訊
 
-| 項目 | 內容 |
-|------|------|
-| **設備** | Mac mini (M2, 2023) |
-| **作業系統** | macOS Sonoma 14.x |
-| **RAM** | 16 GB |
-| **Storage** | 512 GB SSD |
-| **Tailscale IP** | 100.89.92.46 |
+| 項目             | 內容                |
+| ---------------- | ------------------- |
+| **設備**         | Mac mini (M2, 2023) |
+| **作業系統**     | macOS Sonoma 14.x   |
+| **RAM**          | 16 GB               |
+| **Storage**      | 512 GB SSD          |
+| **Tailscale IP** | 100.89.92.46        |
 
 ---
 
@@ -239,10 +248,10 @@ tail -30 /tmp/online-dev.log
 
 ### 專案資訊
 
-| 專案 | Vercel URL | GitHub Repo | Branch |
-|------|-----------|-------------|--------|
-| **Venturo ERP** | venturo-erp.vercel.app | venturo-erp | main |
-| **Venturo Online** | venturo-online.vercel.app | venturo-online | main |
+| 專案               | Vercel URL                | GitHub Repo    | Branch |
+| ------------------ | ------------------------- | -------------- | ------ |
+| **Venturo ERP**    | venturo-erp.vercel.app    | venturo-erp    | main   |
+| **Venturo Online** | venturo-online.vercel.app | venturo-online | main   |
 
 ---
 
@@ -284,17 +293,20 @@ vercel --prod
 ### 環境變數管理
 
 **查看環境變數**：
+
 ```bash
 vercel env ls
 ```
 
 **新增環境變數**：
+
 ```bash
 vercel env add SUPABASE_URL production
 vercel env add SUPABASE_ANON_KEY production
 ```
 
 **重要環境變數**：
+
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`（Server-side only）
@@ -356,6 +368,7 @@ git reset --hard HEAD@{1}
 ### VS Code
 
 **推薦擴充套件**：
+
 - ESLint
 - Prettier
 - Tailwind CSS IntelliSense
@@ -363,6 +376,7 @@ git reset --hard HEAD@{1}
 - GitLens
 
 **設定檔**（`.vscode/settings.json`）：
+
 ```json
 {
   "editor.formatOnSave": true,
@@ -380,6 +394,7 @@ git reset --hard HEAD@{1}
 **查看**：https://vercel.com/analytics
 
 **指標**：
+
 - 頁面瀏覽量
 - 使用者數
 - 效能指標（Core Web Vitals）
@@ -391,6 +406,7 @@ git reset --hard HEAD@{1}
 **查看**：https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/logs
 
 **類型**：
+
 - API Logs（API 呼叫）
 - Database Logs（SQL 查詢）
 - Auth Logs（登入/登出）
@@ -417,11 +433,13 @@ grep -i error /tmp/erp-dev.log
 ### 問題 1：Dev Server 無法啟動
 
 **症狀**：
+
 ```
 Error: listen EADDRINUSE: address already in use :::3000
 ```
 
 **解決**：
+
 ```bash
 # 找出佔用 port 的 process
 lsof -i :3000
@@ -438,11 +456,13 @@ npm run dev
 ### 問題 2：Supabase 連線失敗
 
 **症狀**：
+
 ```
 Error: Connection timeout
 ```
 
 **解決**：
+
 1. 檢查環境變數：`echo $NEXT_PUBLIC_SUPABASE_URL`
 2. 檢查網路：`ping pfqvdacxowpgfamuvnsn.supabase.co`
 3. 檢查 Supabase 狀態：https://status.supabase.com
@@ -452,11 +472,13 @@ Error: Connection timeout
 ### 問題 3：Vercel 部署失敗
 
 **症狀**：
+
 ```
 Error: Build failed
 ```
 
 **解決**：
+
 1. 本機測試：`npm run build`
 2. 查看 Vercel 錯誤訊息
 3. 檢查環境變數是否正確
@@ -467,11 +489,13 @@ Error: Build failed
 ### 問題 4：Tailscale 連線失敗
 
 **症狀**：
+
 ```
 ping: cannot resolve 100.89.92.46
 ```
 
 **解決**：
+
 1. 檢查 Tailscale 是否運行：`tailscale status`
 2. 重新連線：`tailscale up`
 3. 檢查防火牆
@@ -482,12 +506,13 @@ ping: cannot resolve 100.89.92.46
 
 ### Supabase 權限
 
-| 角色 | 權限 | 用途 |
-|------|------|------|
+| 角色             | 權限               | 用途            |
+| ---------------- | ------------------ | --------------- |
 | **Service Role** | 繞過 RLS，完整存取 | Server-side API |
-| **Anon Key** | 遵守 RLS，公開 Key | Client-side API |
+| **Anon Key**     | 遵守 RLS，公開 Key | Client-side API |
 
 **絕對不要**：
+
 - ❌ 在前端使用 Service Role Key
 - ❌ 把 Service Role Key 提交到 Git
 
@@ -495,18 +520,18 @@ ping: cannot resolve 100.89.92.46
 
 ### Vercel 權限
 
-| 角色 | 權限 |
-|------|------|
-| **Owner** | 完整權限（William） |
+| 角色       | 權限                |
+| ---------- | ------------------- |
+| **Owner**  | 完整權限（William） |
 | **Member** | 部署權限（Matthew） |
 
 ---
 
 ### GitHub 權限
 
-| 角色 | 權限 |
-|------|------|
-| **Admin** | 完整權限（William） |
+| 角色      | 權限                             |
+| --------- | -------------------------------- |
+| **Admin** | 完整權限（William）              |
 | **Write** | Push 權限（Matthew, 前端工程師） |
 
 ---

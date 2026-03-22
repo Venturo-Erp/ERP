@@ -1271,7 +1271,7 @@ export default function PhaserOffice({
               placeholder={GAME_OFFICE_LABELS.SEARCH_6779}
               value={searchText}
               onChange={e => setSearchText(e.target.value)}
-              className="w-full px-2 py-1 text-xs bg-gray-900 border border-[var(--border)] rounded text-white"
+              className="w-full px-2 py-1 text-xs bg-morandi-primary border border-[var(--border)] rounded text-white"
             />
           </div>
           {/* Quick filter tabs */}
@@ -1286,7 +1286,7 @@ export default function PhaserOffice({
               <button
                 key={t.id}
                 onClick={() => setFilterCat(t.id)}
-                className={`text-[10px] px-2 py-1 rounded font-bold ${filterCat === t.id ? 'bg-emerald-600 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}
+                className={`text-[10px] px-2 py-1 rounded font-bold ${filterCat === t.id ? 'bg-emerald-600 text-white' : 'bg-morandi-primary text-muted-foreground hover:text-white'}`}
               >
                 {t.label}
               </button>
@@ -1301,7 +1301,7 @@ export default function PhaserOffice({
                   <button
                     key={c}
                     onClick={() => setFilterCat(c)}
-                    className={`text-[10px] px-1.5 py-0.5 rounded ${filterCat === c ? 'bg-emerald-600 text-white' : 'bg-gray-800 text-gray-400'}`}
+                    className={`text-[10px] px-1.5 py-0.5 rounded ${filterCat === c ? 'bg-emerald-600 text-white' : 'bg-morandi-primary text-muted-foreground'}`}
                   >
                     {c.slice(0, 4)}
                   </button>
@@ -1326,7 +1326,7 @@ export default function PhaserOffice({
                 className={`flex items-center gap-2 w-full p-1 rounded text-left text-xs transition-colors ${
                   selectedAsset === a.name
                     ? 'bg-emerald-600/20 text-emerald-400'
-                    : 'hover:bg-gray-800 text-gray-300'
+                    : 'hover:bg-morandi-primary text-muted-foreground'
                 }`}
               >
                 <img
@@ -1339,7 +1339,7 @@ export default function PhaserOffice({
                   <div className="truncate" style={{ maxWidth: '150px' }}>
                     {a.label}
                   </div>
-                  <div className="text-[10px] text-gray-600">
+                  <div className="text-[10px] text-morandi-secondary">
                     {a.w}×{a.h}
                   </div>
                 </div>
@@ -1347,7 +1347,7 @@ export default function PhaserOffice({
             ))}
           </div>
           {/* Help */}
-          <div className="p-2 border-t border-[var(--border)] text-[10px] text-gray-600">
+          <div className="p-2 border-t border-[var(--border)] text-[10px] text-morandi-secondary">
             {GAME_OFFICE_LABELS.HELP_PLACE}
             <br />
             {GAME_OFFICE_LABELS.HELP_SHORTCUTS}

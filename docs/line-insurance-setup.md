@@ -37,6 +37,7 @@ Webhook 收到事件
 **優點**：最可靠，不會因改名而失效
 
 **步驟**：
+
 1. 保險公司在群組發一則訊息
 2. 查看 webhook log 取得 `userId`
 3. 加到 `TRUSTED_SENDERS` 清單
@@ -44,8 +45,8 @@ Webhook 收到事件
 ```javascript
 // scripts/line-insurance-filter.cjs
 const TRUSTED_SENDERS = [
-  'U1234567890abcdef',  // 喜多里保代的 userId
-  'Uabcdef1234567890',  // 其他保險公司
+  'U1234567890abcdef', // 喜多里保代的 userId
+  'Uabcdef1234567890', // 其他保險公司
 ]
 ```
 
@@ -55,11 +56,7 @@ const TRUSTED_SENDERS = [
 **缺點**：對方改名就失效
 
 ```javascript
-const TRUSTED_SENDERS = [
-  '喜多里保代',
-  '喜多里',
-  '保險公司',
-]
+const TRUSTED_SENDERS = ['喜多里保代', '喜多里', '保險公司']
 ```
 
 ---
@@ -67,6 +64,7 @@ const TRUSTED_SENDERS = [
 ## 📝 檔名規範
 
 **正確格式**：
+
 ```
 TW260321A.pdf             ✅ 台北角落
 TC260322B 保險單.pdf       ✅ 台中角落
@@ -74,6 +72,7 @@ TW260323C-保險.pdf        ✅ 可以有後綴
 ```
 
 **錯誤格式**：
+
 ```
 保險單.pdf                ❌ 缺團號
 TW2603.pdf                ❌ 團號格式錯
@@ -81,6 +80,7 @@ TW2603.pdf                ❌ 團號格式錯
 ```
 
 **團號格式規則**：
+
 - 台北：`TW` + 6位數字 + 1位英文（例：TW260321A）
 - 台中：`TC` + 6位數字 + 1位英文（例：TC260321A）
 
@@ -97,6 +97,7 @@ TW2603.pdf                ❌ 團號格式錯
 ```
 
 **不會**：
+
 - ❌ 不會下載
 - ❌ 不會歸檔
 - ❌ 不會通知（太吵）
@@ -155,16 +156,19 @@ node scripts/manual-insurance-save.cjs <messageId> "TW260321A 保險單.pdf"
 ## 📊 歸檔位置
 
 **Supabase Storage 路徑**：
+
 ```
 documents/tour-documents/{團號}/insurance/{timestamp}_{檔名}
 ```
 
 **範例**：
+
 ```
 documents/tour-documents/TW260321A/insurance/1773756000551_TW260321A.pdf
 ```
 
 **ERP 查看位置**：
+
 ```
 團詳細頁 → 檔案 tab → 🛡️ 保險
 ```
@@ -190,7 +194,7 @@ grep "userId" /tmp/line-webhook.log
 ```json
 {
   "source": {
-    "userId": "U1234567890abcdef",  // ← 這個
+    "userId": "U1234567890abcdef", // ← 這個
     "type": "user"
   }
 }
@@ -200,7 +204,7 @@ grep "userId" /tmp/line-webhook.log
 
 ```javascript
 const TRUSTED_SENDERS = [
-  'U1234567890abcdef',  // 喜多里保代
+  'U1234567890abcdef', // 喜多里保代
 ]
 ```
 
@@ -232,6 +236,7 @@ const TRUSTED_SENDERS = [
 ### RLS 保護
 
 即使檔案被誤上傳，RLS policy 也會保護：
+
 - ✅ 只有同 workspace 的人能看到
 - ✅ 其他公司看不到
 

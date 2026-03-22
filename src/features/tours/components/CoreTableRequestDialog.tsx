@@ -1,6 +1,6 @@
 /**
  * CoreTableRequestDialog - 從核心表產生需求單
- * 
+ *
  * 功能：
  * 1. 從 tour_itinerary_items 讀取已報價項目
  * 2. JOIN 供應商資料（restaurants/hotels/attractions）
@@ -21,8 +21,12 @@ import {
   DIALOG_SIZES,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { FileText, Printer, Loader2 } from 'lucide-react'
-import { useCoreRequestItems, useTotalPax, type CoreRequestItem } from '../hooks/useCoreRequestItems'
+import { FileText, Printer, Loader2, X } from 'lucide-react'
+import {
+  useCoreRequestItems,
+  useTotalPax,
+  type CoreRequestItem,
+} from '../hooks/useCoreRequestItems'
 import { useToast } from '@/components/ui/use-toast'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores'
@@ -42,7 +46,7 @@ interface CoreTableRequestDialogProps {
   isOpen: boolean
   onClose: () => void
   tour: Tour
-  supplierId?: string | null  // 可選，如果沒有會用 supplierName 查詢
+  supplierId?: string | null // 可選，如果沒有會用 supplierName 查詢
   supplierName: string
   category: string
 }
@@ -57,17 +61,19 @@ export function CoreTableRequestDialog({
 }: CoreTableRequestDialogProps) {
   const { user } = useAuthStore()
   const { toast } = useToast()
-  
-  const [resolvedSupplierId, setResolvedSupplierId] = useState<string | null>(propSupplierId || null)
+
+  const [resolvedSupplierId, setResolvedSupplierId] = useState<string | null>(
+    propSupplierId || null
+  )
   const [resolvingSupplier, setResolvingSupplier] = useState(false)
-  
+
   // 如果沒有 supplierId，用 supplierName 查詢
   useEffect(() => {
     if (propSupplierId || !supplierName || !isOpen) {
       setResolvedSupplierId(propSupplierId || null)
       return
     }
-    
+
     const resolveSupplier = async () => {
       setResolvingSupplier(true)
       try {
@@ -78,13 +84,13 @@ export function CoreTableRequestDialog({
           .eq('name', supplierName)
           .eq('workspace_id', user?.workspace_id || '')
           .maybeSingle()
-        
+
         if (error) {
           logger.error('查詢供應商失敗:', error)
           setResolvedSupplierId(null)
           return
         }
-        
+
         setResolvedSupplierId(data?.id || null)
       } catch (err) {
         logger.error('resolveSupplier 錯誤:', err)
@@ -93,19 +99,19 @@ export function CoreTableRequestDialog({
         setResolvingSupplier(false)
       }
     }
-    
+
     resolveSupplier()
   }, [propSupplierId, supplierName, isOpen, user?.workspace_id])
-  
+
   // 讀取核心表資料
   const { data: coreItems, isLoading: itemsLoading } = useCoreRequestItems(
     tour?.id || null,
     resolvedSupplierId
   )
-  
+
   // 讀取總人數
   const { data: totalPax, isLoading: paxLoading } = useTotalPax(tour?.id || null)
-  
+
   const [printing, setPrinting] = useState(false)
 
   // 產生 PDF HTML
@@ -116,11 +122,7 @@ export function CoreTableRequestDialog({
 
     // 取得供應商資料（從第一個項目）
     const firstItem = coreItems[0]
-    const supplierData = 
-      firstItem.restaurant || 
-      firstItem.hotel || 
-      firstItem.attraction || 
-      null
+    const supplierData = firstItem.restaurant || firstItem.hotel || firstItem.attraction || null
 
     const categoryName = CATEGORY_LABELS[category] || category
 
@@ -233,18 +235,26 @@ export function CoreTableRequestDialog({
         <span class="info-label">${categoryName}：</span>
         <span>${supplierData?.name || supplierName}</span>
       </div>
-      ${supplierData?.address ? `
+      ${
+        supplierData?.address
+          ? `
       <div class="info-row">
         <span class="info-label">地址：</span>
         <span>${supplierData.address}</span>
       </div>
-      ` : ''}
-      ${supplierData?.phone ? `
+      `
+          : ''
+      }
+      ${
+        supplierData?.phone
+          ? `
       <div class="info-row">
         <span class="info-label">電話：</span>
         <span>${supplierData.phone}</span>
       </div>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
   </div>
   
@@ -278,7 +288,9 @@ export function CoreTableRequestDialog({
       </tr>
     </thead>
     <tbody>
-      ${coreItems.map(item => `
+      ${coreItems
+        .map(
+          item => `
       <tr>
         <td>Day ${item.day_number || '-'}${item.sub_category ? ` ${item.sub_category === 'breakfast' ? '早' : item.sub_category === 'lunch' ? '午' : '晚'}` : ''}</td>
         <td>${item.title || '-'}</td>
@@ -286,7 +298,9 @@ export function CoreTableRequestDialog({
         <td><span class="blank-field"></span></td>
         <td>${item.quote_note || ''}</td>
       </tr>
-      `).join('')}
+      `
+        )
+        .join('')}
     </tbody>
   </table>
   
@@ -365,7 +379,10 @@ export function CoreTableRequestDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-      <DialogContent level={2} className={`${DIALOG_SIZES.lg} max-h-[85vh] overflow-hidden flex flex-col`}>
+      <DialogContent
+        level={2}
+        className={`${DIALOG_SIZES.lg} max-h-[85vh] overflow-hidden flex flex-col`}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText size={18} className="text-morandi-gold" />
@@ -420,9 +437,7 @@ export function CoreTableRequestDialog({
                 <div className="space-y-2">
                   {coreItems.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-2 text-sm">
-                      <span className="text-morandi-secondary">
-                        Day {item.day_number || '-'}
-                      </span>
+                      <span className="text-morandi-secondary">Day {item.day_number || '-'}</span>
                       <span>{item.title || '-'}</span>
                       <span className="ml-auto text-morandi-primary">
                         NT$ {item.unit_price?.toLocaleString() || '-'}/人
@@ -446,6 +461,7 @@ export function CoreTableRequestDialog({
 
         <div className="flex justify-end gap-2 pt-4 border-t border-border">
           <Button variant="outline" onClick={onClose} disabled={printing}>
+            <X className="h-4 w-4 mr-1" />
             取消
           </Button>
           <Button

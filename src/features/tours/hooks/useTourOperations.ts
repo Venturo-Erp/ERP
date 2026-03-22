@@ -86,7 +86,8 @@ export function useTourOperations(params: UseTourOperationsParams) {
 
   const handleAddTour = useCallback(
     async (newTour: NewTourData, newOrder: Partial<OrderFormData>, fromQuoteId?: string) => {
-      const isProposalOrTemplate = newTour.tour_type === 'proposal' || newTour.tour_type === 'template'
+      const isProposalOrTemplate =
+        newTour.tour_type === 'proposal' || newTour.tour_type === 'template'
 
       // 提案/模板只需要名稱，正式團需要日期
       if (!isProposalOrTemplate) {
@@ -176,13 +177,13 @@ export function useTourOperations(params: UseTourOperationsParams) {
         if (newTour.countryCode === '__custom__') {
           countryId = undefined // 自訂國家不設 country_id
         } else {
-          countryId = newTour.countryId  // ✅ 直接使用
+          countryId = newTour.countryId // ✅ 直接使用
         }
 
         const tourData = {
           name: newTour.name,
           tour_type: newTour.tour_type || 'official',
-          days_count: isProposalOrTemplate ? (newTour.days_count || null) : null,
+          days_count: isProposalOrTemplate ? newTour.days_count || null : null,
           location: cityName || '',
           country_id: countryId,
           airport_code: cityCode || undefined,
@@ -198,10 +199,14 @@ export function useTourOperations(params: UseTourOperationsParams) {
           profit: 0,
           current_participants: 0,
           quote_id: fromQuoteId || undefined,
-          enable_checkin: isProposalOrTemplate ? false : (newTour.enable_checkin || false),
-          controller_id: isProposalOrTemplate ? undefined : (newTour.controller_id || undefined),
-          outbound_flight: isProposalOrTemplate ? undefined : parseFlightText(newTour.outbound_flight_text),
-          return_flight: isProposalOrTemplate ? undefined : parseFlightText(newTour.return_flight_text),
+          enable_checkin: isProposalOrTemplate ? false : newTour.enable_checkin || false,
+          controller_id: isProposalOrTemplate ? undefined : newTour.controller_id || undefined,
+          outbound_flight: isProposalOrTemplate
+            ? undefined
+            : parseFlightText(newTour.outbound_flight_text),
+          return_flight: isProposalOrTemplate
+            ? undefined
+            : parseFlightText(newTour.return_flight_text),
           workspace_id: workspaceId,
         }
 
@@ -369,7 +374,18 @@ export function useTourOperations(params: UseTourOperationsParams) {
    * - 模板：複製一份新團，tour_type='official'，填入日期，產生團號（模板保留）
    */
   const handleConvertToOfficial = useCallback(
-    async (tour: Tour, departure_date: string, return_date: string, orderData?: { contact_person?: string; sales_person?: string; assistant?: string; member_count?: number; total_amount?: number }) => {
+    async (
+      tour: Tour,
+      departure_date: string,
+      return_date: string,
+      orderData?: {
+        contact_person?: string
+        sales_person?: string
+        assistant?: string
+        member_count?: number
+        total_amount?: number
+      }
+    ) => {
       try {
         // Determine city code from existing location or code
         const cityCode = tour.code?.slice(0, 3) || 'TYO'
@@ -408,7 +424,9 @@ export function useTourOperations(params: UseTourOperationsParams) {
             days_count: tour.days_count,
             workspace_id: workspaceId,
           }
-          const createdTour = await (actions.create as (data: unknown) => Promise<Tour>)(newTourData)
+          const createdTour = await (actions.create as (data: unknown) => Promise<Tour>)(
+            newTourData
+          )
           tourId = createdTour.id
         }
 

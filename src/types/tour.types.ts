@@ -467,8 +467,20 @@ export interface Tour extends BaseEntity {
   checkin_qrcode?: string | null // 團體報到 QR Code 內容
 
   // 定價欄位（從報價單搬過來，一個團 = 一個報價單）
-  selling_prices?: { adult: number; child_with_bed: number; child_no_bed: number; single_room: number; infant: number } | null
-  participant_counts?: { adult: number; child_with_bed: number; child_no_bed: number; single_room: number; infant: number } | null
+  selling_prices?: {
+    adult: number
+    child_with_bed: number
+    child_no_bed: number
+    single_room: number
+    infant: number
+  } | null
+  participant_counts?: {
+    adult: number
+    child_with_bed: number
+    child_no_bed: number
+    single_room: number
+    infant: number
+  } | null
   tier_pricings?: TierPricing[] | null
   accommodation_days?: number | null
 
@@ -595,8 +607,20 @@ export interface UpdateTourData {
   quote_id?: string
   quote_cost_structure?: unknown
   // 定價欄位
-  selling_prices?: { adult: number; child_with_bed: number; child_no_bed: number; single_room: number; infant: number } | null
-  participant_counts?: { adult: number; child_with_bed: number; child_no_bed: number; single_room: number; infant: number } | null
+  selling_prices?: {
+    adult: number
+    child_with_bed: number
+    child_no_bed: number
+    single_room: number
+    infant: number
+  } | null
+  participant_counts?: {
+    adult: number
+    child_with_bed: number
+    child_no_bed: number
+    single_room: number
+    infant: number
+  } | null
   tier_pricings?: TierPricing[] | null
   accommodation_days?: number | null
 }

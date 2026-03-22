@@ -134,17 +134,10 @@ export function AddMemberDialog({
                     <span className="text-muted-foreground ml-1">— {item.confirmMessage}</span>
                   </div>
                   <div className="flex gap-1 shrink-0">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onRejectUpdate?.(i)}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => onRejectUpdate?.(i)}>
                       跳過
                     </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => onConfirmUpdate?.(i)}
-                    >
+                    <Button size="sm" onClick={() => onConfirmUpdate?.(i)}>
                       更新
                     </Button>
                   </div>

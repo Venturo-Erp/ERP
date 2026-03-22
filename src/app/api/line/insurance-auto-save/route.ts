@@ -98,14 +98,14 @@ export async function POST(request: Request) {
     if (tourError || !tour) {
       // ERP 查不到 → 可能是舊團或台中的團
       console.log(`[insurance] ⚠️  團號 ${parsed.tourCode} 不在 ERP（可能是舊團或台中）`)
-      
+
       // 簡單記錄 log，不發 Telegram（避免太吵）
       // William 可以從 Vercel logs 查看
-      return NextResponse.json({ 
-        ok: true, 
+      return NextResponse.json({
+        ok: true,
         skipped: '團號不在 ERP',
         tourCode: parsed.tourCode,
-        reason: '可能是舊團或台中的團'
+        reason: '可能是舊團或台中的團',
       })
     }
 
@@ -173,7 +173,15 @@ export async function POST(request: Request) {
 }
 
 // Telegram 通知（成功）
-async function notifySuccess({ tourCode, fileName, size }: { tourCode: string; fileName: string; size: string }) {
+async function notifySuccess({
+  tourCode,
+  fileName,
+  size,
+}: {
+  tourCode: string
+  fileName: string
+  size: string
+}) {
   try {
     const telegramToken = process.env.TELEGRAM_BOT_TOKEN
     const chatId = '8559214126'

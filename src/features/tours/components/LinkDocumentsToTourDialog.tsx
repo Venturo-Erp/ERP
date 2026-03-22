@@ -15,20 +15,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
-import {
-  Plus,
-  Calculator,
-  Loader2,
-  ExternalLink,
-  Trash2,
-} from 'lucide-react'
-import {
-  useQuotes,
-  useOrdersSlim,
-  createQuote,
-  updateQuote,
-  deleteQuote,
-} from '@/data'
+import { Plus, Calculator, Loader2, ExternalLink, Trash2 } from 'lucide-react'
+import { useQuotes, useOrdersSlim, createQuote, updateQuote, deleteQuote } from '@/data'
 import { DEFAULT_CATEGORIES } from '@/features/quotes/constants'
 import type { Tour, Quote } from '@/stores/types'
 import { logger } from '@/lib/utils/logger'

@@ -37,10 +37,10 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
   const isMealItem = categoryId === 'meals'
   // 判斷是否為自理餐（顯示為淡色）
   const isSelfArranged = item.is_self_arranged
-  
+
   // 判斷是否需要隱藏數量欄位（餐廳、活動固定是個人分攤，不需要數量）
   const hideQuantity = categoryId === 'meals' || categoryId === 'activities'
-  
+
   // 判斷是否為 Local 報價（禁止直接編輯單價，只能透過視窗修改）
   const isLocalPricing = item.name?.includes('Local 報價')
 
@@ -62,7 +62,13 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
           {item.day && categoryId !== 'activities' && (
             <span className="text-xs text-morandi-secondary/70 whitespace-nowrap shrink-0">
               D{item.day}
-              {item.sub_category === 'breakfast' ? ' 早' : item.sub_category === 'lunch' ? ' 午' : item.sub_category === 'dinner' ? ' 晚' : ''}
+              {item.sub_category === 'breakfast'
+                ? ' 早'
+                : item.sub_category === 'lunch'
+                  ? ' 午'
+                  : item.sub_category === 'dinner'
+                    ? ' 晚'
+                    : ''}
             </span>
           )}
           <input
@@ -127,23 +133,25 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
                 // 價格變動顏色
                 item.estimated_cost && item.unit_price
                   ? item.unit_price < item.estimated_cost
-                    ? 'text-blue-600 font-semibold'    // 降價 → 藍色
+                    ? 'text-blue-600 font-semibold' // 降價 → 藍色
                     : item.unit_price > item.estimated_cost
-                    ? 'text-red-600 font-semibold'     // 漲價 → 紅色
-                    : ''
+                      ? 'text-red-600 font-semibold' // 漲價 → 紅色
+                      : ''
                   : ''
               }`}
               disabled={isLocalPricing}
               title={
                 isLocalPricing
                   ? '請點擊「Local 報價」按鈕修改'
-                  : item.estimated_cost && item.unit_price && item.estimated_cost !== item.unit_price
-                  ? `預估 ${item.estimated_cost.toLocaleString()} → 當前 ${item.unit_price.toLocaleString()} (${
-                      item.unit_price > item.estimated_cost
-                        ? `↑${(item.unit_price - item.estimated_cost).toLocaleString()}`
-                        : `↓${(item.estimated_cost - item.unit_price).toLocaleString()}`
-                    })`
-                  : undefined
+                  : item.estimated_cost &&
+                      item.unit_price &&
+                      item.estimated_cost !== item.unit_price
+                    ? `預估 ${item.estimated_cost.toLocaleString()} → 當前 ${item.unit_price.toLocaleString()} (${
+                        item.unit_price > item.estimated_cost
+                          ? `↑${(item.unit_price - item.estimated_cost).toLocaleString()}`
+                          : `↓${(item.estimated_cost - item.unit_price).toLocaleString()}`
+                      })`
+                    : undefined
               }
             />
           </div>

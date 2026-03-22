@@ -18,7 +18,7 @@ export function TransportConfirmForm({ itemId, defaultValues }: Props) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
-  
+
   const [form, setForm] = useState({
     driver_name: defaultValues.driver_name,
     driver_phone: defaultValues.driver_phone,
@@ -29,7 +29,7 @@ export function TransportConfirmForm({ itemId, defaultValues }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    
+
     // 驗證必填
     if (!form.driver_name.trim()) {
       setError('請填寫司機姓名')
@@ -65,63 +65,62 @@ export function TransportConfirmForm({ itemId, defaultValues }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border-x border-b border-gray-200 rounded-b-lg p-6">
-      <h2 className="font-medium text-gray-700 mb-4">司機資訊</h2>
-      
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white border-x border-b border-border rounded-b-lg p-6"
+    >
+      <h2 className="font-medium text-morandi-primary mb-4">司機資訊</h2>
+
       <div className="space-y-4">
         {/* 司機姓名 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-morandi-primary mb-1">
             司機姓名 <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={form.driver_name}
-            onChange={(e) => setForm({ ...form, driver_name: e.target.value })}
+            onChange={e => setForm({ ...form, driver_name: e.target.value })}
             placeholder="例：田中太郎"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
         {/* 司機電話 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-morandi-primary mb-1">
             司機電話 <span className="text-red-500">*</span>
           </label>
           <input
             type="tel"
             value={form.driver_phone}
-            onChange={(e) => setForm({ ...form, driver_phone: e.target.value })}
+            onChange={e => setForm({ ...form, driver_phone: e.target.value })}
             placeholder="例：090-1234-5678"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
         {/* 車牌號碼 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            車牌號碼
-          </label>
+          <label className="block text-sm font-medium text-morandi-primary mb-1">車牌號碼</label>
           <input
             type="text"
             value={form.vehicle_plate}
-            onChange={(e) => setForm({ ...form, vehicle_plate: e.target.value })}
+            onChange={e => setForm({ ...form, vehicle_plate: e.target.value })}
             placeholder="例：福岡 200 あ 1234"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
 
         {/* 車款 */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            車款
-          </label>
+          <label className="block text-sm font-medium text-morandi-primary mb-1">車款</label>
           <input
             type="text"
             value={form.vehicle_type}
-            onChange={(e) => setForm({ ...form, vehicle_type: e.target.value })}
+            onChange={e => setForm({ ...form, vehicle_type: e.target.value })}
             placeholder="例：45人座大巴"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       </div>
@@ -142,7 +141,7 @@ export function TransportConfirmForm({ itemId, defaultValues }: Props) {
         {isSubmitting ? '提交中...' : '✓ 確認提交'}
       </button>
 
-      <p className="mt-4 text-xs text-gray-500 text-center">
+      <p className="mt-4 text-xs text-morandi-secondary text-center">
         提交後如需修改，請聯繫{COMPANY_NAME}
       </p>
     </form>

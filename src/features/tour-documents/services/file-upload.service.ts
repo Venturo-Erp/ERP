@@ -75,9 +75,7 @@ export async function getSignedUrl(url: string, expiresIn = 3600): Promise<strin
     throw new Error('Invalid file URL')
   }
 
-  const { data, error } = await supabase.storage
-    .from(BUCKET_NAME)
-    .createSignedUrl(path, expiresIn)
+  const { data, error } = await supabase.storage.from(BUCKET_NAME).createSignedUrl(path, expiresIn)
 
   if (error) throw error
   return data.signedUrl

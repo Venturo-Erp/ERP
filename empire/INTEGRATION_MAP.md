@@ -39,6 +39,7 @@
 #### 資料同步
 
 **行程發佈**（ERP → Online）
+
 ```
 觸發：業務在 ERP 勾選「上架到 Online」
 流程：
@@ -54,6 +55,7 @@
 ```
 
 **訂單回寫**（Online → ERP）
+
 ```
 觸發：客戶在 Online 完成報名
 流程：
@@ -63,6 +65,7 @@
 ```
 
 **庫存同步**（雙向）
+
 ```
 ERP：
   - tours.max_pax（最大人數）
@@ -75,6 +78,7 @@ Online：
 ```
 
 #### 共用資料表
+
 ```sql
 -- 共用（同一個 DB）
 tours              -- 行程主表
@@ -97,6 +101,7 @@ membership_tiers   -- 會員等級
 #### AI 按鈕嵌入
 
 **報價頁 AI 助手**
+
 ```
 位置：ERP /tours/[id] Tab:報價
 按鈕：「AI 智能估價」
@@ -109,6 +114,7 @@ membership_tiers   -- 會員等級
 ```
 
 **行程頁 AI 助手**
+
 ```
 位置：ERP /tours/[id] Tab:行程
 按鈕：「AI 優化行程」
@@ -121,6 +127,7 @@ membership_tiers   -- 會員等級
 #### Webhook 通知
 
 **新團建立 → AI 自動分析**
+
 ```
 觸發：ERP 建立新團
 Webhook → AI Console
@@ -132,6 +139,7 @@ AI：
 ```
 
 **需求單發送 → AI 追蹤**
+
 ```
 觸發：ERP 發送需求單
 Webhook → AI Console
@@ -145,10 +153,7 @@ AI：
 
 ```typescript
 // AI Console 透過 Supabase Client 讀 ERP 資料
-const { data: tours } = await supabase
-  .from('tours')
-  .select('*')
-  .eq('workspace_id', workspace_id)  // RLS 控制
+const { data: tours } = await supabase.from('tours').select('*').eq('workspace_id', workspace_id) // RLS 控制
 ```
 
 ---
@@ -158,6 +163,7 @@ const { data: tours } = await supabase
 #### 客服聊天窗
 
 **位置**：Online 所有頁面右下角
+
 ```
 元件：<AIChatWidget />
 功能：
@@ -168,6 +174,7 @@ const { data: tours } = await supabase
 ```
 
 **技術架構**：
+
 ```
 Online 前端
   ↓ WebSocket
@@ -179,6 +186,7 @@ AI Console (Supabase Realtime)
 #### 個人化推薦
 
 **首頁推薦卡片**
+
 ```
 位置：Online / 首頁
 API：GET /api/ai/recommend?user_id={uuid}
@@ -198,6 +206,7 @@ API：GET /api/ai/recommend?user_id={uuid}
 #### Claude Desktop 呼叫 ERP
 
 **使用情境**：業務用 Claude Desktop 查詢資料
+
 ```
 業務：「幫我查一下 3 月有哪些越南團」
 
@@ -215,6 +224,7 @@ Claude 整理成文字回覆
 #### OpenClaw Agent 呼叫 MCP
 
 **使用情境**：Matthew 要查世界樹資料
+
 ```
 Matthew：「查 tour-123 的世界樹」
 
@@ -232,6 +242,7 @@ Matthew 分析資料
 #### AI Console 呼叫 MCP
 
 **使用情境**：AI 報價助手需要查歷史資料
+
 ```
 業務：「AI 幫我估這個團」
 
@@ -262,13 +273,14 @@ USING (workspace_id = current_setting('app.current_workspace')::uuid);
 ```
 
 **系統帶入 workspace_id**：
+
 ```typescript
 // ERP
 const client = supabase.auth.admin.setAuth(user.jwt)
 client.rpc('set_workspace', { id: user.workspace_id })
 
 // Online（客戶端）
-const client = supabase.auth.setSession(session)  // 無 workspace_id，只看 public_tours
+const client = supabase.auth.setSession(session) // 無 workspace_id，只看 public_tours
 
 // AI Console
 const client = supabase.auth.admin.setAuth(api_key)
@@ -277,8 +289,8 @@ client.rpc('set_workspace', { id: request.workspace_id })
 // MCP Server
 const client = createClient(url, key, {
   global: {
-    headers: { 'x-workspace-id': workspace_id }
-  }
+    headers: { 'x-workspace-id': workspace_id },
+  },
 })
 ```
 
@@ -291,37 +303,37 @@ const client = createClient(url, key, {
 ```
 1. 【ERP】業務建立新團
    ↓ 寫入 tours 表
-   
+
 2. 【ERP】規劃行程（世界樹東面）
    ↓ 寫入 tour_itinerary_items
-   
+
 3. 【AI Console】AI 建議報價
    ↓ 讀取歷史資料 → 回傳建議
-   
+
 4. 【ERP】業務確認報價（世界樹南面）
    ↓ 更新 unit_cost
-   
+
 5. 【ERP】發佈到 Online
    ↓ 寫入 public_tours (published=true)
-   
+
 6. 【Online】客戶報名
    ↓ 寫入 orders + travelers
-   
+
 7. 【AI Console】自動通知業務
    ↓ Webhook + 推播
-   
+
 8. 【ERP】確認訂單
    ↓ 更新 orders.status = 'confirmed'
-   
+
 9. 【ERP】發需求單（世界樹西面）
    ↓ 寫入 requests 表
-   
+
 10. 【AI Console】追蹤回覆（三紀）
     ↓ 監控 requests.status
-    
+
 11. 【ERP】團確（世界樹北面）
     ↓ 所有 confirmed → 給領隊
-    
+
 12. 【ERP】回團結算（落葉）
     ↓ 寫入 actual_expense
 ```
@@ -355,6 +367,7 @@ const client = createClient(url, key, {
 ```
 
 **網域規劃**：
+
 - ERP：`erp.venturo.travel`
 - Online：`www.venturo.travel`
 - AI Console API：`ai.venturo.travel`
@@ -365,26 +378,31 @@ const client = createClient(url, key, {
 ## 📅 開發時程
 
 ### 二紀（Q2 2026）
+
 - [x] ERP 核心功能（世界樹五面）
 - [ ] Online 基礎頁面（首頁、行程列表、報名）
 - [ ] MCP Server 基礎工具（10 個核心 tools）
 
 ### 三紀（Q3 2026）
+
 - [ ] ERP 需求單系統完善
 - [ ] Online 付款整合
 - [ ] AI Console 報價助手
 
 ### 四紀（Q4 2026）
+
 - [ ] 租戶系統（多旅行社）
 - [ ] 附屬國整合（Local 地接社）
 - [ ] AI 客服上線
 
 ### 五紀（2027 H1）
+
 - [ ] 會員系統
 - [ ] AI 自動化工作流
 - [ ] 進階報表
 
 ### 六紀（2027 H2）
+
 - [ ] 帝國統一（全產業標準化）
 - [ ] 網絡效應啟動
 

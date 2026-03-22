@@ -14,7 +14,7 @@ export default function MonitoringPage() {
 
   // Star-Office-UI URL（本地部署）
   const starOfficeUrl = 'http://127.0.0.1:19000'
-  
+
   // Mission Control URL（需要部署後填入）
   const missionControlUrl = 'http://127.0.0.1:3100'
 
@@ -24,9 +24,7 @@ export default function MonitoringPage() {
       <div className="flex items-center justify-between space-y-2">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">監控中心</h2>
-          <p className="text-muted-foreground">
-            即時監控 AI Agents 狀態和任務進度
-          </p>
+          <p className="text-muted-foreground">即時監控 AI Agents 狀態和任務進度</p>
         </div>
       </div>
 
@@ -45,9 +43,7 @@ export default function MonitoringPage() {
             <Card className="p-0 overflow-hidden">
               <div className="bg-muted px-4 py-3 border-b">
                 <h3 className="font-semibold">AI Agents 辦公室</h3>
-                <p className="text-sm text-muted-foreground">
-                  像素風格即時狀態
-                </p>
+                <p className="text-sm text-muted-foreground">像素風格即時狀態</p>
               </div>
               <div className="aspect-[4/3]">
                 <iframe
@@ -62,9 +58,7 @@ export default function MonitoringPage() {
             <Card className="p-0 overflow-hidden">
               <div className="bg-muted px-4 py-3 border-b">
                 <h3 className="font-semibold">任務控制中心</h3>
-                <p className="text-sm text-muted-foreground">
-                  Kanban 看板管理
-                </p>
+                <p className="text-sm text-muted-foreground">Kanban 看板管理</p>
               </div>
               <div className="aspect-[4/3]">
                 <iframe
@@ -102,9 +96,7 @@ export default function MonitoringPage() {
           <Card className="p-0 overflow-hidden">
             <div className="bg-muted px-4 py-3 border-b">
               <h3 className="font-semibold">AI Agents 即時狀態</h3>
-              <p className="text-sm text-muted-foreground">
-                Star Office UI - 像素風格辦公室
-              </p>
+              <p className="text-sm text-muted-foreground">Star Office UI - 像素風格辦公室</p>
             </div>
             <div className="h-[calc(100vh-300px)]">
               <iframe

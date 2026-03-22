@@ -4,7 +4,13 @@ import { useState, useEffect } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
@@ -44,7 +50,7 @@ export default function GeneralLedgerPage() {
 
   useEffect(() => {
     loadAccounts()
-    
+
     // 預設日期範圍（本月）
     const now = new Date()
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -57,7 +63,6 @@ export default function GeneralLedgerPage() {
     if (!user?.workspace_id) return
 
     try {
-      
       const { data, error } = await supabase
         .from('chart_of_accounts')
         .select('id, code, name, account_type')
@@ -67,7 +72,7 @@ export default function GeneralLedgerPage() {
 
       if (error) throw error
       setAccounts(data || [])
-      
+
       // 預設選第一個科目
       if (data && data.length > 0) {
         setSelectedAccountId(data[0].id)
@@ -86,11 +91,10 @@ export default function GeneralLedgerPage() {
     setIsLoading(true)
 
     try {
-      
-      
       const { data, error } = await supabase
         .from('journal_lines')
-        .select(`
+        .select(
+          `
           id,
           voucher_id,
           line_no,
@@ -102,7 +106,8 @@ export default function GeneralLedgerPage() {
             voucher_date,
             memo
           )
-        `)
+        `
+        )
         .eq('account_id', selectedAccountId)
         .gte('voucher.voucher_date', startDate)
         .lte('voucher.voucher_date', endDate)
@@ -154,20 +159,12 @@ export default function GeneralLedgerPage() {
 
             <div className="space-y-2">
               <Label>開始日期</Label>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
+              <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
             </div>
 
             <div className="space-y-2">
               <Label>結束日期</Label>
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
+              <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </div>
 
             <div className="flex items-end">
@@ -195,7 +192,7 @@ export default function GeneralLedgerPage() {
         <Card className="p-0 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-morandi-container border-b">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold">日期</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold">傳票號碼</th>
@@ -221,10 +218,8 @@ export default function GeneralLedgerPage() {
                         .reduce((sum, l) => sum + (l.debit_amount - l.credit_amount), 0)
 
                       return (
-                        <tr key={line.id} className="border-b hover:bg-gray-50">
-                          <td className="px-4 py-3 text-sm">
-                            {line.voucher?.voucher_date}
-                          </td>
+                        <tr key={line.id} className="border-b hover:bg-morandi-container">
+                          <td className="px-4 py-3 text-sm">{line.voucher?.voucher_date}</td>
                           <td className="px-4 py-3 text-sm font-mono">
                             {line.voucher?.voucher_no}
                           </td>
@@ -244,7 +239,7 @@ export default function GeneralLedgerPage() {
                       )
                     })}
                     {/* 總計 */}
-                    <tr className="bg-gray-100 font-semibold">
+                    <tr className="bg-morandi-container font-semibold">
                       <td colSpan={3} className="px-4 py-3 text-sm">
                         總計
                       </td>

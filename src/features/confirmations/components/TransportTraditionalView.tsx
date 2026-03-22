@@ -3,7 +3,13 @@
  * 莫蘭迪色系、雙欄資訊、供應商下拉
  */
 
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
@@ -54,8 +60,8 @@ export function TransportTraditionalView({
     <div className="bg-white p-6">
       {/* 標題 */}
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">廠商需求單</h2>
-        <div className="text-right text-sm text-gray-600">
+        <h2 className="text-2xl font-bold text-morandi-primary">廠商需求單</h2>
+        <div className="text-right text-sm text-morandi-secondary">
           <div className="font-semibold">${COMPANY_NAME}</div>
           <div className="text-xs">COMPANY_NAME_EN</div>
         </div>
@@ -71,7 +77,7 @@ export function TransportTraditionalView({
               type="text"
               value={tour?.code || ''}
               readOnly
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary"
             />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
@@ -80,7 +86,7 @@ export function TransportTraditionalView({
               type="text"
               value={tour?.name || ''}
               readOnly
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary"
             />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
@@ -89,7 +95,7 @@ export function TransportTraditionalView({
               type="text"
               value={totalPax ? `${totalPax} 人` : ''}
               readOnly
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary"
             />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
@@ -97,7 +103,7 @@ export function TransportTraditionalView({
             <input
               type="text"
               placeholder="業務人員"
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary"
             />
           </div>
         </div>
@@ -109,14 +115,14 @@ export function TransportTraditionalView({
             <input
               type="text"
               value={selectedSupplier?.name || ''}
-              onChange={(e) => {
+              onChange={e => {
                 // 允許手動輸入供應商名稱
                 const name = e.target.value
                 const match = suppliers.find(s => s.name === name)
                 if (match) setSelectedSupplierId(match.id)
               }}
               placeholder="選擇或輸入供應商"
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary"
               list="suppliers-list"
             />
             <datalist id="suppliers-list">
@@ -131,7 +137,7 @@ export function TransportTraditionalView({
               type="text"
               value={selectedSupplier?.contact_person || ''}
               readOnly
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-600"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-secondary"
             />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
@@ -140,7 +146,7 @@ export function TransportTraditionalView({
               type="text"
               value={selectedSupplier?.phone || ''}
               readOnly
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-600"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-secondary"
             />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
@@ -149,7 +155,7 @@ export function TransportTraditionalView({
               type="text"
               value={selectedSupplier?.fax || ''}
               readOnly
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-600"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-secondary"
             />
           </div>
         </div>
@@ -160,7 +166,7 @@ export function TransportTraditionalView({
         <h3 className="text-lg font-semibold text-[#78716c] mb-3">交通表</h3>
         <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-gray-800">
+            <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-morandi-primary">
               <th className="border border-[#a8a29e] px-3 py-2 text-left w-20">天數</th>
               <th className="border border-[#a8a29e] px-3 py-2 text-left w-24">日期</th>
               <th className="border border-[#a8a29e] px-3 py-2 text-left">行程內容</th>
@@ -169,8 +175,12 @@ export function TransportTraditionalView({
           <tbody>
             {daySchedules.map((day, idx) => (
               <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf8]'}>
-                <td className="border border-[#a8a29e] px-3 py-2 font-medium">Day {day.dayNumber}</td>
-                <td className="border border-[#a8a29e] px-3 py-2 text-gray-600">{day.date}</td>
+                <td className="border border-[#a8a29e] px-3 py-2 font-medium">
+                  Day {day.dayNumber}
+                </td>
+                <td className="border border-[#a8a29e] px-3 py-2 text-morandi-secondary">
+                  {day.date}
+                </td>
                 <td className="border border-[#a8a29e] px-3 py-2">{day.route}</td>
               </tr>
             ))}
@@ -192,64 +202,68 @@ export function TransportTraditionalView({
         <table className="w-full border-collapse text-sm">
           <tbody>
             <tr className="bg-white">
-              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c] w-48">車資（總金額）</td>
+              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c] w-48">
+                車資（總金額）
+              </td>
               <td className="border border-[#a8a29e] px-3 py-3">NT$ _________________</td>
             </tr>
             <tr className="bg-[#fafaf8]">
-              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">是否含停車費</td>
+              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">
+                是否含停車費
+              </td>
               <td className="border border-[#a8a29e] px-3 py-3">
                 <span className="inline-flex items-center gap-4">
                   <label className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
-                    是
+                    <span className="w-4 h-4 border-2 border-border inline-block"></span>是
                   </label>
                   <label className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
-                    否
+                    <span className="w-4 h-4 border-2 border-border inline-block"></span>否
                   </label>
                 </span>
               </td>
             </tr>
             <tr className="bg-white">
-              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">是否含過路費</td>
+              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">
+                是否含過路費
+              </td>
               <td className="border border-[#a8a29e] px-3 py-3">
                 <span className="inline-flex items-center gap-4">
                   <label className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
-                    是
+                    <span className="w-4 h-4 border-2 border-border inline-block"></span>是
                   </label>
                   <label className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
-                    否
+                    <span className="w-4 h-4 border-2 border-border inline-block"></span>否
                   </label>
                 </span>
               </td>
             </tr>
             <tr className="bg-[#fafaf8]">
-              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">是否含司機住宿</td>
+              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">
+                是否含司機住宿
+              </td>
               <td className="border border-[#a8a29e] px-3 py-3">
                 <span className="inline-flex items-center gap-4">
                   <label className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
-                    是
+                    <span className="w-4 h-4 border-2 border-border inline-block"></span>是
                   </label>
                   <label className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
+                    <span className="w-4 h-4 border-2 border-border inline-block"></span>
                     否，住宿費：NT$ __________
                   </label>
                 </span>
               </td>
             </tr>
             <tr className="bg-white">
-              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">是否含小費</td>
+              <td className="border border-[#a8a29e] px-3 py-3 font-semibold text-[#78716c]">
+                是否含小費
+              </td>
               <td className="border border-[#a8a29e] px-3 py-3">
                 <span className="inline-flex items-center gap-4">
                   <label className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
-                    是
+                    <span className="w-4 h-4 border-2 border-border inline-block"></span>是
                   </label>
                   <label className="flex items-center gap-2">
-                    <span className="w-4 h-4 border-2 border-gray-400 inline-block"></span>
+                    <span className="w-4 h-4 border-2 border-border inline-block"></span>
                     否，小費：NT$ __________
                   </label>
                 </span>
@@ -272,8 +286,8 @@ export function TransportTraditionalView({
 
       {/* 頁尾 + 發票章 */}
       <div className="flex justify-between items-end pt-4 border-t-2 border-[#a8a29e]">
-        <div className="text-sm text-gray-600">
-          <div className="font-semibold text-gray-800 mb-2">敬請確認回傳資訊</div>
+        <div className="text-sm text-morandi-secondary">
+          <div className="font-semibold text-morandi-primary mb-2">敬請確認回傳資訊</div>
           <div>${COMPANY_NAME}</div>
           <div>電話：02-2345-6789</div>
           <div>傳真：02-2345-6788</div>
@@ -286,7 +300,6 @@ export function TransportTraditionalView({
           </div>
         )}
       </div>
-
     </div>
   )
 }

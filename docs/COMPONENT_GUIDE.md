@@ -339,7 +339,6 @@ import { FormField } from '@/components/ui/form-field'
 
 ```tsx
 import { Label } from '@/components/ui/label'
-
 ;<Label required>姓名</Label> // 顯示紅色星號
 ```
 
@@ -555,7 +554,6 @@ if (!data) return <NotFoundState resourceName="訂單" />
 
 ```tsx
 import { StoreSyncProvider } from '@/stores/sync'
-
 ;<StoreSyncProvider>{children}</StoreSyncProvider>
 ```
 

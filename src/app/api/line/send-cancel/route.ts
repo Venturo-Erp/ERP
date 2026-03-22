@@ -30,8 +30,9 @@ export async function POST(req: NextRequest) {
 
     // 取消項目列表
     const itemList = (items || [])
-      .map((item: { name: string; date?: string; quantity?: number }) => 
-        `• ${item.name}${item.date ? ` (${item.date})` : ''}${item.quantity ? ` x${item.quantity}` : ''}`
+      .map(
+        (item: { name: string; date?: string; quantity?: number }) =>
+          `• ${item.name}${item.date ? ` (${item.date})` : ''}${item.quantity ? ` x${item.quantity}` : ''}`
       )
       .join('\n')
 
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
             },
             {
               type: 'text',
-              text: {COMPANY_NAME},
+              text: { COMPANY_NAME },
               color: '#FFFFFF',
               size: 'xs',
               margin: 'sm',
@@ -117,27 +118,29 @@ export async function POST(req: NextRequest) {
               margin: 'sm',
             },
             // 取消原因
-            ...(reason ? [
-              {
-                type: 'separator',
-                margin: 'lg',
-              },
-              {
-                type: 'text',
-                text: '📝 取消原因',
-                size: 'sm',
-                weight: 'bold',
-                margin: 'lg',
-              },
-              {
-                type: 'text',
-                text: reason,
-                size: 'sm',
-                wrap: true,
-                margin: 'sm',
-                color: '#666666',
-              },
-            ] as const : []),
+            ...(reason
+              ? ([
+                  {
+                    type: 'separator',
+                    margin: 'lg',
+                  },
+                  {
+                    type: 'text',
+                    text: '📝 取消原因',
+                    size: 'sm',
+                    weight: 'bold',
+                    margin: 'lg',
+                  },
+                  {
+                    type: 'text',
+                    text: reason,
+                    size: 'sm',
+                    wrap: true,
+                    margin: 'sm',
+                    color: '#666666',
+                  },
+                ] as const)
+              : []),
             // 致歉
             {
               type: 'box',
@@ -165,7 +168,7 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         to: lineGroupId,

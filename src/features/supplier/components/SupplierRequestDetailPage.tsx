@@ -48,7 +48,10 @@ interface SupplierRequestDetailPageProps {
 }
 
 // 回覆狀態 Badge
-const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+> = {
   pending: { label: SUPPLIER_LABELS.STATUS_PENDING_REPLY, variant: 'outline' },
   responded: { label: SUPPLIER_LABELS.STATUS_RESPONDED, variant: 'secondary' },
   quoted: { label: SUPPLIER_LABELS.STATUS_QUOTED, variant: 'secondary' },
@@ -175,9 +178,7 @@ export function SupplierRequestDetailPage({ paramsPromise }: SupplierRequestDeta
     }
   }, [request, user, quoteItems, replyNote, totalQuotedCost, toast, router])
 
-  const isPending =
-    !request?.response_status ||
-    request.response_status === 'pending'
+  const isPending = !request?.response_status || request.response_status === 'pending'
 
   const canReply = isPending || request?.response_status === 'need_info'
 
@@ -287,16 +288,14 @@ export function SupplierRequestDetailPage({ paramsPromise }: SupplierRequestDeta
                 <div>
                   <span className="text-morandi-secondary">類別</span>
                   <div className="font-medium mt-1">
-                    {
-                      {
-                        transport: SUPPLIER_LABELS.CAT_TRANSPORT,
-                        guide: SUPPLIER_LABELS.CAT_GUIDE,
-                        hotel: SUPPLIER_LABELS.CAT_HOTEL,
-                        restaurant: SUPPLIER_LABELS.CAT_RESTAURANT,
-                        activity: SUPPLIER_LABELS.CAT_ACTIVITY,
-                        other: SUPPLIER_LABELS.CAT_OTHER,
-                      }[request.category] || request.category
-                    }
+                    {{
+                      transport: SUPPLIER_LABELS.CAT_TRANSPORT,
+                      guide: SUPPLIER_LABELS.CAT_GUIDE,
+                      hotel: SUPPLIER_LABELS.CAT_HOTEL,
+                      restaurant: SUPPLIER_LABELS.CAT_RESTAURANT,
+                      activity: SUPPLIER_LABELS.CAT_ACTIVITY,
+                      other: SUPPLIER_LABELS.CAT_OTHER,
+                    }[request.category] || request.category}
                   </div>
                 </div>
               </div>
@@ -389,7 +388,10 @@ export function SupplierRequestDetailPage({ paramsPromise }: SupplierRequestDeta
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-border">
-                    <td colSpan={5} className="py-3 px-2 text-right font-medium text-morandi-primary">
+                    <td
+                      colSpan={5}
+                      className="py-3 px-2 text-right font-medium text-morandi-primary"
+                    >
                       報價總計
                     </td>
                     <td className="py-3 px-2 text-right font-bold text-lg text-morandi-gold">
@@ -431,10 +433,7 @@ export function SupplierRequestDetailPage({ paramsPromise }: SupplierRequestDeta
         {/* 送出按鈕 */}
         {canReply && (
           <div className="flex justify-end gap-3 pb-4">
-            <Button
-              variant="outline"
-              onClick={() => router.push('/supplier/requests')}
-            >
+            <Button variant="outline" onClick={() => router.push('/supplier/requests')}>
               取消
             </Button>
             <Button
@@ -442,11 +441,7 @@ export function SupplierRequestDetailPage({ paramsPromise }: SupplierRequestDeta
               disabled={saving}
               className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
             >
-              {saving ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <Send size={16} />
-              )}
+              {saving ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
               回覆報價
             </Button>
           </div>

@@ -1,12 +1,20 @@
 'use client'
 
+import { Trash2, X } from 'lucide-react'
+
 import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -37,7 +45,12 @@ const accountTypes = [
   { value: 'cost', label: '成本' },
 ]
 
-export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: EditAccountDialogProps) {
+export function EditAccountDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+  account,
+}: EditAccountDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState({
     code: '',
@@ -61,7 +74,7 @@ export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: Ed
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!account) return
 
     if (!formData.code || !formData.name) {
@@ -109,8 +122,7 @@ export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: Ed
     }
 
     const confirmed = confirm(
-      `確定要刪除科目「${account.code} ${account.name}」嗎？\n\n` +
-      `此操作無法復原！`
+      `確定要刪除科目「${account.code} ${account.name}」嗎？\n\n` + `此操作無法復原！`
     )
 
     if (!confirmed) return
@@ -118,10 +130,7 @@ export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: Ed
     setIsSubmitting(true)
 
     try {
-      const { error } = await supabase
-        .from('chart_of_accounts')
-        .delete()
-        .eq('id', account.id)
+      const { error } = await supabase.from('chart_of_accounts').delete().eq('id', account.id)
 
       if (error) throw error
 
@@ -148,7 +157,7 @@ export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: Ed
         <DialogHeader>
           <DialogTitle>編輯會計科目</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {account.is_system_locked && (
             <div className="p-3 bg-amber-50 text-amber-800 rounded-md text-sm">
@@ -162,7 +171,7 @@ export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: Ed
               id="code"
               placeholder="例如：1100"
               value={formData.code}
-              onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+              onChange={e => setFormData({ ...formData, code: e.target.value })}
               disabled={account.is_system_locked}
               required
             />
@@ -174,7 +183,7 @@ export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: Ed
               id="name"
               placeholder="例如：銀行存款"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={e => setFormData({ ...formData, name: e.target.value })}
               required
             />
           </div>
@@ -183,7 +192,7 @@ export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: Ed
             <Label htmlFor="account_type">科目類型 *</Label>
             <Select
               value={formData.account_type}
-              onValueChange={(value) => setFormData({ ...formData, account_type: value })}
+              onValueChange={value => setFormData({ ...formData, account_type: value })}
               disabled={account.is_system_locked}
             >
               <SelectTrigger id="account_type">
@@ -205,7 +214,7 @@ export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: Ed
               id="description"
               placeholder="科目說明（選填）"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={e => setFormData({ ...formData, description: e.target.value })}
               rows={3}
             />
           </div>
@@ -215,7 +224,7 @@ export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: Ed
             <Switch
               id="is_active"
               checked={formData.is_active}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+              onCheckedChange={checked => setFormData({ ...formData, is_active: checked })}
             />
           </div>
 
@@ -226,6 +235,7 @@ export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: Ed
               onClick={handleDelete}
               disabled={isSubmitting || account.is_system_locked}
             >
+              <Trash2 className="h-4 w-4 mr-1" />
               刪除
             </Button>
             <div className="flex gap-3">
@@ -235,6 +245,7 @@ export function EditAccountDialog({ open, onOpenChange, onSuccess, account }: Ed
                 onClick={() => onOpenChange(false)}
                 disabled={isSubmitting}
               >
+                <X className="h-4 w-4 mr-1" />
                 取消
               </Button>
               <Button type="submit" disabled={isSubmitting}>

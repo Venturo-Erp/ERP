@@ -453,31 +453,30 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   }
                 })
 
-              const sortedDays = Object.keys(groupedByDay)
-                .sort((a, b) => Number(a) - Number(b))
+              const sortedDays = Object.keys(groupedByDay).sort((a, b) => Number(a) - Number(b))
 
               return sortedDays.map((dayStr, dayIndex) => {
-                  const day = Number(dayStr)
-                  const dayItems = groupedByDay[day]
-                  const prevDayHotelName = day > 1 ? dayHotelNames[day - 1] : undefined
+                const day = Number(dayStr)
+                const dayItems = groupedByDay[day]
+                const prevDayHotelName = day > 1 ? dayHotelNames[day - 1] : undefined
 
-                  return dayItems.map((item, roomIndex) => (
-                    <AccommodationItemRow
-                      key={item.id}
-                      item={item}
-                      categoryId={category.id}
-                      day={day}
-                      dayIndex={dayIndex}
-                      roomIndex={roomIndex}
-                      roomCount={dayItems.length}
-                      prevDayHotelName={prevDayHotelName}
-                      isReadOnly={isReadOnly}
-                      handleUpdateItem={handleUpdateItem}
-                      handleRemoveItem={handleRemoveItem}
-                      handleToggleVisibility={handleToggleVisibility!}
-                    />
-                  ))
-                })
+                return dayItems.map((item, roomIndex) => (
+                  <AccommodationItemRow
+                    key={item.id}
+                    item={item}
+                    categoryId={category.id}
+                    day={day}
+                    dayIndex={dayIndex}
+                    roomIndex={roomIndex}
+                    roomCount={dayItems.length}
+                    prevDayHotelName={prevDayHotelName}
+                    isReadOnly={isReadOnly}
+                    handleUpdateItem={handleUpdateItem}
+                    handleRemoveItem={handleRemoveItem}
+                    handleToggleVisibility={handleToggleVisibility!}
+                  />
+                ))
+              })
             })()
           : // 一般分類的渲染
             category.items.map(item => (

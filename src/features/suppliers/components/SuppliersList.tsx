@@ -41,7 +41,9 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string | null; supplier_id: string | null }[]>([])
+  const [lineGroups, setLineGroups] = useState<
+    { group_id: string; group_name: string | null; supplier_id: string | null }[]
+  >([])
   const [bindingSupplier, setBindingSupplier] = useState<Supplier | null>(null)
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const supabase = createSupabaseBrowserClient()
@@ -49,7 +51,9 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
   // 載入 LINE 群組
   useEffect(() => {
     const loadGroups = async () => {
-      const { data } = await supabase.from('line_groups').select('group_id, group_name, supplier_id')
+      const { data } = await supabase
+        .from('line_groups')
+        .select('group_id, group_name, supplier_id')
       if (data) setLineGroups(data)
     }
     loadGroups()
@@ -64,20 +68,33 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
   // 綁定群組
   const handleBindGroup = async () => {
     if (!bindingSupplier || !selectedGroupId) return
-    
+
     try {
       // 先解除其他供應商對這個群組的綁定
-      await supabase.from('line_groups').update({ supplier_id: null }).eq('group_id', selectedGroupId)
-      
+      await supabase
+        .from('line_groups')
+        .update({ supplier_id: null })
+        .eq('group_id', selectedGroupId)
+
       // 綁定到當前供應商
-      await supabase.from('line_groups').update({ supplier_id: bindingSupplier.id }).eq('group_id', selectedGroupId)
-      
+      await supabase
+        .from('line_groups')
+        .update({ supplier_id: bindingSupplier.id })
+        .eq('group_id', selectedGroupId)
+
       // 更新本地狀態
-      setLineGroups(prev => prev.map(g => ({
-        ...g,
-        supplier_id: g.group_id === selectedGroupId ? bindingSupplier.id : (g.supplier_id === bindingSupplier.id ? null : g.supplier_id)
-      })))
-      
+      setLineGroups(prev =>
+        prev.map(g => ({
+          ...g,
+          supplier_id:
+            g.group_id === selectedGroupId
+              ? bindingSupplier.id
+              : g.supplier_id === bindingSupplier.id
+                ? null
+                : g.supplier_id,
+        }))
+      )
+
       toast.success(`已綁定 LINE 群組`)
       setBindingSupplier(null)
       setSelectedGroupId('')
@@ -154,7 +171,7 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
             size="sm"
             variant="outline"
             className="h-7 text-xs"
-            onClick={(e) => {
+            onClick={e => {
               e.stopPropagation()
               setBindingSupplier(supplier)
             }}
@@ -167,7 +184,9 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
   ]
 
   // 可用群組（未綁定 + 當前供應商綁定的）
-  const availableGroups = lineGroups.filter(g => !g.supplier_id || g.supplier_id === bindingSupplier?.id)
+  const availableGroups = lineGroups.filter(
+    g => !g.supplier_id || g.supplier_id === bindingSupplier?.id
+  )
 
   return (
     <>
@@ -225,9 +244,10 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
           {bindingSupplier && (
             <div className="space-y-4">
               <p className="text-sm text-morandi-secondary">
-                為「<span className="font-medium text-morandi-primary">{bindingSupplier.name}</span>」選擇 LINE 群組
+                為「<span className="font-medium text-morandi-primary">{bindingSupplier.name}</span>
+                」選擇 LINE 群組
               </p>
-              
+
               {availableGroups.length === 0 ? (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm text-yellow-700">
                   目前沒有可綁定的群組。請先將 VENTURO 數位助理加入 LINE 群組。
@@ -240,21 +260,27 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
                       className={`w-full text-left px-4 py-3 rounded-md border-2 transition-colors ${
                         selectedGroupId === group.group_id
                           ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 hover:border-green-300 hover:bg-green-50/50'
+                          : 'border-border hover:border-green-300 hover:bg-green-50/50'
                       }`}
                       onClick={() => setSelectedGroupId(group.group_id)}
                     >
-                      <div className="font-medium">{group.group_name || group.group_id.slice(0, 12)}</div>
+                      <div className="font-medium">
+                        {group.group_name || group.group_id.slice(0, 12)}
+                      </div>
                     </button>
                   ))}
                 </div>
               )}
-              
+
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => setBindingSupplier(null)}>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setBindingSupplier(null)}
+                >
                   取消
                 </Button>
-                <Button 
+                <Button
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                   disabled={!selectedGroupId}
                   onClick={handleBindGroup}

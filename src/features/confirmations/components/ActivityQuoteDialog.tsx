@@ -3,8 +3,14 @@
 import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Loader2 } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Loader2, X } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import { UnifiedTraditionalView } from './UnifiedTraditionalView'
@@ -47,7 +53,10 @@ export function ActivityQuoteDialog({
         .from('line_groups')
         .select('group_id, group_name')
         .not('group_name', 'is', null)
-      if (data) setLineGroups(data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name))
+      if (data)
+        setLineGroups(
+          data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
+        )
     }
     load()
   }, [open, supabase])
@@ -121,15 +130,18 @@ export function ActivityQuoteDialog({
           ) : (
             <div className="space-y-4">
               <div className="text-sm">
-                <span className="font-medium">團號：</span>{tour?.code}
-                <span className="ml-4 font-medium">團名：</span>{tour?.name}
-                <span className="ml-4 font-medium">人數：</span>{totalPax} 人
+                <span className="font-medium">團號：</span>
+                {tour?.code}
+                <span className="ml-4 font-medium">團名：</span>
+                {tour?.name}
+                <span className="ml-4 font-medium">人數：</span>
+                {totalPax} 人
               </div>
               <div>
                 <h3 className="font-semibold mb-2">活動需求</h3>
                 <table className="w-full border-collapse text-sm">
                   <thead>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-morandi-container">
                       <th className="border px-3 py-2 text-left">活動時間</th>
                       <th className="border px-3 py-2 text-left">場地名稱</th>
                       <th className="border px-3 py-2 text-left">數量</th>
@@ -174,9 +186,17 @@ export function ActivityQuoteDialog({
                 disabled={!selectedGroupId || sending}
                 className="bg-[#06c755] hover:bg-[#05b34c] text-white"
               >
-                {sending ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />發送中...</> : '發送'}
+                {sending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    發送中...
+                  </>
+                ) : (
+                  '發送'
+                )}
               </Button>
               <Button variant="outline" onClick={() => setSelectedMethod(null)}>
+                <X className="h-4 w-4 mr-1" />
                 取消
               </Button>
             </div>
@@ -187,36 +207,39 @@ export function ActivityQuoteDialog({
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => handleDelivery('print')}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-gray-50"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
                 >
                   列印
                 </button>
                 <button
                   onClick={() => handleDelivery('line')}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-gray-50"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
                 >
                   LINE
                 </button>
-                <button 
+                <button
                   onClick={() => handleDelivery('email')}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-gray-50"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
                 >
                   Email
                 </button>
                 <button
                   onClick={() => handleDelivery('fax')}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-gray-50"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
                 >
                   傳真
                 </button>
-                <button 
+                <button
                   onClick={() => handleDelivery('tenant')}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-gray-50"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
                 >
                   租戶
                 </button>
               </div>
-              <Button variant="outline" onClick={onClose}>取消</Button>
+              <Button variant="outline" onClick={onClose}>
+                <X className="h-4 w-4 mr-1" />
+                取消
+              </Button>
             </div>
           )}
         </div>

@@ -67,9 +67,8 @@ export function useTourHealth(tourId: string): TourHealthData {
         const requestIds = tourRequests?.map(req => req.id) || []
 
         // 統計待回覆的需求單
-        const pendingRequests = tourRequests?.filter(
-          r => r.status === 'pending' || r.status === 'sent'
-        ) || []
+        const pendingRequests =
+          tourRequests?.filter(r => r.status === 'pending' || r.status === 'sent') || []
 
         // 2. 查詢該團所有成員的護照和機票狀態
         // 先查詢該團的所有訂單

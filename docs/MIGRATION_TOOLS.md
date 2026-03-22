@@ -7,6 +7,7 @@
 **使用時機**：本機沒有 psql / supabase CLI
 
 **從 `.env.local` 取得認證資訊**：
+
 ```bash
 SUPABASE_ACCESS_TOKEN=sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02
 PROJECT_REF=pfqvdacxowpgfamuvnsn
@@ -54,17 +55,14 @@ const accessToken = 'sbp_ae479b3d5d81d4992b6cebb91d93a16bfa499e02'
 
 const migrationSQL = readFileSync(process.argv[2], 'utf-8')
 
-const response = await fetch(
-  `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
-  {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query: migrationSQL }),
-  }
-)
+const response = await fetch(`https://api.supabase.com/v1/projects/${projectRef}/database/query`, {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${accessToken}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({ query: migrationSQL }),
+})
 
 const result = await response.json()
 if (!response.ok) {
@@ -75,6 +73,7 @@ console.log('✅ Migration 執行成功')
 ```
 
 **使用**：
+
 ```bash
 node scripts/exec-migration.mjs supabase/migrations/20260318_xxx.sql
 ```
@@ -141,6 +140,7 @@ fetch(\`https://api.supabase.com/v1/projects/\${projectRef}/database/query\`, {
 **原因**：外鍵約束參考的欄位型別不符
 
 **解決**：
+
 1. 先檢查 `tours.id` 的型別
 2. 確保外鍵也用相同型別（例如 `TEXT` 而非 `UUID`）
 3. 如果不確定，先不加外鍵約束
@@ -233,8 +233,8 @@ pbcopy < supabase/migrations/20260318_xxx.sql
 node -e "..." # 用上面的「檢查表結構」指令
 
 # 或在 Supabase Dashboard 執行
-SELECT column_name FROM information_schema.columns 
-WHERE table_name = 'tour_requests' 
+SELECT column_name FROM information_schema.columns
+WHERE table_name = 'tour_requests'
   AND column_name = 'new_field';
 ```
 
@@ -249,20 +249,24 @@ WHERE table_name = 'tour_requests'
 **執行方式**：
 
 1. **Step 1**: 擴充 `tour_requests` 表
+
 ```bash
 node scripts/exec-migration-step1.mjs
 ```
 
 2. **Step 2**: 重建 `tour_request_items` 表
+
 ```bash
 node scripts/exec-migration-final.mjs
 ```
 
 **結果**：
+
 - ✅ tour_requests 新增 9 個欄位
 - ✅ tour_request_items 表重建（24 個欄位）
 
 **經驗教訓**：
+
 1. 複雜 migration 分多個步驟執行更安全
 2. 先檢查表結構再決定是否需要 DROP
 3. 外鍵約束要確認型別一致

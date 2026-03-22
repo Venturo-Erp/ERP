@@ -1,12 +1,20 @@
 'use client'
 
+import { X } from 'lucide-react'
+
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
@@ -40,7 +48,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!user?.workspace_id) {
       toast.error('無法取得 workspace_id')
       return
@@ -54,26 +62,22 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
     setIsSubmitting(true)
 
     try {
-      
-      
-      const { error } = await supabase
-        .from('chart_of_accounts')
-        .insert({
-          workspace_id: user.workspace_id,
-          code: formData.code,
-          name: formData.name,
-          account_type: formData.account_type,
-          description: formData.description || null,
-          is_active: formData.is_active,
-          is_system_locked: false,
-        })
+      const { error } = await supabase.from('chart_of_accounts').insert({
+        workspace_id: user.workspace_id,
+        code: formData.code,
+        name: formData.name,
+        account_type: formData.account_type,
+        description: formData.description || null,
+        is_active: formData.is_active,
+        is_system_locked: false,
+      })
 
       if (error) throw error
 
       toast.success('科目新增成功')
       onOpenChange(false)
       onSuccess()
-      
+
       // 重置表單
       setFormData({
         code: '',
@@ -100,7 +104,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
         <DialogHeader>
           <DialogTitle>新增會計科目</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="code">科目代號 *</Label>
@@ -108,7 +112,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
               id="code"
               placeholder="例如：1100"
               value={formData.code}
-              onChange={(e) => setFormData({ ...formData, code: e.target.value })}
+              onChange={e => setFormData({ ...formData, code: e.target.value })}
               required
             />
           </div>
@@ -119,7 +123,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
               id="name"
               placeholder="例如：銀行存款"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={e => setFormData({ ...formData, name: e.target.value })}
               required
             />
           </div>
@@ -128,7 +132,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
             <Label htmlFor="account_type">科目類型 *</Label>
             <Select
               value={formData.account_type}
-              onValueChange={(value) => setFormData({ ...formData, account_type: value })}
+              onValueChange={value => setFormData({ ...formData, account_type: value })}
             >
               <SelectTrigger id="account_type">
                 <SelectValue />
@@ -149,7 +153,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
               id="description"
               placeholder="科目說明（選填）"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={e => setFormData({ ...formData, description: e.target.value })}
               rows={3}
             />
           </div>
@@ -159,7 +163,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
             <Switch
               id="is_active"
               checked={formData.is_active}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+              onCheckedChange={checked => setFormData({ ...formData, is_active: checked })}
             />
           </div>
 
@@ -170,6 +174,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
+              <X className="h-4 w-4 mr-1" />
               取消
             </Button>
             <Button type="submit" disabled={isSubmitting}>

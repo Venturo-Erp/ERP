@@ -5,7 +5,13 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, CheckCircle, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
@@ -32,7 +38,7 @@ export default function PeriodClosingPage() {
   const { user } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
   const [closings, setClosings] = useState<PeriodClosing[]>([])
-  
+
   // 選擇期間
   const [periodType, setPeriodType] = useState<'month' | 'quarter' | 'year'>('month')
   const [year, setYear] = useState(new Date().getFullYear())
@@ -103,10 +109,10 @@ export default function PeriodClosingPage() {
 
     const confirmed = confirm(
       `確定要執行 ${periodTypeLabels[periodType]}（${start} ~ ${end}）嗎？\n\n` +
-      `此操作將：\n` +
-      `1. 將所有損益科目餘額結轉到「本期損益」\n` +
-      `2. ${periodType === 'year' ? '將「本期損益」結轉到「保留盈餘」\n3. ' : ''}損益科目餘額歸零\n\n` +
-      `執行後無法復原！`
+        `此操作將：\n` +
+        `1. 將所有損益科目餘額結轉到「本期損益」\n` +
+        `2. ${periodType === 'year' ? '將「本期損益」結轉到「保留盈餘」\n3. ' : ''}損益科目餘額歸零\n\n` +
+        `執行後無法復原！`
     )
 
     if (!confirmed) return
@@ -174,13 +180,15 @@ export default function PeriodClosingPage() {
 
             <div>
               <Label>年度</Label>
-              <Select value={year.toString()} onValueChange={(value) => setYear(parseInt(value))}>
+              <Select value={year.toString()} onValueChange={value => setYear(parseInt(value))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(y => (
-                    <SelectItem key={y} value={y.toString()}>{y} 年</SelectItem>
+                    <SelectItem key={y} value={y.toString()}>
+                      {y} 年
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -189,13 +197,15 @@ export default function PeriodClosingPage() {
             {periodType === 'month' && (
               <div>
                 <Label>月份</Label>
-                <Select value={month.toString()} onValueChange={(value) => setMonth(parseInt(value))}>
+                <Select value={month.toString()} onValueChange={value => setMonth(parseInt(value))}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                      <SelectItem key={m} value={m.toString()}>{m} 月</SelectItem>
+                      <SelectItem key={m} value={m.toString()}>
+                        {m} 月
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -205,13 +215,18 @@ export default function PeriodClosingPage() {
             {periodType === 'quarter' && (
               <div>
                 <Label>季度</Label>
-                <Select value={quarter.toString()} onValueChange={(value) => setQuarter(parseInt(value))}>
+                <Select
+                  value={quarter.toString()}
+                  onValueChange={value => setQuarter(parseInt(value))}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {[1, 2, 3, 4].map(q => (
-                      <SelectItem key={q} value={q.toString()}>Q{q}</SelectItem>
+                      <SelectItem key={q} value={q.toString()}>
+                        Q{q}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -223,7 +238,9 @@ export default function PeriodClosingPage() {
             <div className="text-sm space-y-1">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">期間：</span>
-                <span className="font-mono">{start} ~ {end}</span>
+                <span className="font-mono">
+                  {start} ~ {end}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">狀態：</span>
@@ -242,11 +259,7 @@ export default function PeriodClosingPage() {
             </div>
           </div>
 
-          <Button
-            onClick={handleClose}
-            disabled={isLoading || isClosed}
-            className="w-full"
-          >
+          <Button onClick={handleClose} disabled={isLoading || isClosed} className="w-full">
             {isLoading ? '結轉中...' : isClosed ? '此期間已結轉' : '執行結轉'}
           </Button>
 
@@ -271,26 +284,31 @@ export default function PeriodClosingPage() {
           <h2 className="text-lg font-semibold mb-4">結轉歷史</h2>
 
           {closings.length === 0 ? (
-            <div className="text-center text-muted-foreground py-8">
-              尚無結轉記錄
-            </div>
+            <div className="text-center text-muted-foreground py-8">尚無結轉記錄</div>
           ) : (
             <div className="space-y-2">
-              {closings.map((closing) => (
+              {closings.map(closing => (
                 <div
                   key={closing.id}
                   className="flex items-center justify-between p-3 border rounded-lg"
                 >
                   <div className="flex-1">
                     <div className="font-medium">
-                      {periodTypeLabels[closing.period_type as keyof typeof periodTypeLabels] || closing.period_type} - {closing.period_start} ~ {closing.period_end}
+                      {periodTypeLabels[closing.period_type as keyof typeof periodTypeLabels] ||
+                        closing.period_type}{' '}
+                      - {closing.period_start} ~ {closing.period_end}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      結轉時間：{closing.closed_at ? new Date(closing.closed_at).toLocaleString('zh-TW') : '-'}
+                      結轉時間：
+                      {closing.closed_at
+                        ? new Date(closing.closed_at).toLocaleString('zh-TW')
+                        : '-'}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className={`font-semibold ${closing.net_income >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div
+                      className={`font-semibold ${closing.net_income >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                    >
                       {closing.net_income >= 0 ? '淨利' : '淨損'}
                     </div>
                     <div className="font-mono text-sm">

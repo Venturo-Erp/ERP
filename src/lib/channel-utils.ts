@@ -114,10 +114,10 @@ export async function archiveChannelForTour(tourId: string): Promise<boolean> {
     // 更新頻道狀態為封存
     const { error: updateError } = await supabase
       .from('channels')
-      .update({ 
+      .update({
         is_archived: true,
         archived_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('id', channel.id)
 

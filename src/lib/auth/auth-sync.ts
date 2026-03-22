@@ -82,9 +82,7 @@ interface SyncOptions {
  * 帶 timeout 的 getSession wrapper
  * 避免 getSession 掛住導致整個應用卡住
  */
-async function getSessionWithTimeout(
-  timeoutMs: number = 10000
-): Promise<{
+async function getSessionWithTimeout(timeoutMs: number = 10000): Promise<{
   session: Awaited<ReturnType<typeof supabase.auth.getSession>>['data']['session'] | null
   error: Error | null
 }> {

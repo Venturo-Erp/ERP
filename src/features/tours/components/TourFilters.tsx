@@ -9,7 +9,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Calendar, FileCheck, MapPin, BarChart3, Archive, Star, Plus, FileText, Copy, ChevronDown } from 'lucide-react'
+import {
+  Calendar,
+  FileCheck,
+  MapPin,
+  BarChart3,
+  Archive,
+  Star,
+  Plus,
+  FileText,
+  Copy,
+  ChevronDown,
+} from 'lucide-react'
 import { TOUR_FILTERS } from '../constants'
 
 interface TourFiltersProps {
@@ -35,9 +46,7 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
     <ResponsiveHeader
       title={TOUR_FILTERS.page_title}
       icon={MapPin}
-      breadcrumb={[
-        { label: TOUR_FILTERS.breadcrumb_tours, href: '/tours' },
-      ]}
+      breadcrumb={[{ label: TOUR_FILTERS.breadcrumb_tours, href: '/tours' }]}
       showSearch={true}
       searchTerm={searchQuery}
       onSearchChange={onSearchChange}
@@ -62,18 +71,18 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
               <ChevronDown size={16} />
             </Button>
           </DropdownMenuTrigger>
-          
+
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onAddTour}>
               <Calendar className="mr-2 h-4 w-4" />
               開團（正式團）
             </DropdownMenuItem>
-            
+
             <DropdownMenuItem onClick={onAddProposal}>
               <FileText className="mr-2 h-4 w-4" />
               提案（客戶詢價）
             </DropdownMenuItem>
-            
+
             <DropdownMenuItem onClick={onAddTemplate}>
               <Copy className="mr-2 h-4 w-4" />
               開模板（標準行程）

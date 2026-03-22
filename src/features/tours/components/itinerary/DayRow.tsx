@@ -2,17 +2,12 @@
 
 import React from 'react'
 import { Input } from '@/components/ui/input'
-import {
-  Check,
-  Hotel,
-  MapPin,
-  X,
-} from 'lucide-react'
+import { Check, Hotel, MapPin, X } from 'lucide-react'
 import { COMP_TOURS_LABELS } from '../../constants/labels'
 import { DroppableZone } from './DroppableZone'
 import { MentionInput, type MentionInputHandle } from '../mention-input'
 
-export type ItineraryBlock = 
+export type ItineraryBlock =
   | { type: 'text'; content: string }
   | { type: 'attraction'; id: string; name: string; verified?: boolean }
 
@@ -43,7 +38,10 @@ interface DayRowProps {
   isLast: boolean
   updateDaySchedule: (index: number, field: string, value: string | boolean | undefined) => void
   removeAttraction: (dayIdx: number, attractionId: string) => void
-  reorderAttractions: (dayIdx: number, newOrder: { id: string; name: string; verified?: boolean }[]) => void
+  reorderAttractions: (
+    dayIdx: number,
+    newOrder: { id: string; name: string; verified?: boolean }[]
+  ) => void
   handleMentionSelect: (dayIdx: number, attraction: { id: string; name: string }) => void
   updateBlocks?: (dayIdx: number, blocks: ItineraryBlock[]) => void
   mentionInputRefs: React.MutableRefObject<Record<number, MentionInputHandle | null>>
@@ -72,70 +70,93 @@ export function DayRow({
   const routeInputRef = React.useRef<HTMLInputElement>(null)
 
   // 插入景點：名字插到游標位置 + 加到 attractions 列表
-  const handleInsertAttraction = React.useCallback((attraction: { id: string; name: string }) => {
-    // 加到 attractions 列表（DB 連結）
-    const existing = day.attractions || []
-    if (existing.some(a => a.id === attraction.id)) return
-    const newAttractions = [...existing, attraction]
-    reorderAttractions(idx, newAttractions)
+  const handleInsertAttraction = React.useCallback(
+    (attraction: { id: string; name: string }) => {
+      // 加到 attractions 列表（DB 連結）
+      const existing = day.attractions || []
+      if (existing.some(a => a.id === attraction.id)) return
+      const newAttractions = [...existing, attraction]
+      reorderAttractions(idx, newAttractions)
 
-    // 在游標位置插入景點名字
-    const input = routeInputRef.current
-    const currentRoute = day.route || ''
-    const cursorPos = input?.selectionStart ?? currentRoute.length
-    const before = currentRoute.slice(0, cursorPos)
-    const after = currentRoute.slice(cursorPos)
-    const newRoute = before + attraction.name + after
-    updateDaySchedule(idx, 'route', newRoute)
+      // 在游標位置插入景點名字
+      const input = routeInputRef.current
+      const currentRoute = day.route || ''
+      const cursorPos = input?.selectionStart ?? currentRoute.length
+      const before = currentRoute.slice(0, cursorPos)
+      const after = currentRoute.slice(cursorPos)
+      const newRoute = before + attraction.name + after
+      updateDaySchedule(idx, 'route', newRoute)
 
-    // 同步 blocks
-    if (updateBlocks) {
-      const newBlocks: ItineraryBlock[] = [
-        { type: 'text', content: newRoute },
-        ...newAttractions.map(a => ({ type: 'attraction' as const, id: a.id, name: a.name })),
-      ]
-      updateBlocks(idx, newBlocks)
-    }
-
-    // Focus 回 input，游標放在插入的景點名後面
-    const newCursorPos = cursorPos + attraction.name.length
-    setTimeout(() => {
-      if (input) {
-        input.focus()
-        input.setSelectionRange(newCursorPos, newCursorPos)
+      // 同步 blocks
+      if (updateBlocks) {
+        const newBlocks: ItineraryBlock[] = [
+          { type: 'text', content: newRoute },
+          ...newAttractions.map(a => ({ type: 'attraction' as const, id: a.id, name: a.name })),
+        ]
+        updateBlocks(idx, newBlocks)
       }
-    }, 50)
-  }, [day.route, day.attractions, idx, reorderAttractions, updateDaySchedule, updateBlocks])
+
+      // Focus 回 input，游標放在插入的景點名後面
+      const newCursorPos = cursorPos + attraction.name.length
+      setTimeout(() => {
+        if (input) {
+          input.focus()
+          input.setSelectionRange(newCursorPos, newCursorPos)
+        }
+      }, 50)
+    },
+    [day.route, day.attractions, idx, reorderAttractions, updateDaySchedule, updateBlocks]
+  )
 
   // route 文字變更
-  const handleRouteChange = React.useCallback((value: string) => {
-    updateDaySchedule(idx, 'route', value)
-    // 同步 blocks（保留文字 + attractions）
-    if (updateBlocks) {
-      const newBlocks: ItineraryBlock[] = [
-        { type: 'text', content: value },
-        ...(day.attractions || []).map(a => ({ type: 'attraction' as const, id: a.id, name: a.name, verified: a.verified })),
-      ]
-      updateBlocks(idx, newBlocks)
-    }
-  }, [idx, day.attractions, updateDaySchedule, updateBlocks])
+  const handleRouteChange = React.useCallback(
+    (value: string) => {
+      updateDaySchedule(idx, 'route', value)
+      // 同步 blocks（保留文字 + attractions）
+      if (updateBlocks) {
+        const newBlocks: ItineraryBlock[] = [
+          { type: 'text', content: value },
+          ...(day.attractions || []).map(a => ({
+            type: 'attraction' as const,
+            id: a.id,
+            name: a.name,
+            verified: a.verified,
+          })),
+        ]
+        updateBlocks(idx, newBlocks)
+      }
+    },
+    [idx, day.attractions, updateDaySchedule, updateBlocks]
+  )
 
   // 移除景點：從 attractions 移除 + 從 route 文字中移除名字
-  const handleRemoveAttraction = React.useCallback((attractionId: string) => {
-    const attraction = (day.attractions || []).find(a => a.id === attractionId)
-    removeAttraction(idx, attractionId)
+  const handleRemoveAttraction = React.useCallback(
+    (attractionId: string) => {
+      const attraction = (day.attractions || []).find(a => a.id === attractionId)
+      removeAttraction(idx, attractionId)
 
-    // 從 route 文字中移除景點名
-    if (attraction && day.route) {
-      let newRoute = day.route
-      // 移除 " → 景點名" 或 "景點名 → " 或單獨的 "景點名"
-      newRoute = newRoute.replace(new RegExp(`\\s*→\\s*${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'), '')
-      newRoute = newRoute.replace(new RegExp(`${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*→\\s*`, 'g'), '')
-      newRoute = newRoute.replace(new RegExp(`${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'), '')
-      newRoute = newRoute.replace(/^\s*→\s*|\s*→\s*$/g, '').trim()
-      updateDaySchedule(idx, 'route', newRoute)
-    }
-  }, [day.attractions, day.route, idx, removeAttraction, updateDaySchedule])
+      // 從 route 文字中移除景點名
+      if (attraction && day.route) {
+        let newRoute = day.route
+        // 移除 " → 景點名" 或 "景點名 → " 或單獨的 "景點名"
+        newRoute = newRoute.replace(
+          new RegExp(`\\s*→\\s*${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'),
+          ''
+        )
+        newRoute = newRoute.replace(
+          new RegExp(`${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*→\\s*`, 'g'),
+          ''
+        )
+        newRoute = newRoute.replace(
+          new RegExp(`${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'),
+          ''
+        )
+        newRoute = newRoute.replace(/^\s*→\s*|\s*→\s*$/g, '').trim()
+        updateDaySchedule(idx, 'route', newRoute)
+      }
+    },
+    [day.attractions, day.route, idx, removeAttraction, updateDaySchedule]
+  )
 
   return (
     <tbody>
@@ -238,7 +259,13 @@ export function DayRow({
                 <div className="h-8 flex items-center px-2">
                   <div className="inline-flex items-center gap-1 bg-orange-500/10 text-orange-600 rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.breakfast}</span>
-                    <button type="button" onClick={() => updateDaySchedule(idx, 'meals.breakfast', '')} className="hover:text-destructive"><X size={10} /></button>
+                    <button
+                      type="button"
+                      onClick={() => updateDaySchedule(idx, 'meals.breakfast', '')}
+                      className="hover:text-destructive"
+                    >
+                      <X size={10} />
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -253,9 +280,7 @@ export function DayRow({
               {!isFirst && (
                 <button
                   type="button"
-                  onClick={() =>
-                    updateDaySchedule(idx, 'hotelBreakfast', !day.hotelBreakfast)
-                  }
+                  onClick={() => updateDaySchedule(idx, 'hotelBreakfast', !day.hotelBreakfast)}
                   className="absolute right-1.5 top-1/2 -translate-y-1/2"
                   title={COMP_TOURS_LABELS.飯店早餐}
                 >
@@ -276,7 +301,13 @@ export function DayRow({
                 <div className="h-8 flex items-center px-2">
                   <div className="inline-flex items-center gap-1 bg-orange-500/10 text-orange-600 rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.lunch}</span>
-                    <button type="button" onClick={() => updateDaySchedule(idx, 'meals.lunch', '')} className="hover:text-destructive"><X size={10} /></button>
+                    <button
+                      type="button"
+                      onClick={() => updateDaySchedule(idx, 'meals.lunch', '')}
+                      className="hover:text-destructive"
+                    >
+                      <X size={10} />
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -310,7 +341,13 @@ export function DayRow({
                 <div className="h-8 flex items-center px-2">
                   <div className="inline-flex items-center gap-1 bg-orange-500/10 text-orange-600 rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.dinner}</span>
-                    <button type="button" onClick={() => updateDaySchedule(idx, 'meals.dinner', '')} className="hover:text-destructive"><X size={10} /></button>
+                    <button
+                      type="button"
+                      onClick={() => updateDaySchedule(idx, 'meals.dinner', '')}
+                      className="hover:text-destructive"
+                    >
+                      <X size={10} />
+                    </button>
                   </div>
                 </div>
               ) : (
@@ -354,7 +391,13 @@ export function DayRow({
                   <div className="inline-flex items-center gap-1 bg-blue-500/10 text-blue-600 rounded-full px-2 py-0.5 text-xs">
                     <Hotel size={10} />
                     <span>{day.accommodation}</span>
-                    <button type="button" onClick={() => updateDaySchedule(idx, 'accommodation', '')} className="hover:text-destructive"><X size={10} /></button>
+                    <button
+                      type="button"
+                      onClick={() => updateDaySchedule(idx, 'accommodation', '')}
+                      className="hover:text-destructive"
+                    >
+                      <X size={10} />
+                    </button>
                   </div>
                 </div>
               ) : (

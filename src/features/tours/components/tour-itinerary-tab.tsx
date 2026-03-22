@@ -35,7 +35,10 @@ import { useItineraries, createItinerary, updateItinerary } from '@/data'
 import { updateTour } from '@/data/entities/tours'
 import { useFlightSearch } from '@/hooks'
 // syncItineraryToQuote 已移除 — 報價單直接讀核心表，不需要同步
-import { useSyncItineraryToCore, useTourItineraryItemsByTour } from '@/features/tours/hooks/useTourItineraryItems'
+import {
+  useSyncItineraryToCore,
+  useTourItineraryItemsByTour,
+} from '@/features/tours/hooks/useTourItineraryItems'
 import type { DailyItinerary } from '@/components/editor/tour-form/types'
 import type { Tour } from '@/stores/types'
 import type { FlightInfo } from '@/types/flight.types'
@@ -46,7 +49,10 @@ import { type MentionInputHandle } from './mention-input'
 import { DayRow, type DailyScheduleItem } from './itinerary/DayRow'
 import { useItineraryDrag } from '../hooks/useItineraryDrag'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import { AccommodationChangeDialog, type AccommodationChange } from './itinerary/AccommodationChangeDialog'
+import {
+  AccommodationChangeDialog,
+  type AccommodationChange,
+} from './itinerary/AccommodationChangeDialog'
 
 interface TourItineraryTabProps {
   tour: Tour
@@ -250,18 +256,33 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
 
           if (itinerary.daily_itinerary && Array.isArray(itinerary.daily_itinerary)) {
             // 從核心表建立 day→meals/accommodation/activities 對應
-            const coreMealsByDay: Record<number, { breakfast: string; lunch: string; dinner: string }> = {}
+            const coreMealsByDay: Record<
+              number,
+              { breakfast: string; lunch: string; dinner: string }
+            > = {}
             const coreAccomByDay: Record<number, string> = {}
             const coreAccomIdByDay: Record<number, string> = {}
-            const coreMealIdsByDay: Record<number, { breakfast?: string; lunch?: string; dinner?: string }> = {}
-            const coreActivitiesByDay: Record<number, Array<{ title: string; attraction_id?: string; verified?: boolean }>> = {}
+            const coreMealIdsByDay: Record<
+              number,
+              { breakfast?: string; lunch?: string; dinner?: string }
+            > = {}
+            const coreActivitiesByDay: Record<
+              number,
+              Array<{ title: string; attraction_id?: string; verified?: boolean }>
+            > = {}
             for (const item of coreItems) {
               const dn = item.day_number
               if (!dn) continue
               if (item.category === 'meals' && item.sub_category) {
-                if (!coreMealsByDay[dn]) coreMealsByDay[dn] = { breakfast: '', lunch: '', dinner: '' }
+                if (!coreMealsByDay[dn])
+                  coreMealsByDay[dn] = { breakfast: '', lunch: '', dinner: '' }
                 if (!coreMealIdsByDay[dn]) coreMealIdsByDay[dn] = {}
-                const key = item.sub_category === 'breakfast' ? 'breakfast' : item.sub_category === 'lunch' ? 'lunch' : 'dinner'
+                const key =
+                  item.sub_category === 'breakfast'
+                    ? 'breakfast'
+                    : item.sub_category === 'lunch'
+                      ? 'lunch'
+                      : 'dinner'
                 coreMealsByDay[dn][key] = item.title || ''
                 if (item.resource_id) {
                   coreMealIdsByDay[dn][key] = item.resource_id
@@ -273,7 +294,10 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 }
               } else if (item.category === 'activities') {
                 if (!coreActivitiesByDay[dn]) coreActivitiesByDay[dn] = []
-                coreActivitiesByDay[dn].push({ title: item.title || '', attraction_id: item.resource_id || undefined })
+                coreActivitiesByDay[dn].push({
+                  title: item.title || '',
+                  attraction_id: item.resource_id || undefined,
+                })
               }
             }
 
@@ -321,11 +345,15 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               const activities = coreActs || day.activities || []
               const attractions = activities
                 .filter(a => a.attraction_id)
-                .map(a => ({ id: a.attraction_id!, name: a.title || '', verified: verifiedMap[a.attraction_id!] ?? true }))
+                .map(a => ({
+                  id: a.attraction_id!,
+                  name: a.title || '',
+                  verified: verifiedMap[a.attraction_id!] ?? true,
+                }))
 
               // route = 完整的行程文字（包含景點名稱）
               let routeText = day.title || ''
-              
+
               // 過濾預設文字（這些只是 placeholder，不是真正的 route）
               const defaultTexts = ['抵達目的地', '返回台灣']
               const defaultPattern = /^第\s*\d+\s*天行程$/
@@ -371,46 +399,76 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
     }
 
     loadItinerary()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tour.id, tour.name, tour.departure_date, tour.return_date, itineraries.length, coreItems.length])
+  }, [
+    tour.id,
+    tour.name,
+    tour.departure_date,
+    tour.return_date,
+    itineraries.length,
+    coreItems.length,
+  ])
 
   // Update day schedule (with ID clearing for accommodation/meals)
-  const updateDaySchedule = useCallback((index: number, field: string, value: string | boolean | undefined) => {
-    setDailySchedule(prev => {
-      const newSchedule = [...prev]
-      if (field === 'accommodation' && value === '') {
-        newSchedule[index] = { ...newSchedule[index], accommodation: '', accommodationId: undefined }
-        return newSchedule
-      }
-      // 取消續住 → 清空住宿欄讓用戶重新選擇
-      if (field === 'sameAsPrevious' && value === false) {
-        newSchedule[index] = { ...newSchedule[index], sameAsPrevious: false, accommodation: '', accommodationId: undefined }
-        return newSchedule
-      }
-      if (field === 'meals.breakfast' && value === '') {
-        newSchedule[index] = { ...newSchedule[index], meals: { ...newSchedule[index].meals, breakfast: '' }, mealIds: { ...newSchedule[index].mealIds, breakfast: undefined } }
-        return newSchedule
-      }
-      if (field === 'meals.lunch' && value === '') {
-        newSchedule[index] = { ...newSchedule[index], meals: { ...newSchedule[index].meals, lunch: '' }, mealIds: { ...newSchedule[index].mealIds, lunch: undefined } }
-        return newSchedule
-      }
-      if (field === 'meals.dinner' && value === '') {
-        newSchedule[index] = { ...newSchedule[index], meals: { ...newSchedule[index].meals, dinner: '' }, mealIds: { ...newSchedule[index].mealIds, dinner: undefined } }
-        return newSchedule
-      }
-      if (field.startsWith('meals.')) {
-        const mealType = field.split('.')[1] as 'breakfast' | 'lunch' | 'dinner'
-        newSchedule[index] = {
-          ...newSchedule[index],
-          meals: { ...newSchedule[index].meals, [mealType]: value as string },
+  const updateDaySchedule = useCallback(
+    (index: number, field: string, value: string | boolean | undefined) => {
+      setDailySchedule(prev => {
+        const newSchedule = [...prev]
+        if (field === 'accommodation' && value === '') {
+          newSchedule[index] = {
+            ...newSchedule[index],
+            accommodation: '',
+            accommodationId: undefined,
+          }
+          return newSchedule
         }
-      } else {
-        newSchedule[index] = { ...newSchedule[index], [field]: value }
-      }
-      return newSchedule
-    })
-  }, [])
+        // 取消續住 → 清空住宿欄讓用戶重新選擇
+        if (field === 'sameAsPrevious' && value === false) {
+          newSchedule[index] = {
+            ...newSchedule[index],
+            sameAsPrevious: false,
+            accommodation: '',
+            accommodationId: undefined,
+          }
+          return newSchedule
+        }
+        if (field === 'meals.breakfast' && value === '') {
+          newSchedule[index] = {
+            ...newSchedule[index],
+            meals: { ...newSchedule[index].meals, breakfast: '' },
+            mealIds: { ...newSchedule[index].mealIds, breakfast: undefined },
+          }
+          return newSchedule
+        }
+        if (field === 'meals.lunch' && value === '') {
+          newSchedule[index] = {
+            ...newSchedule[index],
+            meals: { ...newSchedule[index].meals, lunch: '' },
+            mealIds: { ...newSchedule[index].mealIds, lunch: undefined },
+          }
+          return newSchedule
+        }
+        if (field === 'meals.dinner' && value === '') {
+          newSchedule[index] = {
+            ...newSchedule[index],
+            meals: { ...newSchedule[index].meals, dinner: '' },
+            mealIds: { ...newSchedule[index].mealIds, dinner: undefined },
+          }
+          return newSchedule
+        }
+        if (field.startsWith('meals.')) {
+          const mealType = field.split('.')[1] as 'breakfast' | 'lunch' | 'dinner'
+          newSchedule[index] = {
+            ...newSchedule[index],
+            meals: { ...newSchedule[index].meals, [mealType]: value as string },
+          }
+        } else {
+          newSchedule[index] = { ...newSchedule[index], [field]: value }
+        }
+        return newSchedule
+      })
+    },
+    []
+  )
 
   // Get previous accommodation
   const getPreviousAccommodation = useCallback(
@@ -427,122 +485,125 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   )
 
   // Remove an attraction from a day
-  const removeAttraction = useCallback(async (dayIdx: number, attractionId: string) => {
-    // 找到要刪除的景點名稱（用於通知）
-    const day = dailySchedule[dayIdx]
-    const attraction = day?.attractions?.find(a => a.id === attractionId)
-    const attractionName = attraction?.name || '景點'
-    
-    // 檢查核心表是否有下游資料（需求單、確認單、Local 報價確認）
-    const dayNumber = dayIdx + 1
-    const relatedCoreItem = coreItems.find(
-      item =>
-        item.day_number === dayNumber &&
-        item.category === 'activities' &&
-        item.resource_id === attractionId
-    )
-    
-    // 判斷是否有下游資料
-    const hasDownstream =
-      relatedCoreItem &&
-      (relatedCoreItem.request_id != null ||  // 已發需求單
-        relatedCoreItem.confirmation_status !== 'none' ||  // 已確認
-        relatedCoreItem.leader_status !== 'none' ||  // 領隊已填寫
-        (relatedCoreItem.unit_price != null &&
-          relatedCoreItem.unit_price > 0 &&
-          relatedCoreItem.quote_status === 'confirmed'))  // Local 報價已確認
-    
-    // 🆕 如果已發需求單，自動產生取消單
-    if (relatedCoreItem?.request_id) {
-      try {
-        const sb = createSupabaseBrowserClient()
-        const { data: originalRequest } = await sb
-          .from('tour_requests')
-          .select('*')
-          .eq('id', relatedCoreItem.request_id)
-          .single()
-        
-        if (originalRequest && originalRequest.status !== 'draft') {
-          // 產生取消單
-          await sb.from('tour_requests').insert({
-            tour_id: originalRequest.tour_id,
-            workspace_id: originalRequest.workspace_id,
-            request_type: 'cancellation',
-            supplier_name: originalRequest.supplier_name,
-            supplier_id: originalRequest.supplier_id,
-            supplier_contact: originalRequest.supplier_contact,
-            source_type: originalRequest.source_type,
-            source_id: originalRequest.source_id,
-            status: 'draft',
-            note: `行程異動，取消「${attractionName}」，煩請協助取消預訂`,
-            items: originalRequest.items,
-            created_by: currentUser?.id || '',
-          })
-          
-          toast.success(
-            `✅ 已自動產生取消單\n\n景點「${attractionName}」已刪除，取消單已建立（待發送）`,
-            {
-              duration: 6000,
-              style: {
-                whiteSpace: 'pre-line',
-                maxWidth: '500px',
-              },
-            }
-          )
+  const removeAttraction = useCallback(
+    async (dayIdx: number, attractionId: string) => {
+      // 找到要刪除的景點名稱（用於通知）
+      const day = dailySchedule[dayIdx]
+      const attraction = day?.attractions?.find(a => a.id === attractionId)
+      const attractionName = attraction?.name || '景點'
+
+      // 檢查核心表是否有下游資料（需求單、確認單、Local 報價確認）
+      const dayNumber = dayIdx + 1
+      const relatedCoreItem = coreItems.find(
+        item =>
+          item.day_number === dayNumber &&
+          item.category === 'activities' &&
+          item.resource_id === attractionId
+      )
+
+      // 判斷是否有下游資料
+      const hasDownstream =
+        relatedCoreItem &&
+        (relatedCoreItem.request_id != null || // 已發需求單
+          relatedCoreItem.confirmation_status !== 'none' || // 已確認
+          relatedCoreItem.leader_status !== 'none' || // 領隊已填寫
+          (relatedCoreItem.unit_price != null &&
+            relatedCoreItem.unit_price > 0 &&
+            relatedCoreItem.quote_status === 'confirmed')) // Local 報價已確認
+
+      // 🆕 如果已發需求單，自動產生取消單
+      if (relatedCoreItem?.request_id) {
+        try {
+          const sb = createSupabaseBrowserClient()
+          const { data: originalRequest } = await sb
+            .from('tour_requests')
+            .select('*')
+            .eq('id', relatedCoreItem.request_id)
+            .single()
+
+          if (originalRequest && originalRequest.status !== 'draft') {
+            // 產生取消單
+            await sb.from('tour_requests').insert({
+              tour_id: originalRequest.tour_id,
+              workspace_id: originalRequest.workspace_id,
+              request_type: 'cancellation',
+              supplier_name: originalRequest.supplier_name,
+              supplier_id: originalRequest.supplier_id,
+              supplier_contact: originalRequest.supplier_contact,
+              source_type: originalRequest.source_type,
+              source_id: originalRequest.source_id,
+              status: 'draft',
+              note: `行程異動，取消「${attractionName}」，煩請協助取消預訂`,
+              items: originalRequest.items,
+              created_by: currentUser?.id || '',
+            })
+
+            toast.success(
+              `✅ 已自動產生取消單\n\n景點「${attractionName}」已刪除，取消單已建立（待發送）`,
+              {
+                duration: 6000,
+                style: {
+                  whiteSpace: 'pre-line',
+                  maxWidth: '500px',
+                },
+              }
+            )
+          }
+        } catch (error) {
+          logger.error('Failed to create cancellation request', error)
         }
-      } catch (error) {
-        logger.error('Failed to create cancellation request', error)
       }
-    }
-    
-    // 如果有其他下游資料，顯示警告
-    if (hasDownstream) {
-      const warnings = []
-      if (relatedCoreItem.request_id) warnings.push('已發需求單（已產生取消單）')
-      if (relatedCoreItem.confirmation_status !== 'none') warnings.push('已確認訂位')
-      if (relatedCoreItem.leader_status !== 'none') warnings.push('領隊已填寫')
-      if (
-        relatedCoreItem.unit_price != null &&
-        relatedCoreItem.unit_price > 0 &&
-        relatedCoreItem.quote_status === 'confirmed'
-      ) {
-        warnings.push(`已確認報價 ${relatedCoreItem.unit_price.toLocaleString()} 元`)
-      }
-      
-      if (warnings.length > 0) {
-        toast.warning(
-          `⚠️ 刪除景點「${attractionName}」\n\n此景點${warnings.join('、')}`,
-          {
+
+      // 如果有其他下游資料，顯示警告
+      if (hasDownstream) {
+        const warnings = []
+        if (relatedCoreItem.request_id) warnings.push('已發需求單（已產生取消單）')
+        if (relatedCoreItem.confirmation_status !== 'none') warnings.push('已確認訂位')
+        if (relatedCoreItem.leader_status !== 'none') warnings.push('領隊已填寫')
+        if (
+          relatedCoreItem.unit_price != null &&
+          relatedCoreItem.unit_price > 0 &&
+          relatedCoreItem.quote_status === 'confirmed'
+        ) {
+          warnings.push(`已確認報價 ${relatedCoreItem.unit_price.toLocaleString()} 元`)
+        }
+
+        if (warnings.length > 0) {
+          toast.warning(`⚠️ 刪除景點「${attractionName}」\n\n此景點${warnings.join('、')}`, {
             duration: 6000,
             style: {
               whiteSpace: 'pre-line',
               maxWidth: '500px',
             },
-          }
-        )
+          })
+        }
       }
-    }
-    
-    // 不管有沒有下游資料，都刪除（行程是 SSOT）
-    setDailySchedule(prev => {
-      const newSchedule = [...prev]
-      const day = newSchedule[dayIdx]
-      if (!day) return prev
-      const updated = (day.attractions || []).filter(a => a.id !== attractionId)
-      newSchedule[dayIdx] = { ...day, attractions: updated }
-      return newSchedule
-    })
-  }, [dailySchedule, coreItems])
 
-  const reorderAttractions = useCallback((dayIdx: number, newOrder: { id: string; name: string }[]) => {
-    setDailySchedule(prev => {
-      const newSchedule = [...prev]
-      const day = newSchedule[dayIdx]
-      if (!day) return prev
-      newSchedule[dayIdx] = { ...day, attractions: newOrder }
-      return newSchedule
-    })
-  }, [])
+      // 不管有沒有下游資料，都刪除（行程是 SSOT）
+      setDailySchedule(prev => {
+        const newSchedule = [...prev]
+        const day = newSchedule[dayIdx]
+        if (!day) return prev
+        const updated = (day.attractions || []).filter(a => a.id !== attractionId)
+        newSchedule[dayIdx] = { ...day, attractions: updated }
+        return newSchedule
+      })
+    },
+    [dailySchedule, coreItems]
+  )
+
+  const reorderAttractions = useCallback(
+    (dayIdx: number, newOrder: { id: string; name: string }[]) => {
+      setDailySchedule(prev => {
+        const newSchedule = [...prev]
+        const day = newSchedule[dayIdx]
+        if (!day) return prev
+        newSchedule[dayIdx] = { ...day, attractions: newOrder }
+        return newSchedule
+      })
+    },
+    []
+  )
 
   // Drag hook (extracted)
   const { activeDragName, handleDragStart, handleDragEnd } = useItineraryDrag(setDailySchedule)
@@ -561,30 +622,30 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   }, [dailySchedule])
 
   // Handle mention (@) attraction selection
-  const handleMentionSelect = useCallback((dayIdx: number, attraction: { id: string; name: string }) => {
-    // 檢查整個行程是否已有這個景點（景點唯一性）
-    const existingDay = dailySchedule.findIndex((day, idx) =>
-      day.attractions?.some(a => a.id === attraction.id)
-    )
-    
-    if (existingDay !== -1) {
-      // 景點已存在於其他天
-      toast.error(
-        `此景點已在 Day ${existingDay + 1} 排入行程，無法重複新增`,
-        { duration: 5000 }
+  const handleMentionSelect = useCallback(
+    (dayIdx: number, attraction: { id: string; name: string }) => {
+      // 檢查整個行程是否已有這個景點（景點唯一性）
+      const existingDay = dailySchedule.findIndex((day, idx) =>
+        day.attractions?.some(a => a.id === attraction.id)
       )
-      return
-    }
-    
-    setDailySchedule(prev => {
-      const newSchedule = [...prev]
-      const day = newSchedule[dayIdx]
-      if (!day) return prev
-      const existing = day.attractions || []
-      newSchedule[dayIdx] = { ...day, attractions: [...existing, attraction] }
-      return newSchedule
-    })
-  }, [dailySchedule])
+
+      if (existingDay !== -1) {
+        // 景點已存在於其他天
+        toast.error(`此景點已在 Day ${existingDay + 1} 排入行程，無法重複新增`, { duration: 5000 })
+        return
+      }
+
+      setDailySchedule(prev => {
+        const newSchedule = [...prev]
+        const day = newSchedule[dayIdx]
+        if (!day) return prev
+        const existing = day.attractions || []
+        newSchedule[dayIdx] = { ...day, attractions: [...existing, attraction] }
+        return newSchedule
+      })
+    },
+    [dailySchedule]
+  )
 
   // Preview data
   const getPreviewDailyData = useCallback(() => {
@@ -607,7 +668,10 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
     const sb = createSupabaseBrowserClient()
 
     // 從核心表取得目前住宿
-    const oldAccommodationByDay: Record<number, { title: string; resourceId: string | null; unitPrice: number | null }> = {}
+    const oldAccommodationByDay: Record<
+      number,
+      { title: string; resourceId: string | null; unitPrice: number | null }
+    > = {}
     for (const item of coreItems) {
       if (item.category === 'accommodation' && item.day_number) {
         let title = item.title || ''
@@ -735,9 +799,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           })),
           recommendations: [],
           meals: { breakfast, lunch, dinner },
-          accommodation: day.sameAsPrevious
-            ? (getPreviousAccommodation(idx) || '')
-            : accommodation,
+          accommodation: day.sameAsPrevious ? getPreviousAccommodation(idx) || '' : accommodation,
           isSameAccommodation: day.sameAsPrevious || false,
           images: [],
           accommodation_id: day.accommodationId || undefined,
@@ -838,35 +900,44 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           itinerary_id: savedItineraryId,
           tour_id: tour.id,
           daily_itinerary: fullDailyItinerary as DailyItinerary[],
-        }).then((result) => {
-          if (result && 'success' in result && !result.success) {
-            logger.error('syncToCore failed:', result.message)
-            toast.error(`核心表同步失敗：${result.message}`)
-          } else {
-            refreshCoreItems()
-            
-            // 顯示取消摘要（如果有）
-            if (result && 'cancellations' in result && result.cancellations && result.cancellations.length > 0) {
-              const cancelList = result.cancellations.map((c: any) => 
-                c.items.map((i: any) => `${i.service_date || ''} ${i.title}`).join('、')
-              ).join('\n')
-              
-              toast.warning(
-                `📋 行程變更摘要\n\n已產生 ${result.cancellations.length} 個取消通知：\n${cancelList}\n\n請前往需求單頁面發送取消通知給供應商`,
-                {
-                  duration: 10000,
-                  style: {
-                    whiteSpace: 'pre-line',
-                    maxWidth: '600px',
-                  },
-                }
-              )
-            }
-          }
-        }).catch(err => {
-          logger.error('syncToCore error (background):', err)
-          toast.error('核心表同步失敗')
         })
+          .then(result => {
+            if (result && 'success' in result && !result.success) {
+              logger.error('syncToCore failed:', result.message)
+              toast.error(`核心表同步失敗：${result.message}`)
+            } else {
+              refreshCoreItems()
+
+              // 顯示取消摘要（如果有）
+              if (
+                result &&
+                'cancellations' in result &&
+                result.cancellations &&
+                result.cancellations.length > 0
+              ) {
+                const cancelList = result.cancellations
+                  .map((c: any) =>
+                    c.items.map((i: any) => `${i.service_date || ''} ${i.title}`).join('、')
+                  )
+                  .join('\n')
+
+                toast.warning(
+                  `📋 行程變更摘要\n\n已產生 ${result.cancellations.length} 個取消通知：\n${cancelList}\n\n請前往需求單頁面發送取消通知給供應商`,
+                  {
+                    duration: 10000,
+                    style: {
+                      whiteSpace: 'pre-line',
+                      maxWidth: '600px',
+                    },
+                  }
+                )
+              }
+            }
+          })
+          .catch(err => {
+            logger.error('syncToCore error (background):', err)
+            toast.error('核心表同步失敗')
+          })
       }
 
       refresh()
@@ -1049,14 +1120,25 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                     <Plane className="w-4 h-4" />
                     去程
                   </h4>
-                  {outboundFlights.filter(f => f.flightNumber).map((f, i) => (
-                    <div key={i} className="flight-info flex items-center gap-2 text-muted-foreground">
-                      <span className="bold font-medium text-morandi-primary">{f.airline} {f.flightNumber}</span>
-                      <span>{f.departureAirport} {f.departureTime}</span>
-                      <span>→</span>
-                      <span>{f.arrivalAirport} {f.arrivalTime}</span>
-                    </div>
-                  ))}
+                  {outboundFlights
+                    .filter(f => f.flightNumber)
+                    .map((f, i) => (
+                      <div
+                        key={i}
+                        className="flight-info flex items-center gap-2 text-muted-foreground"
+                      >
+                        <span className="bold font-medium text-morandi-primary">
+                          {f.airline} {f.flightNumber}
+                        </span>
+                        <span>
+                          {f.departureAirport} {f.departureTime}
+                        </span>
+                        <span>→</span>
+                        <span>
+                          {f.arrivalAirport} {f.arrivalTime}
+                        </span>
+                      </div>
+                    ))}
                 </div>
               )}
               {returnFlights.some(f => f.flightNumber) && (
@@ -1065,14 +1147,25 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                     <Plane className="w-4 h-4" />
                     回程
                   </h4>
-                  {returnFlights.filter(f => f.flightNumber).map((f, i) => (
-                    <div key={i} className="flight-info flex items-center gap-2 text-muted-foreground">
-                      <span className="bold font-medium text-morandi-primary">{f.airline} {f.flightNumber}</span>
-                      <span>{f.departureAirport} {f.departureTime}</span>
-                      <span>→</span>
-                      <span>{f.arrivalAirport} {f.arrivalTime}</span>
-                    </div>
-                  ))}
+                  {returnFlights
+                    .filter(f => f.flightNumber)
+                    .map((f, i) => (
+                      <div
+                        key={i}
+                        className="flight-info flex items-center gap-2 text-muted-foreground"
+                      >
+                        <span className="bold font-medium text-morandi-primary">
+                          {f.airline} {f.flightNumber}
+                        </span>
+                        <span>
+                          {f.departureAirport} {f.departureTime}
+                        </span>
+                        <span>→</span>
+                        <span>
+                          {f.arrivalAirport} {f.arrivalTime}
+                        </span>
+                      </div>
+                    ))}
                 </div>
               )}
             </div>
@@ -1095,12 +1188,13 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 return (
                   <Fragment key={index}>
                     <tr className={index % 2 === 0 ? 'bg-card' : 'bg-muted/20'}>
-                      <td className="border border-muted px-3 py-2 align-middle text-center font-semibold text-morandi-gold" rowSpan={rowCount}>
+                      <td
+                        className="border border-muted px-3 py-2 align-middle text-center font-semibold text-morandi-gold"
+                        rowSpan={rowCount}
+                      >
                         {day.date || day.dayLabel}
                       </td>
-                      <td className="border border-muted px-3 py-2 font-medium">
-                        {day.title}
-                      </td>
+                      <td className="border border-muted px-3 py-2 font-medium">{day.title}</td>
                     </tr>
                     {day.note && (
                       <tr className={index % 2 === 0 ? 'bg-card' : 'bg-muted/20'}>
@@ -1113,15 +1207,21 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                       <td className="border border-muted px-0 py-1.5">
                         <div className="grid grid-cols-3 text-[12px]">
                           <div className="flex items-center gap-2 px-3">
-                            <span className="font-medium text-muted-foreground shrink-0">{TOUR_ITINERARY_TAB_LABELS.早餐_表頭}</span>
+                            <span className="font-medium text-muted-foreground shrink-0">
+                              {TOUR_ITINERARY_TAB_LABELS.早餐_表頭}
+                            </span>
                             <span>{day.meals.breakfast || 'X'}</span>
                           </div>
                           <div className="flex items-center gap-2 px-3 border-l border-muted">
-                            <span className="font-medium text-muted-foreground shrink-0">{TOUR_ITINERARY_TAB_LABELS.午餐_表頭}</span>
+                            <span className="font-medium text-muted-foreground shrink-0">
+                              {TOUR_ITINERARY_TAB_LABELS.午餐_表頭}
+                            </span>
                             <span>{day.meals.lunch || 'X'}</span>
                           </div>
                           <div className="flex items-center gap-2 px-3 border-l border-muted">
-                            <span className="font-medium text-muted-foreground shrink-0">{TOUR_ITINERARY_TAB_LABELS.晚餐_表頭}</span>
+                            <span className="font-medium text-muted-foreground shrink-0">
+                              {TOUR_ITINERARY_TAB_LABELS.晚餐_表頭}
+                            </span>
                             <span>{day.meals.dinner || 'X'}</span>
                           </div>
                         </div>
@@ -1130,7 +1230,9 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                     {day.accommodation && (
                       <tr className={index % 2 === 0 ? 'bg-card' : 'bg-muted/20'}>
                         <td className="border border-muted px-3 py-1.5 text-[12px]">
-                          <span className="font-medium text-muted-foreground mr-2">{TOUR_ITINERARY_TAB_LABELS.住宿_表頭}</span>
+                          <span className="font-medium text-muted-foreground mr-2">
+                            {TOUR_ITINERARY_TAB_LABELS.住宿_表頭}
+                          </span>
                           <span>{day.accommodation}</span>
                         </td>
                       </tr>
@@ -1150,580 +1252,593 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   // ============================================================
   return (
     <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* -- Header -- */}
-      <div className="px-4 py-2 flex items-center justify-between">
-        <h3 className="flex items-center gap-2 text-sm font-bold text-morandi-primary">
-          <FileText className="w-4 h-4 text-morandi-gold" />
-          {currentItineraryId ? COMP_TOURS_LABELS.編輯行程表 : COMP_TOURS_LABELS.建立行程表}
-          <span className="font-normal text-xs text-muted-foreground ml-1">
-            — {tour.name || COMP_TOURS_LABELS.未設定}
-          </span>
-        </h3>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setViewMode('preview')}
-            className="h-7 px-2 text-xs gap-1"
-          >
-            <Eye size={12} />
-            {TOUR_ITINERARY_TAB_LABELS.預覽}
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleSave}
-            disabled={saving || !title.trim()}
-            className="h-7 px-3 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1"
-          >
-            {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-            {currentItineraryId ? COMP_TOURS_LABELS.更新行程 : COMP_TOURS_LABELS.建立行程}
-          </Button>
-        </div>
-      </div>
-
-      {/* -- 左右分割主內容區 -- */}
-      <div className="flex-1 flex overflow-hidden">
-
-      {/* -- 左側：行程編輯（60%）-- */}
-      <div className="w-[60%] overflow-y-auto px-4 pb-4">
-        {/* Info row: title + days + accommodation */}
-        <div className="flex items-end gap-3 mb-3">
-          <div className="flex-1 space-y-1">
-            <Label className="text-xs text-muted-foreground">
-              {TOUR_ITINERARY_TAB_LABELS.行程標題_必填}
-            </Label>
-            <Input
-              value={title}
-              onChange={e => setTitle(e.target.value)}
-              placeholder={TOUR_ITINERARY_TAB_LABELS.行程表標題}
-              className="h-8 text-sm"
-            />
-          </div>
-          <div className="w-20 space-y-1">
-            <Label className="text-xs text-muted-foreground">
-              {TOUR_ITINERARY_TAB_LABELS.調整天數}
-            </Label>
-            <Input
-              type="number"
-              min={1}
-              max={30}
-              value={numDays}
-              onChange={e => {
-                const v = parseInt(e.target.value, 10)
-                if (v >= 1 && v <= 30) {
-                  setNumDays(v)
-                  if (tour.departure_date && tour.id) {
-                    const start = new Date(tour.departure_date)
-                    const newReturnDate = new Date(start)
-                    newReturnDate.setDate(start.getDate() + v - 1)
-                    const returnDateStr = newReturnDate.toISOString().split('T')[0]
-
-                    updateTour(tour.id, { return_date: returnDateStr })
-                      .then(() => {
-                        toast.success(`已同步更新团的回程日期为 ${returnDateStr}`)
-                      })
-                      .catch(err => {
-                        logger.error('更新团回程日期失败', err)
-                        toast.error('更新回程日期失败')
-                      })
-                  }
-                }
-              }}
-              className="h-8 text-sm"
-            />
+      <div className="flex flex-col h-full overflow-hidden">
+        {/* -- Header -- */}
+        <div className="px-4 py-2 flex items-center justify-between">
+          <h3 className="flex items-center gap-2 text-sm font-bold text-morandi-primary">
+            <FileText className="w-4 h-4 text-morandi-gold" />
+            {currentItineraryId ? COMP_TOURS_LABELS.編輯行程表 : COMP_TOURS_LABELS.建立行程表}
+            <span className="font-normal text-xs text-muted-foreground ml-1">
+              — {tour.name || COMP_TOURS_LABELS.未設定}
+            </span>
+          </h3>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setViewMode('preview')}
+              className="h-7 px-2 text-xs gap-1"
+            >
+              <Eye size={12} />
+              {TOUR_ITINERARY_TAB_LABELS.預覽}
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSave}
+              disabled={saving || !title.trim()}
+              className="h-7 px-3 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1"
+            >
+              {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+              {currentItineraryId ? COMP_TOURS_LABELS.更新行程 : COMP_TOURS_LABELS.建立行程}
+            </Button>
           </div>
         </div>
 
-        {/* Flights row (hidden for domestic) */}
-        {!isDomestic && (
-          <div className="flex flex-col gap-3 mb-3">
-            {/* Outbound flights */}
-            <div className="flex-1">
-              <div className="flex items-center gap-1.5 text-xs mb-1.5">
-                <Plane size={12} className="text-morandi-gold" />
-                <span className="text-muted-foreground font-medium">
-                  {TOUR_ITINERARY_TAB_LABELS.去程}
-                </span>
+        {/* -- 左右分割主內容區 -- */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* -- 左側：行程編輯（60%）-- */}
+          <div className="w-[60%] overflow-y-auto px-4 pb-4">
+            {/* Info row: title + days + accommodation */}
+            <div className="flex items-end gap-3 mb-3">
+              <div className="flex-1 space-y-1">
+                <Label className="text-xs text-muted-foreground">
+                  {TOUR_ITINERARY_TAB_LABELS.行程標題_必填}
+                </Label>
+                <Input
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  placeholder={TOUR_ITINERARY_TAB_LABELS.行程表標題}
+                  className="h-8 text-sm"
+                />
               </div>
-              <div className="border border-border/50 rounded overflow-hidden">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/30 px-2 py-1.5 border-b border-border/30">
-                  <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.LABEL_5176}</span>
-                  <span className="w-20">{TOUR_ITINERARY_TAB_LABELS.LABEL_3349}</span>
-                  <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.LABEL_7681}</span>
-                  <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
-                  <span className="w-4"></span>
-                  <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.抵達}</span>
-                  <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
-                  <span className="flex-1"></span>
-                </div>
-                {outboundFlights.map((flight, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-1.5 text-sm px-2 py-1 border-b border-border/20 hover:bg-muted/10 group"
-                  >
-                    <Input
-                      value={flight.airline || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setOutboundFlights(prev =>
-                          prev.map((f, i) => (i === index ? { ...f, airline: e.target.value } : f))
-                        )
+              <div className="w-20 space-y-1">
+                <Label className="text-xs text-muted-foreground">
+                  {TOUR_ITINERARY_TAB_LABELS.調整天數}
+                </Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={30}
+                  value={numDays}
+                  onChange={e => {
+                    const v = parseInt(e.target.value, 10)
+                    if (v >= 1 && v <= 30) {
+                      setNumDays(v)
+                      if (tour.departure_date && tour.id) {
+                        const start = new Date(tour.departure_date)
+                        const newReturnDate = new Date(start)
+                        newReturnDate.setDate(start.getDate() + v - 1)
+                        const returnDateStr = newReturnDate.toISOString().split('T')[0]
+
+                        updateTour(tour.id, { return_date: returnDateStr })
+                          .then(() => {
+                            toast.success(`已同步更新团的回程日期为 ${returnDateStr}`)
+                          })
+                          .catch(err => {
+                            logger.error('更新团回程日期失败', err)
+                            toast.error('更新回程日期失败')
+                          })
                       }
-                      className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    <Input
-                      value={flight.flightNumber || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setOutboundFlights(prev =>
-                          prev.map((f, i) =>
-                            i === index ? { ...f, flightNumber: e.target.value.toUpperCase() } : f
-                          )
-                        )
-                      }
-                      className="h-7 text-sm w-20 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    <Input
-                      value={flight.departureAirport || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setOutboundFlights(prev =>
-                          prev.map((f, i) =>
-                            i === index
-                              ? { ...f, departureAirport: e.target.value.toUpperCase() }
-                              : f
-                          )
-                        )
-                      }
-                      className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    <Input
-                      value={flight.departureTime || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setOutboundFlights(prev =>
-                          prev.map((f, i) =>
-                            i === index ? { ...f, departureTime: e.target.value } : f
-                          )
-                        )
-                      }
-                      className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    <span className="text-muted-foreground w-4 text-center text-xs">→</span>
-                    <Input
-                      value={flight.arrivalAirport || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setOutboundFlights(prev =>
-                          prev.map((f, i) =>
-                            i === index ? { ...f, arrivalAirport: e.target.value.toUpperCase() } : f
-                          )
-                        )
-                      }
-                      className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    <Input
-                      value={flight.arrivalTime || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setOutboundFlights(prev =>
-                          prev.map((f, i) =>
-                            i === index ? { ...f, arrivalTime: e.target.value } : f
-                          )
-                        )
-                      }
-                      className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    {index === 0 ? (
-                      <div className="flex-1 flex items-center justify-end gap-1">
+                    }
+                  }}
+                  className="h-8 text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Flights row (hidden for domestic) */}
+            {!isDomestic && (
+              <div className="flex flex-col gap-3 mb-3">
+                {/* Outbound flights */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5 text-xs mb-1.5">
+                    <Plane size={12} className="text-morandi-gold" />
+                    <span className="text-muted-foreground font-medium">
+                      {TOUR_ITINERARY_TAB_LABELS.去程}
+                    </span>
+                  </div>
+                  <div className="border border-border/50 rounded overflow-hidden">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/30 px-2 py-1.5 border-b border-border/30">
+                      <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.LABEL_5176}</span>
+                      <span className="w-20">{TOUR_ITINERARY_TAB_LABELS.LABEL_3349}</span>
+                      <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.LABEL_7681}</span>
+                      <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
+                      <span className="w-4"></span>
+                      <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.抵達}</span>
+                      <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
+                      <span className="flex-1"></span>
+                    </div>
+                    {outboundFlights.map((flight, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-1.5 text-sm px-2 py-1 border-b border-border/20 hover:bg-muted/10 group"
+                      >
                         <Input
-                          value={outboundFlightNumber}
-                          onChange={e => setOutboundFlightNumber(e.target.value.toUpperCase())}
-                          placeholder={TOUR_ITINERARY_TAB_LABELS.SEARCH_8458}
-                          className="h-7 text-xs w-36 px-1"
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && outboundFlightNumber) {
-                              handleSearchOutboundFlight()
-                            }
-                          }}
-                        />
-                        <DatePicker
-                          value={outboundFlightDate}
-                          onChange={date => setOutboundFlightDate(date || '')}
-                          placeholder={TOUR_ITINERARY_TAB_LABELS.日期_表頭}
-                          className="h-7 text-xs w-24"
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={handleSearchOutboundFlight}
-                          disabled={searchingOutbound || !outboundFlightNumber}
-                          className="h-7 w-7 p-0 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-                          title={TOUR_ITINERARY_TAB_LABELS.SEARCH_3338}
-                        >
-                          {searchingOutbound ? (
-                            <Loader2 size={12} className="animate-spin" />
-                          ) : (
-                            <Search size={12} />
-                          )}
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            setOutboundFlights(prev => [
-                              ...prev,
-                              {
-                                airline: '',
-                                flightNumber: '',
-                                departureAirport: '',
-                                departureTime: '',
-                                arrivalAirport: '',
-                                arrivalTime: '',
-                              },
-                            ])
+                          value={flight.airline || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setOutboundFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index ? { ...f, airline: e.target.value } : f
+                              )
+                            )
                           }
-                          className="h-7 w-7 p-0"
-                          title={TOUR_ITINERARY_TAB_LABELS.ADD_9636}
-                        >
-                          <Plus size={12} />
-                        </Button>
+                          className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        <Input
+                          value={flight.flightNumber || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setOutboundFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index
+                                  ? { ...f, flightNumber: e.target.value.toUpperCase() }
+                                  : f
+                              )
+                            )
+                          }
+                          className="h-7 text-sm w-20 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        <Input
+                          value={flight.departureAirport || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setOutboundFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index
+                                  ? { ...f, departureAirport: e.target.value.toUpperCase() }
+                                  : f
+                              )
+                            )
+                          }
+                          className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        <Input
+                          value={flight.departureTime || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setOutboundFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index ? { ...f, departureTime: e.target.value } : f
+                              )
+                            )
+                          }
+                          className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        <span className="text-muted-foreground w-4 text-center text-xs">→</span>
+                        <Input
+                          value={flight.arrivalAirport || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setOutboundFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index
+                                  ? { ...f, arrivalAirport: e.target.value.toUpperCase() }
+                                  : f
+                              )
+                            )
+                          }
+                          className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        <Input
+                          value={flight.arrivalTime || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setOutboundFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index ? { ...f, arrivalTime: e.target.value } : f
+                              )
+                            )
+                          }
+                          className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        {index === 0 ? (
+                          <div className="flex-1 flex items-center justify-end gap-1">
+                            <Input
+                              value={outboundFlightNumber}
+                              onChange={e => setOutboundFlightNumber(e.target.value.toUpperCase())}
+                              placeholder={TOUR_ITINERARY_TAB_LABELS.SEARCH_8458}
+                              className="h-7 text-xs w-36 px-1"
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' && outboundFlightNumber) {
+                                  handleSearchOutboundFlight()
+                                }
+                              }}
+                            />
+                            <DatePicker
+                              value={outboundFlightDate}
+                              onChange={date => setOutboundFlightDate(date || '')}
+                              placeholder={TOUR_ITINERARY_TAB_LABELS.日期_表頭}
+                              className="h-7 text-xs w-24"
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={handleSearchOutboundFlight}
+                              disabled={searchingOutbound || !outboundFlightNumber}
+                              className="h-7 w-7 p-0 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                              title={TOUR_ITINERARY_TAB_LABELS.SEARCH_3338}
+                            >
+                              {searchingOutbound ? (
+                                <Loader2 size={12} className="animate-spin" />
+                              ) : (
+                                <Search size={12} />
+                              )}
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                setOutboundFlights(prev => [
+                                  ...prev,
+                                  {
+                                    airline: '',
+                                    flightNumber: '',
+                                    departureAirport: '',
+                                    departureTime: '',
+                                    arrivalAirport: '',
+                                    arrivalTime: '',
+                                  },
+                                ])
+                              }
+                              className="h-7 w-7 p-0"
+                              title={TOUR_ITINERARY_TAB_LABELS.ADD_9636}
+                            >
+                              <Plus size={12} />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex-1 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setOutboundFlights(prev => prev.filter((_, i) => i !== index))
+                              }
+                              className="text-destructive/60 hover:text-destructive p-0.5"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="flex-1 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    ))}
+                    {outboundSegments.length > 0 && (
+                      <div className="space-y-1 px-2 py-1.5 bg-morandi-gold/5">
+                        <p className="text-xs text-muted-foreground">
+                          {TOUR_ITINERARY_TAB_LABELS.此航班有多個航段_請選擇}
+                        </p>
+                        {outboundSegments.map((seg, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => handleSelectOutboundSegment(seg)}
+                            className="w-full text-left p-1 rounded hover:bg-morandi-gold/10 transition-colors text-xs"
+                          >
+                            {seg.departureAirport} → {seg.arrivalAirport}
+                            <span className="text-muted-foreground ml-1">
+                              {seg.departureTime} - {seg.arrivalTime}
+                            </span>
+                          </button>
+                        ))}
                         <button
                           type="button"
-                          onClick={() =>
-                            setOutboundFlights(prev => prev.filter((_, i) => i !== index))
-                          }
-                          className="text-destructive/60 hover:text-destructive p-0.5"
+                          onClick={clearOutboundSegments}
+                          className="text-xs text-muted-foreground hover:text-foreground"
                         >
-                          <Trash2 size={14} />
+                          {COMP_TOURS_LABELS.取消}
                         </button>
                       </div>
                     )}
                   </div>
-                ))}
-                {outboundSegments.length > 0 && (
-                  <div className="space-y-1 px-2 py-1.5 bg-morandi-gold/5">
-                    <p className="text-xs text-muted-foreground">
-                      {TOUR_ITINERARY_TAB_LABELS.此航班有多個航段_請選擇}
-                    </p>
-                    {outboundSegments.map((seg, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => handleSelectOutboundSegment(seg)}
-                        className="w-full text-left p-1 rounded hover:bg-morandi-gold/10 transition-colors text-xs"
-                      >
-                        {seg.departureAirport} → {seg.arrivalAirport}
-                        <span className="text-muted-foreground ml-1">
-                          {seg.departureTime} - {seg.arrivalTime}
-                        </span>
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={clearOutboundSegments}
-                      className="text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      {COMP_TOURS_LABELS.取消}
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Return flights */}
-            <div className="flex-1">
-              <div className="flex items-center gap-1.5 text-xs mb-1.5">
-                <Plane size={12} className="text-morandi-gold" />
-                <span className="text-muted-foreground font-medium">
-                  {TOUR_ITINERARY_TAB_LABELS.回程}
-                </span>
-              </div>
-              <div className="border border-border/50 rounded overflow-hidden">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/30 px-2 py-1.5 border-b border-border/30">
-                  <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.LABEL_5176}</span>
-                  <span className="w-20">{TOUR_ITINERARY_TAB_LABELS.LABEL_3349}</span>
-                  <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.LABEL_7681}</span>
-                  <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
-                  <span className="w-4"></span>
-                  <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.抵達}</span>
-                  <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
-                  <span className="flex-1"></span>
                 </div>
-                {returnFlights.map((flight, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-1.5 text-sm px-2 py-1 border-b border-border/20 hover:bg-muted/10 group"
-                  >
-                    <Input
-                      value={flight.airline || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setReturnFlights(prev =>
-                          prev.map((f, i) => (i === index ? { ...f, airline: e.target.value } : f))
-                        )
-                      }
-                      className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    <Input
-                      value={flight.flightNumber || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setReturnFlights(prev =>
-                          prev.map((f, i) =>
-                            i === index ? { ...f, flightNumber: e.target.value.toUpperCase() } : f
-                          )
-                        )
-                      }
-                      className="h-7 text-sm w-20 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    <Input
-                      value={flight.departureAirport || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setReturnFlights(prev =>
-                          prev.map((f, i) =>
-                            i === index
-                              ? { ...f, departureAirport: e.target.value.toUpperCase() }
-                              : f
-                          )
-                        )
-                      }
-                      className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    <Input
-                      value={flight.departureTime || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setReturnFlights(prev =>
-                          prev.map((f, i) =>
-                            i === index ? { ...f, departureTime: e.target.value } : f
-                          )
-                        )
-                      }
-                      className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    <span className="text-muted-foreground w-4 text-center text-xs">→</span>
-                    <Input
-                      value={flight.arrivalAirport || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setReturnFlights(prev =>
-                          prev.map((f, i) =>
-                            i === index ? { ...f, arrivalAirport: e.target.value.toUpperCase() } : f
-                          )
-                        )
-                      }
-                      className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    <Input
-                      value={flight.arrivalTime || ''}
-                      placeholder="—"
-                      onChange={e =>
-                        setReturnFlights(prev =>
-                          prev.map((f, i) =>
-                            i === index ? { ...f, arrivalTime: e.target.value } : f
-                          )
-                        )
-                      }
-                      className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
-                    />
-                    {index === 0 ? (
-                      <div className="flex-1 flex items-center justify-end gap-1">
+
+                {/* Return flights */}
+                <div className="flex-1">
+                  <div className="flex items-center gap-1.5 text-xs mb-1.5">
+                    <Plane size={12} className="text-morandi-gold" />
+                    <span className="text-muted-foreground font-medium">
+                      {TOUR_ITINERARY_TAB_LABELS.回程}
+                    </span>
+                  </div>
+                  <div className="border border-border/50 rounded overflow-hidden">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/30 px-2 py-1.5 border-b border-border/30">
+                      <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.LABEL_5176}</span>
+                      <span className="w-20">{TOUR_ITINERARY_TAB_LABELS.LABEL_3349}</span>
+                      <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.LABEL_7681}</span>
+                      <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
+                      <span className="w-4"></span>
+                      <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.抵達}</span>
+                      <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.TIME}</span>
+                      <span className="flex-1"></span>
+                    </div>
+                    {returnFlights.map((flight, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-1.5 text-sm px-2 py-1 border-b border-border/20 hover:bg-muted/10 group"
+                      >
                         <Input
-                          value={returnFlightNumber}
-                          onChange={e => setReturnFlightNumber(e.target.value.toUpperCase())}
-                          placeholder={TOUR_ITINERARY_TAB_LABELS.SEARCH_8458}
-                          className="h-7 text-xs w-36 px-1"
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && returnFlightNumber) {
-                              handleSearchReturnFlight()
-                            }
-                          }}
-                        />
-                        <DatePicker
-                          value={returnFlightDate}
-                          onChange={date => setReturnFlightDate(date || '')}
-                          placeholder={TOUR_ITINERARY_TAB_LABELS.日期_表頭}
-                          className="h-7 text-xs w-24"
-                        />
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={handleSearchReturnFlight}
-                          disabled={searchingReturn || !returnFlightNumber}
-                          className="h-7 w-7 p-0 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-                          title={TOUR_ITINERARY_TAB_LABELS.SEARCH_3338}
-                        >
-                          {searchingReturn ? (
-                            <Loader2 size={12} className="animate-spin" />
-                          ) : (
-                            <Search size={12} />
-                          )}
-                        </Button>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          onClick={() =>
-                            setReturnFlights(prev => [
-                              ...prev,
-                              {
-                                airline: '',
-                                flightNumber: '',
-                                departureAirport: '',
-                                departureTime: '',
-                                arrivalAirport: '',
-                                arrivalTime: '',
-                              },
-                            ])
+                          value={flight.airline || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setReturnFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index ? { ...f, airline: e.target.value } : f
+                              )
+                            )
                           }
-                          className="h-7 w-7 p-0"
-                          title={TOUR_ITINERARY_TAB_LABELS.ADD_9636}
-                        >
-                          <Plus size={12} />
-                        </Button>
+                          className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        <Input
+                          value={flight.flightNumber || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setReturnFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index
+                                  ? { ...f, flightNumber: e.target.value.toUpperCase() }
+                                  : f
+                              )
+                            )
+                          }
+                          className="h-7 text-sm w-20 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        <Input
+                          value={flight.departureAirport || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setReturnFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index
+                                  ? { ...f, departureAirport: e.target.value.toUpperCase() }
+                                  : f
+                              )
+                            )
+                          }
+                          className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        <Input
+                          value={flight.departureTime || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setReturnFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index ? { ...f, departureTime: e.target.value } : f
+                              )
+                            )
+                          }
+                          className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        <span className="text-muted-foreground w-4 text-center text-xs">→</span>
+                        <Input
+                          value={flight.arrivalAirport || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setReturnFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index
+                                  ? { ...f, arrivalAirport: e.target.value.toUpperCase() }
+                                  : f
+                              )
+                            )
+                          }
+                          className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        <Input
+                          value={flight.arrivalTime || ''}
+                          placeholder="—"
+                          onChange={e =>
+                            setReturnFlights(prev =>
+                              prev.map((f, i) =>
+                                i === index ? { ...f, arrivalTime: e.target.value } : f
+                              )
+                            )
+                          }
+                          className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                        />
+                        {index === 0 ? (
+                          <div className="flex-1 flex items-center justify-end gap-1">
+                            <Input
+                              value={returnFlightNumber}
+                              onChange={e => setReturnFlightNumber(e.target.value.toUpperCase())}
+                              placeholder={TOUR_ITINERARY_TAB_LABELS.SEARCH_8458}
+                              className="h-7 text-xs w-36 px-1"
+                              onKeyDown={e => {
+                                if (e.key === 'Enter' && returnFlightNumber) {
+                                  handleSearchReturnFlight()
+                                }
+                              }}
+                            />
+                            <DatePicker
+                              value={returnFlightDate}
+                              onChange={date => setReturnFlightDate(date || '')}
+                              placeholder={TOUR_ITINERARY_TAB_LABELS.日期_表頭}
+                              className="h-7 text-xs w-24"
+                            />
+                            <Button
+                              type="button"
+                              size="sm"
+                              onClick={handleSearchReturnFlight}
+                              disabled={searchingReturn || !returnFlightNumber}
+                              className="h-7 w-7 p-0 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                              title={TOUR_ITINERARY_TAB_LABELS.SEARCH_3338}
+                            >
+                              {searchingReturn ? (
+                                <Loader2 size={12} className="animate-spin" />
+                              ) : (
+                                <Search size={12} />
+                              )}
+                            </Button>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() =>
+                                setReturnFlights(prev => [
+                                  ...prev,
+                                  {
+                                    airline: '',
+                                    flightNumber: '',
+                                    departureAirport: '',
+                                    departureTime: '',
+                                    arrivalAirport: '',
+                                    arrivalTime: '',
+                                  },
+                                ])
+                              }
+                              className="h-7 w-7 p-0"
+                              title={TOUR_ITINERARY_TAB_LABELS.ADD_9636}
+                            >
+                              <Plus size={12} />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex-1 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setReturnFlights(prev => prev.filter((_, i) => i !== index))
+                              }
+                              className="text-destructive/60 hover:text-destructive p-0.5"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="flex-1 flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    ))}
+                    {returnSegments.length > 0 && (
+                      <div className="space-y-1 px-2 py-1.5 bg-morandi-gold/5">
+                        <p className="text-xs text-muted-foreground">
+                          {TOUR_ITINERARY_TAB_LABELS.此航班有多個航段_請選擇}
+                        </p>
+                        {returnSegments.map((seg, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => handleSelectReturnSegment(seg)}
+                            className="w-full text-left p-1 rounded hover:bg-morandi-gold/10 transition-colors text-xs"
+                          >
+                            {seg.departureAirport} → {seg.arrivalAirport}
+                            <span className="text-muted-foreground ml-1">
+                              {seg.departureTime} - {seg.arrivalTime}
+                            </span>
+                          </button>
+                        ))}
                         <button
                           type="button"
-                          onClick={() => setReturnFlights(prev => prev.filter((_, i) => i !== index))}
-                          className="text-destructive/60 hover:text-destructive p-0.5"
+                          onClick={clearReturnSegments}
+                          className="text-xs text-muted-foreground hover:text-foreground"
                         >
-                          <Trash2 size={14} />
+                          {COMP_TOURS_LABELS.取消}
                         </button>
                       </div>
                     )}
                   </div>
-                ))}
-                {returnSegments.length > 0 && (
-                  <div className="space-y-1 px-2 py-1.5 bg-morandi-gold/5">
-                    <p className="text-xs text-muted-foreground">
-                      {TOUR_ITINERARY_TAB_LABELS.此航班有多個航段_請選擇}
-                    </p>
-                    {returnSegments.map((seg, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        onClick={() => handleSelectReturnSegment(seg)}
-                        className="w-full text-left p-1 rounded hover:bg-morandi-gold/10 transition-colors text-xs"
-                      >
-                        {seg.departureAirport} → {seg.arrivalAirport}
-                        <span className="text-muted-foreground ml-1">
-                          {seg.departureTime} - {seg.arrivalTime}
-                        </span>
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={clearReturnSegments}
-                      className="text-xs text-muted-foreground hover:text-foreground"
-                    >
-                      {COMP_TOURS_LABELS.取消}
-                    </button>
-                  </div>
-                )}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* -- Daily schedule table -- */}
+            <table className="w-full border-collapse text-sm border border-border/30">
+              <thead className="sticky top-0 z-10">
+                <tr className="bg-morandi-gold text-white text-xs">
+                  <th className="px-2 py-1.5 text-left w-16 font-medium border-r border-white/20">
+                    {TOUR_ITINERARY_TAB_LABELS.日期_表頭}
+                  </th>
+                  <th className="px-2 py-1.5 text-left font-medium border-r border-white/20">
+                    {TOUR_ITINERARY_TAB_LABELS.行程內容}
+                  </th>
+                  <th className="px-1 py-1.5 text-center w-24 font-medium border-r border-white/20">
+                    工具
+                  </th>
+                  <th className="px-1 py-1.5 text-center w-[120px] font-medium border-r border-white/20">
+                    {TOUR_ITINERARY_TAB_LABELS.早餐_表頭}
+                  </th>
+                  <th className="px-1 py-1.5 text-center w-[120px] font-medium border-r border-white/20">
+                    {TOUR_ITINERARY_TAB_LABELS.午餐_表頭}
+                  </th>
+                  <th className="px-1 py-1.5 text-center w-[120px] font-medium">
+                    {TOUR_ITINERARY_TAB_LABELS.晚餐_表頭}
+                  </th>
+                </tr>
+              </thead>
+              {dailySchedule.map((day, idx) => (
+                <DayRow
+                  key={idx}
+                  day={day}
+                  idx={idx}
+                  isFirst={idx === 0}
+                  isLast={idx === dailySchedule.length - 1}
+                  updateDaySchedule={updateDaySchedule}
+                  removeAttraction={removeAttraction}
+                  reorderAttractions={reorderAttractions}
+                  handleMentionSelect={handleMentionSelect}
+                  updateBlocks={(dayIdx, blocks) => {
+                    setDailySchedule(prev => {
+                      const newSchedule = [...prev]
+                      newSchedule[dayIdx] = { ...newSchedule[dayIdx], blocks }
+                      return newSchedule
+                    })
+                  }}
+                  mentionInputRefs={mentionInputRefs}
+                  tourLocation={tour.location || ''}
+                  getDateLabel={getDateLabel}
+                  getPreviousAccommodation={getPreviousAccommodation}
+                  disabledAttractionIds={disabledAttractionIds}
+                />
+              ))}
+            </table>
           </div>
-        )}
 
-        {/* -- Daily schedule table -- */}
-        <table className="w-full border-collapse text-sm border border-border/30">
-          <thead className="sticky top-0 z-10">
-            <tr className="bg-morandi-gold text-white text-xs">
-              <th className="px-2 py-1.5 text-left w-16 font-medium border-r border-white/20">
-                {TOUR_ITINERARY_TAB_LABELS.日期_表頭}
-              </th>
-              <th className="px-2 py-1.5 text-left font-medium border-r border-white/20">
-                {TOUR_ITINERARY_TAB_LABELS.行程內容}
-              </th>
-              <th className="px-1 py-1.5 text-center w-24 font-medium border-r border-white/20">
-                工具
-              </th>
-              <th className="px-1 py-1.5 text-center w-[120px] font-medium border-r border-white/20">
-                {TOUR_ITINERARY_TAB_LABELS.早餐_表頭}
-              </th>
-              <th className="px-1 py-1.5 text-center w-[120px] font-medium border-r border-white/20">
-                {TOUR_ITINERARY_TAB_LABELS.午餐_表頭}
-              </th>
-              <th className="px-1 py-1.5 text-center w-[120px] font-medium">
-                {TOUR_ITINERARY_TAB_LABELS.晚餐_表頭}
-              </th>
-            </tr>
-          </thead>
-            {dailySchedule.map((day, idx) => (
-              <DayRow
-                key={idx}
-                day={day}
-                idx={idx}
-                isFirst={idx === 0}
-                isLast={idx === dailySchedule.length - 1}
-                updateDaySchedule={updateDaySchedule}
-                removeAttraction={removeAttraction}
-                reorderAttractions={reorderAttractions}
-                handleMentionSelect={handleMentionSelect}
-                updateBlocks={(dayIdx, blocks) => {
-                  setDailySchedule(prev => {
-                    const newSchedule = [...prev]
-                    newSchedule[dayIdx] = { ...newSchedule[dayIdx], blocks }
-                    return newSchedule
-                  })
-                }}
-                mentionInputRefs={mentionInputRefs}
-                tourLocation={tour.location || ''}
-                getDateLabel={getDateLabel}
-                getPreviousAccommodation={getPreviousAccommodation}
-                disabledAttractionIds={disabledAttractionIds}
-              />
-            ))}
-        </table>
-      </div>
+          {/* -- 右側：資源庫 + 地圖（40%）-- */}
+          <div className="w-[40%] flex flex-col border-l border-border overflow-hidden">
+            <ResourcePanel
+              className="flex-1 overflow-hidden"
+              countryId={tour.country_id || ''}
+              locationName={tour.location || ''}
+              tourId={tour.id}
+              tourCode={tour.code || ''}
+            />
+          </div>
+        </div>
+        {/* 左右分割結束 */}
 
-      {/* -- 右側：資源庫 + 地圖（40%）-- */}
-      <div className="w-[40%] flex flex-col border-l border-border overflow-hidden">
-        <ResourcePanel
-          className="flex-1 overflow-hidden"
-          countryId={tour.country_id || ''}
-          locationName={tour.location || ''}
-          tourId={tour.id}
-          tourCode={tour.code || ''}
+        {/* 拖拽覆蓋層 */}
+        <DragOverlay>
+          {activeDragName ? (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-md border border-morandi-gold bg-card shadow-lg text-sm font-medium">
+              <MapPin size={14} className="text-morandi-gold" />
+              {activeDragName}
+            </div>
+          ) : null}
+        </DragOverlay>
+
+        {/* 住宿變更確認 Dialog */}
+        <AccommodationChangeDialog
+          open={showChangeDialog}
+          changes={accommodationChanges}
+          onConfirm={() => {
+            setShowChangeDialog(false)
+            pendingSaveRef.current?.()
+            pendingSaveRef.current = null
+          }}
+          onCancel={() => {
+            setShowChangeDialog(false)
+            pendingSaveRef.current = null
+          }}
         />
       </div>
-
-      </div>{/* 左右分割結束 */}
-
-      {/* 拖拽覆蓋層 */}
-      <DragOverlay>
-        {activeDragName ? (
-          <div className="flex items-center gap-2 px-3 py-2 rounded-md border border-morandi-gold bg-card shadow-lg text-sm font-medium">
-            <MapPin size={14} className="text-morandi-gold" />
-            {activeDragName}
-          </div>
-        ) : null}
-      </DragOverlay>
-
-      {/* 住宿變更確認 Dialog */}
-      <AccommodationChangeDialog
-        open={showChangeDialog}
-        changes={accommodationChanges}
-        onConfirm={() => {
-          setShowChangeDialog(false)
-          pendingSaveRef.current?.()
-          pendingSaveRef.current = null
-        }}
-        onCancel={() => {
-          setShowChangeDialog(false)
-          pendingSaveRef.current = null
-        }}
-      />
-    </div>
     </DndContext>
   )
 }

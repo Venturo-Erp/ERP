@@ -6,14 +6,7 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
-import {
-  Inbox,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  FolderOpen,
-  Send,
-} from 'lucide-react'
+import { Inbox, Clock, CheckCircle, AlertCircle, FolderOpen, Send } from 'lucide-react'
 import useSWR from 'swr'
 import type { Database } from '@/lib/supabase/types'
 
@@ -61,9 +54,7 @@ export default function LocalPage() {
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
       filtered = filtered.filter(
-        r =>
-          r.code?.toLowerCase().includes(q) ||
-          r.supplier_name?.toLowerCase().includes(q)
+        r => r.code?.toLowerCase().includes(q) || r.supplier_name?.toLowerCase().includes(q)
       )
     }
     return filtered
@@ -124,7 +115,8 @@ export default function LocalPage() {
                     </div>
                     <div className="text-xs text-morandi-secondary mt-0.5">
                       {req.request_type}
-                      {req.created_at && ` · ${new Date(req.created_at).toLocaleDateString('zh-TW')}`}
+                      {req.created_at &&
+                        ` · ${new Date(req.created_at).toLocaleDateString('zh-TW')}`}
                     </div>
                   </div>
                   <span

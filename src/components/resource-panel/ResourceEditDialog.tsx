@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import { Loader2, MapPin, Building2, UtensilsCrossed, ExternalLink } from 'lucide-react'
+import { Loader2, MapPin, Building2, UtensilsCrossed, ExternalLink, X, Save } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 
 const supabase = createSupabaseBrowserClient()
@@ -53,12 +53,15 @@ export function ResourceEditDialog({
 
     async function fetchData() {
       if (!resourceId) return
-      
+
       setLoading(true)
       try {
-        const tableName = resourceType === 'attraction' ? 'attractions' 
-          : resourceType === 'hotel' ? 'hotels' 
-          : 'restaurants'
+        const tableName =
+          resourceType === 'attraction'
+            ? 'attractions'
+            : resourceType === 'hotel'
+              ? 'hotels'
+              : 'restaurants'
 
         const { data: result, error } = await supabase
           .from(tableName)
@@ -84,9 +87,12 @@ export function ResourceEditDialog({
 
     setSaving(true)
     try {
-      const tableName = resourceType === 'attraction' ? 'attractions' 
-        : resourceType === 'hotel' ? 'hotels' 
-        : 'restaurants'
+      const tableName =
+        resourceType === 'attraction'
+          ? 'attractions'
+          : resourceType === 'hotel'
+            ? 'hotels'
+            : 'restaurants'
 
       const { error } = await supabase
         .from(tableName)
@@ -156,7 +162,7 @@ export function ResourceEditDialog({
               <Label>名稱</Label>
               <Input
                 value={data.name || ''}
-                onChange={(e) => setData({ ...data, name: e.target.value })}
+                onChange={e => setData({ ...data, name: e.target.value })}
               />
             </div>
 
@@ -165,7 +171,7 @@ export function ResourceEditDialog({
               <Label>地址</Label>
               <Input
                 value={data.address || ''}
-                onChange={(e) => setData({ ...data, address: e.target.value })}
+                onChange={e => setData({ ...data, address: e.target.value })}
                 placeholder="輸入地址..."
               />
             </div>
@@ -178,7 +184,12 @@ export function ResourceEditDialog({
                   type="number"
                   step="any"
                   value={data.latitude ?? ''}
-                  onChange={(e) => setData({ ...data, latitude: e.target.value ? parseFloat(e.target.value) : null })}
+                  onChange={e =>
+                    setData({
+                      ...data,
+                      latitude: e.target.value ? parseFloat(e.target.value) : null,
+                    })
+                  }
                   placeholder="25.0330"
                 />
               </div>
@@ -188,7 +199,12 @@ export function ResourceEditDialog({
                   type="number"
                   step="any"
                   value={data.longitude ?? ''}
-                  onChange={(e) => setData({ ...data, longitude: e.target.value ? parseFloat(e.target.value) : null })}
+                  onChange={e =>
+                    setData({
+                      ...data,
+                      longitude: e.target.value ? parseFloat(e.target.value) : null,
+                    })
+                  }
                   placeholder="121.5654"
                 />
               </div>
@@ -202,8 +218,7 @@ export function ResourceEditDialog({
               onClick={openGoogleMaps}
               className="w-full gap-2"
             >
-              <ExternalLink size={14} />
-              在 Google Maps 查看
+              <ExternalLink size={14} />在 Google Maps 查看
             </Button>
 
             {/* 分類 */}
@@ -211,7 +226,7 @@ export function ResourceEditDialog({
               <Label>分類</Label>
               <Input
                 value={data.category || ''}
-                onChange={(e) => setData({ ...data, category: e.target.value })}
+                onChange={e => setData({ ...data, category: e.target.value })}
                 placeholder="如：購物、景點、餐廳..."
               />
             </div>
@@ -221,7 +236,7 @@ export function ResourceEditDialog({
               <Label>電話</Label>
               <Input
                 value={data.phone || ''}
-                onChange={(e) => setData({ ...data, phone: e.target.value })}
+                onChange={e => setData({ ...data, phone: e.target.value })}
                 placeholder="+81-xxx-xxxx"
               />
             </div>
@@ -231,7 +246,7 @@ export function ResourceEditDialog({
               <Label>網站</Label>
               <Input
                 value={data.website || ''}
-                onChange={(e) => setData({ ...data, website: e.target.value })}
+                onChange={e => setData({ ...data, website: e.target.value })}
                 placeholder="https://..."
               />
             </div>
@@ -241,7 +256,7 @@ export function ResourceEditDialog({
               <Label>描述</Label>
               <Textarea
                 value={data.description || ''}
-                onChange={(e) => setData({ ...data, description: e.target.value })}
+                onChange={e => setData({ ...data, description: e.target.value })}
                 placeholder="簡短描述..."
                 rows={2}
               />
@@ -250,18 +265,21 @@ export function ResourceEditDialog({
             {/* 按鈕 */}
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
+                <X className="h-4 w-4 mr-1" />
                 取消
               </Button>
               <Button onClick={handleSave} disabled={saving}>
-                {saving && <Loader2 size={14} className="animate-spin mr-1" />}
+                {saving ? (
+                  <Loader2 size={14} className="animate-spin mr-1" />
+                ) : (
+                  <Save className="h-4 w-4 mr-1" />
+                )}
                 儲存
               </Button>
             </div>
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            找不到資料
-          </div>
+          <div className="text-center py-8 text-muted-foreground">找不到資料</div>
         )}
       </DialogContent>
     </Dialog>

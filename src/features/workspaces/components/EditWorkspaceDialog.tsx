@@ -156,7 +156,7 @@ export function EditWorkspaceDialog({
             <X size={16} />
             {WORKSPACES_LABELS.CANCEL}
           </Button>
-          {/* eslint-disable-next-line venturo/button-requires-icon -- 三元運算式中有圖標 */}
+          {}
           <Button
             onClick={handleSubmit}
             disabled={isSubmitting}

@@ -19,7 +19,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params
     const body = await request.json()
-    
+
     const { driver_name, driver_phone, vehicle_plate, vehicle_type } = body
 
     if (!driver_name?.trim() || !driver_phone?.trim()) {
@@ -43,11 +43,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: '更新失敗' }, { status: 500 })
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      message: '司機資訊已提交' 
+    return NextResponse.json({
+      success: true,
+      message: '司機資訊已提交',
     })
-
   } catch (error) {
     console.error('Confirm error:', error)
     return NextResponse.json({ error: '提交失敗', details: String(error) }, { status: 500 })

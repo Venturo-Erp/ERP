@@ -124,10 +124,11 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
   }, [bonusSettings, getEmployee])
 
   const normalExpenses = useMemo(
-    () => paymentRequests.filter(pr => {
-      const rt = (pr.request_type || '').toLowerCase()
-      return !rt.includes('bonus') && !rt.includes('獎金')
-    }),
+    () =>
+      paymentRequests.filter(pr => {
+        const rt = (pr.request_type || '').toLowerCase()
+        return !rt.includes('bonus') && !rt.includes('獎金')
+      }),
     [paymentRequests]
   )
 
@@ -142,7 +143,9 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     try {
       await updateTour(tour.id, {
         closing_status: nextStatus,
-        ...(nextStatus === 'closed' ? { closing_date: new Date().toISOString() } : { closing_date: null }),
+        ...(nextStatus === 'closed'
+          ? { closing_date: new Date().toISOString() }
+          : { closing_date: null }),
       })
       toast.success(nextStatus === 'closed' ? '已標記為結團' : '已重新開啟團')
     } catch (err) {
@@ -169,7 +172,10 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
       label: CATEGORY_LABELS[category] ?? category,
       items: catItems,
       estimatedTotal: catItems.reduce((sum, it) => sum + getEstimatedCost(it), 0),
-      actualTotal: catItems.reduce((sum, it) => sum + (getActualCost(it) ?? getEstimatedCost(it)), 0),
+      actualTotal: catItems.reduce(
+        (sum, it) => sum + (getActualCost(it) ?? getEstimatedCost(it)),
+        0
+      ),
     }))
   }, [items])
 
@@ -292,13 +298,21 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                             {formatCurrency(est)}
                           </td>
                           <td className="px-4 py-2 text-right font-mono tabular-nums">
-                            {act != null ? formatCurrency(act) : (
+                            {act != null ? (
+                              formatCurrency(act)
+                            ) : (
                               <span className="text-muted-foreground">—</span>
                             )}
                           </td>
-                          <td className={`px-4 py-2 text-right font-mono tabular-nums ${
-                            diff != null && diff > 0 ? 'text-red-600' : diff != null && diff < 0 ? 'text-green-600' : ''
-                          }`}>
+                          <td
+                            className={`px-4 py-2 text-right font-mono tabular-nums ${
+                              diff != null && diff > 0
+                                ? 'text-red-600'
+                                : diff != null && diff < 0
+                                  ? 'text-green-600'
+                                  : ''
+                            }`}
+                          >
                             {diff != null ? (
                               `${diff > 0 ? '+' : ''}${formatCurrency(diff)}`
                             ) : (
@@ -330,12 +344,15 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                 {formatCurrency(summary.actualTotal)}
               </span>
             </div>
-            <div className={`flex justify-between text-sm font-semibold ${
-              summary.diff > 0 ? 'text-red-600' : summary.diff < 0 ? 'text-green-600' : ''
-            }`}>
+            <div
+              className={`flex justify-between text-sm font-semibold ${
+                summary.diff > 0 ? 'text-red-600' : summary.diff < 0 ? 'text-green-600' : ''
+              }`}
+            >
               <span>差異</span>
               <span className="font-mono tabular-nums">
-                {summary.diff > 0 ? '+' : ''}{formatCurrency(summary.diff)}
+                {summary.diff > 0 ? '+' : ''}
+                {formatCurrency(summary.diff)}
               </span>
             </div>
             {summary.perPerson != null && (
@@ -358,7 +375,9 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
       <div className="flex items-center justify-between border rounded-lg px-4 py-3 bg-muted/10">
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium">結案狀態</span>
-          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusInfo.color}`}>
+          <span
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusInfo.color}`}
+          >
             {statusInfo.label}
           </span>
         </div>

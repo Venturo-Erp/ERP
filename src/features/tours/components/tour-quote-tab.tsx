@@ -99,7 +99,7 @@ export function TourQuoteTab({ tour }: TourQuoteTabProps) {
     if (!loading && !quoteId && !creating) {
       handleCreateQuote()
     }
-  }, [loading, quoteId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loading, quoteId])
 
   if (loading || !quoteId) {
     return (

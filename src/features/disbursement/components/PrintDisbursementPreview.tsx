@@ -67,11 +67,11 @@ function processItems(
       : request?.tour_name || '-'
 
     // 有代墊人時，付款對象是「代墊人（廠商）」
-    const advancedBy = (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined
+    const advancedBy = (item as unknown as Record<string, unknown>).advanced_by_name as
+      | string
+      | undefined
     const supplierName = item.supplier_name || DISBURSEMENT_LABELS.未指定供應商
-    const payFor = advancedBy
-      ? `${advancedBy}（${supplierName}）`
-      : supplierName
+    const payFor = advancedBy ? `${advancedBy}（${supplierName}）` : supplierName
 
     return {
       requestCode: request?.code || '-',
@@ -165,7 +165,7 @@ function splitLargeGroups(groups: PayForGroup[], maxSize = 5): PayForGroup[] {
 
   // 計算每個收款人的總金額，並標記誰是最後一組
   const payeeGroups = new Map<string, { total: number; indices: number[] }>()
-  
+
   result.forEach((group, idx) => {
     const payee = extractPayee(group.payFor)
     if (!payeeGroups.has(payee)) {
@@ -195,7 +195,7 @@ function splitLargeGroups(groups: PayForGroup[], maxSize = 5): PayForGroup[] {
     const payee = extractPayee(group.payFor)
     const pg = payeeGroups.get(payee)!
     const isFirstGroupOfPayee = pg.indices[0] === idx
-    
+
     if (isFirstGroupOfPayee) {
       // 計算該收款人的所有行數
       const totalRows = pg.indices.reduce((sum, gIdx) => sum + result[gIdx].items.length, 0)
@@ -437,7 +437,9 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                     const subtotalRowSpan = (group as any).subtotalRowSpan || 0
                     const showSubtotalCell = subtotalRowSpan > 0 && isFirstInGroup
                     if (isFirstInGroup) {
-                      console.log(`[Tour] Group ${groupIdx}: payFor=${group.payFor}, subtotalRowSpan=${subtotalRowSpan}, showSubtotalCell=${showSubtotalCell}, showTotal=${group.showTotal}, total=${group.total}`)
+                      console.log(
+                        `[Tour] Group ${groupIdx}: payFor=${group.payFor}, subtotalRowSpan=${subtotalRowSpan}, showSubtotalCell=${showSubtotalCell}, showTotal=${group.showTotal}, total=${group.total}`
+                      )
                     }
                     return (
                       <tr key={`tour-${groupIdx}-${itemIdx}`}>
@@ -455,7 +457,14 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                           >
                             <div>{groupPayee}</div>
                             {groupSupplier && (
-                              <div style={{ fontSize: '9px', fontWeight: 'normal', color: COLORS.gray, marginTop: '2px' }}>
+                              <div
+                                style={{
+                                  fontSize: '9px',
+                                  fontWeight: 'normal',
+                                  color: COLORS.gray,
+                                  marginTop: '2px',
+                                }}
+                              >
                                 {groupSupplier}
                               </div>
                             )}
@@ -678,7 +687,19 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                               borderTop: groupIdx > 0 ? `1px solid ${COLORS.gold}` : 'none',
                             }}
                           >
-                            <div>{groupPayee}</div>{groupSupplier && <div style={{ fontSize: '9px', fontWeight: 'normal', color: COLORS.gray, marginTop: '2px' }}>{groupSupplier}</div>}
+                            <div>{groupPayee}</div>
+                            {groupSupplier && (
+                              <div
+                                style={{
+                                  fontSize: '9px',
+                                  fontWeight: 'normal',
+                                  color: COLORS.gray,
+                                  marginTop: '2px',
+                                }}
+                              >
+                                {groupSupplier}
+                              </div>
+                            )}
                           </td>
                         )}
                         <td

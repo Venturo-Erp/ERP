@@ -165,21 +165,19 @@ export async function POST(req: NextRequest) {
 
       if (!existingRequest) {
         // 建立新的需求單記錄
-        await supabase
-          .from('tour_requests')
-          .insert({
-            workspace_id: tour.workspace_id,
-            tour_id: tourId,
-            request_type: 'other',
-            request_scope: 'full_package',
-            supplier_name: 'Local 供應商',
-            status: '已發送',
-            sent_at: new Date().toISOString(),
-            sent_via: 'Line',
-            sent_to: lineGroupId,
-            line_group_id: lineGroupId,
-            note,
-          })
+        await supabase.from('tour_requests').insert({
+          workspace_id: tour.workspace_id,
+          tour_id: tourId,
+          request_type: 'other',
+          request_scope: 'full_package',
+          supplier_name: 'Local 供應商',
+          status: '已發送',
+          sent_at: new Date().toISOString(),
+          sent_via: 'Line',
+          sent_to: lineGroupId,
+          line_group_id: lineGroupId,
+          note,
+        })
       } else {
         // 更新現有記錄
         await supabase

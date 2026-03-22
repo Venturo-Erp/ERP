@@ -14,7 +14,11 @@ import { Button } from '@/components/ui/button'
 import type { Tour } from '@/stores/types'
 import { useTourItineraryItemsByTour } from '@/features/tours/hooks/useTourItineraryItems'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
-import { usePendingQuotes, useAcceptedQuotes, useRejectedQuotes } from '@/features/tours/hooks/useTourRequests'
+import {
+  usePendingQuotes,
+  useAcceptedQuotes,
+  useRejectedQuotes,
+} from '@/features/tours/hooks/useTourRequests'
 import { QuoteCard } from './QuoteCard'
 import { CollaborativeConfirmationSheet } from './CollaborativeConfirmationSheet'
 import { TOUR_TRACKING_LABELS } from './constants/labels'
@@ -54,7 +58,7 @@ function getQuoteStatusDisplay(status: string): StatusDisplay {
     default:
       return {
         label: TOUR_TRACKING_LABELS.QUOTE_NONE,
-        color: 'text-gray-400 bg-gray-50',
+        color: 'text-muted-foreground bg-morandi-container',
         icon: '⬜',
       }
   }
@@ -89,7 +93,7 @@ function getRequestStatusDisplay(status: string): StatusDisplay {
     default:
       return {
         label: TOUR_TRACKING_LABELS.REQUEST_NONE,
-        color: 'text-gray-400 bg-gray-50',
+        color: 'text-muted-foreground bg-morandi-container',
         icon: '⬜',
       }
   }
@@ -112,7 +116,7 @@ function getConfirmationStatusDisplay(status: string): StatusDisplay {
     default:
       return {
         label: TOUR_TRACKING_LABELS.CONFIRM_NONE,
-        color: 'text-gray-400 bg-gray-50',
+        color: 'text-muted-foreground bg-morandi-container',
         icon: '⬜',
       }
   }
@@ -135,7 +139,7 @@ function getLeaderStatusDisplay(status: string): StatusDisplay {
     default:
       return {
         label: TOUR_TRACKING_LABELS.LEADER_NONE,
-        color: 'text-gray-400 bg-gray-50',
+        color: 'text-muted-foreground bg-morandi-container',
         icon: '⬜',
       }
   }
@@ -176,10 +180,14 @@ interface TourTrackingPanelProps {
 
 export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
   const { items, loading } = useTourItineraryItemsByTour(tour.id)
-  const { pendingQuotes, loading: quotesLoading, refresh: refreshQuotes } = usePendingQuotes(tour.id)
+  const {
+    pendingQuotes,
+    loading: quotesLoading,
+    refresh: refreshQuotes,
+  } = usePendingQuotes(tour.id)
   const { acceptedQuotes } = useAcceptedQuotes(tour.id)
   const { rejectedQuotes } = useRejectedQuotes(tour.id)
-  
+
   const [showRejected, setShowRejected] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<any>(null)
 
@@ -238,7 +246,7 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
           </div>
         </div>
       )}
-      
+
       {/* 已成交報價區塊 */}
       {acceptedQuotes.length > 0 && (
         <div className="space-y-3">
@@ -253,17 +261,12 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
               const response = quote.supplier_response
               const selectedTier = quote.selected_tier ?? 0
               const selectedPrice = response?.tierPrices?.[selectedTier]
-              
+
               return (
-                <div
-                  key={quote.id}
-                  className="border rounded-lg p-4 bg-green-50 border-green-200"
-                >
+                <div key={quote.id} className="border rounded-lg p-4 bg-green-50 border-green-200">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-semibold">
-                        {quote.supplier_name || 'Local 供應商'}
-                      </p>
+                      <p className="font-semibold">{quote.supplier_name || 'Local 供應商'}</p>
                       <p className="text-sm text-muted-foreground mt-1">
                         {quote.selected_tier} 人團 • {Number(selectedPrice).toLocaleString()} 元/人
                       </p>
@@ -271,11 +274,7 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
                         成交時間：{new Date(quote.accepted_at!).toLocaleString('zh-TW')}
                       </p>
                     </div>
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => setSelectedRequest(quote)}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => setSelectedRequest(quote)}>
                       查看協作確認單
                     </Button>
                   </div>
@@ -285,7 +284,7 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
           </div>
         </div>
       )}
-      
+
       {/* 未成交報價區塊（可展開） */}
       {rejectedQuotes.length > 0 && (
         <div className="space-y-3">
@@ -301,10 +300,7 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
           {showRejected && (
             <div className="space-y-2 pl-4">
               {rejectedQuotes.map(quote => (
-                <div
-                  key={quote.id}
-                  className="border rounded-lg p-3 bg-gray-50 text-sm"
-                >
+                <div key={quote.id} className="border rounded-lg p-3 bg-morandi-container text-sm">
                   <p className="font-medium">{quote.supplier_name || 'Local 供應商'}</p>
                   {quote.rejection_reason && (
                     <p className="text-muted-foreground mt-1">原因：{quote.rejection_reason}</p>
@@ -318,7 +314,7 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
           )}
         </div>
       )}
-      
+
       {/* 原本的核心表追蹤 */}
       {items.length > 0 && (
         <>
@@ -326,7 +322,9 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-semibold">{TOUR_TRACKING_LABELS.PANEL_TITLE}</h3>
-                <p className="text-sm text-muted-foreground">{TOUR_TRACKING_LABELS.PANEL_DESCRIPTION}</p>
+                <p className="text-sm text-muted-foreground">
+                  {TOUR_TRACKING_LABELS.PANEL_DESCRIPTION}
+                </p>
               </div>
               <span className="text-sm text-muted-foreground">
                 {TOUR_TRACKING_LABELS.TOTAL_ITEMS}: {items.length}
@@ -422,7 +420,7 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
           </div>
         </>
       )}
-      
+
       {/* 空狀態 */}
       {items.length === 0 && pendingQuotes.length === 0 && acceptedQuotes.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">

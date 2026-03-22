@@ -125,7 +125,13 @@ export function TourQuickQuoteTab({ tour }: TourQuickQuoteTabProps) {
             <span className="font-medium text-morandi-secondary">狀態</span>
           </div>
           <div className="py-1 px-4 flex items-center justify-end">
-            <Button variant="default" size="sm" className="h-7 px-2 text-xs" onClick={handleAdd} disabled={creating}>
+            <Button
+              variant="default"
+              size="sm"
+              className="h-7 px-2 text-xs"
+              onClick={handleAdd}
+              disabled={creating}
+            >
               <Plus size={12} className="mr-1" />
               新增
             </Button>
@@ -143,7 +149,13 @@ export function TourQuickQuoteTab({ tour }: TourQuickQuoteTabProps) {
           <div className="flex flex-col items-center justify-center py-12 text-morandi-secondary">
             <FileText size={32} className="mb-2 opacity-30" />
             <p className="text-sm">尚無快速報價單</p>
-            <Button variant="outline" size="sm" className="mt-3" onClick={handleAdd} disabled={creating}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3"
+              onClick={handleAdd}
+              disabled={creating}
+            >
               <Plus size={14} className="mr-1" />
               {COMP_TOURS_LABELS.新增快速報價}
             </Button>
@@ -162,9 +174,7 @@ export function TourQuickQuoteTab({ tour }: TourQuickQuoteTabProps) {
                 </span>
               </div>
               <div className="py-2 px-4">
-                <span className="text-xs text-morandi-primary">
-                  {quote.issue_date || '-'}
-                </span>
+                <span className="text-xs text-morandi-primary">{quote.issue_date || '-'}</span>
               </div>
               <div className="py-2 px-4 text-right">
                 <CurrencyCell amount={quote.total_amount || 0} />

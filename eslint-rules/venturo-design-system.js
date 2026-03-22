@@ -359,28 +359,48 @@ module.exports = {
             let hasIcon = false
             let buttonText = ''
 
-            for (const child of children) {
-              // 檢查是否有圖標組件
-              if (child.type === 'JSXElement') {
-                const childName = child.openingElement?.name?.name || ''
-                // 常見圖標組件名稱
-                if (
-                  [
-                    'Save',
-                    'Check',
-                    'Plus',
-                    'X',
-                    'Trash2',
-                    'Edit2',
-                    'RefreshCw',
-                    'Upload',
-                    'Download',
-                    'Search',
-                    'Printer',
-                  ].includes(childName)
-                ) {
-                  hasIcon = true
+            const iconNames = [
+              'Save',
+              'Check',
+              'Plus',
+              'X',
+              'Trash2',
+              'Edit2',
+              'RefreshCw',
+              'Upload',
+              'Download',
+              'Search',
+              'Printer',
+              'Loader2',
+            ]
+
+            // 遞迴檢查是否有圖標
+            function checkForIcon(node) {
+              if (!node) return false
+              if (node.type === 'JSXElement') {
+                const name = node.openingElement?.name?.name || ''
+                if (iconNames.includes(name)) return true
+                // 檢查子元素
+                for (const child of node.children || []) {
+                  if (checkForIcon(child)) return true
                 }
+              }
+              if (node.type === 'JSXExpressionContainer') {
+                return checkForIcon(node.expression)
+              }
+              if (node.type === 'ConditionalExpression') {
+                return checkForIcon(node.consequent) || checkForIcon(node.alternate)
+              }
+              if (node.type === 'LogicalExpression') {
+                return checkForIcon(node.left) || checkForIcon(node.right)
+              }
+              return false
+            }
+
+            for (const child of children) {
+              // 檢查是否有圖標組件（包括三元運算符和邏輯運算符）
+              if (checkForIcon(child)) {
+                hasIcon = true
               }
               // 收集文字內容
               if (child.type === 'JSXText') {

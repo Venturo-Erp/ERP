@@ -204,7 +204,14 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
               : 'hover:bg-morandi-container/30 text-morandi-secondary'
           )}
         >
-          <Star size={14} className={selectedVersion === 'main' ? 'text-morandi-gold fill-morandi-gold' : 'text-morandi-secondary'} />
+          <Star
+            size={14}
+            className={
+              selectedVersion === 'main'
+                ? 'text-morandi-gold fill-morandi-gold'
+                : 'text-morandi-secondary'
+            }
+          />
           <span>主報價單</span>
         </button>
 
@@ -226,9 +233,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
                 <div className="truncate text-xs">
                   {quote.customer_name || `快速報價 ${index + 1}`}
                 </div>
-                <div className="text-[10px] opacity-60">
-                  {quote.issue_date || ''}
-                </div>
+                <div className="text-[10px] opacity-60">{quote.issue_date || ''}</div>
               </div>
             </button>
           ))}

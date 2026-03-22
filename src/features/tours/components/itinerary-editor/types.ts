@@ -6,7 +6,7 @@ import type { FlightInfo } from '@/types/flight.types'
 
 /** 行程編輯器上下文（取代 ProposalPackage + Proposal） */
 export interface ItineraryEditorContext {
-  id: string              // 用於 key，可以是 tour.id
+  id: string // 用於 key，可以是 tour.id
   itinerary_id?: string | null
   start_date?: string | null
   end_date?: string | null

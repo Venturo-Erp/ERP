@@ -25,11 +25,13 @@ Supabase（帝國資料庫）
 ### ✅ 已完成（一紀）
 
 #### 🛠️ 基礎架構
+
 - [x] MCP Server 骨架（Node.js / Python）
 - [x] Supabase 連接（讀取權限）
 - [x] 基本認證（RLS）
 
 **參考**：
+
 - Anthropic MCP SDK
 - mcporter CLI（OpenClaw skill）
 
@@ -40,9 +42,11 @@ Supabase（帝國資料庫）
 ### 二紀：核心工具（Supabase CRUD）
 
 #### 📊 世界樹工具
+
 **工具名稱**：`venturo_get_itinerary_items`
 
 **功能**：讀取世界樹枝條
+
 ```typescript
 {
   "name": "venturo_get_itinerary_items",
@@ -58,6 +62,7 @@ Supabase（帝國資料庫）
 **工具名稱**：`venturo_update_itinerary_item`
 
 **功能**：修改枝條資料
+
 ```typescript
 {
   "name": "venturo_update_itinerary_item",
@@ -74,9 +79,11 @@ Supabase（帝國資料庫）
 ```
 
 #### 🗂️ 團務工具
+
 **工具名稱**：`venturo_get_tours`
 
 **功能**：查詢旅遊團
+
 ```typescript
 {
   "name": "venturo_get_tours",
@@ -93,6 +100,7 @@ Supabase（帝國資料庫）
 **工具名稱**：`venturo_create_tour`
 
 **功能**：建立新團
+
 ```typescript
 {
   "name": "venturo_create_tour",
@@ -107,9 +115,11 @@ Supabase（帝國資料庫）
 ```
 
 #### 📋 訂單工具
+
 **工具名稱**：`venturo_get_orders`
 
 **功能**：查詢訂單
+
 ```typescript
 {
   "name": "venturo_get_orders",
@@ -127,9 +137,11 @@ Supabase（帝國資料庫）
 ### 三紀：進階工具（業務邏輯）
 
 #### 💰 報價工具
+
 **工具名稱**：`venturo_calculate_quote`
 
 **功能**：自動計算報價
+
 ```typescript
 {
   "name": "venturo_calculate_quote",
@@ -151,9 +163,11 @@ Supabase（帝國資料庫）
 ```
 
 #### 📦 需求單工具
+
 **工具名稱**：`venturo_create_request`
 
 **功能**：發送需求單給供應商
+
 ```typescript
 {
   "name": "venturo_create_request",
@@ -170,6 +184,7 @@ Supabase（帝國資料庫）
 **工具名稱**：`venturo_get_request_status`
 
 **功能**：查詢需求單狀態
+
 ```typescript
 {
   "name": "venturo_get_request_status",
@@ -185,9 +200,11 @@ Supabase（帝國資料庫）
 ```
 
 #### 👥 團員工具
+
 **工具名稱**：`venturo_get_travelers`
 
 **功能**：查詢團員名單
+
 ```typescript
 {
   "name": "venturo_get_travelers",
@@ -213,9 +230,11 @@ Supabase（帝國資料庫）
 ### 四紀：智能工具（AI 輔助）
 
 #### 🧠 AI 分析工具
+
 **工具名稱**：`venturo_analyze_profitability`
 
 **功能**：分析行程獲利性
+
 ```typescript
 {
   "name": "venturo_analyze_profitability",
@@ -235,6 +254,7 @@ Supabase（帝國資料庫）
 **工具名稱**：`venturo_suggest_alternatives`
 
 **功能**：推薦替代方案
+
 ```typescript
 {
   "name": "venturo_suggest_alternatives",
@@ -256,9 +276,11 @@ Supabase（帝國資料庫）
 ```
 
 #### 📊 報表工具
+
 **工具名稱**：`venturo_generate_report`
 
 **功能**：生成各類報表
+
 ```typescript
 {
   "name": "venturo_generate_report",
@@ -279,9 +301,11 @@ Supabase（帝國資料庫）
 ### 五紀：跨系統整合工具
 
 #### 🌐 Online 整合
+
 **工具名稱**：`venturo_publish_tour_online`
 
 **功能**：上架行程到 Online
+
 ```typescript
 {
   "name": "venturo_publish_tour_online",
@@ -297,6 +321,7 @@ Supabase（帝國資料庫）
 **工具名稱**：`venturo_sync_online_orders`
 
 **功能**：同步 Online 訂單到 ERP
+
 ```typescript
 {
   "name": "venturo_sync_online_orders",
@@ -306,9 +331,11 @@ Supabase（帝國資料庫）
 ```
 
 #### 📧 通訊整合
+
 **工具名稱**：`venturo_send_notification`
 
 **功能**：發送通知（Email/Line/簡訊）
+
 ```typescript
 {
   "name": "venturo_send_notification",
@@ -327,9 +354,11 @@ Supabase（帝國資料庫）
 ### 六紀：自動化工作流工具
 
 #### 🤖 Workflow 工具
+
 **工具名稱**：`venturo_trigger_workflow`
 
 **功能**：觸發自動化流程
+
 ```typescript
 {
   "name": "venturo_trigger_workflow",
@@ -344,6 +373,7 @@ Supabase（帝國資料庫）
 **工具名稱**：`venturo_schedule_task`
 
 **功能**：排程任務
+
 ```typescript
 {
   "name": "venturo_schedule_task",
@@ -361,16 +391,18 @@ Supabase（帝國資料庫）
 ## 🔐 安全與權限
 
 ### RLS 整合
+
 ```typescript
 // 每個 MCP 工具都帶 workspace_id
 const client = supabase.auth.admin.createClient({
   headers: {
-    'x-workspace-id': context.workspace_id
-  }
+    'x-workspace-id': context.workspace_id,
+  },
 })
 ```
 
 ### API Key 認證
+
 ```typescript
 // MCP Server 啟動時需要
 {
@@ -385,6 +417,7 @@ const client = supabase.auth.admin.createClient({
 ## 📦 部署方式
 
 ### 本機開發
+
 ```bash
 # 使用 mcporter（OpenClaw skill）
 mcporter add venturo-mcp-server stdio
@@ -394,6 +427,7 @@ node venturo-mcp-server/index.js
 ```
 
 ### Claude Desktop 整合
+
 ```json
 // claude_desktop_config.json
 {
@@ -411,6 +445,7 @@ node venturo-mcp-server/index.js
 ```
 
 ### OpenClaw 整合
+
 ```bash
 # 透過 mcporter skill
 cd ~/.openclaw/workspace-william/skills/mcporter
@@ -423,16 +458,19 @@ python3 scripts/mcporter.py add venturo stdio \
 ## 🛠️ 開發優先順序
 
 ### Phase 1（二紀）
+
 1. `venturo_get_itinerary_items`
 2. `venturo_get_tours`
 3. `venturo_update_itinerary_item`
 
 ### Phase 2（三紀）
+
 1. `venturo_calculate_quote`
 2. `venturo_create_request`
 3. `venturo_get_request_status`
 
 ### Phase 3（四紀~六紀）
+
 - AI 分析工具
 - 跨系統整合
 - 自動化工作流

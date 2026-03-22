@@ -139,7 +139,6 @@ await paymentRequestService.markAsPaid(requestId, {
 
 ```tsx
 import { TourClosingDialog } from '@/components/tours/TourClosingDialog'
-
 ;<TourClosingDialog
   open={isClosingDialogOpen}
   onOpenChange={setIsClosingDialogOpen}

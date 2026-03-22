@@ -23,6 +23,7 @@ tour_itinerary_items（核心表）
 ```
 
 **鐵律**：
+
 - 只有行程表編輯器可以新增項目
 - 其他功能只能讀取 + 更新狀態
 - 絕對不重複儲存資料
@@ -65,7 +66,7 @@ tour_itinerary_items
 ```
 業務操作：
   /tours/[id] → 報價單 Tab
-  
+
 讀取核心表：
   coreItemsToCostCategories()
     → SELECT * FROM tour_itinerary_items
@@ -85,7 +86,7 @@ tour_itinerary_items
     quote_status: 'quoted'
   }
   WHERE id = '一蘭拉麵-uuid'
-  
+
   UPDATE {
     unit_price: 3500,
     quantity: 2,
@@ -106,11 +107,11 @@ tour_itinerary_items
 
 讀取資料（JOIN）：
   useCoreRequestItems()
-    → SELECT 
+    → SELECT
         t.*,
         r.address, r.phone, r.fax
       FROM tour_itinerary_items t
-      LEFT JOIN restaurants r 
+      LEFT JOIN restaurants r
         ON t.resource_id = r.id
       WHERE t.tour_id = ?
         AND t.supplier_id = ?
@@ -333,7 +334,7 @@ tour_itinerary_items
 
 ```
 需求單產生時：
-  SELECT 
+  SELECT
     t.*,
     r.address, r.phone, r.fax
   FROM tour_itinerary_items t
@@ -456,10 +457,10 @@ tour_itinerary_items.unit_price 更新
 檢查：
   quote_status = 'confirmed'
   request_status = 'none'
-  
+
 問題：
   報價已確認，但還沒發需求單
-  
+
 解決：
   顯示提示「可以產生需求單了」
 ```
@@ -470,7 +471,7 @@ tour_itinerary_items.unit_price 更新
 ✅ 正確：
   tour_itinerary_items.title = '一蘭拉麵'
   restaurants.name = '一蘭拉麵餐廳'（可能不同）
-  
+
   需求單顯示：
     JOIN 取得 restaurants.name（最新資料）
 
@@ -504,10 +505,10 @@ tour_itinerary_items.unit_price 更新
   需求單顯示 0 人
 
 診斷：
-  SELECT * FROM orders 
-  WHERE tour_id = ? 
+  SELECT * FROM orders
+  WHERE tour_id = ?
     AND status IN ('confirmed', 'paid')
-  
+
   → 可能沒有 confirmed 訂單
 
 解決：
@@ -534,6 +535,7 @@ tour_itinerary_items.unit_price 更新
 ## 🎓 資料流理解檢查清單
 
 理解資料流前：
+
 ```
 □ 知道核心表是什麼
 □ 知道為什麼要核心表
@@ -541,6 +543,7 @@ tour_itinerary_items.unit_price 更新
 ```
 
 理解資料流後：
+
 ```
 □ 能畫出完整生命週期圖
 □ 能說出每個階段的資料變化

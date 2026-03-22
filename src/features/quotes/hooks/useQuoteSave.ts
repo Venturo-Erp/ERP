@@ -97,7 +97,7 @@ export const useQuoteSave = ({
         tier_pricings: tierPricingsData,
         ...quickQuoteData,
       }
-      
+
       // ✅ 等待存檔完成，捕獲錯誤
       await updateQuote(quote.id, quoteHeaderData)
 
@@ -129,9 +129,7 @@ export const useQuoteSave = ({
               .order('sort_order', { ascending: true })
               .limit(500)
             if (freshItems && freshItems.length > 0) {
-              setCategories(
-                coreItemsToCostCategories(freshItems as TourItineraryItem[])
-              )
+              setCategories(coreItemsToCostCategories(freshItems as TourItineraryItem[]))
             }
             // 也更新 SWR 快取
             refreshCoreItems?.()

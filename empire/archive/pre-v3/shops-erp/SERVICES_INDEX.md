@@ -7,6 +7,7 @@
 ### `profit-calculation.service.ts` (258 行)
 
 **主要函數：**
+
 ```typescript
 31:export function calculateReceiptTotal(receipts: ReceiptData[]): number {
 41:export function calculateExpenseTotal(
@@ -26,6 +27,7 @@
 ### `tour-channel.service.ts` (167 行)
 
 **主要函數：**
+
 ```typescript
 23:export async function createTourChannel(
 108:export async function addMembersToTourChannel(
@@ -34,12 +36,15 @@
 ### `tour-stats.service.test.ts` (85 行)
 
 **主要函數：**
+
 ```typescript
+
 ```
 
 ### `tour_dependency.service.ts` (176 行)
 
 **主要函數：**
+
 ```typescript
 20:export async function checkTourDependencies(tourId: string): Promise<TourDependencyCheck> {
 50:export async function checkTourPaidOrders(
@@ -53,6 +58,7 @@
 ### `tour-stats.service.ts` (82 行)
 
 **主要函數：**
+
 ```typescript
 27:export async function recalculateParticipants(tour_id: string): Promise<void> {
 ```
@@ -60,7 +66,9 @@
 ### `tour.service.ts` (379 行)
 
 **主要函數：**
+
 ```typescript
+
 ```
 
 ## quotes (2 services)
@@ -68,6 +76,7 @@
 ### `quoteItinerarySync.ts` (265 行)
 
 **主要函數：**
+
 ```typescript
 30:export async function syncHotelsFromQuoteToItinerary(
 135:export async function syncHotelsFromItineraryToQuote(
@@ -76,7 +85,9 @@
 ### `quote.service.ts` (124 行)
 
 **主要函數：**
+
 ```typescript
+
 ```
 
 ## orders (4 services)
@@ -84,6 +95,7 @@
 ### `order-stats.service.ts` (148 行)
 
 **主要函數：**
+
 ```typescript
 28:export async function recalculateOrderAmount(order_id: string): Promise<void> {
 112:export async function recalculatePaymentStatus(order_id: string): Promise<void> {
@@ -92,18 +104,23 @@
 ### `order.service.ts` (94 行)
 
 **主要函數：**
+
 ```typescript
+
 ```
 
 ### `order-stats.service.test.ts` (127 行)
 
 **主要函數：**
+
 ```typescript
+
 ```
 
 ### `order_member.service.ts` (39 行)
 
 **主要函數：**
+
 ```typescript
 8:export async function updateMembersTicketingDeadline(
 20:export async function insertRoomAssignments(
@@ -115,6 +132,7 @@
 ### `requestCoreTableSync.ts` (157 行)
 
 **主要函數：**
+
 ```typescript
 34:export async function updateRequestFields(
 70:export async function markRequestSent(
@@ -129,13 +147,17 @@
 ### `disbursement-order.service.ts` (379 行)
 
 **主要函數：**
+
 ```typescript
+
 ```
 
 ### `payment-request.service.ts` (548 行)
 
 **主要函數：**
+
 ```typescript
+
 ```
 
 ## tour-confirmation (2 services)
@@ -143,6 +165,7 @@
 ### `syncToOnline.ts` (366 行)
 
 **主要函數：**
+
 ```typescript
 75:export async function syncTripToOnline(tourId: string): Promise<SyncResult> {
 ```
@@ -150,10 +173,10 @@
 ### `confirmationCoreTableSync.ts` (224 行)
 
 **主要函數：**
+
 ```typescript
 24:export async function syncConfirmationCreateToCore(params: {
 65:export async function syncConfirmationUpdateToCore(params: {
 127:export async function syncLeaderExpenseToCore(params: {
 170:export async function batchSyncConfirmationToCore(params: {
 ```
-

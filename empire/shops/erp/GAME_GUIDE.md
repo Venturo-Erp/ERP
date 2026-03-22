@@ -11,6 +11,7 @@
 這不只是技術文檔，這是一本**遊戲攻略**。
 
 把 Venturo ERP 當成一個 RPG 遊戲：
+
 - **世界地圖**：77 個路由（地點）→ [ARCHITECTURE_MAP.md](./ARCHITECTURE_MAP.md)
 - **戰鬥系統**：核心功能（技能）
 - **任務流程**：完整生命週期（主線任務）
@@ -43,6 +44,7 @@
 ### **主城區（主要功能）**
 
 #### 🏰 旅遊團管理區
+
 ```
 /tours
   ├─ /tours/[id]               主線任務：旅遊團詳細頁
@@ -58,6 +60,7 @@
 ```
 
 #### 💰 報價管理區
+
 ```
 /quotes
   ├─ /quotes/[id]              支線任務：報價單編輯
@@ -69,6 +72,7 @@
 ```
 
 #### 📋 訂單管理區
+
 ```
 /orders
   ├─ /orders/[id]              支線任務：訂單處理
@@ -80,6 +84,7 @@
 ```
 
 #### 🏢 供應商管理區
+
 ```
 /suppliers
   ├─ /suppliers/[id]           NPC 資料庫
@@ -257,7 +262,7 @@ tour_itinerary_items {
   category TEXT                -- 分類
   sub_category TEXT            -- 子分類
   title TEXT                   -- 項目名稱
-  
+
   -- 戰鬥屬性（報價資訊）
   unit_price DECIMAL           -- 單價（ATK）
   quantity INT                 -- 數量（Combo）
@@ -265,18 +270,18 @@ tour_itinerary_items {
   adult_price DECIMAL          -- 成人價
   child_price DECIMAL          -- 兒童價
   infant_price DECIMAL         -- 嬰兒價
-  
+
   -- 任務狀態
   quote_status TEXT            -- drafted/quoted/confirmed
   request_status TEXT          -- none/sent/replied
   confirmation_status TEXT     -- none/confirmed
   leader_status TEXT           -- none/filled/reviewed
-  
+
   -- 回覆屬性
   quoted_cost DECIMAL          -- 供應商報價
   confirmed_cost DECIMAL       -- 確認價格
   actual_expense DECIMAL       -- 實際費用
-  
+
   -- 時間戳
   request_sent_at TIMESTAMP    -- 需求單發送時間
   request_reply_at TIMESTAMP   -- 供應商回覆時間
@@ -292,13 +297,13 @@ tour_itinerary_items {
 ```
 quote_status:
   none → drafted → quoted → confirmed
-  
+
 request_status:
   none → sent → replied → confirmed
-  
+
 confirmation_status:
   none → pending → confirmed
-  
+
 leader_status:
   none → filled → reviewed
 ```
@@ -367,6 +372,7 @@ leader_status:
 ## 🐛 已知 Bug（需要修復的問題）
 
 ### **Bug #1：Local 報價階梯切換**
+
 ```
 問題：人數變動時，適用階梯不會自動更新
 狀態：待修復
@@ -374,6 +380,7 @@ leader_status:
 ```
 
 ### **Bug #2：需求單 PDF 格式**
+
 ```
 問題：桌數/房間數欄位格式需確認
 狀態：待測試
@@ -385,6 +392,7 @@ leader_status:
 ## 📝 開發日誌
 
 ### **2026-03-14**
+
 - ✅ Local 報價禁止直接編輯
 - ✅ Local 報價多列顯示
 - ✅ 需求單核心表模式
@@ -402,7 +410,7 @@ leader_status:
 ```
 核心概念：
   tour_itinerary_items = 唯一真相來源
-  
+
   其他表都是「視圖」：
     - tours：團的基本資料
     - quotes：報價單（從核心表計算）
@@ -435,27 +443,26 @@ leader_status:
   "tour_id": "T001",
   "name": "日本賞櫻團",
   "members": [
-    {"name": "王小明", "room": "101", "meal": "素食"},
-    {"name": "李大華", "room": "101", "meal": "葷食"}
+    { "name": "王小明", "room": "101", "meal": "素食" },
+    { "name": "李大華", "room": "101", "meal": "葷食" }
   ],
   "requests": [
-    {"supplier": "飯店A", "items": ["房間x2"], "status": "confirmed"},
-    {"supplier": "餐廳B", "items": ["晚餐x2"], "status": "pending"}
+    { "supplier": "飯店A", "items": ["房間x2"], "status": "confirmed" },
+    { "supplier": "餐廳B", "items": ["晚餐x2"], "status": "pending" }
   ],
-  "payments": [
-    {"date": "2026-03-01", "amount": 10000, "status": "paid"}
-  ]
+  "payments": [{ "date": "2026-03-01", "amount": 10000, "status": "paid" }]
 }
 ```
 
 **遊戲比喻**：
+
 - 就像你把**所有物品都塞進「雜物袋」**
 - 劍、藥水、食物、任務道具全部混在一起
 - 要找東西？得把整個袋子倒出來翻
 
 **問題**：
 
-1. 🔍 **找不到東西** 
+1. 🔍 **找不到東西**
    - 「咦，我的藥水在哪？」（查詢困難）
    - SQL: `WHERE payments::jsonb @> '[{"status": "pending"}]'` ← 慢
 
@@ -483,6 +490,7 @@ tours (主表)
 ```
 
 **遊戲比喻**：
+
 - 就像你有**「武器倉庫」「藥水倉庫」「食物倉庫」**
 - 每個倉庫有專屬管理員（foreign key）
 - 要找劍？去武器倉庫。要找藥水？去藥水倉庫
@@ -490,6 +498,7 @@ tours (主表)
 **優點**：
 
 1. ⚡ **快速查找**
+
    ```sql
    -- ✅ 找所有還沒付款的團
    SELECT t.* FROM tours t
@@ -502,9 +511,10 @@ tours (主表)
    - `tour_members.tour_id REFERENCES tours(id)`
 
 3. 🔗 **彈性查詢**
+
    ```sql
    -- ✅ 找出所有欠款團的業務員
-   SELECT s.name, COUNT(*) 
+   SELECT s.name, COUNT(*)
    FROM tours t
    JOIN tour_payments p ON p.tour_id = t.id
    JOIN staff s ON s.id = t.salesperson_id
@@ -521,9 +531,11 @@ tours (主表)
 ### **你擔心的「資料不同步」問題**
 
 **擔心**：
+
 > 「多個表會造成資料不同步，例如改了 tours 但忘記改 tour_members」
 
 **遊戲解釋**：
+
 - 就像你在 RPG 裡刪除了「公會」，但成員還在成員倉庫
 - 不是「多倉庫」的錯，是**「沒設好門禁」**
 
@@ -537,10 +549,12 @@ CREATE TABLE tour_members (
 ```
 
 **遊戲比喻**：
+
 - `ON DELETE CASCADE` = 「公會解散時，自動清空成員倉庫」
 - `REFERENCES` = 「不能加入不存在的公會」
 
 **你現有的表已經有這個**：
+
 ```sql
 tour_members.tour_id REFERENCES tours(id) ON DELETE CASCADE ✅
 tour_requests.tour_id REFERENCES tours(id) ON DELETE CASCADE ✅
@@ -553,11 +567,13 @@ tour_requests.tour_id REFERENCES tours(id) ON DELETE CASCADE ✅
 ### **什麼時候用 JSONB？**
 
 **✅ 用 JSONB**：
+
 - **彈性欄位**（每個團的「自訂欄位」不一樣）
 - **不需查詢的設定**（UI 偏好設定、顏色主題）
 - **版本記錄**（保存舊版報價單的快照）
 
 **你現有的設計已經很聰明**：
+
 ```sql
 tours.features (JSONB) ✅           -- 團體特色（彈性）
 tours.quote_cost_structure (JSONB) ✅  -- 報價快照（版本記錄）
@@ -565,6 +581,7 @@ tours.confirmed_requirements (JSONB) ✅ -- 確認需求（版本記錄）
 ```
 
 **❌ 不用 JSONB**：
+
 - **需要查詢的資料**（團員、付款、需求單）
 - **需要計算的資料**（總金額、數量）
 - **需要關聯的資料**（供應商、訂單）
@@ -574,18 +591,20 @@ tours.confirmed_requirements (JSONB) ✅ -- 確認需求（版本記錄）
 ### **結論：你現有的設計是對的**
 
 ```
-tours (核心表) 
+tours (核心表)
 ├── 基本欄位（團號、名稱、日期）
 ├── JSONB 欄位（features, quote_cost_structure, confirmed_requirements）
 └── 關聯表（tour_members, tour_requests, tour_payments）
 ```
 
 **這就是最佳實踐**：
+
 - ✅ 核心資料用欄位（快速查詢）
 - ✅ 彈性設定用 JSONB（不需查詢）
 - ✅ 關聯資料用關聯表（保持一致性）
 
 **不建議改成「全部 JSONB」**：
+
 - ❌ 查詢慢（找欠款團要掃描所有 JSON）
 - ❌ 無法驗證（可以塞錯誤資料）
 - ❌ 無法計算（總金額、統計報表）

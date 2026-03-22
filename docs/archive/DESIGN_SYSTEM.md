@@ -210,7 +210,6 @@
 ```tsx
 // ✅ 標準方式：使用 shadcn Dialog 組件（推薦）
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-
 ;<Dialog open={open} onOpenChange={setOpen}>
   <DialogContent>
     <DialogHeader>

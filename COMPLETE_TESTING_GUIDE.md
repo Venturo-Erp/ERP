@@ -8,6 +8,7 @@
 ## ✅ 已完成的功能
 
 ### Phase 1: 報價接收與決策
+
 - ✅ 發送 Local 報價請求（LINE）
 - ✅ 供應商填寫報價（公開頁面）
 - ✅ 追蹤頁籤顯示待處理報價
@@ -15,12 +16,14 @@
 - ✅ 自動產生協作確認單
 
 ### Phase 2: 協作確認單
+
 - ✅ 顯示所有項目（從行程表自動複製）
 - ✅ 雙方可編輯（標記處理方：Local/我們/客人）
 - ✅ 新增項目功能（手動追加）
 - ✅ 進度追蹤（X/Y 已確認）
 
 ### Phase 3: 列印輸出
+
 - ✅ 列印領隊確認單（只顯示必要資訊）
 
 ---
@@ -41,9 +44,9 @@
 執行以下 SQL 確認欄位存在：
 
 ```sql
-SELECT column_name 
-FROM information_schema.columns 
-WHERE table_name = 'tour_requests' 
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'tour_requests'
   AND column_name IN ('supplier_response', 'request_scope', 'accepted_at', 'rejected_at', 'selected_tier', 'package_status');
 ```
 
@@ -52,8 +55,8 @@ WHERE table_name = 'tour_requests'
 ### Step 3: 驗證 tour_request_items 表
 
 ```sql
-SELECT table_name 
-FROM information_schema.tables 
+SELECT table_name
+FROM information_schema.tables
 WHERE table_name = 'tour_request_items';
 ```
 
@@ -72,6 +75,7 @@ WHERE table_name = 'tour_request_items';
 5. 點「給 Local 報價」按鈕
 
 **預期結果**:
+
 - 看到大型 Dialog（max-w-4xl）
 - 上方顯示團資訊：團號、團名、出發日、人數
 - 中間顯示行程表（Day 1, Day 2...）
@@ -86,6 +90,7 @@ WHERE table_name = 'tour_request_items';
 10. 點發送
 
 **預期結果**:
+
 - 泰國角落 LINE 群組收到 Flex Message
 - 顯示團號、團名、出發日、人數
 - 單一按鈕「📄 查看需求內容」
@@ -98,6 +103,7 @@ WHERE table_name = 'tour_request_items';
 2. 開啟公開頁面
 
 **預期結果**:
+
 - 看到完整行程表（表格格式）
 - 日期 | 行程內容 | 早餐 | 午餐 | 晚餐 | 住宿
 - Day 1、Day 2 分段顯示
@@ -116,6 +122,7 @@ WHERE table_name = 'tour_request_items';
 4. 點「提交報價」
 
 **預期結果**:
+
 - 顯示成功訊息
 - 顯示「下載此報價」按鈕
 
@@ -128,6 +135,7 @@ WHERE table_name = 'tour_request_items';
 3. 點「追蹤」分頁
 
 **預期結果**:
+
 - 最上方顯示「📬 待處理報價 (1 筆)」
 - 報價卡片顯示：
   - 🌏 供應商名稱
@@ -150,6 +158,7 @@ WHERE table_name = 'tour_request_items';
 3. 點「確認成交」
 
 **預期結果**:
+
 - 顯示「✅ 成交成功，已自動產生協作確認單」
 - 報價卡片移到「✅ 已成交 (1 筆)」區塊
 - 顯示：
@@ -159,12 +168,13 @@ WHERE table_name = 'tour_request_items';
   - [查看協作確認單] 按鈕
 
 **驗證 DB**:
+
 ```sql
-SELECT * FROM tour_requests 
-WHERE tour_id = 'be97ebec-4cf9-4a94-b821-54a103689d21' 
+SELECT * FROM tour_requests
+WHERE tour_id = 'be97ebec-4cf9-4a94-b821-54a103689d21'
   AND accepted_at IS NOT NULL;
 
-SELECT COUNT(*) FROM tour_request_items 
+SELECT COUNT(*) FROM tour_request_items
 WHERE request_id = '(上面查到的 request_id)';
 ```
 
@@ -177,6 +187,7 @@ WHERE request_id = '(上面查到的 request_id)';
 1. 點「查看協作確認單」按鈕
 
 **預期結果**:
+
 - 顯示協作確認單頁面
 - 標頭顯示：
   - 「協作確認單」
@@ -201,6 +212,7 @@ WHERE request_id = '(上面查到的 request_id)';
 3. 選「客人」
 
 **預期結果**:
+
 - 狀態改為「⚪ 客人自理」（灰色）
 - 顯示「✅ 已更新」訊息
 
@@ -216,6 +228,7 @@ WHERE request_id = '(上面查到的 request_id)';
 3. 點「新增」
 
 **預期結果**:
+
 - 列表最下方新增一行：
   - 額外導遊費 | Local | ⏳ 待確認 | 需要中文導遊
 - 進度更新（分母 +1）
@@ -227,18 +240,20 @@ WHERE request_id = '(上面查到的 request_id)';
 1. 點「列印」按鈕
 
 **預期結果**:
+
 - 開啟新視窗（列印預覽）
 - 顯示：
+
   ```
   ═══════════════════════════════════════
            領隊確認單
   ═══════════════════════════════════════
-  
+
   團號：TW260321A
   供應商：Local 供應商
   報價：20 人團 50,000 元/人
   緊急聯絡：王小明 / +66 12345678
-  
+
   ───────────────────────────────────────
    日期    項目           說明
   ───────────────────────────────────────
@@ -246,10 +261,11 @@ WHERE request_id = '(上面查到的 request_id)';
    Day 1   午餐           ⏳ 待確認
    Day 2   飯店           ⚠️ 客人自理
    ...
-  
+
   列印時間：2026-03-18 19:30
   ═══════════════════════════════════════
   ```
+
 - 可直接列印或存 PDF
 
 ---
@@ -264,6 +280,7 @@ WHERE request_id = '(上面查到的 request_id)';
 4. 點「確認不成交」
 
 **預期結果**:
+
 - 報價移到「❌ 未成交 (1 筆)」（可展開）
 - 展開後顯示：
   - 供應商名稱
@@ -275,26 +292,28 @@ WHERE request_id = '(上面查到的 request_id)';
 ## 📊 資料驗證 SQL
 
 ### 檢查報價記錄
+
 ```sql
-SELECT 
-  id, 
-  tour_id, 
-  supplier_name, 
-  status, 
+SELECT
+  id,
+  tour_id,
+  supplier_name,
+  status,
   package_status,
   sent_at,
   replied_at,
   accepted_at,
   rejected_at,
   selected_tier
-FROM tour_requests 
+FROM tour_requests
 WHERE tour_id = 'be97ebec-4cf9-4a94-b821-54a103689d21'
 ORDER BY created_at DESC;
 ```
 
 ### 檢查協作確認單
+
 ```sql
-SELECT 
+SELECT
   id,
   item_name,
   item_category,
@@ -302,7 +321,7 @@ SELECT
   local_status,
   source,
   day_number
-FROM tour_request_items 
+FROM tour_request_items
 WHERE request_id = '(你的 request_id)'
 ORDER BY day_number, sort_order;
 ```
@@ -312,20 +331,25 @@ ORDER BY day_number, sort_order;
 ## ❌ 可能的錯誤
 
 ### 1. 追蹤頁籤看不到報價
+
 **原因**: 供應商還沒提交報價  
-**檢查**: 
+**檢查**:
+
 ```sql
 SELECT supplier_response FROM tour_requests WHERE tour_id = '...';
 ```
 
 ### 2. 成交後沒有協作確認單
+
 **原因**: 核心表沒有資料  
 **檢查**:
+
 ```sql
 SELECT COUNT(*) FROM tour_itinerary_items WHERE tour_id = '...';
 ```
 
 ### 3. 列印時樣式跑掉
+
 **原因**: 瀏覽器列印設定  
 **解決**: 啟用背景圖形/色彩
 

@@ -28,9 +28,14 @@ async function getGroupMemberCount(groupId: string): Promise<number | null> {
   return null
 }
 
-async function saveGroupToDb(groupId: string, groupName: string | null, memberCount: number | null) {
+async function saveGroupToDb(
+  groupId: string,
+  groupName: string | null,
+  memberCount: number | null
+) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const supabaseKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseKey) return
 
@@ -67,17 +72,18 @@ async function processGroupEvent(groupId: string) {
 async function processEmployeeBinding(event: any) {
   const userId = event.source?.userId
   const text = event.message?.text?.trim() || ''
-  
+
   // 檢查是否為綁定指令：「綁定 E001」或「綁定:E001」
   const bindMatch = text.match(/^綁定[:\s]*([A-Za-z0-9]+)$/i)
   if (!bindMatch || !userId) return false
-  
+
   const employeeCode = bindMatch[1].toUpperCase()
-  
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const supabaseKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!supabaseUrl || !supabaseKey) return false
-  
+
   try {
     // 查找員工
     const findRes = await fetch(
@@ -90,7 +96,7 @@ async function processEmployeeBinding(event: any) {
       }
     )
     const employees = await findRes.json()
-    
+
     if (!employees || employees.length === 0) {
       // 員工不存在，回覆錯誤
       await fetch('https://api.line.me/v2/bot/message/reply', {
@@ -106,25 +112,22 @@ async function processEmployeeBinding(event: any) {
       })
       return true
     }
-    
+
     const employee = employees[0]
-    
+
     // 更新員工的 LINE User ID
-    await fetch(
-      `${supabaseUrl}/rest/v1/employees?id=eq.${employee.id}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: supabaseKey,
-          Authorization: `Bearer ${supabaseKey}`,
-        },
-        body: JSON.stringify({ line_user_id: userId }),
-      }
-    )
-    
+    await fetch(`${supabaseUrl}/rest/v1/employees?id=eq.${employee.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+      },
+      body: JSON.stringify({ line_user_id: userId }),
+    })
+
     const empName = employee.display_name || employee.english_name || employeeCode
-    
+
     // 回覆成功
     await fetch('https://api.line.me/v2/bot/message/reply', {
       method: 'POST',
@@ -134,10 +137,15 @@ async function processEmployeeBinding(event: any) {
       },
       body: JSON.stringify({
         replyToken: event.replyToken,
-        messages: [{ type: 'text', text: `✅ ${empName}，LINE 綁定成功！\n\n之後指派給你的任務會透過這裡通知你 📱` }],
+        messages: [
+          {
+            type: 'text',
+            text: `✅ ${empName}，LINE 綁定成功！\n\n之後指派給你的任務會透過這裡通知你 📱`,
+          },
+        ],
       }),
     })
-    
+
     console.log(`[LINE] Employee binding: ${employeeCode} -> ${userId}`)
     return true
   } catch (err) {

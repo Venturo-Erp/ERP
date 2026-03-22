@@ -65,8 +65,10 @@ export function TourFormShell({
           ? TOUR_FORM.submit_convert_with_order
           : TOUR_FORM.submit_convert
     }
-    if (newTour.tour_type === 'proposal') return submitting ? TOUR_FORM.submit_creating : TOUR_FORM.submit_create_proposal
-    if (newTour.tour_type === 'template') return submitting ? TOUR_FORM.submit_creating : TOUR_FORM.submit_create_template
+    if (newTour.tour_type === 'proposal')
+      return submitting ? TOUR_FORM.submit_creating : TOUR_FORM.submit_create_proposal
+    if (newTour.tour_type === 'template')
+      return submitting ? TOUR_FORM.submit_creating : TOUR_FORM.submit_create_template
     return submitting
       ? TOUR_FORM.submit_creating
       : newOrder.contact_person
@@ -86,7 +88,11 @@ export function TourFormShell({
   }
 
   // 提案/模板用窄版（不需要訂單區塊）
-  const dialogWidth = isProposalOrTemplate ? 'max-w-2xl' : mode === 'edit' ? 'max-w-3xl' : 'max-w-6xl'
+  const dialogWidth = isProposalOrTemplate
+    ? 'max-w-2xl'
+    : mode === 'edit'
+      ? 'max-w-3xl'
+      : 'max-w-6xl'
 
   return (
     <Dialog
@@ -131,7 +137,9 @@ export function TourFormShell({
 
         <div className="flex h-full overflow-hidden">
           {/* Left side - Tour info */}
-          <div className={`flex-1 ${mode === 'create' && !isProposalOrTemplate ? 'pr-6 border-r border-border' : ''}`}>
+          <div
+            className={`flex-1 ${mode === 'create' && !isProposalOrTemplate ? 'pr-6 border-r border-border' : ''}`}
+          >
             <div className="h-full overflow-y-auto">
               <h3 className="text-lg font-medium text-morandi-primary mb-4">
                 {TOUR_FORM.section_info}

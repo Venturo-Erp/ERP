@@ -49,7 +49,7 @@ export const footerComponent: DesignComponent = {
         opacity: 1,
         locked: false,
         visible: true,
-        content: (data.companyName as string) || {COMPANY_NAME_EN},
+        content: (data.companyName as string) || { COMPANY_NAME_EN },
         style: {
           fontFamily: p.fontFamily,
           fontSize: 7,

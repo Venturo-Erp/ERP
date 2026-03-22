@@ -291,12 +291,14 @@ Python Scripts:
 **優先級：緊急**
 
 1. **建立 Matthew Workspace**（20 分鐘）
+
    ```bash
    mkdir -p ~/.openclaw/workspace-matthew
    # 建立 SOUL.md, MEMORY.md, TOOLS.md, README.md
    ```
 
 2. **建立 Matthew 記憶庫**（5 分鐘）
+
    ```bash
    python3 ~/.openclaw/empire-memory/citizen-memory.py store matthew \
      "我是 Matthew，帝國生產系統與魔法研發中心主管..." \
@@ -319,6 +321,7 @@ Python Scripts:
 4. **Yuzuki Workspace**（20 分鐘）
 
 每個包含：
+
 - 性格定義（SOUL.md）
 - 工作指引（README.md）
 - 記憶初始化
@@ -433,6 +436,7 @@ echo "✅ 檢查完成"
 ## 📝 整合檢查清單
 
 ### 今天必做
+
 - [ ] 建立 Matthew Workspace
 - [ ] 初始化 Matthew 記憶庫
 - [ ] 派任務給 Matthew（填魔法數據）
@@ -440,6 +444,7 @@ echo "✅ 檢查完成"
 - [ ] 測試任務派發流程
 
 ### 本週必做
+
 - [ ] 建立其他 4 位主管 Workspace
 - [ ] 初始化所有記憶庫
 - [ ] 召開第一次守護者會議
@@ -447,6 +452,7 @@ echo "✅ 檢查完成"
 - [ ] 驗證所有 Cron Jobs
 
 ### 下週目標
+
 - [ ] 建立任務派發系統
 - [ ] 建立進度監控 Dashboard
 - [ ] 建立會議系統

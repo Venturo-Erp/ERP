@@ -270,7 +270,7 @@ export default function QuoteDetailPage() {
       const currentLocalPrice = sortedTiers[currentTierIdx]?.unitPrice || 0
 
       // 產生檻次表：全部使用用戶輸入的檻次人數
-      const newTierPricings = sortedTiers.map((tier) => {
+      const newTierPricings = sortedTiers.map(tier => {
         const participantCount = tier.participants
         const localUnitPrice = tier.unitPrice
 
@@ -312,9 +312,11 @@ export default function QuoteDetailPage() {
           // 新增多個 Local 報價項目（每個階梯一個列）
           sortedTiers.forEach((tier, index) => {
             // 判斷是否為目前適用的階梯
-            const isCurrentTier = tier.participants <= totalParticipants && 
-              (index === sortedTiers.length - 1 || sortedTiers[index + 1].participants > totalParticipants)
-            
+            const isCurrentTier =
+              tier.participants <= totalParticipants &&
+              (index === sortedTiers.length - 1 ||
+                sortedTiers[index + 1].participants > totalParticipants)
+
             const newItem: CostItem = {
               id: `local-${tier.participants}-${Date.now()}`,
               name: `${QUOTE_PAGE_LABELS.LOCAL_QUOTE} ${tier.participants}人`,
@@ -459,7 +461,6 @@ export default function QuoteDetailPage() {
         handleCreateTour={handleCreateTour}
         handleGenerateQuotation={handleGenerateQuotation}
         handleSyncToItinerary={handleSyncToItinerary}
-
         onStatusChange={handleStatusChange}
         router={router}
         accommodationDays={accommodationDays}

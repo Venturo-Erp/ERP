@@ -42,7 +42,10 @@ export function useDayTemplate({ dayData, style }: UseDayTemplateProps) {
   const addActivity = () => {
     setEditingDay(prev => ({
       ...prev,
-      activities: [...(prev.activities || []), { icon: '📍', title: '', description: '', image: '' }],
+      activities: [
+        ...(prev.activities || []),
+        { icon: '📍', title: '', description: '', image: '' },
+      ],
     }))
   }
 

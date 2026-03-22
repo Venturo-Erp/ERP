@@ -84,10 +84,7 @@ interface UseRequirementsDataOptions {
   quoteId?: string | null
 }
 
-export function useRequirementsData({
-  tourId,
-  quoteId: propQuoteId,
-}: UseRequirementsDataOptions) {
+export function useRequirementsData({ tourId, quoteId: propQuoteId }: UseRequirementsDataOptions) {
   const { user } = useAuthStore()
 
   // 狀態

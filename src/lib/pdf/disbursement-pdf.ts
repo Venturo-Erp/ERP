@@ -52,12 +52,12 @@ function processItems(
 
   return paymentRequestItems.map(item => {
     const request = requestMap.get(item.request_id)
-    const advancedBy = (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined
+    const advancedBy = (item as unknown as Record<string, unknown>).advanced_by_name as
+      | string
+      | undefined
     const supplierName = item.supplier_name || DISBURSEMENT_PDF_LABELS.UNSPECIFIED_SUPPLIER
-    const payFor = advancedBy
-      ? `${advancedBy}（${supplierName}）`
-      : supplierName
-    
+    const payFor = advancedBy ? `${advancedBy}（${supplierName}）` : supplierName
+
     return {
       requestCode: request?.code || '-',
       createdBy: request?.created_by_name || '-',
@@ -126,7 +126,7 @@ function splitLargeGroups(groups: PayForGroup[], maxSize = 5): PayForGroup[] {
 
   // 計算每個收款人的總金額，並標記誰是最後一組
   const payeeGroups = new Map<string, { total: number; indices: number[] }>()
-  
+
   result.forEach((group, idx) => {
     const payee = extractPayee(group.payFor)
     if (!payeeGroups.has(payee)) {

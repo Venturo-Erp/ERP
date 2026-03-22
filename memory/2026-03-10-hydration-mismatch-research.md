@@ -3,19 +3,21 @@
 **日期**: 2026-03-10  
 **時間**: 05:30-05:35  
 **研究人員**: 馬修 (Matthew)  
-**問題**: React Hydration Mismatch 導致所有按鈕失效  
+**問題**: React Hydration Mismatch 導致所有按鈕失效
 
 ---
 
 ## 📋 問題摘要
 
 ### 症狀
+
 - `/tours` 頁面的所有按鈕無法點擊
 - Console 持續出現 hydration mismatch 錯誤
 - 錯誤訊息指向 `<TourFilters activeTab="archived">`
 - 清除快取和 localStorage 後問題依然存在
 
 ### 影響範圍
+
 - **直接影響**: 旅遊團管理頁面完全無法操作
 - **間接影響**: 其他頁面可能也有類似問題
 - **嚴重程度**: P0（阻礙性問題）
@@ -123,26 +125,31 @@ useEffect(() => {
 即使代碼已經正確修改，但問題仍然出現的原因：
 
 #### 1️⃣ Next.js Build Cache (`.next/`)
+
 - **位置**: `.next/cache/`
 - **內容**: Compiled components, RSC payload
 - **清理**: `rm -rf .next`
 
 #### 2️⃣ Node Modules Cache
+
 - **位置**: `node_modules/.cache/`
 - **內容**: TypeScript incremental build, ESLint cache
 - **清理**: `rm -rf node_modules/.cache`
 
 #### 3️⃣ TypeScript Build Info
+
 - **位置**: `.tsbuildinfo`
 - **內容**: Incremental TypeScript compilation info
 - **清理**: `rm -rf .tsbuildinfo`
 
 #### 4️⃣ Browser Cache
+
 - **位置**: Browser's local storage + HTTP cache
 - **內容**: JavaScript bundles, images, CSS
 - **清理**: Cmd+Shift+Delete → 清除快取
 
 #### 5️⃣ Fast Refresh State
+
 - **位置**: Next.js dev server memory
 - **內容**: HMR (Hot Module Replacement) state
 - **清理**: 重啟開發伺服器
@@ -168,11 +175,14 @@ useEffect(() => {
 ## 🔧 完整修復步驟（已執行）
 
 ### 步驟 1: 代碼修復
+
 ✅ 已完成 (05:10)
+
 - 修改 `useTourPageState.ts`
 - Git diff 確認修改正確
 
 ### 步驟 2: 完全清理快取
+
 ✅ 已完成 (05:35)
 
 ```bash
@@ -192,6 +202,7 @@ npm run dev
 ```
 
 ### 步驟 3: 瀏覽器清理（待用戶執行）
+
 ⏳ **需要 William 執行**
 
 1. 按 `Cmd+Shift+Delete`
@@ -235,6 +246,7 @@ npm run dev
 ### 教訓 #1: SSR 環境變數檢查的陷阱
 
 **錯誤模式**:
+
 ```typescript
 // ❌ 危險：在 useState 初始化時使用 typeof window
 const [state, setState] = useState(() => {
@@ -246,6 +258,7 @@ const [state, setState] = useState(() => {
 ```
 
 **正確模式**:
+
 ```typescript
 // ✅ 安全：先用固定值，useEffect 再更新
 const [state, setState] = useState('default')
@@ -296,10 +309,11 @@ useEffect(() => {
 
 **規則 #24: SSR-Safe State 初始化**
 
-```markdown
+````markdown
 ## 規則 #24: SSR-Safe State 初始化
 
 ### ❌ 錯誤
+
 ```typescript
 // 在 useState 初始化時讀取 localStorage
 const [state, setState] = useState(() => {
@@ -309,8 +323,10 @@ const [state, setState] = useState(() => {
   return 'default'
 })
 ```
+````
 
 ### ✅ 正確
+
 ```typescript
 // 先用固定初始值
 const [state, setState] = useState('default')
@@ -323,18 +339,21 @@ useEffect(() => {
 ```
 
 ### 原因
+
 1. SSR 和 CSR 必須產生相同的初始渲染結果
 2. localStorage 只存在於客戶端
 3. 在 useState 初始化時讀取會導致 hydration mismatch
 4. useEffect 在 SSR 時不執行，避免不一致
 
 ### 適用範圍
+
 - localStorage
 - sessionStorage
 - window 物件
 - document 物件
 - 任何只存在於瀏覽器的 API
-```
+
+````
 
 ---
 
@@ -350,12 +369,14 @@ useEffect(() => {
    ```bash
    grep -r "useState(() =>" src --include="*.tsx" --include="*.ts" | \
    grep "typeof window"
-   ```
+````
+
 2. [ ] 修復所有發現的類似模式
 3. [ ] 更新 CODING_RULES.md（加入規則 #24）
 4. [ ] 團隊內部分享這次的教訓
 
 ### 長期行動（本月）
+
 1. [ ] 建立 ESLint rule 檢測這種模式
 2. [ ] 加入 pre-commit hook 防止未來再犯
 3. [ ] 考慮改用 URL query params 而不是 localStorage（避免 hydration 問題）
@@ -365,14 +386,17 @@ useEffect(() => {
 ## 📚 參考資料
 
 ### React 官方文檔
+
 - [Hydration Mismatch](https://react.dev/link/hydration-mismatch)
 - [useEffect Hook](https://react.dev/reference/react/useEffect)
 
 ### Next.js 官方文檔
+
 - [Fast Refresh](https://nextjs.org/docs/architecture/fast-refresh)
 - [Client Components](https://nextjs.org/docs/app/building-your-application/rendering/client-components)
 
 ### 相關 Issue
+
 - Next.js GitHub Issue #50382: "Hydration Mismatch with localStorage"
 - React GitHub Issue #24430: "useEffect and Server-Side Rendering"
 
@@ -381,22 +405,24 @@ useEffect(() => {
 ## 🎯 結論
 
 ### 問題嚴重程度
+
 - **影響**: P0（阻礙性）
 - **範圍**: 1 個頁面（可能更多）
 - **修復複雜度**: 低（代碼簡單）
 - **驗證複雜度**: 高（需要完整的快取清理）
 
 ### 修復狀態
+
 - **代碼修復**: ✅ 完成
 - **伺服器清理**: ✅ 完成
 - **瀏覽器清理**: ⏳ 待 William 執行
 - **驗證測試**: ⏳ 待瀏覽器清理後進行
 
 ### 預計結果
+
 清除瀏覽器快取並硬性重新整理後，問題應該完全解決。
 
 ---
 
 **報告完成時間**: 2026-03-10 05:35  
 **下一步**: 等待 William 清除瀏覽器快取並測試驗證
-

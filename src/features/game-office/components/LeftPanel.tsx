@@ -40,7 +40,9 @@ export default function LeftPanel() {
         /* Not logged in */
         <div className="flex-1 flex flex-col items-center justify-center p-4 gap-4">
           <div className="text-4xl">🎮</div>
-          <p className="text-sm text-gray-400 text-center">{GAME_OFFICE_LABELS.LABEL_6922}</p>
+          <p className="text-sm text-muted-foreground text-center">
+            {GAME_OFFICE_LABELS.LABEL_6922}
+          </p>
           <Link
             href="/login"
             className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg hover:bg-emerald-500 transition-colors"
@@ -48,12 +50,12 @@ export default function LeftPanel() {
             <LogIn className="w-4 h-4" />
             {GAME_OFFICE_LABELS.LABEL_2142}
           </Link>
-          <p className="text-xs text-gray-600 mt-2">{GAME_OFFICE_LABELS.LABEL_4923}</p>
+          <p className="text-xs text-morandi-secondary mt-2">{GAME_OFFICE_LABELS.LABEL_4923}</p>
         </div>
       ) : (
         <>
           {/* User info */}
-          <div className="px-3 py-2 border-b border-[var(--border)] text-xs text-gray-500">
+          <div className="px-3 py-2 border-b border-[var(--border)] text-xs text-morandi-secondary">
             👤 {user?.display_name || user?.chinese_name || '使用者'}
           </div>
 
@@ -66,7 +68,7 @@ export default function LeftPanel() {
                 className={`flex-1 flex flex-col items-center py-2 text-xs transition-colors ${
                   activeTab === tab.id
                     ? 'text-emerald-400 border-b-2 border-emerald-400'
-                    : 'text-gray-500 hover:text-gray-300'
+                    : 'text-morandi-secondary hover:text-muted-foreground'
                 }`}
               >
                 <tab.icon className="w-4 h-4 mb-1" />
@@ -76,7 +78,7 @@ export default function LeftPanel() {
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-3 text-sm text-gray-300">
+          <div className="flex-1 overflow-y-auto p-3 text-sm text-muted-foreground">
             {activeTab === 'stats' && <StatsPanel />}
             {activeTab === 'chat' && <ChatPanel />}
             {activeTab === 'todos' && <TodosPanel />}
@@ -146,12 +148,16 @@ function StatsPanel() {
 
   if (loading)
     return (
-      <div className="text-xs text-gray-500 animate-pulse">{GAME_OFFICE_LABELS.LOADING_6991}</div>
+      <div className="text-xs text-morandi-secondary animate-pulse">
+        {GAME_OFFICE_LABELS.LOADING_6991}
+      </div>
     )
 
   return (
     <div className="space-y-4">
-      <h3 className="text-xs font-bold text-gray-500 uppercase">{GAME_OFFICE_LABELS.LABEL_3241}</h3>
+      <h3 className="text-xs font-bold text-morandi-secondary uppercase">
+        {GAME_OFFICE_LABELS.LABEL_3241}
+      </h3>
       <div className="grid grid-cols-2 gap-2">
         {[
           { label: '進行中的團', value: String(stats?.activeTours || 0), color: 'text-blue-400' },
@@ -167,20 +173,20 @@ function StatsPanel() {
             color: 'text-orange-400',
           },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900/50 rounded-lg p-2">
+          <div key={s.label} className="bg-morandi-primary/50 rounded-lg p-2">
             <div className={`text-lg font-bold ${s.color}`}>{s.value}</div>
-            <div className="text-xs text-gray-500">{s.label}</div>
+            <div className="text-xs text-morandi-secondary">{s.label}</div>
           </div>
         ))}
       </div>
       {stats?.recentTours && stats.recentTours.length > 0 && (
         <>
-          <h3 className="text-xs font-bold text-gray-500 uppercase mt-4">
+          <h3 className="text-xs font-bold text-morandi-secondary uppercase mt-4">
             {GAME_OFFICE_LABELS.LABEL_8724}
           </h3>
           <div className="space-y-2">
             {stats.recentTours.map(t => (
-              <div key={t} className="bg-gray-900/50 rounded px-2 py-1.5 text-xs">
+              <div key={t} className="bg-morandi-primary/50 rounded px-2 py-1.5 text-xs">
                 {t}
               </div>
             ))}
@@ -194,8 +200,10 @@ function StatsPanel() {
 function ChatPanel() {
   return (
     <div className="space-y-3">
-      <h3 className="text-xs font-bold text-gray-500 uppercase">{GAME_OFFICE_LABELS.LABEL_4689}</h3>
-      <div className="text-xs text-gray-500 text-center py-8">即將推出 💬</div>
+      <h3 className="text-xs font-bold text-morandi-secondary uppercase">
+        {GAME_OFFICE_LABELS.LABEL_4689}
+      </h3>
+      <div className="text-xs text-morandi-secondary text-center py-8">即將推出 💬</div>
     </div>
   )
 }
@@ -220,12 +228,14 @@ function TodosPanel() {
   }, [])
 
   if (todos.length === 0) {
-    return <div className="text-xs text-gray-500 text-center py-8">沒有待辦事項 ✅</div>
+    return <div className="text-xs text-morandi-secondary text-center py-8">沒有待辦事項 ✅</div>
   }
 
   return (
     <div className="space-y-3">
-      <h3 className="text-xs font-bold text-gray-500 uppercase">{GAME_OFFICE_LABELS.LABEL_4477}</h3>
+      <h3 className="text-xs font-bold text-morandi-secondary uppercase">
+        {GAME_OFFICE_LABELS.LABEL_4477}
+      </h3>
       {todos.map(t => (
         <label
           key={t.id}
@@ -242,8 +252,10 @@ function TodosPanel() {
 function AlertsPanel() {
   return (
     <div className="space-y-3">
-      <h3 className="text-xs font-bold text-gray-500 uppercase">{GAME_OFFICE_LABELS.LABEL_514}</h3>
-      <div className="text-xs text-gray-500 text-center py-8">目前沒有新通知 ✅</div>
+      <h3 className="text-xs font-bold text-morandi-secondary uppercase">
+        {GAME_OFFICE_LABELS.LABEL_514}
+      </h3>
+      <div className="text-xs text-morandi-secondary text-center py-8">目前沒有新通知 ✅</div>
     </div>
   )
 }

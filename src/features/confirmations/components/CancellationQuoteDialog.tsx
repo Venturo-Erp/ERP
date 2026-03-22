@@ -1,6 +1,6 @@
 /**
  * CancellationQuoteDialog - 取消單發送 Dialog
- * 
+ *
  * 用途：行程刪除項目後，發送取消通知給廠商
  */
 
@@ -9,7 +9,13 @@
 import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { UnifiedTraditionalView } from './UnifiedTraditionalView'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -47,7 +53,7 @@ export function CancellationQuoteDialog({
   const [note, setNote] = useState(reason)
   const [viewMode, setViewMode] = useState<'modern' | 'traditional'>('modern')
   const [sending, setSending] = useState(false)
-  
+
   // LINE 群組
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string }[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>(defaultLineGroupId || '')
@@ -63,10 +69,12 @@ export function CancellationQuoteDialog({
         .select('group_id, group_name')
         .order('group_name')
       if (data) {
-        setLineGroups(data.map(g => ({ 
-          group_id: g.group_id, 
-          group_name: g.group_name || '(未命名)' 
-        })))
+        setLineGroups(
+          data.map(g => ({
+            group_id: g.group_id,
+            group_name: g.group_name || '(未命名)',
+          }))
+        )
         // 如果有預設群組，自動選中
         if (defaultLineGroupId && data.some(g => g.group_id === defaultLineGroupId)) {
           setSelectedGroupId(defaultLineGroupId)
@@ -255,11 +263,7 @@ export function CancellationQuoteDialog({
           {/* 按鈕 */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                onClick={handlePrint}
-                className="gap-2"
-              >
+              <Button variant="outline" onClick={handlePrint} className="gap-2">
                 <Printer size={16} />
                 列印
               </Button>

@@ -111,8 +111,8 @@ tours ───────→ orders
   │              │
   │              ↓
   └─────→ confirmations
-  
-  
+
+
 直接 import 路徑：
   tours → orders（createOrder）
   tours → quotes（syncQuote）
@@ -121,6 +121,7 @@ tours ───────→ orders
 ```
 
 **問題**：
+
 - 模組耦合度高
 - 難以獨立測試
 - 難以替換或移除
@@ -142,6 +143,7 @@ tours ───────→ orders
 ```
 
 **改進後**：
+
 - 模組解耦
 - 透過事件通訊
 - 可以獨立開發、測試、部署
@@ -162,6 +164,7 @@ features/tours/
 ```
 
 **問題**：
+
 - 讀寫邏輯混合在 hooks
 - 業務邏輯散落各處
 - 沒有清晰的分層
@@ -202,6 +205,7 @@ features/tours/
 ```
 
 **改進**：
+
 - ✅ 分層清晰（Domain/App/Infra/UI）
 - ✅ CQRS 分離（queries/ + commands/）
 - ✅ 業務邏輯封裝（domain/）
@@ -275,6 +279,7 @@ features/tours/
 ```
 
 **核心原則**：
+
 - 所有階段都指向同一個核心表
 - 不重複儲存資料
 - 單一真相來源
@@ -311,11 +316,11 @@ attractions ──┘     (resource_type + resource_id)
 關聯方式：
   核心表.resource_type = 'restaurant'
   核心表.resource_id = restaurants.id
-  
+
 讀取時 JOIN：
   SELECT t.*, r.address, r.phone
   FROM tour_itinerary_items t
-  LEFT JOIN restaurants r 
+  LEFT JOIN restaurants r
     ON t.resource_id = r.id
 ```
 
@@ -326,15 +331,18 @@ attractions ──┘     (resource_type + resource_id)
 ### tours（旅遊團）
 
 **職責**：
+
 - 團的建立、修改、刪除
 - 行程規劃
 - 狀態管理（draft/active/completed）
 
 **資料擁有**：
+
 - tours 表
 - tour_itinerary_items 表（核心）
 
 **發出事件**：
+
 - TourCreated
 - TourStatusChanged
 - ItineraryUpdated
@@ -344,14 +352,17 @@ attractions ──┘     (resource_type + resource_id)
 ### quotes（報價）
 
 **職責**：
+
 - 報價計算
 - 個人分攤計算
 - Local 報價
 
 **資料擁有**：
+
 - 無（從核心表讀取）
 
 **訂閱事件**：
+
 - ItineraryUpdated → 重新計算報價
 
 ---
@@ -359,15 +370,18 @@ attractions ──┘     (resource_type + resource_id)
 ### orders（訂單）
 
 **職責**：
+
 - 訂單管理
 - 團員管理
 - 收款狀態
 
 **資料擁有**：
+
 - orders 表
 - tour_members 表
 
 **訂閱事件**：
+
 - TourCreated → 建立草稿訂單
 
 ---
@@ -375,15 +389,18 @@ attractions ──┘     (resource_type + resource_id)
 ### payments（收款）
 
 **職責**：
+
 - 收款記錄
 - 代收轉付
 - 財務報表
 
 **資料擁有**：
+
 - payments 表
 - payment_transactions 表
 
 **訂閱事件**：
+
 - OrderCreated → 建立收款記錄
 - OrderPaid → 更新財務狀態
 
@@ -469,6 +486,7 @@ Testing（需補強）
 ## 🔧 開發工具建議
 
 ### 架構驗證
+
 ```bash
 # 檢查模組依賴（未來工具）
 npm run arch:validate
@@ -481,6 +499,7 @@ npm run arch:graph
 ```
 
 ### 測試覆蓋
+
 ```bash
 # Unit Tests
 npm run test:unit

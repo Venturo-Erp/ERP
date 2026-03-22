@@ -19,10 +19,7 @@ async function main() {
   console.log('开始初始化科目表...\n')
 
   // 获取 workspace_id
-  const { data: workspaces } = await supabase
-    .from('workspaces')
-    .select('id, name')
-    .limit(1)
+  const { data: workspaces } = await supabase.from('workspaces').select('id, name').limit(1)
 
   if (!workspaces || workspaces.length === 0) {
     console.error('❌ 找不到 workspace')
@@ -58,10 +55,7 @@ async function main() {
 
   console.log(`准备插入 ${accountsToInsert.length} 个科目...`)
 
-  const { data, error } = await supabase
-    .from('chart_of_accounts')
-    .insert(accountsToInsert)
-    .select()
+  const { data, error } = await supabase.from('chart_of_accounts').insert(accountsToInsert).select()
 
   if (error) {
     console.error('❌ 插入失败:', error)

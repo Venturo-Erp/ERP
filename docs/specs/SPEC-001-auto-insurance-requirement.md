@@ -10,11 +10,13 @@
 ## 📋 需求說明
 
 **背景**：
+
 - 每個團都需要向保險公司發送保險需求
 - 目前需要業務手動建立，容易遺漏
 - 公司要求保險是必備項目
 
 **目標**：
+
 - 每個團自動產生一筆「保險」需求單
 - 自動計算團員人數
 - 固定在「其他」分類下
@@ -26,10 +28,12 @@
 ### 觸發時機
 
 **方案 A：建團時自動建立（推薦）**
+
 - 建立新團時自動產生
 - 位置：`src/features/tours/services/create-tour.ts`
 
 **方案 B：進入需求單頁面時檢查**
+
 - 如果沒有保險需求單，自動建立
 - 位置：`RequirementsList.tsx` 的 `loadData()`
 
@@ -120,8 +124,8 @@ export async function createInsuranceRequirement(
           category: 'other',
           quantity: memberCount,
           service_date: startDate,
-          notes: '自動產生'
-        }
+          notes: '自動產生',
+        },
       ],
       status: 'draft',
       hidden: false,
@@ -186,27 +190,27 @@ setExistingRequests(requests || [])
 ```tsx
 // RequirementsList.tsx 渲染時
 
-{existingRequests.map((req) => {
-  const isInsurance = req.request_type === 'other' && 
-    req.items?.some(item => item.title === '旅遊平安保險')
+{
+  existingRequests.map(req => {
+    const isInsurance =
+      req.request_type === 'other' && req.items?.some(item => item.title === '旅遊平安保險')
 
-  return (
-    <div 
-      key={req.id}
-      className={cn(
-        "border rounded-lg p-4",
-        isInsurance && "border-blue-500 bg-blue-50" // 藍色邊框標示
-      )}
-    >
-      {isInsurance && (
-        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-          🛡️ 必備項目
-        </span>
-      )}
-      {/* ... 其他內容 */}
-    </div>
-  )
-})}
+    return (
+      <div
+        key={req.id}
+        className={cn(
+          'border rounded-lg p-4',
+          isInsurance && 'border-blue-500 bg-blue-50' // 藍色邊框標示
+        )}
+      >
+        {isInsurance && (
+          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">🛡️ 必備項目</span>
+        )}
+        {/* ... 其他內容 */}
+      </div>
+    )
+  })
+}
 ```
 
 ---
@@ -311,6 +315,7 @@ const insuranceProvider = await getDefaultInsuranceProvider(workspaceId)
 ## 📞 聯絡
 
 **有問題找**：
+
 - 需求確認：William
 - 技術問題：Matthew
 - 測試協助：Leon/Ben
@@ -319,6 +324,6 @@ const insuranceProvider = await getDefaultInsuranceProvider(workspaceId)
 
 ## 🔖 版本記錄
 
-| 版本 | 日期 | 變更 |
-|------|------|------|
-| 1.0 | 2026-03-17 | 初版規格 |
+| 版本 | 日期       | 變更     |
+| ---- | ---------- | -------- |
+| 1.0  | 2026-03-17 | 初版規格 |

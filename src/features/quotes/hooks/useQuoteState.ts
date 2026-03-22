@@ -109,8 +109,8 @@ export const useQuoteState = () => {
   }, [quote_id])
 
   // categories 初始為空分類，由核心表效果填入
-  const [categories, setCategories] = useState<CostCategory[]>(
-    () => costCategories.map(cat => ({ ...cat, items: [], total: 0 }))
+  const [categories, setCategories] = useState<CostCategory[]>(() =>
+    costCategories.map(cat => ({ ...cat, items: [], total: 0 }))
   )
 
   const [accommodationDays, setAccommodationDays] = useState<number>(0)
@@ -173,12 +173,30 @@ export const useQuoteState = () => {
       const tourOrders = orders.filter(order => order.tour_id === relatedTour.id)
       const totalMembers = tourOrders.reduce((sum, order) => sum + (order.member_count || 0), 0)
       if (totalMembers > 0) {
-        setParticipantCounts({ adult: totalMembers, child_with_bed: 0, child_no_bed: 0, single_room: 0, infant: 0 })
+        setParticipantCounts({
+          adult: totalMembers,
+          child_with_bed: 0,
+          child_no_bed: 0,
+          single_room: 0,
+          infant: 0,
+        })
       } else if (relatedTour.max_participants) {
-        setParticipantCounts({ adult: relatedTour.max_participants, child_with_bed: 0, child_no_bed: 0, single_room: 0, infant: 0 })
+        setParticipantCounts({
+          adult: relatedTour.max_participants,
+          child_with_bed: 0,
+          child_no_bed: 0,
+          single_room: 0,
+          infant: 0,
+        })
       }
     } else if (quote?.group_size && quote.group_size > 0) {
-      setParticipantCounts({ adult: quote.group_size, child_with_bed: 0, child_no_bed: 0, single_room: 0, infant: 0 })
+      setParticipantCounts({
+        adult: quote.group_size,
+        child_with_bed: 0,
+        child_no_bed: 0,
+        single_room: 0,
+        infant: 0,
+      })
     }
 
     const sp = fullTour?.selling_prices ?? quote?.selling_prices
@@ -188,7 +206,10 @@ export const useQuoteState = () => {
 
     // 砍次表
     if (!hasLoadedTierPricings.current) {
-      const tp = (fullTour?.tier_pricings ?? (quote as typeof quote & { tier_pricings?: TierPricing[] })?.tier_pricings) as TierPricing[] | undefined
+      const tp = (fullTour?.tier_pricings ??
+        (quote as typeof quote & { tier_pricings?: TierPricing[] })?.tier_pricings) as
+        | TierPricing[]
+        | undefined
       if (tp && Array.isArray(tp) && tp.length > 0) {
         setTierPricings(tp)
       }

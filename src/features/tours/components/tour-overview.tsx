@@ -180,12 +180,12 @@ export const TourOverview = React.memo(function TourOverview({
     !healthData.isLoading && !healthData.error
       ? [
           { label: TOUR_HEALTH_LABELS.需求單狀態, data: healthData.requirements },
-          { 
-            label: TOUR_HEALTH_LABELS.團員人數, 
+          {
+            label: TOUR_HEALTH_LABELS.團員人數,
             data: {
               status: 'good' as const, // 團員人數只是資訊，不是警告
-              message: `${healthData.participants.current || 0} 人`
-            }
+              message: `${healthData.participants.current || 0} 人`,
+            },
           },
         ]
       : []
@@ -218,8 +218,6 @@ export const TourOverview = React.memo(function TourOverview({
           </div>
         </div>
       </div>
-
-
 
       {/* 財務概況 — 橫排緊湊 */}
       <div className="px-5 py-3 border-b border-border/40">
@@ -262,9 +260,7 @@ export const TourOverview = React.memo(function TourOverview({
             {healthItems.map((item, index) => (
               <div key={index} className="flex items-center gap-2">
                 <span className="text-sm">{getHealthStatusEmoji(item.data.status)}</span>
-                <span className="text-xs text-morandi-secondary">
-                  {item.label}
-                </span>
+                <span className="text-xs text-morandi-secondary">{item.label}</span>
                 <span
                   className={cn(
                     'text-xs font-medium ml-auto',

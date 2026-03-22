@@ -134,7 +134,9 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
                 {COMP_ORDERS_LABELS.新增}
               </Button>
             ) : (
-              <span className="text-xs font-medium text-morandi-secondary">{COMP_ORDERS_LABELS.ACTIONS}</span>
+              <span className="text-xs font-medium text-morandi-secondary">
+                {COMP_ORDERS_LABELS.ACTIONS}
+              </span>
             )}
           </div>
         </div>

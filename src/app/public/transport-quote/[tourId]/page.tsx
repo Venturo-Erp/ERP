@@ -18,15 +18,21 @@ export default async function TransportQuotePage({
   searchParams,
 }: {
   params: Promise<{ tourId: string }>
-  searchParams: Promise<{ note?: string; vehicleDesc?: string; supplierName?: string; requestId?: string; itemId?: string }>
+  searchParams: Promise<{
+    note?: string
+    vehicleDesc?: string
+    supplierName?: string
+    requestId?: string
+    itemId?: string
+  }>
 }) {
   const { tourId } = await params
   const { note, vehicleDesc, supplierName = '車行', requestId, itemId } = await searchParams
-  
+
   // 查詢需求單狀態（如果有 requestId 或 itemId）
   let requestStatus: string | null = null
   let transportItem: Record<string, unknown> | null = null
-  
+
   if (requestId) {
     const { data: request } = await supabase
       .from('tour_requests')
@@ -35,11 +41,13 @@ export default async function TransportQuotePage({
       .single()
     requestStatus = request?.status || null
   }
-  
+
   if (itemId) {
     const { data: item } = await supabase
       .from('tour_itinerary_items')
-      .select('id, booking_confirmed_at, driver_name, driver_phone, vehicle_plate, vehicle_type, estimated_cost, request_status')
+      .select(
+        'id, booking_confirmed_at, driver_name, driver_phone, vehicle_plate, vehicle_type, estimated_cost, request_status'
+      )
       .eq('id', itemId)
       .single()
     transportItem = item
@@ -68,10 +76,10 @@ export default async function TransportQuotePage({
 
   if (!tour || !coreItems) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-morandi-container">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">找不到行程</h1>
-          <p className="text-gray-600 mt-2">請確認連結是否正確</p>
+          <h1 className="text-2xl font-bold text-morandi-primary">找不到行程</h1>
+          <p className="text-morandi-secondary mt-2">請確認連結是否正確</p>
         </div>
       </div>
     )
@@ -81,8 +89,7 @@ export default async function TransportQuotePage({
   const totalDays =
     tour.departure_date && tour.return_date
       ? Math.ceil(
-          (new Date(tour.return_date).getTime() -
-            new Date(tour.departure_date).getTime()) /
+          (new Date(tour.return_date).getTime() - new Date(tour.departure_date).getTime()) /
             (1000 * 60 * 60 * 24)
         ) + 1
       : null
@@ -90,7 +97,7 @@ export default async function TransportQuotePage({
   // 按天分組（自動計算日期）
   const grouped = new Map<number, any>()
   const weekdays = ['日', '一', '二', '三', '四', '五', '六']
-  
+
   for (const item of coreItems) {
     const day = item.day_number ?? 0
     if (!grouped.has(day)) {
@@ -103,7 +110,7 @@ export default async function TransportQuotePage({
         dateStr = `${d.getMonth() + 1}/${d.getDate()}`
         weekday = weekdays[d.getDay()]
       }
-      
+
       grouped.set(day, {
         date: dateStr,
         weekday: weekday,
@@ -170,13 +177,17 @@ export default async function TransportQuotePage({
                     .filter(Boolean)
                     .join(' → ')
                   const content =
-                    activities || day.items.map((i: any) => i.title).filter(Boolean).join('、')
+                    activities ||
+                    day.items
+                      .map((i: any) => i.title)
+                      .filter(Boolean)
+                      .join('、')
 
                   return (
                     <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf5]'}>
                       <td className="border border-[#e8e5e0] px-3 py-2">
                         <div className="font-semibold text-[#c9a96e]">Day {day.dayNumber}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-morandi-secondary">
                           {day.date} ({day.weekday})
                         </div>
                       </td>
@@ -205,7 +216,7 @@ export default async function TransportQuotePage({
             {note && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 <h3 className="font-semibold text-amber-900 mb-2">{COMPANY_NAME}備註</h3>
-                <p className="text-sm text-gray-700">{note}</p>
+                <p className="text-sm text-morandi-primary">{note}</p>
               </div>
             )}
 
@@ -218,12 +229,18 @@ export default async function TransportQuotePage({
                 <p className="text-green-700 mb-4">司機資訊已提交完成</p>
                 <div className="bg-white rounded-lg p-4 text-left text-sm max-w-xs mx-auto">
                   <div className="grid grid-cols-2 gap-2">
-                    <span className="text-gray-500">司機姓名</span>
-                    <span className="font-medium">{(transportItem as Record<string, unknown>)?.driver_name as string || '-'}</span>
-                    <span className="text-gray-500">司機電話</span>
-                    <span className="font-medium">{(transportItem as Record<string, unknown>)?.driver_phone as string || '-'}</span>
-                    <span className="text-gray-500">車牌號碼</span>
-                    <span className="font-medium">{(transportItem as Record<string, unknown>)?.vehicle_plate as string || '-'}</span>
+                    <span className="text-morandi-secondary">司機姓名</span>
+                    <span className="font-medium">
+                      {((transportItem as Record<string, unknown>)?.driver_name as string) || '-'}
+                    </span>
+                    <span className="text-morandi-secondary">司機電話</span>
+                    <span className="font-medium">
+                      {((transportItem as Record<string, unknown>)?.driver_phone as string) || '-'}
+                    </span>
+                    <span className="text-morandi-secondary">車牌號碼</span>
+                    <span className="font-medium">
+                      {((transportItem as Record<string, unknown>)?.vehicle_plate as string) || '-'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -246,19 +263,24 @@ export default async function TransportQuotePage({
               </div>
             ) : requestStatus === 'rejected' ? (
               // 未選用
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+              <div className="bg-morandi-container border border-border rounded-lg p-8 text-center">
                 <div className="text-4xl mb-4">😔</div>
-                <h3 className="text-xl font-semibold text-gray-700 mb-2">感謝您的報價</h3>
-                <p className="text-gray-500">本次未選用，期待下次合作</p>
+                <h3 className="text-xl font-semibold text-morandi-primary mb-2">感謝您的報價</h3>
+                <p className="text-morandi-secondary">本次未選用，期待下次合作</p>
               </div>
             ) : (
               // 未報價，顯示報價表單
-              <TransportQuoteForm tourId={tourId} requestId={requestId} itemId={itemId} vehicleDesc={vehicleDesc} />
+              <TransportQuoteForm
+                tourId={tourId}
+                requestId={requestId}
+                itemId={itemId}
+                vehicleDesc={vehicleDesc}
+              />
             )}
           </div>
         </div>
 
-        <div className="text-center text-xs text-gray-500 mt-4">
+        <div className="text-center text-xs text-morandi-secondary mt-4">
           本行程表由{COMPANY_NAME}提供
         </div>
       </div>

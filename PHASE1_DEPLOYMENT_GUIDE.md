@@ -3,14 +3,17 @@
 ## ✅ 已完成的代碼
 
 ### 1. 資料庫 Migration
+
 **檔案**: `supabase/migrations/20260318_extend_tour_requests_for_local_quotes.sql`
 
 **內容**:
+
 - 擴充 `tour_requests` 表（新增欄位：`supplier_response`, `request_scope`, `accepted_at`, `rejected_at`, `selected_tier`, `line_group_id`, `package_status` 等）
 - 建立 `tour_request_items` 表（協作確認單）
 - 建立 RLS 策略
 
 ### 2. 前端組件
+
 - ✅ `src/features/tours/hooks/useTourRequests.ts` - 查詢報價的 hooks
 - ✅ `src/features/tours/components/tour-tracking/QuoteCard.tsx` - 報價卡片
 - ✅ `src/features/tours/components/tour-tracking/AcceptQuoteDialog.tsx` - 成交確認
@@ -19,6 +22,7 @@
 - ✅ `src/components/ui/radio-group.tsx` - RadioGroup 組件
 
 ### 3. 後端 API
+
 - ✅ `src/app/api/tours/[tourId]/requests/[requestId]/accept/route.ts` - 成交 API
 - ✅ `src/app/api/tours/[tourId]/requests/[requestId]/reject/route.ts` - 拒絕 API
 - ✅ `src/app/api/public/submit-quote/route.ts` - 供應商提交報價（已修改）
@@ -38,10 +42,11 @@
 4. 點「Run」執行
 
 **驗證**：執行以下 SQL 確認欄位存在
+
 ```sql
-SELECT column_name 
-FROM information_schema.columns 
-WHERE table_name = 'tour_requests' 
+SELECT column_name
+FROM information_schema.columns
+WHERE table_name = 'tour_requests'
   AND column_name IN ('supplier_response', 'request_scope', 'accepted_at', 'rejected_at', 'selected_tier');
 ```
 
@@ -81,6 +86,7 @@ git push
 Vercel 會自動偵測到 push 並開始部署。
 
 等待約 2-3 分鐘後，前往：
+
 ```
 https://app.cornertravel.com.tw
 ```
@@ -90,6 +96,7 @@ https://app.cornertravel.com.tw
 ## 🧪 測試流程
 
 ### 1. 發送報價請求
+
 1. 登入 ERP：http://100.89.92.46:3000
 2. 進入團詳情頁（例如 TW260321A）
 3. 點「需求」分頁 → 「給 Local 報價」
@@ -98,6 +105,7 @@ https://app.cornertravel.com.tw
 6. 發送
 
 ### 2. 供應商填寫報價
+
 1. 泰國 Local 在 LINE 群組收到訊息
 2. 點「📄 查看需求內容」
 3. 看到行程表 + 填寫報價表單
@@ -105,6 +113,7 @@ https://app.cornertravel.com.tw
 5. 提交報價
 
 ### 3. 我們收到報價
+
 1. 回到 ERP → 團詳情 → 「追蹤」分頁
 2. 應該看到「📬 待處理報價 (1 筆)」
 3. 看到報價卡片：
@@ -114,6 +123,7 @@ https://app.cornertravel.com.tw
    - 聯絡資訊
 
 ### 4. 成交
+
 1. 點「✅ 確認成交」
 2. 選擇人數梯次（例如 20 人團）
 3. 點「確認成交」
@@ -121,9 +131,10 @@ https://app.cornertravel.com.tw
 5. 顯示成交時間和選定梯次
 
 ### 5. 驗證協作確認單
+
 ```sql
 -- 查詢是否產生協作確認單
-SELECT * FROM tour_request_items 
+SELECT * FROM tour_request_items
 WHERE request_id = '(剛成交的 request_id)';
 ```
 
@@ -134,24 +145,29 @@ WHERE request_id = '(剛成交的 request_id)';
 ## ❌ 可能的錯誤
 
 ### 1. Migration 執行失敗
+
 **錯誤**: `column "supplier_response" already exists`
 
 **解決**: 欄位已存在，跳過該欄位的 `ADD COLUMN` 語句（Migration 已用 `IF NOT EXISTS`，應該不會出錯）
 
 ### 2. 追蹤頁籤看不到報價
+
 **檢查**:
+
 ```sql
-SELECT * FROM tour_requests 
-WHERE tour_id = '(你的 tour_id)' 
+SELECT * FROM tour_requests
+WHERE tour_id = '(你的 tour_id)'
   AND supplier_response IS NOT NULL;
 ```
 
 如果沒有資料 → 供應商還沒提交報價
 
 ### 3. 成交後沒有產生協作確認單
+
 **檢查**:
+
 ```sql
-SELECT * FROM tour_request_items 
+SELECT * FROM tour_request_items
 WHERE request_id = '(request_id)';
 ```
 
@@ -198,6 +214,7 @@ WHERE request_id = '(request_id)';
 ## 🎯 下一步（Phase 2）
 
 Phase 2 將實作：
+
 - 協作確認單頁面（雙方可編輯）
 - [+ 新增項目] 功能
 - 進度追蹤（6/8 已確認）

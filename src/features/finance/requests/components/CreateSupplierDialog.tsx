@@ -1,3 +1,4 @@
+import { X } from 'lucide-react'
 // @ts-nocheck -- tour_requests table missing columns in generated types; pending DB migration
 import { useState, useEffect } from 'react'
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
@@ -107,7 +108,7 @@ export function CreateSupplierDialog({
         // 重置表單
         setFormData({
           name: '',
-          type: '',
+          type: '' as SupplierType,
           contact_person: '',
           phone: '',
           email: '',
@@ -222,7 +223,9 @@ export function CreateSupplierDialog({
                 <Label className="text-morandi-muted">戶名</Label>
                 <Input
                   value={formData.bank_account_name}
-                  onChange={e => setFormData(prev => ({ ...prev, bank_account_name: e.target.value }))}
+                  onChange={e =>
+                    setFormData(prev => ({ ...prev, bank_account_name: e.target.value }))
+                  }
                   placeholder="例：XX旅行社有限公司"
                 />
               </div>
@@ -248,6 +251,7 @@ export function CreateSupplierDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            <X className="h-4 w-4 mr-1" />
             取消
           </Button>
           <Button onClick={handleSubmit} disabled={submitting}>

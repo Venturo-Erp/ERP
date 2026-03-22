@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    
+
     const {
       tourId,
       tourCode,
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       // 更新現有需求單的 supplier_response
       await supabase
         .from('tour_requests')
-        .update({ 
+        .update({
           supplier_response: quoteData,
           replied_at: new Date().toISOString(),
           package_status: 'quoted',
@@ -60,18 +60,16 @@ export async function POST(req: NextRequest) {
     } else {
       // 建立新需求單
       // 這裡簡單處理，先存到 tour_requests
-      await supabase
-        .from('tour_requests')
-        .insert({
-          tour_id: tourId,
-          request_type: 'other',
-          request_scope: 'full_package', // 標記為整包報價
-          supplier_name: 'Local 供應商',
-          status: '已回覆',
-          supplier_response: quoteData,
-          replied_at: new Date().toISOString(),
-          package_status: 'quoted',
-        })
+      await supabase.from('tour_requests').insert({
+        tour_id: tourId,
+        request_type: 'other',
+        request_scope: 'full_package', // 標記為整包報價
+        supplier_name: 'Local 供應商',
+        status: '已回覆',
+        supplier_response: quoteData,
+        replied_at: new Date().toISOString(),
+        package_status: 'quoted',
+      })
     }
 
     return NextResponse.json({ success: true })

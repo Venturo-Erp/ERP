@@ -271,7 +271,9 @@ export function TourWebpageTab({ tour }: TourWebpageTabProps) {
       })
 
       // 載入砍次表（優先從 tour，fallback 到 relatedQuote）
-      const tp = (relatedTour?.tier_pricings ?? relatedQuote?.tier_pricings) as TierPricing[] | undefined
+      const tp = (relatedTour?.tier_pricings ?? relatedQuote?.tier_pricings) as
+        | TierPricing[]
+        | undefined
       if (tp && tp.length > 0) {
         setQuoteTierPricings(tp)
       }
@@ -339,14 +341,19 @@ export function TourWebpageTab({ tour }: TourWebpageTabProps) {
         // 同步到核心表（報價單直接讀核心表，不需要額外同步）
         if (convertedData.daily_itinerary && convertedData.daily_itinerary.length > 0) {
           // 同步到核心表
-          logger.log('🔄 syncToCore called', { itinerary_id: currentItineraryId, tour_id: tour.id, days: (convertedData.daily_itinerary as DailyItinerary[]).length })
+          logger.log('🔄 syncToCore called', {
+            itinerary_id: currentItineraryId,
+            tour_id: tour.id,
+            days: (convertedData.daily_itinerary as DailyItinerary[]).length,
+          })
           syncToCore({
             itinerary_id: currentItineraryId,
             tour_id: tour.id,
             daily_itinerary: convertedData.daily_itinerary as DailyItinerary[],
-          }).then(result => {
-            logger.log('✅ syncToCore result:', result)
           })
+            .then(result => {
+              logger.log('✅ syncToCore result:', result)
+            })
             .catch(err => logger.error('❌ syncToCore error:', err))
         }
 

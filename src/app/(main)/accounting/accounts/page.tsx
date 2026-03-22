@@ -75,10 +75,8 @@ export default function AccountsPage() {
       if (error) throw error
 
       // 更新本地状态
-      setAccounts(prev => 
-        prev.map(acc => 
-          acc.id === accountId ? { ...acc, is_favorite: !currentFavorite } : acc
-        )
+      setAccounts(prev =>
+        prev.map(acc => (acc.id === accountId ? { ...acc, is_favorite: !currentFavorite } : acc))
       )
 
       toast.success(currentFavorite ? '已取消常用' : '已標記為常用')
@@ -97,7 +95,7 @@ export default function AccountsPage() {
     {
       key: 'favorite',
       label: '常用',
-      width: "60px",
+      width: '60px',
       render: (_: unknown, row: Account) => (
         <button
           onClick={() => toggleFavorite(row.id, row.is_favorite || false)}
@@ -105,7 +103,9 @@ export default function AccountsPage() {
         >
           <Star
             size={18}
-            className={row.is_favorite ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
+            className={
+              row.is_favorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
+            }
           />
         </button>
       ),
@@ -113,7 +113,7 @@ export default function AccountsPage() {
     {
       key: 'code',
       label: '科目代號',
-      width: "100px",
+      width: '100px',
       render: (_: unknown, row: Account) => (
         <span className="font-mono font-semibold">{row.code}</span>
       ),
@@ -121,14 +121,12 @@ export default function AccountsPage() {
     {
       key: 'name',
       label: '科目名稱',
-      render: (_: unknown, row: Account) => (
-        <span className="font-medium">{row.name}</span>
-      ),
+      render: (_: unknown, row: Account) => <span className="font-medium">{row.name}</span>,
     },
     {
       key: 'account_type',
       label: '類型',
-      width: "100px",
+      width: '100px',
       render: (_: unknown, row: Account) => {
         const config = typeConfig[row.account_type as keyof typeof typeConfig]
         if (!config) return <Badge variant="outline">-</Badge>
@@ -143,25 +141,20 @@ export default function AccountsPage() {
       key: 'description',
       label: '說明',
       render: (_: unknown, row: Account) => (
-        <span className="text-sm text-muted-foreground">
-          {row.description || '-'}
-        </span>
+        <span className="text-sm text-muted-foreground">{row.description || '-'}</span>
       ),
     },
     {
       key: 'is_system_locked',
       label: '系統科目',
-      width: "100px",
-      render: (_: unknown, row: Account) => (
-        row.is_system_locked ? (
-          <Badge variant="secondary">系統</Badge>
-        ) : null
-      ),
+      width: '100px',
+      render: (_: unknown, row: Account) =>
+        row.is_system_locked ? <Badge variant="secondary">系統</Badge> : null,
     },
     {
       key: 'is_active',
       label: '狀態',
-      width: "80px",
+      width: '80px',
       render: (_: unknown, row: Account) => (
         <Badge variant={row.is_active ? 'default' : 'outline'}>
           {row.is_active ? '啟用' : '停用'}
@@ -171,14 +164,9 @@ export default function AccountsPage() {
     {
       key: 'actions',
       label: '操作',
-      width: "80px",
+      width: '80px',
       render: (_: unknown, row: Account) => (
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={() => handleEdit(row)}
-          className="gap-1"
-        >
+        <Button size="sm" variant="ghost" onClick={() => handleEdit(row)} className="gap-1">
           <Edit size={14} />
           編輯
         </Button>
@@ -205,7 +193,7 @@ export default function AccountsPage() {
           </Button>
         }
       />
-      
+
       <CreateAccountDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}

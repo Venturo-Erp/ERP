@@ -62,9 +62,7 @@ export default function LineSettingsPage() {
         .eq('id', bindingGroup.id)
 
       setGroups(prev =>
-        prev.map(g =>
-          g.id === bindingGroup.id ? { ...g, supplier_id: selectedSupplierId } : g
-        )
+        prev.map(g => (g.id === bindingGroup.id ? { ...g, supplier_id: selectedSupplierId } : g))
       )
       toast.success('綁定成功')
       setBindingGroup(null)
@@ -77,14 +75,9 @@ export default function LineSettingsPage() {
   // 解除綁定
   const handleUnbind = async (group: LineGroup) => {
     try {
-      await supabase
-        .from('line_groups')
-        .update({ supplier_id: null })
-        .eq('id', group.id)
+      await supabase.from('line_groups').update({ supplier_id: null }).eq('id', group.id)
 
-      setGroups(prev =>
-        prev.map(g => (g.id === group.id ? { ...g, supplier_id: null } : g))
-      )
+      setGroups(prev => prev.map(g => (g.id === group.id ? { ...g, supplier_id: null } : g)))
       toast.success('已解除綁定')
     } catch {
       toast.error('解除失敗')
@@ -161,7 +154,7 @@ export default function LineSettingsPage() {
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <SettingsTabs />
-      
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold text-morandi-primary flex items-center gap-2">
@@ -220,7 +213,7 @@ export default function LineSettingsPage() {
           </DialogHeader>
           {bindingGroup && (
             <div className="space-y-4">
-              <div className="bg-gray-50 rounded-md p-3">
+              <div className="bg-morandi-container rounded-md p-3">
                 <p className="text-sm text-morandi-secondary">群組</p>
                 <p className="font-medium">
                   {bindingGroup.group_name || bindingGroup.group_id.slice(0, 12)}
@@ -238,11 +231,7 @@ export default function LineSettingsPage() {
               </div>
 
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => setBindingGroup(null)}
-                >
+                <Button variant="outline" className="flex-1" onClick={() => setBindingGroup(null)}>
                   取消
                 </Button>
                 <Button

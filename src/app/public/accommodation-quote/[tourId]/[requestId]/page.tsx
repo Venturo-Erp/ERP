@@ -28,10 +28,10 @@ export default async function AccommodationQuotePage({
 
   if (!request) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-morandi-container">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">找不到需求單</h1>
-          <p className="text-gray-600 mt-2">請確認連結是否正確</p>
+          <h1 className="text-2xl font-bold text-morandi-primary">找不到需求單</h1>
+          <p className="text-morandi-secondary mt-2">請確認連結是否正確</p>
         </div>
       </div>
     )
@@ -59,10 +59,10 @@ export default async function AccommodationQuotePage({
 
   if (!tour) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-morandi-container">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">找不到行程</h1>
-          <p className="text-gray-600 mt-2">請確認連結是否正確</p>
+          <h1 className="text-2xl font-bold text-morandi-primary">找不到行程</h1>
+          <p className="text-morandi-secondary mt-2">請確認連結是否正確</p>
         </div>
       </div>
     )
@@ -76,8 +76,7 @@ export default async function AccommodationQuotePage({
   const totalDays =
     tour.departure_date && tour.return_date
       ? Math.ceil(
-          (new Date(tour.return_date).getTime() -
-            new Date(tour.departure_date).getTime()) /
+          (new Date(tour.return_date).getTime() - new Date(tour.departure_date).getTime()) /
             (1000 * 60 * 60 * 24)
         ) + 1
       : null
@@ -103,11 +102,11 @@ export default async function AccommodationQuotePage({
             {/* 住宿需求 */}
             <div>
               <h3 className="font-semibold text-[#c9a96e] mb-3">住宿需求</h3>
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div className="bg-morandi-container border border-border rounded-lg p-4">
                 {requestItems.length > 0 ? (
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-300">
+                      <tr className="border-b border-border">
                         <th className="text-left py-2">房型</th>
                         <th className="text-center py-2">數量</th>
                         <th className="text-left py-2">入住日期</th>
@@ -116,7 +115,7 @@ export default async function AccommodationQuotePage({
                     </thead>
                     <tbody>
                       {requestItems.map((item: any, idx: number) => (
-                        <tr key={idx} className="border-b border-gray-200">
+                        <tr key={idx} className="border-b border-border">
                           <td className="py-2">{item.room_type || '—'}</td>
                           <td className="text-center py-2">{item.quantity || '—'}</td>
                           <td className="py-2">{item.check_in_date || '—'}</td>
@@ -126,7 +125,7 @@ export default async function AccommodationQuotePage({
                     </tbody>
                   </table>
                 ) : (
-                  <p className="text-sm text-gray-500">無房型需求</p>
+                  <p className="text-sm text-morandi-secondary">無房型需求</p>
                 )}
               </div>
             </div>
@@ -135,44 +134,53 @@ export default async function AccommodationQuotePage({
             {request.note && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 <h3 className="font-semibold text-amber-900 mb-2">{COMPANY_NAME}備註</h3>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{request.note}</p>
+                <p className="text-sm text-morandi-primary whitespace-pre-wrap">{request.note}</p>
               </div>
             )}
 
             {/* 🆕 報價歷程 */}
             {history.length > 0 && (
-              <details className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
-                <summary className="px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors select-none">
-                  <span className="font-semibold text-gray-700">📜 報價歷程 ({history.length})</span>
-                  <span className="text-xs text-gray-500 ml-2">（點擊展開）</span>
+              <details className="bg-morandi-container border border-border rounded-lg overflow-hidden">
+                <summary className="px-4 py-3 cursor-pointer hover:bg-morandi-container transition-colors select-none">
+                  <span className="font-semibold text-morandi-primary">
+                    📜 報價歷程 ({history.length})
+                  </span>
+                  <span className="text-xs text-morandi-secondary ml-2">（點擊展開）</span>
                 </summary>
-                <div className="p-4 space-y-3 border-t border-gray-200">
+                <div className="p-4 space-y-3 border-t border-border">
                   {history.map((h: any) => {
                     const quoteData = h.supplier_response as any
                     return (
-                      <div key={h.id} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
+                      <div
+                        key={h.id}
+                        className="bg-white border border-border rounded-lg p-3 text-sm"
+                      >
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-gray-500 text-xs">
+                          <span className="text-morandi-secondary text-xs">
                             {new Date(h.replied_at).toLocaleString('zh-TW')}
                           </span>
                           <span className="font-bold text-lg text-[#c9a96e]">
                             ${quoteData?.totalCost?.toLocaleString() || '—'}
                           </span>
                         </div>
-                        <div className="text-xs text-gray-600 space-y-1">
+                        <div className="text-xs text-morandi-secondary space-y-1">
                           <div>聯絡人：{quoteData?.contact || '—'}</div>
                           {quoteData?.rooms && quoteData.rooms.length > 0 && (
                             <div className="mt-2">
                               {quoteData.rooms.map((room: any, idx: number) => (
                                 <div key={idx} className="flex justify-between py-1">
-                                  <span>{room.roomType} × {room.quantity}</span>
-                                  <span className="font-medium">${room.unitPrice?.toLocaleString()}</span>
+                                  <span>
+                                    {room.roomType} × {room.quantity}
+                                  </span>
+                                  <span className="font-medium">
+                                    ${room.unitPrice?.toLocaleString()}
+                                  </span>
                                 </div>
                               ))}
                             </div>
                           )}
                           {quoteData?.notes && (
-                            <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                            <div className="mt-2 p-2 bg-morandi-container rounded text-xs">
                               備註：{quoteData.notes}
                             </div>
                           )}
@@ -194,36 +202,38 @@ export default async function AccommodationQuotePage({
                     提交時間：{new Date(quoteData.submitted_at).toLocaleString('zh-TW')}
                   </p>
                 </div>
-                
+
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between border-b pb-2">
-                    <span className="text-gray-600">聯絡人：</span>
+                    <span className="text-morandi-secondary">聯絡人：</span>
                     <span className="font-medium">{quoteData.contact}</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="text-gray-600">聯絡電話：</span>
+                    <span className="text-morandi-secondary">聯絡電話：</span>
                     <span className="font-medium">{quoteData.phone}</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="text-gray-600">總金額：</span>
+                    <span className="text-morandi-secondary">總金額：</span>
                     <span className="font-bold text-lg text-green-700">
                       ${quoteData.totalCost?.toLocaleString()} 元
                     </span>
                   </div>
                   {quoteData.rooms && quoteData.rooms.length > 0 && (
                     <div>
-                      <div className="text-gray-600 mb-2">房型報價：</div>
+                      <div className="text-morandi-secondary mb-2">房型報價：</div>
                       {quoteData.rooms.map((room: any, idx: number) => (
                         <div key={idx} className="flex justify-between py-1 pl-4">
-                          <span>{room.roomType} × {room.quantity}</span>
+                          <span>
+                            {room.roomType} × {room.quantity}
+                          </span>
                           <span className="font-medium">${room.unitPrice?.toLocaleString()}</span>
                         </div>
                       ))}
                     </div>
                   )}
                   {quoteData.notes && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded">
-                      <div className="text-gray-600 text-xs mb-1">供應商備註：</div>
+                    <div className="mt-3 p-3 bg-morandi-container rounded">
+                      <div className="text-morandi-secondary text-xs mb-1">供應商備註：</div>
                       <div className="whitespace-pre-wrap">{quoteData.notes}</div>
                     </div>
                   )}
@@ -231,8 +241,8 @@ export default async function AccommodationQuotePage({
               </div>
             ) : (
               /* 未提交：顯示填寫表單 */
-              <AccommodationQuoteForm 
-                tourId={tourId} 
+              <AccommodationQuoteForm
+                tourId={tourId}
                 requestId={requestId}
                 requestItems={requestItems}
               />
@@ -240,7 +250,7 @@ export default async function AccommodationQuotePage({
           </div>
         </div>
 
-        <div className="text-center text-xs text-gray-500 mt-4">
+        <div className="text-center text-xs text-morandi-secondary mt-4">
           本報價單由{COMPANY_NAME}提供
         </div>
       </div>

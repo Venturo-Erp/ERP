@@ -64,9 +64,7 @@ export const SuppliersDialog: React.FC<SuppliersDialogProps> = ({
         {/* 出帳帳號資訊 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium text-morandi-primary">
-              {LABELS.bankName}
-            </label>
+            <label className="text-sm font-medium text-morandi-primary">{LABELS.bankName}</label>
             <Input
               value={formData.bank_name}
               onChange={e => onFormFieldChange('bank_name', e.target.value)}
@@ -76,9 +74,7 @@ export const SuppliersDialog: React.FC<SuppliersDialogProps> = ({
           </div>
 
           <div>
-            <label className="text-sm font-medium text-morandi-primary">
-              {LABELS.bankAccount}
-            </label>
+            <label className="text-sm font-medium text-morandi-primary">{LABELS.bankAccount}</label>
             <Input
               value={formData.bank_account}
               onChange={e => onFormFieldChange('bank_account', e.target.value)}

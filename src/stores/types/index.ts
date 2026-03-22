@@ -91,8 +91,6 @@ export { SYSTEM_PERMISSIONS, FEATURE_PERMISSIONS } from '@/lib/permissions'
 // Store 工具型別（重新導出）
 export type { CreateInput, UpdateInput } from '../core/types'
 
-
-
 // 獎金型別
 export { BonusSettingType, BonusCalculationType } from '@/types/bonus.types'
 

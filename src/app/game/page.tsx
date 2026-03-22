@@ -51,7 +51,7 @@ export default function GameOfficePage() {
           <span className="text-lg">🏢</span>
           <span className="text-sm font-bold text-white tracking-wider">VENTURO OFFICE</span>
         </div>
-        <span className="text-xs text-gray-600">Prototype v0.4</span>
+        <span className="text-xs text-morandi-secondary">Prototype v0.4</span>
       </div>
 
       {/* Main Content */}
@@ -63,8 +63,8 @@ export default function GameOfficePage() {
             onClick={() => setShowGrid(!showGrid)}
             className={`absolute top-3 left-3 z-10 flex items-center gap-1 px-3 py-1.5 text-xs rounded border transition-colors ${
               showGrid
-                ? 'border-[var(--border)] text-white bg-gray-800/80'
-                : 'border-[var(--border)] text-gray-500 bg-gray-900/80'
+                ? 'border-[var(--border)] text-white bg-morandi-primary/80'
+                : 'border-[var(--border)] text-morandi-secondary bg-morandi-primary/80'
             }`}
           >
             <Grid3X3 className="w-3 h-3" />
@@ -103,21 +103,21 @@ export default function GameOfficePage() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="flex items-center gap-4 px-4 py-2 border-t border-[var(--border)] text-xs text-gray-500">
+      <div className="flex items-center gap-4 px-4 py-2 border-t border-[var(--border)] text-xs text-morandi-secondary">
         <button
           onClick={() => setEditMode(!editMode)}
           className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
-            editMode ? 'text-amber-400 bg-amber-400/10' : 'text-gray-400 hover:text-white'
+            editMode ? 'text-amber-400 bg-amber-400/10' : 'text-muted-foreground hover:text-white'
           }`}
         >
           {editMode ? <Edit3 className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
           {editMode ? '✏️ 編輯中' : '👁️ 瀏覽中'}
         </button>
-        <span className="text-gray-700">|</span>
+        <span className="text-morandi-primary">|</span>
         <span>🏢 辦公室模式</span>
-        <span className="text-gray-700">|</span>
+        <span className="text-morandi-primary">|</span>
         <span>{GAME_OFFICE_LABELS.LABEL_3801}</span>
-        <span className="text-gray-700">|</span>
+        <span className="text-morandi-primary">|</span>
         <span className="text-yellow-500/70">💡 提示：點電腦打開訂單管理</span>
       </div>
     </div>

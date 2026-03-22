@@ -5,7 +5,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { Input } from '@/components/ui/input'
 import { FormDialog } from '@/components/dialog/form-dialog'
 import { useAirports, type Airport } from '@/features/tours/hooks/useAirports'
-import { useCountries } from '@/data'  // 🔧 核心表架構
+import { useCountries } from '@/data' // 🔧 核心表架構
 import { SELECTORS_LABELS } from './constants/labels'
 
 // 判斷是否為台灣（支援多種寫法）
@@ -46,7 +46,7 @@ export function CountryAirportSelector({
 }: CountryAirportSelectorProps) {
   // 🔧 核心表架構：用 useCountries 取得完整資料
   const { items: countriesData } = useCountries()
-  
+
   const {
     countries: hookCountries,
     countryNameToCode,
@@ -55,7 +55,7 @@ export function CountryAirportSelector({
     addAirport,
     loading,
   } = useAirports({ enabled: true })
-  
+
   // 向下相容：優先用 countryName，fallback 到 country
   const displayCountryName = countryName || country || ''
 
@@ -97,13 +97,13 @@ export function CountryAirportSelector({
     (newCountryName: string) => {
       // 從核心表取得完整資料
       const countryData = countriesData.find(c => c.name === newCountryName)
-      
+
       if (!countryData) {
         console.warn(`找不到國家資料: ${newCountryName}`)
         // Fallback：用舊格式（但這不應該發生）
         return
       }
-      
+
       // 傳完整資料給父元件
       onCountryChange({
         id: countryData.id,

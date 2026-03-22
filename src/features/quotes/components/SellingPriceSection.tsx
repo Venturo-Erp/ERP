@@ -93,9 +93,9 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
   const handlePriceChange = (identity: keyof SellingPrices, value: string) => {
     const normalized = normalizeNumber(value)
     const newPrice = Number(normalized) || 0
-    
+
     setSellingPrices(prev => ({ ...prev, [identity]: newPrice }))
-    
+
     // 同步更新第一個砍次的售價（確保存檔時不丟失）
     if (tierPricings.length > 0) {
       setTierPricings(prev =>
@@ -111,13 +111,10 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
           }
         })
       )
-      
+
       // 提醒：如果有多個砍次，售價需要各自設定
       if (tierPricings.length > 1) {
-        toast.info(
-          '💡 不同人數的售價已分開設定，記得檢查其他砍次',
-          { duration: 3000 }
-        )
+        toast.info('💡 不同人數的售價已分開設定，記得檢查其他砍次', { duration: 3000 })
       }
     }
   }
@@ -152,13 +149,10 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
         }
       })
     )
-    
+
     // 提醒：修改砍次售價時，提醒檢查其他砍次
     if (tierPricings.length > 1) {
-      toast.info(
-        '💡 不同人數的售價已分開設定，記得檢查其他砍次',
-        { duration: 3000 }
-      )
+      toast.info('💡 不同人數的售價已分開設定，記得檢查其他砍次', { duration: 3000 })
     }
   }
 
@@ -257,195 +251,38 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
 
       {/* 檻次卡片 - 橫向排列，最多 3 個 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-
-      {/* 目前人數檻次卡片 */}
-      <div className="bg-card border border-morandi-gold/40 rounded-xl overflow-hidden shadow-sm">
-        <div className="bg-morandi-gold/15 px-4 py-2 flex items-center justify-between border-b border-morandi-gold/30">
-          <div className="flex items-center gap-1">
-            <input
-              type="text"
-              inputMode="decimal"
-              value={currentTotalCount}
-              onChange={e => {
-                const total = Number(normalizeNumber(e.target.value)) || 0
-                setParticipantCounts({
-                  adult: total,
-                  child_with_bed: 0,
-                  child_no_bed: 0,
-                  single_room: 0,
-                  infant: 0,
-                })
-              }}
-              disabled={isReadOnly || hasLocalPricing}
-              title={hasLocalPricing ? '人數由 Local 報價控制，請修改 Local 報價' : ''}
-              className={cn(
-                'w-12 h-7 px-1 text-sm font-semibold text-center text-morandi-primary bg-white/50 border border-morandi-gold/30 rounded focus:outline-none focus:ring-1 focus:ring-morandi-gold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
-                (isReadOnly || hasLocalPricing) && 'cursor-not-allowed opacity-60'
-              )}
-            />
-            <span className="text-sm font-semibold text-morandi-primary">
-              {SELLING_PRICE_SECTION_LABELS.LABEL_2543}
-            </span>
-          </div>
-        </div>
-        <table className="w-full text-sm">
-          <thead className="border-b border-morandi-container/60">
-            <tr>
-              <th className="text-left py-2 px-4 text-xs font-medium text-morandi-secondary">
-                {SELLING_PRICE_SECTION_LABELS.LABEL_8725}
-              </th>
-              <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
-                {SELLING_PRICE_SECTION_LABELS.LABEL_7178}
-              </th>
-              <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
-                {SELLING_PRICE_SECTION_LABELS.LABEL_561}
-              </th>
-              <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
-                {SELLING_PRICE_SECTION_LABELS.LABEL_7705}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <PriceInputRow
-              label={PRICE_SUMMARY_CARD_LABELS.單人房}
-              cost={identityCosts.single_room}
-              sellingPrice={sellingPrices.single_room}
-              profit={identityProfits.single_room}
-              onPriceChange={value => handlePriceChange('single_room', value)}
-              isReadOnly={isReadOnly}
-            />
-            <PriceInputRow
-              label={CATEGORY_SECTION_LABELS.成人}
-              cost={identityCosts.adult}
-              sellingPrice={sellingPrices.adult}
-              profit={identityProfits.adult}
-              onPriceChange={value => handlePriceChange('adult', value)}
-              isReadOnly={isReadOnly}
-            />
-            <PriceInputRow
-              label={PRICE_SUMMARY_CARD_LABELS.小孩}
-              cost={identityCosts.child_with_bed}
-              sellingPrice={sellingPrices.child_with_bed}
-              profit={identityProfits.child_with_bed}
-              onPriceChange={value => handlePriceChange('child_with_bed', value)}
-              isReadOnly={isReadOnly}
-            />
-            <PriceInputRow
-              label={PRICE_SUMMARY_CARD_LABELS.不佔床}
-              cost={identityCosts.child_no_bed}
-              sellingPrice={sellingPrices.child_no_bed}
-              profit={identityProfits.child_no_bed}
-              onPriceChange={value => handlePriceChange('child_no_bed', value)}
-              isReadOnly={isReadOnly}
-            />
-            <PriceInputRow
-              label={COST_ITEM_ROW_LABELS.嬰兒}
-              cost={identityCosts.infant}
-              sellingPrice={sellingPrices.infant}
-              profit={identityProfits.infant}
-              onPriceChange={value => handlePriceChange('infant', value)}
-              isReadOnly={isReadOnly}
-            />
-
-            {/* 動態房型 */}
-            {accommodationSummary.length > 1 &&
-              accommodationSummary.slice(1).map(room => (
-                <React.Fragment key={room.name}>
-                  <tr className="border-b border-morandi-container/60">
-                    <td
-                      colSpan={4}
-                      className="py-2 px-3 text-xs font-medium text-morandi-secondary"
-                    >
-                      {room.name}
-                    </td>
-                  </tr>
-                  <PriceInputRow
-                    label={CATEGORY_SECTION_LABELS.成人}
-                    cost={getRoomTypeCost(room.name, 'adult', accommodationSummary, identityCosts)}
-                    sellingPrice={sellingPrices.room_types?.[room.name]?.adult || 0}
-                    profit={getRoomTypeProfit(
-                      room.name,
-                      'adult',
-                      sellingPrices,
-                      accommodationSummary,
-                      identityCosts
-                    )}
-                    onPriceChange={value => handleRoomTypePriceChange(room.name, 'adult', value)}
-                    isReadOnly={isReadOnly}
-                    indented
-                  />
-                  <PriceInputRow
-                    label={PRICE_SUMMARY_CARD_LABELS.小孩}
-                    cost={getRoomTypeCost(room.name, 'child', accommodationSummary, identityCosts)}
-                    sellingPrice={sellingPrices.room_types?.[room.name]?.child || 0}
-                    profit={getRoomTypeProfit(
-                      room.name,
-                      'child',
-                      sellingPrices,
-                      accommodationSummary,
-                      identityCosts
-                    )}
-                    onPriceChange={value => handleRoomTypePriceChange(room.name, 'child', value)}
-                    isReadOnly={isReadOnly}
-                    indented
-                  />
-                </React.Fragment>
-              ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* 檻次表列表 */}
-      {tierPricings.map(tier => (
-        <div
-          key={tier.id}
-          className="bg-card border border-border rounded-xl overflow-hidden shadow-sm"
-        >
-          <div className="bg-morandi-container/30 px-4 py-2 flex items-center justify-between border-b border-border">
+        {/* 目前人數檻次卡片 */}
+        <div className="bg-card border border-morandi-gold/40 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-morandi-gold/15 px-4 py-2 flex items-center justify-between border-b border-morandi-gold/30">
             <div className="flex items-center gap-1">
               <input
                 type="text"
                 inputMode="decimal"
-                value={tier.participant_count}
+                value={currentTotalCount}
                 onChange={e => {
-                  const newCount = Number(normalizeNumber(e.target.value)) || 0
-                  handleTierCountChange(tier.id, newCount)
+                  const total = Number(normalizeNumber(e.target.value)) || 0
+                  setParticipantCounts({
+                    adult: total,
+                    child_with_bed: 0,
+                    child_no_bed: 0,
+                    single_room: 0,
+                    infant: 0,
+                  })
                 }}
-                disabled={isReadOnly}
+                disabled={isReadOnly || hasLocalPricing}
+                title={hasLocalPricing ? '人數由 Local 報價控制，請修改 Local 報價' : ''}
                 className={cn(
-                  'w-12 h-7 px-1 text-sm font-medium text-center text-morandi-primary bg-white/50 border border-border rounded focus:outline-none focus:ring-1 focus:ring-morandi-gold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
-                  isReadOnly && 'cursor-not-allowed opacity-60'
+                  'w-12 h-7 px-1 text-sm font-semibold text-center text-morandi-primary bg-white/50 border border-morandi-gold/30 rounded focus:outline-none focus:ring-1 focus:ring-morandi-gold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+                  (isReadOnly || hasLocalPricing) && 'cursor-not-allowed opacity-60'
                 )}
               />
-              <span className="text-sm font-medium text-morandi-primary">
+              <span className="text-sm font-semibold text-morandi-primary">
                 {SELLING_PRICE_SECTION_LABELS.LABEL_2543}
               </span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Button
-                onClick={() => {
-                  const tierLabel = `${SELLING_PRICE_SECTION_LABELS.TIER_QUOTE_PREFIX}${tier.participant_count}${SELLING_PRICE_SECTION_LABELS.TIER_QUOTE_SUFFIX}`
-                  handleGenerateQuotation(tier.participant_counts, tier.selling_prices, tierLabel)
-                }}
-                size="sm"
-                className="h-6 px-2 text-xs bg-morandi-secondary hover:bg-morandi-secondary/90 text-white"
-                type="button"
-              >
-                {SELLING_PRICE_SECTION_LABELS.PRINT}
-              </Button>
-              {!isReadOnly && (
-                <button
-                  onClick={() => handleRemoveTier(tier.id)}
-                  className="text-morandi-red hover:bg-morandi-red/10 p-1 rounded transition-colors"
-                  type="button"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
           </div>
           <table className="w-full text-sm">
-            <thead className="border-b border-border/60">
+            <thead className="border-b border-morandi-container/60">
               <tr>
                 <th className="text-left py-2 px-4 text-xs font-medium text-morandi-secondary">
                   {SELLING_PRICE_SECTION_LABELS.LABEL_8725}
@@ -464,48 +301,214 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
             <tbody>
               <PriceInputRow
                 label={PRICE_SUMMARY_CARD_LABELS.單人房}
-                cost={tier.identity_costs.single_room}
-                sellingPrice={tier.selling_prices.single_room}
-                profit={tier.identity_profits.single_room}
-                onPriceChange={value => handleTierPriceChange(tier.id, 'single_room', value)}
+                cost={identityCosts.single_room}
+                sellingPrice={sellingPrices.single_room}
+                profit={identityProfits.single_room}
+                onPriceChange={value => handlePriceChange('single_room', value)}
                 isReadOnly={isReadOnly}
               />
               <PriceInputRow
                 label={CATEGORY_SECTION_LABELS.成人}
-                cost={tier.identity_costs.adult}
-                sellingPrice={tier.selling_prices.adult}
-                profit={tier.identity_profits.adult}
-                onPriceChange={value => handleTierPriceChange(tier.id, 'adult', value)}
+                cost={identityCosts.adult}
+                sellingPrice={sellingPrices.adult}
+                profit={identityProfits.adult}
+                onPriceChange={value => handlePriceChange('adult', value)}
                 isReadOnly={isReadOnly}
               />
               <PriceInputRow
                 label={PRICE_SUMMARY_CARD_LABELS.小孩}
-                cost={tier.identity_costs.child_with_bed}
-                sellingPrice={tier.selling_prices.child_with_bed}
-                profit={tier.identity_profits.child_with_bed}
-                onPriceChange={value => handleTierPriceChange(tier.id, 'child_with_bed', value)}
+                cost={identityCosts.child_with_bed}
+                sellingPrice={sellingPrices.child_with_bed}
+                profit={identityProfits.child_with_bed}
+                onPriceChange={value => handlePriceChange('child_with_bed', value)}
                 isReadOnly={isReadOnly}
               />
               <PriceInputRow
                 label={PRICE_SUMMARY_CARD_LABELS.不佔床}
-                cost={tier.identity_costs.child_no_bed}
-                sellingPrice={tier.selling_prices.child_no_bed}
-                profit={tier.identity_profits.child_no_bed}
-                onPriceChange={value => handleTierPriceChange(tier.id, 'child_no_bed', value)}
+                cost={identityCosts.child_no_bed}
+                sellingPrice={sellingPrices.child_no_bed}
+                profit={identityProfits.child_no_bed}
+                onPriceChange={value => handlePriceChange('child_no_bed', value)}
                 isReadOnly={isReadOnly}
               />
               <PriceInputRow
                 label={COST_ITEM_ROW_LABELS.嬰兒}
-                cost={tier.identity_costs.infant}
-                sellingPrice={tier.selling_prices.infant}
-                profit={tier.identity_profits.infant}
-                onPriceChange={value => handleTierPriceChange(tier.id, 'infant', value)}
+                cost={identityCosts.infant}
+                sellingPrice={sellingPrices.infant}
+                profit={identityProfits.infant}
+                onPriceChange={value => handlePriceChange('infant', value)}
                 isReadOnly={isReadOnly}
               />
+
+              {/* 動態房型 */}
+              {accommodationSummary.length > 1 &&
+                accommodationSummary.slice(1).map(room => (
+                  <React.Fragment key={room.name}>
+                    <tr className="border-b border-morandi-container/60">
+                      <td
+                        colSpan={4}
+                        className="py-2 px-3 text-xs font-medium text-morandi-secondary"
+                      >
+                        {room.name}
+                      </td>
+                    </tr>
+                    <PriceInputRow
+                      label={CATEGORY_SECTION_LABELS.成人}
+                      cost={getRoomTypeCost(
+                        room.name,
+                        'adult',
+                        accommodationSummary,
+                        identityCosts
+                      )}
+                      sellingPrice={sellingPrices.room_types?.[room.name]?.adult || 0}
+                      profit={getRoomTypeProfit(
+                        room.name,
+                        'adult',
+                        sellingPrices,
+                        accommodationSummary,
+                        identityCosts
+                      )}
+                      onPriceChange={value => handleRoomTypePriceChange(room.name, 'adult', value)}
+                      isReadOnly={isReadOnly}
+                      indented
+                    />
+                    <PriceInputRow
+                      label={PRICE_SUMMARY_CARD_LABELS.小孩}
+                      cost={getRoomTypeCost(
+                        room.name,
+                        'child',
+                        accommodationSummary,
+                        identityCosts
+                      )}
+                      sellingPrice={sellingPrices.room_types?.[room.name]?.child || 0}
+                      profit={getRoomTypeProfit(
+                        room.name,
+                        'child',
+                        sellingPrices,
+                        accommodationSummary,
+                        identityCosts
+                      )}
+                      onPriceChange={value => handleRoomTypePriceChange(room.name, 'child', value)}
+                      isReadOnly={isReadOnly}
+                      indented
+                    />
+                  </React.Fragment>
+                ))}
             </tbody>
           </table>
         </div>
-      ))}
+
+        {/* 檻次表列表 */}
+        {tierPricings.map(tier => (
+          <div
+            key={tier.id}
+            className="bg-card border border-border rounded-xl overflow-hidden shadow-sm"
+          >
+            <div className="bg-morandi-container/30 px-4 py-2 flex items-center justify-between border-b border-border">
+              <div className="flex items-center gap-1">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={tier.participant_count}
+                  onChange={e => {
+                    const newCount = Number(normalizeNumber(e.target.value)) || 0
+                    handleTierCountChange(tier.id, newCount)
+                  }}
+                  disabled={isReadOnly}
+                  className={cn(
+                    'w-12 h-7 px-1 text-sm font-medium text-center text-morandi-primary bg-white/50 border border-border rounded focus:outline-none focus:ring-1 focus:ring-morandi-gold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+                    isReadOnly && 'cursor-not-allowed opacity-60'
+                  )}
+                />
+                <span className="text-sm font-medium text-morandi-primary">
+                  {SELLING_PRICE_SECTION_LABELS.LABEL_2543}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Button
+                  onClick={() => {
+                    const tierLabel = `${SELLING_PRICE_SECTION_LABELS.TIER_QUOTE_PREFIX}${tier.participant_count}${SELLING_PRICE_SECTION_LABELS.TIER_QUOTE_SUFFIX}`
+                    handleGenerateQuotation(tier.participant_counts, tier.selling_prices, tierLabel)
+                  }}
+                  size="sm"
+                  className="h-6 px-2 text-xs bg-morandi-secondary hover:bg-morandi-secondary/90 text-white"
+                  type="button"
+                >
+                  {SELLING_PRICE_SECTION_LABELS.PRINT}
+                </Button>
+                {!isReadOnly && (
+                  <button
+                    onClick={() => handleRemoveTier(tier.id)}
+                    className="text-morandi-red hover:bg-morandi-red/10 p-1 rounded transition-colors"
+                    type="button"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            </div>
+            <table className="w-full text-sm">
+              <thead className="border-b border-border/60">
+                <tr>
+                  <th className="text-left py-2 px-4 text-xs font-medium text-morandi-secondary">
+                    {SELLING_PRICE_SECTION_LABELS.LABEL_8725}
+                  </th>
+                  <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
+                    {SELLING_PRICE_SECTION_LABELS.LABEL_7178}
+                  </th>
+                  <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
+                    {SELLING_PRICE_SECTION_LABELS.LABEL_561}
+                  </th>
+                  <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
+                    {SELLING_PRICE_SECTION_LABELS.LABEL_7705}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <PriceInputRow
+                  label={PRICE_SUMMARY_CARD_LABELS.單人房}
+                  cost={tier.identity_costs.single_room}
+                  sellingPrice={tier.selling_prices.single_room}
+                  profit={tier.identity_profits.single_room}
+                  onPriceChange={value => handleTierPriceChange(tier.id, 'single_room', value)}
+                  isReadOnly={isReadOnly}
+                />
+                <PriceInputRow
+                  label={CATEGORY_SECTION_LABELS.成人}
+                  cost={tier.identity_costs.adult}
+                  sellingPrice={tier.selling_prices.adult}
+                  profit={tier.identity_profits.adult}
+                  onPriceChange={value => handleTierPriceChange(tier.id, 'adult', value)}
+                  isReadOnly={isReadOnly}
+                />
+                <PriceInputRow
+                  label={PRICE_SUMMARY_CARD_LABELS.小孩}
+                  cost={tier.identity_costs.child_with_bed}
+                  sellingPrice={tier.selling_prices.child_with_bed}
+                  profit={tier.identity_profits.child_with_bed}
+                  onPriceChange={value => handleTierPriceChange(tier.id, 'child_with_bed', value)}
+                  isReadOnly={isReadOnly}
+                />
+                <PriceInputRow
+                  label={PRICE_SUMMARY_CARD_LABELS.不佔床}
+                  cost={tier.identity_costs.child_no_bed}
+                  sellingPrice={tier.selling_prices.child_no_bed}
+                  profit={tier.identity_profits.child_no_bed}
+                  onPriceChange={value => handleTierPriceChange(tier.id, 'child_no_bed', value)}
+                  isReadOnly={isReadOnly}
+                />
+                <PriceInputRow
+                  label={COST_ITEM_ROW_LABELS.嬰兒}
+                  cost={tier.identity_costs.infant}
+                  sellingPrice={tier.selling_prices.infant}
+                  profit={tier.identity_profits.infant}
+                  onPriceChange={value => handleTierPriceChange(tier.id, 'infant', value)}
+                  isReadOnly={isReadOnly}
+                />
+              </tbody>
+            </table>
+          </div>
+        ))}
       </div>
     </div>
   )

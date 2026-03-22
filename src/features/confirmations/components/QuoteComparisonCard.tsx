@@ -1,6 +1,6 @@
 /**
  * QuoteComparisonCard - 多廠商報價比較卡片
- * 
+ *
  * 顯示同一個項目的多個廠商報價，讓業務選擇得標廠商
  */
 
@@ -28,20 +28,15 @@ interface QuoteComparisonCardProps {
   onSelect: () => void
 }
 
-export function QuoteComparisonCard({
-  itemTitle,
-  quotes,
-  onSelect,
-}: QuoteComparisonCardProps) {
+export function QuoteComparisonCard({ itemTitle, quotes, onSelect }: QuoteComparisonCardProps) {
   const [selecting, setSelecting] = useState(false)
   const [showReasonInput, setShowReasonInput] = useState<string | null>(null)
   const [reason, setReason] = useState('')
 
   // 找出最低報價
   const validQuotes = quotes.filter(q => q.quotedCost !== null && q.quotedCost > 0)
-  const lowestQuote = validQuotes.length > 0
-    ? Math.min(...validQuotes.map(q => q.quotedCost!))
-    : null
+  const lowestQuote =
+    validQuotes.length > 0 ? Math.min(...validQuotes.map(q => q.quotedCost!)) : null
 
   const handleSelect = async (requestId: string) => {
     if (!reason.trim()) {
@@ -65,10 +60,7 @@ export function QuoteComparisonCard({
       // 2. 標記其他的為 rejected
       const otherIds = quotes.filter(q => q.requestId !== requestId).map(q => q.requestId)
       if (otherIds.length > 0) {
-        await supabase
-          .from('tour_requests')
-          .update({ status: 'rejected' })
-          .in('id', otherIds)
+        await supabase.from('tour_requests').update({ status: 'rejected' }).in('id', otherIds)
       }
 
       // 3. 覆蓋核心表的 unit_price（選中的報價）
@@ -80,7 +72,7 @@ export function QuoteComparisonCard({
           .select('source_id')
           .eq('id', requestId)
           .single()
-        
+
         if (request?.source_id) {
           // 更新核心表 unit_price（覆蓋）
           await supabase
@@ -110,10 +102,7 @@ export function QuoteComparisonCard({
     const supabase = createSupabaseBrowserClient()
 
     try {
-      await supabase
-        .from('tour_requests')
-        .update({ status: 'rejected' })
-        .eq('id', requestId)
+      await supabase.from('tour_requests').update({ status: 'rejected' }).eq('id', requestId)
 
       toast.success('已拒絕')
       onSelect()
@@ -127,11 +116,12 @@ export function QuoteComparisonCard({
   return (
     <div className="bg-white border border-morandi-gold/30 rounded-lg p-4 space-y-3">
       <div className="font-semibold text-morandi-primary">
-        {itemTitle} <span className="text-sm text-muted-foreground">（{quotes.length} 家報價）</span>
+        {itemTitle}{' '}
+        <span className="text-sm text-muted-foreground">（{quotes.length} 家報價）</span>
       </div>
 
       <div className="space-y-2">
-        {quotes.map((quote) => {
+        {quotes.map(quote => {
           const isLowest = quote.quotedCost === lowestQuote && lowestQuote !== null
           const isSelected = quote.status === 'selected'
           const isRejected = quote.status === 'rejected'
@@ -143,8 +133,8 @@ export function QuoteComparisonCard({
                 isSelected
                   ? 'border-green-500 bg-green-50'
                   : isRejected
-                  ? 'border-gray-300 bg-gray-50 opacity-60'
-                  : 'border-gray-200'
+                    ? 'border-border bg-morandi-container opacity-60'
+                    : 'border-border'
               }`}
             >
               <div className="flex items-center justify-between">
@@ -163,7 +153,7 @@ export function QuoteComparisonCard({
                     </span>
                   )}
                   {isRejected && (
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                    <span className="text-xs bg-morandi-container text-morandi-secondary px-2 py-0.5 rounded">
                       已拒絕
                     </span>
                   )}
@@ -188,7 +178,7 @@ export function QuoteComparisonCard({
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-8 border-gray-400 text-gray-600"
+                        className="h-8 border-border text-morandi-secondary"
                         onClick={() => handleReject(quote.requestId)}
                         disabled={selecting}
                       >
@@ -205,7 +195,7 @@ export function QuoteComparisonCard({
                   <Input
                     placeholder="選擇原因（例如：服務較好、價格便宜）"
                     value={reason}
-                    onChange={(e) => setReason(e.target.value)}
+                    onChange={e => setReason(e.target.value)}
                     className="text-sm"
                   />
                   <div className="flex gap-2">
@@ -234,9 +224,7 @@ export function QuoteComparisonCard({
 
               {/* 已選擇的原因 */}
               {isSelected && quote.note && (
-                <div className="mt-2 text-sm text-green-700">
-                  選擇原因：{quote.note}
-                </div>
+                <div className="mt-2 text-sm text-green-700">選擇原因：{quote.note}</div>
               )}
             </div>
           )

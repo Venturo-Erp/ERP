@@ -42,9 +42,7 @@ function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
     },
   })
 
-  const style = transform
-    ? { transform: CSS.Translate.toString(transform) }
-    : undefined
+  const style = transform ? { transform: CSS.Translate.toString(transform) } : undefined
 
   const iconMap: Record<ResourceType, React.ReactNode> = {
     attraction: <MapPin size={14} className="text-emerald-600" />,
@@ -96,7 +94,7 @@ function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
 interface ResourcePanelProps {
   className?: string
   countryId?: string // 行程目的地國家，預設篩選
-  cityId?: string    // 行程目的地城市，預設篩選
+  cityId?: string // 行程目的地城市，預設篩選
 }
 
 export function ResourcePanel({ className, countryId, cityId }: ResourcePanelProps) {
@@ -213,9 +211,7 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
         .eq('is_active', true)
       if (resolvedCountryId) query = query.eq('country_id', resolvedCountryId)
       if (selectedCity) query = query.eq('city_id', selectedCity)
-      const { data, error } = await query
-        .order('name')
-        .limit(200)
+      const { data, error } = await query.order('name').limit(200)
 
       if (error) {
         logger.error('[ResourcePanel] 載入景點失敗:', error)
@@ -242,9 +238,7 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
         .eq('is_active', true)
       if (resolvedCountryId) query = query.eq('country_id', resolvedCountryId)
       if (selectedCity) query = query.eq('city_id', selectedCity)
-      const { data, error } = await query
-        .order('name')
-        .limit(200)
+      const { data, error } = await query.order('name').limit(200)
 
       if (error) {
         logger.error('[ResourcePanel] 載入酒店失敗:', error)
@@ -271,9 +265,7 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
         .eq('is_active', true)
       if (resolvedCountryId) query = query.eq('country_id', resolvedCountryId)
       if (selectedCity) query = query.eq('city_id', selectedCity)
-      const { data, error } = await query
-        .order('name')
-        .limit(200)
+      const { data, error } = await query.order('name').limit(200)
 
       if (error) {
         logger.error('[ResourcePanel] 載入餐廳失敗:', error)
@@ -382,7 +374,10 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
       {/* 搜尋框 */}
       <div className="p-2 border-b border-border">
         <div className="relative">
-          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <Input
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}

@@ -84,10 +84,10 @@ export function RequirementsList({
   const [quoteGroupSize, setQuoteGroupSize] = useState<number | null>(null)
   const [memberAgeBreakdown, setMemberAgeBreakdown] = useState<{
     total: number
-    adult: number    // ≥12
-    child6to12: number  // ≥6 & <12
-    child2to6: number   // ≥2 & <6
-    infant: number      // <2
+    adult: number // ≥12
+    child6to12: number // ≥6 & <12
+    child2to6: number // ≥2 & <6
+    infant: number // <2
   } | null>(null)
   const [startDate, setStartDate] = useState<string | null>(null)
   const [outboundFlight, setOutboundFlight] = useState<FlightInfo | null>(null)
@@ -111,13 +111,12 @@ export function RequirementsList({
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set())
   const [showAssignDialog, setShowAssignDialog] = useState(false)
 
-
   // 隱藏項目展開狀態
   const [expandedHiddenCategories, setExpandedHiddenCategories] = useState<Set<string>>(new Set())
 
   // 🆕 產生需求單狀態
   const [generatingRequests, setGeneratingRequests] = useState(false)
-  
+
   // 🆕 從核心表產生需求單
   const [showCoreRequestDialog, setShowCoreRequestDialog] = useState(false)
   const [selectedSupplierName, setSelectedSupplierName] = useState<string>('')
@@ -126,10 +125,10 @@ export function RequirementsList({
 
   // Local 報價 Dialog
   const [showLocalQuoteDialog, setShowLocalQuoteDialog] = useState(false)
-  
+
   // 🆕 團確單 Dialog
   const [showTeamConfirmationSheet, setShowTeamConfirmationSheet] = useState(false)
-  
+
   // 委託展開狀態
   const [expandedDelegation, setExpandedDelegation] = useState<string | null>(null)
   // 發送方式 state（draft→sent 用）
@@ -213,10 +212,18 @@ export function RequirementsList({
               .from('customers')
               .select('id, birth_date')
               .in('id', customerIds)
-            
-            const departureDate = tourData.departure_date ? new Date(tourData.departure_date) : new Date()
-            const breakdown = { total: members.length, adult: 0, child6to12: 0, child2to6: 0, infant: 0 }
-            
+
+            const departureDate = tourData.departure_date
+              ? new Date(tourData.departure_date)
+              : new Date()
+            const breakdown = {
+              total: members.length,
+              adult: 0,
+              child6to12: 0,
+              child2to6: 0,
+              infant: 0,
+            }
+
             for (const member of members) {
               const customer = customers?.find(c => c.id === member.customer_id)
               if (!customer?.birth_date) {
@@ -226,7 +233,7 @@ export function RequirementsList({
               const birth = new Date(customer.birth_date)
               const ageMs = departureDate.getTime() - birth.getTime()
               const ageYears = ageMs / (365.25 * 24 * 60 * 60 * 1000)
-              
+
               if (ageYears >= 12) breakdown.adult++
               else if (ageYears >= 6) breakdown.child6to12++
               else if (ageYears >= 2) breakdown.child2to6++
@@ -315,7 +322,9 @@ export function RequirementsList({
         const date = calculateDate(dn)
         dayMap.set(dn, {
           dayNumber: dn,
-          date: date ? new Date(date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' }) : `Day ${dn}`,
+          date: date
+            ? new Date(date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
+            : `Day ${dn}`,
           route: '',
         })
       }
@@ -383,15 +392,17 @@ export function RequirementsList({
             tour_id: tourId || null,
             supplier_name: itemData.supplierName?.trim() || null,
             request_type: itemData.category || 'other',
-            items: [{
-              category: itemData.category,
-              title: itemData.title,
-              service_date: itemData.serviceDate || null,
-              quantity: itemData.quantity,
-              notes: itemData.notes || null,
-              resource_id: itemData.resourceId || null,
-              resource_type: itemData.resourceType || null,
-            }],
+            items: [
+              {
+                category: itemData.category,
+                title: itemData.title,
+                service_date: itemData.serviceDate || null,
+                quantity: itemData.quantity,
+                notes: itemData.notes || null,
+                resource_id: itemData.resourceId || null,
+                resource_type: itemData.resourceType || null,
+              },
+            ],
             status: 'draft',
             hidden,
             note: itemData.notes || null,
@@ -405,7 +416,8 @@ export function RequirementsList({
             )
             .single()
           if (error) throw error
-          if (newRequest) setExistingRequests(prev => [...prev, newRequest as unknown as TourRequest])
+          if (newRequest)
+            setExistingRequests(prev => [...prev, newRequest as unknown as TourRequest])
         }
         toast({
           title: hidden ? COMP_REQUIREMENTS_LABELS.已隱藏 : COMP_REQUIREMENTS_LABELS.已恢復顯示,
@@ -452,7 +464,7 @@ export function RequirementsList({
             .eq('id', match.id)
           if (error) throw error
           setExistingRequests(prev =>
-            prev.map(r => r.id === match.id ? { ...r, items: updatedItems } : r)
+            prev.map(r => (r.id === match.id ? { ...r, items: updatedItems } : r))
           )
         } else if (user?.workspace_id) {
           // 建立新的 draft request
@@ -489,7 +501,6 @@ export function RequirementsList({
     [user, tourId]
   )
 
-
   // 勾選項目的 key
   const getItemKey = (cat: string, item: QuoteItem, idx: number) =>
     `${cat}::${item.resourceId || item.supplierName || item.title}::${item.serviceDate || idx}`
@@ -522,8 +533,10 @@ export function RequirementsList({
     if (!memberAgeBreakdown) return ''
     const parts: string[] = []
     if (memberAgeBreakdown.adult > 0) parts.push(`滿12歲以上 ${memberAgeBreakdown.adult} 位`)
-    if (memberAgeBreakdown.child6to12 > 0) parts.push(`滿6歲未滿12歲 ${memberAgeBreakdown.child6to12} 位`)
-    if (memberAgeBreakdown.child2to6 > 0) parts.push(`滿2歲未滿6歲 ${memberAgeBreakdown.child2to6} 位`)
+    if (memberAgeBreakdown.child6to12 > 0)
+      parts.push(`滿6歲未滿12歲 ${memberAgeBreakdown.child6to12} 位`)
+    if (memberAgeBreakdown.child2to6 > 0)
+      parts.push(`滿2歲未滿6歲 ${memberAgeBreakdown.child2to6} 位`)
     if (memberAgeBreakdown.infant > 0) parts.push(`未滿2歲 ${memberAgeBreakdown.infant} 位`)
     return parts.join('、')
   }, [memberAgeBreakdown])
@@ -531,12 +544,13 @@ export function RequirementsList({
   const totalPax = memberAgeBreakdown?.total || quoteGroupSize || null
 
   // 列印住宿需求單
-  const handlePrintRequest = useCallback((draft: TourRequest, item: QuoteItem) => {
-    const rooms = draft.items || []
-    const totalRooms = rooms.reduce((sum, r) => sum + r.quantity, 0)
-    const nights = rooms[0]?.nights || item.quantity || 1
+  const handlePrintRequest = useCallback(
+    (draft: TourRequest, item: QuoteItem) => {
+      const rooms = draft.items || []
+      const totalRooms = rooms.reduce((sum, r) => sum + r.quantity, 0)
+      const nights = rooms[0]?.nights || item.quantity || 1
 
-    const html = `<!DOCTYPE html>
+      const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <title>住宿需求單 - ${draft.supplier_name}</title>
 <style>
@@ -587,40 +601,48 @@ export function RequirementsList({
   </div>
 </body></html>`
 
-    const printWindow = window.open('', '_blank', 'width=900,height=700')
-    if (printWindow) {
-      printWindow.document.write(html)
-      printWindow.document.close()
-    }
-  }, [tour, totalPax, ageBreakdownText])
+      const printWindow = window.open('', '_blank', 'width=900,height=700')
+      if (printWindow) {
+        printWindow.document.write(html)
+        printWindow.document.close()
+      }
+    },
+    [tour, totalPax, ageBreakdownText]
+  )
 
   // 餐廳/活動直接列印（不需填需求）
   // 發送保險名單到 LINE
-  const handleSendInsurance = useCallback(async (item: QuoteItem) => {
-    if (!tourId || !tour) return
-    // 判斷是否為人員異動（已經發過的再次發送）
-    const req = existingRequests.find(r => r.supplier_name === '保險公司' && r.request_type === 'other')
-    const isChange = req?.status === 'sent' || req?.status === 'confirmed'
-    try {
-      const res = await fetch('/api/cron/auto-insurance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tourId, isChange }),
-      })
-      const result = await res.json()
-      if (result.success) {
-        toast({ title: isChange ? '✅ 人員異動已發送到保險群組' : '✅ 保險名單已發送到 LINE' })
-        await loadData(false)
-      } else {
-        toast({ title: '❌ 發送失敗', description: result.error, variant: 'destructive' })
+  const handleSendInsurance = useCallback(
+    async (item: QuoteItem) => {
+      if (!tourId || !tour) return
+      // 判斷是否為人員異動（已經發過的再次發送）
+      const req = existingRequests.find(
+        r => r.supplier_name === '保險公司' && r.request_type === 'other'
+      )
+      const isChange = req?.status === 'sent' || req?.status === 'confirmed'
+      try {
+        const res = await fetch('/api/cron/auto-insurance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tourId, isChange }),
+        })
+        const result = await res.json()
+        if (result.success) {
+          toast({ title: isChange ? '✅ 人員異動已發送到保險群組' : '✅ 保險名單已發送到 LINE' })
+          await loadData(false)
+        } else {
+          toast({ title: '❌ 發送失敗', description: result.error, variant: 'destructive' })
+        }
+      } catch (err) {
+        toast({ title: '❌ 發送失敗', description: String(err), variant: 'destructive' })
       }
-    } catch (err) {
-      toast({ title: '❌ 發送失敗', description: String(err), variant: 'destructive' })
-    }
-  }, [tourId, tour, existingRequests, toast, loadData])
+    },
+    [tourId, tour, existingRequests, toast, loadData]
+  )
 
-  const handlePrintSimpleRequest = useCallback((categoryKey: string, categoryLabel: string, item: QuoteItem) => {
-    const html = `<!DOCTYPE html>
+  const handlePrintSimpleRequest = useCallback(
+    (categoryKey: string, categoryLabel: string, item: QuoteItem) => {
+      const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
 <title>${categoryLabel}需求單 - ${item.supplierName || item.title}</title>
 <style>
@@ -655,19 +677,38 @@ export function RequirementsList({
     </div>
   </div>
   <table>
-    ${categoryKey === 'meal' ? `
+    ${
+      categoryKey === 'meal'
+        ? `
     <thead><tr><th>日期</th><th>餐廳</th><th>餐別/時間</th><th>人數</th><th>預算</th><th>備註</th></tr></thead>
     <tbody>
       <tr>
         <td>${item.serviceDate ? formatDate(item.serviceDate) : '-'}</td>
         <td>${item.supplierName || item.title}</td>
-        <td>${(() => { const req = existingRequests.find(r => r.request_type === 'meal' && r.supplier_name?.trim() === item.supplierName?.trim()); return (req?.items?.[0] as any)?.meal_time as string || item.title || '-'; })()}</td>
-        <td>${(() => { const req = existingRequests.find(r => r.request_type === 'meal' && r.supplier_name?.trim() === item.supplierName?.trim()); const pax = (req?.items?.[0] as any)?.pax; return pax || totalPax || '-'; })()} 人</td>
+        <td>${(() => {
+          const req = existingRequests.find(
+            r => r.request_type === 'meal' && r.supplier_name?.trim() === item.supplierName?.trim()
+          )
+          return ((req?.items?.[0] as any)?.meal_time as string) || item.title || '-'
+        })()}</td>
+        <td>${(() => {
+          const req = existingRequests.find(
+            r => r.request_type === 'meal' && r.supplier_name?.trim() === item.supplierName?.trim()
+          )
+          const pax = (req?.items?.[0] as any)?.pax
+          return pax || totalPax || '-'
+        })()} 人</td>
         <td>${item.quotedPrice ? 'NT$ ' + item.quotedPrice.toLocaleString() : '-'}</td>
-        <td>${(() => { const req = existingRequests.find(r => r.request_type === 'meal' && r.supplier_name?.trim() === item.supplierName?.trim()); return (req?.items?.[0] as any)?.meal_note as string || item.notes || ''; })()}</td>
+        <td>${(() => {
+          const req = existingRequests.find(
+            r => r.request_type === 'meal' && r.supplier_name?.trim() === item.supplierName?.trim()
+          )
+          return ((req?.items?.[0] as any)?.meal_note as string) || item.notes || ''
+        })()}</td>
       </tr>
     </tbody>
-    ` : `
+    `
+        : `
     <thead><tr><th>日期</th><th>項目</th><th>人數</th><th>預算</th><th>備註</th></tr></thead>
     <tbody>
       <tr>
@@ -678,7 +719,8 @@ export function RequirementsList({
         <td>${item.notes || ''}</td>
       </tr>
     </tbody>
-    `}
+    `
+    }
   </table>
   <div class="footer">
     <p>列印時間：${new Date().toLocaleString('zh-TW')}</p>
@@ -686,19 +728,22 @@ export function RequirementsList({
   </div>
 </body></html>`
 
-    const printWindow = window.open('', '_blank', 'width=900,height=700')
-    if (printWindow) {
-      printWindow.document.write(html)
-      printWindow.document.close()
-    }
-  }, [tour, totalPax, ageBreakdownText])
+      const printWindow = window.open('', '_blank', 'width=900,height=700')
+      if (printWindow) {
+        printWindow.document.write(html)
+        printWindow.document.close()
+      }
+    },
+    [tour, totalPax, ageBreakdownText]
+  )
 
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return '-'
     // 支援日期範圍（如 "2026-09-25~2026-09-28"）
     if (dateStr.includes('~')) {
       const [start, end] = dateStr.split('~')
-      const fmt = (s: string) => new Date(s).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
+      const fmt = (s: string) =>
+        new Date(s).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
       return `${fmt(start)}~${fmt(end)}`
     }
     return new Date(dateStr).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
@@ -726,188 +771,199 @@ export function RequirementsList({
     },
     [itemsByCategory, tour, startDate, onOpenRequestDialog]
   )
-  
+
   // 🆕 從核心表產生需求單
-  const openCoreRequestDialog = useCallback(
-    (category: string, supplierName: string) => {
-      setSelectedCategory(category)
-      setSelectedSupplierName(supplierName)
-      setShowCoreRequestDialog(true)
-    },
-    []
-  )
+  const openCoreRequestDialog = useCallback((category: string, supplierName: string) => {
+    setSelectedCategory(category)
+    setSelectedSupplierName(supplierName)
+    setShowCoreRequestDialog(true)
+  }, [])
 
   // ============================================
   // 委託狀態流轉
   // ============================================
 
   // draft → sent
-  const handleMarkSent = useCallback(async (delegation: TourRequest) => {
-    if (!user?.workspace_id) return
-    setStatusUpdating(true)
-    try {
-      const { error } = await supabase
-        .from('tour_requests')
-        .update({
-          status: 'sent',
-          sent_at: new Date().toISOString(),
-          sent_via: sentViaInput || null,
-          sent_to: sentToInput || null,
-          updated_by: user.id,
-        } as never)
-        .eq('id', delegation.id)
-      if (error) throw error
-      toast({ title: '已標記為已發出' })
-      setSentViaInput('line')
-      setSentToInput('')
-      await loadData(false)
-    } catch (error) {
-      logger.error('標記已發出失敗', error)
-      toast({ title: '操作失敗', variant: 'destructive' })
-    } finally {
-      setStatusUpdating(false)
-    }
-  }, [user, sentViaInput, sentToInput, toast, loadData])
+  const handleMarkSent = useCallback(
+    async (delegation: TourRequest) => {
+      if (!user?.workspace_id) return
+      setStatusUpdating(true)
+      try {
+        const { error } = await supabase
+          .from('tour_requests')
+          .update({
+            status: 'sent',
+            sent_at: new Date().toISOString(),
+            sent_via: sentViaInput || null,
+            sent_to: sentToInput || null,
+            updated_by: user.id,
+          } as never)
+          .eq('id', delegation.id)
+        if (error) throw error
+        toast({ title: '已標記為已發出' })
+        setSentViaInput('line')
+        setSentToInput('')
+        await loadData(false)
+      } catch (error) {
+        logger.error('標記已發出失敗', error)
+        toast({ title: '操作失敗', variant: 'destructive' })
+      } finally {
+        setStatusUpdating(false)
+      }
+    },
+    [user, sentViaInput, sentToInput, toast, loadData]
+  )
 
   // sent → replied（可以更新每個 item 的 quoted_cost）
-  const handleMarkReplied = useCallback(async (delegation: TourRequest) => {
-    if (!user?.workspace_id) return
-    setStatusUpdating(true)
-    try {
-      // 合併 editingItemCosts 到 items
-      const updatedItems = (delegation.items || []).map((item, idx) => {
-        const editedCost = editingItemCosts[idx]
-        if (editedCost !== undefined && editedCost !== null) {
-          return { ...item, quoted_cost: editedCost }
-        }
-        return item
-      })
+  const handleMarkReplied = useCallback(
+    async (delegation: TourRequest) => {
+      if (!user?.workspace_id) return
+      setStatusUpdating(true)
+      try {
+        // 合併 editingItemCosts 到 items
+        const updatedItems = (delegation.items || []).map((item, idx) => {
+          const editedCost = editingItemCosts[idx]
+          if (editedCost !== undefined && editedCost !== null) {
+            return { ...item, quoted_cost: editedCost }
+          }
+          return item
+        })
 
-      const { error } = await supabase
-        .from('tour_requests')
-        .update({
-          status: 'replied',
-          replied_at: new Date().toISOString(),
-          items: updatedItems as never,
-          updated_by: user.id,
-        } as never)
-        .eq('id', delegation.id)
-      if (error) throw error
-      toast({ title: '已標記為已回覆' })
-      setEditingItemCosts({})
-      await loadData(false)
-    } catch (error) {
-      logger.error('標記已回覆失敗', error)
-      toast({ title: '操作失敗', variant: 'destructive' })
-    } finally {
-      setStatusUpdating(false)
-    }
-  }, [user, editingItemCosts, toast, loadData])
+        const { error } = await supabase
+          .from('tour_requests')
+          .update({
+            status: 'replied',
+            replied_at: new Date().toISOString(),
+            items: updatedItems as never,
+            updated_by: user.id,
+          } as never)
+          .eq('id', delegation.id)
+        if (error) throw error
+        toast({ title: '已標記為已回覆' })
+        setEditingItemCosts({})
+        await loadData(false)
+      } catch (error) {
+        logger.error('標記已回覆失敗', error)
+        toast({ title: '操作失敗', variant: 'destructive' })
+      } finally {
+        setStatusUpdating(false)
+      }
+    },
+    [user, editingItemCosts, toast, loadData]
+  )
 
   // replied → confirmed + 回填世界樹
-  const handleMarkConfirmed = useCallback(async (delegation: TourRequest) => {
-    if (!user?.workspace_id || !tourId) return
-    setStatusUpdating(true)
-    try {
-      // 1. 更新 tour_requests 狀態
-      const { error } = await supabase
-        .from('tour_requests')
-        .update({
-          status: 'confirmed',
-          confirmed_at: new Date().toISOString(),
-          confirmed_by: user.id,
-          confirmed_by_name: user.display_name || user.chinese_name || '',
-          updated_by: user.id,
-        } as never)
-        .eq('id', delegation.id)
-      if (error) throw error
+  const handleMarkConfirmed = useCallback(
+    async (delegation: TourRequest) => {
+      if (!user?.workspace_id || !tourId) return
+      setStatusUpdating(true)
+      try {
+        // 1. 更新 tour_requests 狀態
+        const { error } = await supabase
+          .from('tour_requests')
+          .update({
+            status: 'confirmed',
+            confirmed_at: new Date().toISOString(),
+            confirmed_by: user.id,
+            confirmed_by_name: user.display_name || user.chinese_name || '',
+            updated_by: user.id,
+          } as never)
+          .eq('id', delegation.id)
+        if (error) throw error
 
-      // 2. 回填世界樹：把 quoted_cost 寫回 tour_itinerary_items.unit_cost
-      const items = delegation.items || []
-      const costDiffs: string[] = []
+        // 2. 回填世界樹：把 quoted_cost 寫回 tour_itinerary_items.unit_cost
+        const items = delegation.items || []
+        const costDiffs: string[] = []
 
-      for (const item of items) {
-        const quotedCost = item.quoted_cost
-        if (quotedCost === undefined || quotedCost === null) continue
+        for (const item of items) {
+          const quotedCost = item.quoted_cost
+          if (quotedCost === undefined || quotedCost === null) continue
 
-        // 用 resource_id 或 itinerary_item_id 找到對應的 core item
-        const resourceId = item.resource_id
-        const itineraryItemId = item.itinerary_item_id
+          // 用 resource_id 或 itinerary_item_id 找到對應的 core item
+          const resourceId = item.resource_id
+          const itineraryItemId = item.itinerary_item_id
 
-        let matchingCoreItem: TourItineraryItem | undefined
+          let matchingCoreItem: TourItineraryItem | undefined
 
-        if (itineraryItemId) {
-          matchingCoreItem = coreItems.find(c => c.id === itineraryItemId)
-        }
-        if (!matchingCoreItem && resourceId) {
-          matchingCoreItem = coreItems.find(c => c.resource_id === resourceId)
-        }
-
-        if (!matchingCoreItem) continue
-
-        const oldCost = matchingCoreItem.unit_price
-        if (oldCost !== quotedCost) {
-          // 更新 tour_itinerary_items（覆蓋價格 + 標記已確認）
-          const { error: updateError } = await supabase
-            .from('tour_itinerary_items')
-            .update({ 
-              unit_price: quotedCost, 
-              confirmation_status: 'confirmed',
-              confirmed_cost: quotedCost,
-              updated_by: user.id 
-            } as never)
-            .eq('id', matchingCoreItem.id)
-          if (updateError) {
-            logger.error('回填成本失敗', updateError)
-            continue
+          if (itineraryItemId) {
+            matchingCoreItem = coreItems.find(c => c.id === itineraryItemId)
+          }
+          if (!matchingCoreItem && resourceId) {
+            matchingCoreItem = coreItems.find(c => c.resource_id === resourceId)
           }
 
-          const itemTitle = item.title || matchingCoreItem.title || '項目'
-          const diff = (oldCost || 0) - quotedCost
-          if (oldCost && diff !== 0) {
-            const direction = diff > 0 ? `多賺 $${diff.toLocaleString()}` : `多花 $${Math.abs(diff).toLocaleString()}`
-            costDiffs.push(`${itemTitle} $${oldCost.toLocaleString()} → $${quotedCost.toLocaleString()}，${direction}`)
-          } else {
-            costDiffs.push(`${itemTitle} 成本設為 $${quotedCost.toLocaleString()}`)
+          if (!matchingCoreItem) continue
+
+          const oldCost = matchingCoreItem.unit_price
+          if (oldCost !== quotedCost) {
+            // 更新 tour_itinerary_items（覆蓋價格 + 標記已確認）
+            const { error: updateError } = await supabase
+              .from('tour_itinerary_items')
+              .update({
+                unit_price: quotedCost,
+                confirmation_status: 'confirmed',
+                confirmed_cost: quotedCost,
+                updated_by: user.id,
+              } as never)
+              .eq('id', matchingCoreItem.id)
+            if (updateError) {
+              logger.error('回填成本失敗', updateError)
+              continue
+            }
+
+            const itemTitle = item.title || matchingCoreItem.title || '項目'
+            const diff = (oldCost || 0) - quotedCost
+            if (oldCost && diff !== 0) {
+              const direction =
+                diff > 0
+                  ? `多賺 $${diff.toLocaleString()}`
+                  : `多花 $${Math.abs(diff).toLocaleString()}`
+              costDiffs.push(
+                `${itemTitle} $${oldCost.toLocaleString()} → $${quotedCost.toLocaleString()}，${direction}`
+              )
+            } else {
+              costDiffs.push(`${itemTitle} 成本設為 $${quotedCost.toLocaleString()}`)
+            }
           }
         }
-      }
 
-      // 3. 顯示結果
-      if (costDiffs.length > 0) {
-        toast({
-          title: '已確認預訂，成本已回填',
-          description: costDiffs.join('；'),
-        })
-      } else {
-        toast({ title: '已確認預訂' })
-      }
+        // 3. 顯示結果
+        if (costDiffs.length > 0) {
+          toast({
+            title: '已確認預訂，成本已回填',
+            description: costDiffs.join('；'),
+          })
+        } else {
+          toast({ title: '已確認預訂' })
+        }
 
-      // 4. 刷新 coreItems
-      await loadData(false)
-    } catch (error) {
-      logger.error('確認預訂失敗', error)
-      toast({ title: '操作失敗', variant: 'destructive' })
-    } finally {
-      setStatusUpdating(false)
-    }
-  }, [user, tourId, coreItems, toast, loadData])
+        // 4. 刷新 coreItems
+        await loadData(false)
+      } catch (error) {
+        logger.error('確認預訂失敗', error)
+        toast({ title: '操作失敗', variant: 'destructive' })
+      } finally {
+        setStatusUpdating(false)
+      }
+    },
+    [user, tourId, coreItems, toast, loadData]
+  )
 
   // 刪除委託
-  const handleDeleteRequest = useCallback(async (delegationId: string) => {
-    if (!confirm('確定要刪除此委託？')) return
-    try {
-      const { error } = await supabase
-        .from('tour_requests')
-        .delete()
-        .eq('id', delegationId)
-      if (error) throw error
-      toast({ title: '已刪除委託' })
-      await loadData(false)
-    } catch {
-      toast({ title: '刪除失敗', variant: 'destructive' })
-    }
-  }, [supabase, toast, loadData])
+  const handleDeleteRequest = useCallback(
+    async (delegationId: string) => {
+      if (!confirm('確定要刪除此委託？')) return
+      try {
+        const { error } = await supabase.from('tour_requests').delete().eq('id', delegationId)
+        if (error) throw error
+        toast({ title: '已刪除委託' })
+        await loadData(false)
+      } catch {
+        toast({ title: '刪除失敗', variant: 'destructive' })
+      }
+    },
+    [supabase, toast, loadData]
+  )
 
   // 🆕 產生單一供應商的需求單
   const handleGenerateSupplierRequest = useCallback(
@@ -996,16 +1052,12 @@ export function RequirementsList({
   return (
     <>
       <div className={cn('space-y-4', className)}>
-
-
         {/* 主表格 — 核心表有資料就顯示，不需要綁定報價單 */}
         {coreItems.length === 0 && !linkedQuoteId ? (
           <div className="bg-card border border-border rounded-lg p-8 text-center">
             <AlertCircle className="mx-auto text-morandi-muted mb-3" size={48} />
             <p className="text-morandi-secondary mb-2">尚無行程資料</p>
-            <p className="text-xs text-morandi-muted">
-              請先到「行程」頁籤填寫行程內容
-            </p>
+            <p className="text-xs text-morandi-muted">請先到「行程」頁籤填寫行程內容</p>
           </div>
         ) : quoteItems.length === 0 && existingRequests.length === 0 ? (
           <div className="bg-card border border-border rounded-lg p-8 text-center">
@@ -1017,700 +1069,850 @@ export function RequirementsList({
           </div>
         ) : (
           <>
-          {/* 操作列：Local 報價 + 團確單（固定）+ 發給供應商（勾選後出現） */}
-          <div className="mb-3 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5">
-            <Button
-              size="sm"
-              onClick={() => setShowLocalQuoteDialog(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white h-7 px-3 text-xs"
-            >
-              <Send size={12} className="mr-1" />
-              給 Local 報價
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setShowTeamConfirmationSheet(true)}
-              className="bg-[#c9a96e] hover:bg-[#b8960e] text-white h-7 px-3 text-xs"
-            >
-              <FileText size={12} className="mr-1" />
-              產生團確單
-            </Button>
-            {checkedItems.size > 0 && (
-              <>
-                <span className="text-sm font-medium text-blue-700 ml-2">
-                  已選 {checkedItems.size} 項
-                </span>
-                <Button
-                  size="sm"
-                  onClick={() => setShowAssignDialog(true)}
-                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white h-7 px-3 text-xs"
-                >
-                  <Printer size={12} className="mr-1" />
-                  發給供應商
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setCheckedItems(new Set())}
-                  className="h-7 px-2 text-xs text-muted-foreground"
-                >
-                  取消選取
-                </Button>
-              </>
-            )}
-          </div>
-          <div className="border border-border rounded-lg overflow-hidden bg-card">
-            <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
-              <thead>
-                <tr className="bg-morandi-container/50 border-b border-border">
-                  <th className="px-2 py-2.5 text-center" style={{ width: '32px' }}></th>
-                  <th className="px-2 py-2.5 text-center" style={{ width: '36px' }}>
-                    <Checkbox
-                      checked={checkedItems.size > 0 && checkedItems.size === Object.values(itemsByCategory).flat().length}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          const allKeys = new Set<string>()
-                          CATEGORIES.forEach(cat => {
-                            itemsByCategory[cat.key].forEach((item, idx) => {
-                              allKeys.add(getItemKey(cat.key, item, idx))
-                            })
-                          })
-                          setCheckedItems(allKeys)
-                        } else {
-                          setCheckedItems(new Set())
+            {/* 操作列：Local 報價 + 團確單（固定）+ 發給供應商（勾選後出現） */}
+            <div className="mb-3 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5">
+              <Button
+                size="sm"
+                onClick={() => setShowLocalQuoteDialog(true)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white h-7 px-3 text-xs"
+              >
+                <Send size={12} className="mr-1" />給 Local 報價
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setShowTeamConfirmationSheet(true)}
+                className="bg-[#c9a96e] hover:bg-[#b8960e] text-white h-7 px-3 text-xs"
+              >
+                <FileText size={12} className="mr-1" />
+                產生團確單
+              </Button>
+              {checkedItems.size > 0 && (
+                <>
+                  <span className="text-sm font-medium text-blue-700 ml-2">
+                    已選 {checkedItems.size} 項
+                  </span>
+                  <Button
+                    size="sm"
+                    onClick={() => setShowAssignDialog(true)}
+                    className="bg-morandi-gold hover:bg-morandi-gold-hover text-white h-7 px-3 text-xs"
+                  >
+                    <Printer size={12} className="mr-1" />
+                    發給供應商
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setCheckedItems(new Set())}
+                    className="h-7 px-2 text-xs text-muted-foreground"
+                  >
+                    取消選取
+                  </Button>
+                </>
+              )}
+            </div>
+            <div className="border border-border rounded-lg overflow-hidden bg-card">
+              <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+                <thead>
+                  <tr className="bg-morandi-container/50 border-b border-border">
+                    <th className="px-2 py-2.5 text-center" style={{ width: '32px' }}></th>
+                    <th className="px-2 py-2.5 text-center" style={{ width: '36px' }}>
+                      <Checkbox
+                        checked={
+                          checkedItems.size > 0 &&
+                          checkedItems.size === Object.values(itemsByCategory).flat().length
                         }
-                      }}
-                    />
-                  </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '100px' }}>
-                    {COMP_REQUIREMENTS_LABELS.日期}
-                  </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '18%' }}>
-                    {COMP_REQUIREMENTS_LABELS.供應商}
-                  </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '15%' }}>
-                    {COMP_REQUIREMENTS_LABELS.項目說明}
-                  </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '12%' }}>
-                  </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary">
-                  </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '70px' }}>
-                    {COMP_REQUIREMENTS_LABELS.成本}
-                  </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '90px' }}>
-                    {COMP_REQUIREMENTS_LABELS.狀態}
-                  </th>
-                  <th className="px-3 py-2.5 text-left font-medium text-morandi-primary" style={{ width: '12%' }}>
-                    操作
-                  </th>
+                        onCheckedChange={checked => {
+                          if (checked) {
+                            const allKeys = new Set<string>()
+                            CATEGORIES.forEach(cat => {
+                              itemsByCategory[cat.key].forEach((item, idx) => {
+                                allKeys.add(getItemKey(cat.key, item, idx))
+                              })
+                            })
+                            setCheckedItems(allKeys)
+                          } else {
+                            setCheckedItems(new Set())
+                          }
+                        }}
+                      />
+                    </th>
+                    <th
+                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
+                      style={{ width: '100px' }}
+                    >
+                      {COMP_REQUIREMENTS_LABELS.日期}
+                    </th>
+                    <th
+                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
+                      style={{ width: '18%' }}
+                    >
+                      {COMP_REQUIREMENTS_LABELS.供應商}
+                    </th>
+                    <th
+                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
+                      style={{ width: '15%' }}
+                    >
+                      {COMP_REQUIREMENTS_LABELS.項目說明}
+                    </th>
+                    <th
+                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
+                      style={{ width: '12%' }}
+                    ></th>
+                    <th className="px-3 py-2.5 text-left font-medium text-morandi-primary"></th>
+                    <th
+                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
+                      style={{ width: '70px' }}
+                    >
+                      {COMP_REQUIREMENTS_LABELS.成本}
+                    </th>
+                    <th
+                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
+                      style={{ width: '90px' }}
+                    >
+                      {COMP_REQUIREMENTS_LABELS.狀態}
+                    </th>
+                    <th
+                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
+                      style={{ width: '12%' }}
+                    >
+                      操作
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {CATEGORIES.map(cat => {
+                    const categoryItems = itemsByCategory[cat.key]
+                    if (categoryItems.length === 0) return null
 
-                </tr>
-              </thead>
-              <tbody>
-                {CATEGORIES.map(cat => {
-                  const categoryItems = itemsByCategory[cat.key]
-                  if (categoryItems.length === 0) return null
-
-                  const findMatchingRequest = (item: QuoteItem) => {
-                    if (item.resourceId) {
-                      const byResourceId = existingRequests.find(
-                        r => r.request_type === cat.key && r.resource_id === item.resourceId
+                    const findMatchingRequest = (item: QuoteItem) => {
+                      if (item.resourceId) {
+                        const byResourceId = existingRequests.find(
+                          r => r.request_type === cat.key && r.resource_id === item.resourceId
+                        )
+                        if (byResourceId) return byResourceId
+                      }
+                      return existingRequests.find(
+                        r =>
+                          r.request_type === cat.key &&
+                          r.supplier_name?.trim() === item.supplierName?.trim()
                       )
-                      if (byResourceId) return byResourceId
-                    }
-                    return existingRequests.find(
-                      r =>
-                        r.request_type === cat.key &&
-                        r.supplier_name?.trim() === item.supplierName?.trim()
-                    )
-                  }
-
-                  const getSupplierKey = (item: QuoteItem) => {
-                    if (item.resourceId) return item.resourceId
-                    if (item.supplierName === '飯店早餐')
-                      return `飯店早餐-${item.serviceDate || ''}`
-                    if (item.supplierName) return item.supplierName
-                    return `${item.title}-${item.serviceDate || ''}`
-                  }
-
-                  const visibleItems: QuoteItem[] = []
-                  const hiddenItems: QuoteItem[] = []
-                  // 不需要需求的餐食關鍵字
-                  const autoHideMealKeywords = ['飯店早餐', '機上簡餐', '敬請自理', '自理']
-                  for (const item of categoryItems) {
-                    const existingRequest = findMatchingRequest(item)
-                    const isAutoHideMeal = cat.key === 'meal' && autoHideMealKeywords.some(
-                      kw => item.title?.includes(kw) || item.supplierName?.includes(kw)
-                    )
-                    if (existingRequest?.hidden || isAutoHideMeal) hiddenItems.push(item)
-                    else visibleItems.push(item)
-                  }
-
-                  const isHiddenExpanded = expandedHiddenCategories.has(cat.key)
-                  const categoryTotal = visibleItems.reduce((sum, item) => {
-                    const existing = findMatchingRequest(item)
-                    return sum + (existing?.quoted_cost || 0)
-                  }, 0)
-
-                  const renderedSuppliers = new Set<string>()
-
-                  const renderItem = (item: QuoteItem, idx: number, isHidden: boolean) => {
-                    const existingRequest = findMatchingRequest(item)
-                    const supplierKey = getSupplierKey(item)
-                    const isFirstRowForSupplier = !renderedSuppliers.has(supplierKey)
-                    if (isFirstRowForSupplier) renderedSuppliers.add(supplierKey)
-
-                    let statusLabel = COMP_REQUIREMENTS_LABELS.待作業
-                    let statusClass = ''
-                    if (!existingRequest) {
-                      const config = getStatusConfig('tour_request', 'pending')
-                      statusClass = `${config.bgColor} ${config.color}`
-                    } else {
-                      const s = existingRequest.status || 'pending'
-                      const config = getStatusConfig('tour_request', s)
-                      statusLabel = config.label
-                      statusClass = `${config.bgColor} ${config.color}`
                     }
 
-                    const itemKey = getItemKey(cat.key, item, idx)
-                    const isExpanded = expandedMainItems.has(itemKey)
-                    
-                    return (
-                      <React.Fragment key={`${cat.key}-${isHidden ? 'hidden' : 'visible'}-${idx}`}>
-                      <tr
-                        className={cn(
-                          'border-t border-border/50 hover:bg-morandi-container/20',
-                          isHidden && 'bg-morandi-muted/5',
-                          checkedItems.has(itemKey) && 'bg-blue-50/50',
-                          isExpanded && 'bg-morandi-container/30'
-                        )}
-                      >
-                        <td className="px-2 py-2.5 text-center">
-                          <button
-                            onClick={() => {
-                              const newExpanded = new Set(expandedMainItems)
-                              if (isExpanded) {
-                                newExpanded.delete(itemKey)
-                              } else {
-                                newExpanded.add(itemKey)
-                              }
-                              setExpandedMainItems(newExpanded)
-                            }}
-                            className="p-1 hover:bg-morandi-container/50 rounded"
-                          >
-                            {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                          </button>
-                        </td>
-                        <td className="px-2 py-2.5 text-center">
-                          <Checkbox
-                            checked={checkedItems.has(itemKey)}
-                            onCheckedChange={() => toggleItem(itemKey)}
-                          />
-                        </td>
-                        <td className="px-3 py-2.5">{formatDate(item.serviceDate)}</td>
-                        <td className="px-3 py-2.5">
-                          <div className="flex items-center gap-1">
-                            <span className="flex-1">{item.supplierName || '-'}</span>
-                            {(cat.key === 'meal' || cat.key === 'activity') && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const existingRequest = findMatchingRequest(item)
-                                  handleToggleHidden(
-                                    existingRequest?.id || null,
-                                    !isHidden,
-                                    !existingRequest ? {
-                                      category: cat.key,
-                                      supplierName: item.supplierName || item.title || '',
-                                      title: item.title || '',
-                                      serviceDate: item.serviceDate || null,
-                                      quantity: item.quantity || 1,
-                                    } : undefined
-                                  )
-                                }}
-                                className={`p-0.5 rounded hover:bg-morandi-gold/20 ${isHidden ? 'text-emerald-500' : 'text-muted-foreground/40 hover:text-muted-foreground'}`}
-                                title={isHidden ? '恢復顯示' : '隱藏此項'}
-                              >
-                                {isHidden ? <Check size={12} /> : <X size={12} />}
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                        {/* 欄位4: 項目說明 / 時間 */}
-                        <td className="px-3 py-2.5">
-                          {cat.key === 'meal' ? (
-                            <input
-                              type="text"
-                              placeholder={`${item.title} 12:00`}
-                              defaultValue={(() => {
-                                const req = findMatchingRequest(item)
-                                return (req?.items?.[0] as any)?.meal_time as string || ''
-                              })()}
-                              onBlur={e => {
-                                // 全形→半形 + 4位數自動加冒號
-                                let v = e.target.value.replace(/[\uff01-\uff5e]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
-                                const timeMatch = v.match(/(\d{2})(\d{2})/)
-                                if (timeMatch && v.replace(/\D/g, '').length === 4 && !v.includes(':')) {
-                                  const h = parseInt(timeMatch[1]), m = parseInt(timeMatch[2])
-                                  if (h < 24 && m < 60) v = `${timeMatch[1]}:${timeMatch[2]}`
-                                }
-                                e.target.value = v
-                                handleInlineUpdate(item, cat.key, 'meal_time', v, existingRequests)
-                              }}
-                              className="h-7 w-full text-sm px-1.5 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30 rounded placeholder:text-muted-foreground/60"
-                            />
-                          ) : cat.key === 'transport' ? (
-                            <input
-                              type="text"
-                              placeholder="例：43人座遊覽車"
-                              defaultValue={(() => {
-                                const req = findMatchingRequest(item)
-                                return (req?.items?.[0] as any)?.vehicle_desc as string || ''
-                              })()}
-                              onBlur={e => {
-                                handleInlineUpdate(item, cat.key, 'vehicle_desc', e.target.value, existingRequests)
-                              }}
-                              className="h-7 w-full text-sm px-1.5 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30 rounded placeholder:text-muted-foreground/60"
-                            />
-                          ) : (
-                            <span>{item.title}</span>
-                          )}
-                        </td>
-                        {/* 欄位5: 房型 / 數量 */}
-                        <td className="px-3 py-2.5">
-                          {cat.key === 'accommodation' && (() => {
-                            const supplierName = item.supplierName || item.title
-                            const hotelDraft = existingRequests.find(
-                              r => r.request_type === 'accommodation' &&
-                                   r.supplier_name === supplierName &&
-                                   r.status === 'draft'
-                            )
-                            if (!hotelDraft?.items?.length) return null
-                            return (
-                              <div className="flex items-center gap-1.5">
-                                {hotelDraft.items.map((room: { room_type?: string; quantity?: number }, ri: number) => (
-                                  <span key={ri} className="text-[11px] text-muted-foreground whitespace-nowrap">
-                                    {room.room_type}×{room.quantity}
-                                  </span>
-                                ))}
-                              </div>
-                            )
-                          })()}
-                          {cat.key === 'meal' && (
-                            <input
-                              type="text"
-                              placeholder="數量"
-                              defaultValue={(() => {
-                                const req = findMatchingRequest(item)
-                                return (req?.items?.[0] as any)?.pax as string || ''
-                              })()}
-                              onBlur={e => {
-                                const v = e.target.value.replace(/[\uff01-\uff5e]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
-                                e.target.value = v
-                                handleInlineUpdate(item, cat.key, 'pax', v ? parseInt(v) : undefined, existingRequests)
-                              }}
-                              className="w-16 h-6 text-[11px] px-1.5 border border-border/50 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30"
-                            />
-                          )}
-                        </td>
-                        {/* 欄位6: 備註 */}
-                        <td className="px-3 py-2.5">
-                          {(cat.key === 'accommodation' || cat.key === 'meal' || cat.key === 'transport') && (
-                            <input
-                              type="text"
-                              placeholder="備註"
-                              defaultValue={(() => {
-                                const req = findMatchingRequest(item)
-                                const noteFieldMap: Record<string, string> = {
-                                  accommodation: 'hotel_note',
-                                  meal: 'meal_note',
-                                  transport: 'transport_note',
-                                }
-                                const noteField = noteFieldMap[cat.key] || 'note'
-                                return (req?.items?.[0] as any)?.[noteField] as string || req?.note || ''
-                              })()}
-                              onBlur={e => {
-                                const noteFieldMap: Record<string, string> = {
-                                  accommodation: 'hotel_note',
-                                  meal: 'meal_note',
-                                  transport: 'transport_note',
-                                }
-                                const field = noteFieldMap[cat.key] || 'note'
-                                handleInlineUpdate(item, cat.key, field, e.target.value, existingRequests)
-                              }}
-                              className="w-full h-6 text-[11px] px-1.5 border border-border/50 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30"
-                            />
-                          )}
-                        </td>
-                        <td className="px-3 py-2.5 text-left font-medium text-morandi-primary">
-                          {item.quotedPrice ? `$${item.quotedPrice.toLocaleString()}` : '-'}
-                        </td>
-                        <td className="px-3 py-2.5 text-left">
-                          <span
+                    const getSupplierKey = (item: QuoteItem) => {
+                      if (item.resourceId) return item.resourceId
+                      if (item.supplierName === '飯店早餐')
+                        return `飯店早餐-${item.serviceDate || ''}`
+                      if (item.supplierName) return item.supplierName
+                      return `${item.title}-${item.serviceDate || ''}`
+                    }
+
+                    const visibleItems: QuoteItem[] = []
+                    const hiddenItems: QuoteItem[] = []
+                    // 不需要需求的餐食關鍵字
+                    const autoHideMealKeywords = ['飯店早餐', '機上簡餐', '敬請自理', '自理']
+                    for (const item of categoryItems) {
+                      const existingRequest = findMatchingRequest(item)
+                      const isAutoHideMeal =
+                        cat.key === 'meal' &&
+                        autoHideMealKeywords.some(
+                          kw => item.title?.includes(kw) || item.supplierName?.includes(kw)
+                        )
+                      if (existingRequest?.hidden || isAutoHideMeal) hiddenItems.push(item)
+                      else visibleItems.push(item)
+                    }
+
+                    const isHiddenExpanded = expandedHiddenCategories.has(cat.key)
+                    const categoryTotal = visibleItems.reduce((sum, item) => {
+                      const existing = findMatchingRequest(item)
+                      return sum + (existing?.quoted_cost || 0)
+                    }, 0)
+
+                    const renderedSuppliers = new Set<string>()
+
+                    const renderItem = (item: QuoteItem, idx: number, isHidden: boolean) => {
+                      const existingRequest = findMatchingRequest(item)
+                      const supplierKey = getSupplierKey(item)
+                      const isFirstRowForSupplier = !renderedSuppliers.has(supplierKey)
+                      if (isFirstRowForSupplier) renderedSuppliers.add(supplierKey)
+
+                      let statusLabel = COMP_REQUIREMENTS_LABELS.待作業
+                      let statusClass = ''
+                      if (!existingRequest) {
+                        const config = getStatusConfig('tour_request', 'pending')
+                        statusClass = `${config.bgColor} ${config.color}`
+                      } else {
+                        const s = existingRequest.status || 'pending'
+                        const config = getStatusConfig('tour_request', s)
+                        statusLabel = config.label
+                        statusClass = `${config.bgColor} ${config.color}`
+                      }
+
+                      const itemKey = getItemKey(cat.key, item, idx)
+                      const isExpanded = expandedMainItems.has(itemKey)
+
+                      return (
+                        <React.Fragment
+                          key={`${cat.key}-${isHidden ? 'hidden' : 'visible'}-${idx}`}
+                        >
+                          <tr
                             className={cn(
-                              'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
-                              statusClass
+                              'border-t border-border/50 hover:bg-morandi-container/20',
+                              isHidden && 'bg-morandi-muted/5',
+                              checkedItems.has(itemKey) && 'bg-blue-50/50',
+                              isExpanded && 'bg-morandi-container/30'
                             )}
                           >
-                            {statusLabel}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2.5 text-left">
-                          {(() => {
-                            const supplierName = item.supplierName || item.title
-                            const draft = existingRequests.find(
-                              r => r.supplier_name === supplierName &&
-                                   r.request_type === cat.key &&
-                                   r.status === 'draft'
-                            )
-
-                            // 住宿：有 draft → 列印，沒有 → 新增需求 or 同上
-                            if (cat.key === 'accommodation') {
-                              if (draft) {
-                                return (
-                                  <Button variant="outline" size="sm"
-                                    onClick={() => {
-                                      setSelectedHotel({
-                                        name: supplierName,
-                                        resourceId: item.resourceId ?? null,
-                                        serviceDate: item.serviceDate ?? null,
-                                        nights: item.quantity || 1,
-                                      })
-                                      setShowAccommodationDialog(true)
-                                    }}
-                                    className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50">
-                                    <Printer size={12} className="mr-1" />列印需求單
-                                  </Button>
-                                )
-                              }
-                              // 找其他飯店已有的 draft（同上來源 = 換飯店但房型通常一樣）
-                              const sameHotelDraft = existingRequests.find(
-                                r => r.request_type === 'accommodation' &&
-                                     r.supplier_name !== supplierName &&
-                                     r.status === 'draft' &&
-                                     r.items && r.items.length > 0
-                              )
-                              return (
-                                <div className="flex items-center gap-1">
-                                  {sameHotelDraft && (
-                                    <Button variant="outline" size="sm"
-                                      onClick={async () => {
-                                        // 複製其他飯店的房型需求
-                                        try {
-                                          if (!user?.workspace_id) throw new Error('缺少 workspace_id')
-                                          const { error: dbError } = await supabase.from('tour_requests').insert({
-                                            workspace_id: user.workspace_id,
-                                            tour_id: tourId,
-                                            supplier_name: supplierName,
-                                            request_type: 'accommodation',
-                                            status: 'draft',
-                                            items: sameHotelDraft.items,
-                                            note: `${item.serviceDate ? item.serviceDate + ' ' : ''}${item.quantity || 1}晚`,
-                                          } as any)
-                                          if (dbError) throw dbError
-                                          loadData(false)
-                                        } catch (err) {
-                                          logger.error('同上需求失敗:', err)
-                                        }
-                                      }}
-                                      className="h-7 px-2 text-xs border-emerald-300 text-emerald-600 hover:bg-emerald-50">
-                                      同上
-                                    </Button>
-                                  )}
-                                  <Button variant="outline" size="sm"
-                                    onClick={() => {
-                                      setSelectedHotel({
-                                        name: supplierName,
-                                        resourceId: item.resourceId ?? null,
-                                        serviceDate: item.serviceDate ?? null,
-                                        nights: item.quantity || 1,
-                                      })
-                                      setShowRoomDialog(true)
-                                    }}
-                                    className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10">
-                                    新增需求
-                                  </Button>
-                                </div>
-                              )
-                            }
-
-                            // 交通：需要勾選天數
-                            if (cat.key === 'transport') {
-                              return (
-                                <Button variant="outline" size="sm"
-                                  onClick={() => {
-                                    setSelectedTransport({
-                                      name: supplierName,
-                                      resourceId: item.resourceId ?? null,
-                                    })
-                                    setShowTransportDialog(true)
-                                  }}
-                                  className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10">
-                                  列印需求單
-                                </Button>
-                              )
-                            }
-
-                            // 餐廳
-                            if (cat.key === 'meal') {
-                              return (
-                                <Button variant="outline" size="sm"
-                                  onClick={() => {
-                                    setSelectedTransport({ name: supplierName, resourceId: item.resourceId ?? null })
-                                    setShowMealDialog(true)
-                                  }}
-                                  className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50">
-                                  <Printer size={12} className="mr-1" />列印需求單
-                                </Button>
-                              )
-                            }
-
-                            // 活動
-                            if (cat.key === 'activity') {
-                              return (
-                                <Button variant="outline" size="sm"
-                                  onClick={() => {
-                                    setSelectedTransport({ name: supplierName, resourceId: item.resourceId ?? null })
-                                    setShowActivityDialog(true)
-                                  }}
-                                  className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50">
-                                  <Printer size={12} className="mr-1" />列印需求單
-                                </Button>
-                              )
-                            }
-
-                            // 其他（保險等）：發送保險名單
-                            if (cat.key === 'other' && item.supplierName === '保險公司') {
-                              return (
-                                <Button variant="outline" size="sm"
-                                  onClick={() => handleSendInsurance(item)}
-                                  className="h-7 px-2 text-xs border-emerald-300 text-emerald-600 hover:bg-emerald-50">
-                                  <Send size={12} className="mr-1" />發送保險
-                                </Button>
-                              )
-                            }
-
-                            return null
-                          })()}
-                        </td>
-                      </tr>
-
-                      {/* 🆕 展開抽屜：顯示需求單詳情 */}
-                      {isExpanded && (
-                        <tr>
-                          <td colSpan={10} className="p-0">
-                            <div className="bg-morandi-container/10 border-t border-morandi-gold/10 p-6 space-y-4">
-                              {/* 需求內容 */}
-                              <div>
-                                <h4 className="text-sm font-semibold text-morandi-primary mb-2">📋 需求內容</h4>
-                                <div className="bg-white border border-morandi-gold/20 rounded-lg p-3 text-sm">
-                                  <div className="grid grid-cols-2 gap-2">
-                                    <div><span className="text-morandi-secondary">日期：</span>{formatDate(item.serviceDate)}</div>
-                                    <div><span className="text-morandi-secondary">供應商：</span>{item.supplierName || '—'}</div>
-                                    <div><span className="text-morandi-secondary">項目：</span>{item.title}</div>
-                                    <div><span className="text-morandi-secondary">數量：</span>{item.quantity || '—'}</div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* 已發送需求單（最新報價 + 歷史）*/}
-                              {(() => {
-                                const relatedRequests = existingRequests.filter(r => {
-                                  if (item.resourceId) {
-                                    return r.request_type === cat.key && r.resource_id === item.resourceId
-                                  }
-                                  return r.request_type === cat.key && r.supplier_name?.trim() === item.supplierName?.trim()
-                                })
-
-                                if (relatedRequests.length === 0) {
-                                  return (
-                                    <div className="text-sm text-morandi-muted">
-                                      尚未發送需求單
-                                    </div>
-                                  )
-                                }
-
-                                // 🆕 按時間排序（最新在前）
-                                const sortedRequests = [...relatedRequests].sort((a, b) => {
-                                  const timeA = a.replied_at || a.sent_at || a.created_at || ''
-                                  const timeB = b.replied_at || b.sent_at || b.created_at || ''
-                                  return timeB.localeCompare(timeA)
-                                })
-
-                                const latestRequest = sortedRequests[0]
-                                const historyRequests = sortedRequests.slice(1)
-
-                                // 🆕 處理多廠商比價分組（只用於最新報價）
-                                const quoteGroups = new Map<string, TourRequest[]>()
-                                const standaloneRequests: TourRequest[] = []
-                                
-                                for (const req of [latestRequest]) {
-                                  const sourceId = req.source_id
-                                  if (sourceId && req.status !== 'draft') {
-                                    if (!quoteGroups.has(sourceId)) {
-                                      quoteGroups.set(sourceId, [])
-                                    }
-                                    quoteGroups.get(sourceId)!.push(req)
-                                  } else {
-                                    standaloneRequests.push(req)
-                                  }
-                                }
-                                
-                                // 合併比價組
-                                const latestRequestDisplay = standaloneRequests.length > 0 
-                                  ? standaloneRequests 
-                                  : Array.from(quoteGroups.values()).flatMap(requests => {
-                                      if (requests.length >= 2) {
-                                        return [{
-                                          ...requests[0],
-                                          _isComparisonGroup: true,
-                                          _comparisonRequests: requests,
-                                          _sourceId: requests[0].source_id,
-                                        } as any]
-                                      }
-                                      return requests
-                                    })
-
-                                return (
-                                  <div className="space-y-4">
-                                    {/* 最新報價 */}
-                                    <div>
-                                      <h4 className="text-sm font-semibold text-morandi-primary mb-2 flex items-center gap-2">
-                                        <Send size={14} />
-                                        最新報價
-                                      </h4>
-                                      <RequirementsDrawer
-                                        requests={latestRequestDisplay as any}
-                                        onRefresh={() => loadData(false)}
-                                      />
-                                    </div>
-
-                                    {/* 報價歷程 */}
-                                    {historyRequests.length > 0 && (
-                                      <div>
-                                        <button
-                                          onClick={() => {
-                                            const historyKey = `history-${itemKey}`
-                                            const newExpanded = new Set(expandedMainItems)
-                                            if (newExpanded.has(historyKey)) {
-                                              newExpanded.delete(historyKey)
-                                            } else {
-                                              newExpanded.add(historyKey)
-                                            }
-                                            setExpandedMainItems(newExpanded)
-                                          }}
-                                          className="flex items-center gap-2 text-sm font-medium text-morandi-secondary hover:text-morandi-primary transition-colors mb-2"
-                                        >
-                                          {expandedMainItems.has(`history-${itemKey}`) ? (
-                                            <ChevronDown size={14} />
-                                          ) : (
-                                            <ChevronRight size={14} />
-                                          )}
-                                          📜 報價歷程 ({historyRequests.length})
-                                        </button>
-                                        
-                                        {expandedMainItems.has(`history-${itemKey}`) && (
-                                          <div className="space-y-2 pl-6">
-                                            {historyRequests.map(req => {
-                                              const statusConfig = getStatusConfig('tour_request', req.status || 'draft')
-                                              const quotedCost = (req.supplier_response as any)?.quotedCost
-                                              const time = req.replied_at || req.sent_at || req.created_at
-                                              
-                                              return (
-                                                <div key={req.id} className="bg-white border border-morandi-gold/20 rounded-lg p-3 text-sm">
-                                                  <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-2">
-                                                      <span className="text-morandi-secondary">
-                                                        {time ? new Date(time).toLocaleDateString('zh-TW') : '—'}
-                                                      </span>
-                                                      <span className={cn(
-                                                        'px-2 py-0.5 rounded text-xs',
-                                                        statusConfig.bgColor,
-                                                        statusConfig.color
-                                                      )}>
-                                                        {statusConfig.label}
-                                                      </span>
-                                                    </div>
-                                                    {quotedCost && (
-                                                      <span className="font-semibold text-morandi-gold">
-                                                        ${quotedCost.toLocaleString()}
-                                                      </span>
-                                                    )}
-                                                  </div>
-                                                </div>
-                                              )
-                                            })}
-                                          </div>
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                )
-                              })()}
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-
-                      </React.Fragment>
-                    )
-                  }
-
-                  return (
-                    <React.Fragment key={cat.key}>
-                      <tr className="bg-morandi-container/30 border-t border-border">
-                        <td colSpan={10} className="px-3 py-2">
-                          <div className="flex items-center gap-3">
-                            <span className="font-medium text-morandi-primary">{cat.label}</span>
-                            <span className="text-xs text-morandi-secondary">
-                              ({visibleItems.length}
-                              {COMP_REQUIREMENTS_LABELS.項})
-                            </span>
-                            {hiddenItems.length > 0 && (
+                            <td className="px-2 py-2.5 text-center">
                               <button
-                                onClick={() => toggleHiddenCategory(cat.key)}
-                                className="flex items-center gap-1 text-xs text-morandi-muted hover:text-morandi-secondary transition-colors"
+                                onClick={() => {
+                                  const newExpanded = new Set(expandedMainItems)
+                                  if (isExpanded) {
+                                    newExpanded.delete(itemKey)
+                                  } else {
+                                    newExpanded.add(itemKey)
+                                  }
+                                  setExpandedMainItems(newExpanded)
+                                }}
+                                className="p-1 hover:bg-morandi-container/50 rounded"
                               >
-                                {isHiddenExpanded ? (
+                                {isExpanded ? (
                                   <ChevronDown size={14} />
                                 ) : (
                                   <ChevronRight size={14} />
                                 )}
-                                <EyeOff size={12} />
-                                <span>
-                                  {COMP_REQUIREMENTS_LABELS.已隱藏}({hiddenItems.length})
-                                </span>
                               </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-
-                      {visibleItems.map((trackItem, idx) => renderItem(trackItem, idx, false))}
-                      {isHiddenExpanded && hiddenItems.length > 0 && (
-                        <>
-                          <tr className="bg-morandi-muted/10 border-t border-dashed border-morandi-muted/30">
-                            <td colSpan={10} className="px-3 py-1.5 text-xs text-morandi-muted">
+                            </td>
+                            <td className="px-2 py-2.5 text-center">
+                              <Checkbox
+                                checked={checkedItems.has(itemKey)}
+                                onCheckedChange={() => toggleItem(itemKey)}
+                              />
+                            </td>
+                            <td className="px-3 py-2.5">{formatDate(item.serviceDate)}</td>
+                            <td className="px-3 py-2.5">
                               <div className="flex items-center gap-1">
-                                <EyeOff size={12} />
-                                <span>{COMP_REQUIREMENTS_LABELS.已隱藏的項目}</span>
+                                <span className="flex-1">{item.supplierName || '-'}</span>
+                                {(cat.key === 'meal' || cat.key === 'activity') && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const existingRequest = findMatchingRequest(item)
+                                      handleToggleHidden(
+                                        existingRequest?.id || null,
+                                        !isHidden,
+                                        !existingRequest
+                                          ? {
+                                              category: cat.key,
+                                              supplierName: item.supplierName || item.title || '',
+                                              title: item.title || '',
+                                              serviceDate: item.serviceDate || null,
+                                              quantity: item.quantity || 1,
+                                            }
+                                          : undefined
+                                      )
+                                    }}
+                                    className={`p-0.5 rounded hover:bg-morandi-gold/20 ${isHidden ? 'text-emerald-500' : 'text-muted-foreground/40 hover:text-muted-foreground'}`}
+                                    title={isHidden ? '恢復顯示' : '隱藏此項'}
+                                  >
+                                    {isHidden ? <Check size={12} /> : <X size={12} />}
+                                  </button>
+                                )}
                               </div>
                             </td>
+                            {/* 欄位4: 項目說明 / 時間 */}
+                            <td className="px-3 py-2.5">
+                              {cat.key === 'meal' ? (
+                                <input
+                                  type="text"
+                                  placeholder={`${item.title} 12:00`}
+                                  defaultValue={(() => {
+                                    const req = findMatchingRequest(item)
+                                    return ((req?.items?.[0] as any)?.meal_time as string) || ''
+                                  })()}
+                                  onBlur={e => {
+                                    // 全形→半形 + 4位數自動加冒號
+                                    let v = e.target.value.replace(/[\uff01-\uff5e]/g, c =>
+                                      String.fromCharCode(c.charCodeAt(0) - 0xfee0)
+                                    )
+                                    const timeMatch = v.match(/(\d{2})(\d{2})/)
+                                    if (
+                                      timeMatch &&
+                                      v.replace(/\D/g, '').length === 4 &&
+                                      !v.includes(':')
+                                    ) {
+                                      const h = parseInt(timeMatch[1]),
+                                        m = parseInt(timeMatch[2])
+                                      if (h < 24 && m < 60) v = `${timeMatch[1]}:${timeMatch[2]}`
+                                    }
+                                    e.target.value = v
+                                    handleInlineUpdate(
+                                      item,
+                                      cat.key,
+                                      'meal_time',
+                                      v,
+                                      existingRequests
+                                    )
+                                  }}
+                                  className="h-7 w-full text-sm px-1.5 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30 rounded placeholder:text-muted-foreground/60"
+                                />
+                              ) : cat.key === 'transport' ? (
+                                <input
+                                  type="text"
+                                  placeholder="例：43人座遊覽車"
+                                  defaultValue={(() => {
+                                    const req = findMatchingRequest(item)
+                                    return ((req?.items?.[0] as any)?.vehicle_desc as string) || ''
+                                  })()}
+                                  onBlur={e => {
+                                    handleInlineUpdate(
+                                      item,
+                                      cat.key,
+                                      'vehicle_desc',
+                                      e.target.value,
+                                      existingRequests
+                                    )
+                                  }}
+                                  className="h-7 w-full text-sm px-1.5 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30 rounded placeholder:text-muted-foreground/60"
+                                />
+                              ) : (
+                                <span>{item.title}</span>
+                              )}
+                            </td>
+                            {/* 欄位5: 房型 / 數量 */}
+                            <td className="px-3 py-2.5">
+                              {cat.key === 'accommodation' &&
+                                (() => {
+                                  const supplierName = item.supplierName || item.title
+                                  const hotelDraft = existingRequests.find(
+                                    r =>
+                                      r.request_type === 'accommodation' &&
+                                      r.supplier_name === supplierName &&
+                                      r.status === 'draft'
+                                  )
+                                  if (!hotelDraft?.items?.length) return null
+                                  return (
+                                    <div className="flex items-center gap-1.5">
+                                      {hotelDraft.items.map(
+                                        (
+                                          room: { room_type?: string; quantity?: number },
+                                          ri: number
+                                        ) => (
+                                          <span
+                                            key={ri}
+                                            className="text-[11px] text-muted-foreground whitespace-nowrap"
+                                          >
+                                            {room.room_type}×{room.quantity}
+                                          </span>
+                                        )
+                                      )}
+                                    </div>
+                                  )
+                                })()}
+                              {cat.key === 'meal' && (
+                                <input
+                                  type="text"
+                                  placeholder="數量"
+                                  defaultValue={(() => {
+                                    const req = findMatchingRequest(item)
+                                    return ((req?.items?.[0] as any)?.pax as string) || ''
+                                  })()}
+                                  onBlur={e => {
+                                    const v = e.target.value.replace(/[\uff01-\uff5e]/g, c =>
+                                      String.fromCharCode(c.charCodeAt(0) - 0xfee0)
+                                    )
+                                    e.target.value = v
+                                    handleInlineUpdate(
+                                      item,
+                                      cat.key,
+                                      'pax',
+                                      v ? parseInt(v) : undefined,
+                                      existingRequests
+                                    )
+                                  }}
+                                  className="w-16 h-6 text-[11px] px-1.5 border border-border/50 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30"
+                                />
+                              )}
+                            </td>
+                            {/* 欄位6: 備註 */}
+                            <td className="px-3 py-2.5">
+                              {(cat.key === 'accommodation' ||
+                                cat.key === 'meal' ||
+                                cat.key === 'transport') && (
+                                <input
+                                  type="text"
+                                  placeholder="備註"
+                                  defaultValue={(() => {
+                                    const req = findMatchingRequest(item)
+                                    const noteFieldMap: Record<string, string> = {
+                                      accommodation: 'hotel_note',
+                                      meal: 'meal_note',
+                                      transport: 'transport_note',
+                                    }
+                                    const noteField = noteFieldMap[cat.key] || 'note'
+                                    return (
+                                      ((req?.items?.[0] as any)?.[noteField] as string) ||
+                                      req?.note ||
+                                      ''
+                                    )
+                                  })()}
+                                  onBlur={e => {
+                                    const noteFieldMap: Record<string, string> = {
+                                      accommodation: 'hotel_note',
+                                      meal: 'meal_note',
+                                      transport: 'transport_note',
+                                    }
+                                    const field = noteFieldMap[cat.key] || 'note'
+                                    handleInlineUpdate(
+                                      item,
+                                      cat.key,
+                                      field,
+                                      e.target.value,
+                                      existingRequests
+                                    )
+                                  }}
+                                  className="w-full h-6 text-[11px] px-1.5 border border-border/50 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30"
+                                />
+                              )}
+                            </td>
+                            <td className="px-3 py-2.5 text-left font-medium text-morandi-primary">
+                              {item.quotedPrice ? `$${item.quotedPrice.toLocaleString()}` : '-'}
+                            </td>
+                            <td className="px-3 py-2.5 text-left">
+                              <span
+                                className={cn(
+                                  'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
+                                  statusClass
+                                )}
+                              >
+                                {statusLabel}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 text-left">
+                              {(() => {
+                                const supplierName = item.supplierName || item.title
+                                const draft = existingRequests.find(
+                                  r =>
+                                    r.supplier_name === supplierName &&
+                                    r.request_type === cat.key &&
+                                    r.status === 'draft'
+                                )
+
+                                // 住宿：有 draft → 列印，沒有 → 新增需求 or 同上
+                                if (cat.key === 'accommodation') {
+                                  if (draft) {
+                                    return (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          setSelectedHotel({
+                                            name: supplierName,
+                                            resourceId: item.resourceId ?? null,
+                                            serviceDate: item.serviceDate ?? null,
+                                            nights: item.quantity || 1,
+                                          })
+                                          setShowAccommodationDialog(true)
+                                        }}
+                                        className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
+                                      >
+                                        <Printer size={12} className="mr-1" />
+                                        列印需求單
+                                      </Button>
+                                    )
+                                  }
+                                  // 找其他飯店已有的 draft（同上來源 = 換飯店但房型通常一樣）
+                                  const sameHotelDraft = existingRequests.find(
+                                    r =>
+                                      r.request_type === 'accommodation' &&
+                                      r.supplier_name !== supplierName &&
+                                      r.status === 'draft' &&
+                                      r.items &&
+                                      r.items.length > 0
+                                  )
+                                  return (
+                                    <div className="flex items-center gap-1">
+                                      {sameHotelDraft && (
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={async () => {
+                                            // 複製其他飯店的房型需求
+                                            try {
+                                              if (!user?.workspace_id)
+                                                throw new Error('缺少 workspace_id')
+                                              const { error: dbError } = await supabase
+                                                .from('tour_requests')
+                                                .insert({
+                                                  workspace_id: user.workspace_id,
+                                                  tour_id: tourId,
+                                                  supplier_name: supplierName,
+                                                  request_type: 'accommodation',
+                                                  status: 'draft',
+                                                  items: sameHotelDraft.items,
+                                                  note: `${item.serviceDate ? item.serviceDate + ' ' : ''}${item.quantity || 1}晚`,
+                                                } as any)
+                                              if (dbError) throw dbError
+                                              loadData(false)
+                                            } catch (err) {
+                                              logger.error('同上需求失敗:', err)
+                                            }
+                                          }}
+                                          className="h-7 px-2 text-xs border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                                        >
+                                          同上
+                                        </Button>
+                                      )}
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          setSelectedHotel({
+                                            name: supplierName,
+                                            resourceId: item.resourceId ?? null,
+                                            serviceDate: item.serviceDate ?? null,
+                                            nights: item.quantity || 1,
+                                          })
+                                          setShowRoomDialog(true)
+                                        }}
+                                        className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10"
+                                      >
+                                        新增需求
+                                      </Button>
+                                    </div>
+                                  )
+                                }
+
+                                // 交通：需要勾選天數
+                                if (cat.key === 'transport') {
+                                  return (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedTransport({
+                                          name: supplierName,
+                                          resourceId: item.resourceId ?? null,
+                                        })
+                                        setShowTransportDialog(true)
+                                      }}
+                                      className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10"
+                                    >
+                                      列印需求單
+                                    </Button>
+                                  )
+                                }
+
+                                // 餐廳
+                                if (cat.key === 'meal') {
+                                  return (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedTransport({
+                                          name: supplierName,
+                                          resourceId: item.resourceId ?? null,
+                                        })
+                                        setShowMealDialog(true)
+                                      }}
+                                      className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
+                                    >
+                                      <Printer size={12} className="mr-1" />
+                                      列印需求單
+                                    </Button>
+                                  )
+                                }
+
+                                // 活動
+                                if (cat.key === 'activity') {
+                                  return (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setSelectedTransport({
+                                          name: supplierName,
+                                          resourceId: item.resourceId ?? null,
+                                        })
+                                        setShowActivityDialog(true)
+                                      }}
+                                      className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
+                                    >
+                                      <Printer size={12} className="mr-1" />
+                                      列印需求單
+                                    </Button>
+                                  )
+                                }
+
+                                // 其他（保險等）：發送保險名單
+                                if (cat.key === 'other' && item.supplierName === '保險公司') {
+                                  return (
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleSendInsurance(item)}
+                                      className="h-7 px-2 text-xs border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                                    >
+                                      <Send size={12} className="mr-1" />
+                                      發送保險
+                                    </Button>
+                                  )
+                                }
+
+                                return null
+                              })()}
+                            </td>
                           </tr>
-                          {hiddenItems.map((trackItem, idx) => renderItem(trackItem, idx, true))}
-                        </>
-                      )}
-                    </React.Fragment>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+
+                          {/* 🆕 展開抽屜：顯示需求單詳情 */}
+                          {isExpanded && (
+                            <tr>
+                              <td colSpan={10} className="p-0">
+                                <div className="bg-morandi-container/10 border-t border-morandi-gold/10 p-6 space-y-4">
+                                  {/* 需求內容 */}
+                                  <div>
+                                    <h4 className="text-sm font-semibold text-morandi-primary mb-2">
+                                      📋 需求內容
+                                    </h4>
+                                    <div className="bg-white border border-morandi-gold/20 rounded-lg p-3 text-sm">
+                                      <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                          <span className="text-morandi-secondary">日期：</span>
+                                          {formatDate(item.serviceDate)}
+                                        </div>
+                                        <div>
+                                          <span className="text-morandi-secondary">供應商：</span>
+                                          {item.supplierName || '—'}
+                                        </div>
+                                        <div>
+                                          <span className="text-morandi-secondary">項目：</span>
+                                          {item.title}
+                                        </div>
+                                        <div>
+                                          <span className="text-morandi-secondary">數量：</span>
+                                          {item.quantity || '—'}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* 已發送需求單（最新報價 + 歷史）*/}
+                                  {(() => {
+                                    const relatedRequests = existingRequests.filter(r => {
+                                      if (item.resourceId) {
+                                        return (
+                                          r.request_type === cat.key &&
+                                          r.resource_id === item.resourceId
+                                        )
+                                      }
+                                      return (
+                                        r.request_type === cat.key &&
+                                        r.supplier_name?.trim() === item.supplierName?.trim()
+                                      )
+                                    })
+
+                                    if (relatedRequests.length === 0) {
+                                      return (
+                                        <div className="text-sm text-morandi-muted">
+                                          尚未發送需求單
+                                        </div>
+                                      )
+                                    }
+
+                                    // 🆕 按時間排序（最新在前）
+                                    const sortedRequests = [...relatedRequests].sort((a, b) => {
+                                      const timeA = a.replied_at || a.sent_at || a.created_at || ''
+                                      const timeB = b.replied_at || b.sent_at || b.created_at || ''
+                                      return timeB.localeCompare(timeA)
+                                    })
+
+                                    const latestRequest = sortedRequests[0]
+                                    const historyRequests = sortedRequests.slice(1)
+
+                                    // 🆕 處理多廠商比價分組（只用於最新報價）
+                                    const quoteGroups = new Map<string, TourRequest[]>()
+                                    const standaloneRequests: TourRequest[] = []
+
+                                    for (const req of [latestRequest]) {
+                                      const sourceId = req.source_id
+                                      if (sourceId && req.status !== 'draft') {
+                                        if (!quoteGroups.has(sourceId)) {
+                                          quoteGroups.set(sourceId, [])
+                                        }
+                                        quoteGroups.get(sourceId)!.push(req)
+                                      } else {
+                                        standaloneRequests.push(req)
+                                      }
+                                    }
+
+                                    // 合併比價組
+                                    const latestRequestDisplay =
+                                      standaloneRequests.length > 0
+                                        ? standaloneRequests
+                                        : Array.from(quoteGroups.values()).flatMap(requests => {
+                                            if (requests.length >= 2) {
+                                              return [
+                                                {
+                                                  ...requests[0],
+                                                  _isComparisonGroup: true,
+                                                  _comparisonRequests: requests,
+                                                  _sourceId: requests[0].source_id,
+                                                } as any,
+                                              ]
+                                            }
+                                            return requests
+                                          })
+
+                                    return (
+                                      <div className="space-y-4">
+                                        {/* 最新報價 */}
+                                        <div>
+                                          <h4 className="text-sm font-semibold text-morandi-primary mb-2 flex items-center gap-2">
+                                            <Send size={14} />
+                                            最新報價
+                                          </h4>
+                                          <RequirementsDrawer
+                                            requests={latestRequestDisplay as any}
+                                            onRefresh={() => loadData(false)}
+                                          />
+                                        </div>
+
+                                        {/* 報價歷程 */}
+                                        {historyRequests.length > 0 && (
+                                          <div>
+                                            <button
+                                              onClick={() => {
+                                                const historyKey = `history-${itemKey}`
+                                                const newExpanded = new Set(expandedMainItems)
+                                                if (newExpanded.has(historyKey)) {
+                                                  newExpanded.delete(historyKey)
+                                                } else {
+                                                  newExpanded.add(historyKey)
+                                                }
+                                                setExpandedMainItems(newExpanded)
+                                              }}
+                                              className="flex items-center gap-2 text-sm font-medium text-morandi-secondary hover:text-morandi-primary transition-colors mb-2"
+                                            >
+                                              {expandedMainItems.has(`history-${itemKey}`) ? (
+                                                <ChevronDown size={14} />
+                                              ) : (
+                                                <ChevronRight size={14} />
+                                              )}
+                                              📜 報價歷程 ({historyRequests.length})
+                                            </button>
+
+                                            {expandedMainItems.has(`history-${itemKey}`) && (
+                                              <div className="space-y-2 pl-6">
+                                                {historyRequests.map(req => {
+                                                  const statusConfig = getStatusConfig(
+                                                    'tour_request',
+                                                    req.status || 'draft'
+                                                  )
+                                                  const quotedCost = (req.supplier_response as any)
+                                                    ?.quotedCost
+                                                  const time =
+                                                    req.replied_at || req.sent_at || req.created_at
+
+                                                  return (
+                                                    <div
+                                                      key={req.id}
+                                                      className="bg-white border border-morandi-gold/20 rounded-lg p-3 text-sm"
+                                                    >
+                                                      <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-2">
+                                                          <span className="text-morandi-secondary">
+                                                            {time
+                                                              ? new Date(time).toLocaleDateString(
+                                                                  'zh-TW'
+                                                                )
+                                                              : '—'}
+                                                          </span>
+                                                          <span
+                                                            className={cn(
+                                                              'px-2 py-0.5 rounded text-xs',
+                                                              statusConfig.bgColor,
+                                                              statusConfig.color
+                                                            )}
+                                                          >
+                                                            {statusConfig.label}
+                                                          </span>
+                                                        </div>
+                                                        {quotedCost && (
+                                                          <span className="font-semibold text-morandi-gold">
+                                                            ${quotedCost.toLocaleString()}
+                                                          </span>
+                                                        )}
+                                                      </div>
+                                                    </div>
+                                                  )
+                                                })}
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )
+                                  })()}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      )
+                    }
+
+                    return (
+                      <React.Fragment key={cat.key}>
+                        <tr className="bg-morandi-container/30 border-t border-border">
+                          <td colSpan={10} className="px-3 py-2">
+                            <div className="flex items-center gap-3">
+                              <span className="font-medium text-morandi-primary">{cat.label}</span>
+                              <span className="text-xs text-morandi-secondary">
+                                ({visibleItems.length}
+                                {COMP_REQUIREMENTS_LABELS.項})
+                              </span>
+                              {hiddenItems.length > 0 && (
+                                <button
+                                  onClick={() => toggleHiddenCategory(cat.key)}
+                                  className="flex items-center gap-1 text-xs text-morandi-muted hover:text-morandi-secondary transition-colors"
+                                >
+                                  {isHiddenExpanded ? (
+                                    <ChevronDown size={14} />
+                                  ) : (
+                                    <ChevronRight size={14} />
+                                  )}
+                                  <EyeOff size={12} />
+                                  <span>
+                                    {COMP_REQUIREMENTS_LABELS.已隱藏}({hiddenItems.length})
+                                  </span>
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+
+                        {visibleItems.map((trackItem, idx) => renderItem(trackItem, idx, false))}
+                        {isHiddenExpanded && hiddenItems.length > 0 && (
+                          <>
+                            <tr className="bg-morandi-muted/10 border-t border-dashed border-morandi-muted/30">
+                              <td colSpan={10} className="px-3 py-1.5 text-xs text-morandi-muted">
+                                <div className="flex items-center gap-1">
+                                  <EyeOff size={12} />
+                                  <span>{COMP_REQUIREMENTS_LABELS.已隱藏的項目}</span>
+                                </div>
+                              </td>
+                            </tr>
+                            {hiddenItems.map((trackItem, idx) => renderItem(trackItem, idx, true))}
+                          </>
+                        )}
+                      </React.Fragment>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </>
         )}
-
-
       </div>
 
       {/* 從核心表產生需求單 Dialog */}
@@ -1729,7 +1931,10 @@ export function RequirementsList({
       {/* 勾選發給供應商 Dialog */}
       <AssignSupplierDialog
         open={showAssignDialog}
-        onClose={() => { setShowAssignDialog(false); setCheckedItems(new Set()) }}
+        onClose={() => {
+          setShowAssignDialog(false)
+          setCheckedItems(new Set())
+        }}
         tour={tour}
         tourId={tourId || ''}
         items={checkedQuoteItems}
@@ -1744,7 +1949,10 @@ export function RequirementsList({
       {selectedTransport && tour && (
         <TransportQuoteDialog
           open={showTransportDialog}
-          onClose={() => { setShowTransportDialog(false); setSelectedTransport(null) }}
+          onClose={() => {
+            setShowTransportDialog(false)
+            setSelectedTransport(null)
+          }}
           tour={{
             id: tour.id,
             code: tour.code,
@@ -1763,7 +1971,10 @@ export function RequirementsList({
       {selectedHotel && tour && (
         <AccommodationQuoteDialog
           open={showAccommodationDialog}
-          onClose={() => { setShowAccommodationDialog(false); setSelectedHotel(null) }}
+          onClose={() => {
+            setShowAccommodationDialog(false)
+            setSelectedHotel(null)
+          }}
           tour={{
             id: tour.id,
             code: tour.code,
@@ -1772,7 +1983,9 @@ export function RequirementsList({
           }}
           totalPax={totalPax}
           accommodations={coreItems
-            .filter(it => it.item_category === 'accommodation' && it.supplier_name === selectedHotel.name)
+            .filter(
+              it => it.item_category === 'accommodation' && it.supplier_name === selectedHotel.name
+            )
             .map(it => ({
               checkIn: it.service_date || '',
               roomType: it.item_name,
@@ -1788,7 +2001,10 @@ export function RequirementsList({
       {selectedTransport && tour && (
         <MealQuoteDialog
           open={showMealDialog}
-          onClose={() => { setShowMealDialog(false); setSelectedTransport(null) }}
+          onClose={() => {
+            setShowMealDialog(false)
+            setSelectedTransport(null)
+          }}
           tour={{
             id: tour.id,
             code: tour.code,
@@ -1803,7 +2019,10 @@ export function RequirementsList({
             })
             .map(it => ({
               date: it.service_date || '',
-              time: it.sub_category ? ({ breakfast: '早餐', lunch: '午餐', dinner: '晚餐' }[it.sub_category] || it.sub_category) : '',
+              time: it.sub_category
+                ? { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' }[it.sub_category] ||
+                  it.sub_category
+                : '',
               price: '',
               quantity: it.quantity || 1,
               note: it.quote_note || '',
@@ -1816,7 +2035,10 @@ export function RequirementsList({
       {selectedTransport && tour && (
         <ActivityQuoteDialog
           open={showActivityDialog}
-          onClose={() => { setShowActivityDialog(false); setSelectedTransport(null) }}
+          onClose={() => {
+            setShowActivityDialog(false)
+            setSelectedTransport(null)
+          }}
           tour={{
             id: tour.id,
             code: tour.code,
@@ -1843,7 +2065,10 @@ export function RequirementsList({
       {selectedHotel && (
         <RoomRequirementDialog
           open={showRoomDialog}
-          onClose={() => { setShowRoomDialog(false); setSelectedHotel(null) }}
+          onClose={() => {
+            setShowRoomDialog(false)
+            setSelectedHotel(null)
+          }}
           hotelName={selectedHotel.name}
           hotelResourceId={selectedHotel.resourceId}
           tourId={tourId || ''}

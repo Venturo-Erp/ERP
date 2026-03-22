@@ -7,7 +7,14 @@ const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { tourId, tourCode, tourName, departureDate, returnDate, groupId: requestedGroupId } = body
+    const {
+      tourId,
+      tourCode,
+      tourName,
+      departureDate,
+      returnDate,
+      groupId: requestedGroupId,
+    } = body
 
     if (!tourId || !tourCode) {
       return NextResponse.json({ success: false, error: '缺少必要參數' }, { status: 400 })
@@ -17,7 +24,7 @@ export async function POST(request: Request) {
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
     const lineToken = process.env.LINE_CHANNEL_ACCESS_TOKEN!
     const supabase = createClient(supabaseUrl, supabaseKey)
-    
+
     let targetGroup: { group_id: string; group_name: string | null }
 
     if (requestedGroupId) {
@@ -44,14 +51,13 @@ export async function POST(request: Request) {
     }
 
     // 2. 取團員（透過 order_members）
-    const { data: orders } = await supabase
-      .from('orders')
-      .select('id')
-      .eq('tour_id', tourId)
+    const { data: orders } = await supabase.from('orders').select('id').eq('tour_id', tourId)
 
     const orderIds = orders?.map(o => o.id) || []
-    
-    let members: { customer: { name: string; national_id: string | null; birth_date: string | null } | null }[] = []
+
+    let members: {
+      customer: { name: string; national_id: string | null; birth_date: string | null } | null
+    }[] = []
     if (orderIds.length > 0) {
       const { data } = await supabase
         .from('order_members')
@@ -70,7 +76,8 @@ export async function POST(request: Request) {
     ws.getCell('A1').alignment = { horizontal: 'center' }
 
     ws.mergeCells('A2:D2')
-    ws.getCell('A2').value = `出發: ${departureDate || '-'} | 回程: ${returnDate || '-'} | 人數: ${members.length} 人`
+    ws.getCell('A2').value =
+      `出發: ${departureDate || '-'} | 回程: ${returnDate || '-'} | 人數: ${members.length} 人`
     ws.getCell('A2').alignment = { horizontal: 'center' }
     ws.getCell('A2').font = { size: 11 }
 
@@ -81,14 +88,24 @@ export async function POST(request: Request) {
     headerRow.font = { bold: true }
     headerRow.eachCell(c => {
       c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8DCC8' } }
-      c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }
+      c.border = {
+        top: { style: 'thin' },
+        bottom: { style: 'thin' },
+        left: { style: 'thin' },
+        right: { style: 'thin' },
+      }
     })
 
     members.forEach((m, i) => {
       const c = m.customer || { name: '', national_id: null, birth_date: null }
       const row = ws.addRow([i + 1, c.name || '', c.national_id || '', c.birth_date || ''])
       row.eachCell(cell => {
-        cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }
+        cell.border = {
+          top: { style: 'thin' },
+          bottom: { style: 'thin' },
+          left: { style: 'thin' },
+          right: { style: 'thin' },
+        }
       })
     })
 
@@ -99,32 +116,26 @@ export async function POST(request: Request) {
     const fileName = `${tourCode}_members_${new Date().toISOString().slice(0, 10)}.xlsx`
     const storagePath = `tour-documents/${tourCode}/${fileName}`
 
-    await supabase.storage
-      .from('documents')
-      .upload(storagePath, buffer as ArrayBuffer, {
-        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        upsert: true,
-      })
+    await supabase.storage.from('documents').upload(storagePath, buffer as ArrayBuffer, {
+      contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      upsert: true,
+    })
 
     // 4.5 取得公開 URL
-    const { data: publicData } = supabase.storage
-      .from('documents')
-      .getPublicUrl(storagePath)
+    const { data: publicData } = supabase.storage.from('documents').getPublicUrl(storagePath)
 
     // 4.6 寫入 tour_documents 紀錄（供短網址查詢）
-    await supabase
-      .from('tour_documents')
-      .insert({
-        workspace_id: '8ef05a74-1f87-48ab-afd3-9bfeb423935d',
-        tour_id: tourId,
-        name: `${tourCode} 保險團員名單`,
-        description: '保險用團員名單 Excel',
-        file_path: storagePath,
-        public_url: publicData.publicUrl,
-        file_name: fileName,
-        file_size: (buffer as ArrayBuffer).byteLength,
-        mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      })
+    await supabase.from('tour_documents').insert({
+      workspace_id: '8ef05a74-1f87-48ab-afd3-9bfeb423935d',
+      tour_id: tourId,
+      name: `${tourCode} 保險團員名單`,
+      description: '保險用團員名單 Excel',
+      file_path: storagePath,
+      public_url: publicData.publicUrl,
+      file_name: fileName,
+      file_size: (buffer as ArrayBuffer).byteLength,
+      mime_type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
 
     // 5. 公開名單頁面（網頁版，手機可直接看）
     const memberPageUrl = `https://app.cornertravel.com.tw/public/insurance/${tourCode}`

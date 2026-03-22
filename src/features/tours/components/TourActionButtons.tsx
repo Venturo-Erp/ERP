@@ -36,12 +36,7 @@ interface UseTourActionButtonsParams {
 }
 
 export function useTourActionButtons(params: UseTourActionButtonsParams) {
-  const {
-    operations,
-    onEditTour,
-    setDeleteConfirm,
-    onOpenArchiveDialog,
-  } = params
+  const { operations, onEditTour, setDeleteConfirm, onOpenArchiveDialog } = params
 
   const renderActions = useCallback(
     (row: unknown) => {
@@ -96,12 +91,7 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
         </DropdownMenu>
       )
     },
-    [
-      operations,
-      onEditTour,
-      setDeleteConfirm,
-      onOpenArchiveDialog,
-    ]
+    [operations, onEditTour, setDeleteConfirm, onOpenArchiveDialog]
   )
 
   return {

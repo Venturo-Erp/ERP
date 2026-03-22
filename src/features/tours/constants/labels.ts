@@ -594,7 +594,6 @@ export const COMP_TOURS_LABELS = {
   TABLE_NUMBER: (n: number) => `${n} 桌`,
   CAPACITY_SHORT: (n: number) => `${n}人`,
   VEHICLE_COUNT_SHORT: (n: number) => `共 ${n} 輛車`,
-
 }
 
 // CheckinSettings 模組的 UI 標籤

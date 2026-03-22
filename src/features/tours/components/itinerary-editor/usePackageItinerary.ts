@@ -285,15 +285,7 @@ export function usePackageItinerary({
     } else if (!isOpen) {
       loadingRef.current = false
     }
-  }, [
-    isOpen,
-    ctx.itinerary_id,
-    ctx.start_date,
-    ctx.end_date,
-    ctx.version_name,
-    ctx.title,
-    refresh,
-  ])
+  }, [isOpen, ctx.itinerary_id, ctx.start_date, ctx.end_date, ctx.version_name, ctx.title, refresh])
 
   // 已關聯的行程表（透過 itinerary_id 查找）
   const linkedItineraries = useMemo(() => {
@@ -311,8 +303,7 @@ export function usePackageItinerary({
       const days = calculateDays()
 
       const itinerary =
-        directLoadedItinerary ||
-        linkedItineraries.find(i => i.id === ctx.itinerary_id)
+        directLoadedItinerary || linkedItineraries.find(i => i.id === ctx.itinerary_id)
 
       if (itinerary) {
         loadDailyDataFromItinerary(itinerary, -1, days)
@@ -344,10 +335,7 @@ export function usePackageItinerary({
 
   // 判斷是否為編輯模式
   const existingItinerary = useMemo(() => {
-    return (
-      directLoadedItinerary ||
-      linkedItineraries.find(i => i.id === ctx.itinerary_id)
-    )
+    return directLoadedItinerary || linkedItineraries.find(i => i.id === ctx.itinerary_id)
   }, [directLoadedItinerary, linkedItineraries, ctx.itinerary_id])
 
   const isEditMode = Boolean(existingItinerary)
@@ -362,8 +350,7 @@ export function usePackageItinerary({
     (index: number) => {
       setSelectedVersionIndex(index)
       const itinerary =
-        directLoadedItinerary ||
-        linkedItineraries.find(i => i.id === ctx.itinerary_id)
+        directLoadedItinerary || linkedItineraries.find(i => i.id === ctx.itinerary_id)
       if (itinerary) {
         loadDailyDataFromItinerary(itinerary, index, calculateDays())
       }
@@ -523,7 +510,9 @@ export function usePackageItinerary({
     const record = versionRecords[selectedVersionIndex]
     return (
       record?.note ||
-      ITINERARY_EDITOR_LABELS.brochurePreview.versionLabel(record?.version || selectedVersionIndex + 1)
+      ITINERARY_EDITOR_LABELS.brochurePreview.versionLabel(
+        record?.version || selectedVersionIndex + 1
+      )
     )
   }, [selectedVersionIndex, versionRecords, existingItinerary])
 

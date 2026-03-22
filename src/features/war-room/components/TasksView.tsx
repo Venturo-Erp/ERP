@@ -1,30 +1,30 @@
-'use client';
+'use client'
 
 /**
  * 任務視圖 - 使用 EnhancedTable
  */
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase/client';
-import { EnhancedTable } from '@/components/ui/enhanced-table';
-import type { TableColumn } from '@/components/ui/enhanced-table';
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase/client'
+import { EnhancedTable } from '@/components/ui/enhanced-table'
+import type { TableColumn } from '@/components/ui/enhanced-table'
 
-type TaskType = 'individual' | 'workflow';
+type TaskType = 'individual' | 'workflow'
 
 type Task = {
-  id: string;
-  title: string;
-  description: string | null;
-  priority: 'P0' | 'P1' | 'P2';
-  status: string;
-  progress: number;
-  assignees: string[];
-  created_at: string;
-  created_by: string;
-};
+  id: string
+  title: string
+  description: string | null
+  priority: 'P0' | 'P1' | 'P2'
+  status: string
+  progress: number
+  assignees: string[]
+  created_at: string
+  created_by: string
+}
 
 interface TasksViewProps {
-  taskType: TaskType;
+  taskType: TaskType
 }
 
 const getPriorityColor = (priority: string) => {
@@ -32,20 +32,20 @@ const getPriorityColor = (priority: string) => {
     P0: 'bg-red-100 text-red-700',
     P1: 'bg-amber-100 text-amber-700',
     P2: 'bg-green-100 text-green-700',
-  };
-  return colors[priority as keyof typeof colors] || colors.P2;
-};
+  }
+  return colors[priority as keyof typeof colors] || colors.P2
+}
 
 export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    loadTasks();
-  }, [taskType]);
+    loadTasks()
+  }, [taskType])
 
   const loadTasks = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
       const { data } = await supabase
         .from('tasks')
@@ -53,15 +53,15 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
         .eq('task_type', taskType)
         .neq('status', 'completed')
         .order('priority')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
 
-      if (data) setTasks(data as unknown as Task[]);
+      if (data) setTasks(data as unknown as Task[])
     } catch (err) {
-      console.error('載入任務失敗:', err);
+      console.error('載入任務失敗:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const columns: TableColumn<Task>[] = [
     {
@@ -136,7 +136,7 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
         </span>
       ),
     },
-  ];
+  ]
 
   return (
     <div className="h-full">
@@ -148,5 +148,5 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
         hoverable={true}
       />
     </div>
-  );
-};
+  )
+}

@@ -21,10 +21,10 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
   const handleCountryChange = (data: { id: string; name: string; code: string }) => {
     setNewTour(prev => ({
       ...prev,
-      countryId: data.id,      // countries.id
-      countryName: data.name,  // 顯示用
-      countryCode: data.code,  // 用於過濾機場
-      cityCode: '',            // 清空機場
+      countryId: data.id, // countries.id
+      countryName: data.name, // 顯示用
+      countryCode: data.code, // 用於過濾機場
+      cityCode: '', // 清空機場
       cityName: '',
     }))
   }
@@ -72,7 +72,9 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
             min={1}
             max={30}
             value={newTour.days_count || ''}
-            onChange={e => setNewTour(prev => ({ ...prev, days_count: parseInt(e.target.value) || null }))}
+            onChange={e =>
+              setNewTour(prev => ({ ...prev, days_count: parseInt(e.target.value) || null }))
+            }
             className="mt-1 w-32"
           />
         </div>

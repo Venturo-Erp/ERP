@@ -7,9 +7,11 @@
 ## 🤖 自動化系統（已部署）
 
 ### 1. Pre-commit Hook（強制執行）
+
 **位置**：`.husky/pre-commit`
 
 **自動檢查**：
+
 - ✅ TypeScript type check（整個專案）
 - ✅ ESLint（staged files）
 - ✅ 禁止 `@ts-expect-error`（自動拒絕 commit）
@@ -20,9 +22,11 @@
 ---
 
 ### 2. Migration Wrapper（自動更新 types）
+
 **指令**：`./scripts/run-migration.sh <migration-file.sql>`
 
 **自動執行**：
+
 1. ✅ 執行 migration
 2. ✅ **立即**重新生成 Supabase types
 3. ✅ 提示檢查變更
@@ -32,9 +36,11 @@
 ---
 
 ### 3. VSCode Snippets（自動產生正確程式碼）
+
 **位置**：`.vscode/nextjs15.code-snippets`
 
 **可用 snippets**：
+
 - `nxpage` → Server Component with params
 - `nxpagefull` → Server Component with params + searchParams
 - `nxapi` → API Route with params
@@ -44,6 +50,7 @@
 ---
 
 ### 4. Types 自動更新工具
+
 **指令**：`node scripts/regenerate-supabase-types.mjs`
 
 **用途**：手動執行 migration 後更新 types
@@ -53,20 +60,18 @@
 ## 📋 開發流程（自動化）
 
 ### 寫 Next.js 15 程式碼
+
 ```typescript
 // 1. 打 snippet：nxpage + Tab
 // 2. 自動產生正確程式碼：
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   // ...
 }
 ```
 
 ### 執行 Migration
+
 ```bash
 # ❌ 舊方式（會忘記更新 types）
 node scripts/exec-migration.mjs
@@ -76,6 +81,7 @@ node scripts/exec-migration.mjs
 ```
 
 ### Commit 程式碼
+
 ```bash
 git add -A
 git commit -m "feat: ..."
@@ -94,18 +100,19 @@ git commit -m "feat: ..."
 
 ## 🚫 系統禁止的行為
 
-| 行為 | 系統反應 |
-|------|---------|
-| 使用 `@ts-expect-error` | ❌ Pre-commit hook 拒絕 commit |
-| TypeScript 有錯誤 | ❌ Pre-commit hook 拒絕 commit |
-| Migration 不更新 types | ⚠️ 使用 wrapper script 自動更新 |
-| 手動寫 Next.js 15 params | 💡 用 snippet 自動產生 |
+| 行為                     | 系統反應                        |
+| ------------------------ | ------------------------------- |
+| 使用 `@ts-expect-error`  | ❌ Pre-commit hook 拒絕 commit  |
+| TypeScript 有錯誤        | ❌ Pre-commit hook 拒絕 commit  |
+| Migration 不更新 types   | ⚠️ 使用 wrapper script 自動更新 |
+| 手動寫 Next.js 15 params | 💡 用 snippet 自動產生          |
 
 ---
 
 ## 📊 成效對比
 
 ### 舊流程（靠記憶）
+
 ```
 寫程式 → 忘記 await params → Commit → Push
 → Vercel 部署失敗 → 查錯誤 → 修正 → 重新部署
@@ -113,6 +120,7 @@ git commit -m "feat: ..."
 ```
 
 ### 新流程（自動化）
+
 ```
 打 snippet → 自動產生正確程式碼 → Commit
 → Pre-commit 檢查 → 全部通過 → Push → Vercel 成功
@@ -146,6 +154,7 @@ git commit -m "feat: ..."
 ## 🔧 故障排除
 
 ### Pre-commit hook 失敗
+
 ```bash
 # 1. 查看錯誤訊息
 # 2. 修正錯誤（不要繞過）
@@ -157,6 +166,7 @@ npm run type-check
 ```
 
 ### Migration wrapper 失敗
+
 ```bash
 # 檢查 migration SQL 語法
 # 修正後重新執行

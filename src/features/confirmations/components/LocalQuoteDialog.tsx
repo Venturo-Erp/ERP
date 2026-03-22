@@ -6,7 +6,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Send, Loader2, Printer, Sun, Mail, Phone, Globe, Plus, X } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
@@ -15,7 +21,13 @@ import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-it
 interface LocalQuoteDialogProps {
   open: boolean
   onClose: () => void
-  tour: { id: string; code: string; name: string; departure_date?: string; return_date?: string } | null
+  tour: {
+    id: string
+    code: string
+    name: string
+    departure_date?: string
+    return_date?: string
+  } | null
   transportDays: { dayNumber: number; date: string; route: string }[]
   totalPax: number | null
   coreItems?: TourItineraryItem[]
@@ -81,7 +93,10 @@ export function LocalQuoteDialog({
         .from('line_groups')
         .select('group_id, group_name')
         .not('group_name', 'is', null)
-      if (data) setLineGroups(data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name))
+      if (data)
+        setLineGroups(
+          data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
+        )
     }
     load()
   }, [open])
@@ -152,7 +167,11 @@ export function LocalQuoteDialog({
         if (item.sub_category === 'breakfast') day.breakfast = name
         else if (item.sub_category === 'lunch') day.lunch = name
         else if (item.sub_category === 'dinner') day.dinner = name
-      } else if (item.category === 'activities' || item.category === 'transport' || item.category === 'group-transport') {
+      } else if (
+        item.category === 'activities' ||
+        item.category === 'transport' ||
+        item.category === 'group-transport'
+      ) {
         if (item.title) {
           day.route = day.route ? `${day.route} → ${item.title}` : item.title
         }
@@ -165,8 +184,9 @@ export function LocalQuoteDialog({
   // 列印
   const handlePrint = () => {
     const pax = paxInput || totalPax || '-'
-    const tableRows = daySchedules.map((day, idx) => {
-      return `<tr style="background: ${idx % 2 === 0 ? '#fff' : '#fafaf5'}">
+    const tableRows = daySchedules
+      .map((day, idx) => {
+        return `<tr style="background: ${idx % 2 === 0 ? '#fff' : '#fafaf5'}">
         <td style="border: 1px solid #e8e5e0; padding: 8px 12px;">
           <div style="font-weight: 600; color: #c9a96e;">Day ${day.dayNumber}</div>
           <div style="font-size: 12px; color: #999;">${day.date}${day.weekday ? ` (${day.weekday})` : ''}</div>
@@ -177,7 +197,8 @@ export function LocalQuoteDialog({
         <td style="border: 1px solid #e8e5e0; padding: 8px 12px; text-align: center; font-size: 12px;">${day.dinner || '-'}</td>
         <td style="border: 1px solid #e8e5e0; padding: 8px 12px; font-size: 12px;">${day.hotel || '—'}</td>
       </tr>`
-    }).join('')
+      })
+      .join('')
 
     const html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
@@ -358,7 +379,8 @@ export function LocalQuoteDialog({
                     <td className="border border-[#e8e5e0] px-3 py-2">
                       <div className="font-semibold text-[#c9a96e]">Day {day.dayNumber}</div>
                       <div className="text-xs text-muted-foreground">
-                        {day.date}{day.weekday ? ` (${day.weekday})` : ''}
+                        {day.date}
+                        {day.weekday ? ` (${day.weekday})` : ''}
                       </div>
                     </td>
                     <td className="border border-[#e8e5e0] px-3 py-2 font-medium">
@@ -384,7 +406,9 @@ export function LocalQuoteDialog({
 
           {/* 人數梯次設定 */}
           <div className="pt-2">
-            <label className="text-sm font-medium mb-1.5 block">報價梯次（供應商會看到這些人數選項）</label>
+            <label className="text-sm font-medium mb-1.5 block">
+              報價梯次（供應商會看到這些人數選項）
+            </label>
             <div className="flex flex-wrap items-center gap-2">
               {paxTiers.map(num => (
                 <div
@@ -409,12 +433,7 @@ export function LocalQuoteDialog({
                   placeholder="新增人數"
                   className="h-8 w-24 text-sm"
                 />
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleAddTier}
-                  className="h-8 px-2"
-                >
+                <Button size="sm" variant="outline" onClick={handleAddTier} className="h-8 px-2">
                   <Plus size={14} />
                 </Button>
               </div>
@@ -447,9 +466,10 @@ export function LocalQuoteDialog({
                     key={m.key}
                     onClick={() => handleDelivery(m.key)}
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium transition-all
-                      ${selectedMethod === m.key 
-                        ? 'border-[#c9a96e] bg-[#faf8f5] text-[#8B6914]' 
-                        : 'border-border hover:border-[#c9a96e] hover:bg-[#faf8f5] text-foreground'
+                      ${
+                        selectedMethod === m.key
+                          ? 'border-[#c9a96e] bg-[#faf8f5] text-[#8B6914]'
+                          : 'border-border hover:border-[#c9a96e] hover:bg-[#faf8f5] text-foreground'
                       }`}
                   >
                     <Icon size={15} />
@@ -479,7 +499,11 @@ export function LocalQuoteDialog({
                   disabled={!selectedGroupId || sending}
                   className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
                 >
-                  {sending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Send size={14} className="mr-1" />}
+                  {sending ? (
+                    <Loader2 size={14} className="animate-spin mr-1" />
+                  ) : (
+                    <Send size={14} className="mr-1" />
+                  )}
                   發送
                 </Button>
               </div>
@@ -488,7 +512,10 @@ export function LocalQuoteDialog({
 
           {/* 底部按鈕 */}
           <div className="flex justify-end gap-3 pt-2 pb-1">
-            <Button variant="outline" onClick={onClose}>取消</Button>
+            <Button variant="outline" onClick={onClose}>
+              <X className="h-4 w-4 mr-1" />
+              取消
+            </Button>
           </div>
         </div>
       </DialogContent>

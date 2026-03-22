@@ -149,7 +149,7 @@ export default function RightPanel() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-[#0d1117] text-gray-300 font-mono text-sm border-l border-[var(--border)] overflow-y-auto">
+    <div className="flex flex-col h-full bg-[#0d1117] text-muted-foreground font-mono text-sm border-l border-[var(--border)] overflow-y-auto">
       {/* Online + Clock */}
       <div className="p-4 border-b border-[var(--border)]">
         <div className="flex items-center gap-2 mb-2">
@@ -163,7 +163,9 @@ export default function RightPanel() {
       <div className="p-4 border-b border-[var(--border)]">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-blue-400">📊</span>
-          <span className="text-xs text-gray-500 font-bold">{GAME_OFFICE_LABELS.LABEL_8131}</span>
+          <span className="text-xs text-morandi-secondary font-bold">
+            {GAME_OFFICE_LABELS.LABEL_8131}
+          </span>
         </div>
         <div className="space-y-2">
           <Row
@@ -194,12 +196,14 @@ export default function RightPanel() {
         <div className="p-4 border-b border-[var(--border)]">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-blue-400">👥</span>
-            <span className="text-xs text-gray-500 font-bold">{GAME_OFFICE_LABELS.LABEL_6017}</span>
+            <span className="text-xs text-morandi-secondary font-bold">
+              {GAME_OFFICE_LABELS.LABEL_6017}
+            </span>
           </div>
           <div className="space-y-2">
             {teamMembers.map((m, i) => (
               <div key={i} className="flex justify-between items-center">
-                <span className="text-gray-400">
+                <span className="text-muted-foreground">
                   {m.name}（{m.role}）
                 </span>
                 <span className={`flex items-center gap-1 ${m.color} font-bold`}>
@@ -217,13 +221,15 @@ export default function RightPanel() {
         <div className="p-4 border-b border-[var(--border)]">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-blue-400">✈</span>
-            <span className="text-xs text-gray-500 font-bold">{GAME_OFFICE_LABELS.LABEL_2938}</span>
+            <span className="text-xs text-morandi-secondary font-bold">
+              {GAME_OFFICE_LABELS.LABEL_2938}
+            </span>
           </div>
           <div className="space-y-2">
             {todayTours.map((t, i) => (
               <div key={i} className="flex justify-between items-center">
-                <span className="text-gray-400">{t.tour_code}</span>
-                <span className={`font-bold ${statusColors[t.status] || 'text-gray-400'}`}>
+                <span className="text-muted-foreground">{t.tour_code}</span>
+                <span className={`font-bold ${statusColors[t.status] || 'text-muted-foreground'}`}>
                   {t.status}
                 </span>
               </div>
@@ -236,23 +242,25 @@ export default function RightPanel() {
       <div className="p-4 border-b border-[var(--border)]">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-purple-400">🎙️</span>
-          <span className="text-xs text-gray-500 font-bold">{GAME_OFFICE_LABELS.LABEL_1006}</span>
+          <span className="text-xs text-morandi-secondary font-bold">
+            {GAME_OFFICE_LABELS.LABEL_1006}
+          </span>
         </div>
         <div className="space-y-2">
-          <div className="bg-gray-900/50 rounded-lg p-3 border border-[var(--border)]">
+          <div className="bg-morandi-primary/50 rounded-lg p-3 border border-[var(--border)]">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-purple-400 font-bold">
                 {GAME_OFFICE_LABELS.LABEL_8236}
               </span>
-              <span className="text-[10px] text-gray-600 bg-gray-800 px-1.5 py-0.5 rounded">
+              <span className="text-[10px] text-morandi-secondary bg-morandi-primary px-1.5 py-0.5 rounded">
                 0 人在線
               </span>
             </div>
-            <button className="w-full py-1.5 text-xs text-gray-500 border border-dashed border-[var(--border)] rounded hover:border-purple-400 hover:text-purple-400 transition-colors">
+            <button className="w-full py-1.5 text-xs text-morandi-secondary border border-dashed border-[var(--border)] rounded hover:border-purple-400 hover:text-purple-400 transition-colors">
               🚧 即將開放
             </button>
           </div>
-          <div className="text-[10px] text-gray-600">{GAME_OFFICE_LABELS.LABEL_9095}</div>
+          <div className="text-[10px] text-morandi-secondary">{GAME_OFFICE_LABELS.LABEL_9095}</div>
         </div>
       </div>
 
@@ -260,11 +268,13 @@ export default function RightPanel() {
       <div className="p-4">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-yellow-400">🔔</span>
-          <span className="text-xs text-gray-500 font-bold">{GAME_OFFICE_LABELS.LABEL_4511}</span>
+          <span className="text-xs text-morandi-secondary font-bold">
+            {GAME_OFFICE_LABELS.LABEL_4511}
+          </span>
         </div>
         <div className="space-y-2">
           {activities.map((a, i) => (
-            <div key={i} className="flex items-start gap-2 text-xs text-gray-400">
+            <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
               <span>{a.icon}</span>
               <span>{a.text}</span>
             </div>
@@ -278,7 +288,7 @@ export default function RightPanel() {
 function Row({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div className="flex justify-between items-center">
-      <span className="text-gray-400">{label}</span>
+      <span className="text-muted-foreground">{label}</span>
       <span className={`font-bold ${color}`}>{value}</span>
     </div>
   )

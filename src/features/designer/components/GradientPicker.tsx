@@ -242,7 +242,7 @@ export function cssGradientToFabric(cssGradient: string, width: number, height: 
   }
 
   // 動態 import fabric（因為在 client side）
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
+
   const fabric = require('fabric')
 
   // 解析 CSS linear-gradient

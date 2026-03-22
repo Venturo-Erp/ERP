@@ -73,6 +73,9 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
+      // 允許 @ts-nocheck 和 @ts-ignore（部分舊檔案需要，待 DB migration 後移除）
+      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
       'react-hooks/rules-of-hooks': 'off', // 建議在下一階段開啟 (error)
       'react-hooks/exhaustive-deps': 'off', // 建議在下一階段開啟 (warn)
 

@@ -197,10 +197,10 @@ export function useSyncItineraryToCore() {
 
         // 2. 建立新項目的指紋集合（用於比對是否「還存在」）
         const newItemFingerprints = new Set<string>()
-        
+
         for (let day_index = 0; day_index < daily_itinerary.length; day_index++) {
           const day = daily_itinerary[day_index]
-          
+
           // 景點
           if (day.activities) {
             for (const activity of day.activities) {
@@ -208,16 +208,20 @@ export function useSyncItineraryToCore() {
               newItemFingerprints.add(fingerprint)
             }
           }
-          
+
           // 住宿
           if (day.accommodation) {
             const fingerprint = `accommodation:${day.accommodation}` // 用 title 匹配
             newItemFingerprints.add(fingerprint)
           }
-          
+
           // 餐食（Meals 是 { breakfast: string, lunch: string, dinner: string }）
           if (day.meals) {
-            const mealTypes: Array<'breakfast' | 'lunch' | 'dinner'> = ['breakfast', 'lunch', 'dinner']
+            const mealTypes: Array<'breakfast' | 'lunch' | 'dinner'> = [
+              'breakfast',
+              'lunch',
+              'dinner',
+            ]
             for (const mealType of mealTypes) {
               const meal = day.meals[mealType]
               if (meal && typeof meal === 'string' && meal.trim()) {
@@ -235,7 +239,7 @@ export function useSyncItineraryToCore() {
         if (old_items) {
           for (const oldItem of old_items) {
             let fingerprint = ''
-            
+
             if (oldItem.category === 'activities' && oldItem.resource_id) {
               fingerprint = `activities:${oldItem.resource_id}`
             } else if (oldItem.category === 'accommodation') {
@@ -243,7 +247,7 @@ export function useSyncItineraryToCore() {
             } else if (oldItem.category === 'meals') {
               fingerprint = `meal:${oldItem.title}`
             }
-            
+
             if (!newItemFingerprints.has(fingerprint)) {
               // 不在新行程中 → 刪除
               deletedItems.push(oldItem)
@@ -255,12 +259,15 @@ export function useSyncItineraryToCore() {
         }
 
         // 4. 處理刪除項目（產生取消單）
-        const cancellationsByRequestId = new Map<string, {
-          request_id: string
-          supplier_name: string
-          category: string
-          items: Array<{ title: string; service_date: string | null }>
-        }>()
+        const cancellationsByRequestId = new Map<
+          string,
+          {
+            request_id: string
+            supplier_name: string
+            category: string
+            items: Array<{ title: string; service_date: string | null }>
+          }
+        >()
 
         for (const item of deletedItems) {
           if (!item.request_id) continue
@@ -292,7 +299,7 @@ export function useSyncItineraryToCore() {
         // 6. 標記刪除項目的需求單為 cancelled
         for (const [request_id, cancellation] of cancellationsByRequestId) {
           const cancellationNote = `行程刪除，取消項目：\n${cancellation.items.map(i => `- ${i.service_date || ''} ${i.title}`).join('\n')}`
-          
+
           await supabase
             .from('tour_requests')
             .update({
@@ -341,7 +348,9 @@ export function useSyncItineraryToCore() {
           // Meals
           if (day.meals) {
             const meals = day.meals as Meals
-            const mealIds = (day as unknown as Record<string, unknown>).meal_ids as { breakfast?: string; lunch?: string; dinner?: string } | undefined
+            const mealIds = (day as unknown as Record<string, unknown>).meal_ids as
+              | { breakfast?: string; lunch?: string; dinner?: string }
+              | undefined
             const meal_entries: [string, MealSubCategory, string | undefined][] = [
               [meals.breakfast, MEAL_SUB_CATEGORIES.BREAKFAST, mealIds?.breakfast],
               [meals.lunch, MEAL_SUB_CATEGORIES.LUNCH, mealIds?.lunch],
@@ -368,8 +377,13 @@ export function useSyncItineraryToCore() {
           // Accommodation — 續住時解析完整飯店名稱
           if (day.accommodation) {
             let resolvedAccommodation = day.accommodation
-            let resolvedAccommodationId = (day as unknown as Record<string, unknown>).accommodation_id as string | undefined
-            if (day.isSameAccommodation || resolvedAccommodation.startsWith('續住') || resolvedAccommodation.startsWith('同上')) {
+            let resolvedAccommodationId = (day as unknown as Record<string, unknown>)
+              .accommodation_id as string | undefined
+            if (
+              day.isSameAccommodation ||
+              resolvedAccommodation.startsWith('續住') ||
+              resolvedAccommodation.startsWith('同上')
+            ) {
               // 從「續住 (XXX)」或「同上 (XXX)」提取飯店名，或往前找上一天的住宿
               const match = resolvedAccommodation.match(/(?:續住|同上)\s*[（(](.+?)[）)]/)
               if (match) {
@@ -383,7 +397,9 @@ export function useSyncItineraryToCore() {
                     if (!match) resolvedAccommodation = prevAcc
                     // 續住也帶上前一天的 accommodation_id
                     if (!resolvedAccommodationId) {
-                      resolvedAccommodationId = (daily_itinerary[prev] as unknown as Record<string, unknown>).accommodation_id as string | undefined
+                      resolvedAccommodationId = (
+                        daily_itinerary[prev] as unknown as Record<string, unknown>
+                      ).accommodation_id as string | undefined
                     }
                     break
                   }

@@ -14,19 +14,23 @@ async function sendInsuranceForTour(
   isChange = false
 ) {
   // 團資料
-  const { data: tour } = await supabase
+  const { data: tour } = (await supabase
     .from('tours')
     .select(
       'id, code, name, departure_date, return_date, days_count, airport_code, outbound_flight, return_flight, tour_leader_id, country_id'
     )
     .eq('id', tourId)
-    .single() as { data: any }
+    .single()) as { data: any }
   if (!tour) return { success: false, error: 'Tour not found' }
 
   // 國家
   let countryName = '台灣'
   if (tour.country_id) {
-    const { data: c } = await supabase.from('countries').select('name').eq('id', tour.country_id).single()
+    const { data: c } = await supabase
+      .from('countries')
+      .select('name')
+      .eq('id', tour.country_id)
+      .single()
     if (c) countryName = c.name
   }
 
@@ -57,16 +61,19 @@ async function sendInsuranceForTour(
   }
 
   // 團員
-  const { data: orders } = await supabase.from('orders').select('id, sales_person').eq('tour_id', tour.id) as { data: any[] | null }
+  const { data: orders } = (await supabase
+    .from('orders')
+    .select('id, sales_person')
+    .eq('tour_id', tour.id)) as { data: any[] | null }
   const orderIds = orders?.map((o: any) => o.id) || []
   if (!orderIds.length) return { success: false, error: 'No orders' }
 
   const salesPerson = orders?.[0]?.sales_person || '-'
 
-  const { data: members } = await supabase
+  const { data: members } = (await supabase
     .from('order_members')
     .select('customer:customer_id(name, national_id, birth_date)')
-    .in('order_id', orderIds) as { data: any[] | null }
+    .in('order_id', orderIds)) as { data: any[] | null }
 
   if (!members?.length) return { success: false, error: 'No members' }
 
@@ -76,22 +83,27 @@ async function sendInsuranceForTour(
   const ExcelJS = (await import('exceljs')).default
   const wb = new ExcelJS.Workbook()
   const ws = wb.addWorksheet('團員名單')
-  
+
   const title = `${tour.code} ${tour.name}`
   ws.mergeCells('A1:D1')
   ws.getCell('A1').value = title
   ws.getCell('A1').font = { bold: true, size: 14 }
   ws.getCell('A1').alignment = { horizontal: 'center' }
   ws.addRow([])
-  
+
   const headers = ['序', '姓名', '身分證字號', '出生年月日']
   const hr = ws.addRow(headers)
   hr.font = { bold: true }
-  hr.eachCell((c) => {
+  hr.eachCell(c => {
     c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8DCC8' } }
-    c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }
+    c.border = {
+      top: { style: 'thin' },
+      bottom: { style: 'thin' },
+      left: { style: 'thin' },
+      right: { style: 'thin' },
+    }
   })
-  
+
   members.forEach((m: any, i: number) => {
     const row = ws.addRow([
       i + 1,
@@ -99,11 +111,16 @@ async function sendInsuranceForTour(
       m.customer?.national_id || '',
       m.customer?.birth_date || '',
     ])
-    row.eachCell((c) => {
-      c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }
+    row.eachCell(c => {
+      c.border = {
+        top: { style: 'thin' },
+        bottom: { style: 'thin' },
+        left: { style: 'thin' },
+        right: { style: 'thin' },
+      }
     })
   })
-  
+
   ws.columns = [{ width: 5 }, { width: 12 }, { width: 14 }, { width: 14 }]
 
   const xlsxBuf = (await wb.xlsx.writeBuffer()) as unknown as Buffer
@@ -149,9 +166,7 @@ async function sendInsuranceForTour(
     },
     body: JSON.stringify({
       to: INSURANCE_GROUP_ID,
-      messages: [
-        { type: 'text', text: textLines.join('\n') },
-      ],
+      messages: [{ type: 'text', text: textLines.join('\n') }],
     }),
   })
 

@@ -18,12 +18,12 @@
 
 ### 四個分頁
 
-| Tab | 說明 | 數據表 | 負責人 |
-|-----|------|--------|--------|
-| 📚 魔法塔圖書館 | 追蹤所有開源魔法 | `magic_library` | Matthew |
-| 🤖 機器人管理中心 | 管理所有 Bot | `bot_registry` + `bot_groups` | Matthew |
-| 📋 獨立任務 | 單一任務 | `tasks` (task_type=individual) | William AI |
-| 🔄 工作流任務 | n8n 工作流 | `tasks` (task_type=workflow) | William AI |
+| Tab               | 說明             | 數據表                         | 負責人     |
+| ----------------- | ---------------- | ------------------------------ | ---------- |
+| 📚 魔法塔圖書館   | 追蹤所有開源魔法 | `magic_library`                | Matthew    |
+| 🤖 機器人管理中心 | 管理所有 Bot     | `bot_registry` + `bot_groups`  | Matthew    |
+| 📋 獨立任務       | 單一任務         | `tasks` (task_type=individual) | William AI |
+| 🔄 工作流任務     | n8n 工作流       | `tasks` (task_type=workflow)   | William AI |
 
 ---
 
@@ -34,6 +34,7 @@
 **位置**：Supabase `magic_library` 表
 
 **欄位**：
+
 ```sql
 - id (UUID)
 - workspace_id (UUID) -- Venturo workspace
@@ -52,6 +53,7 @@
 ```
 
 **範例數據**：
+
 ```json
 {
   "workspace_id": "8ef05a74-1f87-48ab-afd3-9bfeb423935d",
@@ -76,6 +78,7 @@
 **位置**：Supabase `bot_registry` 表
 
 **欄位**：
+
 ```sql
 - id (UUID)
 - workspace_id (UUID)
@@ -89,6 +92,7 @@
 ```
 
 **範例數據**：
+
 ```json
 {
   "workspace_id": "8ef05a74-1f87-48ab-afd3-9bfeb423935d",
@@ -109,6 +113,7 @@
 **位置**：Supabase `bot_groups` 表
 
 **欄位**：
+
 ```sql
 - id (UUID)
 - bot_id (UUID) -- 關聯到 bot_registry
@@ -136,6 +141,7 @@
 **參考文件**：`/MAGIC_LIBRARY.md`
 
 **步驟**：
+
 ```bash
 # 1. 進入 Supabase Dashboard
 open https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/editor
@@ -150,6 +156,7 @@ open https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/editor
 **要添加的魔法項目**（13 個）：
 
 #### 任務管理（3 個）
+
 1. **@hello-pangea/dnd**
    - category: `task_management`
    - layer: `layer2_opensource`
@@ -187,6 +194,7 @@ open https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/editor
    - check_frequency: `monthly`
 
 #### 記憶系統（1 個）
+
 4. **OpenViking**
    - category: `memory`
    - layer: `layer2_opensource`
@@ -200,6 +208,7 @@ open https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/editor
    - check_frequency: `half_yearly`
 
 #### 搜尋魔法（2 個）
+
 5. **Tavily Search API**
    - category: `search`
    - layer: `layer2_opensource`
@@ -225,6 +234,7 @@ open https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/editor
    - check_frequency: `monthly`
 
 #### AI 框架（2 個）
+
 7. **AutoGen**
    - category: `ai_framework`
    - layer: `layer2_opensource`
@@ -250,6 +260,7 @@ open https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/editor
    - check_frequency: `weekly`
 
 #### 開發工具（4 個）
+
 9. **Next.js**
    - category: `dev_tool`
    - layer: `layer2_opensource`
@@ -299,6 +310,7 @@ open https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/editor
     - check_frequency: `half_yearly`
 
 #### 數據處理（1 個）
+
 13. **n8n**
     - category: `data_processing`
     - layer: `layer2_opensource`
@@ -318,6 +330,7 @@ open https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/editor
 ### 第二階段：填充機器人數據（預計 15 分鐘）
 
 **步驟**：
+
 ```bash
 # 1. 進入 Supabase Dashboard
 # 2. 選擇 bot_registry 表
@@ -345,6 +358,7 @@ open https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/editor
    - managed_by: `eddie`
 
 **（可選）添加群組數據**：
+
 - 如果知道 bot 加入了哪些群組，可以在 `bot_groups` 表添加
 - 需要 bot_id（先查 bot_registry 拿到 UUID）
 
@@ -357,6 +371,7 @@ open https://supabase.com/dashboard/project/pfqvdacxowpgfamuvnsn/editor
 **腳本位置**：`~/Projects/venturo-erp/scripts/check-magic-updates.sh`
 
 **執行方式**：
+
 ```bash
 # 手動執行
 bash ~/Projects/venturo-erp/scripts/check-magic-updates.sh
@@ -366,6 +381,7 @@ bash ~/Projects/venturo-erp/scripts/check-magic-updates.sh
 ```
 
 **更新流程**：
+
 1. 每週日 22:00 自動檢查
 2. 發現更新 → Telegram 通知 William
 3. William 評估是否升級
@@ -378,6 +394,7 @@ bash ~/Projects/venturo-erp/scripts/check-magic-updates.sh
 **場景**：發現 Next.js 有更新（13.x → 14.x）
 
 **步驟**：
+
 1. 進入 Supabase Dashboard
 2. 找到 `magic_library` 表
 3. 找到 `Next.js` 那一行
@@ -417,16 +434,19 @@ bash ~/Projects/venturo-erp/scripts/check-magic-updates.sh
 ## 🎯 快速開始（Matthew）
 
 ### 1. 訪問作戰會議室
+
 ```
 http://localhost:3000/war-room
 ```
 
 ### 2. 填充數據（按順序）
+
 1. ✅ 魔法塔圖書館（13 個項目）
 2. ✅ 機器人註冊表（2 個 bot）
 3. ⏸️ 任務系統（William AI 管理，暫時不用填）
 
 ### 3. 驗證
+
 - 每個 Tab 都能正常顯示
 - 表格數據正確
 - 鏈接可以點擊
@@ -452,7 +472,8 @@ A: Venturo 的工作空間 ID：`8ef05a74-1f87-48ab-afd3-9bfeb423935d`
 A: 執行 `bash scripts/check-magic-updates.sh` 或查看官網
 
 **Q: update_status 怎麼判斷？**  
-A: 
+A:
+
 - `latest`: 當前版本 = 最新版本
 - `update_available`: 有新版本可用
 - `outdated`: 版本太舊

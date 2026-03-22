@@ -52,7 +52,7 @@ const STATUS_COLORS: Record<LeaveRequestStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-700',
   approved: 'bg-green-100 text-green-700',
   rejected: 'bg-red-100 text-red-700',
-  cancelled: 'bg-gray-100 text-gray-500',
+  cancelled: 'bg-morandi-container text-morandi-secondary',
 }
 
 type TabType = 'requests' | 'types' | 'balances'
@@ -137,7 +137,7 @@ export function LeaveManagementPage() {
           className={`px-2 py-0.5 rounded text-xs ${
             row.requires_proof === true
               ? 'bg-yellow-100 text-yellow-700'
-              : 'bg-gray-100 text-gray-500'
+              : 'bg-morandi-container text-morandi-secondary'
           }`}
         >
           {row.requires_proof === true ? L.yes : L.no}
@@ -151,7 +151,9 @@ export function LeaveManagementPage() {
       render: (_, row) => (
         <span
           className={`px-2 py-0.5 rounded text-xs ${
-            row.is_active !== false ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+            row.is_active !== false
+              ? 'bg-green-100 text-green-700'
+              : 'bg-morandi-container text-morandi-secondary'
           }`}
         >
           {row.is_active !== false ? L.active : L.inactive}

@@ -10,11 +10,13 @@
 ## 📋 需求說明
 
 **背景**：
+
 - 業務需要將團員名單（Excel）發送給廠商
 - 目前需要手動下載、手動傳送，效率低
 - 廠商通常在 LINE 群組溝通
 
 **目標**：
+
 - 一鍵發送團員名單 Excel 到 LINE 群組
 - 自動產生 Excel（團員資料）
 - 記錄發送歷史
@@ -26,8 +28,9 @@
 ### 使用場景
 
 **主要流程**：
+
 ```
-業務在需求單頁面 
+業務在需求單頁面
   → 點擊「發送團員名單」
   → 選擇目標群組（飯店/交通/保險）
   → 系統產生 Excel
@@ -36,6 +39,7 @@
 ```
 
 **次要流程**：
+
 - 發送記錄可追蹤
 - 可重新發送（如果團員異動）
 
@@ -48,6 +52,7 @@
 **方案**：LINE Messaging API + Supabase Storage
 
 **流程圖**：
+
 ```
 1. 產生 Excel（ExcelJS）
    ↓
@@ -94,7 +99,7 @@ CREATE INDEX idx_line_messages_workspace_id ON line_messages(workspace_id);
 
 ```sql
 -- 在 suppliers 表加欄位
-ALTER TABLE suppliers 
+ALTER TABLE suppliers
 ADD COLUMN line_group_id TEXT,
 ADD COLUMN line_group_name TEXT;
 
@@ -179,7 +184,7 @@ export async function generateMemberExcel(
   worksheet.getRow(4).fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: { argb: 'FFD9D9D9' }
+    fgColor: { argb: 'FFD9D9D9' },
   }
 
   // 資料
@@ -191,19 +196,19 @@ export async function generateMemberExcel(
       member.birth_date,
       member.age,
       member.room_type || '',
-      member.notes || ''
+      member.notes || '',
     ])
   })
 
   // 欄寬
   worksheet.columns = [
-    { width: 8 },  // 序號
+    { width: 8 }, // 序號
     { width: 12 }, // 姓名
     { width: 15 }, // 護照號
     { width: 12 }, // 生日
-    { width: 8 },  // 年齡
+    { width: 8 }, // 年齡
     { width: 12 }, // 房型
-    { width: 20 }  // 備註
+    { width: 20 }, // 備註
   ]
 
   // 產生 Buffer
@@ -237,7 +242,7 @@ export async function uploadTourDocument(
     .upload(storagePath, fileBuffer, {
       contentType,
       cacheControl: '3600',
-      upsert: false // 不覆蓋（保留歷史）
+      upsert: false, // 不覆蓋（保留歷史）
     })
 
   if (error) {
@@ -258,7 +263,7 @@ export async function uploadTourDocument(
   return {
     path: storagePath,
     url: signedData.signedUrl,
-    expiresAt: new Date(Date.now() + 604800 * 1000) // 7 天後
+    expiresAt: new Date(Date.now() + 604800 * 1000), // 7 天後
   }
 }
 ```
@@ -289,14 +294,14 @@ export async function sendFileToLineGroup(
   if (message) {
     messages.push({
       type: 'text',
-      text: message
+      text: message,
     })
   }
 
   // 檔案連結（使用 text 類型，因為 file 類型需要特殊格式）
   messages.push({
     type: 'text',
-    text: `📥 ${fileName}\n\n下載連結：\n${fileUrl}\n\n（連結7天有效）`
+    text: `📥 ${fileName}\n\n下載連結：\n${fileUrl}\n\n（連結7天有效）`,
   })
 
   // 發送到群組
@@ -304,12 +309,12 @@ export async function sendFileToLineGroup(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${LINE_CHANNEL_ACCESS_TOKEN}`,
+      Authorization: `Bearer ${LINE_CHANNEL_ACCESS_TOKEN}`,
     },
     body: JSON.stringify({
       to: groupId,
-      messages
-    })
+      messages,
+    }),
   })
 
   if (!response.ok) {
@@ -335,10 +340,7 @@ import { generateMemberExcel } from '@/lib/excel/generate-member-excel'
 import { uploadTourDocument } from '@/lib/storage/upload-tour-document'
 import { sendFileToLineGroup } from '@/lib/line/send-to-group'
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { tourId: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { tourId: string } }) {
   try {
     const { groupId, groupName } = await req.json()
 
@@ -350,30 +352,26 @@ export async function POST(
       .single()
 
     if (tourError || !tour) {
-      return NextResponse.json(
-        { error: '找不到團資料' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: '找不到團資料' }, { status: 404 })
     }
 
     // 2. 取得團員資料
     const { data: orderMembers, error: membersError } = await supabase
       .from('order_members')
-      .select(`
+      .select(
+        `
         *,
         customer:customers (
           name,
           passport_number,
           birth_date
         )
-      `)
+      `
+      )
       .eq('order.tour_id', params.tourId)
 
     if (membersError || !orderMembers || orderMembers.length === 0) {
-      return NextResponse.json(
-        { error: '無團員資料' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: '無團員資料' }, { status: 400 })
     }
 
     // 3. 整理團員資料
@@ -383,7 +381,7 @@ export async function POST(
       birth_date: om.customer.birth_date,
       age: calculateAge(om.customer.birth_date),
       room_type: om.room_type,
-      notes: om.notes
+      notes: om.notes,
     }))
 
     // 4. 產生 Excel
@@ -396,15 +394,11 @@ export async function POST(
 
     // 5. 上傳到 Supabase Storage
     const fileName = `${tour.code}_團員名單.xlsx`
-    const { url, path } = await uploadTourDocument(
-      tour.code,
-      fileName,
-      excelBuffer
-    )
+    const { url, path } = await uploadTourDocument(tour.code, fileName, excelBuffer)
 
     // 6. 發送到 LINE 群組
     const message = `📋 ${tour.code} 團員名單\n\n團名：${tour.name}\n出發日期：${tour.departure_date}\n團員數：${members.length} 人`
-    
+
     await sendFileToLineGroup(groupId, url, fileName, message)
 
     // 7. 記錄到資料庫
@@ -417,21 +411,18 @@ export async function POST(
       file_url: url,
       file_name: fileName,
       status: 'sent',
-      sent_by: req.headers.get('x-user-id') // 假設有用戶 ID
+      sent_by: req.headers.get('x-user-id'), // 假設有用戶 ID
     })
 
     return NextResponse.json({
       success: true,
       url,
       fileName,
-      memberCount: members.length
+      memberCount: members.length,
     })
   } catch (error: any) {
     console.error('[API] 發送團員名單失敗:', error)
-    return NextResponse.json(
-      { error: error.message || '發送失敗' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: error.message || '發送失敗' }, { status: 500 })
   }
 }
 
@@ -505,14 +496,14 @@ export function SendMembersButton({ tourId }: { tourId: string }) {
 
     try {
       const group = GROUPS.find(g => g.id === selectedGroup)
-      
+
       const response = await fetch(`/api/tours/${tourId}/send-members`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           groupId: selectedGroup,
-          groupName: group?.name
-        })
+          groupName: group?.name,
+        }),
       })
 
       if (!response.ok) {
@@ -524,7 +515,7 @@ export function SendMembersButton({ tourId }: { tourId: string }) {
 
       toast({
         title: '✅ 已發送團員名單',
-        description: `已發送到「${group?.name}」，共 ${result.memberCount} 位團員`
+        description: `已發送到「${group?.name}」，共 ${result.memberCount} 位團員`,
       })
 
       setOpen(false)
@@ -534,7 +525,7 @@ export function SendMembersButton({ tourId }: { tourId: string }) {
       toast({
         title: '❌ 發送失敗',
         description: error.message,
-        variant: 'destructive'
+        variant: 'destructive',
       })
     } finally {
       setSending(false)
@@ -552,9 +543,7 @@ export function SendMembersButton({ tourId }: { tourId: string }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>發送團員名單到 LINE 群組</DialogTitle>
-          <DialogDescription>
-            系統將自動產生 Excel 檔案並發送到指定群組
-          </DialogDescription>
+          <DialogDescription>系統將自動產生 Excel 檔案並發送到指定群組</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
@@ -575,17 +564,10 @@ export function SendMembersButton({ tourId }: { tourId: string }) {
           </div>
 
           <div className="flex justify-end space-x-2">
-            <Button
-              variant="outline"
-              onClick={() => setOpen(false)}
-              disabled={sending}
-            >
+            <Button variant="outline" onClick={() => setOpen(false)} disabled={sending}>
               取消
             </Button>
-            <Button
-              onClick={handleSend}
-              disabled={!selectedGroup || sending}
-            >
+            <Button onClick={handleSend} disabled={!selectedGroup || sending}>
               {sending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -614,7 +596,7 @@ export function SendMembersButton({ tourId }: { tourId: string }) {
 import { SendMembersButton } from './SendMembersButton'
 
 // 在頁面右上角加按鈕
-<div className="flex justify-between items-center mb-4">
+;<div className="flex justify-between items-center mb-4">
   <h2>需求總覽</h2>
   <SendMembersButton tourId={tourId} />
 </div>
@@ -762,6 +744,7 @@ const pdfBuffer = await generateMemberPDF(...)
 ## 📞 聯絡
 
 **有問題找**：
+
 - 需求確認：William
 - 技術問題：Matthew
 - LINE 設定：William/Leon
@@ -771,6 +754,6 @@ const pdfBuffer = await generateMemberPDF(...)
 
 ## 🔖 版本記錄
 
-| 版本 | 日期 | 變更 |
-|------|------|------|
-| 1.0 | 2026-03-17 | 初版規格 |
+| 版本 | 日期       | 變更     |
+| ---- | ---------- | -------- |
+| 1.0  | 2026-03-17 | 初版規格 |

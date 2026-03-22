@@ -6,14 +6,7 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
-import {
-  FolderOpen,
-  Clock,
-  CheckCircle,
-  Inbox,
-  Calendar,
-  Package,
-} from 'lucide-react'
+import { FolderOpen, Clock, CheckCircle, Inbox, Calendar, Package } from 'lucide-react'
 import useSWR from 'swr'
 import type { Database } from '@/lib/supabase/types'
 
@@ -54,9 +47,7 @@ export default function LocalCasesPage() {
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
       filtered = filtered.filter(
-        r =>
-          r.code?.toLowerCase().includes(q) ||
-          r.supplier_name?.toLowerCase().includes(q)
+        r => r.code?.toLowerCase().includes(q) || r.supplier_name?.toLowerCase().includes(q)
       )
     }
     return filtered
@@ -136,9 +127,7 @@ export default function LocalCasesPage() {
                   <div className="text-right shrink-0">
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
-                        isCompleted
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-amber-100 text-amber-700'
+                        isCompleted ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                       }`}
                     >
                       {isCompleted ? '已完成' : '進行中'}

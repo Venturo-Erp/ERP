@@ -52,10 +52,7 @@ export async function POST(request: NextRequest) {
     if (!existingAccounts || existingAccounts.length === 0) {
       // 插入預設科目
       if (!DEFAULT_ACCOUNTS || DEFAULT_ACCOUNTS.length === 0) {
-        return NextResponse.json(
-          { error: 'DEFAULT_ACCOUNTS 未定義或為空' },
-          { status: 500 }
-        )
+        return NextResponse.json({ error: 'DEFAULT_ACCOUNTS 未定義或為空' }, { status: 500 })
       }
 
       const accountsToInsert = DEFAULT_ACCOUNTS.map(account => {
@@ -77,17 +74,17 @@ export async function POST(request: NextRequest) {
       if (accountsError) {
         console.error('科目表插入失敗:', accountsError)
         return NextResponse.json(
-          { 
+          {
             error: `科目表初始化失敗: ${accountsError.message}`,
             details: accountsError,
             hint: '請檢查 chart_of_accounts 表是否存在，以及 RLS 政策是否正確',
             workspace_id: workspaceId,
-            accounts_count: accountsToInsert.length
+            accounts_count: accountsToInsert.length,
           },
           { status: 500 }
         )
       }
-      
+
       console.log(`成功插入 ${insertedAccounts?.length || 0} 個科目`)
       stats.accounts_created = insertedAccounts?.length || accountsToInsert.length
     }

@@ -85,9 +85,7 @@ const TourClosingTab = dynamic(
 
 const ConfirmationSheet = dynamic(
   () =>
-    import('@/features/confirmations/components/ConfirmationSheet').then(
-      m => m.ConfirmationSheet
-    ),
+    import('@/features/confirmations/components/ConfirmationSheet').then(m => m.ConfirmationSheet),
   { loading: () => <TabLoading /> }
 )
 

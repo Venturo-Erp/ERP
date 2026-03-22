@@ -203,9 +203,9 @@ export const ToursPage: React.FC = () => {
     setNewTour({
       name: '',
       tour_type: 'proposal',
-      countryId: '',       // 🔧 核心表架構
-      countryName: '',     // 🔧 核心表架構
-      countryCode: '',     // 🔧 核心表架構
+      countryId: '', // 🔧 核心表架構
+      countryName: '', // 🔧 核心表架構
+      countryCode: '', // 🔧 核心表架構
       cityCode: '',
       departure_date: '',
       return_date: '',
@@ -223,9 +223,9 @@ export const ToursPage: React.FC = () => {
     setNewTour({
       name: '',
       tour_type: 'template',
-      countryId: '',       // 🔧 核心表架構
-      countryName: '',     // 🔧 核心表架構
-      countryCode: '',     // 🔧 核心表架構
+      countryId: '', // 🔧 核心表架構
+      countryName: '', // 🔧 核心表架構
+      countryCode: '', // 🔧 核心表架構
       cityCode: '',
       departure_date: '',
       return_date: '',
@@ -244,7 +244,18 @@ export const ToursPage: React.FC = () => {
   }, [])
 
   const handleConvertConfirm = useCallback(
-    async (tour: Tour, departure_date: string, return_date: string, orderData?: { contact_person?: string; sales_person?: string; assistant?: string; member_count?: number; total_amount?: number }) => {
+    async (
+      tour: Tour,
+      departure_date: string,
+      return_date: string,
+      orderData?: {
+        contact_person?: string
+        sales_person?: string
+        assistant?: string
+        member_count?: number
+        total_amount?: number
+      }
+    ) => {
       await operations.handleConvertToOfficial(tour, departure_date, return_date, orderData)
     },
     [operations]

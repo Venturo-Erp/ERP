@@ -1,6 +1,6 @@
 /**
  * 为现有的 3 笔已批准请款单补传票
- * 
+ *
  * 请款单详情：
  * 1. 2026-03-12：机票款 13,175（id: 0d8eeaad-c731-47e4-ae13-cc005a652d7f）
  * 2. 2026-03-19：餐费+住宿+订金 211,746（id: 29336336-5fac-4307-af0a-8acf42cb94db）
@@ -163,9 +163,7 @@ async function createVoucherForRequest(
     },
   ]
 
-  const { error: linesError } = await supabase
-    .from('journal_lines')
-    .insert(lines)
+  const { error: linesError } = await supabase.from('journal_lines').insert(lines)
 
   if (linesError) {
     console.error('❌ 创建分录失败:', linesError)
@@ -181,10 +179,7 @@ async function main() {
   console.log('开始补录传票...\n')
 
   // 获取 workspace_id
-  const { data: workspaces } = await supabase
-    .from('workspaces')
-    .select('id, name')
-    .limit(1)
+  const { data: workspaces } = await supabase.from('workspaces').select('id, name').limit(1)
 
   if (!workspaces || workspaces.length === 0) {
     console.error('❌ 找不到 workspace')
@@ -195,10 +190,7 @@ async function main() {
   console.log(`Workspace: ${workspaces[0].name} (${workspaceId})`)
 
   // 获取第一个用户 ID（作为 created_by）
-  const { data: users } = await supabase
-    .from('users')
-    .select('id')
-    .limit(1)
+  const { data: users } = await supabase.from('users').select('id').limit(1)
 
   const userId = users?.[0]?.id || '00000000-0000-0000-0000-000000000000'
 

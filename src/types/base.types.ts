@@ -149,13 +149,13 @@ export type PaymentMethod = 'cash' | 'transfer' | 'card' | 'check'
 export type VisaStatus = 'pending' | 'submitted' | 'collected' | 'rejected' | 'returned'
 
 // 待辦事項類型
-export type TodoTaskType = 
-  | 'accommodation'  // 訂房
-  | 'restaurant'     // 訂餐廳
-  | 'transport'      // 訂交通
-  | 'ticket'         // 訂票（門票/機票）
-  | 'activity'       // 訂活動
-  | 'general'        // 一般任務
+export type TodoTaskType =
+  | 'accommodation' // 訂房
+  | 'restaurant' // 訂餐廳
+  | 'transport' // 訂交通
+  | 'ticket' // 訂票（門票/機票）
+  | 'activity' // 訂活動
+  | 'general' // 一般任務
 
 // 待辦事項
 export interface Todo {
@@ -167,9 +167,9 @@ export interface Todo {
   completed?: boolean // 對齊資料庫欄位
 
   // 任務類型與關聯（新增）
-  task_type?: TodoTaskType       // 任務類型（決定右半部顯示什麼表單）
-  tour_request_id?: string       // 連結需求單
-  tour_id?: string               // 連結團
+  task_type?: TodoTaskType // 任務類型（決定右半部顯示什麼表單）
+  tour_request_id?: string // 連結需求單
+  tour_id?: string // 連結團
 
   // 人員關係（共享機制）
   creator: string // 建立者

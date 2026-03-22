@@ -4,14 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const {
-      tourId,
-      supplierName,
-      vehicleDesc,
-      note,
-      totalPax,
-      workspaceId,
-    } = body
+    const { tourId, supplierName, vehicleDesc, note, totalPax, workspaceId } = body
 
     if (!tourId || !workspaceId) {
       return NextResponse.json({ error: '缺少必填欄位' }, { status: 400 })
@@ -34,15 +27,15 @@ export async function POST(req: NextRequest) {
     if (existingRequest) {
       // 已有需求單
       const hasReplied = existingRequest.supplier_response && existingRequest.replied_at
-      
+
       if (hasReplied) {
         // 已回覆 → 需要使用者確認是否重新發送
-        return NextResponse.json({ 
-          success: false, 
-          alreadyExists: true, 
+        return NextResponse.json({
+          success: false,
+          alreadyExists: true,
           hasReplied: true,
           requestId: existingRequest.id,
-          message: '此廠商已報價' 
+          message: '此廠商已報價',
         })
       } else {
         // 未回覆 → 更新現有需求單（使用同一個 requestId）
@@ -58,10 +51,10 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ error: updateError.message }, { status: 500 })
         }
 
-        return NextResponse.json({ 
-          success: true, 
+        return NextResponse.json({
+          success: true,
           requestId: existingRequest.id,
-          updated: true 
+          updated: true,
         })
       }
     }

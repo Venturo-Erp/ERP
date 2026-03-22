@@ -36,16 +36,14 @@ export default function TestPrintTransportPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-8">
+    <div className="min-h-screen flex items-center justify-center bg-morandi-container p-8">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
         <h1 className="text-2xl font-bold mb-4">測試交通需求單列印</h1>
-        <p className="text-gray-600 mb-6">
-          點擊下方按鈕測試列印效果。
-        </p>
+        <p className="text-morandi-secondary mb-6">點擊下方按鈕測試列印效果。</p>
         <Button onClick={handlePrint} className="w-full">
           列印交通需求單
         </Button>
-        <div className="mt-6 text-sm text-gray-500">
+        <div className="mt-6 text-sm text-morandi-secondary">
           <p>測試資料：</p>
           <ul className="list-disc list-inside mt-2">
             <li>供應商：中興遊覽車</li>

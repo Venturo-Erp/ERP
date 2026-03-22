@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 
 /**
  * POST /api/tours/[tourId]/requests/[requestId]/reject
- * 
+ *
  * 標記報價為不成交
  */
 export async function POST(
@@ -13,12 +13,12 @@ export async function POST(
   try {
     const { reason } = await req.json()
     const { requestId } = await params
-    
+
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
-    
+
     // 更新 tour_requests 狀態為不成交
     const { error } = await supabase
       .from('tour_requests')
@@ -29,12 +29,12 @@ export async function POST(
         status: '取消',
       })
       .eq('id', requestId)
-    
+
     if (error) {
       console.error('更新需求單失敗:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
-    
+
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('拒絕處理失敗:', error)

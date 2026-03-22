@@ -21,10 +21,10 @@ import { COMP_TOURS_LABELS } from '../constants/labels'
 export interface EditFormData {
   name: string
   // 🔧 核心表架構：統一用 countryId + countryName + airportCode
-  countryId: string        // countries.id (如 "japan")
-  countryName: string      // 顯示用 (如 "日本")
-  airportCode: string      // IATA 碼 (如 "NRT")
-  airportCityName: string  // 城市名 (如 "東京")
+  countryId: string // countries.id (如 "japan")
+  countryName: string // 顯示用 (如 "日本")
+  airportCode: string // IATA 碼 (如 "NRT")
+  airportCityName: string // 城市名 (如 "東京")
   departure_date: string
   return_date: string
   description: string
@@ -336,7 +336,7 @@ export function useTourEdit(params: UseTourEditParams) {
         description: formData.description.trim(),
         outbound_flight: cleanFlightInfo(formData.outboundFlight),
         return_flight: cleanFlightInfo(formData.returnFlight),
-        status: formData.isSpecial ? COMP_TOURS_LABELS.特殊團 : (tour.status || undefined),
+        status: formData.isSpecial ? COMP_TOURS_LABELS.特殊團 : tour.status || undefined,
         enable_checkin: formData.enable_checkin,
         updated_at: new Date().toISOString(),
       }
@@ -355,7 +355,11 @@ export function useTourEdit(params: UseTourEditParams) {
       // Reload data
       mutate(`tour-${tour.id}`)
       mutate('tours')
-      mutate((key: string) => typeof key === 'string' && key.startsWith('tours-paginated-'), undefined, { revalidate: true })
+      mutate(
+        (key: string) => typeof key === 'string' && key.startsWith('tours-paginated-'),
+        undefined,
+        { revalidate: true }
+      )
 
       const updatedTour = data as Tour
 

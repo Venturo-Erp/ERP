@@ -5,7 +5,12 @@ import { Settings, Building2, MessageCircle } from 'lucide-react'
 
 type SettingsTab = 'personal' | 'company' | 'line'
 
-const tabs: { value: SettingsTab; label: string; href: string; icon: React.ComponentType<{ className?: string }> }[] = [
+const tabs: {
+  value: SettingsTab
+  label: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+}[] = [
   { value: 'personal', label: '個人設定', href: '/settings', icon: Settings },
   { value: 'company', label: '公司資訊', href: '/settings/company', icon: Building2 },
   { value: 'line', label: 'LINE 設定', href: '/settings/line', icon: MessageCircle },

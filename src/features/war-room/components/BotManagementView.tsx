@@ -1,40 +1,37 @@
-'use client';
+'use client'
 
 /**
  * 機器人管理中心視圖 - 使用 EnhancedTable
  */
 
-import { EnhancedTable } from '@/components/ui/enhanced-table';
-import type { TableColumn } from '@/components/ui/enhanced-table';
+import { EnhancedTable } from '@/components/ui/enhanced-table'
+import type { TableColumn } from '@/components/ui/enhanced-table'
 
 type Bot = {
-  id: string;
-  bot_name: string;
-  bot_username: string | null;
-  platform: string;
-  status: string;
-  webhook_url: string | null;
-  groups: BotGroup[];
-};
-
-type BotGroup = {
-  id: string;
-  group_id: string;
-  group_name: string | null;
-  is_new: boolean;
-  joined_at: string;
-  member_count: number | null;
-};
-
-interface BotManagementViewProps {
-  bots: Bot[];
-  loading: boolean;
+  id: string
+  bot_name: string
+  bot_username: string | null
+  platform: string
+  status: string
+  webhook_url: string | null
+  groups: BotGroup[]
 }
 
-export const BotManagementView: React.FC<BotManagementViewProps> = ({
-  bots,
-  loading,
-}) => {
+type BotGroup = {
+  id: string
+  group_id: string
+  group_name: string | null
+  is_new: boolean
+  joined_at: string
+  member_count: number | null
+}
+
+interface BotManagementViewProps {
+  bots: Bot[]
+  loading: boolean
+}
+
+export const BotManagementView: React.FC<BotManagementViewProps> = ({ bots, loading }) => {
   const columns: TableColumn<Bot>[] = [
     {
       key: 'bot_name',
@@ -61,9 +58,7 @@ export const BotManagementView: React.FC<BotManagementViewProps> = ({
       render: (_value: unknown, row: Bot) => (
         <span
           className={`px-2 py-1 rounded text-xs font-medium ${
-            row.status === 'active'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
+            row.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
           }`}
         >
           {row.status === 'active' ? '運行中' : '離線'}
@@ -86,7 +81,7 @@ export const BotManagementView: React.FC<BotManagementViewProps> = ({
       width: '100px',
       align: 'center',
       render: (_value: unknown, row: Bot) => {
-        const newGroupsCount = row.groups?.filter((g: BotGroup) => g.is_new).length || 0;
+        const newGroupsCount = row.groups?.filter((g: BotGroup) => g.is_new).length || 0
         return (
           <div className="flex items-center justify-center gap-1">
             <span className="font-medium">{row.groups?.length || 0}</span>
@@ -96,19 +91,22 @@ export const BotManagementView: React.FC<BotManagementViewProps> = ({
               </span>
             )}
           </div>
-        );
+        )
       },
     },
     {
       key: 'webhook_url',
       label: 'Webhook URL',
       render: (_value: unknown, row: Bot) => (
-        <span className="text-xs text-morandi-secondary font-mono truncate" title={row.webhook_url || ''}>
+        <span
+          className="text-xs text-morandi-secondary font-mono truncate"
+          title={row.webhook_url || ''}
+        >
           {row.webhook_url || '-'}
         </span>
       ),
     },
-  ];
+  ]
 
   return (
     <div className="h-full">
@@ -120,5 +118,5 @@ export const BotManagementView: React.FC<BotManagementViewProps> = ({
         hoverable={true}
       />
     </div>
-  );
-};
+  )
+}

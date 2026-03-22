@@ -6,24 +6,14 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ code: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params
 
   // 1. 先查團號對應的 tour UUID
-  const { data: tour } = await supabase
-    .from('tours')
-    .select('id')
-    .eq('code', code)
-    .single()
+  const { data: tour } = await supabase.from('tours').select('id').eq('code', code).single()
 
   if (!tour) {
-    return NextResponse.json(
-      { error: 'Tour not found', code },
-      { status: 404 }
-    )
+    return NextResponse.json({ error: 'Tour not found', code }, { status: 404 })
   }
 
   // 2. 查詢 tour_documents 表（用 UUID）
@@ -37,10 +27,7 @@ export async function GET(
     .single()
 
   if (error || !data) {
-    return NextResponse.json(
-      { error: 'File not found', tourId: tour.id },
-      { status: 404 }
-    )
+    return NextResponse.json({ error: 'File not found', tourId: tour.id }, { status: 404 })
   }
 
   // 生成 24hr signed URL
@@ -49,10 +36,7 @@ export async function GET(
     .createSignedUrl(data.file_path, 86400) // 24hr
 
   if (!signedData?.signedUrl) {
-    return NextResponse.json(
-      { error: 'Failed to generate download URL' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to generate download URL' }, { status: 500 })
   }
 
   // 302 redirect to signed URL

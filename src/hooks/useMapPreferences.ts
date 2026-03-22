@@ -53,35 +53,41 @@ export function useMapPreferences(tourId: string | null) {
   }, [tourId])
 
   // 設定展開/收合
-  const setExpanded = useCallback((expanded: boolean) => {
-    setPreferences(prev => ({ ...prev, expanded }))
-    
-    if (tourId) {
-      try {
-        localStorage.setItem(`map_expanded_${tourId}`, String(expanded))
-      } catch (error) {
-        console.error('儲存地圖展開狀態失敗:', error)
+  const setExpanded = useCallback(
+    (expanded: boolean) => {
+      setPreferences(prev => ({ ...prev, expanded }))
+
+      if (tourId) {
+        try {
+          localStorage.setItem(`map_expanded_${tourId}`, String(expanded))
+        } catch (error) {
+          console.error('儲存地圖展開狀態失敗:', error)
+        }
       }
-    }
-  }, [tourId])
+    },
+    [tourId]
+  )
 
   // 設定最後位置
-  const setCenter = useCallback((center: MapCenter) => {
-    setPreferences(prev => ({ ...prev, center }))
-    
-    if (tourId) {
-      try {
-        localStorage.setItem(`map_center_${tourId}`, JSON.stringify(center))
-      } catch (error) {
-        console.error('儲存地圖位置失敗:', error)
+  const setCenter = useCallback(
+    (center: MapCenter) => {
+      setPreferences(prev => ({ ...prev, center }))
+
+      if (tourId) {
+        try {
+          localStorage.setItem(`map_center_${tourId}`, JSON.stringify(center))
+        } catch (error) {
+          console.error('儲存地圖位置失敗:', error)
+        }
       }
-    }
-  }, [tourId])
+    },
+    [tourId]
+  )
 
   // 清除位置（回到預設）
   const clearCenter = useCallback(() => {
     setPreferences(prev => ({ ...prev, center: null }))
-    
+
     if (tourId) {
       try {
         localStorage.removeItem(`map_center_${tourId}`)

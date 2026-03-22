@@ -1,6 +1,6 @@
 /**
  * usePaymentStatus - 查詢需求單的付款狀態
- * 
+ *
  * 從 tour_request_id 查詢所有關聯的請款項目，加總金額並區分已付/待付
  */
 
@@ -9,9 +9,9 @@ import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 
 interface PaymentAmounts {
-  paidAmount: number      // 已付款金額（有 paid_at）
-  pendingAmount: number   // 待付款金額（無 paid_at）
-  totalAmount: number     // 總請款金額
+  paidAmount: number // 已付款金額（有 paid_at）
+  pendingAmount: number // 待付款金額（無 paid_at）
+  totalAmount: number // 總請款金額
 }
 
 export function usePaymentStatus(requestId: string | null | undefined) {

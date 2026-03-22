@@ -9,14 +9,17 @@
 ## 🎯 核心原則
 
 ### **報價單 = 個人分攤金額**
+
 - 所有價格都是「一個人要付多少錢」
 - 不是「實際要訂幾桌/幾間房」
 
 ### **需求單 = 實際訂位**
+
 - 從訂單總人數推算
 - 助理根據客戶需求安排
 
 ### **核心表是唯一真相來源**
+
 - tour_itinerary_items 儲存所有資料
 - 報價單、需求單都從核心表讀取
 
@@ -28,21 +31,21 @@
 1. 行程表（業務規劃）
    ├─ 選餐廳/飯店/景點
    └─ 不填價格
-   
+
 2. 報價單（業務填價格）
    ├─ 餐廳：填一個人的價格
    ├─ 活動：填一個人的價格
    ├─ 住宿：填房間價格 + 幾人房
    └─ Local：階梯報價
-   
+
 3. 需求單（助理產生）
    ├─ 總人數：從訂單讀取
    ├─ 桌數：助理手動安排
    └─ 房間數：助理手動安排
-   
+
 4. 供應商回覆
    └─ 確認價格填回核心表
-   
+
 5. 確認單/結帳單
    └─ 從核心表讀取
 ```
@@ -111,7 +114,7 @@
   unit_price: 3500
   quantity: 2（幾人房）
   total_cost: 3500
-  
+
 個人分攤計算（系統自動）：
   成人成本 += 3500 ÷ 2 = 1750
 ```
@@ -140,7 +143,7 @@
   title: 'Local 報價'
   unit_price: 5000（目前適用價格）
   note: '10人=$5,000 / 20人=$4,000 / 30人=$3,333'
-  
+
 階梯表儲存（tierPricings）：
   [
     { participants: 10, unitPrice: 5000 },
@@ -150,6 +153,7 @@
 ```
 
 **Local 報價修改規則**：
+
 - ✅ 只能透過「Local 報價」視窗修改
 - ❌ 禁止直接在表格編輯單價
 - ✅ 人數變動時自動切換適用階梯
@@ -183,7 +187,7 @@
 餐廳需求單：
   ✅ 帶入：總人數 30人
   ❌ 不計算：桌數（助理手動填）
-  
+
   理由：
   - 桌數由助理根據餐廳狀況安排
   - 可能 10人一桌 → 3桌
@@ -193,7 +197,7 @@
 住宿需求單：
   ✅ 帶入：總人數 30人
   ❌ 不計算：房間數（助理手動填）
-  
+
   理由：
   - 房間數由客戶需求決定
   - 可能全部雙人房 → 15間
@@ -216,23 +220,23 @@ tour_itinerary_items {
   category TEXT,               -- meals/accommodation/activities
   sub_category TEXT,           -- breakfast/lunch/dinner (餐食)
   title TEXT,                  -- 項目名稱
-  
+
   -- 報價資訊（報價單填寫）
   unit_price DECIMAL,          -- 單價
   quantity INT,                -- 數量（餐廳=1, 住宿=幾人房）
   total_cost DECIMAL,          -- 小計（unit_price × quantity 或其他邏輯）
-  
+
   -- 需求單資訊（助理填寫）
   special_requirements TEXT,   -- 特殊需求（司機餐、素食等）
-  
+
   -- 供應商回覆（需求單回來後填）
   quoted_cost DECIMAL,         -- 供應商報價
   confirmed_cost DECIMAL,      -- 確認價格
-  
+
   -- 關聯
   resource_type TEXT,          -- restaurant/hotel/attraction
   resource_id UUID,            -- 關聯資料庫 ID
-  
+
   -- 狀態
   request_status TEXT,         -- none/sent/replied
   quote_status TEXT,           -- drafted/quoted/confirmed
@@ -248,11 +252,11 @@ tour_itinerary_items {
 行程表（業務）
   └─ 選餐廳：一蘭拉麵
   └─ 核心表：title='一蘭拉麵', unit_price=null
-  
+
 報價單（業務）
   └─ 填價格：$1000/人
   └─ 核心表：unit_price=1000, quantity=1
-  
+
 需求單（助理）
   └─ 從核心表讀取：
       - 餐廳名稱：一蘭拉麵
@@ -262,11 +266,11 @@ tour_itinerary_items {
       - 桌數：3桌
       - 特殊需求：司機餐
   └─ 產生 PDF 發送
-  
+
 供應商回覆
   └─ 確認價格：$1,100/人
   └─ 核心表：quoted_cost=1100
-  
+
 確認單/結帳單
   └─ 從核心表讀取最新資料
 ```
@@ -278,19 +282,19 @@ tour_itinerary_items {
 ### **個人成本計算**
 
 ```typescript
-成人成本 = 
+成人成本 =
   Σ(餐廳 unit_price) +
   Σ(活動 unit_price) +
   Σ(住宿 unit_price ÷ quantity) +
   Local_unit_price（適用階梯）
 
-兒童成本 = 
+兒童成本 =
   Σ(餐廳 child_price || unit_price) +
   Σ(活動 child_price || unit_price) +
   Σ(住宿 child_price ÷ quantity) +
   Local_unit_price（適用階梯）
 
-嬰兒成本 = 
+嬰兒成本 =
   Σ(餐廳 infant_price || 0) +
   Σ(活動 infant_price || 0) +
   Σ(住宿 infant_price || 0) +
@@ -328,11 +332,11 @@ tour_itinerary_items {
 餐廳/活動：
   ✅ 顯示：項目名稱、單價
   ❌ 隱藏：數量欄位（固定 = 1）
-  
+
 住宿：
   ✅ 顯示：項目名稱、單價、數量（幾人房）
   ✅ 可編輯：所有欄位
-  
+
 Local 報價：
   ✅ 顯示：項目名稱、單價、備註（階梯資訊）
   ❌ 禁止：直接編輯單價
@@ -349,7 +353,7 @@ Local 報價：
     - 餐廳名稱（從核心表）
     - 預算（unit_price）
     - 總人數（從訂單）
-  
+
   助理填寫：
     - 桌數
     - 特殊需求
@@ -360,7 +364,7 @@ Local 報價：
     - 飯店名稱（從核心表）
     - 預算（unit_price）
     - 總人數（從訂單）
-  
+
   助理填寫：
     - 房間數
     - 房型需求
@@ -377,12 +381,12 @@ Local 報價：
   □ 住宿數量欄位正常顯示 ✅
   □ Local 報價禁止直接編輯 ⏳
   □ Local 備註顯示階梯資訊 ⏳
-  
+
 □ 需求單
   □ 自動帶入總人數 ⏳
   □ 桌數/房間數手動填寫 ⏳
   □ 從核心表 JOIN 讀取資料 ⏳
-  
+
 □ 核心表
   □ 欄位結構正確 ✅
   □ 報價單寫回核心表 ✅
@@ -394,18 +398,21 @@ Local 報價：
 ## 📝 待辦事項
 
 ### **P1：Local 報價 UI 改進**
+
 - [ ] 禁止直接編輯單價欄位
 - [ ] 修改只能透過視窗
 - [ ] 備註顯示完整階梯
 - [ ] 人數變動自動切換階梯
 
 ### **P2：需求單自動產生**
+
 - [ ] 從核心表讀取資料
 - [ ] 帶入訂單總人數
 - [ ] 助理手動填寫桌數/房間數
 - [ ] 產生 PDF
 
 ### **P3：供應商回覆流程**
+
 - [ ] 回填確認價格
 - [ ] 更新核心表
 - [ ] 同步到報價單

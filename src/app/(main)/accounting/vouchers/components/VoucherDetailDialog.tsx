@@ -58,10 +58,12 @@ export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDeta
     try {
       const { data, error } = await supabase
         .from('journal_lines')
-        .select(`
+        .select(
+          `
           *,
           account:chart_of_accounts(code, name)
-        `)
+        `
+        )
         .eq('voucher_id', voucher.id)
         .order('line_no')
 
@@ -119,12 +121,24 @@ export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDeta
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground w-16">項次</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground w-24">科目代號</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground w-40">科目名稱</th>
-                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground">摘要</th>
-                  <th className="px-3 py-3 text-right text-xs font-medium text-muted-foreground w-32">借方</th>
-                  <th className="px-3 py-3 text-right text-xs font-medium text-muted-foreground w-32">貸方</th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground w-16">
+                    項次
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground w-24">
+                    科目代號
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground w-40">
+                    科目名稱
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-muted-foreground">
+                    摘要
+                  </th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-muted-foreground w-32">
+                    借方
+                  </th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-muted-foreground w-32">
+                    貸方
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -142,12 +156,10 @@ export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDeta
                   </tr>
                 ) : (
                   <>
-                    {lines.map((line) => (
+                    {lines.map(line => (
                       <tr key={line.id} className="border-t hover:bg-muted/30">
                         <td className="px-3 py-3 text-sm text-center">{line.line_no}</td>
-                        <td className="px-3 py-3 font-mono text-sm">
-                          {line.account?.code || '-'}
-                        </td>
+                        <td className="px-3 py-3 font-mono text-sm">{line.account?.code || '-'}</td>
                         <td className="px-3 py-3 text-sm font-medium">
                           {line.account?.name || '-'}
                         </td>
@@ -166,7 +178,9 @@ export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDeta
                     ))}
                     {/* 合計 */}
                     <tr className="border-t-2 bg-muted/50">
-                      <td colSpan={4} className="px-3 py-3 text-right font-semibold text-sm">合計</td>
+                      <td colSpan={4} className="px-3 py-3 text-right font-semibold text-sm">
+                        合計
+                      </td>
                       <td className="px-3 py-3 text-right font-mono font-semibold text-sm tabular-nums">
                         {voucher.total_debit.toLocaleString()}
                       </td>

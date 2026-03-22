@@ -1,1 +1,1 @@
-export { WarRoomPage } from './components/WarRoomPage';
+export { WarRoomPage } from './components/WarRoomPage'

@@ -71,7 +71,11 @@ const CORRECTIONS = [
 
   { code: '3500', name: '其他權益', description: null },
   { code: '3510', name: '國外營運機構財務報表換算之兌換差額', description: null },
-  { code: '3520', name: '透過其他綜合損益按公允價值衡量之金融資產未實現評價損益', description: null },
+  {
+    code: '3520',
+    name: '透過其他綜合損益按公允價值衡量之金融資產未實現評價損益',
+    description: null,
+  },
   { code: '3530', name: '備供出售金融資產未實現損益', description: null },
   { code: '3540', name: '確定福利計畫之再衡量數', description: null },
 
@@ -103,10 +107,7 @@ const CORRECTIONS = [
 async function main() {
   console.log('開始修正簡繁體科目名稱...\n')
 
-  const { data: workspaces } = await supabase
-    .from('workspaces')
-    .select('id, name')
-    .limit(1)
+  const { data: workspaces } = await supabase.from('workspaces').select('id, name').limit(1)
 
   if (!workspaces || workspaces.length === 0) {
     console.error('❌ 找不到 workspace')

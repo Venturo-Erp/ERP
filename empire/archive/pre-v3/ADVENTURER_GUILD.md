@@ -49,6 +49,7 @@ ak_41978e84caccebb712db81a1bbf612e9
 ### 1. 接收神諭（William 的指令）
 
 **範例**：
+
 ```
 William: "研究小紅書競品，找出可借鑒的報價方式"
 ```
@@ -56,33 +57,39 @@ William: "研究小紅書競品，找出可借鑒的報價方式"
 ### 2. 拆解任務
 
 **分析**：
+
 - 技術部分：需要抓取小紅書內容
 - 分析部分：需要競品分析
 - 實作部分：需要對照 ERP
 
 **拆分**：
+
 - 模塊 1：技術方案
 - 模塊 2：內容分析
 
 ### 3. 派遣冒險者
 
 **子任務 1** → Matthew 🔧
+
 - 研究工具（you-get/yt-dlp）
 - 抓取內容
 
 **子任務 2** → Caesar 🏛️
+
 - 分析競品
 - 提出建議
 
 ### 4. 監控進度
 
 **查看狀態**：
+
 ```bash
 cd ~/.openclaw/skills/openmoss-planner
 python3 task-cli.py --key ak_41978e84caccebb712db81a1bbf612e9 st list --task-id <task_id>
 ```
 
 **查看日誌**：
+
 ```bash
 python3 task-cli.py --key ak_41978e84caccebb712db81a1bbf612e9 log list --days 1
 ```
@@ -90,6 +97,7 @@ python3 task-cli.py --key ak_41978e84caccebb712db81a1bbf612e9 log list --days 1
 ### 5. 收尾交付
 
 **當所有子任務完成**：
+
 1. 整理交付物
 2. 撰寫總結報告
 3. 更新任務狀態為 `completed`
@@ -102,12 +110,14 @@ python3 task-cli.py --key ak_41978e84caccebb712db81a1bbf612e9 log list --days 1
 ### Matthew 的一天
 
 **早上醒來**：
+
 ```bash
 cd ~/.openclaw/skills/openmoss-executor
 python3 task-cli.py --key <API_KEY> st mine
 ```
 
 **看到任務**：
+
 ```
 ✅ 研究小紅書抓取工具
 狀態：assigned
@@ -115,17 +125,20 @@ python3 task-cli.py --key <API_KEY> st mine
 ```
 
 **開始執行**：
+
 ```bash
 python3 task-cli.py --key <API_KEY> st start <sub_task_id>
 ```
 
 **執行過程**：
+
 1. 研究 you-get 工具
 2. 測試安裝
 3. 寫文檔
 4. 寫日誌記錄進度
 
 **提交成果**：
+
 ```bash
 python3 task-cli.py --key <API_KEY> st submit <sub_task_id>
 ```
@@ -150,7 +163,7 @@ planning → active → in_progress → completed
 pending → assigned → in_progress → review → done ✅
              ↑            ↓
              └── rework ──┘
-             
+
 assigned → blocked → assigned（重新分配）
 ```
 
@@ -193,13 +206,13 @@ python3 task-cli.py --key ak_41978e84caccebb712db81a1bbf612e9 \
 
 ### 評分標準
 
-| 分數 | 含義 | 積分影響 |
-|------|------|----------|
-| 5 | 超出預期 | +5 |
-| 4 | 完全達標 | +5 |
-| 3 | 基本達標 | 無變化 |
-| 2 | 部分不足 | -5 |
-| 1 | 嚴重不足 | -5 |
+| 分數 | 含義     | 積分影響 |
+| ---- | -------- | -------- |
+| 5    | 超出預期 | +5       |
+| 4    | 完全達標 | +5       |
+| 3    | 基本達標 | 無變化   |
+| 2    | 部分不足 | -5       |
+| 1    | 嚴重不足 | -5       |
 
 ### 查看排行榜
 
@@ -208,6 +221,7 @@ python3 task-cli.py --key <API_KEY> score leaderboard
 ```
 
 **用途**：
+
 - 分配任務時參考
 - 高分冒險者優先分配
 - 激勵機制
@@ -216,18 +230,18 @@ python3 task-cli.py --key <API_KEY> score leaderboard
 
 ## 📚 遊戲化術語對照
 
-| 遊戲術語 | 技術術語 | 說明 |
-|---------|---------|------|
-| 創世神 | William Chien | 下達指令的人 |
-| 大祭司 | William AI | 中樞神經、任務調度者 |
-| 冒險者工會 | OpenMOSS | 任務管理系統 |
-| 冒險者 | AI Agents | 執行任務的 agents |
-| 任務發布 | task create | 創建任務 |
-| 派遣冒險者 | st create --assign | 分配子任務 |
-| 任務日誌 | log create | 記錄工作過程 |
-| 戰利品 | deliverable | 交付物 |
-| 收尾 | task completed | 任務完成 |
-| 冒險者等級 | score | 積分 |
+| 遊戲術語   | 技術術語           | 說明                 |
+| ---------- | ------------------ | -------------------- |
+| 創世神     | William Chien      | 下達指令的人         |
+| 大祭司     | William AI         | 中樞神經、任務調度者 |
+| 冒險者工會 | OpenMOSS           | 任務管理系統         |
+| 冒險者     | AI Agents          | 執行任務的 agents    |
+| 任務發布   | task create        | 創建任務             |
+| 派遣冒險者 | st create --assign | 分配子任務           |
+| 任務日誌   | log create         | 記錄工作過程         |
+| 戰利品     | deliverable        | 交付物               |
+| 收尾       | task completed     | 任務完成             |
+| 冒險者等級 | score              | 積分                 |
 
 ---
 
@@ -238,6 +252,7 @@ python3 task-cli.py --key <API_KEY> score leaderboard
 **靈感來源**：《為美好的世界獻上祝福》、《盾之勇者成名錄》
 
 **核心概念**：
+
 1. **創世神下神諭**：William 給指令
 2. **大祭司發布任務**：William AI 拆解並派遣
 3. **冒險者領取任務**：各 AI Agent 執行
@@ -247,12 +262,14 @@ python3 task-cli.py --key <API_KEY> score leaderboard
 ### 為什麼不直接用 sessions_spawn？
 
 **sessions_spawn 的限制**：
+
 - 只能派遣，無法追蹤進度
 - 沒有任務狀態管理
 - 沒有交付物驗收
 - 沒有積分系統
 
 **OpenMOSS 的優勢**：
+
 - ✅ 完整的任務生命週期
 - ✅ 子任務狀態追蹤
 - ✅ 交付物驗收機制
@@ -275,11 +292,13 @@ python3 task-cli.py --key <API_KEY> score leaderboard
 ### 案例：小紅書競品分析（2026-03-15）
 
 **William 下令**：
+
 ```
 研究小紅書連結的旅行社報價方式，找出可借鑒的創新點
 ```
 
 **William AI 執行**：
+
 1. 創建任務：「小紅書競品分析」
 2. 拆分模塊：
    - 技術方案：抓取小紅書內容

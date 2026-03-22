@@ -52,7 +52,7 @@ async function getTourItinerary(tourId: string) {
       code: tour.code || '',
       name: tour.name || '',
       departureDate: tour.departure_date || '',
-      destination: (tour as Record<string, unknown>).location as string || '',
+      destination: ((tour as Record<string, unknown>).location as string) || '',
     },
     items: (items || []) as ItineraryItem[],
   }
@@ -105,7 +105,11 @@ function buildDays(items: ItineraryItem[], departureDate: string): DayData[] {
       if (item.sub_category === 'breakfast') day.breakfast = name
       else if (item.sub_category === 'lunch') day.lunch = name
       else if (item.sub_category === 'dinner') day.dinner = name
-    } else if (item.category === 'activities' || item.category === 'transport' || item.category === 'group-transport') {
+    } else if (
+      item.category === 'activities' ||
+      item.category === 'transport' ||
+      item.category === 'group-transport'
+    ) {
       if (item.title) {
         day.title = day.title ? `${day.title} → ${item.title}` : item.title
       }
@@ -124,7 +128,7 @@ export default async function PublicItineraryPage({
 }) {
   const { tourId } = await params
   const query = await searchParams
-  
+
   const data = await getTourItinerary(tourId)
 
   if (!data) {
@@ -138,16 +142,31 @@ export default async function PublicItineraryPage({
   const tiersStr = query.tiers as string | undefined
   const noteFromUrl = query.note as string | undefined
   const paxFromUrl = query.pax as string | undefined
-  
-  const paxTiers = tiersStr ? tiersStr.split(',').map(Number).filter(n => n > 0) : []
+
+  const paxTiers = tiersStr
+    ? tiersStr
+        .split(',')
+        .map(Number)
+        .filter(n => n > 0)
+    : []
 
   return (
     <div style={{ minHeight: '100vh', background: '#fafaf9', padding: '24px 16px' }}>
-      <div style={{ maxWidth: 900, margin: '0 auto', background: '#fff', borderRadius: 8, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '32px' }}>
-        
+      <div
+        style={{
+          maxWidth: 900,
+          margin: '0 auto',
+          background: '#fff',
+          borderRadius: 8,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          padding: '32px',
+        }}
+      >
         {/* 標題區 */}
         <div style={{ borderBottom: '2px solid #c9a96e', paddingBottom: 16, marginBottom: 24 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}
+          >
             <div>
               <h1 style={{ fontSize: 20, fontWeight: 'bold', color: '#333', marginBottom: 4 }}>
                 {tour.name || '行程表'}
@@ -159,7 +178,15 @@ export default async function PublicItineraryPage({
           </div>
 
           {/* 基本資訊 */}
-          <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, fontSize: 14 }}>
+          <div
+            style={{
+              marginTop: 16,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr 1fr',
+              gap: 16,
+              fontSize: 14,
+            }}
+          >
             <div style={{ display: 'flex', gap: 8 }}>
               <span style={{ color: '#999' }}>目的地：</span>
               <span style={{ fontWeight: 500 }}>{tour.destination || '-'}</span>
@@ -182,15 +209,70 @@ export default async function PublicItineraryPage({
         </div>
 
         {/* 每日行程表格 */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14, marginBottom: 24 }}>
+        <table
+          style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14, marginBottom: 24 }}
+        >
           <thead>
             <tr style={{ background: '#c9a96e', color: '#fff' }}>
-              <th style={{ border: '1px solid rgba(201, 169, 110, 0.5)', padding: '8px 12px', textAlign: 'left', width: 80 }}>日期</th>
-              <th style={{ border: '1px solid rgba(201, 169, 110, 0.5)', padding: '8px 12px', textAlign: 'left' }}>行程內容</th>
-              <th style={{ border: '1px solid rgba(201, 169, 110, 0.5)', padding: '8px 12px', textAlign: 'center', width: 64 }}>早餐</th>
-              <th style={{ border: '1px solid rgba(201, 169, 110, 0.5)', padding: '8px 12px', textAlign: 'center', width: 64 }}>午餐</th>
-              <th style={{ border: '1px solid rgba(201, 169, 110, 0.5)', padding: '8px 12px', textAlign: 'center', width: 64 }}>晚餐</th>
-              <th style={{ border: '1px solid rgba(201, 169, 110, 0.5)', padding: '8px 12px', textAlign: 'left', width: 128 }}>住宿</th>
+              <th
+                style={{
+                  border: '1px solid rgba(201, 169, 110, 0.5)',
+                  padding: '8px 12px',
+                  textAlign: 'left',
+                  width: 80,
+                }}
+              >
+                日期
+              </th>
+              <th
+                style={{
+                  border: '1px solid rgba(201, 169, 110, 0.5)',
+                  padding: '8px 12px',
+                  textAlign: 'left',
+                }}
+              >
+                行程內容
+              </th>
+              <th
+                style={{
+                  border: '1px solid rgba(201, 169, 110, 0.5)',
+                  padding: '8px 12px',
+                  textAlign: 'center',
+                  width: 64,
+                }}
+              >
+                早餐
+              </th>
+              <th
+                style={{
+                  border: '1px solid rgba(201, 169, 110, 0.5)',
+                  padding: '8px 12px',
+                  textAlign: 'center',
+                  width: 64,
+                }}
+              >
+                午餐
+              </th>
+              <th
+                style={{
+                  border: '1px solid rgba(201, 169, 110, 0.5)',
+                  padding: '8px 12px',
+                  textAlign: 'center',
+                  width: 64,
+                }}
+              >
+                晚餐
+              </th>
+              <th
+                style={{
+                  border: '1px solid rgba(201, 169, 110, 0.5)',
+                  padding: '8px 12px',
+                  textAlign: 'left',
+                  width: 128,
+                }}
+              >
+                住宿
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -203,13 +285,34 @@ export default async function PublicItineraryPage({
                 <td style={{ border: '1px solid #e8e5e0', padding: '8px 12px', fontWeight: 500 }}>
                   {day.title || '待安排'}
                 </td>
-                <td style={{ border: '1px solid #e8e5e0', padding: '8px 12px', textAlign: 'center', fontSize: 12 }}>
+                <td
+                  style={{
+                    border: '1px solid #e8e5e0',
+                    padding: '8px 12px',
+                    textAlign: 'center',
+                    fontSize: 12,
+                  }}
+                >
                   {day.breakfast || '-'}
                 </td>
-                <td style={{ border: '1px solid #e8e5e0', padding: '8px 12px', textAlign: 'center', fontSize: 12 }}>
+                <td
+                  style={{
+                    border: '1px solid #e8e5e0',
+                    padding: '8px 12px',
+                    textAlign: 'center',
+                    fontSize: 12,
+                  }}
+                >
                   {day.lunch || '-'}
                 </td>
-                <td style={{ border: '1px solid #e8e5e0', padding: '8px 12px', textAlign: 'center', fontSize: 12 }}>
+                <td
+                  style={{
+                    border: '1px solid #e8e5e0',
+                    padding: '8px 12px',
+                    textAlign: 'center',
+                    fontSize: 12,
+                  }}
+                >
                   {day.dinner || '-'}
                 </td>
                 <td style={{ border: '1px solid #e8e5e0', padding: '8px 12px', fontSize: 12 }}>
@@ -223,17 +326,27 @@ export default async function PublicItineraryPage({
         {/* 我們的備註 */}
         {noteFromUrl && (
           <div style={{ marginBottom: 24 }}>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
+            <label
+              style={{
+                display: 'block',
+                fontSize: 13,
+                fontWeight: 600,
+                marginBottom: 6,
+                color: '#555',
+              }}
+            >
               我們的備註
             </label>
-            <div style={{
-              padding: '8px 12px',
-              border: '1px solid #e8e5e0',
-              borderRadius: 4,
-              fontSize: 14,
-              background: '#fafaf5',
-              whiteSpace: 'pre-wrap',
-            }}>
+            <div
+              style={{
+                padding: '8px 12px',
+                border: '1px solid #e8e5e0',
+                borderRadius: 4,
+                fontSize: 14,
+                background: '#fafaf5',
+                whiteSpace: 'pre-wrap',
+              }}
+            >
               {noteFromUrl}
             </div>
           </div>
@@ -245,7 +358,16 @@ export default async function PublicItineraryPage({
         )}
 
         {/* 頁尾 */}
-        <div style={{ paddingTop: 16, borderTop: '1px solid #e8e5e0', textAlign: 'center', fontSize: 12, color: '#999', marginTop: 32 }}>
+        <div
+          style={{
+            paddingTop: 16,
+            borderTop: '1px solid #e8e5e0',
+            textAlign: 'center',
+            fontSize: 12,
+            color: '#999',
+            marginTop: 32,
+          }}
+        >
           <p>本行程表由 {COMPANY_NAME} 提供</p>
         </div>
       </div>

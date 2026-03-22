@@ -2,17 +2,17 @@
 
 ## 📋 需要建立的表格（9 個）
 
-| # | 表名 | 用途 | 狀態 |
-|---|------|------|------|
-| 1 | `chart_of_accounts` | 會計科目表 | ✅ 必要 |
-| 2 | `erp_bank_accounts` | 銀行帳戶 | ✅ 必要 |
-| 3 | `accounting_events` | 會計事件 | ✅ 必要 |
-| 4 | `journal_vouchers` | 傳票頭 | ✅ 必要 |
-| 5 | `journal_lines` | 傳票分錄 | ✅ 必要 |
-| 6 | `posting_rules` | 過帳規則 | ⚠️ 可選 |
-| 7 | `accounting_periods` | 會計期間 | ⚠️ 可選 |
-| 8 | `accounting_period_closings` | 期末結轉記錄 | ✅ 必要 |
-| 9 | `checks` | 票據管理 | ✅ 必要 |
+| #   | 表名                         | 用途         | 狀態    |
+| --- | ---------------------------- | ------------ | ------- |
+| 1   | `chart_of_accounts`          | 會計科目表   | ✅ 必要 |
+| 2   | `erp_bank_accounts`          | 銀行帳戶     | ✅ 必要 |
+| 3   | `accounting_events`          | 會計事件     | ✅ 必要 |
+| 4   | `journal_vouchers`           | 傳票頭       | ✅ 必要 |
+| 5   | `journal_lines`              | 傳票分錄     | ✅ 必要 |
+| 6   | `posting_rules`              | 過帳規則     | ⚠️ 可選 |
+| 7   | `accounting_periods`         | 會計期間     | ⚠️ 可選 |
+| 8   | `accounting_period_closings` | 期末結轉記錄 | ✅ 必要 |
+| 9   | `checks`                     | 票據管理     | ✅ 必要 |
 
 ---
 
@@ -178,6 +178,7 @@ DROP TYPE IF EXISTS subledger_type CASCADE;
 ## 📞 支援
 
 如果遇到問題：
+
 1. 檢查 Supabase logs
 2. 確認 `get_current_user_workspace()` 和 `is_super_admin()` 函數存在
 3. 確認 workspaces 表存在且有資料

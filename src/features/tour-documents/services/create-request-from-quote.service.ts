@@ -121,5 +121,5 @@ function getCategoryRequestType(categoryName: string): string {
   if (categoryName.includes('機票') || categoryName.includes('航班')) {
     return '訂機票'
   }
-  return categoryName  // 預設使用 category 名稱
+  return categoryName // 預設使用 category 名稱
 }

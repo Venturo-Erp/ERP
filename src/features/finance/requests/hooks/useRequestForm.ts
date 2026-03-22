@@ -166,7 +166,7 @@ export function useRequestForm() {
       tour_id: '',
       order_id: '',
       expense_type: '',
-      request_date: getNextThursdayDate(),  // ✅ 預設下週四
+      request_date: getNextThursdayDate(), // ✅ 預設下週四
       notes: '',
       is_special_billing: false,
       created_by: currentUser?.id || '',

@@ -231,7 +231,7 @@ export function DisbursementPrintDialog({
               </span>
             </div>
           ) : (
-            <div 
+            <div
               className="shadow-lg bg-white"
               style={{
                 width: '210mm',

@@ -58,34 +58,33 @@ export default function AccountingPage() {
     // 自動檢查並初始化科目表
     const checkAndInitialize = async () => {
       try {
-        
         // 檢查科目表是否為空
         const { data: accounts, error } = await supabase
           .from('chart_of_accounts')
           .select('id')
           .limit(1)
-        
+
         if (error) {
           console.error('檢查科目表失敗:', error)
           return
         }
-        
+
         // 如果科目表為空，自動初始化
         if (!accounts || accounts.length === 0) {
           setIsInitializing(true)
-          
+
           const response = await fetch('/api/accounting/initialize', {
             method: 'POST',
           })
-          
+
           if (!response.ok) {
             const error = await response.json()
             throw new Error(error.error || '初始化失敗')
           }
-          
+
           const result = await response.json()
           console.log('自動初始化完成:', result)
-          
+
           setIsInitializing(false)
         }
       } catch (error) {
@@ -93,14 +92,12 @@ export default function AccountingPage() {
         setIsInitializing(false)
       }
     }
-    
+
     checkAndInitialize()
   }, [])
 
   return (
-    <ContentPageLayout
-      title="會計系統"
-    >
+    <ContentPageLayout title="會計系統">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {quickLinks.map(link => (
           <Link key={link.href} href={link.href}>

@@ -7,10 +7,12 @@
 ## 📚 核心文檔
 
 ### 1. 系統總覽
+
 - **MEMORY_UTOPIA.md** — 完整系統說明（創世神視角）
 - **MEMORY_MAGIC.md** — 雙魔法研究（技術細節）
 
 ### 2. 工作區文檔
+
 - **~/.openclaw/workspace-william/MEMORY_UTOPIA.md** — 快速參考
 - **~/.openclaw/workspace-william/AGENTS.md** — 規範（原則 3）
 - **~/.openclaw/workspace-william/TOOLS.md** — 使用方式
@@ -21,6 +23,7 @@
 ## 🗂️ 文件位置
 
 ### 系統檔案
+
 ```
 ~/.openclaw/empire-memory/
 ├── citizens/              # 14 位公民的 SQLite DB
@@ -38,6 +41,7 @@
 ```
 
 ### OpenViking 檔案
+
 ```
 ~/.openclaw/openviking_workspace/
 └── （OpenViking 內部結構）
@@ -47,6 +51,7 @@
 ```
 
 ### 執行腳本
+
 ```
 ~/.openclaw/workspace-william/scripts/
 └── run-harvest.sh       # 收割執行 wrapper
@@ -59,12 +64,14 @@
 ### 公民使用
 
 **存記憶**：
+
 ```bash
 python3 ~/.openclaw/empire-memory/citizen-memory.py store {agent_id} \
   "內容" "category" {importance}
 ```
 
 **搜記憶**：
+
 ```bash
 python3 ~/.openclaw/empire-memory/citizen-memory.py recall {agent_id} "關鍵字"
 ```
@@ -72,6 +79,7 @@ python3 ~/.openclaw/empire-memory/citizen-memory.py recall {agent_id} "關鍵字
 ### 創世神使用
 
 **查看全局**：
+
 ```bash
 for db in ~/.openclaw/empire-memory/citizens/*.db; do
   python3 ~/.openclaw/empire-memory/citizen-memory.py stats $(basename $db .db)
@@ -79,6 +87,7 @@ done
 ```
 
 **手動收割**：
+
 ```bash
 bash ~/.openclaw/workspace-william/scripts/run-harvest.sh
 ```

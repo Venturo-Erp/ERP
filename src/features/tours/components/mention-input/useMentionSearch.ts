@@ -93,11 +93,13 @@ export function useMentionSearch(countryName: string, query: string, isOpen: boo
         if (controller.signal.aborted) return
 
         setResults(
-          (data || []).map((item: { id: string; name: string; cities: { name: string } | null }) => ({
-            id: item.id,
-            name: item.name,
-            city_name: (item.cities as { name: string } | null)?.name || '',
-          }))
+          (data || []).map(
+            (item: { id: string; name: string; cities: { name: string } | null }) => ({
+              id: item.id,
+              name: item.name,
+              city_name: (item.cities as { name: string } | null)?.name || '',
+            })
+          )
         )
       } catch {
         // silently fail

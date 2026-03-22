@@ -317,7 +317,7 @@ export default function HRPage() {
               size="sm"
               variant="outline"
               className="h-7 text-xs"
-              onClick={(e) => {
+              onClick={e => {
                 e.stopPropagation()
                 setLineBindingEmployee(employee)
               }}
@@ -496,10 +496,7 @@ export default function HRPage() {
         />
       )}
 
-      <Dialog 
-        open={isAddDialogOpen} 
-        onOpenChange={setIsAddDialogOpen}
-      >
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent level={1} className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{LABELS.ADD_EMPLOYEE}</DialogTitle>
@@ -545,16 +542,15 @@ export default function HRPage() {
                 <p className="font-medium text-morandi-primary">
                   {lineBindingEmployee.display_name || lineBindingEmployee.chinese_name || '員工'}
                 </p>
-                <p className="text-sm text-morandi-secondary mt-1">
-                  請掃描 QR Code 完成綁定
-                </p>
+                <p className="text-sm text-morandi-secondary mt-1">請掃描 QR Code 完成綁定</p>
               </div>
               <div className="flex gap-2 w-full">
                 <Button
                   variant="outline"
                   className="flex-1"
                   onClick={() => {
-                    const empCode = lineBindingEmployee.employee_number || lineBindingEmployee.id.slice(0, 8)
+                    const empCode =
+                      lineBindingEmployee.employee_number || lineBindingEmployee.id.slice(0, 8)
                     const url = `https://line.me/R/oaMessage/@745gftqd?綁定 ${empCode}`
                     navigator.clipboard.writeText(url)
                     toast.success('連結已複製')
@@ -565,7 +561,8 @@ export default function HRPage() {
                 </Button>
               </div>
               <p className="text-xs text-morandi-muted text-center">
-                掃碼後會打開 LINE 對話<br/>
+                掃碼後會打開 LINE 對話
+                <br />
                 自動傳送綁定指令完成綁定
               </p>
             </div>

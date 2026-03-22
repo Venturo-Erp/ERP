@@ -70,7 +70,10 @@ export default function TreasuryPage() {
       return isWithinInterval(dt, monthRange)
     })
 
-    const totalIncome = monthReceipts.reduce((sum, r) => sum + (r.actual_amount || r.receipt_amount || 0), 0)
+    const totalIncome = monthReceipts.reduce(
+      (sum, r) => sum + (r.actual_amount || r.receipt_amount || 0),
+      0
+    )
     const totalExpense = monthPayments
       .filter(pr => pr.status === 'approved' || pr.status === 'paid')
       .reduce((sum, pr) => sum + (pr.amount || 0), 0)
@@ -110,7 +113,8 @@ export default function TreasuryPage() {
       transactions.push({
         id: pr.id,
         date: pr.request_date || pr.created_at || '',
-        description: `${pr.code || pr.request_number || ''} ${pr.supplier_name || pr.tour_name || ''}`.trim(),
+        description:
+          `${pr.code || pr.request_number || ''} ${pr.supplier_name || pr.tour_name || ''}`.trim(),
         type: 'expense',
         amount: pr.amount || 0,
         status: pr.status === 'paid' ? '已付款' : pr.status === 'approved' ? '已核准' : '待審核',
@@ -172,9 +176,7 @@ export default function TreasuryPage() {
               {isLoading ? '...' : formatCurrency(stats.totalIncome)}
             </div>
             {stats.pendingReceipts > 0 && (
-              <p className="text-xs text-morandi-gold mt-1">
-                {stats.pendingReceipts} 筆待確認
-              </p>
+              <p className="text-xs text-morandi-gold mt-1">{stats.pendingReceipts} 筆待確認</p>
             )}
           </CardContent>
         </Card>
@@ -191,22 +193,20 @@ export default function TreasuryPage() {
               {isLoading ? '...' : formatCurrency(stats.totalExpense)}
             </div>
             {stats.pendingPayments > 0 && (
-              <p className="text-xs text-morandi-gold mt-1">
-                {stats.pendingPayments} 筆待審核
-              </p>
+              <p className="text-xs text-morandi-gold mt-1">{stats.pendingPayments} 筆待審核</p>
             )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-morandi-secondary">
-              本月餘額
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-morandi-secondary">本月餘額</CardTitle>
             <Wallet className="h-4 w-4 text-morandi-gold" />
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${stats.balance >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}>
+            <div
+              className={`text-2xl font-bold ${stats.balance >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}
+            >
               {isLoading ? '...' : formatCurrency(stats.balance)}
             </div>
           </CardContent>
@@ -214,9 +214,7 @@ export default function TreasuryPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-morandi-secondary">
-              待處理撥款
-            </CardTitle>
+            <CardTitle className="text-sm font-medium text-morandi-secondary">待處理撥款</CardTitle>
             <AlertCircle className="h-4 w-4 text-morandi-blue" />
           </CardHeader>
           <CardContent>
@@ -246,11 +244,21 @@ export default function TreasuryPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-3 px-2 text-sm font-medium text-morandi-secondary">日期</th>
-                    <th className="text-left py-3 px-2 text-sm font-medium text-morandi-secondary">類型</th>
-                    <th className="text-left py-3 px-2 text-sm font-medium text-morandi-secondary">說明</th>
-                    <th className="text-right py-3 px-2 text-sm font-medium text-morandi-secondary">金額</th>
-                    <th className="text-center py-3 px-2 text-sm font-medium text-morandi-secondary">狀態</th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-morandi-secondary">
+                      日期
+                    </th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-morandi-secondary">
+                      類型
+                    </th>
+                    <th className="text-left py-3 px-2 text-sm font-medium text-morandi-secondary">
+                      說明
+                    </th>
+                    <th className="text-right py-3 px-2 text-sm font-medium text-morandi-secondary">
+                      金額
+                    </th>
+                    <th className="text-center py-3 px-2 text-sm font-medium text-morandi-secondary">
+                      狀態
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -269,19 +277,23 @@ export default function TreasuryPage() {
                       <td className="py-3 px-2">
                         <Badge
                           variant={tx.type === 'income' ? 'default' : 'outline'}
-                          className={tx.type === 'income'
-                            ? 'bg-morandi-green/20 text-morandi-green border-0'
-                            : 'bg-morandi-red/10 text-morandi-red border-0'
+                          className={
+                            tx.type === 'income'
+                              ? 'bg-morandi-green/20 text-morandi-green border-0'
+                              : 'bg-morandi-red/10 text-morandi-red border-0'
                           }
                         >
                           {tx.type === 'income' ? '收入' : '支出'}
                         </Badge>
                       </td>
                       <td className="py-3 px-2 text-sm max-w-[300px] truncate">{tx.description}</td>
-                      <td className={`py-3 px-2 text-right font-medium text-sm ${
-                        tx.type === 'income' ? 'text-morandi-green' : 'text-morandi-red'
-                      }`}>
-                        {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                      <td
+                        className={`py-3 px-2 text-right font-medium text-sm ${
+                          tx.type === 'income' ? 'text-morandi-green' : 'text-morandi-red'
+                        }`}
+                      >
+                        {tx.type === 'income' ? '+' : '-'}
+                        {formatCurrency(tx.amount)}
                       </td>
                       <td className="py-3 px-2 text-center">
                         <Badge variant="outline" className="text-xs">

@@ -1,29 +1,29 @@
-'use client';
+'use client'
 
 /**
  * 魔法圖書館視圖 - 使用 EnhancedTable
  */
 
-import { ExternalLink, Github } from 'lucide-react';
-import { EnhancedTable } from '@/components/ui/enhanced-table';
-import type { TableColumn } from '@/components/ui/enhanced-table';
+import { ExternalLink, Github } from 'lucide-react'
+import { EnhancedTable } from '@/components/ui/enhanced-table'
+import type { TableColumn } from '@/components/ui/enhanced-table'
 
 type MagicItem = {
-  id: string;
-  name: string;
-  category: string;
-  official_url: string | null;
-  github_url: string | null;
-  current_version: string | null;
-  latest_version: string | null;
-  update_status: 'latest' | 'update_available' | 'outdated' | 'unknown';
-  last_checked_at: string | null;
-  description: string | null;
-};
+  id: string
+  name: string
+  category: string
+  official_url: string | null
+  github_url: string | null
+  current_version: string | null
+  latest_version: string | null
+  update_status: 'latest' | 'update_available' | 'outdated' | 'unknown'
+  last_checked_at: string | null
+  description: string | null
+}
 
 interface MagicLibraryViewProps {
-  items: MagicItem[];
-  loading: boolean;
+  items: MagicItem[]
+  loading: boolean
 }
 
 const getStatusBadge = (status: string) => {
@@ -32,14 +32,11 @@ const getStatusBadge = (status: string) => {
     update_available: { text: '有更新', class: 'bg-amber-100 text-amber-700' },
     outdated: { text: '過時', class: 'bg-red-100 text-red-700' },
     unknown: { text: '未知', class: 'bg-morandi-container text-morandi-secondary' },
-  };
-  return badges[status as keyof typeof badges] || badges.unknown;
-};
+  }
+  return badges[status as keyof typeof badges] || badges.unknown
+}
 
-export const MagicLibraryView: React.FC<MagicLibraryViewProps> = ({
-  items,
-  loading,
-}) => {
+export const MagicLibraryView: React.FC<MagicLibraryViewProps> = ({ items, loading }) => {
   const columns: TableColumn<MagicItem>[] = [
     {
       key: 'name',
@@ -80,12 +77,12 @@ export const MagicLibraryView: React.FC<MagicLibraryViewProps> = ({
       label: '狀態',
       width: '100px',
       render: (_value: unknown, row: MagicItem) => {
-        const badge = getStatusBadge(row.update_status);
+        const badge = getStatusBadge(row.update_status)
         return (
           <span className={`px-2 py-1 rounded text-xs font-medium ${badge.class}`}>
             {badge.text}
           </span>
-        );
+        )
       },
     },
     {
@@ -111,7 +108,7 @@ export const MagicLibraryView: React.FC<MagicLibraryViewProps> = ({
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-700"
               title="官網"
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             >
               <ExternalLink className="h-4 w-4" />
             </a>
@@ -123,7 +120,7 @@ export const MagicLibraryView: React.FC<MagicLibraryViewProps> = ({
               rel="noopener noreferrer"
               className="text-blue-600 hover:text-blue-700"
               title="GitHub"
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             >
               <Github className="h-4 w-4" />
             </a>
@@ -131,7 +128,7 @@ export const MagicLibraryView: React.FC<MagicLibraryViewProps> = ({
         </div>
       ),
     },
-  ];
+  ]
 
   return (
     <div className="h-full">
@@ -143,5 +140,5 @@ export const MagicLibraryView: React.FC<MagicLibraryViewProps> = ({
         hoverable={true}
       />
     </div>
-  );
-};
+  )
+}

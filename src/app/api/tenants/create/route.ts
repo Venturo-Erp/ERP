@@ -1,13 +1,13 @@
 /**
  * 建立租戶 API
- * 
+ *
  * 功能：
  * 1. 建立 workspace
  * 2. 建立第一個管理員 (employee + auth + profile)
  * 3. 建立公告頻道
  * 4. Seed 基礎資料 (countries, cities)
  * 5. 建立 workspace bot
- * 
+ *
  * 權限：只有 Corner 的 super_admin 可以呼叫
  */
 
@@ -22,7 +22,7 @@ interface CreateTenantRequest {
   workspaceName: string
   workspaceCode: string
   workspaceType: string | null
-  
+
   // 第一個管理員資訊
   adminEmployeeNumber: string
   adminName: string
@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     const supabaseAdmin = getSupabaseAdminClient()
-    
+
     // 檢查當前用戶是否為 Corner 的 super_admin
     const { data: currentEmployee } = await supabaseAdmin
       .from('employees')
@@ -64,7 +64,9 @@ export async function POST(request: NextRequest) {
 
     const workspaceCode = currentWorkspace?.code
 
-    logger.log(`Permission check: isSuperAdmin=${isSuperAdmin}, workspace=${workspaceCode || 'unknown'}`)
+    logger.log(
+      `Permission check: isSuperAdmin=${isSuperAdmin}, workspace=${workspaceCode || 'unknown'}`
+    )
 
     if (!isSuperAdmin || workspaceCode !== 'CORNER') {
       logger.error(`Permission denied: isSuperAdmin=${isSuperAdmin}, workspace=${workspaceCode}`)
@@ -72,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 解析請求
-    const body = await request.json() as CreateTenantRequest
+    const body = (await request.json()) as CreateTenantRequest
     const {
       workspaceName,
       workspaceCode: newWorkspaceCode,
@@ -137,7 +139,20 @@ export async function POST(request: NextRequest) {
         display_name: adminName,
         email: adminEmail.toLowerCase(),
         roles: ['admin'],
-        permissions: ['*', 'todos', 'payments', 'requests', 'visas', 'calendar', 'workspace', 'quotes', 'tours', 'orders', 'customers', 'hr'], // 完整權限
+        permissions: [
+          '*',
+          'todos',
+          'payments',
+          'requests',
+          'visas',
+          'calendar',
+          'workspace',
+          'quotes',
+          'tours',
+          'orders',
+          'customers',
+          'hr',
+        ], // 完整權限
         is_active: true,
       })
       .select('id')

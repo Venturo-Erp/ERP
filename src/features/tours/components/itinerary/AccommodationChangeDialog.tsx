@@ -9,15 +9,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Check, X } from 'lucide-react'
 
 export interface AccommodationChange {
   dayNumber: number
   oldHotel: string
   newHotel: string
-  hasQuote: boolean      // 報價單已有成本
+  hasQuote: boolean // 報價單已有成本
   quotedPrice?: number
-  hasRequest: boolean    // 需求單已發出
+  hasRequest: boolean // 需求單已發出
   requestStatus?: string
 }
 
@@ -38,7 +38,12 @@ export function AccommodationChangeDialog({
   const requestChanges = changes.filter(c => c.hasRequest)
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onCancel() }}>
+    <Dialog
+      open={open}
+      onOpenChange={v => {
+        if (!v) onCancel()
+      }}
+    >
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-amber-600">
@@ -48,7 +53,7 @@ export function AccommodationChangeDialog({
           <DialogDescription asChild>
             <div className="space-y-3 text-sm">
               <p className="text-foreground">偵測到以下住宿變更：</p>
-              
+
               {changes.map(c => (
                 <div key={c.dayNumber} className="bg-muted/50 rounded-md p-2 space-y-1">
                   <div className="font-medium">第 {c.dayNumber} 天</div>
@@ -93,8 +98,12 @@ export function AccommodationChangeDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>取消</Button>
+          <Button variant="outline" onClick={onCancel}>
+            <X className="h-4 w-4 mr-1" />
+            取消
+          </Button>
           <Button onClick={onConfirm} className="bg-amber-600 hover:bg-amber-700 text-white">
+            <Check className="h-4 w-4 mr-1" />
             確認變更
           </Button>
         </DialogFooter>

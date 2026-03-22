@@ -10,11 +10,7 @@ interface ActivityQuoteFormProps {
   defaultPax: number
 }
 
-export function ActivityQuoteForm({ 
-  tourId, 
-  requestId,
-  defaultPax 
-}: ActivityQuoteFormProps) {
+export function ActivityQuoteForm({ tourId, requestId, defaultPax }: ActivityQuoteFormProps) {
   const router = useRouter()
   const [submitting, setSubmitting] = useState(false)
   const [contact, setContact] = useState('')
@@ -27,7 +23,7 @@ export function ActivityQuoteForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!contact || !phone) {
       alert('請填寫聯絡人和電話')
       return
@@ -83,27 +79,27 @@ export function ActivityQuoteForm({
       {/* 聯絡資訊 */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-morandi-primary mb-1">
             聯絡人 <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             value={contact}
-            onChange={(e) => setContact(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
+            onChange={e => setContact(e.target.value)}
+            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
             placeholder="請輸入聯絡人姓名"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-morandi-primary mb-1">
             聯絡電話 <span className="text-red-500">*</span>
           </label>
           <input
             type="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
+            onChange={e => setPhone(e.target.value)}
+            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
             placeholder="請輸入聯絡電話"
             required
           />
@@ -111,31 +107,31 @@ export function ActivityQuoteForm({
       </div>
 
       {/* 報價資訊 */}
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-3">
+      <div className="bg-morandi-container border border-border rounded-lg p-4 space-y-3">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-morandi-primary mb-1">
               參加人數 <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               value={pax || ''}
-              onChange={(e) => setPax(parseInt(e.target.value) || 0)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
+              onChange={e => setPax(parseInt(e.target.value) || 0)}
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
               placeholder="0"
               min="1"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-morandi-primary mb-1">
               單價 (元/人) <span className="text-red-500">*</span>
             </label>
             <input
               type="number"
               value={unitPrice || ''}
-              onChange={(e) => setUnitPrice(parseInt(e.target.value) || 0)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
+              onChange={e => setUnitPrice(parseInt(e.target.value) || 0)}
+              className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
               placeholder="0"
               min="1"
               required
@@ -147,25 +143,23 @@ export function ActivityQuoteForm({
       {/* 總金額 */}
       <div className="bg-[#c9a96e]/10 border border-[#c9a96e]/30 rounded-lg p-4">
         <div className="flex items-center justify-between">
-          <span className="text-lg font-semibold text-gray-700">總金額</span>
+          <span className="text-lg font-semibold text-morandi-primary">總金額</span>
           <span className="text-2xl font-bold text-[#c9a96e]">
             ${totalCost.toLocaleString()} 元
           </span>
         </div>
-        <div className="text-sm text-gray-500 mt-1">
+        <div className="text-sm text-morandi-secondary mt-1">
           {pax} 人 × ${unitPrice.toLocaleString()} 元/人
         </div>
       </div>
 
       {/* 備註 */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          備註（選填）
-        </label>
+        <label className="block text-sm font-medium text-morandi-primary mb-1">備註（選填）</label>
         <textarea
           value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
+          onChange={e => setNotes(e.target.value)}
+          className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
           placeholder="如有其他說明事項，請在此填寫"
           rows={3}
         />

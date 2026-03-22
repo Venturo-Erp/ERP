@@ -52,8 +52,6 @@ export default function IncomeStatementPage() {
     setIsLoading(true)
 
     try {
-      
-
       // 1. 取得收入、成本、費用科目
       const { data: accounts, error: accountsError } = await supabase
         .from('chart_of_accounts')
@@ -67,7 +65,8 @@ export default function IncomeStatementPage() {
       // 2. 取得期間內的分錄
       const { data: lines, error: linesError } = await supabase
         .from('journal_lines')
-        .select(`
+        .select(
+          `
           account_id,
           debit_amount,
           credit_amount,
@@ -75,7 +74,8 @@ export default function IncomeStatementPage() {
             voucher_date,
             workspace_id
           )
-        `)
+        `
+        )
         .eq('voucher.workspace_id', user.workspace_id)
         .gte('voucher.voucher_date', startDate)
         .lte('voucher.voucher_date', endDate)
@@ -84,7 +84,7 @@ export default function IncomeStatementPage() {
 
       // 3. 計算各科目餘額
       const balanceMap = new Map<string, number>()
-      
+
       lines.forEach((line: any) => {
         const existing = balanceMap.get(line.account_id) || 0
         // 收入：貸方增加（credit - debit）
@@ -133,7 +133,6 @@ export default function IncomeStatementPage() {
         grossProfit,
         netIncome,
       })
-
     } catch (error) {
       console.error('載入損益表失敗:', error)
       alert('載入失敗')
@@ -150,20 +149,12 @@ export default function IncomeStatementPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>開始日期</Label>
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-              />
+              <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
             </div>
 
             <div className="space-y-2">
               <Label>結束日期</Label>
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
+              <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </div>
 
             <div className="flex items-end">
@@ -192,7 +183,9 @@ export default function IncomeStatementPage() {
                 <div className="font-semibold mb-2 text-green-700">營業收入</div>
                 {data.revenue.map(item => (
                   <div key={item.code} className="flex justify-between py-1 pl-4">
-                    <span className="text-sm">{item.code} {item.name}</span>
+                    <span className="text-sm">
+                      {item.code} {item.name}
+                    </span>
                     <span className="text-sm font-mono">${item.balance.toLocaleString()}</span>
                   </div>
                 ))}
@@ -210,8 +203,10 @@ export default function IncomeStatementPage() {
                 <div className="font-semibold mb-2 text-orange-700">營業成本</div>
                 {data.cost.map(item => (
                   <div key={item.code} className="flex justify-between py-1 pl-4">
-                    <span className="text-sm">{item.code} {item.name}</span>
-                    <span className="text-sm font-mono">(${ item.balance.toLocaleString()})</span>
+                    <span className="text-sm">
+                      {item.code} {item.name}
+                    </span>
+                    <span className="text-sm font-mono">(${item.balance.toLocaleString()})</span>
                   </div>
                 ))}
                 {data.cost.length === 0 && (
@@ -219,14 +214,18 @@ export default function IncomeStatementPage() {
                 )}
                 <div className="flex justify-between py-2 border-t mt-2 font-semibold">
                   <span>成本合計</span>
-                  <span className="font-mono text-red-600">(${ data.totalCost.toLocaleString()})</span>
+                  <span className="font-mono text-red-600">
+                    (${data.totalCost.toLocaleString()})
+                  </span>
                 </div>
               </div>
 
               {/* 毛利 */}
-              <div className={`flex justify-between py-3 border-y-2 font-bold text-lg ${
-                data.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <div
+                className={`flex justify-between py-3 border-y-2 font-bold text-lg ${
+                  data.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}
+              >
                 <span>毛利</span>
                 <span className="font-mono">${data.grossProfit.toLocaleString()}</span>
               </div>
@@ -236,7 +235,9 @@ export default function IncomeStatementPage() {
                 <div className="font-semibold mb-2 text-purple-700">營業費用</div>
                 {data.expense.map(item => (
                   <div key={item.code} className="flex justify-between py-1 pl-4">
-                    <span className="text-sm">{item.code} {item.name}</span>
+                    <span className="text-sm">
+                      {item.code} {item.name}
+                    </span>
                     <span className="text-sm font-mono">(${item.balance.toLocaleString()})</span>
                   </div>
                 ))}
@@ -245,14 +246,18 @@ export default function IncomeStatementPage() {
                 )}
                 <div className="flex justify-between py-2 border-t mt-2 font-semibold">
                   <span>費用合計</span>
-                  <span className="font-mono text-red-600">(${data.totalExpense.toLocaleString()})</span>
+                  <span className="font-mono text-red-600">
+                    (${data.totalExpense.toLocaleString()})
+                  </span>
                 </div>
               </div>
 
               {/* 淨利 */}
-              <div className={`flex justify-between py-4 border-y-2 font-bold text-xl ${
-                data.netIncome >= 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <div
+                className={`flex justify-between py-4 border-y-2 font-bold text-xl ${
+                  data.netIncome >= 0 ? 'text-green-600' : 'text-red-600'
+                }`}
+              >
                 <span>本期損益（淨利）</span>
                 <span className="font-mono">${data.netIncome.toLocaleString()}</span>
               </div>
@@ -263,8 +268,20 @@ export default function IncomeStatementPage() {
                 <ul className="list-disc list-inside space-y-1">
                   <li>毛利 = 營業收入 - 營業成本 = ${data.grossProfit.toLocaleString()}</li>
                   <li>淨利 = 毛利 - 營業費用 = ${data.netIncome.toLocaleString()}</li>
-                  <li>毛利率 = {data.totalRevenue > 0 ? ((data.grossProfit / data.totalRevenue) * 100).toFixed(2) : 0}%</li>
-                  <li>淨利率 = {data.totalRevenue > 0 ? ((data.netIncome / data.totalRevenue) * 100).toFixed(2) : 0}%</li>
+                  <li>
+                    毛利率 ={' '}
+                    {data.totalRevenue > 0
+                      ? ((data.grossProfit / data.totalRevenue) * 100).toFixed(2)
+                      : 0}
+                    %
+                  </li>
+                  <li>
+                    淨利率 ={' '}
+                    {data.totalRevenue > 0
+                      ? ((data.netIncome / data.totalRevenue) * 100).toFixed(2)
+                      : 0}
+                    %
+                  </li>
                 </ul>
               </div>
             </div>
@@ -273,9 +290,7 @@ export default function IncomeStatementPage() {
 
         {!data && !isLoading && (
           <Card className="p-8">
-            <div className="text-center text-muted-foreground">
-              請選擇日期範圍並查詢
-            </div>
+            <div className="text-center text-muted-foreground">請選擇日期範圍並查詢</div>
           </Card>
         )}
       </div>

@@ -2,7 +2,19 @@
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Printer, Search, Building2, Loader2, Mail, MessageCircle, Globe, Phone, Users } from 'lucide-react'
+import {
+  Printer,
+  Search,
+  Building2,
+  Loader2,
+  Mail,
+  MessageCircle,
+  Globe,
+  Phone,
+  Users,
+  Plus,
+  X,
+} from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -36,7 +48,10 @@ export interface AssignSupplierDialogProps {
   ageBreakdown: string
   formatDate: (d: string | null | undefined) => string
   onSave?: () => void
-  existingRequests?: { items?: { rooms?: { room_type: string; quantity: number }[] }[]; supplier_name?: string }[]
+  existingRequests?: {
+    items?: { rooms?: { room_type: string; quantity: number }[] }[]
+    supplier_name?: string
+  }[]
 }
 
 interface Supplier {
@@ -124,7 +139,9 @@ export function AssignSupplierDialog({
           quantity: item.quantity,
           unit_cost: item.quotedPrice || null,
           itinerary_item_id: item.itinerary_item_id || null,
-          ...(rooms.length > 0 ? { rooms: rooms.map(r => ({ room_type: r.name, quantity: r.qty })) } : {}),
+          ...(rooms.length > 0
+            ? { rooms: rooms.map(r => ({ room_type: r.name, quantity: r.qty })) }
+            : {}),
         }
       })
 
@@ -215,9 +232,12 @@ export function AssignSupplierDialog({
   <table>
     <thead><tr><th style="width:60px">日期</th><th>類別</th><th>項目</th><th style="width:80px">預算</th><th style="width:100px">回覆金額</th><th style="width:60px">確認</th></tr></thead>
     <tbody>
-      ${Object.entries(grouped).map(([catKey, catItems]) => {
-        const label = CATEGORY_LABELS[catKey] || catKey
-        const rows = catItems.map(item => `
+      ${Object.entries(grouped)
+        .map(([catKey, catItems]) => {
+          const label = CATEGORY_LABELS[catKey] || catKey
+          const rows = catItems
+            .map(
+              item => `
           <tr>
             <td style="text-align:center">${formatDate(item.serviceDate)}</td>
             <td style="text-align:center">${label}</td>
@@ -225,9 +245,12 @@ export function AssignSupplierDialog({
             <td style="text-align:right">${item.quotedPrice ? 'NT$ ' + item.quotedPrice.toLocaleString() : ''}</td>
             <td></td>
             <td></td>
-          </tr>`).join('')
-        return rows
-      }).join('')}
+          </tr>`
+            )
+            .join('')
+          return rows
+        })
+        .join('')}
     </tbody>
   </table>
 
@@ -252,15 +275,31 @@ export function AssignSupplierDialog({
       printWindow.document.close()
     }
     onClose()
-  }, [canPrint, supplierName, selectedSupplier, tour, totalPax, ageBreakdown, grouped, formatDate, onClose])
+  }, [
+    canPrint,
+    supplierName,
+    selectedSupplier,
+    tour,
+    totalPax,
+    ageBreakdown,
+    grouped,
+    formatDate,
+    onClose,
+  ])
 
   const [step, setStep] = useState<'rooms' | 'preview' | 'send'>('preview')
-  const [roomDetails, setRoomDetails] = useState<Record<string, { name: string; qty: number }[]>>({})
-  const [sendMethod, setSendMethod] = useState<'print' | 'line' | 'email' | 'fax' | 'tenant' | 'assign' | null>(null)
-  const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string; supplier_id?: string }[]>([])
+  const [roomDetails, setRoomDetails] = useState<Record<string, { name: string; qty: number }[]>>(
+    {}
+  )
+  const [sendMethod, setSendMethod] = useState<
+    'print' | 'line' | 'email' | 'fax' | 'tenant' | 'assign' | null
+  >(null)
+  const [lineGroups, setLineGroups] = useState<
+    { group_id: string; group_name: string; supplier_id?: string }[]
+  >([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [loadingGroups, setLoadingGroups] = useState(false)
-  
+
   // 指派同事相關
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('')
   const [assignLoading, setAssignLoading] = useState(false)
@@ -289,23 +328,27 @@ export function AssignSupplierDialog({
       let allHaveRooms = true
 
       try {
-        const { data: existingReqs } = await supabase
+        const { data: existingReqs } = (await supabase
           .from('tour_requests')
           .select('supplier_name, request_type, items' as string & keyof never)
-          .eq('tour_id', tourId) as { data: Record<string, unknown>[] | null }
+          .eq('tour_id', tourId)) as { data: Record<string, unknown>[] | null }
 
         for (const accItem of accItems) {
           const itemTitle = accItem.item.title || accItem.item.supplierName || ''
           let foundRooms = false
 
-          for (const req of (existingReqs || [])) {
+          for (const req of existingReqs || []) {
             const reqItems = (req as Record<string, unknown>).items as Record<string, unknown>[]
             if (!Array.isArray(reqItems)) continue
 
             // 格式 A: 混合需求 — items[].rooms[]
             for (const ri of reqItems) {
               const rooms = ri.rooms as { room_type: string; quantity: number }[] | undefined
-              if (rooms && rooms.length > 0 && String(ri.title || '').includes(itemTitle.slice(0, 4))) {
+              if (
+                rooms &&
+                rooms.length > 0 &&
+                String(ri.title || '').includes(itemTitle.slice(0, 4))
+              ) {
                 init[accItem.item.key] = rooms.map(r => ({ name: r.room_type, qty: r.quantity }))
                 foundRooms = true
                 break
@@ -316,8 +359,15 @@ export function AssignSupplierDialog({
             // 格式 B: 單獨住宿需求 — items[] = [{ room_type, quantity }]
             const roomItems = reqItems.filter(ri => ri.room_type && typeof ri.quantity === 'number')
             const reqSupplierName = String((req as Record<string, unknown>).supplier_name || '')
-            if (roomItems.length > 0 && reqSupplierName && itemTitle.includes(reqSupplierName.slice(0, 4))) {
-              init[accItem.item.key] = roomItems.map(r => ({ name: String(r.room_type), qty: Number(r.quantity) }))
+            if (
+              roomItems.length > 0 &&
+              reqSupplierName &&
+              itemTitle.includes(reqSupplierName.slice(0, 4))
+            ) {
+              init[accItem.item.key] = roomItems.map(r => ({
+                name: String(r.room_type),
+                qty: Number(r.quantity),
+              }))
               foundRooms = true
               break
             }
@@ -369,12 +419,15 @@ export function AssignSupplierDialog({
       [itemKey]: [...(prev[itemKey] || [{ name: '雙人房', qty: 1 }]), { name: '', qty: 1 }],
     }))
   }
-  const updateRoom = (itemKey: string, idx: number, field: 'name' | 'qty', value: string | number) => {
+  const updateRoom = (
+    itemKey: string,
+    idx: number,
+    field: 'name' | 'qty',
+    value: string | number
+  ) => {
     setRoomDetails(prev => ({
       ...prev,
-      [itemKey]: (prev[itemKey] || []).map((r, i) =>
-        i === idx ? { ...r, [field]: value } : r
-      ),
+      [itemKey]: (prev[itemKey] || []).map((r, i) => (i === idx ? { ...r, [field]: value } : r)),
     }))
   }
   const removeRoom = (itemKey: string, idx: number) => {
@@ -391,13 +444,14 @@ export function AssignSupplierDialog({
     const otherItems = items.filter(({ category }) => category !== 'accommodation')
 
     // 住宿區塊 HTML
-    const accHtml = accItems.map(({ item }) => {
-      const rooms = roomDetails[item.key]?.filter(r => r.name.trim() && r.qty > 0) || []
-      const dates = (item.serviceDate || '').split('~')
-      const nights = item.quantity || rooms[0]?.qty || 1
-      const totalRooms = rooms.reduce((s, r) => s + r.qty, 0)
+    const accHtml = accItems
+      .map(({ item }) => {
+        const rooms = roomDetails[item.key]?.filter(r => r.name.trim() && r.qty > 0) || []
+        const dates = (item.serviceDate || '').split('~')
+        const nights = item.quantity || rooms[0]?.qty || 1
+        const totalRooms = rooms.reduce((s, r) => s + r.qty, 0)
 
-      return `
+        return `
       <div style="margin-bottom:25px">
         <div class="info-grid">
           <div class="info-section">
@@ -411,12 +465,16 @@ export function AssignSupplierDialog({
         <table>
           <thead><tr><th>房型</th><th style="width:80px">間數</th><th style="width:80px">晚數</th><th>備註</th></tr></thead>
           <tbody>
-            ${rooms.map(r => `<tr>
+            ${rooms
+              .map(
+                r => `<tr>
               <td style="text-align:center">${r.name}</td>
               <td style="text-align:center">${r.qty}</td>
               <td style="text-align:center">${nights}</td>
               <td></td>
-            </tr>`).join('')}
+            </tr>`
+              )
+              .join('')}
             <tr style="background:#fef3c7;font-weight:bold">
               <td style="text-align:center">合計</td>
               <td style="text-align:center">${totalRooms} 間</td>
@@ -426,28 +484,36 @@ export function AssignSupplierDialog({
           </tbody>
         </table>
       </div>`
-    }).join('')
+      })
+      .join('')
 
     // 其他項目表格
-    const otherHtml = otherItems.length > 0 ? `
+    const otherHtml =
+      otherItems.length > 0
+        ? `
       <table>
         <thead><tr><th style="width:80px">日期</th><th>項目</th><th style="width:100px">報價金額</th><th style="width:60px">確認</th><th>備註</th></tr></thead>
         <tbody>
-          ${otherItems.map(({ item }) => `
+          ${otherItems
+            .map(
+              ({ item }) => `
           <tr>
             <td style="text-align:center">${formatDate(item.serviceDate)}</td>
             <td>${item.title || item.supplierName || ''}</td>
             <td></td>
             <td></td>
             <td></td>
-          </tr>`).join('')}
+          </tr>`
+            )
+            .join('')}
         </tbody>
       </table>
       <div style="border:1px solid #ddd;padding:15px;border-radius:5px;margin-top:15px">
         <h3 style="margin:0 0 8px 0;font-size:13pt">統包報價</h3>
         <p style="margin:4px 0"><b>統包總價：</b>NT$ _______________</p>
         <p style="font-size:10pt;color:#666;margin:4px 0">如為統包報價，可只填此欄，上方單項報價可留空</p>
-      </div>` : ''
+      </div>`
+        : ''
 
     return `<!DOCTYPE html>
 <html><head><meta charset="UTF-8">
@@ -505,8 +571,19 @@ export function AssignSupplierDialog({
   }, [supplierName, selectedSupplier, tour, totalPax, ageBreakdown, items, roomDetails, formatDate])
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
-      <DialogContent className={step === 'preview' || step === 'send' ? 'max-w-4xl max-h-[90vh] overflow-hidden flex flex-col' : 'max-w-lg'}>
+    <Dialog
+      open={open}
+      onOpenChange={v => {
+        if (!v) onClose()
+      }}
+    >
+      <DialogContent
+        className={
+          step === 'preview' || step === 'send'
+            ? 'max-w-4xl max-h-[90vh] overflow-hidden flex flex-col'
+            : 'max-w-lg'
+        }
+      >
         {step === 'rooms' ? (
           <>
             <DialogHeader>
@@ -532,7 +609,7 @@ export function AssignSupplierDialog({
                       className="h-6 text-xs"
                       onClick={() => addRoom(item.key)}
                     >
-                      + 新增房型
+                      <Plus className="h-4 w-4 mr-1" />+ 新增房型
                     </Button>
                   </div>
                   {(roomDetails[item.key] || []).map((room, idx) => (
@@ -548,7 +625,9 @@ export function AssignSupplierDialog({
                         type="number"
                         min={1}
                         value={room.qty}
-                        onChange={e => updateRoom(item.key, idx, 'qty', parseInt(e.target.value) || 1)}
+                        onChange={e =>
+                          updateRoom(item.key, idx, 'qty', parseInt(e.target.value) || 1)
+                        }
                         className="h-7 text-sm w-16"
                       />
                       <span className="text-xs text-muted-foreground shrink-0">間</span>
@@ -564,9 +643,14 @@ export function AssignSupplierDialog({
                       )}
                     </div>
                   ))}
-                  {(roomDetails[item.key] || []).filter(r => r.name.trim() && r.qty > 0).length > 0 && (
+                  {(roomDetails[item.key] || []).filter(r => r.name.trim() && r.qty > 0).length >
+                    0 && (
                     <div className="text-xs text-muted-foreground border-t pt-1 mt-1">
-                      小計：{(roomDetails[item.key] || []).filter(r => r.name.trim() && r.qty > 0).map(r => `${r.name} × ${r.qty}`).join('、')}
+                      小計：
+                      {(roomDetails[item.key] || [])
+                        .filter(r => r.name.trim() && r.qty > 0)
+                        .map(r => `${r.name} × ${r.qty}`)
+                        .join('、')}
                     </div>
                   )}
                 </div>
@@ -574,7 +658,10 @@ export function AssignSupplierDialog({
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={onClose}>取消</Button>
+              <Button variant="outline" onClick={onClose}>
+                <X className="h-4 w-4 mr-1" />
+                取消
+              </Button>
               <Button
                 onClick={() => setStep('preview')}
                 className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
@@ -609,7 +696,11 @@ export function AssignSupplierDialog({
                   size="sm"
                   variant={sendMethod === 'print' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('print')}
-                  className={sendMethod === 'print' ? 'bg-morandi-gold hover:bg-morandi-gold-hover text-white' : ''}
+                  className={
+                    sendMethod === 'print'
+                      ? 'bg-morandi-gold hover:bg-morandi-gold-hover text-white'
+                      : ''
+                  }
                 >
                   <Printer size={14} className="mr-1.5" />
                   列印
@@ -618,7 +709,9 @@ export function AssignSupplierDialog({
                   size="sm"
                   variant={sendMethod === 'line' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('line')}
-                  className={sendMethod === 'line' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
+                  className={
+                    sendMethod === 'line' ? 'bg-green-600 hover:bg-green-700 text-white' : ''
+                  }
                 >
                   <MessageCircle size={14} className="mr-1.5" />
                   Line
@@ -627,7 +720,9 @@ export function AssignSupplierDialog({
                   size="sm"
                   variant={sendMethod === 'email' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('email')}
-                  className={sendMethod === 'email' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''}
+                  className={
+                    sendMethod === 'email' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''
+                  }
                 >
                   <Mail size={14} className="mr-1.5" />
                   Email
@@ -636,7 +731,9 @@ export function AssignSupplierDialog({
                   size="sm"
                   variant={sendMethod === 'fax' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('fax')}
-                  className={sendMethod === 'fax' ? 'bg-gray-700 hover:bg-gray-800 text-white' : ''}
+                  className={
+                    sendMethod === 'fax' ? 'bg-gray-700 hover:bg-morandi-primary text-white' : ''
+                  }
                 >
                   <Phone size={14} className="mr-1.5" />
                   傳真
@@ -645,7 +742,9 @@ export function AssignSupplierDialog({
                   size="sm"
                   variant={sendMethod === 'tenant' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('tenant')}
-                  className={sendMethod === 'tenant' ? 'bg-purple-600 hover:bg-purple-700 text-white' : ''}
+                  className={
+                    sendMethod === 'tenant' ? 'bg-purple-600 hover:bg-purple-700 text-white' : ''
+                  }
                 >
                   <Globe size={14} className="mr-1.5" />
                   租戶
@@ -654,7 +753,9 @@ export function AssignSupplierDialog({
                   size="sm"
                   variant={sendMethod === 'assign' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('assign')}
-                  className={sendMethod === 'assign' ? 'bg-orange-600 hover:bg-orange-700 text-white' : ''}
+                  className={
+                    sendMethod === 'assign' ? 'bg-orange-600 hover:bg-orange-700 text-white' : ''
+                  }
                 >
                   <Users size={14} className="mr-1.5" />
                   指派同事
@@ -664,14 +765,22 @@ export function AssignSupplierDialog({
 
             <DialogFooter>
               {hasAccommodation && (
-                <Button variant="outline" onClick={() => setStep('rooms')}>← 房型</Button>
+                <Button variant="outline" onClick={() => setStep('rooms')}>
+                  ← 房型
+                </Button>
               )}
-              <Button variant="outline" onClick={onClose}>取消</Button>
+              <Button variant="outline" onClick={onClose}>
+                <X className="h-4 w-4 mr-1" />
+                取消
+              </Button>
               {sendMethod === 'print' ? (
                 <Button
                   onClick={() => {
                     const w = window.open('', '_blank', 'width=900,height=700')
-                    if (w) { w.document.write(generateHtml()); w.document.close() }
+                    if (w) {
+                      w.document.write(generateHtml())
+                      w.document.close()
+                    }
                   }}
                   className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
                 >
@@ -710,15 +819,25 @@ export function AssignSupplierDialog({
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 {sendMethod === 'line' ? (
-                  <><MessageCircle size={18} className="text-green-600" /> 💬 Line 發送</>
+                  <>
+                    <MessageCircle size={18} className="text-green-600" /> 💬 Line 發送
+                  </>
                 ) : sendMethod === 'email' ? (
-                  <><Mail size={18} className="text-blue-600" /> 📧 Email 發送</>
+                  <>
+                    <Mail size={18} className="text-blue-600" /> 📧 Email 發送
+                  </>
                 ) : sendMethod === 'fax' ? (
-                  <><Phone size={18} className="text-gray-600" /> 📠 傳真發送</>
+                  <>
+                    <Phone size={18} className="text-morandi-secondary" /> 📠 傳真發送
+                  </>
                 ) : sendMethod === 'assign' ? (
-                  <><Users size={18} className="text-orange-600" /> 👤 指派同事</>
+                  <>
+                    <Users size={18} className="text-orange-600" /> 👤 指派同事
+                  </>
                 ) : (
-                  <><Globe size={18} className="text-purple-600" /> 🌐 發給租戶</>
+                  <>
+                    <Globe size={18} className="text-purple-600" /> 🌐 發給租戶
+                  </>
                 )}
               </DialogTitle>
             </DialogHeader>
@@ -743,11 +862,13 @@ export function AssignSupplierDialog({
                             className={`w-full text-left px-4 py-3 rounded-md border-2 transition-colors ${
                               selectedGroupId === g.group_id
                                 ? 'border-green-500 bg-green-50'
-                                : 'border-gray-200 hover:border-green-300 hover:bg-green-50/50'
+                                : 'border-border hover:border-green-300 hover:bg-green-50/50'
                             }`}
                             onClick={() => setSelectedGroupId(g.group_id)}
                           >
-                            <div className="font-medium">{g.group_name || g.group_id.slice(0, 12)}</div>
+                            <div className="font-medium">
+                              {g.group_name || g.group_id.slice(0, 12)}
+                            </div>
                           </button>
                         ))}
                       </div>
@@ -772,13 +893,17 @@ export function AssignSupplierDialog({
                           className={`w-full text-left px-4 py-3 rounded-md border-2 transition-colors ${
                             selectedEmployeeId === emp.id
                               ? 'border-orange-500 bg-orange-50'
-                              : 'border-gray-200 hover:border-orange-300 hover:bg-orange-50/50'
+                              : 'border-border hover:border-orange-300 hover:bg-orange-50/50'
                           }`}
                           onClick={() => setSelectedEmployeeId(emp.id)}
                         >
-                          <div className="font-medium">{emp.display_name || emp.english_name || '未命名'}</div>
+                          <div className="font-medium">
+                            {emp.display_name || emp.english_name || '未命名'}
+                          </div>
                           {(emp as unknown as { job_title?: string }).job_title && (
-                            <div className="text-xs text-muted-foreground">{(emp as unknown as { job_title?: string }).job_title}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {(emp as unknown as { job_title?: string }).job_title}
+                            </div>
                           )}
                         </button>
                       ))}
@@ -821,7 +946,9 @@ export function AssignSupplierDialog({
                         >
                           <span className="font-medium">{s.name}</span>
                           {s.contact_person && (
-                            <span className="text-xs text-muted-foreground ml-2">窗口: {s.contact_person}</span>
+                            <span className="text-xs text-muted-foreground ml-2">
+                              窗口: {s.contact_person}
+                            </span>
                           )}
                         </button>
                       ))}
@@ -831,7 +958,9 @@ export function AssignSupplierDialog({
                   {selectedSupplier && (
                     <div className="bg-blue-50/50 border border-blue-200 rounded-md p-2 text-xs space-y-0.5">
                       <div className="font-medium text-blue-700">{selectedSupplier.name}</div>
-                      {selectedSupplier.contact_person && <div>窗口: {selectedSupplier.contact_person}</div>}
+                      {selectedSupplier.contact_person && (
+                        <div>窗口: {selectedSupplier.contact_person}</div>
+                      )}
                       {selectedSupplier.phone && <div>電話: {selectedSupplier.phone}</div>}
                       {selectedSupplier.email && <div>Email: {selectedSupplier.email}</div>}
                     </div>
@@ -840,23 +969,32 @@ export function AssignSupplierDialog({
                   {loading && <div className="text-xs text-muted-foreground">搜尋中...</div>}
 
                   {sendMethod === 'email' && (
-                    <div className="text-xs text-blue-500 mt-2">📧 功能開發中 — 需要設定 Email 寄件帳號</div>
+                    <div className="text-xs text-blue-500 mt-2">
+                      📧 功能開發中 — 需要設定 Email 寄件帳號
+                    </div>
                   )}
                   {sendMethod === 'fax' && (
-                    <div className="text-xs text-gray-500 mt-2">📠 功能開發中 — 需要設定虛擬傳真服務</div>
+                    <div className="text-xs text-morandi-secondary mt-2">
+                      📠 功能開發中 — 需要設定虛擬傳真服務
+                    </div>
                   )}
                   {sendMethod === 'tenant' && (
-                    <div className="text-xs text-purple-500 mt-2">🌐 功能開發中 — 需要先建立附屬國租戶</div>
+                    <div className="text-xs text-purple-500 mt-2">
+                      🌐 功能開發中 — 需要先建立附屬國租戶
+                    </div>
                   )}
                 </div>
               )}
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setStep('preview')}>← 返回</Button>
+              <Button variant="outline" onClick={() => setStep('preview')}>
+                ← 返回
+              </Button>
               <Button
                 disabled={
-                  saving || assignLoading ||
+                  saving ||
+                  assignLoading ||
                   (sendMethod === 'line' && !selectedGroupId) ||
                   (sendMethod === 'assign' && !selectedEmployeeId) ||
                   (sendMethod !== 'line' && sendMethod !== 'assign' && !canPrint)
@@ -868,8 +1006,9 @@ export function AssignSupplierDialog({
                     setAssignLoading(true)
                     try {
                       const selectedEmp = employees.find(e => e.id === selectedEmployeeId)
-                      const empName = selectedEmp?.display_name || selectedEmp?.english_name || '同事'
-                      
+                      const empName =
+                        selectedEmp?.display_name || selectedEmp?.english_name || '同事'
+
                       // 取得任務類型
                       const category = items[0]?.category || 'general'
                       const taskTypeMap: Record<string, string> = {
@@ -880,7 +1019,7 @@ export function AssignSupplierDialog({
                         activity: 'activity',
                       }
                       const taskType = taskTypeMap[category] || 'general'
-                      
+
                       // 建立待辦事項
                       const todoTitle = `${tour?.code || ''} ${items[0]?.item?.title || items[0]?.item?.supplierName || '任務'}`
                       const { error: todoError } = await supabase.from('todos').insert({
@@ -899,24 +1038,29 @@ export function AssignSupplierDialog({
                         notes: [],
                         enabled_quick_actions: [],
                       } as never)
-                      
+
                       if (todoError) {
                         logger.error('建立待辦失敗:', todoError)
-                        toast({ title: '建立待辦失敗', description: todoError.message, variant: 'destructive' })
+                        toast({
+                          title: '建立待辦失敗',
+                          description: todoError.message,
+                          variant: 'destructive',
+                        })
                         return
                       }
-                      
+
                       // 2. 查員工的 LINE User ID
                       const { data: empData } = await supabase
                         .from('employees')
                         .select('*')
                         .eq('id', selectedEmployeeId)
                         .single()
-                      
+
                       const lineUserId = (empData as { line_user_id?: string } | null)?.line_user_id
                       const senderName = user?.display_name || user?.chinese_name || '同事'
-                      const itemTitle = items[0]?.item?.title || items[0]?.item?.supplierName || '任務'
-                      
+                      const itemTitle =
+                        items[0]?.item?.title || items[0]?.item?.supplierName || '任務'
+
                       // 3. 發送 LINE 通知給同事（如果有綁定）
                       if (lineUserId) {
                         try {
@@ -925,13 +1069,16 @@ export function AssignSupplierDialog({
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                               to: lineUserId,
-                              messages: [{
-                                type: 'text',
-                                text: `📋 ${senderName} 指派了一項任務給你\n\n` +
-                                      `團號：${tour?.code || ''}\n` +
-                                      `項目：${itemTitle}\n\n` +
-                                      `請到 ERP 查看待辦事項`,
-                              }],
+                              messages: [
+                                {
+                                  type: 'text',
+                                  text:
+                                    `📋 ${senderName} 指派了一項任務給你\n\n` +
+                                    `團號：${tour?.code || ''}\n` +
+                                    `項目：${itemTitle}\n\n` +
+                                    `請到 ERP 查看待辦事項`,
+                                },
+                              ],
                             }),
                           })
                         } catch (lineErr) {
@@ -939,7 +1086,7 @@ export function AssignSupplierDialog({
                           // 不中斷流程
                         }
                       }
-                      
+
                       // 4. 發送頻道訊息
                       if (tourId) {
                         try {
@@ -949,7 +1096,7 @@ export function AssignSupplierDialog({
                             .select('id')
                             .eq('tour_id', tourId)
                             .single()
-                          
+
                           if (channelData?.id) {
                             await supabase.from('messages').insert({
                               channel_id: channelData.id,
@@ -963,8 +1110,11 @@ export function AssignSupplierDialog({
                           // 不中斷流程
                         }
                       }
-                      
-                      toast({ title: '👤 已指派任務', description: `已建立待辦事項並指派給 ${empName}` })
+
+                      toast({
+                        title: '👤 已指派任務',
+                        description: `已建立待辦事項並指派給 ${empName}`,
+                      })
                       onSave?.()
                       onClose()
                     } catch (err) {
@@ -975,10 +1125,11 @@ export function AssignSupplierDialog({
                     }
                     return
                   }
-                  
+
                   if (sendMethod === 'line') {
                     // Line 發送：用群組名稱當供應商名，不需要另選
-                    const groupName = lineGroups.find(g => g.group_id === selectedGroupId)?.group_name || ''
+                    const groupName =
+                      lineGroups.find(g => g.group_id === selectedGroupId)?.group_name || ''
                     const senderName = user?.display_name || user?.chinese_name || '業務員'
 
                     // 儲存委託（供應商名 = 群組名）
@@ -988,73 +1139,93 @@ export function AssignSupplierDialog({
                     try {
                       if (tourId && user?.workspace_id) {
                         const requestItems = items.map(({ category, item }) => {
-                          const rooms = roomDetails[item.key]?.filter(r => r.name.trim() && r.qty > 0) || []
+                          const rooms =
+                            roomDetails[item.key]?.filter(r => r.name.trim() && r.qty > 0) || []
                           return {
                             category,
                             title: item.title || item.supplierName || '',
                             service_date: item.serviceDate || null,
                             quantity: item.quantity,
                             unit_cost: item.quotedPrice || null,
-                            ...(rooms.length > 0 ? { rooms: rooms.map(r => ({ room_type: r.name, quantity: r.qty })) } : {}),
+                            ...(rooms.length > 0
+                              ? { rooms: rooms.map(r => ({ room_type: r.name, quantity: r.qty })) }
+                              : {}),
                           }
                         })
 
-                        const { data: insertedReq } = await supabase.from('tour_requests').insert({
-                          workspace_id: user.workspace_id,
-                          tour_id: tourId,
-                          request_type: 'mixed',
-                          supplier_name: groupName,
-                          items: requestItems,
-                          status: 'sent',
-                          sent_at: new Date().toISOString(),
-                          sent_via: 'line',
-                          created_by: user.id,
-                        } as never).select('id').single()
+                        const { data: insertedReq } = await supabase
+                          .from('tour_requests')
+                          .insert({
+                            workspace_id: user.workspace_id,
+                            tour_id: tourId,
+                            request_type: 'mixed',
+                            supplier_name: groupName,
+                            items: requestItems,
+                            status: 'sent',
+                            sent_at: new Date().toISOString(),
+                            sent_via: 'line',
+                            created_by: user.id,
+                          } as never)
+                          .select('id')
+                          .single()
 
                         // 公開回覆連結
                         const baseUrl = window.location.origin
                         const requestId = (insertedReq as { id: string } | null)?.id || ''
                         viewUrl = requestId ? `${baseUrl}/public/request/${requestId}` : undefined
                         replyUrl = viewUrl
-
                       } // end if (tourId && user?.workspace_id)
 
                       // 取得剛插入的 ID（如果有）— 用於 URL
                       // 如果沒有插入（沒有 tourId），還是能發 LINE 只是沒有回覆連結
                       const res = await fetch('/api/line/send-requirement', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            lineGroupId: selectedGroupId,
-                            senderName,
-                            tourCode: tour?.code || '',
-                            tourName: tour?.name || '',
-                            departureDate: tour?.departure_date || '',
-                            totalPax,
-                            supplierName: groupName,
-                            viewUrl,
-                            replyUrl,
-                            items: items.map(({ category, item }) => ({
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          lineGroupId: selectedGroupId,
+                          senderName,
+                          tourCode: tour?.code || '',
+                          tourName: tour?.name || '',
+                          departureDate: tour?.departure_date || '',
+                          totalPax,
+                          supplierName: groupName,
+                          viewUrl,
+                          replyUrl,
+                          items: items.map(({ category, item }) => ({
                             category,
                             title: item.title || item.supplierName || '',
                             serviceDate: formatDate(item.serviceDate),
-                            rooms: roomDetails[item.key]?.filter(r => r.name.trim() && r.qty > 0).map(r => ({
-                              room_type: r.name,
-                              quantity: r.qty,
-                            })) || [],
+                            rooms:
+                              roomDetails[item.key]
+                                ?.filter(r => r.name.trim() && r.qty > 0)
+                                .map(r => ({
+                                  room_type: r.name,
+                                  quantity: r.qty,
+                                })) || [],
                           })),
                         }),
                       })
                       if (res.ok) {
-                        toast({ title: '💬 Line 已發送', description: `需求單已發送到「${groupName}」群組` })
+                        toast({
+                          title: '💬 Line 已發送',
+                          description: `需求單已發送到「${groupName}」群組`,
+                        })
                         onSave?.()
                         onClose()
                       } else {
                         const err = await res.json()
-                        toast({ title: 'Line 發送失敗', description: err.error, variant: 'destructive' })
+                        toast({
+                          title: 'Line 發送失敗',
+                          description: err.error,
+                          variant: 'destructive',
+                        })
                       }
                     } catch (err) {
-                      toast({ title: 'Line 發送失敗', description: String(err), variant: 'destructive' })
+                      toast({
+                        title: 'Line 發送失敗',
+                        description: String(err),
+                        variant: 'destructive',
+                      })
                     } finally {
                       setSaving(false)
                     }
@@ -1063,13 +1234,21 @@ export function AssignSupplierDialog({
                   }
                 }}
                 className={
-                  sendMethod === 'line' ? 'bg-green-600 hover:bg-green-700 text-white' : 
-                  sendMethod === 'assign' ? 'bg-orange-600 hover:bg-orange-700 text-white' :
-                  'bg-morandi-gold hover:bg-morandi-gold-hover text-white'
+                  sendMethod === 'line'
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : sendMethod === 'assign'
+                      ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                      : 'bg-morandi-gold hover:bg-morandi-gold-hover text-white'
                 }
               >
-                {(saving || assignLoading) ? <Loader2 size={14} className="animate-spin mr-1.5" /> : null}
-                {sendMethod === 'line' ? '發送到群組' : sendMethod === 'assign' ? '確認指派' : '確認發送'}
+                {saving || assignLoading ? (
+                  <Loader2 size={14} className="animate-spin mr-1.5" />
+                ) : null}
+                {sendMethod === 'line'
+                  ? '發送到群組'
+                  : sendMethod === 'assign'
+                    ? '確認指派'
+                    : '確認發送'}
               </Button>
             </DialogFooter>
           </>

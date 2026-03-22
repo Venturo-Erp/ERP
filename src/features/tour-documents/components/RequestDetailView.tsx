@@ -6,15 +6,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import {
-  ArrowLeft,
-  Upload,
-  FileText,
-  Send,
-  CheckCircle2,
-  XCircle,
-  Loader2,
-} from 'lucide-react'
+import { ArrowLeft, Upload, FileText, Send, CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
@@ -111,19 +103,13 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
     try {
       setUploading(true)
 
-      const { uploadSupplierReply } = await import(
-        '../services/request-document.service'
-      )
+      const { uploadSupplierReply } = await import('../services/request-document.service')
 
       for (const file of files) {
         // 上傳到 Storage
-        const { url, size } = await uploadFile(
-          file,
-          `requests/${request.id}/replies`,
-          progress => {
-            console.log(`Uploading ${file.name}: ${progress}%`)
-          }
-        )
+        const { url, size } = await uploadFile(file, `requests/${request.id}/replies`, progress => {
+          console.log(`Uploading ${file.name}: ${progress}%`)
+        })
 
         // 建立供應商回覆記錄（reply_type = 'received'）
         await uploadSupplierReply(
@@ -235,16 +221,14 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
             <h2 className="text-2xl font-semibold">
               {request.request_type} - {request.supplier_name || '未指定供應商'}
             </h2>
-            <p className="text-sm text-morandi-secondary mt-1">
-              {request.code || request.id}
-            </p>
+            <p className="text-sm text-morandi-secondary mt-1">{request.code || request.id}</p>
           </div>
         </div>
 
         {/* 狀態徽章 */}
         <div className="flex items-center gap-2">
           {request.status === '草稿' && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-morandi-container text-morandi-primary">
               🟡 草稿
             </span>
           )}
@@ -269,12 +253,8 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
       {/* 主要內容 */}
       <Tabs defaultValue="documents" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="documents">
-            文件版本 ({request.documents?.length || 0})
-          </TabsTrigger>
-          <TabsTrigger value="related">
-            相關檔案 ({request.related_files?.length || 0})
-          </TabsTrigger>
+          <TabsTrigger value="documents">文件版本 ({request.documents?.length || 0})</TabsTrigger>
+          <TabsTrigger value="related">相關檔案 ({request.related_files?.length || 0})</TabsTrigger>
           <TabsTrigger value="activity">活動記錄</TabsTrigger>
         </TabsList>
 

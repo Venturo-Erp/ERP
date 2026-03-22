@@ -12,13 +12,13 @@ import type { Attraction } from '@/features/attractions/types'
 // 動態載入地圖元件
 const AttractionsMap = dynamic(
   () => import('@/features/attractions/components/AttractionsMap').then(mod => mod.AttractionsMap),
-  { 
-    ssr: false, 
+  {
+    ssr: false,
     loading: () => (
       <div className="w-full h-full flex items-center justify-center text-muted-foreground bg-muted/30">
         載入地圖中...
       </div>
-    )
+    ),
   }
 )
 
@@ -54,13 +54,13 @@ export function ResourceMapPanel({
   // 推斷機場座標作為預設中心
   const defaultCenter = useMemo(() => {
     if (!tourCode) return null
-    
+
     const airportCode = inferAirportCode({ tour_code: tourCode })
     if (!airportCode) return null
-    
+
     const airport = getAirportCoordinate(airportCode)
     if (!airport) return null
-    
+
     return {
       id: `airport-${airportCode}`,
       name: airport.name,
@@ -96,8 +96,10 @@ export function ResourceMapPanel({
           id: a.id,
           name: a.name,
           category: a.category || undefined,
-          latitude: typeof a.latitude === 'string' ? parseFloat(a.latitude) : (a.latitude ?? undefined),
-          longitude: typeof a.longitude === 'string' ? parseFloat(a.longitude) : (a.longitude ?? undefined),
+          latitude:
+            typeof a.latitude === 'string' ? parseFloat(a.latitude) : (a.latitude ?? undefined),
+          longitude:
+            typeof a.longitude === 'string' ? parseFloat(a.longitude) : (a.longitude ?? undefined),
           address: a.address || undefined,
           phone: a.phone || undefined,
           description: a.description || undefined,
@@ -120,22 +122,21 @@ export function ResourceMapPanel({
         if (!selectedAttraction) {
           // 優先使用儲存的位置
           if (savedCenter) {
-            const saved = mapped.find(a => 
-              a.latitude === savedCenter.latitude && 
-              a.longitude === savedCenter.longitude
+            const saved = mapped.find(
+              a => a.latitude === savedCenter.latitude && a.longitude === savedCenter.longitude
             )
             if (saved) {
               setSelectedAttraction(saved)
               return
             }
           }
-          
+
           // 其次使用機場作為中心
           if (defaultCenter) {
             setSelectedAttraction(defaultCenter)
             return
           }
-          
+
           // 最後使用第一個景點
           if (mapped.length > 0) {
             setSelectedAttraction(mapped[0])
@@ -186,9 +187,7 @@ export function ResourceMapPanel({
           <MapPin size={14} />
           <span>地圖探索</span>
           {selectedAttraction && (
-            <span className="text-xs text-muted-foreground/70">
-              · {selectedAttraction.name}
-            </span>
+            <span className="text-xs text-muted-foreground/70">· {selectedAttraction.name}</span>
           )}
         </div>
         {expanded ? (

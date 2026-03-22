@@ -7,7 +7,7 @@ export async function POST(req: NextRequest) {
     const {
       tourId,
       requestId, // 單一性：綁定到特定需求單
-      itemId,    // 核心表項目 ID
+      itemId, // 核心表項目 ID
       contact,
       phone,
       totalFare,
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
         })
         .eq('id', requestId)
         .eq('tour_id', tourId)
-      
+
       if (error) {
         console.error('更新需求單失敗:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })

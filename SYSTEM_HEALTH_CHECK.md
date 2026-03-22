@@ -1,4 +1,5 @@
 # 系統健康檢查報告
+
 **日期**: 2026-03-09  
 **檢查人**: 馬修 (Matthew)  
 **基於**: 今天租戶建立功能的錯誤經驗
@@ -22,15 +23,18 @@
 **檔案**: `src/app/api/auth/create-employee-auth/route.ts`  
 **行數**: 74  
 **問題**:
+
 ```typescript
 .select('roles, workspace_id, workspaces!inner(code)')
 ```
 
 **影響**:
+
 - 可能導致查詢失敗
 - 與今天修正的 `create/route.ts` 相同錯誤
 
 **建議修正**:
+
 ```typescript
 // 分兩步查詢
 .select('roles, workspace_id')
@@ -44,6 +48,7 @@
 **檔案**: `src/app/api/auth/create-employee-auth/route.ts`  
 **行數**: 84  
 **問題**:
+
 ```typescript
 if (!isSuperAdmin || currentUserWorkspaceCode !== 'Corner') {
 ```
@@ -51,10 +56,12 @@ if (!isSuperAdmin || currentUserWorkspaceCode !== 'Corner') {
 **資料庫實際值**: `'CORNER'` (全大寫)
 
 **影響**:
+
 - 權限檢查永遠失敗
 - 無法建立新租戶的第一個員工
 
 **建議修正**:
+
 ```typescript
 if (!isSuperAdmin || currentUserWorkspaceCode !== 'CORNER') {
 ```
@@ -68,16 +75,19 @@ if (!isSuperAdmin || currentUserWorkspaceCode !== 'CORNER') {
 這些地方使用 `!inner()` 但**可能**沒問題（需要驗證）：
 
 1. **src/app/(main)/customers/page.tsx**
+
    ```typescript
    .select('id, order_id, orders!inner(code, tour_name)')
    ```
 
 2. **src/app/(main)/finance/reports/unpaid-orders/page.tsx**
+
    ```typescript
    tours!inner(code, name, departure_date)
    ```
 
 3. **src/components/editor/hotel-selector/hooks/useHotelSearch.ts**
+
    ```typescript
    cities!inner(name)
    ```
@@ -121,6 +131,7 @@ if (!isSuperAdmin || currentUserWorkspaceCode !== 'CORNER') {
 **檔案**: `src/app/api/auth/create-employee-auth/route.ts`
 
 **修正 1**: SQL 查詢
+
 ```typescript
 // ❌ 舊的
 const { data: currentEmployee } = await supabaseAdmin
@@ -148,6 +159,7 @@ const currentUserWorkspaceCode = currentWorkspace?.code
 ```
 
 **修正 2**: 大小寫
+
 ```typescript
 // ❌ 舊的
 if (!isSuperAdmin || currentUserWorkspaceCode !== 'Corner') {
@@ -159,6 +171,7 @@ if (!isSuperAdmin || currentUserWorkspaceCode !== 'CORNER') {
 ### Step 2: 測試驗證
 
 **測試案例**:
+
 1. 用非 Corner 管理員登入 → 建立員工 → 應該拒絕
 2. 用 Corner super_admin 登入 → 建立新租戶員工 → 應該成功
 3. 用 Corner super_admin 登入 → 建立現有租戶員工 → 應該成功
@@ -166,6 +179,7 @@ if (!isSuperAdmin || currentUserWorkspaceCode !== 'CORNER') {
 ### Step 3: 檢查其他 !inner() 使用
 
 **執行測試**:
+
 - [ ] 客戶管理頁面
 - [ ] 未付款報表
 - [ ] 飯店選擇器
@@ -178,11 +192,13 @@ if (!isSuperAdmin || currentUserWorkspaceCode !== 'CORNER') {
 ### 1. SQL 查詢最佳實踐
 
 **避免**:
+
 ```typescript
 .select('field1, related!inner(field2)')
 ```
 
 **建議**:
+
 ```typescript
 // 分兩步查詢
 .select('field1, related_id')
@@ -190,6 +206,7 @@ if (!isSuperAdmin || currentUserWorkspaceCode !== 'CORNER') {
 ```
 
 **原因**:
+
 - 更清晰
 - 更容易 debug
 - 錯誤訊息更明確
@@ -197,10 +214,12 @@ if (!isSuperAdmin || currentUserWorkspaceCode !== 'CORNER') {
 ### 2. 大小寫一致性
 
 **原則**:
+
 - 資料庫值用什麼，程式碼就用什麼
 - 不要假設大小寫
 
 **檢查方式**:
+
 ```sql
 -- 查詢實際值
 SELECT code FROM workspaces WHERE name LIKE '%角落%';
@@ -210,6 +229,7 @@ SELECT code FROM workspaces WHERE name LIKE '%角落%';
 ### 3. 權限檢查模式
 
 **統一模式**:
+
 ```typescript
 // 1. 檢查登入狀態
 const auth = await getServerAuth()

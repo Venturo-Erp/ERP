@@ -288,7 +288,10 @@ export function useCreateDisbursement({
     } catch (error) {
       const msg = error instanceof Error ? error.message : JSON.stringify(error)
       logger.error(DISBURSEMENT_LABELS.更新出納單失敗_2, msg, error)
-      await alert(DISBURSEMENT_LABELS.更新出納單失敗_hook(msg || DISBURSEMENT_LABELS.未知錯誤), 'error')
+      await alert(
+        DISBURSEMENT_LABELS.更新出納單失敗_hook(msg || DISBURSEMENT_LABELS.未知錯誤),
+        'error'
+      )
     } finally {
       setIsSubmitting(false)
     }

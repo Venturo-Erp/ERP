@@ -2,7 +2,7 @@
 
 **建國日**：2026-03-15  
 **掃描深度**：源碼級 + 資料庫級 + 架構級  
-**掃描時間**：10:00 AM  
+**掃描時間**：10:00 AM
 
 ---
 
@@ -11,6 +11,7 @@
 ### 規模統計
 
 **程式碼**：
+
 - TypeScript/TSX 檔案：2010 個
 - 總行數：372,571 行
 - 目錄：641 個
@@ -19,16 +20,19 @@
 - Feature 模組：34 個
 
 **資料庫**：
+
 - 資料表：171 個
 - SQL 遷移：463 個
 - RLS 政策：45+ 個
 
 **API**：
+
 - API Routes：50+ 個
 - Server Actions：5 個
 - Cron Jobs：3 個
 
 **依賴**：
+
 - 生產依賴：121 個
 - 開發依賴：30 個
 - 環境變數：30 個
@@ -48,11 +52,13 @@
 ```
 
 **最大的房間**：
+
 - `/itinerary/page.tsx` — 1387 行（太擁擠！）
 - `tour-itinerary-tab.tsx` — 1626 行（需要拆房間）
 - `PhaserOffice.tsx` — 1359 行（遊戲辦公室）
 
 **倉庫（Stores）**：
+
 - 檔案系統倉庫：25K（最大）
 - 文件倉庫：18K
 - 認證倉庫：13K
@@ -71,6 +77,7 @@
 ```
 
 **關鍵商店**：
+
 - 認證商店：`/api/auth/*`（10 個 endpoints）
 - 報價商店：`/api/quotes/*`（7 個 endpoints）
 - 付款商店：`/api/linkpay/*`（2 個 endpoints）
@@ -78,6 +85,7 @@
 - 健康檢查：`/api/health/*`（3 個 endpoints）
 
 **危險區域**：
+
 - `/api/settings/env` — 洩漏環境變數狀態
 - `/api/gemini/generate-image` — 免費 AI 圖片
 - `/api/linkpay/webhook` — 付款 webhook 無驗證
@@ -95,6 +103,7 @@
 ```
 
 **核心邏輯**：
+
 - 報價計算：`quote.service.ts` — `calculateTotalCost()`
 - 付款計算：`payment-request.service.ts` — `calculateTotalAmount()`
 - 行程建立：（分散在多個檔案）
@@ -116,6 +125,7 @@
 ```
 
 **核心表（唯一真相來源）**：
+
 - `tour_itinerary_items` — 行程核心
 - `tours` — 團務主表
 - `customers` — 客戶主表
@@ -124,6 +134,7 @@
 - `payment_requests` — 付款主表
 
 **RLS 混亂史**：
+
 ```
 2025-12-11: 全部禁用 ❌
 2025-12-20: 重新啟用 ✅
@@ -145,38 +156,39 @@
 1. 客戶詢問（Leon/Ben）
     ↓ API: /api/customers (建檔)
     ↓ 表: customers
-    
+
 2. OP 做團（Leon）
     ↓ UI: /itinerary/new
     ↓ 表: tours, tour_itinerary_items
-    
+
 3. 建立報價（自動/手動）
     ↓ Service: calculateTotalCost()
     ↓ 表: tour_quotes
     ↓ JOIN: tour_itinerary_items (核心表)
-    
+
 4. 發送報價（Email/WhatsApp）
     ↓ API: /api/quotes/confirmation/send
     ↓ 表: quote_confirmations
-    
+
 5. 客戶確認
     ↓ API: /api/quotes/confirmation/customer
     ↓ 表: quote_confirmations (更新狀態)
-    
+
 6. 建立訂單
     ↓ 表: tour_orders
     ↓ JOIN: tour_quotes
-    
+
 7. 收款
     ↓ API: /api/linkpay/webhook
     ↓ 表: payments
-    
+
 8. 對帳（Eddie）
     ↓ UI: /finance/reports
     ↓ 表: payment_requests, payment_request_items
 ```
 
 **資料同步問題**：
+
 - 報價單從 `tour_itinerary_items` 讀取（✅ 正確）
 - 但如果行程改了，舊報價單不會自動更新（⚠️ 可能問題）
 
@@ -187,6 +199,7 @@
 ### 黑暗角落 1：巨型檔案（需要拆分）
 
 **超過 1000 行的檔案**：
+
 - `types.ts` — 19810 行（Supabase 自動生成，可接受）
 - `icon-data.ts` — 4924 行（圖示資料，可接受）
 - `tour-itinerary-tab.tsx` — 1626 行（🔴 需要拆分）
@@ -196,6 +209,7 @@
 - `OrderMembersExpandable.tsx` — 1353 行（🔴 需要拆分）
 
 **風險**：
+
 - 難以維護
 - 難以測試
 - 容易產生 Bug
@@ -205,12 +219,14 @@
 ### 黑暗角落 2：技術債務（73 個 TODO）
 
 **範例**（需要實際查看）：
+
 ```bash
 # 掃描 TODO
 grep -rn "TODO" ~/Projects/venturo-erp/src --include="*.ts" --include="*.tsx" | head -20
 ```
 
 **風險**：
+
 - 未完成的功能
 - 臨時的 workaround
 - 已知的 Bug 沒修
@@ -222,6 +238,7 @@ grep -rn "TODO" ~/Projects/venturo-erp/src --include="*.ts" --include="*.tsx" | 
 **問題**：迴圈內呼叫資料庫
 
 **範例**（需要實際確認）：
+
 ```typescript
 // ❌ N+1 查詢
 for (const tour of tours) {
@@ -234,6 +251,7 @@ const quotes = await supabase.from('quotes').select().in('tour_id', tourIds)
 ```
 
 **風險**：
+
 - 資料量大時效能崩潰
 - 使用者體驗差
 
@@ -242,6 +260,7 @@ const quotes = await supabase.from('quotes').select().in('tour_id', tourIds)
 ### 黑暗角落 4：重複程式碼
 
 **發現的重複**：
+
 - `.backup` 檔案：2 個（需要清理）
 - `*example*` 檔案：11 個（範例/模板）
 - 類似的元件名稱（可能重複邏輯）
@@ -251,6 +270,7 @@ const quotes = await supabase.from('quotes').select().in('tour_id', tourIds)
 ### 黑暗角落 5：環境變數地獄（30 個）
 
 **必要的環境變數**：
+
 ```
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL
@@ -291,6 +311,7 @@ QUOTAGUARD_STATIC_URL (Proxy)
 ```
 
 **風險**：
+
 - 設定複雜
 - 容易遺漏
 - 難以追蹤哪些必要、哪些可選
@@ -302,18 +323,14 @@ QUOTAGUARD_STATIC_URL (Proxy)
 ### 已發現的漏洞（來自 SECURITY_AUDIT_FULL.md）
 
 🔴 **高危**：
+
 1. 10+ 個 API 未保護
 2. 5+ 個 SQL Injection 風險
 3. RLS 政策混亂
 
-⚠️ **中危**：
-4. 環境變數洩漏風險
-5. CORS 設定不完整
-6. 資料驗證不足
+⚠️ **中危**：4. 環境變數洩漏風險 5. CORS 設定不完整 6. 資料驗證不足
 
-ℹ️ **低危**：
-7. Rate Limiting 不一致
-8. 錯誤訊息洩漏資訊
+ℹ️ **低危**：7. Rate Limiting 不一致 8. 錯誤訊息洩漏資訊
 
 ---
 
@@ -332,7 +349,7 @@ tours
     ↓ 1:N
 tour_quotes (報價)
     ↓ JOIN tour_itinerary_items (讀取核心表)
-    
+
 tour_quotes
     ↓ 1:N
 tour_orders (訂單)
@@ -341,10 +358,12 @@ payments (付款)
 ```
 
 **設計優點**：
+
 - ✅ 核心表驅動（單一真相來源）
 - ✅ 報價從核心表讀取（不重複儲存）
 
 **潛在問題**：
+
 - ⚠️ 行程改了，舊報價單不會自動更新
 - ⚠️ 供應商價格改了，需要手動更新行程
 
@@ -355,10 +374,12 @@ payments (付款)
 **測試檔案**：50 個
 
 **位置**：
+
 - `src/lib/auth.test.ts`
 - 其他 49 個（需要掃描）
 
 **問題**：
+
 - 50 個測試 vs 2010 個檔案 = 2.5% 覆蓋率
 - 核心邏輯（報價計算、付款）有測試嗎？
 
@@ -392,19 +413,14 @@ payments (付款)
 ### 🚧 需要立刻修復的
 
 **今天**：
+
 1. 檢查所有表的 RLS 狀態（建立清單）
 2. 加認證到 10 個未保護的 API
 3. 修復 5 個 SQL Injection 漏洞
 
-**本週**：
-4. 拆分 3 個巨型元件
-5. 清理 .backup 檔案
-6. 建立環境變數文檔
+**本週**：4. 拆分 3 個巨型元件 5. 清理 .backup 檔案 6. 建立環境變數文檔
 
-**本月**：
-7. 修復 N+1 查詢（至少前 20 個）
-8. 增加測試覆蓋率（至少 20%）
-9. 清理 73 個 TODO
+**本月**：7. 修復 N+1 查詢（至少前 20 個）8. 增加測試覆蓋率（至少 20%）9. 清理 73 個 TODO
 
 ---
 
@@ -413,10 +429,12 @@ payments (付款)
 ### 關鍵文檔位置
 
 **已掃描**：
+
 - `~/Projects/venturo-erp/empire/` — 帝國文檔（42 個）
 - `~/.openclaw/workspace-william/` — William 的規範
 
 **需要建立**：
+
 - **RLS_STATUS.md** — 所有表的 RLS 現狀
 - **ENV_VARIABLES.md** — 環境變數完整說明
 - **PERFORMANCE_ISSUES.md** — N+1 查詢清單

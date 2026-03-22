@@ -143,7 +143,9 @@ export default function MobileProfilePage() {
       </div>
 
       {/* 版本資訊 */}
-      <div className="text-center py-4 text-xs text-morandi-muted">{COMPANY_NAME} 管理系統 v1.0.0</div>
+      <div className="text-center py-4 text-xs text-morandi-muted">
+        {COMPANY_NAME} 管理系統 v1.0.0
+      </div>
     </div>
   )
 }

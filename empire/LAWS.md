@@ -11,13 +11,16 @@
 **只能用 `openclaw` CLI 官方指令。**
 
 **理由**：
+
 - 手動編輯 → 格式錯誤 → gateway 當機
 - CLI 有驗證機制，保證正確性
 
 **教訓**：
+
 - 2026-03-08：手動編輯 `openclaw.json` → gateway 當機 → 浪費 2 小時除錯
 
 **正確做法**：
+
 ```bash
 # ✅ 正確
 openclaw config set key value
@@ -34,6 +37,7 @@ vim ~/.openclaw/openclaw.json
 **JSONB = 雜物袋，找不到東西。**
 
 **理由**：
+
 - ✅ 關聯表：可查詢（SELECT、JOIN）、可追蹤（誰改了什麼）、可驗證（外鍵約束）
 - ❌ JSONB：難查詢（要用 jsonb 函數）、難追蹤（只能看整個 JSON）、難驗證（沒有 schema）
 
@@ -59,6 +63,7 @@ CREATE TABLE tour_hotels (
 ```
 
 **例外**：
+
 - ✅ 可以用 JSONB：**只有在儲存完全非結構化的使用者輸入時**（例如：表單的自由欄位）
 - ❌ 不能用 JSONB：任何業務邏輯相關的資料
 
@@ -69,6 +74,7 @@ CREATE TABLE tour_hotels (
 **重複資料 = 同步地獄。**
 
 **理由**：
+
 - 單一真相來源：只有一個地方儲存，永遠不會不一致
 - 自動同步：改核心表 = 所有地方都改
 - 簡單邏輯：不需要「同步」程式碼
@@ -105,17 +111,20 @@ WHERE q.id = 'quote-123'
 **忘記為什麼 = 重複犯錯。**
 
 **理由**：
+
 - 未來的人要知道「為什麼這樣設計」
 - 避免重複討論同一個問題
 - 累積帝國的智慧
 
 **記錄格式**：
+
 ```markdown
 ## [決策日期] 決策標題
 
 **背景**：為什麼需要決策
 
 **選項**：
+
 - A) 選項一
 - B) 選項二
 
@@ -133,11 +142,13 @@ WHERE q.id = 'quote-123'
 **盲目開發 = 浪費時間。**
 
 **理由**：
+
 - 避免重複造輪子（可能已經有函式可用）
 - 避免違反設計原則（讀文檔才知道原則）
 - 避免改錯地方（搜向量庫找到所有相關程式碼）
 
 **正確流程**：
+
 ```
 收到任務
   ↓
@@ -153,6 +164,7 @@ grep codebase（找現有程式碼）
 ```
 
 **禁止流程**：
+
 ```
 收到任務
   ↓
@@ -168,6 +180,7 @@ grep codebase（找現有程式碼）
 **用遊戲比喻解釋工程概念。**
 
 **為什麼**：
+
 - 非技術人員也能理解
 - 記憶更深刻
 - 溝通更有趣
@@ -183,6 +196,7 @@ grep codebase（找現有程式碼）
 | 報價單 | 副本（從核心讀取） |
 
 **使用方式**：
+
 - 文檔標題：用遊戲比喻
 - 程式碼註解：用遊戲比喻解釋
 - 溝通：用遊戲比喻講給 William/Leon/Ben 聽
@@ -215,11 +229,13 @@ tour_quotes { tour_id } // 只存 reference
 **拒絕完美主義。**
 
 **為什麼**：
+
 - 100 分需要 5 倍時間
 - 80 分已經能用
 - 剩下 20 分可以慢慢補
 
 **實際應用**：
+
 - 新功能：先做核心功能（80 分），邊緣情況晚點補
 - UI：先做功能正確（80 分），美化晚點補
 - 效能：先做能跑（80 分），優化晚點補
@@ -244,6 +260,7 @@ if (price < 0) {
 ```
 
 **但是**：
+
 - 重大變更：還是要警告（例如：刪除行程）
 - 不可逆操作：一定要確認（例如：發送 Email）
 
@@ -281,11 +298,13 @@ function updateTour(tourId, data) {
 **每個業務領域都有「核心表」，是唯一真相來源。**
 
 **範例**：
+
 - **行程** → `tour_itinerary_items`
 - **供應商** → `suppliers`
 - **客戶** → `customers`
 
 **其他表**：
+
 - 報價單、需求單 → 從核心表 JOIN
 - 不是獨立系統，是核心表的「視圖」
 
@@ -296,6 +315,7 @@ function updateTour(tourId, data) {
 **UI 不直接呼叫 Supabase，要透過 Service 層。**
 
 **理由**：
+
 - 業務邏輯集中管理
 - 容易測試
 - 容易改資料庫
@@ -304,9 +324,7 @@ function updateTour(tourId, data) {
 
 ```typescript
 // ❌ 錯誤：UI 直接呼叫 Supabase
-const { data } = await supabase
-  .from('tours')
-  .select('*')
+const { data } = await supabase.from('tours').select('*')
 
 // ✅ 正確：透過 Service 層
 import { tourService } from '@/services/tourService'
@@ -320,6 +338,7 @@ const tours = await tourService.getAllTours()
 **所有 API、函式都要有 TypeScript 型別。**
 
 **理由**：
+
 - 編譯時發現錯誤
 - IDE 自動完成
 - 重構更安全
@@ -375,6 +394,7 @@ function updatePrice(price: number) {
 **Supabase 的所有表都要啟用 RLS。**
 
 **理由**：
+
 - 防止資料洩漏
 - 多租戶隔離
 - 細粒度權限控制
@@ -490,11 +510,13 @@ if (user.company.tours.length === 0) return
 **不用 100% 測試覆蓋率，但核心邏輯一定要測。**
 
 **必測**：
+
 - 報價計算邏輯
 - 財務對帳邏輯
 - 權限驗證邏輯
 
 **可不測**：
+
 - UI 元件（除非很複雜）
 - 簡單的 CRUD
 
@@ -505,6 +527,7 @@ if (user.company.tours.length === 0) return
 **測試套件 < 10 秒。**
 
 **做法**：
+
 - 用 mock 取代真實資料庫
 - 平行執行測試
 - 只測關鍵路徑
@@ -518,6 +541,7 @@ if (user.company.tours.length === 0) return
 **重大變更要分階段發布。**
 
 **步驟**：
+
 1. Dev Server 測試
 2. William/Leon 測試
 3. 小範圍使用者測試
@@ -530,6 +554,7 @@ if (user.company.tours.length === 0) return
 **每次部署都要能在 5 分鐘內回滾。**
 
 **做法**：
+
 - Vercel 自動保留歷史版本
 - 資料庫遷移要可逆
 - 有回滾 SOP
@@ -543,6 +568,7 @@ if (user.company.tours.length === 0) return
 **改程式碼 = 改文檔。**
 
 **範例**：
+
 - 新增函式 → 更新 FUNCTIONS_INDEX.md
 - 新增頁面 → 更新 ROUTES_MAP.md
 - 重大決策 → 更新 DECISIONS.md
@@ -557,15 +583,17 @@ if (user.company.tours.length === 0) return
 
 ```markdown
 <!-- ❌ 錯誤：只有解釋 -->
+
 這個函式用來建立報價單，需要傳入行程 ID 和客戶 ID。
 
 <!-- ✅ 正確：有範例 -->
+
 建立報價單：
 
 \`\`\`typescript
 const quote = await createQuote({
-  tourId: 'tour-123',
-  customerId: 'customer-456'
+tourId: 'tour-123',
+customerId: 'customer-456'
 })
 \`\`\`
 ```

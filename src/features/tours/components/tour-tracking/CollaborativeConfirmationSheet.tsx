@@ -34,7 +34,7 @@ async function fetchRequestItems(requestId: string): Promise<RequestItem[]> {
     .eq('request_id', requestId)
     .order('day_number', { ascending: true })
     .order('sort_order', { ascending: true })
-  
+
   if (error) throw error
   return data || []
 }
@@ -50,12 +50,11 @@ export function CollaborativeConfirmationSheet({
 }: CollaborativeConfirmationSheetProps) {
   const { toast } = useToast()
   const [showAddDialog, setShowAddDialog] = useState(false)
-  
-  const { data: items, mutate } = useSWR(
-    `request-items-${request.id}`,
-    () => fetchRequestItems(request.id)
+
+  const { data: items, mutate } = useSWR(`request-items-${request.id}`, () =>
+    fetchRequestItems(request.id)
   )
-  
+
   // 按天分組
   const groupedItems = useMemo(() => {
     if (!items) return []
@@ -67,11 +66,13 @@ export function CollaborativeConfirmationSheet({
     }
     return Array.from(groups.entries()).sort((a, b) => a[0] - b[0])
   }, [items])
-  
+
   // 進度統計
   const stats = useMemo(() => {
     if (!items) return { total: 0, confirmed: 0, percentage: 0 }
-    const total = items.filter(item => item.handled_by !== 'customer' && item.handled_by !== 'corner').length
+    const total = items.filter(
+      item => item.handled_by !== 'customer' && item.handled_by !== 'corner'
+    ).length
     const confirmed = items.filter(item => item.local_status === 'confirmed').length
     return {
       total,
@@ -79,16 +80,16 @@ export function CollaborativeConfirmationSheet({
       percentage: total > 0 ? Math.round((confirmed / total) * 100) : 0,
     }
   }, [items])
-  
+
   const handleUpdateHandledBy = async (itemId: string, handledBy: string) => {
     try {
       const { error } = await supabase
         .from('tour_request_items')
         .update({ handled_by: handledBy })
         .eq('id', itemId)
-      
+
       if (error) throw error
-      
+
       mutate()
       toast({ title: '✅ 已更新' })
     } catch (error: any) {
@@ -99,15 +100,16 @@ export function CollaborativeConfirmationSheet({
       })
     }
   }
-  
+
   const handlePrint = () => {
     // 產生列印版 HTML
     const printWindow = window.open('', '_blank')
     if (!printWindow) return
-    
+
     const response = request.supplier_response
-    const selectedPrice = request.selected_tier != null ? response?.tierPrices?.[request.selected_tier] : undefined
-    
+    const selectedPrice =
+      request.selected_tier != null ? response?.tierPrices?.[request.selected_tier] : undefined
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -160,7 +162,11 @@ export function CollaborativeConfirmationSheet({
             </tr>
           </thead>
           <tbody>
-            ${groupedItems.map(([day, dayItems]) => dayItems.map((item, idx) => `
+            ${groupedItems
+              .map(([day, dayItems]) =>
+                dayItems
+                  .map(
+                    (item, idx) => `
               <tr>
                 <td>${idx === 0 ? `Day ${day}` : ''}</td>
                 <td>${item.item_name}</td>
@@ -169,7 +175,11 @@ export function CollaborativeConfirmationSheet({
                   ${item.local_status === 'confirmed' ? '✅ 已確認' : item.handled_by === 'customer' ? '⚠️ 客人自理' : '⏳ 待確認'}
                 </td>
               </tr>
-            `).join('')).join('')}
+            `
+                  )
+                  .join('')
+              )
+              .join('')}
           </tbody>
         </table>
         <div class="footer">
@@ -178,12 +188,12 @@ export function CollaborativeConfirmationSheet({
       </body>
       </html>
     `
-    
+
     printWindow.document.write(html)
     printWindow.document.close()
     printWindow.print()
   }
-  
+
   if (!items) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -191,7 +201,7 @@ export function CollaborativeConfirmationSheet({
       </div>
     )
   }
-  
+
   return (
     <div className="space-y-4">
       {/* 標頭 */}
@@ -201,7 +211,14 @@ export function CollaborativeConfirmationSheet({
           <p className="text-sm text-muted-foreground mt-1">
             供應商：{request.supplier_name || 'Local 供應商'}
             {request.selected_tier != null && (
-              <> • {request.selected_tier} 人團 {Number(request.supplier_response?.tierPrices?.[request.selected_tier]).toLocaleString()} 元/人</>
+              <>
+                {' '}
+                • {request.selected_tier} 人團{' '}
+                {Number(
+                  request.supplier_response?.tierPrices?.[request.selected_tier]
+                ).toLocaleString()}{' '}
+                元/人
+              </>
             )}
           </p>
         </div>
@@ -219,11 +236,13 @@ export function CollaborativeConfirmationSheet({
           </Button>
         </div>
       </div>
-      
+
       {/* 進度 */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">進度：{stats.confirmed}/{stats.total} 項已確認</span>
+          <span className="text-sm font-medium">
+            進度：{stats.confirmed}/{stats.total} 項已確認
+          </span>
           <span className="text-sm text-muted-foreground">{stats.percentage}%</span>
         </div>
         <div className="mt-2 h-2 bg-blue-100 rounded-full overflow-hidden">
@@ -233,7 +252,7 @@ export function CollaborativeConfirmationSheet({
           />
         </div>
       </div>
-      
+
       {/* 項目列表 */}
       <div className="border rounded-lg overflow-hidden">
         <table className="w-full text-sm">
@@ -261,7 +280,7 @@ export function CollaborativeConfirmationSheet({
                   <td className="px-3 py-2">
                     <select
                       value={item.handled_by || 'local'}
-                      onChange={(e) => handleUpdateHandledBy(item.id, e.target.value)}
+                      onChange={e => handleUpdateHandledBy(item.id, e.target.value)}
                       className="text-xs border rounded px-2 py-1"
                     >
                       <option value="local">Local</option>
@@ -276,14 +295,17 @@ export function CollaborativeConfirmationSheet({
                         item.local_status === 'confirmed'
                           ? 'bg-green-100 text-green-700'
                           : item.handled_by === 'customer' || item.handled_by === 'corner'
-                          ? 'bg-gray-100 text-gray-600'
-                          : 'bg-amber-100 text-amber-700'
+                            ? 'bg-morandi-container text-morandi-secondary'
+                            : 'bg-amber-100 text-amber-700'
                       )}
                     >
-                      {item.local_status === 'confirmed' ? '✅ 已確認' :
-                       item.handled_by === 'customer' ? '⚪ 客人自理' :
-                       item.handled_by === 'corner' ? '⚪ 我們處理' :
-                       '⏳ 待確認'}
+                      {item.local_status === 'confirmed'
+                        ? '✅ 已確認'
+                        : item.handled_by === 'customer'
+                          ? '⚪ 客人自理'
+                          : item.handled_by === 'corner'
+                            ? '⚪ 我們處理'
+                            : '⏳ 待確認'}
                     </span>
                   </td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">
@@ -295,7 +317,7 @@ export function CollaborativeConfirmationSheet({
           </tbody>
         </table>
       </div>
-      
+
       {/* 新增項目 Dialog */}
       <AddItemDialog
         open={showAddDialog}

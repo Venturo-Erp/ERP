@@ -844,9 +844,7 @@ export function TourRequestFormDialog({
               </div>
               <div>
                 <span className="text-morandi-secondary">{PROPOSAL_FORM_LABELS.LABEL_168}</span>
-                <span className="font-medium ml-1">
-                  {tourName || tour?.name || '-'}
-                </span>
+                <span className="font-medium ml-1">{tourName || tour?.name || '-'}</span>
               </div>
               <div>
                 <span className="text-morandi-secondary">{PROPOSAL_FORM_LABELS.LABEL_2816}</span>
@@ -857,11 +855,7 @@ export function TourRequestFormDialog({
               <div>
                 <span className="text-morandi-secondary">{PROPOSAL_FORM_LABELS.LABEL_8361}</span>
                 <span className="font-medium ml-1">
-                  {pax ||
-                    tour?.current_participants ||
-                    tour?.max_participants ||
-                    '-'}{' '}
-                  人
+                  {pax || tour?.current_participants || tour?.max_participants || '-'} 人
                 </span>
               </div>
             </div>

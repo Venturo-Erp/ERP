@@ -26,7 +26,9 @@ export function ItineraryEditor({
   onChange,
 }: ItineraryEditorProps) {
   return (
-    <div className={`flex-1 min-w-0 bg-card border-r border-border flex flex-col ${className || ''}`}>
+    <div
+      className={`flex-1 min-w-0 bg-card border-r border-border flex flex-col ${className || ''}`}
+    >
       <div className="h-14 bg-morandi-gold/90 text-white px-6 flex items-center justify-between border-b border-border">
         <h2 className="text-lg font-semibold">{NEW_LABELS.EDIT_2921}</h2>
       </div>

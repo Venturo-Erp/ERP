@@ -73,7 +73,7 @@ Matthew 自己找位置，改程式碼，測試效能。
 
 ```
 William → Caesar:
-"設計報價確認流程的 UI（參考 operations/EMPIRE_COMMAND_CENTER.md 
+"設計報價確認流程的 UI（參考 operations/EMPIRE_COMMAND_CENTER.md
 的報價確認 API 清單）"
 
 Caesar 讀地圖 → 知道有 5 個 API → 設計對應 UI。
@@ -86,11 +86,13 @@ Caesar 讀地圖 → 知道有 5 個 API → 設計對應 UI。
 ### Matthew（IT Lead）
 
 **常用查找**：
+
 - 「某個功能在哪裡？」→ 程式碼地圖
 - 「有哪些安全漏洞？」→ 安全審計
 - 「哪些檔案太大需要重構？」→ 完整掃描
 
 **查找方式**：
+
 ```bash
 cd ~/Projects/venturo-erp/empire/operations
 grep "付款功能" EMPIRE_COMMAND_CENTER.md
@@ -101,6 +103,7 @@ grep "付款功能" EMPIRE_COMMAND_CENTER.md
 ### Caesar（產品經理）
 
 **常用查找**：
+
 - 「現有 API 有哪些？」→ API 地圖
 - 「資料庫有哪些表？」→ 資料庫索引
 - 「報價流程怎麼運作？」→ 資料流地圖
@@ -110,6 +113,7 @@ grep "付款功能" EMPIRE_COMMAND_CENTER.md
 ### IT-Security（安全工程師）
 
 **常用查找**：
+
 - 「有哪些安全漏洞？」→ 安全審計完整版
 - 「RLS 政策狀態？」→ 資料庫索引
 - 「未保護的 API？」→ 37 個清單
@@ -140,11 +144,11 @@ grep "付款功能" EMPIRE_COMMAND_CENTER.md
 
 ## 📊 效率對比
 
-| 任務類型 | 以前 | 現在 | 節省 |
-|---------|------|------|------|
-| 安全修復（37 個 API） | 37 次溝通 | 1 次溝通 | 97% |
-| 功能定位 | 每次都要說 | 自己查地圖 | 100% |
-| 架構理解 | 重複解釋 | 讀文檔 | 90% |
+| 任務類型              | 以前       | 現在       | 節省 |
+| --------------------- | ---------- | ---------- | ---- |
+| 安全修復（37 個 API） | 37 次溝通  | 1 次溝通   | 97%  |
+| 功能定位              | 每次都要說 | 自己查地圖 | 100% |
+| 架構理解              | 重複解釋   | 讀文檔     | 90%  |
 
 ---
 
@@ -153,6 +157,7 @@ grep "付款功能" EMPIRE_COMMAND_CENTER.md
 ### William 發指令時
 
 **✅ 好的指令**：
+
 ```
 "Matthew，修復 SQL Injection 漏洞（P0）
 見 operations/EMPIRE_COMMAND_CENTER.md，搜尋『SQL 注入』
@@ -160,6 +165,7 @@ grep "付款功能" EMPIRE_COMMAND_CENTER.md
 ```
 
 **❌ 不好的指令**：
+
 ```
 "Matthew，修復 SQL Injection"
 （沒指向文檔，Matthew 還是要問在哪裡）
@@ -170,6 +176,7 @@ grep "付款功能" EMPIRE_COMMAND_CENTER.md
 ### 公民回報時
 
 **✅ 好的回報**：
+
 ```
 Matthew: "✅ 已修復 4 個 SQL Injection 漏洞
 - useMentionSearch.ts:80 ✅

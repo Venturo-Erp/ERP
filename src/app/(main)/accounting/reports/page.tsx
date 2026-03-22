@@ -42,9 +42,7 @@ const reports = [
 
 export default function ReportsPage() {
   return (
-    <ContentPageLayout
-      title="會計報表"
-    >
+    <ContentPageLayout title="會計報表">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
         {reports.map(report => (
           <Link key={report.href} href={report.href}>

@@ -25,7 +25,7 @@ interface Check {
 const statusConfig = {
   pending: { label: '未兌現', variant: 'secondary' as const, color: 'text-yellow-600' },
   cleared: { label: '已兌現', variant: 'default' as const, color: 'text-green-600' },
-  voided: { label: '作廢', variant: 'outline' as const, color: 'text-gray-600' },
+  voided: { label: '作廢', variant: 'outline' as const, color: 'text-morandi-secondary' },
   bounced: { label: '退票', variant: 'destructive' as const, color: 'text-red-600' },
 }
 
@@ -68,7 +68,7 @@ export default function ChecksPage() {
     {
       key: 'check_number',
       label: '支票號碼',
-      width: "140px",
+      width: '140px',
       render: (_: unknown, row: Check) => (
         <span className="font-mono text-sm">{row.check_number}</span>
       ),
@@ -76,43 +76,35 @@ export default function ChecksPage() {
     {
       key: 'check_date',
       label: '開票日',
-      width: "100px",
+      width: '100px',
     },
     {
       key: 'due_date',
       label: '到期日',
-      width: "100px",
+      width: '100px',
       render: (_: unknown, row: Check) => {
         const isOverdue = new Date(row.due_date) < new Date() && row.status === 'pending'
-        return (
-          <span className={isOverdue ? 'text-red-600 font-semibold' : ''}>
-            {row.due_date}
-          </span>
-        )
+        return <span className={isOverdue ? 'text-red-600 font-semibold' : ''}>{row.due_date}</span>
       },
     },
     {
       key: 'payee_name',
       label: '受款人',
-      render: (_: unknown, row: Check) => (
-        <span className="text-sm">{row.payee_name}</span>
-      ),
+      render: (_: unknown, row: Check) => <span className="text-sm">{row.payee_name}</span>,
     },
     {
       key: 'amount',
       label: '金額',
-      width: "120px",
+      width: '120px',
       align: 'right',
       render: (_: unknown, row: Check) => (
-        <span className="font-mono font-semibold">
-          ${row.amount.toLocaleString()}
-        </span>
+        <span className="font-mono font-semibold">${row.amount.toLocaleString()}</span>
       ),
     },
     {
       key: 'status',
       label: '狀態',
-      width: "100px",
+      width: '100px',
       render: (_: unknown, row: Check) => {
         const config = statusConfig[row.status as keyof typeof statusConfig]
         if (!config) return <Badge variant="outline">-</Badge>
@@ -122,15 +114,10 @@ export default function ChecksPage() {
     {
       key: 'actions',
       label: '操作',
-      width: "140px",
+      width: '140px',
       render: (_: unknown, row: Check) => (
         <div className="flex gap-1">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => handleViewDetail(row)}
-            title="查看"
-          >
+          <Button size="sm" variant="ghost" onClick={() => handleViewDetail(row)} title="查看">
             <Eye size={14} />
           </Button>
           {row.status === 'pending' && (
@@ -216,12 +203,8 @@ export default function ChecksPage() {
   // 統計資料
   const stats = {
     pending: checks.filter(c => c.status === 'pending').length,
-    pendingAmount: checks
-      .filter(c => c.status === 'pending')
-      .reduce((sum, c) => sum + c.amount, 0),
-    overdue: checks.filter(
-      c => c.status === 'pending' && new Date(c.due_date) < new Date()
-    ).length,
+    pendingAmount: checks.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0),
+    overdue: checks.filter(c => c.status === 'pending' && new Date(c.due_date) < new Date()).length,
   }
 
   return (
@@ -261,7 +244,7 @@ export default function ChecksPage() {
           />
         </div>
       </div>
-      
+
       <CreateCheckDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}

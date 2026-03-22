@@ -4,13 +4,15 @@ import { COMPANY_NAME } from '@/lib/tenant'
 
 export default function DialogComparePage() {
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="min-h-screen bg-morandi-container p-8">
       <h1 className="text-3xl font-bold text-center mb-8">Dialog 兩種樣式對比</h1>
-      
+
       <div className="grid grid-cols-2 gap-8 max-w-[1800px] mx-auto">
         {/* 左邊：現代樣式 */}
         <div>
-          <h2 className="text-xl font-bold mb-4 text-center bg-blue-100 py-2 rounded">現代樣式（LINE/租戶）</h2>
+          <h2 className="text-xl font-bold mb-4 text-center bg-blue-100 py-2 rounded">
+            現代樣式（LINE/租戶）
+          </h2>
           <div className="bg-white rounded-xl shadow-lg overflow-hidden border scale-75 origin-top">
             <ModernView />
           </div>
@@ -18,7 +20,9 @@ export default function DialogComparePage() {
 
         {/* 右邊：傳統樣式 */}
         <div>
-          <h2 className="text-xl font-bold mb-4 text-center bg-green-100 py-2 rounded">傳統樣式（列印/傳真）</h2>
+          <h2 className="text-xl font-bold mb-4 text-center bg-green-100 py-2 rounded">
+            傳統樣式（列印/傳真）
+          </h2>
           <div className="bg-white rounded-xl shadow-lg overflow-hidden border scale-75 origin-top">
             <TraditionalView />
           </div>
@@ -45,8 +49,12 @@ function ModernView() {
       </div>
 
       <div className="bg-[#faf8f5] px-6 py-3 text-sm flex gap-4">
-        <span><strong>團號：</strong>TW260321A</span>
-        <span><strong>人數：</strong>10人</span>
+        <span>
+          <strong>團號：</strong>TW260321A
+        </span>
+        <span>
+          <strong>人數：</strong>10人
+        </span>
       </div>
 
       <div className="p-6">
@@ -80,23 +88,33 @@ function TraditionalView() {
   return (
     <div className="p-6">
       <h1 className="text-center text-xl font-bold mb-4">廠商需求單</h1>
-      
+
       <div className="grid grid-cols-2 gap-4 border border-black p-3 mb-4 text-sm">
         <div>
           <h3 className="font-bold border-b-2 border-black mb-2">我方資訊</h3>
-          <div><strong>團號：</strong>TW260321A</div>
-          <div><strong>人數：</strong>10人</div>
+          <div>
+            <strong>團號：</strong>TW260321A
+          </div>
+          <div>
+            <strong>人數：</strong>10人
+          </div>
         </div>
         <div>
           <h3 className="font-bold border-b-2 border-black mb-2">供應商</h3>
-          <div><strong>供應商：</strong><span className="text-gray-400">[下拉]</span></div>
-          <div><strong>電話：</strong><span className="text-gray-400">(自動)</span></div>
+          <div>
+            <strong>供應商：</strong>
+            <span className="text-muted-foreground">[下拉]</span>
+          </div>
+          <div>
+            <strong>電話：</strong>
+            <span className="text-muted-foreground">(自動)</span>
+          </div>
         </div>
       </div>
 
       <table className="w-full border-collapse text-sm mb-4">
         <thead>
-          <tr className="bg-gray-200">
+          <tr className="bg-morandi-container">
             <th className="border border-black px-2 py-1">天數</th>
             <th className="border border-black px-2 py-1">行程</th>
             <th className="border border-black px-2 py-1">報價</th>

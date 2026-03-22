@@ -7,14 +7,17 @@
 ## 🔴 Critical（致命錯誤，會導致部署失敗）
 
 ### 1. Next.js 15 params 是 Promise
+
 **錯誤**：
+
 ```typescript
-const { id } = params  // ❌ 錯誤！
+const { id } = params // ❌ 錯誤！
 ```
 
 **正確**：
+
 ```typescript
-const { id } = await params  // ✅ 正確
+const { id } = await params // ✅ 正確
 ```
 
 **檢查方式**：Pre-commit hook 會警告
@@ -23,9 +26,11 @@ const { id } = await params  // ✅ 正確
 ---
 
 ### 2. Supabase types 未更新
+
 **錯誤**：執行 migration 後忘記更新 types
 
 **正確流程**：
+
 ```bash
 ./scripts/run-migration.sh migration.sql  # 自動更新 types
 ```
@@ -36,7 +41,9 @@ const { id } = await params  // ✅ 正確
 ---
 
 ### 3. 用 @ts-expect-error 逃避問題
+
 **錯誤**：
+
 ```typescript
 // @ts-expect-error - workspace_id exists
 workspace_id: request.workspace_id
@@ -50,9 +57,11 @@ workspace_id: request.workspace_id
 ---
 
 ### 4. TypeScript 編譯錯誤
+
 **錯誤**：有 TypeScript 錯誤但沒檢查就 commit
 
 **正確流程**：
+
 ```bash
 npm run type-check  # Commit 前必跑
 ```
@@ -65,17 +74,20 @@ npm run type-check  # Commit 前必跑
 ## 🟠 High（高風險，容易導致 runtime 錯誤）
 
 ### 5. Server Component 用 React hooks
+
 **錯誤**：
+
 ```typescript
 // src/app/page.tsx（沒有 'use client'）
 export default function Page() {
-  const [state, setState] = useState()  // ❌ 錯誤！
+  const [state, setState] = useState() // ❌ 錯誤！
 }
 ```
 
 **正確**：
+
 ```typescript
-'use client'  // ✅ 加這行
+'use client' // ✅ 加這行
 
 export default function Page() {
   const [state, setState] = useState()
@@ -88,7 +100,9 @@ export default function Page() {
 ---
 
 ### 6. Public page 用 anon key 寫資料
+
 **錯誤**：
+
 ```typescript
 // src/app/public/xxx/page.tsx
 import { createClient } from '@/lib/supabase/client'  // ❌ anon key
@@ -98,12 +112,13 @@ await supabase.from('xxx').insert(...)  // 會被 RLS 擋住
 ```
 
 **正確**：
+
 ```typescript
 import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!  // ✅ service role key
+  process.env.SUPABASE_SERVICE_ROLE_KEY! // ✅ service role key
 )
 ```
 
@@ -113,14 +128,15 @@ const supabase = createClient(
 ---
 
 ### 7. DB 欄位名稱錯誤
+
 **錯誤**：
+
 ```typescript
-const { data } = await supabase
-  .from('hotels')
-  .select('english_name')  // ❌ 錯誤！實際欄位是 name_en
+const { data } = await supabase.from('hotels').select('english_name') // ❌ 錯誤！實際欄位是 name_en
 ```
 
 **正確流程**：
+
 1. 先查 Supabase schema（Supabase API 或 dashboard）
 2. 確認欄位名稱
 3. 再寫 query
@@ -133,9 +149,11 @@ const { data } = await supabase
 ## 🟡 Medium（中風險，影響程式碼品質）
 
 ### 8. console.log 留在 production code
+
 **錯誤**：
+
 ```typescript
-console.log('Debug:', data)  // ❌ 不應該留在 production
+console.log('Debug:', data) // ❌ 不應該留在 production
 ```
 
 **正確**：刪除或改用 proper logging
@@ -146,7 +164,9 @@ console.log('Debug:', data)  // ❌ 不應該留在 production
 ---
 
 ### 9. unused imports
+
 **錯誤**：
+
 ```typescript
 import { Button } from '@/components/ui/button'  // ❌ 沒用到
 
@@ -163,14 +183,17 @@ export default function Page() {
 ---
 
 ### 10. 未處理的 Promise
+
 **錯誤**：
+
 ```typescript
-fetch('/api/xxx')  // ❌ 沒有 await 或 .then()
+fetch('/api/xxx') // ❌ 沒有 await 或 .then()
 ```
 
 **正確**：
+
 ```typescript
-await fetch('/api/xxx')  // ✅ 處理 Promise
+await fetch('/api/xxx') // ✅ 處理 Promise
 ```
 
 **檢查方式**：ESLint 規則（如果啟用）
@@ -202,13 +225,13 @@ git commit -m "..."
 
 ## 🚫 絕對禁止的行為
 
-| 行為 | 後果 | 替代方案 |
-|------|------|---------|
-| 用 `@ts-expect-error` | Pre-commit 拒絕 | 修正型別或更新 types |
-| 用 `--no-verify` commit | 繞過檢查，製造技術債 | 修正錯誤再 commit |
-| 手動執行 migration | 忘記更新 types | 用 `./scripts/run-migration.sh` |
-| TypeScript 有錯誤就 commit | Vercel 部署失敗 | 先跑 `npm run type-check` |
-| Server Component 用 hooks 沒加 'use client' | Runtime 錯誤 | 加 `'use client'` |
+| 行為                                        | 後果                 | 替代方案                        |
+| ------------------------------------------- | -------------------- | ------------------------------- |
+| 用 `@ts-expect-error`                       | Pre-commit 拒絕      | 修正型別或更新 types            |
+| 用 `--no-verify` commit                     | 繞過檢查，製造技術債 | 修正錯誤再 commit               |
+| 手動執行 migration                          | 忘記更新 types       | 用 `./scripts/run-migration.sh` |
+| TypeScript 有錯誤就 commit                  | Vercel 部署失敗      | 先跑 `npm run type-check`       |
+| Server Component 用 hooks 沒加 'use client' | Runtime 錯誤         | 加 `'use client'`               |
 
 ---
 

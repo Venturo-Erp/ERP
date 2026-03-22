@@ -193,10 +193,7 @@ export async function writePricingToCore(
       }
     } else {
       // 報價頁建的項目（無 itinerary_id）→ DELETE row
-      const { error } = await supabase
-        .from('tour_itinerary_items')
-        .delete()
-        .eq('id', coreItem.id)
+      const { error } = await supabase.from('tour_itinerary_items').delete().eq('id', coreItem.id)
 
       if (!error) result.cleared++
     }

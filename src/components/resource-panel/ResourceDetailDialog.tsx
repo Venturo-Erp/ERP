@@ -61,9 +61,12 @@ export function ResourceDetailDialog({
     const fetchFullData = async () => {
       setLoading(true)
       try {
-        const table = resource.type === 'attraction' ? 'attractions'
-          : resource.type === 'hotel' ? 'hotels'
-          : 'restaurants'
+        const table =
+          resource.type === 'attraction'
+            ? 'attractions'
+            : resource.type === 'hotel'
+              ? 'hotels'
+              : 'restaurants'
 
         const { data, error } = await supabase
           .from(table)
@@ -73,7 +76,7 @@ export function ResourceDetailDialog({
 
         if (error) throw error
         setFullData(data)
-        
+
         // 初始化編輯表單
         setEditName(data.name || '')
         setEditDescription(data.description || '')
@@ -107,9 +110,12 @@ export function ResourceDetailDialog({
 
     setSaving(true)
     try {
-      const table = resource.type === 'attraction' ? 'attractions'
-        : resource.type === 'hotel' ? 'hotels'
-        : 'restaurants'
+      const table =
+        resource.type === 'attraction'
+          ? 'attractions'
+          : resource.type === 'hotel'
+            ? 'hotels'
+            : 'restaurants'
 
       const { error } = await supabase
         .from(table)
@@ -125,9 +131,18 @@ export function ResourceDetailDialog({
 
       toast.success('已儲存')
       setIsEditing(false)
-      setFullData(prev => prev ? { ...prev, name: editName, description: editDescription, address: editAddress } : null)
-      
-      onSave?.({ id: resource.id, name: editName, description: editDescription, address: editAddress })
+      setFullData(prev =>
+        prev
+          ? { ...prev, name: editName, description: editDescription, address: editAddress }
+          : null
+      )
+
+      onSave?.({
+        id: resource.id,
+        name: editName,
+        description: editDescription,
+        address: editAddress,
+      })
     } catch (err) {
       console.error('儲存失敗:', err)
       toast.error('儲存失敗')
@@ -148,7 +163,10 @@ export function ResourceDetailDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {iconMap[resource.type]}
-            <span>{isEditing ? '編輯' : ''}{typeLabel[resource.type]}資訊</span>
+            <span>
+              {isEditing ? '編輯' : ''}
+              {typeLabel[resource.type]}資訊
+            </span>
           </DialogTitle>
         </DialogHeader>
 
@@ -159,11 +177,7 @@ export function ResourceDetailDialog({
             {/* 圖片 */}
             {thumbnail && (
               <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                <img
-                  src={thumbnail}
-                  alt={resource.name}
-                  className="w-full h-full object-cover"
-                />
+                <img src={thumbnail} alt={resource.name} className="w-full h-full object-cover" />
               </div>
             )}
 
@@ -181,7 +195,9 @@ export function ResourceDetailDialog({
               <div>
                 <h3 className="text-lg font-semibold">{String(fullData?.name || resource.name)}</h3>
                 {resource.category && (
-                  <Badge variant="secondary" className="mt-1">{resource.category}</Badge>
+                  <Badge variant="secondary" className="mt-1">
+                    {resource.category}
+                  </Badge>
                 )}
               </div>
             )}
@@ -196,7 +212,7 @@ export function ResourceDetailDialog({
                   placeholder="輸入地址"
                 />
               </div>
-            ) : (fullData?.address || resource.address) ? (
+            ) : fullData?.address || resource.address ? (
               <div className="flex items-start gap-2 text-sm text-muted-foreground">
                 <MapPin size={14} className="mt-0.5 flex-shrink-0" />
                 <span>{String(fullData?.address || resource.address)}</span>
@@ -257,22 +273,14 @@ export function ResourceDetailDialog({
                     <X size={14} className="mr-1" />
                     取消
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSave}
-                    disabled={saving}
-                  >
+                  <Button size="sm" onClick={handleSave} disabled={saving}>
                     <Save size={14} className="mr-1" />
                     {saving ? '儲存中...' : '儲存'}
                   </Button>
                 </>
               ) : (
                 !readOnly && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsEditing(true)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                     編輯資訊
                   </Button>
                 )

@@ -11,15 +11,14 @@ interface SortableAttractionChipProps {
   onRemove: () => void
 }
 
-export function SortableAttractionChip({ id, name, onRemove, dayIndex, verified }: SortableAttractionChipProps & { dayIndex?: number; verified?: boolean }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
+export function SortableAttractionChip({
+  id,
+  name,
+  onRemove,
+  dayIndex,
+  verified,
+}: SortableAttractionChipProps & { dayIndex?: number; verified?: boolean }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     data: {
       type: 'itinerary-attraction',
@@ -34,7 +33,7 @@ export function SortableAttractionChip({ id, name, onRemove, dayIndex, verified 
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 50 : 'auto' as const,
+    zIndex: isDragging ? 50 : ('auto' as const),
   }
 
   return (
@@ -44,9 +43,10 @@ export function SortableAttractionChip({ id, name, onRemove, dayIndex, verified 
       className={`
         inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md
         text-sm cursor-grab active:cursor-grabbing transition-colors
-        ${verified === false
-          ? 'bg-amber-50 border border-amber-400/50 text-amber-800 hover:bg-amber-100 hover:border-amber-400'
-          : 'bg-morandi-gold/10 border border-morandi-gold/30 text-morandi-primary hover:bg-morandi-gold/20 hover:border-morandi-gold/50'
+        ${
+          verified === false
+            ? 'bg-amber-50 border border-amber-400/50 text-amber-800 hover:bg-amber-100 hover:border-amber-400'
+            : 'bg-morandi-gold/10 border border-morandi-gold/30 text-morandi-primary hover:bg-morandi-gold/20 hover:border-morandi-gold/50'
         }
         ${isDragging ? 'shadow-lg ring-2 ring-morandi-gold/60' : ''}
       `}
@@ -54,14 +54,21 @@ export function SortableAttractionChip({ id, name, onRemove, dayIndex, verified 
       {verified === false && <span className="text-amber-500 text-xs mr-0.5">⚠</span>}
       <GripVertical
         size={12}
-        className={verified === false ? 'text-amber-400/60 shrink-0 cursor-grab' : 'text-morandi-gold/60 shrink-0 cursor-grab'}
+        className={
+          verified === false
+            ? 'text-amber-400/60 shrink-0 cursor-grab'
+            : 'text-morandi-gold/60 shrink-0 cursor-grab'
+        }
         {...attributes}
         {...listeners}
       />
       <span className="truncate max-w-[120px]">{name}</span>
       <button
         type="button"
-        onClick={(e) => { e.stopPropagation(); onRemove() }}
+        onClick={e => {
+          e.stopPropagation()
+          onRemove()
+        }}
         className="text-morandi-muted hover:text-destructive opacity-60 hover:opacity-100 transition-opacity ml-0.5"
       >
         <X size={10} />

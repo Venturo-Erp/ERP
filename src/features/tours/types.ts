@@ -4,15 +4,15 @@ export interface NewTourData {
   name: string
   tour_type?: 'official' | 'proposal' | 'template' // 團類型
   days_count?: number | null // 天數（提案/模板用）
-  
+
   // 🔧 核心表架構：統一欄位命名
   countryId?: string // countries.id (如: vietnam, japan) - 核心表主鍵
   countryName?: string // 顯示用國家名稱 (如: 越南, 日本)
   countryCode?: string // countries.code (如: VN, JP) - 用於過濾機場
-  
+
   cityCode: string // 機場代碼 (如: HAN, TYO)
   cityName?: string // 城市名稱 (如: 河內, 東京)
-  
+
   customCountry?: string // 自訂國家名稱
   customLocation?: string // 自訂城市名稱
   customCityCode?: string // 自訂城市代號

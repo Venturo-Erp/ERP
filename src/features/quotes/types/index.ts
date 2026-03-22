@@ -41,7 +41,7 @@ export interface CostItem {
 
   // === 價格追蹤（視覺提示用）===
   estimated_cost?: number | null // 業務預估（初始值，不變）
-  quoted_cost?: number | null    // 廠商報價（待確認）
+  quoted_cost?: number | null // 廠商報價（待確認）
 
   // === 資源關聯（餐廳/飯店/景點）===
   resource_type?: CostItemResourceType // 資源類型

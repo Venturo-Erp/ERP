@@ -30,7 +30,10 @@ export async function POST(request: NextRequest) {
     if (!res.ok) {
       const errorData = await res.json()
       console.error('LINE Push API 錯誤:', errorData)
-      return NextResponse.json({ error: errorData.message || 'LINE 發送失敗' }, { status: res.status })
+      return NextResponse.json(
+        { error: errorData.message || 'LINE 發送失敗' },
+        { status: res.status }
+      )
     }
 
     return NextResponse.json({ success: true })

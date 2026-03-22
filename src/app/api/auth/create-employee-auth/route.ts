@@ -64,7 +64,9 @@ export async function POST(request: NextRequest) {
 
         // 如果該 workspace 沒有任何「有 auth 的員工」，視為新租戶
         isNewTenant = (count ?? 0) === 0
-        logger.log(`Workspace ${workspace_code}: 已有 ${count} 個有 auth 的員工, isNewTenant=${isNewTenant}`)
+        logger.log(
+          `Workspace ${workspace_code}: 已有 ${count} 個有 auth 的員工, isNewTenant=${isNewTenant}`
+        )
       }
     }
 
@@ -93,13 +95,17 @@ export async function POST(request: NextRequest) {
 
     const currentUserWorkspaceCode = currentWorkspace?.code
 
-    logger.log(`Current user: workspace=${currentUserWorkspaceCode || 'unknown'}, isSuperAdmin=${isSuperAdmin}, isAdmin=${isAdmin}`)
+    logger.log(
+      `Current user: workspace=${currentUserWorkspaceCode || 'unknown'}, isSuperAdmin=${isSuperAdmin}, isAdmin=${isAdmin}`
+    )
 
     // 建立新租戶的第一個管理員：只有 CORNER 的 super_admin 可以
     if (isNewTenant) {
       logger.log(`Creating first admin for new tenant: ${workspace_code}`)
       if (!isSuperAdmin || currentUserWorkspaceCode !== 'CORNER') {
-        logger.error(`Permission denied: isSuperAdmin=${isSuperAdmin}, workspace=${currentUserWorkspaceCode}`)
+        logger.error(
+          `Permission denied: isSuperAdmin=${isSuperAdmin}, workspace=${currentUserWorkspaceCode}`
+        )
         return errorResponse('建立新租戶需要 CORNER 的 super_admin 權限', 403, ErrorCode.FORBIDDEN)
       }
     } else {

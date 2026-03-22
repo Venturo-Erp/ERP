@@ -1,13 +1,21 @@
 /**
  * RequirementsDrawer - 需求單抽屜（整合需求/追蹤/確認）
- * 
+ *
  * Morandi 設計風格：表格列表 + 折疊抽屜
  */
 
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Send, MessageSquare, CheckCircle, FileText, Clock } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronRight,
+  Send,
+  MessageSquare,
+  CheckCircle,
+  FileText,
+  Clock,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TransportQuoteActions } from './TransportQuoteActions'
 
@@ -40,9 +48,9 @@ const STATUS_CONFIG = {
   draft: {
     label: '草稿',
     icon: FileText,
-    bgClass: 'bg-gray-50',
-    textClass: 'text-gray-600',
-    borderClass: 'border-gray-200',
+    bgClass: 'bg-morandi-container',
+    textClass: 'text-morandi-secondary',
+    borderClass: 'border-border',
   },
   sent: {
     label: '已發送',
@@ -112,7 +120,7 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
           </tr>
         </thead>
         <tbody>
-          {requests.map((req) => {
+          {requests.map(req => {
             const isExpanded = expandedId === req.id
             const statusConfig = STATUS_CONFIG[req.status] || STATUS_CONFIG.draft
             const StatusIcon = statusConfig.icon
@@ -144,7 +152,9 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                   <td className="px-3 py-3 font-medium text-morandi-primary">
                     {req._isComparisonGroup ? (
                       <div>
-                        <span className="font-semibold text-morandi-gold">{req._comparisonRequests?.length || 0} 家比價</span>
+                        <span className="font-semibold text-morandi-gold">
+                          {req._comparisonRequests?.length || 0} 家比價
+                        </span>
                         <div className="text-xs text-morandi-secondary mt-0.5">
                           {req._comparisonRequests?.map(r => r.supplier_name).join('、')}
                         </div>
@@ -194,21 +204,30 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                                       <th className="px-3 py-2 text-center font-medium">報價</th>
                                       <th className="px-3 py-2 text-center font-medium">狀態</th>
                                       <th className="px-3 py-2 text-left font-medium">備註</th>
-                                      <th className="px-3 py-2 text-center font-medium w-32">操作</th>
+                                      <th className="px-3 py-2 text-center font-medium w-32">
+                                        操作
+                                      </th>
                                     </tr>
                                   </thead>
                                   <tbody>
                                     {req._comparisonRequests.map((compReq, idx) => {
-                                      const quotedCost = (compReq.supplier_response as any)?.quotedCost
-                                      const compStatus = STATUS_CONFIG[compReq.status] || STATUS_CONFIG.draft
+                                      const quotedCost = (compReq.supplier_response as any)
+                                        ?.quotedCost
+                                      const compStatus =
+                                        STATUS_CONFIG[compReq.status] || STATUS_CONFIG.draft
                                       const CompStatusIcon = compStatus.icon
-                                      
+
                                       return (
-                                        <tr key={compReq.id} className={cn(
-                                          'border-t border-morandi-gold/10',
-                                          idx % 2 === 0 ? 'bg-white' : 'bg-morandi-container/5'
-                                        )}>
-                                          <td className="px-3 py-2 font-medium">{compReq.supplier_name}</td>
+                                        <tr
+                                          key={compReq.id}
+                                          className={cn(
+                                            'border-t border-morandi-gold/10',
+                                            idx % 2 === 0 ? 'bg-white' : 'bg-morandi-container/5'
+                                          )}
+                                        >
+                                          <td className="px-3 py-2 font-medium">
+                                            {compReq.supplier_name}
+                                          </td>
                                           <td className="px-3 py-2 text-center">
                                             {quotedCost ? (
                                               <span className="font-semibold text-morandi-primary">
@@ -219,11 +238,13 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                                             )}
                                           </td>
                                           <td className="px-3 py-2 text-center">
-                                            <span className={cn(
-                                              'inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs',
-                                              compStatus.bgClass,
-                                              compStatus.textClass
-                                            )}>
+                                            <span
+                                              className={cn(
+                                                'inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs',
+                                                compStatus.bgClass,
+                                                compStatus.textClass
+                                              )}
+                                            >
                                               <CompStatusIcon size={10} />
                                               {compStatus.label}
                                             </span>
@@ -249,29 +270,29 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
 
                           {/* 需求內容 */}
                           {!req._isComparisonGroup && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-morandi-primary mb-3 flex items-center gap-2">
-                              <FileText size={16} />
-                              需求內容
-                            </h4>
-                            <div className="bg-white border border-morandi-gold/20 rounded-lg p-4">
-                              {Array.isArray(req.items) && req.items.length > 0 ? (
-                                <ul className="space-y-2 text-sm text-morandi-secondary">
-                                  {req.items.map((item, idx) => (
-                                    <li key={idx} className="flex items-start gap-2">
-                                      <span className="text-morandi-gold">•</span>
-                                      <span>
-                                        {item.name || item.title || '項目'}{' '}
-                                        {item.quantity && `× ${item.quantity}`}
-                                      </span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <p className="text-sm text-morandi-muted">無項目</p>
-                              )}
+                            <div>
+                              <h4 className="text-sm font-semibold text-morandi-primary mb-3 flex items-center gap-2">
+                                <FileText size={16} />
+                                需求內容
+                              </h4>
+                              <div className="bg-white border border-morandi-gold/20 rounded-lg p-4">
+                                {Array.isArray(req.items) && req.items.length > 0 ? (
+                                  <ul className="space-y-2 text-sm text-morandi-secondary">
+                                    {req.items.map((item, idx) => (
+                                      <li key={idx} className="flex items-start gap-2">
+                                        <span className="text-morandi-gold">•</span>
+                                        <span>
+                                          {item.name || item.title || '項目'}{' '}
+                                          {item.quantity && `× ${item.quantity}`}
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                ) : (
+                                  <p className="text-sm text-morandi-muted">無項目</p>
+                                )}
+                              </div>
                             </div>
-                          </div>
                           )}
 
                           {/* 追蹤狀態 */}
@@ -291,7 +312,9 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                                 {req.sent_via && (
                                   <div className="flex justify-between">
                                     <span className="text-morandi-secondary">發送方式：</span>
-                                    <span className="text-morandi-primary uppercase">{req.sent_via}</span>
+                                    <span className="text-morandi-primary uppercase">
+                                      {req.sent_via}
+                                    </span>
                                   </div>
                                 )}
                                 {req.sent_to && (
@@ -322,9 +345,10 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                                   <div>
                                     <span className="text-morandi-secondary">報價內容：</span>
                                     {/* 交通報價：顯示專用確認組件 */}
-                                    {(req.request_type === 'transport' || req.request_type === 'group-transport') ? (
+                                    {req.request_type === 'transport' ||
+                                    req.request_type === 'group-transport' ? (
                                       <div className="mt-3">
-                                        <TransportQuoteActions 
+                                        <TransportQuoteActions
                                           quote={{
                                             id: req.id,
                                             tour_id: '',
@@ -368,7 +392,9 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                           {/* 備註 */}
                           {!req._isComparisonGroup && req.note && (
                             <div>
-                              <h4 className="text-sm font-semibold text-morandi-secondary mb-2">備註</h4>
+                              <h4 className="text-sm font-semibold text-morandi-secondary mb-2">
+                                備註
+                              </h4>
                               <p className="text-sm text-morandi-primary bg-white border border-morandi-gold/20 rounded-lg p-3">
                                 {req.note}
                               </p>
@@ -391,7 +417,7 @@ export function RequirementsDrawer({ requests, onRefresh }: RequirementsDrawerPr
                               </button>
                             )}
                             <button
-                              onClick={(e) => {
+                              onClick={e => {
                                 e.stopPropagation()
                                 setExpandedId(null)
                               }}

@@ -38,9 +38,7 @@ export function TransportRequirementPrint({
 }: TransportRequirementPrintProps) {
   const transportTable = (
     <div>
-      <h3 style={{ fontSize: '14pt', fontWeight: 'bold', marginBottom: '0.5cm' }}>
-        交通表
-      </h3>
+      <h3 style={{ fontSize: '14pt', fontWeight: 'bold', marginBottom: '0.5cm' }}>交通表</h3>
       <table>
         <thead>
           <tr>
@@ -64,7 +62,8 @@ export function TransportRequirementPrint({
           {vehicleType && (
             <tr>
               <td colSpan={5}>
-                <strong>車型需求：</strong>{vehicleType}
+                <strong>車型需求：</strong>
+                {vehicleType}
               </td>
             </tr>
           )}

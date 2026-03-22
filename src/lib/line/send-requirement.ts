@@ -18,15 +18,15 @@ interface RequirementItem {
 interface SendRequirementParams {
   lineGroupId: string
   lineAccessToken: string
-  senderName: string         // 發送人姓名（業務員）
+  senderName: string // 發送人姓名（業務員）
   tourCode: string
   tourName: string
   departureDate: string
   totalPax: number | null
   supplierName: string
   items: RequirementItem[]
-  viewUrl?: string           // 查看完整需求單的連結
-  replyUrl?: string          // 回覆報價的連結
+  viewUrl?: string // 查看完整需求單的連結
+  replyUrl?: string // 回覆報價的連結
 }
 
 const CATEGORY_EMOJI: Record<string, string> = {
@@ -45,7 +45,9 @@ const CATEGORY_LABEL: Record<string, string> = {
   other: '其他',
 }
 
-export async function sendRequirementToLine(params: SendRequirementParams): Promise<{ success: boolean; error?: string }> {
+export async function sendRequirementToLine(
+  params: SendRequirementParams
+): Promise<{ success: boolean; error?: string }> {
   const {
     lineGroupId,
     lineAccessToken,
@@ -185,19 +187,23 @@ export async function sendRequirementToLine(params: SendRequirementParams): Prom
         spacing: 'sm',
         contents: [
           ...(viewUrl
-            ? [{
-                type: 'button' as const,
-                action: { type: 'uri' as const, label: '📄 查看完整需求單', uri: viewUrl },
-                style: 'primary' as const,
-                color: '#B8860B',
-              }]
+            ? [
+                {
+                  type: 'button' as const,
+                  action: { type: 'uri' as const, label: '📄 查看完整需求單', uri: viewUrl },
+                  style: 'primary' as const,
+                  color: '#B8860B',
+                },
+              ]
             : []),
           ...(replyUrl
-            ? [{
-                type: 'button' as const,
-                action: { type: 'uri' as const, label: '✏️ 回覆報價', uri: replyUrl },
-                style: 'secondary' as const,
-              }]
+            ? [
+                {
+                  type: 'button' as const,
+                  action: { type: 'uri' as const, label: '✏️ 回覆報價', uri: replyUrl },
+                  style: 'secondary' as const,
+                },
+              ]
             : []),
         ],
       },

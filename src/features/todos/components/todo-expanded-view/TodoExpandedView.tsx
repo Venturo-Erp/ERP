@@ -60,7 +60,9 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
         {/* 主要內容區 */}
         <div className="flex flex-col lg:flex-row flex-1 overflow-hidden pt-2">
           {/* 左半部：待辦詳情 */}
-          <div className={`${todo.task_type ? 'w-full lg:w-1/2' : 'w-full'} px-4 sm:px-6 py-3 sm:py-4 flex flex-col overflow-y-auto`}>
+          <div
+            className={`${todo.task_type ? 'w-full lg:w-1/2' : 'w-full'} px-4 sm:px-6 py-3 sm:py-4 flex flex-col overflow-y-auto`}
+          >
             {/* 標題與星級 */}
             <div className="mb-4 bg-card border border-border rounded-xl p-4 shadow-sm">
               <div className="flex items-center justify-between gap-4">
@@ -140,9 +142,9 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
               {canEdit ? (
                 <>
                   <div className="flex-1 bg-card border border-border rounded-xl p-4 overflow-y-auto shadow-sm">
-                    <TaskTypeForm 
-                      taskType={todo.task_type} 
-                      todo={todo} 
+                    <TaskTypeForm
+                      taskType={todo.task_type}
+                      todo={todo}
                       onUpdate={onUpdate}
                       onClose={onClose}
                     />

@@ -11,11 +11,13 @@
 ## 🎯 為什麼用 AutoGen
 
 **3 大功能原生支援**：
+
 1. ✅ **GroupChat** — agents 開會討論
 2. ✅ **Nested Chat** — 工作流（順序執行任務）
 3. ✅ **AgentTool** — 指派任務給專家
 
 **優點**：
+
 - Microsoft 出品，穩定
 - 100% 開源，免費
 - 社群活躍
@@ -68,39 +70,41 @@ async def main():
         model="gpt-4o",  # 或 "claude-sonnet-4" (透過 OpenAI-compatible endpoint)
         api_key="YOUR_API_KEY"
     )
-    
+
     # 創建 William AI
     william = AssistantAgent(
         name="William_AI",
         model_client=model_client,
         system_message="你是大祭司，負責協調任務"
     )
-    
+
     # 創建 Matthew
     matthew = AssistantAgent(
         name="Matthew",
         model_client=model_client,
         system_message="你是 IT Lead，負責技術實作"
     )
-    
+
     # William 問 Matthew
     result = await william.run(
         task="Matthew，三紀委託狀態流轉進度如何？"
     )
-    
+
     print(result)
-    
+
     await model_client.close()
 
 asyncio.run(main())
 ```
 
 **執行**：
+
 ```bash
 python test_simple_chat.py
 ```
 
 **預期輸出**：
+
 ```
 Matthew: 三紀委託狀態流轉目前已完成 Email 整合...
 ```
@@ -125,32 +129,32 @@ async def main():
         model="gpt-4o",
         api_key="YOUR_API_KEY"
     )
-    
+
     # 創建 3 個 agents
     william = AssistantAgent(
         name="William_AI",
         model_client=model_client,
         system_message="你是大祭司，負責協調任務和主持會議"
     )
-    
+
     matthew = AssistantAgent(
         name="Matthew",
         model_client=model_client,
         system_message="你是 IT Lead，負責技術實作"
     )
-    
+
     leon = AssistantAgent(
         name="Leon",
         model_client=model_client,
         system_message="你是營運主管，負責業務流程"
     )
-    
+
     # 創建會議（RoundRobin = 輪流發言）
     team = RoundRobinGroupChat(
         participants=[william, matthew, leon],
         max_turns=10  # 最多 10 輪對話
     )
-    
+
     # 開會
     await Console(
         team.run_stream(
@@ -163,18 +167,20 @@ async def main():
             """
         )
     )
-    
+
     await model_client.close()
 
 asyncio.run(main())
 ```
 
 **執行**：
+
 ```bash
 python test_meeting.py
 ```
 
 **預期輸出**：
+
 ```
 William_AI: 帝國技術會議開始...
 Matthew: 技術進度報告：Email 整合已完成...
@@ -201,7 +207,7 @@ async def main():
         model="gpt-4o",
         api_key="YOUR_API_KEY"
     )
-    
+
     # 專家 agents
     matthew = AssistantAgent(
         name="Matthew",
@@ -209,18 +215,18 @@ async def main():
         system_message="你是技術專家，解決程式問題",
         description="技術實作專家"
     )
-    
+
     leon = AssistantAgent(
         name="Leon",
         model_client=model_client,
         system_message="你是業務專家，解決流程問題",
         description="業務流程專家"
     )
-    
+
     # 把專家包成 tools
     matthew_tool = AgentTool(matthew, return_value_as_last_message=True)
     leon_tool = AgentTool(leon, return_value_as_last_message=True)
-    
+
     # William AI 有這些 tools
     william = AssistantAgent(
         name="William_AI",
@@ -230,32 +236,34 @@ async def main():
         model_client_stream=True,
         max_tool_iterations=5
     )
-    
+
     # 技術問題 → 自動叫 Matthew
     print("=== 測試 1：技術問題 ===")
     result1 = await william.run(
         task="Email 發送整合要怎麼做？"
     )
     print(result1)
-    
+
     # 業務問題 → 自動叫 Leon
     print("\n=== 測試 2：業務問題 ===")
     result2 = await william.run(
         task="委託單的簽核流程應該怎麼設計？"
     )
     print(result2)
-    
+
     await model_client.close()
 
 asyncio.run(main())
 ```
 
 **執行**：
+
 ```bash
 python test_task_assignment.py
 ```
 
 **預期輸出**：
+
 ```
 === 測試 1：技術問題 ===
 [William_AI 呼叫 Matthew]
@@ -340,6 +348,7 @@ model_client = OpenAIChatCompletionClient(
 ```
 
 或用 LiteLLM proxy：
+
 ```bash
 # 安裝 LiteLLM
 pip install litellm[proxy]
@@ -390,6 +399,7 @@ supabase.table("meeting_records").insert({
 ## 🆘 需要協助
 
 **遇到問題**：
+
 1. 先查 [FAQ](https://docs.deepwisdom.ai/main/en/guide/faq.html)
 2. 透過帝國信箱找大祭司
 3. GitHub Issues

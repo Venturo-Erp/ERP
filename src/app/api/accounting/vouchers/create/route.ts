@@ -17,7 +17,11 @@ const createVoucherSchema = z.object({
 })
 
 // 生成傳票編號
-async function generateVoucherNo(supabase: any, workspaceId: string, date: string): Promise<string> {
+async function generateVoucherNo(
+  supabase: any,
+  workspaceId: string,
+  date: string
+): Promise<string> {
   const yearMonth = date.substring(0, 7).replace('-', '') // "2026-03" -> "202603"
   const prefix = `JV${yearMonth}`
 
@@ -69,7 +73,7 @@ export async function POST(request: NextRequest) {
       if (userError || !userData?.workspace_id) {
         return NextResponse.json({ error: 'User workspace not found' }, { status: 400 })
       }
-      workspaceId = workspaceId
+      workspaceId = userData.workspace_id
     }
 
     // 解析 body
@@ -81,10 +85,7 @@ export async function POST(request: NextRequest) {
     const totalCredit = validated.lines.reduce((sum, line) => sum + line.credit_amount, 0)
 
     if (Math.abs(totalDebit - totalCredit) > 0.01) {
-      return NextResponse.json(
-        { error: '借貸不平衡！借方總額必須等於貸方總額' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: '借貸不平衡！借方總額必須等於貸方總額' }, { status: 400 })
     }
 
     if (totalDebit === 0 || totalCredit === 0) {
@@ -122,9 +123,7 @@ export async function POST(request: NextRequest) {
       credit_amount: line.credit_amount,
     }))
 
-    const { error: linesError } = await supabase
-      .from('journal_lines')
-      .insert(linesData)
+    const { error: linesError } = await supabase.from('journal_lines').insert(linesData)
 
     if (linesError) {
       // 回滾：刪除傳票
@@ -141,7 +140,10 @@ export async function POST(request: NextRequest) {
     console.error('Create voucher error:', error)
 
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request data', details: error.issues }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Invalid request data', details: error.issues },
+        { status: 400 }
+      )
     }
 
     return NextResponse.json(

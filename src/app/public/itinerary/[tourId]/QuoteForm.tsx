@@ -63,7 +63,7 @@ th { background: #c9a96e; color: white; }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!contact.trim() || !phone.trim()) {
       alert('請填寫聯絡人和電話')
       return
@@ -108,14 +108,25 @@ th { background: #c9a96e; color: white; }
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginTop: 32, borderTop: '2px solid #c9a96e', paddingTop: 24 }}>
+    <form
+      onSubmit={handleSubmit}
+      style={{ marginTop: 32, borderTop: '2px solid #c9a96e', paddingTop: 24 }}
+    >
       <h2 style={{ fontSize: 18, fontWeight: 'bold', color: '#c9a96e', marginBottom: 16 }}>
         📝 供應商報價回填
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
         <div>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: 13,
+              fontWeight: 600,
+              marginBottom: 6,
+              color: '#555',
+            }}
+          >
             聯絡人 <span style={{ color: 'red' }}>*</span>
           </label>
           <input
@@ -135,7 +146,15 @@ th { background: #c9a96e; color: white; }
         </div>
 
         <div>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
+          <label
+            style={{
+              display: 'block',
+              fontSize: 13,
+              fontWeight: 600,
+              marginBottom: 6,
+              color: '#555',
+            }}
+          >
             聯絡電話 <span style={{ color: 'red' }}>*</span>
           </label>
           <input
@@ -156,7 +175,15 @@ th { background: #c9a96e; color: white; }
       </div>
 
       <div style={{ marginBottom: 16, paddingTop: 8, borderTop: '1px solid #e8e5e0' }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8, color: '#555' }}>
+        <label
+          style={{
+            display: 'block',
+            fontSize: 13,
+            fontWeight: 600,
+            marginBottom: 8,
+            color: '#555',
+          }}
+        >
           人數梯次報價（每人） <span style={{ color: 'red' }}>*</span>
         </label>
         {paxTiers.length === 0 ? (
@@ -187,7 +214,15 @@ th { background: #c9a96e; color: white; }
       </div>
 
       <div style={{ marginBottom: 16, paddingTop: 8, borderTop: '1px solid #e8e5e0' }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
+        <label
+          style={{
+            display: 'block',
+            fontSize: 13,
+            fontWeight: 600,
+            marginBottom: 6,
+            color: '#555',
+          }}
+        >
           單人房差
         </label>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -209,7 +244,15 @@ th { background: #c9a96e; color: white; }
       </div>
 
       <div style={{ marginBottom: 16 }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
+        <label
+          style={{
+            display: 'block',
+            fontSize: 13,
+            fontWeight: 600,
+            marginBottom: 6,
+            color: '#555',
+          }}
+        >
           小費說明
         </label>
         <input
@@ -228,7 +271,15 @@ th { background: #c9a96e; color: white; }
       </div>
 
       <div style={{ marginBottom: 24 }}>
-        <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 6, color: '#555' }}>
+        <label
+          style={{
+            display: 'block',
+            fontSize: 13,
+            fontWeight: 600,
+            marginBottom: 6,
+            color: '#555',
+          }}
+        >
           供應商備註
         </label>
         <textarea

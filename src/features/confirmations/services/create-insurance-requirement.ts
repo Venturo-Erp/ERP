@@ -15,12 +15,14 @@ export async function createInsuranceRequirement(
   returnDate: string | null = null
 ) {
   // 檢查是否已存在保險需求（supplier_name = '保險公司'）
-  const { data: existing } = await supabase
+  const { data: existing } = (await supabase
     .from('tour_requests')
     .select('id, items, status')
     .eq('tour_id', tourId)
     .eq('request_type', 'other')
-    .eq('supplier_name', '保險公司') as { data: { id: string; items: Record<string, unknown>[]; status: string }[] | null }
+    .eq('supplier_name', '保險公司')) as {
+    data: { id: string; items: Record<string, unknown>[]; status: string }[] | null
+  }
 
   if (existing && existing.length > 0) {
     // 已存在 → 更新團員人數（可能有變）

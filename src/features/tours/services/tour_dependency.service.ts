@@ -132,10 +132,7 @@ export async function unlinkTourItineraries(tourId: string): Promise<number> {
       throw unlinkError
     }
 
-    const { error } = await supabase
-      .from('itineraries')
-      .delete()
-      .eq('tour_id', tourId)
+    const { error } = await supabase.from('itineraries').delete().eq('tour_id', tourId)
     if (error) {
       logger.error('刪除關聯行程表失敗:', error.message)
       throw error
@@ -173,4 +170,3 @@ export async function fetchPnrsByLocators(locators: string[]): Promise<unknown[]
   }
   return data ?? []
 }
-

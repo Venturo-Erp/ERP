@@ -5,7 +5,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Send, Loader2, Printer, Sun, Mail, Phone, Globe, Plus, X } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
@@ -17,7 +23,13 @@ import { printTransportRequirement } from '../utils/printTransportRequirement'
 interface TransportQuoteDialogProps {
   open: boolean
   onClose: () => void
-  tour: { id: string; code: string; name: string; departure_date?: string; return_date?: string } | null
+  tour: {
+    id: string
+    code: string
+    name: string
+    departure_date?: string
+    return_date?: string
+  } | null
   transportDays?: { dayNumber: number; date: string; route: string }[]
   totalPax: number | null
   coreItems?: TourItineraryItem[]
@@ -92,8 +104,11 @@ export function TransportQuoteDialog({
         .from('line_groups')
         .select('group_id, group_name')
         .not('group_name', 'is', null)
-      if (lineData) setLineGroups(lineData.filter((g): g is { group_id: string; group_name: string } => !!g.group_name))
-      
+      if (lineData)
+        setLineGroups(
+          lineData.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
+        )
+
       // 供應商（transport 類型）
       const { data: supplierData } = await supabase
         .from('suppliers')
@@ -173,7 +188,11 @@ export function TransportQuoteDialog({
         if (item.sub_category === 'breakfast') day.breakfast = name
         else if (item.sub_category === 'lunch') day.lunch = name
         else if (item.sub_category === 'dinner') day.dinner = name
-      } else if (item.category === 'activities' || item.category === 'transport' || item.category === 'group-transport') {
+      } else if (
+        item.category === 'activities' ||
+        item.category === 'transport' ||
+        item.category === 'group-transport'
+      ) {
         if (item.title) {
           day.route = day.route ? `${day.route} → ${item.title}` : item.title
         }
@@ -187,7 +206,7 @@ export function TransportQuoteDialog({
   const handlePrint = () => {
     // 產生公開頁面 URL
     const publicUrl = `${window.location.origin}/public/transport-quote/${tour?.id}?supplierName=${encodeURIComponent(supplierName)}&note=${encodeURIComponent(note)}&vehicleDesc=${encodeURIComponent(vehicleDesc)}`
-    
+
     // 開啟公開頁面讓供應商填寫
     window.open(publicUrl, '_blank')
   }
@@ -217,13 +236,13 @@ export function TransportQuoteDialog({
     setSending(true)
     try {
       const pax = paxInput ? parseInt(paxInput) : totalPax
-      
+
       // 1. 先建立需求單，取得 request_id
       if (!user?.workspace_id) {
         toast({ title: '❌ 缺少 workspace_id', variant: 'destructive' })
         return
       }
-      
+
       const createRes = await fetch('/api/create-transport-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -236,22 +255,22 @@ export function TransportQuoteDialog({
           workspaceId: user.workspace_id,
         }),
       })
-      
+
       const createResult = await createRes.json()
-      
+
       // 處理已存在的情況
       if (createResult.alreadyExists && createResult.hasReplied) {
         const confirmed = window.confirm(
           `此廠商「${supplierName}」已報價，是否重新發送需求？\n\n` +
-          `選擇「確定」→ 建立新的需求單\n` +
-          `選擇「取消」→ 不發送`
+            `選擇「確定」→ 建立新的需求單\n` +
+            `選擇「取消」→ 不發送`
         )
-        
+
         if (!confirmed) {
           setSending(false)
           return
         }
-        
+
         // 使用者確認重新發送 → 強制建立新需求單
         const forceCreateRes = await fetch('/api/create-transport-request', {
           method: 'POST',
@@ -265,24 +284,32 @@ export function TransportQuoteDialog({
             workspaceId: user.workspace_id,
           }),
         })
-        
+
         const forceResult = await forceCreateRes.json()
         if (!forceResult.success || !forceResult.requestId) {
-          toast({ title: '❌ 建立需求單失敗', description: forceResult.error, variant: 'destructive' })
+          toast({
+            title: '❌ 建立需求單失敗',
+            description: forceResult.error,
+            variant: 'destructive',
+          })
           return
         }
-        
+
         createResult.requestId = forceResult.requestId
       } else if (!createResult.success || !createResult.requestId) {
-        toast({ title: '❌ 建立需求單失敗', description: createResult.error, variant: 'destructive' })
+        toast({
+          title: '❌ 建立需求單失敗',
+          description: createResult.error,
+          variant: 'destructive',
+        })
         return
       }
-      
+
       // 如果是更新現有需求單，顯示提示
       if (createResult.updated) {
         toast({ title: '✓ 更新需求單內容' })
       }
-      
+
       // 2. 發送 LINE（帶 requestId）
       const res = await fetch('/api/line/send-transport-quote', {
         method: 'POST',
@@ -386,103 +413,112 @@ export function TransportQuoteDialog({
             />
           ) : (
             <>
-          {/* 團資訊條 */}
-          <div className="flex items-center gap-6 px-4 py-3 bg-[#faf8f5] rounded-lg border border-[#e8e0d4]">
-            <div className="text-sm">
-              <span className="text-muted-foreground mr-1">團號</span>
-              <span className="font-semibold">{tour?.code || '-'}</span>
-            </div>
-            <div className="text-sm">
-              <span className="text-muted-foreground mr-1">團名</span>
-              <span className="font-semibold">{tour?.name || '-'}</span>
-            </div>
-            <div className="text-sm">
-              <span className="text-muted-foreground mr-1">出發日</span>
-              <span className="font-semibold">{tour?.departure_date || '-'}</span>
-            </div>
-            <div className="text-sm flex items-center gap-2">
-              <span className="text-muted-foreground">人數</span>
-              <Input
-                type="number"
-                value={paxInput}
-                onChange={e => setPaxInput(e.target.value)}
-                placeholder={totalPax?.toString() || ''}
-                className="h-7 w-20 text-sm"
-              />
-            </div>
-          </div>
+              {/* 團資訊條 */}
+              <div className="flex items-center gap-6 px-4 py-3 bg-[#faf8f5] rounded-lg border border-[#e8e0d4]">
+                <div className="text-sm">
+                  <span className="text-muted-foreground mr-1">團號</span>
+                  <span className="font-semibold">{tour?.code || '-'}</span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-muted-foreground mr-1">團名</span>
+                  <span className="font-semibold">{tour?.name || '-'}</span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-muted-foreground mr-1">出發日</span>
+                  <span className="font-semibold">{tour?.departure_date || '-'}</span>
+                </div>
+                <div className="text-sm flex items-center gap-2">
+                  <span className="text-muted-foreground">人數</span>
+                  <Input
+                    type="number"
+                    value={paxInput}
+                    onChange={e => setPaxInput(e.target.value)}
+                    placeholder={totalPax?.toString() || ''}
+                    className="h-7 w-20 text-sm"
+                  />
+                </div>
+              </div>
 
-          {/* 行程表格（跟公開頁面一樣） */}
-          {daySchedules.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Sun size={40} className="mx-auto mb-3 opacity-30" />
-              <p>尚無行程資料，請先到「行程」頁籤填寫</p>
-            </div>
-          ) : (
-            <table className="w-full border-collapse text-sm mb-3">
-              <thead>
-                <tr className="bg-[#c9a96e] text-white">
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-20">日期</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left">行程內容</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">早餐</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">午餐</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">晚餐</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-32">住宿</th>
-                </tr>
-              </thead>
-              <tbody>
-                {daySchedules.map((day, idx) => (
-                  <tr key={day.dayNumber} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf5]'}>
-                    <td className="border border-[#e8e5e0] px-3 py-2">
-                      <div className="font-semibold text-[#c9a96e]">Day {day.dayNumber}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {day.date}{day.weekday ? ` (${day.weekday})` : ''}
-                      </div>
-                    </td>
-                    <td className="border border-[#e8e5e0] px-3 py-2 font-medium">
-                      {day.route || '—'}
-                    </td>
-                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
-                      {day.breakfast || '-'}
-                    </td>
-                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
-                      {day.lunch || '-'}
-                    </td>
-                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
-                      {day.dinner || '-'}
-                    </td>
-                    <td className="border border-[#e8e5e0] px-3 py-2 text-xs">
-                      {day.hotel || '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+              {/* 行程表格（跟公開頁面一樣） */}
+              {daySchedules.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Sun size={40} className="mx-auto mb-3 opacity-30" />
+                  <p>尚無行程資料，請先到「行程」頁籤填寫</p>
+                </div>
+              ) : (
+                <table className="w-full border-collapse text-sm mb-3">
+                  <thead>
+                    <tr className="bg-[#c9a96e] text-white">
+                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-20">日期</th>
+                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-left">行程內容</th>
+                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">
+                        早餐
+                      </th>
+                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">
+                        午餐
+                      </th>
+                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">
+                        晚餐
+                      </th>
+                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-32">住宿</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {daySchedules.map((day, idx) => (
+                      <tr
+                        key={day.dayNumber}
+                        className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf5]'}
+                      >
+                        <td className="border border-[#e8e5e0] px-3 py-2">
+                          <div className="font-semibold text-[#c9a96e]">Day {day.dayNumber}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {day.date}
+                            {day.weekday ? ` (${day.weekday})` : ''}
+                          </div>
+                        </td>
+                        <td className="border border-[#e8e5e0] px-3 py-2 font-medium">
+                          {day.route || '—'}
+                        </td>
+                        <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                          {day.breakfast || '-'}
+                        </td>
+                        <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                          {day.lunch || '-'}
+                        </td>
+                        <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                          {day.dinner || '-'}
+                        </td>
+                        <td className="border border-[#e8e5e0] px-3 py-2 text-xs">
+                          {day.hotel || '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
 
-          {/* 報價資訊提示（車行填寫） */}
-          <div className="pt-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <p className="text-sm font-medium mb-2">📋 供應商將填寫以下資訊：</p>
-            <ul className="text-xs text-muted-foreground space-y-1">
-              <li>• 車資（總金額）</li>
-              <li>• 是否含停車費、過路費</li>
-              <li>• 是否含司機住宿（如不含，填寫住宿費金額）</li>
-              <li>• 是否含小費（如不含，填寫小費金額）</li>
-            </ul>
-          </div>
+              {/* 報價資訊提示（車行填寫） */}
+              <div className="pt-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p className="text-sm font-medium mb-2">📋 供應商將填寫以下資訊：</p>
+                <ul className="text-xs text-muted-foreground space-y-1">
+                  <li>• 車資（總金額）</li>
+                  <li>• 是否含停車費、過路費</li>
+                  <li>• 是否含司機住宿（如不含，填寫住宿費金額）</li>
+                  <li>• 是否含小費（如不含，填寫小費金額）</li>
+                </ul>
+              </div>
 
-          {/* 備註 */}
-          <div className="pt-2">
-            <label className="text-sm font-medium mb-1.5 block">備註</label>
-            <Textarea
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              placeholder="給 Local 的特殊需求、偏好、注意事項..."
-              rows={2}
-              className="resize-none"
-            />
-          </div>
-
+              {/* 備註 */}
+              <div className="pt-2">
+                <label className="text-sm font-medium mb-1.5 block">備註</label>
+                <Textarea
+                  value={note}
+                  onChange={e => setNote(e.target.value)}
+                  placeholder="給 Local 的特殊需求、偏好、注意事項..."
+                  rows={2}
+                  className="resize-none"
+                />
+              </div>
             </>
           )}
         </div>
@@ -498,9 +534,10 @@ export function TransportQuoteDialog({
                     key={m.key}
                     onClick={() => handleDelivery(m.key)}
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium transition-all
-                      ${selectedMethod === m.key 
-                        ? 'border-[#c9a96e] bg-[#faf8f5] text-[#8B6914]' 
-                        : 'border-border hover:border-[#c9a96e] hover:bg-[#faf8f5] text-foreground'
+                      ${
+                        selectedMethod === m.key
+                          ? 'border-[#c9a96e] bg-[#faf8f5] text-[#8B6914]'
+                          : 'border-border hover:border-[#c9a96e] hover:bg-[#faf8f5] text-foreground'
                       }`}
                   >
                     <Icon size={15} />
@@ -509,7 +546,10 @@ export function TransportQuoteDialog({
                 )
               })}
             </div>
-            <Button variant="outline" onClick={onClose}>取消</Button>
+            <Button variant="outline" onClick={onClose}>
+              <X className="h-4 w-4 mr-1" />
+              取消
+            </Button>
           </div>
 
           {/* LINE 群組選擇（選了 Line 才出現） */}
@@ -532,7 +572,11 @@ export function TransportQuoteDialog({
                 disabled={!selectedGroupId || sending}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
               >
-                {sending ? <Loader2 size={14} className="animate-spin mr-1" /> : <Send size={14} className="mr-1" />}
+                {sending ? (
+                  <Loader2 size={14} className="animate-spin mr-1" />
+                ) : (
+                  <Send size={14} className="mr-1" />
+                )}
                 發送
               </Button>
             </div>

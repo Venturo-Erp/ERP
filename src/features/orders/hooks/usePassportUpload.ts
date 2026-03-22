@@ -386,7 +386,10 @@ export function usePassportUpload({
       })
 
       if (updateResult.success) {
-        void alert(`已更新 ${item.customer.name || item.matchedMember.chinese_name || ''} 的資料`, 'success')
+        void alert(
+          `已更新 ${item.customer.name || item.matchedMember.chinese_name || ''} 的資料`,
+          'success'
+        )
       } else {
         void alert(`更新失敗：${updateResult.error || '未知錯誤'}`, 'error')
       }
@@ -398,12 +401,9 @@ export function usePassportUpload({
   )
 
   // 拒絕更新單筆
-  const rejectUpdate = useCallback(
-    (index: number) => {
-      setPendingConfirmations(prev => prev.filter((_, i) => i !== index))
-    },
-    []
-  )
+  const rejectUpdate = useCallback((index: number) => {
+    setPendingConfirmations(prev => prev.filter((_, i) => i !== index))
+  }, [])
 
   // 確認更新全部
   const confirmAllUpdates = useCallback(async () => {

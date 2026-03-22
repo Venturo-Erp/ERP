@@ -9,12 +9,16 @@ export default function DialogModesTestPage() {
   const [mode, setMode] = useState<'modern' | 'traditional'>('modern')
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-morandi-container p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-2xl font-bold mb-6">Dialog 兩種模式切換測試</h1>
 
         {/* 切換按鈕 */}
-        <Tabs value={mode} onValueChange={(v) => setMode(v as 'modern' | 'traditional')} className="mb-6">
+        <Tabs
+          value={mode}
+          onValueChange={v => setMode(v as 'modern' | 'traditional')}
+          className="mb-6"
+        >
           <TabsList>
             <TabsTrigger value="modern">現代樣式（LINE/租戶）</TabsTrigger>
             <TabsTrigger value="traditional">傳統樣式（列印/傳真）</TabsTrigger>
@@ -23,11 +27,7 @@ export default function DialogModesTestPage() {
 
         {/* 模擬 Dialog 內容 */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden border">
-          {mode === 'modern' ? (
-            <ModernView />
-          ) : (
-            <TraditionalView />
-          )}
+          {mode === 'modern' ? <ModernView /> : <TraditionalView />}
         </div>
       </div>
     </div>
@@ -59,10 +59,18 @@ function ModernView() {
 
       {/* 米黃色團資訊條 */}
       <div className="bg-[#faf8f5] px-6 py-3 border-b flex items-center gap-6 text-sm">
-        <span><strong>團號：</strong>TW260321A</span>
-        <span><strong>團名：</strong>Liz高爾夫球團</span>
-        <span><strong>出發：</strong>2026-03-21</span>
-        <span><strong>人數：</strong>10人</span>
+        <span>
+          <strong>團號：</strong>TW260321A
+        </span>
+        <span>
+          <strong>團名：</strong>Liz高爾夫球團
+        </span>
+        <span>
+          <strong>出發：</strong>2026-03-21
+        </span>
+        <span>
+          <strong>人數：</strong>10人
+        </span>
       </div>
 
       {/* 金色行程表 */}
@@ -82,7 +90,7 @@ function ModernView() {
             <tr className="bg-white">
               <td className="border border-[#e8e5e0] px-3 py-2">
                 <div className="font-semibold text-[#c9a96e]">Day 1</div>
-                <div className="text-xs text-gray-500">3/21 (五)</div>
+                <div className="text-xs text-morandi-secondary">3/21 (五)</div>
               </td>
               <td className="border border-[#e8e5e0] px-3 py-2">台北 → 新竹 → 台中</td>
               <td className="border border-[#e8e5e0] px-3 py-2 text-center">—</td>
@@ -93,7 +101,7 @@ function ModernView() {
             <tr className="bg-[#fafaf5]">
               <td className="border border-[#e8e5e0] px-3 py-2">
                 <div className="font-semibold text-[#c9a96e]">Day 2</div>
-                <div className="text-xs text-gray-500">3/22 (六)</div>
+                <div className="text-xs text-morandi-secondary">3/22 (六)</div>
               </td>
               <td className="border border-[#e8e5e0] px-3 py-2">台中 → 日月潭 → 台中</td>
               <td className="border border-[#e8e5e0] px-3 py-2 text-center">飯店早餐</td>
@@ -157,19 +165,19 @@ function TraditionalView() {
           <div className="space-y-1 text-sm">
             <div className="flex gap-2">
               <span className="font-bold min-w-[3cm]">供應商：</span>
-              <span className="text-gray-400">[下拉選單]</span>
+              <span className="text-muted-foreground">[下拉選單]</span>
             </div>
             <div className="flex gap-2">
               <span className="font-bold min-w-[3cm]">聯絡人：</span>
-              <span className="text-gray-400">(自動帶入)</span>
+              <span className="text-muted-foreground">(自動帶入)</span>
             </div>
             <div className="flex gap-2">
               <span className="font-bold min-w-[3cm]">電話：</span>
-              <span className="text-gray-400">(自動帶入)</span>
+              <span className="text-muted-foreground">(自動帶入)</span>
             </div>
             <div className="flex gap-2">
               <span className="font-bold min-w-[3cm]">傳真：</span>
-              <span className="text-gray-400">(自動帶入)</span>
+              <span className="text-muted-foreground">(自動帶入)</span>
             </div>
           </div>
         </div>
@@ -179,7 +187,7 @@ function TraditionalView() {
       <h3 className="text-lg font-bold mb-3">交通表</h3>
       <table className="w-full border-collapse mb-6 text-sm">
         <thead>
-          <tr className="bg-gray-200">
+          <tr className="bg-morandi-container">
             <th className="border border-black px-3 py-2 text-left w-[3cm]">天數</th>
             <th className="border border-black px-3 py-2 text-left w-[3cm]">日期</th>
             <th className="border border-black px-3 py-2 text-left">行程內容</th>

@@ -9,7 +9,8 @@ import { REQUEST_OPERATIONS_LABELS } from '../../constants/labels'
 import { logger } from '@/lib/utils/logger'
 
 export function useRequestOperations() {
-  const { payment_requests, createPaymentRequest, addPaymentItems, deletePaymentRequest } = usePayments()
+  const { payment_requests, createPaymentRequest, addPaymentItems, deletePaymentRequest } =
+    usePayments()
   const workspaceId = useWorkspaceId()
 
   // 根據團號生成請款單編號：團號-I01, 團號-I02, ...

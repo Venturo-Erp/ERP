@@ -46,8 +46,6 @@ export default function BalanceSheetPage() {
     setIsLoading(true)
 
     try {
-      
-
       // 1. 取得資產、負債、權益科目
       const { data: accounts, error: accountsError } = await supabase
         .from('chart_of_accounts')
@@ -61,7 +59,8 @@ export default function BalanceSheetPage() {
       // 2. 取得截至指定日期的所有分錄
       const { data: lines, error: linesError } = await supabase
         .from('journal_lines')
-        .select(`
+        .select(
+          `
           account_id,
           debit_amount,
           credit_amount,
@@ -69,7 +68,8 @@ export default function BalanceSheetPage() {
             voucher_date,
             workspace_id
           )
-        `)
+        `
+        )
         .eq('voucher.workspace_id', user.workspace_id)
         .lte('voucher.voucher_date', asOfDate)
 
@@ -77,7 +77,7 @@ export default function BalanceSheetPage() {
 
       // 3. 計算各科目餘額
       const balanceMap = new Map<string, number>()
-      
+
       lines.forEach((line: any) => {
         const existing = balanceMap.get(line.account_id) || 0
         // 資產：借方增加（debit - credit）
@@ -96,9 +96,7 @@ export default function BalanceSheetPage() {
 
         // 資產：借方餘額為正
         // 負債/權益：貸方餘額為正（所以要取負值）
-        const balance = account.account_type === 'asset' 
-          ? rawBalance 
-          : -rawBalance
+        const balance = account.account_type === 'asset' ? rawBalance : -rawBalance
 
         if (balance === 0) return
 
@@ -119,10 +117,11 @@ export default function BalanceSheetPage() {
 
       // 5. 計算本期損益（年初至今）
       const yearStart = `${asOfDate.substring(0, 4)}-01-01`
-      
+
       const { data: plLines, error: plError } = await supabase
         .from('journal_lines')
-        .select(`
+        .select(
+          `
           account_id,
           debit_amount,
           credit_amount,
@@ -130,7 +129,8 @@ export default function BalanceSheetPage() {
             voucher_date,
             workspace_id
           )
-        `)
+        `
+        )
         .eq('voucher.workspace_id', user.workspace_id)
         .gte('voucher.voucher_date', yearStart)
         .lte('voucher.voucher_date', asOfDate)
@@ -145,7 +145,7 @@ export default function BalanceSheetPage() {
         .in('account_type', ['revenue', 'cost', 'expense'])
 
       const plAccountIds = new Set(plAccounts?.map(a => a.id) || [])
-      
+
       let revenueTotal = 0
       let costExpenseTotal = 0
 
@@ -156,9 +156,9 @@ export default function BalanceSheetPage() {
         if (!account) return
 
         if (account.account_type === 'revenue') {
-          revenueTotal += (line.credit_amount - line.debit_amount)
+          revenueTotal += line.credit_amount - line.debit_amount
         } else {
-          costExpenseTotal += (line.debit_amount - line.credit_amount)
+          costExpenseTotal += line.debit_amount - line.credit_amount
         }
       })
 
@@ -178,7 +178,6 @@ export default function BalanceSheetPage() {
         totalEquity,
         netIncome,
       })
-
     } catch (error) {
       console.error('載入資產負債表失敗:', error)
       alert('載入失敗')
@@ -195,11 +194,7 @@ export default function BalanceSheetPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>截止日期</Label>
-              <Input
-                type="date"
-                value={asOfDate}
-                onChange={(e) => setAsOfDate(e.target.value)}
-              />
+              <Input type="date" value={asOfDate} onChange={e => setAsOfDate(e.target.value)} />
             </div>
 
             <div className="flex items-end">
@@ -219,16 +214,16 @@ export default function BalanceSheetPage() {
               <div className="space-y-4">
                 <div className="text-center border-b pb-4">
                   <h2 className="text-xl font-bold">資產</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    截至 {asOfDate}
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">截至 {asOfDate}</p>
                 </div>
 
                 <div>
                   <div className="font-semibold mb-2 text-blue-700">流動資產</div>
                   {data.assets.map(item => (
                     <div key={item.code} className="flex justify-between py-1 pl-4">
-                      <span className="text-sm">{item.code} {item.name}</span>
+                      <span className="text-sm">
+                        {item.code} {item.name}
+                      </span>
                       <span className="text-sm font-mono">${item.balance.toLocaleString()}</span>
                     </div>
                   ))}
@@ -249,9 +244,7 @@ export default function BalanceSheetPage() {
               <div className="space-y-4">
                 <div className="text-center border-b pb-4">
                   <h2 className="text-xl font-bold">負債與權益</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    截至 {asOfDate}
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">截至 {asOfDate}</p>
                 </div>
 
                 {/* 負債 */}
@@ -259,7 +252,9 @@ export default function BalanceSheetPage() {
                   <div className="font-semibold mb-2 text-red-700">負債</div>
                   {data.liabilities.map(item => (
                     <div key={item.code} className="flex justify-between py-1 pl-4">
-                      <span className="text-sm">{item.code} {item.name}</span>
+                      <span className="text-sm">
+                        {item.code} {item.name}
+                      </span>
                       <span className="text-sm font-mono">${item.balance.toLocaleString()}</span>
                     </div>
                   ))}
@@ -277,7 +272,9 @@ export default function BalanceSheetPage() {
                   <div className="font-semibold mb-2 text-green-700">權益</div>
                   {data.equity.map(item => (
                     <div key={item.code} className="flex justify-between py-1 pl-4">
-                      <span className="text-sm">{item.code} {item.name}</span>
+                      <span className="text-sm">
+                        {item.code} {item.name}
+                      </span>
                       <span className="text-sm font-mono">${item.balance.toLocaleString()}</span>
                     </div>
                   ))}
@@ -285,7 +282,9 @@ export default function BalanceSheetPage() {
                   {data.netIncome !== 0 && (
                     <div className="flex justify-between py-1 pl-4">
                       <span className="text-sm">本期損益</span>
-                      <span className={`text-sm font-mono ${data.netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <span
+                        className={`text-sm font-mono ${data.netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                      >
                         ${data.netIncome.toLocaleString()}
                       </span>
                     </div>
@@ -312,25 +311,30 @@ export default function BalanceSheetPage() {
 
         {/* 平衡檢查 */}
         {data && (
-          <Card className={`p-4 ${
-            Math.abs(data.totalAssets - (data.totalLiabilities + data.totalEquity)) < 0.01
-              ? 'bg-green-50 border-green-200'
-              : 'bg-red-50 border-red-200'
-          }`}>
-            <div className={`text-sm ${
+          <Card
+            className={`p-4 ${
               Math.abs(data.totalAssets - (data.totalLiabilities + data.totalEquity)) < 0.01
-                ? 'text-green-800'
-                : 'text-red-800'
-            }`}>
+                ? 'bg-green-50 border-green-200'
+                : 'bg-red-50 border-red-200'
+            }`}
+          >
+            <div
+              className={`text-sm ${
+                Math.abs(data.totalAssets - (data.totalLiabilities + data.totalEquity)) < 0.01
+                  ? 'text-green-800'
+                  : 'text-red-800'
+              }`}
+            >
               <div className="font-semibold mb-2">會計等式驗證</div>
               <div className="space-y-1">
                 <div>資產 = ${data.totalAssets.toLocaleString()}</div>
-                <div>負債 + 權益 = ${(data.totalLiabilities + data.totalEquity).toLocaleString()}</div>
+                <div>
+                  負債 + 權益 = ${(data.totalLiabilities + data.totalEquity).toLocaleString()}
+                </div>
                 <div className="font-bold mt-2">
                   {Math.abs(data.totalAssets - (data.totalLiabilities + data.totalEquity)) < 0.01
                     ? '✅ 平衡（資產 = 負債 + 權益）'
-                    : `⚠️ 不平衡！差額：${(data.totalAssets - (data.totalLiabilities + data.totalEquity)).toLocaleString()}`
-                  }
+                    : `⚠️ 不平衡！差額：${(data.totalAssets - (data.totalLiabilities + data.totalEquity)).toLocaleString()}`}
                 </div>
               </div>
             </div>
@@ -339,9 +343,7 @@ export default function BalanceSheetPage() {
 
         {!data && !isLoading && (
           <Card className="p-8">
-            <div className="text-center text-muted-foreground">
-              請選擇日期並查詢
-            </div>
+            <div className="text-center text-muted-foreground">請選擇日期並查詢</div>
           </Card>
         )}
       </div>

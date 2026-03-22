@@ -7,6 +7,7 @@
 ## 🚀 快速開始
 
 ### 本機開發環境
+
 ```bash
 # ERP
 cd ~/Projects/venturo-erp
@@ -18,6 +19,7 @@ npm run dev --port 3001
 ```
 
 ### Dev Server
+
 - **ERP**: http://100.89.92.46:3000
 - **Online**: http://100.89.92.46:3001
 
@@ -34,12 +36,15 @@ npm run dev --port 3001
 ## 🎮 開發哲學
 
 ### 1. 關聯表優先
+
 永遠用關聯表，不用 JSONB。
 
 ### 2. 核心驅動
+
 所有操作都從核心表（`tour_itinerary_items`）讀寫。
 
 ### 3. 遊戲語言
+
 用遊戲比喻解釋概念，讓非技術人員也能理解。
 
 ---

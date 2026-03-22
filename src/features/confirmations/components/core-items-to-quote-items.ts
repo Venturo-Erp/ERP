@@ -1,6 +1,6 @@
 /**
  * 核心表 → QuoteItem[] 轉換器
- * 
+ *
  * 直接從 tour_itinerary_items 轉換為需求單所需的 QuoteItem 格式
  * 替代舊的 parseQuoteItems（依賴 quotes.categories JSON）
  */
@@ -62,12 +62,14 @@ export function coreItemsToQuoteItems(
   const nonAccommodationItems = filtered.filter(i => i.category !== 'accommodation')
 
   // 合併連續同酒店住宿
-  const mergedAccommodation: Array<TourItineraryItem & { _nights: number; _startDay: number; _endDay: number }> = []
+  const mergedAccommodation: Array<
+    TourItineraryItem & { _nights: number; _startDay: number; _endDay: number }
+  > = []
   for (const item of accommodationItems) {
     const hotelName = stripContinueStay(item.title || '')
     const dayNum = item.day_number || 0
     const last = mergedAccommodation[mergedAccommodation.length - 1]
-    
+
     if (last && stripContinueStay(last.title || '') === hotelName && dayNum === last._endDay + 1) {
       // 合併：延長天數
       last._nights++
@@ -125,7 +127,7 @@ export function coreItemsToQuoteItems(
   const otherQuoteItems: QuoteItem[] = nonAccommodationItems.map(item => {
     const category = mapCategory(item.category || '')
     const serviceDate = item.day_number ? calculateDate(item.day_number) : null
-    
+
     let title = (item.title || '').trim()
     let supplierName = (item.resource_name || item.title || '').trim()
 

@@ -1,5 +1,7 @@
 'use client'
 
+import { X } from 'lucide-react'
+
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -30,13 +32,19 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!user?.workspace_id) {
       toast.error('無法取得 workspace_id')
       return
     }
 
-    if (!formData.check_number || !formData.check_date || !formData.due_date || !formData.amount || !formData.payee_name) {
+    if (
+      !formData.check_number ||
+      !formData.check_date ||
+      !formData.due_date ||
+      !formData.amount ||
+      !formData.payee_name
+    ) {
       toast.error('請填寫所有必填欄位')
       return
     }
@@ -54,28 +62,26 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       )
-      
-      const { error } = await supabase
-        .from('checks')
-        .insert({
-          workspace_id: user.workspace_id,
-          check_number: formData.check_number,
-          check_date: formData.check_date,
-          due_date: formData.due_date,
-          amount,
-          payee_name: formData.payee_name,
-          payee_type: 'other',
-          status: 'pending',
-          memo: formData.memo || null,
-          created_by: user.id,
-        })
+
+      const { error } = await supabase.from('checks').insert({
+        workspace_id: user.workspace_id,
+        check_number: formData.check_number,
+        check_date: formData.check_date,
+        due_date: formData.due_date,
+        amount,
+        payee_name: formData.payee_name,
+        payee_type: 'other',
+        status: 'pending',
+        memo: formData.memo || null,
+        created_by: user.id,
+      })
 
       if (error) throw error
 
       toast.success('票據新增成功')
       onOpenChange(false)
       onSuccess()
-      
+
       // 重置表單
       setFormData({
         check_number: '',
@@ -103,7 +109,7 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
         <DialogHeader>
           <DialogTitle>新增票據/支票</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -112,7 +118,7 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
                 id="check_number"
                 placeholder="例如：CH20260319001"
                 value={formData.check_number}
-                onChange={(e) => setFormData({ ...formData, check_number: e.target.value })}
+                onChange={e => setFormData({ ...formData, check_number: e.target.value })}
                 required
               />
             </div>
@@ -125,7 +131,7 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
                 step="0.01"
                 placeholder="0.00"
                 value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                onChange={e => setFormData({ ...formData, amount: e.target.value })}
                 required
               />
             </div>
@@ -138,7 +144,7 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
                 id="check_date"
                 type="date"
                 value={formData.check_date}
-                onChange={(e) => setFormData({ ...formData, check_date: e.target.value })}
+                onChange={e => setFormData({ ...formData, check_date: e.target.value })}
                 required
               />
             </div>
@@ -149,7 +155,7 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
                 id="due_date"
                 type="date"
                 value={formData.due_date}
-                onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
+                onChange={e => setFormData({ ...formData, due_date: e.target.value })}
                 required
               />
             </div>
@@ -161,7 +167,7 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
               id="payee_name"
               placeholder="例如：供應商名稱"
               value={formData.payee_name}
-              onChange={(e) => setFormData({ ...formData, payee_name: e.target.value })}
+              onChange={e => setFormData({ ...formData, payee_name: e.target.value })}
               required
             />
           </div>
@@ -172,7 +178,7 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
               id="memo"
               placeholder="票據備註（選填）"
               value={formData.memo}
-              onChange={(e) => setFormData({ ...formData, memo: e.target.value })}
+              onChange={e => setFormData({ ...formData, memo: e.target.value })}
               rows={3}
             />
           </div>
@@ -184,6 +190,7 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
+              <X className="h-4 w-4 mr-1" />
               取消
             </Button>
             <Button type="submit" disabled={isSubmitting}>

@@ -54,8 +54,6 @@ export default function LoginPage() {
     return '/dashboard'
   }
 
-
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -217,7 +215,6 @@ export default function LoginPage() {
         </form>
 
         {/* Demo 體驗按鈕 */}
-
       </div>
     </div>
   )

@@ -641,7 +641,10 @@ export function createEntityHook<T extends BaseEntity>(
     )
 
     try {
-      const { error } = await supabase.from(tableName as any).update(updateData).eq('id', id)
+      const { error } = await supabase
+        .from(tableName as any)
+        .update(updateData)
+        .eq('id', id)
 
       if (error) {
         logger.error(`[${tableName}] Update error:`, error.message)
@@ -669,7 +672,10 @@ export function createEntityHook<T extends BaseEntity>(
     )
 
     try {
-      const { error } = await supabase.from(tableName as any).delete().eq('id', id)
+      const { error } = await supabase
+        .from(tableName as any)
+        .delete()
+        .eq('id', id)
 
       if (error) {
         logger.error(`[${tableName}] Delete error:`, error.message)
@@ -700,7 +706,10 @@ export function createEntityHook<T extends BaseEntity>(
     )
 
     try {
-      const { error } = await supabase.from(tableName as any).delete().in('id', ids)
+      const { error } = await supabase
+        .from(tableName as any)
+        .delete()
+        .in('id', ids)
 
       if (error) {
         logger.error(`[${tableName}] BatchRemove error:`, error.message)

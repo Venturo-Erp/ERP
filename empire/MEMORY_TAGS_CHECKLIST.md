@@ -10,26 +10,26 @@
 
 ### 核心文檔
 
-| 文檔 | 記憶標籤 | ID | 重要度 |
-|------|---------|-----|--------|
-| EMPIRE_STRUCTURE.md | 帝國重組完成 | 32201533... | milestone:10 |
-| EMPIRE_MAP_V4.md | 帝國地圖 v4.0 完成 | f76dd66d... | milestone:10 |
-| QUICK_REFERENCE.md | 快速參考文檔完成 | 56bdd7bb... | milestone:9 |
-| AGENTS.md | 守護者名冊更新 | 3b1a3b33... | milestone:9 |
-| DEEP_INTEGRATION_REPORT.md | 深度整合報告完成 | cf079548... | milestone:10 |
-| war-room/README.md | 作戰會議室完整文檔給Matthew | 82a96d33... | milestone:10 |
-| MAGIC_LIBRARY.md | 魔法塔圖書館系統建立 | 5f6ae071... | milestone:10 |
-| ARCHITECTURE.md | 冒險者公會三層魔法架構 | 8c658276... | milestone:10 |
-| empire/README.md | 帝國文檔索引更新 | 240586aa... | note:8 |
+| 文檔                       | 記憶標籤                    | ID          | 重要度       |
+| -------------------------- | --------------------------- | ----------- | ------------ |
+| EMPIRE_STRUCTURE.md        | 帝國重組完成                | 32201533... | milestone:10 |
+| EMPIRE_MAP_V4.md           | 帝國地圖 v4.0 完成          | f76dd66d... | milestone:10 |
+| QUICK_REFERENCE.md         | 快速參考文檔完成            | 56bdd7bb... | milestone:9  |
+| AGENTS.md                  | 守護者名冊更新              | 3b1a3b33... | milestone:9  |
+| DEEP_INTEGRATION_REPORT.md | 深度整合報告完成            | cf079548... | milestone:10 |
+| war-room/README.md         | 作戰會議室完整文檔給Matthew | 82a96d33... | milestone:10 |
+| MAGIC_LIBRARY.md           | 魔法塔圖書館系統建立        | 5f6ae071... | milestone:10 |
+| ARCHITECTURE.md            | 冒險者公會三層魔法架構      | 8c658276... | milestone:10 |
+| empire/README.md           | 帝國文檔索引更新            | 240586aa... | note:8       |
 
 ---
 
 ### 系統整合
 
-| 系統 | 記憶標籤 | ID | 重要度 |
-|------|---------|-----|--------|
+| 系統           | 記憶標籤                           | ID          | 重要度       |
+| -------------- | ---------------------------------- | ----------- | ------------ |
 | 作戰會議室整合 | 作戰會議室+冒險者公會完整整合到ERP | 82a96d33... | milestone:10 |
-| 任務系統 | 冒險者公會任務系統啟動 | (earlier) | milestone:9 |
+| 任務系統       | 冒險者公會任務系統啟動             | (earlier)   | milestone:9  |
 
 ---
 
@@ -60,6 +60,7 @@ note:7        — 一般筆記
 ### 記憶標籤格式
 
 **好的範例**：
+
 ```
 "帝國重組完成（2026-03-18 09:27）：6位守護者議會（William分身、Matthew生產魔法、Nova形象禮儀、Caesar財務、Donki特助、Yuzuki魔法師）。核心原則：機器人=主管=只派任務不做事、隨時開會監控停止。文檔：EMPIRE_STRUCTURE.md + AGENTS.md。從混亂到清晰架構。"
 
@@ -75,6 +76,7 @@ note:7        — 一般筆記
 ```
 
 **不好的範例**：
+
 ```
 "完成了一些東西"  ❌ 太模糊
 "建立系統"        ❌ 沒有細節
@@ -100,11 +102,11 @@ find ~/.openclaw/workspace-william -type f -mtime -1 -name "*.md"
 ```bash
 # 查看今天的記憶
 sqlite3 ~/.openclaw/empire-memory/citizens/william.db << 'EOF'
-SELECT 
+SELECT
   substr(content, 1, 100) as preview,
   category,
   importance
-FROM memories 
+FROM memories
 WHERE created_at >= strftime('%s', date('now'))
 ORDER BY created_at DESC;
 EOF
@@ -219,10 +221,10 @@ sqlite3 ~/.openclaw/empire-memory/citizens/william.db \
 
 # 檢查 milestone 記憶
 sqlite3 ~/.openclaw/empire-memory/citizens/william.db \
-  "SELECT substr(content, 1, 80), importance 
-   FROM memories 
-   WHERE category = 'milestone' 
-   ORDER BY created_at DESC 
+  "SELECT substr(content, 1, 80), importance
+   FROM memories
+   WHERE category = 'milestone'
+   ORDER BY created_at DESC
    LIMIT 10"
 ```
 

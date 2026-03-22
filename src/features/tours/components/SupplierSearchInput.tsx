@@ -121,7 +121,10 @@ export function SupplierSearchInput({
   return (
     <div className={`relative ${className}`}>
       <div className="relative">
-        <Search size={14} className="absolute left-2 top-1/2 -translate-y-1/2 text-morandi-secondary" />
+        <Search
+          size={14}
+          className="absolute left-2 top-1/2 -translate-y-1/2 text-morandi-secondary"
+        />
         <Input
           ref={inputRef}
           value={searchTerm}
@@ -131,7 +134,10 @@ export function SupplierSearchInput({
           className="h-7 text-sm pl-7"
         />
         {loading && (
-          <Loader2 size={14} className="absolute right-2 top-1/2 -translate-y-1/2 animate-spin text-morandi-secondary" />
+          <Loader2
+            size={14}
+            className="absolute right-2 top-1/2 -translate-y-1/2 animate-spin text-morandi-secondary"
+          />
         )}
       </div>
       {isOpen && searchTerm.length >= 2 && (
@@ -144,7 +150,15 @@ export function SupplierSearchInput({
               <p className="text-sm text-morandi-secondary mb-2">
                 {SUPPLIER_SEARCH_LABELS.notFound(searchTerm)}
               </p>
-              <Button variant="outline" size="sm" className="gap-1 text-xs" onClick={() => { onChange(searchTerm); setIsOpen(false) }}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1 text-xs"
+                onClick={() => {
+                  onChange(searchTerm)
+                  setIsOpen(false)
+                }}
+              >
                 <Plus size={12} />
                 {SUPPLIER_SEARCH_LABELS.useAs(searchTerm)}
               </Button>
@@ -161,7 +175,12 @@ export function SupplierSearchInput({
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm truncate">{supplier.name}</div>
                     <div className="text-xs text-morandi-secondary flex gap-2">
-                      {supplier.contact_person && <span>{SUPPLIER_SEARCH_LABELS.contactLabel}{supplier.contact_person}</span>}
+                      {supplier.contact_person && (
+                        <span>
+                          {SUPPLIER_SEARCH_LABELS.contactLabel}
+                          {supplier.contact_person}
+                        </span>
+                      )}
                       {supplier.phone && <span>{supplier.phone}</span>}
                     </div>
                   </div>

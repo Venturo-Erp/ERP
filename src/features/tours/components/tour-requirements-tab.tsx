@@ -27,10 +27,6 @@ export function TourRequirementsTab({
   onOpenRequestDialog,
 }: TourRequirementsTabProps) {
   return (
-    <RequirementsList
-      tourId={tourId}
-      quoteId={quoteId}
-      onOpenRequestDialog={onOpenRequestDialog}
-    />
+    <RequirementsList tourId={tourId} quoteId={quoteId} onOpenRequestDialog={onOpenRequestDialog} />
   )
 }

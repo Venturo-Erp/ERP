@@ -74,9 +74,11 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
   const { item: fullTour } = useTour(quote?.tour_id ?? null)
 
   // 核心表資料
-  const { items: coreItems, loading: coreItemsLoading, refresh: refreshCoreItems } = useTourItineraryItemsByTour(
-    quote?.tour_id ?? null
-  )
+  const {
+    items: coreItems,
+    loading: coreItemsLoading,
+    refresh: refreshCoreItems,
+  } = useTourItineraryItemsByTour(quote?.tour_id ?? null)
 
   // 行程資料（用於列印報價單）
   const itinerary = useMemo(() => {
@@ -134,7 +136,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
       // 定價欄位優先從 fullTour 讀取
       setAccommodationDays(fullTour?.accommodation_days ?? quote.accommodation_days ?? 0)
       setParticipantCounts(
-        (fullTour?.participant_counts ?? quote.participant_counts) as ParticipantCounts || {
+        ((fullTour?.participant_counts ?? quote.participant_counts) as ParticipantCounts) || {
           adult: quote.group_size || 20,
           child_with_bed: 0,
           child_no_bed: 0,
@@ -144,7 +146,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
       )
       setQuoteName(quote.name || '')
       setSellingPrices(
-        (fullTour?.selling_prices ?? quote.selling_prices) as SellingPrices || {
+        ((fullTour?.selling_prices ?? quote.selling_prices) as SellingPrices) || {
           adult: 0,
           child_with_bed: 0,
           child_no_bed: 0,
@@ -188,30 +190,33 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
   })
 
   // 切換項目在報價單/需求單的顯示狀態
-  const handleToggleVisibility = useCallback(async (categoryId: string, itemId: string) => {
-    const category = categories.find(c => c.id === categoryId)
-    if (!category) return
+  const handleToggleVisibility = useCallback(
+    async (categoryId: string, itemId: string) => {
+      const category = categories.find(c => c.id === categoryId)
+      if (!category) return
 
-    const item = category.items.find(i => i.id === itemId)
-    if (!item?.itinerary_item_id) return
+      const item = category.items.find(i => i.id === itemId)
+      if (!item?.itinerary_item_id) return
 
-    const newVisibility = !item.show_on_quote
-    
-    // 更新資料庫
-    const { error } = await supabase
-      .from('tour_itinerary_items')
-      .update({ show_on_quote: newVisibility })
-      .eq('id', item.itinerary_item_id)
+      const newVisibility = !item.show_on_quote
 
-    if (error) {
-      toast.error('更新顯示狀態失敗')
-      return
-    }
+      // 更新資料庫
+      const { error } = await supabase
+        .from('tour_itinerary_items')
+        .update({ show_on_quote: newVisibility })
+        .eq('id', item.itinerary_item_id)
 
-    // 重新載入核心表
-    refreshCoreItems()
-    toast.success(newVisibility ? '已顯示' : '已隱藏')
-  }, [categories, refreshCoreItems])
+      if (error) {
+        toast.error('更新顯示狀態失敗')
+        return
+      }
+
+      // 重新載入核心表
+      refreshCoreItems()
+      toast.success(newVisibility ? '已顯示' : '已隱藏')
+    },
+    [categories, refreshCoreItems]
+  )
 
   // Calculations hook
   const calculations = useQuoteCalculations({
@@ -268,20 +273,20 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
       const localItems = groupTransportCategory.items.filter(item =>
         item.name.startsWith(QUOTE_DETAIL_EMBED_LABELS.Local_報價)
       )
-      
+
       if (localItems.length > 0) {
         const restoredTiers: LocalTier[] = localItems.map(item => {
           // 從名稱提取人數：Local 報價 (15人) → 15
           const match = item.name.match(/\((\d+)人\)/)
           const participants = match ? parseInt(match[1]) : 0
-          
+
           return {
             id: item.id,
             participants,
             unitPrice: item.unit_price || 0,
           }
         })
-        
+
         setLocalTiers(restoredTiers)
       }
     }
@@ -371,7 +376,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
     (tiers: LocalTier[], _matchedTierIndex: number) => {
       // 儲存檔次資料（持久化）
       setLocalTiers(tiers)
-      
+
       // 把第一個砍次的人數同步到報價單總人數（全部設為成人）
       if (tiers.length > 0 && tiers[0].participants > 0) {
         setParticipantCounts({
@@ -393,7 +398,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
       const currentLocalPrice = sortedTiers[currentTierIdx]?.unitPrice || 0
 
       // 產生檻次表：全部使用用戶輸入的檻次人數
-      const newTierPricings = sortedTiers.map((tier) => {
+      const newTierPricings = sortedTiers.map(tier => {
         const participantCount = tier.participants
         const localUnitPrice = tier.unitPrice
         const newCounts = calculateTierParticipantCounts(participantCount, participantCounts)
@@ -423,7 +428,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
           groupTransportCategory.items = groupTransportCategory.items.filter(
             item => !item.name.startsWith(QUOTE_DETAIL_EMBED_LABELS.Local_報價)
           )
-          
+
           // 每個砍次新增一列
           sortedTiers.forEach((tier, index) => {
             const newItem: CostItem = {
@@ -505,7 +510,6 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
           handleCreateTour={handleCreateTour}
           handleGenerateQuotation={handleGenerateQuotation}
           handleSyncToItinerary={handleSyncToItinerary}
-  
           onStatusChange={handleStatusChange}
           router={router}
           accommodationDays={accommodationDays}
@@ -530,12 +534,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
       <div className="w-full pb-6">
         <div className="flex flex-col gap-6 w-full">
           {/* 上方：成本計算表格 - 100% 寬度 */}
-          <div
-            className={cn(
-              'w-full',
-              isReadOnly && 'opacity-70 pointer-events-none select-none'
-            )}
-          >
+          <div className={cn('w-full', isReadOnly && 'opacity-70 pointer-events-none select-none')}>
             <div className="border border-border bg-card rounded-xl shadow-sm">
               <div ref={scrollRef} className="overflow-x-auto">
                 <table className="w-full min-w-[800px] border-collapse">

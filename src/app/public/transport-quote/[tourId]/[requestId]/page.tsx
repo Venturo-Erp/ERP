@@ -29,10 +29,10 @@ export default async function TransportQuoteWithRequestPage({
 
   if (!request) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-morandi-container">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">找不到需求單</h1>
-          <p className="text-gray-600 mt-2">請確認連結是否正確</p>
+          <h1 className="text-2xl font-bold text-morandi-primary">找不到需求單</h1>
+          <p className="text-morandi-secondary mt-2">請確認連結是否正確</p>
         </div>
       </div>
     )
@@ -68,10 +68,10 @@ export default async function TransportQuoteWithRequestPage({
 
   if (!tour || !coreItems) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-morandi-container">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900">找不到行程</h1>
-          <p className="text-gray-600 mt-2">請確認連結是否正確</p>
+          <h1 className="text-2xl font-bold text-morandi-primary">找不到行程</h1>
+          <p className="text-morandi-secondary mt-2">請確認連結是否正確</p>
         </div>
       </div>
     )
@@ -85,8 +85,7 @@ export default async function TransportQuoteWithRequestPage({
   const totalDays =
     tour.departure_date && tour.return_date
       ? Math.ceil(
-          (new Date(tour.return_date).getTime() -
-            new Date(tour.departure_date).getTime()) /
+          (new Date(tour.return_date).getTime() - new Date(tour.departure_date).getTime()) /
             (1000 * 60 * 60 * 24)
         ) + 1
       : null
@@ -94,7 +93,7 @@ export default async function TransportQuoteWithRequestPage({
   // 按天分組
   const grouped = new Map<number, any>()
   const weekdays = ['日', '一', '二', '三', '四', '五', '六']
-  
+
   for (const item of coreItems) {
     const day = item.day_number ?? 0
     if (!grouped.has(day)) {
@@ -106,7 +105,7 @@ export default async function TransportQuoteWithRequestPage({
         dateStr = `${d.getMonth() + 1}/${d.getDate()}`
         weekday = weekdays[d.getDay()]
       }
-      
+
       grouped.set(day, {
         date: dateStr,
         weekday: weekday,
@@ -176,13 +175,17 @@ export default async function TransportQuoteWithRequestPage({
                     .filter(Boolean)
                     .join(' → ')
                   const content =
-                    activities || day.items.map((i: any) => i.title).filter(Boolean).join('、')
+                    activities ||
+                    day.items
+                      .map((i: any) => i.title)
+                      .filter(Boolean)
+                      .join('、')
 
                   return (
                     <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf5]'}>
                       <td className="border border-[#e8e5e0] px-3 py-2">
                         <div className="font-semibold text-[#c9a96e]">Day {day.dayNumber}</div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-morandi-secondary">
                           {day.date} ({day.weekday})
                         </div>
                       </td>
@@ -211,40 +214,61 @@ export default async function TransportQuoteWithRequestPage({
             {request.note && (
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                 <h3 className="font-semibold text-amber-900 mb-2">{COMPANY_NAME}備註</h3>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">{request.note}</p>
+                <p className="text-sm text-morandi-primary whitespace-pre-wrap">{request.note}</p>
               </div>
             )}
 
             {/* 🆕 報價歷程 */}
             {history.length > 0 && (
-              <details className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
-                <summary className="px-4 py-3 cursor-pointer hover:bg-gray-100 transition-colors select-none">
-                  <span className="font-semibold text-gray-700">📜 報價歷程 ({history.length})</span>
-                  <span className="text-xs text-gray-500 ml-2">（點擊展開）</span>
+              <details className="bg-morandi-container border border-border rounded-lg overflow-hidden">
+                <summary className="px-4 py-3 cursor-pointer hover:bg-morandi-container transition-colors select-none">
+                  <span className="font-semibold text-morandi-primary">
+                    📜 報價歷程 ({history.length})
+                  </span>
+                  <span className="text-xs text-morandi-secondary ml-2">（點擊展開）</span>
                 </summary>
-                <div className="p-4 space-y-3 border-t border-gray-200">
+                <div className="p-4 space-y-3 border-t border-border">
                   {history.map((h: any) => {
                     const quoteData = h.supplier_response as any
                     return (
-                      <div key={h.id} className="bg-white border border-gray-200 rounded-lg p-3 text-sm">
+                      <div
+                        key={h.id}
+                        className="bg-white border border-border rounded-lg p-3 text-sm"
+                      >
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-gray-500 text-xs">
+                          <span className="text-morandi-secondary text-xs">
                             {new Date(h.replied_at).toLocaleString('zh-TW')}
                           </span>
                           <span className="font-bold text-lg text-[#c9a96e]">
                             ${quoteData?.totalFare?.toLocaleString() || '—'}
                           </span>
                         </div>
-                        <div className="text-xs text-gray-600 space-y-1">
+                        <div className="text-xs text-morandi-secondary space-y-1">
                           <div>聯絡人：{quoteData?.contact || '—'}</div>
                           <div className="flex gap-2 flex-wrap">
-                            {quoteData?.includesParking && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">✓ 停車費</span>}
-                            {quoteData?.includesToll && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">✓ 過路費</span>}
-                            {quoteData?.includesAccommodation && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">✓ 司機住宿</span>}
-                            {quoteData?.includesTip && <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">✓ 小費</span>}
+                            {quoteData?.includesParking && (
+                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                                ✓ 停車費
+                              </span>
+                            )}
+                            {quoteData?.includesToll && (
+                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                                ✓ 過路費
+                              </span>
+                            )}
+                            {quoteData?.includesAccommodation && (
+                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                                ✓ 司機住宿
+                              </span>
+                            )}
+                            {quoteData?.includesTip && (
+                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                                ✓ 小費
+                              </span>
+                            )}
                           </div>
                           {quoteData?.supplierNote && (
-                            <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                            <div className="mt-2 p-2 bg-morandi-container rounded text-xs">
                               備註：{quoteData.supplierNote}
                             </div>
                           )}
@@ -266,31 +290,33 @@ export default async function TransportQuoteWithRequestPage({
                     提交時間：{new Date(quoteData.submitted_at).toLocaleString('zh-TW')}
                   </p>
                 </div>
-                
+
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between border-b pb-2">
-                    <span className="text-gray-600">聯絡人：</span>
+                    <span className="text-morandi-secondary">聯絡人：</span>
                     <span className="font-medium">{quoteData.contact}</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="text-gray-600">聯絡電話：</span>
+                    <span className="text-morandi-secondary">聯絡電話：</span>
                     <span className="font-medium">{quoteData.phone}</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="text-gray-600">總車資：</span>
+                    <span className="text-morandi-secondary">總車資：</span>
                     <span className="font-bold text-lg text-green-700">
                       ${quoteData.totalFare?.toLocaleString()} 元
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">包含項目：</span>
+                    <span className="text-morandi-secondary">包含項目：</span>
                     <div className="text-right">
                       {quoteData.includesParking && <div>✓ 停車費</div>}
                       {quoteData.includesToll && <div>✓ 過路費</div>}
                       {quoteData.includesAccommodation && <div>✓ 司機住宿</div>}
                       {quoteData.includesTip && <div>✓ 小費</div>}
                       {!quoteData.includesAccommodation && quoteData.accommodationFee > 0 && (
-                        <div className="text-amber-700">司機住宿費：${quoteData.accommodationFee} 元</div>
+                        <div className="text-amber-700">
+                          司機住宿費：${quoteData.accommodationFee} 元
+                        </div>
                       )}
                       {!quoteData.includesTip && quoteData.tipAmount > 0 && (
                         <div className="text-amber-700">小費：${quoteData.tipAmount} 元</div>
@@ -298,8 +324,8 @@ export default async function TransportQuoteWithRequestPage({
                     </div>
                   </div>
                   {quoteData.supplierNote && (
-                    <div className="mt-3 p-3 bg-gray-50 rounded">
-                      <div className="text-gray-600 text-xs mb-1">供應商備註：</div>
+                    <div className="mt-3 p-3 bg-morandi-container rounded">
+                      <div className="text-morandi-secondary text-xs mb-1">供應商備註：</div>
                       <div className="whitespace-pre-wrap">{quoteData.supplierNote}</div>
                     </div>
                   )}
@@ -307,16 +333,12 @@ export default async function TransportQuoteWithRequestPage({
               </div>
             ) : (
               /* 未提交：顯示填寫表單 */
-              <TransportQuoteForm 
-                tourId={tourId} 
-                requestId={requestId}
-                vehicleDesc={vehicleDesc} 
-              />
+              <TransportQuoteForm tourId={tourId} requestId={requestId} vehicleDesc={vehicleDesc} />
             )}
           </div>
         </div>
 
-        <div className="text-center text-xs text-gray-500 mt-4">
+        <div className="text-center text-xs text-morandi-secondary mt-4">
           本行程表由{COMPANY_NAME}提供
         </div>
       </div>

@@ -54,6 +54,7 @@ Venturo 集團
 **部署**：Vercel + Dev Server (100.89.92.46:3000)
 
 **核心功能**：
+
 - 行程管理（tour_itinerary_items 核心表）
 - 報價單（從核心表讀取）
 - 需求單（JOIN 核心表）
@@ -72,6 +73,7 @@ Venturo 集團
 **部署**：Vercel + Dev Server (100.89.92.46:3001)
 
 **核心功能**：
+
 - 套裝行程瀏覽
 - 線上訂購
 - 客製化需求
@@ -85,9 +87,10 @@ Venturo 集團
 
 **狀態**：🚧 開發中  
 **使用者**：William, Matthew  
-**技術棧**：Next.js 14, OpenClaw SDK, Supabase  
+**技術棧**：Next.js 14, OpenClaw SDK, Supabase
 
 **核心功能**：
+
 - 17 位 Agent 狀態監控
 - 任務分配和追蹤
 - 決策儀表板
@@ -101,9 +104,10 @@ Venturo 集團
 
 **狀態**：✅ 運行中  
 **使用者**：系統對系統  
-**技術棧**：Node.js, MCP Protocol  
+**技術棧**：Node.js, MCP Protocol
 
 **核心功能**：
+
 - Supabase 資料存取
 - Gmail 整合
 - Google Sheets 整合
@@ -192,17 +196,18 @@ Venturo 集團
 
 ### 決策 vs 執行
 
-| 角色 | 決策權 | 執行權 | 向誰報告 |
-|------|--------|--------|----------|
-| **William 🔱** | ✅ 帝國級 | ❌ 不執行 | - |
-| **Leon 📋** | ⚠️ 營運級 | ✅ 營運 | William |
-| **Ben 🤝** | ⚠️ 業務級 | ✅ 業務 | William |
-| **Eddie 📊** | ❌ 無 | ✅ 財務 | William |
-| **Matthew 🔧** | ⚠️ 技術級 | ✅ 技術 | William |
-| **Caesar 🏛️** | ⚠️ 產品級 | ✅ 產品 | William |
-| **其他 Agent** | ❌ 無 | ✅ 專業 | 各自主管 |
+| 角色           | 決策權    | 執行權    | 向誰報告 |
+| -------------- | --------- | --------- | -------- |
+| **William 🔱** | ✅ 帝國級 | ❌ 不執行 | -        |
+| **Leon 📋**    | ⚠️ 營運級 | ✅ 營運   | William  |
+| **Ben 🤝**     | ⚠️ 業務級 | ✅ 業務   | William  |
+| **Eddie 📊**   | ❌ 無     | ✅ 財務   | William  |
+| **Matthew 🔧** | ⚠️ 技術級 | ✅ 技術   | William  |
+| **Caesar 🏛️**  | ⚠️ 產品級 | ✅ 產品   | William  |
+| **其他 Agent** | ❌ 無     | ✅ 專業   | 各自主管 |
 
 **說明**：
+
 - ✅ 帝國級 = 可決定產品方向、組織架構
 - ⚠️ XX級 = 可在專業範圍內決策，重大事項需請示 William
 - ❌ 無 = 只執行，不決策
@@ -211,17 +216,18 @@ Venturo 集團
 
 ### 跨公司協作矩陣
 
-|  | 威拓旅行社 | 威拓科技 | 威拓活動 |
-|---|-----------|---------|---------|
-| **威拓旅行社** | Leon→Ben→Eddie | 需求→Caesar | 業務素材→IG |
-| **威拓科技** | 功能開發→Leon | Matthew→Caesar→前端 | UI設計→行銷 |
-| **威拓活動** | 客戶→Ben | 數據需求→Matthew | IG→廣告→短視頻 |
+|                | 威拓旅行社     | 威拓科技            | 威拓活動       |
+| -------------- | -------------- | ------------------- | -------------- |
+| **威拓旅行社** | Leon→Ben→Eddie | 需求→Caesar         | 業務素材→IG    |
+| **威拓科技**   | 功能開發→Leon  | Matthew→Caesar→前端 | UI設計→行銷    |
+| **威拓活動**   | 客戶→Ben       | 數據需求→Matthew    | IG→廣告→短視頻 |
 
 ---
 
 ## 📊 帝國統計
 
 ### 人力資源
+
 - **總計**：17 位 AI Agent
 - **決策層**：1 人（William）
 - **威拓旅行社**：3 人（Leon, Ben, Eddie）
@@ -230,10 +236,12 @@ Venturo 集團
 - **外部顧問**：3 人（DONKI, 悠月, Nova）
 
 ### 產品狀態
+
 - **運行中**：2 個（ERP, MCP Server）
 - **開發中**：2 個（Online, AI Console）
 
 ### 技術棧
+
 - **前端**：Next.js 14, React, Tailwind CSS
 - **後端**：Supabase（PostgreSQL）
 - **部署**：Vercel + Dev Server（Tailscale）
@@ -245,24 +253,28 @@ Venturo 集團
 ## 🎯 帝國目標（2026）
 
 ### Q1（✅ 完成）
+
 - ✅ 建立 3 家公司
 - ✅ 招募 17 位 Agent
 - ✅ ERP 上線運行
 - ✅ 基礎建設完成
 
 ### Q2（進行中）
+
 - 🚧 Online 上線
 - 🚧 AI Console 上線
 - 🚧 擴展 3-5 個外部客戶（旅行社）
 - 🚧 IG 粉絲達 1000+
 
 ### Q3（規劃中）
+
 - 供應商評價系統
 - 自動對帳功能
 - 行程模板庫
 - 短視頻自動化生成
 
 ### Q4（規劃中）
+
 - 跨國市場（日本、東南亞）
 - AI 導遊功能
 - 客製化行程規劃
@@ -272,17 +284,20 @@ Venturo 集團
 ## 🔗 相關文檔
 
 ### 組織相關
+
 - [十七位公民詳細職責](citizens/README.md)
 - [決策歷史](DECISIONS.md)
 - [創世記](GENESIS.md)
 
 ### 產品相關
+
 - [ERP 商店](shops/erp/)
 - [Online 商店](shops/online/)
 - [AI Console](shops/ai-console/)
 - [MCP Server](shops/mcp-server/)
 
 ### 技術相關
+
 - [帝國憲法](LAWS.md)
 - [基礎建設](INFRASTRUCTURE.md)
 - [創造者知識](CREATOR_KNOWLEDGE.md)

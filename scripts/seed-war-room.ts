@@ -3,14 +3,15 @@
  * 从 MAGIC_LIBRARY.md 同步数据
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey =
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(supabaseUrl, supabaseKey)
 
-const WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'; // Venturo workspace
+const WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d' // Venturo workspace
 
 const magicItems = [
   // 冒险者公会
@@ -53,7 +54,7 @@ const magicItems = [
     description: '内部卡片设计系统',
     check_frequency: 'monthly',
   },
-  
+
   // 记忆系统
   {
     name: 'OpenViking',
@@ -68,7 +69,7 @@ const magicItems = [
     description: '向量搜索引擎',
     check_frequency: 'half_yearly',
   },
-  
+
   // 搜索魔法
   {
     name: 'Tavily Search API',
@@ -96,7 +97,7 @@ const magicItems = [
     description: '16 平台搜索整合',
     check_frequency: 'monthly',
   },
-  
+
   // AI 框架
   {
     name: 'AutoGen',
@@ -124,7 +125,7 @@ const magicItems = [
     description: 'Agent 运行环境',
     check_frequency: 'weekly',
   },
-  
+
   // 开发工具
   {
     name: 'Next.js',
@@ -178,7 +179,7 @@ const magicItems = [
     description: '动画库',
     check_frequency: 'half_yearly',
   },
-];
+]
 
 const bots = [
   {
@@ -199,51 +200,53 @@ const bots = [
     description: 'William 的 AI 替身',
     managed_by: 'eddie',
   },
-];
+]
 
 async function seed() {
-  console.log('🌱 开始种子数据...');
+  console.log('🌱 开始种子数据...')
 
   // 插入魔法库
-  console.log('📚 插入魔法库...');
+  console.log('📚 插入魔法库...')
   for (const item of magicItems) {
-    const { error } = await supabase
-      .from('magic_library')
-      .upsert({
+    const { error } = await supabase.from('magic_library').upsert(
+      {
         workspace_id: WORKSPACE_ID,
         ...item,
         last_checked_at: new Date().toISOString(),
-      }, {
+      },
+      {
         onConflict: 'name,workspace_id',
-      });
+      }
+    )
 
     if (error) {
-      console.error(`  ❌ ${item.name}:`, error.message);
+      console.error(`  ❌ ${item.name}:`, error.message)
     } else {
-      console.log(`  ✅ ${item.name}`);
+      console.log(`  ✅ ${item.name}`)
     }
   }
 
   // 插入机器人
-  console.log('🤖 插入机器人...');
+  console.log('🤖 插入机器人...')
   for (const bot of bots) {
-    const { error } = await supabase
-      .from('bot_registry')
-      .upsert({
+    const { error } = await supabase.from('bot_registry').upsert(
+      {
         workspace_id: WORKSPACE_ID,
         ...bot,
-      }, {
+      },
+      {
         onConflict: 'bot_username,platform,workspace_id',
-      });
+      }
+    )
 
     if (error) {
-      console.error(`  ❌ ${bot.bot_name}:`, error.message);
+      console.error(`  ❌ ${bot.bot_name}:`, error.message)
     } else {
-      console.log(`  ✅ ${bot.bot_name}`);
+      console.log(`  ✅ ${bot.bot_name}`)
     }
   }
 
-  console.log('✅ 种子数据完成！');
+  console.log('✅ 种子数据完成！')
 }
 
-seed().catch(console.error);
+seed().catch(console.error)

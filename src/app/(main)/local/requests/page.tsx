@@ -7,14 +7,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import { alert as showAlert } from '@/lib/ui/alert-dialog'
-import {
-  Inbox,
-  Clock,
-  CheckCircle,
-  Package,
-  Calendar,
-  Building2,
-} from 'lucide-react'
+import { Inbox, Clock, CheckCircle, Package, Calendar, Building2 } from 'lucide-react'
 import useSWR, { mutate } from 'swr'
 import type { Database } from '@/lib/supabase/types'
 
@@ -37,23 +30,20 @@ export default function LocalRequestsPage() {
 
   const swrKey = workspaceId ? `local-inbox-${workspaceId}` : null
 
-  const { data: requests = [], isLoading } = useSWR<TourRequest[]>(
-    swrKey,
-    async () => {
-      if (!workspaceId) return []
-      const { data, error } = await supabase
-        .from('tour_requests')
-        .select('*')
-        .or(`recipient_workspace_id.eq.${workspaceId},target_workspace_id.eq.${workspaceId}`)
-        .order('created_at', { ascending: false })
+  const { data: requests = [], isLoading } = useSWR<TourRequest[]>(swrKey, async () => {
+    if (!workspaceId) return []
+    const { data, error } = await supabase
+      .from('tour_requests')
+      .select('*')
+      .or(`recipient_workspace_id.eq.${workspaceId},target_workspace_id.eq.${workspaceId}`)
+      .order('created_at', { ascending: false })
 
-      if (error) {
-        logger.error('[Local Inbox] 載入失敗:', error)
-        return []
-      }
-      return (data ?? []) as TourRequest[]
+    if (error) {
+      logger.error('[Local Inbox] 載入失敗:', error)
+      return []
     }
-  )
+    return (data ?? []) as TourRequest[]
+  })
 
   const filteredRequests = useMemo(() => {
     let filtered = requests
@@ -63,9 +53,7 @@ export default function LocalRequestsPage() {
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
       filtered = filtered.filter(
-        r =>
-          r.code?.toLowerCase().includes(q) ||
-          r.supplier_name?.toLowerCase().includes(q)
+        r => r.code?.toLowerCase().includes(q) || r.supplier_name?.toLowerCase().includes(q)
       )
     }
     return filtered
@@ -169,9 +157,7 @@ export default function LocalRequestsPage() {
                       <span className="font-medium text-sm text-morandi-primary">
                         {req.code ?? '—'}
                       </span>
-                      <span
-                        className={`text-xs px-2 py-0.5 rounded-full ${badge.color}`}
-                      >
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${badge.color}`}>
                         {badge.label}
                       </span>
                     </div>
@@ -223,13 +209,17 @@ export default function LocalRequestsPage() {
                 <div>
                   <span className="text-morandi-secondary">建立日期</span>
                   <p className="font-medium">
-                    {selectedRequest.created_at ? new Date(selectedRequest.created_at).toLocaleDateString('zh-TW') : '—'}
+                    {selectedRequest.created_at
+                      ? new Date(selectedRequest.created_at).toLocaleDateString('zh-TW')
+                      : '—'}
                   </p>
                 </div>
                 <div>
                   <span className="text-morandi-secondary">發送日期</span>
                   <p className="font-medium">
-                    {selectedRequest.sent_at ? new Date(selectedRequest.sent_at).toLocaleDateString('zh-TW') : '—'}
+                    {selectedRequest.sent_at
+                      ? new Date(selectedRequest.sent_at).toLocaleDateString('zh-TW')
+                      : '—'}
                   </p>
                 </div>
                 <div>

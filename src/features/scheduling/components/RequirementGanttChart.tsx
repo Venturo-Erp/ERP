@@ -427,7 +427,7 @@ export const RequirementGanttChart: React.FC<RequirementGanttChartProps> = ({
                           className={cn(
                             'px-1.5 py-0.5 rounded text-[10px] border',
                             RESPONSE_STATUS_COLORS[row.responseStatus]?.color ||
-                              'bg-gray-100 text-gray-600'
+                              'bg-morandi-container text-morandi-secondary'
                           )}
                         >
                           {RESPONSE_STATUS_COLORS[row.responseStatus]?.label || row.responseStatus}

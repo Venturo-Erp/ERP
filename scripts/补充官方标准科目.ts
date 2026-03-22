@@ -74,17 +74,37 @@ const OFFICIAL_ACCOUNTS = [
   { code: '1990', name: '其他非流動資產', account_type: 'asset', description: null },
 
   // 2XXX 负债补充
-  { code: '2800', name: '一年或一營業週期內到期長期負債', account_type: 'liability', description: null },
+  {
+    code: '2800',
+    name: '一年或一營業週期內到期長期負債',
+    account_type: 'liability',
+    description: null,
+  },
   { code: '2810', name: '應付公司債－流動', account_type: 'liability', description: '一年內到期' },
-  { code: '2820', name: '應付長期借款－流動', account_type: 'liability', description: '一年內到期' },
+  {
+    code: '2820',
+    name: '應付長期借款－流動',
+    account_type: 'liability',
+    description: '一年內到期',
+  },
   { code: '2900', name: '遞延所得稅負債', account_type: 'liability', description: '時間性差異' },
   { code: '2950', name: '應計退休金負債', account_type: 'liability', description: null },
   { code: '2960', name: '其他非流動負債', account_type: 'liability', description: null },
 
   // 3XXX 权益补充
   { code: '3500', name: '其他權益', account_type: 'equity', description: null },
-  { code: '3510', name: '國外營運機構財務報表換算之兌換差額', account_type: 'equity', description: null },
-  { code: '3520', name: '透過其他綜合損益按公允價值衡量之金融資產未實現評價損益', account_type: 'equity', description: null },
+  {
+    code: '3510',
+    name: '國外營運機構財務報表換算之兌換差額',
+    account_type: 'equity',
+    description: null,
+  },
+  {
+    code: '3520',
+    name: '透過其他綜合損益按公允價值衡量之金融資產未實現評價損益',
+    account_type: 'equity',
+    description: null,
+  },
   { code: '3530', name: '備供出售金融資產未實現損益', account_type: 'equity', description: null },
   { code: '3540', name: '確定福利計畫之再衡量數', account_type: 'equity', description: null },
 
@@ -120,10 +140,7 @@ async function main() {
   console.log('开始补充官方标准会计科目...\n')
 
   // 获取 workspace_id
-  const { data: workspaces } = await supabase
-    .from('workspaces')
-    .select('id, name')
-    .limit(1)
+  const { data: workspaces } = await supabase.from('workspaces').select('id, name').limit(1)
 
   if (!workspaces || workspaces.length === 0) {
     console.error('❌ 找不到 workspace')
@@ -167,10 +184,7 @@ async function main() {
     last_used_at: null,
   }))
 
-  const { data, error } = await supabase
-    .from('chart_of_accounts')
-    .insert(accountsToInsert)
-    .select()
+  const { data, error } = await supabase.from('chart_of_accounts').insert(accountsToInsert).select()
 
   if (error) {
     console.error('❌ 插入失败:', error)
@@ -193,10 +207,13 @@ async function main() {
     .select('account_type')
     .eq('workspace_id', workspaceId)
 
-  const typeCounts = byType?.reduce((acc, a) => {
-    acc[a.account_type] = (acc[a.account_type] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
+  const typeCounts = byType?.reduce(
+    (acc, a) => {
+      acc[a.account_type] = (acc[a.account_type] || 0) + 1
+      return acc
+    },
+    {} as Record<string, number>
+  )
 
   console.log('\n各类型科目数量:')
   Object.entries(typeCounts || {}).forEach(([type, count]) => {
@@ -204,9 +221,12 @@ async function main() {
   })
 
   console.log('\n新增的科目列表（前 30 个）:')
-  data?.sort((a, b) => a.code.localeCompare(b.code)).slice(0, 30).forEach(acc => {
-    console.log(`  ${acc.code} ${acc.name} (${acc.account_type})`)
-  })
+  data
+    ?.sort((a, b) => a.code.localeCompare(b.code))
+    .slice(0, 30)
+    .forEach(acc => {
+      console.log(`  ${acc.code} ${acc.name} (${acc.account_type})`)
+    })
 
   if (data && data.length > 30) {
     console.log(`  ... 还有 ${data.length - 30} 个科目`)

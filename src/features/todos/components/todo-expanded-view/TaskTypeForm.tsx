@@ -4,12 +4,12 @@ import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
 import { Hotel, Utensils, Bus, Ticket, PartyPopper, FileText } from 'lucide-react'
@@ -24,17 +24,20 @@ interface TaskTypeFormProps {
   onClose: () => void
 }
 
-const TASK_TYPE_CONFIG: Record<TodoTaskType, { 
-  icon: React.ElementType
-  label: string
-  color: string 
-}> = {
+const TASK_TYPE_CONFIG: Record<
+  TodoTaskType,
+  {
+    icon: React.ElementType
+    label: string
+    color: string
+  }
+> = {
   accommodation: { icon: Hotel, label: '訂房', color: 'text-blue-600' },
   restaurant: { icon: Utensils, label: '訂餐廳', color: 'text-orange-600' },
   transport: { icon: Bus, label: '訂交通', color: 'text-green-600' },
   ticket: { icon: Ticket, label: '訂票', color: 'text-purple-600' },
   activity: { icon: PartyPopper, label: '訂活動', color: 'text-pink-600' },
-  general: { icon: FileText, label: '一般任務', color: 'text-gray-600' },
+  general: { icon: FileText, label: '一般任務', color: 'text-morandi-secondary' },
 }
 
 export function TaskTypeForm({ taskType, todo, onUpdate, onClose }: TaskTypeFormProps) {
@@ -92,7 +95,7 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
   const { items: tours } = useToursSlim()
   const { items: orders } = useOrdersSlim()
   const { items: employees } = useEmployeesSlim()
-  
+
   const [formData, setFormData] = React.useState({
     hotelName: '',
     roomType: '',
@@ -153,7 +156,7 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
         const { supabase } = await import('@/lib/supabase/client')
         const requestDate = new Date().toISOString().split('T')[0]
         const requestNumber = `PR${Date.now()}`
-        
+
         await supabase.from('payment_requests').insert({
           code: requestNumber,
           request_number: requestNumber,
@@ -167,7 +170,7 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
           request_type: formData.paymentStatus === 'advanced' ? '員工代墊' : '供應商支出',
           request_date: requestDate,
         })
-        
+
         toast.success('已建立請款單')
       }
 
@@ -187,7 +190,7 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
     <div className="space-y-3">
       <div>
         <Label className="text-xs">飯店名稱</Label>
-        <Input 
+        <Input
           value={formData.hotelName}
           onChange={e => setFormData(prev => ({ ...prev, hotelName: e.target.value }))}
           placeholder="The Royal Park Hotel"
@@ -197,7 +200,7 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label className="text-xs">房型</Label>
-          <Input 
+          <Input
             value={formData.roomType}
             onChange={e => setFormData(prev => ({ ...prev, roomType: e.target.value }))}
             placeholder="雙人房"
@@ -206,10 +209,12 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
         </div>
         <div>
           <Label className="text-xs">數量</Label>
-          <Input 
+          <Input
             type="number"
             value={formData.quantity}
-            onChange={e => setFormData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))}
+            onChange={e =>
+              setFormData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))
+            }
             className="h-9 text-sm"
           />
         </div>
@@ -217,17 +222,19 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label className="text-xs">金額</Label>
-          <Input 
+          <Input
             type="number"
             value={formData.amount}
-            onChange={e => setFormData(prev => ({ ...prev, amount: parseInt(e.target.value) || 0 }))}
+            onChange={e =>
+              setFormData(prev => ({ ...prev, amount: parseInt(e.target.value) || 0 }))
+            }
             placeholder="0"
             className="h-9 text-sm"
           />
         </div>
         <div>
           <Label className="text-xs">確認號</Label>
-          <Input 
+          <Input
             value={formData.confirmationNumber}
             onChange={e => setFormData(prev => ({ ...prev, confirmationNumber: e.target.value }))}
             placeholder="ABC123"
@@ -237,9 +244,9 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
       </div>
       <div>
         <Label className="text-xs">付款狀態</Label>
-        <Select 
+        <Select
           value={formData.paymentStatus}
-          onValueChange={(value: 'unpaid' | 'paid' | 'advanced') => 
+          onValueChange={(value: 'unpaid' | 'paid' | 'advanced') =>
             setFormData(prev => ({ ...prev, paymentStatus: value }))
           }
         >
@@ -253,18 +260,19 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
           </SelectContent>
         </Select>
       </div>
-      
+
       {/* 付款相關欄位 */}
       {formData.paymentStatus !== 'unpaid' && (
         <div className="space-y-3 pt-2 border-t border-border/40">
           <p className="text-xs text-morandi-secondary font-medium">請款資訊</p>
-          
+
           {/* 如果待辦已帶團號，顯示團號資訊；否則顯示選擇 */}
           {todo.tour_id ? (
             <div className="bg-morandi-container/50 rounded-md p-2">
-              <Label className="text-xs text-morandi-secondary">團號</Label>
+              <Label className="text-xs text-morandi-primary">團號</Label>
               <p className="text-sm font-medium text-morandi-primary">
-                {tours.find(t => t.id === todo.tour_id)?.code || ''} {tours.find(t => t.id === todo.tour_id)?.name || ''}
+                {tours.find(t => t.id === todo.tour_id)?.code || ''}{' '}
+                {tours.find(t => t.id === todo.tour_id)?.name || ''}
               </p>
             </div>
           ) : (
@@ -279,7 +287,7 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
               />
             </div>
           )}
-          
+
           {formData.tourId && (
             <div>
               <Label className="text-xs">選擇訂單</Label>
@@ -306,9 +314,9 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
           )}
         </div>
       )}
-      
-      <Button 
-        onClick={handleSubmit} 
+
+      <Button
+        onClick={handleSubmit}
         disabled={isSubmitting}
         className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white"
       >
@@ -366,11 +374,11 @@ function GeneralForm({ todo, onUpdate, onClose }: FormProps) {
   return (
     <div className="space-y-3">
       <p className="text-sm text-morandi-secondary">一般任務（無專屬表單）</p>
-      <Button 
+      <Button
         onClick={() => {
           onUpdate({ status: 'completed', completed: true })
           onClose()
-        }} 
+        }}
         className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white"
       >
         標記完成

@@ -2,7 +2,7 @@
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
-import { Bus, Printer, Loader2, Send } from 'lucide-react'
+import { Bus, Printer, Loader2, Send, X } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -51,15 +51,15 @@ export function TransportRequirementDialog({
 }: TransportRequirementDialogProps) {
   const { user } = useAuthStore()
   const { toast } = useToast()
-  const [selectedDays, setSelectedDays] = useState<Set<number>>(
-    new Set(days.map(d => d.dayNumber))
-  )
+  const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set(days.map(d => d.dayNumber)))
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
   // 統一車型說明（套用到所有勾選的天）
   const [vehicleDesc, setVehicleDesc] = useState('')
   // LINE 群組
-  const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string | null }[]>([])
+  const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string | null }[]>(
+    []
+  )
   const [selectedGroupId, setSelectedGroupId] = useState('')
   const [sending, setSending] = useState(false)
 
@@ -108,16 +108,20 @@ export function TransportRequirementDialog({
         vehicle_desc: vehicleDesc || null,
       }))
 
-      const { data: newReq, error } = await sb.from('tour_requests').insert({
-        workspace_id: user.workspace_id,
-        tour_id: tourId,
-        request_type: 'transport',
-        supplier_name: supplierName,
-        items: requestItems,
-        status: 'draft',
-        note: note.trim() || null,
-        created_by: user.id,
-      } as never).select('id').single()
+      const { data: newReq, error } = await sb
+        .from('tour_requests')
+        .insert({
+          workspace_id: user.workspace_id,
+          tour_id: tourId,
+          request_type: 'transport',
+          supplier_name: supplierName,
+          items: requestItems,
+          status: 'draft',
+          note: note.trim() || null,
+          created_by: user.id,
+        } as never)
+        .select('id')
+        .single()
 
       if (error) throw error
 
@@ -134,43 +138,56 @@ export function TransportRequirementDialog({
   }, [selectedDaysList, tourId, user, supplierName, totalPax, note, toast, onSave])
 
   // LINE 發送
-  const handleSendLine = useCallback(async (reqId?: string) => {
-    if (!selectedGroupId || selectedDaysList.length === 0) return
-    setSending(true)
-    try {
-      const res = await fetch('/api/line/send-transport', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          groupId: selectedGroupId,
-          tourCode: tour?.code || '',
-          tourName: tour?.name || '',
-          departureDate: tour?.departure_date || '',
-          totalPax,
-          supplierName,
-          vehicleDesc,
-          days: selectedDaysList.map(d => ({
-            dayNumber: d.dayNumber,
-            date: d.date,
-            route: d.route,
-          })),
-          note: note.trim() || null,
-          requestId: reqId || null,
-        }),
-      })
-      const result = await res.json()
-      if (result.success) {
-        const groupName = lineGroups.find(g => g.group_id === selectedGroupId)?.group_name
-        toast({ title: `✅ 已發送到 LINE「${groupName}」` })
-      } else {
-        toast({ title: '❌ LINE 發送失敗', description: result.error, variant: 'destructive' })
+  const handleSendLine = useCallback(
+    async (reqId?: string) => {
+      if (!selectedGroupId || selectedDaysList.length === 0) return
+      setSending(true)
+      try {
+        const res = await fetch('/api/line/send-transport', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            groupId: selectedGroupId,
+            tourCode: tour?.code || '',
+            tourName: tour?.name || '',
+            departureDate: tour?.departure_date || '',
+            totalPax,
+            supplierName,
+            vehicleDesc,
+            days: selectedDaysList.map(d => ({
+              dayNumber: d.dayNumber,
+              date: d.date,
+              route: d.route,
+            })),
+            note: note.trim() || null,
+            requestId: reqId || null,
+          }),
+        })
+        const result = await res.json()
+        if (result.success) {
+          const groupName = lineGroups.find(g => g.group_id === selectedGroupId)?.group_name
+          toast({ title: `✅ 已發送到 LINE「${groupName}」` })
+        } else {
+          toast({ title: '❌ LINE 發送失敗', description: result.error, variant: 'destructive' })
+        }
+      } catch (err) {
+        toast({ title: '❌ 發送失敗', description: String(err), variant: 'destructive' })
+      } finally {
+        setSending(false)
       }
-    } catch (err) {
-      toast({ title: '❌ 發送失敗', description: String(err), variant: 'destructive' })
-    } finally {
-      setSending(false)
-    }
-  }, [selectedGroupId, selectedDaysList, tour, totalPax, supplierName, vehicleDesc, note, lineGroups, toast])
+    },
+    [
+      selectedGroupId,
+      selectedDaysList,
+      tour,
+      totalPax,
+      supplierName,
+      vehicleDesc,
+      note,
+      lineGroups,
+      toast,
+    ]
+  )
 
   const handlePrintAndSave = useCallback(async () => {
     if (selectedDaysList.length === 0) return
@@ -225,13 +242,17 @@ export function TransportRequirementDialog({
   <table>
     <thead><tr><th>天數</th><th>日期</th><th>行程內容</th><th>備註</th></tr></thead>
     <tbody>
-      ${selectedDaysList.map(d => `
+      ${selectedDaysList
+        .map(
+          d => `
       <tr>
         <td style="text-align:center">Day ${d.dayNumber}</td>
         <td style="text-align:center">${d.date}</td>
         <td>${d.route}</td>
         <td></td>
-      </tr>`).join('')}
+      </tr>`
+        )
+        .join('')}
     </tbody>
   </table>
   ${note ? `<p style="margin-top:15px"><strong>備註：</strong>${note}</p>` : ''}
@@ -250,7 +271,12 @@ export function TransportRequirementDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+    <Dialog
+      open={open}
+      onOpenChange={v => {
+        if (!v) onClose()
+      }}
+    >
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -269,8 +295,12 @@ export function TransportRequirementDialog({
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium">選擇用車天數</Label>
               <div className="flex gap-2 text-xs">
-                <button onClick={selectAll} className="text-blue-600 hover:underline">全選</button>
-                <button onClick={selectNone} className="text-muted-foreground hover:underline">取消全選</button>
+                <button onClick={selectAll} className="text-blue-600 hover:underline">
+                  全選
+                </button>
+                <button onClick={selectNone} className="text-muted-foreground hover:underline">
+                  取消全選
+                </button>
               </div>
             </div>
             {days.map(day => (
@@ -331,20 +361,28 @@ export function TransportRequirementDialog({
           {selectedDays.size > 0 && (
             <div className="bg-morandi-gold/5 border border-morandi-gold/20 rounded-md p-2 text-xs">
               <span className="font-medium text-morandi-primary">摘要：</span>
-              {selectedDaysList.length} 天用車（Day {selectedDaysList.map(d => d.dayNumber).join('、')}）
+              {selectedDaysList.length} 天用車（Day{' '}
+              {selectedDaysList.map(d => d.dayNumber).join('、')}）
               {vehicleDesc && ` — ${vehicleDesc}`}
             </div>
           )}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>取消</Button>
+          <Button variant="outline" onClick={onClose}>
+            <X className="h-4 w-4 mr-1" />
+            取消
+          </Button>
           <Button
             onClick={handlePrintAndSave}
             disabled={selectedDays.size === 0 || saving || sending}
             className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
           >
-            {(saving || sending) ? <Loader2 size={14} className="animate-spin mr-1" /> : <Printer size={14} className="mr-1" />}
+            {saving || sending ? (
+              <Loader2 size={14} className="animate-spin mr-1" />
+            ) : (
+              <Printer size={14} className="mr-1" />
+            )}
             {selectedGroupId ? '儲存、列印並發送 LINE' : '儲存並列印'}
           </Button>
         </DialogFooter>

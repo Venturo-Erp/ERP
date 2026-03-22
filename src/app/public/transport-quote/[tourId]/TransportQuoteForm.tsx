@@ -14,7 +14,7 @@ function DriverInfoFormInline({ itemId }: { itemId: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
-  
+
   const [form, setForm] = useState({
     driver_name: '',
     driver_phone: '',
@@ -58,19 +58,23 @@ function DriverInfoFormInline({ itemId }: { itemId: string }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label>司機姓名 <span className="text-red-500">*</span></Label>
+          <Label>
+            司機姓名 <span className="text-red-500">*</span>
+          </Label>
           <Input
             value={form.driver_name}
-            onChange={(e) => setForm({ ...form, driver_name: e.target.value })}
+            onChange={e => setForm({ ...form, driver_name: e.target.value })}
             placeholder="例：田中太郎"
             className="mt-1"
           />
         </div>
         <div>
-          <Label>司機電話 <span className="text-red-500">*</span></Label>
+          <Label>
+            司機電話 <span className="text-red-500">*</span>
+          </Label>
           <Input
             value={form.driver_phone}
-            onChange={(e) => setForm({ ...form, driver_phone: e.target.value })}
+            onChange={e => setForm({ ...form, driver_phone: e.target.value })}
             placeholder="例：090-1234-5678"
             className="mt-1"
           />
@@ -79,7 +83,7 @@ function DriverInfoFormInline({ itemId }: { itemId: string }) {
           <Label>車牌號碼</Label>
           <Input
             value={form.vehicle_plate}
-            onChange={(e) => setForm({ ...form, vehicle_plate: e.target.value })}
+            onChange={e => setForm({ ...form, vehicle_plate: e.target.value })}
             placeholder="例：福岡 200 あ 1234"
             className="mt-1"
           />
@@ -88,14 +92,18 @@ function DriverInfoFormInline({ itemId }: { itemId: string }) {
           <Label>車款</Label>
           <Input
             value={form.vehicle_type}
-            onChange={(e) => setForm({ ...form, vehicle_type: e.target.value })}
+            onChange={e => setForm({ ...form, vehicle_type: e.target.value })}
             placeholder="例：45人座大巴"
             className="mt-1"
           />
         </div>
       </div>
       {error && <div className="text-red-600 text-sm">{error}</div>}
-      <Button type="submit" disabled={isSubmitting} className="w-full bg-blue-600 hover:bg-blue-700">
+      <Button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full bg-blue-600 hover:bg-blue-700"
+      >
         {isSubmitting ? '提交中...' : '✓ 確認提交司機資訊'}
       </Button>
     </form>
@@ -190,7 +198,7 @@ export function TransportQuoteForm({
         </div>
       )
     }
-    
+
     // 僅報價
     return (
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
@@ -203,10 +211,10 @@ export function TransportQuoteForm({
 
   return (
     <div className="border-t-4 border-[#c9a96e] pt-6">
-      <h2 className="text-xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+      <h2 className="text-xl font-bold text-morandi-primary mb-1 flex items-center gap-2">
         📋 供應商報價回填
       </h2>
-      <p className="text-sm text-gray-600 mb-6">請填寫以下報價資訊</p>
+      <p className="text-sm text-morandi-secondary mb-6">請填寫以下報價資訊</p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* 車資 */}
@@ -219,22 +227,22 @@ export function TransportQuoteForm({
               id="totalFare"
               type="number"
               value={totalFare}
-              onChange={(e) => setTotalFare(e.target.value)}
+              onChange={e => setTotalFare(e.target.value)}
               placeholder="請輸入車資總金額"
               className="flex-1"
               required
             />
-            <span className="text-gray-600">元</span>
+            <span className="text-morandi-secondary">元</span>
           </div>
         </div>
 
         {/* 勾選項目 */}
-        <div className="space-y-2 bg-gray-50 p-4 rounded-lg">
+        <div className="space-y-2 bg-morandi-container p-4 rounded-lg">
           <div className="flex items-center gap-3">
             <Checkbox
               id="includesParking"
               checked={includesParking}
-              onCheckedChange={(checked) => setIncludesParking(checked as boolean)}
+              onCheckedChange={checked => setIncludesParking(checked as boolean)}
             />
             <Label htmlFor="includesParking" className="cursor-pointer">
               是否含停車費
@@ -245,7 +253,7 @@ export function TransportQuoteForm({
             <Checkbox
               id="includesToll"
               checked={includesToll}
-              onCheckedChange={(checked) => setIncludesToll(checked as boolean)}
+              onCheckedChange={checked => setIncludesToll(checked as boolean)}
             />
             <Label htmlFor="includesToll" className="cursor-pointer">
               是否含過路費
@@ -256,7 +264,7 @@ export function TransportQuoteForm({
             <Checkbox
               id="includesAccommodation"
               checked={includesAccommodation}
-              onCheckedChange={(checked) => {
+              onCheckedChange={checked => {
                 setIncludesAccommodation(checked as boolean)
                 if (checked) setAccommodationFee('')
               }}
@@ -266,18 +274,18 @@ export function TransportQuoteForm({
             </Label>
             {!includesAccommodation && (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">不含請填：</span>
+                <span className="text-xs text-morandi-secondary">不含請填：</span>
                 <Input
                   type="number"
                   value={accommodationFee}
-                  onChange={(e) => {
+                  onChange={e => {
                     setAccommodationFee(e.target.value)
                     if (e.target.value) setIncludesAccommodation(false)
                   }}
                   placeholder="金額"
                   className="w-32 h-8"
                 />
-                <span className="text-gray-600">元</span>
+                <span className="text-morandi-secondary">元</span>
               </div>
             )}
           </div>
@@ -286,7 +294,7 @@ export function TransportQuoteForm({
             <Checkbox
               id="includesTip"
               checked={includesTip}
-              onCheckedChange={(checked) => {
+              onCheckedChange={checked => {
                 setIncludesTip(checked as boolean)
                 if (checked) setTipAmount('')
               }}
@@ -296,18 +304,18 @@ export function TransportQuoteForm({
             </Label>
             {!includesTip && (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-600">不含請填：</span>
+                <span className="text-xs text-morandi-secondary">不含請填：</span>
                 <Input
                   type="number"
                   value={tipAmount}
-                  onChange={(e) => {
+                  onChange={e => {
                     setTipAmount(e.target.value)
                     if (e.target.value) setIncludesTip(false)
                   }}
                   placeholder="金額"
                   className="w-32 h-8"
                 />
-                <span className="text-gray-600">元</span>
+                <span className="text-morandi-secondary">元</span>
               </div>
             )}
           </div>
@@ -320,7 +328,7 @@ export function TransportQuoteForm({
             <Input
               id="contact"
               value={contact}
-              onChange={(e) => setContact(e.target.value)}
+              onChange={e => setContact(e.target.value)}
               placeholder="您的姓名"
               className="mt-2"
             />
@@ -330,7 +338,7 @@ export function TransportQuoteForm({
             <Input
               id="phone"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={e => setPhone(e.target.value)}
               placeholder="您的電話"
               className="mt-2"
             />
@@ -343,7 +351,7 @@ export function TransportQuoteForm({
           <Textarea
             id="supplierNote"
             value={supplierNote}
-            onChange={(e) => setSupplierNote(e.target.value)}
+            onChange={e => setSupplierNote(e.target.value)}
             placeholder="其他說明或備註事項"
             className="mt-2"
             rows={3}
@@ -357,11 +365,11 @@ export function TransportQuoteForm({
             disabled={submitting}
             onClick={() => handleSubmitWithStatus('quoted')}
             variant="outline"
-            className="py-6 border-2 border-gray-300 hover:border-gray-400 text-gray-700 font-semibold"
+            className="py-6 border-2 border-border hover:border-border text-morandi-primary font-semibold"
           >
             <div className="text-center">
               <div className="text-lg">📋 僅報價</div>
-              <div className="text-xs text-gray-500 mt-1">（未留車）</div>
+              <div className="text-xs text-morandi-secondary mt-1">（未留車）</div>
             </div>
           </Button>
           <Button
@@ -377,7 +385,7 @@ export function TransportQuoteForm({
           </Button>
         </div>
         {submitting && (
-          <div className="text-center text-gray-500 text-sm mt-2">提交中...</div>
+          <div className="text-center text-morandi-secondary text-sm mt-2">提交中...</div>
         )}
       </form>
     </div>

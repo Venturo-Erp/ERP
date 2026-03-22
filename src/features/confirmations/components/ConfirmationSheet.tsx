@@ -22,12 +22,12 @@ import { useWorkspaceSettings, getLogoStyle } from '@/hooks/useWorkspaceSettings
 
 // 配色 - Morandi 色系
 const COLORS = {
-  primary: '#3a3633',      // 深棕灰（標題、文字）
-  secondary: '#8b8680',    // Morandi secondary
-  green: '#9fa68f',        // Morandi 綠（區塊標題背景）
-  border: '#e8e5e0',       // 更淺邊框
-  gray: '#4B5563',         // 灰（次要文字）
-  lightGray: '#9CA3AF',    // 淺灰
+  primary: '#3a3633', // 深棕灰（標題、文字）
+  secondary: '#8b8680', // Morandi secondary
+  green: '#9fa68f', // Morandi 綠（區塊標題背景）
+  border: '#e8e5e0', // 更淺邊框
+  gray: '#4B5563', // 灰（次要文字）
+  lightGray: '#9CA3AF', // 淺灰
 }
 
 // === 類型定義 ===
@@ -50,9 +50,9 @@ interface TourHeaderInfo {
 
 // 每日行程資料結構
 interface DailyItineraryItem {
-  date: string        // "7/2 (四)"
-  title: string       // "抵達福岡機場 ⇀ 博多 ⇀ ..."
-  dayLabel: string    // "Day 1"
+  date: string // "7/2 (四)"
+  title: string // "抵達福岡機場 ⇀ 博多 ⇀ ..."
+  dayLabel: string // "Day 1"
   description?: string
   highlight?: string
 }
@@ -160,7 +160,9 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
 
   // 按類別分組（顯示所有項目，不篩選狀態）
   const groupedByCategory = useMemo(() => {
-    const transport = items.filter(i => i.category === 'transport' || i.category === 'group-transport')
+    const transport = items.filter(
+      i => i.category === 'transport' || i.category === 'group-transport'
+    )
     const meals = items.filter(i => i.category === 'meals')
     const accommodation = items.filter(i => i.category === 'accommodation')
     const activities = items.filter(i => i.category === 'activities')
@@ -213,11 +215,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
   }
 
   if (!headerInfo) {
-    return (
-      <div className="text-center py-12 text-muted-foreground">
-        無法載入團資訊
-      </div>
-    )
+    return <div className="text-center py-12 text-muted-foreground">無法載入團資訊</div>
   }
 
   // 計算總天數
@@ -232,163 +230,157 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           列印
         </Button>
       </div>
-      
+
       {/* A4 等比例容器 */}
-      <div 
+      <div
         className="bg-white mx-auto shadow-sm print:shadow-none"
-        style={{ 
-          width: '210mm', 
+        style={{
+          width: '210mm',
           minHeight: '297mm',
           maxWidth: '100%',
           border: `1px solid ${COLORS.border}`,
-          padding: '8mm 10mm',  /* 留白：上下8mm 左右10mm */
+          padding: '8mm 10mm' /* 留白：上下8mm 左右10mm */,
         }}
       >
-
-      {/* === 標頭 === */}
-      <div className="px-6 pt-2 pb-4">
-        {/* Logo + 標題 */}
-        <div className="flex items-center justify-between mb-6 pb-4" style={{ borderBottom: `1px solid ${COLORS.border}` }}>
-          {/* Logo */}
-          <div>
-            <img
-              src={logoUrl}
-              alt="公司 Logo"
-              style={getLogoStyle('print')}
-            />
-          </div>
-          
-          {/* 標題 */}
-          <div className="text-center flex-1">
-            <div className="text-xs tracking-widest mb-1" style={{ color: COLORS.secondary }}>
-              TOUR CONFIRMATION
+        {/* === 標頭 === */}
+        <div className="px-6 pt-2 pb-4">
+          {/* Logo + 標題 */}
+          <div
+            className="flex items-center justify-between mb-6 pb-4"
+            style={{ borderBottom: `1px solid ${COLORS.border}` }}
+          >
+            {/* Logo */}
+            <div>
+              <img src={logoUrl} alt="公司 Logo" style={getLogoStyle('print')} />
             </div>
-            <h1 className="text-xl font-bold" style={{ color: COLORS.primary }}>
-              團確單
-            </h1>
+
+            {/* 標題 */}
+            <div className="text-center flex-1">
+              <div className="text-xs tracking-widest mb-1" style={{ color: COLORS.secondary }}>
+                TOUR CONFIRMATION
+              </div>
+              <h1 className="text-xl font-bold" style={{ color: COLORS.primary }}>
+                團確單
+              </h1>
+            </div>
+
+            {/* 團號 */}
+            <div className="text-right text-sm" style={{ color: COLORS.gray }}>
+              <div>{headerInfo.code}</div>
+              <div className="text-xs" style={{ color: COLORS.lightGray }}>
+                {headerInfo.departure_date ? formatDate(headerInfo.departure_date) : ''}
+              </div>
+            </div>
           </div>
-          
-          {/* 團號 */}
-          <div className="text-right text-sm" style={{ color: COLORS.gray }}>
-            <div>{headerInfo.code}</div>
-            <div className="text-xs" style={{ color: COLORS.lightGray }}>
-              {headerInfo.departure_date ? formatDate(headerInfo.departure_date) : ''}
+
+          <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-sm">
+            <div className="flex">
+              <span className="font-medium w-20">出團日期：</span>
+              <span>
+                {headerInfo.departure_date && headerInfo.return_date
+                  ? `${formatDate(headerInfo.departure_date)} ~ ${formatDate(headerInfo.return_date)}`
+                  : '-'}
+              </span>
+            </div>
+            <div className="flex">
+              <span className="font-medium w-20">隨團領隊：</span>
+              <span>{headerInfo.leader_name || '-'}</span>
+            </div>
+
+            <div className="flex">
+              <span className="font-medium w-20">承辦業務：</span>
+              <span>{headerInfo.sales_person || '-'}</span>
+            </div>
+            <div className="flex">
+              <span className="font-medium w-20">助理人員：</span>
+              <span>{headerInfo.assistant || '-'}</span>
+            </div>
+
+            <div className="flex">
+              <span className="font-medium w-20">團體人數：</span>
+              <span>{headerInfo.current_participants || 0} 人</span>
+            </div>
+            <div className="flex">
+              <span className="font-medium w-20">航班資訊：</span>
+              <span>{headerInfo.flight_info || '-'}</span>
+            </div>
+
+            <div className="flex col-span-2">
+              <span className="font-medium w-20">團名：</span>
+              <span className="font-bold">{headerInfo.name}</span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-sm">
-          <div className="flex">
-            <span className="font-medium w-20">出團日期：</span>
-            <span>
-              {headerInfo.departure_date && headerInfo.return_date
-                ? `${formatDate(headerInfo.departure_date)} ~ ${formatDate(headerInfo.return_date)}`
-                : '-'}
-            </span>
-          </div>
-          <div className="flex">
-            <span className="font-medium w-20">隨團領隊：</span>
-            <span>{headerInfo.leader_name || '-'}</span>
-          </div>
+        {/* === 每日行程 + 飯店 + 交通 === */}
+        <DailyItineraryTable
+          dailyItinerary={dailyItinerary}
+          accommodationItems={groupedByCategory.accommodation}
+          transportItems={groupedByCategory.transport}
+          departureDate={headerInfo.departure_date}
+          onActualExpenseUpdate={refresh}
+        />
 
-          <div className="flex">
-            <span className="font-medium w-20">承辦業務：</span>
-            <span>{headerInfo.sales_person || '-'}</span>
-          </div>
-          <div className="flex">
-            <span className="font-medium w-20">助理人員：</span>
-            <span>{headerInfo.assistant || '-'}</span>
-          </div>
+        {/* === 餐食表 === */}
+        <CategoryTable
+          title="餐食"
+          items={groupedByCategory.meals}
+          showUnitPriceColumns={true}
+          onActualExpenseUpdate={refresh}
+          departureDate={headerInfo.departure_date}
+        />
 
-          <div className="flex">
-            <span className="font-medium w-20">團體人數：</span>
-            <span>{headerInfo.current_participants || 0} 人</span>
-          </div>
-          <div className="flex">
-            <span className="font-medium w-20">航班資訊：</span>
-            <span>{headerInfo.flight_info || '-'}</span>
-          </div>
+        {/* === 住宿表 === */}
+        <CategoryTable
+          title="住宿"
+          items={groupedByCategory.accommodation}
+          showUnitPriceColumns={true}
+          onActualExpenseUpdate={refresh}
+          departureDate={headerInfo.departure_date}
+        />
 
-          <div className="flex col-span-2">
-            <span className="font-medium w-20">團名：</span>
-            <span className="font-bold">{headerInfo.name}</span>
-          </div>
-        </div>
-      </div>
+        {/* === 活動表 === */}
+        <CategoryTable
+          title="活動"
+          items={groupedByCategory.activities}
+          showUnitPriceColumns={true}
+          onActualExpenseUpdate={refresh}
+          departureDate={headerInfo.departure_date}
+        />
 
-      {/* === 每日行程 + 飯店 + 交通 === */}
-      <DailyItineraryTable 
-        dailyItinerary={dailyItinerary} 
-        accommodationItems={groupedByCategory.accommodation}
-        transportItems={groupedByCategory.transport}
-        departureDate={headerInfo.departure_date}
-        onActualExpenseUpdate={refresh}
-      />
+        {/* === 其他 === */}
+        <CategoryTable
+          title="其他"
+          items={groupedByCategory.others}
+          showUnitPriceColumns={true}
+          onActualExpenseUpdate={refresh}
+          departureDate={headerInfo.departure_date}
+        />
 
-      {/* === 餐食表 === */}
-      <CategoryTable
-        title="餐食"
-        items={groupedByCategory.meals}
-        showUnitPriceColumns={true}
-        onActualExpenseUpdate={refresh}
-        departureDate={headerInfo.departure_date}
-      />
-
-      {/* === 住宿表 === */}
-      <CategoryTable
-        title="住宿"
-        items={groupedByCategory.accommodation}
-        showUnitPriceColumns={true}
-        onActualExpenseUpdate={refresh}
-        departureDate={headerInfo.departure_date}
-      />
-
-      {/* === 活動表 === */}
-      <CategoryTable
-        title="活動"
-        items={groupedByCategory.activities}
-        showUnitPriceColumns={true}
-        onActualExpenseUpdate={refresh}
-        departureDate={headerInfo.departure_date}
-      />
-
-      {/* === 其他 === */}
-      <CategoryTable
-        title="其他"
-        items={groupedByCategory.others}
-        showUnitPriceColumns={true}
-        onActualExpenseUpdate={refresh}
-        departureDate={headerInfo.departure_date}
-      />
-
-      {/* === 財務彙總 === */}
-      <div 
-        className="p-6"
-        style={{ borderTop: `1px solid ${COLORS.border}` }}
-      >
-        <div className="flex items-center justify-between text-lg font-bold">
-          <div className="flex items-center gap-8">
-            <span style={{ color: COLORS.primary }}>預計支出總金額：</span>
-            <span className="font-mono">
-              ${financialSummary.totalExpected.toLocaleString()}
-            </span>
-          </div>
-          <div className="flex items-center gap-8">
-            <span style={{ color: COLORS.primary }}>實際支出總金額：</span>
-            <span className="font-mono">
-              {financialSummary.totalActual > 0
-                ? `$${financialSummary.totalActual.toLocaleString()}`
-                : '-'}
-            </span>
+        {/* === 財務彙總 === */}
+        <div className="p-6" style={{ borderTop: `1px solid ${COLORS.border}` }}>
+          <div className="flex items-center justify-between text-lg font-bold">
+            <div className="flex items-center gap-8">
+              <span style={{ color: COLORS.primary }}>預計支出總金額：</span>
+              <span className="font-mono">${financialSummary.totalExpected.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-8">
+              <span style={{ color: COLORS.primary }}>實際支出總金額：</span>
+              <span className="font-mono">
+                {financialSummary.totalActual > 0
+                  ? `$${financialSummary.totalActual.toLocaleString()}`
+                  : '-'}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* === 列印頁尾 === */}
-      <div className="hidden print:block text-xs text-muted-foreground text-center pt-4 border-t">
-        列印日期：{formatDate(new Date().toISOString())}
+        {/* === 列印頁尾 === */}
+        <div className="hidden print:block text-xs text-muted-foreground text-center pt-4 border-t">
+          列印日期：{formatDate(new Date().toISOString())}
+        </div>
       </div>
-      </div>{/* A4 容器結束 */}
+      {/* A4 容器結束 */}
     </div>
   )
 }
@@ -403,7 +395,13 @@ interface CategoryTableProps {
   departureDate?: string | null
 }
 
-function CategoryTable({ title, items, showUnitPriceColumns, onActualExpenseUpdate, departureDate }: CategoryTableProps) {
+function CategoryTable({
+  title,
+  items,
+  showUnitPriceColumns,
+  onActualExpenseUpdate,
+  departureDate,
+}: CategoryTableProps) {
   if (items.length === 0) {
     return null // 沒有項目就不顯示表格
   }
@@ -411,10 +409,7 @@ function CategoryTable({ title, items, showUnitPriceColumns, onActualExpenseUpda
   return (
     <div className="overflow-hidden" style={{ borderTop: `1px solid ${COLORS.border}` }}>
       {/* 表頭 */}
-      <div 
-        className="px-4 py-2 font-bold text-white"
-        style={{ backgroundColor: COLORS.green }}
-      >
+      <div className="px-4 py-2 font-bold text-white" style={{ backgroundColor: COLORS.green }}>
         {title}
       </div>
 
@@ -427,16 +422,17 @@ function CategoryTable({ title, items, showUnitPriceColumns, onActualExpenseUpda
             {showUnitPriceColumns && (
               <>
                 <col style={{ width: '12%' }} /> {/* 商品單價 */}
-                <col style={{ width: '8%' }} />  {/* 數量 */}
+                <col style={{ width: '8%' }} /> {/* 數量 */}
                 <col style={{ width: '12%' }} /> {/* 小計 */}
               </>
             )}
             <col style={{ width: '12%' }} /> {/* 預計支出 */}
             <col style={{ width: '12%' }} /> {/* 實際支出 */}
-            <col style={{ width: showUnitPriceColumns ? '12%' : '19%' }} /> {/* 說明（含付款狀態）*/}
+            <col style={{ width: showUnitPriceColumns ? '12%' : '19%' }} />{' '}
+            {/* 說明（含付款狀態）*/}
           </colgroup>
           <thead>
-            <tr className="bg-gray-50 border-b">
+            <tr className="bg-morandi-container border-b">
               <th className="px-2 py-2 text-left font-medium">日期</th>
               <th className="px-2 py-2 text-left font-medium">
                 {title === '交通' ? '接駁地點' : title === '餐食' ? '餐廳名稱' : '名稱'}
@@ -482,14 +478,23 @@ interface TableRowProps {
 }
 
 // 計算實際日期（出發日期 + day_number - 1）
-function calculateServiceDate(departureDate: string | null | undefined, dayNumber: number | null | undefined): string | null {
+function calculateServiceDate(
+  departureDate: string | null | undefined,
+  dayNumber: number | null | undefined
+): string | null {
   if (!departureDate || !dayNumber) return null
   const date = new Date(departureDate)
   date.setDate(date.getDate() + dayNumber - 1)
   return date.toISOString().split('T')[0]
 }
 
-function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate, departureDate }: TableRowProps) {
+function TableRow({
+  item,
+  showUnitPriceColumns,
+  isLast,
+  onActualExpenseUpdate,
+  departureDate,
+}: TableRowProps) {
   const [actualExpense, setActualExpense] = useState<string>(
     item.actual_expense != null ? String(item.actual_expense) : ''
   )
@@ -511,7 +516,7 @@ function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate, d
   // 儲存實際支出
   const handleSaveActualExpense = async () => {
     const newValue = actualExpense.trim() === '' ? null : parseFloat(actualExpense)
-    
+
     // 沒有變化就不更新
     if (newValue === item.actual_expense) return
 
@@ -519,9 +524,9 @@ function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate, d
     try {
       const { error } = await supabase
         .from('tour_itinerary_items')
-        .update({ 
+        .update({
           actual_expense: newValue,
-          expense_at: newValue != null ? new Date().toISOString() : null
+          expense_at: newValue != null ? new Date().toISOString() : null,
         } as any)
         .eq('id', item.id)
 
@@ -539,7 +544,7 @@ function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate, d
   return (
     <tr className={!isLast ? 'border-b' : ''}>
       {/* 日期 */}
-      <td className="px-2 py-2 text-gray-600">
+      <td className="px-2 py-2 text-morandi-secondary">
         {(() => {
           if (item.service_date) return formatDateShort(item.service_date)
           const calculated = calculateServiceDate(departureDate, item.day_number)
@@ -553,10 +558,10 @@ function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate, d
         <div>
           <div className="font-medium">{item.title || '-'}</div>
           {item.supplier_name && (
-            <div className="text-xs text-gray-500 mt-0.5">{item.supplier_name}</div>
+            <div className="text-xs text-morandi-secondary mt-0.5">{item.supplier_name}</div>
           )}
           {item.description && (
-            <div className="text-xs text-gray-500 mt-0.5">{item.description}</div>
+            <div className="text-xs text-morandi-secondary mt-0.5">{item.description}</div>
           )}
         </div>
       </td>
@@ -586,19 +591,19 @@ function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate, d
         <input
           type="number"
           value={actualExpense}
-          onChange={(e) => setActualExpense(e.target.value)}
+          onChange={e => setActualExpense(e.target.value)}
           onBlur={handleSaveActualExpense}
-          onKeyDown={(e) => e.key === 'Enter' && handleSaveActualExpense()}
+          onKeyDown={e => e.key === 'Enter' && handleSaveActualExpense()}
           placeholder="-"
           disabled={isSaving}
-          className="w-24 px-2 py-1 text-right font-mono font-medium text-green-600 border border-gray-200 rounded focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e] outline-none disabled:opacity-50 print:border-0 print:p-0"
+          className="w-24 px-2 py-1 text-right font-mono font-medium text-green-600 border border-border rounded focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e] outline-none disabled:opacity-50 print:border-0 print:p-0"
         />
       </td>
 
       {/* 說明（含付款狀態）*/}
       <td className="px-2 py-2 text-xs">
         <div className="space-y-0.5">
-          {notes && <div className="text-gray-600">{notes}</div>}
+          {notes && <div className="text-morandi-secondary">{notes}</div>}
           <PaymentStatusCell requestId={item.request_id} />
         </div>
       </td>
@@ -610,7 +615,7 @@ function TableRow({ item, showUnitPriceColumns, isLast, onActualExpenseUpdate, d
 
 function PaymentStatusCell({ requestId }: { requestId: string | null }) {
   const { amounts } = usePaymentStatus(requestId)
-  
+
   // 沒有付款金額 → 顯示空白
   if (amounts.totalAmount === 0) {
     return null
@@ -656,7 +661,13 @@ interface DailyItineraryTableProps {
   onActualExpenseUpdate?: () => void
 }
 
-function DailyItineraryTable({ dailyItinerary, accommodationItems, transportItems, departureDate, onActualExpenseUpdate }: DailyItineraryTableProps) {
+function DailyItineraryTable({
+  dailyItinerary,
+  accommodationItems,
+  transportItems,
+  departureDate,
+  onActualExpenseUpdate,
+}: DailyItineraryTableProps) {
   if (dailyItinerary.length === 0) {
     return null
   }
@@ -667,24 +678,21 @@ function DailyItineraryTable({ dailyItinerary, accommodationItems, transportItem
     const dayNumber = dayIndex + 1
     const hotel = accommodationItems.find(item => item.day_number === dayNumber)
     if (!hotel?.title) return undefined
-    
+
     // 提取「同上 (xxx)」裡的實際飯店名
     let title = hotel.title
     const match = title.match(/同上\s*[（(](.+?)[）)]/)
     if (match) {
       title = match[1] // 取括號裡的內容
     }
-    
+
     return { title }
   }
 
   return (
     <div className="overflow-hidden" style={{ borderTop: `1px solid ${COLORS.border}` }}>
       {/* 表頭 */}
-      <div 
-        className="px-4 py-2 font-bold text-white"
-        style={{ backgroundColor: COLORS.green }}
-      >
+      <div className="px-4 py-2 font-bold text-white" style={{ backgroundColor: COLORS.green }}>
         每日行程
       </div>
 
@@ -695,7 +703,7 @@ function DailyItineraryTable({ dailyItinerary, accommodationItems, transportItem
           <col style={{ width: '88%' }} /> {/* 行程 */}
         </colgroup>
         <thead>
-          <tr className="bg-gray-50 border-b">
+          <tr className="bg-morandi-container border-b">
             <th className="px-3 py-2 text-left font-medium">日期</th>
             <th className="px-3 py-2 text-left font-medium">行程</th>
           </tr>
@@ -707,19 +715,19 @@ function DailyItineraryTable({ dailyItinerary, accommodationItems, transportItem
               <React.Fragment key={index}>
                 {/* 行程列 */}
                 <tr className="border-b">
-                  <td className="px-3 py-2 text-gray-600 align-top">
+                  <td className="px-3 py-2 text-morandi-secondary align-top">
                     {day.date || `Day ${index + 1}`}
                   </td>
                   <td className="px-3 py-2">
                     <div className="font-medium">{day.title}</div>
                     {day.description && (
-                      <div className="text-xs text-gray-500 mt-1">{day.description}</div>
+                      <div className="text-xs text-morandi-secondary mt-1">{day.description}</div>
                     )}
                   </td>
                 </tr>
                 {/* 飯店列（如果有）*/}
                 {hotel && (
-                  <tr className="border-b bg-gray-50">
+                  <tr className="border-b bg-morandi-container">
                     <td className="px-3 py-1"></td>
                     <td className="px-3 py-1 text-xs">
                       <span className="font-medium">{hotel.title}</span>
@@ -731,25 +739,25 @@ function DailyItineraryTable({ dailyItinerary, accommodationItems, transportItem
           })}
           {/* 交通（直接在最後一天下面）*/}
           {transportItems.map((item, idx) => (
-            <tr key={item.id || idx} className="border-b bg-gray-50">
+            <tr key={item.id || idx} className="border-b bg-morandi-container">
               <td colSpan={2} className="px-3 py-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 text-sm">
                     <span className="font-medium">{item.supplier_name || '-'}</span>
                     {item.driver_name && (
-                      <span className="text-gray-600">
+                      <span className="text-morandi-secondary">
                         司機: {item.driver_name} {item.driver_phone}
                       </span>
                     )}
                     {item.vehicle_plate && (
-                      <span className="text-gray-500">車牌: {item.vehicle_plate}</span>
+                      <span className="text-morandi-secondary">車牌: {item.vehicle_plate}</span>
                     )}
                     {item.vehicle_type && (
-                      <span className="text-gray-500">{item.vehicle_type}</span>
+                      <span className="text-morandi-secondary">{item.vehicle_type}</span>
                     )}
                   </div>
                   <div className="flex items-center gap-4 text-sm font-mono">
-                    <span className="text-gray-600">
+                    <span className="text-morandi-secondary">
                       {item.estimated_cost?.toLocaleString() || '-'}
                     </span>
                   </div>

@@ -8,11 +8,13 @@
 ## 🎯 核心系統清單
 
 ### 1. 行程表系統
+
 - 檔案：tour-itinerary-tab.tsx (1626行)
 - 職責：**寫入點** - 唯一可以新增核心表資料
 - 關鍵：syncToCore() - 寫入 tour_itinerary_items
 
-### 2. 報價單系統  
+### 2. 報價單系統
+
 - 檔案：quotes/[id]/page.tsx
 - 職責：讀取核心表 → 填價格 → 寫回核心表
 - 關鍵：
@@ -20,6 +22,7 @@
   - writePricingToCore() - 寫回
 
 ### 3. 需求單系統
+
 - 檔案：CoreTableRequestDialog.tsx
 - 職責：從核心表 JOIN 讀取 → 產生 PDF
 - 關鍵：
@@ -27,6 +30,7 @@
   - 更新 request_status
 
 ### 4. 確認單系統
+
 - 檔案：tour-confirmation-sheet.tsx (546行)
 - 服務：confirmationCoreTableSync.ts (224行)
 - 職責：確認價格 → 同步核心表
@@ -37,16 +41,19 @@
   - batchSyncConfirmationToCore() - 批次同步
 
 ### 5. 結帳單系統
+
 - 檔案：tour-closing-tab.tsx
 - 職責：領隊回填實際費用
 - 關鍵：actual_expense, receipt_images
 
 ### 6. 訂單系統
+
 - 檔案：orders/
 - 職責：團員管理、收款記錄
 - 關聯：tour_id → tours
 
 ### 7. 收款/請款系統
+
 - 檔案：payment-requests/
 - 職責：代收轉付
 - 關聯：tour_id, order_id
@@ -68,7 +75,7 @@ tour_itinerary_items
   ↓ writePricingToCore()
 tour_itinerary_items (unit_price, quote_status)
   ↓
-[讀取點 2]  
+[讀取點 2]
 需求單 (CoreTableRequestDialog)
   ↓ useCoreRequestItems() + JOIN
   ↓ 產生 PDF
@@ -94,6 +101,7 @@ tour_itinerary_items (actual_expense, leader_status)
 **職責**：確認單 ↔ 核心表 雙向同步
 
 **函數清單**：
+
 ```typescript
 // 建立確認單 → 核心表
 syncConfirmationCreateToCore(params: {
@@ -125,6 +133,7 @@ batchSyncConfirmationToCore(params: {
 ```
 
 **更新欄位**：
+
 - confirmed_cost
 - booking_reference
 - confirmation_date

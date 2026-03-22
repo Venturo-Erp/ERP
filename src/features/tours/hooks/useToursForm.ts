@@ -28,9 +28,9 @@ export function useToursForm({ state, openDialog }: UseToursFormParams): UseTour
     async (fromQuoteId?: string) => {
       setNewTour({
         name: '',
-        countryId: '',       // 🔧 核心表架構
-        countryName: '',     // 🔧 核心表架構
-        countryCode: '',     // 🔧 核心表架構
+        countryId: '', // 🔧 核心表架構
+        countryName: '', // 🔧 核心表架構
+        countryCode: '', // 🔧 核心表架構
         cityCode: '',
         departure_date: '',
         return_date: '',

@@ -39,7 +39,7 @@ export function printTransportRequirement(data: TransportRequirementData) {
 
   const transportRows = transportDays
     .map(
-      (day) => `
+      day => `
     <tr>
       <td>Day ${day.dayNumber}</td>
       <td>${day.date}</td>

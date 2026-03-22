@@ -11,10 +11,7 @@ const tourFilesDb = () => dynamicFrom('tour_files')
 /**
  * 取得團的檔案（依分類）
  */
-export async function getTourFiles(
-  tourId: string,
-  category?: FileCategory
-): Promise<TourFile[]> {
+export async function getTourFiles(tourId: string, category?: FileCategory): Promise<TourFile[]> {
   let query = tourFilesDb().select('*').eq('tour_id', tourId)
 
   if (category) {
@@ -101,11 +98,7 @@ export async function updateTourFile(
     tags?: string[]
   }
 ): Promise<TourFile> {
-  const { data, error } = await tourFilesDb()
-    .update(input)
-    .eq('id', fileId)
-    .select()
-    .single()
+  const { data, error } = await tourFilesDb().update(input).eq('id', fileId).select().single()
 
   if (error) throw error
   return data

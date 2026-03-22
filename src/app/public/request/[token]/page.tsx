@@ -5,7 +5,11 @@ import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { useParams } from 'next/navigation'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 
-interface RoomItem { room_type: string; quantity: number; nights?: number }
+interface RoomItem {
+  room_type: string
+  quantity: number
+  nights?: number
+}
 interface RequestItem {
   category: string
   title: string
@@ -50,30 +54,40 @@ export default function PublicRequestPage() {
           .select('*')
           .eq('id', token)
           .single()
-        if (e || !data) { setError('找不到此委託單，連結可能已失效'); return }
+        if (e || !data) {
+          setError('找不到此委託單，連結可能已失效')
+          return
+        }
 
         const d = data as Record<string, unknown>
         setRequestId(data.id)
         setSupplierName(String(d.supplier_name || ''))
 
-        const rawItems = d.items as RequestItem[] || []
+        const rawItems = (d.items as RequestItem[]) || []
         setItems(rawItems.map(it => ({ ...it })))
         setReplyNote(String(d.note || ''))
-        setPackagePrice((d as Record<string, unknown>).package_price as number || null)
+        setPackagePrice(((d as Record<string, unknown>).package_price as number) || null)
 
         if (data.status === 'replied' || data.status === 'confirmed') setSubmitted(true)
 
         const tourId = data.tour_id as string
         if (tourId) {
-          const { data: tour } = await supabase.from('tours').select('code, name, departure_date').eq('id', tourId).single()
+          const { data: tour } = await supabase
+            .from('tours')
+            .select('code, name, departure_date')
+            .eq('id', tourId)
+            .single()
           if (tour) {
             setTourCode(tour.code || '')
             setTourName(tour.name || '')
             setDepartureDate(tour.departure_date || '')
           }
         }
-      } catch { setError('載入失敗') }
-      finally { setLoading(false) }
+      } catch {
+        setError('載入失敗')
+      } finally {
+        setLoading(false)
+      }
     }
     load()
   }, [token])
@@ -82,94 +96,226 @@ export default function PublicRequestPage() {
     if (!requestId || saving) return
     setSaving(true)
     try {
-      await supabase.from('tour_requests').update({
-        items: items as never,
-        note: replyNote || null,
-        updated_at: new Date().toISOString(),
-      } as never).eq('id', requestId)
+      await supabase
+        .from('tour_requests')
+        .update({
+          items: items as never,
+          note: replyNote || null,
+          updated_at: new Date().toISOString(),
+        } as never)
+        .eq('id', requestId)
       setLastSaved(new Date().toLocaleTimeString('zh-TW'))
-    } catch { alert('儲存失敗') }
-    finally { setSaving(false) }
+    } catch {
+      alert('儲存失敗')
+    } finally {
+      setSaving(false)
+    }
   }, [requestId, items, replyNote, saving, supabase])
 
   const handleSubmit = useCallback(async () => {
     if (!requestId || submitting) return
     setSubmitting(true)
     try {
-      await supabase.from('tour_requests').update({
-        status: 'replied',
-        replied_at: new Date().toISOString(),
-        items: items as never,
-        note: replyNote || null,
-      } as never).eq('id', requestId)
+      await supabase
+        .from('tour_requests')
+        .update({
+          status: 'replied',
+          replied_at: new Date().toISOString(),
+          items: items as never,
+          note: replyNote || null,
+        } as never)
+        .eq('id', requestId)
       setSubmitted(true)
-    } catch { alert('送出失敗') }
-    finally { setSubmitting(false) }
+    } catch {
+      alert('送出失敗')
+    } finally {
+      setSubmitting(false)
+    }
   }, [requestId, items, replyNote, submitting, supabase])
 
   // --- 畫面 ---
 
-  if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9f9f9' }}>
-      <p style={{ color: '#999' }}>載入中...</p>
-    </div>
-  )
-
-  if (error) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9f9f9' }}>
-      <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.1)', padding: 40, maxWidth: 400, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>找不到委託單</h1>
-        <p style={{ color: '#999' }}>{error}</p>
+  if (loading)
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#f9f9f9',
+        }}
+      >
+        <p style={{ color: '#999' }}>載入中...</p>
       </div>
-    </div>
-  )
+    )
 
-  if (submitted) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f9f9f9' }}>
-      <div style={{ background: '#fff', borderRadius: 8, boxShadow: '0 1px 4px rgba(0,0,0,0.1)', padding: 40, maxWidth: 400, textAlign: 'center' }}>
-        <h1 style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>報價已送出</h1>
-        <p style={{ color: '#999' }}>感謝您的回覆，旅行社會盡快確認。</p>
-        <button
-          onClick={() => setSubmitted(false)}
-          style={{ marginTop: 16, color: '#8B6914', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', fontSize: 14 }}
+  if (error)
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#f9f9f9',
+        }}
+      >
+        <div
+          style={{
+            background: '#fff',
+            borderRadius: 8,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            padding: 40,
+            maxWidth: 400,
+            textAlign: 'center',
+          }}
         >
-          需要修改？點此重新編輯
-        </button>
+          <h1 style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>找不到委託單</h1>
+          <p style={{ color: '#999' }}>{error}</p>
+        </div>
       </div>
-    </div>
-  )
+    )
+
+  if (submitted)
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#f9f9f9',
+        }}
+      >
+        <div
+          style={{
+            background: '#fff',
+            borderRadius: 8,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.1)',
+            padding: 40,
+            maxWidth: 400,
+            textAlign: 'center',
+          }}
+        >
+          <h1 style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>報價已送出</h1>
+          <p style={{ color: '#999' }}>感謝您的回覆，旅行社會盡快確認。</p>
+          <button
+            onClick={() => setSubmitted(false)}
+            style={{
+              marginTop: 16,
+              color: '#8B6914',
+              textDecoration: 'underline',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: 14,
+            }}
+          >
+            需要修改？點此重新編輯
+          </button>
+        </div>
+      </div>
+    )
 
   const accItems = items.filter(i => i.category === 'accommodation')
   const otherItems = items.filter(i => i.category !== 'accommodation')
 
   const cellStyle: React.CSSProperties = { border: '1px solid #333', padding: '8px 10px' }
-  const thStyle: React.CSSProperties = { ...cellStyle, background: '#f0f0f0', fontWeight: 'bold', textAlign: 'center' }
-  const inputStyle: React.CSSProperties = { border: '1px solid #ccc', borderRadius: 4, padding: '6px 10px', fontSize: 13, width: '100%', boxSizing: 'border-box' }
+  const thStyle: React.CSSProperties = {
+    ...cellStyle,
+    background: '#f0f0f0',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  }
+  const inputStyle: React.CSSProperties = {
+    border: '1px solid #ccc',
+    borderRadius: 4,
+    padding: '6px 10px',
+    fontSize: 13,
+    width: '100%',
+    boxSizing: 'border-box',
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#f9f9f9', padding: '30px 16px' }}>
-      <div style={{ maxWidth: 800, margin: '0 auto', fontFamily: "'Microsoft JhengHei', 'PingFang TC', sans-serif", color: '#333', lineHeight: 1.6 }}>
+      <div
+        style={{
+          maxWidth: 800,
+          margin: '0 auto',
+          fontFamily: "'Microsoft JhengHei', 'PingFang TC', sans-serif",
+          color: '#333',
+          lineHeight: 1.6,
+        }}
+      >
         {/* 標題 */}
-        <h1 style={{ textAlign: 'center', fontSize: 24, fontWeight: 'bold', borderBottom: '3px double #333', paddingBottom: 10, marginBottom: 20 }}>
+        <h1
+          style={{
+            textAlign: 'center',
+            fontSize: 24,
+            fontWeight: 'bold',
+            borderBottom: '3px double #333',
+            paddingBottom: 10,
+            marginBottom: 20,
+          }}
+        >
           需求單
         </h1>
 
         {/* 基本資訊 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
           <div style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15 }}>
-            <h3 style={{ margin: '0 0 8px 0', borderBottom: '1px solid #ddd', paddingBottom: 5, fontSize: 14 }}>我方資訊</h3>
+            <h3
+              style={{
+                margin: '0 0 8px 0',
+                borderBottom: '1px solid #ddd',
+                paddingBottom: 5,
+                fontSize: 14,
+              }}
+            >
+              我方資訊
+            </h3>
             <div style={{ fontSize: 13 }}>
-              <div><b>公司：</b>{COMPANY_NAME}</div>
-              <div><b>團號：</b>{tourCode}</div>
-              <div><b>團名：</b>{tourName}</div>
-              <div><b>出發日：</b>{departureDate}</div>
-              {totalPax && <div><b>人數：</b>{totalPax} 人</div>}
+              <div>
+                <b>公司：</b>
+                {COMPANY_NAME}
+              </div>
+              <div>
+                <b>團號：</b>
+                {tourCode}
+              </div>
+              <div>
+                <b>團名：</b>
+                {tourName}
+              </div>
+              <div>
+                <b>出發日：</b>
+                {departureDate}
+              </div>
+              {totalPax && (
+                <div>
+                  <b>人數：</b>
+                  {totalPax} 人
+                </div>
+              )}
             </div>
           </div>
           <div style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15 }}>
-            <h3 style={{ margin: '0 0 8px 0', borderBottom: '1px solid #ddd', paddingBottom: 5, fontSize: 14 }}>供應商資訊</h3>
+            <h3
+              style={{
+                margin: '0 0 8px 0',
+                borderBottom: '1px solid #ddd',
+                paddingBottom: 5,
+                fontSize: 14,
+              }}
+            >
+              供應商資訊
+            </h3>
             <div style={{ fontSize: 13 }}>
-              <div><b>名稱：</b>{supplierName}</div>
+              <div>
+                <b>名稱：</b>
+                {supplierName}
+              </div>
             </div>
           </div>
         </div>
@@ -183,13 +329,36 @@ export default function PublicRequestPage() {
 
           return (
             <div key={`acc-${idx}`} style={{ marginBottom: 24 }}>
-              <div style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15, marginBottom: 10 }}>
-                <h3 style={{ margin: '0 0 8px 0', borderBottom: '1px solid #ddd', paddingBottom: 5, fontSize: 14 }}>飯店資訊</h3>
+              <div
+                style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15, marginBottom: 10 }}
+              >
+                <h3
+                  style={{
+                    margin: '0 0 8px 0',
+                    borderBottom: '1px solid #ddd',
+                    paddingBottom: 5,
+                    fontSize: 14,
+                  }}
+                >
+                  飯店資訊
+                </h3>
                 <div style={{ fontSize: 13 }}>
-                  <div><b>飯店：</b>{item.title}</div>
-                  <div><b>入住日：</b>{dates[0]?.trim() || ''}</div>
-                  <div><b>退房日：</b>{dates[1]?.trim() || ''}</div>
-                  <div><b>晚數：</b>{nights} 晚</div>
+                  <div>
+                    <b>飯店：</b>
+                    {item.title}
+                  </div>
+                  <div>
+                    <b>入住日：</b>
+                    {dates[0]?.trim() || ''}
+                  </div>
+                  <div>
+                    <b>退房日：</b>
+                    {dates[1]?.trim() || ''}
+                  </div>
+                  <div>
+                    <b>晚數：</b>
+                    {nights} 晚
+                  </div>
                 </div>
               </div>
 
@@ -215,7 +384,20 @@ export default function PublicRequestPage() {
                           type="number"
                           placeholder="NT$"
                           value={item.quoted_cost ?? ''}
-                          onChange={e => setItems(prev => prev.map(it => it === item ? { ...it, quoted_cost: e.target.value ? parseFloat(e.target.value) : null } : it))}
+                          onChange={e =>
+                            setItems(prev =>
+                              prev.map(it =>
+                                it === item
+                                  ? {
+                                      ...it,
+                                      quoted_cost: e.target.value
+                                        ? parseFloat(e.target.value)
+                                        : null,
+                                    }
+                                  : it
+                              )
+                            )
+                          }
                           style={inputStyle}
                         />
                       </td>
@@ -223,7 +405,13 @@ export default function PublicRequestPage() {
                         <input
                           type="checkbox"
                           checked={item.booking_confirmed || false}
-                          onChange={e => setItems(prev => prev.map(it => it === item ? { ...it, booking_confirmed: e.target.checked } : it))}
+                          onChange={e =>
+                            setItems(prev =>
+                              prev.map(it =>
+                                it === item ? { ...it, booking_confirmed: e.target.checked } : it
+                              )
+                            )
+                          }
                           style={{ width: 18, height: 18 }}
                         />
                       </td>
@@ -232,7 +420,13 @@ export default function PublicRequestPage() {
                           type="text"
                           placeholder="選填"
                           value={item.booking_ref || ''}
-                          onChange={e => setItems(prev => prev.map(it => it === item ? { ...it, booking_ref: e.target.value } : it))}
+                          onChange={e =>
+                            setItems(prev =>
+                              prev.map(it =>
+                                it === item ? { ...it, booking_ref: e.target.value } : it
+                              )
+                            )
+                          }
                           style={inputStyle}
                         />
                       </td>
@@ -254,7 +448,9 @@ export default function PublicRequestPage() {
 
         {/* 其他項目 */}
         {otherItems.length > 0 && (
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, marginBottom: 24 }}>
+          <table
+            style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, marginBottom: 24 }}
+          >
             <thead>
               <tr>
                 <th style={{ ...thStyle, width: 80 }}>日期</th>
@@ -267,7 +463,9 @@ export default function PublicRequestPage() {
             <tbody>
               {otherItems.map((item, idx) => (
                 <tr key={idx}>
-                  <td style={{ ...cellStyle, textAlign: 'center', fontSize: 12 }}>{item.service_date || ''}</td>
+                  <td style={{ ...cellStyle, textAlign: 'center', fontSize: 12 }}>
+                    {item.service_date || ''}
+                  </td>
                   <td style={cellStyle}>{item.title}</td>
                   <td style={cellStyle}>
                     <input
@@ -276,7 +474,9 @@ export default function PublicRequestPage() {
                       value={item.quoted_cost ?? ''}
                       onChange={e => {
                         const val = e.target.value ? parseFloat(e.target.value) : null
-                        setItems(prev => prev.map(it => it === item ? { ...it, quoted_cost: val } : it))
+                        setItems(prev =>
+                          prev.map(it => (it === item ? { ...it, quoted_cost: val } : it))
+                        )
                       }}
                       style={inputStyle}
                     />
@@ -285,7 +485,13 @@ export default function PublicRequestPage() {
                     <input
                       type="checkbox"
                       checked={item.booking_confirmed || false}
-                      onChange={e => setItems(prev => prev.map(it => it === item ? { ...it, booking_confirmed: e.target.checked } : it))}
+                      onChange={e =>
+                        setItems(prev =>
+                          prev.map(it =>
+                            it === item ? { ...it, booking_confirmed: e.target.checked } : it
+                          )
+                        )
+                      }
                       style={{ width: 18, height: 18 }}
                     />
                   </td>
@@ -294,7 +500,11 @@ export default function PublicRequestPage() {
                       type="text"
                       placeholder="選填"
                       value={item.reply_note || ''}
-                      onChange={e => setItems(prev => prev.map(it => it === item ? { ...it, reply_note: e.target.value } : it))}
+                      onChange={e =>
+                        setItems(prev =>
+                          prev.map(it => (it === item ? { ...it, reply_note: e.target.value } : it))
+                        )
+                      }
                       style={inputStyle}
                     />
                   </td>
@@ -306,11 +516,31 @@ export default function PublicRequestPage() {
 
         {/* 統包價格 */}
         <div style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15, marginBottom: 20 }}>
-          <h3 style={{ margin: '0 0 10px 0', fontSize: 14, borderBottom: '1px solid #ddd', paddingBottom: 5 }}>統包報價</h3>
+          <h3
+            style={{
+              margin: '0 0 10px 0',
+              fontSize: 14,
+              borderBottom: '1px solid #ddd',
+              paddingBottom: 5,
+            }}
+          >
+            統包報價
+          </h3>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <b style={{ fontSize: 13, whiteSpace: 'nowrap' }}>統包總價</b>
             <div style={{ position: 'relative', flex: 1, maxWidth: 240 }}>
-              <span style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#999', fontSize: 13 }}>NT$</span>
+              <span
+                style={{
+                  position: 'absolute',
+                  left: 10,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: '#999',
+                  fontSize: 13,
+                }}
+              >
+                NT$
+              </span>
               <input
                 type="number"
                 value={packagePrice ?? ''}
@@ -320,12 +550,23 @@ export default function PublicRequestPage() {
               />
             </div>
           </div>
-          <p style={{ fontSize: 11, color: '#999', marginTop: 6 }}>如為統包報價，可只填此欄，上方單項報價可留空</p>
+          <p style={{ fontSize: 11, color: '#999', marginTop: 6 }}>
+            如為統包報價，可只填此欄，上方單項報價可留空
+          </p>
         </div>
 
         {/* 整體備註 */}
         <div style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15, marginBottom: 20 }}>
-          <h3 style={{ margin: '0 0 8px 0', fontSize: 14, borderBottom: '1px solid #ddd', paddingBottom: 5 }}>備註</h3>
+          <h3
+            style={{
+              margin: '0 0 8px 0',
+              fontSize: 14,
+              borderBottom: '1px solid #ddd',
+              paddingBottom: 5,
+            }}
+          >
+            備註
+          </h3>
           <textarea
             value={replyNote}
             onChange={e => setReplyNote(e.target.value)}
@@ -340,14 +581,34 @@ export default function PublicRequestPage() {
           <button
             onClick={handleSave}
             disabled={saving}
-            style={{ border: '2px solid #999', background: '#fff', color: '#333', fontWeight: 'bold', padding: '12px 32px', borderRadius: 6, fontSize: 15, cursor: 'pointer', opacity: saving ? 0.5 : 1 }}
+            style={{
+              border: '2px solid #999',
+              background: '#fff',
+              color: '#333',
+              fontWeight: 'bold',
+              padding: '12px 32px',
+              borderRadius: 6,
+              fontSize: 15,
+              cursor: 'pointer',
+              opacity: saving ? 0.5 : 1,
+            }}
           >
             {saving ? '儲存中...' : '暫時儲存'}
           </button>
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            style={{ border: 'none', background: '#8B6914', color: '#fff', fontWeight: 'bold', padding: '12px 32px', borderRadius: 6, fontSize: 15, cursor: 'pointer', opacity: submitting ? 0.5 : 1 }}
+            style={{
+              border: 'none',
+              background: '#8B6914',
+              color: '#fff',
+              fontWeight: 'bold',
+              padding: '12px 32px',
+              borderRadius: 6,
+              fontSize: 15,
+              cursor: 'pointer',
+              opacity: submitting ? 0.5 : 1,
+            }}
           >
             {submitting ? '送出中...' : '確認送出'}
           </button>

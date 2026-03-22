@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { Plus, Trash2, Hotel, Loader2 } from 'lucide-react'
+import { Plus, Trash2, Hotel, Loader2, X } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import { logger } from '@/lib/utils/logger'
 
 interface RoomType {
   id: string
-  name: string   // 房型名稱（雙人房、三人房...）
+  name: string // 房型名稱（雙人房、三人房...）
   quantity: number
   note?: string
 }
@@ -58,21 +58,19 @@ export function RoomRequirementDialog({
   const [note, setNote] = useState('')
 
   const addRoomType = useCallback(() => {
-    setRoomTypes(prev => [
-      ...prev,
-      { id: `room-${++roomIdCounter}`, name: '', quantity: 0 },
-    ])
+    setRoomTypes(prev => [...prev, { id: `room-${++roomIdCounter}`, name: '', quantity: 0 }])
   }, [])
 
   const removeRoomType = useCallback((id: string) => {
     setRoomTypes(prev => prev.filter(r => r.id !== id))
   }, [])
 
-  const updateRoomType = useCallback((id: string, field: keyof RoomType, value: string | number) => {
-    setRoomTypes(prev =>
-      prev.map(r => (r.id === id ? { ...r, [field]: value } : r))
-    )
-  }, [])
+  const updateRoomType = useCallback(
+    (id: string, field: keyof RoomType, value: string | number) => {
+      setRoomTypes(prev => prev.map(r => (r.id === id ? { ...r, [field]: value } : r)))
+    },
+    []
+  )
 
   const handleSave = async () => {
     const validRooms = roomTypes.filter(r => r.name.trim() && r.quantity >= 0)
@@ -124,7 +122,12 @@ export function RoomRequirementDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) onClose() }}>
+    <Dialog
+      open={open}
+      onOpenChange={v => {
+        if (!v) onClose()
+      }}
+    >
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -167,7 +170,9 @@ export function RoomRequirementDialog({
                     value={room.quantity || ''}
                     placeholder="0"
                     onChange={e => {
-                      const v = e.target.value.replace(/[\uff01-\uff5e]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+                      const v = e.target.value.replace(/[\uff01-\uff5e]/g, c =>
+                        String.fromCharCode(c.charCodeAt(0) - 0xfee0)
+                      )
                       updateRoomType(room.id, 'quantity', v ? parseInt(v) || 0 : 0)
                     }}
                     className="h-8 w-16 text-sm text-center"
@@ -215,15 +220,17 @@ export function RoomRequirementDialog({
               {roomTypes
                 .filter(r => r.name.trim() && r.quantity > 0)
                 .map(r => `${r.name} × ${r.quantity}`)
-                .join('、')}
-              {' '}
+                .join('、')}{' '}
               × {nights} 晚
             </div>
           )}
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>取消</Button>
+          <Button variant="outline" onClick={onClose}>
+            <X className="h-4 w-4 mr-1" />
+            取消
+          </Button>
           <Button
             onClick={handleSave}
             disabled={saving}

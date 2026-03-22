@@ -11,6 +11,7 @@
 **→ [START_HERE.md](./START_HERE.md)** 📖
 
 這是你的第一站，包含：
+
 - 5種角色的導航路徑
 - 文檔分類和重要性
 - 學習建議和檢查清單
@@ -21,22 +22,22 @@
 
 ### 你想做什麼？
 
-| 需求 | 看哪個文檔 |
-|------|-----------|
-| **理解核心邏輯** | **[CORE_LOGIC.md](./CORE_LOGIC.md)** ⭐ |
+| 需求                 | 看哪個文檔                                           |
+| -------------------- | ---------------------------------------------------- |
+| **理解核心邏輯**     | **[CORE_LOGIC.md](./CORE_LOGIC.md)** ⭐              |
 | 找某個功能在哪個檔案 | [COMPLETE_SYSTEMS_MAP.md](./COMPLETE_SYSTEMS_MAP.md) |
-| 找某個函數怎麼實作 | [FUNCTIONS_INDEX.md](./FUNCTIONS_INDEX.md) |
-| 找某個按鈕的處理邏輯 | [BUTTONS_INDEX.md](./BUTTONS_INDEX.md) |
-| 找某個 custom hook | [HOOKS_INDEX.md](./HOOKS_INDEX.md) |
-| 找某個業務邏輯層 | [SERVICES_INDEX.md](./SERVICES_INDEX.md) |
-| 找某個資料結構定義 | [TYPES_INDEX.md](./TYPES_INDEX.md) |
-| 找某個頁面路由 | [ROUTES_MAP.md](./ROUTES_MAP.md) |
-| 找某個表在哪裡被用 | [DATABASE_USAGE.md](./DATABASE_USAGE.md) |
-| 理解資料怎麼流動 | [DATAFLOW_MAP.md](./DATAFLOW_MAP.md) |
-| 理解某個欄位的由來 | [CREATOR_KNOWLEDGE.md](./CREATOR_KNOWLEDGE.md) |
-| 理解整個系統架構 | [GAME_GUIDE.md](./GAME_GUIDE.md) |
-| 理解設計決策原因 | [DECISIONS.md](./DECISIONS.md) |
-| 看完整索引目錄 | [MASTER_INDEX.md](./MASTER_INDEX.md) |
+| 找某個函數怎麼實作   | [FUNCTIONS_INDEX.md](./FUNCTIONS_INDEX.md)           |
+| 找某個按鈕的處理邏輯 | [BUTTONS_INDEX.md](./BUTTONS_INDEX.md)               |
+| 找某個 custom hook   | [HOOKS_INDEX.md](./HOOKS_INDEX.md)                   |
+| 找某個業務邏輯層     | [SERVICES_INDEX.md](./SERVICES_INDEX.md)             |
+| 找某個資料結構定義   | [TYPES_INDEX.md](./TYPES_INDEX.md)                   |
+| 找某個頁面路由       | [ROUTES_MAP.md](./ROUTES_MAP.md)                     |
+| 找某個表在哪裡被用   | [DATABASE_USAGE.md](./DATABASE_USAGE.md)             |
+| 理解資料怎麼流動     | [DATAFLOW_MAP.md](./DATAFLOW_MAP.md)                 |
+| 理解某個欄位的由來   | [CREATOR_KNOWLEDGE.md](./CREATOR_KNOWLEDGE.md)       |
+| 理解整個系統架構     | [GAME_GUIDE.md](./GAME_GUIDE.md)                     |
+| 理解設計決策原因     | [DECISIONS.md](./DECISIONS.md)                       |
+| 看完整索引目錄       | [MASTER_INDEX.md](./MASTER_INDEX.md)                 |
 
 ---
 
@@ -119,6 +120,7 @@ company/
 ## 💡 核心原則（必讀）
 
 ### 原則 0：實作前必讀文檔
+
 ```
 收到任務
   ↓
@@ -129,6 +131,7 @@ company/
 ```
 
 ### 原則 1：核心表是唯一真相來源
+
 ```
 tour_itinerary_items = 唯一寫入點
 其他表只儲存「狀態」，不儲存「資料」
@@ -136,6 +139,7 @@ tour_itinerary_items = 唯一寫入點
 ```
 
 ### 原則 2：簡單勝過複雜
+
 ```
 能用 1 個表就不要用 2 個
 能用 JOIN 就不要複製資料
@@ -143,6 +147,7 @@ tour_itinerary_items = 唯一寫入點
 ```
 
 ### 原則 3：聰明的自動化 + 防呆
+
 ```
 該安靜時安靜（報價編輯中）
 該提醒時提醒（有風險變動）
@@ -226,6 +231,7 @@ tour_itinerary_items = 唯一寫入點
 **世界**：Venturo ERP
 
 有任何問題？
+
 1. 先看文檔
 2. 搜向量庫
 3. 問創世神

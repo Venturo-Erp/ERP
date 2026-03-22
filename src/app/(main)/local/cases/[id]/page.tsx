@@ -8,14 +8,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import { alert as showAlert } from '@/lib/ui/alert-dialog'
-import {
-  FileText,
-  Calendar,
-  Package,
-  Building2,
-  DollarSign,
-  ArrowLeft,
-} from 'lucide-react'
+import { FileText, Calendar, Package, Building2, DollarSign, ArrowLeft } from 'lucide-react'
 import useSWR, { mutate } from 'swr'
 import type { Database } from '@/lib/supabase/types'
 
@@ -33,23 +26,20 @@ export default function LocalCaseDetailPage() {
 
   const swrKey = caseId ? `local-case-${caseId}` : null
 
-  const { data: caseData, isLoading } = useSWR<TourRequest | null>(
-    swrKey,
-    async () => {
-      if (!caseId) return null
-      const { data, error } = await supabase
-        .from('tour_requests')
-        .select('*')
-        .eq('id', caseId)
-        .single()
+  const { data: caseData, isLoading } = useSWR<TourRequest | null>(swrKey, async () => {
+    if (!caseId) return null
+    const { data, error } = await supabase
+      .from('tour_requests')
+      .select('*')
+      .eq('id', caseId)
+      .single()
 
-      if (error) {
-        logger.error('[Local Case] 載入失敗:', error)
-        return null
-      }
-      return data as TourRequest
+    if (error) {
+      logger.error('[Local Case] 載入失敗:', error)
+      return null
     }
-  )
+    return data as TourRequest
+  })
 
   // 初始化報價欄位
   useState(() => {
@@ -212,7 +202,7 @@ export default function LocalCaseDetailPage() {
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs text-morandi-secondary mb-1">報價金額</label>
+                  <label className="block text-xs text-morandi-primary mb-1">報價金額</label>
                   <input
                     type="number"
                     value={quotedCost}
@@ -222,7 +212,7 @@ export default function LocalCaseDetailPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-morandi-secondary mb-1">備註</label>
+                  <label className="block text-xs text-morandi-primary mb-1">備註</label>
                   <textarea
                     value={replyNote}
                     onChange={e => setReplyNote(e.target.value)}

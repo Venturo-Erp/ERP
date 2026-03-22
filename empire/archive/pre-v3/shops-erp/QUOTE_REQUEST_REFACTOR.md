@@ -9,10 +9,11 @@
 ## 🎯 **目標**
 
 ### **現有系統（手動輸入）**
+
 ```typescript
 TourRequestFormDialog {
   items: 手動輸入 []
-  
+
   流程：
     1. 手動輸入項目（日期、標題、數量）
     2. 選擇供應商
@@ -22,10 +23,11 @@ TourRequestFormDialog {
 ```
 
 ### **新系統（核心表模式）**
+
 ```typescript
 CoreTableRequestDialog {
   items: 從 tour_itinerary_items 讀取
-  
+
   流程：
     1. 從核心表讀取（已有報價資料）
     2. JOIN 供應商資料（restaurants/hotels）
@@ -61,13 +63,11 @@ ADD COLUMN is_from_core BOOLEAN DEFAULT false;
 
 ```typescript
 // 從核心表讀取需求單資料
-async function fetchRequestItemsFromCore(
-  tourId: string,
-  supplierId: string
-) {
+async function fetchRequestItemsFromCore(tourId: string, supplierId: string) {
   const { data } = await supabase
     .from('tour_itinerary_items')
-    .select(`
+    .select(
+      `
       *,
       restaurants (
         id, name, address, phone, fax,
@@ -81,13 +81,14 @@ async function fetchRequestItemsFromCore(
         id, name, address, phone,
         latitude, longitude, google_maps_url
       )
-    `)
+    `
+    )
     .eq('tour_id', tourId)
     .eq('supplier_id', supplierId)
-    .eq('quote_status', 'quoted')  // 只抓有報價的項目
+    .eq('quote_status', 'quoted') // 只抓有報價的項目
     .order('day_number', { ascending: true })
     .order('sort_order', { ascending: true })
-  
+
   return data || []
 }
 ```
@@ -103,16 +104,18 @@ async function fetchTotalPax(tourId: string) {
     .from('orders')
     .select('adult, child_with_bed, child_no_bed, infant')
     .eq('tour_id', tourId)
-    .eq('status', 'confirmed')  // 只計算已確認訂單
-  
+    .eq('status', 'confirmed') // 只計算已確認訂單
+
   if (!orders || orders.length === 0) return 0
-  
+
   return orders.reduce((total, order) => {
-    return total + 
-      (order.adult || 0) + 
-      (order.child_with_bed || 0) + 
-      (order.child_no_bed || 0) + 
+    return (
+      total +
+      (order.adult || 0) +
+      (order.child_with_bed || 0) +
+      (order.child_no_bed || 0) +
       (order.infant || 0)
+    )
   }, 0)
 }
 ```
@@ -171,6 +174,7 @@ async function fetchTotalPax(tourId: string) {
 ## 📋 **Phase 2：實作計畫**
 
 ### **Step 1：新增資料庫欄位**
+
 ```sql
 -- Migration: 20260314_add_is_from_core_to_tour_requests.sql
 ALTER TABLE tour_requests
@@ -182,23 +186,19 @@ ON tour_requests(is_from_core);
 ```
 
 ### **Step 2：建立新的 Hook**
+
 ```typescript
 // src/features/tours/hooks/useCoreRequestItems.ts
 
-export function useCoreRequestItems(
-  tourId: string,
-  supplierId: string
-) {
-  return useSWR(
-    tourId && supplierId 
-      ? ['core-request-items', tourId, supplierId]
-      : null,
-    () => fetchRequestItemsFromCore(tourId, supplierId)
+export function useCoreRequestItems(tourId: string, supplierId: string) {
+  return useSWR(tourId && supplierId ? ['core-request-items', tourId, supplierId] : null, () =>
+    fetchRequestItemsFromCore(tourId, supplierId)
   )
 }
 ```
 
 ### **Step 3：建立新的 Component**
+
 ```typescript
 // src/features/tours/components/CoreTableRequestDialog.tsx
 
@@ -208,22 +208,22 @@ export function CoreTableRequestDialog({
   tour,
   supplierId,
   supplierName,
-  category
+  category,
 }: CoreTableRequestDialogProps) {
   // 從核心表讀取資料
   const { data: coreItems } = useCoreRequestItems(tour.id, supplierId)
-  
+
   // 讀取訂單總人數
   const { data: totalPax } = useTotalPax(tour.id)
-  
+
   // JOIN 供應商資料
   const supplierData = getSupplierDataFromCoreItems(coreItems, category)
-  
+
   // 產生 PDF
   const generatePDF = () => {
     // 使用 coreItems + totalPax + supplierData
   }
-  
+
   // 儲存狀態
   const saveRequestStatus = async () => {
     await supabase.from('tour_requests').insert({
@@ -231,15 +231,16 @@ export function CoreTableRequestDialog({
       supplier_id: supplierId,
       category,
       status: 'sent',
-      is_from_core: true,  // ← 標記為核心表模式
+      is_from_core: true, // ← 標記為核心表模式
       has_printed: true,
-      printed_at: new Date().toISOString()
+      printed_at: new Date().toISOString(),
     })
   }
 }
 ```
 
 ### **Step 4：整合到現有流程**
+
 ```typescript
 // 在需求確認單頁面新增「從核心表產生」按鈕
 
@@ -267,6 +268,7 @@ export function CoreTableRequestDialog({
 ## 🔄 **Phase 3：資料流程對照**
 
 ### **舊流程（手動輸入）**
+
 ```
 需求確認單
   ↓
@@ -283,6 +285,7 @@ tour_requests.insert({
 ```
 
 ### **新流程（核心表模式）**
+
 ```
 需求確認單
   ↓
@@ -305,20 +308,15 @@ tour_requests.insert({
 ## ⚠️ **相容性設計**
 
 ### **讀取邏輯**
+
 ```typescript
 // 判斷是核心表模式還是手動模式
 if (request.is_from_core) {
   // 從核心表讀取
-  const items = await fetchRequestItemsFromCore(
-    request.tour_id,
-    request.supplier_id
-  )
+  const items = await fetchRequestItemsFromCore(request.tour_id, request.supplier_id)
 } else {
   // 從 tour_request_items 讀取（舊資料）
-  const items = await supabase
-    .from('tour_request_items')
-    .select('*')
-    .eq('request_id', request.id)
+  const items = await supabase.from('tour_request_items').select('*').eq('request_id', request.id)
 }
 ```
 
@@ -327,21 +325,25 @@ if (request.is_from_core) {
 ## 📈 **遷移計畫**
 
 ### **階段 1**（現在）
+
 - ✅ 新增 is_from_core 欄位
 - ✅ 建立新 Component
 - ✅ 新增「從報價單產生」按鈕
 - ❌ 保留舊的手動輸入功能
 
 ### **階段 2**（觀察期）
+
 - 測試新功能 2 週
 - 收集使用者回饋
 - 修正 Bug
 
 ### **階段 3**（正式上線）
+
 - 預設使用核心表模式
 - 保留手動輸入作為備用
 
 ### **階段 4**（未來）
+
 - 評估是否完全移除手動輸入
 - 資料遷移（舊資料標記 is_from_core）
 
@@ -354,20 +356,20 @@ if (request.is_from_core) {
   ✅ 資料結構設計
   ✅ 資料流程設計
   ✅ 相容性設計
-  
+
 □ Phase 2：實作
   ⏳ Migration（is_from_core 欄位）
   ⏳ useCoreRequestItems Hook
   ⏳ CoreTableRequestDialog Component
   ⏳ 整合到現有頁面
-  
+
 □ Phase 3：測試
   ⏳ 讀取核心表資料
   ⏳ JOIN 供應商資料
   ⏳ 總人數計算
   ⏳ PDF 產生
   ⏳ 狀態儲存
-  
+
 □ Phase 4：部署
   ⏳ 測試環境驗證
   ⏳ 正式環境部署

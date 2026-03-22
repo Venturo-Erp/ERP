@@ -17,7 +17,11 @@ interface AccountBalance {
 }
 
 // 生成傳票編號
-async function generateVoucherNo(supabase: any, workspaceId: string, date: string): Promise<string> {
+async function generateVoucherNo(
+  supabase: any,
+  workspaceId: string,
+  date: string
+): Promise<string> {
   const yearMonth = date.substring(0, 7).replace('-', '')
   const prefix = `JV${yearMonth}`
 
@@ -64,11 +68,13 @@ async function calculateProfitLossBalances(
     // 查詢該科目在期間內的所有分錄
     const { data: lines, error: linesError } = await supabase
       .from('journal_lines')
-      .select(`
+      .select(
+        `
         debit_amount,
         credit_amount,
         journal_vouchers!inner(voucher_date, status)
-      `)
+      `
+      )
       .eq('account_id', account.id)
       .gte('journal_vouchers.voucher_date', startDate)
       .lte('journal_vouchers.voucher_date', endDate)
@@ -310,9 +316,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 插入分錄
-    const { error: linesError } = await supabase
-      .from('journal_lines')
-      .insert(lines)
+    const { error: linesError } = await supabase.from('journal_lines').insert(lines)
 
     if (linesError) {
       // 回滾：刪除傳票
@@ -321,17 +325,15 @@ export async function POST(request: NextRequest) {
     }
 
     // 記錄結轉歷史
-    const { error: closingError } = await supabase
-      .from('accounting_period_closings')
-      .insert({
-        workspace_id: workspaceId,
-        period_type: validated.period_type,
-        period_start: validated.period_start,
-        period_end: validated.period_end,
-        closing_voucher_id: voucher.id,
-        net_income: netIncome,
-        closed_by: session.user.id,
-      })
+    const { error: closingError } = await supabase.from('accounting_period_closings').insert({
+      workspace_id: workspaceId,
+      period_type: validated.period_type,
+      period_start: validated.period_start,
+      period_end: validated.period_end,
+      closing_voucher_id: voucher.id,
+      net_income: netIncome,
+      closed_by: session.user.id,
+    })
 
     if (closingError) {
       // 回滾：刪除傳票和分錄
@@ -349,7 +351,10 @@ export async function POST(request: NextRequest) {
     console.error('Period closing error:', error)
 
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: 'Invalid request data', details: error.issues }, { status: 400 })
+      return NextResponse.json(
+        { error: 'Invalid request data', details: error.issues },
+        { status: 400 }
+      )
     }
 
     return NextResponse.json(

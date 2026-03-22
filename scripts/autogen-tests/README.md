@@ -27,11 +27,13 @@ uv pip install autogen-agentchat autogen-ext
 **測試**：2 個 agents 對話
 
 **執行**：
+
 ```bash
 python scripts/autogen-tests/test_simple_chat.py
 ```
 
 **修改重點**：
+
 - 第 13 行：改成你的 OpenAI API key
 
 ---
@@ -43,11 +45,13 @@ python scripts/autogen-tests/test_simple_chat.py
 **測試**：3 個 agents 開會
 
 **執行**：
+
 ```bash
 python scripts/autogen-tests/test_meeting.py
 ```
 
 **修改重點**：
+
 - 第 16 行：改成你的 OpenAI API key
 
 ---
@@ -61,6 +65,7 @@ export OPENAI_API_KEY="sk-..."
 ```
 
 然後程式碼改成：
+
 ```python
 import os
 model_client = OpenAIChatCompletionClient(
@@ -72,11 +77,13 @@ model_client = OpenAIChatCompletionClient(
 ### 方式 2：.env 檔案
 
 建立 `scripts/autogen-tests/.env`：
+
 ```
 OPENAI_API_KEY=sk-...
 ```
 
 程式碼改成：
+
 ```python
 from dotenv import load_dotenv
 load_dotenv()
@@ -110,6 +117,7 @@ model_client = OpenAIChatCompletionClient(
 ### Q: `ModuleNotFoundError: No module named 'autogen_agentchat'`
 
 **A**: 重新安裝
+
 ```bash
 pip uninstall autogen autogen-agentchat autogen-ext
 pip install autogen-agentchat autogen-ext
@@ -122,6 +130,7 @@ pip install autogen-agentchat autogen-ext
 ### Q: 太慢
 
 **A**: 改用 gpt-4o-mini（更快更便宜）
+
 ```python
 model="gpt-4o-mini"
 ```

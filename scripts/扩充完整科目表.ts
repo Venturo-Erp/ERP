@@ -25,7 +25,12 @@ const ADDITIONAL_ACCOUNTS = [
   // 应收票据
   { code: '1160', name: '應收票據', account_type: 'asset', description: null },
   { code: '1170', name: '應收帳款－關係人', account_type: 'asset', description: '關係企業欠款' },
-  { code: '1180', name: '備抵呆帳', account_type: 'asset', description: '負數資產（提列呆帳準備）' },
+  {
+    code: '1180',
+    name: '備抵呆帳',
+    account_type: 'asset',
+    description: '負數資產（提列呆帳準備）',
+  },
   { code: '1190', name: '其他應收款', account_type: 'asset', description: '員工借款、暫付款等' },
   // 存货细分
   { code: '1410', name: '商品存貨', account_type: 'asset', description: null },
@@ -57,7 +62,12 @@ const ADDITIONAL_ACCOUNTS = [
   // ============================================
   // 应付票据
   { code: '2150', name: '應付票據', account_type: 'liability', description: null },
-  { code: '2160', name: '應付帳款－關係人', account_type: 'liability', description: '關係企業欠款' },
+  {
+    code: '2160',
+    name: '應付帳款－關係人',
+    account_type: 'liability',
+    description: '關係企業欠款',
+  },
   // 预收细分
   { code: '2110', name: '預收款項', account_type: 'liability', description: '一般預收款' },
   // 应付员工相关
@@ -151,10 +161,7 @@ async function main() {
   console.log('开始扩充科目表到完整版...\n')
 
   // 获取 workspace_id
-  const { data: workspaces } = await supabase
-    .from('workspaces')
-    .select('id, name')
-    .limit(1)
+  const { data: workspaces } = await supabase.from('workspaces').select('id, name').limit(1)
 
   if (!workspaces || workspaces.length === 0) {
     console.error('❌ 找不到 workspace')
@@ -198,10 +205,7 @@ async function main() {
     last_used_at: null,
   }))
 
-  const { data, error } = await supabase
-    .from('chart_of_accounts')
-    .insert(accountsToInsert)
-    .select()
+  const { data, error } = await supabase.from('chart_of_accounts').insert(accountsToInsert).select()
 
   if (error) {
     console.error('❌ 插入失败:', error)
@@ -224,10 +228,13 @@ async function main() {
     .select('account_type')
     .eq('workspace_id', workspaceId)
 
-  const typeCounts = byType?.reduce((acc, a) => {
-    acc[a.account_type] = (acc[a.account_type] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
+  const typeCounts = byType?.reduce(
+    (acc, a) => {
+      acc[a.account_type] = (acc[a.account_type] || 0) + 1
+      return acc
+    },
+    {} as Record<string, number>
+  )
 
   console.log('\n各类型科目数量:')
   Object.entries(typeCounts || {}).forEach(([type, count]) => {
@@ -235,9 +242,11 @@ async function main() {
   })
 
   console.log('\n新增的科目列表:')
-  data?.sort((a, b) => a.code.localeCompare(b.code)).forEach(acc => {
-    console.log(`  ${acc.code} ${acc.name} (${acc.account_type})`)
-  })
+  data
+    ?.sort((a, b) => a.code.localeCompare(b.code))
+    .forEach(acc => {
+      console.log(`  ${acc.code} ${acc.name} (${acc.account_type})`)
+    })
 }
 
 main().catch(console.error)

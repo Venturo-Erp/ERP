@@ -267,10 +267,7 @@ export function useOrderMembersData({
         // 背景執行，不阻塞 UI
         void (async () => {
           for (const item of membersToSync) {
-            await supabase
-              .from('order_members')
-              .update(item.updateData)
-              .eq('id', item.memberId)
+            await supabase.from('order_members').update(item.updateData).eq('id', item.memberId)
           }
           logger.info(
             `背景同步 ${membersToSync.length} 個成員的顧客資料（${Object.keys(membersToSync[0]?.updateData || {}).join(', ')}）`

@@ -1,7 +1,13 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { SimpleDateInput } from '@/components/ui/simple-date-input'
 import { X } from 'lucide-react'
@@ -24,10 +30,20 @@ interface ConvertToTourDialogProps {
   isOpen: boolean
   onClose: () => void
   tour: Tour | null
-  onConvert: (tour: Tour, departure_date: string, return_date: string, orderData?: ConvertOrderData) => Promise<void>
+  onConvert: (
+    tour: Tour,
+    departure_date: string,
+    return_date: string,
+    orderData?: ConvertOrderData
+  ) => Promise<void>
 }
 
-export function ConvertToTourDialog({ isOpen, onClose, tour, onConvert }: ConvertToTourDialogProps) {
+export function ConvertToTourDialog({
+  isOpen,
+  onClose,
+  tour,
+  onConvert,
+}: ConvertToTourDialogProps) {
   const [departureDate, setDepartureDate] = useState('')
   const [returnDate, setReturnDate] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -43,7 +59,9 @@ export function ConvertToTourDialog({ isOpen, onClose, tour, onConvert }: Conver
 
   const isTemplate = tour.tour_type === 'template'
   const title = isTemplate ? TOUR_CONVERT.title_template : TOUR_CONVERT.title_proposal
-  const description = isTemplate ? TOUR_CONVERT.description_template : TOUR_CONVERT.description_proposal
+  const description = isTemplate
+    ? TOUR_CONVERT.description_template
+    : TOUR_CONVERT.description_proposal
 
   const hasOrder = !!newOrder.contact_person?.trim()
 
@@ -53,13 +71,15 @@ export function ConvertToTourDialog({ isOpen, onClose, tour, onConvert }: Conver
     if (hasOrder && !newOrder.sales_person?.trim()) return
     try {
       setSubmitting(true)
-      const orderData = hasOrder ? {
-        contact_person: newOrder.contact_person,
-        sales_person: newOrder.sales_person,
-        assistant: newOrder.assistant,
-        member_count: newOrder.member_count,
-        total_amount: newOrder.total_amount,
-      } : undefined
+      const orderData = hasOrder
+        ? {
+            contact_person: newOrder.contact_person,
+            sales_person: newOrder.sales_person,
+            assistant: newOrder.assistant,
+            member_count: newOrder.member_count,
+            total_amount: newOrder.total_amount,
+          }
+        : undefined
       await onConvert(tour, departureDate, returnDate, orderData)
       toast.success(isTemplate ? TOUR_CONVERT.success_template : TOUR_CONVERT.success_proposal)
       handleClose()
@@ -102,9 +122,7 @@ export function ConvertToTourDialog({ isOpen, onClose, tour, onConvert }: Conver
           <div className="flex-1 space-y-4">
             <h3 className="text-base font-medium text-morandi-primary">旅遊團資訊</h3>
 
-            <div className="text-sm text-morandi-primary font-medium">
-              {tour.name}
-            </div>
+            <div className="text-sm text-morandi-primary font-medium">{tour.name}</div>
 
             <div>
               <label className="text-sm font-medium text-morandi-primary">
@@ -155,7 +173,12 @@ export function ConvertToTourDialog({ isOpen, onClose, tour, onConvert }: Conver
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={submitting || !departureDate || !returnDate || (hasOrder && !newOrder.sales_person?.trim())}
+            disabled={
+              submitting ||
+              !departureDate ||
+              !returnDate ||
+              (hasOrder && !newOrder.sales_person?.trim())
+            }
             className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
           >
             {submitLabel}

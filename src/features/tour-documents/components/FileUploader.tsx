@@ -201,9 +201,7 @@ export function FileUploader({
               )}
 
               {/* 狀態 */}
-              {f.status === 'completed' && (
-                <div className="text-xs text-green-600">✓ 完成</div>
-              )}
+              {f.status === 'completed' && <div className="text-xs text-green-600">✓ 完成</div>}
 
               {f.status === 'error' && (
                 <div className="text-xs text-red-600" title={f.error}>

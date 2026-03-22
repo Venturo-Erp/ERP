@@ -120,125 +120,132 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
   }, [tourId])
 
   // 載入檔案列表
-  const loadFiles = useCallback(async (folder: FolderWithCount) => {
-    setFilesLoading(true)
-    console.log('[TourFilesManager] loadFiles', { folderId: folder.id, category: folder.category, tourId })
-    try {
-      const fileItems: FileItem[] = []
+  const loadFiles = useCallback(
+    async (folder: FolderWithCount) => {
+      setFilesLoading(true)
+      console.log('[TourFilesManager] loadFiles', {
+        folderId: folder.id,
+        category: folder.category,
+        tourId,
+      })
+      try {
+        const fileItems: FileItem[] = []
 
-      if (folder.dbType) {
-        // DB 記錄（報價單/行程表/需求單等）
-        let data: any[] = []
+        if (folder.dbType) {
+          // DB 記錄（報價單/行程表/需求單等）
+          let data: any[] = []
 
-        switch (folder.dbType) {
-          case 'quote':
-            const { data: quotes } = await supabase
-              .from('quotes')
-              .select('id, code, name, created_at')
-              .eq('tour_id', tourId)
-              .or('quote_type.is.null,quote_type.eq.standard')
-              .order('created_at', { ascending: false })
-            data = quotes || []
-            for (const q of data) {
+          switch (folder.dbType) {
+            case 'quote':
+              const { data: quotes } = await supabase
+                .from('quotes')
+                .select('id, code, name, created_at')
+                .eq('tour_id', tourId)
+                .or('quote_type.is.null,quote_type.eq.standard')
+                .order('created_at', { ascending: false })
+              data = quotes || []
+              for (const q of data) {
+                fileItems.push({
+                  id: q.id,
+                  name: q.name || q.code || COMP_TOURS_LABELS.未命名報價單,
+                  createdAt: q.created_at,
+                  dbType: 'quote',
+                  dbId: q.id,
+                })
+              }
+              break
+
+            case 'quick_quote':
+              const { data: quickQuotes } = await supabase
+                .from('quotes')
+                .select('id, code, name, created_at')
+                .eq('tour_id', tourId)
+                .eq('quote_type', 'quick')
+                .order('created_at', { ascending: false })
+              data = quickQuotes || []
+              for (const q of data) {
+                fileItems.push({
+                  id: q.id,
+                  name: q.name || q.code || COMP_TOURS_LABELS.未命名快速報價,
+                  createdAt: q.created_at,
+                  dbType: 'quick_quote',
+                  dbId: q.id,
+                })
+              }
+              break
+
+            case 'itinerary':
+              const { data: itineraries } = await supabase
+                .from('itineraries')
+                .select('id, title, code, created_at')
+                .eq('tour_id', tourId)
+                .order('created_at', { ascending: false })
+              data = itineraries || []
+              for (const i of data) {
+                fileItems.push({
+                  id: i.id,
+                  name: i.title || i.code || COMP_TOURS_LABELS.未命名行程表,
+                  createdAt: i.created_at,
+                  dbType: 'itinerary',
+                  dbId: i.id,
+                })
+              }
+              break
+
+            case 'request':
+              const { data: requests } = await supabase
+                .from('tour_requests')
+                .select('id, code, supplier_name, request_type, created_at')
+                .eq('tour_id', tourId)
+                .order('created_at', { ascending: false })
+              data = requests || []
+              for (const r of data) {
+                fileItems.push({
+                  id: r.id,
+                  name: `${r.request_type || COMP_TOURS_LABELS.需求} - ${r.supplier_name || r.code}`,
+                  createdAt: r.created_at,
+                  dbType: 'request',
+                  dbId: r.id,
+                })
+              }
+              break
+          }
+        } else if (folder.category) {
+          // 實體檔案
+          const { data } = await supabase
+            .from('files')
+            .select('id, filename, storage_path, content_type, size_bytes, created_at')
+            .eq('tour_id', tourId)
+            .eq('category', folder.category)
+            .order('created_at', { ascending: false })
+
+          if (data) {
+            for (const f of data) {
+              const { data: urlData } = supabase.storage
+                .from(f.storage_path.startsWith('tour-documents') ? 'documents' : 'public')
+                .getPublicUrl(f.storage_path)
               fileItems.push({
-                id: q.id,
-                name: q.name || q.code || COMP_TOURS_LABELS.未命名報價單,
-                createdAt: q.created_at,
-                dbType: 'quote',
-                dbId: q.id,
+                id: f.id,
+                name: f.filename,
+                size: f.size_bytes || undefined,
+                mimeType: f.content_type || undefined,
+                createdAt: f.created_at,
+                url: urlData.publicUrl,
               })
             }
-            break
-
-          case 'quick_quote':
-            const { data: quickQuotes } = await supabase
-              .from('quotes')
-              .select('id, code, name, created_at')
-              .eq('tour_id', tourId)
-              .eq('quote_type', 'quick')
-              .order('created_at', { ascending: false })
-            data = quickQuotes || []
-            for (const q of data) {
-              fileItems.push({
-                id: q.id,
-                name: q.name || q.code || COMP_TOURS_LABELS.未命名快速報價,
-                createdAt: q.created_at,
-                dbType: 'quick_quote',
-                dbId: q.id,
-              })
-            }
-            break
-
-          case 'itinerary':
-            const { data: itineraries } = await supabase
-              .from('itineraries')
-              .select('id, title, code, created_at')
-              .eq('tour_id', tourId)
-              .order('created_at', { ascending: false })
-            data = itineraries || []
-            for (const i of data) {
-              fileItems.push({
-                id: i.id,
-                name: i.title || i.code || COMP_TOURS_LABELS.未命名行程表,
-                createdAt: i.created_at,
-                dbType: 'itinerary',
-                dbId: i.id,
-              })
-            }
-            break
-
-          case 'request':
-            const { data: requests } = await supabase
-              .from('tour_requests')
-              .select('id, code, supplier_name, request_type, created_at')
-              .eq('tour_id', tourId)
-              .order('created_at', { ascending: false })
-            data = requests || []
-            for (const r of data) {
-              fileItems.push({
-                id: r.id,
-                name: `${r.request_type || COMP_TOURS_LABELS.需求} - ${r.supplier_name || r.code}`,
-                createdAt: r.created_at,
-                dbType: 'request',
-                dbId: r.id,
-              })
-            }
-            break
-        }
-      } else if (folder.category) {
-        // 實體檔案
-        const { data } = await supabase
-          .from('files')
-          .select('id, filename, storage_path, content_type, size_bytes, created_at')
-          .eq('tour_id', tourId)
-          .eq('category', folder.category)
-          .order('created_at', { ascending: false })
-
-        if (data) {
-          for (const f of data) {
-            const { data: urlData } = supabase.storage
-              .from(f.storage_path.startsWith('tour-documents') ? 'documents' : 'public')
-              .getPublicUrl(f.storage_path)
-            fileItems.push({
-              id: f.id,
-              name: f.filename,
-              size: f.size_bytes || undefined,
-              mimeType: f.content_type || undefined,
-              createdAt: f.created_at,
-              url: urlData.publicUrl,
-            })
           }
         }
-      }
 
-      setFiles(fileItems)
-    } catch (err) {
-      logger.error('載入檔案失敗', err)
-      toast.error(COMP_TOURS_LABELS.載入失敗)
-    } finally {
-      setFilesLoading(false)
-    }
-  }, [tourId])
+        setFiles(fileItems)
+      } catch (err) {
+        logger.error('載入檔案失敗', err)
+        toast.error(COMP_TOURS_LABELS.載入失敗)
+      } finally {
+        setFilesLoading(false)
+      }
+    },
+    [tourId]
+  )
 
   // 處理檔案上傳
   const handleUpload = async (uploadedFiles: File[]) => {
@@ -264,7 +271,9 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
         const storagePath = `tour-documents/${tourCode}/${selectedFolder.id}/${timestamp}_${file.name}`
 
         // 上傳到 Supabase Storage
-        const { error: uploadError } = await supabase.storage.from('documents').upload(storagePath, file)
+        const { error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(storagePath, file)
 
         if (uploadError) throw uploadError
 
@@ -436,9 +445,7 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
                       {file.size && ` • ${(file.size / 1024).toFixed(0)} KB`}
                     </p>
                   </div>
-                  {file.url && (
-                    <Eye size={16} className="text-morandi-secondary flex-shrink-0" />
-                  )}
+                  {file.url && <Eye size={16} className="text-morandi-secondary flex-shrink-0" />}
                 </button>
               ))}
             </div>

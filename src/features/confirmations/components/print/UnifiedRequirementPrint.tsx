@@ -9,7 +9,7 @@ interface UnifiedRequirementPrintProps {
   supplierContact?: string
   supplierPhone?: string
   supplierFax?: string
-  
+
   // 我方資訊
   companyName: string
   tourCode: string
@@ -17,19 +17,19 @@ interface UnifiedRequirementPrintProps {
   totalPax: number
   departureDate?: string
   returnDate?: string
-  
+
   // 表格內容（根據類型顯示）
   transportTable?: React.ReactNode
   accommodationTable?: React.ReactNode
   mealTable?: React.ReactNode
   activityTable?: React.ReactNode
-  
+
   // 備註
   note?: string
-  
+
   // 發票章
   invoiceSealUrl?: string
-  
+
   // 我方聯絡資訊
   ourPhone?: string
   ourFax?: string

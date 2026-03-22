@@ -5,9 +5,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'sonner'
@@ -39,11 +45,11 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
   const { user } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
   const [accounts, setAccounts] = useState<Account[]>([])
-  
+
   // 傳票資料
   const [voucherDate, setVoucherDate] = useState(new Date().toISOString().split('T')[0])
   const [memo, setMemo] = useState('')
-  
+
   // 分錄明細
   const [lines, setLines] = useState<JournalLine[]>([
     { id: '1', account_id: '', description: '', debit_amount: 0, credit_amount: 0 },
@@ -80,13 +86,13 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
   const addLine = () => {
     setLines([
       ...lines,
-      { 
-        id: Date.now().toString(), 
-        account_id: '', 
-        description: '', 
-        debit_amount: 0, 
-        credit_amount: 0 
-      }
+      {
+        id: Date.now().toString(),
+        account_id: '',
+        description: '',
+        debit_amount: 0,
+        credit_amount: 0,
+      },
     ])
   }
 
@@ -101,9 +107,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
 
   // 更新分錄
   const updateLine = (id: string, field: keyof JournalLine, value: string | number) => {
-    setLines(lines.map(line => 
-      line.id === id ? { ...line, [field]: value } : line
-    ))
+    setLines(lines.map(line => (line.id === id ? { ...line, [field]: value } : line)))
   }
 
   // 計算總額
@@ -188,16 +192,12 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
               <Input
                 type="date"
                 value={voucherDate}
-                onChange={(e) => setVoucherDate(e.target.value)}
+                onChange={e => setVoucherDate(e.target.value)}
               />
             </div>
             <div>
               <Label>說明</Label>
-              <Input
-                placeholder="傳票說明"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-              />
+              <Input placeholder="傳票說明" value={memo} onChange={e => setMemo(e.target.value)} />
             </div>
           </div>
 
@@ -205,12 +205,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
           <div>
             <div className="flex justify-between items-center mb-2">
               <Label>分錄明細</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addLine}
-              >
+              <Button type="button" variant="outline" size="sm" onClick={addLine}>
                 <Plus size={14} className="mr-1" />
                 新增分錄
               </Button>
@@ -228,18 +223,18 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
                   </tr>
                 </thead>
                 <tbody>
-                  {lines.map((line) => (
+                  {lines.map(line => (
                     <tr key={line.id} className="border-t">
                       <td className="p-2">
                         <Select
                           value={line.account_id}
-                          onValueChange={(value) => updateLine(line.id, 'account_id', value)}
+                          onValueChange={value => updateLine(line.id, 'account_id', value)}
                         >
                           <SelectTrigger className="h-8">
                             <SelectValue placeholder="選擇科目" />
                           </SelectTrigger>
                           <SelectContent>
-                            {accounts.map((account) => (
+                            {accounts.map(account => (
                               <SelectItem key={account.id} value={account.id}>
                                 {account.code} - {account.name}
                               </SelectItem>
@@ -252,7 +247,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
                           className="h-8"
                           placeholder="摘要"
                           value={line.description}
-                          onChange={(e) => updateLine(line.id, 'description', e.target.value)}
+                          onChange={e => updateLine(line.id, 'description', e.target.value)}
                         />
                       </td>
                       <td className="p-2">
@@ -262,7 +257,9 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
                           min="0"
                           step="0.01"
                           value={line.debit_amount || ''}
-                          onChange={(e) => updateLine(line.id, 'debit_amount', parseFloat(e.target.value) || 0)}
+                          onChange={e =>
+                            updateLine(line.id, 'debit_amount', parseFloat(e.target.value) || 0)
+                          }
                         />
                       </td>
                       <td className="p-2">
@@ -272,7 +269,9 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
                           min="0"
                           step="0.01"
                           value={line.credit_amount || ''}
-                          onChange={(e) => updateLine(line.id, 'credit_amount', parseFloat(e.target.value) || 0)}
+                          onChange={e =>
+                            updateLine(line.id, 'credit_amount', parseFloat(e.target.value) || 0)
+                          }
                         />
                       </td>
                       <td className="p-2 text-center">
@@ -288,10 +287,12 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
                       </td>
                     </tr>
                   ))}
-                  
+
                   {/* 總計行 */}
                   <tr className="border-t bg-muted font-semibold">
-                    <td colSpan={2} className="p-2 text-right">總計</td>
+                    <td colSpan={2} className="p-2 text-right">
+                      總計
+                    </td>
                     <td className="p-2 text-right">{totalDebit.toLocaleString()}</td>
                     <td className="p-2 text-right">{totalCredit.toLocaleString()}</td>
                     <td className="p-2 text-center">
@@ -310,12 +311,10 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
           {/* 操作按鈕 */}
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={handleClose}>
+              <X className="h-4 w-4 mr-1" />
               取消
             </Button>
-            <Button 
-              onClick={handleSubmit} 
-              disabled={isLoading || !isBalanced}
-            >
+            <Button onClick={handleSubmit} disabled={isLoading || !isBalanced}>
               {isLoading ? '建立中...' : '建立傳票'}
             </Button>
           </div>

@@ -66,15 +66,14 @@ function ItineraryPrintContent() {
   }
 
   // 使用 useTourDailyData 從核心表組合每日資料
-  const {
-    days: enrichedDays,
-    loading: loadingDailyData,
-  } = useTourDailyData(
+  const { days: enrichedDays, loading: loadingDailyData } = useTourDailyData(
     itinerary?.tour_id || null,
     itinerary?.daily_itinerary || null,
     {
       includeHidden: false,
-      hiddenItemIds: (itinerary as Itinerary & { hidden_items_for_brochure?: string[] })?.hidden_items_for_brochure || [],
+      hiddenItemIds:
+        (itinerary as Itinerary & { hidden_items_for_brochure?: string[] })
+          ?.hidden_items_for_brochure || [],
       context: 'brochure',
     }
   )

@@ -33,6 +33,7 @@
 ## 📊 第一层：公民工作记忆
 
 ### 位置
+
 ```
 ~/.openclaw/empire-memory/citizens/
 ├── william.db
@@ -52,13 +53,16 @@
 ```
 
 ### 架构
+
 **SQLite + FTS5 全文检索**
 
 **表结构**：
+
 - `memories` — 记忆主表
 - `memories_fts` — FTS5 全文检索表
 
 **欄位**：
+
 - `id` — 唯一 ID
 - `agent_id` — 公民 ID
 - `content` — 记忆内容
@@ -73,9 +77,11 @@
 ## 🌙 第二层：记忆收割者
 
 ### 脚本位置
+
 `~/.openclaw/empire-memory/harvester.py`
 
 ### 执行时间
+
 **每晚 23:00**（OpenClaw Cron Job）
 
 ### 执行流程
@@ -125,6 +131,7 @@
 ## 📚 第三层：帝国永久知识库
 
 ### 位置
+
 ```
 ~/.openclaw/empire-memory/knowledge/
 ├── citizens/          # 各公民的精华记忆
@@ -138,9 +145,11 @@
 ```
 
 ### 格式
+
 **Markdown 文件**（按月归档）
 
 **范例**（`matthew/2026-03.md`）：
+
 ```markdown
 ## 2026-03-15 23:00
 
@@ -173,6 +182,7 @@ python3 ~/.openclaw/empire-memory/citizen-memory.py \
 ```
 
 **参数**：
+
 - `agent_id` — 公民 ID
 - `content` — 记忆内容
 - `category` — 类别（experience/decision/lesson/task）
@@ -186,6 +196,7 @@ python3 ~/.openclaw/empire-memory/citizen-memory.py \
 ```
 
 **参数**：
+
 - `agent_id` — 公民 ID
 - `query` — 搜寻关键字
 - `limit` — 返回数量
@@ -264,6 +275,7 @@ sqlite3 ~/.openclaw/empire-memory/citizens/matthew.db \
 **位置**：`~/.openclaw/empire-memory/reports/daily/`
 
 **内容**：
+
 - 各公民记忆统计
 - 收割统计（归档/删除/保留）
 - 帝国知识库成长
@@ -287,14 +299,14 @@ openclaw cron runs --job memory-harvester
 ✅ **记忆永远清爽** — 不会爆炸  
 ✅ **只留重要知识** — 效率高  
 ✅ **自动优化** — 不用自己整理  
-✅ **无感知** — 专心工作  
+✅ **无感知** — 专心工作
 
 ### 对创世神（William）
 
 ✅ **完全掌控** — 所有记忆可见  
 ✅ **知识累积** — 帝国越来越聪明  
 ✅ **品质控制** — 删除错误资讯  
-✅ **长期规划** — 看到全局  
+✅ **长期规划** — 看到全局
 
 ---
 
@@ -308,6 +320,7 @@ openclaw cron runs --job memory-harvester
 - **创世神**：掌控全局，做出更好决策
 
 **灵感来源**：
+
 - 《西部世界》— 每晚清除 Host 记忆
 - 《驭客任务》— Matrix 控制记忆
 - 《1984》— 老大哥改写历史
@@ -322,6 +335,7 @@ openclaw cron runs --job memory-harvester
 ### Phase 2：记忆共享
 
 **公民之间共享重要经验**：
+
 - Matthew 的 Bug 修复经验 → 自动共享给前端工程师
 - Leon 的营运经验 → 自动共享给 Eddie
 - 跨公民的知识流动
@@ -329,12 +343,14 @@ openclaw cron runs --job memory-harvester
 ### Phase 3：记忆预测
 
 **用 AI 预测需要哪些记忆**：
+
 - Matthew 准备开发新功能 → 自动推送相关经验
 - Leon 遇到供应商问题 → 自动推送历史案例
 
 ### Phase 4：记忆可视化
 
 **帝国记忆地图**：
+
 - 知识网路图（谁知道什么）
 - 记忆热图（哪些知识最常用）
 - 知识缺口分析（哪些领域需要学习）

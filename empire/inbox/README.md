@@ -6,9 +6,9 @@
 
 ## 📁 信箱列表
 
-| 信箱 | 用途 |
-|------|------|
-| `matthew-to-william.md` | Matthew 找大祭司 |
+| 信箱                    | 用途               |
+| ----------------------- | ------------------ |
+| `matthew-to-william.md` | Matthew 找大祭司   |
 | `william-to-matthew.md` | 大祭司回覆 Matthew |
 
 （未來可擴充：leon-to-william.md、william-to-all.md 等）
@@ -69,6 +69,7 @@ vim empire/inbox/william-to-matthew.md
 **問題**：`sessions_send` 經常 timeout（跨 session 通訊不穩）
 
 **證據**：
+
 - 2026-03-17 08:20：大祭司回覆 → timeout
 - 2026-03-17 08:22：大祭司再回覆 → timeout
 - Matthew 沒收到，自己完成整理

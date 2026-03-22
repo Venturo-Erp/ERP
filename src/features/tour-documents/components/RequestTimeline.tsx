@@ -34,13 +34,13 @@ interface RequestTimelineProps {
   onPreview?: (doc: RequestDocument) => void
   onDownload?: (doc: RequestDocument) => void
   onDelete?: (doc: RequestDocument) => void
-  onUploadReply?: (parentDocumentId: string, files: File[]) => void  // 🆕 上傳供應商回覆
+  onUploadReply?: (parentDocumentId: string, files: File[]) => void // 🆕 上傳供應商回覆
 }
 
 // 狀態徽章
 function StatusBadge({ status }: { status: string }) {
   const colors = {
-    草稿: 'bg-gray-100 text-gray-700',
+    草稿: 'bg-morandi-container text-morandi-primary',
     已發送: 'bg-blue-100 text-blue-700',
     已收到: 'bg-green-100 text-green-700',
     已確認: 'bg-emerald-100 text-emerald-700',
@@ -50,7 +50,7 @@ function StatusBadge({ status }: { status: string }) {
     <span
       className={cn(
         'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
-        colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-700'
+        colors[status as keyof typeof colors] || 'bg-morandi-container text-morandi-primary'
       )}
     >
       {status}
@@ -152,16 +152,14 @@ function DocumentCard({
       )}
 
       {isPDF && (
-        <div className="mb-3 rounded border border-morandi-muted bg-gray-50 p-4 text-center">
+        <div className="mb-3 rounded border border-morandi-muted bg-morandi-container p-4 text-center">
           <FileText size={32} className="mx-auto mb-2 text-red-500" />
           <div className="text-xs text-morandi-secondary">PDF 文件</div>
         </div>
       )}
 
       {/* 描述 */}
-      {doc.description && (
-        <p className="text-sm text-morandi-secondary mb-3">{doc.description}</p>
-      )}
+      {doc.description && <p className="text-sm text-morandi-secondary mb-3">{doc.description}</p>}
 
       {/* 發送/接收資訊 */}
       {doc.sent_at && (

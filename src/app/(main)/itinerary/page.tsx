@@ -330,16 +330,18 @@ function CreateItineraryDialog({
   countries,
   onCreateItinerary,
 }: CreateItineraryDialogProps) {
-  const [step, setStep] = useState<'selectType' | 'selectTour' | 'createTemplate' | 'createItinerary'>('selectType')
+  const [step, setStep] = useState<
+    'selectType' | 'selectTour' | 'createTemplate' | 'createItinerary'
+  >('selectType')
   const [selectedTourId, setSelectedTourId] = useState('')
   const { items: tours } = useToursSlim()
   const [loadingTourData, setLoadingTourData] = useState(false)
-  
+
   // 模板資料
   const [templateCode, setTemplateCode] = useState('')
   const [templateName, setTemplateName] = useState('')
   const [templateDays, setTemplateDays] = useState('')
-  
+
   // 重置步驟當對話框關閉
   useEffect(() => {
     if (!isOpen) {
@@ -354,33 +356,37 @@ function CreateItineraryDialog({
   // 選擇團後進入行程規劃
   const handleTourSelected = async () => {
     if (!selectedTourId) return
-    
+
     setLoadingTourData(true)
     try {
       // 查詢選中的團資料
       const selectedTour = tours.find(t => t.id === selectedTourId)
       if (!selectedTour) return
-      
+
       // 帶入基本資訊
       formState.setNewItineraryTitle(selectedTour.name)
       formState.setNewItineraryTourCode(selectedTour.code)
       formState.setNewItineraryDepartureDate(selectedTour.departure_date || '')
 
       // 計算天數
-      const departureDate = selectedTour.departure_date ? new Date(selectedTour.departure_date) : new Date()
+      const departureDate = selectedTour.departure_date
+        ? new Date(selectedTour.departure_date)
+        : new Date()
       const returnDate = selectedTour.return_date ? new Date(selectedTour.return_date) : new Date()
-      const days = Math.ceil((returnDate.getTime() - departureDate.getTime()) / (1000 * 60 * 60 * 24))
+      const days = Math.ceil(
+        (returnDate.getTime() - departureDate.getTime()) / (1000 * 60 * 60 * 24)
+      )
       formState.setNewItineraryDays(String(days))
-      
+
       // 查詢該團的 tour_itinerary_items（核心表格）
       const { supabase } = await import('@/lib/supabase/client')
-      
+
       const { data: itineraryItems } = await supabase
         .from('tour_itinerary_items')
         .select('*')
         .eq('tour_id', selectedTourId)
         .order('day_number', { ascending: true })
-      
+
       // 將 itinerary_items 資料轉換為每日行程格式
       if (itineraryItems && itineraryItems.length > 0) {
         const dailyData: Array<{
@@ -391,23 +397,35 @@ function CreateItineraryDialog({
           accommodation: string
           isSameAccommodation: boolean
         }> = []
-        
+
         for (let day = 1; day <= days; day++) {
           const dayItems = itineraryItems.filter((item: any) => item.day_number === day)
-          
+
           dailyData.push({
-            title: dayItems.find((item: any) => item.resource_type === 'attraction')?.resource_name || '',
-            breakfast: dayItems.find((item: any) => item.resource_type === 'meal' && item.meal_type === 'breakfast')?.resource_name || '',
-            lunch: dayItems.find((item: any) => item.resource_type === 'meal' && item.meal_type === 'lunch')?.resource_name || '',
-            dinner: dayItems.find((item: any) => item.resource_type === 'meal' && item.meal_type === 'dinner')?.resource_name || '',
-            accommodation: dayItems.find((item: any) => item.resource_type === 'hotel')?.resource_name || '',
+            title:
+              dayItems.find((item: any) => item.resource_type === 'attraction')?.resource_name ||
+              '',
+            breakfast:
+              dayItems.find(
+                (item: any) => item.resource_type === 'meal' && item.meal_type === 'breakfast'
+              )?.resource_name || '',
+            lunch:
+              dayItems.find(
+                (item: any) => item.resource_type === 'meal' && item.meal_type === 'lunch'
+              )?.resource_name || '',
+            dinner:
+              dayItems.find(
+                (item: any) => item.resource_type === 'meal' && item.meal_type === 'dinner'
+              )?.resource_name || '',
+            accommodation:
+              dayItems.find((item: any) => item.resource_type === 'hotel')?.resource_name || '',
             isSameAccommodation: false,
           })
         }
-        
+
         formState.setNewItineraryDailyData(dailyData)
       }
-      
+
       setStep('createItinerary')
     } catch (error) {
       console.error('Failed to load tour data:', error)
@@ -436,9 +454,7 @@ function CreateItineraryDialog({
                 <CalendarDays className="w-6 h-6 text-morandi-gold" />
                 <h3 className="text-lg font-medium">開團</h3>
               </div>
-              <p className="text-sm text-morandi-secondary">
-                從現有團號建立行程
-              </p>
+              <p className="text-sm text-morandi-secondary">從現有團號建立行程</p>
             </button>
 
             <button
@@ -449,9 +465,7 @@ function CreateItineraryDialog({
                 <FileText className="w-6 h-6 text-morandi-gold" />
                 <h3 className="text-lg font-medium">新增模板</h3>
               </div>
-              <p className="text-sm text-morandi-secondary">
-                建立可重複使用的範本
-              </p>
+              <p className="text-sm text-morandi-secondary">建立可重複使用的範本</p>
             </button>
           </div>
         </DialogContent>
@@ -486,7 +500,11 @@ function CreateItineraryDialog({
             </Select>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loadingTourData}>
+            <Button
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={loadingTourData}
+            >
               取消
             </Button>
             <Button
@@ -525,23 +543,21 @@ function CreateItineraryDialog({
               <Label className="mb-2 block">模板代號</Label>
               <Input
                 value={templateCode}
-                onChange={(e) => setTemplateCode(e.target.value)}
+                onChange={e => setTemplateCode(e.target.value)}
                 placeholder="例如：TPL-JPN-001"
               />
-              <p className="text-xs text-morandi-secondary mt-1">
-                建議格式：TPL-[國家代碼]-[編號]
-              </p>
+              <p className="text-xs text-morandi-secondary mt-1">建議格式：TPL-[國家代碼]-[編號]</p>
             </div>
-            
+
             <div>
               <Label className="mb-2 block">模板名稱</Label>
               <Input
                 value={templateName}
-                onChange={(e) => setTemplateName(e.target.value)}
+                onChange={e => setTemplateName(e.target.value)}
                 placeholder="例如：日本東京經典 5 日遊"
               />
             </div>
-            
+
             <div>
               <Label className="mb-2 block">天數</Label>
               <Input
@@ -549,7 +565,7 @@ function CreateItineraryDialog({
                 min="1"
                 max="30"
                 value={templateDays}
-                onChange={(e) => setTemplateDays(e.target.value)}
+                onChange={e => setTemplateDays(e.target.value)}
                 placeholder="請輸入天數"
               />
             </div>

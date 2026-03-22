@@ -12,7 +12,14 @@ import type { Attraction } from '@/features/attractions/types'
 // 動態載入地圖元件
 const AttractionsMap = dynamic(
   () => import('@/features/attractions/components/AttractionsMap').then(mod => mod.AttractionsMap),
-  { ssr: false, loading: () => <div className="w-full h-full flex items-center justify-center text-muted-foreground">載入地圖中...</div> }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+        載入地圖中...
+      </div>
+    ),
+  }
 )
 
 interface MapExplorerDialogProps {
@@ -33,13 +40,15 @@ interface MapExplorerDialogProps {
 // Haversine 公式計算距離
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371
-  const dLat = (lat2 - lat1) * Math.PI / 180
-  const dLon = (lon2 - lon1) * Math.PI / 180
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2)
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLon = ((lon2 - lon1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2)
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return R * c
 }
 
@@ -82,8 +91,10 @@ export function MapExplorerDialog({
           id: a.id,
           name: a.name,
           category: a.category || undefined,
-          latitude: typeof a.latitude === 'string' ? parseFloat(a.latitude) : (a.latitude ?? undefined),
-          longitude: typeof a.longitude === 'string' ? parseFloat(a.longitude) : (a.longitude ?? undefined),
+          latitude:
+            typeof a.latitude === 'string' ? parseFloat(a.latitude) : (a.latitude ?? undefined),
+          longitude:
+            typeof a.longitude === 'string' ? parseFloat(a.longitude) : (a.longitude ?? undefined),
           address: a.address || undefined,
           phone: a.phone || undefined,
           description: a.description || undefined,
@@ -103,14 +114,16 @@ export function MapExplorerDialog({
         setAllAttractions(attractions)
 
         // 設定中心景點
-        const center = attractions.find(a => a.id === centerAttraction.id) || {
-          id: centerAttraction.id,
-          name: centerAttraction.name,
-          latitude: centerAttraction.latitude!,
-          longitude: centerAttraction.longitude!,
-          category: centerAttraction.category || undefined,
-          address: centerAttraction.address || undefined,
-        } as Attraction
+        const center =
+          attractions.find(a => a.id === centerAttraction.id) ||
+          ({
+            id: centerAttraction.id,
+            name: centerAttraction.name,
+            latitude: centerAttraction.latitude!,
+            longitude: centerAttraction.longitude!,
+            category: centerAttraction.category || undefined,
+            address: centerAttraction.address || undefined,
+          } as Attraction)
 
         setSelectedAttraction(center)
       } catch (err) {
@@ -124,21 +137,22 @@ export function MapExplorerDialog({
   }, [open, centerAttraction, countryId])
 
   // 計算周邊景點（5km 內）
-  const nearbyAttractions = selectedAttraction?.latitude && selectedAttraction?.longitude
-    ? allAttractions
-        .filter(a => a.id !== selectedAttraction.id && a.latitude && a.longitude)
-        .map(a => ({
-          ...a,
-          distance: calculateDistance(
-            selectedAttraction.latitude!,
-            selectedAttraction.longitude!,
-            a.latitude!,
-            a.longitude!
-          )
-        }))
-        .filter(a => a.distance <= 5)
-        .sort((a, b) => a.distance - b.distance)
-    : []
+  const nearbyAttractions =
+    selectedAttraction?.latitude && selectedAttraction?.longitude
+      ? allAttractions
+          .filter(a => a.id !== selectedAttraction.id && a.latitude && a.longitude)
+          .map(a => ({
+            ...a,
+            distance: calculateDistance(
+              selectedAttraction.latitude!,
+              selectedAttraction.longitude!,
+              a.latitude!,
+              a.longitude!
+            ),
+          }))
+          .filter(a => a.distance <= 5)
+          .sort((a, b) => a.distance - b.distance)
+      : []
 
   if (!centerAttraction?.latitude || !centerAttraction?.longitude) {
     return null
@@ -154,19 +168,13 @@ export function MapExplorerDialog({
               <Navigation className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-[#5a5a5a]">
-                探索周邊景點
-              </h2>
+              <h2 className="text-lg font-semibold text-[#5a5a5a]">探索周邊景點</h2>
               <p className="text-sm text-[#8a8a8a]">
                 以「{centerAttraction.name}」為中心，5km 範圍
               </p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)}>
             <X className="w-5 h-5" />
           </Button>
         </div>
@@ -180,15 +188,11 @@ export function MapExplorerDialog({
                 周邊景點（{nearbyAttractions.length}）
               </div>
             </div>
-            
+
             {loading ? (
-              <div className="p-8 text-center text-sm text-[#8a8a8a]">
-                載入中...
-              </div>
+              <div className="p-8 text-center text-sm text-[#8a8a8a]">載入中...</div>
             ) : nearbyAttractions.length === 0 ? (
-              <div className="p-8 text-center text-sm text-[#8a8a8a]">
-                5km 內沒有其他景點
-              </div>
+              <div className="p-8 text-center text-sm text-[#8a8a8a]">5km 內沒有其他景點</div>
             ) : (
               <div className="divide-y">
                 {nearbyAttractions.map(attraction => (
@@ -205,25 +209,22 @@ export function MapExplorerDialog({
                           {attraction.name}
                         </div>
                         {attraction.category && (
-                          <div className="text-xs text-[#8a8a8a] mt-0.5">
-                            {attraction.category}
-                          </div>
+                          <div className="text-xs text-[#8a8a8a] mt-0.5">{attraction.category}</div>
                         )}
                       </div>
-                      <Badge 
-                        variant="secondary" 
+                      <Badge
+                        variant="secondary"
                         className={`shrink-0 text-xs ${
-                          attraction.distance < 1 
-                            ? 'bg-green-100 text-green-700' 
-                            : attraction.distance < 3 
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-gray-100 text-gray-600'
+                          attraction.distance < 1
+                            ? 'bg-green-100 text-green-700'
+                            : attraction.distance < 3
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : 'bg-morandi-container text-morandi-secondary'
                         }`}
                       >
-                        {attraction.distance < 1 
+                        {attraction.distance < 1
                           ? `${(attraction.distance * 1000).toFixed(0)}m`
-                          : `${attraction.distance.toFixed(1)}km`
-                        }
+                          : `${attraction.distance.toFixed(1)}km`}
                       </Badge>
                     </div>
                   </button>

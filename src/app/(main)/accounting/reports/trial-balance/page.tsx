@@ -51,8 +51,6 @@ export default function TrialBalancePage() {
     setIsLoading(true)
 
     try {
-      
-      
       // 1. 取得所有科目
       const { data: accounts, error: accountsError } = await supabase
         .from('chart_of_accounts')
@@ -66,7 +64,8 @@ export default function TrialBalancePage() {
       // 2. 取得所有分錄（截至指定日期）
       const { data: lines, error: linesError } = await supabase
         .from('journal_lines')
-        .select(`
+        .select(
+          `
           account_id,
           debit_amount,
           credit_amount,
@@ -74,7 +73,8 @@ export default function TrialBalancePage() {
             voucher_date,
             workspace_id
           )
-        `)
+        `
+        )
         .eq('voucher.workspace_id', user.workspace_id)
         .lte('voucher.voucher_date', endDate)
 
@@ -82,7 +82,7 @@ export default function TrialBalancePage() {
 
       // 3. 計算每個科目的餘額
       const balanceMap = new Map<string, { debit: number; credit: number }>()
-      
+
       lines.forEach((line: any) => {
         const existing = balanceMap.get(line.account_id) || { debit: 0, credit: 0 }
         existing.debit += line.debit_amount || 0
@@ -95,7 +95,7 @@ export default function TrialBalancePage() {
         .map(account => {
           const balance = balanceMap.get(account.id) || { debit: 0, credit: 0 }
           const net = balance.debit - balance.credit
-          
+
           return {
             account_id: account.id,
             code: account.code,
@@ -114,7 +114,6 @@ export default function TrialBalancePage() {
       const totalDebit = result.reduce((sum, item) => sum + item.debit_total, 0)
       const totalCredit = result.reduce((sum, item) => sum + item.credit_total, 0)
       setTotals({ debit: totalDebit, credit: totalCredit })
-
     } catch (error) {
       console.error('載入試算表失敗:', error)
       alert('載入失敗')
@@ -124,14 +123,17 @@ export default function TrialBalancePage() {
   }
 
   // 按類型分組
-  const groupedBalances = balances.reduce((groups, item) => {
-    const type = item.account_type
-    if (!groups[type]) {
-      groups[type] = []
-    }
-    groups[type].push(item)
-    return groups
-  }, {} as Record<string, AccountBalance[]>)
+  const groupedBalances = balances.reduce(
+    (groups, item) => {
+      const type = item.account_type
+      if (!groups[type]) {
+        groups[type] = []
+      }
+      groups[type].push(item)
+      return groups
+    },
+    {} as Record<string, AccountBalance[]>
+  )
 
   return (
     <ContentPageLayout title="試算表">
@@ -141,11 +143,7 @@ export default function TrialBalancePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label>截止日期</Label>
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-              />
+              <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </div>
 
             <div className="flex items-end">
@@ -161,7 +159,7 @@ export default function TrialBalancePage() {
         <Card className="p-0 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-morandi-container border-b">
                 <tr>
                   <th className="px-4 py-3 text-left text-sm font-semibold">科目代號</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold">科目名稱</th>
@@ -183,14 +181,14 @@ export default function TrialBalancePage() {
                     {Object.entries(groupedBalances).map(([type, items]) => (
                       <>
                         {/* 類型標題 */}
-                        <tr key={`header-${type}`} className="bg-gray-100">
+                        <tr key={`header-${type}`} className="bg-morandi-container">
                           <td colSpan={6} className="px-4 py-2 text-sm font-semibold">
                             {typeLabels[type] || type}
                           </td>
                         </tr>
                         {/* 科目明細 */}
                         {items.map(item => (
-                          <tr key={item.account_id} className="border-b hover:bg-gray-50">
+                          <tr key={item.account_id} className="border-b hover:bg-morandi-container">
                             <td className="px-4 py-3 text-sm font-mono">{item.code}</td>
                             <td className="px-4 py-3 text-sm">{item.name}</td>
                             <td className="px-4 py-3 text-center">
@@ -204,9 +202,15 @@ export default function TrialBalancePage() {
                             <td className="px-4 py-3 text-sm text-right font-mono">
                               {item.credit_total > 0 ? item.credit_total.toLocaleString() : '-'}
                             </td>
-                            <td className={`px-4 py-3 text-sm text-right font-mono font-semibold ${
-                              item.balance > 0 ? 'text-green-600' : item.balance < 0 ? 'text-red-600' : ''
-                            }`}>
+                            <td
+                              className={`px-4 py-3 text-sm text-right font-mono font-semibold ${
+                                item.balance > 0
+                                  ? 'text-green-600'
+                                  : item.balance < 0
+                                    ? 'text-red-600'
+                                    : ''
+                              }`}
+                            >
                               {item.balance !== 0 ? item.balance.toLocaleString() : '-'}
                             </td>
                           </tr>
@@ -214,7 +218,7 @@ export default function TrialBalancePage() {
                       </>
                     ))}
                     {/* 總計 */}
-                    <tr className="bg-gray-200 font-bold border-t-2">
+                    <tr className="bg-morandi-container font-bold border-t-2">
                       <td colSpan={3} className="px-4 py-3 text-sm">
                         總計
                       </td>
@@ -232,7 +236,8 @@ export default function TrialBalancePage() {
                     {Math.abs(totals.debit - totals.credit) > 0.01 && (
                       <tr className="bg-red-50">
                         <td colSpan={6} className="px-4 py-3 text-sm text-red-600 text-center">
-                          ⚠️ 警告：借貸不平衡！差額：{(totals.debit - totals.credit).toLocaleString()}
+                          ⚠️ 警告：借貸不平衡！差額：
+                          {(totals.debit - totals.credit).toLocaleString()}
                         </td>
                       </tr>
                     )}

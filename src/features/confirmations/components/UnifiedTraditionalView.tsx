@@ -32,10 +32,12 @@ export function UnifiedTraditionalView({
     <div className="bg-white p-6">
       {/* 標題區 */}
       <div className="flex justify-between items-start mb-6">
-        <h2 className={`text-2xl font-bold ${isCancellation ? 'text-red-700' : 'text-gray-800'}`}>
+        <h2
+          className={`text-2xl font-bold ${isCancellation ? 'text-red-700' : 'text-morandi-primary'}`}
+        >
           {isCancellation ? '⚠️ 取消通知單' : '廠商需求單'}
         </h2>
-        <div className="text-right text-sm text-gray-600">
+        <div className="text-right text-sm text-morandi-secondary">
           <div className="font-semibold">${COMPANY_NAME}</div>
           <div className="text-xs">COMPANY_NAME_EN</div>
         </div>
@@ -51,7 +53,7 @@ export function UnifiedTraditionalView({
               type="text"
               value={supplierName || ''}
               readOnly
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary"
             />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
@@ -60,7 +62,7 @@ export function UnifiedTraditionalView({
               type="text"
               value={phone || ''}
               readOnly
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-600"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-secondary"
             />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
@@ -69,7 +71,7 @@ export function UnifiedTraditionalView({
               type="text"
               value={tour?.name || ''}
               readOnly
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary"
             />
           </div>
         </div>
@@ -82,7 +84,7 @@ export function UnifiedTraditionalView({
               type="text"
               value={contact || ''}
               placeholder="業務人員"
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary"
             />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
@@ -91,7 +93,7 @@ export function UnifiedTraditionalView({
               type="text"
               value={fax || ''}
               readOnly
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-600"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-secondary"
             />
           </div>
           <div className="grid grid-cols-[5rem_1fr] gap-2">
@@ -100,35 +102,25 @@ export function UnifiedTraditionalView({
               type="text"
               value={totalPax ? `${totalPax} 人` : ''}
               readOnly
-              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-gray-800"
+              className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary"
             />
           </div>
         </div>
       </div>
 
       {/* 根據類型顯示對應表格 */}
-      {requestType === 'accommodation' && (
-        <AccommodationTable items={items} />
-      )}
-      {requestType === 'meal' && (
-        <MealTable items={items} />
-      )}
-      {requestType === 'transport' && (
-        <TransportTable items={items} />
-      )}
-      {requestType === 'activity' && (
-        <ActivityTable items={items} />
-      )}
-      {requestType === 'cancellation' && (
-        <CancellationTable items={items} />
-      )}
+      {requestType === 'accommodation' && <AccommodationTable items={items} />}
+      {requestType === 'meal' && <MealTable items={items} />}
+      {requestType === 'transport' && <TransportTable items={items} />}
+      {requestType === 'activity' && <ActivityTable items={items} />}
+      {requestType === 'cancellation' && <CancellationTable items={items} />}
 
       {/* 備註 */}
       <div className="mt-6">
         <label className="block text-sm font-semibold text-[#78716c] mb-2">備註</label>
         <Textarea
           value={note}
-          onChange={(e) => setNote(e.target.value)}
+          onChange={e => setNote(e.target.value)}
           placeholder="其他說明或備註事項..."
           className="min-h-[100px] border-[#a8a29e] focus:border-[#8B6914] bg-white"
         />
@@ -144,7 +136,7 @@ function AccommodationTable({ items }: { items: any[] }) {
       <h3 className="text-lg font-semibold text-[#78716c] mb-3">住宿表 ▽</h3>
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-gray-800">
+          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-morandi-primary">
             <th className="border border-[#a8a29e] px-3 py-2 text-left">入住日期</th>
             <th className="border border-[#a8a29e] px-3 py-2 text-left">需求房型</th>
             <th className="border border-[#a8a29e] px-3 py-2 text-left">床型安排</th>
@@ -181,7 +173,7 @@ function MealTable({ items }: { items: any[] }) {
       <h3 className="text-lg font-semibold text-[#78716c] mb-3">餐食表 ▽</h3>
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-gray-800">
+          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-morandi-primary">
             <th className="border border-[#a8a29e] px-3 py-2 text-left">用餐日期</th>
             <th className="border border-[#a8a29e] px-3 py-2 text-left">用餐時段</th>
             <th className="border border-[#a8a29e] px-3 py-2 text-left">餐標單價（桌／人）</th>
@@ -214,7 +206,7 @@ function TransportTable({ items }: { items: any[] }) {
       <h3 className="text-lg font-semibold text-[#78716c] mb-3">交通表 ▽</h3>
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-gray-800">
+          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-morandi-primary">
             <th className="border border-[#a8a29e] px-3 py-2 text-left w-24">訂車日期</th>
             <th className="border border-[#a8a29e] px-3 py-2 text-left">接駁地點</th>
             <th className="border border-[#a8a29e] px-3 py-2 text-left">車資（未稅）</th>
@@ -247,7 +239,7 @@ function ActivityTable({ items }: { items: any[] }) {
       <h3 className="text-lg font-semibold text-[#78716c] mb-3">活動表 ▽</h3>
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-gray-800">
+          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-morandi-primary">
             <th className="border border-[#a8a29e] px-3 py-2 text-left">活動時間</th>
             <th className="border border-[#a8a29e] px-3 py-2 text-left">場地名稱</th>
             <th className="border border-[#a8a29e] px-3 py-2 text-left">客報價</th>
@@ -298,7 +290,9 @@ function CancellationTable({ items }: { items: any[] }) {
               <td className="border border-red-300 px-3 py-2 font-medium">{item.name || '—'}</td>
               <td className="border border-red-300 px-3 py-2">{item.date || '—'}</td>
               <td className="border border-red-300 px-3 py-2">{item.quantity || '—'}</td>
-              <td className="border border-red-300 px-3 py-2 text-gray-600">{item.note || ''}</td>
+              <td className="border border-red-300 px-3 py-2 text-morandi-secondary">
+                {item.note || ''}
+              </td>
             </tr>
           ))}
         </tbody>

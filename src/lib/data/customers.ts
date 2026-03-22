@@ -70,7 +70,9 @@ export async function getPaginatedCustomers({
   // 可選搜尋條件
   if (search) {
     const sanitized = sanitizeInput(search)
-    query = query.or(`name.ilike.%${sanitized}%,phone.ilike.%${sanitized}%,email.ilike.%${sanitized}%`)
+    query = query.or(
+      `name.ilike.%${sanitized}%,phone.ilike.%${sanitized}%,email.ilike.%${sanitized}%`
+    )
   }
 
   // 分頁

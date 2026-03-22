@@ -25,18 +25,18 @@
   需求單有一份資料
   確認單有一份資料
   結帳單有一份資料
-  
+
   問題：5 份資料要同步，容易不一致
 
 Venturo 做法（正確）：
   tour_itinerary_items = 唯一一份資料
-  
+
   行程表：寫入核心表
   報價單：讀取 + 更新核心表
   需求單：JOIN 讀取核心表
   確認單：更新核心表狀態
   結帳單：更新核心表費用
-  
+
   好處：只有一份資料，永遠同步
 ```
 
@@ -47,20 +47,21 @@ Venturo 做法（正確）：
 每個行程項目有 4 個獨立的狀態：
 
 ```typescript
-quote_status: 
+quote_status:
   none → drafted → quoted → confirmed
-  
+
 request_status:
   none → sent → replied → confirmed → cancelled
-  
+
 confirmation_status:
   none → pending → confirmed
-  
+
 leader_status:
   none → filled → reviewed
 ```
 
 **為什麼要分開？**
+
 - 報價可能完成，需求單還沒發
 - 需求單可能發了，確認單還沒做
 - 確認單可能做了，領隊還沒回填
@@ -75,7 +76,7 @@ leader_status:
 // 模式 1：資料庫參照（推薦）
 resource_type: 'restaurant'
 resource_id: 'uuid-123'
-title: '一蘭拉麵'  // 快照
+title: '一蘭拉麵' // 快照
 
 // 模式 2：純文字輸入（備用）
 resource_type: null
@@ -85,10 +86,12 @@ description: '預計日式料理'
 ```
 
 **為什麼需要兩種模式？**
+
 - 已知餐廳：用資料庫參照（可以 JOIN 取地址電話）
 - 未知餐廳：用文字輸入（之後再補）
 
 **漸進式升級：**
+
 ```
 文字 → 選擇餐廳 → 自動轉換成資料庫參照
 ```
@@ -104,30 +107,31 @@ description: '預計日式料理'
   一蘭拉麵 $1,000/人
   30 人
   → 總共 $30,000
-  
+
   unit_price = 1000
   quantity = 1  // 固定
-  
+
 住宿範例：
   君悅飯店 $3,500/2人房
   30 人 = 15 間房
   → 總共 $52,500
-  
+
   unit_price = 3500
   quantity = 2  // 幾人房
-  
+
   個人分攤 = 3500 ÷ 2 = $1,750/人
-  
+
 Local 報價範例：
   10人 $5,000/人
   20人 $4,000/人
   30人 $3,333/人
-  
+
   自動判斷適用階梯
   30人 → 適用 $3,333/人
 ```
 
 **為什麼這樣設計？**
+
 - 業務要算「每個人付多少」
 - 直接填個人分攤，不用再算一次
 - 報價單看起來更清楚
@@ -152,7 +156,7 @@ Local 報價範例：
     resource_type,
     resource_id
   )
-  
+
 狀態：
   quote_status = 'none'
   request_status = 'none'
@@ -175,13 +179,13 @@ Local 報價範例：
 填寫價格：
   餐廳：unit_price = 1000, quantity = 1
   住宿：unit_price = 3500, quantity = 2
-  
+
 寫回核心表：
   writePricingToCore()
   → UPDATE tour_itinerary_items
   SET unit_price = ?, quantity = ?
   WHERE id = ?
-  
+
 狀態更新：
   quote_status = 'drafted' → 'quoted'
 ```
@@ -203,7 +207,7 @@ Local 報價範例：
       LEFT JOIN restaurants ON ...
       LEFT JOIN hotels ON ...
       WHERE tour_id = ? AND supplier_id = ?
-  
+
   useTotalPax()
   → SELECT SUM(adult + child + infant)
       FROM orders
@@ -213,7 +217,7 @@ Local 報價範例：
   - 供應商資訊（從 JOIN 取得）
   - 團體資訊（總人數自動帶入）
   - 需求項目（預算/人、桌數空白）
-  
+
 更新狀態：
   UPDATE tour_itinerary_items
   SET request_status = 'sent',
@@ -222,6 +226,7 @@ Local 報價範例：
 ```
 
 **為什麼桌數空白？**
+
 - 助理要根據餐廳狀況決定
 - 可能 10人一桌、8人一桌、包廂
 - 不能自動計算
@@ -241,7 +246,7 @@ Local 報價範例：
       request_reply_at = now(),
       reply_content = ?
   WHERE id = ?
-  
+
 狀態更新：
   request_status = 'replied'
 ```
@@ -262,7 +267,7 @@ Local 報價範例：
       booking_reference = ?,
       confirmation_date = ?
   WHERE id = ?
-  
+
 狀態更新：
   confirmation_status = 'confirmed'
 ```
@@ -284,7 +289,7 @@ Local 報價範例：
       leader_status = 'filled',
       expense_at = now()
   WHERE id = ?
-  
+
 狀態更新：
   leader_status = 'filled'
 ```
@@ -297,7 +302,7 @@ Local 報價範例：
 
 ```typescript
 // 個人成本計算
-成人成本 = 
+成人成本 =
   Σ(交通 adult_price || unit_price) +
   Σ(住宿 unit_price ÷ quantity) +
   Σ(餐食 unit_price) +
@@ -334,7 +339,7 @@ Local 報價範例：
 
 適用階梯 = 階梯.filter(t => 總人數 >= t.pax)
               .sort((a, b) => b.pax - a.pax)[0]
-              
+
 → 20人階梯 $4,000/人（最接近且不超過）
 
 // 多列顯示
@@ -389,12 +394,12 @@ generatePrintHtml() {
 ❌ 錯誤：
   需求單產生時，存到 tour_requests 表
   包含：餐廳名稱、地址、電話、預算
-  
+
 ✅ 正確：
   需求單從核心表 JOIN 讀取
   tour_requests 只存「狀態」
   資料永遠從核心表讀取
-  
+
 原因：
   核心表是唯一真相來源
   避免資料重複、不同步
@@ -408,11 +413,11 @@ generatePrintHtml() {
 ❌ 錯誤：
   一蘭拉麵 $30,000（30人總共）
   君悅飯店 $52,500（15間房總共）
-  
+
 ✅ 正確：
   一蘭拉麵 $1,000/人
   君悅飯店 $3,500/2人房
-  
+
 原因：
   業務要算「每個人付多少」
   直接填個人分攤更清楚
@@ -425,10 +430,10 @@ generatePrintHtml() {
 ```
 ❌ 錯誤：
   30人 ÷ 10人/桌 = 3桌（自動）
-  
+
 ✅ 正確：
   桌數空白，助理手動填
-  
+
 原因：
   餐廳可能只有 8人桌
   餐廳可能有包廂
@@ -443,10 +448,10 @@ generatePrintHtml() {
 ```
 ❌ 錯誤：
   君悅飯店 quantity = 30（總人數）
-  
+
 ✅ 正確：
   君悅飯店 quantity = 2（幾人房）
-  
+
 原因：
   報價單填的是「房間價格」
   quantity = 幾人房
@@ -609,11 +614,11 @@ ADD COLUMN restaurant_address TEXT  // 不要這樣做
   - 直接看到 SQL 邏輯
   - 效能可控
   - JOIN 查詢靈活
-  
+
 缺點：
   - 型別安全靠手動維護
   - 沒有自動 migration
-  
+
 結論：
   目前階段，直接用 SQL 更清楚
   未來可考慮 Prisma/Drizzle
@@ -630,17 +635,17 @@ ADD COLUMN restaurant_address TEXT  // 不要這樣做
   - 'sent'
   - 'confirmed'
   - 'paid'
-  
+
 問題：
   報價完成，需求單還沒發 → 卡住
   需求單發了，確認單還沒做 → 卡住
-  
+
 解決：
   quote_status（報價流程）
   request_status（需求單流程）
   confirmation_status（確認流程）
   leader_status（結帳流程）
-  
+
   各自獨立，互不干擾
 ```
 
@@ -655,11 +660,11 @@ ADD COLUMN restaurant_address TEXT  // 不要這樣做
   - Supabase 原生支援
   - PostgREST 效能好
   - RLS 安全性高
-  
+
 缺點：
   - 複雜查詢要多次請求
   - Over-fetching
-  
+
 結論：
   目前階段，REST 夠用
   未來可考慮 GraphQL

@@ -59,6 +59,7 @@ viking://
 - **L2 (Details)**：完整原始資料 — 需要時才深入閱讀
 
 **範例**：
+
 ```
 viking://resources/venturo-erp/
 ├── .abstract           # L0：「Venturo ERP 是 B2B 旅行社後台系統」
@@ -84,6 +85,7 @@ viking://resources/venturo-erp/
 5. **結果聚合** — 回傳最相關的 context
 
 **優勢**：
+
 - 不只找到語意最匹配的片段
 - 還理解資訊所在的完整 context
 - 提高檢索的全域性和準確性
@@ -106,6 +108,7 @@ Result: Found in QUOTE_REQUEST_FLOW.md, lines 45-120
 ```
 
 **優勢**：
+
 - 清楚觀察問題根源
 - 引導檢索邏輯優化
 - 不再是黑盒子
@@ -117,6 +120,7 @@ Result: Found in QUOTE_REQUEST_FLOW.md, lines 45-120
 **記憶自我迭代**：
 
 每次 session 結束：
+
 1. 分析任務執行結果和使用者反饋
 2. 自動更新到 User 和 Agent 記憶目錄
 3. 提取操作技巧、工具使用經驗
@@ -130,14 +134,15 @@ Result: Found in QUOTE_REQUEST_FLOW.md, lines 45-120
 **模型**：seed-2.0-code  
 **OpenViking 版本**：0.1.18
 
-| 實驗組 | 任務完成率 | Input Tokens |
-|--------|-----------|--------------|
-| OpenClaw (原生 memory) | 35.65% | 24,611,530 |
-| OpenClaw + LanceDB | 44.55% | 51,574,530 |
-| **OpenClaw + OpenViking** | **52.08%** | **4,264,396** |
+| 實驗組                                    | 任務完成率 | Input Tokens  |
+| ----------------------------------------- | ---------- | ------------- |
+| OpenClaw (原生 memory)                    | 35.65%     | 24,611,530    |
+| OpenClaw + LanceDB                        | 44.55%     | 51,574,530    |
+| **OpenClaw + OpenViking**                 | **52.08%** | **4,264,396** |
 | **OpenClaw + OpenViking (+ memory-core)** | **51.23%** | **2,099,622** |
 
 **結論**：
+
 - **任務完成率提升 43%**（vs 原生）
 - **Input tokens 減少 91%**（vs 原生）
 - **省錢 + 更準確**
@@ -149,21 +154,25 @@ Result: Found in QUOTE_REQUEST_FLOW.md, lines 45-120
 ### 現在的問題
 
 #### 1. 記憶分散
+
 - **MEMORY.md** — 手動維護，容易過時
-- **memory/*.md** — 按日期分散，難找到相關記憶
+- **memory/\*.md** — 按日期分散，難找到相關記憶
 - **mem0 向量庫** — 單純語意搜尋，缺少結構
 
 #### 2. Token 浪費
+
 - 每次搜尋都載入完整片段
 - 沒有分層（Abstract/Overview/Details）
 - 重複載入相同 context
 
 #### 3. 檢索效果差
+
 - 單純向量檢索，缺少目錄定位
 - 難以理解資訊的完整 context
 - 無法追蹤檢索路徑
 
 #### 4. 無法自我進化
+
 - 記憶是被動記錄，不是主動提取
 - 沒有任務經驗累積
 - Agent 不會越用越聰明
@@ -173,6 +182,7 @@ Result: Found in QUOTE_REQUEST_FLOW.md, lines 45-120
 ### OpenViking 的解決方案
 
 #### 1. 統一管理
+
 ```
 viking://
 ├── resources/          # 帝國文檔（empire/*.md）
@@ -185,16 +195,19 @@ viking://
 ```
 
 #### 2. 分層載入
+
 - L0：快速判斷相關性（省 95% token）
 - L1：規劃階段決策（省 80% token）
 - L2：需要時才載入完整內容
 
 #### 3. 目錄遞迴檢索
+
 - 先定位高分目錄（empire/shops/erp/）
 - 再精細探索（QUOTE_REQUEST_FLOW.md）
 - 理解完整 context
 
 #### 4. 自動提取記憶
+
 - 每次任務結束，自動提取經驗
 - 更新到 agent/{agent_name}/memories/
 - Agent 越用越聰明
@@ -206,6 +219,7 @@ viking://
 ### Phase 1：部署 OpenViking Server（1 小時）
 
 #### Step 1：安裝
+
 ```bash
 # 安裝 Python 套件
 pip install openviking --upgrade --force-reinstall
@@ -215,6 +229,7 @@ curl -fsSL https://raw.githubusercontent.com/volcengine/OpenViking/main/crates/o
 ```
 
 #### Step 2：設定
+
 ```bash
 # 建立設定檔
 mkdir -p ~/.openviking
@@ -252,6 +267,7 @@ export OPENVIKING_CONFIG_FILE=~/.openviking/ov.conf
 ```
 
 #### Step 3：啟動
+
 ```bash
 # 前台啟動（測試）
 openviking-server
@@ -268,6 +284,7 @@ ov status
 ### Phase 2：遷移現有記憶（2 小時）
 
 #### Step 1：遷移帝國文檔
+
 ```bash
 # 新增 resources（帝國文檔）
 ov add-resource ~/Projects/venturo-erp/empire --wait
@@ -278,6 +295,7 @@ ov tree viking://resources/empire -L 2
 ```
 
 #### Step 2：遷移 MEMORY.md
+
 ```bash
 # 新增 William 的記憶
 ov add-memory --type user --content "$(cat ~/.openclaw/workspace-william/MEMORY.md)"
@@ -287,6 +305,7 @@ ov ls viking://user/memories/
 ```
 
 #### Step 3：遷移 mem0 向量庫
+
 ```bash
 # 匯出 mem0 記憶
 python3 scripts/mem0-export.py > /tmp/mem0-memories.jsonl
@@ -304,12 +323,14 @@ done < /tmp/mem0-memories.jsonl
 ### Phase 3：OpenClaw 整合（1 小時）
 
 #### Step 1：安裝 OpenClaw Plugin
+
 ```bash
 # 安裝 OpenViking Memory Plugin
 openclaw plugins install openviking-memory
 ```
 
 #### Step 2：設定
+
 ```bash
 # 編輯 openclaw.json（用 CLI）
 openclaw config set openviking.enabled true
@@ -317,6 +338,7 @@ openclaw config set openviking.server_url http://localhost:1933
 ```
 
 #### Step 3：測試
+
 ```bash
 # 測試檢索
 ov find "如何建立報價單？"
@@ -357,6 +379,7 @@ ov add-file viking://agent/william/instructions/SOUL.md \
 ## 📚 新的記憶管理流程
 
 ### 開發時
+
 ```bash
 # 舊方式（手動）
 memory_search({ query: "報價單" })
@@ -368,6 +391,7 @@ ov tree viking://resources/empire/shops/erp -L 2
 ```
 
 ### 任務結束時
+
 ```bash
 # 自動提取記憶（OpenViking 自動）
 # 不需要手動執行，session 結束時自動觸發
@@ -377,6 +401,7 @@ ov session extract --session-id SESSION_ID
 ```
 
 ### 查看記憶
+
 ```bash
 # 查看 William 的記憶
 ov ls viking://user/memories/
@@ -395,21 +420,25 @@ ov tree viking://resources/empire -L 3
 ## 🎯 預期效益
 
 ### 1. Token 節省
+
 - **現在**：每次搜尋載入完整片段（~5k tokens）
 - **OpenViking**：L0/L1 載入（~100-2k tokens）
 - **節省**：60-98% token
 
 ### 2. 檢索準確性
+
 - **現在**：單純語意搜尋，容易找錯
 - **OpenViking**：目錄遞迴 + 語意搜尋
 - **提升**：任務完成率 +43%（測試數據）
 
 ### 3. 記憶自我進化
+
 - **現在**：被動記錄，手動整理
 - **OpenViking**：自動提取經驗
 - **效果**：Agent 越用越聰明
 
 ### 4. 可追蹤性
+
 - **現在**：黑盒子，不知道為什麼找到這個
 - **OpenViking**：可視化檢索路徑
 - **效果**：容易除錯、優化
@@ -419,20 +448,24 @@ ov tree viking://resources/empire -L 3
 ## 🚧 風險和挑戰
 
 ### 1. 學習曲線
+
 - OpenViking 是新工具，需要學習
 - 建議：先用 Phase 1-2（部署 + 遷移）熟悉
 
 ### 2. 額外成本
+
 - 需要 Embedding API（OpenAI text-embedding-3-large）
 - 需要 VLM API（Claude 3.5 Sonnet）
 - 預估：每月 $50-100（視使用量）
 
 ### 3. 系統複雜度
+
 - 多一個 service（OpenViking Server）
 - 需要監控和維護
 - 建議：先在 Dev Server 測試，穩定後再上 Production
 
 ### 4. 遷移成本
+
 - 現有 MEMORY.md / mem0 需要遷移
 - 預估：2-3 小時
 - 好處：遷移後更結構化
@@ -442,21 +475,25 @@ ov tree viking://resources/empire -L 3
 ## 🎯 行動計畫
 
 ### 立刻做（今天）
+
 - [ ] 閱讀 OpenViking 文檔
 - [ ] 決定：要不要整合？
 
 ### 短期（本週）
+
 - [ ] Phase 1：部署 OpenViking Server
 - [ ] Phase 2：遷移現有記憶
 - [ ] Phase 3：OpenClaw 整合
 - [ ] 測試 1 週
 
 ### 中期（本月）
+
 - [ ] Phase 4：建立 Agent 記憶結構
 - [ ] 為 17 位公民建立專屬記憶
 - [ ] 觀察效益（token 節省、檢索準確性）
 
 ### 長期（Q2）
+
 - [ ] 自動 Session 管理
 - [ ] 記憶自我進化
 - [ ] 擴展到 Online、AI Console

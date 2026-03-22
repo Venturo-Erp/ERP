@@ -1,6 +1,14 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react'
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+  forwardRef,
+  useImperativeHandle,
+} from 'react'
 import { createPortal } from 'react-dom'
 import { Loader2, MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -16,7 +24,7 @@ export interface MentionInputProps {
   attractions?: { id: string; name: string }[]
   placeholder?: string
   className?: string
-  disabledAttractionIds?: string[]  // 已排入行程的景點 ID（不可再選）
+  disabledAttractionIds?: string[] // 已排入行程的景點 ID（不可再選）
 }
 
 export interface MentionInputHandle {
@@ -44,7 +52,7 @@ function buildHtml(text: string, attractions: { id: string; name: string }[]): s
   }
   if (!positions.length) return escapeHtml(text)
 
-  positions.sort((a, b) => a.start - b.start || (b.end - b.start) - (a.end - a.start))
+  positions.sort((a, b) => a.start - b.start || b.end - b.start - (a.end - a.start))
   const filtered: typeof positions = []
   for (const pos of positions) {
     if (!filtered.length || pos.start >= filtered[filtered.length - 1].end) {
@@ -99,7 +107,10 @@ function setCursorOffset(el: HTMLElement, offset: number) {
 }
 
 // ── hover tooltip (portal) ─────────────────────────────────────
-const detailCache = new Map<string, { description?: string; city_name?: string; thumbnail?: string }>()
+const detailCache = new Map<
+  string,
+  { description?: string; city_name?: string; thumbnail?: string }
+>()
 
 function AttractionTooltip({ id, name, anchor }: { id: string; name: string; anchor: DOMRect }) {
   const [detail, setDetail] = useState(detailCache.get(id) || null)
@@ -118,34 +129,52 @@ function AttractionTooltip({ id, name, anchor }: { id: string; name: string; anc
       .then(({ data }) => {
         if (cancelled || !data) return
         const d = {
-          description: (data as Record<string, unknown>).description as string || '',
-          city_name: ((data as Record<string, unknown>).cities as { name: string } | null)?.name || '',
-          thumbnail: (data as Record<string, unknown>).thumbnail as string || '',
+          description: ((data as Record<string, unknown>).description as string) || '',
+          city_name:
+            ((data as Record<string, unknown>).cities as { name: string } | null)?.name || '',
+          thumbnail: ((data as Record<string, unknown>).thumbnail as string) || '',
         }
         detailCache.set(id, d)
         setDetail(d)
       })
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [id, detail])
 
   return createPortal(
     <div
       className="fixed z-[10020] max-w-[280px] bg-card border border-border rounded-lg shadow-lg overflow-hidden animate-in fade-in-0 zoom-in-95 duration-150"
-      style={{ top: anchor.bottom + 4, left: anchor.left + anchor.width / 2, transform: 'translateX(-50%)' }}
+      style={{
+        top: anchor.bottom + 4,
+        left: anchor.left + anchor.width / 2,
+        transform: 'translateX(-50%)',
+      }}
     >
       {detail ? (
         <div className="flex gap-2 p-2">
           {detail.thumbnail && (
-            <img src={detail.thumbnail} alt={name} className="w-16 h-16 object-cover rounded shrink-0" />
+            <img
+              src={detail.thumbnail}
+              alt={name}
+              className="w-16 h-16 object-cover rounded shrink-0"
+            />
           )}
           <div className="text-xs min-w-0">
             <div className="font-medium">{name}</div>
-            {detail.city_name && <div className="text-muted-foreground text-[10px]">{detail.city_name}</div>}
-            {detail.description && <p className="mt-1 line-clamp-3 text-muted-foreground">{detail.description}</p>}
+            {detail.city_name && (
+              <div className="text-muted-foreground text-[10px]">{detail.city_name}</div>
+            )}
+            {detail.description && (
+              <p className="mt-1 line-clamp-3 text-muted-foreground">{detail.description}</p>
+            )}
           </div>
         </div>
       ) : (
-        <div className="p-2 text-xs"><Loader2 size={12} className="animate-spin inline mr-1" />{name}</div>
+        <div className="p-2 text-xs">
+          <Loader2 size={12} className="animate-spin inline mr-1" />
+          {name}
+        </div>
       )}
     </div>,
     document.body
@@ -153,22 +182,29 @@ function AttractionTooltip({ id, name, anchor }: { id: string; name: string; anc
 }
 
 // ── main component ─────────────────────────────────────────────
-export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(function MentionInput({
-  value,
-  onChange,
-  onAttractionSelect,
-  countryName,
-  attractions = [],
-  placeholder,
-  className,
-  disabledAttractionIds = [],
-}, ref) {
+export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(function MentionInput(
+  {
+    value,
+    onChange,
+    onAttractionSelect,
+    countryName,
+    attractions = [],
+    placeholder,
+    className,
+    disabledAttractionIds = [],
+  },
+  ref
+) {
   const [isOpen, setIsOpen] = useState(false)
   const [mentionQuery, setMentionQuery] = useState('')
   const [mentionStart, setMentionStart] = useState(-1)
   const [highlightedIndex, setHighlightedIndex] = useState(0)
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 })
-  const [hoveredAttraction, setHoveredAttraction] = useState<{ id: string; name: string; rect: DOMRect } | null>(null)
+  const [hoveredAttraction, setHoveredAttraction] = useState<{
+    id: string
+    name: string
+    rect: DOMRect
+  } | null>(null)
 
   const editorRef = useRef<HTMLDivElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -177,22 +213,26 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
 
   const { results, loading } = useMentionSearch(countryName, mentionQuery, isOpen)
 
-  useImperativeHandle(ref, () => ({
-    insertAtCursor: (text: string) => {
-      const el = editorRef.current
-      if (!el) return
-      el.focus()
-      const cursor = getCursorOffset(el)
-      const before = value.slice(0, cursor)
-      const after = value.slice(cursor)
-      onChange(before + text + after)
-      requestAnimationFrame(() => {
-        if (editorRef.current) {
-          setCursorOffset(editorRef.current, cursor + text.length)
-        }
-      })
-    },
-  }), [value, onChange])
+  useImperativeHandle(
+    ref,
+    () => ({
+      insertAtCursor: (text: string) => {
+        const el = editorRef.current
+        if (!el) return
+        el.focus()
+        const cursor = getCursorOffset(el)
+        const before = value.slice(0, cursor)
+        const after = value.slice(cursor)
+        onChange(before + text + after)
+        requestAnimationFrame(() => {
+          if (editorRef.current) {
+            setCursorOffset(editorRef.current, cursor + text.length)
+          }
+        })
+      },
+    }),
+    [value, onChange]
+  )
 
   const html = useMemo(() => buildHtml(value, attractions), [value, attractions])
   const attractionIdsKey = useMemo(() => attractions.map(a => a.id).join(','), [attractions])
@@ -203,7 +243,6 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
     const el = editorRef.current
     if (!el) return
     el.innerHTML = html || ''
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Sync HTML into contentEditable — only when value or attractions actually change
@@ -270,7 +309,10 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
       // Detect @
       let atIdx = -1
       for (let i = cursor - 1; i >= 0; i--) {
-        if (text[i] === '@') { atIdx = i; break }
+        if (text[i] === '@') {
+          atIdx = i
+          break
+        }
       }
       if (atIdx >= 0) {
         const q = text.slice(atIdx + 1, cursor)
@@ -302,15 +344,19 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
     })
   }, [])
 
-  useEffect(() => { if (isOpen) updatePosition() }, [isOpen, mentionQuery, updatePosition])
+  useEffect(() => {
+    if (isOpen) updatePosition()
+  }, [isOpen, mentionQuery, updatePosition])
 
   // ── click outside ──
   useEffect(() => {
     if (!isOpen) return
     const handler = (e: MouseEvent) => {
       if (
-        dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
-        editorRef.current && !editorRef.current.contains(e.target as Node)
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        editorRef.current &&
+        !editorRef.current.contains(e.target as Node)
       ) {
         setIsOpen(false)
       }
@@ -319,7 +365,9 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
     return () => document.removeEventListener('mousedown', handler)
   }, [isOpen])
 
-  useEffect(() => { setHighlightedIndex(0) }, [results])
+  useEffect(() => {
+    setHighlightedIndex(0)
+  }, [results])
   useEffect(() => {
     if (highlightedIndex >= 0 && optionRefs.current[highlightedIndex]) {
       optionRefs.current[highlightedIndex]?.scrollIntoView({ block: 'nearest' })
@@ -390,7 +438,12 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
           <div
             ref={dropdownRef}
             className="fixed z-[10010] bg-card border border-border rounded-lg shadow-lg overflow-hidden"
-            style={{ top: dropdownPos.top, left: dropdownPos.left, width: dropdownPos.width, pointerEvents: 'auto' }}
+            style={{
+              top: dropdownPos.top,
+              left: dropdownPos.left,
+              width: dropdownPos.width,
+              pointerEvents: 'auto',
+            }}
             onMouseDown={e => e.preventDefault()}
           >
             <div className="overflow-y-auto max-h-[200px]">
@@ -405,7 +458,9 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
                   return (
                     <button
                       key={item.id}
-                      ref={el => { optionRefs.current[i] = el }}
+                      ref={el => {
+                        optionRefs.current[i] = el
+                      }}
                       type="button"
                       disabled={isDisabled}
                       title={isDisabled ? '此景點已在行程中' : ''}
@@ -417,10 +472,18 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
                       )}
                       onClick={() => !isDisabled && selectAttraction(item)}
                     >
-                      <MapPin size={12} className={cn('shrink-0', isDisabled ? 'text-gray-400' : 'text-blue-500')} />
+                      <MapPin
+                        size={12}
+                        className={cn(
+                          'shrink-0',
+                          isDisabled ? 'text-muted-foreground' : 'text-blue-500'
+                        )}
+                      />
                       <span className="truncate">{item.name}</span>
                       {item.city_name && (
-                        <span className="text-[10px] text-muted-foreground shrink-0">{item.city_name}</span>
+                        <span className="text-[10px] text-muted-foreground shrink-0">
+                          {item.city_name}
+                        </span>
                       )}
                       {isDisabled && (
                         <span className="text-[10px] text-muted-foreground shrink-0">✓ 已排入</span>
@@ -429,7 +492,9 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
                   )
                 })
               ) : (
-                <div className="px-3 py-3 text-center text-xs text-muted-foreground">找不到景點</div>
+                <div className="px-3 py-3 text-center text-xs text-muted-foreground">
+                  找不到景點
+                </div>
               )}
             </div>
           </div>,
@@ -446,7 +511,9 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
         suppressContentEditableWarning
         onInput={handleInput}
         onKeyDown={handleKeyDownAll}
-        onCompositionStart={() => { isComposingRef.current = true }}
+        onCompositionStart={() => {
+          isComposingRef.current = true
+        }}
         onCompositionEnd={() => {
           isComposingRef.current = false
           handleInput()
@@ -456,7 +523,7 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
           'w-full rounded-md border border-input bg-card px-3 py-1 whitespace-nowrap overflow-x-auto overflow-y-hidden',
           'focus-visible:outline-none focus-visible:border-morandi-gold transition-colors',
           'empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
-          className,
+          className
         )}
       />
 

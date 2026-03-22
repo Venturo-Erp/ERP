@@ -52,7 +52,9 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
       group: '供應商',
     }))
     const employeeList = employees
-      .filter(e => e.employee_number !== 'BOT001' && e.id !== '00000000-0000-0000-0000-000000000001')
+      .filter(
+        e => e.employee_number !== 'BOT001' && e.id !== '00000000-0000-0000-0000-000000000001'
+      )
       .map(e => ({
         id: e.id,
         name: e.display_name,
@@ -70,7 +72,9 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
   // 快速新增供應商
   const [createSupplierDialogOpen, setCreateSupplierDialogOpen] = useState(false)
   const [pendingSupplierName, setPendingSupplierName] = useState('')
-  const [supplierCreateResolver, setSupplierCreateResolver] = useState<((id: string) => void) | null>(null)
+  const [supplierCreateResolver, setSupplierCreateResolver] = useState<
+    ((id: string) => void) | null
+  >(null)
 
   // === 本地編輯狀態（不即時寫 DB，按存檔才寫） ===
   const [localItems, setLocalItems] = useState<RequestItem[]>([])
@@ -157,9 +161,13 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
         unit_price: item.unit_price ?? (item as unknown as { unitprice?: number }).unitprice ?? 0,
         quantity: item.quantity,
         tour_request_id: item.tour_request_id,
-        confirmation_item_id: (item as unknown as Record<string, unknown>).confirmation_item_id as string | undefined,
+        confirmation_item_id: (item as unknown as Record<string, unknown>).confirmation_item_id as
+          | string
+          | undefined,
         advanced_by: (item as unknown as Record<string, unknown>).advanced_by as string | undefined,
-        advanced_by_name: (item as unknown as Record<string, unknown>).advanced_by_name as string | undefined,
+        advanced_by_name: (item as unknown as Record<string, unknown>).advanced_by_name as
+          | string
+          | undefined,
       }))
   }, [requestItems, currentRequestId])
 
@@ -185,31 +193,37 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
 
   // === 本地操作（不寫 DB） ===
   const handleUpdateItem = useCallback((itemId: string, updates: Partial<RequestItem>) => {
-    setLocalItems(prev => prev.map(item => item.id === itemId ? { ...item, ...updates } : item))
+    setLocalItems(prev => prev.map(item => (item.id === itemId ? { ...item, ...updates } : item)))
     setIsDirty(true)
   }, [])
 
-  const handleRemoveItem = useCallback((itemId: string) => {
-    setLocalItems(prev => prev.filter(item => item.id !== itemId))
-    // 只有 DB 已存在的項目才需要刪除
-    if (!newItemIds.includes(itemId)) {
-      setDeletedItemIds(prev => [...prev, itemId])
-    }
-    setNewItemIds(prev => prev.filter(id => id !== itemId))
-    setIsDirty(true)
-  }, [newItemIds])
+  const handleRemoveItem = useCallback(
+    (itemId: string) => {
+      setLocalItems(prev => prev.filter(item => item.id !== itemId))
+      // 只有 DB 已存在的項目才需要刪除
+      if (!newItemIds.includes(itemId)) {
+        setDeletedItemIds(prev => [...prev, itemId])
+      }
+      setNewItemIds(prev => prev.filter(id => id !== itemId))
+      setIsDirty(true)
+    },
+    [newItemIds]
+  )
 
   const handleAddItem = useCallback(() => {
     const newId = `new_${Math.random().toString(36).substr(2, 9)}`
-    setLocalItems(prev => [...prev, {
-      id: newId,
-      category: '' as PaymentItemCategory,
-      supplier_id: '',
-      supplierName: '',
-      description: '',
-      unit_price: 0,
-      quantity: 1,
-    }])
+    setLocalItems(prev => [
+      ...prev,
+      {
+        id: newId,
+        category: '' as PaymentItemCategory,
+        supplier_id: '',
+        supplierName: '',
+        description: '',
+        unit_price: 0,
+        quantity: 1,
+      },
+    ])
     setNewItemIds(prev => [...prev, newId])
     setIsDirty(true)
   }, [])
@@ -238,7 +252,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
           quantity: item.quantity,
           subtotal: item.unit_price * item.quantity,
           sort_order: localItems.indexOf(item) + 1,
-          advanced_by: item.advanced_by === '_pending' ? null : (item.advanced_by || null),
+          advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
           item_number: `${currentRequest.code}-${dbEditableItems.length + idx + 1}`,
         }))
@@ -255,10 +269,13 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
           unitprice: item.unit_price,
           quantity: item.quantity,
           subtotal: item.unit_price * item.quantity,
-          advanced_by: item.advanced_by === '_pending' ? null : (item.advanced_by || null),
+          advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
         }
-        await supabase.from('payment_request_items').update(dbUpdates as never).eq('id', item.id)
+        await supabase
+          .from('payment_request_items')
+          .update(dbUpdates as never)
+          .eq('id', item.id)
       }
 
       // 4. 更新請款單總金額

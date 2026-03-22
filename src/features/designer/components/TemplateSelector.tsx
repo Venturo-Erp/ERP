@@ -198,7 +198,7 @@ export function TemplateSelector({
       // 使用載入的行程資料，如果沒有則用基本預設（不應該發生）
       const data = itineraryData || {
         mainTitle: '旅遊手冊',
-        companyName: {COMPANY_NAME_EN},
+        companyName: { COMPANY_NAME_EN },
       }
 
       // 生成完整手冊（封面 + 目錄 + 行程總覽 + 每日行程 + 備忘錄）
