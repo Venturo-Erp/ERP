@@ -248,6 +248,22 @@ export function useDisbursementData() {
         if (request?.tour_id) {
           tour_ids_to_recalculate.add(request.tour_id)
         }
+
+        // 自動產生傳票
+        try {
+          await fetch('/api/accounting/vouchers/auto-create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              source_type: 'payment_request',
+              source_id: requestId,
+              workspace_id: request?.workspace_id,
+            }),
+          })
+        } catch (error) {
+          console.error('自動產生傳票失敗:', error)
+          // 不中斷流程，傳票可手動補建
+        }
       }
 
       // 重算相關團的成本
