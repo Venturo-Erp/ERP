@@ -101,7 +101,7 @@ export default function AccountingPage() {
     <ContentPageLayout
       title="會計系統"
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {quickLinks.map(link => (
           <Link key={link.href} href={link.href}>
             <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
@@ -120,7 +120,7 @@ export default function AccountingPage() {
       </div>
 
       {/* 統計卡片 */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
         <Card className="p-6">
           <div className="text-sm text-muted-foreground mb-2">本月傳票數</div>
           <div className="text-2xl font-bold">-</div>
