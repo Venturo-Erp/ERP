@@ -1,3 +1,5 @@
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
+
 // comp-tours 模組 UI 標籤常量
 
 export const COMP_TOURS_LABELS = {

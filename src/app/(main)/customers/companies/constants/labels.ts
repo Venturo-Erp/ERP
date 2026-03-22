@@ -1,3 +1,5 @@
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
+
 export const COMPANY_LABELS = {
   // Page
   PAGE_TITLE: '企業客戶管理',

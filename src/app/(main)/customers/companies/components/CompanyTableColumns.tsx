@@ -1,3 +1,5 @@
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
+
 /**
  * 企業客戶表格欄位配置
  */

@@ -1,3 +1,5 @@
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
+
 export const INVOICE_LABELS = {
   LABEL_2201: '團別',
   LABEL_5934: '訂單',

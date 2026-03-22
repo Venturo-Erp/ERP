@@ -1,3 +1,5 @@
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
+
 /**
  * 公司相關常數
  * 用於統一管理公司名稱、標語等固定文字

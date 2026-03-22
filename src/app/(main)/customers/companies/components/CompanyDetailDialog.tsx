@@ -1,5 +1,7 @@
 'use client'
 
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
+
 /**
  * 企業客戶詳情 Dialog
  */

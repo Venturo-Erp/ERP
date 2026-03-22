@@ -1,5 +1,7 @@
 'use client'
 
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
+
 import React from 'react'
 import { Plus } from 'lucide-react'
 import { Combobox, ComboboxOption } from '@/components/ui/combobox'

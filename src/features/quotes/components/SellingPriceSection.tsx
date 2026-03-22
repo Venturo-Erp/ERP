@@ -211,7 +211,8 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
     (participantCounts.single_room || 0)
 
   return (
-    <div className="lg:col-span-3 space-y-3 lg:sticky lg:top-0 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-2 lg:scrollbar-thin">
+    <div className="w-full border border-border rounded-xl bg-card p-4">
+      <div className="flex flex-wrap gap-4 items-start">
       {/* 儲存與列印按鈕 */}
       <div className="flex gap-2">
         {handleSave && (
@@ -508,6 +509,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
           </table>
         </div>
       ))}
+      </div>
     </div>
   )
 }

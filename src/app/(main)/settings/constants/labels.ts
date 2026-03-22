@@ -1,3 +1,5 @@
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
+
 export const LABELS = {
   // Header and Navigation
   SYSTEM_SETTINGS: '系統設定',

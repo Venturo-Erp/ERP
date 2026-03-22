@@ -528,11 +528,11 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
       )}
 
       <div className="w-full pb-6">
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 w-full">
-          {/* 左側：成本計算表格 - 70% */}
+        <div className="flex flex-col gap-6 w-full">
+          {/* 上方：成本計算表格 - 100% 寬度 */}
           <div
             className={cn(
-              'lg:col-span-7',
+              'w-full',
               isReadOnly && 'opacity-70 pointer-events-none select-none'
             )}
           >
@@ -596,7 +596,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
             </div>
           </div>
 
-          {/* 右側：報價設定 - 30% */}
+          {/* 下方：報價設定 */}
           <SellingPriceSection
             participantCounts={participantCounts}
             setParticipantCounts={setParticipantCounts}
