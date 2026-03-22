@@ -239,7 +239,7 @@ export const COMPANY_LABELS = {
   SEAL_IMAGE: '公司印章',
   SEAL_IMAGE_HINT: '建議使用 PNG 透明背景，大小不超過 2MB',
   LEGAL_NAME: '法定公司名稱',
-  LEGAL_NAME_PLACEHOLDER: '例如：角落旅行社股份有限公司',
+  LEGAL_NAME_PLACEHOLDER: '例如：{COMPANY_NAME}股份有限公司',
   SUBTITLE_LABEL: '公司標語',
   SUBTITLE_PLACEHOLDER: '例如：如果可以，讓我們一起探索世界的每個角落',
   INVOICE_SEAL_IMAGE: '發票印章',

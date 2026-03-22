@@ -40,7 +40,7 @@ export const LABELS = {
   STEP1_DESC: '填寫新租戶的基本資料',
   FIELD_NAME: '公司名稱',
   FIELD_NAME_REQUIRED: '*',
-  FIELD_NAME_PLACEHOLDER: '例如：角落旅行社、大地旅遊',
+  FIELD_NAME_PLACEHOLDER: '例如：XX旅行社、XX旅遊',
   FIELD_CODE: '公司代碼',
   FIELD_CODE_REQUIRED: '*',
   FIELD_CODE_PLACEHOLDER: '例如：CORNER、DEMO（英文大寫）',

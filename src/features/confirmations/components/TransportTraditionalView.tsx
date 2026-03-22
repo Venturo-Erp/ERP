@@ -4,6 +4,7 @@
  */
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Printer } from 'lucide-react'
@@ -55,8 +56,8 @@ export function TransportTraditionalView({
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">廠商需求單</h2>
         <div className="text-right text-sm text-gray-600">
-          <div className="font-semibold">角落旅行社</div>
-          <div className="text-xs">Corner Travel</div>
+          <div className="font-semibold">${COMPANY_NAME}</div>
+          <div className="text-xs">COMPANY_NAME_EN</div>
         </div>
       </div>
 
@@ -273,7 +274,7 @@ export function TransportTraditionalView({
       <div className="flex justify-between items-end pt-4 border-t-2 border-[#a8a29e]">
         <div className="text-sm text-gray-600">
           <div className="font-semibold text-gray-800 mb-2">敬請確認回傳資訊</div>
-          <div>角落旅行社</div>
+          <div>${COMPANY_NAME}</div>
           <div>電話：02-2345-6789</div>
           <div>傳真：02-2345-6788</div>
           <div>Email：service@cornertravel.com.tw</div>

@@ -7,6 +7,7 @@
  */
 
 import { useState, useCallback, useEffect } from 'react'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { BookOpen, ChevronRight, Check, Loader2, ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -29,7 +30,7 @@ const STYLE_DESCRIPTIONS: Record<string, { description: string; colors: string[]
     colors: ['#f5f0eb', '#c9aa7c', '#6b5b4a', '#e8dcc8'],
   },
   'corner-travel-v1': {
-    description: '正式、專業的跨頁排版，Corner Travel 官方風格',
+    description: '正式、專業的跨頁排版，旅行社官方風格',
     colors: ['#1a365d', '#c9aa7c', '#f7f5f0', '#2d5a87'],
   },
 }
@@ -197,7 +198,7 @@ export function TemplateSelector({
       // 使用載入的行程資料，如果沒有則用基本預設（不應該發生）
       const data = itineraryData || {
         mainTitle: '旅遊手冊',
-        companyName: 'Corner Travel',
+        companyName: {COMPANY_NAME_EN},
       }
 
       // 生成完整手冊（封面 + 目錄 + 行程總覽 + 每日行程 + 備忘錄）

@@ -1,5 +1,5 @@
 /**
- * Corner Travel 注意事項頁模板
+ * COMPANY_NAME_EN 注意事項頁模板
  *
  * 參考 0209東京手冊 備忘錄頁面設計：
  * - 行李規定表格
@@ -7,6 +7,7 @@
  * - 旅遊注意事項
  */
 import type { PageTemplate, TemplateData, MemoItem } from './types'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import type { CanvasElement, TextElement, ShapeElement } from '@/features/designer/components/types'
 
 // A5 尺寸

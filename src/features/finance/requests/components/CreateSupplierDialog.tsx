@@ -1,5 +1,6 @@
 // @ts-nocheck -- tour_requests table missing columns in generated types; pending DB migration
 import { useState, useEffect } from 'react'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import {
   Dialog,
   DialogContent,
@@ -222,7 +223,7 @@ export function CreateSupplierDialog({
                 <Input
                   value={formData.bank_account_name}
                   onChange={e => setFormData(prev => ({ ...prev, bank_account_name: e.target.value }))}
-                  placeholder="例：角落旅行社有限公司"
+                  placeholder="例：XX旅行社有限公司"
                 />
               </div>
               <div>

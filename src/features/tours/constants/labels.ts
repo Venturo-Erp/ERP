@@ -673,7 +673,7 @@ export const TOUR_PRINT_DIALOG_LABELS = {
   成員名單_團號: (code: string) => `成員名單 - ${code}`,
   出發日期: (date: string) => `出發日期：${date}`,
   總人數: (count: number) => `總人數：${count} 人`,
-  角落旅行社股份有限公司: '', // 動態從 workspace 讀取
+  COMPANY_NAME_股份有限公司: '', // 動態從 workspace 讀取
   電子機票號碼_E_TICKET_NUMBER: '電子機票號碼 E-TICKET NUMBER',
   電腦代號_PNR: '電腦代號 PNR',
   旅客姓名_PASSENGER_NAME: '旅客姓名 PASSENGER NAME',
@@ -1283,7 +1283,7 @@ export const TOUR_REQUEST_FORM_LABELS = {
   SUPPLIER: '廠商：',
   CITY: '城市：',
   CONTACT: '聯絡人：',
-  LABEL_3621: '角落旅行社',
+  LABEL_3621: '', // 動態從 COMPANY_NAME 讀取
   LABEL_7720: '我方資訊',
   LABEL_3340: '廠商資訊',
   LABEL_3785: '團號：',
@@ -1320,7 +1320,6 @@ export const TOUR_REQUEST_FORM_DIALOG_LABELS = {
   路線_車型: '項目說明',
   項目: '項目',
   門票_活動: '門票/活動',
-  角落旅行社: '角落旅行社',
   需求: '需求',
   需求單: '需求單',
   人: '人',

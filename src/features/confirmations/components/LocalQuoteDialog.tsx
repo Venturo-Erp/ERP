@@ -1,4 +1,5 @@
 'use client'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 import { useState, useEffect, useMemo } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -197,7 +198,7 @@ export function LocalQuoteDialog({
   <div class="header">
     <div style="display: flex; justify-content: space-between;">
       <h1>${tour?.name || '行程表'}</h1>
-      <div style="font-weight: 600; color: #c9a96e;">角落旅行社</div>
+      <div style="font-weight: 600; color: #c9a96e;">${COMPANY_NAME}</div>
     </div>
     <div class="info-grid">
       <div class="info-item"><span class="info-label">目的地：</span><span class="info-value">—</span></div>
@@ -221,7 +222,7 @@ export function LocalQuoteDialog({
     </tbody>
   </table>
   ${note ? `<div style="margin-bottom: 24px; font-size: 14px;"><b>備註：</b>${note}</div>` : ''}
-  <div class="footer"><p>本行程表由 角落旅行社 提供</p></div>
+  <div class="footer"><p>本行程表由 ${COMPANY_NAME} 提供</p></div>
 </body></html>`
 
     const printWindow = window.open('', '_blank', 'width=900,height=700')

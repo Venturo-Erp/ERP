@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
             },
             {
               type: 'text',
-              text: '角落旅行社・William 發出',
+              text: `${COMPANY_NAME}・William 發出`,
               color: '#FFFFFF',
               size: 'xs',
               margin: 'sm',

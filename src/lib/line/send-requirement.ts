@@ -4,6 +4,8 @@
  * 用 Flex Message 發送需求單摘要到供應商 LINE 群組
  */
 
+import { COMPANY_NAME } from '@/lib/tenant'
+
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
 interface RequirementItem {
@@ -119,7 +121,7 @@ export async function sendRequirementToLine(params: SendRequirementParams): Prom
           },
           {
             type: 'text',
-            text: `角落旅行社 · ${senderName} 發出`,
+            text: `${COMPANY_NAME} · ${senderName} 發出`,
             color: '#FFFFFF',
             size: 'xs',
             margin: 'sm',

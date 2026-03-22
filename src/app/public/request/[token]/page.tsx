@@ -159,7 +159,7 @@ export default function PublicRequestPage() {
           <div style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15 }}>
             <h3 style={{ margin: '0 0 8px 0', borderBottom: '1px solid #ddd', paddingBottom: 5, fontSize: 14 }}>我方資訊</h3>
             <div style={{ fontSize: 13 }}>
-              <div><b>公司：</b>角落旅行社</div>
+              <div><b>公司：</b>{COMPANY_NAME}</div>
               <div><b>團號：</b>{tourCode}</div>
               <div><b>團名：</b>{tourName}</div>
               <div><b>出發日：</b>{departureDate}</div>
@@ -359,7 +359,7 @@ export default function PublicRequestPage() {
         )}
 
         <p style={{ textAlign: 'center', marginTop: 30, fontSize: 11, color: '#bbb' }}>
-          此頁面由 Venturo ERP 產生 · 角落旅行社
+          此頁面由 Venturo ERP 產生 · {COMPANY_NAME}
         </p>
       </div>
     </div>

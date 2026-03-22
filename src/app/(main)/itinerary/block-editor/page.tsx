@@ -1,4 +1,5 @@
 'use client'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 /**
  * 區塊編輯器版行程表（新架構）
  *
@@ -126,7 +127,7 @@ function BlockEditorPageContent() {
     } else if (!itineraryId) {
       // 創建預設區塊
       const defaultData: TourFormData = {
-        tagline: `Venturo Travel ${new Date().getFullYear()}`,
+        tagline: `${COMPANY_NAME} ${new Date().getFullYear()}`,
         title: '',
         subtitle: '',
         description: '',

@@ -1,4 +1,5 @@
 'use client'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 /**
  * TourRequestFormDialog - 正式需求單
  *
@@ -205,7 +206,7 @@ export function TourRequestFormDialog({
 
   // [Planned] 我方資訊 - 待整合 workspace settings
   const [companyInfo, setCompanyInfo] = useState({
-    name: TOUR_REQUEST_FORM_DIALOG_LABELS.角落旅行社,
+    name: COMPANY_NAME,
     phone: '',
     fax: '',
     sales: '',

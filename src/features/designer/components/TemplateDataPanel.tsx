@@ -7,6 +7,7 @@
  */
 
 import { Label } from '@/components/ui/label'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -334,7 +335,7 @@ export function TemplateDataPanel({
               <Input
                 value={(templateData.companyName as string) || ''}
                 onChange={e => updateField('companyName', e.target.value)}
-                placeholder="Corner Travel"
+                placeholder={COMPANY_NAME_EN}
                 className="h-8 text-sm"
               />
             </div>

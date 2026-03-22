@@ -1,6 +1,7 @@
 'use client'
 
 import { MapPin } from 'lucide-react'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { isHtmlString, cleanTiptapHtml } from '@/lib/utils/rich-text'
 import type { TourPageData } from '@/features/tours/types/tour-display.types'
 
@@ -32,7 +33,7 @@ const LUXURY = {
 
 /**
  * Luxury 風格 Hero Section
- * 參考 Corner Travel Collection 設計
+ * 參考 COMPANY_NAME_EN Collection 設計
  * 特點：左右分欄、標籤系統、數據卡片、襯線字體混排
  */
 export function TourHeroLuxury({ data, viewMode }: TourHeroLuxuryProps) {

@@ -154,7 +154,7 @@ export default async function PublicItineraryPage({
               </h1>
             </div>
             <div style={{ textAlign: 'right', fontSize: 14 }}>
-              <p style={{ fontWeight: 600, color: '#c9a96e' }}>角落旅行社</p>
+              <p style={{ fontWeight: 600, color: '#c9a96e' }}>{COMPANY_NAME}</p>
             </div>
           </div>
 

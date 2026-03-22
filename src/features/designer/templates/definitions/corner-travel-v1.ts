@@ -1,5 +1,5 @@
 /**
- * Corner Travel 官方風格範本 v1
+ * COMPANY_NAME_EN 官方風格範本 v1
  *
  * 參考 0209東京手冊設計：
  * - A5 尺寸，設計成跨頁配對（左/右）
@@ -8,6 +8,7 @@
  * - 清晰的資訊層次
  */
 import type { PageTemplate, TemplateData } from './types'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import type {
   CanvasElement,
   TextElement,
@@ -133,7 +134,7 @@ export const cornerTravelV1BackCover: PageTemplate = {
       opacity: 1,
       locked: false,
       visible: true,
-      content: `${data.companyName || '角落旅行社股份有限公司'} CORNER TRAVEL AGENCY CO.\n10350 台北市大同區重慶北路一段67號8樓之2\nTEL +886 2 7751 6051・FAX +886 2 2552 1332`,
+      content: `${data.companyName || '{COMPANY_NAME}股份有限公司'} CORNER TRAVEL AGENCY CO.\n10350 台北市大同區重慶北路一段67號8樓之2\nTEL +886 2 7751 6051・FAX +886 2 2552 1332`,
       style: {
         fontFamily: 'Noto Sans TC',
         fontSize: 8,

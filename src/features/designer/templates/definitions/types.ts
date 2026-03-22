@@ -4,6 +4,7 @@
  * 定義範本的結構和生成器介面
  */
 import type { CanvasElement } from '@/features/designer/components/types'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 /**
  * 餐食圖標類型（用於手動覆寫自動選擇的圖標）
@@ -271,7 +272,7 @@ export interface TemplateData {
   // 通用
   currentPageNumber?: number // 當前頁碼
 
-  // Corner Travel 專用
+  // COMPANY_NAME_EN 專用
   currentDayData?: DailyDetailData // 當前天數資料（每日行程頁用）
   hotelName?: string // 當天住宿名稱
   cityDescription?: string // 城市介紹文字

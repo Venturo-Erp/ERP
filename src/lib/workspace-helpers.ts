@@ -5,6 +5,7 @@
  */
 
 import { useAuthStore } from '@/stores/auth-store'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { useWorkspaceStoreData } from '@/stores/workspace/workspace-store'
 import type { Workspace } from '@/stores/workspace/types'
 import { logger } from '@/lib/utils/logger'
@@ -244,7 +245,7 @@ export function getWorkspaceCompanyName(): string {
 }
 
 /**
- * 取得當前 workspace 的年度標語 (e.g., "Corner Travel 2026")
+ * 取得當前 workspace 的年度標語 (e.g., "角落旅行社 2026" 或 "大地旅遊 2026")
  *
  * @returns 標語字串
  */

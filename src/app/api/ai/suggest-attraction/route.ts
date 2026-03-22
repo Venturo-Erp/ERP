@@ -2,11 +2,12 @@
  * POST /api/ai/suggest-attraction
  * 用 Gemini AI 補充景點缺失資料
  *
- * ⚠️ 限定功能：僅角落旅行社 (TP/TC) 可用
+ * ⚠️ 限定功能：僅本公司 (TP/TC) 可用（會顯示登入公司名稱）
  * ⚠️ 每日使用限制：30 次/日
  */
 
 import { NextRequest } from 'next/server'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { logger } from '@/lib/utils/logger'
 import { successResponse, errorResponse, ErrorCode } from '@/lib/api/response'
 import { checkApiUsage, updateApiUsage, API_LIMITS } from '@/lib/api-usage'

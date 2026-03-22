@@ -2,6 +2,8 @@
  * 交通需求單列印工具
  */
 
+import { COMPANY_NAME } from '@/lib/tenant'
+
 interface TransportDay {
   dayNumber: number
   date: string
@@ -173,7 +175,7 @@ export function printTransportRequirement(data: TransportRequirementData) {
       <h3>我方資訊</h3>
       <div class="info-row">
         <span class="info-label">公司：</span>
-        <span>角落旅行社</span>
+        <span>${COMPANY_NAME}</span>
       </div>
       <div class="info-row">
         <span class="info-label">團號：</span>
@@ -267,7 +269,7 @@ export function printTransportRequirement(data: TransportRequirementData) {
       <div style="margin-bottom: 0.3cm">
         <strong>敬請確認回傳資訊</strong>
       </div>
-      <div>角落旅行社</div>
+      <div>${COMPANY_NAME}</div>
       <div>電話：02-2345-6789</div>
       <div>傳真：02-2345-6788</div>
       <div>Email：service@cornertravel.com.tw</div>

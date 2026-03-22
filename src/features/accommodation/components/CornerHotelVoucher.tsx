@@ -5,6 +5,7 @@
  */
 
 import React from 'react'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 // Corner 品牌色系
 const CORNER_COLORS = {
@@ -107,7 +108,7 @@ export const CornerHotelVoucher: React.FC<CornerHotelVoucherProps> = ({
       <div className="relative border-b-2 border-[#F89A1E] pb-3 mb-5">
         {/* Logo - 左上角 */}
         <div className="absolute left-0 top-0">
-          <img src="/corner-logo.png" alt="Corner Travel" className="h-[35px] w-auto" />
+          <img src="/corner-logo.png" alt={COMPANY_NAME_EN} className="h-[35px] w-auto" />
         </div>
 
         {/* 標題 - 右側 */}

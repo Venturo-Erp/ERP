@@ -1,5 +1,6 @@
 // @ts-nocheck
 'use client'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 /**
  * RequirementsList - 需求總覽共用組件
@@ -557,7 +558,7 @@ export function RequirementsList({
   <div class="info-grid">
     <div class="info-section">
       <h3>我方資訊</h3>
-      <div class="info-row"><span class="info-label">公司：</span><span>角落旅行社</span></div>
+      <div class="info-row"><span class="info-label">公司：</span><span>${COMPANY_NAME}</span></div>
       <div class="info-row"><span class="info-label">團號：</span><span>${tour?.code || ''}</span></div>
       <div class="info-row"><span class="info-label">團名：</span><span>${tour?.name || ''}</span></div>
       <div class="info-row"><span class="info-label">出發日：</span><span>${tour?.departure_date || ''}</span></div>
@@ -640,7 +641,7 @@ export function RequirementsList({
   <div class="info-grid">
     <div class="info-section">
       <h3>我方資訊</h3>
-      <div class="info-row"><span class="info-label">公司：</span><span>角落旅行社</span></div>
+      <div class="info-row"><span class="info-label">公司：</span><span>${COMPANY_NAME}</span></div>
       <div class="info-row"><span class="info-label">團號：</span><span>${tour?.code || ''}</span></div>
       <div class="info-row"><span class="info-label">團名：</span><span>${tour?.name || ''}</span></div>
       <div class="info-row"><span class="info-label">出發日：</span><span>${tour?.departure_date || ''}</span></div>

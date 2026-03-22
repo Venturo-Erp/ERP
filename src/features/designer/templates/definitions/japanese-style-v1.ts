@@ -4,6 +4,7 @@
  * 簡約、留白、優雅的日式設計風格
  */
 import type { PageTemplate, TemplateData } from './types'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import type {
   CanvasElement,
   TextElement,
@@ -39,7 +40,7 @@ export const japaneseStyleV1: PageTemplate = {
       opacity: 1,
       locked: false,
       visible: true,
-      content: data.companyName || 'Corner Travel',
+      content: data.companyName || {COMPANY_NAME_EN},
       style: {
         fontFamily: 'Noto Sans TC',
         fontSize: 10,

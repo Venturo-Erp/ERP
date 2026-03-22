@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { createClient } from '@supabase/supabase-js'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
             },
             {
               type: 'text',
-              text: '角落旅行社',
+              text: {COMPANY_NAME},
               color: '#FFFFFF',
               size: 'xs',
               margin: 'sm',

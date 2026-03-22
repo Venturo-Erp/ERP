@@ -1,11 +1,12 @@
 /**
- * Corner Travel 每日行程頁模板
+ * COMPANY_NAME_EN 每日行程頁模板
  *
  * 參考 0209東京手冊 Day 頁面設計：
  * - 左頁：Day N 行程 + 城市介紹 + 大圖
  * - 右頁：Day N+1 行程 + 景點介紹 + 圖片
  */
 import type { PageTemplate, TemplateData, DailyDetailData } from './types'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import type {
   CanvasElement,
   TextElement,

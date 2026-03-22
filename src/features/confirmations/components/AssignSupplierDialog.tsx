@@ -1,4 +1,5 @@
 'use client'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 import { useState, useEffect, useCallback } from 'react'
 import { Printer, Search, Building2, Loader2, Mail, MessageCircle, Globe, Phone, Users } from 'lucide-react'
@@ -194,7 +195,7 @@ export function AssignSupplierDialog({
   <div class="info-grid">
     <div class="info-section">
       <h3>我方資訊</h3>
-      <div class="info-row"><span class="info-label">公司：</span><span>角落旅行社</span></div>
+      <div class="info-row"><span class="info-label">公司：</span><span>${COMPANY_NAME}</span></div>
       <div class="info-row"><span class="info-label">團號：</span><span>${tour?.code || ''}</span></div>
       <div class="info-row"><span class="info-label">團名：</span><span>${tour?.name || ''}</span></div>
       <div class="info-row"><span class="info-label">出發日：</span><span>${tour?.departure_date || ''}</span></div>
@@ -471,7 +472,7 @@ export function AssignSupplierDialog({
   <div class="info-grid">
     <div class="info-section">
       <h3>我方資訊</h3>
-      <div class="info-row"><span class="info-label">公司：</span><span>角落旅行社</span></div>
+      <div class="info-row"><span class="info-label">公司：</span><span>${COMPANY_NAME}</span></div>
       <div class="info-row"><span class="info-label">團號：</span><span>${tour?.code || ''}</span></div>
       <div class="info-row"><span class="info-label">團名：</span><span>${tour?.name || ''}</span></div>
       <div class="info-row"><span class="info-label">出發日：</span><span>${tour?.departure_date || ''}</span></div>

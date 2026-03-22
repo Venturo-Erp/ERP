@@ -4,6 +4,7 @@
  * 負責根據範本 ID 和行程數據生成完整的 CanvasPage
  */
 import { japaneseStyleV1 } from '../definitions/japanese-style-v1'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { japaneseStyleV1Itinerary } from '../definitions/japanese-style-v1-itinerary'
 import { japaneseStyleV1Daily } from '../definitions/japanese-style-v1-daily'
 import { japaneseStyleV1Memo } from '../definitions/japanese-style-v1-memo'
@@ -13,7 +14,7 @@ import { japaneseStyleV1Attraction } from '../definitions/japanese-style-v1-attr
 import { japaneseStyleV1HotelMulti } from '../definitions/japanese-style-v1-hotel-multi'
 import { japaneseStyleV1Vehicle } from '../definitions/japanese-style-v1-vehicle'
 import { japaneseStyleV1Table } from '../definitions/japanese-style-v1-table'
-// Corner Travel 官方風格
+// COMPANY_NAME_EN 官方風格
 import {
   cornerTravelV1BackCover,
   cornerTravelV1FrontCover,
@@ -84,7 +85,7 @@ const templateRegistry: Record<string, PageTemplate> = {
   [japaneseStyleV1Memo.id]: japaneseStyleV1Memo,
   [japaneseStyleV1Hotel.id]: japaneseStyleV1Hotel,
   [japaneseStyleV1HotelMulti.id]: japaneseStyleV1HotelMulti,
-  // Corner Travel 官方風格
+  // COMPANY_NAME_EN 官方風格
   [cornerTravelV1BackCover.id]: cornerTravelV1BackCover,
   [cornerTravelV1FrontCover.id]: cornerTravelV1FrontCover,
   [cornerTravelV1TocLeft.id]: cornerTravelV1TocLeft,
@@ -141,7 +142,7 @@ export const styleSeries: StyleSeries[] = [
   },
   {
     id: 'corner-travel-v1',
-    name: 'Corner Travel 官方',
+    name: `${COMPANY_NAME} 官方`,
     templates: {
       cover: 'corner-travel-v1-front-cover', // 封面（右頁）
       backCover: 'corner-travel-v1-back-cover', // 封底（左頁）
@@ -598,7 +599,7 @@ export function itineraryToTemplateData(itinerary: {
     mainTitle: itinerary.title,
     subtitle: itinerary.subtitle,
     travelDates: travelDates || undefined,
-    companyName: 'Corner Travel',
+    companyName: {COMPANY_NAME_EN},
     tourCode: itinerary.tour_code || itinerary.code,
     leaderName: leader?.name,
     leaderPhone: leader?.domesticPhone || leader?.phone,
@@ -745,7 +746,7 @@ export function timelineToTemplateData(timeline: TimelineItineraryData): Templat
     mainTitle: timeline.title,
     subtitle: timeline.subtitle,
     travelDates: travelDates || undefined,
-    companyName: 'Corner Travel',
+    companyName: {COMPANY_NAME_EN},
     dailyItineraries: dailyItineraries.length > 0 ? dailyItineraries : undefined,
     dailyDetails: dailyDetails.length > 0 ? dailyDetails : undefined,
   }
@@ -794,7 +795,7 @@ export function proposalToTemplateData(proposal: {
     destination: destination || undefined,
     mainTitle: mainTitle || undefined,
     travelDates: travelDates || undefined,
-    companyName: 'Corner Travel',
+    companyName: {COMPANY_NAME_EN},
     tourCode: proposal.code,
   }
 }

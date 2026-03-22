@@ -10,6 +10,7 @@
  */
 
 'use client'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 import React, { useState, useEffect } from 'react'
 import {
@@ -218,7 +219,7 @@ export function CoreTableRequestDialog({
       <h3>我方資訊</h3>
       <div class="info-row">
         <span class="info-label">公司：</span>
-        <span>角落旅行社</span>
+        <span>${COMPANY_NAME}</span>
       </div>
       <div class="info-row">
         <span class="info-label">負責人：</span>

@@ -5,6 +5,7 @@
  */
 
 import React from 'react'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 // Corner 品牌色系
 const CORNER_COLORS = {
@@ -139,7 +140,7 @@ export const CornerFlightItinerary: React.FC<CornerFlightItineraryProps> = ({
         >
           <img
             src="/corner-logo.png"
-            alt="Corner Travel"
+            alt={COMPANY_NAME_EN}
             style={{
               height: '35px',
               width: 'auto',

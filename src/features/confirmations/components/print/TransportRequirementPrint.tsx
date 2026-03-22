@@ -3,6 +3,7 @@
  */
 
 import { UnifiedRequirementPrint } from './UnifiedRequirementPrint'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 interface TransportDay {
   dayNumber: number
@@ -75,7 +76,7 @@ export function TransportRequirementPrint({
   return (
     <UnifiedRequirementPrint
       supplierName={supplierName}
-      companyName="角落旅行社"
+      companyName={COMPANY_NAME}
       tourCode={tourCode}
       tourName={tourName}
       totalPax={totalPax}

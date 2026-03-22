@@ -1,4 +1,5 @@
 import { Textarea } from '@/components/ui/textarea'
+import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
 interface UnifiedTraditionalViewProps {
   requestType: 'accommodation' | 'meal' | 'transport' | 'activity' | 'cancellation'
@@ -35,8 +36,8 @@ export function UnifiedTraditionalView({
           {isCancellation ? '⚠️ 取消通知單' : '廠商需求單'}
         </h2>
         <div className="text-right text-sm text-gray-600">
-          <div className="font-semibold">角落旅行社</div>
-          <div className="text-xs">Corner Travel</div>
+          <div className="font-semibold">${COMPANY_NAME}</div>
+          <div className="text-xs">COMPANY_NAME_EN</div>
         </div>
       </div>
 
