@@ -28,43 +28,38 @@ async function getTourMembers(code: string) {
   // 查公司名稱
   let companyName = COMPANY_NAME
   if (tour.workspace_id) {
-    const { data: ws } = await supabase
+    const { data: ws } = (await supabase
       .from('workspaces')
       .select('name')
       .eq('id', tour.workspace_id)
-      .single() as { data: { name: string } | null }
+      .single()) as { data: { name: string } | null }
     if (ws?.name) companyName = ws.name
   }
 
   // 2. 查團員
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('id')
-    .eq('tour_id', tour.id)
+  const { data: orders } = await supabase.from('orders').select('id').eq('tour_id', tour.id)
 
   const orderIds = orders?.map(o => o.id) || []
 
   let members: Member[] = []
   if (orderIds.length > 0) {
-    const { data } = await supabase
+    const { data } = (await supabase
       .from('order_members')
       .select('customer:customer_id(name, national_id, birth_date)')
-      .in('order_id', orderIds) as { data: { customer: Member | null }[] | null }
+      .in('order_id', orderIds)) as { data: { customer: Member | null }[] | null }
 
-    members = (data || [])
-      .map(m => m.customer)
-      .filter((c): c is Member => c !== null)
+    members = (data || []).map(m => m.customer).filter((c): c is Member => c !== null)
   }
 
   // 3. 查 Excel 下載連結
-  const { data: doc } = await supabase
+  const { data: doc } = (await supabase
     .from('tour_documents')
     .select('file_path')
     .eq('tour_id', tour.id)
     .like('file_name', `${code}_members%`)
     .order('created_at', { ascending: false })
     .limit(1)
-    .single() as { data: { file_path: string } | null }
+    .single()) as { data: { file_path: string } | null }
 
   let excelUrl: string | null = null
   if (doc) {
@@ -116,21 +111,25 @@ export default async function InsuranceMemberPage({
         <meta name="robots" content="noindex, nofollow" />
         <title>{tour.code} 團員名單 - 保險用</title>
       </head>
-      <body style={{
-        margin: 0,
-        padding: '16px',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-        backgroundColor: '#f8f6f3',
-        color: '#333',
-      }}>
+      <body
+        style={{
+          margin: 0,
+          padding: '16px',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+          backgroundColor: '#f8f6f3',
+          color: '#333',
+        }}
+      >
         {/* Header */}
-        <div style={{
-          backgroundColor: '#fff',
-          borderRadius: '12px',
-          padding: '20px',
-          marginBottom: '16px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        }}>
+        <div
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            padding: '20px',
+            marginBottom: '16px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          }}
+        >
           <div style={{ fontSize: '12px', color: '#888', marginBottom: '4px' }}>
             🛡️ 旅遊責任險 團員名單
           </div>
@@ -145,17 +144,21 @@ export default async function InsuranceMemberPage({
         </div>
 
         {/* Member List */}
-        <div style={{
-          backgroundColor: '#fff',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            fontSize: '14px',
-          }}>
+        <div
+          style={{
+            backgroundColor: '#fff',
+            borderRadius: '12px',
+            overflow: 'hidden',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          }}
+        >
+          <table
+            style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+              fontSize: '14px',
+            }}
+          >
             <thead>
               <tr style={{ backgroundColor: '#e8dcc8' }}>
                 <th style={{ padding: '10px 8px', textAlign: 'center', width: '36px' }}>#</th>
@@ -173,14 +176,23 @@ export default async function InsuranceMemberPage({
                 </tr>
               ) : (
                 members.map((m, i) => (
-                  <tr key={i} style={{
-                    borderBottom: '1px solid #f0ece6',
-                    backgroundColor: i % 2 === 0 ? '#fff' : '#faf8f5',
-                  }}>
-                    <td style={{ padding: '10px 8px', textAlign: 'center', color: '#999' }}>{i + 1}</td>
+                  <tr
+                    key={i}
+                    style={{
+                      borderBottom: '1px solid #f0ece6',
+                      backgroundColor: i % 2 === 0 ? '#fff' : '#faf8f5',
+                    }}
+                  >
+                    <td style={{ padding: '10px 8px', textAlign: 'center', color: '#999' }}>
+                      {i + 1}
+                    </td>
                     <td style={{ padding: '10px 8px', fontWeight: 500 }}>{m.name}</td>
-                    <td style={{ padding: '10px 8px', textAlign: 'center' }}>{formatDate(m.birth_date)}</td>
-                    <td style={{ padding: '10px 8px', textAlign: 'center', fontFamily: 'monospace' }}>
+                    <td style={{ padding: '10px 8px', textAlign: 'center' }}>
+                      {formatDate(m.birth_date)}
+                    </td>
+                    <td
+                      style={{ padding: '10px 8px', textAlign: 'center', fontFamily: 'monospace' }}
+                    >
                       {m.national_id || '-'}
                     </td>
                   </tr>
@@ -211,12 +223,14 @@ export default async function InsuranceMemberPage({
         )}
 
         {/* Footer */}
-        <div style={{
-          marginTop: '24px',
-          textAlign: 'center',
-          fontSize: '12px',
-          color: '#bbb',
-        }}>
+        <div
+          style={{
+            marginTop: '24px',
+            textAlign: 'center',
+            fontSize: '12px',
+            color: '#bbb',
+          }}
+        >
           {companyName}
         </div>
       </body>

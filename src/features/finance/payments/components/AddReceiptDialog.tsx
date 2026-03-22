@@ -415,7 +415,9 @@ export function AddReceiptDialog({
               </DialogTitle>
               <p className="text-sm text-muted-foreground">
                 {isConfirmed
-                  ? ADD_RECEIPT_TOAST_LABELS.CONFIRMED_READONLY(editingReceipt?.receipt_number || '')
+                  ? ADD_RECEIPT_TOAST_LABELS.CONFIRMED_READONLY(
+                      editingReceipt?.receipt_number || ''
+                    )
                   : isEditMode
                     ? ADD_RECEIPT_TOAST_LABELS.EDIT_TITLE(editingReceipt?.receipt_number || '')
                     : ADD_RECEIPT_DIALOG_LABELS.收款單號將自動產生}
@@ -427,207 +429,206 @@ export function AddReceiptDialog({
           <TabsContent value="tour" className="flex-1 flex flex-col overflow-hidden mt-4">
             {/* 基本資訊 */}
             <div className="flex items-end gap-4">
-          {/* 選擇團體 */}
-          <div className="w-[300px]">
-            <Label className="text-sm font-medium text-muted-foreground">
-              {ADD_RECEIPT_DIALOG_LABELS.LABEL_3406}
-            </Label>
-            <Combobox
-              options={tours.map(tour => ({
-                value: tour.id,
-                label: `${tour.code || ''} - ${tour.name || ''}`,
-              }))}
-              value={formData.tour_id}
-              onChange={value => {
-                setFormData(prev => ({
-                  ...prev,
-                  tour_id: value,
-                  order_id: '',
-                }))
-              }}
-              placeholder={ADD_RECEIPT_DIALOG_LABELS.請選擇團體}
-              emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
-              className="mt-1 bg-card"
-            />
-          </div>
-
-          {/* 選擇訂單 */}
-          <div className="w-[350px]">
-            <Label className="text-sm font-medium text-muted-foreground">
-              {ADD_RECEIPT_DIALOG_LABELS.LABEL_3874}
-            </Label>
-            <Select
-              disabled={!formData.tour_id || filteredOrders.length === 0}
-              value={formData.order_id}
-              onValueChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
-            >
-              <SelectTrigger className="mt-1 bg-card border-morandi-container/30">
-                <SelectValue
-                  placeholder={
-                    !formData.tour_id
-                      ? ADD_RECEIPT_DIALOG_LABELS.請先選擇團體
-                      : filteredOrders.length === 0
-                        ? ADD_RECEIPT_DIALOG_LABELS.此團體沒有訂單
-                        : ADD_RECEIPT_DIALOG_LABELS.請選擇訂單
-                  }
+              {/* 選擇團體 */}
+              <div className="w-[300px]">
+                <Label className="text-sm font-medium text-muted-foreground">
+                  {ADD_RECEIPT_DIALOG_LABELS.LABEL_3406}
+                </Label>
+                <Combobox
+                  options={tours.map(tour => ({
+                    value: tour.id,
+                    label: `${tour.code || ''} - ${tour.name || ''}`,
+                  }))}
+                  value={formData.tour_id}
+                  onChange={value => {
+                    setFormData(prev => ({
+                      ...prev,
+                      tour_id: value,
+                      order_id: '',
+                    }))
+                  }}
+                  placeholder={ADD_RECEIPT_DIALOG_LABELS.請選擇團體}
+                  emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
+                  className="mt-1 bg-card"
                 />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredOrders.map(order => (
-                  <SelectItem key={order.id} value={order.id}>
-                    {order.order_number} -{' '}
-                    {order.contact_person || ADD_RECEIPT_DIALOG_LABELS.無聯絡人}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+              </div>
 
-        {/* 收款項目 - 文青風表格 */}
-        <div className="flex-1 flex flex-col overflow-hidden pt-4 border-t border-morandi-container/30">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-morandi-primary">
-              {ADD_RECEIPT_DIALOG_LABELS.LABEL_4595}
-            </h3>
-            {/* 未確認的收款單都可以新增/刪除項目 */}
-            {!isConfirmed && (
-              <Button
-                onClick={addPaymentItem}
-                size="sm"
-                variant="ghost"
-                className="text-morandi-gold hover:bg-morandi-gold/10"
-              >
-                <Plus size={14} className="mr-2" />
-                {ADD_RECEIPT_DIALOG_LABELS.ADD_2089}
-              </Button>
-            )}
-          </div>
-
-          <div className="flex-1 overflow-auto">
-            {/* 項目表格 */}
-            <div className="border border-border rounded-lg overflow-hidden bg-card">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="text-xs text-morandi-primary font-medium bg-morandi-container/50">
-                    <th
-                      className="text-left py-2.5 px-3 border-b border-r border-border"
-                      style={{ width: '110px' }}
-                    >
-                      {ADD_RECEIPT_DIALOG_LABELS.LABEL_5187}
-                    </th>
-                    <th
-                      className="text-left py-2.5 px-3 border-b border-r border-border"
-                      style={{ width: '150px' }}
-                    >
-                      {ADD_RECEIPT_DIALOG_LABELS.LABEL_1182}
-                    </th>
-                    <th
-                      className="text-left py-2.5 px-3 border-b border-r border-border"
-                      style={{ width: '180px' }}
-                    >
-                      {ADD_RECEIPT_DIALOG_LABELS.LABEL_6465}
-                    </th>
-                    <th className="text-left py-2.5 px-3 border-b border-r border-border">
-                      {ADD_RECEIPT_DIALOG_LABELS.REMARKS}
-                    </th>
-                    <th
-                      className="text-right py-2.5 px-3 border-b border-r border-border"
-                      style={{ width: '120px' }}
-                    >
-                      {ADD_RECEIPT_DIALOG_LABELS.AMOUNT}
-                    </th>
-                    <th className="border-b border-border" style={{ width: '50px' }}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paymentItems.map((item, index) => (
-                    <PaymentItemRow
-                      key={item.id}
-                      item={item}
-                      index={index}
-                      onUpdate={updatePaymentItem}
-                      onRemove={removePaymentItem}
-                      canRemove={paymentItems.length > 1}
-                      isNewRow={index === paymentItems.length - 1}
-                      orderInfo={
-                        selectedOrder
-                          ? {
-                              order_number: selectedOrder.order_number || undefined,
-                              tour_name: selectedOrder.tour_name || undefined,
-                              contact_person: selectedOrder.contact_person || undefined,
-                              contact_email:
-                                (selectedOrder as { contact_email?: string }).contact_email ||
-                                undefined,
-                            }
-                          : undefined
+              {/* 選擇訂單 */}
+              <div className="w-[350px]">
+                <Label className="text-sm font-medium text-muted-foreground">
+                  {ADD_RECEIPT_DIALOG_LABELS.LABEL_3874}
+                </Label>
+                <Select
+                  disabled={!formData.tour_id || filteredOrders.length === 0}
+                  value={formData.order_id}
+                  onValueChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
+                >
+                  <SelectTrigger className="mt-1 bg-card border-morandi-container/30">
+                    <SelectValue
+                      placeholder={
+                        !formData.tour_id
+                          ? ADD_RECEIPT_DIALOG_LABELS.請先選擇團體
+                          : filteredOrders.length === 0
+                            ? ADD_RECEIPT_DIALOG_LABELS.此團體沒有訂單
+                            : ADD_RECEIPT_DIALOG_LABELS.請選擇訂單
                       }
                     />
-                  ))}
-                </tbody>
-              </table>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredOrders.map(order => (
+                      <SelectItem key={order.id} value={order.id}>
+                        {order.order_number} -{' '}
+                        {order.contact_person || ADD_RECEIPT_DIALOG_LABELS.無聯絡人}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* LinkPay 結果區域 */}
-        {linkPayResults.length > 0 && (
-          <div className="space-y-3 pt-4 border-t border-morandi-gold/30 bg-morandi-gold/5 -mx-6 px-6 py-4">
-            <h3 className="text-sm font-medium text-morandi-gold flex items-center gap-2">
-              <ExternalLink size={16} />
-              {ADD_RECEIPT_DIALOG_LABELS.LINKPAY_LINKS_GENERATED}
-            </h3>
-            <div className="space-y-2">
-              {linkPayResults.map(result => (
-                <div
-                  key={result.receiptNumber}
-                  className="flex items-center gap-3 bg-card rounded-lg px-4 py-3 border border-morandi-gold/20"
-                >
-                  <span className="text-sm font-medium text-morandi-primary min-w-[120px]">
-                    {result.receiptNumber}
-                  </span>
-                  <Input
-                    value={result.link}
-                    readOnly
-                    className="flex-1 text-xs bg-morandi-container/30 border-0"
-                  />
+            {/* 收款項目 - 文青風表格 */}
+            <div className="flex-1 flex flex-col overflow-hidden pt-4 border-t border-morandi-container/30">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-morandi-primary">
+                  {ADD_RECEIPT_DIALOG_LABELS.LABEL_4595}
+                </h3>
+                {/* 未確認的收款單都可以新增/刪除項目 */}
+                {!isConfirmed && (
                   <Button
-                    variant="ghost"
+                    onClick={addPaymentItem}
                     size="sm"
-                    onClick={() => {
-                      navigator.clipboard.writeText(result.link)
-                      setCopiedLink(result.receiptNumber)
-                      setTimeout(() => setCopiedLink(null), 2000)
-                    }}
-                    className="gap-1 text-morandi-gold hover:bg-morandi-gold/10"
-                  >
-                    {copiedLink === result.receiptNumber ? (
-                      <>
-                        <Check size={14} />
-                        {ADD_RECEIPT_DIALOG_LABELS.COPYING_1937}
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={14} />
-                        {ADD_RECEIPT_DIALOG_LABELS.COPY}
-                      </>
-                    )}
-                  </Button>
-                  <Button
                     variant="ghost"
-                    size="sm"
-                    onClick={() => window.open(result.link, '_blank')}
-                    className="gap-1 text-morandi-secondary hover:bg-morandi-container/50"
+                    className="text-morandi-gold hover:bg-morandi-gold/10"
                   >
-                    <ExternalLink size={14} />
-                    {ADD_RECEIPT_DIALOG_LABELS.LABEL_1670}
+                    <Plus size={14} className="mr-2" />
+                    {ADD_RECEIPT_DIALOG_LABELS.ADD_2089}
                   </Button>
+                )}
+              </div>
+
+              <div className="flex-1 overflow-auto">
+                {/* 項目表格 */}
+                <div className="border border-border rounded-lg overflow-hidden bg-card">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="text-xs text-morandi-primary font-medium bg-morandi-container/50">
+                        <th
+                          className="text-left py-2.5 px-3 border-b border-r border-border"
+                          style={{ width: '110px' }}
+                        >
+                          {ADD_RECEIPT_DIALOG_LABELS.LABEL_5187}
+                        </th>
+                        <th
+                          className="text-left py-2.5 px-3 border-b border-r border-border"
+                          style={{ width: '150px' }}
+                        >
+                          {ADD_RECEIPT_DIALOG_LABELS.LABEL_1182}
+                        </th>
+                        <th
+                          className="text-left py-2.5 px-3 border-b border-r border-border"
+                          style={{ width: '180px' }}
+                        >
+                          {ADD_RECEIPT_DIALOG_LABELS.LABEL_6465}
+                        </th>
+                        <th className="text-left py-2.5 px-3 border-b border-r border-border">
+                          {ADD_RECEIPT_DIALOG_LABELS.REMARKS}
+                        </th>
+                        <th
+                          className="text-right py-2.5 px-3 border-b border-r border-border"
+                          style={{ width: '120px' }}
+                        >
+                          {ADD_RECEIPT_DIALOG_LABELS.AMOUNT}
+                        </th>
+                        <th className="border-b border-border" style={{ width: '50px' }}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paymentItems.map((item, index) => (
+                        <PaymentItemRow
+                          key={item.id}
+                          item={item}
+                          index={index}
+                          onUpdate={updatePaymentItem}
+                          onRemove={removePaymentItem}
+                          canRemove={paymentItems.length > 1}
+                          isNewRow={index === paymentItems.length - 1}
+                          orderInfo={
+                            selectedOrder
+                              ? {
+                                  order_number: selectedOrder.order_number || undefined,
+                                  tour_name: selectedOrder.tour_name || undefined,
+                                  contact_person: selectedOrder.contact_person || undefined,
+                                  contact_email:
+                                    (selectedOrder as { contact_email?: string }).contact_email ||
+                                    undefined,
+                                }
+                              : undefined
+                          }
+                        />
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-        )}
 
+            {/* LinkPay 結果區域 */}
+            {linkPayResults.length > 0 && (
+              <div className="space-y-3 pt-4 border-t border-morandi-gold/30 bg-morandi-gold/5 -mx-6 px-6 py-4">
+                <h3 className="text-sm font-medium text-morandi-gold flex items-center gap-2">
+                  <ExternalLink size={16} />
+                  {ADD_RECEIPT_DIALOG_LABELS.LINKPAY_LINKS_GENERATED}
+                </h3>
+                <div className="space-y-2">
+                  {linkPayResults.map(result => (
+                    <div
+                      key={result.receiptNumber}
+                      className="flex items-center gap-3 bg-card rounded-lg px-4 py-3 border border-morandi-gold/20"
+                    >
+                      <span className="text-sm font-medium text-morandi-primary min-w-[120px]">
+                        {result.receiptNumber}
+                      </span>
+                      <Input
+                        value={result.link}
+                        readOnly
+                        className="flex-1 text-xs bg-morandi-container/30 border-0"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(result.link)
+                          setCopiedLink(result.receiptNumber)
+                          setTimeout(() => setCopiedLink(null), 2000)
+                        }}
+                        className="gap-1 text-morandi-gold hover:bg-morandi-gold/10"
+                      >
+                        {copiedLink === result.receiptNumber ? (
+                          <>
+                            <Check size={14} />
+                            {ADD_RECEIPT_DIALOG_LABELS.COPYING_1937}
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={14} />
+                            {ADD_RECEIPT_DIALOG_LABELS.COPY}
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => window.open(result.link, '_blank')}
+                        className="gap-1 text-morandi-secondary hover:bg-morandi-container/50"
+                      >
+                        <ExternalLink size={14} />
+                        {ADD_RECEIPT_DIALOG_LABELS.LABEL_1670}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           {/* 公司收款 */}

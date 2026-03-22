@@ -74,7 +74,7 @@ const indonesiaDescriptions = {
     opening_hours: { daily: '全天開放' }
   },
   '藍夢島': {
-    description: '《藍夢島Nusa Lembongan》與本島隔海相望，保留小島純樸氛圍。Devil's Tear海浪拍岸壯觀、Dream Beach細沙碧海、紅樹林獨木舟探險，浮潛邂逅Manta魟魚。島上機車代步、海景餐廳悠閒，是峇里島外的世外桃源。',
+    description: "《藍夢島Nusa Lembongan》與本島隔海相望，保留小島純樸氛圍。Devil's Tear海浪拍岸壯觀、Dream Beach細沙碧海、紅樹林獨木舟探險，浮潛邂逅Manta魟魚。島上機車代步、海景餐廳悠閒，是峇里島外的世外桃源。",
     ticket_price: '快艇往返Rp 250,000-350,000',
     opening_hours: { daily: '全天（建議避開大浪季節）' }
   },

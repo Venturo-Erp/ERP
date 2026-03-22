@@ -12,7 +12,10 @@ import {
 import { Combobox } from '@/components/ui/combobox'
 import { Trash2, Plus, Link2, UserCheck, X, BookOpen } from 'lucide-react'
 import { RequestItem, categoryOptions } from '../types'
-import { useAccountingSubjects, getDefaultSubjectByCategory } from '../../hooks/useAccountingSubjects'
+import {
+  useAccountingSubjects,
+  getDefaultSubjectByCategory,
+} from '../../hooks/useAccountingSubjects'
 import { CurrencyCell } from '@/components/table-cells'
 import {
   REQUEST_DETAIL_DIALOG_LABELS,
@@ -126,7 +129,7 @@ function CalcInput({
   const normalize = (str: string) =>
     str
       // 全形數字 → 半形
-      .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+      .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
       // 全形運算符 → 半形
       .replace(/＋/g, '+')
       .replace(/－/g, '-')
@@ -148,15 +151,13 @@ function CalcInput({
     if (!normalized) return 0
     try {
       // 拆成加減項計算，避免 eval
-      const result = normalized
-        .split('+')
-        .reduce((sum, part) => {
-          if (part.includes('-')) {
-            const [first, ...rest] = part.split('-')
-            return sum + (parseFloat(first) || 0) - rest.reduce((s, v) => s + (parseFloat(v) || 0), 0)
-          }
-          return sum + (parseFloat(part) || 0)
-        }, 0)
+      const result = normalized.split('+').reduce((sum, part) => {
+        if (part.includes('-')) {
+          const [first, ...rest] = part.split('-')
+          return sum + (parseFloat(first) || 0) - rest.reduce((s, v) => s + (parseFloat(v) || 0), 0)
+        }
+        return sum + (parseFloat(part) || 0)
+      }, 0)
       return Math.round(result * 100) / 100
     } catch {
       return parseFloat(normalized) || 0
@@ -175,8 +176,13 @@ function CalcInput({
       inputMode="decimal"
       value={displayValue}
       onChange={e => setDisplayValue(e.target.value)}
-      onFocus={() => { focusedRef.current = true }}
-      onBlur={() => { focusedRef.current = false; handleBlur() }}
+      onFocus={() => {
+        focusedRef.current = true
+      }}
+      onBlur={() => {
+        focusedRef.current = false
+        handleBlur()
+      }}
       onKeyDown={e => {
         if (e.key === 'Enter') {
           e.preventDefault()
@@ -279,7 +285,9 @@ export function EditableRequestItemList({
                   updateItem(item.id, {
                     category: value as RequestItem['category'],
                     accounting_subject_id: defaultSubject?.id || null,
-                    accounting_subject_name: defaultSubject ? `${defaultSubject.code} ${defaultSubject.name}` : null,
+                    accounting_subject_name: defaultSubject
+                      ? `${defaultSubject.code} ${defaultSubject.name}`
+                      : null,
                   })
                 }}
                 disabled={disabled}
@@ -342,7 +350,9 @@ export function EditableRequestItemList({
               ) : (
                 <div className="shrink-0 flex items-center gap-1">
                   <Combobox
-                    options={suppliers.filter(s => s.type === 'employee').map(s => ({ value: s.id, label: s.name || '未命名' }))}
+                    options={suppliers
+                      .filter(s => s.type === 'employee')
+                      .map(s => ({ value: s.id, label: s.name || '未命名' }))}
                     value={item.advanced_by === '_pending' ? '' : item.advanced_by}
                     onChange={value => {
                       const emp = suppliers.find(s => s.id === value)
@@ -355,7 +365,9 @@ export function EditableRequestItemList({
                   />
                   <button
                     type="button"
-                    onClick={() => updateItem(item.id, { advanced_by: undefined, advanced_by_name: undefined })}
+                    onClick={() =>
+                      updateItem(item.id, { advanced_by: undefined, advanced_by_name: undefined })
+                    }
                     disabled={disabled}
                     className="shrink-0 p-0.5 rounded hover:bg-morandi-red/10 text-morandi-muted hover:text-morandi-red disabled:opacity-50 disabled:cursor-not-allowed"
                     title={disabled ? '此請款單已加入出納單，無法修改' : '取消代墊'}
@@ -434,7 +446,11 @@ export function EditableRequestItemList({
                   onClick={addNewEmptyItem}
                   disabled={disabled}
                   className="h-8 w-8 text-morandi-gold hover:bg-morandi-gold/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title={disabled ? '此請款單已加入出納單，無法新增項目' : REQUEST_ITEM_LIST_LABELS.新增項目}
+                  title={
+                    disabled
+                      ? '此請款單已加入出納單，無法新增項目'
+                      : REQUEST_ITEM_LIST_LABELS.新增項目
+                  }
                 >
                   <Plus size={16} />
                 </Button>
@@ -446,7 +462,11 @@ export function EditableRequestItemList({
                   onClick={() => removeItem(item.id)}
                   disabled={disabled}
                   className="h-8 w-8 text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                  title={disabled ? '此請款單已加入出納單，無法刪除項目' : REQUEST_DETAIL_DIALOG_LABELS.刪除項目}
+                  title={
+                    disabled
+                      ? '此請款單已加入出納單，無法刪除項目'
+                      : REQUEST_DETAIL_DIALOG_LABELS.刪除項目
+                  }
                 >
                   <Trash2 size={16} />
                 </Button>

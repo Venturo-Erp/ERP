@@ -177,7 +177,7 @@ export function AddRequestDialog({
       tourRequestItems.forEach(item => {
         initialState[item.id] = {
           selected: false,
-          amount: item.quotedCost || item.estimatedCost || 0,  // 供應商報價 or 業務預估
+          amount: item.quotedCost || item.estimatedCost || 0, // 供應商報價 or 業務預估
         }
       })
       setSelectedRequestItems(initialState)
@@ -491,7 +491,7 @@ export function AddRequestDialog({
             const isEmployee = batchSupplier?.type === 'employee'
             await addPaymentItem(request.id, {
               category: batchCategory,
-              supplier_id: isEmployee ? '' : (batchSupplierId || ''),
+              supplier_id: isEmployee ? '' : batchSupplierId || '',
               supplier_name: batchSupplierName || null,
               description: batchDescription || batchCategory,
               unit_price: allocation.allocated_amount,

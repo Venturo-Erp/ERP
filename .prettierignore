@@ -35,3 +35,6 @@ coverage/
 # Misc
 .DS_Store
 *.pem
+
+# Legacy scripts (手動維護，不需格式化)
+scripts/legacy/
