@@ -585,23 +585,6 @@ export function Sidebar() {
             href: '/settings',
             label: COMP_LAYOUT_LABELS.設定,
             icon: Settings,
-            children: [
-              { href: '/settings', label: COMP_LAYOUT_LABELS.個人設定, icon: Settings },
-              ...(isSuperAdmin
-                ? [
-                    {
-                      href: '/settings/company',
-                      label: COMP_LAYOUT_LABELS.公司資訊,
-                      icon: Building2,
-                    },
-                    {
-                      href: '/settings/line',
-                      label: 'LINE 設定',
-                      icon: MessageCircle,
-                    },
-                  ]
-                : []),
-            ],
           })}
         </ul>
       </nav>

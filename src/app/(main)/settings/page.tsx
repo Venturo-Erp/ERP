@@ -7,6 +7,7 @@ import { User, LogOut, AlertCircle, Lock, Camera } from 'lucide-react'
 import { useSettingsState } from './hooks/useSettingsState'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { SettingsTabs } from './components/SettingsTabs'
 import {
   AccountSettings,
   SystemSettings,
@@ -106,6 +107,9 @@ export default function SettingsPage() {
       }
     >
       <div className="max-w-4xl mx-auto space-y-8 p-6">
+        {/* 分頁切換 */}
+        {hasSettingsAccess && <SettingsTabs />}
+
         {/* 首次設定提示 */}
         {isSetupMode && (
           <div className="bg-gradient-to-r from-morandi-gold/10 to-morandi-gold/5 border border-morandi-gold/30 rounded-xl p-6 mb-6">
@@ -159,8 +163,6 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* ===== 一般使用者可見 ===== */}
-
         {/* 帳號安全設定 */}
         <AccountSettings
           user={user}
@@ -174,7 +176,7 @@ export default function SettingsPage() {
           setPasswordUpdateLoading={setPasswordUpdateLoading}
         />
 
-        {/* ===== 以下僅有設定權限者可見 ===== */}
+        {/* 以下僅有設定權限者可見 */}
         {hasSettingsAccess && (
           <>
             {/* 藍新金流設定 */}

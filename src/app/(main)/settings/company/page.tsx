@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { SettingsTabs } from '../components/SettingsTabs'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
@@ -340,6 +341,7 @@ export default function CompanySettingsPage() {
       ]}
     >
       <div className="max-w-4xl mx-auto space-y-8 p-6">
+        <SettingsTabs />
         {/* 基本資訊 */}
         <Card className="rounded-xl shadow-lg border border-border p-8">
           <div className="flex items-center gap-3 mb-6">

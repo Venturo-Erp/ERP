@@ -10,6 +10,7 @@ import { MessageCircle, Users, Link2, Unlink } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useSuppliersSlim } from '@/data'
 import { toast } from 'sonner'
+import { SettingsTabs } from '../components/SettingsTabs'
 
 interface LineGroup {
   id: string
@@ -158,13 +159,15 @@ export default function LineSettingsPage() {
   ]
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <SettingsTabs />
+      
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-morandi-primary flex items-center gap-2">
-            <MessageCircle className="w-6 h-6 text-green-600" />
-            LINE 設定
-          </h1>
+          <h2 className="text-xl font-bold text-morandi-primary flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-green-600" />
+            LINE 群組管理
+          </h2>
           <p className="text-sm text-morandi-secondary mt-1">
             Bot 已加入 {groups.length} 個群組，{boundCount} 個已綁定，{unboundCount} 個待綁定
           </p>
