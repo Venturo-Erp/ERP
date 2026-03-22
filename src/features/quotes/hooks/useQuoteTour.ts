@@ -5,8 +5,10 @@ import { formatDate } from '@/lib/utils/format-date'
 import { useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { generateTourCode } from '@/stores/utils/code-generator'
-import { getCurrentWorkspaceCode } from '@/lib/workspace-helpers'
+import { getCurrentWorkspaceCode, getCurrentWorkspaceId } from '@/lib/workspace-helpers'
 import { useToursSlim } from '@/data'
+import { createChannelForTour } from '@/lib/channel-utils'
+import { useAuthStore } from '@/stores/auth-store'
 import type { ParticipantCounts, SellingPrices, CostCategory } from '../types'
 import type { Quote, Tour } from '@/stores/types'
 import type { CreateInput } from '@/stores/core/types'
@@ -93,6 +95,20 @@ export const useQuoteTour = ({
       await updateQuote(quote.id, { tour_id: newTour.id })
       const { updateTour } = await import('@/data')
       await updateTour(newTour.id, { quote_id: quote.id })
+
+      // 自動建立頻道
+      const workspaceId = getCurrentWorkspaceId()
+      const userId = useAuthStore.getState().user?.id
+      if (workspaceId && userId) {
+        await createChannelForTour({
+          tourId: newTour.id,
+          tourCode: tourCode,
+          tourName: quoteName,
+          departureDate: formatDate(departure_date),
+          workspaceId,
+          createdBy: userId,
+        })
+      }
     }
 
     // 跳轉到旅遊團管理頁面，並高亮新建的團
