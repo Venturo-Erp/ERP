@@ -4,12 +4,10 @@ import { useState, useMemo, useEffect, useCallback } from 'react'
 import {
   FileSignature,
   Plus,
-  Printer,
   Check,
   Users,
   Loader2,
   Link,
-  Send,
   Copy,
   ExternalLink,
   Mail,
@@ -46,10 +44,8 @@ interface MemberWithOrder {
   chinese_name?: string
   id_number?: string
   phone?: string
-  contract_id?: string | null
   order_code: string
   order_id: string
-  line_user_id?: string | null
 }
 
 interface Contract {
@@ -147,8 +143,6 @@ export function TourContractTab({ tour }: TourContractTabProps) {
               chinese_name?: string
               id_number?: string
               phone?: string
-              contract_id?: string
-              line_user_id?: string
             }>
           }
         ).order_members || []
@@ -158,30 +152,30 @@ export function TourContractTab({ tour }: TourContractTabProps) {
         chinese_name: m.chinese_name,
         id_number: m.id_number,
         phone: m.phone,
-        contract_id: m.contract_id,
-        line_user_id: m.line_user_id,
         order_code: order.code,
         order_id: order.id,
       }))
     })
   }, [orders])
 
+  // 根據已建立的合約判斷哪些團員已簽約
+  const memberIdsWithContract = useMemo(() => {
+    const ids = new Set<string>()
+    contracts.forEach(c => {
+      c.member_ids?.forEach((id: string) => ids.add(id))
+    })
+    return ids
+  }, [contracts])
+
   // 已有合約的團員
   const membersWithContract = useMemo(() => {
-    return allMembers.filter(m => m.contract_id)
-  }, [allMembers])
+    return allMembers.filter(m => memberIdsWithContract.has(m.id))
+  }, [allMembers, memberIdsWithContract])
 
   // 尚未簽約的團員
   const membersWithoutContract = useMemo(() => {
-    return allMembers.filter(m => !m.contract_id)
-  }, [allMembers])
-
-  // 選中的團員中有 LINE 的
-  const selectedMembersWithLine = useMemo(() => {
-    return allMembers.filter(
-      m => selectedMemberIds.includes(m.id) && m.line_user_id
-    )
-  }, [allMembers, selectedMemberIds])
+    return allMembers.filter(m => !memberIdsWithContract.has(m.id))
+  }, [allMembers, memberIdsWithContract])
 
   // 切換團員選擇
   const toggleMember = (memberId: string) => {
@@ -391,11 +385,6 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                 <div className="flex-1">
                   <span className="font-medium text-morandi-primary">{member.name}</span>
                   <span className="text-sm text-morandi-secondary ml-2">{member.order_code}</span>
-                  {member.line_user_id && (
-                    <span className="ml-2 text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded">
-                      LINE
-                    </span>
-                  )}
                 </div>
               </div>
             ))}
@@ -490,7 +479,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Send className="w-5 h-5 text-morandi-gold" />
+              <ExternalLink className="w-5 h-5 text-morandi-gold" />
               發送合約
             </DialogTitle>
           </DialogHeader>
@@ -513,16 +502,9 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   複製簽約連結
                 </Button>
 
-                {selectedMembersWithLine.length > 0 && (
-                  <Button variant="outline" className="w-full justify-start">
-                    <Send className="w-4 h-4 mr-2 text-green-600" />
-                    LINE 發送給 {selectedMembersWithLine[0].name}
-                  </Button>
-                )}
-
-                <Button variant="outline" className="w-full justify-start">
+                <Button variant="outline" className="w-full justify-start" disabled>
                   <Mail className="w-4 h-4 mr-2" />
-                  Email 發送
+                  Email 發送（開發中）
                 </Button>
 
                 <Button

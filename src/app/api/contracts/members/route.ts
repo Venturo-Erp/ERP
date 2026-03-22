@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // 查詢訂單和團員
+    // 查詢訂單和團員（只查詢存在的欄位）
     const { data: orders, error } = await supabase
       .from('orders')
       .select(`
@@ -30,9 +30,7 @@ export async function GET(request: NextRequest) {
           id,
           chinese_name,
           id_number,
-          phone,
-          contract_id,
-          line_user_id
+          phone
         )
       `)
       .eq('tour_id', tourId)
