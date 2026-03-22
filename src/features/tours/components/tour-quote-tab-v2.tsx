@@ -191,76 +191,58 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
   }
 
   return (
-    <div className="flex h-full border border-border rounded-lg overflow-hidden bg-card">
-      {/* 左邊版本選單 */}
-      <div className="w-48 border-r border-border bg-morandi-container/20 flex flex-col">
-        <div className="p-3 border-b border-border/60">
-          <span className="text-xs font-medium text-morandi-secondary">報價版本</span>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {/* 主報價單 */}
-          <button
-            onClick={() => setSelectedVersion('main')}
-            className={cn(
-              'w-full text-left px-3 py-2 rounded-md text-sm transition-colors',
-              selectedVersion === 'main'
-                ? 'bg-morandi-gold text-white'
-                : 'hover:bg-morandi-container/50 text-morandi-primary'
-            )}
-          >
-            <div className="flex items-center gap-2">
-              <Star size={14} className={selectedVersion === 'main' ? 'fill-white' : 'text-morandi-gold'} />
-              <span className="font-medium">主報價單</span>
-            </div>
-          </button>
-
-          {/* 分隔線 */}
-          {quickQuotes.length > 0 && (
-            <div className="py-2">
-              <div className="border-t border-border/60" />
-              <span className="text-[10px] text-morandi-secondary px-2">快速報價</span>
-            </div>
+    <div className="flex h-full">
+      {/* 左邊版本選單 - 窄條狀 */}
+      <div className="w-40 shrink-0 border-r border-border/40 flex flex-col bg-morandi-container/10">
+        {/* 主報價單 */}
+        <button
+          onClick={() => setSelectedVersion('main')}
+          className={cn(
+            'flex items-center gap-2 px-3 py-3 text-sm border-b border-border/30 transition-colors',
+            selectedVersion === 'main'
+              ? 'bg-morandi-gold/10 border-l-2 border-l-morandi-gold text-morandi-primary font-medium'
+              : 'hover:bg-morandi-container/30 text-morandi-secondary'
           )}
+        >
+          <Star size={14} className={selectedVersion === 'main' ? 'text-morandi-gold fill-morandi-gold' : 'text-morandi-secondary'} />
+          <span>主報價單</span>
+        </button>
 
-          {/* 快速報價單列表 */}
+        {/* 快速報價列表 */}
+        <div className="flex-1 overflow-y-auto">
           {quickQuotes.map((quote, index) => (
             <button
               key={quote.id}
               onClick={() => setSelectedVersion(quote.id)}
               className={cn(
-                'w-full text-left px-3 py-2 rounded-md text-sm transition-colors',
+                'w-full flex items-center gap-2 px-3 py-2.5 text-sm border-b border-border/20 transition-colors',
                 selectedVersion === quote.id
-                  ? 'bg-morandi-gold text-white'
-                  : 'hover:bg-morandi-container/50 text-morandi-primary'
+                  ? 'bg-morandi-gold/10 border-l-2 border-l-morandi-gold text-morandi-primary'
+                  : 'hover:bg-morandi-container/30 text-morandi-secondary'
               )}
             >
-              <div className="flex items-center gap-2">
-                <Receipt size={14} />
-                <span className="truncate">
+              <Receipt size={12} className="shrink-0" />
+              <div className="min-w-0 text-left">
+                <div className="truncate text-xs">
                   {quote.customer_name || `快速報價 ${index + 1}`}
-                </span>
-              </div>
-              <div className="text-[10px] opacity-70 mt-0.5 pl-5">
-                {quote.issue_date || '未填日期'}
+                </div>
+                <div className="text-[10px] opacity-60">
+                  {quote.issue_date || ''}
+                </div>
               </div>
             </button>
           ))}
         </div>
 
         {/* 新增按鈕 */}
-        <div className="p-2 border-t border-border/60">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full h-8 text-xs"
-            onClick={handleAddQuickQuote}
-            disabled={creatingQuick}
-          >
-            <Plus size={12} className="mr-1" />
-            新增快速報價
-          </Button>
-        </div>
+        <button
+          onClick={handleAddQuickQuote}
+          disabled={creatingQuick}
+          className="flex items-center justify-center gap-1 px-3 py-2.5 text-xs text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/30 border-t border-border/40 transition-colors"
+        >
+          <Plus size={12} />
+          <span>新增快速報價</span>
+        </button>
       </div>
 
       {/* 右邊內容區 */}
