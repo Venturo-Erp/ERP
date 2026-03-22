@@ -3,17 +3,20 @@
  * QuickQuoteDetail - 快速報價單詳細頁面
  */
 
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { Save, Printer, Edit2, X } from 'lucide-react'
+import { Save, Printer, Edit2, X, Download, Loader2 } from 'lucide-react'
 import { ResponsiveHeader } from '@/components/layout/responsive-header'
-import { Quote } from '@/stores/types'
+import { Quote, QuickQuoteItem } from '@/stores/types'
 import type { Quote as PrintableQuote } from '@/types/quote.types'
 import { PrintableQuickQuote } from './PrintableQuickQuote'
 import { useQuickQuoteDetail } from '../hooks/useQuickQuoteDetail'
 import { QuickQuoteHeader, QuickQuoteItemsTable, QuickQuoteSummary } from './quick-quote'
 import { QUICK_QUOTE_DETAIL_LABELS } from '../constants/labels'
+import { supabase } from '@/lib/supabase/client'
+import { toast } from 'sonner'
+import { nanoid } from 'nanoid'
 
 interface QuickQuoteDetailProps {
   quote: Quote
@@ -38,6 +41,7 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
     formData,
     setFormField,
     items,
+    setItems,
     totalAmount,
     totalCost,
     totalProfit,
@@ -48,6 +52,65 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
     reorderItems,
     handleSave,
   } = useQuickQuoteDetail({ quote, onUpdate })
+
+  // 載入狀態
+  const [isLoadingItems, setIsLoadingItems] = useState(false)
+
+  // 從行程載入項目（成本從需求單回覆帶入）
+  const handleLoadFromTour = useCallback(async () => {
+    if (!quote.tour_id) {
+      toast.error('此報價單沒有關聯旅遊團')
+      return
+    }
+
+    setIsLoadingItems(true)
+    try {
+      // 1. 取得核心表項目
+      const { data: coreItems, error: coreError } = await supabase
+        .from('tour_itinerary_items')
+        .select('id, day_number, category, title, resource_name, confirmed_cost, quantity')
+        .eq('tour_id', quote.tour_id)
+        .order('day_number', { ascending: true })
+        .order('category', { ascending: true })
+
+      if (coreError) throw coreError
+
+      if (!coreItems || coreItems.length === 0) {
+        toast.info('沒有找到行程項目')
+        setIsLoadingItems(false)
+        return
+      }
+
+      // 2. 轉換成 QuickQuoteItem 格式
+      const newItems: QuickQuoteItem[] = coreItems.map(item => ({
+        id: nanoid(),
+        description: `Day${item.day_number} ${item.category}: ${item.title || item.resource_name || ''}`,
+        cost: item.confirmed_cost || 0,
+        unit_price: 0, // 單價由使用者自己填
+        quantity: item.quantity || 1,
+        amount: 0,
+        notes: '',
+      }))
+
+      // 3. 合併到現有項目（避免重複）
+      const existingDescriptions = new Set(items.map(i => i.description))
+      const itemsToAdd = newItems.filter(i => !existingDescriptions.has(i.description))
+
+      if (itemsToAdd.length === 0) {
+        toast.info('所有項目都已存在')
+      } else {
+        // 合併現有項目和新項目
+        setItems(prev => [...prev, ...itemsToAdd])
+        setIsEditing(true)
+        toast.success(`已載入 ${itemsToAdd.length} 個項目`)
+      }
+    } catch (error) {
+      console.error('載入失敗:', error)
+      toast.error('載入行程項目失敗')
+    } finally {
+      setIsLoadingItems(false)
+    }
+  }, [quote.tour_id, items, setItems, setIsEditing])
 
   // 列印
   const handlePrint = async () => {
@@ -92,6 +155,21 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
             {/* 編輯模式 */}
             {isEditing && (
               <>
+                {quote.tour_id && (
+                  <Button
+                    onClick={handleLoadFromTour}
+                    variant="outline"
+                    className="gap-2"
+                    disabled={isLoadingItems}
+                  >
+                    {isLoadingItems ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                    載入行程項目
+                  </Button>
+                )}
                 <Button onClick={() => setIsEditing(false)} variant="outline" className="gap-2">
                   <X size={16} />
                   {QUICK_QUOTE_DETAIL_LABELS.CANCEL}

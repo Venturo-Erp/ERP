@@ -181,6 +181,7 @@ export function useQuickQuoteDetail({ quote, onUpdate }: UseQuickQuoteDetailProp
 
     // 項目資料
     items,
+    setItems,
     isLoadingItems,
 
     // 計算結果
