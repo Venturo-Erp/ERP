@@ -211,10 +211,20 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
     (participantCounts.single_room || 0)
 
   return (
-    <div className="w-full border border-border rounded-xl bg-card p-4">
-      <div className="flex flex-wrap gap-4 items-start">
-      {/* 儲存與列印按鈕 */}
+    <div className="w-full space-y-4">
+      {/* 按鈕列：新增檻次 + 儲存 + 列印 */}
       <div className="flex gap-2">
+        {!isReadOnly && (
+          <Button
+            onClick={handleAddTier}
+            variant="outline"
+            className="h-9 text-sm gap-1.5 border-dashed"
+            type="button"
+          >
+            <Plus size={14} />
+            {SELLING_PRICE_SECTION_LABELS.ADD_8828}
+          </Button>
+        )}
         {handleSave && (
           <Button
             onClick={() => {
@@ -222,7 +232,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
               toast.success(SELLING_PRICE_SECTION_LABELS.已儲存)
             }}
             disabled={isReadOnly}
-            className="flex-1 h-9 text-sm bg-morandi-green hover:bg-morandi-green-hover text-white gap-1.5"
+            className="h-9 text-sm bg-morandi-green hover:bg-morandi-green-hover text-white gap-1.5"
             type="button"
           >
             <Save size={14} />
@@ -237,10 +247,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
             }))
             handleGenerateQuotation(undefined, undefined, undefined, tierPricingsData)
           }}
-          className={cn(
-            'h-9 text-sm bg-morandi-secondary hover:bg-morandi-secondary/90 text-white gap-1.5',
-            handleSave ? 'flex-1' : 'w-full'
-          )}
+          className="h-9 text-sm bg-morandi-secondary hover:bg-morandi-secondary/90 text-white gap-1.5"
           type="button"
         >
           <Printer size={14} />
@@ -248,18 +255,8 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
         </Button>
       </div>
 
-      {/* 新增檻次按鈕 */}
-      {!isReadOnly && (
-        <Button
-          onClick={handleAddTier}
-          variant="outline"
-          className="w-full h-9 text-sm gap-1.5 border-dashed"
-          type="button"
-        >
-          <Plus size={14} />
-          {SELLING_PRICE_SECTION_LABELS.ADD_8828}
-        </Button>
-      )}
+      {/* 檻次卡片 - 橫向排列，最多 3 個 */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
       {/* 目前人數檻次卡片 */}
       <div className="bg-card border border-morandi-gold/40 rounded-xl overflow-hidden shadow-sm">

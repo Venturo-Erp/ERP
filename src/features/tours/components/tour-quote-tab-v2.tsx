@@ -191,9 +191,9 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
   }
 
   return (
-    <div className="flex h-full">
-      {/* 左邊版本選單 - 窄條狀 */}
-      <div className="w-40 shrink-0 border-r border-border/40 flex flex-col bg-morandi-container/10">
+    <div className="flex h-full gap-4 p-4">
+      {/* 左邊版本選單 - 卡片樣式 */}
+      <div className="w-40 shrink-0 flex flex-col bg-card border border-border rounded-xl overflow-hidden">
         {/* 主報價單 */}
         <button
           onClick={() => setSelectedVersion('main')}
