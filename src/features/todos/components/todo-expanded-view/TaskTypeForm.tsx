@@ -11,7 +11,10 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select'
+import { Combobox } from '@/components/ui/combobox'
 import { Hotel, Utensils, Bus, Ticket, PartyPopper, FileText } from 'lucide-react'
+import { useToursSlim, useOrdersSlim, useEmployeesSlim } from '@/data'
+import { toast } from 'sonner'
 import type { Todo, TodoTaskType } from '@/types/base.types'
 
 interface TaskTypeFormProps {
@@ -86,6 +89,10 @@ interface FormProps {
 }
 
 function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
+  const { items: tours } = useToursSlim()
+  const { items: orders } = useOrdersSlim()
+  const { items: employees } = useEmployeesSlim()
+  
   const [formData, setFormData] = React.useState({
     hotelName: '',
     roomType: '',
@@ -93,12 +100,87 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
     amount: 0,
     confirmationNumber: '',
     paymentStatus: 'unpaid' as 'unpaid' | 'paid' | 'advanced',
+    // 請款相關
+    tourId: todo.tour_id || '',
+    orderId: '',
+    advancedBy: '',
   })
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
 
-  const handleSubmit = () => {
-    // TODO: 更新核心表 + 建請款單
-    onUpdate({ status: 'completed', completed: true })
-    onClose()
+  // 篩選該團的訂單
+  const filteredOrders = orders.filter(o => o.tour_id === formData.tourId)
+
+  // 團選項
+  const tourOptions = tours.map(t => ({
+    value: t.id,
+    label: `${t.code} ${t.name}`,
+  }))
+
+  // 訂單選項
+  const orderOptions = filteredOrders.map(o => ({
+    value: o.id,
+    label: `${o.order_number || o.code} - ${o.contact_person || '未命名'}`,
+  }))
+
+  // 員工選項（代墊人）
+  const employeeOptions = employees.map(e => ({
+    value: e.id,
+    label: e.display_name || e.english_name || '未命名',
+  }))
+
+  const handleSubmit = async () => {
+    if (!formData.hotelName) {
+      toast.error('請填寫飯店名稱')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // 1. 更新核心表（如果有 tour_request_id）
+      if (todo.tour_request_id) {
+        const { supabase } = await import('@/lib/supabase/client')
+        await supabase
+          .from('tour_requests')
+          .update({
+            status: 'confirmed',
+            confirmed_at: new Date().toISOString(),
+          })
+          .eq('id', todo.tour_request_id)
+      }
+
+      // 2. 如果有付款，建立請款單
+      if (formData.paymentStatus !== 'unpaid' && formData.amount > 0) {
+        const { supabase } = await import('@/lib/supabase/client')
+        const requestDate = new Date().toISOString().split('T')[0]
+        const requestNumber = `PR${Date.now()}`
+        
+        await supabase.from('payment_requests').insert({
+          code: requestNumber,
+          request_number: requestNumber,
+          tour_id: formData.tourId || null,
+          order_id: formData.orderId || null,
+          supplier_name: formData.hotelName,
+          notes: `訂房 - ${formData.roomType} x ${formData.quantity}`,
+          amount: formData.amount,
+          total_amount: formData.amount,
+          status: 'pending',
+          request_type: formData.paymentStatus === 'advanced' ? '員工代墊' : '供應商支出',
+          request_date: requestDate,
+        })
+        
+        toast.success('已建立請款單')
+      }
+
+      // 3. 標記待辦完成
+      onUpdate({ status: 'completed', completed: true })
+      toast.success('任務已完成')
+      onClose()
+    } catch (error) {
+      console.error('提交失敗:', error)
+      toast.error('提交失敗')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -166,16 +248,59 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="unpaid">未付款</SelectItem>
-            <SelectItem value="paid">已刷卡</SelectItem>
+            <SelectItem value="paid">已刷卡（公司卡）</SelectItem>
             <SelectItem value="advanced">代墊</SelectItem>
           </SelectContent>
         </Select>
       </div>
       
-      {/* TODO: 如果付款狀態是已刷卡或代墊，顯示選團+訂單 */}
+      {/* 付款相關欄位 */}
+      {formData.paymentStatus !== 'unpaid' && (
+        <div className="space-y-3 pt-2 border-t border-border/40">
+          <p className="text-xs text-morandi-secondary font-medium">請款資訊</p>
+          <div>
+            <Label className="text-xs">選擇團</Label>
+            <Combobox
+              options={tourOptions}
+              value={formData.tourId}
+              onChange={value => setFormData(prev => ({ ...prev, tourId: value, orderId: '' }))}
+              placeholder="選擇團..."
+              className="h-9"
+            />
+          </div>
+          {formData.tourId && (
+            <div>
+              <Label className="text-xs">選擇訂單</Label>
+              <Combobox
+                options={orderOptions}
+                value={formData.orderId}
+                onChange={value => setFormData(prev => ({ ...prev, orderId: value }))}
+                placeholder="選擇訂單..."
+                className="h-9"
+              />
+            </div>
+          )}
+          {formData.paymentStatus === 'advanced' && (
+            <div>
+              <Label className="text-xs">代墊人</Label>
+              <Combobox
+                options={employeeOptions}
+                value={formData.advancedBy}
+                onChange={value => setFormData(prev => ({ ...prev, advancedBy: value }))}
+                placeholder="選擇代墊人..."
+                className="h-9"
+              />
+            </div>
+          )}
+        </div>
+      )}
       
-      <Button onClick={handleSubmit} className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white">
-        提交並完成任務
+      <Button 
+        onClick={handleSubmit} 
+        disabled={isSubmitting}
+        className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+      >
+        {isSubmitting ? '提交中...' : '提交並完成任務'}
       </Button>
     </div>
   )
