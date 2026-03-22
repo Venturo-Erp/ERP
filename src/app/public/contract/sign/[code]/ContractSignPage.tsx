@@ -85,6 +85,49 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
           template = template.replace(regex, safeValue)
         })
         
+        // 加入列印樣式（A4 排版 + 跨頁設定）
+        const printStyles = `
+          <style>
+            @media print {
+              @page {
+                size: A4;
+                margin: 15mm 10mm;
+              }
+              body {
+                font-size: 12pt !important;
+                line-height: 1.5 !important;
+              }
+              table {
+                page-break-inside: auto;
+              }
+              tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+              }
+              thead {
+                display: table-header-group;
+              }
+              tfoot {
+                display: table-footer-group;
+              }
+              h1, h2, h3, h4, h5, h6 {
+                page-break-after: avoid;
+              }
+              p {
+                orphans: 3;
+                widows: 3;
+              }
+              .page-break {
+                page-break-before: always;
+              }
+              .no-print {
+                display: none !important;
+              }
+            }
+          </style>
+        `
+        template = printStyles + template
+        
         // 清理 HTML
         const sanitizedHtml = DOMPurify.sanitize(template, {
           ALLOWED_TAGS: [
