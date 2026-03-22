@@ -150,7 +150,7 @@ export default function FinancePage() {
   return (
     <ContentPageLayout
       title={FINANCE_PAGE_LABELS.MANAGE_8421}
-      contentClassName="flex-1 overflow-auto p-6"
+      contentClassName="flex-1 overflow-auto"
     >
       <div className="space-y-6">
         {/* 財務總覽 - Enhanced UI */}
