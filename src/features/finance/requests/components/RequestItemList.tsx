@@ -263,7 +263,7 @@ export function EditableRequestItemList({
         {items.map((item, index) => (
           <div
             key={item.id}
-            className={`grid grid-cols-[80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-1.5 border-b border-morandi-container/30 items-center ${index === 0 ? 'bg-card' : 'hover:bg-morandi-container/5'}`}
+            className="grid grid-cols-[80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-1.5 border-b border-morandi-container/30 items-center bg-card hover:bg-morandi-container/5"
           >
             {/* Category */}
             <div>
