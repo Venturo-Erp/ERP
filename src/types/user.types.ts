@@ -88,7 +88,7 @@ export interface User {
   workspace_id?: string // 所屬工作空間 ID
   workspace_code?: string // 所屬工作空間代碼（TP, TC 等）- 登入時一併取得
   workspace_name?: string // 所屬工作空間名稱
-  workspace_type?: 'travel_agency' | 'vehicle_supplier' | 'guide_supplier' // 工作空間類型
+  workspace_type?: 'travel_agency' | 'vehicle_supplier' | 'guide_supplier' | 'transportation' | 'dmc' // 工作空間類型
   selected_workspace_id?: string // Super Admin 選擇的工作空間 ID
   pinyin?: string | null // 拼音姓名
   hidden_menu_items?: string[] // 隱藏的選單項目 ID

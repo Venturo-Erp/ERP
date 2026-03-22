@@ -328,6 +328,9 @@ const supplierMenuItems: MenuItem[] = [
   { href: '/supplier/requests', label: COMP_LAYOUT_LABELS.需求收件匣, icon: ClipboardList },
   { href: '/supplier/dispatch', label: COMP_LAYOUT_LABELS.派單管理, icon: Truck }, // 車行專用
   { href: '/database/fleet', label: COMP_LAYOUT_LABELS.車隊管理, icon: Bus }, // 車行專用
+  { href: '/supplier/finance', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
+  { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: Users },
+  { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Settings },
 ]
 
 const personalToolItems: MenuItem[] = []
@@ -411,8 +414,13 @@ export function Sidebar() {
 
   // 檢查是否為供應商 workspace
   const isSupplierWorkspace =
-    user?.workspace_type === 'vehicle_supplier' || user?.workspace_type === 'guide_supplier'
-  const isVehicleSupplier = user?.workspace_type === 'vehicle_supplier'
+    user?.workspace_type === 'vehicle_supplier' || 
+    user?.workspace_type === 'guide_supplier' ||
+    user?.workspace_type === 'transportation' ||
+    user?.workspace_type === 'dmc'
+  const isVehicleSupplier = 
+    user?.workspace_type === 'vehicle_supplier' || 
+    user?.workspace_type === 'transportation'
 
   const visibleMenuItems = useMemo(() => {
     const workspaceCode = user?.workspace_code

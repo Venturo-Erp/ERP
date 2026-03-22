@@ -54,8 +54,23 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
   const [canSign, setCanSign] = useState(false)
   const [signing, setSigning] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [signatureWidth, setSignatureWidth] = useState(350)
+  const [readingProgress, setReadingProgress] = useState(0)
+  const [signaturePreview, setSignaturePreview] = useState<string | null>(null)
   
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // 計算響應式簽名板寬度
+  useEffect(() => {
+    const updateWidth = () => {
+      const width = Math.min(350, window.innerWidth - 96) // 左右各留 48px
+      setSignatureWidth(width)
+    }
+    
+    updateWidth()
+    window.addEventListener('resize', updateWidth)
+    return () => window.removeEventListener('resize', updateWidth)
+  }, [])
 
   // 載入合約範本
   useEffect(() => {
@@ -156,6 +171,9 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     if (!container) return
     
     const { scrollTop, scrollHeight, clientHeight } = container
+    const progress = Math.min((scrollTop / (scrollHeight - clientHeight)) * 100, 100)
+    setReadingProgress(progress)
+    
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50
     
     if (isAtBottom && !canSign) {
@@ -163,8 +181,21 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     }
   }
 
-  // 處理電子簽名
-  const handleSign = async (signatureDataUrl: string) => {
+  // 處理電子簽名預覽
+  const handleSignatureCapture = (signatureDataUrl: string) => {
+    setSignaturePreview(signatureDataUrl)
+  }
+
+  // 重新簽名
+  const handleRetrySign = () => {
+    setSignaturePreview(null)
+    setError(null)
+  }
+
+  // 確認並提交簽名
+  const handleConfirmSign = async () => {
+    if (!signaturePreview) return
+    
     setSigning(true)
     setError(null)
 
@@ -174,7 +205,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contractId: contract.id,
-          signature: signatureDataUrl,
+          signature: signaturePreview,
         }),
       })
 
@@ -196,22 +227,32 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         {/* 頂部資訊列 */}
-        <div className="bg-white border-b shadow-sm px-4 py-3 sticky top-0 z-10">
-          <div className="max-w-4xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <FileSignature className="w-5 h-5 text-amber-600" />
-              <div>
-                <div className="font-medium text-gray-900">
-                  {TEMPLATE_LABELS[contract.template] || '旅遊合約'}
-                </div>
-                <div className="text-sm text-gray-500">
-                  {contract.tours.name} · {contract.code}
+        <div className="bg-white border-b shadow-sm sticky top-0 z-10">
+          <div className="px-4 py-3">
+            <div className="max-w-4xl mx-auto flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileSignature className="w-5 h-5 text-amber-600" />
+                <div>
+                  <div className="font-medium text-gray-900">
+                    {TEMPLATE_LABELS[contract.template] || '旅遊合約'}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {contract.tours.name} · {contract.code}
+                  </div>
                 </div>
               </div>
+              <div className="text-sm text-gray-500">
+                {contract.workspaces.name}
+              </div>
             </div>
-            <div className="text-sm text-gray-500">
-              {contract.workspaces.name}
-            </div>
+          </div>
+          
+          {/* 閱讀進度條 */}
+          <div className="w-full h-1 bg-gray-100">
+            <div
+              className="h-full bg-amber-500 transition-all duration-300"
+              style={{ width: `${readingProgress}%` }}
+            />
           </div>
         </div>
 
@@ -320,16 +361,50 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
               </div>
             </div>
 
-            {/* 簽名板 */}
+            {/* 簽名板或預覽 */}
             {signing ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-amber-500 mb-4" />
                 <p className="text-gray-600">簽署中...</p>
               </div>
+            ) : signaturePreview ? (
+              // 簽名預覽
+              <div className="space-y-4">
+                <div className="text-sm text-gray-600 text-center">
+                  請確認您的簽名：
+                </div>
+                <div className="border-2 border-amber-200 rounded-lg p-4 bg-amber-50">
+                  <img
+                    src={signaturePreview}
+                    alt="簽名預覽"
+                    className="mx-auto"
+                    style={{ maxWidth: signatureWidth, height: 180 }}
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex-1"
+                    onClick={handleRetrySign}
+                  >
+                    重新簽名
+                  </Button>
+                  <Button
+                    type="button"
+                    className="flex-1 bg-amber-500 hover:bg-amber-600"
+                    onClick={handleConfirmSign}
+                  >
+                    <Check className="w-4 h-4 mr-1" />
+                    確認提交
+                  </Button>
+                </div>
+              </div>
             ) : (
+              // 簽名板
               <SignaturePad
-                onSave={handleSign}
-                width={350}
+                onSave={handleSignatureCapture}
+                width={signatureWidth}
                 height={180}
               />
             )}
@@ -363,10 +438,28 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             <br />
             旅行社將會收到通知。
           </p>
-          <div className="text-sm text-gray-400">
+          <div className="text-sm text-gray-400 mb-6">
             合約編號：{contract.code}
             <br />
             簽署時間：{new Date().toLocaleString('zh-TW')}
+          </div>
+          
+          {/* 導航按鈕 */}
+          <div className="flex flex-col gap-3">
+            <Button
+              size="lg"
+              onClick={() => window.location.href = '/'}
+              className="bg-amber-500 hover:bg-amber-600"
+            >
+              回到首頁
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => setStep('preview')}
+            >
+              查看合約
+            </Button>
           </div>
         </div>
       </div>
