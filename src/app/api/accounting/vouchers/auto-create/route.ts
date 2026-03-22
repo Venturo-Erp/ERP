@@ -67,7 +67,11 @@ export async function POST(request: NextRequest) {
  * 根據科目代碼取得 subject_id
  */
 async function getSubjectId(code: string): Promise<string | null> {
-  const { data } = await getSupabase().from('accounting_subjects').select('id').eq('code', code).single()
+  const { data } = await getSupabase()
+    .from('accounting_subjects')
+    .select('id')
+    .eq('code', code)
+    .single()
   return data?.id || null
 }
 
