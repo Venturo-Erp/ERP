@@ -323,12 +323,14 @@ const menuItems: MenuItem[] = [
 ]
 
 // 供應商專用選單（車行、領隊公司）
+// 供應商選單 - 使用與主系統相同的名詞
 const supplierMenuItems: MenuItem[] = [
   { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: Home },
-  { href: '/supplier/requests', label: COMP_LAYOUT_LABELS.需求收件匣, icon: ClipboardList },
-  { href: '/supplier/dispatch', label: COMP_LAYOUT_LABELS.派單管理, icon: Truck }, // 車行專用
-  { href: '/database/fleet', label: COMP_LAYOUT_LABELS.車隊管理, icon: Bus }, // 車行專用
-  { href: '/supplier/finance', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
+  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPin }, // 他們的「團」
+  { href: '/orders', label: COMP_LAYOUT_LABELS.訂單, icon: ShoppingCart }, // 收到的訂單
+  { href: '/itinerary', label: COMP_LAYOUT_LABELS.行程管理, icon: Route },
+  { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
+  { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
   { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: Users },
   { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Settings },
 ]
