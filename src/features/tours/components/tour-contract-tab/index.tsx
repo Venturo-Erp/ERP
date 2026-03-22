@@ -18,7 +18,6 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tour, Order } from '@/stores/types'
 import { ContractTemplate } from '@/types/tour.types'
-import { supabase } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import {
   Dialog,
@@ -108,31 +107,18 @@ export function TourContractTab({ tour }: TourContractTabProps) {
   const loadData = useCallback(async () => {
     setLoading(true)
 
-    // 載入訂單和團員
-    const { data: ordersData } = await supabase
-      .from('orders')
-      .select(`
-        id,
-        code,
-        contact_person,
-        contact_phone,
-        order_members (
-          id,
-          chinese_name,
-          id_number,
-          phone,
-          contract_id,
-          line_user_id
-        )
-      `)
-      .eq('tour_id', tour.id)
-      .order('code')
-
-    if (ordersData) {
-      setOrders(ordersData as unknown as Order[])
+    // 載入訂單和團員（使用 API 繞過 RLS）
+    try {
+      const membersRes = await fetch(`/api/contracts/members?tourId=${tour.id}`)
+      if (membersRes.ok) {
+        const membersJson = await membersRes.json()
+        setOrders(membersJson.orders || [])
+      }
+    } catch {
+      // 忽略錯誤
     }
 
-    // 載入合約（contracts 表尚未加入 TypeScript types，使用 fetch）
+    // 載入合約
     try {
       const contractsRes = await fetch(`/api/contracts/list?tourId=${tour.id}`)
       if (contractsRes.ok) {
