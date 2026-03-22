@@ -99,6 +99,12 @@ export function TourContractTab({ tour }: TourContractTabProps) {
   const [signerType, setSignerType] = useState<'individual' | 'company'>('individual')
   const [signerName, setSignerName] = useState('')
   const [signerPhone, setSignerPhone] = useState('')
+  
+  // 合約資訊欄位
+  const [gatherLocation, setGatherLocation] = useState('桃園國際機場第一航廈')
+  const [gatherTime, setGatherTime] = useState('06:00')
+  const [depositAmount, setDepositAmount] = useState('')
+  const [balanceAmount, setBalanceAmount] = useState('')
 
   // 載入訂單和團員
   const loadData = useCallback(async () => {
@@ -225,6 +231,12 @@ export function TourContractTab({ tour }: TourContractTabProps) {
           signerType,
           signerName: signerName.trim(),
           signerPhone: signerPhone.trim(),
+          contractData: {
+            gatherLocation,
+            gatherTime,
+            depositAmount: depositAmount || '0',
+            balanceAmount: balanceAmount || '0',
+          },
         }),
       })
 
@@ -496,6 +508,67 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                 onChange={e => setSignerPhone(e.target.value)}
                 placeholder="電話"
               />
+            </div>
+
+            {/* 行程資訊確認 */}
+            <div className="bg-morandi-container/50 rounded-lg p-3 text-sm space-y-2">
+              <div className="font-medium text-morandi-primary mb-2">行程資訊確認</div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <span className="text-morandi-secondary">出發日期：</span>
+                  <span className="font-medium">{tour.departure_date || '未設定'}</span>
+                </div>
+                <div>
+                  <span className="text-morandi-secondary">回程日期：</span>
+                  <span className="font-medium">{tour.return_date || '未設定'}</span>
+                </div>
+                <div className="col-span-2">
+                  <span className="text-morandi-secondary">目的地：</span>
+                  <span className="font-medium">{tour.location || '未設定'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* 集合資訊 */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>集合地點</Label>
+                <Input
+                  value={gatherLocation}
+                  onChange={e => setGatherLocation(e.target.value)}
+                  placeholder="例：桃園國際機場第一航廈"
+                />
+              </div>
+              <div>
+                <Label>集合時間</Label>
+                <Input
+                  type="time"
+                  value={gatherTime}
+                  onChange={e => setGatherTime(e.target.value)}
+                />
+              </div>
+            </div>
+
+            {/* 費用資訊 */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>訂金金額</Label>
+                <Input
+                  type="number"
+                  value={depositAmount}
+                  onChange={e => setDepositAmount(e.target.value)}
+                  placeholder="輸入訂金"
+                />
+              </div>
+              <div>
+                <Label>尾款金額</Label>
+                <Input
+                  type="number"
+                  value={balanceAmount}
+                  onChange={e => setBalanceAmount(e.target.value)}
+                  placeholder="輸入尾款"
+                />
+              </div>
             </div>
 
             <div className="bg-morandi-container/50 rounded-lg p-3 text-sm">
