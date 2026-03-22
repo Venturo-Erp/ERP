@@ -1,4 +1,4 @@
-import { Calculator, DollarSign, Clock, Clipboard, Cloud, Plane, CloudSun } from 'lucide-react'
+import { Calculator, DollarSign, Clock, Clipboard, Cloud, Plane, CloudSun, ClipboardList } from 'lucide-react'
 import type { WidgetConfig } from '../types'
 import { CalculatorWidget } from './calculator-widget'
 import { CurrencyWidget } from './currency-widget'
@@ -7,10 +7,19 @@ import { NotesWidget } from './notes-widget'
 import { WeatherWidget } from './weather-widget'
 import { WeatherWidgetWeekly } from './weather-widget-weekly'
 import { FlightWidget } from './flight-widget'
+import { SupplierQuickActionsWidget } from './supplier-quick-actions-widget'
 // PNR widget 已移至團內操作（TourPnrToolDialog）
 
 // 小工具配置
 export const AVAILABLE_WIDGETS: Array<Omit<WidgetConfig, 'id'> & { id: string }> = [
+  {
+    id: 'supplier-quick-actions',
+    name: '供應商專區',
+    icon: ClipboardList,
+    component: SupplierQuickActionsWidget,
+    span: 1,
+    // 只對供應商顯示（在 DashboardClient 中會根據 workspace_type 過濾）
+  },
   {
     id: 'flight',
     name: '航班查詢',
