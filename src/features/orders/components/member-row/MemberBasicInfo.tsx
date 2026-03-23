@@ -4,7 +4,7 @@
  * 包含：中文姓名、出生年月日、性別、身分證號
  */
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Eye } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { OrderMember } from '../../types/order-member.types'
@@ -61,16 +61,19 @@ export function MemberBasicInfo({
   const seqLeft = 'left-[28px]'
   const nameLeft = 'left-[68px]'
 
+  // 日期輸入的本地狀態（避免每次按鍵都觸發 DB 更新）
+  const [localBirthDate, setLocalBirthDate] = useState(member.birth_date || '')
+  
+  // 同步外部變化
+  useEffect(() => {
+    setLocalBirthDate(member.birth_date || '')
+  }, [member.birth_date])
+
   // 處理日期輸入（自動格式化 YYYY-MM-DD）
   const handleDateInput = (value: string) => {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 8) // 最多 8 位數字
     
-    // 空值傳 null（避免 DB 錯誤）
-    if (!digitsOnly) {
-      onUpdateField(member.id, 'birth_date', null)
-      return
-    }
-    
+    // 格式化顯示
     let formatted = ''
     if (digitsOnly.length <= 4) {
       formatted = digitsOnly
@@ -80,7 +83,26 @@ export function MemberBasicInfo({
       formatted = digitsOnly.slice(0, 4) + '-' + digitsOnly.slice(4, 6) + '-' + digitsOnly.slice(6)
     }
     
-    onUpdateField(member.id, 'birth_date', formatted)
+    // 更新本地狀態（即時顯示）
+    setLocalBirthDate(formatted)
+    
+    // 只有完整日期或空值才更新到 DB
+    if (formatted.length === 10 || formatted === '') {
+      onUpdateField(member.id, 'birth_date', formatted || null)
+    }
+  }
+  
+  // 失焦時儲存（即使不完整也存）
+  const handleDateBlur = () => {
+    if (localBirthDate !== (member.birth_date || '')) {
+      // 只有完整日期才存，不完整就清空
+      if (localBirthDate.length === 10) {
+        onUpdateField(member.id, 'birth_date', localBirthDate)
+      } else if (localBirthDate === '') {
+        onUpdateField(member.id, 'birth_date', null)
+      }
+      // 不完整的日期保持原值
+    }
   }
 
   return (
@@ -267,8 +289,9 @@ export function MemberBasicInfo({
           {isEditMode ? (
             <input
               type="text"
-              value={member.birth_date || ''}
+              value={localBirthDate}
               onChange={e => handleDateInput(e.target.value)}
+              onBlur={handleDateBlur}
               onKeyDown={e => onKeyDown(e, index, 'birth_date')}
               onPaste={e => onPaste?.(e, index, 'birth_date')}
               data-member={member.id}
