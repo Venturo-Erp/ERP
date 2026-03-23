@@ -366,6 +366,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
   const [loading, setLoading] = useState(true)
   const [pnrInput, setPnrInput] = useState('')
   const [copied, setCopied] = useState(false)
+  const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set())
 
   // 讀取航班和團員資料
   useEffect(() => {
@@ -435,15 +436,51 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
     return '未設定'
   }
 
-  // 複製團員名單
+  // 複製團員名單（Amadeus 訂位格式）
   const handleCopyMembers = () => {
-    const text = members
-      .map(m => `${m.chinese_name}\t${m.english_name}`)
-      .join('\n')
+    // 取得選取的團員，如果沒選就用全部
+    const targetMembers = selectedMembers.size > 0
+      ? members.filter(m => selectedMembers.has(m.id))
+      : members
+
+    // 產生 Amadeus 格式：NM1姓/名 然後 1姓/名
+    const lines = targetMembers
+      .filter(m => m.english_name) // 必須有英文名
+      .map((m, index) => {
+        const name = m.english_name.toUpperCase()
+        if (index === 0) {
+          return `NM1${name}`
+        }
+        return `1${name}`
+      })
+
+    const text = lines.join('\n')
     navigator.clipboard.writeText(text)
     setCopied(true)
-    toast.success('已複製團員名單')
+    toast.success(`已複製 ${lines.length} 位旅客（Amadeus 格式）`)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  // 切換選取
+  const toggleMember = (id: string) => {
+    setSelectedMembers(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  // 全選/取消全選
+  const toggleAll = () => {
+    if (selectedMembers.size === members.length) {
+      setSelectedMembers(new Set())
+    } else {
+      setSelectedMembers(new Set(members.map(m => m.id)))
+    }
   }
 
   if (loading) {
@@ -487,30 +524,60 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-morandi-primary">
             <Users size={16} />
-            <span className="text-sm font-medium">團員名單 ({members.length}人)</span>
+            <span className="text-sm font-medium">
+              團員名單 ({selectedMembers.size > 0 ? `${selectedMembers.size}/` : ''}{members.length}人)
+            </span>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleCopyMembers}
+            disabled={members.length === 0}
             className="h-7 text-xs"
           >
             {copied ? <Check size={12} className="mr-1" /> : <Copy size={12} className="mr-1" />}
-            {copied ? '已複製' : '複製'}
+            {copied ? '已複製' : selectedMembers.size > 0 ? `複製 ${selectedMembers.size} 人` : '複製全部'}
           </Button>
         </div>
+
+        <p className="text-xs text-morandi-muted">
+          勾選要複製的旅客，產生 Amadeus 訂位格式（NM1姓/名）
+        </p>
         
         <div className="max-h-48 overflow-y-auto border border-border rounded-lg">
           <table className="w-full text-xs">
             <thead className="bg-morandi-background/50 sticky top-0">
               <tr>
+                <th className="w-8 px-2 py-1.5 text-center">
+                  <input
+                    type="checkbox"
+                    checked={selectedMembers.size === members.length && members.length > 0}
+                    onChange={toggleAll}
+                    className="rounded border-morandi-muted"
+                  />
+                </th>
                 <th className="px-2 py-1.5 text-left font-medium text-morandi-muted">中文姓名</th>
                 <th className="px-2 py-1.5 text-left font-medium text-morandi-muted">英文姓名</th>
               </tr>
             </thead>
             <tbody>
               {members.map((member) => (
-                <tr key={member.id} className="border-t border-border/50">
+                <tr 
+                  key={member.id} 
+                  className={`border-t border-border/50 cursor-pointer hover:bg-morandi-background/30 ${
+                    selectedMembers.has(member.id) ? 'bg-morandi-gold/10' : ''
+                  }`}
+                  onClick={() => toggleMember(member.id)}
+                >
+                  <td className="px-2 py-1.5 text-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedMembers.has(member.id)}
+                      onChange={() => toggleMember(member.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="rounded border-morandi-muted"
+                    />
+                  </td>
                   <td className="px-2 py-1.5">{member.chinese_name || '-'}</td>
                   <td className="px-2 py-1.5 font-mono text-morandi-secondary">
                     {member.english_name || '-'}
@@ -519,7 +586,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
               ))}
               {members.length === 0 && (
                 <tr>
-                  <td colSpan={2} className="px-2 py-4 text-center text-morandi-muted">
+                  <td colSpan={3} className="px-2 py-4 text-center text-morandi-muted">
                     尚無團員資料
                   </td>
                 </tr>
