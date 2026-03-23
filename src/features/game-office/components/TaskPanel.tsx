@@ -341,6 +341,7 @@ interface TaskCardProps {
 }
 
 function TaskCard({ task, agents, onStart, onComplete }: TaskCardProps) {
+  const [expanded, setExpanded] = useState(false)
   const assigneeAgent = agents.find(a => a.id === task.assignee)
   const collabAgents = agents.filter(a => task.collaborators.includes(a.id))
   
@@ -349,13 +350,14 @@ function TaskCard({ task, agents, onStart, onComplete }: TaskCardProps) {
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`p-3 rounded-lg border transition-colors ${
+      className={`p-3 rounded-lg border transition-colors cursor-pointer ${
         task.status === 'in_progress' 
           ? 'bg-blue-500/10 border-blue-500/30' 
           : task.status === 'completed'
-            ? 'bg-green-500/10 border-green-500/30 opacity-60'
+            ? 'bg-green-500/10 border-green-500/30'
             : 'bg-white/5 border-white/10'
       }`}
+      onClick={() => task.result && setExpanded(!expanded)}
     >
       <div className="flex items-start gap-2">
         <div className={`p-1 rounded ${
@@ -376,27 +378,43 @@ function TaskCard({ task, agents, onStart, onComplete }: TaskCardProps) {
                 + {collabAgents.map(a => a.emoji).join('')}
               </span>
             )}
+            {task.status === 'completed' && (
+              <span className="text-xs text-green-400">✓</span>
+            )}
           </div>
         </div>
         
         {/* Actions */}
         {task.status === 'pending' && onStart && (
           <button
-            onClick={onStart}
+            onClick={(e) => { e.stopPropagation(); onStart(); }}
             className="p-1.5 rounded bg-green-500 text-white hover:bg-green-600 transition-colors"
           >
             <Play size={12} />
           </button>
         )}
-        {task.status === 'in_progress' && onComplete && (
-          <button
-            onClick={onComplete}
-            className="p-1.5 rounded bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-          >
-            <CheckCircle size={12} />
-          </button>
+        {task.status === 'in_progress' && (
+          <div className="p-1.5">
+            <div className="w-3 h-3 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          </div>
         )}
       </div>
+      
+      {/* Result (expandable) */}
+      <AnimatePresence>
+        {expanded && task.result && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="mt-2 pt-2 border-t border-white/10 overflow-hidden"
+          >
+            <div className="text-xs text-white/70 whitespace-pre-wrap">
+              {task.result}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
