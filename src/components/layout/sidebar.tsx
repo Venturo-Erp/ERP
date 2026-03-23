@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useWorkspaceFeatures } from '@/lib/permissions'
 import {
   ChevronRight,
   ChevronDown,
@@ -95,13 +96,13 @@ const menuItems: MenuItem[] = [
     icon: ShoppingCart,
     requiredPermission: 'orders',
   },
-  // 行程管理 - 付費訂閱功能
-  // {
-  //   href: '/itinerary',
-  //   label: COMP_LAYOUT_LABELS.行程管理,
-  //   icon: Route,
-  //   requiredPermission: 'itinerary',
-  // },
+  // 行程管理 - 付費功能（由 workspace_features 控制）
+  {
+    href: '/itinerary',
+    label: COMP_LAYOUT_LABELS.行程管理,
+    icon: Route,
+    requiredPermission: 'itinerary',
+  },
   {
     href: '/finance',
     label: COMP_LAYOUT_LABELS.財務系統,
@@ -246,13 +247,13 @@ const menuItems: MenuItem[] = [
     icon: Database,
     requiredPermission: 'database',
     children: [
-      // 顧客管理 - 付費訂閱功能
-      // {
-      //   href: '/customers',
-      //   label: COMP_LAYOUT_LABELS.顧客管理,
-      //   icon: Users,
-      //   requiredPermission: 'customers',
-      // },
+      // 顧客管理 - 付費功能（由 workspace_features 控制）
+      {
+        href: '/customers',
+        label: COMP_LAYOUT_LABELS.顧客管理,
+        icon: Users,
+        requiredPermission: 'customers',
+      },
       {
         href: '/database/attractions',
         label: COMP_LAYOUT_LABELS.旅遊資料庫,
@@ -364,6 +365,7 @@ const personalToolItems: MenuItem[] = []
 export function Sidebar() {
   const pathname = usePathname()
   const { user } = useAuthStore()
+  const { isFeatureEnabled, enabledFeatures } = useWorkspaceFeatures()
   const [mounted, setMounted] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false) // 點擊固定展開
   const [isHovered, setIsHovered] = useState(false) // 滑鼠懸停暫時展開
@@ -465,6 +467,16 @@ export function Sidebar() {
       return items
         .map(item => {
           if (isMenuItemHidden(item.href, hiddenMenuItems)) return null
+          
+          // 🔧 檢查租戶功能權限（workspace_features）
+          // Super Admin 跳過此檢查
+          if (!isSuperAdmin && item.requiredPermission) {
+            // requiredPermission 對應到 feature_code
+            if (!isFeatureEnabled(item.requiredPermission)) {
+              return null
+            }
+          }
+          
           // 檢查功能限制（非 TP/TC 不可見）
           if (
             item.restrictedFeature &&
@@ -499,6 +511,8 @@ export function Sidebar() {
     preferredFeatures,
     hiddenMenuItems,
     userPermissions,
+    isFeatureEnabled,
+    enabledFeatures,
   ])
 
   const visiblePersonalToolItems = useMemo(() => {
