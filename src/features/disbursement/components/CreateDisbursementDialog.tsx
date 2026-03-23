@@ -9,7 +9,7 @@
  * - 下方：建立/儲存出納單按鈕
  */
 
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,7 @@ import { useCreateDisbursement } from '../hooks/useCreateDisbursement'
 import { DisbursementForm } from './create-dialog/DisbursementForm'
 import { DisbursementItemList } from './create-dialog/DisbursementItemList'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
+import { RequestDetailDialog } from '@/features/finance/requests/components/RequestDetailDialog'
 
 interface CreateDisbursementDialogProps {
   open: boolean
@@ -63,6 +64,9 @@ export function CreateDisbursementDialog({
     handleUpdate,
     resetForm,
   } = useCreateDisbursement({ pendingRequests, onSuccess, editingOrder })
+
+  // 請款單詳情視窗
+  const [viewingRequest, setViewingRequest] = useState<PaymentRequest | null>(null)
 
   // 關閉時重置
   const handleClose = useCallback(
@@ -116,6 +120,7 @@ export function CreateDisbursementDialog({
             onToggleSelectAll={toggleSelectAll}
             onSetToday={setToday}
             onClearFilters={clearFilters}
+            onViewRequest={setViewingRequest}
           />
         </div>
 
@@ -133,6 +138,13 @@ export function CreateDisbursementDialog({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* 請款單詳情視窗 */}
+      <RequestDetailDialog
+        request={viewingRequest}
+        open={!!viewingRequest}
+        onOpenChange={(open) => !open && setViewingRequest(null)}
+      />
     </Dialog>
   )
 }

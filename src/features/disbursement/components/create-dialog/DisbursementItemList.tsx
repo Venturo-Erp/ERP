@@ -27,6 +27,7 @@ interface DisbursementItemListProps {
   onToggleSelectAll: () => void
   onSetToday: () => void
   onClearFilters: () => void
+  onViewRequest?: (request: PaymentRequest) => void
 }
 
 export function DisbursementItemList({
@@ -41,6 +42,7 @@ export function DisbursementItemList({
   onToggleSelectAll,
   onSetToday,
   onClearFilters,
+  onViewRequest,
 }: DisbursementItemListProps) {
   // 取得狀態顯示
   const getStatusBadge = (status: string) => {
@@ -169,10 +171,13 @@ export function DisbursementItemList({
                       onCheckedChange={() => onToggleSelect(request.id)}
                     />
                   </td>
-                  <td className="py-3 px-4">
-                    <span className="font-medium text-morandi-gold hover:underline">
+                  <td className="py-3 px-4" onClick={e => e.stopPropagation()}>
+                    <button
+                      className="font-medium text-morandi-gold hover:underline cursor-pointer"
+                      onClick={() => onViewRequest?.(request)}
+                    >
                       {request.code}
-                    </span>
+                    </button>
                   </td>
                   <td className="py-3 px-4 text-morandi-primary max-w-[200px] truncate">
                     {request.request_category === 'company'
