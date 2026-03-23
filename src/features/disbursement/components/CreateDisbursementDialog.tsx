@@ -9,7 +9,7 @@
  * - 下方：建立/儲存出納單按鈕
  */
 
-import { useCallback, useState, useEffect } from 'react'
+import { useCallback, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -25,24 +25,6 @@ import { DisbursementForm } from './create-dialog/DisbursementForm'
 import { DisbursementItemList } from './create-dialog/DisbursementItemList'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
 import { RequestDetailDialog } from '@/features/finance/requests/components/RequestDetailDialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Label } from '@/components/ui/label'
-import { useAuthStore } from '@/stores/auth-store'
-
-interface BankAccount {
-  id: string
-  code: string
-  name: string
-  bank_name: string | null
-  account_number: string | null
-  is_default: boolean
-}
 
 interface CreateDisbursementDialogProps {
   open: boolean
@@ -86,26 +68,6 @@ export function CreateDisbursementDialog({
   // 請款單詳情視窗
   const [viewingRequest, setViewingRequest] = useState<PaymentRequest | null>(null)
 
-  // 銀行帳戶
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
-  const [selectedBankId, setSelectedBankId] = useState<string>('')
-  const workspaceId = useAuthStore(state => state.user?.workspace_id)
-
-  // 載入銀行帳戶
-  useEffect(() => {
-    if (open && workspaceId) {
-      fetch(`/api/bank-accounts?workspace_id=${workspaceId}`)
-        .then(res => res.json())
-        .then(data => {
-          setBankAccounts(data || [])
-          // 預設選擇 is_default 的銀行
-          const defaultBank = data?.find((b: BankAccount) => b.is_default)
-          setSelectedBankId(defaultBank?.id || data?.[0]?.id || '')
-        })
-        .catch(err => console.error('載入銀行帳戶失敗:', err))
-    }
-  }, [open, workspaceId])
-
   // 關閉時重置
   const handleClose = useCallback(
     (isOpen: boolean) => {
@@ -117,14 +79,7 @@ export function CreateDisbursementDialog({
     [onOpenChange, resetForm]
   )
 
-  // 包裝 handleCreate，傳入銀行帳戶
-  const handleSubmitWithBank = async () => {
-    if (isEditMode) {
-      await handleUpdate()
-    } else {
-      await handleCreate(selectedBankId)
-    }
-  }
+  const handleSubmit = isEditMode ? handleUpdate : handleCreate
   const title = isEditMode
     ? `${DISBURSEMENT_LABELS.編輯出納單} ${editingOrder?.order_number || ''}`
     : DISBURSEMENT_LABELS.新增出納單
@@ -145,34 +100,12 @@ export function CreateDisbursementDialog({
 
         <div className="flex-1 min-h-0 flex flex-col space-y-4">
           {/* 表單區塊 */}
-          <div className="flex items-end gap-4">
-            <DisbursementForm
-              disbursementDate={disbursementDate}
-              statusFilter={statusFilter}
-              onDateChange={setDisbursementDate}
-              onStatusChange={setStatusFilter}
-            />
-            
-            {/* 付款銀行選擇 */}
-            {!isEditMode && (
-              <div className="space-y-1.5">
-                <Label className="text-sm text-morandi-muted">付款銀行</Label>
-                <Select value={selectedBankId} onValueChange={setSelectedBankId}>
-                  <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="選擇付款來源" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {bankAccounts.map(bank => (
-                      <SelectItem key={bank.id} value={bank.id}>
-                        {bank.name}
-                        {bank.is_default && ' (預設)'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-          </div>
+          <DisbursementForm
+            disbursementDate={disbursementDate}
+            statusFilter={statusFilter}
+            onDateChange={setDisbursementDate}
+            onStatusChange={setStatusFilter}
+          />
 
           {/* 項目列表區塊 */}
           <DisbursementItemList
@@ -197,8 +130,8 @@ export function CreateDisbursementDialog({
             {DISBURSEMENT_LABELS.取消}
           </Button>
           <Button
-            onClick={handleSubmitWithBank}
-            disabled={(!isEditMode && (selectedRequestIds.length === 0 || !selectedBankId)) || isSubmitting}
+            onClick={handleSubmit}
+            disabled={(!isEditMode && selectedRequestIds.length === 0) || isSubmitting}
             className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
           >
             {submitLabel}

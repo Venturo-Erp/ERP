@@ -154,7 +154,7 @@ export function useCreateDisbursement({
   }, [])
 
   // 建立出納單
-  const handleCreate = useCallback(async (bankAccountId?: string) => {
+  const handleCreate = useCallback(async () => {
     const validation = createDisbursementSchema.safeParse({
       selectedRequestIds,
       disbursementDate,
@@ -182,7 +182,6 @@ export function useCreateDisbursement({
           status: 'pending',
           workspace_id: user?.workspace_id || null,
           created_by: user?.id || null,
-          bank_account_id: bankAccountId || null,
         })
         .select()
         .single()
