@@ -126,22 +126,22 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
     <div className="flex items-center gap-2">
       {viewModeToggle}
 
+      {/* 列印按鈕（任何模式都顯示） */}
+      <Button
+        onClick={() => setShowPrintPreview(true)}
+        variant="outline"
+        className="gap-2"
+      >
+        <Printer className="h-4 w-4" />
+        {QUICK_QUOTE_DETAIL_LABELS.PRINT}
+      </Button>
+
       {/* 非編輯模式 */}
       {!isEditing && (
-        <>
-          <Button
-            onClick={() => setShowPrintPreview(true)}
-            variant="outline"
-            className="gap-2"
-          >
-            <Printer className="h-4 w-4" />
-            {QUICK_QUOTE_DETAIL_LABELS.PRINT}
-          </Button>
-          <Button onClick={() => setIsEditing(true)} variant="outline" className="gap-2">
-            <Edit2 size={16} />
-            {QUICK_QUOTE_DETAIL_LABELS.EDIT}
-          </Button>
-        </>
+        <Button onClick={() => setIsEditing(true)} variant="outline" className="gap-2">
+          <Edit2 size={16} />
+          {QUICK_QUOTE_DETAIL_LABELS.EDIT}
+        </Button>
       )}
 
       {/* 編輯模式 */}
