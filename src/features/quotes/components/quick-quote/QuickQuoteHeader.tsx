@@ -18,12 +18,14 @@ interface QuickQuoteHeaderProps {
   formData: FormData
   isEditing: boolean
   onFieldChange: <K extends keyof FormData>(field: K, value: FormData[K]) => void
+  actions?: React.ReactNode
 }
 
 export const QuickQuoteHeader: React.FC<QuickQuoteHeaderProps> = ({
   formData,
   isEditing,
   onFieldChange,
+  actions,
 }) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -34,9 +36,12 @@ export const QuickQuoteHeader: React.FC<QuickQuoteHeaderProps> = ({
 
   return (
     <div className="bg-card border border-border rounded-xl p-6">
-      <h2 className="text-lg font-semibold text-morandi-primary mb-4">
-        {QUICK_QUOTE_DIALOG_LABELS.LABEL_8897}
-      </h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-morandi-primary">
+          {QUICK_QUOTE_DIALOG_LABELS.LABEL_8897}
+        </h2>
+        {actions && <div className="flex items-center gap-2">{actions}</div>}
+      </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium text-morandi-primary">

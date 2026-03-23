@@ -198,15 +198,13 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
       )}
 
       <div className="w-full p-3 space-y-4 overflow-x-auto">
-        {/* 嵌入模式：頂部操作按鈕 */}
-        {embedded && (
-          <div className="flex justify-end pb-2 border-b border-border/40">
-            <ActionButtons />
-          </div>
-        )}
-
-        {/* 客戶資訊 */}
-        <QuickQuoteHeader formData={formData} isEditing={isEditing} onFieldChange={setFormField} />
+        {/* 客戶資訊（嵌入模式時按鈕整合在這裡） */}
+        <QuickQuoteHeader 
+          formData={formData} 
+          isEditing={isEditing} 
+          onFieldChange={setFormField}
+          actions={embedded ? <ActionButtons /> : undefined}
+        />
 
         {/* 收費明細表 */}
         <QuickQuoteItemsTable
