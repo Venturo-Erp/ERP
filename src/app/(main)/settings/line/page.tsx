@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { EnhancedTable, type TableColumn } from '@/components/ui/enhanced-table'
 import { Combobox } from '@/components/ui/combobox'
+import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { MessageCircle, Users, Link2, Unlink } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useSuppliersSlim } from '@/data'
@@ -152,55 +153,59 @@ export default function LineSettingsPage() {
   ]
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <SettingsTabs />
+    <ContentPageLayout
+      title="LINE 群組管理"
+      icon={MessageCircle}
+      breadcrumb={[
+        { label: '首頁', href: '/dashboard' },
+        { label: '系統設定', href: '/settings' },
+        { label: 'LINE 設定', href: '/settings/line' },
+      ]}
+      contentClassName="flex-1 overflow-auto"
+    >
+      <div className="max-w-4xl mx-auto space-y-6">
+        <SettingsTabs />
 
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-morandi-primary flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-green-600" />
-            LINE 群組管理
-          </h2>
-          <p className="text-sm text-morandi-secondary mt-1">
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-morandi-secondary">
             Bot 已加入 {groups.length} 個群組，{boundCount} 個已綁定，{unboundCount} 個待綁定
           </p>
         </div>
-      </div>
-      <EnhancedTable
-        columns={columns}
-        data={groups}
-        loading={loading}
-        actions={row => {
-          const group = row as LineGroup
-          if (group.supplier_id) {
+        <EnhancedTable
+          columns={columns}
+          data={groups}
+          loading={loading}
+          actions={row => {
+            const group = row as LineGroup
+            if (group.supplier_id) {
+              return (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:bg-red-50"
+                  onClick={() => handleUnbind(group)}
+                >
+                  <Unlink className="w-4 h-4 mr-1" />
+                  解除
+                </Button>
+              )
+            }
             return (
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-red-600 hover:bg-red-50"
-                onClick={() => handleUnbind(group)}
+                className="text-green-600 hover:bg-green-50"
+                onClick={() => {
+                  setBindingGroup(group)
+                  setSelectedSupplierId('')
+                }}
               >
-                <Unlink className="w-4 h-4 mr-1" />
-                解除
+                <Link2 className="w-4 h-4 mr-1" />
+                綁定
               </Button>
             )
-          }
-          return (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-green-600 hover:bg-green-50"
-              onClick={() => {
-                setBindingGroup(group)
-                setSelectedSupplierId('')
-              }}
-            >
-              <Link2 className="w-4 h-4 mr-1" />
-              綁定
-            </Button>
-          )
-        }}
-      />
+          }}
+        />
 
       {/* 綁定 Dialog */}
       <Dialog open={!!bindingGroup} onOpenChange={() => setBindingGroup(null)}>
@@ -246,6 +251,7 @@ export default function LineSettingsPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </ContentPageLayout>
   )
 }
