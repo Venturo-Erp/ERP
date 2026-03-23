@@ -195,7 +195,7 @@ export default function GameOfficePage() {
         {/* Game Area */}
         <div 
           ref={containerRef}
-          className="flex-1 relative cursor-crosshair"
+          className="flex-1 min-w-0 relative cursor-crosshair overflow-hidden"
           onClick={handleMapClick}
         >
           {/* Phaser 辦公室背景 */}
