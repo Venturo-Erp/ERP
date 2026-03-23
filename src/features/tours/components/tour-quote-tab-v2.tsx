@@ -94,7 +94,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setQuickQuotes((data as Quote[]) || [])
+      setQuickQuotes((data as unknown as Quote[]) || [])
     } catch (err) {
       logger.error('載入快速報價單失敗', err)
     } finally {
@@ -284,7 +284,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
                   // 更新快速報價單
                   const { error } = await supabase
                     .from('quotes')
-                    .update(data)
+                    .update(data as any)
                     .eq('id', selectedQuote.id)
                   if (error) throw error
                   // 重新載入

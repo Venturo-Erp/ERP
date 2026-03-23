@@ -404,16 +404,16 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
           .select(`
             id,
             chinese_name,
-            english_name,
+            passport_name,
             orders!inner(tour_id)
           `)
           .eq('orders.tour_id', todo.tour_id)
 
         if (orderMembers) {
-          setMembers(orderMembers.map(m => ({
+          setMembers((orderMembers as any[]).map(m => ({
             id: m.id,
             chinese_name: m.chinese_name || '',
-            english_name: m.english_name || '',
+            english_name: m.passport_name || '',
           })))
         }
       } catch (error) {

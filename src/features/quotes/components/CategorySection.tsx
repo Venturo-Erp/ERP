@@ -525,7 +525,6 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 categoryId={category.id}
                 handleUpdateItem={handleUpdateItem}
                 handleRemoveItem={handleRemoveItem}
-                handleToggleVisibility={handleToggleVisibility!}
               />
             )))}
 

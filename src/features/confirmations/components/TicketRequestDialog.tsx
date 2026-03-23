@@ -44,7 +44,7 @@ export function TicketRequestDialog({
   totalPax,
 }: TicketRequestDialogProps) {
   const { user } = useAuthStore()
-  const { employees } = useEmployeesSlim()
+  const { items: employees } = useEmployeesSlim()
   const [selectedEmployee, setSelectedEmployee] = useState<string>('')
   const [submitting, setSubmitting] = useState(false)
   const [memberCount, setMemberCount] = useState(0)
@@ -107,9 +107,12 @@ export function TicketRequestDialog({
       // 查員工資訊發通知
       const { data: empData } = await supabase
         .from('employees')
-        .select('name, line_user_id')
+        .select('*')
         .eq('id', selectedEmployee)
         .single()
+      
+      const empName = (empData as any)?.display_name || (empData as any)?.chinese_name || '同事'
+      const lineUserId = (empData as any)?.line_user_id
 
       // 發送頻道通知
       try {
@@ -120,7 +123,7 @@ export function TicketRequestDialog({
             event: 'ticket_request',
             tourId: tour.id,
             tourCode: tour.code,
-            assignee: empData?.name || '同事',
+            assignee: empName,
             assigneeId: selectedEmployee,
             outboundFlight: formatFlight(tour.outbound_flight),
             returnFlight: formatFlight(tour.return_flight),
@@ -131,7 +134,7 @@ export function TicketRequestDialog({
         console.error('通知失敗:', notifyError)
       }
 
-      toast.success(`已建立訂票任務，指派給 ${empData?.name || '同事'}`)
+      toast.success(`已建立訂票任務，指派給 ${empName}`)
       onClose()
     } catch (error) {
       console.error('建立訂票任務失敗:', error)
@@ -182,9 +185,9 @@ export function TicketRequestDialog({
           <div className="space-y-2">
             <Label>指派給</Label>
             <Combobox
-              options={employees.map(e => ({
+              options={employees.map((e: any) => ({
                 value: e.id,
-                label: e.name,
+                label: e.display_name || e.chinese_name || e.id,
               }))}
               value={selectedEmployee}
               onChange={setSelectedEmployee}
