@@ -80,8 +80,8 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
           />
         </div>
       </td>
-      {!hideQuantity && (
-        <td className="py-3 px-4 text-sm text-morandi-secondary text-center table-divider">
+      <td className="py-3 px-4 text-sm text-morandi-secondary text-center table-divider">
+        {!hideQuantity ? (
           <CalcInput
             value={item.quantity}
             onChange={val => handleUpdateItem(categoryId, item.id, 'quantity', val)}
@@ -89,8 +89,8 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
             onFormulaChange={f => handleUpdateItem(categoryId, item.id, 'quantity_formula', f)}
             className={`${inputClass} text-center`}
           />
-        </td>
-      )}
+        ) : null}
+      </td>
       <td className="py-3 px-4 text-sm text-morandi-secondary text-center table-divider">
         {isAccommodation ? (
           // 飯店：不顯示預估成本（避免影響報價）
