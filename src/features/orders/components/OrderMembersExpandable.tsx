@@ -841,26 +841,37 @@ export function OrderMembersExpandable({
       e.preventDefault()
       
       const { members } = membersData
-      const updates: Array<{ id: string; field: string; value: string }> = []
+      const updates: Array<{ id: string; [key: string]: string }> = []
       
       // 從當前成員開始，依序填入
       for (let i = 0; i < lines.length && memberIndex + i < members.length; i++) {
         const member = members[memberIndex + i]
         updates.push({
           id: member.id,
-          field: fieldName,
-          value: lines[i].trim()
+          [fieldName]: lines[i].trim()
         })
       }
       
-      // 批量更新
-      for (const update of updates) {
-        await handleUpdateField(update.id, update.field, update.value)
+      // 批量更新（使用 Supabase 批量更新）
+      try {
+        const promises = updates.map(update => 
+          supabase
+            .from('order_members')
+            .update({ [fieldName]: update[fieldName] })
+            .eq('id', update.id)
+        )
+        await Promise.all(promises)
+        
+        // 重新載入資料
+        await membersData.loadMembers()
+        
+        toast.success(`已貼上 ${updates.length} 筆資料`)
+      } catch (error) {
+        logger.error('批量貼上失敗', error)
+        toast.error('批量貼上失敗')
       }
-      
-      toast.success(`已貼上 ${updates.length} 筆資料`)
     },
-    [membersData, handleUpdateField]
+    [membersData]
   )
 
   const sortedMembers = useMemo(() => {
