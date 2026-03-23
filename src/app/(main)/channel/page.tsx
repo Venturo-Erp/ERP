@@ -35,10 +35,14 @@ export default function WorkspacePage() {
     if (hasLoaded || !currentWorkspace) return
 
     const loadData = async () => {
-      logger.log('🔵 [WorkspacePage] 載入頻道和群組')
+      logger.log('🔵 [ChannelPage] 載入頻道和群組, workspace:', currentWorkspace.id)
       await Promise.all([loadChannelGroups(currentWorkspace.id), loadChannels(currentWorkspace.id)])
+      // 取得 channels store 的資料
+      const channelStore = await import('@/stores/workspace/channel-store')
+      const channels = channelStore.useChannelStore.getState().items
+      logger.log('🔵 [ChannelPage] 載入的頻道數量:', channels.length, channels)
       setHasLoaded(true)
-      logger.log('✅ [WorkspacePage] 初始化完成')
+      logger.log('✅ [ChannelPage] 初始化完成')
     }
 
     loadData().catch(err => logger.error('[loadData]', err))
