@@ -346,18 +346,11 @@ export default function GameOfficePage() {
         </div>
 
         {/* Task Panel */}
-        <AnimatePresence>
-          {showTaskPanel && (
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 320, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              className="flex-shrink-0 overflow-hidden"
-            >
-              <TaskPanel onTaskStart={handleTaskStart} />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {showTaskPanel && (
+          <div className="w-80 flex-shrink-0">
+            <TaskPanel onTaskStart={handleTaskStart} />
+          </div>
+        )}
       </div>
 
       {/* Bottom Bar */}
