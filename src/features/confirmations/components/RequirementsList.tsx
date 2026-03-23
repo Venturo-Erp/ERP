@@ -37,6 +37,7 @@ import { MealQuoteDialog } from './MealQuoteDialog'
 import { ActivityQuoteDialog } from './ActivityQuoteDialog'
 import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSupplierDialog'
 import { LocalQuoteDialog } from './LocalQuoteDialog'
+import { TicketRequestDialog } from './TicketRequestDialog'
 import { RequirementsDrawer } from './RequirementsDrawer'
 import { TeamConfirmationSheet } from './TeamConfirmationSheet'
 // CostCategory 已不需要 — 需求單直接讀核心表
@@ -104,6 +105,7 @@ export function RequirementsList({
     name: string
     resourceId: string | null
   } | null>(null)
+  const [showTicketDialog, setShowTicketDialog] = useState(false)
   const [showAccommodationDialog, setShowAccommodationDialog] = useState(false)
   const [showMealDialog, setShowMealDialog] = useState(false)
   const [showActivityDialog, setShowActivityDialog] = useState(false)
@@ -1582,8 +1584,27 @@ export function RequirementsList({
                                   )
                                 }
 
-                                // 交通：需要勾選天數
+                                // 交通：區分機票和遊覽車
                                 if (cat.key === 'transport') {
+                                  // 機票（成人/小孩/嬰兒）
+                                  const isTicket = ['成人', '小孩', '嬰兒', '兒童'].some(t => 
+                                    item.title?.includes(t) || supplierName?.includes(t)
+                                  )
+                                  
+                                  if (isTicket) {
+                                    return (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => setShowTicketDialog(true)}
+                                        className="h-7 px-2 text-xs border-morandi-sky/50 text-morandi-sky hover:bg-morandi-sky/10"
+                                      >
+                                        發訂票任務
+                                      </Button>
+                                    )
+                                  }
+                                  
+                                  // 遊覽車等其他交通
                                   return (
                                     <Button
                                       variant="outline"
@@ -1964,6 +1985,24 @@ export function RequirementsList({
           coreItems={coreItems}
           supplierName={selectedTransport.name}
           vehicleDesc=""
+        />
+      )}
+
+      {/* 機票訂票任務 Dialog */}
+      {tour && (
+        <TicketRequestDialog
+          open={showTicketDialog}
+          onClose={() => setShowTicketDialog(false)}
+          tour={{
+            id: tour.id,
+            code: tour.code,
+            name: tour.name,
+            departure_date: tour.departure_date,
+            return_date: tour.return_date,
+            outbound_flight: outboundFlight,
+            return_flight: returnFlight,
+          }}
+          totalPax={totalPax}
         />
       )}
 
