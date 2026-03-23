@@ -153,6 +153,7 @@ export function TourTabContent({
     case 'members':
       return (
         <OrderMembersExpandable
+          key={`members-${tour.id}`}  // 強制重新掛載
           tourId={tour.id}
           workspaceId={workspaceId || ''}
           mode="tour"
