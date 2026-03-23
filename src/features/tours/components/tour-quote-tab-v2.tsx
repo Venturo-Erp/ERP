@@ -27,6 +27,7 @@ import type { Quote } from '@/stores/types'
 import { createQuote } from '@/data'
 import { DEFAULT_CATEGORIES } from '@/features/quotes/constants'
 import { QuoteDetailEmbed } from '@/features/quotes/components/QuoteDetailEmbed'
+import { QuickQuoteDetail } from '@/features/quotes/components/QuickQuoteDetail'
 
 interface TourQuoteTabV2Props {
   tour: Tour
@@ -263,19 +264,34 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
             </div>
           )
         ) : (
-          // 快速報價單 - 跳轉到詳情頁
-          <div className="flex flex-col items-center justify-center h-full">
-            <FileText size={48} className="text-morandi-secondary/30 mb-4" />
-            <p className="text-sm text-morandi-secondary mb-4">
-              {quickQuotes.find(q => q.id === selectedVersion)?.customer_name || '快速報價單'}
-            </p>
-            <Button
-              variant="default"
-              onClick={() => router.push(`/quotes/quick/${selectedVersion}`)}
-            >
-              編輯快速報價單
-            </Button>
-          </div>
+          // 快速報價單 - 直接嵌入顯示
+          (() => {
+            const selectedQuote = quickQuotes.find(q => q.id === selectedVersion)
+            if (!selectedQuote) {
+              return (
+                <div className="flex flex-col items-center justify-center h-full">
+                  <FileText size={48} className="text-morandi-secondary/30 mb-4" />
+                  <p className="text-sm text-morandi-secondary">找不到報價單</p>
+                </div>
+              )
+            }
+            return (
+              <QuickQuoteDetail
+                quote={selectedQuote}
+                onUpdate={async (data) => {
+                  // 更新快速報價單
+                  const { error } = await supabase
+                    .from('quotes')
+                    .update(data)
+                    .eq('id', selectedQuote.id)
+                  if (error) throw error
+                  // 重新載入
+                  await loadQuickQuotes()
+                  return selectedQuote
+                }}
+              />
+            )
+          })()
         )}
       </div>
     </div>
