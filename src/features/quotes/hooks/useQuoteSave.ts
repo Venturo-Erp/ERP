@@ -98,6 +98,13 @@ export const useQuoteSave = ({
         ...quickQuoteData,
       }
 
+      logger.log('[handleSave] 儲存報價單:', { 
+        quoteId: quote.id, 
+        groupSize, 
+        tierPricingsCount: tierPricingsData.length,
+        tierPricings: tierPricingsData
+      })
+
       // ✅ 等待存檔完成，捕獲錯誤
       await updateQuote(quote.id, quoteHeaderData)
 
