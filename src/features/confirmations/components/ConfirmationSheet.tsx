@@ -417,19 +417,12 @@ function CategoryTable({
       <div className="overflow-x-auto">
         <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
           <colgroup>
-            <col style={{ width: '10%' }} /> {/* 日期 */}
-            <col style={{ width: showUnitPriceColumns ? '22%' : '35%' }} /> {/* 名稱 */}
-            {showUnitPriceColumns && (
-              <>
-                <col style={{ width: '12%' }} /> {/* 商品單價 */}
-                <col style={{ width: '8%' }} /> {/* 數量 */}
-                <col style={{ width: '12%' }} /> {/* 小計 */}
-              </>
-            )}
-            <col style={{ width: '12%' }} /> {/* 預計支出 */}
-            <col style={{ width: '12%' }} /> {/* 實際支出 */}
-            <col style={{ width: showUnitPriceColumns ? '12%' : '19%' }} />{' '}
-            {/* 說明（含付款狀態）*/}
+            <col style={{ width: '10%' }} />
+            <col style={{ width: showUnitPriceColumns ? '22%' : '35%' }} />
+            {showUnitPriceColumns && <><col style={{ width: '12%' }} /><col style={{ width: '8%' }} /><col style={{ width: '12%' }} /></>}
+            <col style={{ width: '12%' }} />
+            <col style={{ width: '12%' }} />
+            <col style={{ width: showUnitPriceColumns ? '12%' : '19%' }} />
           </colgroup>
           <thead>
             <tr className="bg-morandi-container border-b">
@@ -698,10 +691,7 @@ function DailyItineraryTable({
 
       {/* 表格 */}
       <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
-        <colgroup>
-          <col style={{ width: '12%' }} /> {/* 日期 */}
-          <col style={{ width: '88%' }} /> {/* 行程 */}
-        </colgroup>
+        <colgroup><col style={{ width: '12%' }} /><col style={{ width: '88%' }} /></colgroup>
         <thead>
           <tr className="bg-morandi-container border-b">
             <th className="px-3 py-2 text-left font-medium">日期</th>
