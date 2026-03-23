@@ -61,21 +61,19 @@ export function MemberBasicInfo({
   const seqLeft = 'left-[28px]'
   const nameLeft = 'left-[68px]'
 
-  // 處理日期輸入（自動格式化）
+  // 處理日期輸入（自動格式化 YYYY-MM-DD）
   const handleDateInput = (value: string) => {
-    const digitsOnly = value.replace(/\D/g, '')
-    let formatted = digitsOnly
-    if (digitsOnly.length >= 4) {
-      formatted = digitsOnly.slice(0, 4)
-      if (digitsOnly.length >= 6) {
-        formatted += '-' + digitsOnly.slice(4, 6)
-        if (digitsOnly.length >= 8) {
-          formatted += '-' + digitsOnly.slice(6, 8)
-        }
-      } else if (digitsOnly.length > 4) {
-        formatted += '-' + digitsOnly.slice(4)
-      }
+    const digitsOnly = value.replace(/\D/g, '').slice(0, 8) // 最多 8 位數字
+    let formatted = ''
+    
+    if (digitsOnly.length <= 4) {
+      formatted = digitsOnly
+    } else if (digitsOnly.length <= 6) {
+      formatted = digitsOnly.slice(0, 4) + '-' + digitsOnly.slice(4)
+    } else {
+      formatted = digitsOnly.slice(0, 4) + '-' + digitsOnly.slice(4, 6) + '-' + digitsOnly.slice(6)
     }
+    
     onUpdateField(member.id, 'birth_date', formatted)
   }
 
