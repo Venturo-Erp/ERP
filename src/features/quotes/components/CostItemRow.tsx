@@ -1,14 +1,11 @@
 import React from 'react'
 import { CostItem } from '../types'
-import { ResourceSelectButton } from './ResourceSelectButton'
 import { CalcInput } from '@/components/ui/calc-input'
-import { EyeOff } from 'lucide-react'
 import {
   ACCOMMODATION_ITEM_ROW_LABELS,
   CATEGORY_SECTION_LABELS,
   COST_ITEM_ROW_LABELS,
 } from '../constants/labels'
-import { QUOTE_COMPONENT_LABELS } from '../constants/labels'
 
 interface CostItemRowProps {
   item: CostItem
@@ -20,7 +17,6 @@ interface CostItemRowProps {
     value: unknown
   ) => void
   handleRemoveItem: (categoryId: string, itemId: string) => void
-  handleToggleVisibility?: (categoryId: string, itemId: string) => void
 }
 
 export const CostItemRow: React.FC<CostItemRowProps> = ({
@@ -28,18 +24,10 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
   categoryId,
   handleUpdateItem,
   handleRemoveItem,
-  handleToggleVisibility,
 }) => {
   // 判斷是否為兒童或嬰兒（顯示為灰色）
   const isChildOrInfantTicket =
     item.name === COST_ITEM_ROW_LABELS.兒童 || item.name === COST_ITEM_ROW_LABELS.嬰兒
-  // 判斷是否為餐飲類別（顯示自理選項）
-  const isMealItem = categoryId === 'meals'
-  // 判斷是否為自理餐（顯示為淡色）
-  const isSelfArranged = item.is_self_arranged
-
-  // 判斷是否需要隱藏數量欄位（餐廳、活動固定是個人分攤，不需要數量）
-  const hideQuantity = categoryId === 'meals' || categoryId === 'activities'
 
   // 判斷是否為 Local 報價（禁止直接編輯單價，只能透過視窗修改）
   const isLocalPricing = item.name?.includes('Local 報價')
@@ -81,15 +69,13 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
         </div>
       </td>
       <td className="py-3 px-4 text-sm text-morandi-secondary text-center table-divider">
-        {!hideQuantity ? (
-          <CalcInput
-            value={item.quantity}
-            onChange={val => handleUpdateItem(categoryId, item.id, 'quantity', val)}
-            formula={item.quantity_formula}
-            onFormulaChange={f => handleUpdateItem(categoryId, item.id, 'quantity_formula', f)}
-            className={`${inputClass} text-center`}
-          />
-        ) : null}
+        <CalcInput
+          value={item.quantity}
+          onChange={val => handleUpdateItem(categoryId, item.id, 'quantity', val)}
+          formula={item.quantity_formula}
+          onFormulaChange={f => handleUpdateItem(categoryId, item.id, 'quantity_formula', f)}
+          className={`${inputClass} text-center`}
+        />
       </td>
       <td className="py-3 px-4 text-sm text-morandi-secondary text-center table-divider">
         {isAccommodation ? (
@@ -161,7 +147,7 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
         {item.total.toLocaleString()}
       </td>
 
-      {/* 備註 / 操作合併欄 */}
+      {/* 備註 / 操作欄 */}
       <td colSpan={2} className="py-3 px-4 text-sm text-morandi-secondary">
         <div className="flex items-center justify-between">
           <input
@@ -174,40 +160,6 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
             title={isLocalPricing ? 'Local 報價階梯資訊（自動產生）' : undefined}
           />
           <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-            {/* 資源選擇按鈕（餐廳/飯店/景點） */}
-            <ResourceSelectButton
-              categoryId={categoryId}
-              item={item}
-              onUpdateItem={handleUpdateItem}
-            />
-            {/* 餐飲類別：自理按鈕 */}
-            {isMealItem && (
-              <button
-                onClick={() =>
-                  handleUpdateItem(categoryId, item.id, 'is_self_arranged', !item.is_self_arranged)
-                }
-                className={`px-2 py-0.5 text-xs rounded transition-all ${
-                  item.is_self_arranged
-                    ? 'bg-morandi-gold text-white'
-                    : 'bg-morandi-container/50 text-morandi-secondary hover:bg-morandi-container'
-                }`}
-                title={
-                  item.is_self_arranged
-                    ? COST_ITEM_ROW_LABELS.取消自理
-                    : COST_ITEM_ROW_LABELS.設為自理
-                }
-              >
-                {COST_ITEM_ROW_LABELS.LABEL_2796}
-              </button>
-            )}
-            {/* 隱藏/顯示按鈕（眼睛圖示） */}
-            <button
-              onClick={() => handleToggleVisibility?.(categoryId, item.id)}
-              className="w-4 h-4 flex items-center justify-center text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 rounded transition-all"
-              title="在報價單和需求單隱藏此項目（免費景點等不需要報價的項目）"
-            >
-              <EyeOff size={14} />
-            </button>
             {/* 刪除按鈕 */}
             <button
               onClick={() => handleRemoveItem(categoryId, item.id)}
