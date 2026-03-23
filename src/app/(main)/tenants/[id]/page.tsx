@@ -2,8 +2,7 @@
 
 /**
  * 租戶詳情頁面
- * 
- * 包含：基本資料、功能權限設定
+ * 使用 API Route 處理 DB 操作
  */
 
 import { useState, useEffect, use } from 'react'
@@ -18,22 +17,19 @@ import { Label } from '@/components/ui/label'
 import { useToast } from '@/components/ui/use-toast'
 import { 
   Building2, 
-  Settings, 
   Shield, 
   ArrowLeft,
   Save,
   Loader2
 } from 'lucide-react'
-import { supabase } from '@/lib/supabase/client'
-import { FEATURES, getBasicFeatures, getPremiumFeatures, getEnterpriseFeatures } from '@/lib/workspace-permissions'
+import { FEATURES, getBasicFeatures, getPremiumFeatures, getEnterpriseFeatures } from '@/lib/permissions'
 
 interface Workspace {
   id: string
   name: string
   code: string
   type: string
-  status: string
-  created_at: string
+  is_active: boolean
 }
 
 interface WorkspaceFeature {
@@ -57,29 +53,22 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       setLoading(true)
 
       // 取得租戶資料
-      const { data: ws, error: wsError } = await supabase
-        .from('workspaces')
-        .select('id, name, code, type, status, created_at')
-        .eq('id', id)
-        .single()
-
-      if (wsError || !ws) {
+      const wsRes = await fetch(`/api/workspaces/${id}`)
+      if (!wsRes.ok) {
         toast({ title: '找不到租戶', variant: 'destructive' })
         router.push('/tenants')
         return
       }
-
+      const ws = await wsRes.json()
       setWorkspace(ws)
 
       // 取得功能權限
-      const { data: featuresData } = await supabase
-        .from('workspace_features')
-        .select('feature_code, enabled')
-        .eq('workspace_id', id)
-
-      // 初始化功能列表（如果沒有記錄，預設為未啟用）
-      const featureMap = new Map(featuresData?.map(f => [f.feature_code, f.enabled]) || [])
-      const allFeatures = FEATURES.map(f => ({
+      const featuresRes = await fetch(`/api/permissions/features?workspace_id=${id}`)
+      const featuresData: WorkspaceFeature[] = featuresRes.ok ? await featuresRes.json() : []
+      
+      // 初始化功能列表
+      const featureMap = new Map<string, boolean>(featuresData.map(f => [f.feature_code, f.enabled]))
+      const allFeatures: WorkspaceFeature[] = FEATURES.map(f => ({
         feature_code: f.code,
         enabled: featureMap.get(f.code) ?? false,
       }))
@@ -105,21 +94,20 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
     setSaving(true)
 
     try {
-      // 使用 upsert 更新所有功能
-      const upsertData = features.map(f => ({
-        workspace_id: id,
-        feature_code: f.feature_code,
-        enabled: f.enabled,
-        enabled_at: f.enabled ? new Date().toISOString() : null,
-      }))
+      const res = await fetch('/api/permissions/features', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace_id: id,
+          features,
+        }),
+      })
 
-      const { error } = await supabase
-        .from('workspace_features')
-        .upsert(upsertData, { onConflict: 'workspace_id,feature_code' })
-
-      if (error) throw error
-
-      toast({ title: '已儲存功能權限' })
+      if (res.ok) {
+        toast({ title: '已儲存功能權限' })
+      } else {
+        throw new Error('儲存失敗')
+      }
     } catch (err) {
       console.error('儲存失敗:', err)
       toast({ title: '儲存失敗', variant: 'destructive' })
@@ -170,17 +158,15 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       icon={Building2}
       breadcrumb={[
         { label: '租戶管理', href: '/tenants' },
-        { label: workspace?.name || '詳情' },
+        { label: workspace?.name || '詳情', href: `/tenants/${id}` },
       ]}
     >
       <div className="space-y-6">
-        {/* 返回按鈕 */}
         <Button variant="ghost" onClick={() => router.push('/tenants')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           返回列表
         </Button>
 
-        {/* 基本資訊卡片 */}
         <Card className="p-6">
           <div className="grid grid-cols-4 gap-4">
             <div>
@@ -197,14 +183,13 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
             </div>
             <div>
               <Label className="text-muted-foreground">狀態</Label>
-              <Badge variant={workspace?.status === 'active' ? 'default' : 'secondary'}>
-                {workspace?.status === 'active' ? '啟用' : '停用'}
+              <Badge variant={workspace?.is_active ? 'default' : 'secondary'}>
+                {workspace?.is_active ? '啟用' : '停用'}
               </Badge>
             </div>
           </div>
         </Card>
 
-        {/* 功能權限 */}
         <Tabs defaultValue="basic" className="w-full">
           <div className="flex items-center justify-between mb-4">
             <TabsList>
@@ -221,38 +206,28 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
             </TabsList>
 
             <Button onClick={handleSave} disabled={saving}>
-              {saving ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Save className="h-4 w-4 mr-2" />
-              )}
+              {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
               儲存
             </Button>
           </div>
 
           <TabsContent value="basic">
             <Card className="p-4">
-              <h3 className="font-medium mb-4 text-muted-foreground">
-                基本功能（免費）
-              </h3>
+              <h3 className="font-medium mb-4 text-muted-foreground">基本功能（免費）</h3>
               {renderFeatureList(getBasicFeatures())}
             </Card>
           </TabsContent>
 
           <TabsContent value="premium">
             <Card className="p-4">
-              <h3 className="font-medium mb-4 text-muted-foreground">
-                付費功能（需要訂閱）
-              </h3>
+              <h3 className="font-medium mb-4 text-muted-foreground">付費功能（需要訂閱）</h3>
               {renderFeatureList(getPremiumFeatures())}
             </Card>
           </TabsContent>
 
           <TabsContent value="enterprise">
             <Card className="p-4">
-              <h3 className="font-medium mb-4 text-muted-foreground">
-                企業功能（特殊訂閱）
-              </h3>
+              <h3 className="font-medium mb-4 text-muted-foreground">企業功能（特殊訂閱）</h3>
               {renderFeatureList(getEnterpriseFeatures())}
             </Card>
           </TabsContent>

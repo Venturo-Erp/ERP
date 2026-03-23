@@ -2,20 +2,16 @@
 
 /**
  * 角色管理頁面
- * 
- * 租戶管理員可以：
- * 1. 建立/編輯角色（管理員、會計、業務、助理等）
- * 2. 設定每個角色的路由權限（可讀/可寫）
+ * 使用 API Route 處理 DB 操作，避免 Supabase Client 型別問題
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/components/ui/use-toast'
 import {
@@ -25,18 +21,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { 
   Shield, 
   Plus, 
-  Edit, 
   Trash2, 
   Save,
   Loader2,
@@ -44,8 +31,6 @@ import {
   Star
 } from 'lucide-react'
 import { useAuthStore } from '@/stores'
-import { supabase } from '@/lib/supabase/client'
-import { FEATURES } from '@/lib/workspace-permissions'
 
 interface Role {
   id: string
@@ -63,21 +48,21 @@ interface RoutePermission {
 
 // 可設定權限的路由列表
 const PERMISSION_ROUTES = [
-  { route: '/tours', name: '旅遊團', feature: 'tours' },
-  { route: '/orders', name: '訂單', feature: 'orders' },
-  { route: '/quotes', name: '報價單', feature: 'quotes' },
-  { route: '/finance/payments', name: '收款管理', feature: 'finance' },
-  { route: '/finance/requests', name: '請款管理', feature: 'finance' },
-  { route: '/finance/treasury', name: '金庫管理', feature: 'finance' },
-  { route: '/accounting', name: '會計系統', feature: 'finance' },
-  { route: '/database', name: '資料管理', feature: 'database' },
-  { route: '/customers', name: '顧客管理', feature: 'customers' },
-  { route: '/hr', name: '人資管理', feature: 'hr' },
-  { route: '/calendar', name: '行事曆', feature: 'calendar' },
-  { route: '/workspace', name: '工作空間', feature: 'workspace' },
-  { route: '/todos', name: '待辦事項', feature: 'todos' },
-  { route: '/itinerary', name: '行程管理', feature: 'itinerary' },
-  { route: '/settings', name: '設定', feature: 'settings' },
+  { route: '/tours', name: '旅遊團' },
+  { route: '/orders', name: '訂單' },
+  { route: '/quotes', name: '報價單' },
+  { route: '/finance/payments', name: '收款管理' },
+  { route: '/finance/requests', name: '請款管理' },
+  { route: '/finance/treasury', name: '金庫管理' },
+  { route: '/accounting', name: '會計系統' },
+  { route: '/database', name: '資料管理' },
+  { route: '/customers', name: '顧客管理' },
+  { route: '/hr', name: '人資管理' },
+  { route: '/calendar', name: '行事曆' },
+  { route: '/workspace', name: '工作空間' },
+  { route: '/todos', name: '待辦事項' },
+  { route: '/itinerary', name: '行程管理' },
+  { route: '/settings', name: '設定' },
 ]
 
 export default function RolesPage() {
@@ -90,9 +75,8 @@ export default function RolesPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   
-  // Dialog 狀態
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingRole, setEditingRole] = useState<Partial<Role>>({ name: '', description: '' })
+  const [editingRole, setEditingRole] = useState({ name: '', description: '' })
 
   // 載入角色
   useEffect(() => {
@@ -100,17 +84,17 @@ export default function RolesPage() {
 
     const fetchRoles = async () => {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('workspace_roles')
-        .select('*')
-        .eq('workspace_id', user.workspace_id)
-        .order('sort_order')
-
-      if (!error && data) {
-        setRoles(data)
-        if (data.length > 0 && !selectedRole) {
-          setSelectedRole(data[0])
+      try {
+        const res = await fetch(`/api/permissions/roles?workspace_id=${user.workspace_id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setRoles(data)
+          if (data.length > 0 && !selectedRole) {
+            setSelectedRole(data[0])
+          }
         }
+      } catch (err) {
+        console.error('載入角色失敗:', err)
       }
       setLoading(false)
     }
@@ -126,20 +110,20 @@ export default function RolesPage() {
     }
 
     const fetchPermissions = async () => {
-      const { data, error } = await supabase
-        .from('role_route_permissions')
-        .select('route, can_read, can_write')
-        .eq('role_id', selectedRole.id)
-
-      if (!error && data) {
-        // 合併預設路由和已有權限
-        const permMap = new Map(data.map(p => [p.route, p]))
-        const merged = PERMISSION_ROUTES.map(r => ({
-          route: r.route,
-          can_read: permMap.get(r.route)?.can_read ?? false,
-          can_write: permMap.get(r.route)?.can_write ?? false,
-        }))
-        setPermissions(merged)
+      try {
+        const res = await fetch(`/api/permissions/role-permissions?role_id=${selectedRole.id}`)
+        if (res.ok) {
+          const data = await res.json()
+          const permMap = new Map(data.map((p: RoutePermission) => [p.route, p]))
+          const merged = PERMISSION_ROUTES.map(r => ({
+            route: r.route,
+            can_read: (permMap.get(r.route) as RoutePermission | undefined)?.can_read ?? false,
+            can_write: (permMap.get(r.route) as RoutePermission | undefined)?.can_write ?? false,
+          }))
+          setPermissions(merged)
+        }
+      } catch (err) {
+        console.error('載入權限失敗:', err)
       }
     }
 
@@ -152,25 +136,26 @@ export default function RolesPage() {
     setSaving(true)
 
     try {
-      const { data, error } = await supabase
-        .from('workspace_roles')
-        .insert({
+      const res = await fetch('/api/permissions/roles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           workspace_id: user.workspace_id,
           name: editingRole.name,
           description: editingRole.description || null,
-          is_admin: false,
-          sort_order: roles.length,
-        })
-        .select()
-        .single()
+        }),
+      })
 
-      if (error) throw error
-
-      setRoles([...roles, data])
-      setSelectedRole(data)
-      setIsDialogOpen(false)
-      setEditingRole({ name: '', description: '' })
-      toast({ title: '已建立角色' })
+      if (res.ok) {
+        const newRole = await res.json()
+        setRoles([...roles, newRole])
+        setSelectedRole(newRole)
+        setIsDialogOpen(false)
+        setEditingRole({ name: '', description: '' })
+        toast({ title: '已建立角色' })
+      } else {
+        throw new Error('建立失敗')
+      }
     } catch (err) {
       console.error('建立角色失敗:', err)
       toast({ title: '建立失敗', variant: 'destructive' })
@@ -184,11 +169,9 @@ export default function RolesPage() {
     setPermissions(prev =>
       prev.map(p => {
         if (p.route === route) {
-          // 如果取消讀取，也要取消寫入
           if (field === 'can_read' && !value) {
             return { ...p, can_read: false, can_write: false }
           }
-          // 如果啟用寫入，也要啟用讀取
           if (field === 'can_write' && value) {
             return { ...p, can_read: true, can_write: true }
           }
@@ -205,31 +188,20 @@ export default function RolesPage() {
     setSaving(true)
 
     try {
-      // 先刪除舊權限
-      await supabase
-        .from('role_route_permissions')
-        .delete()
-        .eq('role_id', selectedRole.id)
-
-      // 插入新權限（只插入有權限的）
-      const toInsert = permissions
-        .filter(p => p.can_read || p.can_write)
-        .map(p => ({
+      const res = await fetch('/api/permissions/role-permissions', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           role_id: selectedRole.id,
-          route: p.route,
-          can_read: p.can_read,
-          can_write: p.can_write,
-        }))
+          permissions,
+        }),
+      })
 
-      if (toInsert.length > 0) {
-        const { error } = await supabase
-          .from('role_route_permissions')
-          .insert(toInsert)
-
-        if (error) throw error
+      if (res.ok) {
+        toast({ title: '已儲存權限' })
+      } else {
+        throw new Error('儲存失敗')
       }
-
-      toast({ title: '已儲存權限' })
     } catch (err) {
       console.error('儲存權限失敗:', err)
       toast({ title: '儲存失敗', variant: 'destructive' })
@@ -248,18 +220,20 @@ export default function RolesPage() {
     if (!confirm(`確定要刪除角色「${role.name}」嗎？`)) return
 
     try {
-      const { error } = await supabase
-        .from('workspace_roles')
-        .delete()
-        .eq('id', role.id)
+      const res = await fetch(`/api/permissions/roles?id=${role.id}`, {
+        method: 'DELETE',
+      })
 
-      if (error) throw error
-
-      setRoles(roles.filter(r => r.id !== role.id))
-      if (selectedRole?.id === role.id) {
-        setSelectedRole(roles[0] || null)
+      if (res.ok) {
+        const newRoles = roles.filter(r => r.id !== role.id)
+        setRoles(newRoles)
+        if (selectedRole?.id === role.id) {
+          setSelectedRole(newRoles[0] || null)
+        }
+        toast({ title: '已刪除角色' })
+      } else {
+        throw new Error('刪除失敗')
       }
-      toast({ title: '已刪除角色' })
     } catch (err) {
       console.error('刪除角色失敗:', err)
       toast({ title: '刪除失敗', variant: 'destructive' })
@@ -272,7 +246,7 @@ export default function RolesPage() {
       icon={Shield}
       breadcrumb={[
         { label: '設定', href: '/settings' },
-        { label: '角色管理' },
+        { label: '角色管理', href: '/settings/roles' },
       ]}
     >
       <div className="grid grid-cols-12 gap-6">
@@ -295,7 +269,6 @@ export default function RolesPage() {
               <div className="text-center py-8 text-muted-foreground">
                 <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
                 <p>尚未建立角色</p>
-                <p className="text-sm">點擊「新增」建立第一個角色</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -333,9 +306,7 @@ export default function RolesPage() {
                       )}
                     </div>
                     {role.description && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {role.description}
-                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">{role.description}</p>
                     )}
                   </div>
                 ))}
@@ -353,54 +324,48 @@ export default function RolesPage() {
               </h3>
               {selectedRole && (
                 <Button onClick={handleSavePermissions} disabled={saving}>
-                  {saving ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4 mr-2" />
-                  )}
+                  {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                   儲存
                 </Button>
               )}
             </div>
 
             {selectedRole ? (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[200px]">功能</TableHead>
-                    <TableHead className="w-[100px] text-center">可讀取</TableHead>
-                    <TableHead className="w-[100px] text-center">可寫入</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {PERMISSION_ROUTES.map(route => {
-                    const perm = permissions.find(p => p.route === route.route)
-                    return (
-                      <TableRow key={route.route}>
-                        <TableCell className="font-medium">{route.name}</TableCell>
-                        <TableCell className="text-center">
-                          <Checkbox
-                            checked={perm?.can_read ?? false}
-                            onCheckedChange={v =>
-                              handlePermissionChange(route.route, 'can_read', v as boolean)
-                            }
-                            disabled={selectedRole.is_admin}
-                          />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <Checkbox
-                            checked={perm?.can_write ?? false}
-                            onCheckedChange={v =>
-                              handlePermissionChange(route.route, 'can_write', v as boolean)
-                            }
-                            disabled={selectedRole.is_admin}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="text-left p-3 font-medium">功能</th>
+                      <th className="text-center p-3 font-medium w-24">可讀取</th>
+                      <th className="text-center p-3 font-medium w-24">可寫入</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {PERMISSION_ROUTES.map(route => {
+                      const perm = permissions.find(p => p.route === route.route)
+                      return (
+                        <tr key={route.route} className="border-t">
+                          <td className="p-3 font-medium">{route.name}</td>
+                          <td className="text-center p-3">
+                            <Checkbox
+                              checked={perm?.can_read ?? false}
+                              onCheckedChange={v => handlePermissionChange(route.route, 'can_read', v as boolean)}
+                              disabled={selectedRole.is_admin}
+                            />
+                          </td>
+                          <td className="text-center p-3">
+                            <Checkbox
+                              checked={perm?.can_write ?? false}
+                              onCheckedChange={v => handlePermissionChange(route.route, 'can_write', v as boolean)}
+                              disabled={selectedRole.is_admin}
+                            />
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               <div className="text-center py-12 text-muted-foreground">
                 <Shield className="h-12 w-12 mx-auto mb-2 opacity-50" />
@@ -438,7 +403,7 @@ export default function RolesPage() {
               <Label htmlFor="description">說明（選填）</Label>
               <Input
                 id="description"
-                value={editingRole.description || ''}
+                value={editingRole.description}
                 onChange={e => setEditingRole({ ...editingRole, description: e.target.value })}
                 placeholder="這個角色的職責說明"
                 className="mt-1"
@@ -446,9 +411,7 @@ export default function RolesPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              取消
-            </Button>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>取消</Button>
             <Button onClick={handleCreateRole} disabled={saving || !editingRole.name}>
               {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               建立

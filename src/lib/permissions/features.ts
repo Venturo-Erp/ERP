@@ -164,6 +164,19 @@ export function getFeatureByRoute(route: string): FeatureDefinition | undefined 
   )
 }
 
+// 根據路由取得所有相關的功能（複數）
+export function getFeaturesByRoute(route: string): FeatureDefinition[] {
+  const normalizedRoute = route.replace(/\/\[.*?\]/g, '/[param]')
+  
+  return FEATURES.filter(f => 
+    f.routes.some(r => {
+      const normalizedFeatureRoute = r.replace(/\/\[.*?\]/g, '/[param]')
+      return route.startsWith(normalizedFeatureRoute.replace('/[param]', '')) ||
+             normalizedRoute === normalizedFeatureRoute
+    })
+  )
+}
+
 // 取得所有基本功能
 export function getBasicFeatures(): FeatureDefinition[] {
   return FEATURES.filter(f => f.category === 'basic')

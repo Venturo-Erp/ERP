@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useWorkspaceFeatures } from '@/lib/workspace-permissions'
+import { useWorkspaceFeatures } from '@/lib/permissions'
 import {
   ChevronRight,
   ChevronDown,
