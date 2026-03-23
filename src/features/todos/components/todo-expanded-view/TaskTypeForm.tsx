@@ -454,7 +454,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
         return `1${name}`
       })
 
-    const text = lines.join('\n')
+    const text = lines.join(' ')
     navigator.clipboard.writeText(text)
     setCopied(true)
     toast.success(`已複製 ${lines.length} 位旅客（Amadeus 格式）`)
