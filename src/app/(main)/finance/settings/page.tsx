@@ -6,14 +6,23 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+// 簡易 Table 組件
+const Table = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <table className={`w-full text-sm ${className || ''}`}>{children}</table>
+)
+const TableHeader = ({ children }: { children: React.ReactNode }) => (
+  <thead className="bg-morandi-background/50">{children}</thead>
+)
+const TableBody = ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>
+const TableRow = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <tr className={`border-b border-border ${className || ''}`}>{children}</tr>
+)
+const TableHead = ({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <th className={`px-4 py-3 text-left font-medium text-morandi-muted ${className || ''}`}>{children}</th>
+)
+const TableCell = ({ children, className, colSpan }: { children: React.ReactNode; className?: string; colSpan?: number }) => (
+  <td className={`px-4 py-3 ${className || ''}`} colSpan={colSpan}>{children}</td>
+)
 import {
   Dialog,
   DialogContent,
@@ -127,7 +136,7 @@ export default function FinanceSettingsPage() {
   const handleDeleteMethod = async (method: PaymentMethod) => {
     const confirmed = await confirm(`確定要刪除「${method.name}」嗎？`, {
       title: '刪除付款方式',
-      type: 'danger',
+      type: 'warning',
     })
     if (!confirmed) return
     
@@ -169,7 +178,7 @@ export default function FinanceSettingsPage() {
   const handleDeleteBank = async (bank: BankAccount) => {
     const confirmed = await confirm(`確定要刪除「${bank.name}」嗎？`, {
       title: '刪除銀行帳戶',
-      type: 'danger',
+      type: 'warning',
     })
     if (!confirmed) return
     

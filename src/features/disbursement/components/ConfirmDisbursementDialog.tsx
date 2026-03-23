@@ -95,7 +95,7 @@ export function ConfirmDisbursementDialog({
             <div className="flex justify-between text-sm">
               <span className="text-morandi-muted">出帳金額</span>
               <span className="font-bold text-lg text-morandi-gold">
-                <CurrencyCell value={totalAmount} />
+                <CurrencyCell amount={totalAmount} />
               </span>
             </div>
           </div>
