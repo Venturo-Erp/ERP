@@ -96,8 +96,14 @@ export const useChannelsStore = () => {
   const workspaceLoading = useWorkspaceStore(state => state.loading)
   const workspaceError = useWorkspaceStore(state => state.error)
 
-  // UI 狀態
-  const uiStore = useChannelsUIStore()
+  // UI 狀態（使用 selectors 避免不必要的 re-render）
+  const selectedChannel = useChannelsUIStore(state => state.selectedChannel)
+  const currentChannel = useChannelsUIStore(state => state.currentChannel)
+  const currentWorkspace = useChannelsUIStore(state => state.currentWorkspace)
+  const currentWorkspaceId = useChannelsUIStore(state => state.currentWorkspaceId)
+  const searchQuery = useChannelsUIStore(state => state.searchQuery)
+  const channelFilter = useChannelsUIStore(state => state.channelFilter)
+  const uiError = useChannelsUIStore(state => state.error)
 
   return {
     // ============================================
@@ -110,18 +116,18 @@ export const useChannelsStore = () => {
     // ============================================
     // UI 狀態
     // ============================================
-    selectedChannel: uiStore.selectedChannel,
-    currentChannel: uiStore.currentChannel,
-    currentWorkspace: uiStore.currentWorkspace,
-    currentWorkspaceId: uiStore.currentWorkspaceId,
-    searchQuery: uiStore.searchQuery,
-    channelFilter: uiStore.channelFilter,
+    selectedChannel,
+    currentChannel,
+    currentWorkspace,
+    currentWorkspaceId,
+    searchQuery,
+    channelFilter,
 
     // ============================================
     // Loading 和 Error
     // ============================================
     loading: channelLoading || channelGroupLoading || workspaceLoading,
-    error: uiStore.error || channelError || channelGroupError || workspaceError,
+    error: uiError || channelError || channelGroupError || workspaceError,
 
     // ============================================
     // Workspace 操作
@@ -130,7 +136,7 @@ export const useChannelsStore = () => {
       const workspaces = await useWorkspaceStore.getState().fetchAll()
 
       // 🔥 使用 fetchAll 的返回值，而不是 items (避免競爭條件)
-      if (workspaces && workspaces.length > 0 && !uiStore.currentWorkspace) {
+      if (workspaces && workspaces.length > 0 && !useChannelsUIStore.getState().currentWorkspace) {
         // 根據使用者的 workspace_id 選擇對應的工作空間
         const user = useAuthStore.getState().user
         const userWorkspaceId = user?.workspace_id
@@ -144,7 +150,7 @@ export const useChannelsStore = () => {
           }
         }
 
-        uiStore.setCurrentWorkspace(selectedWorkspace)
+        useChannelsUIStore.getState().setCurrentWorkspace(selectedWorkspace)
         // 🔥 設定 workspace filter
         setCurrentWorkspaceFilter(selectedWorkspace.id)
       }
@@ -153,17 +159,17 @@ export const useChannelsStore = () => {
     setCurrentWorkspace: (workspace: Workspace | string | null) => {
       if (typeof workspace === 'string') {
         // 如果傳入 workspace ID，設定 ID
-        uiStore.setCurrentWorkspaceId(workspace)
+        useChannelsUIStore.getState().setCurrentWorkspaceId(workspace)
         // 嘗試從列表中找到對應的 workspace 物件
         const ws = useWorkspaceStore.getState().items.find(w => w.id === workspace)
-        uiStore.setCurrentWorkspace(ws || null)
+        useChannelsUIStore.getState().setCurrentWorkspace(ws || null)
         // 🔥 設定 workspace filter，讓 fetchAll 可以正確過濾
         setCurrentWorkspaceFilter(workspace)
       } else {
         // 如果傳入 workspace 物件
-        uiStore.setCurrentWorkspace(workspace)
+        useChannelsUIStore.getState().setCurrentWorkspace(workspace)
         const workspaceId = workspace?.id || null
-        uiStore.setCurrentWorkspaceId(workspaceId)
+        useChannelsUIStore.getState().setCurrentWorkspaceId(workspaceId)
         // 🔥 設定 workspace filter，讓 fetchAll 可以正確過濾
         setCurrentWorkspaceFilter(workspaceId)
       }
@@ -226,11 +232,11 @@ export const useChannelsStore = () => {
       await useChannelStore.getState().delete(id)
 
       // 如果刪除的是當前選中的頻道，清除選擇
-      if (uiStore.selectedChannel?.id === id) {
-        uiStore.setSelectedChannel(null)
+      if (useChannelsUIStore.getState().selectedChannel?.id === id) {
+        useChannelsUIStore.getState().setSelectedChannel(null)
       }
-      if (uiStore.currentChannel?.id === id) {
-        uiStore.setCurrentChannel(null)
+      if (useChannelsUIStore.getState().currentChannel?.id === id) {
+        useChannelsUIStore.getState().setCurrentChannel(null)
       }
     },
 
@@ -261,8 +267,8 @@ export const useChannelsStore = () => {
     },
 
     selectChannel: async (channel: Channel | null) => {
-      uiStore.setSelectedChannel(channel)
-      uiStore.setCurrentChannel(channel)
+      useChannelsUIStore.getState().setSelectedChannel(channel)
+      useChannelsUIStore.getState().setCurrentChannel(channel)
     },
 
     updateChannelOrder: async (channelId: string, newOrder: number) => {
@@ -317,8 +323,8 @@ export const useChannelsStore = () => {
     // ============================================
     // 搜尋與過濾
     // ============================================
-    setSearchQuery: uiStore.setSearchQuery,
-    setChannelFilter: uiStore.setChannelFilter,
+    setSearchQuery: useChannelsUIStore.getState().setSearchQuery,
+    setChannelFilter: useChannelsUIStore.getState().setChannelFilter,
 
     // ============================================
     // Realtime 訂閱 (createStore 自動處理，但保留接口以防舊代碼呼叫)
@@ -334,7 +340,7 @@ export const useChannelsStore = () => {
     // ============================================
     // 錯誤處理
     // ============================================
-    clearError: uiStore.clearError,
+    clearError: useChannelsUIStore.getState().clearError,
   }
 }
 
