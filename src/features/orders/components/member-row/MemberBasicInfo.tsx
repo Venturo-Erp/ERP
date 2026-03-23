@@ -264,7 +264,9 @@ export function MemberBasicInfo({
               onKeyDown={e => onKeyDown(e, index, 'birth_date')}
               data-member={member.id}
               data-field="birth_date"
-              className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
+              placeholder="YYYY-MM-DD"
+              maxLength={10}
+              className="w-full bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
             />
           ) : (
             <span className="text-xs text-morandi-primary">{member.birth_date || '-'}</span>
