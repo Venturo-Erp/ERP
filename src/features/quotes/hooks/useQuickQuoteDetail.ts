@@ -118,8 +118,9 @@ export function useQuickQuoteDetail({ quote, onUpdate }: UseQuickQuoteDetailProp
         }
         return item
       })
-      pendingItemsRef.current = updated
-      triggerAutoSave()
+      // 🔧 關閉自動存檔，改成手動點「儲存」按鈕
+      // pendingItemsRef.current = updated
+      // triggerAutoSave()
       return updated
     })
   }
