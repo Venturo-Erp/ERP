@@ -165,26 +165,11 @@ export const useChannelsStore = () => {
     updateWorkspace: workspaceStore.update,
 
     // ============================================
-    // Channel 操作 (使用 API Route 繞過 RLS)
+    // Channel 操作 (使用 createStore 的方法)
     // ============================================
-    loadChannels: async (workspaceId?: string) => {
-      if (!workspaceId) {
-        logger.warn('[ChannelsStore] loadChannels: 沒有 workspaceId')
-        return
-      }
-      
-      try {
-        const response = await fetch(`/api/channels/list?workspaceId=${workspaceId}`)
-        const result = await response.json()
-        
-        if (result.channels) {
-          // 直接設定到 channelStore
-          channelStore.setState({ items: result.channels, isLoading: false })
-          logger.log('[ChannelsStore] 載入頻道:', result.channels.length, '個')
-        }
-      } catch (error) {
-        logger.error('[ChannelsStore] 載入頻道失敗:', error)
-      }
+    loadChannels: async (_workspaceId?: string) => {
+      // workspaceId 參數保留以維持 API 兼容性，實際過濾由 RLS 處理
+      await channelStore.fetchAll()
     },
 
     createChannel: async (channel: Omit<Channel, 'id' | 'created_at'>) => {
