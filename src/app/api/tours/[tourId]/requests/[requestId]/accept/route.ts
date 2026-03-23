@@ -95,6 +95,14 @@ export async function POST(
       .update({ covered_item_ids: coveredIds })
       .eq('id', requestId)
 
+    // 6. 標記核心表項目為 Local 負責
+    if (coveredIds.length > 0) {
+      await supabase
+        .from('tour_itinerary_items')
+        .update({ handled_by: 'local' })
+        .in('id', coveredIds)
+    }
+
     return NextResponse.json({
       success: true,
       itemsCreated: requestItems.length,
