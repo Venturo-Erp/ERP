@@ -88,7 +88,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
     try {
       const { data, error } = await supabase
         .from('quotes')
-        .select('id, customer_name, issue_date, total_amount, status, created_at')
+        .select('*')  // 載入完整資料給 QuickQuoteDetail 使用
         .eq('tour_id', tour.id)
         .eq('quote_type', 'quick')
         .order('created_at', { ascending: false })
@@ -277,6 +277,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
             }
             return (
               <QuickQuoteDetail
+                key={selectedQuote.id}  // 強制重新渲染
                 quote={selectedQuote}
                 onUpdate={async (data) => {
                   // 更新快速報價單
