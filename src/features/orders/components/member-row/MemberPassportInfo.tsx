@@ -21,6 +21,7 @@ interface MemberPassportInfoProps {
   columnVisibility?: ColumnVisibility
   onUpdateField: (memberId: string, field: keyof OrderMember, value: string | number | null) => void
   onKeyDown: (e: React.KeyboardEvent, memberIndex: number, field: string) => void
+  onPaste?: (e: React.ClipboardEvent, memberIndex: number, field: string) => void
 }
 
 export function MemberPassportInfo({
@@ -31,6 +32,7 @@ export function MemberPassportInfo({
   columnVisibility,
   onUpdateField,
   onKeyDown,
+  onPaste,
 }: MemberPassportInfoProps) {
   // 預設欄位顯示設定（訂金/尾款/應付金額 預設關閉）
   const cv = columnVisibility || {
@@ -81,9 +83,10 @@ export function MemberPassportInfo({
               value={member.passport_number || ''}
               onChange={e => onUpdateField(member.id, 'passport_number', e.target.value)}
               onKeyDown={e => onKeyDown(e, index, 'passport_number')}
+              onPaste={e => onPaste?.(e, index, 'passport_number')}
               data-member={member.id}
               data-field="passport_number"
-              className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
+              className="w-full bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
             />
           ) : (
             <span className="text-xs text-morandi-primary">{member.passport_number || '-'}</span>
@@ -105,9 +108,10 @@ export function MemberPassportInfo({
               value={member.passport_expiry || ''}
               onChange={e => handlePassportExpiryInput(e.target.value)}
               onKeyDown={e => onKeyDown(e, index, 'passport_expiry')}
+              onPaste={e => onPaste?.(e, index, 'passport_expiry')}
               data-member={member.id}
               data-field="passport_expiry"
-              className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
+              className="w-full bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
             />
           ) : (
             (() => {

@@ -21,6 +21,7 @@ interface MemberBasicInfoProps {
   onUpdateField: (memberId: string, field: keyof OrderMember, value: string | number | null) => void
   onPreview: (member: OrderMember) => void
   onKeyDown: (e: React.KeyboardEvent, memberIndex: number, field: string) => void
+  onPaste?: (e: React.ClipboardEvent, memberIndex: number, field: string) => void
   onNameSearch?: (memberId: string, value: string) => void
   onIdNumberSearch?: (memberId: string, value: string, memberIndex: number) => void
 }
@@ -35,6 +36,7 @@ export function MemberBasicInfo({
   onUpdateField,
   onPreview,
   onKeyDown,
+  onPaste,
   onNameSearch,
   onIdNumberSearch,
 }: MemberBasicInfoProps) {
@@ -128,6 +130,7 @@ export function MemberBasicInfo({
                   onKeyDown(e, index, 'chinese_name')
                 }
               }}
+              onPaste={e => onPaste?.(e, index, 'chinese_name')}
               data-member={member.id}
               data-field="chinese_name"
               className={cn(
@@ -238,9 +241,10 @@ export function MemberBasicInfo({
                 if (isComposing) return
                 onKeyDown(e, index, 'passport_name')
               }}
+              onPaste={e => onPaste?.(e, index, 'passport_name')}
               data-member={member.id}
               data-field="passport_name"
-              className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
+              className="w-full bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
             />
           ) : (
             <span className="text-xs text-morandi-primary">{member.passport_name || '-'}</span>
@@ -262,6 +266,7 @@ export function MemberBasicInfo({
               value={member.birth_date || ''}
               onChange={e => handleDateInput(e.target.value)}
               onKeyDown={e => onKeyDown(e, index, 'birth_date')}
+              onPaste={e => onPaste?.(e, index, 'birth_date')}
               data-member={member.id}
               data-field="birth_date"
               placeholder="YYYY-MM-DD"

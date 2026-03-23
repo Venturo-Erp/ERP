@@ -60,6 +60,7 @@ interface MemberRowProps {
   onCustomCostChange: (fieldId: string, memberId: string, value: string) => void
   onSurchargeChange?: (memberId: string, surcharges: MemberSurcharges) => void // 附加費用變更
   onKeyDown: (e: React.KeyboardEvent, memberIndex: number, field: string) => void
+  onPaste?: (e: React.ClipboardEvent, memberIndex: number, field: string) => void
   onNameSearch?: (memberId: string, value: string) => void
   onIdNumberSearch?: (memberId: string, value: string, memberIndex: number) => void
   onRoomAssign?: (
@@ -103,6 +104,7 @@ export function MemberRow({
   onCustomCostChange,
   onSurchargeChange,
   onKeyDown,
+  onPaste,
   onNameSearch,
   onIdNumberSearch,
   roomIdByHotelMember = {},
@@ -196,6 +198,7 @@ export function MemberRow({
         onUpdateField={onUpdateField}
         onPreview={onPreview}
         onKeyDown={onKeyDown}
+        onPaste={onPaste}
         onNameSearch={onNameSearch}
         onIdNumberSearch={onIdNumberSearch}
       />
@@ -209,6 +212,7 @@ export function MemberRow({
         columnVisibility={cv}
         onUpdateField={onUpdateField}
         onKeyDown={onKeyDown}
+        onPaste={onPaste}
       />
 
       {/* 飲食禁忌 */}

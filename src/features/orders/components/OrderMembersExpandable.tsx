@@ -824,6 +824,45 @@ export function OrderMembersExpandable({
     [isComposing, editableFields, membersData]
   )
 
+  // 批量貼上功能（Excel-like）
+  const handlePaste = useCallback(
+    async (e: React.ClipboardEvent, memberIndex: number, fieldName: string) => {
+      const pastedText = e.clipboardData.getData('text')
+      
+      // 檢查是否有多行（換行符分隔）
+      const lines = pastedText.split(/[\r\n]+/).filter(line => line.trim())
+      
+      if (lines.length <= 1) {
+        // 單行貼上，讓瀏覽器預設處理
+        return
+      }
+      
+      // 多行貼上，阻止預設行為
+      e.preventDefault()
+      
+      const { members } = membersData
+      const updates: Array<{ id: string; field: string; value: string }> = []
+      
+      // 從當前成員開始，依序填入
+      for (let i = 0; i < lines.length && memberIndex + i < members.length; i++) {
+        const member = members[memberIndex + i]
+        updates.push({
+          id: member.id,
+          field: fieldName,
+          value: lines[i].trim()
+        })
+      }
+      
+      // 批量更新
+      for (const update of updates) {
+        await handleUpdateField(update.id, update.field, update.value)
+      }
+      
+      toast.success(`已貼上 ${updates.length} 筆資料`)
+    },
+    [membersData, handleUpdateField]
+  )
+
   const sortedMembers = useMemo(() => {
     // 有分房時按房間排序（同房的人排在一起）
     if (roomVehicle.showRoomColumn && Object.keys(roomVehicle.roomSortKeys).length > 0) {
@@ -1184,6 +1223,7 @@ export function OrderMembersExpandable({
                     }}
                     onSurchargeChange={handleSurchargeChange}
                     onKeyDown={handleKeyDown}
+                    onPaste={handlePaste}
                     onNameSearch={(memberId, value) => {
                       const memberIndex = membersData.members.findIndex(m => m.id === memberId)
                       if (memberIndex >= 0) {
