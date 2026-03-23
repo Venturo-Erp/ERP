@@ -7,24 +7,20 @@ const supabase = createClient(
 )
 
 /**
- * GET /api/bank-accounts?workspace_id=xxx
- * 取得銀行帳戶列表
+ * GET /api/accounting/accounts?workspace_id=xxx
+ * 取得會計科目列表
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const workspaceId = searchParams.get('workspace_id')
 
-  if (!workspaceId) {
-    return NextResponse.json({ error: '缺少 workspace_id' }, { status: 400 })
-  }
-
-  const { data, error } = await supabase
-    .from('bank_accounts')
+  // 會計科目是全域的（不分 workspace），但可以過濾
+  const query = supabase
+    .from('chart_of_accounts')
     .select('*')
-    .eq('workspace_id', workspaceId)
-    .eq('is_active', true)
-    .order('is_default', { ascending: false })
-    .order('name')
+    .order('code')
+
+  const { data, error } = await query
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -34,35 +30,27 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST /api/bank-accounts
- * 新增銀行帳戶
+ * POST /api/accounting/accounts
+ * 新增會計科目
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { code, name, bank_name, account_number, is_default, workspace_id } = body
+    const { code, name, account_type, description, workspace_id } = body
 
-    if (!code || !name || !workspace_id) {
+    if (!code || !name) {
       return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
     }
 
-    // 如果設為預設，先把其他的取消預設
-    if (is_default) {
-      await supabase
-        .from('bank_accounts')
-        .update({ is_default: false })
-        .eq('workspace_id', workspace_id)
-    }
-
     const { data, error } = await supabase
-      .from('bank_accounts')
+      .from('chart_of_accounts')
       .insert({
         code,
         name,
-        bank_name,
-        account_number,
-        is_default: is_default || false,
+        account_type: account_type || 'expense',
+        description,
         workspace_id,
+        is_system_locked: false,
         is_active: true,
       })
       .select()
@@ -79,35 +67,25 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * PUT /api/bank-accounts
- * 更新銀行帳戶
+ * PUT /api/accounting/accounts
+ * 更新會計科目
  */
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, code, name, bank_name, account_number, is_default, workspace_id } = body
+    const { id, code, name, account_type, description } = body
 
     if (!id) {
       return NextResponse.json({ error: '缺少 id' }, { status: 400 })
     }
 
-    // 如果設為預設，先把其他的取消預設
-    if (is_default && workspace_id) {
-      await supabase
-        .from('bank_accounts')
-        .update({ is_default: false })
-        .eq('workspace_id', workspace_id)
-        .neq('id', id)
-    }
-
     const { data, error } = await supabase
-      .from('bank_accounts')
+      .from('chart_of_accounts')
       .update({
         code,
         name,
-        bank_name,
-        account_number,
-        is_default,
+        account_type,
+        description,
         updated_at: new Date().toISOString(),
       })
       .eq('id', id)
@@ -125,8 +103,8 @@ export async function PUT(request: NextRequest) {
 }
 
 /**
- * DELETE /api/bank-accounts?id=xxx
- * 刪除銀行帳戶
+ * DELETE /api/accounting/accounts?id=xxx
+ * 刪除會計科目
  */
 export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -136,8 +114,19 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: '缺少 id' }, { status: 400 })
   }
 
+  // 檢查是否為系統鎖定科目
+  const { data: account } = await supabase
+    .from('chart_of_accounts')
+    .select('is_system_locked')
+    .eq('id', id)
+    .single()
+
+  if (account?.is_system_locked) {
+    return NextResponse.json({ error: '系統科目無法刪除' }, { status: 400 })
+  }
+
   const { error } = await supabase
-    .from('bank_accounts')
+    .from('chart_of_accounts')
     .delete()
     .eq('id', id)
 
