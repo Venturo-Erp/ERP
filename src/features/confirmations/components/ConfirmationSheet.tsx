@@ -733,7 +733,7 @@ function DailyItineraryTable({
               <td colSpan={2} className="px-3 py-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 text-sm">
-                    <span className="font-medium">{item.supplier_name || '-'}</span>
+                    <span className="font-medium">{item.title || item.supplier_name || '-'}</span>
                     {item.driver_name && (
                       <span className="text-morandi-secondary">
                         司機: {item.driver_name} {item.driver_phone}
