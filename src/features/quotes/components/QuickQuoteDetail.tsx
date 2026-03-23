@@ -188,7 +188,7 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
         }
       />
 
-      <div className="w-full max-w-7xl mx-auto p-6 space-y-6">
+      <div className="w-full p-4 md:p-6 space-y-6 overflow-x-auto">
         {/* 客戶資訊 */}
         <QuickQuoteHeader formData={formData} isEditing={isEditing} onFieldChange={setFormField} />
 
