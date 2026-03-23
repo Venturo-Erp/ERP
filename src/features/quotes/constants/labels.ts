@@ -2,7 +2,7 @@
 
 export const ACCOMMODATION_ITEM_ROW_LABELS = {
   房型名稱: '房型名稱',
-  人: '人',
+  人: '幾人房',
   單價: '單價',
   續住: '續住',
   備註: '備註',

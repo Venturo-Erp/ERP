@@ -30,7 +30,7 @@ export const useAccommodationOperations = ({
       newItems.push({
         id: `accommodation-day${day}-${timestamp}`,
         name: '',
-        quantity: null,
+        quantity: 2, // 預設 2 人房
         unit_price: null,
         total: 0,
         note: '',
@@ -62,7 +62,7 @@ export const useAccommodationOperations = ({
     const newAccommodationItem: CostItem = {
       id: `accommodation-day${newDayCount}-${timestamp}`,
       name: '',
-      quantity: null,
+      quantity: 2, // 預設 2 人房
       unit_price: null,
       total: 0,
       note: '',
