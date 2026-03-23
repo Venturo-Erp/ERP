@@ -52,7 +52,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
     const fetchData = async () => {
       setLoading(true)
 
-      // 取得租戶資料
+      // 取得租戶資料（注意：API 路徑是 [workspaceId] 不是 [id]）
       const wsRes = await fetch(`/api/workspaces/${id}`)
       if (!wsRes.ok) {
         toast({ title: '找不到租戶', variant: 'destructive' })

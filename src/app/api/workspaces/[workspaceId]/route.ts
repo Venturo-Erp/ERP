@@ -7,19 +7,19 @@ const supabase = createClient(
 )
 
 /**
- * GET /api/workspaces/[id]
+ * GET /api/workspaces/[workspaceId]
  * 取得租戶詳情
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ workspaceId: string }> }
 ) {
-  const { id } = await params
+  const { workspaceId } = await params
 
   const { data, error } = await supabase
     .from('workspaces')
     .select('id, name, code, type, is_active')
-    .eq('id', id)
+    .eq('id', workspaceId)
     .single()
 
   if (error || !data) {
