@@ -139,11 +139,12 @@ export function CreateDisbursementDialog({
         </DialogFooter>
       </DialogContent>
 
-      {/* 請款單詳情視窗 */}
+      {/* 請款單詳情視窗（只讀模式） */}
       <RequestDetailDialog
         request={viewingRequest}
         open={!!viewingRequest}
         onOpenChange={(open) => !open && setViewingRequest(null)}
+        readOnly
       />
     </Dialog>
   )

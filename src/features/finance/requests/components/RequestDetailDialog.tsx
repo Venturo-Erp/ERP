@@ -35,9 +35,11 @@ interface RequestDetailDialogProps {
   request: PaymentRequest | null
   open: boolean
   onOpenChange: (open: boolean) => void
+  /** 只讀模式：隱藏編輯/刪除按鈕 */
+  readOnly?: boolean
 }
 
-export function RequestDetailDialog({ request, open, onOpenChange }: RequestDetailDialogProps) {
+export function RequestDetailDialog({ request, open, onOpenChange, readOnly = false }: RequestDetailDialogProps) {
   const { items: requestItems, refresh: refreshRequestItems } = usePaymentRequestItems()
   const { items: tours } = useToursSlim()
   const { items: suppliers } = useSuppliersSlim()
@@ -362,7 +364,7 @@ export function RequestDetailDialog({ request, open, onOpenChange }: RequestDeta
   }
 
   // 只有待處理狀態才能編輯（已確認/已出帳的被出納單鎖定）
-  const canEdit = currentRequest?.status === 'pending'
+  const canEdit = !readOnly && currentRequest?.status === 'pending'
 
   if (!request || !currentRequest) return null
 
