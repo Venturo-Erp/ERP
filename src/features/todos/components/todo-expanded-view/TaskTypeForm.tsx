@@ -356,6 +356,8 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
     return: any
     tourCode: string
     tourName: string
+    departureDate: string
+    returnDate: string
   } | null>(null)
   const [members, setMembers] = useState<{
     id: string
@@ -381,7 +383,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
         // 讀取團的航班資訊
         const { data: tour } = await supabase
           .from('tours')
-          .select('code, name, outbound_flight, return_flight')
+          .select('code, name, outbound_flight, return_flight, departure_date, return_date')
           .eq('id', todo.tour_id)
           .single()
 
@@ -391,6 +393,8 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
             return: tour.return_flight,
             tourCode: tour.code,
             tourName: tour.name,
+            departureDate: tour.departure_date || '',
+            returnDate: tour.return_date || '',
           })
         }
 
@@ -422,18 +426,91 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
     fetchData()
   }, [todo.tour_id])
 
-  // 格式化航班資訊
-  const formatFlight = (flight: any) => {
-    if (!flight) return '未設定'
-    if (Array.isArray(flight) && flight.length > 0) {
-      const f = flight[0]
-      if (f.flightNumber) return f.flightNumber
-      return '未設定'
+  // 解析航班資訊
+  const parseFlight = (flight: any): {
+    display: string
+    flightNumber: string
+    airline: string
+    departureAirport: string
+    arrivalAirport: string
+    departureDate: string
+    departureTime: string
+  } | null => {
+    if (!flight) return null
+    const f = Array.isArray(flight) ? flight[0] : flight
+    if (!f) return null
+    
+    // 嘗試從 flightNumber 解析（格式如：中華航空 CI 154 07:30-11:20）
+    const flightStr = f.flightNumber || ''
+    const match = flightStr.match(/([A-Z]{2})\s*(\d+)/)
+    
+    return {
+      display: flightStr || '未設定',
+      flightNumber: match ? `${match[1]}${match[2]}` : '',
+      airline: match ? match[1] : (f.airline || ''),
+      departureAirport: f.departureAirport || '',
+      arrivalAirport: f.arrivalAirport || '',
+      departureDate: f.departureDate || '',
+      departureTime: f.departureTime || '',
     }
-    if (typeof flight === 'object' && flight.flightNumber) {
-      return flight.flightNumber
+  }
+
+  // 產生 Amadeus 查位指令
+  const generateAvailabilityCommand = (flight: ReturnType<typeof parseFlight>, date?: string) => {
+    if (!flight || !flight.airline) return null
+    
+    // AN日期出發抵達/A航空 例：AN15JANTPENRT/ACI
+    let cmd = 'AN'
+    
+    // 日期格式：15JAN
+    if (date || flight.departureDate) {
+      const d = new Date(date || flight.departureDate)
+      if (!isNaN(d.getTime())) {
+        const day = d.getDate().toString().padStart(2, '0')
+        const month = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][d.getMonth()]
+        cmd += `${day}${month}`
+      }
     }
-    return '未設定'
+    
+    // 機場
+    if (flight.departureAirport && flight.arrivalAirport) {
+      cmd += `${flight.departureAirport}${flight.arrivalAirport}`
+    }
+    
+    // 航空公司
+    cmd += `/A${flight.airline}`
+    
+    return cmd
+  }
+
+  // 複製航班指令
+  const handleCopyFlight = (type: 'outbound' | 'return') => {
+    if (!flightInfo) return
+    
+    const flight = type === 'outbound' 
+      ? parseFlight(flightInfo.outbound)
+      : parseFlight(flightInfo.return)
+    
+    if (!flight) {
+      toast.error('航班資訊不完整')
+      return
+    }
+
+    // 取得日期
+    const tourDate = type === 'outbound' 
+      ? flightInfo.departureDate 
+      : flightInfo.returnDate
+
+    const cmd = generateAvailabilityCommand(flight, tourDate)
+    
+    if (cmd && cmd.length > 5) {
+      navigator.clipboard.writeText(cmd)
+      toast.success(`已複製：${cmd}`)
+    } else {
+      // 如果無法產生完整指令，就複製航班號
+      navigator.clipboard.writeText(flight.display)
+      toast.success(`已複製：${flight.display}`)
+    }
   }
 
   // 複製團員名單（Amadeus 訂位格式）
@@ -509,12 +586,31 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
         <div className="flex items-center gap-2 text-morandi-sky">
           <Plane size={16} />
           <span className="text-sm font-medium">航班資訊</span>
+          <span className="text-xs text-morandi-muted ml-auto">點擊複製查位指令</span>
         </div>
         {flightInfo && (
-          <div className="text-xs space-y-1 text-morandi-primary">
-            <p className="font-medium">{flightInfo.tourCode} {flightInfo.tourName}</p>
-            <p>去程：{formatFlight(flightInfo.outbound)}</p>
-            <p>回程：{formatFlight(flightInfo.return)}</p>
+          <div className="text-xs space-y-1.5">
+            <p className="font-medium text-morandi-primary">{flightInfo.tourCode} {flightInfo.tourName}</p>
+            
+            {/* 去程 - 可點選 */}
+            <div
+              onClick={() => handleCopyFlight('outbound')}
+              className="flex items-center gap-2 p-2 rounded bg-white/50 cursor-pointer hover:bg-white/80 transition-colors group"
+            >
+              <span className="text-morandi-muted w-10">去程</span>
+              <span className="flex-1 font-mono">{parseFlight(flightInfo.outbound)?.display || '未設定'}</span>
+              <Copy size={12} className="text-morandi-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+            
+            {/* 回程 - 可點選 */}
+            <div
+              onClick={() => handleCopyFlight('return')}
+              className="flex items-center gap-2 p-2 rounded bg-white/50 cursor-pointer hover:bg-white/80 transition-colors group"
+            >
+              <span className="text-morandi-muted w-10">回程</span>
+              <span className="flex-1 font-mono">{parseFlight(flightInfo.return)?.display || '未設定'}</span>
+              <Copy size={12} className="text-morandi-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
           </div>
         )}
       </div>
