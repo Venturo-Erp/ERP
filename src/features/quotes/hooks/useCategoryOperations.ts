@@ -73,7 +73,7 @@ export const useCategoryOperations = ({
 
   // 一般新增項目（包含住宿特殊處理）
   const handleAddRow = useCallback(
-    (category_id: string) => {
+    (category_id: string, options?: { quantity?: number | null }) => {
       if (category_id === 'accommodation') {
         // 住宿用專用函數
         handleAddAccommodationRoomType()
@@ -83,7 +83,7 @@ export const useCategoryOperations = ({
       const newItem = {
         id: Date.now().toString(),
         name: '',
-        quantity: null,
+        quantity: options?.quantity ?? null,
         unit_price: null,
         total: 0,
         note: '',

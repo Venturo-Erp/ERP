@@ -67,7 +67,7 @@ interface CategorySectionProps {
   accommodationDays: number
   isReadOnly: boolean
   handleAddAccommodationDay: () => void
-  handleAddRow: (categoryId: string) => void
+  handleAddRow: (categoryId: string, options?: { quantity?: number | null }) => void
   handleInsertItem: (categoryId: string, item: CostItem) => void
   handleAddGuideRow: (categoryId: string) => void
   handleAddTransportRow: (categoryId: string) => void
@@ -399,6 +399,35 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               >
                 <Plus size={12} className="mr-1" />
                 {CATEGORY_SECTION_LABELS.ADD}
+              </Button>
+            </div>
+          ) : category.id === 'guide' ? (
+            <div className="flex gap-1 justify-end">
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={() => handleAddRow(category.id, { quantity: null })}
+                disabled={isReadOnly}
+                className={cn(
+                  'text-morandi-gold hover:bg-morandi-gold/10',
+                  isReadOnly && 'cursor-not-allowed opacity-60'
+                )}
+              >
+                <Plus size={12} className="mr-1" />
+                小費
+              </Button>
+              <Button
+                variant="ghost"
+                size="xs"
+                onClick={() => handleAddRow(category.id, { quantity: 1 })}
+                disabled={isReadOnly}
+                className={cn(
+                  'text-morandi-secondary hover:bg-morandi-gold/10',
+                  isReadOnly && 'cursor-not-allowed opacity-60'
+                )}
+              >
+                <Plus size={12} className="mr-1" />
+                出差費
               </Button>
             </div>
           ) : (
