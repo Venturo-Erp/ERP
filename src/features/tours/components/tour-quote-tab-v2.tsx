@@ -251,7 +251,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
       </div>
 
       {/* 右邊內容區 */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
         {selectedVersion === 'main' ? (
           // 主報價單
           mainQuoteId ? (
