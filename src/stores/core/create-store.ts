@@ -196,7 +196,7 @@ export function createStore<T extends BaseEntity>(
             const { workspaceId, userRole } = getCurrentUserContext()
             const isSuperAdmin = canCrossWorkspace(userRole)
             
-            console.log(`[createStore] ${tableName} workspaceScoped:`, { workspaceId, userRole, isSuperAdmin })
+            
 
             // 只有 Super Admin 且明確開啟跨 workspace 模式才不過濾
             if (shouldCrossWorkspace(isSuperAdmin)) {
@@ -219,7 +219,7 @@ export function createStore<T extends BaseEntity>(
 
           if (error) throw error
           
-          console.log(`[createStore] ${tableName} fetchAll 結果:`, data?.length, '筆')
+          
 
           const items = castRows<T>(data)
           set({ items, loading: false })

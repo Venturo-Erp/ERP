@@ -96,11 +96,7 @@ export const useChannelsStore = () => {
     // 資料 (來自 createStore)
     // ============================================
     workspaces: workspaceStore.items || [],
-    channels: (() => {
-      const items = channelStore.items || []
-      console.log('[ChannelsStore] channels getter:', items.length, '筆')
-      return items
-    })(),
+    channels: channelStore.items || [],
     channelGroups: channelGroupStore.items || [],
 
     // ============================================
