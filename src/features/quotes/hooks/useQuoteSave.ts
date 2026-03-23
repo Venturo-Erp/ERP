@@ -115,8 +115,8 @@ export const useQuoteSave = ({
       setTimeout(() => setSaveSuccess(false), UI_DELAYS.SUCCESS_MESSAGE)
 
       // 背景寫入核心表
-      if (quote.tour_id) {
-        const workspace_id = user?.workspace_id || ''
+      if (quote.tour_id && user?.workspace_id) {
+        const workspace_id = user.workspace_id
         writePricingToCore(updatedCategories, quote.tour_id, workspace_id, coreItems || [])
           .then(async result => {
             logger.log('核心表寫入:', result)

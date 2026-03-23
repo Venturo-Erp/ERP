@@ -159,8 +159,15 @@ export async function writePricingToCore(
           .single()
 
         if (error) {
-          logger.error('Insert core item failed:', { category: category.id, error })
+          logger.error('Insert core item failed:', { 
+            category: category.id, 
+            item: item.name,
+            workspace_id,
+            tour_id,
+            error 
+          })
         } else if (data) {
+          logger.log('Insert core item success:', { category: category.id, item: item.name, id: data.id })
           result.inserted++
         }
       }
