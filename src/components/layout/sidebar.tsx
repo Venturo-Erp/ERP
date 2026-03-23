@@ -447,15 +447,17 @@ export function Sidebar() {
   const visibleMenuItems = useMemo(() => {
     const workspaceCode = user?.workspace_code
 
-    // Local/DMC 使用簡化選單
-    if (isLocal) {
-      return localMenuItems
-    }
-
-    // 車行使用車趟管理選單
-    if (isTransport) {
+    // Super Admin 看到所有功能（開發需要）
+    // 不受租戶類型限制
+    if (isSuperAdmin) {
+      // 直接進入完整選單過濾邏輯
+    } 
+    // 車行使用簡化選單（車趟管理為主）
+    else if (isTransport) {
       return transportMenuItems
     }
+    // Local 和旅行社使用完整選單
+    // （Local 跟旅行社差不多，不需要簡化）
 
     const filterMenuByPermissions = (items: MenuItem[]): MenuItem[] => {
       if (!user) return items.filter(item => !item.requiredPermission)
