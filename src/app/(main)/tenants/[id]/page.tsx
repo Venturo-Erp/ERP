@@ -25,7 +25,7 @@ import {
   Loader2
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
-import { FEATURES, getBasicFeatures, getPremiumFeatures, getEnterpriseFeatures } from '@/lib/permissions'
+import { FEATURES, getBasicFeatures, getPremiumFeatures, getEnterpriseFeatures } from '@/lib/workspace-permissions'
 
 interface Workspace {
   id: string

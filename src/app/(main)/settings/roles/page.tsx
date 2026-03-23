@@ -45,7 +45,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '@/stores'
 import { supabase } from '@/lib/supabase/client'
-import { FEATURES } from '@/lib/permissions'
+import { FEATURES } from '@/lib/workspace-permissions'
 
 interface Role {
   id: string
