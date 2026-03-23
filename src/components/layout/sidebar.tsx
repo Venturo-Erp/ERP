@@ -95,12 +95,13 @@ const menuItems: MenuItem[] = [
     icon: ShoppingCart,
     requiredPermission: 'orders',
   },
-  {
-    href: '/itinerary',
-    label: COMP_LAYOUT_LABELS.行程管理,
-    icon: Route,
-    requiredPermission: 'itinerary',
-  },
+  // 行程管理 - 付費訂閱功能
+  // {
+  //   href: '/itinerary',
+  //   label: COMP_LAYOUT_LABELS.行程管理,
+  //   icon: Route,
+  //   requiredPermission: 'itinerary',
+  // },
   {
     href: '/finance',
     label: COMP_LAYOUT_LABELS.財務系統,
@@ -245,42 +246,46 @@ const menuItems: MenuItem[] = [
     icon: Database,
     requiredPermission: 'database',
     children: [
-      {
-        href: '/customers',
-        label: COMP_LAYOUT_LABELS.顧客管理,
-        icon: Users,
-        requiredPermission: 'customers',
-      },
+      // 顧客管理 - 付費訂閱功能
+      // {
+      //   href: '/customers',
+      //   label: COMP_LAYOUT_LABELS.顧客管理,
+      //   icon: Users,
+      //   requiredPermission: 'customers',
+      // },
       {
         href: '/database/attractions',
         label: COMP_LAYOUT_LABELS.旅遊資料庫,
         icon: MapPin,
         requiredPermission: 'database',
       },
-      {
-        href: '/database/transportation-rates',
-        label: COMP_LAYOUT_LABELS.車資管理,
-        icon: Bus,
-        requiredPermission: 'database',
-      },
+      // 運價表 - 暫時移除，之後整合
+      // {
+      //   href: '/database/transportation-rates',
+      //   label: COMP_LAYOUT_LABELS.車資管理,
+      //   icon: Bus,
+      //   requiredPermission: 'database',
+      // },
       {
         href: '/database/suppliers',
         label: COMP_LAYOUT_LABELS.供應商管理,
         icon: Building2,
         requiredPermission: 'database',
       },
-      {
-        href: '/database/tour-leaders',
-        label: COMP_LAYOUT_LABELS.領隊資料,
-        icon: Users,
-        requiredPermission: 'database',
-      },
-      {
-        href: '/database/company-assets',
-        label: COMP_LAYOUT_LABELS.公司資源管理,
-        icon: ImageIcon,
-        requiredPermission: 'database',
-      },
+      // 領隊資料 - 移到 HR 分頁
+      // {
+      //   href: '/database/tour-leaders',
+      //   label: COMP_LAYOUT_LABELS.領隊資料,
+      //   icon: Users,
+      //   requiredPermission: 'database',
+      // },
+      // 公司資源 - 已整合到設定
+      // {
+      //   href: '/database/company-assets',
+      //   label: COMP_LAYOUT_LABELS.公司資源管理,
+      //   icon: ImageIcon,
+      //   requiredPermission: 'database',
+      // },
       {
         href: '/database/archive-management',
         label: COMP_LAYOUT_LABELS.封存管理,
@@ -289,16 +294,17 @@ const menuItems: MenuItem[] = [
       },
     ],
   },
-  {
-    href: '/local',
-    label: COMP_LAYOUT_LABELS.Local,
-    icon: Truck,
-    children: [
-      { href: '/local', label: COMP_LAYOUT_LABELS.Local, icon: Inbox },
-      { href: '/local/requests', label: COMP_LAYOUT_LABELS.委託收件匣, icon: ClipboardList },
-      { href: '/local/cases', label: COMP_LAYOUT_LABELS.案件列表, icon: FolderOpen },
-    ],
-  },
+  // Local 管理 - 威廉專屬，已移除
+  // {
+  //   href: '/local',
+  //   label: COMP_LAYOUT_LABELS.Local,
+  //   icon: Truck,
+  //   children: [
+  //     { href: '/local', label: COMP_LAYOUT_LABELS.Local, icon: Inbox },
+  //     { href: '/local/requests', label: COMP_LAYOUT_LABELS.委託收件匣, icon: ClipboardList },
+  //     { href: '/local/cases', label: COMP_LAYOUT_LABELS.案件列表, icon: FolderOpen },
+  //   ],
+  // },
   { href: '/war-room', label: '作戰會議室', icon: Target, requiredPermission: 'super_admin_only' },
   { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserCog, requiredPermission: 'hr' },
   {
@@ -307,18 +313,20 @@ const menuItems: MenuItem[] = [
     icon: Building,
     requiredPermission: 'super_admin_only',
   },
-  {
-    href: '/scheduling',
-    label: COMP_LAYOUT_LABELS.資源調度,
-    icon: Calendar,
-    requiredPermission: 'hr',
-  },
-  {
-    href: '/database/fleet',
-    label: COMP_LAYOUT_LABELS.車隊管理,
-    icon: Bus,
-    requiredPermission: 'hr',
-  },
+  // 資源調度 - 威廉專屬
+  // {
+  //   href: '/scheduling',
+  //   label: COMP_LAYOUT_LABELS.資源調度,
+  //   icon: Calendar,
+  //   requiredPermission: 'hr',
+  // },
+  // 車隊管理 - 只有車行使用（在租戶選單中配置）
+  // {
+  //   href: '/database/fleet',
+  //   label: COMP_LAYOUT_LABELS.車隊管理,
+  //   icon: Bus,
+  //   requiredPermission: 'hr',
+  // },
   // { href: '/esims', label: COMP_LAYOUT_LABELS.網卡管理, icon: Wifi, requiredPermission: 'hr', restrictedFeature: 'esim' },
 ]
 
