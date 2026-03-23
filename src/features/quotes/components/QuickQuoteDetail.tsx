@@ -197,7 +197,14 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
         />
       )}
 
-      <div className="w-full p-4 md:p-6 space-y-6 overflow-x-auto">
+      <div className="w-full p-3 space-y-4 overflow-x-auto">
+        {/* 嵌入模式：頂部操作按鈕 */}
+        {embedded && (
+          <div className="flex justify-end pb-2 border-b border-border/40">
+            <ActionButtons />
+          </div>
+        )}
+
         {/* 客戶資訊 */}
         <QuickQuoteHeader formData={formData} isEditing={isEditing} onFieldChange={setFormField} />
 
@@ -223,13 +230,6 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
           onReceivedAmountChange={value => setFormField('received_amount', value)}
           onExpenseDescriptionChange={value => setFormField('expense_description', value)}
         />
-
-        {/* 嵌入模式：底部操作按鈕 */}
-        {embedded && (
-          <div className="flex justify-end pt-4 border-t border-border/40">
-            <ActionButtons />
-          </div>
-        )}
 
         {/* 列印預覽對話框 */}
         <PrintableQuickQuote
