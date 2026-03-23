@@ -282,23 +282,26 @@ export function DisbursementDetailDialog({
 
               {/* 操作按鈕 */}
               <div className="flex items-center justify-between pt-4 border-t border-morandi-container/20">
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={handlePrintPDF}
-                    className="text-morandi-gold border-morandi-gold hover:bg-morandi-gold/10"
-                  >
-                    <FileText size={16} className="mr-2" />
-                    {DISBURSEMENT_LABELS.列印PDF}
-                  </Button>
-                  {order.pdf_url && (
-                    <a href={order.pdf_url} target="_blank" rel="noopener noreferrer">
-                      <Button variant="ghost" size="sm" className="text-morandi-secondary">
-                        {DISBURSEMENT_LABELS.查看存檔}
-                      </Button>
-                    </a>
-                  )}
-                </div>
+                {/* 列印按鈕只在已出帳時顯示 */}
+                {order.status === 'paid' && (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={handlePrintPDF}
+                      className="text-morandi-gold border-morandi-gold hover:bg-morandi-gold/10"
+                    >
+                      <FileText size={16} className="mr-2" />
+                      {DISBURSEMENT_LABELS.列印PDF}
+                    </Button>
+                    {order.pdf_url && (
+                      <a href={order.pdf_url} target="_blank" rel="noopener noreferrer">
+                        <Button variant="ghost" size="sm" className="text-morandi-secondary">
+                          {DISBURSEMENT_LABELS.查看存檔}
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                )}
 
                 <div className="flex gap-2">
                   {order.status === 'pending' && (
