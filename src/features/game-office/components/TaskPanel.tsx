@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Play, Users, CheckCircle, Clock, MessageSquare, Code, Search } from 'lucide-react'
 import { useAgentStatusStore, Agent } from '@/stores/agent-status-store'
@@ -37,7 +37,18 @@ const taskTypeLabels: Record<TaskType, string> = {
 
 export function TaskPanel({ onTaskStart }: TaskPanelProps) {
   const { agents, setAgentStatus, setAgentMessage, startMeeting } = useAgentStatusStore()
-  const [tasks, setTasks] = useState<Task[]>([])
+  
+  // 從 localStorage 讀取任務（持久化）
+  const [tasks, setTasks] = useState<Task[]>(() => {
+    if (typeof window === 'undefined') return []
+    const saved = localStorage.getItem('ai-office-tasks')
+    return saved ? JSON.parse(saved) : []
+  })
+  
+  // 任務變更時存到 localStorage
+  useEffect(() => {
+    localStorage.setItem('ai-office-tasks', JSON.stringify(tasks))
+  }, [tasks])
   const [showForm, setShowForm] = useState(false)
   
   // Form state
