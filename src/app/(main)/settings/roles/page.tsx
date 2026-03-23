@@ -241,14 +241,7 @@ export default function RolesPage() {
   }
 
   return (
-    <ContentPageLayout
-      title="角色管理"
-      icon={Shield}
-      breadcrumb={[
-        { label: '設定', href: '/settings' },
-        { label: '角色管理', href: '/settings/roles' },
-      ]}
-    >
+    <ContentPageLayout title="角色管理" icon={Shield}>
       <div className="grid grid-cols-12 gap-6">
         {/* 左側：角色列表 */}
         <div className="col-span-4">

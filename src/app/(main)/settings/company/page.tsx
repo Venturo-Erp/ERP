@@ -283,14 +283,7 @@ export default function CompanySettingsPage() {
   // 權限檢查
   if (!isAdmin) {
     return (
-      <ContentPageLayout
-        title={COMPANY_LABELS.TITLE}
-        breadcrumb={[
-          { label: COMPANY_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-          { label: COMPANY_LABELS.BREADCRUMB_SETTINGS, href: '/settings' },
-          { label: COMPANY_LABELS.BREADCRUMB_COMPANY, href: '/settings/company' },
-        ]}
-      >
+      <ContentPageLayout title={COMPANY_LABELS.TITLE}>
         <div className="max-w-4xl mx-auto p-6">
           <Card className="p-8 text-center">
             <AlertCircle className="h-12 w-12 mx-auto text-morandi-red mb-4" />
@@ -303,14 +296,7 @@ export default function CompanySettingsPage() {
 
   if (!workspaceId) {
     return (
-      <ContentPageLayout
-        title={COMPANY_LABELS.TITLE}
-        breadcrumb={[
-          { label: COMPANY_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-          { label: COMPANY_LABELS.BREADCRUMB_SETTINGS, href: '/settings' },
-          { label: COMPANY_LABELS.BREADCRUMB_COMPANY, href: '/settings/company' },
-        ]}
-      >
+      <ContentPageLayout title={COMPANY_LABELS.TITLE}>
         <div className="max-w-4xl mx-auto p-6">
           <Card className="p-8 text-center">
             <AlertCircle className="h-12 w-12 mx-auto text-morandi-secondary mb-4" />
@@ -323,14 +309,7 @@ export default function CompanySettingsPage() {
 
   if (loading) {
     return (
-      <ContentPageLayout
-        title={COMPANY_LABELS.TITLE}
-        breadcrumb={[
-          { label: COMPANY_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-          { label: COMPANY_LABELS.BREADCRUMB_SETTINGS, href: '/settings' },
-          { label: COMPANY_LABELS.BREADCRUMB_COMPANY, href: '/settings/company' },
-        ]}
-      >
+      <ContentPageLayout title={COMPANY_LABELS.TITLE}>
         <div className="max-w-4xl mx-auto p-6 flex items-center justify-center min-h-[400px]">
           <Loader2 className="h-8 w-8 animate-spin text-morandi-gold" />
         </div>
@@ -339,14 +318,7 @@ export default function CompanySettingsPage() {
   }
 
   return (
-    <ContentPageLayout
-      title={COMPANY_LABELS.TITLE}
-      breadcrumb={[
-        { label: COMPANY_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-        { label: COMPANY_LABELS.BREADCRUMB_SETTINGS, href: '/settings' },
-        { label: COMPANY_LABELS.BREADCRUMB_COMPANY, href: '/settings/company' },
-      ]}
-    >
+    <ContentPageLayout title={COMPANY_LABELS.TITLE}>
       <div className="max-w-4xl mx-auto space-y-8 p-6">
         <SettingsTabs />
         {/* 基本資訊 */}

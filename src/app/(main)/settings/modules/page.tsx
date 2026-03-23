@@ -179,15 +179,7 @@ export default function ModulesManagementPage() {
 
   return (
     <>
-      <ContentPageLayout
-        title={MODULES_PAGE_LABELS.MANAGE_8474}
-        breadcrumb={[
-          { label: MODULES_PAGE_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-          { label: MODULES_PAGE_LABELS.BREADCRUMB_SETTINGS, href: '/settings' },
-          { label: MODULES_PAGE_LABELS.BREADCRUMB_MODULES, href: '/settings/modules' },
-        ]}
-        className=""
-      >
+      <ContentPageLayout title={MODULES_PAGE_LABELS.MANAGE_8474} className="">
         <div className="p-6">
           <div className="max-w-6xl mx-auto space-y-6">
             {/* 工作空間資訊 */}

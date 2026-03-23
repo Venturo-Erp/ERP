@@ -74,10 +74,6 @@ export default function SettingsPage() {
   return (
     <ContentPageLayout
       title={LABELS.SYSTEM_SETTINGS}
-      breadcrumb={[
-        { label: LABELS.HOME, href: '/dashboard' },
-        { label: LABELS.SETTINGS, href: '/settings' },
-      ]}
       headerActions={
         <div className="flex items-center gap-3">
           {/* 用戶資訊 */}
