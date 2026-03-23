@@ -64,8 +64,14 @@ export function MemberBasicInfo({
   // 處理日期輸入（自動格式化 YYYY-MM-DD）
   const handleDateInput = (value: string) => {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 8) // 最多 8 位數字
-    let formatted = ''
     
+    // 空值傳 null（避免 DB 錯誤）
+    if (!digitsOnly) {
+      onUpdateField(member.id, 'birth_date', null)
+      return
+    }
+    
+    let formatted = ''
     if (digitsOnly.length <= 4) {
       formatted = digitsOnly
     } else if (digitsOnly.length <= 6) {
