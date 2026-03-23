@@ -4,7 +4,7 @@
  * 出納單詳情對話框 - 用於查看詳情和確認出帳
  */
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -27,6 +27,16 @@ import { DISBURSEMENT_STATUS } from '../constants'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
 import { generateDisbursementPDF } from '@/lib/pdf/disbursement-pdf'
+import { ConfirmDisbursementDialog } from './ConfirmDisbursementDialog'
+
+interface BankAccount {
+  id: string
+  code: string
+  name: string
+  bank_name: string | null
+  account_number: string | null
+  is_default: boolean
+}
 
 interface DisbursementDetailDialogProps {
   order: DisbursementOrder | null
@@ -42,6 +52,18 @@ export function DisbursementDetailDialog({
   const { items: payment_requests } = usePaymentRequests()
   const user = useAuthStore(state => state.user)
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false)
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false)
+  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
+
+  // 載入銀行帳戶
+  useEffect(() => {
+    if (open && order?.workspace_id) {
+      fetch(`/api/bank-accounts?workspace_id=${order.workspace_id}`)
+        .then(res => res.json())
+        .then(data => setBankAccounts(data || []))
+        .catch(err => console.error('載入銀行帳戶失敗:', err))
+    }
+  }, [open, order?.workspace_id])
 
   // 取得此出納單包含的請款單
   const includedRequests = useMemo(() => {
@@ -57,21 +79,16 @@ export function DisbursementDetailDialog({
     DISBURSEMENT_STATUS[order.status as keyof typeof DISBURSEMENT_STATUS] ||
     DISBURSEMENT_STATUS.pending
 
-  // 確認出帳
-  const handleConfirmPaid = async () => {
-    const confirmed = await confirm(DISBURSEMENT_LABELS.確定要將此出納單標記為_已出帳_嗎, {
-      title: DISBURSEMENT_LABELS.確認出帳,
-      type: 'warning',
-    })
-    if (!confirmed) return
-
+  // 確認出帳（帶銀行選擇）
+  const handleConfirmPaid = async (bankAccountId: string) => {
     try {
-      // 更新出納單狀態
+      // 更新出納單狀態（含銀行帳戶）
       await updateDisbursementOrderApi(order.id, {
         status: 'paid',
         confirmed_by: user?.id || null,
         confirmed_at: new Date().toISOString(),
-      })
+        bank_account_id: bankAccountId,
+      } as Partial<DisbursementOrder>)
 
       // 更新所有請款單狀態為 billed
       const requestIds = order.payment_request_ids || []
@@ -286,7 +303,7 @@ export function DisbursementDetailDialog({
                 <div className="flex gap-2">
                   {order.status === 'pending' && (
                     <Button
-                      onClick={handleConfirmPaid}
+                      onClick={() => setIsConfirmDialogOpen(true)}
                       className="bg-morandi-green hover:bg-morandi-green/90 text-white"
                     >
                       <Check size={16} className="mr-2" />
@@ -305,6 +322,16 @@ export function DisbursementDetailDialog({
         order={order}
         open={isPrintDialogOpen}
         onOpenChange={setIsPrintDialogOpen}
+      />
+
+      {/* 確認出帳對話框（選擇銀行） */}
+      <ConfirmDisbursementDialog
+        open={isConfirmDialogOpen}
+        onOpenChange={setIsConfirmDialogOpen}
+        orderNumber={order.order_number || ''}
+        totalAmount={order.total_amount || 0}
+        bankAccounts={bankAccounts}
+        onConfirm={handleConfirmPaid}
       />
     </>
   )
