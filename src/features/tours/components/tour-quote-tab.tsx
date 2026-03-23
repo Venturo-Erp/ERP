@@ -110,7 +110,7 @@ export function TourQuoteTab({ tour }: TourQuoteTabProps) {
   }
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
       <QuoteDetailEmbed quoteId={quoteId} showHeader={true} />
     </div>
   )
