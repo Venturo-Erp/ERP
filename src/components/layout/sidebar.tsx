@@ -146,6 +146,12 @@ const menuItems: MenuItem[] = [
         icon: BarChart3,
         requiredPermission: 'reports',
       },
+      {
+        href: '/finance/settings',
+        label: '財務設定',
+        icon: Settings,
+        requiredPermission: 'settings',
+      },
     ],
   },
   {
@@ -340,6 +346,7 @@ const localMenuItems: MenuItem[] = [
   { href: '/finance', label: COMP_LAYOUT_LABELS.財務系統, icon: CreditCard, children: [
     { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
     { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
+    { href: '/finance/settings', label: '財務設定', icon: Settings },
   ]},
   { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserCog },
   { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Settings },
@@ -353,6 +360,7 @@ const transportMenuItems: MenuItem[] = [
   { href: '/finance', label: COMP_LAYOUT_LABELS.財務系統, icon: CreditCard, children: [
     { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
     { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
+    { href: '/finance/settings', label: '財務設定', icon: Settings },
   ]},
   { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserCog },
   { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Settings },
