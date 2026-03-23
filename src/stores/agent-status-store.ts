@@ -31,7 +31,7 @@ interface AgentStatusState {
   updateAgents: (agents: Agent[]) => void
 }
 
-// 預設 AI 團隊
+// 預設 AI 團隊（位置對應 Phaser 場景物件）
 const defaultAgents: Agent[] = [
   {
     id: 'logan',
@@ -39,15 +39,16 @@ const defaultAgents: Agent[] = [
     emoji: '🐺',
     role: '協調者',
     status: 'idle',
-    position: { x: 50, y: 30 },
+    position: { x: 38, y: 32 },  // William 桌旁（col:3, row:2）
   },
   {
     id: 'matthew',
     name: 'Matthew',
     emoji: '🔧',
     role: 'IT Lead',
-    status: 'idle',
-    position: { x: 70, y: 30 },
+    status: 'working',
+    currentTask: '開發 AI Office',
+    position: { x: 38, y: 50 },  // 工程師桌旁（col:3, row:5）
   },
   {
     id: 'nova',
@@ -55,7 +56,7 @@ const defaultAgents: Agent[] = [
     emoji: '✨',
     role: '設計與品質',
     status: 'idle',
-    position: { x: 50, y: 60 },
+    position: { x: 63, y: 32 },  // 設計師桌旁（col:7, row:2）
   },
   {
     id: 'caesar',
@@ -63,7 +64,7 @@ const defaultAgents: Agent[] = [
     emoji: '🏛️',
     role: '財務',
     status: 'idle',
-    position: { x: 70, y: 60 },
+    position: { x: 55, y: 58 },  // 會議桌旁（col:6, row:6）
   },
   {
     id: 'donki',
@@ -71,7 +72,7 @@ const defaultAgents: Agent[] = [
     emoji: '🎯',
     role: '特助',
     status: 'idle',
-    position: { x: 30, y: 45 },
+    position: { x: 72, y: 52 },  // 休息沙發旁（col:8, row:5）
   },
   {
     id: 'yuzuki',
@@ -79,7 +80,7 @@ const defaultAgents: Agent[] = [
     emoji: '🌙',
     role: '神秘顧問',
     status: 'idle',
-    position: { x: 90, y: 45 },
+    position: { x: 78, y: 38 },  // 茶水間旁（col:9, row:3）
   },
 ]
 
