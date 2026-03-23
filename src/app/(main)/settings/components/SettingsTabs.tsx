@@ -1,9 +1,9 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { Settings, Building2, MessageCircle } from 'lucide-react'
+import { Settings, Building2, MessageCircle, Shield } from 'lucide-react'
 
-type SettingsTab = 'personal' | 'company' | 'line'
+type SettingsTab = 'personal' | 'company' | 'line' | 'roles'
 
 const tabs: {
   value: SettingsTab
@@ -13,6 +13,7 @@ const tabs: {
 }[] = [
   { value: 'personal', label: '個人設定', href: '/settings', icon: Settings },
   { value: 'company', label: '公司資訊', href: '/settings/company', icon: Building2 },
+  { value: 'roles', label: '角色管理', href: '/settings/roles', icon: Shield },
   { value: 'line', label: 'LINE 設定', href: '/settings/line', icon: MessageCircle },
 ]
 
@@ -23,6 +24,7 @@ export function SettingsTabs() {
   const getActiveTab = (): SettingsTab => {
     if (pathname === '/settings/company') return 'company'
     if (pathname === '/settings/line') return 'line'
+    if (pathname === '/settings/roles') return 'roles'
     return 'personal'
   }
 
