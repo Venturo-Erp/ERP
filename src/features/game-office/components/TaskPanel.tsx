@@ -73,7 +73,7 @@ export function TaskPanel({ onTaskStart }: TaskPanelProps) {
     
     // 更新 agent 狀態
     setAgentStatus(task.assignee, 'working', task.title)
-    setAgentMessage(task.assignee, `執行中：${task.title}`)
+    setAgentMessage(task.assignee, `執行中...`)
     
     // 如果是會議，啟動會議
     if (task.type === 'meeting') {
@@ -86,11 +86,45 @@ export function TaskPanel({ onTaskStart }: TaskPanelProps) {
       if (task.type === 'meeting') {
         setAgentStatus(collab, 'meeting', task.title)
       } else {
-        setAgentStatus(collab, 'thinking', `協助：${task.title}`)
+        setAgentStatus(collab, 'thinking', `協助中...`)
       }
     })
     
     onTaskStart?.(task)
+
+    // 呼叫 AI API 執行任務
+    try {
+      const response = await fetch('/api/ai-workflow/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          taskId: task.id,
+          title: task.title,
+          type: task.type,
+          assignee: task.assignee,
+          collaborators: task.collaborators,
+        }),
+      })
+      
+      const result = await response.json()
+      
+      if (result.ok) {
+        // 任務完成
+        setTasks(prev => prev.map(t => 
+          t.id === task.id 
+            ? { ...t, status: 'completed' as TaskStatus, result: result.result } 
+            : t
+        ))
+        setAgentStatus(task.assignee, 'idle')
+        setAgentMessage(task.assignee, '✅ 完成！')
+        task.collaborators.forEach(collab => {
+          setAgentStatus(collab, 'idle')
+        })
+      }
+    } catch (error) {
+      console.error('Task execution failed:', error)
+      setAgentMessage(task.assignee, '❌ 執行失敗')
+    }
   }
 
   const handleCompleteTask = (taskId: string) => {
