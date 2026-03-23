@@ -279,6 +279,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
               <QuickQuoteDetail
                 key={selectedQuote.id}  // 強制重新渲染
                 quote={selectedQuote}
+                embedded={true}  // 嵌入模式：隱藏 header，按鈕移到底部
                 onUpdate={async (data) => {
                   // 更新快速報價單
                   const { error } = await supabase

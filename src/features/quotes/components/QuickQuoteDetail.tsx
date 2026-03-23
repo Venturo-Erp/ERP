@@ -22,12 +22,15 @@ interface QuickQuoteDetailProps {
   quote: Quote
   onUpdate: (data: Partial<Quote>) => Promise<void> | Promise<Quote>
   viewModeToggle?: React.ReactNode
+  /** 嵌入模式：隱藏頂部 header，按鈕移到底部 */
+  embedded?: boolean
 }
 
 export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
   quote,
   onUpdate,
   viewModeToggle,
+  embedded = false,
 }) => {
   const router = useRouter()
 
@@ -118,75 +121,81 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
     setShowPrintPreview(false)
   }
 
+  // 操作按鈕（在 header 或底部使用）
+  const ActionButtons = () => (
+    <div className="flex items-center gap-2">
+      {viewModeToggle}
+
+      {/* 非編輯模式 */}
+      {!isEditing && (
+        <>
+          <Button
+            onClick={() => setShowPrintPreview(true)}
+            variant="outline"
+            className="gap-2"
+          >
+            <Printer className="h-4 w-4" />
+            {QUICK_QUOTE_DETAIL_LABELS.PRINT}
+          </Button>
+          <Button onClick={() => setIsEditing(true)} variant="outline" className="gap-2">
+            <Edit2 size={16} />
+            {QUICK_QUOTE_DETAIL_LABELS.EDIT}
+          </Button>
+        </>
+      )}
+
+      {/* 編輯模式 */}
+      {isEditing && (
+        <>
+          {quote.tour_id && (
+            <Button
+              onClick={handleLoadFromTour}
+              variant="outline"
+              className="gap-2"
+              disabled={isLoadingItems}
+            >
+              {isLoadingItems ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              載入行程項目
+            </Button>
+          )}
+          <Button onClick={() => setIsEditing(false)} variant="outline" className="gap-2">
+            <X size={16} />
+            {QUICK_QUOTE_DETAIL_LABELS.CANCEL}
+          </Button>
+          <Button
+            onClick={() => handleSave(true)}
+            disabled={isSaving}
+            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-2"
+          >
+            <Save className="h-4 w-4" />
+            {isSaving ? QUICK_QUOTE_DETAIL_LABELS.儲存中 : QUICK_QUOTE_DETAIL_LABELS.儲存}
+          </Button>
+        </>
+      )}
+    </div>
+  )
+
   return (
     <>
-      <ResponsiveHeader
-        title={`快速報價單 ${quote.code || ''}`}
-        showBackButton={true}
-        onBack={() => {
-          if (quote.tour_code) {
-            router.push(`/tours/${quote.tour_code}?tab=quick-quote`)
-          } else {
-            router.push('/quotes')
-          }
-        }}
-        actions={
-          <div className="flex items-center gap-2">
-            {viewModeToggle}
-
-            {/* 非編輯模式 */}
-            {!isEditing && (
-              <>
-                <Button
-                  onClick={() => setShowPrintPreview(true)}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  <Printer className="h-4 w-4" />
-                  {QUICK_QUOTE_DETAIL_LABELS.PRINT}
-                </Button>
-                <Button onClick={() => setIsEditing(true)} variant="outline" className="gap-2">
-                  <Edit2 size={16} />
-                  {QUICK_QUOTE_DETAIL_LABELS.EDIT}
-                </Button>
-              </>
-            )}
-
-            {/* 編輯模式 */}
-            {isEditing && (
-              <>
-                {quote.tour_id && (
-                  <Button
-                    onClick={handleLoadFromTour}
-                    variant="outline"
-                    className="gap-2"
-                    disabled={isLoadingItems}
-                  >
-                    {isLoadingItems ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Download className="h-4 w-4" />
-                    )}
-                    載入行程項目
-                  </Button>
-                )}
-                <Button onClick={() => setIsEditing(false)} variant="outline" className="gap-2">
-                  <X size={16} />
-                  {QUICK_QUOTE_DETAIL_LABELS.CANCEL}
-                </Button>
-                <Button
-                  onClick={() => handleSave(true)}
-                  disabled={isSaving}
-                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  {isSaving ? QUICK_QUOTE_DETAIL_LABELS.儲存中 : QUICK_QUOTE_DETAIL_LABELS.儲存}
-                </Button>
-              </>
-            )}
-          </div>
-        }
-      />
+      {/* 非嵌入模式才顯示 header */}
+      {!embedded && (
+        <ResponsiveHeader
+          title={`快速報價單 ${quote.code || ''}`}
+          showBackButton={true}
+          onBack={() => {
+            if (quote.tour_code) {
+              router.push(`/tours/${quote.tour_code}?tab=quick-quote`)
+            } else {
+              router.push('/quotes')
+            }
+          }}
+          actions={<ActionButtons />}
+        />
+      )}
 
       <div className="w-full p-4 md:p-6 space-y-6 overflow-x-auto">
         {/* 客戶資訊 */}
@@ -214,6 +223,13 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
           onReceivedAmountChange={value => setFormField('received_amount', value)}
           onExpenseDescriptionChange={value => setFormField('expense_description', value)}
         />
+
+        {/* 嵌入模式：底部操作按鈕 */}
+        {embedded && (
+          <div className="flex justify-end pt-4 border-t border-border/40">
+            <ActionButtons />
+          </div>
+        )}
 
         {/* 列印預覽對話框 */}
         <PrintableQuickQuote
