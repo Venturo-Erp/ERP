@@ -21,7 +21,7 @@ export const CATEGORY_SECTION_LABELS = {
   ADD: '新增',
   新增房型: '新增房型',
   LABEL_138: '交通',
-  LABEL_8731: '導遊',
+  LABEL_8731: '新增',
   LABEL_475: '兒童',
   LABEL_2772: '嬰兒',
   LABEL_7496: '其他',
