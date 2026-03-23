@@ -109,5 +109,9 @@ export function TourQuoteTab({ tour }: TourQuoteTabProps) {
     )
   }
 
-  return <QuoteDetailEmbed quoteId={quoteId} showHeader={true} />
+  return (
+    <div className="h-full overflow-y-auto">
+      <QuoteDetailEmbed quoteId={quoteId} showHeader={true} />
+    </div>
+  )
 }
