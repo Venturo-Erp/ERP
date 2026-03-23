@@ -787,6 +787,11 @@ export function OrderMembersExpandable({
           (currentFieldIndex + fDelta + editableFields.length) % editableFields.length
       }
 
+      // 取得游標位置資訊
+      const input = e.target as HTMLInputElement
+      const cursorAtEnd = input.selectionStart === input.value.length
+      const cursorAtStart = input.selectionStart === 0
+
       if (e.key === 'ArrowDown' || e.key === 'Enter') {
         e.preventDefault()
         navigate(1, 0)
@@ -794,6 +799,8 @@ export function OrderMembersExpandable({
         e.preventDefault()
         navigate(-1, 0)
       } else if (e.key === 'ArrowRight') {
+        // 只有游標在文字最後面時才跳到下一欄
+        if (!cursorAtEnd) return
         e.preventDefault()
         nextFieldIndex = currentFieldIndex + 1
         if (nextFieldIndex >= editableFields.length) {
@@ -801,6 +808,8 @@ export function OrderMembersExpandable({
           navigate(1, 0)
         }
       } else if (e.key === 'ArrowLeft') {
+        // 只有游標在文字最前面時才跳到上一欄
+        if (!cursorAtStart) return
         e.preventDefault()
         nextFieldIndex = currentFieldIndex - 1
         if (nextFieldIndex < 0) {
