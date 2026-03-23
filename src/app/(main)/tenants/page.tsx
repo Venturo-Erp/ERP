@@ -3,6 +3,7 @@
 import { LABELS } from './constants/labels'
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Building2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -25,9 +26,15 @@ const WORKSPACE_TYPE_MAP: Record<string, string> = {
 }
 
 export default function TenantsPage() {
+  const router = useRouter()
   const { workspaces, loadWorkspaces, updateWorkspace } = useWorkspaceChannels()
   const { items: employees } = useEmployeesSlim()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+
+  // 點擊行進入詳情頁
+  const handleRowClick = useCallback((workspace: WorkspaceRow) => {
+    router.push(`/tenants/${workspace.id}`)
+  }, [router])
 
   useEffect(() => {
     loadWorkspaces()
@@ -167,6 +174,7 @@ export default function TenantsPage() {
         renderActions={renderActions}
         bordered={true}
         emptyMessage={LABELS.EMPTY_MESSAGE}
+        onRowClick={handleRowClick}
         headerActions={
           <Button
             onClick={() => setIsCreateOpen(true)}
