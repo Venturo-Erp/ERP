@@ -139,6 +139,9 @@ export interface TourItineraryItem {
   assigned_at: string | null
   assigned_by: string | null
 
+  // 負責方標示（Local 報價後鎖定）
+  handled_by: 'self' | 'local' | null
+
   // 元資料
   created_at: string
   updated_at: string

@@ -607,9 +607,16 @@ function TableRow({
         </>
       )}
 
-      {/* 預計支出：有系統值顯示，沒有則可編輯 */}
+      {/* 預計支出：Local 負責顯示標籤，有系統值顯示，沒有則可編輯 */}
       <td className="px-3 py-2">
-        {systemExpectedCost != null ? (
+        {(item as any).handled_by === 'local' ? (
+          // Local 負責 → 顯示標籤（不需填預算）
+          <div className="text-right">
+            <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded print:bg-transparent print:text-blue-700">
+              Local 負責
+            </span>
+          </div>
+        ) : systemExpectedCost != null ? (
           // 有系統值（來自供應商確認）→ 唯讀顯示
           <div className="text-right font-mono font-medium">
             {systemExpectedCost.toLocaleString()}
