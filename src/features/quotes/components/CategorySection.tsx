@@ -67,7 +67,7 @@ interface CategorySectionProps {
   accommodationDays: number
   isReadOnly: boolean
   handleAddAccommodationDay: () => void
-  handleAddRow: (categoryId: string, options?: { quantity?: number | null }) => void
+  handleAddRow: (categoryId: string, options?: { quantity?: number | null; name?: string }) => void
   handleInsertItem: (categoryId: string, item: CostItem) => void
   handleAddGuideRow: (categoryId: string) => void
   handleAddTransportRow: (categoryId: string) => void
@@ -406,7 +406,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               <Button
                 variant="ghost"
                 size="xs"
-                onClick={() => handleAddRow(category.id, { quantity: null })}
+                onClick={() => handleAddRow(category.id, { quantity: null, name: '小費' })}
                 disabled={isReadOnly}
                 className={cn(
                   'text-morandi-gold hover:bg-morandi-gold/10',
@@ -419,7 +419,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               <Button
                 variant="ghost"
                 size="xs"
-                onClick={() => handleAddRow(category.id, { quantity: 1 })}
+                onClick={() => handleAddRow(category.id, { quantity: 1, name: '出差費' })}
                 disabled={isReadOnly}
                 className={cn(
                   'text-morandi-secondary hover:bg-morandi-gold/10',
