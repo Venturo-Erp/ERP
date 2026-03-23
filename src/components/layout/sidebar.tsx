@@ -322,18 +322,34 @@ const menuItems: MenuItem[] = [
   // { href: '/esims', label: COMP_LAYOUT_LABELS.網卡管理, icon: Wifi, requiredPermission: 'hr', restrictedFeature: 'esim' },
 ]
 
-// 供應商專用選單（車行、領隊公司）
-// 供應商選單 - 使用與主系統相同的名詞
-const supplierMenuItems: MenuItem[] = [
+// ===== 按租戶類型的選單配置 =====
+
+// Local/DMC 選單（地接社）
+const localMenuItems: MenuItem[] = [
   { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: Home },
-  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPin }, // 他們的「團」
-  { href: '/orders', label: COMP_LAYOUT_LABELS.訂單, icon: ShoppingCart }, // 收到的訂單
-  { href: '/itinerary', label: COMP_LAYOUT_LABELS.行程管理, icon: Route },
-  { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
-  { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
-  { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: Users },
+  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPin }, // 包含「收到的委託」分頁
+  { href: '/finance', label: COMP_LAYOUT_LABELS.財務系統, icon: CreditCard, children: [
+    { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
+    { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
+  ]},
+  { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserCog },
   { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Settings },
 ]
+
+// 車行選單（遊覽車公司）
+const transportMenuItems: MenuItem[] = [
+  { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: Home },
+  { href: '/supplier/trips', label: '車趟管理', icon: Truck }, // 新的車趟管理頁面
+  { href: '/database/fleet', label: COMP_LAYOUT_LABELS.車隊管理, icon: Bus },
+  { href: '/finance', label: COMP_LAYOUT_LABELS.財務系統, icon: CreditCard, children: [
+    { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
+    { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
+  ]},
+  { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserCog },
+  { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Settings },
+]
+
+// 旅行社完整選單（使用上面的 menuItems）
 
 const personalToolItems: MenuItem[] = []
 
@@ -414,22 +430,23 @@ export function Sidebar() {
     userPermissions.includes('*') ||
     userRoles.includes('super_admin')
 
-  // 所有租戶都使用相同的完整選單
-  // 商業基石：統一表格制度，同一套系統
-  const isSupplierWorkspace = false // 不再區分，所有租戶看到相同介面
-  const isVehicleSupplier = 
-    user?.workspace_type === 'vehicle_supplier' || 
-    user?.workspace_type === 'transportation'
+  // 判斷租戶類型
+  const workspaceType = user?.workspace_type
+  const isLocal = workspaceType === 'dmc' || workspaceType === 'guide_supplier'
+  const isTransport = workspaceType === 'transportation' || workspaceType === 'vehicle_supplier'
+  const isTravelAgency = workspaceType === 'travel_agency' || (!isLocal && !isTransport)
 
   const visibleMenuItems = useMemo(() => {
     const workspaceCode = user?.workspace_code
 
-    // 供應商使用簡化選單
-    if (isSupplierWorkspace) {
-      return supplierMenuItems.filter(item => {
-        // 車隊管理只給車行看
-        return true
-      })
+    // Local/DMC 使用簡化選單
+    if (isLocal) {
+      return localMenuItems
+    }
+
+    // 車行使用車趟管理選單
+    if (isTransport) {
+      return transportMenuItems
     }
 
     const filterMenuByPermissions = (items: MenuItem[]): MenuItem[] => {
@@ -466,8 +483,8 @@ export function Sidebar() {
     user?.id,
     user?.workspace_code,
     user?.workspace_type,
-    isSupplierWorkspace,
-    isVehicleSupplier,
+    isLocal,
+    isTransport,
     isSuperAdmin,
     preferredFeatures,
     hiddenMenuItems,
@@ -475,8 +492,8 @@ export function Sidebar() {
   ])
 
   const visiblePersonalToolItems = useMemo(() => {
-    // 供應商不顯示個人工具
-    if (isSupplierWorkspace) return []
+    // 供應商（Local/車行）不顯示個人工具
+    if (isLocal || isTransport) return []
 
     // 簡化版篩選（個人工具不需要 restrictedFeature 或 preferredFeatures 檢查）
     return personalToolItems.filter(item => {
@@ -486,7 +503,7 @@ export function Sidebar() {
       if (isSuperAdmin) return true
       return userPermissions.includes(item.requiredPermission)
     })
-  }, [user?.id, isSupplierWorkspace, isSuperAdmin, hiddenMenuItems, userPermissions])
+  }, [user?.id, isLocal, isTransport, isSuperAdmin, hiddenMenuItems, userPermissions])
 
   // 渲染菜單項目
   const renderMenuItem = (item: MenuItem, isChild = false) => {
