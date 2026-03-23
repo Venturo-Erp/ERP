@@ -74,7 +74,7 @@ const menuItems: MenuItem[] = [
     requiredPermission: 'calendar',
   },
   {
-    href: '/workspace',
+    href: '/channel',
     label: COMP_LAYOUT_LABELS.工作空間,
     icon: Building2,
     requiredPermission: 'workspace',

@@ -10,7 +10,7 @@ import { COMP_LAYOUT_LABELS } from './constants/labels'
 const PAGE_TITLES: Record<string, string> = {
   '/': COMP_LAYOUT_LABELS.首頁,
   '/calendar': COMP_LAYOUT_LABELS.行事曆,
-  '/workspace': COMP_LAYOUT_LABELS.工作空間,
+  '/channel': COMP_LAYOUT_LABELS.工作空間,
   '/todos': COMP_LAYOUT_LABELS.待辦事項,
   '/itinerary': COMP_LAYOUT_LABELS.行程管理,
   '/tours': COMP_LAYOUT_LABELS.旅遊團,

@@ -59,7 +59,7 @@ const PERMISSION_ROUTES = [
   { route: '/customers', name: '顧客管理' },
   { route: '/hr', name: '人資管理' },
   { route: '/calendar', name: '行事曆' },
-  { route: '/workspace', name: '工作空間' },
+  { route: '/channel', name: '工作空間' },
   { route: '/todos', name: '待辦事項' },
   { route: '/itinerary', name: '行程管理' },
   { route: '/settings', name: '設定' },
