@@ -493,11 +493,20 @@ function TableRow({
   )
   const [isSaving, setIsSaving] = useState(false)
 
-  // 預計支出 = confirmed_cost || reply_cost || (unit_price × quantity)
-  const expectedCost =
+  // 預計支出 = confirmed_cost || reply_cost || estimated_cost || (unit_price × quantity)
+  const systemExpectedCost =
     item.confirmed_cost ??
     item.reply_cost ??
     (item.unit_price != null && item.quantity != null ? item.unit_price * item.quantity : null)
+  
+  // 如果系統沒有預計支出，可以手動填 estimated_cost
+  const [manualEstimatedCost, setManualEstimatedCost] = useState<string>(
+    item.estimated_cost != null ? String(item.estimated_cost) : ''
+  )
+  const [isSavingEstimated, setIsSavingEstimated] = useState(false)
+
+  // 最終預計支出：系統值優先，沒有才用手動值
+  const expectedCost = systemExpectedCost ?? item.estimated_cost
 
   // 小計 = unit_price × quantity
   const subtotal =
@@ -505,6 +514,29 @@ function TableRow({
 
   // 說明 = expense_note || confirmation_note || quote_note
   const notes = item.expense_note || item.confirmation_note || item.quote_note || ''
+
+  // 儲存預計支出（手動填的預算）
+  const handleSaveEstimatedCost = async () => {
+    const newValue = manualEstimatedCost.trim() === '' ? null : parseFloat(manualEstimatedCost)
+
+    if (newValue === item.estimated_cost) return
+
+    setIsSavingEstimated(true)
+    try {
+      const { error } = await supabase
+        .from('tour_itinerary_items')
+        .update({ estimated_cost: newValue } as any)
+        .eq('id', item.id)
+
+      if (error) throw error
+      onActualExpenseUpdate?.() // 重新載入資料
+    } catch (err) {
+      logger.error('儲存預計支出失敗:', err)
+      setManualEstimatedCost(item.estimated_cost != null ? String(item.estimated_cost) : '')
+    } finally {
+      setIsSavingEstimated(false)
+    }
+  }
 
   // 儲存實際支出
   const handleSaveActualExpense = async () => {
@@ -574,9 +606,26 @@ function TableRow({
         </>
       )}
 
-      {/* 預計支出 */}
-      <td className="px-3 py-2 text-right font-mono font-medium">
-        {expectedCost != null ? expectedCost.toLocaleString() : '-'}
+      {/* 預計支出：有系統值顯示，沒有則可編輯 */}
+      <td className="px-3 py-2">
+        {systemExpectedCost != null ? (
+          // 有系統值（來自供應商確認）→ 唯讀顯示
+          <div className="text-right font-mono font-medium">
+            {systemExpectedCost.toLocaleString()}
+          </div>
+        ) : (
+          // 沒有系統值 → 可編輯欄位填預算
+          <input
+            type="number"
+            value={manualEstimatedCost}
+            onChange={e => setManualEstimatedCost(e.target.value)}
+            onBlur={handleSaveEstimatedCost}
+            onKeyDown={e => e.key === 'Enter' && handleSaveEstimatedCost()}
+            placeholder="填預算"
+            disabled={isSavingEstimated}
+            className="w-24 px-2 py-1 text-right font-mono font-medium text-orange-600 border border-border rounded focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e] outline-none disabled:opacity-50 print:border-0 print:p-0"
+          />
+        )}
       </td>
 
       {/* 實際支出（可編輯）*/}
