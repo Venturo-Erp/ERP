@@ -83,12 +83,27 @@ export const useCategoryItems = ({
                       effectiveQuantity > 0
                         ? Math.ceil((updatedItem.unit_price || 0) / effectiveQuantity)
                         : 0
+                  } else if (category_id === 'guide') {
+                    // 領隊導遊分類：
+                    // - 數量為 0 或 null → 個人分攤（小費），total = unit_price
+                    // - 數量 > 0 → 團體分攤（出差費），total = (數量 × 單價) ÷ 人數
+                    if (!effectiveQuantity || effectiveQuantity === 0) {
+                      // 個人分攤（小費）
+                      updatedItem.total = updatedItem.unit_price || 0
+                    } else if (groupSizeForGuide > 1) {
+                      // 團體分攤（出差費）
+                      const total_cost = effectiveQuantity * (updatedItem.unit_price || 0)
+                      updatedItem.total = Math.ceil(total_cost / groupSizeForGuide)
+                    } else {
+                      // 人數為 1 時不分攤
+                      updatedItem.total = Math.ceil(effectiveQuantity * (updatedItem.unit_price || 0))
+                    }
                   } else if (
-                    (category_id === 'transport' || category_id === 'guide') &&
+                    category_id === 'transport' &&
                     updatedItem.is_group_cost &&
                     groupSize > 1
                   ) {
-                    // 交通和領隊導遊的團體分攤邏輯：小計 = (數量 × 單價) ÷ 團體人數
+                    // 交通的團體分攤邏輯：小計 = (數量 × 單價) ÷ 團體人數
                     const total_cost = effectiveQuantity * (updatedItem.unit_price || 0)
                     updatedItem.total = Math.ceil(total_cost / groupSize)
                   } else if (category_id === 'group-transport') {

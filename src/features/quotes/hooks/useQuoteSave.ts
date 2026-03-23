@@ -94,6 +94,7 @@ export const useQuoteSave = ({
         name: quoteName,
         total_cost,
         group_size: groupSize,
+        participant_counts: participantCounts, // 人數明細
         tier_pricings: tierPricingsData,
         ...quickQuoteData,
       }
