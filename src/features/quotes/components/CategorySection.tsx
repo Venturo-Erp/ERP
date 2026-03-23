@@ -316,45 +316,55 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             </div>
           ) : category.id === 'transport' ? (
             <div className="flex gap-1 justify-end">
-              <Button
-                variant="ghost"
-                size="xs"
-                onClick={() => handleAddAdultTicket(category.id)}
-                disabled={isReadOnly}
-                className={cn(
-                  'text-morandi-gold hover:bg-morandi-gold/10',
-                  isReadOnly && 'cursor-not-allowed opacity-60'
-                )}
-              >
-                <Plus size={12} className="mr-1" />
-                {CATEGORY_SECTION_LABELS.成人}
-              </Button>
-              <Button
-                variant="ghost"
-                size="xs"
-                onClick={() => handleAddChildTicket(category.id)}
-                disabled={isReadOnly}
-                className={cn(
-                  'text-morandi-secondary hover:bg-morandi-gold/10',
-                  isReadOnly && 'cursor-not-allowed opacity-60'
-                )}
-              >
-                <Plus size={12} className="mr-1" />
-                {CATEGORY_SECTION_LABELS.LABEL_475}
-              </Button>
-              <Button
-                variant="ghost"
-                size="xs"
-                onClick={() => handleAddInfantTicket(category.id)}
-                disabled={isReadOnly}
-                className={cn(
-                  'text-morandi-secondary hover:bg-morandi-gold/10',
-                  isReadOnly && 'cursor-not-allowed opacity-60'
-                )}
-              >
-                <Plus size={12} className="mr-1" />
-                {CATEGORY_SECTION_LABELS.LABEL_2772}
-              </Button>
+              {/* 成人/小孩/嬰兒 各只能新增一次 */}
+              {(() => {
+                const hasAdult = category.items.some(item => item.name === CATEGORY_SECTION_LABELS.成人)
+                const hasChild = category.items.some(item => item.name === CATEGORY_SECTION_LABELS.LABEL_475)
+                const hasInfant = category.items.some(item => item.name === CATEGORY_SECTION_LABELS.LABEL_2772)
+                return (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      onClick={() => handleAddAdultTicket(category.id)}
+                      disabled={isReadOnly || hasAdult}
+                      className={cn(
+                        'text-morandi-gold hover:bg-morandi-gold/10',
+                        (isReadOnly || hasAdult) && 'cursor-not-allowed opacity-60'
+                      )}
+                    >
+                      <Plus size={12} className="mr-1" />
+                      {CATEGORY_SECTION_LABELS.成人}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      onClick={() => handleAddChildTicket(category.id)}
+                      disabled={isReadOnly || hasChild}
+                      className={cn(
+                        'text-morandi-secondary hover:bg-morandi-gold/10',
+                        (isReadOnly || hasChild) && 'cursor-not-allowed opacity-60'
+                      )}
+                    >
+                      <Plus size={12} className="mr-1" />
+                      {CATEGORY_SECTION_LABELS.LABEL_475}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="xs"
+                      onClick={() => handleAddInfantTicket(category.id)}
+                      disabled={isReadOnly || hasInfant}
+                      className={cn(
+                        'text-morandi-secondary hover:bg-morandi-gold/10',
+                        (isReadOnly || hasInfant) && 'cursor-not-allowed opacity-60'
+                      )}
+                    >
+                      <Plus size={12} className="mr-1" />
+                      {CATEGORY_SECTION_LABELS.LABEL_2772}
+                    </Button>
+                  </>
+                )
+              })()}
               <Button
                 variant="ghost"
                 size="xs"
