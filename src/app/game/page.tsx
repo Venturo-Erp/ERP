@@ -13,15 +13,14 @@ const PhaserOffice = dynamic(() => import('@/features/game-office/components/Pha
   loading: () => <div className="flex-1 bg-[#1a1a2e] animate-pulse" />,
 })
 
-// 辦公室區域定義（對應 Phaser 場景物件位置）
-// 這些座標是根據 defaultRoom() 的物件位置計算的
+// 辦公室區域定義（調整為場景內）
 const OFFICE_ZONES = {
-  meetingRoom: { x: 55, y: 55, label: '會議桌', icon: '🏛️' },      // Table_10 (col:6, row:6)
-  waterCooler: { x: 75, y: 35, label: '茶水間', icon: '☕' },       // Fridge (col:9, row:3)
-  desk1: { x: 35, y: 30, label: 'William 桌', icon: '💻' },        // Desk (col:3, row:2)
-  desk2: { x: 35, y: 48, label: '工程師桌', icon: '💻' },          // Desk (col:3, row:5)
-  desk3: { x: 60, y: 30, label: '設計師桌', icon: '💻' },          // Desk (col:7, row:2)
-  restArea: { x: 70, y: 50, label: '休息沙發', icon: '🛋️' },       // Sofa (col:8, row:5)
+  meetingRoom: { x: 50, y: 38, label: '會議桌', icon: '🏛️' },
+  waterCooler: { x: 65, y: 28, label: '茶水間', icon: '☕' },
+  desk1: { x: 42, y: 22, label: '電腦桌 1', icon: '💻' },
+  desk2: { x: 42, y: 32, label: '電腦桌 2', icon: '💻' },
+  desk3: { x: 58, y: 22, label: '電腦桌 3', icon: '💻' },
+  restArea: { x: 60, y: 35, label: '沙發', icon: '🛋️' },
 }
 
 const statusColors: Record<AgentStatus, string> = {
