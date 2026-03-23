@@ -1,9 +1,10 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
@@ -12,9 +13,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
-import { Hotel, Utensils, Bus, Ticket, PartyPopper, FileText } from 'lucide-react'
+import { Hotel, Utensils, Bus, Ticket, PartyPopper, FileText, Plane, Users, Copy, Check } from 'lucide-react'
 import { useToursSlim, useOrdersSlim, useEmployeesSlim } from '@/data'
 import { toast } from 'sonner'
+import { supabase } from '@/lib/supabase/client'
 import type { Todo, TodoTaskType } from '@/types/base.types'
 
 interface TaskTypeFormProps {
@@ -349,12 +351,214 @@ function TransportForm({ todo, onUpdate, onClose }: FormProps) {
 }
 
 function TicketForm({ todo, onUpdate, onClose }: FormProps) {
+  const [flightInfo, setFlightInfo] = useState<{
+    outbound: any
+    return: any
+    tourCode: string
+    tourName: string
+  } | null>(null)
+  const [members, setMembers] = useState<{
+    id: string
+    chinese_name: string
+    english_name: string
+    pnr?: string
+  }[]>([])
+  const [loading, setLoading] = useState(true)
+  const [pnrInput, setPnrInput] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  // 讀取航班和團員資料
+  useEffect(() => {
+    async function fetchData() {
+      if (!todo.tour_id) {
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      try {
+        // 讀取團的航班資訊
+        const { data: tour } = await supabase
+          .from('tours')
+          .select('code, name, outbound_flight, return_flight')
+          .eq('id', todo.tour_id)
+          .single()
+
+        if (tour) {
+          setFlightInfo({
+            outbound: tour.outbound_flight,
+            return: tour.return_flight,
+            tourCode: tour.code,
+            tourName: tour.name,
+          })
+        }
+
+        // 讀取團員名單（透過 orders）
+        const { data: orderMembers } = await supabase
+          .from('order_members')
+          .select(`
+            id,
+            chinese_name,
+            english_name,
+            orders!inner(tour_id)
+          `)
+          .eq('orders.tour_id', todo.tour_id)
+
+        if (orderMembers) {
+          setMembers(orderMembers.map(m => ({
+            id: m.id,
+            chinese_name: m.chinese_name || '',
+            english_name: m.english_name || '',
+          })))
+        }
+      } catch (error) {
+        console.error('讀取訂票資料失敗:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [todo.tour_id])
+
+  // 格式化航班資訊
+  const formatFlight = (flight: any) => {
+    if (!flight) return '未設定'
+    if (Array.isArray(flight) && flight.length > 0) {
+      const f = flight[0]
+      if (f.flightNumber) return f.flightNumber
+      return '未設定'
+    }
+    if (typeof flight === 'object' && flight.flightNumber) {
+      return flight.flightNumber
+    }
+    return '未設定'
+  }
+
+  // 複製團員名單
+  const handleCopyMembers = () => {
+    const text = members
+      .map(m => `${m.chinese_name}\t${m.english_name}`)
+      .join('\n')
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    toast.success('已複製團員名單')
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-morandi-gold" />
+      </div>
+    )
+  }
+
+  if (!todo.tour_id) {
+    return (
+      <div className="space-y-3">
+        <p className="text-sm text-morandi-secondary">請先關聯團才能查看訂票資訊</p>
+        <Button onClick={onClose} variant="outline" className="w-full">
+          關閉
+        </Button>
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-morandi-secondary">訂票表單（待實作）</p>
-      <Button onClick={onClose} variant="outline" className="w-full">
-        關閉
-      </Button>
+    <div className="space-y-4">
+      {/* 航班資訊 */}
+      <div className="bg-morandi-sky/10 rounded-lg p-3 space-y-2">
+        <div className="flex items-center gap-2 text-morandi-sky">
+          <Plane size={16} />
+          <span className="text-sm font-medium">航班資訊</span>
+        </div>
+        {flightInfo && (
+          <div className="text-xs space-y-1 text-morandi-primary">
+            <p className="font-medium">{flightInfo.tourCode} {flightInfo.tourName}</p>
+            <p>去程：{formatFlight(flightInfo.outbound)}</p>
+            <p>回程：{formatFlight(flightInfo.return)}</p>
+          </div>
+        )}
+      </div>
+
+      {/* 團員名單 */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-morandi-primary">
+            <Users size={16} />
+            <span className="text-sm font-medium">團員名單 ({members.length}人)</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopyMembers}
+            className="h-7 text-xs"
+          >
+            {copied ? <Check size={12} className="mr-1" /> : <Copy size={12} className="mr-1" />}
+            {copied ? '已複製' : '複製'}
+          </Button>
+        </div>
+        
+        <div className="max-h-48 overflow-y-auto border border-border rounded-lg">
+          <table className="w-full text-xs">
+            <thead className="bg-morandi-background/50 sticky top-0">
+              <tr>
+                <th className="px-2 py-1.5 text-left font-medium text-morandi-muted">中文姓名</th>
+                <th className="px-2 py-1.5 text-left font-medium text-morandi-muted">英文姓名</th>
+              </tr>
+            </thead>
+            <tbody>
+              {members.map((member) => (
+                <tr key={member.id} className="border-t border-border/50">
+                  <td className="px-2 py-1.5">{member.chinese_name || '-'}</td>
+                  <td className="px-2 py-1.5 font-mono text-morandi-secondary">
+                    {member.english_name || '-'}
+                  </td>
+                </tr>
+              ))}
+              {members.length === 0 && (
+                <tr>
+                  <td colSpan={2} className="px-2 py-4 text-center text-morandi-muted">
+                    尚無團員資料
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* PNR 輸入 */}
+      <div className="space-y-2">
+        <Label className="text-sm">PNR 電報</Label>
+        <Textarea
+          placeholder="貼上 Amadeus 電報內容..."
+          value={pnrInput}
+          onChange={(e) => setPnrInput(e.target.value)}
+          rows={4}
+          className="font-mono text-xs"
+        />
+        <p className="text-xs text-morandi-muted">
+          貼上電報後，系統會自動解析旅客和航班資訊
+        </p>
+      </div>
+
+      {/* 操作按鈕 */}
+      <div className="flex gap-2 pt-2">
+        <Button
+          onClick={() => {
+            onUpdate({ status: 'completed', completed: true })
+            onClose()
+          }}
+          className="flex-1 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+        >
+          標記完成
+        </Button>
+        <Button onClick={onClose} variant="outline">
+          關閉
+        </Button>
+      </div>
     </div>
   )
 }
