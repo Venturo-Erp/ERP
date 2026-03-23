@@ -188,6 +188,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
       const expected =
         item.confirmed_cost ??
         item.reply_cost ??
+        item.estimated_cost ??
         (item.unit_price != null && item.quantity != null ? item.unit_price * item.quantity : 0)
 
       totalExpected += expected
