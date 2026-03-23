@@ -3,10 +3,11 @@
 import dynamic from 'next/dynamic'
 import { Suspense, useState, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Grid3X3, Edit3, Eye, MessageSquare, Play, Users } from 'lucide-react'
+import { Grid3X3, Edit3, Eye, MessageSquare, Play, Users, PanelRightOpen, PanelRightClose } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { useAgentStatusStore, Agent, AgentStatus } from '@/stores/agent-status-store'
 import { GAME_OFFICE_LABELS } from './constants/labels'
+import { TaskPanel, Task } from '@/features/game-office/components/TaskPanel'
 
 const PhaserOffice = dynamic(() => import('@/features/game-office/components/PhaserOffice'), {
   ssr: false,
@@ -36,11 +37,29 @@ export default function GameOfficePage() {
   
   const [editMode, setEditMode] = useState(false)
   const [showGrid, setShowGrid] = useState(true)
+  const [showTaskPanel, setShowTaskPanel] = useState(true)
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
   const [showMeetingDialog, setShowMeetingDialog] = useState(false)
   const [meetingInput, setMeetingInput] = useState('')
   const [meetingResult, setMeetingResult] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // 當任務開始時，移動 agent 到對應位置
+  const handleTaskStart = (task: Task) => {
+    const assignee = agents.find(a => a.id === task.assignee)
+    if (!assignee) return
+    
+    if (task.type === 'meeting') {
+      // 移動到會議桌
+      setAgentPosition(task.assignee, { x: 48, y: 36 })
+      task.collaborators.forEach((collab, i) => {
+        setAgentPosition(collab, { x: 52 + i * 4, y: 38 + i * 2 })
+      })
+    } else {
+      // 移動到電腦桌
+      setAgentPosition(task.assignee, { x: 42, y: 22 })
+    }
+  }
 
   // 點擊地圖移動 Agent
   const handleMapClick = useCallback((e: React.MouseEvent) => {
@@ -160,6 +179,13 @@ export default function GameOfficePage() {
               👆 點擊地圖移動 {agents.find(a => a.id === selectedAgent)?.name}
             </span>
           )}
+          <button
+            onClick={() => setShowTaskPanel(!showTaskPanel)}
+            className="p-1.5 rounded hover:bg-white/10 text-white/70 hover:text-white transition-colors"
+            title={showTaskPanel ? '隱藏工作流' : '顯示工作流'}
+          >
+            {showTaskPanel ? <PanelRightClose size={18} /> : <PanelRightOpen size={18} />}
+          </button>
           <span className="text-xs text-morandi-secondary">v1.0</span>
         </div>
       </div>
@@ -318,6 +344,20 @@ export default function GameOfficePage() {
             )}
           </AnimatePresence>
         </div>
+
+        {/* Task Panel */}
+        <AnimatePresence>
+          {showTaskPanel && (
+            <motion.div
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 320, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              className="flex-shrink-0 overflow-hidden"
+            >
+              <TaskPanel onTaskStart={handleTaskStart} />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Bottom Bar */}
