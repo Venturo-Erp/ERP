@@ -31,7 +31,12 @@ interface TourFiltersProps {
   onAddTour: () => void
   onAddProposal?: () => void
   onAddTemplate?: () => void
+  showReceivedTab?: boolean // Local/DMC 顯示「收到的委託」分頁
+  receivedCount?: number // 收到的委託數量
 }
+
+import { Inbox } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 
 export const TourFilters: React.FC<TourFiltersProps> = ({
   searchQuery,
@@ -41,7 +46,34 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
   onAddTour,
   onAddProposal,
   onAddTemplate,
+  showReceivedTab,
+  receivedCount,
 }) => {
+  // 基本 tabs
+  const baseTabs = [
+    { value: 'all', label: TOUR_FILTERS.tab_all, icon: BarChart3 },
+    { value: '待出發', label: TOUR_FILTERS.tab_active, icon: Calendar },
+    { value: '已結團', label: TOUR_FILTERS.tab_closed, icon: FileCheck },
+    { value: '特殊團', label: TOUR_FILTERS.tab_special, icon: Star },
+    { value: 'archived', label: TOUR_FILTERS.tab_archived, icon: Archive },
+    { value: 'proposal', label: TOUR_FILTERS.tab_proposals, icon: FileText },
+    { value: 'template', label: TOUR_FILTERS.tab_templates, icon: Copy },
+  ]
+
+  // Local/DMC 時加入「收到的委託」分頁
+  const tabs = showReceivedTab
+    ? [
+        { 
+          value: 'received', 
+          label: receivedCount && receivedCount > 0 
+            ? `收到的委託 (${receivedCount})` 
+            : '收到的委託', 
+          icon: Inbox 
+        },
+        ...baseTabs,
+      ]
+    : baseTabs
+
   return (
     <ResponsiveHeader
       title={TOUR_FILTERS.page_title}
@@ -51,15 +83,7 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
       searchTerm={searchQuery}
       onSearchChange={onSearchChange}
       searchPlaceholder={TOUR_FILTERS.search_placeholder}
-      tabs={[
-        { value: 'all', label: TOUR_FILTERS.tab_all, icon: BarChart3 },
-        { value: '待出發', label: TOUR_FILTERS.tab_active, icon: Calendar },
-        { value: '已結團', label: TOUR_FILTERS.tab_closed, icon: FileCheck },
-        { value: '特殊團', label: TOUR_FILTERS.tab_special, icon: Star },
-        { value: 'archived', label: TOUR_FILTERS.tab_archived, icon: Archive },
-        { value: 'proposal', label: TOUR_FILTERS.tab_proposals, icon: FileText },
-        { value: 'template', label: TOUR_FILTERS.tab_templates, icon: Copy },
-      ]}
+      tabs={tabs}
       activeTab={activeTab}
       onTabChange={onTabChange}
       customActions={

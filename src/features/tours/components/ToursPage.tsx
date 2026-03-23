@@ -29,10 +29,18 @@ import { ConvertToTourDialog } from './ConvertToTourDialog'
 import { TourEditDialog } from '@/features/tours/components/tour-edit-dialog'
 import { alert } from '@/lib/ui/alert-dialog'
 
+import { supabase } from '@/lib/supabase/client'
+
 export const ToursPage: React.FC = () => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user } = useAuthStore()
+
+  // 判斷是否為 Local/DMC
+  const isLocal = user?.workspace_type === 'dmc' || user?.workspace_type === 'guide_supplier'
+  
+  // 收到的委託數量（Local 專用）
+  const [receivedCount, setReceivedCount] = useState(0)
 
   // Edit dialog state (using TourEditDialog instead of TourForm for edit mode)
   const [editDialogTour, setEditDialogTour] = useState<Tour | null>(null)
@@ -86,6 +94,23 @@ export const ToursPage: React.FC = () => {
     actions,
     handleSortChange,
   } = useToursPage()
+
+  // Local/DMC：查詢收到的委託數量
+  useEffect(() => {
+    if (!isLocal || !user?.workspace_id) return
+
+    const fetchReceivedCount = async () => {
+      const { count } = await supabase
+        .from('tour_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('recipient_workspace_id', user.workspace_id as string)
+        .eq('status', 'sent')
+
+      setReceivedCount(count || 0)
+    }
+
+    fetchReceivedCount()
+  }, [isLocal, user?.workspace_id])
 
   const {
     itineraryDialogTour,
@@ -278,6 +303,8 @@ export const ToursPage: React.FC = () => {
         onAddTour={handleOpenTourDialog}
         onAddProposal={handleOpenProposalDialog}
         onAddTemplate={handleOpenTemplateDialog}
+        showReceivedTab={isLocal}
+        receivedCount={receivedCount}
       />
 
       <div className="flex-1 overflow-hidden flex flex-col">
