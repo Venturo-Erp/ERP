@@ -218,6 +218,8 @@ export function createStore<T extends BaseEntity>(
           const { data, error } = await query
 
           if (error) throw error
+          
+          console.log(`[createStore] ${tableName} fetchAll 結果:`, data?.length, '筆')
 
           const items = castRows<T>(data)
           set({ items, loading: false })
