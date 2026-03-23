@@ -81,12 +81,20 @@ const useChannelsUIStore = create<
  * Channels Store Facade
  * 整合 Channel, ChannelGroup, Workspace 三個 createStore
  * 保持與舊版相同的 API
+ * 
+ * 🔧 優化：使用 selector 避免不必要的 re-render
  */
 export const useChannelsStore = () => {
-  // 使用 createStore 的 stores
-  const channelStore = useChannelStore()
-  const channelGroupStore = useChannelGroupStore()
-  const workspaceStore = useWorkspaceStore()
+  // 資料（使用 selector 避免整個 store re-render）
+  const channelItems = useChannelStore(state => state.items)
+  const channelLoading = useChannelStore(state => state.loading)
+  const channelError = useChannelStore(state => state.error)
+  const channelGroupItems = useChannelGroupStore(state => state.items)
+  const channelGroupLoading = useChannelGroupStore(state => state.loading)
+  const channelGroupError = useChannelGroupStore(state => state.error)
+  const workspaceItems = useWorkspaceStore(state => state.items)
+  const workspaceLoading = useWorkspaceStore(state => state.loading)
+  const workspaceError = useWorkspaceStore(state => state.error)
 
   // UI 狀態
   const uiStore = useChannelsUIStore()
@@ -95,9 +103,9 @@ export const useChannelsStore = () => {
     // ============================================
     // 資料 (來自 createStore)
     // ============================================
-    workspaces: workspaceStore.items || [],
-    channels: channelStore.items || [],
-    channelGroups: channelGroupStore.items || [],
+    workspaces: workspaceItems || [],
+    channels: channelItems || [],
+    channelGroups: channelGroupItems || [],
 
     // ============================================
     // UI 狀態
@@ -112,14 +120,14 @@ export const useChannelsStore = () => {
     // ============================================
     // Loading 和 Error
     // ============================================
-    loading: channelStore.loading || channelGroupStore.loading || workspaceStore.loading,
-    error: uiStore.error || channelStore.error || channelGroupStore.error || workspaceStore.error,
+    loading: channelLoading || channelGroupLoading || workspaceLoading,
+    error: uiStore.error || channelError || channelGroupError || workspaceError,
 
     // ============================================
     // Workspace 操作
     // ============================================
     loadWorkspaces: async () => {
-      const workspaces = await workspaceStore.fetchAll()
+      const workspaces = await useWorkspaceStore.getState().fetchAll()
 
       // 🔥 使用 fetchAll 的返回值，而不是 items (避免競爭條件)
       if (workspaces && workspaces.length > 0 && !uiStore.currentWorkspace) {
@@ -147,7 +155,7 @@ export const useChannelsStore = () => {
         // 如果傳入 workspace ID，設定 ID
         uiStore.setCurrentWorkspaceId(workspace)
         // 嘗試從列表中找到對應的 workspace 物件
-        const ws = workspaceStore.items.find(w => w.id === workspace)
+        const ws = useWorkspaceStore.getState().items.find(w => w.id === workspace)
         uiStore.setCurrentWorkspace(ws || null)
         // 🔥 設定 workspace filter，讓 fetchAll 可以正確過濾
         setCurrentWorkspaceFilter(workspace)
@@ -161,15 +169,15 @@ export const useChannelsStore = () => {
       }
     },
 
-    createWorkspace: workspaceStore.create,
-    updateWorkspace: workspaceStore.update,
+    createWorkspace: useWorkspaceStore.getState().create,
+    updateWorkspace: useWorkspaceStore.getState().update,
 
     // ============================================
     // Channel 操作 (使用 createStore 的方法)
     // ============================================
     loadChannels: async (_workspaceId?: string) => {
       // workspaceId 參數保留以維持 API 兼容性，實際過濾由 RLS 處理
-      await channelStore.fetchAll()
+      await useChannelStore.getState().fetchAll()
     },
 
     createChannel: async (channel: Omit<Channel, 'id' | 'created_at'>) => {
@@ -178,7 +186,7 @@ export const useChannelsStore = () => {
         id: uuidv4(),
         created_at: new Date().toISOString(),
       }
-      await channelStore.create(newChannel)
+      await useChannelStore.getState().create(newChannel)
 
       // 🔥 自動將創建者加入為頻道擁有者
       if (newChannel.created_by) {
@@ -199,7 +207,7 @@ export const useChannelsStore = () => {
     },
 
     updateChannel: async (id: string, updates: Partial<Channel>) => {
-      await channelStore.update(id, updates)
+      await useChannelStore.getState().update(id, updates)
     },
 
     deleteChannel: async (id: string) => {
@@ -215,7 +223,7 @@ export const useChannelsStore = () => {
       }
 
       // 刪除頻道（會級聯刪除 messages）
-      await channelStore.delete(id)
+      await useChannelStore.getState().delete(id)
 
       // 如果刪除的是當前選中的頻道，清除選擇
       if (uiStore.selectedChannel?.id === id) {
@@ -227,15 +235,15 @@ export const useChannelsStore = () => {
     },
 
     toggleChannelFavorite: async (id: string) => {
-      const channel = channelStore.items.find(ch => ch.id === id)
+      const channel = useChannelStore.getState().items.find(ch => ch.id === id)
       if (!channel) return
 
-      await channelStore.update(id, { is_favorite: !channel.is_favorite })
+      await useChannelStore.getState().update(id, { is_favorite: !channel.is_favorite })
     },
 
     archiveChannel: async (id: string) => {
       const now = new Date().toISOString()
-      await channelStore.update(id, {
+      await useChannelStore.getState().update(id, {
         is_archived: true,
         archived_at: now,
         updated_at: now,
@@ -244,7 +252,7 @@ export const useChannelsStore = () => {
     },
 
     unarchiveChannel: async (id: string) => {
-      await channelStore.update(id, {
+      await useChannelStore.getState().update(id, {
         is_archived: false,
         archived_at: null,
         updated_at: new Date().toISOString(),
@@ -258,13 +266,13 @@ export const useChannelsStore = () => {
     },
 
     updateChannelOrder: async (channelId: string, newOrder: number) => {
-      await channelStore.update(channelId, { order: newOrder })
+      await useChannelStore.getState().update(channelId, { order: newOrder })
     },
 
     reorderChannels: (channels: Channel[]) => {
       // 批量更新順序 (createStore 會自動處理)
       channels.forEach((channel, index) => {
-        channelStore.update(channel.id, { order: index }).catch(error => {
+        useChannelStore.getState().update(channel.id, { order: index }).catch(error => {
           logger.warn('[ChannelsStore] 更新頻道順序失敗:', error)
         })
       })
@@ -274,7 +282,7 @@ export const useChannelsStore = () => {
     // Channel Group 操作 (使用 createStore 的方法)
     // ============================================
     loadChannelGroups: async (workspaceId?: string) => {
-      await channelGroupStore.fetchAll()
+      await useChannelGroupStore.getState().fetchAll()
     },
 
     createChannelGroup: async (group: Omit<ChannelGroup, 'id' | 'created_at'>) => {
@@ -283,27 +291,27 @@ export const useChannelsStore = () => {
         id: uuidv4(),
         created_at: new Date().toISOString(),
       }
-      await channelGroupStore.create(newGroup)
+      await useChannelGroupStore.getState().create(newGroup)
     },
 
     deleteChannelGroup: async (id: string) => {
       // 先更新該群組下的頻道，將 group_id 設為 null
-      const channelsInGroup = channelStore.items.filter(ch => ch.group_id === id)
+      const channelsInGroup = useChannelStore.getState().items.filter(ch => ch.group_id === id)
 
       // 批量更新頻道
       await Promise.all(
-        channelsInGroup.map(channel => channelStore.update(channel.id, { group_id: null }))
+        channelsInGroup.map(channel => useChannelStore.getState().update(channel.id, { group_id: null }))
       )
 
       // 刪除群組
-      await channelGroupStore.delete(id)
+      await useChannelGroupStore.getState().delete(id)
     },
 
     toggleGroupCollapse: async (id: string) => {
-      const group = channelGroupStore.items.find(g => g.id === id)
+      const group = useChannelGroupStore.getState().items.find(g => g.id === id)
       if (!group) return
 
-      await channelGroupStore.update(id, { is_collapsed: !group.is_collapsed })
+      await useChannelGroupStore.getState().update(id, { is_collapsed: !group.is_collapsed })
     },
 
     // ============================================
