@@ -115,7 +115,7 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
     throw new Error(`建立傳票失敗：${voucherError.message}`)
   }
 
-  // 4. 建立傳票分錄（依類別對應會計科目）
+  // 4. 建立傳票分錄（每個請款項目一筆借方）
   const entries: Array<{
     voucher_id: string
     entry_no: number
@@ -125,32 +125,27 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
     description: string
   }> = []
 
-  // 按類別分組金額
-  const categoryAmounts: Record<string, number> = {}
+  let entryNo = 1
+  const supplierName = request.supplier_name || '供應商'
+
+  // 借方分錄（每個項目一筆，摘要：供應商 + 項目描述）
   for (const item of request.items || []) {
     const category = item.category || '其他'
-    categoryAmounts[category] = (categoryAmounts[category] || 0) + (item.amount || 0)
-  }
-
-  let entryNo = 1
-
-  // 借方分錄（成本科目）
-  for (const [category, amount] of Object.entries(categoryAmounts)) {
     const mapping = getAccountMapping(category)
     const subjectId = await getSubjectId(mapping.debitCode)
-    if (subjectId) {
+    if (subjectId && item.amount) {
       entries.push({
         voucher_id: voucher.id,
         entry_no: entryNo++,
         subject_id: subjectId,
-        debit: amount,
+        debit: item.amount,
         credit: 0,
-        description: `${category}費用`,
+        description: `${supplierName} / ${item.description || category}`,
       })
     }
   }
 
-  // 貸方分錄（應付帳款）
+  // 貸方分錄（應付帳款，一筆總金額）
   const apSubjectId = await getSubjectId('2101')
   if (apSubjectId) {
     entries.push({
@@ -159,7 +154,7 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
       subject_id: apSubjectId,
       debit: 0,
       credit: request.amount,
-      description: `應付 ${request.supplier_name || '供應商'}`,
+      description: `應付 ${supplierName}`,
     })
   }
 
