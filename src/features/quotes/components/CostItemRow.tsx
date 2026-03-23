@@ -44,7 +44,7 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
     >
       <td
         colSpan={2}
-        className={`py-3 px-4 text-sm text-morandi-primary text-center ${item.quantity && item.quantity !== 1 ? 'table-divider' : ''}`}
+        className="py-3 px-4 text-sm text-morandi-primary text-center table-divider"
       >
         <div className="flex items-center gap-1">
           {item.day && categoryId !== 'activities' && (
