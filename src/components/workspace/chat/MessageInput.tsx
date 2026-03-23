@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useEffect, useMemo } from 'react'
+import React, { useRef, useState, useEffect, useMemo, memo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus, Send, Smile } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -50,7 +50,7 @@ function toHalfWidth(str: string): string {
     .replace(/\u3000/g, ' ') // 全形空格
 }
 
-export function MessageInput({
+export const MessageInput = memo(function MessageInput({
   channel,
   isAdmin,
   channelName,
@@ -504,4 +504,4 @@ export function MessageInput({
       </form>
     </div>
   )
-}
+})
