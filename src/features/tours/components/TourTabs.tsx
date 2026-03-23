@@ -173,6 +173,7 @@ export function TourTabContent({
     case 'requirements':
       return (
         <TourRequirementsTab
+          key={`requirements-${tour.id}`}  // 強制重新掛載
           tourId={tour.id}
           quoteId={tour.quote_id}
           tour={tour}
