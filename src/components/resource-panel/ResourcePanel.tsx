@@ -320,6 +320,9 @@ export function ResourcePanel({
     )
   }, [resources, activeTab, searchQuery])
 
+  // 取得當前選擇的國家名稱
+  const selectedCountryName = countries.find(c => c.id === resolvedCountryId)?.name || ''
+
   const tabs: { key: ResourceType; label: string; icon: React.ReactNode }[] = [
     { key: 'attraction', label: '景點', icon: <MapPin size={14} /> },
     { key: 'hotel', label: '酒店', icon: <Building2 size={14} /> },
@@ -328,15 +331,8 @@ export function ResourcePanel({
 
   return (
     <div className={cn('flex flex-col bg-card border-b border-border', className)}>
-      {/* 標題列 */}
-      <div className="h-10 bg-morandi-green/80 text-white px-4 flex items-center border-b border-border">
-        <h3 className="text-sm font-semibold">資源庫</h3>
-        <span className="ml-auto text-xs opacity-75">拖拽至行程</span>
-      </div>
-
-      {/* 篩選：只用國家（簡化版） */}
-      <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border">
-        {/* 國家 */}
+      {/* 標題列：國家選擇 */}
+      <div className="h-10 bg-morandi-green/80 text-white px-3 flex items-center gap-2 border-b border-border">
         <Combobox
           value={resolvedCountryId || ''}
           onChange={v => {
@@ -344,12 +340,38 @@ export function ResourcePanel({
           }}
           options={countries.map(c => ({ value: c.id, label: c.name }))}
           placeholder="選擇國家"
-          className="w-[140px]"
+          className="w-[100px] [&_button]:bg-white/20 [&_button]:border-white/30 [&_button]:text-white [&_button]:h-7 [&_button]:text-xs"
           showClearButton={false}
           disablePortal
         />
-        {/* 快速新增資源 */}
-        <div className="ml-auto">
+        <span className="text-xs opacity-75">資源庫</span>
+      </div>
+
+      {/* 類型 Tab + 新增按鈕 */}
+      <div className="flex items-center border-b border-border">
+        {tabs.map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => {
+              setActiveTab(tab.key)
+              setSearchQuery('')
+            }}
+            className={cn(
+              'flex-1 flex items-center justify-center gap-1 px-2 py-2 text-xs font-medium transition-colors',
+              activeTab === tab.key
+                ? 'text-morandi-primary border-b-2 border-morandi-gold bg-morandi-gold/5'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {tab.icon}
+            {selectedCountryName || ''}{tab.label}
+            <span className="text-[10px] text-muted-foreground ml-0.5">
+              ({resources[tab.key].length})
+            </span>
+          </button>
+        ))}
+        {/* 新增按鈕 */}
+        <div className="px-2">
           <QuickAddResource
             type={activeTab}
             countryId={resolvedCountryId || countryId}
@@ -369,31 +391,6 @@ export function ResourcePanel({
             }}
           />
         </div>
-      </div>
-
-      {/* 類型 Tab */}
-      <div className="flex border-b border-border">
-        {tabs.map(tab => (
-          <button
-            key={tab.key}
-            onClick={() => {
-              setActiveTab(tab.key)
-              setSearchQuery('')
-            }}
-            className={cn(
-              'flex-1 flex items-center justify-center gap-1 px-2 py-2 text-xs font-medium transition-colors',
-              activeTab === tab.key
-                ? 'text-morandi-primary border-b-2 border-morandi-gold bg-morandi-gold/5'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            {tab.icon}
-            {tab.label}
-            <span className="text-[10px] text-muted-foreground ml-0.5">
-              ({resources[tab.key].length})
-            </span>
-          </button>
-        ))}
       </div>
 
       {/* 搜尋框 */}
