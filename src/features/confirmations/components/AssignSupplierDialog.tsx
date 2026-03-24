@@ -117,6 +117,11 @@ export function AssignSupplierDialog({
   const supplierName = selectedSupplier?.name || customName
   const canPrint = supplierName.trim().length > 0
 
+  // 發送方式狀態（需要在 handleSaveRequest 之前定義）
+  const [sendMethod, setSendMethod] = useState<
+    'print' | 'line' | 'email' | 'fax' | 'tenant' | 'assign' | null
+  >(null)
+
   // 分類整理
   const grouped = items.reduce<Record<string, QuoteItem[]>>((acc, { category, item }) => {
     if (!acc[category]) acc[category] = []
@@ -298,9 +303,6 @@ export function AssignSupplierDialog({
   const [roomDetails, setRoomDetails] = useState<Record<string, { name: string; qty: number }[]>>(
     {}
   )
-  const [sendMethod, setSendMethod] = useState<
-    'print' | 'line' | 'email' | 'fax' | 'tenant' | 'assign' | null
-  >(null)
   const [lineGroups, setLineGroups] = useState<
     { group_id: string; group_name: string; supplier_id?: string }[]
   >([])
