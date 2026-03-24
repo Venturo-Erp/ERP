@@ -49,7 +49,7 @@ export function UnifiedTraditionalView({
       <div className="grid grid-cols-2 gap-6 mb-6 p-4 border-2 border-[#a8a29e] rounded-lg bg-gradient-to-br from-[#faf8f5] to-[#f5f1ea]">
         {/* 左欄 */}
         <div className="space-y-3 text-sm">
-          <div className="grid grid-cols-[5rem_1fr] gap-2">
+          <div className="grid grid-cols-[6rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">致：</span>
             <input
               type="text"
@@ -58,7 +58,7 @@ export function UnifiedTraditionalView({
               className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary"
             />
           </div>
-          <div className="grid grid-cols-[5rem_1fr] gap-2">
+          <div className="grid grid-cols-[6rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">聯絡電話：</span>
             <input
               type="text"
@@ -67,7 +67,7 @@ export function UnifiedTraditionalView({
               className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-secondary"
             />
           </div>
-          <div className="grid grid-cols-[5rem_1fr] gap-2">
+          <div className="grid grid-cols-[6rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">團體名稱：</span>
             <input
               type="text"
@@ -80,16 +80,16 @@ export function UnifiedTraditionalView({
 
         {/* 右欄 */}
         <div className="space-y-3 text-sm">
-          <div className="grid grid-cols-[5rem_1fr] gap-2">
-            <span className="font-semibold text-[#78716c]">業務窗口：</span>
+          <div className="grid grid-cols-[6rem_1fr] gap-2">
+            <span className="font-semibold text-[#78716c]">聯絡窗口：</span>
             <input
               type="text"
               value={contact || ''}
-              placeholder="業務人員"
+              placeholder="聯絡人"
               className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary"
             />
           </div>
-          <div className="grid grid-cols-[5rem_1fr] gap-2">
+          <div className="grid grid-cols-[6rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">傳真號碼：</span>
             <input
               type="text"
@@ -98,7 +98,7 @@ export function UnifiedTraditionalView({
               className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-secondary"
             />
           </div>
-          <div className="grid grid-cols-[5rem_1fr] gap-2">
+          <div className="grid grid-cols-[6rem_1fr] gap-2">
             <span className="font-semibold text-[#78716c]">人數預估：</span>
             <input
               type="text"

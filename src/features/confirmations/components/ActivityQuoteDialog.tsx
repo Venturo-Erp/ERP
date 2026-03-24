@@ -40,6 +40,11 @@ export function ActivityQuoteDialog({
   const [note, setNote] = useState('')
   const [viewMode, setViewMode] = useState<'modern' | 'traditional'>('traditional')
   const [editableItems, setEditableItems] = useState(activities)
+  const [supplierInfo, setSupplierInfo] = useState<{
+    contact?: string
+    phone?: string
+    fax?: string
+  }>({})
 
   // 當 activities 變化時更新
   useEffect(() => {
@@ -55,6 +60,28 @@ export function ActivityQuoteDialog({
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null)
   const { toast } = useToast()
   const supabase = createSupabaseBrowserClient()
+
+  // 查詢供應商資訊
+  useEffect(() => {
+    if (!open || !supplierName) return
+    const loadSupplier = async () => {
+      const { data } = await supabase
+        .from('suppliers')
+        .select('contact_person, phone, fax')
+        .eq('name', supplierName)
+        .maybeSingle()
+      if (data) {
+        setSupplierInfo({
+          contact: data.contact_person || undefined,
+          phone: data.phone || undefined,
+          fax: data.fax || undefined,
+        })
+      } else {
+        setSupplierInfo({})
+      }
+    }
+    loadSupplier()
+  }, [open, supplierName, supabase])
 
   useEffect(() => {
     if (!open) return
