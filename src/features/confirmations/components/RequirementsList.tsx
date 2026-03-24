@@ -962,16 +962,65 @@ export function RequirementsList({
             }
 
             if (toReject.length > 0) {
+              // 更新狀態為 rejected
               await supabase
                 .from('tour_requests')
                 .update({
                   status: 'rejected',
                   note: `已選擇其他供應商（${delegation.supplier_name || ''}）`,
                   updated_by: user.id,
+                  needs_cancellation_notice: true, // 標記需要發送取消通知
                 } as never)
                 .in('id', toReject)
 
-              logger.info(`已關閉 ${toReject.length} 個重複需求單`)
+              // 檢查需要發送的通知
+              const { data: rejectedRequests } = await supabase
+                .from('tour_requests')
+                .select('id, supplier_name, sent_via')
+                .in('id', toReject)
+
+              const lineNotices: string[] = []
+              const printNotices: string[] = []
+              const pendingNotices: string[] = []
+
+              if (rejectedRequests) {
+                for (const req of rejectedRequests) {
+                  if (req.sent_via === 'line') {
+                    lineNotices.push(req.supplier_name || '')
+                  } else if (req.sent_via === 'print' || req.sent_via === 'fax') {
+                    printNotices.push(req.supplier_name || '')
+                  } else {
+                    pendingNotices.push(req.supplier_name || '')
+                  }
+                }
+              }
+
+              // 彙總通知
+              const notices: string[] = []
+              if (lineNotices.length > 0) {
+                notices.push(
+                  `📱 LINE 通知：${lineNotices.join('、')}（系統將自動發送取消通知）`
+                )
+                // TODO: 自動發送 LINE 通知（需要整合 LINE API）
+              }
+              if (printNotices.length > 0) {
+                notices.push(
+                  `📄 列印/傳真：${printNotices.join('、')}（請至需求單頁面列印取消通知）`
+                )
+              }
+              if (pendingNotices.length > 0) {
+                notices.push(`⚠️ 待通知：${pendingNotices.join('、')}（請手動通知供應商）`)
+              }
+
+              if (notices.length > 0) {
+                toast({
+                  title: `已關閉 ${toReject.length} 個重複需求單`,
+                  description: notices.join('\n'),
+                  duration: 8000,
+                })
+              } else {
+                logger.info(`已關閉 ${toReject.length} 個重複需求單`)
+              }
             }
           }
         }
@@ -1484,44 +1533,87 @@ export function RequirementsList({
                             </td>
                             {/* 欄位6: 備註 */}
                             <td className="px-3 py-2.5">
-                              {(cat.key === 'accommodation' ||
-                                cat.key === 'meal' ||
-                                cat.key === 'transport') && (
-                                <input
-                                  type="text"
-                                  placeholder="備註"
-                                  defaultValue={(() => {
-                                    const req = findMatchingRequest(item)
-                                    const noteFieldMap: Record<string, string> = {
-                                      accommodation: 'hotel_note',
-                                      meal: 'meal_note',
-                                      transport: 'transport_note',
-                                    }
-                                    const noteField = noteFieldMap[cat.key] || 'note'
-                                    return (
-                                      ((req?.items?.[0] as any)?.[noteField] as string) ||
-                                      req?.note ||
-                                      ''
-                                    )
-                                  })()}
-                                  onBlur={e => {
-                                    const noteFieldMap: Record<string, string> = {
-                                      accommodation: 'hotel_note',
-                                      meal: 'meal_note',
-                                      transport: 'transport_note',
-                                    }
-                                    const field = noteFieldMap[cat.key] || 'note'
-                                    handleInlineUpdate(
-                                      item,
-                                      cat.key,
-                                      field,
-                                      e.target.value,
-                                      existingRequests
-                                    )
-                                  }}
-                                  className="w-full h-6 text-[11px] px-1.5 border border-border/50 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30"
-                                />
-                              )}
+                              {(() => {
+                                // 找到對應的 core item（有 quote_note）
+                                const resourceId = item.resourceId
+                                const itineraryItemId = item.itinerary_item_id
+                                let matchingCoreItem: any = undefined
+
+                                if (itineraryItemId) {
+                                  matchingCoreItem = coreItems.find(c => c.id === itineraryItemId)
+                                }
+                                if (!matchingCoreItem && resourceId) {
+                                  matchingCoreItem = coreItems.find(c => c.resource_id === resourceId)
+                                }
+
+                                const quoteNote = matchingCoreItem?.quote_note
+
+                                if (quoteNote && quoteNote.includes('⚠️ 行程變更')) {
+                                  // 顯示變更警告（帶確認按鈕）
+                                  return (
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-[10px] text-red-600 flex-1">
+                                        {quoteNote}
+                                      </span>
+                                      <button
+                                        onClick={async () => {
+                                          // 清除警告
+                                          if (matchingCoreItem?.id) {
+                                            await supabase
+                                              .from('tour_itinerary_items')
+                                              .update({ quote_note: null } as never)
+                                              .eq('id', matchingCoreItem.id)
+                                            await loadData(false) // 刷新
+                                          }
+                                        }}
+                                        className="px-1.5 py-0.5 text-[10px] text-white bg-red-600 hover:bg-red-700 rounded"
+                                        title="我已確認價格"
+                                      >
+                                        ✓
+                                      </button>
+                                    </div>
+                                  )
+                                }
+
+                                // 一般備註欄位
+                                if (
+                                  cat.key === 'accommodation' ||
+                                  cat.key === 'meal' ||
+                                  cat.key === 'transport'
+                                ) {
+                                  const req = findMatchingRequest(item)
+                                  const noteFieldMap: Record<string, string> = {
+                                    accommodation: 'hotel_note',
+                                    meal: 'meal_note',
+                                    transport: 'transport_note',
+                                  }
+                                  const noteField = noteFieldMap[cat.key] || 'note'
+                                  return (
+                                    <input
+                                      type="text"
+                                      placeholder="備註"
+                                      defaultValue={
+                                        ((req?.items?.[0] as any)?.[noteField] as string) ||
+                                        req?.note ||
+                                        ''
+                                      }
+                                      onBlur={e => {
+                                        const field = noteFieldMap[cat.key] || 'note'
+                                        handleInlineUpdate(
+                                          item,
+                                          cat.key,
+                                          field,
+                                          e.target.value,
+                                          existingRequests
+                                        )
+                                      }}
+                                      className="w-full h-6 text-[11px] px-1.5 border border-border/50 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30"
+                                    />
+                                  )
+                                }
+
+                                return null
+                              })()}
                             </td>
                             <td className="px-3 py-2.5 text-left font-medium">
                               {(() => {
