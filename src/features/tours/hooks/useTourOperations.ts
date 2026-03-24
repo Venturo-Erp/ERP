@@ -264,6 +264,24 @@ export function useTourOperations(params: UseTourOperationsParams) {
             }
             onQuoteLinked?.(fromQuoteId, createdTour.id)
           }
+
+          // 🔧 自動建立頻道（正式團才建立）
+          const { useAuthStore } = await import('@/stores/auth-store')
+          const user = useAuthStore.getState().user
+          if (user && createdTour.workspace_id) {
+            const { createTourChannel } = await import('../services/tour-channel.service')
+            createTourChannel(createdTour as unknown as Tour, user.id)
+              .then(result => {
+                if (result.success) {
+                  logger.log(`[useTourOperations] 已為 ${createdTour.code} 建立頻道`)
+                } else {
+                  logger.warn(`[useTourOperations] 建立頻道失敗: ${result.error}`)
+                }
+              })
+              .catch(error => {
+                logger.error('[useTourOperations] 建立頻道時發生錯誤:', error)
+              })
+          }
         }
 
         resetForm()
