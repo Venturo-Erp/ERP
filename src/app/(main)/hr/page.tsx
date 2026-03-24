@@ -432,6 +432,7 @@ export default function HRPage() {
         statusTabs={tabOptions}
         activeStatusTab={activeTab}
         onStatusTabChange={(tab) => setActiveTab(tab as EmployeeTab)}
+        defaultSort={{ key: 'employee_number', direction: 'asc' }}
         headerActions={
           <div className="flex gap-3">
             <Button
