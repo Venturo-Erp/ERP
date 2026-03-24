@@ -155,19 +155,19 @@ export const SuppliersPage: React.FC = () => {
         // 新增模式
         await createSupplier({
           name: formData.name,
-          code: formData.code || null,
-          english_name: formData.english_name || null,
-          tax_id: formData.tax_id || null,
-          bank_name: formData.bank_name || null,
-          bank_branch: formData.bank_branch || null,
-          bank_code_legacy: formData.bank_code_legacy || null,
-          bank_account_name: formData.bank_account_name || null,
-          bank_account: formData.bank_account || null,
-          contact_person: formData.contact_person || null,
-          phone: formData.phone || null,
-          email: formData.email || null,
-          address: formData.address || null,
-          notes: formData.notes || null,
+          code: formData.code || undefined,
+          english_name: formData.english_name || undefined,
+          tax_id: formData.tax_id || undefined,
+          bank_name: formData.bank_name || undefined,
+          bank_branch: formData.bank_branch || undefined,
+          bank_code_legacy: formData.bank_code_legacy || undefined,
+          bank_account_name: formData.bank_account_name || undefined,
+          bank_account: formData.bank_account || undefined,
+          contact_person: formData.contact_person || undefined,
+          phone: formData.phone || undefined,
+          email: formData.email || undefined,
+          address: formData.address || undefined,
+          notes: formData.notes || undefined,
           type: 'other', // 預設類別
         })
         await alert(SUPPLIERS_PAGE_LABELS.CREATE_SUCCESS, 'success')

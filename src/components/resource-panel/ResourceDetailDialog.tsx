@@ -277,28 +277,28 @@ export function ResourceDetailDialog({
               {!isEditing && fullData && (
                 <div className="space-y-2 text-sm">
                   {/* 電話 */}
-                  {fullData.phone && (
+                  {fullData.phone ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-xs">📞</span>
-                      <span>{String(fullData.phone ?? '')}</span>
+                      <span>{String(fullData.phone)}</span>
                     </div>
-                  )}
+                  ) : null}
                   {/* 網站 */}
-                  {fullData.website && (
+                  {fullData.website ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-xs">🌐</span>
                       <a
-                        href={String(fullData.website ?? '#')}
+                        href={String(fullData.website)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline truncate"
                       >
-                        {String(fullData.website ?? '')}
+                        {String(fullData.website)}
                       </a>
                     </div>
-                  )}
+                  ) : null}
                   {/* 營業時間 */}
-                  {fullData.opening_hours && (
+                  {fullData.opening_hours ? (
                     <div className="flex items-start gap-2 text-muted-foreground">
                       <span className="text-xs">🕐</span>
                       <span>
@@ -307,28 +307,28 @@ export function ResourceDetailDialog({
                           : JSON.stringify(fullData.opening_hours)}
                       </span>
                     </div>
-                  )}
+                  ) : null}
                   {/* 建議遊玩時間 */}
-                  {fullData.duration_minutes && (
+                  {fullData.duration_minutes ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-xs">⏱️</span>
                       <span>建議 {String(fullData.duration_minutes)} 分鐘</span>
                     </div>
-                  )}
+                  ) : null}
                   {/* 票價 */}
-                  {fullData.ticket_price && (
+                  {fullData.ticket_price ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-xs">🎫</span>
-                      <span>{String(fullData.ticket_price ?? '')}</span>
+                      <span>{String(fullData.ticket_price)}</span>
                     </div>
-                  )}
+                  ) : null}
                   {/* 備註 */}
-                  {fullData.notes && (
+                  {fullData.notes ? (
                     <div className="flex items-start gap-2 text-muted-foreground">
                       <span className="text-xs">📝</span>
-                      <span>{String(fullData.notes ?? '')}</span>
+                      <span>{String(fullData.notes)}</span>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               )}
 

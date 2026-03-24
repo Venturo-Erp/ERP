@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { useEnterSubmitWithShift } from '@/hooks/useEnterSubmit'
-import { MessageSquare, Edit2, X, Save, Plus } from 'lucide-react'
+import { MessageSquare, Edit2, X, Save } from 'lucide-react'
 import { NotesSectionProps } from './types'
 import { useAuthStore } from '@/stores/auth-store'
 import { generateUUID } from '@/lib/utils/uuid'
@@ -167,25 +167,15 @@ export function NotesSection({ todo, onUpdate }: NotesSectionProps) {
         ))}
       </div>
 
-      <div className="flex gap-2">
-        <Textarea
-          placeholder={PLACEHOLDER_LABELS.addNote}
-          value={newNote}
-          onChange={e => setNewNote(e.target.value)}
-          onKeyDown={handleNoteKeyDown}
-          {...noteCompositionProps}
-          className="text-sm resize-none border-morandi-container/40 focus-visible:ring-morandi-gold focus-visible:border-morandi-gold shadow-sm"
-          rows={3}
-        />
-        <Button
-          size="sm"
-          onClick={addNote}
-          className="bg-morandi-gold hover:bg-morandi-gold-hover text-white shadow-sm gap-1.5"
-        >
-          <Plus size={14} />
-          {BUTTON_LABELS.add}
-        </Button>
-      </div>
+      <Textarea
+        placeholder={PLACEHOLDER_LABELS.addNote}
+        value={newNote}
+        onChange={e => setNewNote(e.target.value)}
+        onKeyDown={handleNoteKeyDown}
+        {...noteCompositionProps}
+        className="text-sm resize-none border-morandi-container/40 focus-visible:ring-morandi-gold focus-visible:border-morandi-gold shadow-sm"
+        rows={3}
+      />
     </div>
   )
 }
