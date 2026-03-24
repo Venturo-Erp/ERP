@@ -15,6 +15,20 @@ import { supabase } from '@/lib/supabase/client'
 import { FullCalendarEvent } from '../types'
 import type { CalendarEvent } from '@/types/calendar.types'
 import type { DatesSetArg } from '@fullcalendar/core'
+import useSWR from 'swr'
+
+// 請假資料類型
+interface LeaveRequest {
+  id: string
+  employee_id: string
+  leave_type_id: string
+  start_date: string
+  end_date: string
+  days: number
+  status: string
+  employee?: { chinese_name: string; english_name: string; display_name: string }
+  leave_type?: { name: string; code: string }
+}
 
 // 從 ISO 時間字串取得顯示用的時間（HH:MM）
 const getDisplayTime = (isoString: string, allDay?: boolean): string => {
@@ -51,6 +65,26 @@ export function useCalendarEvents() {
   const { user } = useAuthStore()
   const { items: employees } = useEmployeesSlim()
   const { workspaces, loadWorkspaces } = useWorkspaceStore()
+
+  // 載入已核准的請假資料（顯示在行事曆上）
+  const workspaceId = user?.workspace_id
+  const { data: leaveRequests } = useSWR<LeaveRequest[]>(
+    workspaceId ? ['leave_requests_for_calendar', workspaceId] : null,
+    async ([, wsId]: [string, string]) => {
+      const { data, error } = await supabase
+        .from('leave_requests')
+        .select(`
+          id, employee_id, leave_type_id, start_date, end_date, days, status,
+          employee:employees!leave_requests_employee_id_fkey(chinese_name, english_name, display_name),
+          leave_type:leave_types!leave_requests_leave_type_id_fkey(name, code)
+        `)
+        .eq('workspace_id', wsId)
+        .eq('status', 'approved')
+      if (error) throw error
+      return data as LeaveRequest[]
+    },
+    { revalidateOnFocus: false }
+  )
 
   // Workspace 篩選狀態（只有超級管理員能用）
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null)
@@ -291,10 +325,50 @@ export function useCalendarEvents() {
     return [...customerBirthdayEvents]
   }, [customerBirthdayEvents])
 
+  // 轉換請假為日曆事件（只顯示已核准的）
+  const leaveEvents: FullCalendarEvent[] = useMemo(() => {
+    if (!leaveRequests) return []
+
+    return leaveRequests.map(leave => {
+      // 取得員工姓名
+      const emp = leave.employee as { chinese_name?: string; english_name?: string; display_name?: string } | null
+      const employeeName = emp?.display_name || emp?.chinese_name || emp?.english_name || '未知員工'
+      
+      // 取得假別名稱
+      const leaveType = leave.leave_type as { name?: string; code?: string } | null
+      const leaveTypeName = leaveType?.name || '請假'
+
+      // 修正 FullCalendar 的多日事件顯示問題（需要加一天）
+      let endDate = leave.end_date
+      if (endDate && endDate !== leave.start_date) {
+        const endDateObj = new Date(endDate)
+        endDateObj.setDate(endDateObj.getDate() + 1)
+        endDate = formatDate(endDateObj)
+      }
+
+      return {
+        id: `leave-${leave.id}`,
+        title: `🏖️ ${employeeName} ${leaveTypeName}`,
+        start: leave.start_date,
+        end: endDate || undefined,
+        allDay: true,
+        backgroundColor: '#D4A5A5', // 莫蘭迪粉紅
+        borderColor: '#C39494',
+        extendedProps: {
+          type: 'leave' as const,
+          leave_id: leave.id,
+          employee_name: employeeName,
+          leave_type_name: leaveTypeName,
+          days: leave.days,
+        },
+      } as FullCalendarEvent
+    })
+  }, [leaveRequests])
+
   // 合併所有事件（生日改用獨立彈窗顯示，不在行事曆上顯示）
   const allEvents = useMemo(() => {
-    return [...tourEvents, ...personalCalendarEvents, ...companyCalendarEvents]
-  }, [tourEvents, personalCalendarEvents, companyCalendarEvents])
+    return [...tourEvents, ...personalCalendarEvents, ...companyCalendarEvents, ...leaveEvents]
+  }, [tourEvents, personalCalendarEvents, companyCalendarEvents, leaveEvents])
 
   // 過濾事件（根據 settings）
   const filteredEvents = useMemo(() => {
@@ -304,6 +378,7 @@ export function useCalendarEvents() {
       if (type === 'tour' && !settings.showTours) return false
       if (type === 'personal' && !settings.showPersonal) return false
       if (type === 'company' && !settings.showCompany) return false
+      if (type === 'leave' && settings.showLeave === false) return false // 預設顯示
 
       return true
     })

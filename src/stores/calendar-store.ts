@@ -12,6 +12,7 @@ export interface CalendarSettings {
   showCompany: boolean
   showTours: boolean
   showBirthdays: boolean
+  showLeave: boolean // 顯示請假
 }
 
 interface CalendarStore {
@@ -35,6 +36,7 @@ export const useCalendarStore = create<CalendarStore>()(
         showCompany: true,
         showTours: true,
         showBirthdays: true,
+        showLeave: true, // 預設顯示請假
       },
 
       setSelectedDate: date => {

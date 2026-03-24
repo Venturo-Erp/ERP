@@ -10,7 +10,7 @@ export interface FullCalendarEvent {
   backgroundColor: string
   borderColor: string
   extendedProps: {
-    type: 'tour' | 'personal' | 'birthday' | 'company'
+    type: 'tour' | 'personal' | 'birthday' | 'company' | 'leave'
     description?: string
     location?: string
     participants?: number
@@ -26,6 +26,11 @@ export interface FullCalendarEvent {
     created_by?: string
     creator_name?: string
     source?: 'member' | 'customer'
+    // 請假相關
+    leave_id?: string
+    employee_name?: string
+    leave_type_name?: string
+    days?: number
   }
 }
 
