@@ -53,11 +53,61 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 3. 將創建者加入為頻道擁有者
-    const membersToAdd = [{ employeeId: creatorId, role: 'owner' }]
+    // 3. 將相關人員加入頻道
+    const membersToAdd: Array<{ employeeId: string; role: string }> = []
+    const addedIds = new Set<string>()
 
-    if (tour.controller_id && tour.controller_id !== creatorId) {
+    // 創建者 → owner
+    if (creatorId && !addedIds.has(creatorId)) {
+      membersToAdd.push({ employeeId: creatorId, role: 'owner' })
+      addedIds.add(creatorId)
+    }
+
+    // 業務 (controller_id) → admin
+    if (tour.controller_id && !addedIds.has(tour.controller_id)) {
       membersToAdd.push({ employeeId: tour.controller_id, role: 'admin' })
+      addedIds.add(tour.controller_id)
+    }
+
+    // 查詢訂單的助理
+    if (tour.id) {
+      const { data: orders } = await supabase
+        .from('orders')
+        .select('assistant')
+        .eq('tour_id', tour.id)
+        .not('assistant', 'is', null)
+
+      if (orders) {
+        for (const order of orders) {
+          // assistant 可能是 employee_id 或名字，需要查詢
+          if (order.assistant && !addedIds.has(order.assistant)) {
+            // 先嘗試當作 employee_id
+            const { data: emp } = await supabase
+              .from('employees')
+              .select('id')
+              .eq('id', order.assistant)
+              .maybeSingle()
+
+            if (emp) {
+              membersToAdd.push({ employeeId: emp.id, role: 'member' })
+              addedIds.add(emp.id)
+            } else {
+              // 如果不是 UUID，嘗試用名字查詢
+              const { data: empByName } = await supabase
+                .from('employees')
+                .select('id')
+                .eq('chinese_name', order.assistant)
+                .eq('workspace_id', tour.workspace_id)
+                .maybeSingle()
+
+              if (empByName && !addedIds.has(empByName.id)) {
+                membersToAdd.push({ employeeId: empByName.id, role: 'member' })
+                addedIds.add(empByName.id)
+              }
+            }
+          }
+        }
+      }
     }
 
     if (membersToAdd.length > 0) {
@@ -69,6 +119,7 @@ export async function POST(request: NextRequest) {
       }))
 
       await supabase.from('channel_members').insert(memberInserts)
+      console.log(`[API] 已加入 ${membersToAdd.length} 位成員到頻道 ${channelName}`)
     }
 
     return NextResponse.json({ success: true, channelId: newChannel.id })
