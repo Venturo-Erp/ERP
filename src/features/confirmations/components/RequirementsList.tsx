@@ -1623,19 +1623,13 @@ export function RequirementsList({
                                   )
                                 }
 
-                                // 餐廳
+                                // 餐廳：直接列印需求單
                                 if (cat.key === 'meal') {
                                   return (
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => {
-                                        setSelectedTransport({
-                                          name: supplierName,
-                                          resourceId: item.resourceId ?? null,
-                                        })
-                                        setShowMealDialog(true)
-                                      }}
+                                      onClick={() => handlePrintSimpleRequest('meal', '餐食', item)}
                                       className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
                                     >
                                       <Printer size={12} className="mr-1" />
@@ -1644,19 +1638,13 @@ export function RequirementsList({
                                   )
                                 }
 
-                                // 活動
+                                // 活動：直接列印需求單
                                 if (cat.key === 'activity') {
                                   return (
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => {
-                                        setSelectedTransport({
-                                          name: supplierName,
-                                          resourceId: item.resourceId ?? null,
-                                        })
-                                        setShowActivityDialog(true)
-                                      }}
+                                      onClick={() => handlePrintSimpleRequest('activity', '活動', item)}
                                       className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
                                     >
                                       <Printer size={12} className="mr-1" />
