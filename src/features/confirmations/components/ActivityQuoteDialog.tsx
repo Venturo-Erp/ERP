@@ -27,6 +27,7 @@ interface ActivityQuoteDialogProps {
     note?: string
   }>
   supplierName: string
+  resourceId?: string | null
 }
 
 export function ActivityQuoteDialog({
@@ -36,6 +37,7 @@ export function ActivityQuoteDialog({
   totalPax,
   activities,
   supplierName,
+  resourceId,
 }: ActivityQuoteDialogProps) {
   const [note, setNote] = useState('')
   const [viewMode, setViewMode] = useState<'modern' | 'traditional'>('traditional')
@@ -54,6 +56,11 @@ export function ActivityQuoteDialog({
   const handleItemChange = (idx: number, field: string, value: any) => {
     setEditableItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item))
   }
+
+  const handleInfoChange = (field: 'contact' | 'phone' | 'fax', value: string) => {
+    setSupplierInfo(prev => ({ ...prev, [field]: value }))
+  }
+
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string }[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [sending, setSending] = useState(false)
@@ -61,27 +68,37 @@ export function ActivityQuoteDialog({
   const { toast } = useToast()
   const supabase = createSupabaseBrowserClient()
 
-  // 查詢供應商資訊
+  // 原始資料（用於比對是否有變化）
+  const [originalInfo, setOriginalInfo] = useState<typeof supplierInfo>({})
+
+  // 從 attractions 表讀取活動資料
   useEffect(() => {
-    if (!open || !supplierName) return
-    const loadSupplier = async () => {
-      const { data } = await supabase
-        .from('suppliers')
-        .select('contact_person, phone, fax')
-        .eq('name', supplierName)
-        .maybeSingle()
-      if (data) {
-        setSupplierInfo({
-          contact: data.contact_person || undefined,
-          phone: data.phone || undefined,
-          fax: data.fax || undefined,
-        })
-      } else {
-        setSupplierInfo({})
+    if (!open) return
+    const loadAttractionInfo = async () => {
+      if (resourceId) {
+        // 有 resourceId，從 attractions 表讀取
+        const { data } = await supabase
+          .from('attractions')
+          .select('contact_name, phone, fax')
+          .eq('id', resourceId)
+          .maybeSingle() as { data: { contact_name?: string; phone?: string; fax?: string } | null; error: any }
+        if (data) {
+          const info = {
+            contact: data.contact_name || undefined,
+            phone: data.phone || undefined,
+            fax: data.fax || undefined,
+          }
+          setSupplierInfo(info)
+          setOriginalInfo(info)
+          return
+        }
       }
+      // 沒有 resourceId 或找不到，清空
+      setSupplierInfo({})
+      setOriginalInfo({})
     }
-    loadSupplier()
-  }, [open, supplierName, supabase])
+    loadAttractionInfo()
+  }, [open, resourceId, supabase])
 
   useEffect(() => {
     if (!open) return
@@ -136,7 +153,43 @@ export function ActivityQuoteDialog({
     }
   }
 
-  const handleDelivery = (method: string) => {
+  // 檢查活動資料是否有變化
+  const hasInfoChanged = () => {
+    return (
+      supplierInfo.contact !== originalInfo.contact ||
+      supplierInfo.phone !== originalInfo.phone ||
+      supplierInfo.fax !== originalInfo.fax
+    )
+  }
+
+  // 更新活動資料到 attractions 表
+  const updateAttractionInfo = async () => {
+    if (!resourceId) return
+    const { error } = await supabase
+      .from('attractions')
+      .update({
+        contact_name: supplierInfo.contact || null,
+        phone: supplierInfo.phone || null,
+        fax: supplierInfo.fax || null,
+      })
+      .eq('id', resourceId)
+    if (error) {
+      toast({ title: '❌ 更新失敗', description: error.message, variant: 'destructive' })
+    } else {
+      toast({ title: '✅ 活動資料已更新' })
+      setOriginalInfo({ ...supplierInfo })
+    }
+  }
+
+  const handleDelivery = async (method: string) => {
+    // 檢查是否有變化，提示是否更新
+    if (resourceId && hasInfoChanged()) {
+      const confirmed = window.confirm('活動資料已修改，是否更新到資料庫？')
+      if (confirmed) {
+        await updateAttractionInfo()
+      }
+    }
+
     if (method === 'print' || method === 'fax') {
       // 直接列印 Dialog 內容
       window.print()
@@ -161,10 +214,14 @@ export function ActivityQuoteDialog({
               tour={tour}
               totalPax={totalPax}
               supplierName={supplierName}
+              contact={supplierInfo.contact}
+              phone={supplierInfo.phone}
+              fax={supplierInfo.fax}
               items={editableItems}
               note={note}
               setNote={setNote}
               onItemChange={handleItemChange}
+              onInfoChange={handleInfoChange}
             />
           ) : (
             <div className="space-y-4">

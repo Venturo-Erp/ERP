@@ -44,9 +44,13 @@ export async function checkTourDependencies(tourId: string): Promise<TourDepende
       .select('id', { count: 'exact', head: true })
       .eq('tour_id', tourId),
     supabase.from('pnrs').select('id', { count: 'exact', head: true }).eq('tour_id', tourId),
+    supabase
+      .from('tour_confirmation_sheets')
+      .select('id', { count: 'exact', head: true })
+      .eq('tour_id', tourId),
   ])
 
-  const [receipts, payments, pnrs] = checks
+  const [receipts, payments, pnrs, confirmationSheets] = checks
   const blockers: string[] = []
 
   // 4. 只有真正有團員時才加入 blocker
@@ -56,6 +60,8 @@ export async function checkTourDependencies(tourId: string): Promise<TourDepende
   if (payments.count && payments.count > 0)
     blockers.push(TOUR_DEPENDENCY_LABELS.PAYMENTS_COUNT(payments.count))
   if (pnrs.count && pnrs.count > 0) blockers.push(TOUR_DEPENDENCY_LABELS.PNRS_COUNT(pnrs.count))
+  if (confirmationSheets.count && confirmationSheets.count > 0)
+    blockers.push(TOUR_DEPENDENCY_LABELS.CONFIRMATION_SHEETS_COUNT(confirmationSheets.count))
 
   return { blockers, hasBlockers: blockers.length > 0 }
 }

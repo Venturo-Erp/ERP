@@ -1240,6 +1240,7 @@ export const TOUR_DEPENDENCY_LABELS = {
   RECEIPTS_COUNT: (count: number) => `${count} 筆收款單`,
   PAYMENTS_COUNT: (count: number) => `${count} 筆請款單`,
   PNRS_COUNT: (count: number) => `${count} 筆 PNR`,
+  CONFIRMATION_SHEETS_COUNT: (count: number) => `${count} 筆團確認單`,
   DELETE_EMPTY_ORDER_FAILED: (message: string) => `刪除空訂單失敗: ${message}`,
 }
 

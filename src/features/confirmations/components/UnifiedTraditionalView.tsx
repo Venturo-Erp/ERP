@@ -13,6 +13,7 @@ interface UnifiedTraditionalViewProps {
   note: string
   setNote: (note: string) => void
   onItemChange?: (idx: number, field: string, value: any) => void
+  onInfoChange?: (field: 'contact' | 'phone' | 'fax', value: string) => void
 }
 
 export function UnifiedTraditionalView({
@@ -27,6 +28,7 @@ export function UnifiedTraditionalView({
   note,
   setNote,
   onItemChange,
+  onInfoChange,
 }: UnifiedTraditionalViewProps) {
   const isCancellation = requestType === 'cancellation'
 
@@ -50,21 +52,21 @@ export function UnifiedTraditionalView({
         <div className="grid grid-cols-[80px_1fr_80px_1fr] gap-x-4 gap-y-3 text-sm items-center">
           {/* 第一行 */}
           <span className="font-semibold text-[#78716c]">致：</span>
-          <input type="text" value={supplierName || ''} readOnly className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary" />
+          <input type="text" value={supplierName || ''} readOnly className="px-2 py-1 bg-gray-100 border border-[#a8a29e] rounded text-morandi-primary" />
           <span className="font-semibold text-[#78716c]">聯絡人：</span>
-          <input type="text" value={contact || ''} placeholder="聯絡人" className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary" />
+          <input type="text" value={contact || ''} onChange={e => onInfoChange?.('contact', e.target.value)} placeholder="聯絡人" className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary focus:ring-1 focus:ring-morandi-gold focus:outline-none" />
           
           {/* 第二行 */}
           <span className="font-semibold text-[#78716c]">聯絡電話：</span>
-          <input type="text" value={phone || ''} readOnly className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-secondary" />
+          <input type="text" value={phone || ''} onChange={e => onInfoChange?.('phone', e.target.value)} placeholder="電話" className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary focus:ring-1 focus:ring-morandi-gold focus:outline-none" />
           <span className="font-semibold text-[#78716c]">傳真號碼：</span>
-          <input type="text" value={fax || ''} readOnly className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-secondary" />
+          <input type="text" value={fax || ''} onChange={e => onInfoChange?.('fax', e.target.value)} placeholder="傳真" className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary focus:ring-1 focus:ring-morandi-gold focus:outline-none" />
           
           {/* 第三行 */}
           <span className="font-semibold text-[#78716c]">團體名稱：</span>
-          <input type="text" value={tour?.name || ''} readOnly className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary" />
+          <input type="text" value={tour?.name || ''} readOnly className="px-2 py-1 bg-gray-100 border border-[#a8a29e] rounded text-morandi-primary" />
           <span className="font-semibold text-[#78716c]">人數預估：</span>
-          <input type="text" value={totalPax ? `${totalPax} 人` : ''} readOnly className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary" />
+          <input type="text" value={totalPax ? `${totalPax} 人` : ''} readOnly className="px-2 py-1 bg-gray-100 border border-[#a8a29e] rounded text-morandi-primary" />
         </div>
       </div>
 

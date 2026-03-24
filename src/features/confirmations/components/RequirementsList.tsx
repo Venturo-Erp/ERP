@@ -2070,6 +2070,7 @@ export function RequirementsList({
               note: it.quote_note || '',
             }))}
           supplierName={selectedTransport.name}
+          resourceId={selectedTransport.resourceId}
         />
       )}
 
