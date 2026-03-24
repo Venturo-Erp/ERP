@@ -40,6 +40,7 @@ import {
   Pencil,
   Trash2,
   Building2,
+  Tag,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { alert, confirm } from '@/lib/ui/alert-dialog'
@@ -76,18 +77,32 @@ interface ChartOfAccount {
   account_type?: string
 }
 
+interface ExpenseCategory {
+  id: string
+  name: string
+  icon: string
+  color: string
+  type: string
+  is_active: boolean
+  is_system: boolean
+  sort_order: number
+}
+
 export default function FinanceSettingsPage() {
-  const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank' | 'mapping'>('receipt')
+  const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank' | 'category'>('receipt')
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
   const [chartOfAccounts, setChartOfAccounts] = useState<ChartOfAccount[]>([])
+  const [expenseCategories, setExpenseCategories] = useState<ExpenseCategory[]>([])
   const [isLoading, setIsLoading] = useState(true)
   
   // 編輯對話框
   const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null)
   const [editingBank, setEditingBank] = useState<BankAccount | null>(null)
+  const [editingCategory, setEditingCategory] = useState<ExpenseCategory | null>(null)
   const [isMethodDialogOpen, setIsMethodDialogOpen] = useState(false)
   const [isBankDialogOpen, setIsBankDialogOpen] = useState(false)
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
   
   const workspaceId = useAuthStore(state => state.user?.workspace_id)
 
@@ -115,6 +130,11 @@ export default function FinanceSettingsPage() {
       const accountsRes = await fetch(`/api/finance/accounting-subjects?workspace_id=${workspaceId}`)
       const accountsData = await accountsRes.json()
       setChartOfAccounts(accountsData || [])
+
+      // 載入請款類別
+      const categoriesRes = await fetch(`/api/finance/expense-categories?workspace_id=${workspaceId}`)
+      const categoriesData = await categoriesRes.json()
+      setExpenseCategories(categoriesData || [])
     } catch (error) {
       console.error('載入資料失敗:', error)
     } finally {
@@ -212,9 +232,57 @@ export default function FinanceSettingsPage() {
     }
   }
 
+  // 儲存請款類別
+  const handleSaveCategory = async (category: Partial<ExpenseCategory>) => {
+    try {
+      const res = await fetch('/api/finance/expense-categories', {
+        method: editingCategory?.id ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...category,
+          id: editingCategory?.id,
+          workspace_id: workspaceId,
+        }),
+      })
+      if (!res.ok) throw new Error('儲存失敗')
+      await loadData()
+      setIsCategoryDialogOpen(false)
+      setEditingCategory(null)
+      await alert('儲存成功', 'success')
+    } catch (error) {
+      await alert('儲存失敗', 'error')
+    }
+  }
+
+  // 刪除請款類別
+  const handleDeleteCategory = async (category: ExpenseCategory) => {
+    if (category.is_system) {
+      await alert('系統預設類別無法刪除', 'warning')
+      return
+    }
+
+    const confirmed = await confirm(`確定要刪除「${category.name}」嗎？`, {
+      title: '刪除請款類別',
+      type: 'warning',
+    })
+    if (!confirmed) return
+    
+    try {
+      const res = await fetch(`/api/finance/expense-categories?id=${category.id}`, {
+        method: 'DELETE',
+      })
+      if (!res.ok) throw new Error('刪除失敗')
+      await loadData()
+      await alert('刪除成功', 'success')
+    } catch (error) {
+      await alert('刪除失敗', 'error')
+    }
+  }
+
   const sections = [
     { key: 'receipt', label: '收款方式', icon: CreditCard },
     { key: 'payment', label: '請款方式', icon: Banknote },
+    { key: 'category', label: '請款類別', icon: Tag },
     { key: 'bank', label: '銀行帳戶', icon: Building2 },
   ] as const
 
@@ -248,6 +316,17 @@ export default function FinanceSettingsPage() {
           >
             <Plus className="h-4 w-4 mr-2" />
             新增請款方式
+          </Button>
+        ) : activeSection === 'category' ? (
+          <Button
+            onClick={() => {
+              setEditingCategory(null)
+              setIsCategoryDialogOpen(true)
+            }}
+            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            新增請款類別
           </Button>
         ) : activeSection === 'bank' ? (
           <Button
@@ -428,6 +507,85 @@ export default function FinanceSettingsPage() {
             </div>
           )}
 
+          {/* 請款類別 */}
+          {activeSection === 'category' && (
+            <div className="space-y-4">
+              <Card className="rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[60px]">圖示</TableHead>
+                      <TableHead>名稱</TableHead>
+                      <TableHead>顏色</TableHead>
+                      <TableHead className="w-[80px]">類型</TableHead>
+                      <TableHead className="w-[80px]">狀態</TableHead>
+                      <TableHead className="w-[100px] text-right">操作</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {expenseCategories.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                          尚未設定請款類別
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      expenseCategories.map(category => (
+                        <TableRow key={category.id}>
+                          <TableCell className="text-2xl">{category.icon}</TableCell>
+                          <TableCell className="font-medium">{category.name}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div 
+                                className="w-4 h-4 rounded" 
+                                style={{ backgroundColor: category.color }}
+                              />
+                              <span className="text-xs font-mono text-morandi-muted">{category.color}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {category.is_system && (
+                              <Badge variant="secondary" className="text-xs">系統</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={category.is_active ? 'default' : 'secondary'}>
+                              {category.is_active ? '啟用' : '停用'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setEditingCategory(category)
+                                  setIsCategoryDialogOpen(true)
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              {!category.is_system && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteCategory(category)}
+                                  className="text-status-danger hover:text-status-danger/80"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </Card>
+            </div>
+          )}
+
           {/* 銀行帳戶 */}
           {activeSection === 'bank' && (
             <div className="space-y-4">
@@ -512,6 +670,14 @@ export default function FinanceSettingsPage() {
         onOpenChange={setIsBankDialogOpen}
         bank={editingBank}
         onSave={handleSaveBank}
+      />
+
+      {/* 請款類別編輯對話框 */}
+      <CategoryDialog
+        open={isCategoryDialogOpen}
+        onOpenChange={setIsCategoryDialogOpen}
+        category={editingCategory}
+        onSave={handleSaveCategory}
       />
 
     </ContentPageLayout>
@@ -779,3 +945,128 @@ function BankDialog({
 }
 
 
+
+// 請款類別編輯對話框
+function CategoryDialog({
+  open,
+  onOpenChange,
+  category,
+  onSave,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  category: ExpenseCategory | null
+  onSave: (category: Partial<ExpenseCategory>) => Promise<void>
+}) {
+  const [name, setName] = useState('')
+  const [icon, setIcon] = useState('')
+  const [color, setColor] = useState('')
+  const [sortOrder, setSortOrder] = useState(100)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setName(category?.name || '')
+      setIcon(category?.icon || '💰')
+      setColor(category?.color || '#c9aa7c')
+      setSortOrder(category?.sort_order || 100)
+    }
+  }, [open, category])
+
+  const handleSubmit = async () => {
+    if (!name) {
+      await alert('請填寫類別名稱', 'warning')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await onSave({
+        name,
+        icon,
+        color,
+        sort_order: sortOrder,
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{category ? '編輯請款類別' : '新增請款類別'}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>名稱 *</Label>
+              <Input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="例：住宿"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>圖示</Label>
+              <Input
+                value={icon}
+                onChange={e => setIcon(e.target.value)}
+                placeholder="例：🏨"
+                className="text-2xl"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>顏色</Label>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  value={color}
+                  onChange={e => setColor(e.target.value)}
+                  className="w-16 h-10 p-1 cursor-pointer"
+                />
+                <Input
+                  value={color}
+                  onChange={e => setColor(e.target.value)}
+                  placeholder="#c9aa7c"
+                  className="flex-1 font-mono"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>排序</Label>
+              <Input
+                type="number"
+                value={sortOrder}
+                onChange={e => setSortOrder(Number(e.target.value))}
+                placeholder="100"
+              />
+            </div>
+          </div>
+          <div className="flex items-center gap-3 p-3 bg-morandi-container/30 rounded-lg">
+            <span className="text-2xl">{icon}</span>
+            <span className="font-medium">{name || '類別名稱'}</span>
+            <div 
+              className="w-6 h-6 rounded ml-auto" 
+              style={{ backgroundColor: color }}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            取消
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+          >
+            {isSubmitting ? '儲存中...' : '儲存'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}

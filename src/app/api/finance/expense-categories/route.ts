@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase
     .from('expense_categories')
     .select('*')
-    .eq('type', 'payment_request') // 只取請款類別
+    .eq('type: 'expense') // 只取請款類別
     .or(`user_id.is.null,user_id.eq.${workspaceId}`) // 系統預設或該工作區的
     .order('sort_order', { ascending: true })
 
@@ -35,13 +35,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
   }
 
-  const { data, error } = await supabase
+  const { data, error} = await supabase
     .from('expense_categories')
     .insert({
       name,
       icon: icon || '💰',
       color: color || '#c9aa7c',
-      type: 'payment_request',
+      type: 'expense',
       user_id: workspace_id,
       is_active: true,
       is_system: false,
