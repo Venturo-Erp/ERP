@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-import { getAccountMapping } from '@/features/finance/constants/account-mapping'
+import { getAccountMappingAsync } from '@/features/finance/constants/account-mapping'
 
 // Lazy initialization to avoid build-time errors
 let supabase: SupabaseClient
@@ -131,7 +131,7 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
   // 借方分錄（每個項目一筆，摘要：供應商 + 項目描述）
   for (const item of request.items || []) {
     const category = item.category || '其他'
-    const mapping = getAccountMapping(category)
+    const mapping = await getAccountMappingAsync(category, workspaceId)
     const subjectId = await getSubjectId(mapping.debitCode)
     if (subjectId && item.amount) {
       entries.push({
