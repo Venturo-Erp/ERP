@@ -38,8 +38,8 @@ export function UnifiedTraditionalView({
           {isCancellation ? '⚠️ 取消通知單' : '廠商需求單'}
         </h2>
         <div className="text-right text-sm text-morandi-secondary">
-          <div className="font-semibold">${COMPANY_NAME}</div>
-          <div className="text-xs">COMPANY_NAME_EN</div>
+          <div className="font-semibold">{COMPANY_NAME}</div>
+          {COMPANY_NAME_EN && <div className="text-xs">{COMPANY_NAME_EN}</div>}
         </div>
       </div>
 
