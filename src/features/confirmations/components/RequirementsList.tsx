@@ -328,11 +328,11 @@ export function RequirementsList({
   const transportDays = useMemo(() => {
     const dayMap = new Map<number, { dayNumber: number; date: string; route: string }>()
 
-    // 優先從 daily_itinerary 讀取完整的行程描述（destinations 欄位）
+    // 優先從 daily_itinerary 讀取完整的行程描述（route 欄位）
     if (itinerary?.daily_itinerary && Array.isArray(itinerary.daily_itinerary)) {
       const dailyItinerary = itinerary.daily_itinerary as Array<{
         day?: number
-        destinations?: string
+        route?: string
         activities?: any[]
         meals?: any
         accommodation?: string
@@ -343,14 +343,14 @@ export function RequirementsList({
         if (!dayNum) continue
 
         const date = calculateDate(dayNum)
-        const destinations = day.destinations || ''
+        const routeText = day.route || ''
 
         dayMap.set(dayNum, {
           dayNumber: dayNum,
           date: date
             ? new Date(date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
             : `Day ${dayNum}`,
-          route: destinations, // 直接使用行程表的完整描述
+          route: routeText, // 直接使用行程表的完整描述（例如：台北車站 ⇀ 高爾夫球場 ⇀台中洲際酒店）
         })
       }
     }
