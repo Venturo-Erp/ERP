@@ -70,6 +70,9 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
   const [isSubmitting, setIsSubmitting] = useState(false)
   // 從 DB 讀取的收款方式
   const [paymentMethods, setPaymentMethods] = useState(defaultPaymentMethods)
+  // 會計科目（選填）
+  const [accountingSubjectId, setAccountingSubjectId] = useState<string>('')
+  const [accountingSubjects, setAccountingSubjects] = useState<{ value: string; label: string }[]>([])
 
   // 載入收款方式
   useEffect(() => {
@@ -89,6 +92,18 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
         .catch(() => {
           // 失敗時使用預設值
         })
+      
+      // 載入會計科目（收入類）
+      fetch(`/api/finance/accounting-subjects?workspace_id=${user.workspace_id}&type=revenue`)
+        .then(res => res.json())
+        .then(data => {
+          const subjects = Array.isArray(data) ? data : []
+          setAccountingSubjects(subjects.map((s: { id: string; code: string; name: string }) => ({
+            value: s.id,
+            label: `${s.code} ${s.name}`,
+          })))
+        })
+        .catch(() => {})
     }
   }, [user?.workspace_id])
 
@@ -322,6 +337,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           check_number: null,
           check_bank: null,
           check_date: null,
+          accounting_subject_id: accountingSubjectId || null,
           linkpay_order_number: null,
           receipt_account: null,
           email: null,
@@ -391,6 +407,31 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
               />
             </div>
           </div>
+          
+          {/* 會計科目（選填）*/}
+          {accountingSubjects.length > 0 && (
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>會計科目（選填）</Label>
+                <Select
+                  value={accountingSubjectId}
+                  onValueChange={setAccountingSubjectId}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="請選擇會計科目" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">不指定</SelectItem>
+                    {accountingSubjects.map(subject => (
+                      <SelectItem key={subject.value} value={subject.value}>
+                        {subject.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
 
           {/* 訂單分配表格 */}
           <div className="space-y-3">

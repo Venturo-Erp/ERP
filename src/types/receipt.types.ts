@@ -49,6 +49,9 @@ export interface Receipt {
 
   notes: string | null | undefined
 
+  // 會計科目（選填）
+  accounting_subject_id: string | null | undefined
+
   // 系統欄位
   created_at: string
   created_by: string | null | undefined

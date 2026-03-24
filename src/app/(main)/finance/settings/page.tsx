@@ -64,10 +64,21 @@ interface BankAccount {
   is_active: boolean
 }
 
+interface AccountingSubject {
+  id: string
+  code: string
+  name: string
+  type: string
+  description: string | null
+  is_system: boolean
+  is_active: boolean
+}
+
 export default function FinanceSettingsPage() {
-  const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank'>('receipt')
+  const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank' | 'accounting'>('receipt')
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
+  const [accountingSubjects, setAccountingSubjects] = useState<AccountingSubject[]>([])
   const [isLoading, setIsLoading] = useState(true)
   
   // 編輯對話框
@@ -97,6 +108,11 @@ export default function FinanceSettingsPage() {
       const banksRes = await fetch(`/api/bank-accounts?workspace_id=${workspaceId}`)
       const banksData = await banksRes.json()
       setBankAccounts(banksData || [])
+
+      // 載入會計科目
+      const subjectsRes = await fetch(`/api/finance/accounting-subjects?workspace_id=${workspaceId}`)
+      const subjectsData = await subjectsRes.json()
+      setAccountingSubjects(subjectsData || [])
     } catch (error) {
       console.error('載入資料失敗:', error)
     } finally {
@@ -198,6 +214,7 @@ export default function FinanceSettingsPage() {
     { key: 'receipt', label: '收款方式', icon: CreditCard },
     { key: 'payment', label: '請款方式', icon: Banknote },
     { key: 'bank', label: '銀行帳戶', icon: Building2 },
+    { key: 'accounting', label: '會計科目', icon: Settings },
   ] as const
 
   return (
@@ -459,6 +476,71 @@ export default function FinanceSettingsPage() {
                   </TableBody>
                 </Table>
               </Card>
+            </div>
+          )}
+
+          {/* 會計科目 */}
+          {activeSection === 'accounting' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">會計科目管理</h2>
+                <p className="text-sm text-morandi-muted">
+                  會計科目用於分類收款和請款（選填功能）
+                </p>
+              </div>
+
+              <Card className="border rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">代碼</TableHead>
+                      <TableHead>名稱</TableHead>
+                      <TableHead className="w-[100px]">類型</TableHead>
+                      <TableHead>說明</TableHead>
+                      <TableHead className="w-[80px]">狀態</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {accountingSubjects.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
+                          尚未設定會計科目
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      accountingSubjects.map(subject => (
+                        <TableRow key={subject.id}>
+                          <TableCell className="font-mono">{subject.code}</TableCell>
+                          <TableCell className="font-medium">{subject.name}</TableCell>
+                          <TableCell>
+                            <Badge className={
+                              subject.type === 'revenue' 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-orange-100 text-orange-700'
+                            }>
+                              {subject.type === 'revenue' ? '收入' : '支出'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-morandi-muted">
+                            {subject.description || '-'}
+                          </TableCell>
+                          <TableCell>
+                            {subject.is_system ? (
+                              <Badge className="bg-morandi-background text-morandi-muted">系統</Badge>
+                            ) : (
+                              <Badge className="bg-morandi-gold/20 text-morandi-gold">自訂</Badge>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </Card>
+              
+              <p className="text-sm text-morandi-muted">
+                💡 系統科目由系統預設，不可刪除。如需新增自訂科目，請聯繫管理員。
+              </p>
             </div>
           )}
         </div>
