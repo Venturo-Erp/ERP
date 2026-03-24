@@ -810,9 +810,11 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
       // 🔧 修復：daily_itinerary 必須保留完整資料（activities, meals, accommodation）
       // 否則重新載入時景點/住宿/餐食全部消失
       const displayDailyItinerary = fullDailyItinerary.map(day => ({
+        day: day.day, // 天數
         dayLabel: day.dayLabel,
         date: day.date,
         title: day.title,
+        route: day.route || '', // ✅ 完整行程描述（台北車站 ⇀ 高爾夫球場 ⇀台中洲際酒店）
         highlight: day.highlight || '',
         description: day.description || '',
         activities: day.activities || [],
