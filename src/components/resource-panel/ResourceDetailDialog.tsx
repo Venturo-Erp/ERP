@@ -243,6 +243,65 @@ export function ResourceDetailDialog({
                 </p>
               ) : null}
 
+              {/* 額外資訊（只在檢視模式顯示） */}
+              {!isEditing && fullData && (
+                <div className="space-y-2 text-sm">
+                  {/* 電話 */}
+                  {fullData.phone && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="text-xs">📞</span>
+                      <span>{String(fullData.phone)}</span>
+                    </div>
+                  )}
+                  {/* 網站 */}
+                  {fullData.website && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="text-xs">🌐</span>
+                      <a
+                        href={String(fullData.website)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline truncate"
+                      >
+                        {String(fullData.website)}
+                      </a>
+                    </div>
+                  )}
+                  {/* 營業時間 */}
+                  {fullData.opening_hours && (
+                    <div className="flex items-start gap-2 text-muted-foreground">
+                      <span className="text-xs">🕐</span>
+                      <span>
+                        {typeof fullData.opening_hours === 'string'
+                          ? fullData.opening_hours
+                          : JSON.stringify(fullData.opening_hours)}
+                      </span>
+                    </div>
+                  )}
+                  {/* 建議遊玩時間 */}
+                  {fullData.duration_minutes && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="text-xs">⏱️</span>
+                      <span>建議 {fullData.duration_minutes} 分鐘</span>
+                    </div>
+                  )}
+                  {/* 票價 */}
+                  {fullData.ticket_price && (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <span className="text-xs">🎫</span>
+                      <span>{String(fullData.ticket_price)}</span>
+                    </div>
+                  )}
+                  {/* 備註 */}
+                  {fullData.notes && (
+                    <div className="flex items-start gap-2 text-muted-foreground">
+                      <span className="text-xs">📝</span>
+                      <span>{String(fullData.notes)}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* 座標 & 地圖連結 */}
               {hasCoordinates && !isEditing && (
                 <div className="flex items-center gap-2 pt-2 border-t">
