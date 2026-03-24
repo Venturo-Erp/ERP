@@ -331,24 +331,21 @@ export function ResourcePanel({
 
   return (
     <div className={cn('flex flex-col bg-card border-b border-border', className)}>
-      {/* 標題列：國家選擇 */}
-      <div className="h-10 bg-morandi-green/80 text-white px-3 flex items-center gap-2 border-b border-border">
+      {/* 國家 + 類型 Tab + 新增按鈕（全部同一排） */}
+      <div className="flex items-center border-b border-border bg-card">
+        {/* 國家選擇 */}
         <Combobox
           value={resolvedCountryId || ''}
           onChange={v => {
             setResolvedCountryId(v || undefined)
           }}
           options={countries.map(c => ({ value: c.id, label: c.name }))}
-          placeholder="選擇國家"
-          className="w-[100px] [&_button]:bg-white/20 [&_button]:border-white/30 [&_button]:text-white [&_button]:h-7 [&_button]:text-xs"
+          placeholder="國家"
+          className="w-[80px] mx-1 [&_button]:h-8 [&_button]:text-xs"
           showClearButton={false}
           disablePortal
         />
-        <span className="text-xs opacity-75">資源庫</span>
-      </div>
-
-      {/* 類型 Tab + 新增按鈕 */}
-      <div className="flex items-center border-b border-border">
+        {/* 類型 Tabs */}
         {tabs.map(tab => (
           <button
             key={tab.key}
@@ -357,21 +354,21 @@ export function ResourcePanel({
               setSearchQuery('')
             }}
             className={cn(
-              'flex-1 flex items-center justify-center gap-1 px-2 py-2 text-xs font-medium transition-colors',
+              'flex items-center gap-1 px-3 py-2 text-xs font-medium transition-colors whitespace-nowrap',
               activeTab === tab.key
                 ? 'text-morandi-primary border-b-2 border-morandi-gold bg-morandi-gold/5'
                 : 'text-muted-foreground hover:text-foreground'
             )}
           >
             {tab.icon}
-            {selectedCountryName || ''}{tab.label}
-            <span className="text-[10px] text-muted-foreground ml-0.5">
+            {tab.label}
+            <span className="text-[10px] text-muted-foreground">
               ({resources[tab.key].length})
             </span>
           </button>
         ))}
         {/* 新增按鈕 */}
-        <div className="px-2">
+        <div className="ml-auto px-2">
           <QuickAddResource
             type={activeTab}
             countryId={resolvedCountryId || countryId}
