@@ -31,6 +31,8 @@ interface CreateAccountDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
+  parentAccount?: { id: string; code: string; name: string; account_type: string } | null
+  suggestedCode?: string
 }
 
 const accountTypes = [
@@ -42,7 +44,7 @@ const accountTypes = [
   { value: 'cost', label: '成本' },
 ]
 
-export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAccountDialogProps) {
+export function CreateAccountDialog({ open, onOpenChange, onSuccess, parentAccount, suggestedCode }: CreateAccountDialogProps) {
   const { user } = useAuthStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [parentAccounts, setParentAccounts] = useState<ParentAccount[]>([])
@@ -54,6 +56,27 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
     is_active: true,
     parent_id: '',
   })
+
+  // 當有父科目時，自動填入
+  useEffect(() => {
+    if (open && parentAccount) {
+      setFormData(prev => ({
+        ...prev,
+        code: suggestedCode || '',
+        account_type: parentAccount.account_type,
+        parent_id: parentAccount.id,
+      }))
+    } else if (open && !parentAccount) {
+      setFormData({
+        code: '',
+        name: '',
+        account_type: 'asset',
+        description: '',
+        is_active: true,
+        parent_id: '',
+      })
+    }
+  }, [open, parentAccount, suggestedCode])
 
   // 載入可作為父科目的科目（只有大類和中類）
   useEffect(() => {
@@ -134,7 +157,12 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>新增會計科目</DialogTitle>
+          <DialogTitle>
+            {parentAccount 
+              ? `新增子科目（${parentAccount.code} ${parentAccount.name}）`
+              : '新增會計科目'
+            }
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

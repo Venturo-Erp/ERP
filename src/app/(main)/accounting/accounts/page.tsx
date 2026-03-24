@@ -49,6 +49,7 @@ export default function AccountsPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const [parentForNew, setParentForNew] = useState<Account | null>(null) // 新增子科目的父科目
 
   // 判斷科目是否有子科目
   const hasChildren = (accountId: string) => {
@@ -84,6 +85,26 @@ export default function AccountsPage() {
 
   // 過濾可見的科目
   const visibleAccounts = accounts.filter(isVisible)
+
+  // 計算下一個子科目代碼
+  const getNextChildCode = (parentCode: string): string => {
+    // 找出所有以 parentCode- 開頭的子科目
+    const children = accounts.filter(a => a.code.startsWith(parentCode + '-'))
+    if (children.length === 0) return `${parentCode}-1`
+    
+    // 找出最大的編號
+    const maxNum = Math.max(...children.map(c => {
+      const match = c.code.match(new RegExp(`^${parentCode}-(\\d+)$`))
+      return match ? parseInt(match[1]) : 0
+    }))
+    return `${parentCode}-${maxNum + 1}`
+  }
+
+  // 新增子科目
+  const handleAddChild = (parent: Account) => {
+    setParentForNew(parent)
+    setCreateDialogOpen(true)
+  }
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
 
   useEffect(() => {
@@ -245,17 +266,28 @@ export default function AccountsPage() {
     {
       key: 'actions',
       label: '操作',
-      width: '80px',
+      width: '120px',
       render: (_: unknown, row: Account) => (
-        <Button size="sm" variant="ghost" onClick={() => handleEdit(row)} className="gap-1">
-          <Edit size={14} />
-          編輯
-        </Button>
+        <div className="flex gap-1">
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={() => handleAddChild(row)} 
+            className="gap-1 px-2"
+            title="新增子科目"
+          >
+            <Plus size={14} />
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => handleEdit(row)} className="gap-1 px-2">
+            <Edit size={14} />
+          </Button>
+        </div>
       ),
     },
   ]
 
   const handleCreate = () => {
+    setParentForNew(null)
     setCreateDialogOpen(true)
   }
 
@@ -299,6 +331,8 @@ export default function AccountsPage() {
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
         onSuccess={loadAccounts}
+        parentAccount={parentForNew}
+        suggestedCode={parentForNew ? getNextChildCode(parentForNew.code) : ''}
       />
 
       <EditAccountDialog
