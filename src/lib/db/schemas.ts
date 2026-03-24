@@ -20,7 +20,6 @@ export const TABLES = {
   DISBURSEMENT_ORDERS: 'disbursement_orders',
   RECEIPT_ORDERS: 'receipt_orders',
   QUOTES: 'quotes',
-  QUOTE_ITEMS: 'quote_items',
   TODOS: 'todos',
   VISAS: 'visas',
   SUPPLIERS: 'suppliers',

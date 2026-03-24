@@ -74,6 +74,9 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
   const [accountingSubjectId, setAccountingSubjectId] = useState<string>('')
   const [accountingSubjects, setAccountingSubjects] = useState<{ value: string; label: string }[]>([])
 
+  // 原始收款方式資料（含 id）
+  const [paymentMethodsRaw, setPaymentMethodsRaw] = useState<{ id: string; code: string; name: string }[]>([])
+
   // 載入收款方式
   useEffect(() => {
     if (user?.workspace_id) {
@@ -83,7 +86,9 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           // API 直接回傳陣列
           const methods = Array.isArray(data) ? data : data.data
           if (methods && methods.length > 0) {
-            setPaymentMethods(methods.map((m: { code: string; name: string }) => ({
+            // 保留完整資料（含 id）
+            setPaymentMethodsRaw(methods)
+            setPaymentMethods(methods.map((m: { id: string; code: string; name: string }) => ({
               value: m.code.toLowerCase(),
               label: m.name,
             })))
@@ -293,6 +298,12 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
         card: 'card',
         check: 'check',
       }
+      
+      // 取得選中的收款方式 ID
+      const selectedPaymentMethod = paymentMethodsRaw.find(
+        m => m.code.toLowerCase() === paymentMethod
+      )
+      const paymentMethodId = selectedPaymentMethod?.id || null
 
       // 為每個訂單分配建立一筆收款單
       for (const allocation of validAllocations) {
@@ -322,6 +333,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           receipt_date: receiptDate,
           payment_date: receiptDate,
           payment_method: paymentMethodMap[paymentMethod] || 'transfer',
+          payment_method_id: paymentMethodId, // 新增：關聯到 payment_methods 表
           receipt_type: paymentMethod === 'cash' ? 1 : 0,
           receipt_amount: allocation.allocated_amount,
           amount: allocation.allocated_amount,

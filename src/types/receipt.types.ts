@@ -20,6 +20,7 @@ export interface Receipt {
   receipt_date: string // ISO date
   payment_date: string // 付款日期（資料庫必填欄位）
   payment_method: string // 付款方式（資料庫用 string: transfer/cash/card/check/linkpay）
+  payment_method_id: string | null // 付款方式 ID（關聯 payment_methods 表）
   receipt_type: ReceiptType // 0:匯款 1:現金 2:刷卡 3:支票 4:LinkPay
   receipt_amount: number // 應收金額
   total_amount?: number // 所有項目金額加總

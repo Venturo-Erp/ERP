@@ -118,7 +118,8 @@ export const useSuppliers = createCloudHook<Supplier>('suppliers', {
 })
 
 // 報價項目
-export const useQuoteItems = createCloudHook<QuoteItem>('quote_items')
+// TODO: quote_items 表已不存在
+// export const useQuoteItems = createCloudHook<QuoteItem>('quote_items')
 
 // ===== 圖片庫 =====
 

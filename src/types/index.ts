@@ -38,7 +38,6 @@ export type {
   Visa,
   Supplier,
   Quote,
-  QuoteItem,
   PaymentRequest,
   DisbursementOrder,
   ReceiptOrder,

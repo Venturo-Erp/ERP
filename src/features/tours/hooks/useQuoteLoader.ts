@@ -17,7 +17,22 @@ import type {
 import type { Database } from '@/lib/supabase/types'
 import { COMP_TOURS_LABELS } from '../constants/labels'
 
-type QuoteItemRow = Database['public']['Tables']['quote_items']['Row']
+// TODO: quote_items 表已不存在，改用 quotes.quick_quote_items JSONB
+// type QuoteItemRow = Database['public']['Tables']['quote_items']['Row']
+interface QuoteItemRow {
+  id: string
+  quote_id: string
+  category: string | null
+  item_type: string | null
+  description: string | null
+  quantity: number | null
+  unit_price: number | null
+  total_price: number | null
+  display_order: number | null
+  notes: string | null
+  created_at: string | null
+  updated_at: string | null
+}
 
 const supabase = supabaseClient
 
@@ -129,12 +144,14 @@ export function useQuoteLoader(
 
       logger.info(COMP_TOURS_LABELS.報價單載入成功, quote?.id, quote?.name)
 
-      const { data: quoteItems, error: itemsError } = await supabase
+      // TODO: quote_items 表已不存在，這個 hook 需要重構
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: quoteItems, error: itemsError } = await (supabase as any)
         .from('quote_items')
         .select('*')
         .eq('quote_id', quoteId)
         .order('display_order', { ascending: true })
-        .limit(500)
+        .limit(500) as { data: QuoteItemRow[] | null; error: Error | null }
 
       if (itemsError) {
         logger.error(COMP_TOURS_LABELS.載入報價項目失敗, itemsError)
@@ -148,7 +165,7 @@ export function useQuoteLoader(
       const activityItems: TourDepartureActivity[] = []
       const otherItems: TourDepartureOther[] = []
 
-      quoteItems?.forEach((item: QuoteItemRow, index: number) => {
+      ;(quoteItems as QuoteItemRow[] | null)?.forEach((item: QuoteItemRow, index: number) => {
         const baseDate = tour.departure_date || getTodayString()
         const itemName = item.description || ''
         const category = item.category?.toLowerCase() || ''
