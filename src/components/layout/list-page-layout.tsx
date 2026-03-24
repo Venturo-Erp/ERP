@@ -63,6 +63,10 @@ export interface ListPageLayoutProps<T extends Record<string, any>> {
   statusField?: keyof T
   /** 預設狀態 Tab */
   defaultStatusTab?: string
+  /** 外部控制的 Tab 狀態 */
+  activeStatusTab?: string
+  /** Tab 切換回調 */
+  onStatusTabChange?: (tab: string) => void
 
   // ========== 新增操作 ==========
   /** 新增按鈕點擊事件 */
@@ -152,6 +156,8 @@ export function ListPageLayout<T extends Record<string, any>>({
   statusTabs,
   statusField,
   defaultStatusTab = 'all',
+  activeStatusTab: externalActiveTab,
+  onStatusTabChange,
   onAdd,
   addLabel = COMP_LAYOUT_LABELS.新增,
   addDisabled = false,
@@ -170,7 +176,10 @@ export function ListPageLayout<T extends Record<string, any>>({
 }: ListPageLayoutProps<T>) {
   // ========== 內部狀態管理 ==========
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeStatusTab, setActiveStatusTab] = useState(defaultStatusTab)
+  const [internalActiveTab, setInternalActiveTab] = useState(defaultStatusTab)
+  
+  // 支援外部控制或內部控制
+  const activeStatusTab = externalActiveTab ?? internalActiveTab
 
   // ========== 數據過濾 ==========
   const filteredData = useDataFiltering(data, activeStatusTab, searchQuery, {
@@ -180,7 +189,11 @@ export function ListPageLayout<T extends Record<string, any>>({
 
   // ========== 處理 Tab 切換 ==========
   const handleTabChange = (tab: string) => {
-    setActiveStatusTab(tab)
+    if (onStatusTabChange) {
+      onStatusTabChange(tab)
+    } else {
+      setInternalActiveTab(tab)
+    }
   }
 
   return (

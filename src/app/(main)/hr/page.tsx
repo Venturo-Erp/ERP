@@ -429,35 +429,9 @@ export default function HRPage() {
         onRowClick={handleEmployeeClick}
         renderActions={renderActions}
         bordered={true}
-        beforeTable={
-          <div className="px-6 py-3 border-b border-border/50">
-            <div className="flex gap-1 bg-morandi-container/50 p-1 rounded-lg w-fit">
-              {tabOptions.map(tab => (
-                <button
-                  key={tab.value}
-                  onClick={() => setActiveTab(tab.value)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
-                    activeTab === tab.value
-                      ? 'bg-white text-morandi-primary shadow-sm'
-                      : 'text-morandi-secondary hover:text-morandi-primary hover:bg-white/50'
-                  }`}
-                >
-                  {tab.value === 'bot' && <Bot className="w-4 h-4" />}
-                  {tab.label}
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-xs ${
-                      activeTab === tab.value
-                        ? 'bg-morandi-gold/20 text-morandi-gold'
-                        : 'bg-morandi-container text-morandi-secondary'
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        }
+        statusTabs={tabOptions}
+        activeStatusTab={activeTab}
+        onStatusTabChange={(tab) => setActiveTab(tab as EmployeeTab)}
         headerActions={
           <div className="flex gap-3">
             <Button
