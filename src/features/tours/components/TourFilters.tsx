@@ -99,17 +99,17 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onAddTour}>
               <Calendar className="mr-2 h-4 w-4" />
-              開團（正式團）
+              開團
             </DropdownMenuItem>
 
             <DropdownMenuItem onClick={onAddProposal}>
               <FileText className="mr-2 h-4 w-4" />
-              提案（客戶詢價）
+              提案
             </DropdownMenuItem>
 
             <DropdownMenuItem onClick={onAddTemplate}>
               <Copy className="mr-2 h-4 w-4" />
-              開模板（標準行程）
+              開模板
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
