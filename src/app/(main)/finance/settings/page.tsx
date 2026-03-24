@@ -220,8 +220,59 @@ export default function FinanceSettingsPage() {
     { key: 'accounting', label: '會計科目', icon: Settings },
   ] as const
 
+  // 取得當前 section 的標題
+  const currentSection = sections.find(s => s.key === activeSection)
+  const sectionTitle = currentSection?.label || ''
+
   return (
-    <ContentPageLayout title="財務設定" icon={Settings}>
+    <ContentPageLayout 
+      title={`財務設定 > ${sectionTitle}管理`} 
+      icon={Settings}
+      headerActions={
+        activeSection === 'receipt' ? (
+          <Button
+            onClick={() => {
+              setEditingMethod(null)
+              setIsMethodDialogOpen(true)
+            }}
+            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            新增收款方式
+          </Button>
+        ) : activeSection === 'payment' ? (
+          <Button
+            onClick={() => {
+              setEditingMethod(null)
+              setIsMethodDialogOpen(true)
+            }}
+            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            新增請款方式
+          </Button>
+        ) : activeSection === 'bank' ? (
+          <Button
+            onClick={() => {
+              setEditingBank(null)
+              setIsBankDialogOpen(true)
+            }}
+            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            新增銀行帳戶
+          </Button>
+        ) : activeSection === 'accounting' ? (
+          <Button
+            onClick={() => setIsSubjectDialogOpen(true)}
+            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            新增子科目
+          </Button>
+        ) : null
+      }
+    >
       <div className="flex h-full">
         {/* 左側選單 */}
         <div className="w-[200px] border-r border-border bg-morandi-background/30">
@@ -252,25 +303,11 @@ export default function FinanceSettingsPage() {
           {/* 收款方式 */}
           {activeSection === 'receipt' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">收款方式管理</h2>
-                <Button
-                  onClick={() => {
-                    setEditingMethod(null)
-                    setIsMethodDialogOpen(true)
-                  }}
-                  className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  新增收款方式
-                </Button>
-              </div>
-
               <Card className="border rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">代碼</TableHead>
+                      <TableHead className="w-[120px]">科目代號</TableHead>
                       <TableHead>名稱</TableHead>
                       <TableHead>說明</TableHead>
                       <TableHead className="w-[80px]">狀態</TableHead>
@@ -329,25 +366,11 @@ export default function FinanceSettingsPage() {
           {/* 請款方式 */}
           {activeSection === 'payment' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">請款方式管理</h2>
-                <Button
-                  onClick={() => {
-                    setEditingMethod(null)
-                    setIsMethodDialogOpen(true)
-                  }}
-                  className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  新增請款方式
-                </Button>
-              </div>
-
               <Card className="border rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">代碼</TableHead>
+                      <TableHead className="w-[120px]">科目代號</TableHead>
                       <TableHead>名稱</TableHead>
                       <TableHead>說明</TableHead>
                       <TableHead className="w-[80px]">狀態</TableHead>
@@ -406,25 +429,11 @@ export default function FinanceSettingsPage() {
           {/* 銀行帳戶 */}
           {activeSection === 'bank' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">銀行帳戶管理</h2>
-                <Button
-                  onClick={() => {
-                    setEditingBank(null)
-                    setIsBankDialogOpen(true)
-                  }}
-                  className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  新增銀行帳戶
-                </Button>
-              </div>
-
               <Card className="border rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">代碼</TableHead>
+                      <TableHead className="w-[120px]">科目代號</TableHead>
                       <TableHead>名稱</TableHead>
                       <TableHead>銀行</TableHead>
                       <TableHead>帳號</TableHead>
@@ -485,16 +494,6 @@ export default function FinanceSettingsPage() {
           {/* 會計科目 */}
           {activeSection === 'accounting' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">會計科目管理</h2>
-                <Button
-                  onClick={() => setIsSubjectDialogOpen(true)}
-                  className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  新增子科目
-                </Button>
-              </div>
               <p className="text-sm text-morandi-muted">
                 會計科目用於分類收款和請款（選填功能）
               </p>
@@ -503,7 +502,7 @@ export default function FinanceSettingsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">代碼</TableHead>
+                      <TableHead className="w-[120px]">科目代號</TableHead>
                       <TableHead>名稱</TableHead>
                       <TableHead className="w-[100px]">類型</TableHead>
                       <TableHead>說明</TableHead>
