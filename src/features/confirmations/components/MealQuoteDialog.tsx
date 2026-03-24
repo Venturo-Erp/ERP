@@ -40,7 +40,17 @@ export function MealQuoteDialog({
 }: MealQuoteDialogProps) {
   const [note, setNote] = useState('')
   const [viewMode, setViewMode] = useState<'modern' | 'traditional'>('traditional')
+  const [editableItems, setEditableItems] = useState(meals)
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string }[]>([])
+
+  // 當 meals 變化時更新
+  useEffect(() => {
+    setEditableItems(meals)
+  }, [meals])
+
+  const handleItemChange = (idx: number, field: string, value: any) => {
+    setEditableItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item))
+  }
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [sending, setSending] = useState(false)
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null)
@@ -124,9 +134,10 @@ export function MealQuoteDialog({
               tour={tour}
               totalPax={totalPax}
               supplierName={supplierName}
-              items={meals}
+              items={editableItems}
               note={note}
               setNote={setNote}
+              onItemChange={handleItemChange}
             />
           ) : (
             <div className="space-y-4">

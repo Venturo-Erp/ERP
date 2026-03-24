@@ -70,7 +70,7 @@ export function UnifiedTraditionalView({
 
       {/* 根據類型顯示對應表格 */}
       {requestType === 'accommodation' && <AccommodationTable items={items} />}
-      {requestType === 'meal' && <MealTable items={items} />}
+      {requestType === 'meal' && <MealTable items={items} onItemChange={onItemChange} />}
       {requestType === 'transport' && <TransportTable items={items} />}
       {requestType === 'activity' && <ActivityTable items={items} onItemChange={onItemChange} />}
       {requestType === 'cancellation' && <CancellationTable items={items} />}
@@ -126,31 +126,53 @@ function AccommodationTable({ items }: { items: any[] }) {
   )
 }
 
-// 餐食表
-function MealTable({ items }: { items: any[] }) {
+// 餐食表（可編輯）
+function MealTable({ items, onItemChange }: { items: any[]; onItemChange?: (idx: number, field: string, value: any) => void }) {
   return (
     <div className="mb-6">
       <h3 className="text-lg font-semibold text-[#78716c] mb-3">餐食表 ▽</h3>
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full border-collapse text-sm table-fixed">
         <thead>
           <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-morandi-primary">
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">用餐日期</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">用餐時段</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">餐標單價（桌／人）</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">訂金</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left w-20">數量</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">備註</th>
+            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '100px'}}>用餐日期</th>
+            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '120px'}}>用餐時段</th>
+            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '140px'}}>餐標單價（桌／人）</th>
+            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '80px'}}>訂金</th>
+            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '70px'}}>數量</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, idx) => (
             <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf8]'}>
               <td className="border border-[#a8a29e] px-3 py-2">{item.date || '—'}</td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.time || '—'}</td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.price || '—'}</td>
+              <td className="border border-[#a8a29e] px-1 py-1">
+                <input
+                  type="text"
+                  value={item.time || ''}
+                  onChange={e => onItemChange?.(idx, 'time', e.target.value)}
+                  placeholder="午餐 12:00"
+                  className="w-full px-2 py-1 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold rounded"
+                />
+              </td>
+              <td className="border border-[#a8a29e] px-1 py-1">
+                <input
+                  type="text"
+                  value={item.price || ''}
+                  onChange={e => onItemChange?.(idx, 'price', e.target.value)}
+                  placeholder=""
+                  className="w-full px-2 py-1 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold rounded"
+                />
+              </td>
               <td className="border border-[#a8a29e] px-3 py-2"></td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.quantity || ''}</td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.note || ''}</td>
+              <td className="border border-[#a8a29e] px-1 py-1">
+                <input
+                  type="number"
+                  value={item.quantity || ''}
+                  onChange={e => onItemChange?.(idx, 'quantity', parseInt(e.target.value) || 0)}
+                  placeholder=""
+                  className="w-full px-2 py-1 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold rounded text-center"
+                />
+              </td>
             </tr>
           ))}
         </tbody>
