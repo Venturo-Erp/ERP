@@ -38,7 +38,7 @@ export function ActivityQuoteDialog({
   supplierName,
 }: ActivityQuoteDialogProps) {
   const [note, setNote] = useState('')
-  const [viewMode, setViewMode] = useState<'modern' | 'traditional'>('modern')
+  const [viewMode, setViewMode] = useState<'modern' | 'traditional'>('traditional')
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string }[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [sending, setSending] = useState(false)

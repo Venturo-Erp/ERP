@@ -1623,13 +1623,19 @@ export function RequirementsList({
                                   )
                                 }
 
-                                // 餐廳：直接列印需求單
+                                // 餐廳：打開需求單 Dialog（預設列印樣式）
                                 if (cat.key === 'meal') {
                                   return (
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => handlePrintSimpleRequest('meal', '餐食', item)}
+                                      onClick={() => {
+                                        setSelectedTransport({
+                                          name: supplierName,
+                                          resourceId: item.resourceId ?? null,
+                                        })
+                                        setShowMealDialog(true)
+                                      }}
                                       className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
                                     >
                                       <Printer size={12} className="mr-1" />
@@ -1638,13 +1644,19 @@ export function RequirementsList({
                                   )
                                 }
 
-                                // 活動：直接列印需求單
+                                // 活動：打開需求單 Dialog（預設列印樣式）
                                 if (cat.key === 'activity') {
                                   return (
                                     <Button
                                       variant="outline"
                                       size="sm"
-                                      onClick={() => handlePrintSimpleRequest('activity', '活動', item)}
+                                      onClick={() => {
+                                        setSelectedTransport({
+                                          name: supplierName,
+                                          resourceId: item.resourceId ?? null,
+                                        })
+                                        setShowActivityDialog(true)
+                                      }}
                                       className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
                                     >
                                       <Printer size={12} className="mr-1" />
