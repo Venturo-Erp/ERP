@@ -375,6 +375,12 @@ export function MemberRow({
             type="text"
             value={pnrValue || ''}
             onChange={e => onPnrChange(member.id, e.target.value)}
+            onBlur={e => {
+              // 離開欄位時儲存到資料庫
+              if (e.target.value !== member.pnr) {
+                onUpdateField(member.id, 'pnr', e.target.value)
+              }
+            }}
             className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
           />
         </td>
