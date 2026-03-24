@@ -51,7 +51,7 @@ export function UnifiedTraditionalView({
           {/* 第一行 */}
           <span className="font-semibold text-[#78716c]">致：</span>
           <input type="text" value={supplierName || ''} readOnly className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary" />
-          <span className="font-semibold text-[#78716c]">聯絡窗口：</span>
+          <span className="font-semibold text-[#78716c]">聯絡人：</span>
           <input type="text" value={contact || ''} placeholder="聯絡人" className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary" />
           
           {/* 第二行 */}
