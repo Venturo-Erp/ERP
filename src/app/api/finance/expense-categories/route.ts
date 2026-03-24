@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await supabase
     .from('expense_categories')
     .select('*')
-    .eq('type: 'expense') // 只取請款類別
+    .eq('type', 'expense') // 只取請款類別
     .or(`user_id.is.null,user_id.eq.${workspaceId}`) // 系統預設或該工作區的
     .order('sort_order', { ascending: true })
 
