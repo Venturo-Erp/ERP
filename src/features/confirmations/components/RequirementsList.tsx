@@ -1690,33 +1690,6 @@ export function RequirementsList({
                             <tr>
                               <td colSpan={10} className="p-0">
                                 <div className="bg-morandi-container/10 border-t border-morandi-gold/10 p-6 space-y-4">
-                                  {/* 需求內容 */}
-                                  <div>
-                                    <h4 className="text-sm font-semibold text-morandi-primary mb-2">
-                                      📋 需求內容
-                                    </h4>
-                                    <div className="bg-white border border-morandi-gold/20 rounded-lg p-3 text-sm">
-                                      <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                          <span className="text-morandi-secondary">日期：</span>
-                                          {formatDate(item.serviceDate)}
-                                        </div>
-                                        <div>
-                                          <span className="text-morandi-secondary">供應商：</span>
-                                          {item.supplierName || '—'}
-                                        </div>
-                                        <div>
-                                          <span className="text-morandi-secondary">項目：</span>
-                                          {item.title}
-                                        </div>
-                                        <div>
-                                          <span className="text-morandi-secondary">數量：</span>
-                                          {item.quantity || '—'}
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-
                                   {/* 已發送需求單（最新報價 + 歷史）*/}
                                   {(() => {
                                     const relatedRequests = existingRequests.filter(r => {
