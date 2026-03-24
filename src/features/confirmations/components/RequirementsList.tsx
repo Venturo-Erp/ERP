@@ -929,7 +929,54 @@ export function RequirementsList({
           }
         }
 
-        // 3. 顯示結果
+        // 3. 自動關閉同一項目的其他需求單
+        const confirmedResourceIds = new Set<string>()
+        const confirmedItineraryItemIds = new Set<string>()
+        
+        for (const item of items) {
+          if (item.resource_id) confirmedResourceIds.add(item.resource_id)
+          if (item.itinerary_item_id) confirmedItineraryItemIds.add(item.itinerary_item_id)
+        }
+
+        if (confirmedResourceIds.size > 0 || confirmedItineraryItemIds.size > 0) {
+          // 找出其他待處理的需求單（同一項目）
+          const { data: otherRequests } = await supabase
+            .from('tour_requests')
+            .select('id, items, supplier_name')
+            .eq('tour_id', tourId)
+            .in('status', ['draft', 'sent', 'replied'])
+            .neq('id', delegation.id)
+
+          if (otherRequests && otherRequests.length > 0) {
+            const toReject: string[] = []
+            for (const req of otherRequests) {
+              const reqItems = req.items || []
+              const hasOverlap = reqItems.some(
+                (ri: any) =>
+                  (ri.resource_id && confirmedResourceIds.has(ri.resource_id)) ||
+                  (ri.itinerary_item_id && confirmedItineraryItemIds.has(ri.itinerary_item_id))
+              )
+              if (hasOverlap) {
+                toReject.push(req.id)
+              }
+            }
+
+            if (toReject.length > 0) {
+              await supabase
+                .from('tour_requests')
+                .update({
+                  status: 'rejected',
+                  note: `已選擇其他供應商（${delegation.supplier_name || ''}）`,
+                  updated_by: user.id,
+                } as never)
+                .in('id', toReject)
+
+              logger.info(`已關閉 ${toReject.length} 個重複需求單`)
+            }
+          }
+        }
+
+        // 4. 顯示結果
         if (costDiffs.length > 0) {
           toast({
             title: '已確認預訂，成本已回填',
@@ -939,7 +986,7 @@ export function RequirementsList({
           toast({ title: '已確認預訂' })
         }
 
-        // 4. 刷新 coreItems
+        // 5. 刷新 coreItems
         await loadData(false)
       } catch (error) {
         logger.error('確認預訂失敗', error)
@@ -1476,8 +1523,38 @@ export function RequirementsList({
                                 />
                               )}
                             </td>
-                            <td className="px-3 py-2.5 text-left font-medium text-morandi-primary">
-                              {item.quotedPrice ? `$${item.quotedPrice.toLocaleString()}` : '-'}
+                            <td className="px-3 py-2.5 text-left font-medium">
+                              {(() => {
+                                const estimatedPrice = item.quotedPrice
+                                const request = findMatchingRequest(item)
+                                const actualPrice = request?.items?.[0]?.quoted_cost
+
+                                if (!estimatedPrice && !actualPrice) return '-'
+                                
+                                const displayPrice = actualPrice || estimatedPrice
+                                const hasPriceChange = estimatedPrice && actualPrice && estimatedPrice !== actualPrice
+                                const isExpensive = hasPriceChange && actualPrice! > estimatedPrice
+                                const isCheaper = hasPriceChange && actualPrice! < estimatedPrice
+
+                                return (
+                                  <span
+                                    className={cn(
+                                      hasPriceChange && isExpensive && 'text-red-600',
+                                      hasPriceChange && isCheaper && 'text-blue-600',
+                                      !hasPriceChange && 'text-morandi-primary'
+                                    )}
+                                    title={
+                                      hasPriceChange
+                                        ? `原估 $${estimatedPrice.toLocaleString()} → ${
+                                            isExpensive ? '調漲' : '優惠'
+                                          } $${actualPrice!.toLocaleString()}`
+                                        : undefined
+                                    }
+                                  >
+                                    ${displayPrice!.toLocaleString()}
+                                  </span>
+                                )
+                              })()}
                             </td>
                             <td className="px-3 py-2.5 text-left">
                               <span
