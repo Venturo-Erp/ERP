@@ -317,16 +317,19 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
 
       {/* 國家/城市篩選 */}
       {availableCities.length > 0 && (
-        <div className="px-3 py-3 border-b border-border">
-          <div className="text-xs text-muted-foreground mb-2 font-medium">📍 篩選地區</div>
-          <div className="flex items-center gap-1.5 overflow-x-auto">
+        <div className="px-4 py-4 bg-morandi-container/20 border-b-2 border-border">
+          <div className="text-sm text-morandi-primary mb-3 font-semibold flex items-center gap-1">
+            <span>📍</span>
+            <span>地區篩選</span>
+          </div>
+          <div className="flex items-center gap-2 overflow-x-auto pb-1">
             <button
               onClick={() => setSelectedCity(undefined)}
               className={cn(
-                'px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors',
+                'px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all',
                 !selectedCity
-                  ? 'bg-morandi-gold text-white shadow-sm'
-                  : 'bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80'
+                  ? 'bg-morandi-gold text-white shadow-md scale-105'
+                  : 'bg-white border border-border text-muted-foreground hover:text-foreground hover:border-morandi-gold/50'
               )}
             >
               全部地區
@@ -336,10 +339,10 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
                 key={city.id}
                 onClick={() => setSelectedCity(city.id)}
                 className={cn(
-                  'px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors',
+                  'px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-all',
                   selectedCity === city.id
-                    ? 'bg-morandi-gold text-white shadow-sm'
-                    : 'bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80'
+                    ? 'bg-morandi-gold text-white shadow-md scale-105'
+                    : 'bg-white border border-border text-muted-foreground hover:text-foreground hover:border-morandi-gold/50'
                 )}
               >
                 {city.name}
@@ -350,7 +353,7 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
       )}
 
       {/* 類型 Tab（景點/酒店/餐廳） */}
-      <div className="flex border-b border-border">
+      <div className="flex border-b-2 border-border bg-white">
         {tabs.map(tab => (
           <button
             key={tab.key}
