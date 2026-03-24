@@ -77,8 +77,10 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
       fetch(`/api/finance/payment-methods?workspace_id=${user.workspace_id}&type=receipt`)
         .then(res => res.json())
         .then(data => {
-          if (data.data && data.data.length > 0) {
-            setPaymentMethods(data.data.map((m: { code: string; name: string }) => ({
+          // API 直接回傳陣列
+          const methods = Array.isArray(data) ? data : data.data
+          if (methods && methods.length > 0) {
+            setPaymentMethods(methods.map((m: { code: string; name: string }) => ({
               value: m.code.toLowerCase(),
               label: m.name,
             })))
