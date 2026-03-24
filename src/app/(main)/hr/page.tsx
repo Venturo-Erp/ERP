@@ -444,7 +444,6 @@ export default function HRPage() {
             </Button>
             <Button
               onClick={() => {
-                alert('按鈕被點擊了！')
                 setIsAddDialogOpen(true)
               }}
               className="bg-morandi-gold hover:bg-morandi-gold-hover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center"
