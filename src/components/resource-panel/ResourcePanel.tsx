@@ -5,7 +5,6 @@ import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Search, MapPin, Building2, UtensilsCrossed, Loader2 } from 'lucide-react'
-import { QuickAddResource } from './QuickAddResource'
 import { ResourceDetailDialog } from './ResourceDetailDialog'
 import { ResourceMapPanel } from './ResourceMapPanel'
 import { Input } from '@/components/ui/input'
@@ -147,7 +146,6 @@ interface ResourcePanelProps {
   locationName?: string // 團的目的地名稱（用於反查地區，如「名古屋」）
   tourId?: string // 團 ID（用於地圖偏好儲存）
   tourCode?: string // 團代碼（用於推斷機場座標，如 FUK260702A）
-  onAddNew?: (type: ResourceType) => void // 新增資源回調，帶類型
 }
 
 export function ResourcePanel({
@@ -157,7 +155,6 @@ export function ResourcePanel({
   locationName,
   tourId,
   tourCode,
-  onAddNew,
 }: ResourcePanelProps) {
   const [activeTab, setActiveTab] = useState<ResourceType>('attraction')
   const [searchQuery, setSearchQuery] = useState('')
@@ -430,38 +427,18 @@ export function ResourcePanel({
         ))}
       </div>
 
-      {/* 搜尋框（包含快速新增功能） */}
+      {/* 搜尋框 */}
       <div className="p-2 border-b border-border">
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <Search
-              size={14}
-              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-            />
-            <Input
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder={`搜尋${tabs.find(t => t.key === activeTab)?.label}...`}
-              className="h-8 pl-8 text-sm"
-            />
-          </div>
-          <QuickAddResource
-            type={activeTab}
-            countryId={resolvedCountryId || countryId}
-            onCreated={resource => {
-              // 新增到當前 tab 的資源列表頂部
-              const newItem: ResourceItem = {
-                id: resource.id,
-                name: resource.name,
-                type: activeTab,
-                category: '',
-                data_verified: false,
-              }
-              setResources(prev => ({
-                ...prev,
-                [activeTab]: [newItem, ...(prev[activeTab] || [])],
-              }))
-            }}
+        <div className="relative">
+          <Search
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder={`搜尋${tabs.find(t => t.key === activeTab)?.label}...`}
+            className="h-8 pl-8 text-sm"
           />
         </div>
       </div>
