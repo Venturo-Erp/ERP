@@ -80,7 +80,8 @@ export default function LoginPage() {
 
       if (result.success) {
         const redirectPath = getRedirectPath()
-        router.push(redirectPath)
+        // 使用 window.location.href 確保完整頁面導航（避免 router.push 有時不生效）
+        window.location.href = redirectPath
       } else {
         setError(result.message || '帳號或密碼錯誤')
       }
