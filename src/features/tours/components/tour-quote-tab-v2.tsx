@@ -111,16 +111,25 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
     try {
       setCreatingMain(true)
       
-      // 查詢現有報價單數量，生成遞增編號
+      // 查詢現有報價單最大編號，生成遞增編號
       let quoteCode: string | undefined = undefined
       if (tour.code) {
         const supabase = (await import('@/lib/supabase/client')).createSupabaseBrowserClient()
-        const { count } = await supabase
+        const { data: existingQuotes } = await supabase
           .from('quotes')
-          .select('*', { count: 'exact', head: true })
+          .select('code')
           .like('code', `${tour.code}-Q%`)
+          .order('code', { ascending: false })
+          .limit(1)
         
-        const nextNum = (count || 0) + 1
+        let nextNum = 1
+        if (existingQuotes && existingQuotes.length > 0 && existingQuotes[0].code) {
+          // 從 KIX261223A-Q05 提取 05
+          const match = existingQuotes[0].code.match(/-Q(\d+)$/)
+          if (match) {
+            nextNum = parseInt(match[1], 10) + 1
+          }
+        }
         quoteCode = `${tour.code}-Q${String(nextNum).padStart(2, '0')}`
       }
 
