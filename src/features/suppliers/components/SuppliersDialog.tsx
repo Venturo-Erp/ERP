@@ -75,7 +75,7 @@ export const SuppliersDialog: React.FC<SuppliersDialogProps> = ({
       onSubmit={onSubmit}
       submitLabel={isEditMode ? LABELS.saveChanges : LABELS.addSupplier}
       submitDisabled={!formData.name}
-      maxWidth="lg"
+      maxWidth="2xl"
     >
       <div className="space-y-3">
         {/* 第1列 */}

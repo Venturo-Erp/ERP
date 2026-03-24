@@ -121,19 +121,6 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
       ),
     },
     {
-      key: 'type',
-      label: LABELS.type,
-      sortable: true,
-      render: value => {
-        const label = TYPE_LABELS[String(value)] || String(value)
-        return (
-          <Badge variant="secondary" className="text-xs">
-            {label}
-          </Badge>
-        )
-      },
-    },
-    {
       key: 'bank_name',
       label: LABELS.bankName,
       sortable: true,

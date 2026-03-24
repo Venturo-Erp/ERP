@@ -20,6 +20,40 @@ import {
 import type { Supplier } from '@/types/supplier.types'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
 import { LABELS, SUPPLIERS_PAGE_LABELS, SUPPLIER_IMPORT_LABELS } from '../constants/labels'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+
+// 產生下一個供應商編號（S00001, S00002, ...）
+async function generateSupplierCode(): Promise<string> {
+  const supabase = createSupabaseBrowserClient()
+  const { data, error } = await supabase
+    .from('suppliers')
+    .select('code')
+    .like('code', 'S%')
+    .order('code', { ascending: false })
+    .limit(1)
+
+  if (error) {
+    logger.error('無法查詢供應商編號', error)
+    // 如果查詢失敗，從 S00001 開始
+    return 'S00001'
+  }
+
+  if (!data || data.length === 0) {
+    // 沒有現有編號，從 S00001 開始
+    return 'S00001'
+  }
+
+  const lastCode = data[0].code
+  // 提取數字部分（例如 S00123 → 123）
+  const match = lastCode?.match(/^S(\d+)$/)
+  if (match) {
+    const nextNum = parseInt(match[1], 10) + 1
+    return `S${String(nextNum).padStart(5, '0')}`
+  }
+
+  // 無法解析，從 S00001 開始
+  return 'S00001'
+}
 
 export const SuppliersPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -152,22 +186,24 @@ export const SuppliersPage: React.FC = () => {
         })
         await alert(SUPPLIERS_PAGE_LABELS.UPDATE_SUCCESS, 'success')
       } else {
-        // 新增模式
+        // 新增模式：自動產生編號（如果沒填）
+        const finalCode = formData.code || (await generateSupplierCode())
+
         await createSupplier({
           name: formData.name,
-          code: formData.code || undefined,
-          english_name: formData.english_name || undefined,
-          tax_id: formData.tax_id || undefined,
-          bank_name: formData.bank_name || undefined,
-          bank_branch: formData.bank_branch || undefined,
-          bank_code_legacy: formData.bank_code_legacy || undefined,
-          bank_account_name: formData.bank_account_name || undefined,
-          bank_account: formData.bank_account || undefined,
-          contact_person: formData.contact_person || undefined,
-          phone: formData.phone || undefined,
-          email: formData.email || undefined,
-          address: formData.address || undefined,
-          notes: formData.notes || undefined,
+          code: finalCode,
+          english_name: formData.english_name || null,
+          tax_id: formData.tax_id || null,
+          bank_name: formData.bank_name || null,
+          bank_branch: formData.bank_branch || null,
+          bank_code_legacy: formData.bank_code_legacy || null,
+          bank_account_name: formData.bank_account_name || null,
+          bank_account: formData.bank_account || null,
+          contact_person: formData.contact_person || null,
+          phone: formData.phone || null,
+          email: formData.email || null,
+          address: formData.address || null,
+          notes: formData.notes || null,
           type: 'other', // 預設類別
         })
         await alert(SUPPLIERS_PAGE_LABELS.CREATE_SUCCESS, 'success')
