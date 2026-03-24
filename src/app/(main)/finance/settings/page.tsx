@@ -307,7 +307,7 @@ export default function FinanceSettingsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[120px]">科目代號</TableHead>
+                      <TableHead className="w-[100px]">代碼</TableHead>
                       <TableHead>名稱</TableHead>
                       <TableHead>說明</TableHead>
                       <TableHead className="w-[80px]">狀態</TableHead>
@@ -370,7 +370,7 @@ export default function FinanceSettingsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[120px]">科目代號</TableHead>
+                      <TableHead className="w-[100px]">代碼</TableHead>
                       <TableHead>名稱</TableHead>
                       <TableHead>說明</TableHead>
                       <TableHead className="w-[80px]">狀態</TableHead>
@@ -433,7 +433,7 @@ export default function FinanceSettingsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[120px]">科目代號</TableHead>
+                      <TableHead className="w-[100px]">代碼</TableHead>
                       <TableHead>名稱</TableHead>
                       <TableHead>銀行</TableHead>
                       <TableHead>帳號</TableHead>

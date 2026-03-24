@@ -9,17 +9,30 @@
  * 執行：npx tsx scripts/fill-japan-attractions-photos.ts
  */
 
+// 💡 重要：必須先載入環境變數，才能 import 其他模組
 import * as dotenv from 'dotenv'
 import * as path from 'path'
+import * as fs from 'fs'
 
-// 載入 .env.local
 dotenv.config({ path: path.join(process.cwd(), '.env.local') })
 
+// 確認環境變數已載入
+if (!process.env.NEXT_PUBLIC_PEXELS_API_KEY) {
+  console.error('❌ Pexels API Key 未設定！')
+  console.error('請確認 .env.local 中有設定 NEXT_PUBLIC_PEXELS_API_KEY')
+  process.exit(1)
+}
+
+if (!process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY) {
+  console.error('❌ Unsplash API Key 未設定！')
+  console.error('請確認 .env.local 中有設定 NEXT_PUBLIC_UNSPLASH_ACCESS_KEY')
+  process.exit(1)
+}
+
+// 環境變數確認後，才 import 依賴環境變數的模組
 import { createClient } from '@supabase/supabase-js'
 import { searchPexelsPhotos } from '../src/lib/pexels'
 import { searchPhotos as searchUnsplash, trackDownload } from '../src/lib/unsplash'
-import * as fs from 'fs'
-import * as path from 'path'
 
 // Supabase 設定
 const SUPABASE_URL = 'https://pfqvdacxowpgfamuvnsn.supabase.co'
