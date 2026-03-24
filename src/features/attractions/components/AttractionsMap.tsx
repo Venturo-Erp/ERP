@@ -79,7 +79,7 @@ export function AttractionsMap({
     })
 
     setNearbyAttractions(nearby)
-  }, [selectedAttraction, attractions, radiusKm, mapCenter])
+  }, [selectedAttraction?.id, selectedAttraction?.latitude, selectedAttraction?.longitude, attractions.length, radiusKm, mapCenter?.lat, mapCenter?.lng])
 
   // 初始化地圖
   useEffect(() => {
@@ -316,7 +316,8 @@ export function AttractionsMap({
     }
 
     updateMarkers()
-  }, [nearbyAttractions, mapCenter, selectedAttraction?.latitude, selectedAttraction?.longitude])
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- nearbyAttractions 已經是穩定的陣列
+  }, [JSON.stringify(nearbyAttractions.map(a => a.id)), mapCenter?.lat, mapCenter?.lng, selectedAttraction?.latitude, selectedAttraction?.longitude])
 
   // 組件卸載時清理
   useEffect(() => {
