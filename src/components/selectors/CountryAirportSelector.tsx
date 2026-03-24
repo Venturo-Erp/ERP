@@ -65,13 +65,17 @@ export function CountryAirportSelector({
   const [newIataCode, setNewIataCode] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 國家選項（優先使用外部傳入的）
+  // 國家選項：優先用 countriesData（有完整 id），確保選國家時能取得 countryId
   const countryOptions = useMemo(() => {
     if (externalCountries) {
       return externalCountries.filter(c => c.is_active).map(c => ({ value: c.name, label: c.name }))
     }
+    // 優先用 countriesData（有 id），fallback 到 hookCountries
+    if (countriesData.length > 0) {
+      return countriesData.filter(c => c.is_active).map(c => ({ value: c.name, label: c.name }))
+    }
     return hookCountries.map(c => ({ value: c, label: c }))
-  }, [externalCountries, hookCountries])
+  }, [externalCountries, countriesData, hookCountries])
 
   // 根據國家取得機場列表
   const availableAirports = useMemo(() => {
