@@ -331,20 +331,32 @@ export function ResourcePanel({
 
   return (
     <div className={cn('flex flex-col bg-card border-b border-border', className)}>
-      {/* 國家 + 類型 Tab + 新增按鈕（全部同一排） */}
-      <div className="flex items-center border-b border-border bg-card">
-        {/* 國家選擇 */}
+      {/* 大標題：景點庫 */}
+      <div className="h-14 bg-morandi-green/90 text-white px-4 flex items-center border-b border-border">
+        <h2 className="text-lg font-bold">景點庫</h2>
+      </div>
+
+      {/* 國家篩選 */}
+      <div className="px-4 py-4 bg-morandi-container/20 border-b-2 border-border">
+        <div className="text-sm text-morandi-primary mb-3 font-semibold flex items-center gap-1">
+          <span>📍</span>
+          <span>地區篩選</span>
+        </div>
         <Combobox
           value={resolvedCountryId || ''}
           onChange={v => {
             setResolvedCountryId(v || undefined)
           }}
           options={countries.map(c => ({ value: c.id, label: c.name }))}
-          placeholder="國家"
-          className="w-[80px] mx-1 [&_button]:h-8 [&_button]:text-xs"
-          showClearButton={false}
+          placeholder="選擇國家"
+          className="w-full [&_button]:h-10"
+          showClearButton={true}
           disablePortal
         />
+      </div>
+
+      {/* 類型分頁（景點/酒店/餐廳） + 新增按鈕 */}
+      <div className="flex items-center border-b-2 border-border bg-white">
         {/* 類型 Tabs */}
         {tabs.map(tab => (
           <button
