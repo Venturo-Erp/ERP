@@ -70,6 +70,8 @@ interface AccountingSubject {
   name: string
   type: string
   description: string | null
+  parent_id: string | null
+  level: number
   is_system: boolean
   is_active: boolean
 }
@@ -86,6 +88,7 @@ export default function FinanceSettingsPage() {
   const [editingBank, setEditingBank] = useState<BankAccount | null>(null)
   const [isMethodDialogOpen, setIsMethodDialogOpen] = useState(false)
   const [isBankDialogOpen, setIsBankDialogOpen] = useState(false)
+  const [isSubjectDialogOpen, setIsSubjectDialogOpen] = useState(false)
   
   const workspaceId = useAuthStore(state => state.user?.workspace_id)
 
@@ -484,10 +487,17 @@ export default function FinanceSettingsPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">會計科目管理</h2>
-                <p className="text-sm text-morandi-muted">
-                  會計科目用於分類收款和請款（選填功能）
-                </p>
+                <Button
+                  onClick={() => setIsSubjectDialogOpen(true)}
+                  className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  新增子科目
+                </Button>
               </div>
+              <p className="text-sm text-morandi-muted">
+                會計科目用於分類收款和請款（選填功能）
+              </p>
 
               <Card className="border rounded-lg overflow-hidden">
                 <Table>
@@ -539,7 +549,7 @@ export default function FinanceSettingsPage() {
               </Card>
               
               <p className="text-sm text-morandi-muted">
-                💡 系統科目由系統預設，不可刪除。如需新增自訂科目，請聯繫管理員。
+                💡 系統科目不可刪除，但可新增子科目細分。
               </p>
             </div>
           )}
@@ -561,6 +571,18 @@ export default function FinanceSettingsPage() {
         onOpenChange={setIsBankDialogOpen}
         bank={editingBank}
         onSave={handleSaveBank}
+      />
+
+      {/* 新增子科目對話框 */}
+      <SubjectDialog
+        open={isSubjectDialogOpen}
+        onOpenChange={setIsSubjectDialogOpen}
+        parentSubjects={accountingSubjects.filter(s => !s.is_system || s.level === 1)}
+        workspaceId={workspaceId || ''}
+        onSave={async () => {
+          await loadData()
+          setIsSubjectDialogOpen(false)
+        }}
       />
     </ContentPageLayout>
   )
@@ -772,6 +794,141 @@ function BankDialog({
             className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
           >
             {isSubmitting ? '儲存中...' : '儲存'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// 新增子科目對話框
+function SubjectDialog({
+  open,
+  onOpenChange,
+  parentSubjects,
+  workspaceId,
+  onSave,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  parentSubjects: AccountingSubject[]
+  workspaceId: string
+  onSave: () => Promise<void>
+}) {
+  const [parentId, setParentId] = useState('')
+  const [code, setCode] = useState('')
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // 根據父科目自動生成子科目代碼
+  useEffect(() => {
+    if (parentId) {
+      const parent = parentSubjects.find(s => s.id === parentId)
+      if (parent) {
+        // 找出該父科目下已有的子科目數量
+        const siblings = parentSubjects.filter(s => s.code.startsWith(parent.code + '-'))
+        const nextNum = siblings.length + 1
+        setCode(`${parent.code}-${nextNum.toString().padStart(2, '0')}`)
+      }
+    }
+  }, [parentId, parentSubjects])
+
+  const handleSubmit = async () => {
+    if (!parentId || !code || !name) {
+      await alert('請填寫父科目、代碼和名稱', 'warning')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const res = await fetch('/api/finance/accounting-subjects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workspace_id: workspaceId,
+          parent_id: parentId,
+          code,
+          name,
+          description,
+          type: parentSubjects.find(s => s.id === parentId)?.type || 'expense',
+        }),
+      })
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || '新增失敗')
+      }
+      await onSave()
+      // 重置表單
+      setParentId('')
+      setCode('')
+      setName('')
+      setDescription('')
+    } catch (error) {
+      await alert(error instanceof Error ? error.message : '新增失敗', 'error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>新增子科目</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label>父科目 *</Label>
+            <select
+              value={parentId}
+              onChange={e => setParentId(e.target.value)}
+              className="w-full h-10 px-3 rounded-md border border-input bg-background"
+            >
+              <option value="">請選擇父科目</option>
+              {parentSubjects.filter(s => s.level === 1).map(subject => (
+                <option key={subject.id} value={subject.id}>
+                  {subject.code} {subject.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>代碼 *</Label>
+              <Input
+                value={code}
+                onChange={e => setCode(e.target.value)}
+                placeholder="自動生成"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>名稱 *</Label>
+              <Input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="例：XXX 飯店"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>說明（選填）</Label>
+            <Input
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="子科目說明"
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            取消
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={isSubmitting || !parentId || !code || !name}
+            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+          >
+            {isSubmitting ? '新增中...' : '新增'}
           </Button>
         </DialogFooter>
       </DialogContent>
