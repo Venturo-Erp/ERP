@@ -191,9 +191,9 @@ export function ResourceMapPanel({
           )}
         </div>
         {expanded ? (
-          <ChevronUp size={16} className="text-muted-foreground" />
-        ) : (
           <ChevronDown size={16} className="text-muted-foreground" />
+        ) : (
+          <ChevronUp size={16} className="text-muted-foreground" />
         )}
       </button>
 
