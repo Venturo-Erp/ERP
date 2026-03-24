@@ -152,18 +152,6 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  id="edit-isSpecial"
-                  checked={formData.isSpecial}
-                  onChange={e => setFormData(prev => ({ ...prev, isSpecial: e.target.checked }))}
-                  className="rounded"
-                />
-                <label htmlFor="edit-isSpecial" className="text-sm text-morandi-primary">
-                  特殊團
-                </label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
                   id="edit-enableCheckin"
                   checked={formData.enable_checkin}
                   onChange={e =>
@@ -176,17 +164,6 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
                 </label>
               </div>
             </div>
-
-            {/* 航班資訊區塊 */}
-            <FlightInfoSection
-              outboundFlight={formData.outboundFlight}
-              returnFlight={formData.returnFlight}
-              loadingOutbound={loadingOutbound}
-              loadingReturn={loadingReturn}
-              onUpdateFlight={updateFlightField}
-              onSearchOutbound={handleSearchOutbound}
-              onSearchReturn={handleSearchReturn}
-            />
           </div>
 
           {/* 按鈕 */}
