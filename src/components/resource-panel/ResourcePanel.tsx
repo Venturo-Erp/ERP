@@ -4,7 +4,8 @@ import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import { Search, MapPin, Building2, UtensilsCrossed, Loader2 } from 'lucide-react'
+import { Search, MapPin, Building2, UtensilsCrossed, Loader2, Plus } from 'lucide-react'
+import { QuickAddResource } from './QuickAddResource'
 import { ResourceDetailDialog } from './ResourceDetailDialog'
 import { ResourceMapPanel } from './ResourceMapPanel'
 import { Input } from '@/components/ui/input'
@@ -162,6 +163,10 @@ export function ResourcePanel({
   // 編輯 Dialog
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [editingResource, setEditingResource] = useState<ResourceItem | null>(null)
+
+  // 快速新增 Dialog
+  const [quickAddOpen, setQuickAddOpen] = useState(false)
+  const [quickAddInitialName, setQuickAddInitialName] = useState('')
 
   // 篩選：只用國家（簡化版）
   const [resolvedCountryId, setResolvedCountryId] = useState<string | undefined>(undefined)
@@ -450,8 +455,22 @@ export function ResourcePanel({
             <Loader2 size={20} className="animate-spin text-muted-foreground" />
           </div>
         ) : filteredResources.length === 0 ? (
-          <div className="text-center py-8 text-sm text-muted-foreground">
-            {searchQuery ? '找不到符合的結果' : '尚無資料'}
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground mb-3">
+              {searchQuery ? `找不到「${searchQuery}」` : '尚無資料'}
+            </p>
+            {searchQuery && (
+              <button
+                onClick={() => {
+                  setQuickAddInitialName(searchQuery)
+                  setQuickAddOpen(true)
+                }}
+                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-morandi-gold hover:bg-morandi-gold/90 rounded-md transition-colors"
+              >
+                <Plus size={14} />
+                新增「{searchQuery}」
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-1.5">
@@ -489,6 +508,31 @@ export function ResourcePanel({
               r.id === updated.id ? { ...r, name: updated.name } : r
             ),
           }))
+        }}
+      />
+
+      {/* 快速新增 Dialog */}
+      <QuickAddResource
+        type={activeTab}
+        countryId={resolvedCountryId || countryId}
+        open={quickAddOpen}
+        onOpenChange={setQuickAddOpen}
+        initialName={quickAddInitialName}
+        onCreated={resource => {
+          // 新增到當前 tab 的資源列表頂部
+          const newItem: ResourceItem = {
+            id: resource.id,
+            name: resource.name,
+            type: activeTab,
+            category: '',
+            data_verified: false,
+          }
+          setResources(prev => ({
+            ...prev,
+            [activeTab]: [newItem, ...(prev[activeTab] || [])],
+          }))
+          setQuickAddOpen(false)
+          setSearchQuery('') // 清空搜尋框
         }}
       />
     </div>

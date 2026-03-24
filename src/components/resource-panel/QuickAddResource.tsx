@@ -12,6 +12,9 @@ import type { ResourceType } from './ResourcePanel'
 interface QuickAddResourceProps {
   type: ResourceType
   countryId?: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  initialName?: string
   onCreated: (resource: { id: string; name: string; type: string }) => void
 }
 
@@ -27,16 +30,36 @@ const TABLE_MAP: Record<ResourceType, string> = {
   restaurant: 'restaurants',
 }
 
-export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourceProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [name, setName] = useState('')
+export function QuickAddResource({
+  type,
+  countryId,
+  open: controlledOpen,
+  onOpenChange,
+  initialName = '',
+  onCreated,
+}: QuickAddResourceProps) {
+  // 受控/非受控模式
+  const [internalOpen, setInternalOpen] = useState(false)
+  const isControlled = controlledOpen !== undefined
+  const isOpen = isControlled ? controlledOpen : internalOpen
+
+  const [name, setName] = useState(initialName)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const { user } = useAuthStore()
 
+  const handleOpenChange = (open: boolean) => {
+    if (isControlled) {
+      onOpenChange?.(open)
+    } else {
+      setInternalOpen(open)
+    }
+  }
+
   useEffect(() => {
     if (isOpen) {
+      setName(initialName)
       setTimeout(() => inputRef.current?.focus(), 100)
     }
   }, [isOpen])
@@ -105,7 +128,7 @@ export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourc
       logger.log(`快速新增${TYPE_LABELS[type]}:`, result)
       onCreated({ id: result.id, name: result.name, type })
       setName('')
-      setIsOpen(false)
+      handleOpenChange(false)
     } catch (err) {
       logger.error('快速新增失敗:', err)
       setError(err instanceof Error ? err.message : '新增失敗')
@@ -119,7 +142,7 @@ export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourc
       <Button
         variant="outline"
         size="sm"
-        onClick={() => setIsOpen(true)}
+        onClick={() => handleOpenChange(true)}
         className="gap-1 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10"
       >
         <Plus size={14} />
@@ -141,7 +164,7 @@ export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourc
           onKeyDown={e => {
             if (e.key === 'Enter') handleSubmit()
             if (e.key === 'Escape') {
-              setIsOpen(false)
+              handleOpenChange(false)
               setName('')
             }
           }}
@@ -168,7 +191,7 @@ export function QuickAddResource({ type, countryId, onCreated }: QuickAddResourc
         variant="ghost"
         size="sm"
         onClick={() => {
-          setIsOpen(false)
+          handleOpenChange(false)
           setName('')
           setError('')
         }}
