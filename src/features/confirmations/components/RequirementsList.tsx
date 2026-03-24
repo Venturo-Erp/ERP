@@ -79,6 +79,7 @@ export function RequirementsList({
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [tour, setTour] = useState<Tour | null>(null)
+  const [itinerary, setItinerary] = useState<any>(null) // 行程表資料（包含 daily_itinerary）
   const [linkedQuoteId, setLinkedQuoteId] = useState<string | null>(propQuoteId || null)
   const [existingRequests, setExistingRequests] = useState<TourRequest[]>([])
   // quoteCategories 已移除 — 需求單直接讀核心表
@@ -165,6 +166,16 @@ export function RequirementsList({
           if (tourData.outbound_flight) {
             setOutboundFlight(tourData.outbound_flight as FlightInfo)
             setReturnFlight(tourData.return_flight as FlightInfo | null)
+          }
+
+          // 讀取行程表（包含 daily_itinerary 的完整行程描述）
+          const { data: itineraryData } = await supabase
+            .from('itinerary')
+            .select('id, daily_itinerary')
+            .eq('tour_id', tourId)
+            .single()
+          if (itineraryData) {
+            setItinerary(itineraryData)
           }
           // 🛡️ 自動建立保險需求單（如果不存在）
           if (user?.workspace_id && tourData.departure_date) {
@@ -313,37 +324,69 @@ export function RequirementsList({
   }, [coreItems, calculateDate, existingRequests])
   const itemsByCategory = useMemo(() => groupItemsByCategory(quoteItems), [quoteItems])
 
-  // 交通 Dialog 用：建立天數資訊（從行程項目組合路線）
+  // 交通 Dialog 用：建立天數資訊（從行程表 daily_itinerary 讀取完整描述）
   const transportDays = useMemo(() => {
     const dayMap = new Map<number, { dayNumber: number; date: string; route: string }>()
-    // 先建立每天的基礎資訊
-    for (const item of coreItems) {
-      const dn = item.day_number
-      if (!dn) continue
-      if (!dayMap.has(dn)) {
-        const date = calculateDate(dn)
-        dayMap.set(dn, {
-          dayNumber: dn,
+
+    // 優先從 daily_itinerary 讀取完整的行程描述（destinations 欄位）
+    if (itinerary?.daily_itinerary && Array.isArray(itinerary.daily_itinerary)) {
+      const dailyItinerary = itinerary.daily_itinerary as Array<{
+        day?: number
+        destinations?: string
+        activities?: any[]
+        meals?: any
+        accommodation?: string
+      }>
+
+      for (const day of dailyItinerary) {
+        const dayNum = day.day || 0
+        if (!dayNum) continue
+
+        const date = calculateDate(dayNum)
+        const destinations = day.destinations || ''
+
+        dayMap.set(dayNum, {
+          dayNumber: dayNum,
           date: date
             ? new Date(date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
-            : `Day ${dn}`,
-          route: '',
+            : `Day ${dayNum}`,
+          route: destinations, // 直接使用行程表的完整描述
         })
       }
     }
-    // 從所有 item 組合路線（景點、餐廳名都算）
-    for (const item of coreItems) {
-      const dn = item.day_number
-      if (!dn || !dayMap.has(dn)) continue
-      const title = item.supplierName || item.title || ''
-      if (!title) continue
-      const day = dayMap.get(dn)!
-      // 避免重複（飯店早餐等跳過）
-      if (title === '飯店早餐' || day.route.includes(title)) continue
-      day.route = day.route ? `${day.route} → ${title}` : title
+
+    // 如果沒有 daily_itinerary，fallback 到原本的邏輯（從 coreItems 組合）
+    if (dayMap.size === 0) {
+      // 先建立每天的基礎資訊
+      for (const item of coreItems) {
+        const dn = item.day_number
+        if (!dn) continue
+        if (!dayMap.has(dn)) {
+          const date = calculateDate(dn)
+          dayMap.set(dn, {
+            dayNumber: dn,
+            date: date
+              ? new Date(date).toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
+              : `Day ${dn}`,
+            route: '',
+          })
+        }
+      }
+      // 從所有 item 組合路線（景點、餐廳名都算）
+      for (const item of coreItems) {
+        const dn = item.day_number
+        if (!dn || !dayMap.has(dn)) continue
+        const title = item.supplierName || item.title || ''
+        if (!title) continue
+        const day = dayMap.get(dn)!
+        // 避免重複（飯店早餐等跳過）
+        if (title === '飯店早餐' || day.route.includes(title)) continue
+        day.route = day.route ? `${day.route} → ${title}` : title
+      }
     }
+
     return Array.from(dayMap.values()).sort((a, b) => a.dayNumber - b.dayNumber)
-  }, [coreItems, calculateDate])
+  }, [coreItems, itinerary, calculateDate])
 
   // 團確單
   const { generatingSheet, handleGenerateConfirmationSheet } = useConfirmationSheet({
