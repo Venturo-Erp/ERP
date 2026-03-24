@@ -5,6 +5,7 @@ export interface UseTableStateProps<T> {
   searchTerm?: string
   searchableFields?: (keyof T)[]
   initialPageSize?: number
+  defaultSort?: { key: string; direction: 'asc' | 'desc' }
 }
 
 export function useTableState<T>({
@@ -12,9 +13,10 @@ export function useTableState<T>({
   searchTerm = '',
   searchableFields = [],
   initialPageSize = 15,
+  defaultSort,
 }: UseTableStateProps<T>) {
-  const [sortColumn, setSortColumn] = useState<string | null>(null)
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [sortColumn, setSortColumn] = useState<string | null>(defaultSort?.key ?? null)
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(defaultSort?.direction ?? 'asc')
   const [filters, setFilters] = useState<Record<string, string>>({})
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)

@@ -37,6 +37,7 @@ interface ResponsiveHeaderProps {
     value: string
     label: string
     icon?: unknown
+    count?: number
   }[]
   activeTab?: string
   onTabChange?: (value: string) => void

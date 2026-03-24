@@ -32,6 +32,7 @@ export function EnhancedTable<T extends RowData = RowData>({
   searchTerm: externalSearchTerm = '',
   emptyState,
   emptyMessage,
+  defaultSort,
   selection,
   expandable,
   actions,
@@ -78,6 +79,7 @@ export function EnhancedTable<T extends RowData = RowData>({
     searchTerm: externalSearchTerm,
     searchableFields: searchableFields as (keyof RowData)[],
     initialPageSize,
+    defaultSort,
   })
 
   // Helper functions for selection and expandable
