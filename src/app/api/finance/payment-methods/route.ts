@@ -7,21 +7,29 @@ const supabase = createClient(
 )
 
 /**
- * GET /api/finance/payment-methods?workspace_id=xxx
+ * GET /api/finance/payment-methods?workspace_id=xxx&type=receipt|payment
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const workspaceId = searchParams.get('workspace_id')
+  const type = searchParams.get('type') // 'receipt' or 'payment'
 
   if (!workspaceId) {
     return NextResponse.json({ error: '缺少 workspace_id' }, { status: 400 })
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('payment_methods')
     .select('*')
     .eq('workspace_id', workspaceId)
-    .order('type')
+    .eq('is_active', true)
+
+  // 如果有指定類型，只取該類型
+  if (type) {
+    query = query.eq('type', type)
+  }
+
+  const { data, error } = await query
     .order('sort_order')
     .order('name')
 

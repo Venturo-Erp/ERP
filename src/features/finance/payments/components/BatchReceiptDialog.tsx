@@ -49,8 +49,8 @@ interface BatchReceiptDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-// 收款方式選項
-const paymentMethods = [
+// 收款方式選項（fallback，優先從 DB 讀取）
+const defaultPaymentMethods = [
   { value: 'cash', label: BATCH_RECEIPT_DIALOG_LABELS.現金 },
   { value: 'transfer', label: BATCH_RECEIPT_DIALOG_LABELS.匯款 },
   { value: 'card', label: BATCH_RECEIPT_DIALOG_LABELS.刷卡 },
@@ -68,6 +68,27 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
   // 訂單分配列表
   const [orderAllocations, setOrderAllocations] = useState<OrderAllocationWithNote[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // 從 DB 讀取的收款方式
+  const [paymentMethods, setPaymentMethods] = useState(defaultPaymentMethods)
+
+  // 載入收款方式
+  useEffect(() => {
+    if (user?.workspace_id) {
+      fetch(`/api/finance/payment-methods?workspace_id=${user.workspace_id}&type=receipt`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.data && data.data.length > 0) {
+            setPaymentMethods(data.data.map((m: { code: string; name: string }) => ({
+              value: m.code.toLowerCase(),
+              label: m.name,
+            })))
+          }
+        })
+        .catch(() => {
+          // 失敗時使用預設值
+        })
+    }
+  }, [user?.workspace_id])
 
   // 可用訂單（未收款或部分收款）
   const availableOrders = useMemo(() => {
