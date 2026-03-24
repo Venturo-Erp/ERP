@@ -157,9 +157,12 @@ export function ResourceDetailDialog({
     ? `https://www.google.com/maps?q=${resource.latitude},${resource.longitude}`
     : null
 
+  // 有圖片時用左右兩欄，沒有時用單欄
+  const hasThumbnail = !!thumbnail
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className={hasThumbnail ? 'max-w-3xl' : 'max-w-md'}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {iconMap[resource.type]}
@@ -173,118 +176,123 @@ export function ResourceDetailDialog({
         {loading ? (
           <div className="py-8 text-center text-muted-foreground">載入中...</div>
         ) : (
-          <div className="space-y-4">
-            {/* 圖片 */}
-            {thumbnail && (
-              <div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-                <img src={thumbnail} alt={resource.name} className="w-full h-full object-cover" />
+          <div className={hasThumbnail ? 'flex gap-6' : 'space-y-4'}>
+            {/* 左側：圖片 */}
+            {hasThumbnail && (
+              <div className="w-[280px] flex-shrink-0">
+                <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted">
+                  <img src={thumbnail} alt={resource.name} className="w-full h-full object-cover" />
+                </div>
               </div>
             )}
 
-            {/* 名稱 */}
-            {isEditing ? (
-              <div className="space-y-1.5">
-                <Label>名稱</Label>
-                <Input
-                  value={editName}
-                  onChange={e => setEditName(e.target.value)}
-                  placeholder="輸入名稱"
-                />
-              </div>
-            ) : (
-              <div>
-                <h3 className="text-lg font-semibold">{String(fullData?.name || resource.name)}</h3>
-                {resource.category && (
-                  <Badge variant="secondary" className="mt-1">
-                    {resource.category}
-                  </Badge>
-                )}
-              </div>
-            )}
-
-            {/* 地址 */}
-            {isEditing ? (
-              <div className="space-y-1.5">
-                <Label>地址</Label>
-                <Input
-                  value={editAddress}
-                  onChange={e => setEditAddress(e.target.value)}
-                  placeholder="輸入地址"
-                />
-              </div>
-            ) : fullData?.address || resource.address ? (
-              <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                <MapPin size={14} className="mt-0.5 flex-shrink-0" />
-                <span>{String(fullData?.address || resource.address)}</span>
-              </div>
-            ) : null}
-
-            {/* 描述 */}
-            {isEditing ? (
-              <div className="space-y-1.5">
-                <Label>描述</Label>
-                <Textarea
-                  value={editDescription}
-                  onChange={e => setEditDescription(e.target.value)}
-                  placeholder="輸入描述"
-                  rows={3}
-                />
-              </div>
-            ) : fullData?.description ? (
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {String(fullData.description)}
-              </p>
-            ) : null}
-
-            {/* 座標 & 地圖連結 */}
-            {hasCoordinates && !isEditing && (
-              <div className="flex items-center gap-2 pt-2 border-t">
-                <span className="text-xs text-muted-foreground">
-                  📍 {resource.latitude?.toFixed(4)}, {resource.longitude?.toFixed(4)}
-                </span>
-                {googleMapsUrl && (
-                  <a
-                    href={googleMapsUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-blue-600 hover:underline flex items-center gap-1"
-                  >
-                    Google Maps <ExternalLink size={10} />
-                  </a>
-                )}
-              </div>
-            )}
-
-            {/* 按鈕區 */}
-            <div className="flex justify-end gap-2 pt-2">
+            {/* 右側：資訊 */}
+            <div className={hasThumbnail ? 'flex-1 space-y-3 max-h-[400px] overflow-y-auto pr-2' : 'space-y-4'}>
+              {/* 名稱 */}
               {isEditing ? (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setIsEditing(false)
-                      // 重置表單
-                      setEditName(String(fullData?.name || ''))
-                      setEditDescription(String(fullData?.description || ''))
-                      setEditAddress(String(fullData?.address || ''))
-                    }}
-                  >
-                    <X size={14} className="mr-1" />
-                    取消
-                  </Button>
-                  <Button size="sm" onClick={handleSave} disabled={saving}>
-                    <Save size={14} className="mr-1" />
-                    {saving ? '儲存中...' : '儲存'}
-                  </Button>
-                </>
+                <div className="space-y-1.5">
+                  <Label>名稱</Label>
+                  <Input
+                    value={editName}
+                    onChange={e => setEditName(e.target.value)}
+                    placeholder="輸入名稱"
+                  />
+                </div>
               ) : (
-                !readOnly && (
-                  <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                    編輯資訊
-                  </Button>
-                )
+                <div>
+                  <h3 className="text-lg font-semibold">{String(fullData?.name || resource.name)}</h3>
+                  {resource.category && (
+                    <Badge variant="secondary" className="mt-1">
+                      {resource.category}
+                    </Badge>
+                  )}
+                </div>
               )}
+
+              {/* 地址 */}
+              {isEditing ? (
+                <div className="space-y-1.5">
+                  <Label>地址</Label>
+                  <Input
+                    value={editAddress}
+                    onChange={e => setEditAddress(e.target.value)}
+                    placeholder="輸入地址"
+                  />
+                </div>
+              ) : fullData?.address || resource.address ? (
+                <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <MapPin size={14} className="mt-0.5 flex-shrink-0" />
+                  <span>{String(fullData?.address || resource.address)}</span>
+                </div>
+              ) : null}
+
+              {/* 描述 */}
+              {isEditing ? (
+                <div className="space-y-1.5">
+                  <Label>描述</Label>
+                  <Textarea
+                    value={editDescription}
+                    onChange={e => setEditDescription(e.target.value)}
+                    placeholder="輸入描述"
+                    rows={3}
+                  />
+                </div>
+              ) : fullData?.description ? (
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {String(fullData.description)}
+                </p>
+              ) : null}
+
+              {/* 座標 & 地圖連結 */}
+              {hasCoordinates && !isEditing && (
+                <div className="flex items-center gap-2 pt-2 border-t">
+                  <span className="text-xs text-muted-foreground">
+                    📍 {resource.latitude?.toFixed(4)}, {resource.longitude?.toFixed(4)}
+                  </span>
+                  {googleMapsUrl && (
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                    >
+                      Google Maps <ExternalLink size={10} />
+                    </a>
+                  )}
+                </div>
+              )}
+
+              {/* 按鈕區 */}
+              <div className="flex justify-end gap-2 pt-2">
+                {isEditing ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setIsEditing(false)
+                        // 重置表單
+                        setEditName(String(fullData?.name || ''))
+                        setEditDescription(String(fullData?.description || ''))
+                        setEditAddress(String(fullData?.address || ''))
+                      }}
+                    >
+                      <X size={14} className="mr-1" />
+                      取消
+                    </Button>
+                    <Button size="sm" onClick={handleSave} disabled={saving}>
+                      <Save size={14} className="mr-1" />
+                      {saving ? '儲存中...' : '儲存'}
+                    </Button>
+                  </>
+                ) : (
+                  !readOnly && (
+                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                      編輯資訊
+                    </Button>
+                  )
+                )}
+              </div>
             </div>
           </div>
         )}
