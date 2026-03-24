@@ -344,8 +344,8 @@ export default function FinanceSettingsPage() {
     >
       <div className="flex h-full">
         {/* 左側選單 */}
-        <div className="w-[200px] border-r border-border bg-morandi-background/30">
-          <div className="p-4 space-y-1">
+        <div className="w-[180px] border-r border-border bg-morandi-background/30">
+          <div className="p-3 space-y-1">
             {sections.map(section => {
               const Icon = section.icon
               const isActive = activeSection === section.key
@@ -353,7 +353,7 @@ export default function FinanceSettingsPage() {
                 <button
                   key={section.key}
                   onClick={() => setActiveSection(section.key)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                  className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-morandi-gold text-white'
                       : 'text-morandi-secondary hover:bg-morandi-container'
@@ -368,7 +368,7 @@ export default function FinanceSettingsPage() {
         </div>
 
         {/* 右側內容 */}
-        <div className="flex-1 p-6">
+        <div className="flex-1 p-4">
           {/* 收款方式 */}
           {activeSection === 'receipt' && (
             <div className="space-y-4">
