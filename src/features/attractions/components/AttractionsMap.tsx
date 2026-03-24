@@ -144,11 +144,17 @@ export function AttractionsMap({
         dashArray: '8, 8',
       }).addTo(map)
 
-      // 地圖移動時更新圓圈位置 + 重新計算附近景點
+      // 地圖移動時更新圓圈位置 + 重新計算附近景點（延遲避免 popup 被關閉）
+      let moveTimeout: ReturnType<typeof setTimeout> | null = null
       map.on('moveend', () => {
         const center = map.getCenter()
         searchCircle.setLatLng(center)
-        setMapCenter({ lat: center.lat, lng: center.lng })
+        
+        // 延遲更新，讓 popup 有時間顯示
+        if (moveTimeout) clearTimeout(moveTimeout)
+        moveTimeout = setTimeout(() => {
+          setMapCenter({ lat: center.lat, lng: center.lng })
+        }, 800)
       })
 
       // 創建自訂標記（圓角方形 + 圖片）
@@ -349,14 +355,6 @@ export function AttractionsMap({
         </div>
       )}
       <div ref={containerRef} className="w-full h-full" style={{ minHeight: '400px' }} />
-      {nearbyAttractions.length > 0 && (
-        <div className="absolute bottom-3 left-3 text-xs bg-card/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm z-[1000] text-morandi-primary">
-          {radiusKm}
-          {ATTRACTIONS_MAP_LABELS.NEARBY_PREFIX}
-          {nearbyAttractions.length}
-          {ATTRACTIONS_MAP_LABELS.NEARBY_SUFFIX}
-        </div>
-      )}
     </div>
   )
 }
