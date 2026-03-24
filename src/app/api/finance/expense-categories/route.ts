@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createSupabaseServerClient } from '@/lib/supabase/server'
 
 // GET - 取得請款類別列表
 export async function GET(request: NextRequest) {
-  const supabase = await createClient()
+  const supabase = await createSupabaseServerClient()
   const { searchParams } = new URL(request.url)
   const workspaceId = searchParams.get('workspace_id')
 
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
 // POST - 新增請款類別
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
+  const supabase = await createSupabaseServerClient()
   const body = await request.json()
   const { name, icon, color, workspace_id, sort_order } = body
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
 
 // PUT - 更新請款類別
 export async function PUT(request: NextRequest) {
-  const supabase = await createClient()
+  const supabase = await createSupabaseServerClient()
   const body = await request.json()
   const { id, name, icon, color, is_active, sort_order } = body
 
@@ -89,7 +89,7 @@ export async function PUT(request: NextRequest) {
 
 // DELETE - 刪除請款類別
 export async function DELETE(request: NextRequest) {
-  const supabase = await createClient()
+  const supabase = await createSupabaseServerClient()
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
 
