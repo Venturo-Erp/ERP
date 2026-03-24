@@ -17,13 +17,13 @@ function getSupabase() {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const workspaceId = searchParams.get('workspace_id')
-  const mappingType = searchParams.get('mapping_type') || 'payment_category'
+  const mappingType = searchParams.get('mapping_type') // 可選，不傳就返回全部
 
   if (!workspaceId) {
     return NextResponse.json({ error: '缺少 workspace_id' }, { status: 400 })
   }
 
-  const { data, error } = await getSupabase()
+  let query = getSupabase()
     .from('account_mappings')
     .select(`
       id,
@@ -35,9 +35,15 @@ export async function GET(request: NextRequest) {
       credit:chart_of_accounts!credit_account_id(id, code, name)
     `)
     .eq('workspace_id', workspaceId)
-    .eq('mapping_type', mappingType)
     .eq('is_active', true)
+    .order('mapping_type')
     .order('category')
+
+  if (mappingType) {
+    query = query.eq('mapping_type', mappingType)
+  }
+
+  const { data, error } = await query
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

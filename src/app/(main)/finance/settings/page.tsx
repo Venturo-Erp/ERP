@@ -497,24 +497,22 @@ export default function FinanceSettingsPage() {
           {/* 科目對應 */}
           {activeSection === 'mapping' && (
             <div className="space-y-4">
-              <p className="text-sm text-morandi-muted">
-                設定請款類別對應的會計科目，產生傳票時自動帶入
-              </p>
-
               <Card className="border rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[120px]">類別</TableHead>
-                      <TableHead>借方科目</TableHead>
-                      <TableHead>貸方科目</TableHead>
-                      <TableHead className="w-[100px] text-right">操作</TableHead>
+                      <TableHead className="w-[100px]">名稱</TableHead>
+                      <TableHead className="w-[150px]">說明</TableHead>
+                      <TableHead>借方</TableHead>
+                      <TableHead>貸方</TableHead>
+                      <TableHead className="w-[80px]">狀態</TableHead>
+                      <TableHead className="w-[80px] text-right">操作</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {accountMappings.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} className="text-center py-8 text-morandi-muted">
+                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
                           尚未設定科目對應
                         </TableCell>
                       </TableRow>
@@ -522,6 +520,9 @@ export default function FinanceSettingsPage() {
                       accountMappings.map(mapping => (
                         <TableRow key={mapping.id}>
                           <TableCell className="font-medium">{mapping.category}</TableCell>
+                          <TableCell className="text-morandi-muted text-sm">
+                            {mapping.mapping_type === 'payment_category' ? '請款' : '收款'}
+                          </TableCell>
                           <TableCell>
                             <select
                               value={mapping.debit_account_id || ''}
@@ -540,13 +541,11 @@ export default function FinanceSettingsPage() {
                               className="w-full h-9 px-2 rounded border border-input bg-background text-sm"
                             >
                               <option value="">選擇科目</option>
-                              {chartOfAccounts
-                                .filter(a => a.type === 'cost' || a.type === 'expense' || a.type === 'asset')
-                                .map(account => (
-                                  <option key={account.id} value={account.id}>
-                                    {account.code} {account.name}
-                                  </option>
-                                ))}
+                              {chartOfAccounts.map(account => (
+                                <option key={account.id} value={account.id}>
+                                  {account.code} {account.name}
+                                </option>
+                              ))}
                             </select>
                           </TableCell>
                           <TableCell>
@@ -567,19 +566,20 @@ export default function FinanceSettingsPage() {
                               className="w-full h-9 px-2 rounded border border-input bg-background text-sm"
                             >
                               <option value="">選擇科目</option>
-                              {chartOfAccounts
-                                .filter(a => a.type === 'liability' || a.type === 'revenue')
-                                .map(account => (
-                                  <option key={account.id} value={account.id}>
-                                    {account.code} {account.name}
-                                  </option>
-                                ))}
+                              {chartOfAccounts.map(account => (
+                                <option key={account.id} value={account.id}>
+                                  {account.code} {account.name}
+                                </option>
+                              ))}
                             </select>
                           </TableCell>
+                          <TableCell>
+                            <Badge className="bg-green-100 text-green-700">啟用</Badge>
+                          </TableCell>
                           <TableCell className="text-right">
-                            <span className="text-xs text-morandi-muted">
-                              {mapping.debit?.code} → {mapping.credit?.code}
-                            </span>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <Pencil className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))
