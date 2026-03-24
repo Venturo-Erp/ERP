@@ -824,56 +824,6 @@ export function OrderMembersExpandable({
     [isComposing, editableFields, membersData]
   )
 
-  // 批量貼上功能（Excel-like）
-  const handlePaste = useCallback(
-    async (e: React.ClipboardEvent, memberIndex: number, fieldName: string) => {
-      const pastedText = e.clipboardData.getData('text')
-      
-      // 檢查是否有多行（換行符分隔）
-      const lines = pastedText.split(/[\r\n]+/).filter(line => line.trim())
-      
-      if (lines.length <= 1) {
-        // 單行貼上，讓瀏覽器預設處理
-        return
-      }
-      
-      // 多行貼上，阻止預設行為
-      e.preventDefault()
-      
-      const { members } = membersData
-      const updates: Array<{ id: string; [key: string]: string }> = []
-      
-      // 從當前成員開始，依序填入
-      for (let i = 0; i < lines.length && memberIndex + i < members.length; i++) {
-        const member = members[memberIndex + i]
-        updates.push({
-          id: member.id,
-          [fieldName]: lines[i].trim()
-        })
-      }
-      
-      // 批量更新（使用 Supabase 批量更新）
-      try {
-        const promises = updates.map(update => 
-          supabase
-            .from('order_members')
-            .update({ [fieldName]: update[fieldName] })
-            .eq('id', update.id)
-        )
-        await Promise.all(promises)
-        
-        // 重新載入資料
-        await membersData.loadMembers()
-        
-        toast.success(`已貼上 ${updates.length} 筆資料`)
-      } catch (error) {
-        logger.error('批量貼上失敗', error)
-        toast.error('批量貼上失敗')
-      }
-    },
-    [membersData]
-  )
-
   const sortedMembers = useMemo(() => {
     // 有分房時按房間排序（同房的人排在一起）
     if (roomVehicle.showRoomColumn && Object.keys(roomVehicle.roomSortKeys).length > 0) {
@@ -904,6 +854,56 @@ export function OrderMembersExpandable({
       roomVehicle.hotelColumns,
       roomVehicle.roomAssignmentsByHotel,
     ]
+  )
+
+  // 批量貼上功能（Excel-like）- 使用 sortedMembers 確保順序正確
+  const handlePaste = useCallback(
+    async (e: React.ClipboardEvent, memberIndex: number, fieldName: string) => {
+      const pastedText = e.clipboardData.getData('text')
+      
+      // 檢查是否有多行（換行符分隔）
+      const lines = pastedText.split(/[\r\n]+/).filter(line => line.trim())
+      
+      if (lines.length <= 1) {
+        // 單行貼上，讓瀏覽器預設處理
+        return
+      }
+      
+      // 多行貼上，阻止預設行為
+      e.preventDefault()
+      
+      // 使用 sortedMembers（畫面顯示的順序）而不是 membersData.members
+      const updates: Array<{ id: string; [key: string]: string }> = []
+      
+      // 從當前成員開始，依序填入
+      for (let i = 0; i < lines.length && memberIndex + i < sortedMembers.length; i++) {
+        const member = sortedMembers[memberIndex + i]
+        updates.push({
+          id: member.id,
+          [fieldName]: lines[i].trim()
+        })
+      }
+      
+      // 批量更新（使用 Supabase 批量更新）
+      try {
+        const promises = updates.map(update => 
+          supabase
+            .from('order_members')
+            .update({ [fieldName]: update[fieldName] })
+            .eq('id', update.id)
+        )
+        await Promise.all(promises)
+        
+        // 重新載入資料
+        await membersData.loadMembers()
+        
+        toast.success(`已貼上 ${updates.length} 筆資料`)
+      } catch (error) {
+        logger.error('批量貼上失敗', error)
+        toast.error('批量貼上失敗')
+      }
+    },
+    [sortedMembers, membersData]
   )
 
   return (
