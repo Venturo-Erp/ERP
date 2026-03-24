@@ -523,11 +523,17 @@ export default function FinanceSettingsPage() {
                           <TableCell className="font-medium">{subject.name}</TableCell>
                           <TableCell>
                             <Badge className={
-                              subject.type === 'revenue' 
-                                ? 'bg-green-100 text-green-700' 
-                                : 'bg-orange-100 text-orange-700'
+                              subject.type === 'revenue' ? 'bg-green-100 text-green-700' :
+                              subject.type === 'asset' ? 'bg-blue-100 text-blue-700' :
+                              subject.type === 'liability' ? 'bg-purple-100 text-purple-700' :
+                              subject.type === 'equity' ? 'bg-indigo-100 text-indigo-700' :
+                              'bg-orange-100 text-orange-700'
                             }>
-                              {subject.type === 'revenue' ? '收入' : '支出'}
+                              {subject.type === 'revenue' ? '收入' :
+                               subject.type === 'asset' ? '資產' :
+                               subject.type === 'liability' ? '負債' :
+                               subject.type === 'equity' ? '權益' :
+                               subject.type === 'cost' ? '成本' : '費用'}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-morandi-muted">
