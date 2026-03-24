@@ -64,23 +64,10 @@ interface BankAccount {
   is_active: boolean
 }
 
-interface AccountingSubject {
-  id: string
-  code: string
-  name: string
-  type: string
-  description: string | null
-  parent_id: string | null
-  level: number
-  is_system: boolean
-  is_active: boolean
-}
-
 export default function FinanceSettingsPage() {
-  const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank' | 'accounting'>('receipt')
+  const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank'>('receipt')
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
-  const [accountingSubjects, setAccountingSubjects] = useState<AccountingSubject[]>([])
   const [isLoading, setIsLoading] = useState(true)
   
   // 編輯對話框
@@ -88,7 +75,6 @@ export default function FinanceSettingsPage() {
   const [editingBank, setEditingBank] = useState<BankAccount | null>(null)
   const [isMethodDialogOpen, setIsMethodDialogOpen] = useState(false)
   const [isBankDialogOpen, setIsBankDialogOpen] = useState(false)
-  const [isSubjectDialogOpen, setIsSubjectDialogOpen] = useState(false)
   
   const workspaceId = useAuthStore(state => state.user?.workspace_id)
 
@@ -111,11 +97,6 @@ export default function FinanceSettingsPage() {
       const banksRes = await fetch(`/api/bank-accounts?workspace_id=${workspaceId}`)
       const banksData = await banksRes.json()
       setBankAccounts(banksData || [])
-
-      // 載入會計科目
-      const subjectsRes = await fetch(`/api/finance/accounting-subjects?workspace_id=${workspaceId}`)
-      const subjectsData = await subjectsRes.json()
-      setAccountingSubjects(subjectsData || [])
     } catch (error) {
       console.error('載入資料失敗:', error)
     } finally {
@@ -217,7 +198,6 @@ export default function FinanceSettingsPage() {
     { key: 'receipt', label: '收款方式', icon: CreditCard },
     { key: 'payment', label: '請款方式', icon: Banknote },
     { key: 'bank', label: '銀行帳戶', icon: Building2 },
-    { key: 'accounting', label: '會計科目', icon: Settings },
   ] as const
 
   // 取得當前 section 的標題
@@ -261,14 +241,6 @@ export default function FinanceSettingsPage() {
           >
             <Plus className="h-4 w-4 mr-2" />
             新增銀行帳戶
-          </Button>
-        ) : activeSection === 'accounting' ? (
-          <Button
-            onClick={() => setIsSubjectDialogOpen(true)}
-            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            新增子科目
           </Button>
         ) : null
       }
@@ -491,73 +463,7 @@ export default function FinanceSettingsPage() {
             </div>
           )}
 
-          {/* 會計科目 */}
-          {activeSection === 'accounting' && (
-            <div className="space-y-4">
-              <p className="text-sm text-morandi-muted">
-                會計科目用於分類收款和請款（選填功能）
-              </p>
 
-              <Card className="border rounded-lg overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[120px]">科目代號</TableHead>
-                      <TableHead>名稱</TableHead>
-                      <TableHead className="w-[100px]">類型</TableHead>
-                      <TableHead>說明</TableHead>
-                      <TableHead className="w-[80px]">狀態</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {accountingSubjects.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
-                          尚未設定會計科目
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      accountingSubjects.map(subject => (
-                        <TableRow key={subject.id}>
-                          <TableCell className="font-mono">{subject.code}</TableCell>
-                          <TableCell className="font-medium">{subject.name}</TableCell>
-                          <TableCell>
-                            <Badge className={
-                              subject.type === 'revenue' ? 'bg-green-100 text-green-700' :
-                              subject.type === 'asset' ? 'bg-blue-100 text-blue-700' :
-                              subject.type === 'liability' ? 'bg-purple-100 text-purple-700' :
-                              subject.type === 'equity' ? 'bg-indigo-100 text-indigo-700' :
-                              'bg-orange-100 text-orange-700'
-                            }>
-                              {subject.type === 'revenue' ? '收入' :
-                               subject.type === 'asset' ? '資產' :
-                               subject.type === 'liability' ? '負債' :
-                               subject.type === 'equity' ? '權益' :
-                               subject.type === 'cost' ? '成本' : '費用'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-morandi-muted">
-                            {subject.description || '-'}
-                          </TableCell>
-                          <TableCell>
-                            {subject.is_system ? (
-                              <Badge className="bg-morandi-background text-morandi-muted">系統</Badge>
-                            ) : (
-                              <Badge className="bg-morandi-gold/20 text-morandi-gold">自訂</Badge>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </Card>
-              
-              <p className="text-sm text-morandi-muted">
-                💡 系統科目不可刪除，但可新增子科目細分。
-              </p>
-            </div>
-          )}
         </div>
       </div>
 
@@ -578,17 +484,6 @@ export default function FinanceSettingsPage() {
         onSave={handleSaveBank}
       />
 
-      {/* 新增子科目對話框 */}
-      <SubjectDialog
-        open={isSubjectDialogOpen}
-        onOpenChange={setIsSubjectDialogOpen}
-        parentSubjects={accountingSubjects.filter(s => !s.is_system || s.level === 1)}
-        workspaceId={workspaceId || ''}
-        onSave={async () => {
-          await loadData()
-          setIsSubjectDialogOpen(false)
-        }}
-      />
     </ContentPageLayout>
   )
 }
@@ -806,137 +701,4 @@ function BankDialog({
   )
 }
 
-// 新增子科目對話框
-function SubjectDialog({
-  open,
-  onOpenChange,
-  parentSubjects,
-  workspaceId,
-  onSave,
-}: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  parentSubjects: AccountingSubject[]
-  workspaceId: string
-  onSave: () => Promise<void>
-}) {
-  const [parentId, setParentId] = useState('')
-  const [code, setCode] = useState('')
-  const [name, setName] = useState('')
-  const [description, setDescription] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 根據父科目自動生成子科目代碼
-  useEffect(() => {
-    if (parentId) {
-      const parent = parentSubjects.find(s => s.id === parentId)
-      if (parent) {
-        // 找出該父科目下已有的子科目數量
-        const siblings = parentSubjects.filter(s => s.code.startsWith(parent.code + '-'))
-        const nextNum = siblings.length + 1
-        setCode(`${parent.code}-${nextNum.toString().padStart(2, '0')}`)
-      }
-    }
-  }, [parentId, parentSubjects])
-
-  const handleSubmit = async () => {
-    if (!parentId || !code || !name) {
-      await alert('請填寫父科目、代碼和名稱', 'warning')
-      return
-    }
-    setIsSubmitting(true)
-    try {
-      const res = await fetch('/api/finance/accounting-subjects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          workspace_id: workspaceId,
-          parent_id: parentId,
-          code,
-          name,
-          description,
-          type: parentSubjects.find(s => s.id === parentId)?.type || 'expense',
-        }),
-      })
-      if (!res.ok) {
-        const error = await res.json()
-        throw new Error(error.error || '新增失敗')
-      }
-      await onSave()
-      // 重置表單
-      setParentId('')
-      setCode('')
-      setName('')
-      setDescription('')
-    } catch (error) {
-      await alert(error instanceof Error ? error.message : '新增失敗', 'error')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>新增子科目</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>父科目 *</Label>
-            <select
-              value={parentId}
-              onChange={e => setParentId(e.target.value)}
-              className="w-full h-10 px-3 rounded-md border border-input bg-background"
-            >
-              <option value="">請選擇父科目</option>
-              {parentSubjects.filter(s => s.level === 1).map(subject => (
-                <option key={subject.id} value={subject.id}>
-                  {subject.code} {subject.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>代碼 *</Label>
-              <Input
-                value={code}
-                onChange={e => setCode(e.target.value)}
-                placeholder="自動生成"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>名稱 *</Label>
-              <Input
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="例：XXX 飯店"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label>說明（選填）</Label>
-            <Input
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="子科目說明"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            取消
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting || !parentId || !code || !name}
-            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-          >
-            {isSubmitting ? '新增中...' : '新增'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
-}
