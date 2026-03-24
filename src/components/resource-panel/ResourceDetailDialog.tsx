@@ -152,17 +152,22 @@ export function ResourceDetailDialog({
   }
 
   const thumbnail = (fullData?.thumbnail as string) || resource.thumbnail
+  const images = (fullData?.images as string[]) || []
+  // 合併所有圖片：thumbnail + images
+  const allImages = [thumbnail, ...images].filter(Boolean) as string[]
+  const hasImages = allImages.length > 0
+  
   const hasCoordinates = resource.latitude && resource.longitude
   const googleMapsUrl = hasCoordinates
     ? `https://www.google.com/maps?q=${resource.latitude},${resource.longitude}`
     : null
 
-  // 有圖片時用左右兩欄，沒有時用單欄
-  const hasThumbnail = !!thumbnail
+  // 圖片輪播狀態
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={hasThumbnail ? 'max-w-3xl' : 'max-w-md'}>
+      <DialogContent className={hasImages ? 'max-w-4xl' : 'max-w-md'}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {iconMap[resource.type]}
@@ -176,18 +181,45 @@ export function ResourceDetailDialog({
         {loading ? (
           <div className="py-8 text-center text-muted-foreground">載入中...</div>
         ) : (
-          <div className={hasThumbnail ? 'flex gap-6' : 'space-y-4'}>
+          <div className={hasImages ? 'flex gap-6' : 'space-y-4'}>
             {/* 左側：圖片 */}
-            {hasThumbnail && (
-              <div className="w-[280px] flex-shrink-0">
+            {hasImages && (
+              <div className="w-[320px] flex-shrink-0 space-y-2">
+                {/* 主圖 */}
                 <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted">
-                  <img src={thumbnail} alt={resource.name} className="w-full h-full object-cover" />
+                  <img 
+                    src={allImages[currentImageIndex]} 
+                    alt={resource.name} 
+                    className="w-full h-full object-cover" 
+                  />
+                  {/* 圖片計數 */}
+                  {allImages.length > 1 && (
+                    <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                      {currentImageIndex + 1} / {allImages.length}
+                    </div>
+                  )}
                 </div>
+                {/* 縮圖列表 */}
+                {allImages.length > 1 && (
+                  <div className="flex gap-1 overflow-x-auto">
+                    {allImages.map((img, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setCurrentImageIndex(idx)}
+                        className={`w-16 h-12 flex-shrink-0 rounded overflow-hidden border-2 transition-colors ${
+                          idx === currentImageIndex ? 'border-primary' : 'border-transparent'
+                        }`}
+                      >
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             {/* 右側：資訊 */}
-            <div className={hasThumbnail ? 'flex-1 space-y-3 max-h-[400px] overflow-y-auto pr-2' : 'space-y-4'}>
+            <div className={hasImages ? 'flex-1 space-y-3 max-h-[500px] overflow-y-auto pr-2' : 'space-y-4'}>
               {/* 名稱 */}
               {isEditing ? (
                 <div className="space-y-1.5">
