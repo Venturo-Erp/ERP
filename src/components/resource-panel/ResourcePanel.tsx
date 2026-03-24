@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
@@ -44,7 +44,8 @@ interface DraggableResourceCardProps {
 }
 
 function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps) {
-  const [hasDragged, setHasDragged] = useState(false)
+  const dragStartPos = useRef<{ x: number; y: number } | null>(null)
+  const hasMoved = useRef(false)
 
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `resource-${resource.type}-${resource.id}`,
@@ -56,13 +57,6 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
     },
   })
 
-  // 追蹤是否真的拖曳了
-  useEffect(() => {
-    if (isDragging) {
-      setHasDragged(true)
-    }
-  }, [isDragging])
-
   const isUnverified = resource.data_verified === false
 
   const style = transform ? { transform: CSS.Translate.toString(transform) } : undefined
@@ -73,12 +67,29 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
     restaurant: <UtensilsCrossed size={14} className="text-orange-600" />,
   }
 
-  // 處理點擊：只有沒拖曳過才觸發編輯
+  // 追蹤是否真的移動了（超過 5px 才算拖曳）
+  const handlePointerDown = (e: React.PointerEvent) => {
+    dragStartPos.current = { x: e.clientX, y: e.clientY }
+    hasMoved.current = false
+  }
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (dragStartPos.current) {
+      const dx = Math.abs(e.clientX - dragStartPos.current.x)
+      const dy = Math.abs(e.clientY - dragStartPos.current.y)
+      if (dx > 5 || dy > 5) {
+        hasMoved.current = true
+      }
+    }
+  }
+
+  // 處理點擊：只有沒移動過才觸發編輯
   const handleClick = () => {
-    if (!hasDragged) {
+    if (!hasMoved.current) {
       onEdit?.(resource)
     }
-    setHasDragged(false)
+    dragStartPos.current = null
+    hasMoved.current = false
   }
 
   return (
@@ -87,6 +98,8 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
       style={style}
       {...listeners}
       {...attributes}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
       onClick={handleClick}
       className={cn(
         'flex items-center gap-1.5 px-2 py-1.5 rounded-md border bg-card cursor-pointer',

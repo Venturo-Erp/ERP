@@ -74,52 +74,121 @@ export const SuppliersDialog: React.FC<SuppliersDialogProps> = ({
       maxWidth="lg"
     >
       <div className="space-y-4">
-        {/* 供應商名稱 */}
-        <div>
-          <label className="text-sm font-medium text-morandi-primary">
-            {LABELS.supplierName} <span className="text-morandi-red">*</span>
-          </label>
-          <Input
-            value={formData.name}
-            onChange={e => onFormFieldChange('name', e.target.value)}
-            placeholder={LABELS.supplierNamePlaceholder}
-            className="mt-1"
-          />
-        </div>
-
-        {/* 出帳帳號資訊 */}
+        {/* 必填：名稱 + 類別 */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium text-morandi-primary">{LABELS.bankName}</label>
+            <Label>
+              {LABELS.supplierName} <span className="text-morandi-red">*</span>
+            </Label>
             <Input
-              value={formData.bank_name}
-              onChange={e => onFormFieldChange('bank_name', e.target.value)}
-              placeholder={LABELS.bankNamePlaceholder}
+              value={formData.name}
+              onChange={e => onFormFieldChange('name', e.target.value)}
+              placeholder={LABELS.supplierNamePlaceholder}
               className="mt-1"
             />
           </div>
-
           <div>
-            <label className="text-sm font-medium text-morandi-primary">{LABELS.bankAccount}</label>
-            <Input
-              value={formData.bank_account}
-              onChange={e => onFormFieldChange('bank_account', e.target.value)}
-              placeholder={LABELS.bankAccountPlaceholder}
-              className="mt-1"
-            />
+            <Label>
+              類別 <span className="text-morandi-red">*</span>
+            </Label>
+            <Select
+              value={formData.type}
+              onValueChange={value => onFormFieldChange('type', value as SupplierType)}
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="選擇類別" />
+              </SelectTrigger>
+              <SelectContent>
+                {SUPPLIER_TYPE_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* 備註 */}
-        <div>
-          <label className="text-sm font-medium text-morandi-primary">{LABELS.notes}</label>
-          <Textarea
-            value={formData.notes}
-            onChange={e => onFormFieldChange('notes', e.target.value)}
-            placeholder={LABELS.notesPlaceholder}
-            rows={3}
-            className="mt-1"
-          />
+        {/* 選填：左右兩欄 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-3">
+            <div>
+              <Label className="text-morandi-muted">聯絡人</Label>
+              <Input
+                value={formData.contact_person}
+                onChange={e => onFormFieldChange('contact_person', e.target.value)}
+                placeholder="例：王小明"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-morandi-muted">電話</Label>
+              <Input
+                value={formData.phone}
+                onChange={e => onFormFieldChange('phone', e.target.value)}
+                placeholder="例：02-2345-6789"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-morandi-muted">Email</Label>
+              <Input
+                type="email"
+                value={formData.email}
+                onChange={e => onFormFieldChange('email', e.target.value)}
+                placeholder="例：contact@hotel.com"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-morandi-muted">統編</Label>
+              <Input
+                value={formData.tax_id}
+                onChange={e => onFormFieldChange('tax_id', e.target.value)}
+                placeholder="例：12345678"
+                maxLength={8}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <Label className="text-morandi-muted">銀行名稱</Label>
+              <Input
+                value={formData.bank_name}
+                onChange={e => onFormFieldChange('bank_name', e.target.value)}
+                placeholder="例：台灣銀行"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-morandi-muted">戶名</Label>
+              <Input
+                value={formData.bank_account_name}
+                onChange={e => onFormFieldChange('bank_account_name', e.target.value)}
+                placeholder="例：XX旅行社有限公司"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-morandi-muted">銀行帳號</Label>
+              <Input
+                value={formData.bank_account}
+                onChange={e => onFormFieldChange('bank_account', e.target.value)}
+                placeholder="例：1234-5678-9012-3456"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-morandi-muted">備註</Label>
+              <Input
+                value={formData.notes}
+                onChange={e => onFormFieldChange('notes', e.target.value)}
+                placeholder="例：常用供應商"
+                className="mt-1"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </FormDialog>

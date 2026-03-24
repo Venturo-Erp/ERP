@@ -30,10 +30,16 @@ export const SuppliersPage: React.FC = () => {
 
   const { items: suppliers } = useSuppliersSlim()
 
-  // 簡化的表單狀態
+  // 完整的表單狀態
   const [formData, setFormData] = useState({
     name: '',
+    type: '' as any,
+    contact_person: '',
+    phone: '',
+    email: '',
+    tax_id: '',
     bank_name: '',
+    bank_account_name: '',
     bank_account: '',
     notes: '',
   })
@@ -58,7 +64,13 @@ export const SuppliersPage: React.FC = () => {
     setEditingSupplier(supplier)
     setFormData({
       name: supplier.name || '',
+      type: supplier.type || '',
+      contact_person: supplier.contact_person || '',
+      phone: supplier.phone || '',
+      email: supplier.email || '',
+      tax_id: supplier.tax_id || '',
       bank_name: supplier.bank_name || '',
+      bank_account_name: supplier.bank_account_name || '',
       bank_account: supplier.bank_account || '',
       notes: supplier.notes || '',
     })
@@ -87,7 +99,13 @@ export const SuppliersPage: React.FC = () => {
     setEditingSupplier(null)
     setFormData({
       name: '',
+      type: '',
+      contact_person: '',
+      phone: '',
+      email: '',
+      tax_id: '',
       bank_name: '',
+      bank_account_name: '',
       bank_account: '',
       notes: '',
     })
@@ -101,24 +119,40 @@ export const SuppliersPage: React.FC = () => {
   )
 
   const handleSubmit = useCallback(async () => {
+    if (!formData.type) {
+      await alert('請選擇供應商類別', 'warning')
+      return
+    }
+
     try {
       if (isEditMode && editingSupplier) {
         // 更新模式
         await updateSupplier(editingSupplier.id, {
           name: formData.name,
-          bank_name: formData.bank_name,
-          bank_account: formData.bank_account,
-          notes: formData.notes,
+          type: formData.type,
+          contact_person: formData.contact_person || null,
+          phone: formData.phone || null,
+          email: formData.email || null,
+          tax_id: formData.tax_id || null,
+          bank_name: formData.bank_name || null,
+          bank_account_name: formData.bank_account_name || null,
+          bank_account: formData.bank_account || null,
+          notes: formData.notes || null,
         })
         await alert(SUPPLIERS_PAGE_LABELS.UPDATE_SUCCESS, 'success')
       } else {
         // 新增模式
         await createSupplier({
           name: formData.name,
+          type: formData.type,
+          contact_person: formData.contact_person || null,
+          phone: formData.phone || null,
+          email: formData.email || null,
+          tax_id: formData.tax_id || null,
           bank_name: formData.bank_name || null,
+          bank_account_name: formData.bank_account_name || null,
           bank_account: formData.bank_account || null,
           notes: formData.notes || null,
-          type: 'other', // 預設型別
         })
         await alert(SUPPLIERS_PAGE_LABELS.CREATE_SUCCESS, 'success')
       }
