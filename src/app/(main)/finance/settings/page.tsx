@@ -293,7 +293,7 @@ export default function FinanceSettingsPage() {
           {/* 收款方式 */}
           {activeSection === 'receipt' && (
             <div className="space-y-4">
-              <Card className="border rounded-lg overflow-hidden">
+              <Card className="rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -362,7 +362,7 @@ export default function FinanceSettingsPage() {
           {/* 請款方式 */}
           {activeSection === 'payment' && (
             <div className="space-y-4">
-              <Card className="border rounded-lg overflow-hidden">
+              <Card className="rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -431,7 +431,7 @@ export default function FinanceSettingsPage() {
           {/* 銀行帳戶 */}
           {activeSection === 'bank' && (
             <div className="space-y-4">
-              <Card className="border rounded-lg overflow-hidden">
+              <Card className="rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
