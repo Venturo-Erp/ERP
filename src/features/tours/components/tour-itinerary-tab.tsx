@@ -786,9 +786,11 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         }
 
         return {
+          day: day.day, // 天數
           dayLabel: `Day ${day.day}`,
           date: dateLabel,
           title: dayTitle,
+          route: day.route || '', // 路線描述
           highlight: '',
           description: day.note || '',
           activities: (day.attractions || []).map(a => ({

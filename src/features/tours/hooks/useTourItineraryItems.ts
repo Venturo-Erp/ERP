@@ -190,7 +190,7 @@ export function useSyncItineraryToCore() {
         // 1. 取得所有舊項目（檢查需求單狀態）
         const { data: old_items, error: fetch_error } = await supabase
           .from('tour_itinerary_items')
-          .select('id,title,category,request_id,supplier_name,service_date,resource_id')
+          .select('id,title,category,request_id,supplier_name,service_date,resource_id,unit_price')
           .eq('itinerary_id', itinerary_id)
 
         if (fetch_error) throw fetch_error
@@ -358,7 +358,7 @@ export function useSyncItineraryToCore() {
               )
               
               // 如果有舊估價且項目改變，加上備註提示
-              if (oldItem && oldItem.title !== activity.name) {
+              if (oldItem && oldItem.title !== activity.title) {
                 newItem.quote_note = `⚠️ 行程變更：原為「${oldItem.title}」($${oldItem.unit_price.toLocaleString()})，請重新確認價格`
               }
               
