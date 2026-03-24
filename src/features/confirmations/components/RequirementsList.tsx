@@ -1175,31 +1175,52 @@ export function RequirementsList({
                           📱 發送 Line
                         </button>
                       ) : req.sent_via === 'print' || req.sent_via === 'fax' ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => {
-                              // TODO: 產生並下載取消通知 PDF
-                              logger.info('產生取消通知 PDF:', req.id)
-                              toast({ title: 'PDF 產生中...', description: '功能開發中' })
-                            }}
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded"
-                          >
-                            📄 下載 PDF
-                          </button>
-                          <button
-                            onClick={async () => {
-                              await supabase
-                                .from('tour_requests')
-                                .update({ needs_cancellation_notice: false } as never)
-                                .eq('id', req.id)
-                              await loadData(false)
-                              toast({ title: '已標記為已處理' })
-                            }}
-                            className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded"
-                          >
-                            ✓ 已處理
-                          </button>
-                        </div>
+                        (() => {
+                          const downloaded = (req as any).cancellation_pdf_downloaded === true
+                          const confirmLabel = req.sent_via === 'fax' ? '✓ 已傳真' : '✓ 已完成'
+                          
+                          return !downloaded ? (
+                            <button
+                              onClick={async () => {
+                                // TODO: 產生並下載取消通知 PDF
+                                logger.info('產生取消通知 PDF:', req.id)
+                                
+                                // 暫時模擬下載
+                                toast({ title: 'PDF 下載中...', description: '功能開發中' })
+                                
+                                // 標記為已下載
+                                await supabase
+                                  .from('tour_requests')
+                                  .update({ cancellation_pdf_downloaded: true } as never)
+                                  .eq('id', req.id)
+                                
+                                await loadData(false)
+                                toast({ title: `PDF 已下載，請${req.sent_via === 'fax' ? '傳真' : '列印'}後點擊確認` })
+                              }}
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded"
+                            >
+                              📄 下載 PDF
+                            </button>
+                          ) : (
+                            <button
+                              onClick={async () => {
+                                await supabase
+                                  .from('tour_requests')
+                                  .update({ 
+                                    needs_cancellation_notice: false,
+                                    cancellation_pdf_downloaded: false
+                                  } as never)
+                                  .eq('id', req.id)
+                                await loadData(false)
+                                toast({ title: '已標記為已處理' })
+                              }}
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded"
+                            >
+                              {confirmLabel}
+                            </button>
+                          )
+                        })()
+                      
                       ) : (
                         <button
                           onClick={async () => {
