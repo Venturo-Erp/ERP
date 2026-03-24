@@ -310,8 +310,8 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
   return (
     <div className={cn('flex flex-col bg-card border-b border-border', className)}>
       {/* 標題列 */}
-      <div className="h-10 bg-morandi-green/80 text-white px-4 flex items-center border-b border-border">
-        <h3 className="text-sm font-semibold">資源庫</h3>
+      <div className="h-12 bg-morandi-green/80 text-white px-4 flex items-center border-b border-border">
+        <h3 className="text-base font-bold">景點庫</h3>
         <span className="ml-auto text-xs opacity-75">拖拽至行程</span>
       </div>
 
