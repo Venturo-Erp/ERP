@@ -210,14 +210,14 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess, parentAccou
           <div className="space-y-2">
             <Label htmlFor="parent_id">父科目（選填）</Label>
             <Select
-              value={formData.parent_id}
-              onValueChange={value => setFormData({ ...formData, parent_id: value })}
+              value={formData.parent_id || 'none'}
+              onValueChange={value => setFormData({ ...formData, parent_id: value === 'none' ? '' : value })}
             >
               <SelectTrigger id="parent_id">
                 <SelectValue placeholder="選擇父科目（可不選）" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">不選擇（頂層科目）</SelectItem>
+                <SelectItem value="none">不選擇（頂層科目）</SelectItem>
                 {parentAccounts
                   .filter(p => p.account_type === formData.account_type)
                   .map(parent => (
