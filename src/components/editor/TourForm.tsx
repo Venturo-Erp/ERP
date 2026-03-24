@@ -42,7 +42,7 @@ interface TourFormProps {
 // 導覽項目配置
 const navItems = [
   { id: 'section-cover', label: COMP_EDITOR_LABELS.封面, icon: Image },
-  { id: 'section-flight', label: COMP_EDITOR_LABELS.航班, icon: Plane },
+  // { id: 'section-flight', label: COMP_EDITOR_LABELS.航班, icon: Plane }, // 建團時不需要航班資訊，訂票時再輸入
   { id: 'section-features', label: COMP_EDITOR_LABELS.特色, icon: Star },
   { id: 'section-itinerary', label: COMP_EDITOR_LABELS.行程, icon: MapPin, hasDayNav: true },
   { id: 'section-leader', label: COMP_EDITOR_LABELS.領隊, icon: Users },
@@ -253,8 +253,8 @@ export function TourForm({ data, onChange, quoteTierPricings, hasLinkedQuote }: 
             />
           </div>
 
-          {/* 航班資訊 */}
-          <div id="section-flight">
+          {/* 航班資訊 - 建團時不需要，訂票時再輸入 */}
+          {/* <div id="section-flight">
             <FlightInfoSection
               data={data}
               updateFlightField={handlers.updateFlightField}
@@ -324,7 +324,7 @@ export function TourForm({ data, onChange, quoteTierPricings, hasLinkedQuote }: 
                 onChange({ ...data, dailyItinerary: newDailyItinerary })
               }}
             />
-          </div>
+          </div> */}
 
           {/* 行程特色 */}
           <div id="section-features">
