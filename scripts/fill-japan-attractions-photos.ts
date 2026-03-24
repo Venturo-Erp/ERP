@@ -9,30 +9,25 @@
  * 執行：npx tsx scripts/fill-japan-attractions-photos.ts
  */
 
-// 💡 重要：必須先載入環境變數，才能 import 其他模組
+// 💡 先載入環境變數
 import * as dotenv from 'dotenv'
 import * as path from 'path'
 import * as fs from 'fs'
 
 dotenv.config({ path: path.join(process.cwd(), '.env.local') })
 
-// 確認環境變數已載入
-if (!process.env.NEXT_PUBLIC_PEXELS_API_KEY) {
-  console.error('❌ Pexels API Key 未設定！')
-  console.error('請確認 .env.local 中有設定 NEXT_PUBLIC_PEXELS_API_KEY')
+// 讀取 API Keys
+const PEXELS_API_KEY = process.env.NEXT_PUBLIC_PEXELS_API_KEY
+const UNSPLASH_API_KEY = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY
+
+if (!PEXELS_API_KEY || !UNSPLASH_API_KEY) {
+  console.error('❌ API Keys 未設定！')
+  console.error(`Pexels: ${PEXELS_API_KEY ? '✅' : '❌'}`)
+  console.error(`Unsplash: ${UNSPLASH_API_KEY ? '✅' : '❌'}`)
   process.exit(1)
 }
 
-if (!process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY) {
-  console.error('❌ Unsplash API Key 未設定！')
-  console.error('請確認 .env.local 中有設定 NEXT_PUBLIC_UNSPLASH_ACCESS_KEY')
-  process.exit(1)
-}
-
-// 環境變數確認後，才 import 依賴環境變數的模組
 import { createClient } from '@supabase/supabase-js'
-import { searchPexelsPhotos } from '../src/lib/pexels'
-import { searchPhotos as searchUnsplash, trackDownload } from '../src/lib/unsplash'
 
 // Supabase 設定
 const SUPABASE_URL = 'https://pfqvdacxowpgfamuvnsn.supabase.co'
@@ -71,50 +66,107 @@ if (!fs.existsSync(LOG_DIR)) {
 }
 
 /**
+ * 搜尋 Pexels 圖片（直接 API 呼叫）
+ */
+async function searchPexels(query: string, perPage = 5) {
+  try {
+    const params = new URLSearchParams({
+      query,
+      per_page: String(perPage),
+      orientation: 'landscape'
+    })
+    
+    const response = await fetch(`https://api.pexels.com/v1/search?${params}`, {
+      headers: {
+        'Authorization': PEXELS_API_KEY!
+      }
+    })
+    
+    if (!response.ok) {
+      console.error(`  ⚠️  Pexels API error: ${response.status}`)
+      return []
+    }
+    
+    const data = await response.json()
+    return (data.photos || []).map((p: any) => ({
+      url: p.src.large,
+      source: 'pexels'
+    }))
+  } catch (error) {
+    console.error(`  ⚠️  Pexels error:`, error)
+    return []
+  }
+}
+
+/**
+ * 搜尋 Unsplash 圖片（直接 API 呼叫）
+ */
+async function searchUnsplash(query: string, perPage = 5) {
+  try {
+    const params = new URLSearchParams({
+      query,
+      per_page: String(perPage),
+      orientation: 'landscape'
+    })
+    
+    const response = await fetch(`https://api.unsplash.com/search/photos?${params}`, {
+      headers: {
+        'Authorization': `Client-ID ${UNSPLASH_API_KEY}`
+      }
+    })
+    
+    if (!response.ok) {
+      console.error(`  ⚠️  Unsplash API error: ${response.status}`)
+      return []
+    }
+    
+    const data = await response.json()
+    
+    // Unsplash 需要追蹤下載
+    const photos = []
+    for (const photo of (data.results || []).slice(0, perPage)) {
+      // 追蹤下載
+      try {
+        await fetch(photo.links.download_location, {
+          headers: {
+            'Authorization': `Client-ID ${UNSPLASH_API_KEY}`
+          }
+        })
+      } catch (e) {
+        // 追蹤失敗不影響結果
+      }
+      
+      photos.push({
+        url: photo.urls.regular,
+        source: 'unsplash'
+      })
+    }
+    
+    return photos
+  } catch (error) {
+    console.error(`  ⚠️  Unsplash error:`, error)
+    return []
+  }
+}
+
+/**
  * 搜尋景點照片
  */
 async function searchAttractionPhotos(name: string, englishName?: string) {
   // 優先使用英文名稱搜尋（圖片品質較好）
   const query = englishName || name
   
-  try {
-    // 1. 優先使用 Pexels（限制較寬鬆）
-    const pexelsResult = await searchPexelsPhotos(query, {
-      perPage: 5,
-      orientation: 'landscape'
-    })
-    
-    if (pexelsResult.photos && pexelsResult.photos.length > 0) {
-      return pexelsResult.photos.slice(0, 5).map(p => ({
-        url: p.src.large,
-        source: 'pexels'
-      }))
-    }
-    
-    // 2. 備用 Unsplash
-    const unsplashResult = await searchUnsplash(query, {
-      perPage: 5,
-      orientation: 'landscape'
-    })
-    
-    if (unsplashResult.results && unsplashResult.results.length > 0) {
-      // Unsplash 需要追蹤下載
-      const photos = []
-      for (const photo of unsplashResult.results.slice(0, 5)) {
-        await trackDownload(photo.links.download_location)
-        photos.push({
-          url: photo.urls.regular,
-          source: 'unsplash'
-        })
-      }
-      return photos
-    }
-    
-    return []
-  } catch (error) {
-    console.error(`搜尋失敗: ${query}`, error)
-    return []
+  // 1. 優先使用 Pexels（限制較寬鬆）
+  let photos = await searchPexels(query, 5)
+  
+  if (photos.length > 0) {
+    return photos
   }
+  
+  // 2. 備用 Unsplash
+  photos = await searchUnsplash(query, 5)
+  
+  return photos
 }
 
 /**
