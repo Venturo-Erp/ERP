@@ -175,20 +175,8 @@ export const TourOverview = React.memo(function TourOverview({
     return badges[status || ''] || 'bg-morandi-container text-morandi-secondary'
   }
 
-  // 健康度項目（只保留最重要的 2 個）
-  const healthItems =
-    !healthData.isLoading && !healthData.error
-      ? [
-          { label: TOUR_HEALTH_LABELS.需求單狀態, data: healthData.requirements },
-          {
-            label: TOUR_HEALTH_LABELS.團員人數,
-            data: {
-              status: 'good' as const, // 團員人數只是資訊，不是警告
-              message: `${healthData.participants.current || 0} 人`,
-            },
-          },
-        ]
-      : []
+  // 健康度項目（移除需求單狀態，團員人數已在標題列顯示）
+  const healthItems: Array<{ label: string; data: { status: 'good' | 'warning' | 'danger'; message: string } }> = []
 
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-card">
@@ -206,6 +194,10 @@ export const TourOverview = React.memo(function TourOverview({
               <span>
                 {tour.departure_date} ~ {tour.return_date}
               </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-morandi-secondary">
+              <Users size={14} />
+              <span>{tour.current_participants ?? 0} 人</span>
             </div>
             <span
               className={cn(
