@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Plus, Star, Edit } from 'lucide-react'
+import { Plus, Star, Edit, ChevronRight, ChevronDown } from 'lucide-react'
 import type { TableColumn } from '@/components/ui/enhanced-table'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
@@ -48,6 +48,42 @@ export default function AccountsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  // 判斷科目是否有子科目
+  const hasChildren = (accountId: string) => {
+    return accounts.some(a => a.parent_id === accountId)
+  }
+
+  // 切換展開/折疊
+  const toggleExpand = (accountId: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(accountId)) {
+        next.delete(accountId)
+      } else {
+        next.add(accountId)
+      }
+      return next
+    })
+  }
+
+  // 判斷科目是否應該顯示
+  const isVisible = (account: Account): boolean => {
+    if (!account.parent_id) return true // 頂層永遠顯示
+    // 檢查所有祖先是否都展開
+    let current = account
+    while (current.parent_id) {
+      if (!expandedIds.has(current.parent_id)) return false
+      const parent = accounts.find(a => a.id === current.parent_id)
+      if (!parent) break
+      current = parent
+    }
+    return true
+  }
+
+  // 過濾可見的科目
+  const visibleAccounts = accounts.filter(isVisible)
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
 
   useEffect(() => {
@@ -134,13 +170,37 @@ export default function AccountsPage() {
       render: (_: unknown, row: Account) => {
         const level = getAccountLevel(row.code)
         const indent = level * 20 // 每層縮排 20px
+        const hasChild = hasChildren(row.id)
+        const isExpanded = expandedIds.has(row.id)
+        
         return (
-          <span 
-            className={`font-medium ${level === 0 ? 'text-base font-bold' : level === 1 ? 'font-semibold' : ''}`}
+          <div 
+            className="flex items-center"
             style={{ paddingLeft: `${indent}px` }}
           >
-            {row.name}
-          </span>
+            {hasChild ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  toggleExpand(row.id)
+                }}
+                className="mr-1 p-0.5 hover:bg-muted rounded"
+              >
+                {isExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                )}
+              </button>
+            ) : (
+              <span className="w-5" /> // 占位符，保持對齊
+            )}
+            <span 
+              className={`font-medium ${level === 0 ? 'text-base font-bold' : level === 1 ? 'font-semibold' : ''}`}
+            >
+              {row.name}
+            </span>
+          </div>
         )
       },
     },
@@ -203,15 +263,35 @@ export default function AccountsPage() {
     <>
       <ListPageLayout
         title={`會計科目管理（共 ${accounts.length} 個科目）`}
-        data={accounts}
+        data={visibleAccounts}
         columns={columns}
         loading={isLoading}
         searchable={false}
         headerActions={
-          <Button onClick={handleCreate} className="gap-2">
-            <Plus size={16} />
-            新增科目
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                // 展開所有
+                const allIds = accounts.filter(a => hasChildren(a.id)).map(a => a.id)
+                setExpandedIds(new Set(allIds))
+              }}
+            >
+              全部展開
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setExpandedIds(new Set())}
+            >
+              全部折疊
+            </Button>
+            <Button onClick={handleCreate} className="gap-2">
+              <Plus size={16} />
+              新增科目
+            </Button>
+          </div>
         }
       />
 
