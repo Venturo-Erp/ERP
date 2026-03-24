@@ -1518,7 +1518,7 @@ export function RequirementsList({
                                         className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
                                       >
                                         <Printer size={12} className="mr-1" />
-                                        列印需求單
+                                        新增需求單
                                       </Button>
                                     )
                                   }
@@ -1618,7 +1618,7 @@ export function RequirementsList({
                                       }}
                                       className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10"
                                     >
-                                      列印需求單
+                                      新增需求單
                                     </Button>
                                   )
                                 }
@@ -1639,7 +1639,7 @@ export function RequirementsList({
                                       className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
                                     >
                                       <Printer size={12} className="mr-1" />
-                                      列印需求單
+                                      新增需求單
                                     </Button>
                                   )
                                 }
@@ -1660,7 +1660,7 @@ export function RequirementsList({
                                       className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
                                     >
                                       <Printer size={12} className="mr-1" />
-                                      列印需求單
+                                      新增需求單
                                     </Button>
                                   )
                                 }

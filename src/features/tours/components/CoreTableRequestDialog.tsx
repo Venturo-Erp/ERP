@@ -313,7 +313,7 @@ export function CoreTableRequestDialog({
     `
   }
 
-  // 列印需求單
+  // 新增需求單
   const handlePrint = async () => {
     if (!coreItems || coreItems.length === 0) {
       toast({
@@ -476,7 +476,7 @@ export function CoreTableRequestDialog({
             ) : (
               <>
                 <Printer className="mr-2 h-4 w-4" />
-                列印需求單
+                新增需求單
               </>
             )}
           </Button>
