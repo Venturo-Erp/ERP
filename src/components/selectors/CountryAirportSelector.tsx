@@ -99,8 +99,14 @@ export function CountryAirportSelector({
       const countryData = countriesData.find(c => c.name === newCountryName)
 
       if (!countryData) {
-        console.warn(`找不到國家資料: ${newCountryName}`)
-        // Fallback：用舊格式（但這不應該發生）
+        console.warn(`找不到國家資料: ${newCountryName}，使用 fallback`)
+        // Fallback：仍然呼叫 onCountryChange，但用 countryNameToCode 取得 code
+        const code = countryNameToCode[newCountryName] || ''
+        onCountryChange({
+          id: '', // 沒有 id，但至少有名稱
+          name: newCountryName,
+          code: code,
+        })
         return
       }
 
@@ -111,7 +117,7 @@ export function CountryAirportSelector({
         code: countryData.code || '',
       })
     },
-    [countriesData, onCountryChange]
+    [countriesData, countryNameToCode, onCountryChange]
   )
 
   // 處理機場代碼變更
