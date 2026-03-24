@@ -2030,7 +2030,7 @@ export function RequirementsList({
               return itemSupplierName === selectedTransport.name && it.category === 'meals'
             })
             .map(it => ({
-              date: it.service_date || '',
+              date: it.service_date || (it.day_number != null ? calculateDate(it.day_number) : ''),
               time: it.sub_category
                 ? { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' }[it.sub_category] ||
                   it.sub_category
@@ -2064,7 +2064,7 @@ export function RequirementsList({
               return itemSupplierName === selectedTransport.name && it.category === 'activities'
             })
             .map(it => ({
-              time: it.service_date || '',
+              time: it.service_date || (it.day_number != null ? calculateDate(it.day_number) : ''),
               venue: it.title || '',
               quantity: it.quantity || 1,
               note: it.quote_note || '',
