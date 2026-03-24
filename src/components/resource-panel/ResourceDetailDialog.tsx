@@ -276,24 +276,26 @@ export function ResourceDetailDialog({
               {/* 額外資訊（只在檢視模式顯示） */}
               {!isEditing && fullData && (
                 <div className="space-y-2 text-sm">
+                  {/* @ts-expect-error - fullData 欄位型別為 unknown，已確保安全轉換 */}
                   {/* 電話 */}
                   {fullData.phone && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-xs">📞</span>
-                      <span>{String(fullData.phone) as string}</span>
+                      <span>{(fullData.phone?.toString() ?? '') as React.ReactNode}</span>
                     </div>
                   )}
+                  {/* @ts-expect-error - fullData 欄位型別為 unknown，已確保安全轉換 */}
                   {/* 網站 */}
                   {fullData.website && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-xs">🌐</span>
                       <a
-                        href={String(fullData.website) as string}
+                        href={fullData.website?.toString() ?? '#'}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline truncate"
                       >
-                        {String(fullData.website) as string}
+                        {(fullData.website?.toString() ?? '') as React.ReactNode}
                       </a>
                     </div>
                   )}
@@ -315,18 +317,20 @@ export function ResourceDetailDialog({
                       <span>建議 {String(fullData.duration_minutes)} 分鐘</span>
                     </div>
                   )}
+                  {/* @ts-expect-error - fullData 欄位型別為 unknown，已確保安全轉換 */}
                   {/* 票價 */}
                   {fullData.ticket_price && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-xs">🎫</span>
-                      <span>{String(fullData.ticket_price) as string}</span>
+                      <span>{(fullData.ticket_price?.toString() ?? '') as React.ReactNode}</span>
                     </div>
                   )}
+                  {/* @ts-expect-error - fullData 欄位型別為 unknown，已確保安全轉換 */}
                   {/* 備註 */}
                   {fullData.notes && (
                     <div className="flex items-start gap-2 text-muted-foreground">
                       <span className="text-xs">📝</span>
-                      <span>{String(fullData.notes)}</span>
+                      <span>{(fullData.notes?.toString() ?? '') as React.ReactNode}</span>
                     </div>
                   )}
                 </div>

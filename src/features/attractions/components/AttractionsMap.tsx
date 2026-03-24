@@ -58,28 +58,27 @@ export function AttractionsMap({
   const [isLoading, setIsLoading] = useState(true)
   const [nearbyAttractions, setNearbyAttractions] = useState<Attraction[]>([])
   const initedRef = useRef(false)
+  // 地圖中心（用於重新計算附近景點）
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null)
 
-  // 篩選附近景點
+  // 篩選附近景點（根據地圖中心或選中景點）
   useEffect(() => {
-    if (!selectedAttraction?.latitude || !selectedAttraction?.longitude) {
+    const centerLat = mapCenter?.lat ?? selectedAttraction?.latitude
+    const centerLng = mapCenter?.lng ?? selectedAttraction?.longitude
+    
+    if (!centerLat || !centerLng) {
       setNearbyAttractions([])
       return
     }
 
     const nearby = attractions.filter(a => {
       if (!a.latitude || !a.longitude) return false
-      if (a.id === selectedAttraction.id) return false
-      const distance = calculateDistance(
-        selectedAttraction.latitude!,
-        selectedAttraction.longitude!,
-        a.latitude,
-        a.longitude
-      )
+      const distance = calculateDistance(centerLat, centerLng, a.latitude, a.longitude)
       return distance <= radiusKm
     })
 
     setNearbyAttractions(nearby)
-  }, [selectedAttraction, attractions, radiusKm])
+  }, [selectedAttraction, attractions, radiusKm, mapCenter])
 
   // 初始化地圖
   useEffect(() => {
@@ -123,7 +122,16 @@ export function AttractionsMap({
       mapRef.current = map
       initedRef.current = true
 
-      setTimeout(() => map.invalidateSize(), 200)
+      // 延遲刷新大小，確保地圖已渲染
+      setTimeout(() => {
+        if (mapRef.current && mapRef.current.getContainer()) {
+          try {
+            mapRef.current.invalidateSize()
+          } catch (e) {
+            console.warn('地圖 invalidateSize 失敗:', e)
+          }
+        }
+      }, 300)
 
       // 搜尋範圍圓圈（虛線）- 跟著地圖中心移動
       const searchCircle = L.circle([selectedAttraction.latitude!, selectedAttraction.longitude!], {
@@ -135,10 +143,11 @@ export function AttractionsMap({
         dashArray: '8, 8',
       }).addTo(map)
 
-      // 地圖移動時更新圓圈位置
+      // 地圖移動時更新圓圈位置 + 重新計算附近景點
       map.on('moveend', () => {
         const center = map.getCenter()
         searchCircle.setLatLng(center)
+        setMapCenter({ lat: center.lat, lng: center.lng })
       })
 
       // 創建自訂標記（圓角方形 + 圖片）

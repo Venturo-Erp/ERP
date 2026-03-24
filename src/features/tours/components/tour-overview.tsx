@@ -176,7 +176,7 @@ export const TourOverview = React.memo(function TourOverview({
   }
 
   // 健康度項目（移除需求單狀態，團員人數已在標題列顯示）
-  const healthItems: Array<{ label: string; data: { status: 'good' | 'warning' | 'danger'; message: string } }> = []
+  const healthItems: Array<{ label: string; data: { status: 'good' | 'warning' | 'error'; message: string } }> = []
 
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-card">
