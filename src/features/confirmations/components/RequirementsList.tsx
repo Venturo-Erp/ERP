@@ -995,32 +995,11 @@ export function RequirementsList({
                 }
               }
 
-              // 彙總通知
-              const notices: string[] = []
-              if (lineNotices.length > 0) {
-                notices.push(
-                  `📱 LINE 通知：${lineNotices.join('、')}（系統將自動發送取消通知）`
-                )
-                // TODO: 自動發送 LINE 通知（需要整合 LINE API）
-              }
-              if (printNotices.length > 0) {
-                notices.push(
-                  `📄 列印/傳真：${printNotices.join('、')}（請至需求單頁面列印取消通知）`
-                )
-              }
-              if (pendingNotices.length > 0) {
-                notices.push(`⚠️ 待通知：${pendingNotices.join('、')}（請手動通知供應商）`)
-              }
-
-              if (notices.length > 0) {
-                toast({
-                  title: `已關閉 ${toReject.length} 個重複需求單`,
-                  description: notices.join('\n'),
-                  duration: 8000,
-                })
-              } else {
-                logger.info(`已關閉 ${toReject.length} 個重複需求單`)
-              }
+              // 標記需要處理的取消通知（不用 Toast，改用持久化提示）
+              logger.info(`已關閉 ${toReject.length} 個重複需求單，請確認取消通知`)
+              
+              // 刷新頁面（顯示持久化提示區域）
+              await loadData(false)
             }
           }
         }
@@ -1147,9 +1126,103 @@ export function RequirementsList({
     )
   }
 
+  // 找出需要處理的取消通知
+  const pendingCancellations = existingRequests.filter(
+    req => req.status === 'rejected' && (req as any).needs_cancellation_notice === true
+  )
+
   return (
     <>
       <div className={cn('space-y-4', className)}>
+        {/* 待處理取消通知（持久化提示）*/}
+        {pendingCancellations.length > 0 && (
+          <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="text-red-600 mt-0.5" size={20} />
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-700 mb-2">
+                  ⚠️ 待處理取消通知（{pendingCancellations.length} 筆）
+                </h3>
+                <div className="space-y-2">
+                  {pendingCancellations.map(req => (
+                    <div
+                      key={req.id}
+                      className="flex items-center gap-3 bg-white rounded px-3 py-2 border border-red-200"
+                    >
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">
+                          {req.supplier_name || '供應商'}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {req.note || '已選擇其他供應商'}
+                        </p>
+                      </div>
+                      {req.sent_via === 'line' ? (
+                        <button
+                          onClick={async () => {
+                            // TODO: 自動發送 Line 通知
+                            logger.info('發送 Line 取消通知:', req.id)
+                            // 暫時直接標記為已處理
+                            await supabase
+                              .from('tour_requests')
+                              .update({ needs_cancellation_notice: false } as never)
+                              .eq('id', req.id)
+                            await loadData(false)
+                            toast({ title: `Line 取消通知已發送給 ${req.supplier_name}` })
+                          }}
+                          className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded"
+                        >
+                          📱 發送 Line
+                        </button>
+                      ) : req.sent_via === 'print' || req.sent_via === 'fax' ? (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              // TODO: 產生並下載取消通知 PDF
+                              logger.info('產生取消通知 PDF:', req.id)
+                              toast({ title: 'PDF 產生中...', description: '功能開發中' })
+                            }}
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded"
+                          >
+                            📄 下載 PDF
+                          </button>
+                          <button
+                            onClick={async () => {
+                              await supabase
+                                .from('tour_requests')
+                                .update({ needs_cancellation_notice: false } as never)
+                                .eq('id', req.id)
+                              await loadData(false)
+                              toast({ title: '已標記為已處理' })
+                            }}
+                            className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded"
+                          >
+                            ✓ 已處理
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={async () => {
+                            await supabase
+                              .from('tour_requests')
+                              .update({ needs_cancellation_notice: false } as never)
+                              .eq('id', req.id)
+                            await loadData(false)
+                            toast({ title: '已標記為已通知' })
+                          }}
+                          className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded"
+                        >
+                          ✓ 已通知
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 主表格 — 核心表有資料就顯示，不需要綁定報價單 */}
         {coreItems.length === 0 && !linkedQuoteId ? (
           <div className="bg-card border border-border rounded-lg p-8 text-center">
