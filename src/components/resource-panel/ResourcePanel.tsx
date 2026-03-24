@@ -9,7 +9,6 @@ import { QuickAddResource } from './QuickAddResource'
 import { ResourceDetailDialog } from './ResourceDetailDialog'
 import { ResourceMapPanel } from './ResourceMapPanel'
 import { Input } from '@/components/ui/input'
-import { Combobox, type ComboboxOption } from '@/components/ui/combobox'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/utils/logger'
 
@@ -329,6 +328,19 @@ export function ResourcePanel({
     { key: 'restaurant', label: '餐廳', icon: <UtensilsCrossed size={14} /> },
   ]
 
+  // 點擊外部關閉下拉選單
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const menu = document.getElementById('country-dropdown-menu')
+      const btn = document.getElementById('country-dropdown-btn')
+      if (menu && !menu.contains(e.target as Node) && !btn?.contains(e.target as Node)) {
+        menu.classList.add('hidden')
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
+
   return (
     <div className={cn('flex flex-col bg-card border-b border-border', className)}>
       {/* 大標題：景點庫 */}
@@ -338,19 +350,66 @@ export function ResourcePanel({
 
       {/* 地區篩選 + 類型分頁（4欄平均） */}
       <div className="grid grid-cols-4 border-b-2 border-border bg-white">
-        {/* 地區篩選 */}
-        <div className="border-r border-border p-2">
-          <Combobox
-            value={resolvedCountryId || ''}
-            onChange={v => {
-              setResolvedCountryId(v || undefined)
+        {/* 地區篩選 - 下拉選單按鈕 */}
+        <div className="relative border-r border-border group">
+          <button
+            onClick={() => {
+              // 切換下拉選單
+              const btn = document.getElementById('country-dropdown-btn')
+              const menu = document.getElementById('country-dropdown-menu')
+              if (menu) {
+                menu.classList.toggle('hidden')
+              }
             }}
-            options={countries.map(c => ({ value: c.id, label: c.name }))}
-            placeholder="📍 地區"
-            className="w-full [&_button]:h-9 [&_button]:text-xs"
-            showClearButton={true}
-            disablePortal
-          />
+            id="country-dropdown-btn"
+            className={cn(
+              'w-full h-full flex flex-col items-center justify-center py-2 text-xs font-medium transition-colors',
+              resolvedCountryId
+                ? 'text-morandi-primary bg-morandi-gold/10'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+            )}
+          >
+            <div className="flex items-center gap-1">
+              <MapPin size={14} />
+              <span>{selectedCountryName || '地區'}</span>
+            </div>
+            {resolvedCountryId && (
+              <span className="text-[10px] text-muted-foreground mt-0.5">
+                {resources.attraction.length + resources.hotel.length + resources.restaurant.length}
+              </span>
+            )}
+          </button>
+          
+          {/* 下拉選單 */}
+          <div
+            id="country-dropdown-menu"
+            className="hidden absolute top-full left-0 w-48 max-h-60 overflow-y-auto bg-white border border-border rounded-md shadow-lg z-50 mt-1"
+          >
+            <button
+              onClick={() => {
+                setResolvedCountryId(undefined)
+                document.getElementById('country-dropdown-menu')?.classList.add('hidden')
+              }}
+              className="w-full px-3 py-2 text-left text-xs hover:bg-muted/50 border-b border-border"
+            >
+              全部地區
+            </button>
+            {countries.map(c => (
+              <button
+                key={c.id}
+                onClick={() => {
+                  setResolvedCountryId(c.id)
+                  document.getElementById('country-dropdown-menu')?.classList.add('hidden')
+                }}
+                className={cn(
+                  'w-full px-3 py-2 text-left text-xs hover:bg-muted/50',
+                  resolvedCountryId === c.id && 'bg-morandi-gold/10 text-morandi-primary font-medium'
+                )}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* 景點/酒店/餐廳分頁 */}
@@ -380,9 +439,21 @@ export function ResourcePanel({
         ))}
       </div>
 
-      {/* 原本新增按鈕的邏輯（暫時隱藏，保留功能） */}
-      <div className="hidden">
-        <div className="ml-auto px-2">
+      {/* 搜尋框（包含快速新增功能） */}
+      <div className="p-2 border-b border-border">
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search
+              size={14}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder={`搜尋${tabs.find(t => t.key === activeTab)?.label}...`}
+              className="h-8 pl-8 text-sm"
+            />
+          </div>
           <QuickAddResource
             type={activeTab}
             countryId={resolvedCountryId || countryId}
@@ -400,22 +471,6 @@ export function ResourcePanel({
                 [activeTab]: [newItem, ...(prev[activeTab] || [])],
               }))
             }}
-          />
-        </div>
-      </div>
-
-      {/* 搜尋框 */}
-      <div className="p-2 border-b border-border">
-        <div className="relative">
-          <Search
-            size={14}
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder={`搜尋${tabs.find(t => t.key === activeTab)?.label}...`}
-            className="h-8 pl-8 text-sm"
           />
         </div>
       </div>
