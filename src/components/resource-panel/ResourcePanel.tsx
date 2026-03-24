@@ -336,29 +336,25 @@ export function ResourcePanel({
         <h2 className="text-lg font-bold">景點庫</h2>
       </div>
 
-      {/* 國家篩選 */}
-      <div className="px-4 py-4 bg-morandi-container/20 border-b-2 border-border">
-        <div className="text-sm text-morandi-primary mb-3 font-semibold flex items-center gap-1">
-          <span>📍</span>
-          <span>地區篩選</span>
+      {/* 地區篩選 + 類型分頁（4欄平均） */}
+      <div className="grid grid-cols-4 border-b-2 border-border bg-white">
+        {/* 地區篩選 */}
+        <div className="border-r border-border p-2">
+          <Combobox
+            value={resolvedCountryId || ''}
+            onChange={v => {
+              setResolvedCountryId(v || undefined)
+            }}
+            options={countries.map(c => ({ value: c.id, label: c.name }))}
+            placeholder="📍 地區"
+            className="w-full [&_button]:h-9 [&_button]:text-xs"
+            showClearButton={true}
+            disablePortal
+          />
         </div>
-        <Combobox
-          value={resolvedCountryId || ''}
-          onChange={v => {
-            setResolvedCountryId(v || undefined)
-          }}
-          options={countries.map(c => ({ value: c.id, label: c.name }))}
-          placeholder="選擇國家"
-          className="w-full [&_button]:h-10"
-          showClearButton={true}
-          disablePortal
-        />
-      </div>
 
-      {/* 類型分頁（景點/酒店/餐廳） + 新增按鈕 */}
-      <div className="flex items-center border-b-2 border-border bg-white">
-        {/* 類型 Tabs */}
-        {tabs.map(tab => (
+        {/* 景點/酒店/餐廳分頁 */}
+        {tabs.map((tab, index) => (
           <button
             key={tab.key}
             onClick={() => {
@@ -366,20 +362,26 @@ export function ResourcePanel({
               setSearchQuery('')
             }}
             className={cn(
-              'flex items-center gap-1 px-3 py-2 text-xs font-medium transition-colors whitespace-nowrap',
+              'flex flex-col items-center justify-center py-2 text-xs font-medium transition-colors',
+              index < tabs.length - 1 && 'border-r border-border',
               activeTab === tab.key
-                ? 'text-morandi-primary border-b-2 border-morandi-gold bg-morandi-gold/5'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'text-morandi-primary bg-morandi-gold/10 border-b-2 border-morandi-gold'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
             )}
           >
-            {tab.icon}
-            {tab.label}
-            <span className="text-[10px] text-muted-foreground">
-              ({resources[tab.key].length})
+            <div className="flex items-center gap-1">
+              {tab.icon}
+              {tab.label}
+            </div>
+            <span className="text-[10px] text-muted-foreground mt-0.5">
+              {resources[tab.key].length}
             </span>
           </button>
         ))}
-        {/* 新增按鈕 */}
+      </div>
+
+      {/* 原本新增按鈕的邏輯（暫時隱藏，保留功能） */}
+      <div className="hidden">
         <div className="ml-auto px-2">
           <QuickAddResource
             type={activeTab}
