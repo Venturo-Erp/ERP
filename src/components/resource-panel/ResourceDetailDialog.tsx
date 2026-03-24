@@ -42,6 +42,7 @@ export function ResourceDetailDialog({
   const [saving, setSaving] = useState(false)
   const [fullData, setFullData] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(false)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   // 編輯表單狀態
   const [editName, setEditName] = useState('')
@@ -162,9 +163,6 @@ export function ResourceDetailDialog({
     ? `https://www.google.com/maps?q=${resource.latitude},${resource.longitude}`
     : null
 
-  // 圖片輪播狀態
-  const [currentImageIndex, setCurrentImageIndex] = useState(0)
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className={hasImages ? 'max-w-4xl' : 'max-w-md'}>
@@ -282,7 +280,7 @@ export function ResourceDetailDialog({
                   {fullData.phone && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-xs">📞</span>
-                      <span>{String(fullData.phone)}</span>
+                      <span>{String(fullData.phone) as string}</span>
                     </div>
                   )}
                   {/* 網站 */}
@@ -290,12 +288,12 @@ export function ResourceDetailDialog({
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-xs">🌐</span>
                       <a
-                        href={String(fullData.website)}
+                        href={String(fullData.website) as string}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline truncate"
                       >
-                        {String(fullData.website)}
+                        {String(fullData.website) as string}
                       </a>
                     </div>
                   )}
@@ -314,14 +312,14 @@ export function ResourceDetailDialog({
                   {fullData.duration_minutes && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-xs">⏱️</span>
-                      <span>建議 {fullData.duration_minutes} 分鐘</span>
+                      <span>建議 {String(fullData.duration_minutes)} 分鐘</span>
                     </div>
                   )}
                   {/* 票價 */}
                   {fullData.ticket_price && (
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <span className="text-xs">🎫</span>
-                      <span>{String(fullData.ticket_price)}</span>
+                      <span>{String(fullData.ticket_price) as string}</span>
                     </div>
                   )}
                   {/* 備註 */}
