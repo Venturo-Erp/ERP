@@ -39,6 +39,16 @@ export function ActivityQuoteDialog({
 }: ActivityQuoteDialogProps) {
   const [note, setNote] = useState('')
   const [viewMode, setViewMode] = useState<'modern' | 'traditional'>('traditional')
+  const [editableItems, setEditableItems] = useState(activities)
+
+  // 當 activities 變化時更新
+  useEffect(() => {
+    setEditableItems(activities)
+  }, [activities])
+
+  const handleItemChange = (idx: number, field: string, value: any) => {
+    setEditableItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item))
+  }
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string }[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [sending, setSending] = useState(false)
@@ -123,9 +133,10 @@ export function ActivityQuoteDialog({
               tour={tour}
               totalPax={totalPax}
               supplierName={supplierName}
-              items={activities}
+              items={editableItems}
               note={note}
               setNote={setNote}
+              onItemChange={handleItemChange}
             />
           ) : (
             <div className="space-y-4">
