@@ -39,7 +39,8 @@ export function PasswordAndRoleFields({ formData, setFormData }: PasswordAndRole
         const res = await fetch(`/api/permissions/roles?workspace_id=${user.workspace_id}`)
         if (res.ok) {
           const data = await res.json()
-          setWorkspaceRoles(data.roles || [])
+          // API 直接返回 array，不是 { roles: [] }
+          setWorkspaceRoles(Array.isArray(data) ? data : [])
         }
       } catch (error) {
         console.error('載入職務失敗:', error)
