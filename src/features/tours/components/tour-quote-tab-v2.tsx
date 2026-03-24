@@ -110,7 +110,19 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
   const handleCreateMainQuote = async () => {
     try {
       setCreatingMain(true)
-      const quoteCode = tour.code ? `${tour.code}-Q01` : undefined
+      
+      // 查詢現有報價單數量，生成遞增編號
+      let quoteCode: string | undefined = undefined
+      if (tour.code) {
+        const supabase = (await import('@/lib/supabase/client')).createSupabaseBrowserClient()
+        const { count } = await supabase
+          .from('quotes')
+          .select('*', { count: 'exact', head: true })
+          .like('code', `${tour.code}-Q%`)
+        
+        const nextNum = (count || 0) + 1
+        quoteCode = `${tour.code}-Q${String(nextNum).padStart(2, '0')}`
+      }
 
       const newQuote = await createQuote({
         name: tour.name,
