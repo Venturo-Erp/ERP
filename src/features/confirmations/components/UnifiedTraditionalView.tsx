@@ -239,15 +239,15 @@ function ActivityTable({ items, onItemChange }: { items: any[]; onItemChange?: (
   return (
     <div className="mb-6">
       <h3 className="text-lg font-semibold text-[#78716c] mb-3">活動表 ▽</h3>
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full border-collapse text-sm table-fixed">
         <thead>
           <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-morandi-primary">
-            <th className="border border-[#a8a29e] px-3 py-2 text-left w-28">活動時間</th>
+            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '100px'}}>活動時間</th>
             <th className="border border-[#a8a29e] px-3 py-2 text-left">場地名稱</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">客報價</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">NET價</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">訂金</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left w-20">數量</th>
+            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '80px'}}>客報價</th>
+            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '80px'}}>NET價</th>
+            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '80px'}}>訂金</th>
+            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '70px'}}>數量</th>
           </tr>
         </thead>
         <tbody>
