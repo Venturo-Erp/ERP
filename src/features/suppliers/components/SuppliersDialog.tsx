@@ -1,17 +1,43 @@
 'use client'
 /**
- * SuppliersDialog - 供應商對話框（僅基本資訊）
+ * SuppliersDialog - 供應商對話框（完整資訊）
  */
 
 import React from 'react'
 import { FormDialog } from '@/components/dialog'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { LABELS } from '../constants/labels'
+import type { SupplierType } from '@/types/supplier.types'
+
+const SUPPLIER_TYPE_OPTIONS: { value: SupplierType; label: string }[] = [
+  { value: 'hotel', label: '飯店' },
+  { value: 'restaurant', label: '餐廳' },
+  { value: 'transport', label: '交通' },
+  { value: 'attraction', label: '景點' },
+  { value: 'guide', label: '導遊' },
+  { value: 'agency', label: '旅行社' },
+  { value: 'ticketing', label: '票務' },
+  { value: 'other', label: '其他' },
+]
 
 type SupplierFormData = {
   name: string
+  type: SupplierType | ''
+  contact_person: string
+  phone: string
+  email: string
+  tax_id: string
   bank_name: string
+  bank_account_name: string
   bank_account: string
   notes: string
 }

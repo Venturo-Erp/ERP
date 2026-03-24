@@ -105,7 +105,7 @@ export function AttractionsMap({
       // 創建地圖 - 隱藏縮放控制，確保可拖曳
       const map = L.map(container, {
         center: [selectedAttraction.latitude!, selectedAttraction.longitude!],
-        zoom: 14,
+        zoom: 12, // 縮小比例，顯示更大範圍
         zoomControl: false, // 隱藏縮放控制
         dragging: true,
         touchZoom: true,
@@ -125,8 +125,8 @@ export function AttractionsMap({
 
       setTimeout(() => map.invalidateSize(), 200)
 
-      // 搜尋範圍圓圈（虛線）
-      L.circle([selectedAttraction.latitude!, selectedAttraction.longitude!], {
+      // 搜尋範圍圓圈（虛線）- 跟著地圖中心移動
+      const searchCircle = L.circle([selectedAttraction.latitude!, selectedAttraction.longitude!], {
         radius: radiusKm * 1000,
         color: '#94A3B8',
         fillColor: '#94A3B8',
@@ -134,6 +134,12 @@ export function AttractionsMap({
         weight: 2,
         dashArray: '8, 8',
       }).addTo(map)
+
+      // 地圖移動時更新圓圈位置
+      map.on('moveend', () => {
+        const center = map.getCenter()
+        searchCircle.setLatLng(center)
+      })
 
       // 創建自訂標記（圓角方形 + 圖片）
       const createMarkerIcon = (attraction: Attraction, isMain: boolean) => {
