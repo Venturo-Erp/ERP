@@ -139,8 +139,8 @@ export function RoomRequirementDialog({
         <div className="space-y-4">
           {/* 基本資訊 */}
           <div className="flex items-center gap-4 text-sm text-muted-foreground bg-muted/50 rounded-md px-3 py-2">
-            <span>📅 {serviceDate || '-'}</span>
-            <span>🌙 {nights} 晚</span>
+            <span>{serviceDate || '-'}</span>
+            <span>{nights} 晚</span>
           </div>
 
           {/* 房型列表 */}
