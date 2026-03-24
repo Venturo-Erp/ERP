@@ -237,6 +237,7 @@ export function MemberRow({
                 if (isComposing) return
                 onKeyDown(e, index, 'special_meal')
               }}
+              onPaste={e => onPaste?.(e, index, 'special_meal')}
               data-member={member.id}
               data-field="special_meal"
               className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
@@ -302,6 +303,7 @@ export function MemberRow({
                 if (isComposing) return
                 onKeyDown(e, index, 'remarks')
               }}
+              onPaste={e => onPaste?.(e, index, 'remarks')}
               data-member={member.id}
               data-field="remarks"
               className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"

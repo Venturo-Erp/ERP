@@ -362,6 +362,7 @@ export function MemberBasicInfo({
                   onKeyDown(e, index, 'id_number')
                 }
               }}
+              onPaste={e => onPaste?.(e, index, 'id_number')}
               data-member={member.id}
               data-field="id_number"
               className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
