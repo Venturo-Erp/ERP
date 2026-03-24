@@ -188,14 +188,16 @@ export function ResourcePanel({
     const supabase = createSupabaseBrowserClient()
 
     const resolve = async () => {
+      // 總是載入所有國家供選擇（支援跨國旅遊）
+      const { data: allCountries } = await supabase
+        .from('countries')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name')
+      if (allCountries) setCountries(allCountries)
+
       if (!countryId) {
-        // 沒有 countryId，載入所有國家供選擇
-        const { data } = await supabase
-          .from('countries')
-          .select('id, name')
-          .eq('is_active', true)
-          .order('name')
-        if (data) setCountries(data)
+        // 沒有預設國家，完成
         return
       }
 
@@ -208,7 +210,6 @@ export function ResourcePanel({
 
       if (direct && direct.length > 0) {
         setResolvedCountryId(direct[0].id)
-        setCountries(direct)
         return
       }
 
@@ -221,7 +222,6 @@ export function ResourcePanel({
 
       if (byName && byName.length > 0) {
         setResolvedCountryId(byName[0].id)
-        setCountries(byName)
         return
       }
 
@@ -235,19 +235,10 @@ export function ResourcePanel({
       if (byCity && byCity.length > 0) {
         const cid = byCity[0].country_id
         setResolvedCountryId(cid)
-        // 載入國家名
-        const { data: cData } = await supabase.from('countries').select('id, name').eq('id', cid)
-        if (cData) setCountries(cData)
         return
       }
 
-      // 都找不到
-      const { data: all } = await supabase
-        .from('countries')
-        .select('id, name')
-        .eq('is_active', true)
-        .order('name')
-      if (all) setCountries(all)
+      // 都找不到，不設定預設國家
     }
     void resolve()
   }, [countryId, locationName])
