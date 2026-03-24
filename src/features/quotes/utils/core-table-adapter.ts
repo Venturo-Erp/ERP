@@ -135,6 +135,12 @@ export async function writePricingToCore(
         }
       } else {
         // INSERT: 報價頁新建的項目 → 插入核心表
+        // ⚠️ 住宿類別的新項目不同步到核心表（房型只用於報價，不產生需求單）
+        if (category.id === 'accommodation') {
+          logger.log('跳過住宿新項目同步（僅報價用）:', { item: item.name, day: item.day })
+          continue
+        }
+
         const { data, error } = await supabase
           .from('tour_itinerary_items')
           .insert({

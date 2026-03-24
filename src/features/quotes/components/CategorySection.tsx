@@ -243,7 +243,21 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
         <td className="py-3 px-4"></td>
         <td className="py-3 px-4"></td>
         <td className="py-3 px-4 text-right">
-          {category.id === 'group-transport' ? (
+          {category.id === 'accommodation' ? (
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => handleAddRow(category.id)}
+              disabled={isReadOnly}
+              className={cn(
+                'text-morandi-gold hover:bg-morandi-gold/10',
+                isReadOnly && 'cursor-not-allowed opacity-60'
+              )}
+            >
+              <Plus size={12} className="mr-1" />
+              {CATEGORY_SECTION_LABELS.新增房型}
+            </Button>
+          ) : category.id === 'group-transport' ? (
             <div className="flex gap-1 justify-end">
               {onOpenLocalPricingDialog && (
                 <Button
