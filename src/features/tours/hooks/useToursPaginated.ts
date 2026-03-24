@@ -82,6 +82,7 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
           'id, code, name, location, status, departure_date, return_date, price, selling_price_per_person, max_participants, current_participants, total_revenue, total_cost, profit, archived, is_active, quote_id, itinerary_id, controller_id, closing_status, workspace_id, created_at, tour_type, days_count',
           { count: 'exact' }
         )
+        .eq('is_deleted', false) // 過濾已刪除的團
         .range(from, to) // ✅ Server-side pagination
         .order(sortBy, { ascending: sortOrder === 'asc' })
 

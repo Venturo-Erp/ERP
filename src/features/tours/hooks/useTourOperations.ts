@@ -319,19 +319,20 @@ export function useTourOperations(params: UseTourOperationsParams) {
           }
         }
 
-        // 刪除關聯的訂單（沒有團員的空訂單可以刪）
-        await deleteTourEmptyOrders(tour.id)
+        // 軟刪除：只標記為已刪除，不真正刪除資料
+        const { error: softDeleteError } = await supabase
+          .from('tours')
+          .update({
+            is_deleted: true,
+            deleted_at: new Date().toISOString(),
+          } as any) // TODO: 重新生成型別後移除 as any
+          .eq('id', tour.id)
 
-        // 斷開關聯的報價單和行程表
-        const linkedQuotesCount = await unlinkTourQuotes(tour.id)
-        const linkedItinerariesCount = await unlinkTourItineraries(tour.id)
+        if (softDeleteError) {
+          throw softDeleteError
+        }
 
-        // 刪除旅遊團
-        await actions.delete(tour.id)
-
-        logger.info(
-          `已刪除旅遊團 ${tour.code}，斷開 ${linkedQuotesCount} 個報價單和 ${linkedItinerariesCount} 個行程表的連結`
-        )
+        logger.info(`已軟刪除旅遊團 ${tour.code}`)
         return { success: true }
       } catch (err) {
         const errorMsg =
