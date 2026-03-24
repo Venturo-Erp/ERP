@@ -44,7 +44,7 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
     <Dialog open={!!todo} onOpenChange={open => !open && onClose()}>
       <DialogContent
         level={1}
-        className="w-full max-w-[95vw] sm:max-w-4xl max-h-[95vh] sm:max-h-[85vh] flex flex-col p-0 gap-0"
+        className="w-full max-w-[95vw] sm:max-w-6xl max-h-[95vh] sm:max-h-[85vh] flex flex-col p-0 gap-0"
       >
         <VisuallyHidden>
           <DialogTitle>{todo.title || DIALOG_LABELS.todoDetails}</DialogTitle>
