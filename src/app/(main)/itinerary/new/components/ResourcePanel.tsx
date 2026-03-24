@@ -309,44 +309,47 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
 
   return (
     <div className={cn('flex flex-col bg-card border-b border-border', className)}>
-      {/* 標題列 */}
-      <div className="h-10 bg-morandi-green/80 text-white px-4 flex items-center border-b border-border">
-        <h3 className="text-sm font-semibold">資源庫</h3>
+      {/* 大標題：景點庫 */}
+      <div className="h-14 bg-morandi-green/90 text-white px-4 flex items-center border-b border-border">
+        <h2 className="text-lg font-bold">景點庫</h2>
         <span className="ml-auto text-xs opacity-75">拖拽至行程</span>
       </div>
 
-      {/* 城市篩選（可切換） */}
+      {/* 國家/城市篩選 */}
       {availableCities.length > 0 && (
-        <div className="flex items-center gap-1.5 px-3 py-2 border-b border-border overflow-x-auto">
-          <button
-            onClick={() => setSelectedCity(undefined)}
-            className={cn(
-              'px-2 py-1 rounded text-xs font-medium whitespace-nowrap transition-colors',
-              !selectedCity
-                ? 'bg-morandi-gold text-white'
-                : 'bg-muted text-muted-foreground hover:text-foreground'
-            )}
-          >
-            全部
-          </button>
-          {availableCities.map(city => (
+        <div className="px-3 py-3 border-b border-border">
+          <div className="text-xs text-muted-foreground mb-2 font-medium">📍 篩選地區</div>
+          <div className="flex items-center gap-1.5 overflow-x-auto">
             <button
-              key={city.id}
-              onClick={() => setSelectedCity(city.id)}
+              onClick={() => setSelectedCity(undefined)}
               className={cn(
-                'px-2 py-1 rounded text-xs font-medium whitespace-nowrap transition-colors',
-                selectedCity === city.id
-                  ? 'bg-morandi-gold text-white'
-                  : 'bg-muted text-muted-foreground hover:text-foreground'
+                'px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors',
+                !selectedCity
+                  ? 'bg-morandi-gold text-white shadow-sm'
+                  : 'bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80'
               )}
             >
-              {city.name}
+              全部地區
             </button>
-          ))}
+            {availableCities.map(city => (
+              <button
+                key={city.id}
+                onClick={() => setSelectedCity(city.id)}
+                className={cn(
+                  'px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap transition-colors',
+                  selectedCity === city.id
+                    ? 'bg-morandi-gold text-white shadow-sm'
+                    : 'bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80'
+                )}
+              >
+                {city.name}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* 類型 Tab */}
+      {/* 類型 Tab（景點/酒店/餐廳） */}
       <div className="flex border-b border-border">
         {tabs.map(tab => (
           <button
