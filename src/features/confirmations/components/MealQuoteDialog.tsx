@@ -102,7 +102,7 @@ export function MealQuoteDialog({
 
   const handleDelivery = (method: string) => {
     if (method === 'print' || method === 'fax') {
-      setViewMode('traditional')
+      window.print()
     } else if (method === 'line') {
       setSelectedMethod('line')
     } else {

@@ -111,7 +111,8 @@ export function ActivityQuoteDialog({
 
   const handleDelivery = (method: string) => {
     if (method === 'print' || method === 'fax') {
-      setViewMode('traditional')
+      // 直接列印 Dialog 內容
+      window.print()
     } else if (method === 'line') {
       setSelectedMethod('line')
     } else {
@@ -121,7 +122,7 @@ export function ActivityQuoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col print:max-w-none print:max-h-none print:overflow-visible">
         <DialogHeader>
           <DialogTitle>活動需求單</DialogTitle>
         </DialogHeader>
