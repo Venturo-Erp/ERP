@@ -2,7 +2,7 @@
 
 import { X } from 'lucide-react'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,6 +19,13 @@ import { Switch } from '@/components/ui/switch'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'sonner'
+
+interface ParentAccount {
+  id: string
+  code: string
+  name: string
+  account_type: string
+}
 
 interface CreateAccountDialogProps {
   open: boolean
@@ -38,13 +45,36 @@ const accountTypes = [
 export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAccountDialogProps) {
   const { user } = useAuthStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [parentAccounts, setParentAccounts] = useState<ParentAccount[]>([])
   const [formData, setFormData] = useState({
     code: '',
     name: '',
     account_type: 'asset',
     description: '',
     is_active: true,
+    parent_id: '',
   })
+
+  // 載入可作為父科目的科目（只有大類和中類）
+  useEffect(() => {
+    if (open && user?.workspace_id) {
+      loadParentAccounts()
+    }
+  }, [open, user?.workspace_id])
+
+  const loadParentAccounts = async () => {
+    if (!user?.workspace_id) return
+    
+    const { data } = await supabase
+      .from('chart_of_accounts')
+      .select('id, code, name, account_type')
+      .eq('workspace_id', user.workspace_id)
+      .order('code')
+    
+    // 過濾出可作為父科目的（大類、中類、明細）
+    const filtered = (data || []).filter(d => d.code.length <= 4)
+    setParentAccounts(filtered)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -70,6 +100,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
         description: formData.description || null,
         is_active: formData.is_active,
         is_system_locked: false,
+        parent_id: formData.parent_id || null,
       })
 
       if (error) throw error
@@ -85,6 +116,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
         account_type: 'asset',
         description: '',
         is_active: true,
+        parent_id: '',
       })
     } catch (error: any) {
       console.error('新增科目失敗:', error)
@@ -145,6 +177,31 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess }: CreateAcc
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="parent_id">父科目（選填）</Label>
+            <Select
+              value={formData.parent_id}
+              onValueChange={value => setFormData({ ...formData, parent_id: value })}
+            >
+              <SelectTrigger id="parent_id">
+                <SelectValue placeholder="選擇父科目（可不選）" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">不選擇（頂層科目）</SelectItem>
+                {parentAccounts
+                  .filter(p => p.account_type === formData.account_type)
+                  .map(parent => (
+                    <SelectItem key={parent.id} value={parent.id}>
+                      {parent.code} {parent.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              選擇父科目後，新科目會顯示在該科目下方
+            </p>
           </div>
 
           <div className="space-y-2">

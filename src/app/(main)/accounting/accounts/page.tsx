@@ -21,6 +21,16 @@ interface Account {
   is_system_locked: boolean | null
   is_favorite: boolean | null
   description: string | null
+  parent_id: string | null
+}
+
+// 根據科目代碼計算層級（用於縮排）
+function getAccountLevel(code: string): number {
+  if (code.length === 1) return 0  // 大類：1, 2, 3...
+  if (code.length === 2) return 1  // 中類：11, 12, 21...
+  if (code.length === 4) return 2  // 明細：1100, 1110...
+  if (code.includes('-')) return 3 // 子明細：1100-1, 1100-2...
+  return 2
 }
 
 const typeConfig = {
@@ -121,7 +131,18 @@ export default function AccountsPage() {
     {
       key: 'name',
       label: '科目名稱',
-      render: (_: unknown, row: Account) => <span className="font-medium">{row.name}</span>,
+      render: (_: unknown, row: Account) => {
+        const level = getAccountLevel(row.code)
+        const indent = level * 20 // 每層縮排 20px
+        return (
+          <span 
+            className={`font-medium ${level === 0 ? 'text-base font-bold' : level === 1 ? 'font-semibold' : ''}`}
+            style={{ paddingLeft: `${indent}px` }}
+          >
+            {row.name}
+          </span>
+        )
+      },
     },
     {
       key: 'account_type',
