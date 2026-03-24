@@ -371,30 +371,38 @@ export function MemberRow({
       {/* 團體模式：PNR 欄位 */}
       {mode === 'tour' && showPnrColumn && (
         <td className="border border-morandi-gold/20 px-2 py-1 bg-sky-50/50">
-          <input
-            type="text"
-            value={pnrValue || ''}
-            onChange={e => onPnrChange(member.id, e.target.value)}
-            onBlur={e => {
-              // 離開欄位時儲存到資料庫
-              if (e.target.value !== member.pnr) {
-                onUpdateField(member.id, 'pnr', e.target.value)
-              }
-            }}
-            className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
-          />
+          {isEditMode ? (
+            <input
+              type="text"
+              value={pnrValue || ''}
+              onChange={e => onPnrChange(member.id, e.target.value)}
+              onBlur={e => {
+                // 離開欄位時儲存到資料庫
+                if (e.target.value !== member.pnr) {
+                  onUpdateField(member.id, 'pnr', e.target.value)
+                }
+              }}
+              className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
+            />
+          ) : (
+            <span className="text-xs text-morandi-primary">{member.pnr || '-'}</span>
+          )}
         </td>
       )}
 
       {/* 團體模式：機票號碼 */}
       {mode === 'tour' && cv.ticket_number && (
         <td className="border border-morandi-gold/20 px-2 py-1 bg-sky-50/50">
-          <input
-            type="text"
-            value={member.ticket_number || ''}
-            onChange={e => onUpdateField(member.id, 'ticket_number', e.target.value)}
-            className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
-          />
+          {isEditMode ? (
+            <input
+              type="text"
+              value={member.ticket_number || ''}
+              onChange={e => onUpdateField(member.id, 'ticket_number', e.target.value)}
+              className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
+            />
+          ) : (
+            <span className="text-xs text-morandi-primary">{member.ticket_number || '-'}</span>
+          )}
         </td>
       )}
 
@@ -406,13 +414,17 @@ export function MemberRow({
               <Check size={10} />
               {ORDERS_LABELS.LABEL_9032}
             </span>
-          ) : (
+          ) : isEditMode ? (
             <input
               type="date"
               value={member.ticketing_deadline ? member.ticketing_deadline.slice(0, 10) : ''}
               onChange={e => onUpdateField(member.id, 'ticketing_deadline', e.target.value || null)}
               className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
             />
+          ) : (
+            <span className="text-xs text-morandi-primary">
+              {member.ticketing_deadline ? member.ticketing_deadline.slice(0, 10) : '-'}
+            </span>
           )}
         </td>
       )}
