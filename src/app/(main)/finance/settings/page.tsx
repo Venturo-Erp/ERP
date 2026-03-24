@@ -15,7 +15,7 @@ const TableHeader = ({ children }: { children: React.ReactNode }) => (
 )
 const TableBody = ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>
 const TableRow = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <tr className={`border-b border-border ${className || ''}`}>{children}</tr>
+  <tr className={`border-b border-morandi-border/40 ${className || ''}`}>{children}</tr>
 )
 const TableHead = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <th className={`px-4 py-3 text-left font-medium text-morandi-muted ${className || ''}`}>{children}</th>
@@ -265,7 +265,7 @@ export default function FinanceSettingsPage() {
     >
       <div className="flex h-full">
         {/* 左側選單 */}
-        <div className="w-[200px] border-r border-border bg-morandi-background/30">
+        <div className="w-[200px] border-r border-morandi-border/60 bg-morandi-background/30">
           <div className="p-4 space-y-1">
             {sections.map(section => {
               const Icon = section.icon
@@ -293,7 +293,7 @@ export default function FinanceSettingsPage() {
           {/* 收款方式 */}
           {activeSection === 'receipt' && (
             <div className="space-y-4">
-              <Card className="border rounded-lg overflow-hidden">
+              <Card className="border border-morandi-border/40 rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -344,7 +344,7 @@ export default function FinanceSettingsPage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleDeleteMethod(method)}
-                                className="text-red-500 hover:text-red-600"
+                                className="text-status-danger hover:text-status-danger/80"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -362,7 +362,7 @@ export default function FinanceSettingsPage() {
           {/* 請款方式 */}
           {activeSection === 'payment' && (
             <div className="space-y-4">
-              <Card className="border rounded-lg overflow-hidden">
+              <Card className="border border-morandi-border/40 rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -413,7 +413,7 @@ export default function FinanceSettingsPage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleDeleteMethod(method)}
-                                className="text-red-500 hover:text-red-600"
+                                className="text-status-danger hover:text-status-danger/80"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -431,7 +431,7 @@ export default function FinanceSettingsPage() {
           {/* 銀行帳戶 */}
           {activeSection === 'bank' && (
             <div className="space-y-4">
-              <Card className="border rounded-lg overflow-hidden">
+              <Card className="border border-morandi-border/40 rounded-lg overflow-hidden">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -478,7 +478,7 @@ export default function FinanceSettingsPage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handleDeleteBank(bank)}
-                                className="text-red-500 hover:text-red-600"
+                                className="text-status-danger hover:text-status-danger/80"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
