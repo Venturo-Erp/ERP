@@ -176,6 +176,27 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
       if (insertError) throw insertError
 
       await invalidateAllPaginatedQueries()
+
+      // 🔧 自動建立頻道（正式團才建立，提案/模板不建立）
+      if (newTour.tour_type === 'official' || !newTour.tour_type) {
+        const { useAuthStore } = await import('@/stores/auth-store')
+        const user = useAuthStore.getState().user
+        if (user && newTour.workspace_id) {
+          const { createTourChannel } = await import('../services/tour-channel.service')
+          createTourChannel(newTour, user.id)
+            .then(result => {
+              if (result.success) {
+                console.log(`[useToursPaginated] 已為 ${newTour.code} 建立頻道`)
+              } else {
+                console.warn(`[useToursPaginated] 建立頻道失敗: ${result.error}`)
+              }
+            })
+            .catch(error => {
+              console.error('[useToursPaginated] 建立頻道時發生錯誤:', error)
+            })
+        }
+      }
+
       return newTour
     } catch (err) {
       await invalidateAllPaginatedQueries()

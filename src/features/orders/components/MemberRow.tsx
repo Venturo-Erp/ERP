@@ -57,6 +57,7 @@ interface MemberRowProps {
   onEdit: (member: OrderMember, mode: 'verify' | 'edit') => void
   onPreview: (member: OrderMember) => void
   onPnrChange: (memberId: string, value: string) => void
+  onPnrBlur?: (memberId: string, value: string) => void
   onCustomCostChange: (fieldId: string, memberId: string, value: string) => void
   onSurchargeChange?: (memberId: string, surcharges: MemberSurcharges) => void // 附加費用變更
   onKeyDown: (e: React.KeyboardEvent, memberIndex: number, field: string) => void
@@ -101,6 +102,7 @@ export function MemberRow({
   onEdit,
   onPreview,
   onPnrChange,
+  onPnrBlur,
   onCustomCostChange,
   onSurchargeChange,
   onKeyDown,
@@ -375,6 +377,7 @@ export function MemberRow({
             type="text"
             value={pnrValue || ''}
             onChange={e => onPnrChange(member.id, e.target.value)}
+            onBlur={e => onPnrBlur?.(member.id, e.target.value)}
             className="bg-transparent text-xs border-none outline-none shadow-none focus:ring-0 text-morandi-primary"
           />
         </td>
