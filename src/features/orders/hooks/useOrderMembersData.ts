@@ -127,6 +127,7 @@ export function useOrderMembersData({
             .in('order_id', orderIds)
             .order('sort_order', { ascending: true })
             .order('created_at', { ascending: true })
+            .order('id', { ascending: true })  // 加上 id 確保順序穩定
             .limit(500)
 
           if (membersError) throw membersError
@@ -140,6 +141,7 @@ export function useOrderMembersData({
           .eq('order_id', orderId)
           .order('sort_order', { ascending: true })
           .order('created_at', { ascending: true })
+          .order('id', { ascending: true })  // 加上 id 確保順序穩定
           .limit(500)
 
         if (membersError) throw membersError

@@ -830,11 +830,16 @@ export function OrderMembersExpandable({
       return [...membersData.members].sort((a, b) => {
         const aKey = roomVehicle.roomSortKeys[a.id] ?? 9999
         const bKey = roomVehicle.roomSortKeys[b.id] ?? 9999
-        return aKey - bKey
+        if (aKey !== bKey) return aKey - bKey
+        return a.id.localeCompare(b.id)  // 相同時用 id 排序確保穩定
       })
     }
-    // 沒有分房時按 sort_order 排序
-    return [...membersData.members].sort((a, b) => (a.sort_order ?? 999) - (b.sort_order ?? 999))
+    // 沒有分房時按 sort_order 排序，相同時用 id 確保穩定
+    return [...membersData.members].sort((a, b) => {
+      const sortDiff = (a.sort_order ?? 999) - (b.sort_order ?? 999)
+      if (sortDiff !== 0) return sortDiff
+      return a.id.localeCompare(b.id)
+    })
   }, [membersData.members, roomVehicle.showRoomColumn, roomVehicle.roomSortKeys])
 
   // 計算分房/分車欄位的合併行數（rowSpan）
