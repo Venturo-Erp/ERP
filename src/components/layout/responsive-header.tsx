@@ -270,7 +270,7 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
                 key={tab.value}
                 onClick={() => props.onTabChange?.(tab.value)}
                 className={cn(
-                  'relative px-3 py-2 text-sm font-medium transition-colors pointer-events-auto',
+                  'relative px-3 py-2 text-sm font-medium transition-colors pointer-events-auto flex items-center gap-1.5',
                   'text-morandi-secondary hover:text-morandi-primary',
                   props.activeTab === tab.value
                     ? 'text-morandi-primary after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-morandi-gold'
@@ -278,6 +278,16 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
                 )}
               >
                 {tab.label}
+                {tab.count !== undefined && (
+                  <span className={cn(
+                    'px-1.5 py-0.5 rounded text-xs',
+                    props.activeTab === tab.value
+                      ? 'bg-morandi-gold/20 text-morandi-gold'
+                      : 'bg-morandi-container text-morandi-secondary'
+                  )}>
+                    {tab.count}
+                  </span>
+                )}
               </button>
             ))}
           </div>
