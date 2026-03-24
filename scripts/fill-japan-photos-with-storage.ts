@@ -60,7 +60,7 @@ async function ensureBucket() {
 /**
  * 搜尋 Pexels 圖片
  */
-async function searchPexels(query: string, perPage = 3) {
+async function searchPexels(query: string, perPage = 2) {
   const params = new URLSearchParams({
     query,
     per_page: String(perPage),
@@ -83,7 +83,7 @@ async function searchPexels(query: string, perPage = 3) {
 /**
  * 搜尋 Unsplash 圖片
  */
-async function searchUnsplash(query: string, perPage = 3) {
+async function searchUnsplash(query: string, perPage = 2) {
   const params = new URLSearchParams({
     query,
     per_page: String(perPage),
@@ -161,12 +161,12 @@ async function downloadAndUpload(imageUrl: string, attractionId: string, index: 
 async function processAttraction(attraction: any) {
   console.log(`處理中: ${attraction.name}${attraction.english_name ? ` (${attraction.english_name})` : ''}`)
   
-  // 1. 搜尋圖片
+  // 1. 搜尋圖片（2 張，有備用）
   const query = attraction.english_name || attraction.name
-  let photos = await searchPexels(query, 3)
+  let photos = await searchPexels(query, 2)
   
   if (photos.length === 0) {
-    photos = await searchUnsplash(query, 3)
+    photos = await searchUnsplash(query, 2)
   }
   
   if (photos.length === 0) {
@@ -261,8 +261,9 @@ async function main() {
       lastReportTime = now
     }
     
-    // API 限制：每 20 秒處理一個
-    await new Promise(resolve => setTimeout(resolve, 20000))
+    // API 限制：Pexels 200/h = 每 18 秒
+    // 只要 1 張圖，可以稍微快一點
+    await new Promise(resolve => setTimeout(resolve, 18000))
   }
   
   // 4. 最終報告

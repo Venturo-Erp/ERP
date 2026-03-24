@@ -52,6 +52,10 @@ interface PaymentMethod {
   description: string | null
   is_active: boolean
   sort_order: number
+  debit_account_id: string | null
+  credit_account_id: string | null
+  debit_account: { id: string; code: string; name: string } | null
+  credit_account: { id: string; code: string; name: string } | null
 }
 
 interface BankAccount {
@@ -62,16 +66,6 @@ interface BankAccount {
   account_number: string | null
   is_default: boolean
   is_active: boolean
-}
-
-interface AccountMapping {
-  id: string
-  category: string
-  mapping_type: string
-  debit_account_id: string | null
-  credit_account_id: string | null
-  debit: { id: string; code: string; name: string } | null
-  credit: { id: string; code: string; name: string } | null
 }
 
 interface ChartOfAccount {
@@ -86,7 +80,6 @@ export default function FinanceSettingsPage() {
   const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank' | 'mapping'>('receipt')
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
-  const [accountMappings, setAccountMappings] = useState<AccountMapping[]>([])
   const [chartOfAccounts, setChartOfAccounts] = useState<ChartOfAccount[]>([])
   const [isLoading, setIsLoading] = useState(true)
   
@@ -117,11 +110,6 @@ export default function FinanceSettingsPage() {
       const banksRes = await fetch(`/api/bank-accounts?workspace_id=${workspaceId}`)
       const banksData = await banksRes.json()
       setBankAccounts(banksData || [])
-
-      // 載入科目對應
-      const mappingsRes = await fetch(`/api/finance/account-mappings?workspace_id=${workspaceId}`)
-      const mappingsData = await mappingsRes.json()
-      setAccountMappings(mappingsData || [])
 
       // 載入會計科目（供選擇用）
       const accountsRes = await fetch(`/api/finance/accounting-subjects?workspace_id=${workspaceId}`)
@@ -228,7 +216,6 @@ export default function FinanceSettingsPage() {
     { key: 'receipt', label: '收款方式', icon: CreditCard },
     { key: 'payment', label: '請款方式', icon: Banknote },
     { key: 'bank', label: '銀行帳戶', icon: Building2 },
-    { key: 'mapping', label: '科目對應', icon: Settings },
   ] as const
 
   // 取得當前 section 的標題
@@ -312,15 +299,16 @@ export default function FinanceSettingsPage() {
                     <TableRow>
                       <TableHead className="w-[100px]">代碼</TableHead>
                       <TableHead>名稱</TableHead>
-                      <TableHead>說明</TableHead>
+                      <TableHead>借方科目</TableHead>
+                      <TableHead>貸方科目</TableHead>
                       <TableHead className="w-[80px]">狀態</TableHead>
-                      <TableHead className="w-[100px] text-right">操作</TableHead>
+                      <TableHead className="w-[80px] text-right">操作</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {receiptMethods.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
+                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
                           尚未設定收款方式
                         </TableCell>
                       </TableRow>
@@ -329,7 +317,12 @@ export default function FinanceSettingsPage() {
                         <TableRow key={method.id}>
                           <TableCell className="font-mono">{method.code}</TableCell>
                           <TableCell className="font-medium">{method.name}</TableCell>
-                          <TableCell className="text-morandi-muted">{method.description || '-'}</TableCell>
+                          <TableCell className="text-morandi-muted text-sm">
+                            {method.debit_account ? `${method.debit_account.code} ${method.debit_account.name}` : '-'}
+                          </TableCell>
+                          <TableCell className="text-morandi-muted text-sm">
+                            {method.credit_account ? `${method.credit_account.code} ${method.credit_account.name}` : '-'}
+                          </TableCell>
                           <TableCell>
                             <Badge variant={method.is_active ? 'default' : 'secondary'}>
                               {method.is_active ? '啟用' : '停用'}
@@ -375,15 +368,16 @@ export default function FinanceSettingsPage() {
                     <TableRow>
                       <TableHead className="w-[100px]">代碼</TableHead>
                       <TableHead>名稱</TableHead>
-                      <TableHead>說明</TableHead>
+                      <TableHead>借方科目</TableHead>
+                      <TableHead>貸方科目</TableHead>
                       <TableHead className="w-[80px]">狀態</TableHead>
-                      <TableHead className="w-[100px] text-right">操作</TableHead>
+                      <TableHead className="w-[80px] text-right">操作</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paymentMethodsList.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
+                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
                           尚未設定請款方式
                         </TableCell>
                       </TableRow>
@@ -392,7 +386,12 @@ export default function FinanceSettingsPage() {
                         <TableRow key={method.id}>
                           <TableCell className="font-mono">{method.code}</TableCell>
                           <TableCell className="font-medium">{method.name}</TableCell>
-                          <TableCell className="text-morandi-muted">{method.description || '-'}</TableCell>
+                          <TableCell className="text-morandi-muted text-sm">
+                            {method.debit_account ? `${method.debit_account.code} ${method.debit_account.name}` : '-'}
+                          </TableCell>
+                          <TableCell className="text-morandi-muted text-sm">
+                            {method.credit_account ? `${method.credit_account.code} ${method.credit_account.name}` : '-'}
+                          </TableCell>
                           <TableCell>
                             <Badge variant={method.is_active ? 'default' : 'secondary'}>
                               {method.is_active ? '啟用' : '停用'}
@@ -494,102 +493,6 @@ export default function FinanceSettingsPage() {
             </div>
           )}
 
-          {/* 科目對應 */}
-          {activeSection === 'mapping' && (
-            <div className="space-y-4">
-              <Card className="border rounded-lg overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">名稱</TableHead>
-                      <TableHead className="w-[150px]">說明</TableHead>
-                      <TableHead>借方</TableHead>
-                      <TableHead>貸方</TableHead>
-                      <TableHead className="w-[80px]">狀態</TableHead>
-                      <TableHead className="w-[80px] text-right">操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {accountMappings.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
-                          尚未設定科目對應
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      accountMappings.map(mapping => (
-                        <TableRow key={mapping.id}>
-                          <TableCell className="font-medium">{mapping.category}</TableCell>
-                          <TableCell className="text-morandi-muted text-sm">
-                            {mapping.mapping_type === 'payment_category' ? '請款' : '收款'}
-                          </TableCell>
-                          <TableCell>
-                            <select
-                              value={mapping.debit_account_id || ''}
-                              onChange={async (e) => {
-                                const newDebitId = e.target.value
-                                await fetch(`/api/finance/account-mappings?id=${mapping.id}`, {
-                                  method: 'PUT',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ 
-                                    debit_account_id: newDebitId,
-                                    credit_account_id: mapping.credit_account_id 
-                                  }),
-                                })
-                                await loadData()
-                              }}
-                              className="w-full h-9 px-2 rounded border border-input bg-background text-sm"
-                            >
-                              <option value="">選擇科目</option>
-                              {chartOfAccounts.map(account => (
-                                <option key={account.id} value={account.id}>
-                                  {account.code} {account.name}
-                                </option>
-                              ))}
-                            </select>
-                          </TableCell>
-                          <TableCell>
-                            <select
-                              value={mapping.credit_account_id || ''}
-                              onChange={async (e) => {
-                                const newCreditId = e.target.value
-                                await fetch(`/api/finance/account-mappings?id=${mapping.id}`, {
-                                  method: 'PUT',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ 
-                                    debit_account_id: mapping.debit_account_id,
-                                    credit_account_id: newCreditId 
-                                  }),
-                                })
-                                await loadData()
-                              }}
-                              className="w-full h-9 px-2 rounded border border-input bg-background text-sm"
-                            >
-                              <option value="">選擇科目</option>
-                              {chartOfAccounts.map(account => (
-                                <option key={account.id} value={account.id}>
-                                  {account.code} {account.name}
-                                </option>
-                              ))}
-                            </select>
-                          </TableCell>
-                          <TableCell>
-                            <Badge className="bg-green-100 text-green-700">啟用</Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </Card>
-            </div>
-          )}
-
         </div>
       </div>
 
@@ -600,6 +503,7 @@ export default function FinanceSettingsPage() {
         method={editingMethod}
         type={activeSection === 'receipt' ? 'receipt' : 'payment'}
         onSave={handleSaveMethod}
+        chartOfAccounts={chartOfAccounts}
       />
 
       {/* 銀行帳戶編輯對話框 */}
@@ -621,16 +525,20 @@ function MethodDialog({
   method,
   type,
   onSave,
+  chartOfAccounts,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   method: PaymentMethod | null
   type: 'receipt' | 'payment'
   onSave: (method: Partial<PaymentMethod>) => Promise<void>
+  chartOfAccounts: ChartOfAccount[]
 }) {
   const [code, setCode] = useState('')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [debitAccountId, setDebitAccountId] = useState('')
+  const [creditAccountId, setCreditAccountId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -638,6 +546,8 @@ function MethodDialog({
       setCode(method?.code || '')
       setName(method?.name || '')
       setDescription(method?.description || '')
+      setDebitAccountId(method?.debit_account_id || '')
+      setCreditAccountId(method?.credit_account_id || '')
     }
   }, [open, method])
 
@@ -648,7 +558,13 @@ function MethodDialog({
     }
     setIsSubmitting(true)
     try {
-      await onSave({ code, name, description })
+      await onSave({ 
+        code, 
+        name, 
+        description,
+        debit_account_id: debitAccountId || null,
+        credit_account_id: creditAccountId || null,
+      })
     } finally {
       setIsSubmitting(false)
     }
@@ -660,7 +576,7 @@ function MethodDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -692,6 +608,41 @@ function MethodDialog({
               rows={2}
             />
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>借方科目（選填）</Label>
+              <select
+                value={debitAccountId}
+                onChange={e => setDebitAccountId(e.target.value)}
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              >
+                <option value="">不綁定</option>
+                {chartOfAccounts.map(account => (
+                  <option key={account.id} value={account.id}>
+                    {account.code} {account.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>貸方科目（選填）</Label>
+              <select
+                value={creditAccountId}
+                onChange={e => setCreditAccountId(e.target.value)}
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              >
+                <option value="">不綁定</option>
+                {chartOfAccounts.map(account => (
+                  <option key={account.id} value={account.id}>
+                    {account.code} {account.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <p className="text-xs text-morandi-muted">
+            💡 綁定科目後，收款/請款時會自動產生對應傳票。不綁定則不產生。
+          </p>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>

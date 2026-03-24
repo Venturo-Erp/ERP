@@ -20,7 +20,11 @@ export async function GET(request: NextRequest) {
 
   let query = supabase
     .from('payment_methods')
-    .select('*')
+    .select(`
+      *,
+      debit_account:chart_of_accounts!debit_account_id(id, code, name),
+      credit_account:chart_of_accounts!credit_account_id(id, code, name)
+    `)
     .eq('workspace_id', workspaceId)
     .eq('is_active', true)
 
@@ -46,7 +50,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { code, name, type, description, workspace_id } = body
+    const { code, name, type, description, workspace_id, debit_account_id, credit_account_id } = body
 
     if (!code || !name || !type || !workspace_id) {
       return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
@@ -60,6 +64,8 @@ export async function POST(request: NextRequest) {
         type,
         description,
         workspace_id,
+        debit_account_id: debit_account_id || null,
+        credit_account_id: credit_account_id || null,
         is_active: true,
       })
       .select()
@@ -81,7 +87,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, code, name, description, is_active } = body
+    const { id, code, name, description, is_active, debit_account_id, credit_account_id } = body
 
     if (!id) {
       return NextResponse.json({ error: '缺少 id' }, { status: 400 })
@@ -93,6 +99,8 @@ export async function PUT(request: NextRequest) {
         code,
         name,
         description,
+        debit_account_id: debit_account_id || null,
+        credit_account_id: credit_account_id || null,
         is_active,
         updated_at: new Date().toISOString(),
       })
