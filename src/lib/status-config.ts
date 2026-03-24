@@ -510,10 +510,10 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
       bgColor: 'bg-morandi-gold/10',
     },
     draft: {
-      color: 'text-blue-600',
-      label: '作業中',
+      color: 'text-gray-500',
+      label: '草稿',
       icon: Package,
-      bgColor: 'bg-blue-50',
+      bgColor: 'bg-gray-100',
     },
     in_progress: {
       color: 'text-morandi-primary',
