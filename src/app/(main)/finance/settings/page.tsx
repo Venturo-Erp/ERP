@@ -64,10 +64,30 @@ interface BankAccount {
   is_active: boolean
 }
 
+interface AccountMapping {
+  id: string
+  category: string
+  mapping_type: string
+  debit_account_id: string | null
+  credit_account_id: string | null
+  debit: { id: string; code: string; name: string } | null
+  credit: { id: string; code: string; name: string } | null
+}
+
+interface ChartOfAccount {
+  id: string
+  code: string
+  name: string
+  type: string // API 返回的是 type（轉換自 account_type）
+  account_type?: string
+}
+
 export default function FinanceSettingsPage() {
-  const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank'>('receipt')
+  const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank' | 'mapping'>('receipt')
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
+  const [accountMappings, setAccountMappings] = useState<AccountMapping[]>([])
+  const [chartOfAccounts, setChartOfAccounts] = useState<ChartOfAccount[]>([])
   const [isLoading, setIsLoading] = useState(true)
   
   // 編輯對話框
@@ -97,6 +117,16 @@ export default function FinanceSettingsPage() {
       const banksRes = await fetch(`/api/bank-accounts?workspace_id=${workspaceId}`)
       const banksData = await banksRes.json()
       setBankAccounts(banksData || [])
+
+      // 載入科目對應
+      const mappingsRes = await fetch(`/api/finance/account-mappings?workspace_id=${workspaceId}`)
+      const mappingsData = await mappingsRes.json()
+      setAccountMappings(mappingsData || [])
+
+      // 載入會計科目（供選擇用）
+      const accountsRes = await fetch(`/api/finance/accounting-subjects?workspace_id=${workspaceId}`)
+      const accountsData = await accountsRes.json()
+      setChartOfAccounts(accountsData || [])
     } catch (error) {
       console.error('載入資料失敗:', error)
     } finally {
@@ -198,6 +228,7 @@ export default function FinanceSettingsPage() {
     { key: 'receipt', label: '收款方式', icon: CreditCard },
     { key: 'payment', label: '請款方式', icon: Banknote },
     { key: 'bank', label: '銀行帳戶', icon: Building2 },
+    { key: 'mapping', label: '科目對應', icon: Settings },
   ] as const
 
   // 取得當前 section 的標題
@@ -463,6 +494,101 @@ export default function FinanceSettingsPage() {
             </div>
           )}
 
+          {/* 科目對應 */}
+          {activeSection === 'mapping' && (
+            <div className="space-y-4">
+              <p className="text-sm text-morandi-muted">
+                設定請款類別對應的會計科目，產生傳票時自動帶入
+              </p>
+
+              <Card className="border rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[120px]">類別</TableHead>
+                      <TableHead>借方科目</TableHead>
+                      <TableHead>貸方科目</TableHead>
+                      <TableHead className="w-[100px] text-right">操作</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {accountMappings.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center py-8 text-morandi-muted">
+                          尚未設定科目對應
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      accountMappings.map(mapping => (
+                        <TableRow key={mapping.id}>
+                          <TableCell className="font-medium">{mapping.category}</TableCell>
+                          <TableCell>
+                            <select
+                              value={mapping.debit_account_id || ''}
+                              onChange={async (e) => {
+                                const newDebitId = e.target.value
+                                await fetch(`/api/finance/account-mappings?id=${mapping.id}`, {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ 
+                                    debit_account_id: newDebitId,
+                                    credit_account_id: mapping.credit_account_id 
+                                  }),
+                                })
+                                await loadData()
+                              }}
+                              className="w-full h-9 px-2 rounded border border-input bg-background text-sm"
+                            >
+                              <option value="">選擇科目</option>
+                              {chartOfAccounts
+                                .filter(a => a.type === 'cost' || a.type === 'expense' || a.type === 'asset')
+                                .map(account => (
+                                  <option key={account.id} value={account.id}>
+                                    {account.code} {account.name}
+                                  </option>
+                                ))}
+                            </select>
+                          </TableCell>
+                          <TableCell>
+                            <select
+                              value={mapping.credit_account_id || ''}
+                              onChange={async (e) => {
+                                const newCreditId = e.target.value
+                                await fetch(`/api/finance/account-mappings?id=${mapping.id}`, {
+                                  method: 'PUT',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ 
+                                    debit_account_id: mapping.debit_account_id,
+                                    credit_account_id: newCreditId 
+                                  }),
+                                })
+                                await loadData()
+                              }}
+                              className="w-full h-9 px-2 rounded border border-input bg-background text-sm"
+                            >
+                              <option value="">選擇科目</option>
+                              {chartOfAccounts
+                                .filter(a => a.type === 'liability' || a.type === 'revenue')
+                                .map(account => (
+                                  <option key={account.id} value={account.id}>
+                                    {account.code} {account.name}
+                                  </option>
+                                ))}
+                            </select>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <span className="text-xs text-morandi-muted">
+                              {mapping.debit?.code} → {mapping.credit?.code}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </Card>
+            </div>
+          )}
 
         </div>
       </div>
