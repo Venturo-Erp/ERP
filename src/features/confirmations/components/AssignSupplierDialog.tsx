@@ -145,6 +145,11 @@ export function AssignSupplierDialog({
         }
       })
 
+      // 根據 sendMethod 決定發送狀態和方式
+      const isSending = sendMethod === 'print' || sendMethod === 'fax' || sendMethod === 'line'
+      const requestStatus = isSending ? 'sent' : 'draft'
+      const sentVia = sendMethod && sendMethod !== 'assign' ? sendMethod : null
+
       const { error } = await supabase.from('tour_requests').insert({
         workspace_id: user.workspace_id,
         tour_id: tourId,
@@ -153,7 +158,9 @@ export function AssignSupplierDialog({
         supplier_name: supplierName,
         supplier_contact: selectedSupplier?.contact_person || null,
         items: requestItems,
-        status: 'draft',
+        status: requestStatus,
+        sent_via: sentVia,
+        sent_at: isSending ? new Date().toISOString() : null,
         note: null,
         created_by: user.id,
       } as never)
@@ -171,7 +178,7 @@ export function AssignSupplierDialog({
       setSaving(false)
     }
     return true
-  }, [canPrint, tourId, user, items, selectedSupplier, supplierName, supabase, toast, onSave])
+  }, [canPrint, tourId, user, items, selectedSupplier, supplierName, sendMethod, supabase, toast, onSave])
 
   const handlePrintAndSave = useCallback(async () => {
     if (!canPrint) return
