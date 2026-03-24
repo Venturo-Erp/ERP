@@ -267,7 +267,8 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (error) {
-    logger.error('Failed to create tenant:', error)
-    return errorResponse('建立租戶失敗', 500, ErrorCode.INTERNAL_ERROR)
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    logger.error('Failed to create tenant:', { error: errorMessage, stack: error instanceof Error ? error.stack : undefined })
+    return errorResponse(`建立租戶失敗: ${errorMessage}`, 500, ErrorCode.INTERNAL_ERROR)
   }
 }
