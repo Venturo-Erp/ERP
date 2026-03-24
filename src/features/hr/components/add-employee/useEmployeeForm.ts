@@ -121,6 +121,7 @@ export function useEmployeeForm(onSubmit: () => void) {
         pinyin: formData.pinyin || null,
         workspace_id: targetWorkspaceId,
         supabase_user_id: authUserId, // 設定 supabase_user_id（向後相容）
+        role_id: formData.role_id || undefined, // 職務 ID
         roles: formData.roles as (
           | 'admin'
           | 'employee'

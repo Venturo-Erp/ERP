@@ -8,7 +8,8 @@ export interface EmployeeFormData {
   auth_email: string // 用於建立 Supabase Auth 帳號的 email
   defaultPassword: string
   workspace_id?: string // super_admin 可以選擇 workspace
-  roles: UserRole[]
+  role_id?: string // 職務 ID（關聯 workspace_roles 表）
+  roles: UserRole[] // 舊的硬編碼角色（保留向後相容）
   personal_info: {
     national_id: string
     birth_date: string

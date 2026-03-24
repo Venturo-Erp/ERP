@@ -1,34 +1,54 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { EmployeeFormData } from './types'
-import { type UserRole, ROLES } from '@/lib/rbac-config'
 import { COMP_HR_LABELS } from '@/features/hr/constants/labels'
+import { useAuthStore } from '@/stores/auth-store'
+
+interface WorkspaceRole {
+  id: string
+  name: string
+  description: string | null
+  is_admin: boolean
+}
 
 interface PasswordAndRoleFieldsProps {
   formData: EmployeeFormData
   setFormData: (data: EmployeeFormData) => void
 }
 
-// 可選擇的角色（排除 super_admin，只有超級管理員才能賦予）
-const SELECTABLE_ROLES: { value: UserRole; label: string }[] = [
-  { value: 'staff', label: ROLES.staff.label },
-  { value: 'sales', label: ROLES.sales.label },
-  { value: 'tour_leader', label: ROLES.tour_leader.label },
-  { value: 'accountant', label: ROLES.accountant.label },
-  { value: 'assistant', label: ROLES.assistant.label },
-  { value: 'admin', label: ROLES.admin.label },
-]
-
 export function PasswordAndRoleFields({ formData, setFormData }: PasswordAndRoleFieldsProps) {
-  const toggleRole = (role: UserRole) => {
-    if (formData.roles.includes(role)) {
-      setFormData({ ...formData, roles: formData.roles.filter(r => r !== role) })
-    } else {
-      setFormData({ ...formData, roles: [...formData.roles, role] })
+  const [workspaceRoles, setWorkspaceRoles] = useState<WorkspaceRole[]>([])
+  const [loading, setLoading] = useState(true)
+  const user = useAuthStore(state => state.user)
+
+  // 載入工作空間的職務列表
+  useEffect(() => {
+    async function loadRoles() {
+      if (!user?.workspace_id) return
+
+      try {
+        const res = await fetch(`/api/permissions/roles?workspace_id=${user.workspace_id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setWorkspaceRoles(data.roles || [])
+        }
+      } catch (error) {
+        console.error('載入職務失敗:', error)
+      }
+      setLoading(false)
     }
-  }
+
+    loadRoles()
+  }, [user?.workspace_id])
 
   return (
     <>
@@ -48,23 +68,40 @@ export function PasswordAndRoleFields({ formData, setFormData }: PasswordAndRole
 
       <div>
         <label className="block text-sm font-medium text-morandi-primary mb-2">
-          {COMP_HR_LABELS.LABEL_4884}
+          職務
         </label>
-        <div className="flex flex-wrap gap-4">
-          {SELECTABLE_ROLES.map(({ value, label }) => (
-            <label key={value} className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                value={value}
-                checked={formData.roles.includes(value)}
-                onChange={() => toggleRole(value)}
-                className="w-4 h-4 text-morandi-gold focus:ring-morandi-gold rounded"
-              />
-              <span className="text-sm text-morandi-primary">{label}</span>
-            </label>
-          ))}
-        </div>
-        <p className="text-xs text-morandi-muted mt-2">{COMP_HR_LABELS.PLEASE_SELECT_1794}</p>
+        {loading ? (
+          <p className="text-sm text-morandi-muted">載入中...</p>
+        ) : workspaceRoles.length === 0 ? (
+          <div className="text-sm text-morandi-muted">
+            <p>尚未建立職務</p>
+            <p className="text-xs mt-1">請先到「設定 &gt; 角色管理」建立職務</p>
+          </div>
+        ) : (
+          <>
+            <Select
+              value={formData.role_id || ''}
+              onValueChange={value => setFormData({ ...formData, role_id: value })}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="選擇職務..." />
+              </SelectTrigger>
+              <SelectContent>
+                {workspaceRoles.map(role => (
+                  <SelectItem key={role.id} value={role.id}>
+                    {role.name}
+                    {role.is_admin && (
+                      <span className="ml-2 text-xs text-morandi-gold">（管理員）</span>
+                    )}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-morandi-muted mt-2">
+              職務決定員工的系統權限
+            </p>
+          </>
+        )}
       </div>
     </>
   )
