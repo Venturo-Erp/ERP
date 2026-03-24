@@ -1211,19 +1211,6 @@ export function OrderMembersExpandable({
                     onEdit={memberEdit.openEditDialog}
                     onPreview={member => setPreviewMember(member)}
                     onPnrChange={(id, val) => setPnrValues({ ...pnrValues, [id]: val })}
-                    onPnrBlur={async (id, val) => {
-                      // 儲存 PNR 到資料庫
-                      try {
-                        await updateMember(id, { pnr: val || null })
-                        // 同步更新本地狀態
-                        membersData.setMembers(
-                          membersData.members.map(m => (m.id === id ? { ...m, pnr: val || null } : m))
-                        )
-                      } catch (error) {
-                        logger.error('儲存 PNR 失敗', error)
-                        toast.error('儲存 PNR 失敗')
-                      }
-                    }}
                     onCustomCostChange={async (fId, mId, val) => {
                       // 更新前端 state
                       setCustomCostFields(
