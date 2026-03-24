@@ -299,6 +299,70 @@ export function OrderMembersExpandable({
     return localStorage.getItem('memberListShowIdentity') === 'true'
   })
   const [isAllEditMode, setIsAllEditMode] = useState(false)
+
+  // 關閉編輯模式時，自動將未關聯顧客的成員存為顧客
+  const handleToggleEditMode = useCallback(async () => {
+    if (isAllEditMode) {
+      // 關閉編輯模式 → 自動存為顧客
+      const membersToSync = membersData.members.filter(
+        m => !m.customer_id && (m.chinese_name || m.passport_name || m.id_number)
+      )
+      
+      if (membersToSync.length > 0) {
+        const { createCustomer } = await import('@/data')
+        
+        for (const member of membersToSync) {
+          try {
+            // 先查是否已有顧客
+            const { data: existing } = await supabase
+              .from('customers')
+              .select('id')
+              .or(`passport_number.eq.${member.passport_number || ''},national_id.eq.${member.id_number || ''}`)
+              .not('passport_number', 'is', null)
+              .limit(1)
+              .maybeSingle()
+
+            let customerId: string | null = null
+
+            if (existing) {
+              customerId = existing.id
+            } else if (member.chinese_name || member.passport_name) {
+              // 建立新顧客
+              const newCustomer = await createCustomer({
+                name: member.chinese_name || '',
+                passport_name: member.passport_name || '',
+                passport_number: member.passport_number || null,
+                national_id: member.id_number || null,
+                birth_date: member.birth_date || null,
+                gender: member.gender || null,
+                is_active: true,
+                member_type: 'member',
+                verification_status: 'unverified',
+              })
+              if (newCustomer) {
+                customerId = newCustomer.id
+              }
+            }
+
+            // 關聯到成員
+            if (customerId) {
+              await supabase
+                .from('order_members')
+                .update({ customer_id: customerId })
+                .eq('id', member.id)
+            }
+          } catch (err) {
+            logger.warn('自動存為顧客失敗:', member.chinese_name, err)
+          }
+        }
+        
+        if (membersToSync.length > 0) {
+          toast.success(`已自動建立/關聯 ${membersToSync.length} 位顧客`)
+        }
+      }
+    }
+    setIsAllEditMode(!isAllEditMode)
+  }, [isAllEditMode, membersData.members])
   const [isSyncingFromCustomers, setIsSyncingFromCustomers] = useState(false)
   const [isComposing, setIsComposing] = useState(false)
   const [previewMember, setPreviewMember] = useState<OrderMember | null>(null)
@@ -954,7 +1018,7 @@ export function OrderMembersExpandable({
             variant="ghost"
             size="sm"
             className={`h-8 px-2 gap-1 ${isAllEditMode ? 'bg-morandi-gold/10 text-morandi-gold' : ''}`}
-            onClick={() => setIsAllEditMode(!isAllEditMode)}
+            onClick={handleToggleEditMode}
             title={
               isAllEditMode
                 ? COMP_ORDERS_LABELS.關閉全部編輯模式
