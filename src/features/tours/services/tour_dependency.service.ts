@@ -18,9 +18,25 @@ export interface TourDependencyCheck {
  * 檢查旅遊團是否有不可刪除的關聯資料
  */
 export async function checkTourDependencies(tourId: string): Promise<TourDependencyCheck> {
+  // 1. 先取得該團的所有訂單 ID
+  const { data: orderIds } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('tour_id', tourId)
+
+  // 2. 用訂單 ID 查詢真正的團員數
+  let memberCount = 0
+  if (orderIds && orderIds.length > 0) {
+    const ids = orderIds.map(o => o.id)
+    const { count } = await supabase
+      .from('order_members')
+      .select('id', { count: 'exact', head: true })
+      .in('order_id', ids)
+    memberCount = count ?? 0
+  }
+
+  // 3. 檢查其他關聯資料
   const checks = await Promise.all([
-    // order_members 沒有 tour_id，先查該團的 order_ids 再計算成員數
-    supabase.from('orders').select('id', { count: 'exact', head: true }).eq('tour_id', tourId),
     // receipt_orders 沒有 tour_id，用 receipts 表（有 tour_id）
     supabase.from('receipts').select('id', { count: 'exact', head: true }).eq('tour_id', tourId),
     supabase
@@ -30,11 +46,11 @@ export async function checkTourDependencies(tourId: string): Promise<TourDepende
     supabase.from('pnrs').select('id', { count: 'exact', head: true }).eq('tour_id', tourId),
   ])
 
-  const [orders, receipts, payments, pnrs] = checks
+  const [receipts, payments, pnrs] = checks
   const blockers: string[] = []
 
-  if (orders.count && orders.count > 0)
-    blockers.push(TOUR_DEPENDENCY_LABELS.MEMBERS_COUNT(orders.count))
+  // 4. 只有真正有團員時才加入 blocker
+  if (memberCount > 0) blockers.push(TOUR_DEPENDENCY_LABELS.MEMBERS_COUNT(memberCount))
   if (receipts.count && receipts.count > 0)
     blockers.push(TOUR_DEPENDENCY_LABELS.RECEIPTS_COUNT(receipts.count))
   if (payments.count && payments.count > 0)
