@@ -1,14 +1,11 @@
 'use client'
 
-import { getTodayString } from '@/lib/utils/format-date'
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Tour, FlightInfo, Itinerary, DailyItineraryDay } from '@/stores/types'
-import type { Json } from '@/lib/supabase/types'
+import { Tour, Itinerary, DailyItineraryDay } from '@/stores/types'
 import { useCountries } from '@/data'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { mutate } from 'swr'
-import { searchFlightAction } from '@/features/dashboard/actions/flight-actions'
 import { logger } from '@/lib/utils/logger'
 import { differenceInDays, addDays, format, parseISO } from 'date-fns'
 import { zhTW } from 'date-fns/locale'
@@ -28,9 +25,6 @@ export interface EditFormData {
   departure_date: string
   return_date: string
   description: string
-  outboundFlight: FlightInfo
-  returnFlight: FlightInfo
-  isSpecial: boolean
   enable_checkin: boolean
 }
 
@@ -49,21 +43,6 @@ interface UseTourEditParams {
 }
 
 // ================================
-// Constants
-// ================================
-
-const emptyFlightInfo: FlightInfo = {
-  airline: '',
-  flightNumber: '',
-  departureAirport: 'TPE',
-  departureTime: '',
-  departureDate: '',
-  arrivalAirport: '',
-  arrivalTime: '',
-  duration: '',
-}
-
-// ================================
 // Hook
 // ================================
 
@@ -75,8 +54,6 @@ export function useTourEdit(params: UseTourEditParams) {
   // Form state
   const [submitting, setSubmitting] = useState(false)
   const initializedRef = useRef(false)
-  const [loadingOutbound, setLoadingOutbound] = useState(false)
-  const [loadingReturn, setLoadingReturn] = useState(false)
 
   // Sync dialog state
   const [syncDialogOpen, setSyncDialogOpen] = useState(false)
@@ -92,9 +69,6 @@ export function useTourEdit(params: UseTourEditParams) {
     departure_date: '',
     return_date: '',
     description: '',
-    outboundFlight: { ...emptyFlightInfo },
-    returnFlight: { ...emptyFlightInfo, departureAirport: '', arrivalAirport: 'TPE' },
-    isSpecial: false,
     enable_checkin: false,
   })
 
@@ -122,9 +96,6 @@ export function useTourEdit(params: UseTourEditParams) {
       countryName = country?.name || ''
     }
 
-    const tourOutbound = tour.outbound_flight as FlightInfo | null
-    const tourReturn = tour.return_flight as FlightInfo | null
-
     setFormData({
       name: tour.name,
       countryId,
@@ -134,126 +105,9 @@ export function useTourEdit(params: UseTourEditParams) {
       departure_date: tour.departure_date || '',
       return_date: tour.return_date || '',
       description: tour.description || '',
-      outboundFlight: tourOutbound || { ...emptyFlightInfo },
-      returnFlight: tourReturn || {
-        ...emptyFlightInfo,
-        departureAirport: '',
-        arrivalAirport: 'TPE',
-      },
-      isSpecial: tour.status === COMP_TOURS_LABELS.特殊團,
       enable_checkin: tour.enable_checkin || false,
     })
   }, [isOpen, tour, countries])
-
-  // Update flight field
-  const updateFlightField = useCallback(
-    (flightType: 'outboundFlight' | 'returnFlight', field: keyof FlightInfo, value: string) => {
-      setFormData(prev => ({
-        ...prev,
-        [flightType]: {
-          ...prev[flightType],
-          [field]: value,
-        },
-      }))
-    },
-    []
-  )
-
-  // Search outbound flight
-  const handleSearchOutbound = useCallback(async () => {
-    const flightNumber = formData.outboundFlight.flightNumber
-    if (!flightNumber) {
-      toast.error(COMP_TOURS_LABELS.請先輸入航班號碼)
-      return
-    }
-
-    let fullDate = ''
-    if (formData.departure_date) {
-      fullDate = formData.departure_date
-    } else {
-      fullDate = getTodayString()
-    }
-
-    setLoadingOutbound(true)
-    try {
-      const result = await searchFlightAction(flightNumber, fullDate)
-      if (result.error) {
-        toast.error(result.error)
-        return
-      }
-      if (result.data) {
-        setFormData(prev => ({
-          ...prev,
-          outboundFlight: {
-            ...prev.outboundFlight,
-            airline: result.data!.airline,
-            departureAirport: result.data!.departure.iata,
-            arrivalAirport: result.data!.arrival.iata,
-            departureTime: result.data!.departure.time,
-            arrivalTime: result.data!.arrival.time,
-            duration: result.data!.duration || '',
-          },
-        }))
-        if (result.warning) {
-          toast.warning(result.warning, { duration: 5000 })
-        } else {
-          toast.success(COMP_TOURS_LABELS.航班資料已更新)
-        }
-      }
-    } catch {
-      toast.error(COMP_TOURS_LABELS.查詢航班時發生錯誤)
-    } finally {
-      setLoadingOutbound(false)
-    }
-  }, [formData.outboundFlight.flightNumber, formData.departure_date])
-
-  // Search return flight
-  const handleSearchReturn = useCallback(async () => {
-    const flightNumber = formData.returnFlight.flightNumber
-    if (!flightNumber) {
-      toast.error(COMP_TOURS_LABELS.請先輸入航班號碼)
-      return
-    }
-
-    let fullDate = ''
-    if (formData.return_date) {
-      fullDate = formData.return_date
-    } else {
-      fullDate = getTodayString()
-    }
-
-    setLoadingReturn(true)
-    try {
-      const result = await searchFlightAction(flightNumber, fullDate)
-      if (result.error) {
-        toast.error(result.error)
-        return
-      }
-      if (result.data) {
-        setFormData(prev => ({
-          ...prev,
-          returnFlight: {
-            ...prev.returnFlight,
-            airline: result.data!.airline,
-            departureAirport: result.data!.departure.iata,
-            arrivalAirport: result.data!.arrival.iata,
-            departureTime: result.data!.departure.time,
-            arrivalTime: result.data!.arrival.time,
-            duration: result.data!.duration || '',
-          },
-        }))
-        if (result.warning) {
-          toast.warning(result.warning, { duration: 5000 })
-        } else {
-          toast.success(COMP_TOURS_LABELS.航班資料已更新)
-        }
-      }
-    } catch {
-      toast.error(COMP_TOURS_LABELS.查詢航班時發生錯誤)
-    } finally {
-      setLoadingReturn(false)
-    }
-  }, [formData.returnFlight.flightNumber, formData.return_date])
 
   // Calculate tour days from dates
   const calculateTourDays = useCallback((departureDate: string, returnDate: string): number => {
@@ -313,19 +167,6 @@ export function useTourEdit(params: UseTourEditParams) {
       const countryId = formData.countryId || null
       const location = formData.airportCityName || ''
 
-      // Clean empty flight info (convert to Json for Supabase)
-      const cleanFlightInfo = (flight: FlightInfo): Json | null => {
-        if (
-          !flight.flightNumber &&
-          !flight.airline &&
-          !flight.departureTime &&
-          !flight.arrivalTime
-        ) {
-          return null
-        }
-        return flight as unknown as Json
-      }
-
       const updates = {
         name: formData.name.trim(),
         location,
@@ -334,9 +175,6 @@ export function useTourEdit(params: UseTourEditParams) {
         departure_date: formData.departure_date,
         return_date: formData.return_date,
         description: formData.description.trim(),
-        outbound_flight: cleanFlightInfo(formData.outboundFlight),
-        return_flight: cleanFlightInfo(formData.returnFlight),
-        status: formData.isSpecial ? COMP_TOURS_LABELS.特殊團 : tour.status || undefined,
         enable_checkin: formData.enable_checkin,
         updated_at: new Date().toISOString(),
       }
@@ -524,11 +362,6 @@ export function useTourEdit(params: UseTourEditParams) {
     formData,
     setFormData,
     submitting,
-    loadingOutbound,
-    loadingReturn,
-    updateFlightField,
-    handleSearchOutbound,
-    handleSearchReturn,
     handleSubmit,
     // Sync dialog state
     syncDialogOpen,

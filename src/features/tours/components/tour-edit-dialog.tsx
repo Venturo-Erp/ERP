@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
 import { Tour } from '@/stores/types'
 import { useTourEdit } from '../hooks/useTourEdit'
-import { FlightInfoSection } from './edit-dialog/FlightInfoSection'
 import { CountryAirportSelector } from '@/components/selectors/CountryAirportSelector'
 import { Input } from '@/components/ui/input'
 import { SimpleDateInput } from '@/components/ui/simple-date-input'
@@ -25,11 +24,6 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
     formData,
     setFormData,
     submitting,
-    loadingOutbound,
-    loadingReturn,
-    updateFlightField,
-    handleSearchOutbound,
-    handleSearchReturn,
     handleSubmit,
     // Sync dialog state
     syncDialogOpen,

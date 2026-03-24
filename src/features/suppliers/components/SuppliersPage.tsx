@@ -86,7 +86,8 @@ export const SuppliersPage: React.FC = () => {
   const filteredSuppliers = suppliers.filter(supplier =>
     searchQuery
       ? supplier.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        supplier.bank_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        supplier.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        supplier.bank_code_legacy?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         supplier.bank_account?.toLowerCase().includes(searchQuery.toLowerCase())
       : true
   )
