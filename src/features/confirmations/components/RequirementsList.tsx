@@ -1346,7 +1346,7 @@ export function RequirementsList({
               )}
             </div>
             <div className="border border-border rounded-lg overflow-hidden bg-card">
-              <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+              <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-morandi-container/50 border-b border-border h-1">
                     <th colSpan={7}></th>
