@@ -63,7 +63,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
   const { user } = useAuthStore()
 
   const [receiptDate, setReceiptDate] = useState(getTodayString())
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('transfer')
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('' as PaymentMethod)
   const [totalAmount, setTotalAmount] = useState(0)
   // 訂單分配列表
   const [orderAllocations, setOrderAllocations] = useState<OrderAllocationWithNote[]>([])
@@ -140,7 +140,10 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
   useEffect(() => {
     if (open) {
       setReceiptDate(getTodayString())
-      setPaymentMethod('transfer')
+      // 重置為第一個收款方式
+      if (paymentMethodsRaw.length > 0) {
+        setPaymentMethod(paymentMethodsRaw[0].id as PaymentMethod)
+      }
       setTotalAmount(0)
       setOrderAllocations([
         {
@@ -233,7 +236,10 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
   // 重置表單
   const resetForm = () => {
     setReceiptDate(getTodayString())
-    setPaymentMethod('transfer')
+    // 重置為第一個收款方式
+    if (paymentMethodsRaw.length > 0) {
+      setPaymentMethod(paymentMethodsRaw[0].id as PaymentMethod)
+    }
     setTotalAmount(0)
     setOrderAllocations([
       {

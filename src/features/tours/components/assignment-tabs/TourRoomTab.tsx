@@ -384,20 +384,30 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
       {/* 房型輸入列表 */}
       <div className="py-4 space-y-2">
         {/* 表頭 */}
-        <div className="grid grid-cols-[1fr_80px_40px] gap-2 px-2 text-xs text-morandi-muted">
+        <div className="grid grid-cols-[1fr_80px_80px_40px] gap-2 px-2 text-xs text-morandi-muted">
           <span>房型名稱</span>
+          <span className="text-center">幾人房</span>
           <span className="text-center">數量</span>
           <span></span>
         </div>
         
         {/* 輸入行 */}
         {roomTypeRows.map((row, index) => (
-          <div key={row.id} className="grid grid-cols-[1fr_80px_40px] gap-2 items-center">
+          <div key={row.id} className="grid grid-cols-[1fr_80px_80px_40px] gap-2 items-center">
             <Input
               value={row.room_type}
               onChange={e => updateRow(row.id, 'room_type', e.target.value)}
-              placeholder="輸入房型名稱..."
+              placeholder="標準雙人房..."
               className="h-9"
+            />
+            <Input
+              type="number"
+              min={1}
+              max={10}
+              value={row.capacity || ''}
+              onChange={e => updateRow(row.id, 'capacity', parseInt(e.target.value) || 2)}
+              placeholder="2"
+              className="h-9 text-center"
             />
             <Input
               type="number"
