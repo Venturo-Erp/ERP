@@ -24,6 +24,7 @@ export function useRequestForm() {
     notes: '',
     is_special_billing: false,
     created_by: currentUser?.id || '',
+    payment_method_id: '', // 付款方式
   })
 
   const [requestItems, setRequestItems] = useState<RequestItem[]>(() => [

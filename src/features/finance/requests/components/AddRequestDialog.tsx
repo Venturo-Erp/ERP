@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { Plus, X, FileInput, Building2, Briefcase, Users, Layers, AlertCircle } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -32,6 +32,7 @@ import { alert } from '@/lib/ui/alert-dialog'
 import { formatDate } from '@/lib/utils/format-date'
 import { useWorkspaceId } from '@/lib/workspace-context'
 import { createSupplier, invalidateSuppliers } from '@/data'
+import { supabase } from '@/lib/supabase/client'
 import type { UserRole } from '@/lib/rbac-config'
 import {
   ADD_RECEIPT_DIALOG_LABELS,
@@ -160,6 +161,24 @@ export function AddRequestDialog({
   const [batchNote, setBatchNote] = useState('')
   const [tourAllocations, setTourAllocations] = useState<TourAllocation[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // === 付款方式 ===
+  const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string }>>([])
+
+  useEffect(() => {
+    if (open && workspaceId) {
+      supabase
+        .from('payment_methods')
+        .select('id, name')
+        .eq('workspace_id', workspaceId)
+        .eq('type', 'payment')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .then(({ data }) => {
+          setPaymentMethods(data || [])
+        })
+    }
+  }, [open, workspaceId])
 
   // === 新增供應商對話框狀態 ===
   const [createSupplierDialogOpen, setCreateSupplierDialogOpen] = useState(false)
@@ -681,6 +700,26 @@ export function AddRequestDialog({
                     }))
                   }
                 />
+                <div>
+                  <label className="text-sm font-medium text-morandi-primary">
+                    付款方式
+                  </label>
+                  <Select
+                    value={formData.payment_method_id || ''}
+                    onValueChange={value => setFormData(prev => ({ ...prev, payment_method_id: value || undefined }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="選擇付款方式（選填）" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {paymentMethods.map(method => (
+                        <SelectItem key={method.id} value={method.id}>
+                          {method.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div>
                   <label className="text-sm font-medium text-morandi-primary">
                     {ADD_REQUEST_FORM_LABELS.備註}

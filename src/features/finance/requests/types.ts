@@ -10,6 +10,7 @@ export interface RequestFormData {
   notes: string
   is_special_billing: boolean
   created_by: string
+  payment_method_id?: string // 付款方式（用於傳票）
 }
 
 export interface BatchRequestFormData {
@@ -17,6 +18,7 @@ export interface BatchRequestFormData {
   notes: string
   is_special_billing: boolean
   created_by: string
+  payment_method_id?: string
 }
 
 export interface RequestItem {
