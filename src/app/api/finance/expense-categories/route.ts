@@ -13,7 +13,10 @@ export async function GET(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('expense_categories')
-    .select('*')
+    .select(`
+      *,
+      accounting_subject:chart_of_accounts!accounting_subject_id(id, code, name)
+    `)
     .eq('type', 'expense') // 只取請款類別
     .or(`user_id.is.null,user_id.eq.${workspaceId}`) // 系統預設或該工作區的
     .order('sort_order', { ascending: true })
@@ -29,7 +32,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient()
   const body = await request.json()
-  const { name, icon, color, workspace_id, sort_order } = body
+  const { name, icon, color, workspace_id, sort_order, accounting_subject_id } = body
 
   if (!name || !workspace_id) {
     return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
@@ -46,8 +49,12 @@ export async function POST(request: NextRequest) {
       is_active: true,
       is_system: false,
       sort_order: sort_order || 100,
+      accounting_subject_id: accounting_subject_id || null,
     })
-    .select()
+    .select(`
+      *,
+      accounting_subject:chart_of_accounts!accounting_subject_id(id, code, name)
+    `)
     .single()
 
   if (error) {
@@ -61,7 +68,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   const supabase = await createSupabaseServerClient()
   const body = await request.json()
-  const { id, name, icon, color, is_active, sort_order } = body
+  const { id, name, icon, color, is_active, sort_order, accounting_subject_id } = body
 
   if (!id) {
     return NextResponse.json({ error: '缺少 id' }, { status: 400 })
@@ -75,9 +82,13 @@ export async function PUT(request: NextRequest) {
       color,
       is_active,
       sort_order,
+      accounting_subject_id: accounting_subject_id || null,
     })
     .eq('id', id)
-    .select()
+    .select(`
+      *,
+      accounting_subject:chart_of_accounts!accounting_subject_id(id, code, name)
+    `)
     .single()
 
   if (error) {

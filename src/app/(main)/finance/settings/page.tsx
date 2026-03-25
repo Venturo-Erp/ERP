@@ -86,6 +86,8 @@ interface ExpenseCategory {
   is_active: boolean
   is_system: boolean
   sort_order: number
+  accounting_subject_id: string | null
+  accounting_subject?: { id: string; code: string; name: string } | null
 }
 
 export default function FinanceSettingsPage() {
@@ -514,9 +516,8 @@ export default function FinanceSettingsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[60px]">圖示</TableHead>
                       <TableHead>名稱</TableHead>
-                      <TableHead>顏色</TableHead>
+                      <TableHead>會計科目</TableHead>
                       <TableHead className="w-[80px]">類型</TableHead>
                       <TableHead className="w-[80px]">狀態</TableHead>
                       <TableHead className="w-[100px] text-right">操作</TableHead>
@@ -525,23 +526,22 @@ export default function FinanceSettingsPage() {
                   <TableBody>
                     {expenseCategories.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                        <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
                           尚未設定請款類別
                         </TableCell>
                       </TableRow>
                     ) : (
                       expenseCategories.map(category => (
                         <TableRow key={category.id}>
-                          <TableCell className="text-2xl">{category.icon}</TableCell>
                           <TableCell className="font-medium">{category.name}</TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
-                              <div 
-                                className="w-4 h-4 rounded" 
-                                style={{ backgroundColor: category.color }}
-                              />
-                              <span className="text-xs font-mono text-morandi-muted">{category.color}</span>
-                            </div>
+                            {category.accounting_subject ? (
+                              <span className="text-sm">
+                                {category.accounting_subject.code} {category.accounting_subject.name}
+                              </span>
+                            ) : (
+                              <span className="text-morandi-muted text-sm">未設定</span>
+                            )}
                           </TableCell>
                           <TableCell>
                             {category.is_system && (
@@ -678,6 +678,7 @@ export default function FinanceSettingsPage() {
         onOpenChange={setIsCategoryDialogOpen}
         category={editingCategory}
         onSave={handleSaveCategory}
+        chartOfAccounts={chartOfAccounts}
       />
 
     </ContentPageLayout>
@@ -952,23 +953,26 @@ function CategoryDialog({
   onOpenChange,
   category,
   onSave,
+  chartOfAccounts,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   category: ExpenseCategory | null
   onSave: (category: Partial<ExpenseCategory>) => Promise<void>
+  chartOfAccounts: ChartOfAccount[]
 }) {
   const [name, setName] = useState('')
-  const [icon, setIcon] = useState('')
-  const [color, setColor] = useState('')
+  const [accountingSubjectId, setAccountingSubjectId] = useState<string>('')
   const [sortOrder, setSortOrder] = useState(100)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // 篩選費用類科目（5 開頭）
+  const expenseAccounts = chartOfAccounts.filter(a => a.code.startsWith('5'))
 
   useEffect(() => {
     if (open) {
       setName(category?.name || '')
-      setIcon(category?.icon || '💰')
-      setColor(category?.color || '#c9aa7c')
+      setAccountingSubjectId(category?.accounting_subject_id || '')
       setSortOrder(category?.sort_order || 100)
     }
   }, [open, category])
@@ -982,8 +986,7 @@ function CategoryDialog({
     try {
       await onSave({
         name,
-        icon,
-        color,
+        accounting_subject_id: accountingSubjectId || null,
         sort_order: sortOrder,
       })
     } finally {
@@ -998,59 +1001,40 @@ function CategoryDialog({
           <DialogTitle>{category ? '編輯請款類別' : '新增請款類別'}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>名稱 *</Label>
-              <Input
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="例：住宿"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>圖示</Label>
-              <Input
-                value={icon}
-                onChange={e => setIcon(e.target.value)}
-                placeholder="例：🏨"
-                className="text-2xl"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label>名稱 *</Label>
+            <Input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="例：住宿、交通、餐食"
+            />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>顏色</Label>
-              <div className="flex gap-2">
-                <Input
-                  type="color"
-                  value={color}
-                  onChange={e => setColor(e.target.value)}
-                  className="w-16 h-10 p-1 cursor-pointer"
-                />
-                <Input
-                  value={color}
-                  onChange={e => setColor(e.target.value)}
-                  placeholder="#c9aa7c"
-                  className="flex-1 font-mono"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>排序</Label>
-              <Input
-                type="number"
-                value={sortOrder}
-                onChange={e => setSortOrder(Number(e.target.value))}
-                placeholder="100"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label>會計科目</Label>
+            <select
+              value={accountingSubjectId}
+              onChange={e => setAccountingSubjectId(e.target.value)}
+              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+            >
+              <option value="">請選擇會計科目</option>
+              {expenseAccounts.map(account => (
+                <option key={account.id} value={account.id}>
+                  {account.code} {account.name}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-morandi-muted">
+              選擇後，建立請款單時會自動帶入此科目
+            </p>
           </div>
-          <div className="flex items-center gap-3 p-3 bg-morandi-container/30 rounded-lg">
-            <span className="text-2xl">{icon}</span>
-            <span className="font-medium">{name || '類別名稱'}</span>
-            <div 
-              className="w-6 h-6 rounded ml-auto" 
-              style={{ backgroundColor: color }}
+          <div className="space-y-2">
+            <Label>排序</Label>
+            <Input
+              type="number"
+              value={sortOrder}
+              onChange={e => setSortOrder(Number(e.target.value))}
+              placeholder="100"
+              className="w-24"
             />
           </div>
         </div>
