@@ -1373,42 +1373,43 @@ export function RequirementsList({
                     </th>
                     <th
                       className="px-3 py-2.5 text-left font-medium text-morandi-primary"
-                      style={{ width: '100px' }}
+                      style={{ width: '20%' }}
                     >
-                      {COMP_REQUIREMENTS_LABELS.日期}
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
-                      style={{ width: '18%' }}
-                    >
-                      {COMP_REQUIREMENTS_LABELS.供應商}
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
-                      style={{ width: '15%' }}
-                    >
-                      {COMP_REQUIREMENTS_LABELS.項目說明}
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
-                      style={{ width: '12%' }}
-                    ></th>
-                    <th className="px-3 py-2.5 text-left font-medium text-morandi-primary"></th>
-                    <th
-                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
-                      style={{ width: '70px' }}
-                    >
-                      {COMP_REQUIREMENTS_LABELS.成本}
+                      項目
                     </th>
                     <th
                       className="px-3 py-2.5 text-left font-medium text-morandi-primary"
                       style={{ width: '90px' }}
                     >
-                      {COMP_REQUIREMENTS_LABELS.狀態}
+                      日期
                     </th>
                     <th
                       className="px-3 py-2.5 text-left font-medium text-morandi-primary"
-                      style={{ width: '12%' }}
+                      style={{ width: '15%' }}
+                    >
+                      說明
+                    </th>
+                    <th
+                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
+                      style={{ width: '15%' }}
+                    >
+                      備註
+                    </th>
+                    <th
+                      className="px-3 py-2.5 text-right font-medium text-morandi-primary"
+                      style={{ width: '90px' }}
+                    >
+                      報價
+                    </th>
+                    <th
+                      className="px-3 py-2.5 text-center font-medium text-morandi-primary"
+                      style={{ width: '90px' }}
+                    >
+                      狀態
+                    </th>
+                    <th
+                      className="px-3 py-2.5 text-center font-medium text-morandi-primary"
+                      style={{ width: '100px' }}
                     >
                       操作
                     </th>
@@ -1523,10 +1524,10 @@ export function RequirementsList({
                                 onCheckedChange={() => toggleItem(itemKey)}
                               />
                             </td>
-                            <td className="px-3 py-2.5">{formatDate(item.serviceDate)}</td>
+                            {/* 項目名稱（飯店/餐廳/景點名稱） */}
                             <td className="px-3 py-2.5">
                               <div className="flex items-center gap-1">
-                                <span className="flex-1">{item.supplierName || '-'}</span>
+                                <span className="flex-1 font-medium">{item.supplierName || item.title || '-'}</span>
                                 {(cat.key === 'meal' || cat.key === 'activity') && (
                                   <button
                                     type="button"
@@ -1554,6 +1555,8 @@ export function RequirementsList({
                                 )}
                               </div>
                             </td>
+                            {/* 日期 */}
+                            <td className="px-3 py-2.5 text-sm text-morandi-secondary">{formatDate(item.serviceDate)}</td>
                             {/* 欄位4: 項目說明 / 時間 */}
                             <td className="px-3 py-2.5">
                               {cat.key === 'meal' ? (
