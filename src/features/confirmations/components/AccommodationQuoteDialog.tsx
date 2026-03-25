@@ -134,12 +134,71 @@ export function AccommodationQuoteDialog({
         <title>${printTitle}</title>
         <style>
           @page { size: A4; margin: 1.5cm; }
-          body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+          body { 
+            margin: 0; 
+            font-family: system-ui, -apple-system, sans-serif;
+            font-size: 13px;
+            color: #333;
+          }
           * { box-sizing: border-box; }
+          
+          /* 容器撐滿頁面 */
+          .print-container {
+            min-height: calc(297mm - 3cm);
+            display: flex;
+            flex-direction: column;
+          }
+          
+          /* 標題區 */
+          h2 { font-size: 20px; margin: 0 0 16px 0; }
+          
+          /* 資訊區 */
+          .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            border: 1px solid #a8a29e;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+          }
+          .info-row { display: flex; align-items: center; gap: 8px; }
+          .info-label { font-weight: 500; color: #78716c; min-width: 70px; }
+          .info-value { flex: 1; }
+          input { border: none; background: transparent; width: 100%; }
+          
+          /* 表格 */
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+          th, td { border: 1px solid #a8a29e; padding: 8px 12px; text-align: left; }
+          th { background-color: #d4c5b9; font-weight: 600; }
+          tr:nth-child(even) { background-color: #fafaf8; }
+          
+          /* 備註 */
+          textarea { 
+            width: 100%; 
+            min-height: 60px; 
+            border: 1px solid #a8a29e; 
+            border-radius: 4px; 
+            padding: 8px;
+            resize: none;
+          }
+          
+          /* 頁尾撐到底部 */
+          .flex-1 { flex: 1; }
+          .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            border-top: 1px solid #a8a29e;
+            padding-top: 16px;
+            margin-top: auto;
+          }
         </style>
       </head>
       <body>
-        ${printContentRef.current.innerHTML}
+        <div class="print-container">
+          ${printContentRef.current.innerHTML}
+        </div>
       </body>
       </html>
     `)

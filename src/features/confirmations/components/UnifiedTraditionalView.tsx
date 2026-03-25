@@ -48,7 +48,7 @@ export function UnifiedTraditionalView({
       </div>
 
       {/* 固定資訊區 */}
-      <div className="mb-6 p-4 border-2 border-[#a8a29e] rounded-lg bg-gradient-to-br from-[#faf8f5] to-[#f5f1ea]">
+      <div className="info-grid mb-6 p-4 border-2 border-[#a8a29e] rounded-lg bg-gradient-to-br from-[#faf8f5] to-[#f5f1ea]">
         <div className="grid grid-cols-[80px_1fr_80px_1fr] gap-x-4 gap-y-3 text-sm items-center">
           {/* 第一行 */}
           <span className="font-semibold text-[#78716c]">致：</span>
@@ -89,10 +89,10 @@ export function UnifiedTraditionalView({
       </div>
 
       {/* 撐開中間空間（列印時撐到頁尾） */}
-      <div className="flex-1 print:flex-1"></div>
+      <div className="flex-1"></div>
 
       {/* 頁尾：公司資料 + 供應商簽回 */}
-      <div className="mt-6 grid grid-cols-2 gap-6 border-t border-[#a8a29e] pt-4 print:mt-auto">
+      <div className="footer-grid mt-6 grid grid-cols-2 gap-6 border-t border-[#a8a29e] pt-4">
         {/* 左邊：公司資料 */}
         <div className="text-sm space-y-1">
           <div><span className="font-medium text-[#78716c]">公司名稱：</span>{COMPANY_NAME}</div>
