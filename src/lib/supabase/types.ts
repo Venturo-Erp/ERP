@@ -15925,6 +15925,7 @@ export type Database = {
           created_by: string | null
           hidden: boolean | null
           id: string
+          is_selected: boolean | null
           items: Json
           line_group_id: string | null
           line_group_name: string | null
@@ -15971,6 +15972,7 @@ export type Database = {
           created_by?: string | null
           hidden?: boolean | null
           id?: string
+          is_selected?: boolean | null
           items?: Json
           line_group_id?: string | null
           line_group_name?: string | null
@@ -16017,6 +16019,7 @@ export type Database = {
           created_by?: string | null
           hidden?: boolean | null
           id?: string
+          is_selected?: boolean | null
           items?: Json
           line_group_id?: string | null
           line_group_name?: string | null
