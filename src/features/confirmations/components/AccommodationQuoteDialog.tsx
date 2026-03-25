@@ -130,6 +130,17 @@ export function AccommodationQuoteDialog({
       return
     }
 
+    // 複製所有 stylesheets
+    const styles = Array.from(document.styleSheets)
+      .map(sheet => {
+        try {
+          return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\n')
+        } catch {
+          return ''
+        }
+      })
+      .join('\n')
+
     iframeDoc.open()
     iframeDoc.write(`
       <!DOCTYPE html>
@@ -137,6 +148,9 @@ export function AccommodationQuoteDialog({
       <head>
         <meta charset="utf-8">
         <title>${printTitle}</title>
+        <style>
+          ${styles}
+        </style>
         <style>
           @page {
             size: A4;
