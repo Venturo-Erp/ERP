@@ -114,8 +114,8 @@ export function AccommodationQuoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="max-w-[210mm] w-[210mm] max-h-[95vh] overflow-hidden flex flex-col">
-        <DialogHeader>
+      <DialogContent className="max-w-[210mm] w-[210mm] max-h-[95vh] overflow-hidden flex flex-col print:max-w-none print:w-full print:max-h-none print:overflow-visible print:shadow-none print:border-none">
+        <DialogHeader className="print:hidden">
           <DialogTitle>住宿需求單</DialogTitle>
         </DialogHeader>
         {/* 列印預覽 */}
@@ -131,8 +131,8 @@ export function AccommodationQuoteDialog({
           />
         </div>
 
-        {/* 固定底部：發送方式按鈕 */}
-        <div className="flex-shrink-0 border-t pt-4 mt-2 space-y-3">
+        {/* 固定底部：發送方式按鈕（列印時隱藏） */}
+        <div className="flex-shrink-0 border-t pt-4 mt-2 space-y-3 print:hidden">
           {/* LINE 群組選擇 */}
           {selectedMethod === 'line' && (
             <div className="flex items-center gap-3">
