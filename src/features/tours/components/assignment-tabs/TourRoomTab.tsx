@@ -195,82 +195,37 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
     
     setSaving(true)
     try {
-      // 取得目前區段的所有房間
+      // 刪除此區段的所有舊房間，重新建立（確保 display_order 正確）
       const { data: existingRooms } = await supabase
         .from('tour_rooms')
-        .select('id, room_type, night_number')
+        .select('id')
         .eq('tour_id', tourId)
         .in('night_number', selectedSegment.nights)
       
-      // 統計目前各房型數量（只看第一晚）
-      const existingStats: Record<string, string[]> = {} // room_type -> [room_ids]
-      for (const room of (existingRooms || [])) {
-        if (room.night_number !== selectedSegment.start_night) continue
-        if (!existingStats[room.room_type]) {
-          existingStats[room.room_type] = []
+      // 刪除舊房間
+      if (existingRooms && existingRooms.length > 0) {
+        for (const room of existingRooms) {
+          await deleteTourRoom(room.id)
         }
-        existingStats[room.room_type].push(room.id)
       }
       
-      // 計算需要新增和刪除的
+      // 重新建立所有房間，display_order 全域遞增（跨房型）
+      let globalDisplayOrder = 0
+      
       for (const row of validRows) {
-        const existingCount = existingStats[row.room_type]?.length || 0
-        const targetCount = row.quantity
-        
-        if (targetCount > existingCount) {
-          // 需要新增
-          const toAdd = targetCount - existingCount
-          for (let i = 0; i < toAdd; i++) {
-            for (const nightNumber of selectedSegment.nights) {
-              await createTourRoom({
-                tour_id: tourId,
-                room_type: row.room_type.trim(),
-                capacity: row.capacity,
-                hotel_name: selectedSegment.hotel_name || null,
-                night_number: nightNumber,
-                display_order: existingCount + i,
-              })
-            }
-          }
-        } else if (targetCount < existingCount) {
-          // 需要刪除（從後面開始刪）
-          const toDelete = existingCount - targetCount
-          const idsToDelete = existingStats[row.room_type].slice(-toDelete)
-          
-          // 刪除所有晚數對應的房間
+        for (let i = 0; i < row.quantity; i++) {
+          // 每一間房，為所有晚數都建立記錄（使用相同的 display_order）
           for (const nightNumber of selectedSegment.nights) {
-            const { data: roomsToDelete } = await supabase
-              .from('tour_rooms')
-              .select('id')
-              .eq('tour_id', tourId)
-              .eq('room_type', row.room_type)
-              .eq('night_number', nightNumber)
-              .order('display_order', { ascending: false })
-              .limit(toDelete)
-            
-            for (const room of (roomsToDelete || [])) {
-              await deleteTourRoom(room.id)
-            }
+            await createTourRoom({
+              tour_id: tourId,
+              room_type: row.room_type.trim(),
+              capacity: row.capacity,
+              hotel_name: selectedSegment.hotel_name || null,
+              night_number: nightNumber,
+              display_order: globalDisplayOrder,
+            })
           }
-        }
-        
-        // 從 existingStats 移除已處理的
-        delete existingStats[row.room_type]
-      }
-      
-      // 刪除不在列表中的房型
-      for (const [roomType, roomIds] of Object.entries(existingStats)) {
-        for (const nightNumber of selectedSegment.nights) {
-          const { data: roomsToDelete } = await supabase
-            .from('tour_rooms')
-            .select('id')
-            .eq('tour_id', tourId)
-            .eq('room_type', roomType)
-            .eq('night_number', nightNumber)
-          
-          for (const room of (roomsToDelete || [])) {
-            await deleteTourRoom(room.id)
-          }
+          globalDisplayOrder++
         }
       }
       
