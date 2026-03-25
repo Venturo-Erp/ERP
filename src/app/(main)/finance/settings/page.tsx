@@ -148,7 +148,7 @@ export default function FinanceSettingsPage() {
 
   // 收款方式
   const receiptMethods = paymentMethods.filter(m => m.type === 'receipt')
-  // 請款方式
+  // 付款方式
   const paymentMethodsList = paymentMethods.filter(m => m.type === 'payment')
 
   // 儲存付款方式
@@ -285,7 +285,7 @@ export default function FinanceSettingsPage() {
 
   const sections = [
     { key: 'receipt', label: '收款方式', icon: CreditCard },
-    { key: 'payment', label: '請款方式', icon: Banknote },
+    { key: 'payment', label: '付款方式', icon: Banknote },
     { key: 'category', label: '請款類別', icon: Tag },
     { key: 'bank', label: '銀行帳戶', icon: Building2 },
   ] as const
@@ -319,7 +319,7 @@ export default function FinanceSettingsPage() {
             className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            新增請款方式
+            新增付款方式
           </Button>
         ) : activeSection === 'category' ? (
           <Button
@@ -440,7 +440,7 @@ export default function FinanceSettingsPage() {
             </div>
           )}
 
-          {/* 請款方式 */}
+          {/* 付款方式 */}
           {activeSection === 'payment' && (
             <div className="space-y-4">
               <Card className="rounded-lg overflow-hidden">
@@ -458,7 +458,7 @@ export default function FinanceSettingsPage() {
                     {paymentMethodsList.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
-                          尚未設定請款方式
+                          尚未設定付款方式
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -738,7 +738,7 @@ function MethodDialog({
 
   const title = type === 'receipt' 
     ? (method ? '編輯收款方式' : '新增收款方式')
-    : (method ? '編輯請款方式' : '新增請款方式')
+    : (method ? '編輯付款方式' : '新增付款方式')
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
