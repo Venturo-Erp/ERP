@@ -892,10 +892,25 @@ export function OrderMembersExpandable({
     // 有分房時按房間排序（同房的人排在一起）
     if (roomVehicle.showRoomColumn && Object.keys(roomVehicle.roomSortKeys).length > 0) {
       return [...membersData.members].sort((a, b) => {
-        const aKey = roomVehicle.roomSortKeys[a.id] ?? 9999
-        const bKey = roomVehicle.roomSortKeys[b.id] ?? 9999
-        if (aKey !== bKey) return aKey - bKey
-        return a.id.localeCompare(b.id)  // 相同時用 id 排序確保穩定
+        const aKey = roomVehicle.roomSortKeys[a.id]
+        const bKey = roomVehicle.roomSortKeys[b.id]
+        const aHasRoom = aKey !== undefined
+        const bHasRoom = bKey !== undefined
+        
+        // 已分配的排前面，未分配的排後面
+        if (aHasRoom && !bHasRoom) return -1
+        if (!aHasRoom && bHasRoom) return 1
+        
+        // 都已分配：先按房間順序，同房內按原本的 sort_order
+        if (aHasRoom && bHasRoom) {
+          const roomDiff = Math.floor(aKey / 10) - Math.floor(bKey / 10)
+          if (roomDiff !== 0) return roomDiff
+          // 同房內按 sort_order 排序
+          return (a.sort_order ?? 999) - (b.sort_order ?? 999)
+        }
+        
+        // 都未分配：按原本的 sort_order
+        return (a.sort_order ?? 999) - (b.sort_order ?? 999)
       })
     }
     // 沒有分房時按 sort_order 排序，相同時用 id 確保穩定
