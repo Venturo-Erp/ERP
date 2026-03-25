@@ -108,118 +108,9 @@ export function AccommodationQuoteDialog({
     }
   }
 
-  // 列印
+  // 列印（直接列印當前畫面）
   const handlePrint = () => {
-    if (!printContentRef.current) return
-    
-    const printTitle = `${supplierName}-住宿需求單`
-    const originalTitle = document.title
-    document.title = printTitle
-
-    const iframe = document.createElement('iframe')
-    iframe.style.position = 'absolute'
-    iframe.style.width = '0'
-    iframe.style.height = '0'
-    iframe.style.border = 'none'
-    document.body.appendChild(iframe)
-
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
-    if (!iframeDoc) return
-
-    iframeDoc.open()
-    iframeDoc.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>${printTitle}</title>
-        <style>
-          @page { size: A4; margin: 1.5cm; }
-          body { 
-            margin: 0; 
-            font-family: system-ui, -apple-system, sans-serif;
-            font-size: 13px;
-            color: #333;
-          }
-          * { box-sizing: border-box; }
-          
-          /* 容器撐滿頁面 */
-          .print-container {
-            min-height: calc(297mm - 3cm);
-            display: flex;
-            flex-direction: column;
-          }
-          
-          /* 標題區 */
-          h2 { font-size: 20px; margin: 0 0 16px 0; }
-          
-          /* 資訊區 */
-          .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            border: 1px solid #a8a29e;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 20px;
-          }
-          .info-row { display: flex; align-items: center; gap: 8px; }
-          .info-label { font-weight: 500; color: #78716c; min-width: 70px; }
-          .info-value { flex: 1; }
-          input { border: none; background: transparent; width: 100%; }
-          
-          /* 表格 */
-          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-          th, td { border: 1px solid #a8a29e; padding: 8px 12px; text-align: left; }
-          th { background-color: #d4c5b9; font-weight: 600; }
-          tr:nth-child(even) { background-color: #fafaf8; }
-          
-          /* 備註 */
-          textarea { 
-            width: 100%; 
-            min-height: 60px; 
-            border: 1px solid #a8a29e; 
-            border-radius: 4px; 
-            padding: 8px;
-            resize: none;
-          }
-          
-          /* 頁尾固定在底部 */
-          .footer-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            border-top: 1px solid #a8a29e;
-            padding-top: 16px;
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-          }
-          
-          /* 容器相對定位 */
-          .print-container {
-            position: relative;
-            min-height: calc(297mm - 3cm);
-            padding-bottom: 80px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="print-container">
-          ${printContentRef.current.innerHTML}
-        </div>
-      </body>
-      </html>
-    `)
-    iframeDoc.close()
-
-    setTimeout(() => {
-      iframe.contentWindow?.print()
-      setTimeout(() => {
-        document.body.removeChild(iframe)
-        document.title = originalTitle
-      }, 1000)
-    }, 100)
+    window.print()
   }
 
   const handleDelivery = (method: string) => {
@@ -236,15 +127,35 @@ export function AccommodationQuoteDialog({
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-8"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-8 print:p-0 print:bg-white"
       onClick={onClose}
     >
+      {/* 列印時的樣式 */}
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 0; }
+          body > *:not([data-print-modal]) { display: none !important; }
+          [data-print-modal] { 
+            position: static !important;
+            background: white !important;
+          }
+          .print-hide { display: none !important; }
+          .print-content {
+            width: 210mm !important;
+            min-height: 297mm !important;
+            padding: 1.5cm !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+          }
+        }
+      `}</style>
       <div
-        className="bg-card rounded-lg max-w-[900px] w-full max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-card rounded-lg max-w-[900px] w-full max-h-[90vh] overflow-hidden flex flex-col print:max-w-none print:max-h-none print:rounded-none"
         onClick={e => e.stopPropagation()}
+        data-print-modal
       >
-        {/* 頂部按鈕 */}
-        <div className="flex justify-between items-center gap-2 p-4 border-b bg-morandi-container/30">
+        {/* 頂部按鈕（列印時隱藏） */}
+        <div className="flex justify-between items-center gap-2 p-4 border-b bg-morandi-container/30 print-hide">
           <h2 className="text-lg font-semibold text-morandi-primary">住宿需求單預覽</h2>
           <div className="flex gap-2">
             <Button onClick={onClose} variant="outline" size="sm" className="gap-1">
@@ -263,10 +174,10 @@ export function AccommodationQuoteDialog({
         </div>
 
         {/* A4 預覽區 */}
-        <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+        <div className="flex-1 overflow-y-auto p-6 bg-gray-100 print:p-0 print:bg-white print:overflow-visible">
           <div
             ref={printContentRef}
-            className="bg-white mx-auto shadow-lg"
+            className="bg-white mx-auto shadow-lg print-content"
             style={{
               width: '210mm',
               minHeight: '297mm',
@@ -285,8 +196,8 @@ export function AccommodationQuoteDialog({
           </div>
         </div>
 
-        {/* 底部發送按鈕 */}
-        <div className="flex-shrink-0 border-t p-4 bg-white space-y-3">
+        {/* 底部發送按鈕（列印時隱藏） */}
+        <div className="flex-shrink-0 border-t p-4 bg-white space-y-3 print-hide">
           {/* LINE 群組選擇 */}
           {selectedMethod === 'line' && (
             <div className="flex items-center gap-3">
