@@ -380,7 +380,6 @@ export default function FinanceSettingsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">代碼</TableHead>
                       <TableHead>名稱</TableHead>
                       <TableHead>借方科目</TableHead>
                       <TableHead>貸方科目</TableHead>
@@ -391,14 +390,13 @@ export default function FinanceSettingsPage() {
                   <TableBody>
                     {receiptMethods.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                        <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
                           尚未設定收款方式
                         </TableCell>
                       </TableRow>
                     ) : (
                       receiptMethods.map(method => (
                         <TableRow key={method.id}>
-                          <TableCell className="font-mono">{method.code}</TableCell>
                           <TableCell className="font-medium">{method.name}</TableCell>
                           <TableCell className="text-morandi-muted text-sm">
                             {method.debit_account ? `${method.debit_account.code} ${method.debit_account.name}` : '-'}
@@ -449,7 +447,6 @@ export default function FinanceSettingsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px]">代碼</TableHead>
                       <TableHead>名稱</TableHead>
                       <TableHead>借方科目</TableHead>
                       <TableHead>貸方科目</TableHead>
@@ -460,14 +457,13 @@ export default function FinanceSettingsPage() {
                   <TableBody>
                     {paymentMethodsList.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                        <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
                           尚未設定請款方式
                         </TableCell>
                       </TableRow>
                     ) : (
                       paymentMethodsList.map(method => (
                         <TableRow key={method.id}>
-                          <TableCell className="font-mono">{method.code}</TableCell>
                           <TableCell className="font-medium">{method.name}</TableCell>
                           <TableCell className="text-morandi-muted text-sm">
                             {method.debit_account ? `${method.debit_account.code} ${method.debit_account.name}` : '-'}
@@ -707,7 +703,6 @@ function MethodDialog({
   onSave: (method: Partial<PaymentMethod>) => Promise<void>
   chartOfAccounts: ChartOfAccount[]
 }) {
-  const [code, setCode] = useState('')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [debitAccountId, setDebitAccountId] = useState('')
@@ -716,7 +711,6 @@ function MethodDialog({
 
   useEffect(() => {
     if (open) {
-      setCode(method?.code || '')
       setName(method?.name || '')
       setDescription(method?.description || '')
       setDebitAccountId(method?.debit_account_id || '')
@@ -725,14 +719,13 @@ function MethodDialog({
   }, [open, method])
 
   const handleSubmit = async () => {
-    if (!code || !name) {
-      await alert('請填寫代碼和名稱', 'warning')
+    if (!name) {
+      await alert('請填寫名稱', 'warning')
       return
     }
     setIsSubmitting(true)
     try {
       await onSave({ 
-        code, 
         name, 
         description,
         debit_account_id: debitAccountId || null,
@@ -754,23 +747,13 @@ function MethodDialog({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>代碼 *</Label>
-              <Input
-                value={code}
-                onChange={e => setCode(e.target.value)}
-                placeholder="例：CASH"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>名稱 *</Label>
-              <Input
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="例：現金"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label>名稱 *</Label>
+            <Input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="例：現金、匯款、信用卡"
+            />
           </div>
           <div className="space-y-2">
             <Label>說明</Label>
