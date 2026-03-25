@@ -1,6 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-import { getAccountMappingAsync } from '@/features/finance/constants/account-mapping'
 
 // Lazy initialization to avoid build-time errors
 let supabase: SupabaseClient
@@ -16,13 +15,13 @@ function getSupabase() {
 }
 
 /**
- * 自動產生傳票 API
+ * 自動產生傳票 API（使用使用者設定的科目，不再硬編碼）
  *
  * POST /api/accounting/vouchers/auto-create
  *
  * Body:
- * - source_type: 'payment_request' | 'receipt' | 'tour_closing'
- * - source_id: string (請款單/收款單/團 ID)
+ * - source_type: 'payment_request' | 'receipt'
+ * - source_id: string (請款單/收款單 ID)
  * - workspace_id: string
  */
 export async function POST(request: NextRequest) {
@@ -46,9 +45,6 @@ export async function POST(request: NextRequest) {
       case 'receipt':
         voucher = await createVoucherFromReceipt(workspace_id, source_id)
         break
-      case 'tour_closing':
-        voucher = await createVoucherFromTourClosing(workspace_id, source_id)
-        break
       default:
         return NextResponse.json({ error: `不支援的來源類型：${source_type}` }, { status: 400 })
     }
@@ -64,23 +60,132 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * 根據科目代碼取得 subject_id
+ * 產生傳票編號
  */
-async function getSubjectId(code: string): Promise<string | null> {
+async function generateVoucherNo(workspaceId: string, date: string): Promise<string> {
+  const yearMonth = date.substring(0, 7).replace('-', '') // "2026-03" -> "202603"
+  const prefix = `JV${yearMonth}`
+
   const { data } = await getSupabase()
-    .from('accounting_subjects')
-    .select('id')
-    .eq('code', code)
+    .from('journal_vouchers')
+    .select('voucher_no')
+    .eq('workspace_id', workspaceId)
+    .like('voucher_no', `${prefix}%`)
+    .order('voucher_no', { ascending: false })
+    .limit(1)
+
+  let seq = 1
+  if (data && data.length > 0) {
+    const lastNo = data[0].voucher_no
+    const lastSeq = parseInt(lastNo.slice(-4))
+    if (!isNaN(lastSeq)) seq = lastSeq + 1
+  }
+
+  return `${prefix}${seq.toString().padStart(4, '0')}`
+}
+
+/**
+ * 從收款單產生傳票
+ * 使用「收款方式」的借方/貸方科目
+ */
+async function createVoucherFromReceipt(workspaceId: string, receiptId: string) {
+  const db = getSupabase()
+
+  // 1. 查詢收款單（含收款方式的科目設定）
+  const { data: receipt, error: recError } = await db
+    .from('receipts')
+    .select(`
+      *,
+      payment_method_ref:payment_methods!payment_method_id(
+        id, name,
+        debit_account:chart_of_accounts!debit_account_id(id, code, name),
+        credit_account:chart_of_accounts!credit_account_id(id, code, name)
+      )
+    `)
+    .eq('id', receiptId)
     .single()
-  return data?.id || null
+
+  if (recError || !receipt) {
+    throw new Error(`找不到收款單：${receiptId}`)
+  }
+
+  // 2. 取得科目
+  const methodRef = receipt.payment_method_ref as {
+    debit_account: { id: string; code: string; name: string } | null
+    credit_account: { id: string; code: string; name: string } | null
+  } | null
+
+  if (!methodRef?.debit_account || !methodRef?.credit_account) {
+    throw new Error('收款方式未設定會計科目，無法自動產生傳票')
+  }
+
+  const debitAccount = methodRef.debit_account
+  const creditAccount = methodRef.credit_account
+
+  // 3. 產生傳票編號
+  const voucherDate = receipt.receipt_date || new Date().toISOString().split('T')[0]
+  const voucherNo = await generateVoucherNo(workspaceId, voucherDate)
+
+  // 4. 建立傳票（使用 journal_vouchers 表）
+  const { data: voucher, error: voucherError } = await db
+    .from('journal_vouchers')
+    .insert({
+      workspace_id: workspaceId,
+      voucher_no: voucherNo,
+      voucher_date: voucherDate,
+      memo: `收款單 ${receipt.receipt_number || ''} - ${receipt.notes || ''}`.trim(),
+      status: 'posted',
+      total_debit: receipt.amount || 0,
+      total_credit: receipt.amount || 0,
+      source_type: 'receipt',
+      source_id: receiptId,
+    })
+    .select()
+    .single()
+
+  if (voucherError) {
+    throw new Error(`建立傳票失敗：${voucherError.message}`)
+  }
+
+  // 5. 建立傳票分錄
+  const lines = [
+    {
+      voucher_id: voucher.id,
+      line_no: 1,
+      account_id: debitAccount.id,
+      description: `收款 - ${receipt.notes || ''}`,
+      debit_amount: receipt.amount || 0,
+      credit_amount: 0,
+    },
+    {
+      voucher_id: voucher.id,
+      line_no: 2,
+      account_id: creditAccount.id,
+      description: `收款 - ${receipt.notes || ''}`,
+      debit_amount: 0,
+      credit_amount: receipt.amount || 0,
+    },
+  ]
+
+  const { error: linesError } = await db.from('journal_lines').insert(lines)
+
+  if (linesError) {
+    await db.from('journal_vouchers').delete().eq('id', voucher.id)
+    throw new Error(`建立傳票分錄失敗：${linesError.message}`)
+  }
+
+  return voucher
 }
 
 /**
  * 從請款單產生傳票
+ * 使用「請款類別」的借方/貸方科目
  */
 async function createVoucherFromPaymentRequest(workspaceId: string, paymentRequestId: string) {
+  const db = getSupabase()
+
   // 1. 查詢請款單
-  const { data: request, error: reqError } = await supabase
+  const { data: request, error: reqError } = await db
     .from('payment_requests')
     .select('*, items:payment_request_items(*)')
     .eq('id', paymentRequestId)
@@ -90,120 +195,55 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
     throw new Error(`找不到請款單：${paymentRequestId}`)
   }
 
-  // 2. 產生傳票編號
-  const voucherNo = await generateVoucherNo(workspaceId, 'PAY')
+  // 2. 查詢所有請款類別（用於對應 category）
+  const { data: categories } = await db
+    .from('expense_categories')
+    .select(`
+      id, name,
+      debit_account:chart_of_accounts!debit_account_id(id, code, name),
+      credit_account:chart_of_accounts!credit_account_id(id, code, name)
+    `)
+    .eq('workspace_id', workspaceId)
+    .eq('is_active', true)
 
-  // 3. 建立傳票主檔
-  const { data: voucher, error: voucherError } = await supabase
-    .from('vouchers')
-    .insert({
-      workspace_id: workspaceId,
-      voucher_no: voucherNo,
-      voucher_date: request.request_date,
-      type: 'payment',
-      source_type: 'payment_request',
-      source_id: paymentRequestId,
-      description: `請款單 ${request.code} - ${request.tour_name || ''}`,
-      total_debit: request.amount,
-      total_credit: request.amount,
-      status: 'draft',
-    })
-    .select()
-    .single()
+  const categoryMap = new Map<string, {
+    debit_account: { id: string; code: string; name: string } | null
+    credit_account: { id: string; code: string; name: string } | null
+  }>()
 
-  if (voucherError) {
-    throw new Error(`建立傳票失敗：${voucherError.message}`)
-  }
-
-  // 4. 建立傳票分錄（每個請款項目一筆借方）
-  const entries: Array<{
-    voucher_id: string
-    entry_no: number
-    subject_id: string
-    debit: number
-    credit: number
-    description: string
-  }> = []
-
-  let entryNo = 1
-  const supplierName = request.supplier_name || '供應商'
-
-  // 借方分錄（每個項目一筆，摘要：供應商 + 項目描述）
-  for (const item of request.items || []) {
-    const category = item.category || '其他'
-    const mapping = await getAccountMappingAsync(category, workspaceId)
-    const subjectId = await getSubjectId(mapping.debitCode)
-    if (subjectId && item.amount) {
-      entries.push({
-        voucher_id: voucher.id,
-        entry_no: entryNo++,
-        subject_id: subjectId,
-        debit: item.amount,
-        credit: 0,
-        description: `${supplierName} / ${item.description || category}`,
+  if (categories) {
+    for (const cat of categories) {
+      // Supabase join 可能返回陣列或單一物件
+      const debitRaw = cat.debit_account as unknown
+      const creditRaw = cat.credit_account as unknown
+      const debit = Array.isArray(debitRaw) ? debitRaw[0] : debitRaw
+      const credit = Array.isArray(creditRaw) ? creditRaw[0] : creditRaw
+      
+      categoryMap.set(cat.name, {
+        debit_account: debit as { id: string; code: string; name: string } | null,
+        credit_account: credit as { id: string; code: string; name: string } | null,
       })
     }
   }
 
-  // 貸方分錄（應付帳款，一筆總金額）
-  const apSubjectId = await getSubjectId('2101')
-  if (apSubjectId) {
-    entries.push({
-      voucher_id: voucher.id,
-      entry_no: entryNo,
-      subject_id: apSubjectId,
-      debit: 0,
-      credit: request.amount,
-      description: `應付 ${supplierName}`,
-    })
-  }
+  // 3. 產生傳票編號
+  const voucherDate = request.request_date || new Date().toISOString().split('T')[0]
+  const voucherNo = await generateVoucherNo(workspaceId, voucherDate)
 
-  // 插入分錄
-  if (entries.length > 0) {
-    const { error: entriesError } = await getSupabase().from('voucher_entries').insert(entries)
-
-    if (entriesError) {
-      // Rollback: 刪除傳票
-      await getSupabase().from('vouchers').delete().eq('id', voucher.id)
-      throw new Error(`建立傳票分錄失敗：${entriesError.message}`)
-    }
-  }
-
-  return voucher
-}
-
-/**
- * 從收款單產生傳票
- */
-async function createVoucherFromReceipt(workspaceId: string, receiptId: string) {
-  // 1. 查詢收款單
-  const { data: receipt, error: recError } = await supabase
-    .from('receipts')
-    .select('*')
-    .eq('id', receiptId)
-    .single()
-
-  if (recError || !receipt) {
-    throw new Error(`找不到收款單：${receiptId}`)
-  }
-
-  // 2. 產生傳票編號
-  const voucherNo = await generateVoucherNo(workspaceId, 'REC')
-
-  // 3. 建立傳票主檔
-  const { data: voucher, error: voucherError } = await supabase
-    .from('vouchers')
+  // 4. 建立傳票
+  const totalAmount = request.total_amount || 0
+  const { data: voucher, error: voucherError } = await db
+    .from('journal_vouchers')
     .insert({
       workspace_id: workspaceId,
       voucher_no: voucherNo,
-      voucher_date: receipt.receipt_date,
-      type: 'receipt',
-      source_type: 'receipt',
-      source_id: receiptId,
-      description: `收款單 ${receipt.code} - ${receipt.tour_name || ''}`,
-      total_debit: receipt.amount,
-      total_credit: receipt.amount,
-      status: 'draft',
+      voucher_date: voucherDate,
+      memo: `請款單 ${request.code || ''} - ${request.notes || ''}`.trim(),
+      status: 'posted',
+      total_debit: totalAmount,
+      total_credit: totalAmount,
+      source_type: 'payment_request',
+      source_id: paymentRequestId,
     })
     .select()
     .single()
@@ -212,83 +252,67 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
     throw new Error(`建立傳票失敗：${voucherError.message}`)
   }
 
-  // 4. 建立傳票分錄
-  // 借方：銀行存款/現金
-  // 貸方：預收款項
-  const cashSubjectId = await getSubjectId(receipt.payment_method === 'cash' ? '1101' : '1102')
-  const prepaidSubjectId = await getSubjectId('2103') // 預收款項
+  // 5. 建立傳票分錄
+  const lines: Array<{
+    voucher_id: string
+    line_no: number
+    account_id: string
+    description: string
+    debit_amount: number
+    credit_amount: number
+  }> = []
 
-  const entries = []
-  if (cashSubjectId) {
-    entries.push({
-      voucher_id: voucher.id,
-      entry_no: 1,
-      subject_id: cashSubjectId,
-      debit: receipt.amount,
-      credit: 0,
-      description: `收款`,
-    })
-  }
-  if (prepaidSubjectId) {
-    entries.push({
-      voucher_id: voucher.id,
-      entry_no: 2,
-      subject_id: prepaidSubjectId,
-      debit: 0,
-      credit: receipt.amount,
-      description: `預收團款`,
-    })
-  }
+  let lineNo = 1
+  const creditAccountIds: Map<string, number> = new Map() // 用於合併相同貸方科目
 
-  if (entries.length > 0) {
-    const { error: entriesError } = await getSupabase().from('voucher_entries').insert(entries)
+  // 借方分錄（每個項目一筆）
+  for (const item of request.items || []) {
+    const category = item.category || '其他'
+    const catMapping = categoryMap.get(category)
 
-    if (entriesError) {
-      await getSupabase().from('vouchers').delete().eq('id', voucher.id)
-      throw new Error(`建立傳票分錄失敗：${entriesError.message}`)
+    if (!catMapping?.debit_account) {
+      throw new Error(`請款類別「${category}」未設定借方科目，無法自動產生傳票`)
     }
+
+    lines.push({
+      voucher_id: voucher.id,
+      line_no: lineNo++,
+      account_id: catMapping.debit_account.id,
+      description: `${request.supplier_name || ''} / ${item.description || category}`,
+      debit_amount: item.amount || 0,
+      credit_amount: 0,
+    })
+
+    // 累計貸方金額（可能多個項目用同一個貸方科目）
+    if (catMapping.credit_account) {
+      const creditId = catMapping.credit_account.id
+      creditAccountIds.set(creditId, (creditAccountIds.get(creditId) || 0) + (item.amount || 0))
+    }
+  }
+
+  // 貸方分錄（合併相同科目）
+  for (const [creditAccountId, amount] of creditAccountIds) {
+    lines.push({
+      voucher_id: voucher.id,
+      line_no: lineNo++,
+      account_id: creditAccountId,
+      description: `應付 ${request.supplier_name || ''}`,
+      debit_amount: 0,
+      credit_amount: amount,
+    })
+  }
+
+  if (lines.length === 0) {
+    await db.from('journal_vouchers').delete().eq('id', voucher.id)
+    throw new Error('沒有有效的分錄，無法產生傳票')
+  }
+
+  const { error: linesError } = await db.from('journal_lines').insert(lines)
+
+  if (linesError) {
+    await db.from('journal_vouchers').delete().eq('id', voucher.id)
+    throw new Error(`建立傳票分錄失敗：${linesError.message}`)
   }
 
   return voucher
-}
-
-/**
- * 從結團產生傳票
- */
-async function createVoucherFromTourClosing(workspaceId: string, tourId: string) {
-  // TODO: 實作結團傳票
-  // 這個比較複雜，需要：
-  // 1. 預收團款 → 團費收入
-  // 2. 預付團務成本 → 團務成本
-  // 3. 計算毛利
-  throw new Error('結團傳票功能開發中')
-}
-
-/**
- * 產生傳票編號
- */
-async function generateVoucherNo(workspaceId: string, prefix: string): Promise<string> {
-  const today = new Date()
-  const year = today.getFullYear()
-  const month = String(today.getMonth() + 1).padStart(2, '0')
-
-  // 查詢本月最大編號
-  const { data: lastVoucher } = await supabase
-    .from('vouchers')
-    .select('voucher_no')
-    .eq('workspace_id', workspaceId)
-    .like('voucher_no', `${prefix}${year}${month}%`)
-    .order('voucher_no', { ascending: false })
-    .limit(1)
-    .single()
-
-  let seq = 1
-  if (lastVoucher?.voucher_no) {
-    const lastSeq = parseInt(lastVoucher.voucher_no.slice(-3), 10)
-    if (!isNaN(lastSeq)) {
-      seq = lastSeq + 1
-    }
-  }
-
-  return `${prefix}${year}${month}${String(seq).padStart(3, '0')}`
 }
