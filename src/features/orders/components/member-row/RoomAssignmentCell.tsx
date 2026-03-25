@@ -91,15 +91,11 @@ export function RoomAssignmentCell({
           className="w-full h-6 bg-transparent border-none outline-none text-xs text-morandi-secondary cursor-pointer"
         >
           <option value="">{COMP_ORDERS_LABELS.LABEL_322}</option>
-          {roomOptions.map(opt => {
-            const isFull = opt.assignedCount >= opt.capacity
-            return (
-              <option key={opt.id} value={opt.id}>
-                {opt.label}
-                {isFull ? COMP_ORDERS_LABELS._6歲_可加 : ''}
-              </option>
-            )
-          })}
+          {roomOptions.map(opt => (
+            <option key={opt.id} value={opt.id}>
+              {opt.label}
+            </option>
+          ))}
         </select>
       </td>
     )
@@ -205,15 +201,11 @@ export function RoomAssignmentCell({
               className="w-full h-7 text-xs border border-border rounded px-2 bg-card"
             >
               <option value="">{COMP_ORDERS_LABELS.LABEL_3431}</option>
-              {roomOptions.map(opt => {
-                const isFull = opt.assignedCount >= opt.capacity && opt.id !== currentRoomId
-                return (
-                  <option key={opt.id} value={opt.id}>
-                    {opt.label}
-                    {isFull ? COMP_ORDERS_LABELS._6歲_可加 : ''}
-                  </option>
-                )
-              })}
+              {roomOptions.map(opt => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </div>
         </PopoverContent>
