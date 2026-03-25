@@ -1348,71 +1348,8 @@ export function RequirementsList({
             <div className="border border-border rounded-lg overflow-hidden bg-card">
               <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
                 <thead>
-                  <tr className="bg-morandi-container/50 border-b border-border">
-                    <th className="px-2 py-2.5 text-center" style={{ width: '32px' }}></th>
-                    <th className="px-2 py-2.5 text-center" style={{ width: '36px' }}>
-                      <Checkbox
-                        checked={
-                          checkedItems.size > 0 &&
-                          checkedItems.size === Object.values(itemsByCategory).flat().length
-                        }
-                        onCheckedChange={checked => {
-                          if (checked) {
-                            const allKeys = new Set<string>()
-                            CATEGORIES.forEach(cat => {
-                              itemsByCategory[cat.key].forEach((item, idx) => {
-                                allKeys.add(getItemKey(cat.key, item, idx))
-                              })
-                            })
-                            setCheckedItems(allKeys)
-                          } else {
-                            setCheckedItems(new Set())
-                          }
-                        }}
-                      />
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
-                      style={{ width: '20%' }}
-                    >
-                      項目
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
-                      style={{ width: '90px' }}
-                    >
-                      日期
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
-                      style={{ width: '15%' }}
-                    >
-                      說明
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-left font-medium text-morandi-primary"
-                      style={{ width: '15%' }}
-                    >
-                      備註
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-right font-medium text-morandi-primary"
-                      style={{ width: '90px' }}
-                    >
-                      報價
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-center font-medium text-morandi-primary"
-                      style={{ width: '90px' }}
-                    >
-                      狀態
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-center font-medium text-morandi-primary"
-                      style={{ width: '100px' }}
-                    >
-                      操作
-                    </th>
+                  <tr className="bg-morandi-container/50 border-b border-border h-2">
+                    <th colSpan={9}></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2166,8 +2103,9 @@ export function RequirementsList({
 
                     return (
                       <React.Fragment key={cat.key}>
+                        {/* 分類標題 */}
                         <tr className="bg-morandi-container/30 border-t border-border">
-                          <td colSpan={10} className="px-3 py-2">
+                          <td colSpan={9} className="px-3 py-2">
                             <div className="flex items-center gap-3">
                               <span className="font-medium text-morandi-primary">{cat.label}</span>
                               <span className="text-xs text-morandi-secondary">
@@ -2193,12 +2131,24 @@ export function RequirementsList({
                             </div>
                           </td>
                         </tr>
+                        {/* 欄位標題 */}
+                        <tr className="bg-morandi-container/10 border-b border-border/50">
+                          <th className="px-2 py-1.5 text-center" style={{ width: '32px' }}></th>
+                          <th className="px-2 py-1.5 text-center" style={{ width: '36px' }}></th>
+                          <th className="px-3 py-1.5 text-left text-xs font-medium text-morandi-secondary" style={{ width: '20%' }}>項目</th>
+                          <th className="px-3 py-1.5 text-left text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>日期</th>
+                          <th className="px-3 py-1.5 text-left text-xs font-medium text-morandi-secondary" style={{ width: '15%' }}>說明</th>
+                          <th className="px-3 py-1.5 text-left text-xs font-medium text-morandi-secondary" style={{ width: '15%' }}>備註</th>
+                          <th className="px-3 py-1.5 text-right text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>報價</th>
+                          <th className="px-3 py-1.5 text-center text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>狀態</th>
+                          <th className="px-3 py-1.5 text-center text-xs font-medium text-morandi-secondary" style={{ width: '100px' }}>操作</th>
+                        </tr>
 
                         {visibleItems.map((trackItem, idx) => renderItem(trackItem, idx, false))}
                         {isHiddenExpanded && hiddenItems.length > 0 && (
                           <>
                             <tr className="bg-morandi-muted/10 border-t border-dashed border-morandi-muted/30">
-                              <td colSpan={10} className="px-3 py-1.5 text-xs text-morandi-muted">
+                              <td colSpan={9} className="px-3 py-1.5 text-xs text-morandi-muted">
                                 <div className="flex items-center gap-1">
                                   <EyeOff size={12} />
                                   <span>{COMP_REQUIREMENTS_LABELS.已隱藏的項目}</span>
