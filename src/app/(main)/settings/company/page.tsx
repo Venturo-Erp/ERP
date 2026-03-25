@@ -52,7 +52,8 @@ interface CompanyFormData {
   bank_branch: string
   bank_account: string
   bank_account_name: string
-  seal_image_url: string
+  company_seal_url: string
+  personal_seal_url: string
   invoice_seal_image_url: string
   contract_seal_image_url: string
 }
@@ -73,7 +74,8 @@ const INITIAL_FORM: CompanyFormData = {
   bank_branch: '',
   bank_account: '',
   bank_account_name: '',
-  seal_image_url: '',
+  company_seal_url: '',
+  personal_seal_url: '',
   invoice_seal_image_url: '',
   contract_seal_image_url: '',
 }
@@ -217,7 +219,7 @@ export default function CompanySettingsPage() {
       const { data, error } = await supabase
         .from('workspaces')
         .select(
-          'name, description, logo_url, legal_name, subtitle, address, phone, fax, email, website, tax_id, bank_name, bank_branch, bank_account, bank_account_name, seal_image_url, invoice_seal_image_url, contract_seal_image_url'
+          'name, description, logo_url, legal_name, subtitle, address, phone, fax, email, website, tax_id, bank_name, bank_branch, bank_account, bank_account_name, company_seal_url, personal_seal_url, invoice_seal_image_url, contract_seal_image_url'
         )
         .eq('id', workspaceId)
         .single()
@@ -242,7 +244,8 @@ export default function CompanySettingsPage() {
           bank_branch: d.bank_branch ?? '',
           bank_account: d.bank_account ?? '',
           bank_account_name: d.bank_account_name ?? '',
-          seal_image_url: d.seal_image_url ?? '',
+          company_seal_url: d.company_seal_url ?? '',
+          personal_seal_url: d.personal_seal_url ?? '',
           invoice_seal_image_url: d.invoice_seal_image_url ?? '',
           contract_seal_image_url: d.contract_seal_image_url ?? '',
         })
@@ -529,15 +532,25 @@ export default function CompanySettingsPage() {
             <Stamp className="h-6 w-6 text-morandi-gold" />
             <h2 className="text-xl font-semibold">{COMPANY_LABELS.SEAL_INFO}</h2>
           </div>
-          <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-6">
             <ImageUploadField
-              label={COMPANY_LABELS.SEAL_IMAGE}
-              hint={COMPANY_LABELS.SEAL_IMAGE_HINT}
-              value={form.seal_image_url}
-              onChange={url => updateField('seal_image_url', url)}
-              fieldName="seal"
+              label="大章（公司章）"
+              hint="公司正式印章（建議 PNG 透明背景）"
+              value={form.company_seal_url}
+              onChange={url => updateField('company_seal_url', url)}
+              fieldName="company-seal"
               workspaceId={workspaceId}
             />
+            <ImageUploadField
+              label="小章（負責人章）"
+              hint="負責人印章（建議 PNG 透明背景）"
+              value={form.personal_seal_url}
+              onChange={url => updateField('personal_seal_url', url)}
+              fieldName="personal-seal"
+              workspaceId={workspaceId}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-6 mt-6">
             <ImageUploadField
               label={COMPANY_LABELS.INVOICE_SEAL_IMAGE}
               hint={COMPANY_LABELS.INVOICE_SEAL_IMAGE_HINT}
@@ -548,7 +561,7 @@ export default function CompanySettingsPage() {
             />
             <ImageUploadField
               label="合約專用章"
-              hint="用於電子合約，優先於大小章顯示（建議 PNG 透明背景）"
+              hint="用於電子合約（建議 PNG 透明背景）"
               value={form.contract_seal_image_url}
               onChange={url => updateField('contract_seal_image_url', url)}
               fieldName="contract-seal"

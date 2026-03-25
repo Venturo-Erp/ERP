@@ -5188,6 +5188,8 @@ export type Database = {
         Row: {
           color: string
           created_at: string | null
+          credit_account_id: string | null
+          debit_account_id: string | null
           icon: string
           id: string
           is_active: boolean | null
@@ -5201,6 +5203,8 @@ export type Database = {
         Insert: {
           color: string
           created_at?: string | null
+          credit_account_id?: string | null
+          debit_account_id?: string | null
           icon: string
           id?: string
           is_active?: boolean | null
@@ -5214,6 +5218,8 @@ export type Database = {
         Update: {
           color?: string
           created_at?: string | null
+          credit_account_id?: string | null
+          debit_account_id?: string | null
           icon?: string
           id?: string
           is_active?: boolean | null
@@ -5225,6 +5231,20 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "expense_categories_accounting_subject_id_fkey"
+            columns: ["debit_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expense_categories_credit_account_id_fkey"
+            columns: ["credit_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "expense_categories_parent_id_fkey"
             columns: ["parent_id"]
@@ -19515,6 +19535,7 @@ export type Database = {
           bank_branch: string | null
           bank_name: string | null
           code: string
+          company_seal_url: string | null
           contract_seal_image_url: string | null
           created_at: string | null
           created_by: string | null
@@ -19531,8 +19552,8 @@ export type Database = {
           logo_url: string | null
           name: string
           payment_config: Json | null
+          personal_seal_url: string | null
           phone: string | null
-          seal_image_url: string | null
           subtitle: string | null
           tax_id: string | null
           type: string | null
@@ -19550,6 +19571,7 @@ export type Database = {
           bank_branch?: string | null
           bank_name?: string | null
           code?: string
+          company_seal_url?: string | null
           contract_seal_image_url?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -19566,8 +19588,8 @@ export type Database = {
           logo_url?: string | null
           name: string
           payment_config?: Json | null
+          personal_seal_url?: string | null
           phone?: string | null
-          seal_image_url?: string | null
           subtitle?: string | null
           tax_id?: string | null
           type?: string | null
@@ -19585,6 +19607,7 @@ export type Database = {
           bank_branch?: string | null
           bank_name?: string | null
           code?: string
+          company_seal_url?: string | null
           contract_seal_image_url?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -19601,8 +19624,8 @@ export type Database = {
           logo_url?: string | null
           name?: string
           payment_config?: Json | null
+          personal_seal_url?: string | null
           phone?: string | null
-          seal_image_url?: string | null
           subtitle?: string | null
           tax_id?: string | null
           type?: string | null

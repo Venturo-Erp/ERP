@@ -19,7 +19,8 @@ interface WorkspaceSettings {
   email: string
   website: string
   tax_id: string
-  seal_image_url: string
+  company_seal_url: string
+  personal_seal_url: string
   invoice_seal_image_url: string
 }
 
@@ -39,12 +40,13 @@ const EMPTY_SETTINGS: WorkspaceSettings = {
   email: '',
   website: '',
   tax_id: '',
-  seal_image_url: '',
+  company_seal_url: '',
+  personal_seal_url: '',
   invoice_seal_image_url: '',
 }
 
 const SELECT_FIELDS =
-  'name, phone, address, bank_name, bank_branch, bank_account, bank_account_name, legal_name, subtitle, logo_url, fax, email, website, tax_id, seal_image_url, invoice_seal_image_url' as const
+  'name, phone, address, bank_name, bank_branch, bank_account, bank_account_name, legal_name, subtitle, logo_url, fax, email, website, tax_id, company_seal_url, personal_seal_url, invoice_seal_image_url' as const
 
 /**
  * Logo 規範
@@ -119,7 +121,8 @@ export function useWorkspaceSettings(): WorkspaceSettings {
             email: data.email ?? '',
             website: data.website ?? '',
             tax_id: data.tax_id ?? '',
-            seal_image_url: data.seal_image_url ?? '',
+            company_seal_url: data.company_seal_url ?? '',
+            personal_seal_url: data.personal_seal_url ?? '',
             invoice_seal_image_url: data.invoice_seal_image_url ?? '',
           })
         }
