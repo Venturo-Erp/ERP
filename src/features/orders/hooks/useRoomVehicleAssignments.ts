@@ -425,18 +425,26 @@ export function useRoomVehicleAssignments({
           const hotelRooms = rooms.filter(
             r => r.hotel_name === hotelName && r.night_number === firstNight
           )
-          optionsByHotel[hotelName] = hotelRooms.map(room => {
-            const assigned = roomAssignedCount[room.id] || 0
-            const remaining = room.capacity - assigned
-            return {
-              id: room.id,
-              roomType: room.room_type,
-              roomNumber: roomNumbers[room.id] || 1,
-              capacity: room.capacity,
-              assignedCount: assigned,
-              label: `${room.room_type}${roomNumbers[room.id] || 1}${remaining > 0 ? ` (剩${remaining}床)` : COMP_ORDERS_LABELS.滿}`,
-            }
-          })
+          optionsByHotel[hotelName] = hotelRooms
+            .map(room => {
+              const assigned = roomAssignedCount[room.id] || 0
+              const remaining = room.capacity - assigned
+              return {
+                id: room.id,
+                roomType: room.room_type,
+                roomNumber: roomNumbers[room.id] || 1,
+                capacity: room.capacity,
+                assignedCount: assigned,
+                label: `${room.room_type}${roomNumbers[room.id] || 1}${remaining > 0 ? ` (剩${remaining}床)` : COMP_ORDERS_LABELS.滿}`,
+              }
+            })
+            // 排序：先按房型名稱，再按房間編號
+            .sort((a, b) => {
+              if (a.roomType !== b.roomType) {
+                return a.roomType.localeCompare(b.roomType, 'zh-TW')
+              }
+              return a.roomNumber - b.roomNumber
+            })
         })
 
         // 建立 roomMembersByHotelRoom：hotelName -> roomId -> 成員列表
