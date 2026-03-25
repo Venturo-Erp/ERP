@@ -342,46 +342,44 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
 
   return (
     <>
-      {/* 區段選擇 */}
-      <div className="flex items-center gap-2 pb-3 border-b border-border flex-wrap">
-        {effectiveSegments.map(segment => {
-          const isSelected = selectedSegmentId === segment.id
-          const roomCount = rooms.filter(r => r.night_number === segment.start_night).length
-          
-          return (
-            <button
-              key={segment.id}
-              onClick={() => setSelectedSegmentId(segment.id)}
-              className={cn(
-                'px-3 py-1.5 rounded-md text-sm transition-all border flex items-center gap-1.5',
-                isSelected
-                  ? 'border-morandi-gold bg-morandi-gold/10 text-morandi-gold'
-                  : 'border-border text-morandi-secondary hover:border-morandi-gold'
-              )}
-            >
-              {segment.hotel_name && <Hotel className="h-3.5 w-3.5" />}
-              <span>
-                {segment.night_count > 1 
-                  ? `第${segment.start_night}-${segment.end_night}晚`
-                  : `第${segment.start_night}晚`
-                }
-              </span>
-              <span className="text-xs opacity-70">({roomCount}房)</span>
-            </button>
-          )
-        })}
-      </div>
-
-      {/* 當前區段資訊 */}
-      {selectedSegment?.hotel_name && (
-        <div className="mt-3 px-3 py-2 bg-morandi-container/30 rounded-lg flex items-center gap-2 text-sm">
-          <Hotel className="h-4 w-4 text-morandi-gold" />
-          <span className="text-morandi-primary font-medium">{selectedSegment.hotel_name}</span>
-          {selectedSegment.night_count > 1 && (
-            <span className="text-morandi-muted">（連續 {selectedSegment.night_count} 晚）</span>
-          )}
+      {/* 區段選擇 + 飯店名稱 */}
+      <div className="pb-3 border-b border-border space-y-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {effectiveSegments.map(segment => {
+            const isSelected = selectedSegmentId === segment.id
+            const roomCount = rooms.filter(r => r.night_number === segment.start_night).length
+            
+            return (
+              <button
+                key={segment.id}
+                onClick={() => setSelectedSegmentId(segment.id)}
+                className={cn(
+                  'px-3 py-1.5 rounded-md text-sm transition-all border flex items-center gap-1.5',
+                  isSelected
+                    ? 'border-morandi-gold bg-morandi-gold/10 text-morandi-gold'
+                    : 'border-border text-morandi-secondary hover:border-morandi-gold'
+                )}
+              >
+                <span>
+                  {segment.night_count > 1 
+                    ? `第${segment.start_night}-${segment.end_night}晚`
+                    : `第${segment.start_night}晚`
+                  }
+                </span>
+                <span className="text-xs opacity-70">({roomCount}房)</span>
+              </button>
+            )
+          })}
         </div>
-      )}
+        
+        {/* 飯店名稱（從行程表引用） */}
+        {selectedSegment?.hotel_name && (
+          <div className="flex items-center gap-2 text-sm text-morandi-primary">
+            <Hotel className="h-4 w-4 text-morandi-gold" />
+            <span className="font-medium">{selectedSegment.hotel_name}</span>
+          </div>
+        )}
+      </div>
 
       {/* 房型輸入列表 */}
       <div className="py-4 space-y-2">
