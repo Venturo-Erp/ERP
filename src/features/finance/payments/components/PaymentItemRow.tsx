@@ -4,7 +4,7 @@
  */
 
 import { formatDate } from '@/lib/utils/format-date'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -39,6 +39,10 @@ interface PaymentItemRowProps {
     contact_person?: string
     contact_email?: string
   }
+  /** 收款模式：tour = 團體收款，company = 公司收款 */
+  mode?: 'tour' | 'company'
+  /** 唯讀模式（已確認的收款單） */
+  readonly?: boolean
 }
 
 export function PaymentItemRow({
@@ -49,15 +53,41 @@ export function PaymentItemRow({
   canRemove,
   isNewRow = false,
   orderInfo,
+  mode = 'tour',
+  readonly = false,
 }: PaymentItemRowProps) {
   const { toast } = useToast()
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedLink, setGeneratedLink] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
+  // 讀取收入類會計科目（僅公司收款需要）
+  const [incomeSubjects, setIncomeSubjects] = useState<Array<{ id: string; code: string; name: string }>>([])
+  
+  useEffect(() => {
+    if (mode === 'company') {
+      // 讀取收入類科目
+      const loadSubjects = async () => {
+        const { supabase } = await import('@/lib/supabase/client')
+        const { data } = await supabase
+          .from('accounting_subjects')
+          .select('id, code, name')
+          .eq('type', 'revenue')
+          .order('code')
+        setIncomeSubjects(data || [])
+      }
+      loadSubjects()
+    }
+  }, [mode])
+
   const receiptTypeLabel =
     RECEIPT_TYPE_OPTIONS.find(opt => opt.value === item.receipt_type)?.label ||
     BATCH_RECEIPT_DIALOG_LABELS.現金
+
+  // 收款方式選項（公司收款只有 4 種）
+  const receiptTypeOptions = mode === 'company' 
+    ? RECEIPT_TYPE_OPTIONS.filter(opt => opt.value !== RECEIPT_TYPES.LINK_PAY)
+    : RECEIPT_TYPE_OPTIONS
 
   // 產生 LinkPay 連結
   const handleGenerateLink = async () => {
@@ -155,12 +185,13 @@ export function PaymentItemRow({
           <Select
             value={item.receipt_type.toString()}
             onValueChange={value => handleReceiptTypeChange(Number(value) as ReceiptType)}
+            disabled={readonly}
           >
             <SelectTrigger className="h-auto p-0 border-0 shadow-none bg-transparent text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {RECEIPT_TYPE_OPTIONS.map(option => (
+              {receiptTypeOptions.map(option => (
                 <SelectItem key={option.value} value={option.value.toString()}>
                   {option.label}
                 </SelectItem>
@@ -179,41 +210,61 @@ export function PaymentItemRow({
           />
         </td>
 
-        {/* 付款人姓名 / 帳號後五碼 / 收款對象 */}
+        {/* 收款項目（公司收款 = 會計科目下拉，團體收款 = 手打） */}
         <td className="py-2 px-3 border-b border-r border-border">
-          <input
-            type="text"
-            value={item.receipt_account || ''}
-            onChange={e => {
-              // LinkPay 限制五字內，匯款限制五碼
-              const value =
+          {mode === 'company' ? (
+            <Select
+              value={item.accounting_subject_id || ''}
+              onValueChange={value => onUpdate(item.id, { accounting_subject_id: value })}
+              disabled={readonly}
+            >
+              <SelectTrigger className="h-auto p-0 border-0 shadow-none bg-transparent text-sm">
+                <SelectValue placeholder="選擇收入科目" />
+              </SelectTrigger>
+              <SelectContent>
+                {incomeSubjects.map(subject => (
+                  <SelectItem key={subject.id} value={subject.id}>
+                    {subject.code} {subject.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <input
+              type="text"
+              value={item.receipt_account || ''}
+              onChange={e => {
+                // LinkPay 限制五字內，匯款限制五碼
+                const value =
+                  item.receipt_type === RECEIPT_TYPES.LINK_PAY ||
+                  item.receipt_type === RECEIPT_TYPES.BANK_TRANSFER
+                    ? e.target.value.slice(0, 5)
+                    : e.target.value
+                onUpdate(item.id, { receipt_account: value })
+              }}
+              placeholder={
+                item.receipt_type === RECEIPT_TYPES.LINK_PAY
+                  ? PAYMENT_ITEM_ROW_LABELS.收款對象_五字內
+                  : item.receipt_type === RECEIPT_TYPES.BANK_TRANSFER
+                    ? PAYMENT_ITEM_ROW_LABELS.帳號後五碼
+                    : item.receipt_type === RECEIPT_TYPES.CREDIT_CARD
+                      ? PAYMENT_ITEM_ROW_LABELS.調閱編號
+                      : item.receipt_type === RECEIPT_TYPES.CHECK
+                        ? PAYMENT_ITEM_ROW_LABELS.到期日
+                        : item.receipt_type === RECEIPT_TYPES.CASH
+                          ? PAYMENT_ITEM_ROW_LABELS.收款人
+                          : ''
+              }
+              maxLength={
                 item.receipt_type === RECEIPT_TYPES.LINK_PAY ||
                 item.receipt_type === RECEIPT_TYPES.BANK_TRANSFER
-                  ? e.target.value.slice(0, 5)
-                  : e.target.value
-              onUpdate(item.id, { receipt_account: value })
-            }}
-            placeholder={
-              item.receipt_type === RECEIPT_TYPES.LINK_PAY
-                ? PAYMENT_ITEM_ROW_LABELS.收款對象_五字內
-                : item.receipt_type === RECEIPT_TYPES.BANK_TRANSFER
-                  ? PAYMENT_ITEM_ROW_LABELS.帳號後五碼
-                  : item.receipt_type === RECEIPT_TYPES.CREDIT_CARD
-                    ? PAYMENT_ITEM_ROW_LABELS.調閱編號
-                    : item.receipt_type === RECEIPT_TYPES.CHECK
-                      ? PAYMENT_ITEM_ROW_LABELS.到期日
-                      : item.receipt_type === RECEIPT_TYPES.CASH
-                        ? PAYMENT_ITEM_ROW_LABELS.收款人
-                        : ''
-            }
-            maxLength={
-              item.receipt_type === RECEIPT_TYPES.LINK_PAY ||
-              item.receipt_type === RECEIPT_TYPES.BANK_TRANSFER
-                ? 5
-                : undefined
-            }
-            className="input-no-focus w-full bg-transparent text-sm"
-          />
+                  ? 5
+                  : undefined
+              }
+              disabled={readonly}
+              className="input-no-focus w-full bg-transparent text-sm"
+            />
+          )}
         </td>
 
         {/* 備註 */}

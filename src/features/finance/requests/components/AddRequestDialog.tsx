@@ -483,6 +483,7 @@ export function AddRequestDialog({
               request_type: ADD_REQUEST_DIALOG_LABELS.供應商支出,
               request_category: 'tour',
               batch_id: batchId, // 批次 ID：同批請款單共用此 ID
+              payment_method_id: 'd6e2b71f-0d06-4119-9047-c709f31dfc31', // 預設：匯款（付款方式）
             })
 
             // 建立品項（帶獨立編號如 HND260328A-I01-1）

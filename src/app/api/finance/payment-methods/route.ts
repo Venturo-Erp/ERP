@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,37 +7,38 @@ const supabase = createClient(
 )
 
 /**
- * GET /api/finance/payment-methods?workspace_id=xxx&type=receipt|payment
+ * GET /api/finance/payment-methods
+ * 取得收款/付款方式列表
+ * 
+ * Query params:
+ * - workspace_id: 必填
+ * - type: 'receipt' | 'payment' （選填）
  */
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const workspaceId = searchParams.get('workspace_id')
-  const type = searchParams.get('type') // 'receipt' or 'payment'
+  const searchParams = request.nextUrl.searchParams
+  const workspace_id = searchParams.get('workspace_id')
+  const type = searchParams.get('type') // 'receipt' | 'payment'
 
-  if (!workspaceId) {
-    return NextResponse.json({ error: '缺少 workspace_id' }, { status: 400 })
+  if (!workspace_id) {
+    return NextResponse.json({ error: 'workspace_id is required' }, { status: 400 })
   }
 
+  // 先查詢 payment_methods（不 join accounting_subjects）
   let query = supabase
     .from('payment_methods')
-    .select(`
-      *,
-      debit_account:chart_of_accounts!debit_account_id(id, code, name),
-      credit_account:chart_of_accounts!credit_account_id(id, code, name)
-    `)
-    .eq('workspace_id', workspaceId)
+    .select('*')
+    .eq('workspace_id', workspace_id)
     .eq('is_active', true)
+    .order('sort_order')
 
-  // 如果有指定類型，只取該類型
   if (type) {
     query = query.eq('type', type)
   }
 
   const { data, error } = await query
-    .order('sort_order')
-    .order('name')
 
   if (error) {
+    console.error('[payment-methods] Query error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
@@ -46,95 +47,72 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/finance/payment-methods
+ * 新增收款/付款方式
  */
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { code, name, type, description, workspace_id, debit_account_id, credit_account_id } = body
+  const body = await request.json()
 
-    if (!code || !name || !type || !workspace_id) {
-      return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
-    }
+  const { data, error } = await supabase
+    .from('payment_methods')
+    .insert(body)
+    .select()
+    .single()
 
-    const { data, error } = await supabase
-      .from('payment_methods')
-      .insert({
-        code,
-        name,
-        type,
-        description,
-        workspace_id,
-        debit_account_id: debit_account_id || null,
-        credit_account_id: credit_account_id || null,
-        is_active: true,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json(data)
-  } catch (error) {
-    return NextResponse.json({ error: '新增失敗' }, { status: 500 })
+  if (error) {
+    console.error('[payment-methods] Insert error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
+
+  return NextResponse.json(data)
 }
 
 /**
  * PUT /api/finance/payment-methods
+ * 更新收款/付款方式
  */
 export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { id, code, name, description, is_active, debit_account_id, credit_account_id } = body
+  const body = await request.json()
+  const { id, ...updates } = body
 
-    if (!id) {
-      return NextResponse.json({ error: '缺少 id' }, { status: 400 })
-    }
-
-    const { data, error } = await supabase
-      .from('payment_methods')
-      .update({
-        code,
-        name,
-        description,
-        debit_account_id: debit_account_id || null,
-        credit_account_id: credit_account_id || null,
-        is_active,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-      .single()
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json(data)
-  } catch (error) {
-    return NextResponse.json({ error: '更新失敗' }, { status: 500 })
+  if (!id) {
+    return NextResponse.json({ error: 'id is required' }, { status: 400 })
   }
+
+  const { data, error } = await supabase
+    .from('payment_methods')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) {
+    console.error('[payment-methods] Update error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json(data)
 }
 
 /**
- * DELETE /api/finance/payment-methods?id=xxx
+ * DELETE /api/finance/payment-methods
+ * 刪除收款/付款方式（軟刪除，設為 is_active = false）
  */
 export async function DELETE(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
+  const searchParams = request.nextUrl.searchParams
   const id = searchParams.get('id')
 
   if (!id) {
-    return NextResponse.json({ error: '缺少 id' }, { status: 400 })
+    return NextResponse.json({ error: 'id is required' }, { status: 400 })
   }
 
+  // 軟刪除：設為 inactive
   const { error } = await supabase
     .from('payment_methods')
-    .delete()
+    .update({ is_active: false })
     .eq('id', id)
 
   if (error) {
+    console.error('[payment-methods] Delete error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 

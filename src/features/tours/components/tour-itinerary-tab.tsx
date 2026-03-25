@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect, useCallback, useMemo, useRef, Fragment } from 'react'
-import { DndContext, DragOverlay } from '@dnd-kit/core'
+import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import {
   Loader2,
   FileText,
@@ -607,6 +607,14 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
 
   // Drag hook (extracted)
   const { activeDragName, handleDragStart, handleDragEnd } = useItineraryDrag(setDailySchedule)
+
+  // DnD sensors（必須設定，否則拖曳不會生效）
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 8, // 移動 8px 後才開始拖曳，避免誤觸
+    },
+  })
+  const sensors = useSensors(pointerSensor)
 
   // 計算已排入的景點 ID 列表（用於 UI 層阻擋）
   const disabledAttractionIds = useMemo(() => {
@@ -1255,7 +1263,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   // Edit mode — 左右分割佈局（左 60% 行程編輯，右 40% 資源庫+地圖）
   // ============================================================
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex flex-col h-full overflow-hidden">
         {/* -- Header -- */}
         <div className="px-4 py-2 flex items-center justify-between">

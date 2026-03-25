@@ -92,11 +92,9 @@ export function usePaymentForm() {
   const validateForm = useCallback(() => {
     const errors: string[] = []
 
-    if (!formData.tour_id) {
-      errors.push(PAYMENT_FORM_LABELS.SELECT_TOUR)
-    }
-
-    if (!formData.order_id) {
+    // 團體收款需要 tour_id 和 order_id
+    // 公司收款不需要（允許 NULL）
+    if (formData.tour_id && !formData.order_id) {
       errors.push(PAYMENT_FORM_LABELS.SELECT_ORDER)
     }
 

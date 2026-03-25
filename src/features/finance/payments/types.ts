@@ -36,6 +36,9 @@ export interface PaymentItem {
   receipt_account?: string // 付款人姓名
   notes?: string // 備註
 
+  // 公司收款專屬
+  accounting_subject_id?: string // 會計科目 ID（公司收款用）
+
   // LinkPay 專屬
   email?: string
   pay_dateline?: string

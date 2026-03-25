@@ -71,6 +71,7 @@ export async function middleware(request: NextRequest) {
     '/confirm', // 報價確認頁面（客戶公開連結）
     '/api/auth',
     '/api/health',
+    '/api/finance', // 財務 API（使用 service role key）
     '/api/linkpay', // Webhook 回調
     '/api/gemini', // AI 圖片生成 API
     '/api/itineraries', // 公開行程 API（給 /view 頁面使用）

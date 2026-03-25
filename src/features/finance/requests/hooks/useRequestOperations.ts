@@ -82,6 +82,7 @@ export function useRequestOperations() {
           created_by: formData.created_by || undefined,
           created_by_name: createdByName || undefined,
           is_special_billing: formData.is_special_billing,
+          payment_method_id: 'd6e2b71f-0d06-4119-9047-c709f31dfc31', // 預設：匯款（付款方式）
         })
 
         // Batch insert all items — 失敗時刪除剛建的請款單
@@ -134,6 +135,7 @@ export function useRequestOperations() {
           created_by: formData.created_by || undefined,
           created_by_name: createdByName || undefined,
           is_special_billing: formData.is_special_billing,
+          payment_method_id: 'd6e2b71f-0d06-4119-9047-c709f31dfc31', // 預設：匯款（付款方式）
         })
 
         // Batch insert all items — 失敗時刪除剛建的請款單
@@ -210,6 +212,7 @@ export function useRequestOperations() {
           status: 'pending',
           notes: formData.notes,
           request_type: REQUEST_OPERATIONS_LABELS.SUPPLIER_EXPENSE, // Default value for now
+          payment_method_id: 'd6e2b71f-0d06-4119-9047-c709f31dfc31', // 預設：匯款（付款方式）
         })
 
         // Batch insert all items — 失敗時刪除剛建的請款單

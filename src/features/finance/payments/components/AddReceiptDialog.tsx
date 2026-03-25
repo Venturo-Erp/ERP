@@ -633,13 +633,64 @@ export function AddReceiptDialog({
 
           {/* 公司收款 */}
           <TabsContent value="company" className="flex-1 flex flex-col overflow-hidden mt-4">
-            <div className="flex-1 flex items-center justify-center text-morandi-secondary">
-              <div className="text-center space-y-4">
-                <Building2 size={48} className="mx-auto text-morandi-container" />
-                <div>
-                  <p className="text-lg font-medium">公司收款</p>
-                  <p className="text-sm">非旅遊團的收入（顧問費、利息收入等）</p>
-                  <p className="text-sm text-morandi-gold mt-2">功能開發中...</p>
+            {/* 收款項目 - 跟團體收款一樣的結構 */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium text-morandi-primary">
+                  收款項目
+                </h3>
+                {!isConfirmed && (
+                  <Button
+                    onClick={addPaymentItem}
+                    size="sm"
+                    variant="ghost"
+                    className="text-morandi-gold hover:bg-morandi-gold/10"
+                  >
+                    <Plus size={14} className="mr-2" />
+                    新增項目
+                  </Button>
+                )}
+              </div>
+
+              <div className="flex-1 overflow-auto">
+                <div className="border border-border rounded-lg overflow-hidden bg-card">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="text-xs text-morandi-primary font-medium bg-morandi-container/50">
+                        <th className="text-left py-2.5 px-3 border-b border-r border-border" style={{ width: '110px' }}>
+                          收款方式
+                        </th>
+                        <th className="text-left py-2.5 px-3 border-b border-r border-border" style={{ width: '150px' }}>
+                          交易日期
+                        </th>
+                        <th className="text-left py-2.5 px-3 border-b border-r border-border" style={{ width: '180px' }}>
+                          收款項目
+                        </th>
+                        <th className="text-left py-2.5 px-3 border-b border-r border-border">
+                          備註
+                        </th>
+                        <th className="text-right py-2.5 px-3 border-b border-r border-border" style={{ width: '120px' }}>
+                          金額
+                        </th>
+                        <th className="border-b border-border" style={{ width: '50px' }}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {paymentItems.map((item, index) => (
+                        <PaymentItemRow
+                          key={item.id}
+                          item={item}
+                          index={index}
+                          onUpdate={updatePaymentItem}
+                          onRemove={removePaymentItem}
+                          canRemove={paymentItems.length > 1}
+                          isNewRow={index === paymentItems.length - 1}
+                          mode="company"
+                          readonly={isConfirmed}
+                        />
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

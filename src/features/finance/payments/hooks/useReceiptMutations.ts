@@ -164,7 +164,7 @@ export function useReceiptMutations() {
       const createdReceipt = await createReceipt({
         receipt_number: receiptNumber,
         workspace_id: workspaceId,
-        order_id: formData.order_id,
+        order_id: formData.order_id || null,
         tour_id: tourId || null,
         customer_id: orderInfo?.customer_id || null,
         order_number: orderInfo?.order_number || '',
@@ -212,7 +212,7 @@ export function useReceiptMutations() {
           receipt_id: createdReceipt.id,
           workspace_id: workspaceId,
           tour_id: tourId || null,
-          order_id: formData.order_id,
+          order_id: formData.order_id || null,
           customer_id: orderInfo?.customer_id || null,
           amount: item.amount,
           actual_amount: 0,
@@ -302,7 +302,7 @@ export function useReceiptMutations() {
       // 1. 更新收款單主表
       await onUpdate(receipt.id, {
         tour_id: formData.tour_id || null,
-        order_id: formData.order_id,
+        order_id: formData.order_id || null,
         receipt_amount: totalAmount,
         amount: totalAmount,
         total_amount: totalAmount,
@@ -322,7 +322,7 @@ export function useReceiptMutations() {
         const paymentMethod = PAYMENT_METHOD_MAP[item.receipt_type] || 'transfer'
         const itemData = {
           tour_id: formData.tour_id || null,
-          order_id: formData.order_id,
+          order_id: formData.order_id || null,
           customer_id: orderInfo?.customer_id || null,
           amount: item.amount,
           payment_method: paymentMethod,

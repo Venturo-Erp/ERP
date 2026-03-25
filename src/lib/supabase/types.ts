@@ -9424,6 +9424,7 @@ export type Database = {
           order_number: string | null
           paid_at: string | null
           paid_by: string | null
+          payment_method_id: string
           request_category: string | null
           request_date: string | null
           request_number: string | null
@@ -9459,6 +9460,7 @@ export type Database = {
           order_number?: string | null
           paid_at?: string | null
           paid_by?: string | null
+          payment_method_id: string
           request_category?: string | null
           request_date?: string | null
           request_number?: string | null
@@ -9494,6 +9496,7 @@ export type Database = {
           order_number?: string | null
           paid_at?: string | null
           paid_by?: string | null
+          payment_method_id?: string
           request_category?: string | null
           request_date?: string | null
           request_number?: string | null
@@ -9510,6 +9513,13 @@ export type Database = {
           workspace_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_payment_requests_payment_method"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payment_requests_accounting_subject_id_fkey"
             columns: ["accounting_subject_id"]

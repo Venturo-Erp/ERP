@@ -14,7 +14,7 @@ const fs = require('fs')
 const path = require('path')
 
 const SUPABASE_ACCESS_TOKEN = process.env.SUPABASE_ACCESS_TOKEN
-if (!ACCESS_TOKEN && !SUPABASE_ACCESS_TOKEN) {
+if (!SUPABASE_ACCESS_TOKEN) {
   console.error('❌ 請設定 SUPABASE_ACCESS_TOKEN')
   process.exit(1)
 }
