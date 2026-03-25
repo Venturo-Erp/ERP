@@ -566,13 +566,15 @@ export function useRoomVehicleAssignments({
       if (roomId) {
         const targetRoom = hotelRooms.find(r => r.id === roomId)
         if (targetRoom) {
-          // 查詢該房間目前的分配數量
-          const { count } = await supabase
+          // 查詢該房間目前的分配成員數（去重，因為一個成員可能有多晚的分配）
+          const { data: existingAssignments } = await supabase
             .from('tour_room_assignments')
-            .select('*', { count: 'exact', head: true })
+            .select('order_member_id')
             .eq('room_id', roomId)
 
-          const currentCount = count || 0
+          // 去重計算實際成員數
+          const uniqueMembers = new Set((existingAssignments || []).map(a => a.order_member_id))
+          const currentCount = uniqueMembers.size
           const isRoomFull = currentCount >= targetRoom.capacity
 
           if (isRoomFull) {

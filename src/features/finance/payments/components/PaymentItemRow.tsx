@@ -99,15 +99,27 @@ export function PaymentItemRow({
 
   // 收款方式選項：優先使用 DB 的資料，fallback 到 hardcoded
   const useDbMethods = paymentMethods.length > 0
+  
+  // receipt_type (數字) → payment method name 映射
+  const receiptTypeToName: Record<number, string> = {
+    0: '匯款',
+    1: '現金',
+    2: '信用卡',
+    3: '支票',
+    4: 'LINE Pay',
+  }
+  
   const receiptTypeOptions = useDbMethods
     ? paymentMethods.map(m => ({ value: m.name, label: m.name }))
     : (mode === 'company'
         ? RECEIPT_TYPE_OPTIONS.filter(opt => opt.value !== RECEIPT_TYPES.LINK_PAY)
         : RECEIPT_TYPE_OPTIONS)
 
-  // DB 選項值是字串名稱，hardcoded 選項值是數字
+  // 計算 Select value：如果是 DB 模式，從數字映射到名稱
   const selectValue = useDbMethods
-    ? String(item.receipt_type)
+    ? (typeof item.receipt_type === 'number' 
+        ? receiptTypeToName[item.receipt_type] || String(item.receipt_type)
+        : String(item.receipt_type))
     : item.receipt_type.toString()
 
   const receiptTypeLabel =

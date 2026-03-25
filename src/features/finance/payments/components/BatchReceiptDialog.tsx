@@ -88,10 +88,14 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           if (methods && methods.length > 0) {
             // 保留完整資料（含 id）
             setPaymentMethodsRaw(methods)
-            setPaymentMethods(methods.map((m: { id: string; code: string; name: string }) => ({
-              value: m.code.toLowerCase(),
+            setPaymentMethods(methods.map((m: { id: string; code: string | null; name: string }) => ({
+              value: m.id, // 改用 id 作為 value（更穩定）
               label: m.name,
             })))
+            // 設定預設值為第一個方式
+            if (methods.length > 0 && !paymentMethod) {
+              setPaymentMethod(methods[0].id as PaymentMethod)
+            }
           }
         })
         .catch(() => {
@@ -291,19 +295,25 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
     }
 
     try {
-      // 收款方式轉換
-      const paymentMethodMap: Record<string, string> = {
-        cash: 'cash',
-        transfer: 'transfer',
-        card: 'card',
-        check: 'check',
-      }
-      
-      // 取得選中的收款方式 ID
+      // 取得選中的收款方式
       const selectedPaymentMethod = paymentMethodsRaw.find(
-        m => m.code.toLowerCase() === paymentMethod
+        m => m.id === paymentMethod
       )
       const paymentMethodId = selectedPaymentMethod?.id || null
+      
+      // 收款方式名稱映射到舊格式（向下相容）
+      const nameToOldFormat: Record<string, string> = {
+        '現金': 'cash',
+        '匯款': 'transfer',
+        '匯款-國泰': 'transfer',
+        '匯款-合庫': 'transfer',
+        '信用卡': 'card',
+        '支票': 'check',
+        'LINE Pay': 'linkpay',
+      }
+      const oldFormatMethod = selectedPaymentMethod?.name 
+        ? (nameToOldFormat[selectedPaymentMethod.name] || 'transfer')
+        : 'transfer'
 
       // 為每個訂單分配建立一筆收款單
       for (const allocation of validAllocations) {
@@ -332,9 +342,9 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           tour_name: order.tour_name || tour?.name || '',
           receipt_date: receiptDate,
           payment_date: receiptDate,
-          payment_method: paymentMethodMap[paymentMethod] || 'transfer',
+          payment_method: oldFormatMethod,
           payment_method_id: paymentMethodId, // 新增：關聯到 payment_methods 表
-          receipt_type: paymentMethod === 'cash' ? 1 : 0,
+          receipt_type: oldFormatMethod === 'cash' ? 1 : 0,
           receipt_amount: allocation.allocated_amount,
           amount: allocation.allocated_amount,
           actual_amount: 0,
