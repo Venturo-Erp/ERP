@@ -84,8 +84,25 @@ export function UnifiedTraditionalView({
           value={note}
           onChange={e => setNote(e.target.value)}
           placeholder="其他說明或備註事項..."
-          className="min-h-[100px] border-[#a8a29e] focus:border-[#8B6914] bg-white"
+          className="min-h-[80px] border-[#a8a29e] focus:border-[#8B6914] bg-white"
         />
+      </div>
+
+      {/* 下方兩欄：公司資料 + 供應商簽回 */}
+      <div className="mt-6 grid grid-cols-2 gap-6 border-t border-[#a8a29e] pt-4">
+        {/* 左邊：公司資料 */}
+        <div className="text-sm space-y-1">
+          <div><span className="font-medium text-[#78716c]">公司名稱：</span>角落旅行社</div>
+          <div><span className="font-medium text-[#78716c]">公司電話：</span>02-2345-6789</div>
+          <div><span className="font-medium text-[#78716c]">業務：</span></div>
+          <div><span className="font-medium text-[#78716c]">助理：</span></div>
+        </div>
+        {/* 右邊：供應商簽回 */}
+        <div className="text-sm space-y-1">
+          <div><span className="font-medium text-[#78716c]">供應商確認：</span></div>
+          <div className="border-b border-[#a8a29e] h-8 mt-2"></div>
+          <div className="text-xs text-[#a8a29e] mt-1">簽名 / 日期</div>
+        </div>
       </div>
     </div>
   )

@@ -114,7 +114,7 @@ export function AccommodationQuoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-[210mm] w-[210mm] max-h-[95vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle>住宿需求單</DialogTitle>
         </DialogHeader>
