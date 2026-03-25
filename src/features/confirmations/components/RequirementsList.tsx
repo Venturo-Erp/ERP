@@ -1434,7 +1434,7 @@ export function RequirementsList({
                             )}
                           >
                             {/* 欄位1: 項目名稱 */}
-                            <td className="px-3 py-2.5" style={{ width: '20%' }}>
+                            <td className="px-3 py-2.5" style={{ width: '25%' }}>
                               <button
                                 type="button"
                                 className="flex items-center gap-1.5 text-left font-medium text-morandi-primary hover:text-morandi-gold transition-colors"
@@ -1594,7 +1594,7 @@ export function RequirementsList({
                                       r.items.length > 0
                                   )
                                   return (
-                                    <div className="flex items-center gap-1">
+                                    <div className="flex items-center justify-center gap-1">
                                       {sameHotelDraft && (
                                         <Button
                                           variant="outline"
@@ -1921,12 +1921,9 @@ export function RequirementsList({
                       <React.Fragment key={cat.key}>
                         {/* 分類標題 + 欄位標題（同一行） */}
                         <tr className="bg-morandi-container/30 border-t border-border">
-                          <th className="px-3 py-2 text-left" style={{ width: '20%' }}>
+                          <th className="px-3 py-2 text-left" style={{ width: '25%' }}>
                             <div className="flex items-center gap-2">
                               <span className="font-medium text-morandi-primary">{cat.label}</span>
-                              <span className="text-xs text-morandi-secondary font-normal">
-                                ({visibleItems.length}{COMP_REQUIREMENTS_LABELS.項})
-                              </span>
                               {hiddenItems.length > 0 && (
                                 <button
                                   onClick={() => toggleHiddenCategory(cat.key)}
