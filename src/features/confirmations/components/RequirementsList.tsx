@@ -1434,7 +1434,7 @@ export function RequirementsList({
                             )}
                           >
                             {/* 欄位1: 項目名稱 */}
-                            <td className="px-3 py-2.5" style={{ width: '400px' }}>
+                            <td className="px-3 py-2.5" style={{ width: '180px' }}>
                               <button
                                 type="button"
                                 className="flex items-center gap-1.5 text-left font-medium text-morandi-primary hover:text-morandi-gold transition-colors"
@@ -1921,7 +1921,7 @@ export function RequirementsList({
                       <React.Fragment key={cat.key}>
                         {/* 分類標題 + 欄位標題（同一行） */}
                         <tr className="bg-morandi-container/30 border-t border-border">
-                          <th className="px-3 py-2 text-left" style={{ width: '400px' }}>
+                          <th className="px-3 py-2 text-left" style={{ width: '180px' }}>
                             <div className="flex items-center gap-2">
                               <span className="font-medium text-morandi-primary">{cat.label}</span>
                               {hiddenItems.length > 0 && (
