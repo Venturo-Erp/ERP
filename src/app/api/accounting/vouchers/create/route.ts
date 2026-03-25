@@ -13,6 +13,8 @@ const lineSchema = z.object({
 const createVoucherSchema = z.object({
   voucher_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   memo: z.string().nullable().optional(),
+  source_type: z.enum(['receipt', 'payment_request']).nullable().optional(),
+  source_id: z.string().uuid().nullable().optional(),
   lines: z.array(lineSchema).min(2),
 })
 
@@ -107,6 +109,8 @@ export async function POST(request: NextRequest) {
         total_debit: totalDebit,
         total_credit: totalCredit,
         created_by: session.user.id,
+        source_type: validated.source_type || null,
+        source_id: validated.source_id || null,
       })
       .select()
       .single()

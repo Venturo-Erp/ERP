@@ -41,6 +41,17 @@ interface CreateVoucherDialogProps {
   onSuccess?: () => void
 }
 
+// 關聯單據類型
+type SourceType = '' | 'receipt' | 'payment_request'
+
+interface SourceDocument {
+  id: string
+  code: string
+  description: string
+  amount: number
+  date: string
+}
+
 export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVoucherDialogProps) {
   const { user } = useAuthStore()
   const [isLoading, setIsLoading] = useState(false)
@@ -49,6 +60,12 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
   // 傳票資料
   const [voucherDate, setVoucherDate] = useState(new Date().toISOString().split('T')[0])
   const [memo, setMemo] = useState('')
+
+  // 關聯單據
+  const [sourceType, setSourceType] = useState<SourceType>('')
+  const [sourceId, setSourceId] = useState('')
+  const [sourceDocuments, setSourceDocuments] = useState<SourceDocument[]>([])
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(false)
 
   // 分錄明細
   const [lines, setLines] = useState<JournalLine[]>([
@@ -62,6 +79,61 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
       loadAccounts()
     }
   }, [open, user?.workspace_id])
+
+  // 載入關聯單據列表
+  useEffect(() => {
+    if (sourceType && user?.workspace_id) {
+      loadSourceDocuments()
+    } else {
+      setSourceDocuments([])
+      setSourceId('')
+    }
+  }, [sourceType, user?.workspace_id])
+
+  const loadSourceDocuments = async () => {
+    if (!user?.workspace_id || !sourceType) return
+    
+    setIsLoadingDocuments(true)
+    try {
+      if (sourceType === 'receipt') {
+        // 載入收款單（排除已有傳票的）
+        const { data } = await supabase
+          .from('receipts')
+          .select('id, receipt_number, notes, amount, receipt_date')
+          .eq('workspace_id', user.workspace_id)
+          .order('receipt_date', { ascending: false })
+          .limit(50)
+        
+        setSourceDocuments((data || []).map(r => ({
+          id: r.id,
+          code: r.receipt_number || r.id.slice(0, 8),
+          description: r.notes || '收款單',
+          amount: r.amount || 0,
+          date: r.receipt_date || '',
+        })))
+      } else if (sourceType === 'payment_request') {
+        // 載入請款單
+        const { data } = await supabase
+          .from('payment_requests')
+          .select('id, code, notes, total_amount, request_date')
+          .eq('workspace_id', user.workspace_id)
+          .order('request_date', { ascending: false })
+          .limit(50)
+        
+        setSourceDocuments((data || []).map(r => ({
+          id: r.id,
+          code: r.code || r.id.slice(0, 8),
+          description: r.notes || '請款單',
+          amount: r.total_amount || 0,
+          date: r.request_date || '',
+        })))
+      }
+    } catch (error) {
+      console.error('載入單據失敗:', error)
+    } finally {
+      setIsLoadingDocuments(false)
+    }
+  }
 
   const loadAccounts = async () => {
     if (!user?.workspace_id) return
@@ -140,6 +212,8 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           voucher_date: voucherDate,
+          source_type: sourceType || null,
+          source_id: sourceId || null,
           memo: memo.trim() || null,
           lines: lines.map(line => ({
             account_id: line.account_id,
@@ -170,6 +244,9 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
   const handleClose = () => {
     setVoucherDate(new Date().toISOString().split('T')[0])
     setMemo('')
+    setSourceType('')
+    setSourceId('')
+    setSourceDocuments([])
     setLines([
       { id: '1', account_id: '', description: '', debit_amount: 0, credit_amount: 0 },
       { id: '2', account_id: '', description: '', debit_amount: 0, credit_amount: 0 },
@@ -198,6 +275,45 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
             <div>
               <Label>說明</Label>
               <Input placeholder="傳票說明" value={memo} onChange={e => setMemo(e.target.value)} />
+            </div>
+          </div>
+
+          {/* 關聯單據 */}
+          <div className="grid grid-cols-2 gap-4 p-3 bg-muted/50 rounded-lg">
+            <div>
+              <Label>關聯單據類型（選填）</Label>
+              <Select value={sourceType} onValueChange={(v) => setSourceType(v as SourceType)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="不關聯單據" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">不關聯單據</SelectItem>
+                  <SelectItem value="receipt">收款單</SelectItem>
+                  <SelectItem value="payment_request">請款單</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>選擇單據</Label>
+              <Select 
+                value={sourceId} 
+                onValueChange={setSourceId}
+                disabled={!sourceType || isLoadingDocuments}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={isLoadingDocuments ? '載入中...' : '請先選擇類型'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {sourceDocuments.map(doc => (
+                    <SelectItem key={doc.id} value={doc.id}>
+                      {doc.code} - {doc.description} (${doc.amount.toLocaleString()})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {sourceType && sourceDocuments.length === 0 && !isLoadingDocuments && (
+                <p className="text-xs text-muted-foreground mt-1">沒有可選的單據</p>
+              )}
             </div>
           </div>
 

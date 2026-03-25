@@ -7220,6 +7220,8 @@ export type Database = {
           memo: string | null
           reversed_by_id: string | null
           reversed_from_id: string | null
+          source_id: string | null
+          source_type: string | null
           status: Database["public"]["Enums"]["voucher_status"] | null
           total_credit: number | null
           total_debit: number | null
@@ -7237,6 +7239,8 @@ export type Database = {
           memo?: string | null
           reversed_by_id?: string | null
           reversed_from_id?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: Database["public"]["Enums"]["voucher_status"] | null
           total_credit?: number | null
           total_debit?: number | null
@@ -7254,6 +7258,8 @@ export type Database = {
           memo?: string | null
           reversed_by_id?: string | null
           reversed_from_id?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: Database["public"]["Enums"]["voucher_status"] | null
           total_credit?: number | null
           total_debit?: number | null
@@ -9241,7 +9247,7 @@ export type Database = {
       }
       payment_methods: {
         Row: {
-          code: string
+          code: string | null
           created_at: string | null
           credit_account_id: string | null
           debit_account_id: string | null
@@ -9255,7 +9261,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
-          code: string
+          code?: string | null
           created_at?: string | null
           credit_account_id?: string | null
           debit_account_id?: string | null
@@ -9269,7 +9275,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
-          code?: string
+          code?: string | null
           created_at?: string | null
           credit_account_id?: string | null
           debit_account_id?: string | null

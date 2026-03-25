@@ -98,14 +98,20 @@ export function PaymentItemRow({
   }, [mode])
 
   // 收款方式選項：優先使用 DB 的資料，fallback 到 hardcoded
-  const receiptTypeOptions = paymentMethods.length > 0
+  const useDbMethods = paymentMethods.length > 0
+  const receiptTypeOptions = useDbMethods
     ? paymentMethods.map(m => ({ value: m.name, label: m.name }))
-    : (mode === 'company' 
+    : (mode === 'company'
         ? RECEIPT_TYPE_OPTIONS.filter(opt => opt.value !== RECEIPT_TYPES.LINK_PAY)
         : RECEIPT_TYPE_OPTIONS)
 
+  // DB 選項值是字串名稱，hardcoded 選項值是數字
+  const selectValue = useDbMethods
+    ? String(item.receipt_type)
+    : item.receipt_type.toString()
+
   const receiptTypeLabel =
-    receiptTypeOptions.find(opt => opt.value === item.receipt_type)?.label ||
+    receiptTypeOptions.find(opt => String(opt.value) === selectValue)?.label ||
     item.receipt_type ||
     BATCH_RECEIPT_DIALOG_LABELS.現金
 
@@ -167,12 +173,13 @@ export function PaymentItemRow({
     }
   }
 
-  // 當收款方式變更為 LinkPay 時，自動帶入預設值
-  const handleReceiptTypeChange = (newType: ReceiptType) => {
+  // 當收款方式變更時（支援 DB 字串值和 hardcoded 數字值）
+  const handleReceiptTypeChange = (value: string) => {
+    const newType = useDbMethods ? (value as unknown as ReceiptType) : (Number(value) as ReceiptType)
     const updates: Partial<PaymentItem> = { receipt_type: newType }
 
     // 如果切換到 LinkPay，自動帶入預設值
-    if (newType === RECEIPT_TYPES.LINK_PAY) {
+    if (newType === RECEIPT_TYPES.LINK_PAY || value === 'LinkPay' || value === 'LINE Pay') {
       // 預設付款截止日為 7 天後
       if (!item.pay_dateline) {
         const deadline = new Date()
@@ -203,14 +210,14 @@ export function PaymentItemRow({
         {/* 收款方式 */}
         <td className="py-2 px-3 border-b border-r border-border">
           <Select
-            value={item.receipt_type.toString()}
-            onValueChange={value => handleReceiptTypeChange(Number(value) as ReceiptType)}
+            value={selectValue}
+            onValueChange={handleReceiptTypeChange}
             disabled={readonly}
           >
-            <SelectTrigger className="h-auto p-0 border-0 shadow-none bg-transparent text-sm">
-              <SelectValue />
+            <SelectTrigger className="h-8 text-sm w-full border-0 shadow-none bg-transparent px-0">
+              <SelectValue placeholder="請選擇" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent align="start" className="min-w-0 w-[var(--radix-select-trigger-width)]">
               {receiptTypeOptions.map(option => (
                 <SelectItem key={option.value} value={option.value.toString()}>
                   {option.label}
@@ -238,10 +245,10 @@ export function PaymentItemRow({
               onValueChange={value => onUpdate(item.id, { accounting_subject_id: value })}
               disabled={readonly}
             >
-              <SelectTrigger className="h-auto p-0 border-0 shadow-none bg-transparent text-sm">
+              <SelectTrigger className="h-8 text-sm w-full border-0 shadow-none bg-transparent px-0">
                 <SelectValue placeholder="選擇收入科目" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent align="start">
                 {incomeSubjects.map(subject => (
                   <SelectItem key={subject.id} value={subject.id}>
                     {subject.code} {subject.name}

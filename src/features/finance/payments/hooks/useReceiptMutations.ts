@@ -21,6 +21,20 @@ const PAYMENT_METHOD_MAP: Record<number, string> = {
   4: 'linkpay',
 }
 
+/** 將 DB 收款方式名稱轉回 receipt_type 數字（用於存入資料庫） */
+function resolveReceiptType(receiptType: unknown): number {
+  // 已經是數字就直接回傳
+  if (typeof receiptType === 'number' && !isNaN(receiptType)) return receiptType
+  // DB 字串名稱 → 對應的數字
+  const name = String(receiptType).toLowerCase()
+  if (name.includes('匯款') || name.includes('transfer')) return 0
+  if (name.includes('現金') || name.includes('cash')) return 1
+  if (name.includes('信用卡') || name.includes('刷卡') || name.includes('card')) return 2
+  if (name.includes('支票') || name.includes('check')) return 3
+  if (name.includes('linkpay') || name.includes('line pay')) return 4
+  return 0 // 預設匯款
+}
+
 export interface LinkPayResult {
   receiptNumber: string
   link: string
@@ -145,6 +159,27 @@ export function useReceiptMutations() {
         throw new Error(RECEIPT_MUTATION_LABELS.CANNOT_GET_TOUR_CODE)
       }
 
+      // 查詢 payment_methods 取得 ID 對照表
+      const { data: paymentMethodsData } = await supabase
+        .from('payment_methods')
+        .select('id, code, name')
+        .eq('workspace_id', workspaceId)
+        .eq('type', 'receipt')
+        .eq('is_active', true)
+
+      const getPaymentMethodId = (receiptTypeNum: number, itemReceiptType?: unknown): string => {
+        if (!paymentMethodsData?.length) return ''
+        // 先嘗試用 DB 名稱直接比對
+        if (typeof itemReceiptType === 'string') {
+          const byName = paymentMethodsData.find(m => m.name === itemReceiptType)
+          if (byName) return byName.id
+        }
+        // 再用 code 對照
+        const codeMap: Record<number, string> = { 0: 'TRANSFER', 1: 'CASH', 2: 'CREDIT_CARD', 3: 'CHECK', 4: 'LINKPAY' }
+        const byCode = paymentMethodsData.find(m => m.code === codeMap[receiptTypeNum])
+        return byCode?.id || paymentMethodsData[0]?.id || ''
+      }
+
       // 查詢已存在的收款單編號（用於生成編號）
       const { data: existingReceipts } = await supabase
         .from('receipts')
@@ -161,6 +196,10 @@ export function useReceiptMutations() {
       const totalAmount = paymentItems.reduce((sum, item) => sum + (item.amount || 0), 0)
 
       // 1. 建立收款單主表
+      const firstItemReceiptType = resolveReceiptType(paymentItems[0]?.receipt_type)
+      const firstPaymentMethod = PAYMENT_METHOD_MAP[firstItemReceiptType] || 'transfer'
+      const firstPaymentMethodId = getPaymentMethodId(firstItemReceiptType, paymentItems[0]?.receipt_type)
+      logger.info('[createReceiptWithItems] Step 1: Creating receipt...', { tourCode, receiptNumber, totalAmount, firstPaymentMethodId })
       const createdReceipt = await createReceipt({
         receipt_number: receiptNumber,
         workspace_id: workspaceId,
@@ -170,9 +209,10 @@ export function useReceiptMutations() {
         order_number: orderInfo?.order_number || '',
         tour_name: orderInfo?.tour_name || tourInfo?.name || '',
         payment_date: paymentItems[0]?.transaction_date || new Date().toISOString().split('T')[0],
-        payment_method: 'transfer',
+        payment_method: firstPaymentMethod,
+        payment_method_id: firstPaymentMethodId,
         receipt_date: paymentItems[0]?.transaction_date || new Date().toISOString().split('T')[0],
-        receipt_type: 0,
+        receipt_type: firstItemReceiptType,
         receipt_amount: totalAmount,
         amount: totalAmount,
         total_amount: totalAmount,
@@ -201,12 +241,15 @@ export function useReceiptMutations() {
       if (!createdReceipt?.id) {
         throw new Error(RECEIPT_MUTATION_LABELS.CREATE_FAILED)
       }
+      logger.info('[createReceiptWithItems] Step 1 OK, receiptId:', createdReceipt.id)
 
       // 2. 為每個項目建立 receipt_item
       const linkPayResults: LinkPayResult[] = []
 
       for (const item of paymentItems) {
-        const paymentMethod = PAYMENT_METHOD_MAP[item.receipt_type] || 'transfer'
+        const receiptTypeNum = resolveReceiptType(item.receipt_type)
+        const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
+        logger.info('[createReceiptWithItems] Step 2: Creating item...', { receiptTypeNum, paymentMethod, amount: item.amount, originalReceiptType: item.receipt_type })
 
         const createdItem = await createReceiptItem({
           receipt_id: createdReceipt.id,
@@ -217,7 +260,7 @@ export function useReceiptMutations() {
           amount: item.amount,
           actual_amount: 0,
           payment_method: paymentMethod,
-          receipt_type: item.receipt_type,
+          receipt_type: receiptTypeNum,
           receipt_account: item.receipt_account || null,
           handler_name: item.handler_name || null,
           account_info: item.account_info || null,
@@ -239,8 +282,10 @@ export function useReceiptMutations() {
           deleted_at: null,
         })
 
+        logger.info('[createReceiptWithItems] Step 2 OK, itemId:', createdItem?.id)
+
         // 如果是 LinkPay，呼叫 API 產生付款連結
-        if (item.receipt_type === RECEIPT_TYPES.LINK_PAY && createdItem?.id) {
+        if (receiptTypeNum === RECEIPT_TYPES.LINK_PAY && createdItem?.id) {
           const linkPayResult = await handleLinkPayIntegration(
             receiptNumber,
             item,
@@ -319,14 +364,15 @@ export function useReceiptMutations() {
 
       // 3. 處理每個項目
       for (const item of paymentItems) {
-        const paymentMethod = PAYMENT_METHOD_MAP[item.receipt_type] || 'transfer'
+        const receiptTypeNum = resolveReceiptType(item.receipt_type)
+        const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
         const itemData = {
           tour_id: formData.tour_id || null,
           order_id: formData.order_id || null,
           customer_id: orderInfo?.customer_id || null,
           amount: item.amount,
           payment_method: paymentMethod,
-          receipt_type: item.receipt_type,
+          receipt_type: receiptTypeNum,
           receipt_account: item.receipt_account || null,
           handler_name: item.handler_name || null,
           account_info: item.account_info || null,

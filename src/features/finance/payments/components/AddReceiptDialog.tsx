@@ -314,7 +314,7 @@ export function AddReceiptDialog({
         onSuccess?.()
       }
     } catch (error) {
-      logger.error('[AddReceiptDialog] Create Receipt Error:', error)
+      logger.error('[AddReceiptDialog] Create Receipt Error:', error, JSON.stringify(error, Object.getOwnPropertyNames(error instanceof Error ? error : Object(error))))
 
       // 解析錯誤訊息
       let errorMessage = ADD_RECEIPT_DIALOG_LABELS.發生未知錯誤_請檢查必填欄位是否完整
