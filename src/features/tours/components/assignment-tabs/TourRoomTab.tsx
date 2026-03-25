@@ -109,8 +109,9 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
       setNewRoom({ room_type: 'twin', capacity: 2, hotel_name: '' })
       loadRooms()
     } catch (error) {
-      logger.error(COMP_TOURS_LABELS.新增房間失敗_2, error)
-      toast.error(COMP_TOURS_LABELS.新增房間失敗)
+      const errorMessage = error instanceof Error ? error.message : JSON.stringify(error)
+      logger.error(COMP_TOURS_LABELS.新增房間失敗_2, { error, tourId, newRoom, errorMessage })
+      toast.error(`${COMP_TOURS_LABELS.新增房間失敗}: ${errorMessage}`)
     }
   }
 
