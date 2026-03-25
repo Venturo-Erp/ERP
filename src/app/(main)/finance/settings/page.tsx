@@ -380,6 +380,7 @@ export default function FinanceSettingsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-[60px]">排序</TableHead>
                       <TableHead>名稱</TableHead>
                       <TableHead>借方科目</TableHead>
                       <TableHead>貸方科目</TableHead>
@@ -390,13 +391,14 @@ export default function FinanceSettingsPage() {
                   <TableBody>
                     {receiptMethods.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
+                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
                           尚未設定收款方式
                         </TableCell>
                       </TableRow>
                     ) : (
                       receiptMethods.map(method => (
                         <TableRow key={method.id}>
+                          <TableCell className="text-morandi-muted">{method.sort_order}</TableCell>
                           <TableCell className="font-medium">{method.name}</TableCell>
                           <TableCell className="text-morandi-muted text-sm">
                             {method.debit_account ? `${method.debit_account.code} ${method.debit_account.name}` : '-'}
@@ -447,6 +449,7 @@ export default function FinanceSettingsPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead className="w-[60px]">排序</TableHead>
                       <TableHead>名稱</TableHead>
                       <TableHead>借方科目</TableHead>
                       <TableHead>貸方科目</TableHead>
@@ -457,13 +460,14 @@ export default function FinanceSettingsPage() {
                   <TableBody>
                     {paymentMethodsList.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
+                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
                           尚未設定付款方式
                         </TableCell>
                       </TableRow>
                     ) : (
                       paymentMethodsList.map(method => (
                         <TableRow key={method.id}>
+                          <TableCell className="text-morandi-muted">{method.sort_order}</TableCell>
                           <TableCell className="font-medium">{method.name}</TableCell>
                           <TableCell className="text-morandi-muted text-sm">
                             {method.debit_account ? `${method.debit_account.code} ${method.debit_account.name}` : '-'}
@@ -707,6 +711,7 @@ function MethodDialog({
   const [description, setDescription] = useState('')
   const [debitAccountId, setDebitAccountId] = useState('')
   const [creditAccountId, setCreditAccountId] = useState('')
+  const [sortOrder, setSortOrder] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -715,6 +720,7 @@ function MethodDialog({
       setDescription(method?.description || '')
       setDebitAccountId(method?.debit_account_id || '')
       setCreditAccountId(method?.credit_account_id || '')
+      setSortOrder(method?.sort_order || 0)
     }
   }, [open, method])
 
@@ -730,6 +736,7 @@ function MethodDialog({
         description,
         debit_account_id: debitAccountId || null,
         credit_account_id: creditAccountId || null,
+        sort_order: sortOrder,
       })
     } finally {
       setIsSubmitting(false)
@@ -755,14 +762,24 @@ function MethodDialog({
               placeholder="例：現金、匯款、信用卡"
             />
           </div>
-          <div className="space-y-2">
-            <Label>說明</Label>
-            <Textarea
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="選填"
-              rows={2}
-            />
+          <div className="grid grid-cols-4 gap-4">
+            <div className="col-span-3 space-y-2">
+              <Label>說明</Label>
+              <Input
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="選填"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>排序</Label>
+              <Input
+                type="number"
+                value={sortOrder}
+                onChange={e => setSortOrder(Number(e.target.value))}
+                placeholder="0"
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
