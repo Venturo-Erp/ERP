@@ -106,7 +106,6 @@ function AccommodationTable({ items }: { items: any[] }) {
             <th className="border border-[#a8a29e] px-3 py-2 text-left">NET價</th>
             <th className="border border-[#a8a29e] px-3 py-2 text-left">訂金</th>
             <th className="border border-[#a8a29e] px-3 py-2 text-left w-20">數量</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">備註</th>
           </tr>
         </thead>
         <tbody>
@@ -119,7 +118,6 @@ function AccommodationTable({ items }: { items: any[] }) {
               <td className="border border-[#a8a29e] px-3 py-2"></td>
               <td className="border border-[#a8a29e] px-3 py-2"></td>
               <td className="border border-[#a8a29e] px-3 py-2">{item.quantity || ''}</td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.note || ''}</td>
             </tr>
           ))}
         </tbody>
