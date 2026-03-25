@@ -33,13 +33,7 @@ export function UnifiedTraditionalView({
   const isCancellation = requestType === 'cancellation'
 
   return (
-    <div className="bg-white p-6 print:p-[1.5cm] print:min-h-[297mm] print:w-[210mm] print:flex print:flex-col">
-      <style>{`
-        @media print {
-          @page { size: A4; margin: 0; }
-          body { margin: 0; }
-        }
-      `}</style>
+    <div className="bg-white flex flex-col min-h-full">
       {/* 標題區 */}
       <div className="flex justify-between items-start mb-6">
         <h2

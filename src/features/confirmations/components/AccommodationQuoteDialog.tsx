@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Loader2, X } from 'lucide-react'
+import { Loader2, X, Printer } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import { UnifiedTraditionalView } from './UnifiedTraditionalView'
@@ -43,8 +43,14 @@ export function AccommodationQuoteDialog({
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [sending, setSending] = useState(false)
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
+  const printContentRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
   const supabase = createSupabaseBrowserClient()
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // 載入 LINE 群組
   useEffect(() => {
@@ -102,9 +108,55 @@ export function AccommodationQuoteDialog({
     }
   }
 
+  // 列印
+  const handlePrint = () => {
+    if (!printContentRef.current) return
+    
+    const printTitle = `${supplierName}-住宿需求單`
+    const originalTitle = document.title
+    document.title = printTitle
+
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'absolute'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = 'none'
+    document.body.appendChild(iframe)
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+    if (!iframeDoc) return
+
+    iframeDoc.open()
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${printTitle}</title>
+        <style>
+          @page { size: A4; margin: 1.5cm; }
+          body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+          * { box-sizing: border-box; }
+        </style>
+      </head>
+      <body>
+        ${printContentRef.current.innerHTML}
+      </body>
+      </html>
+    `)
+    iframeDoc.close()
+
+    setTimeout(() => {
+      iframe.contentWindow?.print()
+      setTimeout(() => {
+        document.body.removeChild(iframe)
+        document.title = originalTitle
+      }, 1000)
+    }, 100)
+  }
+
   const handleDelivery = (method: string) => {
     if (method === 'print' || method === 'fax') {
-      window.print()
+      handlePrint()
     } else if (method === 'line') {
       setSelectedMethod('line')
     } else {
@@ -112,27 +164,61 @@ export function AccommodationQuoteDialog({
     }
   }
 
-  return (
-    <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="max-w-[210mm] w-[210mm] max-h-[95vh] overflow-hidden flex flex-col print:max-w-none print:w-full print:max-h-none print:overflow-visible print:shadow-none print:border-none">
-        <DialogHeader className="print:hidden">
-          <DialogTitle>住宿需求單</DialogTitle>
-        </DialogHeader>
-        {/* 列印預覽 */}
-        <div className="flex-1 overflow-y-auto pr-1">
-          <UnifiedTraditionalView
-            requestType="accommodation"
-            tour={tour}
-            totalPax={totalPax}
-            supplierName={supplierName}
-            items={accommodations}
-            note={note}
-            setNote={setNote}
-          />
+  if (!open || !isMounted) return null
+
+  return createPortal(
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-8"
+      onClick={onClose}
+    >
+      <div
+        className="bg-card rounded-lg max-w-[900px] w-full max-h-[90vh] overflow-hidden flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* 頂部按鈕 */}
+        <div className="flex justify-between items-center gap-2 p-4 border-b bg-morandi-container/30">
+          <h2 className="text-lg font-semibold text-morandi-primary">住宿需求單預覽</h2>
+          <div className="flex gap-2">
+            <Button onClick={onClose} variant="outline" size="sm" className="gap-1">
+              <X className="h-4 w-4" />
+              關閉
+            </Button>
+            <Button
+              onClick={handlePrint}
+              size="sm"
+              className="gap-1 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            >
+              <Printer className="h-4 w-4" />
+              列印
+            </Button>
+          </div>
         </div>
 
-        {/* 固定底部：發送方式按鈕（列印時隱藏） */}
-        <div className="flex-shrink-0 border-t pt-4 mt-2 space-y-3 print:hidden">
+        {/* A4 預覽區 */}
+        <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+          <div
+            ref={printContentRef}
+            className="bg-white mx-auto shadow-lg"
+            style={{
+              width: '210mm',
+              minHeight: '297mm',
+              padding: '1.5cm',
+            }}
+          >
+            <UnifiedTraditionalView
+              requestType="accommodation"
+              tour={tour}
+              totalPax={totalPax}
+              supplierName={supplierName}
+              items={accommodations}
+              note={note}
+              setNote={setNote}
+            />
+          </div>
+        </div>
+
+        {/* 底部發送按鈕 */}
+        <div className="flex-shrink-0 border-t p-4 bg-white space-y-3">
           {/* LINE 群組選擇 */}
           {selectedMethod === 'line' && (
             <div className="flex items-center gap-3">
@@ -172,47 +258,36 @@ export function AccommodationQuoteDialog({
 
           {/* 發送方式按鈕 */}
           {!selectedMethod && (
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => handleDelivery('print')}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
-                >
-                  列印
-                </button>
-                <button
-                  onClick={() => handleDelivery('line')}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
-                >
-                  LINE
-                </button>
-                <button
-                  onClick={() => handleDelivery('email')}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
-                >
-                  Email
-                </button>
-                <button
-                  onClick={() => handleDelivery('fax')}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
-                >
-                  傳真
-                </button>
-                <button
-                  onClick={() => handleDelivery('tenant')}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
-                >
-                  租戶
-                </button>
-              </div>
-              <Button variant="outline" onClick={onClose}>
-                <X className="h-4 w-4 mr-1" />
-                取消
-              </Button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handleDelivery('line')}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
+              >
+                LINE
+              </button>
+              <button
+                onClick={() => handleDelivery('email')}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
+              >
+                Email
+              </button>
+              <button
+                onClick={() => handleDelivery('fax')}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
+              >
+                傳真
+              </button>
+              <button
+                onClick={() => handleDelivery('tenant')}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium hover:bg-morandi-container"
+              >
+                租戶
+              </button>
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>,
+    document.body
   )
 }
