@@ -1430,243 +1430,83 @@ export function RequirementsList({
                           <tr
                             className={cn(
                               'border-t border-border/50 hover:bg-morandi-container/20',
-                              isHidden && 'bg-morandi-muted/5',
-                              checkedItems.has(itemKey) && 'bg-blue-50/50',
-                              isExpanded && 'bg-morandi-container/30'
+                              isHidden && 'bg-morandi-muted/5'
                             )}
                           >
-                            {/* 項目名稱（飯店/餐廳/景點名稱） */}
-                            <td className="px-3 py-2.5">
-                              <div className="flex items-center gap-1">
-                                <span className="flex-1 font-medium">{item.supplierName || item.title || '-'}</span>
-                                {(cat.key === 'meal' || cat.key === 'activity') && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      const existingRequest = findMatchingRequest(item)
-                                      handleToggleHidden(
-                                        existingRequest?.id || null,
-                                        !isHidden,
-                                        !existingRequest
-                                          ? {
-                                              category: cat.key,
-                                              supplierName: item.supplierName || item.title || '',
-                                              title: item.title || '',
-                                              serviceDate: item.serviceDate || null,
-                                              quantity: item.quantity || 1,
-                                            }
-                                          : undefined
-                                      )
-                                    }}
-                                    className={`p-0.5 rounded hover:bg-morandi-gold/20 ${isHidden ? 'text-emerald-500' : 'text-muted-foreground/40 hover:text-muted-foreground'}`}
-                                    title={isHidden ? '恢復顯示' : '隱藏此項'}
-                                  >
-                                    {isHidden ? <Check size={12} /> : <X size={12} />}
-                                  </button>
-                                )}
-                              </div>
+                            {/* 欄位1: 項目名稱 */}
+                            <td className="px-3 py-2.5" style={{ width: '20%' }}>
+                              <button
+                                type="button"
+                                className="flex items-center gap-1.5 text-left font-medium text-morandi-primary hover:text-morandi-gold transition-colors"
+                                onClick={() => {
+                                  // 之後展開選單用
+                                  const newExpanded = new Set(expandedMainItems)
+                                  if (isExpanded) newExpanded.delete(itemKey)
+                                  else newExpanded.add(itemKey)
+                                  setExpandedMainItems(newExpanded)
+                                }}
+                              >
+                                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                {item.supplierName || item.title || '-'}
+                              </button>
                             </td>
-                            {/* 日期 */}
-                            <td className="px-3 py-2.5 text-sm text-morandi-secondary">{formatDate(item.serviceDate)}</td>
-                            {/* 欄位4: 項目說明 / 時間 */}
-                            <td className="px-3 py-2.5">
-                              {cat.key === 'meal' ? (
-                                <input
-                                  type="text"
-                                  placeholder={`${item.title} 12:00`}
-                                  defaultValue={(() => {
-                                    const req = findMatchingRequest(item)
-                                    return ((req?.items?.[0] as any)?.meal_time as string) || ''
-                                  })()}
-                                  onBlur={e => {
-                                    // 全形→半形 + 4位數自動加冒號
-                                    let v = e.target.value.replace(/[\uff01-\uff5e]/g, c =>
-                                      String.fromCharCode(c.charCodeAt(0) - 0xfee0)
-                                    )
-                                    const timeMatch = v.match(/(\d{2})(\d{2})/)
-                                    if (
-                                      timeMatch &&
-                                      v.replace(/\D/g, '').length === 4 &&
-                                      !v.includes(':')
-                                    ) {
-                                      const h = parseInt(timeMatch[1]),
-                                        m = parseInt(timeMatch[2])
-                                      if (h < 24 && m < 60) v = `${timeMatch[1]}:${timeMatch[2]}`
-                                    }
-                                    e.target.value = v
-                                    handleInlineUpdate(
-                                      item,
-                                      cat.key,
-                                      'meal_time',
-                                      v,
-                                      existingRequests
-                                    )
-                                  }}
-                                  className="h-7 w-full text-sm px-1.5 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30 rounded placeholder:text-muted-foreground/60"
-                                />
-                              ) : cat.key === 'transport' ? (
-                                <input
-                                  type="text"
-                                  placeholder="例：43人座遊覽車"
-                                  defaultValue={(() => {
-                                    const req = findMatchingRequest(item)
-                                    return ((req?.items?.[0] as any)?.vehicle_desc as string) || ''
-                                  })()}
-                                  onBlur={e => {
-                                    handleInlineUpdate(
-                                      item,
-                                      cat.key,
-                                      'vehicle_desc',
-                                      e.target.value,
-                                      existingRequests
-                                    )
-                                  }}
-                                  className="h-7 w-full text-sm px-1.5 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30 rounded placeholder:text-muted-foreground/60"
-                                />
-                              ) : (
-                                <span>{item.title}</span>
-                              )}
+                            {/* 欄位2: 日期 */}
+                            <td className="px-3 py-2.5 text-sm text-morandi-secondary" style={{ width: '90px' }}>
+                              {formatDate(item.serviceDate)}
                             </td>
-                            {/* 欄位5: 房型 / 數量 */}
-                            <td className="px-3 py-2.5">
-                              {cat.key === 'accommodation' &&
-                                (() => {
+                            {/* 欄位3: 說明（房型/車型/時間/數量等） */}
+                            <td className="px-3 py-2.5 text-sm" style={{ width: '15%' }}>
+                              {(() => {
+                                // 住宿：顯示房型
+                                if (cat.key === 'accommodation') {
                                   const supplierName = item.supplierName || item.title
                                   const hotelDraft = existingRequests.find(
-                                    r =>
-                                      r.request_type === 'accommodation' &&
-                                      r.supplier_name === supplierName &&
-                                      r.status === 'draft'
+                                    r => r.request_type === 'accommodation' && r.supplier_name === supplierName && r.status === 'draft'
                                   )
-                                  if (!hotelDraft?.items?.length) return null
-                                  return (
-                                    <div className="flex items-center gap-1.5">
-                                      {hotelDraft.items.map(
-                                        (
-                                          room: { room_type?: string; quantity?: number },
-                                          ri: number
-                                        ) => (
-                                          <span
-                                            key={ri}
-                                            className="text-[11px] text-muted-foreground whitespace-nowrap"
-                                          >
-                                            {room.room_type}×{room.quantity}
-                                          </span>
-                                        )
-                                      )}
-                                    </div>
-                                  )
-                                })()}
-                              {cat.key === 'meal' && (
-                                <input
-                                  type="text"
-                                  placeholder="數量"
-                                  defaultValue={(() => {
-                                    const req = findMatchingRequest(item)
-                                    return ((req?.items?.[0] as any)?.pax as string) || ''
-                                  })()}
-                                  onBlur={e => {
-                                    const v = e.target.value.replace(/[\uff01-\uff5e]/g, c =>
-                                      String.fromCharCode(c.charCodeAt(0) - 0xfee0)
-                                    )
-                                    e.target.value = v
-                                    handleInlineUpdate(
-                                      item,
-                                      cat.key,
-                                      'pax',
-                                      v ? parseInt(v) : undefined,
-                                      existingRequests
-                                    )
-                                  }}
-                                  className="w-16 h-6 text-[11px] px-1.5 border border-border/50 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30"
-                                />
-                              )}
-                            </td>
-                            {/* 欄位6: 備註 */}
-                            <td className="px-3 py-2.5">
-                              {(() => {
-                                // 找到對應的 core item（有 quote_note）
-                                const resourceId = item.resourceId
-                                const itineraryItemId = item.itinerary_item_id
-                                let matchingCoreItem: any = undefined
-
-                                if (itineraryItemId) {
-                                  matchingCoreItem = coreItems.find(c => c.id === itineraryItemId)
-                                }
-                                if (!matchingCoreItem && resourceId) {
-                                  matchingCoreItem = coreItems.find(c => c.resource_id === resourceId)
-                                }
-
-                                const quoteNote = matchingCoreItem?.quote_note
-
-                                if (quoteNote && quoteNote.includes('⚠️ 行程變更')) {
-                                  // 顯示變更警告（帶確認按鈕）
-                                  return (
-                                    <div className="flex items-center gap-1">
-                                      <span className="text-[10px] text-red-600 flex-1">
-                                        {quoteNote}
-                                      </span>
-                                      <button
-                                        onClick={async () => {
-                                          // 清除警告
-                                          if (matchingCoreItem?.id) {
-                                            await supabase
-                                              .from('tour_itinerary_items')
-                                              .update({ quote_note: null } as never)
-                                              .eq('id', matchingCoreItem.id)
-                                            await loadData(false) // 刷新
-                                          }
-                                        }}
-                                        className="px-1.5 py-0.5 text-[10px] text-white bg-red-600 hover:bg-red-700 rounded"
-                                        title="我已確認價格"
-                                      >
-                                        ✓
-                                      </button>
-                                    </div>
-                                  )
-                                }
-
-                                // 一般備註欄位
-                                if (
-                                  cat.key === 'accommodation' ||
-                                  cat.key === 'meal' ||
-                                  cat.key === 'transport'
-                                ) {
-                                  const req = findMatchingRequest(item)
-                                  const noteFieldMap: Record<string, string> = {
-                                    accommodation: 'hotel_note',
-                                    meal: 'meal_note',
-                                    transport: 'transport_note',
+                                  if (hotelDraft?.items?.length) {
+                                    return hotelDraft.items.map((room: any, ri: number) => (
+                                      <span key={ri} className="text-morandi-secondary">{room.room_type}×{room.quantity} </span>
+                                    ))
                                   }
-                                  const noteField = noteFieldMap[cat.key] || 'note'
-                                  return (
-                                    <input
-                                      type="text"
-                                      placeholder="備註"
-                                      defaultValue={
-                                        ((req?.items?.[0] as any)?.[noteField] as string) ||
-                                        req?.note ||
-                                        ''
-                                      }
-                                      onBlur={e => {
-                                        const field = noteFieldMap[cat.key] || 'note'
-                                        handleInlineUpdate(
-                                          item,
-                                          cat.key,
-                                          field,
-                                          e.target.value,
-                                          existingRequests
-                                        )
-                                      }}
-                                      className="w-full h-6 text-[11px] px-1.5 border border-border/50 rounded bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold/30"
-                                    />
-                                  )
+                                  return <span className="text-morandi-muted">{item.quantity || 1}晚</span>
                                 }
-
-                                return null
+                                // 交通：顯示車型
+                                if (cat.key === 'transport') {
+                                  const req = findMatchingRequest(item)
+                                  const vehicleDesc = (req?.items?.[0] as any)?.vehicle_desc
+                                  return vehicleDesc || item.title || '-'
+                                }
+                                // 餐食：顯示時間
+                                if (cat.key === 'meal') {
+                                  const req = findMatchingRequest(item)
+                                  const mealTime = (req?.items?.[0] as any)?.meal_time
+                                  return mealTime ? `${item.title} ${mealTime}` : item.title || '-'
+                                }
+                                // 其他
+                                return item.title || '-'
                               })()}
                             </td>
-                            <td className="px-3 py-2.5 text-left font-medium">
+                            {/* 欄位6: 備註 */}
+                            {/* 欄位4: 備註 */}
+                            <td className="px-3 py-2.5" style={{ width: '15%' }}>
+                              {(() => {
+                                const req = findMatchingRequest(item)
+                                const noteFieldMap: Record<string, string> = {
+                                  accommodation: 'hotel_note',
+                                  meal: 'meal_note',
+                                  transport: 'transport_note',
+                                }
+                                const noteField = noteFieldMap[cat.key] || 'note'
+                                const noteValue = ((req?.items?.[0] as any)?.[noteField] as string) || req?.note || ''
+                                return (
+                                  <span className="text-sm text-morandi-secondary truncate block">
+                                    {noteValue || '-'}
+                                  </span>
+                                )
+                              })()}
+                            </td>
+                            {/* 欄位5: 報價 */}
+                            <td className="px-3 py-2.5 text-right" style={{ width: '90px' }}>
                               {(() => {
                                 const estimatedPrice = item.quotedPrice
                                 const request = findMatchingRequest(item)
@@ -1699,7 +1539,8 @@ export function RequirementsList({
                                 )
                               })()}
                             </td>
-                            <td className="px-3 py-2.5 text-left">
+                            {/* 欄位6: 狀態 */}
+                            <td className="px-3 py-2.5 text-center" style={{ width: '90px' }}>
                               <span
                                 className={cn(
                                   'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
@@ -1709,7 +1550,8 @@ export function RequirementsList({
                                 {statusLabel}
                               </span>
                             </td>
-                            <td className="px-3 py-2.5 text-left">
+                            {/* 欄位7: 操作 */}
+                            <td className="px-3 py-2.5 text-center" style={{ width: '100px' }}>
                               {(() => {
                                 const supplierName = item.supplierName || item.title
                                 const draft = existingRequests.find(
@@ -1908,7 +1750,7 @@ export function RequirementsList({
                           {/* 🆕 展開抽屜：顯示需求單詳情 */}
                           {isExpanded && (
                             <tr>
-                              <td colSpan={10} className="p-0">
+                              <td colSpan={7} className="p-0">
                                 <div className="bg-morandi-container/10 border-t border-morandi-gold/10 p-6 space-y-4">
                                   {/* 已發送需求單（最新報價 + 歷史）*/}
                                   {(() => {
