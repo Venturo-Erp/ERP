@@ -64,7 +64,24 @@ export function PaymentItemRow({
   // 讀取收入類會計科目（僅公司收款需要）
   const [incomeSubjects, setIncomeSubjects] = useState<Array<{ id: string; code: string; name: string }>>([])
   
+  // 從 DB 讀取收款方式
+  const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string }>>([])
+  
   useEffect(() => {
+    // 讀取收款方式（從 payment_methods 表）
+    const loadPaymentMethods = async () => {
+      const { useAuthStore } = await import('@/stores')
+      const workspaceId = useAuthStore.getState().user?.workspace_id
+      if (!workspaceId) return
+      
+      const response = await fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}&type=receipt`)
+      if (response.ok) {
+        const data = await response.json()
+        setPaymentMethods(data || [])
+      }
+    }
+    loadPaymentMethods()
+    
     if (mode === 'company') {
       // 讀取收入類科目
       const loadSubjects = async () => {
@@ -80,14 +97,17 @@ export function PaymentItemRow({
     }
   }, [mode])
 
-  const receiptTypeLabel =
-    RECEIPT_TYPE_OPTIONS.find(opt => opt.value === item.receipt_type)?.label ||
-    BATCH_RECEIPT_DIALOG_LABELS.現金
+  // 收款方式選項：優先使用 DB 的資料，fallback 到 hardcoded
+  const receiptTypeOptions = paymentMethods.length > 0
+    ? paymentMethods.map(m => ({ value: m.name, label: m.name }))
+    : (mode === 'company' 
+        ? RECEIPT_TYPE_OPTIONS.filter(opt => opt.value !== RECEIPT_TYPES.LINK_PAY)
+        : RECEIPT_TYPE_OPTIONS)
 
-  // 收款方式選項（公司收款只有 4 種）
-  const receiptTypeOptions = mode === 'company' 
-    ? RECEIPT_TYPE_OPTIONS.filter(opt => opt.value !== RECEIPT_TYPES.LINK_PAY)
-    : RECEIPT_TYPE_OPTIONS
+  const receiptTypeLabel =
+    receiptTypeOptions.find(opt => opt.value === item.receipt_type)?.label ||
+    item.receipt_type ||
+    BATCH_RECEIPT_DIALOG_LABELS.現金
 
   // 產生 LinkPay 連結
   const handleGenerateLink = async () => {
