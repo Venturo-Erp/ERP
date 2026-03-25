@@ -578,23 +578,8 @@ export function useRoomVehicleAssignments({
           const isRoomFull = currentCount >= targetRoom.capacity
 
           if (isRoomFull) {
-            // 判斷是否為6歲以下幼童（使用出發日期計算，沒有出發日期則用今天）
-            const isChild = isChildNotOccupyingBed(memberBirthDate, departureDate)
-
-            if (isChild) {
-              // 幼童可以加入已滿房間，但顯示提示
-              const age = calculateAge(memberBirthDate, departureDate)
-              const ageText = age !== null && age < 2 ? COMP_ORDERS_LABELS.嬰兒 : `${age}歲幼童`
-              toast.info(MEMBER_DATA_LABELS.AGE_NO_BED_FULL_ROOM(ageText), { duration: 3000 })
-            } else if (!memberBirthDate) {
-              // 沒有出生日期資料，顯示錯誤
-              toast.error(COMP_ORDERS_LABELS.此房間已滿_無法分配_如為幼童請先填寫出生日期)
-              return
-            } else {
-              // 非幼童不能加入已滿房間
-              toast.error(COMP_ORDERS_LABELS.此房間已滿_無法分配)
-              return
-            }
+            // 房間已滿，顯示警告但仍允許分配
+            toast.warning(`此房間已滿（${currentCount}/${targetRoom.capacity}），確定要加入嗎？`, { duration: 3000 })
           }
         }
       }
