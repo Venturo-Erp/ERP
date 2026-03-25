@@ -32,7 +32,7 @@ import { useAuthStore } from '@/stores'
 import type { Tour } from '@/stores/types'
 import { RoomRequirementDialog } from './RoomRequirementDialog'
 import { TransportQuoteDialog } from './TransportQuoteDialog'
-import { AccommodationQuoteDialog } from './AccommodationQuoteDialog'
+import { PrintableAccommodationQuote } from './PrintableAccommodationQuote'
 import { MealQuoteDialog } from './MealQuoteDialog'
 import { ActivityQuoteDialog } from './ActivityQuoteDialog'
 import { AssignSupplierDialog, type AssignSupplierDialogProps } from './AssignSupplierDialog'
@@ -2086,7 +2086,7 @@ export function RequirementsList({
 
       {/* 住宿報價 Dialog */}
       {selectedHotel && tour && (
-        <AccommodationQuoteDialog
+        <PrintableAccommodationQuote
           open={showAccommodationDialog}
           onClose={() => {
             setShowAccommodationDialog(false)
