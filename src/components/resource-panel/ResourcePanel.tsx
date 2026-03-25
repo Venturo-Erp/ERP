@@ -91,13 +91,19 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
     hasMoved.current = false
   }
 
+  // 合併自定義 handler 和 dnd-kit 的 listeners
+  const mergedOnPointerDown = (e: React.PointerEvent) => {
+    handlePointerDown(e)
+    // 調用 dnd-kit 的 onPointerDown
+    ;(listeners?.onPointerDown as ((e: React.PointerEvent) => void) | undefined)?.(e)
+  }
+
   return (
     <div
       ref={setNodeRef}
       style={{ ...style, touchAction: 'none' }}
-      {...listeners}
       {...attributes}
-      onPointerDown={handlePointerDown}
+      onPointerDown={mergedOnPointerDown}
       onPointerMove={handlePointerMove}
       onClick={handleClick}
       className={cn(
