@@ -60,6 +60,7 @@ export interface PaymentRequest {
   approved_by?: string | null
   paid_at?: string | null
   paid_by?: string | null
+  payment_method_id?: string | null // 付款方式 ID（關聯 payment_methods 表）
   created_by?: string | null // 請款人 ID
   created_by_name?: string | null // 請款人姓名（快照）
   workspace_id?: string

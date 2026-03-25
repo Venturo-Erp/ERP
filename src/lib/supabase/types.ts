@@ -9424,7 +9424,7 @@ export type Database = {
           order_number: string | null
           paid_at: string | null
           paid_by: string | null
-          payment_method_id: string
+          payment_method_id: string | null
           request_category: string | null
           request_date: string | null
           request_number: string | null
@@ -9460,7 +9460,7 @@ export type Database = {
           order_number?: string | null
           paid_at?: string | null
           paid_by?: string | null
-          payment_method_id: string
+          payment_method_id?: string | null
           request_category?: string | null
           request_date?: string | null
           request_number?: string | null
@@ -9496,7 +9496,7 @@ export type Database = {
           order_number?: string | null
           paid_at?: string | null
           paid_by?: string | null
-          payment_method_id?: string
+          payment_method_id?: string | null
           request_category?: string | null
           request_date?: string | null
           request_number?: string | null
@@ -9513,13 +9513,6 @@ export type Database = {
           workspace_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "fk_payment_requests_payment_method"
-            columns: ["payment_method_id"]
-            isOneToOne: false
-            referencedRelation: "payment_methods"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "payment_requests_accounting_subject_id_fkey"
             columns: ["accounting_subject_id"]
@@ -12127,12 +12120,12 @@ export type Database = {
           link: string | null
           linkpay_order_number: string | null
           notes: string | null
-          order_id: string
+          order_id: string | null
           order_number: string | null
           pay_dateline: string | null
           payment_date: string
           payment_method: string
-          payment_method_id: string | null
+          payment_method_id: string
           payment_name: string | null
           receipt_account: string | null
           receipt_amount: number
@@ -12175,12 +12168,12 @@ export type Database = {
           link?: string | null
           linkpay_order_number?: string | null
           notes?: string | null
-          order_id: string
+          order_id?: string | null
           order_number?: string | null
           pay_dateline?: string | null
           payment_date: string
           payment_method: string
-          payment_method_id?: string | null
+          payment_method_id: string
           payment_name?: string | null
           receipt_account?: string | null
           receipt_amount: number
@@ -12223,12 +12216,12 @@ export type Database = {
           link?: string | null
           linkpay_order_number?: string | null
           notes?: string | null
-          order_id?: string
+          order_id?: string | null
           order_number?: string | null
           pay_dateline?: string | null
           payment_date?: string
           payment_method?: string
-          payment_method_id?: string | null
+          payment_method_id?: string
           payment_name?: string | null
           receipt_account?: string | null
           receipt_amount?: number
@@ -12246,6 +12239,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_receipts_payment_method"
+            columns: ["payment_method_id"]
+            isOneToOne: false
+            referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "receipts_accounting_subject_id_fkey"
             columns: ["accounting_subject_id"]
@@ -20195,6 +20195,31 @@ export type Database = {
           tour_name: string
           traveler_count: number
           unread_count: number
+        }[]
+      }
+      get_tour_pnl: {
+        Args: {
+          p_workspace_id: string
+          p_year_end: string
+          p_year_start: string
+        }
+        Returns: {
+          actual_cost: number
+          actual_profit: number
+          actual_revenue: number
+          closing_date: string
+          code: string
+          cost_diff: number
+          departure_date: string
+          estimated_cost: number
+          estimated_profit: number
+          estimated_revenue: number
+          id: string
+          max_participants: number
+          name: string
+          return_date: string
+          revenue_diff: number
+          status: string
         }[]
       }
       get_unread_count: { Args: { p_conversation_id: string }; Returns: number }
