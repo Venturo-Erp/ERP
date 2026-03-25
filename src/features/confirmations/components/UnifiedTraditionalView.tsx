@@ -33,7 +33,13 @@ export function UnifiedTraditionalView({
   const isCancellation = requestType === 'cancellation'
 
   return (
-    <div className="bg-white p-6">
+    <div className="bg-white p-6 print:p-[1.5cm] print:min-h-[297mm] print:w-[210mm] print:flex print:flex-col">
+      <style>{`
+        @media print {
+          @page { size: A4; margin: 0; }
+          body { margin: 0; }
+        }
+      `}</style>
       {/* 標題區 */}
       <div className="flex justify-between items-start mb-6">
         <h2
@@ -88,12 +94,15 @@ export function UnifiedTraditionalView({
         />
       </div>
 
-      {/* 下方兩欄：公司資料 + 供應商簽回 */}
-      <div className="mt-6 grid grid-cols-2 gap-6 border-t border-[#a8a29e] pt-4">
+      {/* 撐開中間空間（列印時撐到頁尾） */}
+      <div className="flex-1 print:flex-1"></div>
+
+      {/* 頁尾：公司資料 + 供應商簽回 */}
+      <div className="mt-6 grid grid-cols-2 gap-6 border-t border-[#a8a29e] pt-4 print:mt-auto">
         {/* 左邊：公司資料 */}
         <div className="text-sm space-y-1">
-          <div><span className="font-medium text-[#78716c]">公司名稱：</span>角落旅行社</div>
-          <div><span className="font-medium text-[#78716c]">公司電話：</span>02-2345-6789</div>
+          <div><span className="font-medium text-[#78716c]">公司名稱：</span>{COMPANY_NAME}</div>
+          <div><span className="font-medium text-[#78716c]">公司電話：</span></div>
           <div><span className="font-medium text-[#78716c]">業務：</span></div>
           <div><span className="font-medium text-[#78716c]">助理：</span></div>
         </div>
