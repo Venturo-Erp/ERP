@@ -282,12 +282,15 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
           <div className="grid grid-cols-2 gap-4 p-3 bg-muted/50 rounded-lg">
             <div>
               <Label>關聯單據類型（選填）</Label>
-              <Select value={sourceType} onValueChange={(v) => setSourceType(v as SourceType)}>
+              <Select 
+                value={sourceType || 'none'} 
+                onValueChange={(v) => setSourceType(v === 'none' ? '' : v as SourceType)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="不關聯單據" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">不關聯單據</SelectItem>
+                  <SelectItem value="none">不關聯單據</SelectItem>
                   <SelectItem value="receipt">收款單</SelectItem>
                   <SelectItem value="payment_request">請款單</SelectItem>
                 </SelectContent>
