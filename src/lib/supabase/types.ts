@@ -15199,6 +15199,7 @@ export type Database = {
           resource_id: string | null
           resource_name: string | null
           resource_type: string | null
+          room_details: Json | null
           service_date: string | null
           service_date_end: string | null
           show_on_brochure: boolean
@@ -15268,6 +15269,7 @@ export type Database = {
           resource_id?: string | null
           resource_name?: string | null
           resource_type?: string | null
+          room_details?: Json | null
           service_date?: string | null
           service_date_end?: string | null
           show_on_brochure?: boolean
@@ -15337,6 +15339,7 @@ export type Database = {
           resource_id?: string | null
           resource_name?: string | null
           resource_type?: string | null
+          room_details?: Json | null
           service_date?: string | null
           service_date_end?: string | null
           show_on_brochure?: boolean
