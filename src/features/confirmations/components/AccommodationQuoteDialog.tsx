@@ -183,15 +183,24 @@ export function AccommodationQuoteDialog({
             resize: none;
           }
           
-          /* 頁尾撐到底部 */
-          .flex-1 { flex: 1; }
+          /* 頁尾固定在底部 */
           .footer-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 24px;
             border-top: 1px solid #a8a29e;
             padding-top: 16px;
-            margin-top: auto;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+          }
+          
+          /* 容器相對定位 */
+          .print-container {
+            position: relative;
+            min-height: calc(297mm - 3cm);
+            padding-bottom: 80px;
           }
         </style>
       </head>
