@@ -65,8 +65,8 @@ export const TABLES = {
   LEADER_SCHEDULES: 'leader_schedules',
   // 會計系統
   ACCOUNTING_SUBJECTS: 'accounting_subjects',
-  VOUCHERS: 'vouchers',
-  VOUCHER_ENTRIES: 'voucher_entries',
+  JOURNAL_VOUCHERS: 'journal_vouchers',
+  JOURNAL_LINES: 'journal_lines',
   // Workspace 模組
   WORKSPACE_MODULES: 'workspace_modules',
 } as const
