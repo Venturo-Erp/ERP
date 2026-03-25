@@ -1348,8 +1348,8 @@ export function RequirementsList({
             <div className="border border-border rounded-lg overflow-hidden bg-card">
               <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
                 <thead>
-                  <tr className="bg-morandi-container/50 border-b border-border h-2">
-                    <th colSpan={9}></th>
+                  <tr className="bg-morandi-container/50 border-b border-border h-1">
+                    <th colSpan={7}></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1435,32 +1435,6 @@ export function RequirementsList({
                               isExpanded && 'bg-morandi-container/30'
                             )}
                           >
-                            <td className="px-2 py-2.5 text-center">
-                              <button
-                                onClick={() => {
-                                  const newExpanded = new Set(expandedMainItems)
-                                  if (isExpanded) {
-                                    newExpanded.delete(itemKey)
-                                  } else {
-                                    newExpanded.add(itemKey)
-                                  }
-                                  setExpandedMainItems(newExpanded)
-                                }}
-                                className="p-1 hover:bg-morandi-container/50 rounded"
-                              >
-                                {isExpanded ? (
-                                  <ChevronDown size={14} />
-                                ) : (
-                                  <ChevronRight size={14} />
-                                )}
-                              </button>
-                            </td>
-                            <td className="px-2 py-2.5 text-center">
-                              <Checkbox
-                                checked={checkedItems.has(itemKey)}
-                                onCheckedChange={() => toggleItem(itemKey)}
-                              />
-                            </td>
                             {/* 項目名稱（飯店/餐廳/景點名稱） */}
                             <td className="px-3 py-2.5">
                               <div className="flex items-center gap-1">
@@ -2103,52 +2077,39 @@ export function RequirementsList({
 
                     return (
                       <React.Fragment key={cat.key}>
-                        {/* 分類標題 */}
+                        {/* 分類標題 + 欄位標題（同一行） */}
                         <tr className="bg-morandi-container/30 border-t border-border">
-                          <td colSpan={9} className="px-3 py-2">
-                            <div className="flex items-center gap-3">
+                          <th className="px-3 py-2 text-left" style={{ width: '20%' }}>
+                            <div className="flex items-center gap-2">
                               <span className="font-medium text-morandi-primary">{cat.label}</span>
-                              <span className="text-xs text-morandi-secondary">
-                                ({visibleItems.length}
-                                {COMP_REQUIREMENTS_LABELS.項})
+                              <span className="text-xs text-morandi-secondary font-normal">
+                                ({visibleItems.length}{COMP_REQUIREMENTS_LABELS.項})
                               </span>
                               {hiddenItems.length > 0 && (
                                 <button
                                   onClick={() => toggleHiddenCategory(cat.key)}
-                                  className="flex items-center gap-1 text-xs text-morandi-muted hover:text-morandi-secondary transition-colors"
+                                  className="flex items-center gap-1 text-xs text-morandi-muted hover:text-morandi-secondary transition-colors font-normal"
                                 >
-                                  {isHiddenExpanded ? (
-                                    <ChevronDown size={14} />
-                                  ) : (
-                                    <ChevronRight size={14} />
-                                  )}
+                                  {isHiddenExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                                   <EyeOff size={12} />
-                                  <span>
-                                    {COMP_REQUIREMENTS_LABELS.已隱藏}({hiddenItems.length})
-                                  </span>
+                                  <span>{COMP_REQUIREMENTS_LABELS.已隱藏}({hiddenItems.length})</span>
                                 </button>
                               )}
                             </div>
-                          </td>
-                        </tr>
-                        {/* 欄位標題 */}
-                        <tr className="bg-morandi-container/10 border-b border-border/50">
-                          <th className="px-2 py-1.5 text-center" style={{ width: '32px' }}></th>
-                          <th className="px-2 py-1.5 text-center" style={{ width: '36px' }}></th>
-                          <th className="px-3 py-1.5 text-left text-xs font-medium text-morandi-secondary" style={{ width: '20%' }}>項目</th>
-                          <th className="px-3 py-1.5 text-left text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>日期</th>
-                          <th className="px-3 py-1.5 text-left text-xs font-medium text-morandi-secondary" style={{ width: '15%' }}>說明</th>
-                          <th className="px-3 py-1.5 text-left text-xs font-medium text-morandi-secondary" style={{ width: '15%' }}>備註</th>
-                          <th className="px-3 py-1.5 text-right text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>報價</th>
-                          <th className="px-3 py-1.5 text-center text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>狀態</th>
-                          <th className="px-3 py-1.5 text-center text-xs font-medium text-morandi-secondary" style={{ width: '100px' }}>操作</th>
+                          </th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>日期</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '15%' }}>說明</th>
+                          <th className="px-3 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '15%' }}>備註</th>
+                          <th className="px-3 py-2 text-right text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>報價</th>
+                          <th className="px-3 py-2 text-center text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>狀態</th>
+                          <th className="px-3 py-2 text-center text-xs font-medium text-morandi-secondary" style={{ width: '100px' }}>操作</th>
                         </tr>
 
                         {visibleItems.map((trackItem, idx) => renderItem(trackItem, idx, false))}
                         {isHiddenExpanded && hiddenItems.length > 0 && (
                           <>
                             <tr className="bg-morandi-muted/10 border-t border-dashed border-morandi-muted/30">
-                              <td colSpan={9} className="px-3 py-1.5 text-xs text-morandi-muted">
+                              <td colSpan={7} className="px-3 py-1.5 text-xs text-morandi-muted">
                                 <div className="flex items-center gap-1">
                                   <EyeOff size={12} />
                                   <span>{COMP_REQUIREMENTS_LABELS.已隱藏的項目}</span>
