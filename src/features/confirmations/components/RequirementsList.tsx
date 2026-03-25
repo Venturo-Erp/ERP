@@ -1499,11 +1499,15 @@ export function RequirementsList({
                                   const roomsFromAssignment = tourRoomsByHotel[hotelName]
                                   
                                   if (roomsFromAssignment && roomsFromAssignment.length > 0) {
-                                    return roomsFromAssignment.map((room, ri) => (
-                                      <span key={ri} className="text-morandi-secondary">
-                                        {room.room_type}×{room.quantity}{ri < roomsFromAssignment.length - 1 ? ' ' : ''}
-                                      </span>
-                                    ))
+                                    return (
+                                      <div className="flex flex-col gap-0.5">
+                                        {roomsFromAssignment.map((room, ri) => (
+                                          <span key={ri} className="text-morandi-secondary text-xs">
+                                            {room.room_type}×{room.quantity}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    )
                                   }
                                   return <span className="text-morandi-muted">{item.quantity || 1}晚</span>
                                 }
