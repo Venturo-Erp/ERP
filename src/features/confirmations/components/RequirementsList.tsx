@@ -1451,11 +1451,11 @@ export function RequirementsList({
                               </button>
                             </td>
                             {/* 欄位2: 日期 */}
-                            <td className="px-3 py-2.5 text-sm text-morandi-secondary" style={{ width: '90px' }}>
+                            <td className="px-2 py-2.5 text-sm text-morandi-secondary" style={{ width: '70px' }}>
                               {formatDate(item.serviceDate)}
                             </td>
                             {/* 欄位3: 說明（房型/車型/時間/數量等） */}
-                            <td className="px-3 py-2.5 text-sm" style={{ width: '15%' }}>
+                            <td className="px-2 py-2.5 text-sm" style={{ width: '10%' }}>
                               {(() => {
                                 // 住宿：顯示房型
                                 if (cat.key === 'accommodation') {
@@ -1488,7 +1488,7 @@ export function RequirementsList({
                             </td>
                             {/* 欄位6: 備註 */}
                             {/* 欄位4: 備註 */}
-                            <td className="px-3 py-2.5" style={{ width: '15%' }}>
+                            <td className="px-2 py-2.5" style={{ width: '10%' }}>
                               {(() => {
                                 const req = findMatchingRequest(item)
                                 const noteFieldMap: Record<string, string> = {
@@ -1506,7 +1506,7 @@ export function RequirementsList({
                               })()}
                             </td>
                             {/* 欄位5: 報價 */}
-                            <td className="px-3 py-2.5 text-right" style={{ width: '90px' }}>
+                            <td className="px-2 py-2.5 text-right" style={{ width: '70px' }}>
                               {(() => {
                                 const estimatedPrice = item.quotedPrice
                                 const request = findMatchingRequest(item)
@@ -1540,7 +1540,7 @@ export function RequirementsList({
                               })()}
                             </td>
                             {/* 欄位6: 狀態 */}
-                            <td className="px-3 py-2.5 text-center" style={{ width: '90px' }}>
+                            <td className="px-2 py-2.5 text-center" style={{ width: '60px' }}>
                               <span
                                 className={cn(
                                   'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium',
@@ -1551,7 +1551,7 @@ export function RequirementsList({
                               </span>
                             </td>
                             {/* 欄位7: 操作 */}
-                            <td className="px-3 py-2.5 text-center" style={{ width: '100px' }}>
+                            <td className="px-2 py-2.5 text-center" style={{ width: '80px' }}>
                               {(() => {
                                 const supplierName = item.supplierName || item.title
                                 const draft = existingRequests.find(
@@ -1936,12 +1936,12 @@ export function RequirementsList({
                               )}
                             </div>
                           </th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>日期</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '15%' }}>說明</th>
-                          <th className="px-3 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '15%' }}>備註</th>
-                          <th className="px-3 py-2 text-right text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>報價</th>
-                          <th className="px-3 py-2 text-center text-xs font-medium text-morandi-secondary" style={{ width: '90px' }}>狀態</th>
-                          <th className="px-3 py-2 text-center text-xs font-medium text-morandi-secondary" style={{ width: '100px' }}>操作</th>
+                          <th className="px-2 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '70px' }}>日期</th>
+                          <th className="px-2 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '10%' }}>說明</th>
+                          <th className="px-2 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '10%' }}>備註</th>
+                          <th className="px-2 py-2 text-right text-xs font-medium text-morandi-secondary" style={{ width: '70px' }}>報價</th>
+                          <th className="px-2 py-2 text-center text-xs font-medium text-morandi-secondary" style={{ width: '60px' }}>狀態</th>
+                          <th className="px-2 py-2 text-center text-xs font-medium text-morandi-secondary" style={{ width: '80px' }}>操作</th>
                         </tr>
 
                         {visibleItems.map((trackItem, idx) => renderItem(trackItem, idx, false))}
