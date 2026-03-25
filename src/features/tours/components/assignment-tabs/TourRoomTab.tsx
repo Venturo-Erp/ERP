@@ -5,8 +5,7 @@
  * 
  * 功能：
  * - 從行程表讀取住宿區段
- * - 房型自由文字輸入（可選常用或自己打）
- * - 一次新增多間同類型房間
+ * - 簡單列表輸入：房型名稱 + 數量
  * - 同步到行程表的 room_details
  */
 
@@ -15,11 +14,8 @@ import { supabase } from '@/lib/supabase/client'
 import { createTourRoom, deleteTourRoom } from '@/data/entities/tour-rooms'
 import { useAuthStore } from '@/stores'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Combobox } from '@/components/ui/combobox'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Plus, Trash2, X, Bed, Hotel, AlertCircle } from 'lucide-react'
+import { Plus, Trash2, Bed, Hotel, Save } from 'lucide-react'
 import { toast } from 'sonner'
 import { confirm } from '@/lib/ui/alert-dialog'
 import type { TourRoomStatus } from '@/types/room-vehicle.types'
@@ -30,18 +26,6 @@ import { COMP_TOURS_LABELS } from '../../constants/labels'
 import { useAccommodationSegments, type AccommodationSegment } from '../../hooks/useAccommodationSegments'
 
 type MemberBasic = Pick<OrderMember, 'id' | 'chinese_name' | 'passport_name'>
-
-// 常用房型選項（可自由輸入其他）
-const COMMON_ROOM_TYPES = [
-  { value: '標準雙人房', label: '標準雙人房', capacity: 2 },
-  { value: '豪華雙人房', label: '豪華雙人房', capacity: 2 },
-  { value: '標準單人房', label: '標準單人房', capacity: 1 },
-  { value: '標準三人房', label: '標準三人房', capacity: 3 },
-  { value: '標準四人房', label: '標準四人房', capacity: 4 },
-  { value: '和室四人房', label: '和室四人房', capacity: 4 },
-  { value: '家庭房', label: '家庭房', capacity: 4 },
-  { value: '套房', label: '套房', capacity: 2 },
-]
 
 // 根據房型名稱猜測容量
 function guessCapacity(roomType: string): number {
@@ -67,23 +51,27 @@ interface TourRoomTabProps {
   tourNights: number
 }
 
+// 房型輸入行
+interface RoomTypeRow {
+  id: string
+  room_type: string
+  quantity: number
+  capacity: number
+}
+
 export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabProps) {
   const user = useAuthStore(state => state.user)
   const [rooms, setRooms] = useState<TourRoomStatus[]>([])
   const [loading, setLoading] = useState(true)
-  const [showAddRoom, setShowAddRoom] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null)
 
   // 從行程表讀取住宿區段
   const { segments, loading: segmentsLoading } = useAccommodationSegments(tourId)
 
-  // 新增房間表單
-  const [newRoom, setNewRoom] = useState({
-    room_type: '',
-    capacity: 2,
-    quantity: 1, // 新增：數量
-    hotel_name: '',
-  })
+  // 房型輸入列表
+  const [roomTypeRows, setRoomTypeRows] = useState<RoomTypeRow[]>([])
+  const [hasChanges, setHasChanges] = useState(false)
 
   // 選中的區段
   const selectedSegment = useMemo(() => 
@@ -113,16 +101,40 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
     }
   }, [effectiveSegments, selectedSegmentId])
 
-  // 當選中區段變化時，自動帶入飯店名稱
-  useEffect(() => {
-    if (selectedSegment?.hotel_name) {
-      setNewRoom(prev => ({ ...prev, hotel_name: selectedSegment.hotel_name }))
-    }
-  }, [selectedSegment])
-
   useEffect(() => {
     loadRooms()
   }, [tourId])
+
+  // 當區段或房間變化時，重建輸入列表
+  useEffect(() => {
+    if (!selectedSegment) return
+    
+    // 從現有房間統計出房型列表
+    const segmentRooms = rooms.filter(r => r.night_number === selectedSegment.start_night)
+    const stats: Record<string, RoomTypeRow> = {}
+    
+    for (const room of segmentRooms) {
+      const key = room.room_type
+      if (!stats[key]) {
+        stats[key] = {
+          id: `existing-${key}`,
+          room_type: room.room_type,
+          quantity: 0,
+          capacity: room.capacity,
+        }
+      }
+      stats[key].quantity++
+    }
+    
+    const rows = Object.values(stats)
+    // 如果沒有任何房型，加一個空行
+    if (rows.length === 0) {
+      rows.push({ id: 'new-1', room_type: '', quantity: 0, capacity: 2 })
+    }
+    
+    setRoomTypeRows(rows)
+    setHasChanges(false)
+  }, [rooms, selectedSegment])
 
   const loadRooms = async () => {
     try {
@@ -143,81 +155,135 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
     }
   }
 
-  const handleAddRoom = async () => {
-    if (!selectedSegment) {
-      toast.error('請先選擇住宿區段')
-      return
-    }
+  // 更新行
+  const updateRow = (id: string, field: keyof RoomTypeRow, value: string | number) => {
+    setRoomTypeRows(prev => prev.map(row => {
+      if (row.id !== id) return row
+      
+      const updated = { ...row, [field]: value }
+      
+      // 如果更新房型名稱，自動猜測容量
+      if (field === 'room_type' && typeof value === 'string') {
+        updated.capacity = guessCapacity(value)
+      }
+      
+      return updated
+    }))
+    setHasChanges(true)
+  }
 
-    if (!newRoom.room_type.trim()) {
-      toast.error('請輸入房型名稱')
-      return
-    }
+  // 新增行
+  const addRow = () => {
+    setRoomTypeRows(prev => [
+      ...prev,
+      { id: `new-${Date.now()}`, room_type: '', quantity: 0, capacity: 2 }
+    ])
+  }
 
-    if (newRoom.quantity < 1) {
-      toast.error('數量至少為 1')
-      return
-    }
+  // 刪除行
+  const removeRow = (id: string) => {
+    setRoomTypeRows(prev => prev.filter(row => row.id !== id))
+    setHasChanges(true)
+  }
 
+  // 儲存變更
+  const handleSave = async () => {
+    if (!selectedSegment) return
+    
+    // 過濾掉空的行
+    const validRows = roomTypeRows.filter(row => row.room_type.trim() && row.quantity > 0)
+    
+    setSaving(true)
     try {
-      // 為區段內的每一晚、每個數量都創建房間
-      for (const nightNumber of selectedSegment.nights) {
-        const currentNightRooms = rooms.filter(r => r.night_number === nightNumber)
+      // 取得目前區段的所有房間
+      const { data: existingRooms } = await supabase
+        .from('tour_rooms')
+        .select('id, room_type, night_number')
+        .eq('tour_id', tourId)
+        .in('night_number', selectedSegment.nights)
+      
+      // 統計目前各房型數量（只看第一晚）
+      const existingStats: Record<string, string[]> = {} // room_type -> [room_ids]
+      for (const room of (existingRooms || [])) {
+        if (room.night_number !== selectedSegment.start_night) continue
+        if (!existingStats[room.room_type]) {
+          existingStats[room.room_type] = []
+        }
+        existingStats[room.room_type].push(room.id)
+      }
+      
+      // 計算需要新增和刪除的
+      for (const row of validRows) {
+        const existingCount = existingStats[row.room_type]?.length || 0
+        const targetCount = row.quantity
         
-        for (let i = 0; i < newRoom.quantity; i++) {
-          await createTourRoom({
-            tour_id: tourId,
-            room_type: newRoom.room_type.trim(),
-            capacity: newRoom.capacity,
-            hotel_name: newRoom.hotel_name || selectedSegment.hotel_name || null,
-            night_number: nightNumber,
-            display_order: currentNightRooms.length + i,
-          })
+        if (targetCount > existingCount) {
+          // 需要新增
+          const toAdd = targetCount - existingCount
+          for (let i = 0; i < toAdd; i++) {
+            for (const nightNumber of selectedSegment.nights) {
+              await createTourRoom({
+                tour_id: tourId,
+                room_type: row.room_type.trim(),
+                capacity: row.capacity,
+                hotel_name: selectedSegment.hotel_name || null,
+                night_number: nightNumber,
+                display_order: existingCount + i,
+              })
+            }
+          }
+        } else if (targetCount < existingCount) {
+          // 需要刪除（從後面開始刪）
+          const toDelete = existingCount - targetCount
+          const idsToDelete = existingStats[row.room_type].slice(-toDelete)
+          
+          // 刪除所有晚數對應的房間
+          for (const nightNumber of selectedSegment.nights) {
+            const { data: roomsToDelete } = await supabase
+              .from('tour_rooms')
+              .select('id')
+              .eq('tour_id', tourId)
+              .eq('room_type', row.room_type)
+              .eq('night_number', nightNumber)
+              .order('display_order', { ascending: false })
+              .limit(toDelete)
+            
+            for (const room of (roomsToDelete || [])) {
+              await deleteTourRoom(room.id)
+            }
+          }
+        }
+        
+        // 從 existingStats 移除已處理的
+        delete existingStats[row.room_type]
+      }
+      
+      // 刪除不在列表中的房型
+      for (const [roomType, roomIds] of Object.entries(existingStats)) {
+        for (const nightNumber of selectedSegment.nights) {
+          const { data: roomsToDelete } = await supabase
+            .from('tour_rooms')
+            .select('id')
+            .eq('tour_id', tourId)
+            .eq('room_type', roomType)
+            .eq('night_number', nightNumber)
+          
+          for (const room of (roomsToDelete || [])) {
+            await deleteTourRoom(room.id)
+          }
         }
       }
-
-      const nightsText = selectedSegment.night_count > 1 
-        ? `第 ${selectedSegment.start_night}-${selectedSegment.end_night} 晚`
-        : `第 ${selectedSegment.start_night} 晚`
       
-      const qtyText = newRoom.quantity > 1 ? ` ×${newRoom.quantity}` : ''
-      
-      toast.success(`已為${nightsText}新增「${newRoom.room_type}」${qtyText}`)
-      setShowAddRoom(false)
-      setNewRoom({ 
-        room_type: '', 
-        capacity: 2, 
-        quantity: 1,
-        hotel_name: selectedSegment.hotel_name || '' 
-      })
-      loadRooms()
-      
-      // 同步到行程表
+      toast.success('房型已儲存')
+      setHasChanges(false)
+      await loadRooms()
       await syncRoomDetailsToItinerary()
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : JSON.stringify(error)
-      logger.error(COMP_TOURS_LABELS.新增房間失敗_2, { error, tourId, newRoom, errorMessage })
-      toast.error(`${COMP_TOURS_LABELS.新增房間失敗}: ${errorMessage}`)
-    }
-  }
-
-  const handleDeleteRoom = async (roomId: string) => {
-    const confirmed = await confirm(COMP_TOURS_LABELS.確定要刪除這個房間嗎, {
-      title: COMP_TOURS_LABELS.刪除房間,
-      type: 'warning',
-    })
-    if (!confirmed) return
-
-    try {
-      await deleteTourRoom(roomId)
-      toast.success(COMP_TOURS_LABELS.房間已刪除)
-      loadRooms()
-      
-      // 同步到行程表
-      await syncRoomDetailsToItinerary()
-    } catch (error) {
-      logger.error(COMP_TOURS_LABELS.刪除房間失敗_2, error)
-      toast.error(COMP_TOURS_LABELS.刪除房間失敗)
+      logger.error('儲存房型失敗', { error, errorMessage })
+      toast.error(`儲存失敗: ${errorMessage}`)
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -226,7 +292,6 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
     if (!selectedSegment) return
     
     try {
-      // 取得最新房間資料
       const { data: latestRooms } = await supabase
         .from('tour_rooms')
         .select('room_type, capacity, night_number')
@@ -235,7 +300,6 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
       
       if (!latestRooms) return
       
-      // 統計各房型數量（只統計第一晚，因為區段內每晚相同）
       const firstNightRooms = latestRooms.filter(r => r.night_number === selectedSegment.start_night)
       const roomCounts: Record<string, { type: string; capacity: number; count: number }> = {}
       
@@ -253,7 +317,6 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
         quantity: r.count,
       }))
       
-      // 更新行程表（區段內每天的住宿項目）
       for (const nightNumber of selectedSegment.nights) {
         await supabase
           .from('tour_itinerary_items')
@@ -267,42 +330,15 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
     }
   }
 
-  // 當前區段的房間統計
+  // 當前區段的房間
   const currentSegmentRooms = useMemo(() => {
     if (!selectedSegment) return []
     return rooms.filter(r => r.night_number === selectedSegment.start_night)
   }, [rooms, selectedSegment])
 
-  // 按房型分組統計
-  const roomTypeStats = useMemo(() => {
-    const stats: Record<string, { type: string; count: number; capacity: number; rooms: TourRoomStatus[] }> = {}
-    for (const room of currentSegmentRooms) {
-      const key = room.room_type
-      if (!stats[key]) {
-        stats[key] = { type: room.room_type, count: 0, capacity: room.capacity, rooms: [] }
-      }
-      stats[key].count++
-      stats[key].rooms.push(room)
-    }
-    return Object.values(stats)
-  }, [currentSegmentRooms])
-
   const totalCapacity = currentSegmentRooms.reduce((sum, r) => sum + r.capacity, 0)
   const totalAssigned = currentSegmentRooms.reduce((sum, r) => sum + r.assigned_count, 0)
-
-  // 格式化區段標籤
-  const formatSegmentLabel = (segment: AccommodationSegment) => {
-    const nightsText = segment.night_count > 1 
-      ? `第${segment.start_night}-${segment.end_night}晚`
-      : `第${segment.start_night}晚`
-    return nightsText
-  }
-
-  // 房型選項（供 Combobox 使用）
-  const roomTypeOptions = COMMON_ROOM_TYPES.map(t => ({
-    value: t.value,
-    label: t.label,
-  }))
+  const totalRooms = currentSegmentRooms.length
 
   return (
     <>
@@ -324,20 +360,16 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
               )}
             >
               {segment.hotel_name && <Hotel className="h-3.5 w-3.5" />}
-              <span>{formatSegmentLabel(segment)}</span>
+              <span>
+                {segment.night_count > 1 
+                  ? `第${segment.start_night}-${segment.end_night}晚`
+                  : `第${segment.start_night}晚`
+                }
+              </span>
               <span className="text-xs opacity-70">({roomCount}房)</span>
             </button>
           )
         })}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setShowAddRoom(true)}
-          className="ml-auto gap-1"
-        >
-          <Plus className="h-4 w-4" />
-          新增房型
-        </Button>
       </div>
 
       {/* 當前區段資訊 */}
@@ -351,196 +383,77 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
         </div>
       )}
 
-      {/* 房型統計列表 */}
-      <div className="py-4 space-y-3 max-h-[350px] overflow-auto">
-        {roomTypeStats.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-morandi-muted">
-            <Bed className="h-8 w-8 mb-2" />
-            <p className="text-sm">{COMP_TOURS_LABELS.SETTINGS_4277}</p>
-            <p className="text-xs mt-1">點擊「新增房型」開始分配</p>
+      {/* 房型輸入列表 */}
+      <div className="py-4 space-y-2">
+        {/* 表頭 */}
+        <div className="grid grid-cols-[1fr_80px_40px] gap-2 px-2 text-xs text-morandi-muted">
+          <span>房型名稱</span>
+          <span className="text-center">數量</span>
+          <span></span>
+        </div>
+        
+        {/* 輸入行 */}
+        {roomTypeRows.map((row, index) => (
+          <div key={row.id} className="grid grid-cols-[1fr_80px_40px] gap-2 items-center">
+            <Input
+              value={row.room_type}
+              onChange={e => updateRow(row.id, 'room_type', e.target.value)}
+              placeholder="輸入房型名稱..."
+              className="h-9"
+            />
+            <Input
+              type="number"
+              min={0}
+              value={row.quantity || ''}
+              onChange={e => updateRow(row.id, 'quantity', parseInt(e.target.value) || 0)}
+              placeholder="0"
+              className="h-9 text-center"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-9 w-9 p-0 text-morandi-muted hover:text-morandi-red"
+              onClick={() => removeRow(row.id)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
-        ) : (
-          <>
-            <div className="text-xs text-morandi-muted mb-2">
-              共 {currentSegmentRooms.length} 間房，容量 {totalCapacity} 人，已分配 {totalAssigned} 人
-              {selectedSegment && selectedSegment.night_count > 1 && (
-                <span className="ml-2 text-morandi-gold">
-                  ✓ 套用到第 {selectedSegment.start_night}-{selectedSegment.end_night} 晚
-                </span>
-              )}
-            </div>
-            
-            {roomTypeStats.map(stat => (
-              <div key={stat.type} className="border rounded-lg overflow-hidden">
-                {/* 房型標題 */}
-                <div className="flex items-center justify-between px-3 py-2 bg-morandi-container/20">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-morandi-primary">{stat.type}</span>
-                    <span className="text-xs text-morandi-muted">（{stat.capacity}人房）</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-gold/10 text-morandi-gold">
-                      ×{stat.count}
-                    </span>
-                  </div>
-                </div>
-                
-                {/* 房間列表 */}
-                <div className="divide-y divide-border/50">
-                  {stat.rooms.map((room, index) => (
-                    <div
-                      key={room.id}
-                      className={cn(
-                        'flex items-center justify-between px-3 py-2',
-                        room.is_full ? 'bg-morandi-green/5' : 'bg-white'
-                      )}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm text-morandi-secondary">
-                          #{index + 1}
-                        </span>
-                        <span
-                          className={cn(
-                            'text-xs px-2 py-0.5 rounded-full',
-                            room.is_full
-                              ? 'bg-morandi-green/10 text-morandi-green'
-                              : 'bg-morandi-container text-morandi-secondary'
-                          )}
-                        >
-                          {room.assigned_count}/{room.capacity} 人
-                        </span>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 w-7 p-0 text-morandi-muted hover:text-morandi-red"
-                        onClick={() => handleDeleteRoom(room.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </>
-        )}
+        ))}
+        
+        {/* 新增行按鈕 */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={addRow}
+          className="w-full mt-2 gap-1 text-morandi-muted"
+        >
+          <Plus className="h-4 w-4" />
+          新增房型
+        </Button>
       </div>
 
-      {/* 新增房型 Dialog */}
-      <Dialog open={showAddRoom} onOpenChange={setShowAddRoom}>
-        <DialogContent level={3} className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-morandi-primary">
-              <Plus className="h-5 w-5 text-morandi-gold" />
-              新增房型
-              {selectedSegment && (
-                <span className="text-sm font-normal text-morandi-muted">
-                  （{selectedSegment.night_count > 1 
-                    ? `第${selectedSegment.start_night}-${selectedSegment.end_night}晚`
-                    : `第${selectedSegment.start_night}晚`
-                  }）
-                </span>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {selectedSegment && selectedSegment.night_count > 1 && (
-              <div className="px-3 py-2 bg-morandi-gold/10 rounded-lg text-sm text-morandi-gold">
-                💡 將為這 {selectedSegment.night_count} 晚同時新增
-              </div>
-            )}
-            
-            {/* 房型名稱 */}
-            <div className="space-y-1.5">
-              <Label className="text-morandi-primary">房型名稱</Label>
-              <Combobox
-                options={roomTypeOptions}
-                value={newRoom.room_type}
-                onChange={value => {
-                  const preset = COMMON_ROOM_TYPES.find(t => t.value === value)
-                  setNewRoom({
-                    ...newRoom,
-                    room_type: value,
-                    capacity: preset?.capacity || guessCapacity(value),
-                  })
-                }}
-                placeholder="選擇或輸入房型..."
-                className="w-full"
-                showSearchIcon={false}
-              />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              {/* 每房容量 */}
-              <div className="space-y-1.5">
-                <Label className="text-morandi-primary">每房容量</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={newRoom.capacity}
-                  onChange={e =>
-                    setNewRoom({ ...newRoom, capacity: parseInt(e.target.value) || 2 })
-                  }
-                  className="text-center"
-                />
-              </div>
-              
-              {/* 數量 */}
-              <div className="space-y-1.5">
-                <Label className="text-morandi-primary">數量（間）</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  max={50}
-                  value={newRoom.quantity}
-                  onChange={e =>
-                    setNewRoom({ ...newRoom, quantity: parseInt(e.target.value) || 1 })
-                  }
-                  className="text-center"
-                />
-              </div>
-            </div>
-            
-            {/* 飯店名稱 */}
-            <div className="space-y-1.5">
-              <Label className="text-morandi-primary">飯店名稱</Label>
-              <Input
-                value={newRoom.hotel_name}
-                onChange={e => setNewRoom({ ...newRoom, hotel_name: e.target.value })}
-                placeholder={selectedSegment?.hotel_name || '輸入飯店名稱'}
-              />
-              {selectedSegment?.hotel_name && newRoom.hotel_name !== selectedSegment.hotel_name && (
-                <p className="text-xs text-morandi-muted">
-                  行程表飯店：{selectedSegment.hotel_name}
-                </p>
-              )}
-            </div>
-            
-            {/* 預覽 */}
-            {newRoom.room_type && (
-              <div className="px-3 py-2 bg-morandi-container/30 rounded-lg text-sm">
-                將新增：<span className="font-medium">{newRoom.room_type}</span> ×{newRoom.quantity} 間
-                {selectedSegment && selectedSegment.night_count > 1 && (
-                  <span className="text-morandi-muted">
-                    （共 {newRoom.quantity * selectedSegment.night_count} 間房記錄）
-                  </span>
-                )}
-              </div>
-            )}
-            
-            <div className="flex justify-end gap-2 pt-3 border-t border-border">
-              <Button variant="outline" onClick={() => setShowAddRoom(false)} className="gap-2">
-                <X size={16} />
-                取消
-              </Button>
-              <Button onClick={handleAddRoom} className="gap-2">
-                <Plus size={16} />
-                新增
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* 統計與儲存 */}
+      <div className="flex items-center justify-between pt-3 border-t border-border">
+        <div className="text-sm text-morandi-muted">
+          {totalRooms > 0 ? (
+            <>
+              共 {totalRooms} 間房，容量 {totalCapacity} 人
+              {totalAssigned > 0 && `，已分配 ${totalAssigned} 人`}
+            </>
+          ) : (
+            '尚未設定房型'
+          )}
+        </div>
+        
+        <Button
+          onClick={handleSave}
+          disabled={!hasChanges || saving}
+          className="gap-1"
+        >
+          <Save className="h-4 w-4" />
+          {saving ? '儲存中...' : '儲存'}
+        </Button>
+      </div>
     </>
   )
 }
