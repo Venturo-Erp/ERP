@@ -125,6 +125,8 @@ export function RequirementsList({
   const [selectedSupplierName, setSelectedSupplierName] = useState<string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [coreItems, setCoreItems] = useState<TourItineraryItem[]>([])
+  // 🆕 從分房系統讀取的房型資料（按飯店分組）
+  const [tourRoomsByHotel, setTourRoomsByHotel] = useState<Record<string, { room_type: string; capacity: number; quantity: number }[]>>({})
 
   // Local 報價 Dialog
   const [showLocalQuoteDialog, setShowLocalQuoteDialog] = useState(false)
@@ -213,6 +215,40 @@ export function RequirementsList({
             .order('sort_order', { ascending: true })
           setCoreItems((items as TourItineraryItem[]) || [])
           setStartDate(tourData.departure_date || null)
+
+          // 🆕 讀取分房系統的房型資料
+          const { data: tourRooms } = await supabase
+            .from('tour_rooms')
+            .select('hotel_name, room_type, capacity, night_number, display_order')
+            .eq('tour_id', tourId)
+            .order('night_number', { ascending: true })
+            .order('display_order', { ascending: true })
+          
+          if (tourRooms && tourRooms.length > 0) {
+            // 按飯店分組，統計每種房型的數量
+            const roomsByHotel: Record<string, Record<string, { room_type: string; capacity: number; count: number }>> = {}
+            for (const room of tourRooms) {
+              const hotelName = room.hotel_name || '未指定'
+              if (!roomsByHotel[hotelName]) roomsByHotel[hotelName] = {}
+              const key = `${room.room_type}-${room.capacity}`
+              if (!roomsByHotel[hotelName][key]) {
+                roomsByHotel[hotelName][key] = { room_type: room.room_type || '', capacity: room.capacity || 0, count: 0 }
+              }
+              // 只算第一晚的數量（避免重複計算）
+              const firstNight = tourRooms.filter(r => r.hotel_name === hotelName)[0]?.night_number
+              if (room.night_number === firstNight) {
+                roomsByHotel[hotelName][key].count++
+              }
+            }
+            // 轉換成陣列格式
+            const result: Record<string, { room_type: string; capacity: number; quantity: number }[]> = {}
+            for (const [hotel, rooms] of Object.entries(roomsByHotel)) {
+              result[hotel] = Object.values(rooms).map(r => ({ room_type: r.room_type, capacity: r.capacity, quantity: r.count }))
+            }
+            setTourRoomsByHotel(result)
+          } else {
+            setTourRoomsByHotel({})
+          }
 
           // 查團員 + 客戶生日，計算年齡分類
           const { data: members } = await supabase
@@ -1457,15 +1493,16 @@ export function RequirementsList({
                             {/* 欄位3: 說明（房型/車型/時間/數量等） */}
                             <td className="px-2 py-2.5 text-sm" style={{ width: '10%' }}>
                               {(() => {
-                                // 住宿：顯示房型
+                                // 住宿：從分房系統讀取房型
                                 if (cat.key === 'accommodation') {
-                                  const supplierName = item.supplierName || item.title
-                                  const hotelDraft = existingRequests.find(
-                                    r => r.request_type === 'accommodation' && r.supplier_name === supplierName && r.status === 'draft'
-                                  )
-                                  if (hotelDraft?.items?.length) {
-                                    return hotelDraft.items.map((room: any, ri: number) => (
-                                      <span key={ri} className="text-morandi-secondary">{room.room_type}×{room.quantity} </span>
+                                  const hotelName = item.supplierName || item.title || ''
+                                  const roomsFromAssignment = tourRoomsByHotel[hotelName]
+                                  
+                                  if (roomsFromAssignment && roomsFromAssignment.length > 0) {
+                                    return roomsFromAssignment.map((room, ri) => (
+                                      <span key={ri} className="text-morandi-secondary">
+                                        {room.room_type}×{room.quantity}{ri < roomsFromAssignment.length - 1 ? ' ' : ''}
+                                      </span>
                                     ))
                                   }
                                   return <span className="text-morandi-muted">{item.quantity || 1}晚</span>
@@ -1561,12 +1598,13 @@ export function RequirementsList({
                                     r.status === 'draft'
                                 )
 
-                                // 住宿：有房型 → 不需要新增，沒房型 → 新增需求
+                                // 住宿：從分房系統判斷是否有房型
                                 if (cat.key === 'accommodation') {
-                                  const hasRoomTypes = draft?.items && draft.items.length > 0
+                                  const hotelName = supplierName || ''
+                                  const roomsFromAssignment = tourRoomsByHotel[hotelName]
                                   
-                                  // 有房型了 → 不需要新增需求
-                                  if (hasRoomTypes) {
+                                  // 有房型了（從分房系統）→ 不需要新增需求
+                                  if (roomsFromAssignment && roomsFromAssignment.length > 0) {
                                     return null
                                   }
                                   
