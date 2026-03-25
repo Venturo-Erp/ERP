@@ -238,7 +238,7 @@ export function PrintableAccommodationQuote({
                 </span>
                 <span style={{ fontWeight: 600, color: '#78716c' }}>人數預估：</span>
                 <span style={{ padding: '4px 8px', backgroundColor: '#f3f4f6', borderRadius: '4px', border: '1px solid #a8a29e' }}>
-                  {totalPax ? `${totalPax} 人` : ''}
+                  {totalPax !== null && totalPax !== undefined ? `${totalPax} 人` : ''}
                 </span>
               </div>
             </div>
@@ -266,16 +266,24 @@ export function PrintableAccommodationQuote({
                   </tr>
                 </thead>
                 <tbody>
-                  {accommodations.map((item, idx) => (
-                    <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#fafaf8' }}>
-                      <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.checkIn || '—'}</td>
-                      <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.roomType || '—'}</td>
-                      <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.bedType || '—'}</td>
-                      <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}></td>
-                      <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}></td>
-                      <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.quantity || ''}</td>
+                  {accommodations.length > 0 ? (
+                    accommodations.map((item, idx) => (
+                      <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#fafaf8' }}>
+                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.checkIn || '—'}</td>
+                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.roomType || '—'}</td>
+                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.bedType || '—'}</td>
+                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}></td>
+                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}></td>
+                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.quantity || ''}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} style={{ border: '1px solid #a8a29e', padding: '20px', textAlign: 'center', color: '#a8a29e' }}>
+                        尚未設定房型需求
+                      </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
