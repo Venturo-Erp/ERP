@@ -668,6 +668,7 @@ export default function FinanceSettingsPage() {
         type={activeSection === 'receipt' ? 'receipt' : 'payment'}
         onSave={handleSaveMethod}
         chartOfAccounts={chartOfAccounts}
+        existingMethods={activeSection === 'receipt' ? receiptMethods : paymentMethodsList}
       />
 
       {/* 銀行帳戶編輯對話框 */}
@@ -699,6 +700,7 @@ function MethodDialog({
   type,
   onSave,
   chartOfAccounts,
+  existingMethods,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -706,6 +708,7 @@ function MethodDialog({
   type: 'receipt' | 'payment'
   onSave: (method: Partial<PaymentMethod>) => Promise<void>
   chartOfAccounts: ChartOfAccount[]
+  existingMethods: PaymentMethod[]
 }) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -720,7 +723,13 @@ function MethodDialog({
       setDescription(method?.description || '')
       setDebitAccountId(method?.debit_account_id || '')
       setCreditAccountId(method?.credit_account_id || '')
-      setSortOrder(method?.sort_order || 0)
+      // 新增時自動取下一個排序數字
+      if (method) {
+        setSortOrder(method.sort_order || 0)
+      } else {
+        const maxSort = Math.max(0, ...existingMethods.map(m => m.sort_order || 0))
+        setSortOrder(maxSort + 1)
+      }
     }
   }, [open, method])
 
