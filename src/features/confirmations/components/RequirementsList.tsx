@@ -2098,18 +2098,37 @@ export function RequirementsList({
             name: tour.name,
             departure_date: tour.departure_date,
           }}
-          totalPax={totalPax}
-          accommodations={coreItems
-            .filter(
-              it => it.item_category === 'accommodation' && it.supplier_name === selectedHotel.name
-            )
-            .map(it => ({
-              checkIn: it.service_date || '',
-              roomType: it.item_name,
-              bedType: '',
-              quantity: it.quantity || 1,
-              note: it.note || '',
-            }))}
+          totalPax={memberAgeBreakdown?.total || quoteGroupSize || 0}
+          accommodations={(() => {
+            // 優先從分房系統讀取
+            const roomsFromAssignment = tourRoomsByHotel[selectedHotel.name]
+            if (roomsFromAssignment && roomsFromAssignment.length > 0) {
+              // 找這個飯店的入住日期
+              const hotelItem = coreItems.find(
+                it => it.item_category === 'accommodation' && it.supplier_name === selectedHotel.name
+              )
+              const checkInDate = hotelItem?.service_date || selectedHotel.serviceDate || ''
+              return roomsFromAssignment.map(room => ({
+                checkIn: checkInDate,
+                roomType: room.room_type,
+                bedType: room.capacity === 1 ? '一人房' : room.capacity === 2 ? '兩人房' : `${room.capacity}人房`,
+                quantity: room.quantity,
+                note: '',
+              }))
+            }
+            // Fallback: 從 coreItems 讀取
+            return coreItems
+              .filter(
+                it => it.item_category === 'accommodation' && it.supplier_name === selectedHotel.name
+              )
+              .map(it => ({
+                checkIn: it.service_date || '',
+                roomType: it.item_name,
+                bedType: '',
+                quantity: it.quantity || 1,
+                note: it.note || '',
+              }))
+          })()}
           supplierName={selectedHotel.name}
         />
       )}
