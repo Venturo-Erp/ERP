@@ -386,8 +386,8 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
         {/* 表頭 */}
         <div className="grid grid-cols-[1fr_80px_80px_40px] gap-2 px-2 text-xs text-morandi-muted">
           <span>房型名稱</span>
-          <span className="text-center">幾人房</span>
-          <span className="text-center">數量</span>
+          <span className="text-center">／幾人房</span>
+          <span className="text-center">／數量</span>
           <span></span>
         </div>
         
