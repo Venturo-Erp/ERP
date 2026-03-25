@@ -94,14 +94,14 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
   return (
     <div
       ref={setNodeRef}
-      style={style}
+      style={{ ...style, touchAction: 'none' }}
       {...listeners}
       {...attributes}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onClick={handleClick}
       className={cn(
-        'flex items-center gap-1.5 px-2 py-1.5 rounded-md border bg-card cursor-pointer',
+        'flex items-center gap-1.5 px-2 py-1.5 rounded-md border bg-card cursor-grab select-none',
         'hover:bg-accent/50 transition-colors',
         isDragging && 'opacity-50 shadow-lg z-50 cursor-grabbing',
         // 未驗證 = 橘色警示邊框
