@@ -16144,6 +16144,7 @@ export type Database = {
           booking_code: string | null
           capacity: number
           created_at: string | null
+          created_by: string | null
           display_order: number | null
           hotel_name: string | null
           id: string
@@ -16153,12 +16154,14 @@ export type Database = {
           room_type: string
           tour_id: string
           updated_at: string | null
+          updated_by: string | null
         }
         Insert: {
           amount?: number | null
           booking_code?: string | null
           capacity?: number
           created_at?: string | null
+          created_by?: string | null
           display_order?: number | null
           hotel_name?: string | null
           id?: string
@@ -16168,12 +16171,14 @@ export type Database = {
           room_type: string
           tour_id: string
           updated_at?: string | null
+          updated_by?: string | null
         }
         Update: {
           amount?: number | null
           booking_code?: string | null
           capacity?: number
           created_at?: string | null
+          created_by?: string | null
           display_order?: number | null
           hotel_name?: string | null
           id?: string
@@ -16183,6 +16188,7 @@ export type Database = {
           room_type?: string
           tour_id?: string
           updated_at?: string | null
+          updated_by?: string | null
         }
         Relationships: [
           {
