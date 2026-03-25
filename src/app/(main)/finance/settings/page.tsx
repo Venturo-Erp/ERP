@@ -86,8 +86,10 @@ interface ExpenseCategory {
   is_active: boolean
   is_system: boolean
   sort_order: number
-  accounting_subject_id: string | null
-  accounting_subject?: { id: string; code: string; name: string } | null
+  debit_account_id: string | null
+  credit_account_id: string | null
+  debit_account?: { id: string; code: string; name: string } | null
+  credit_account?: { id: string; code: string; name: string } | null
 }
 
 export default function FinanceSettingsPage() {
@@ -517,8 +519,8 @@ export default function FinanceSettingsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>名稱</TableHead>
-                      <TableHead>會計科目</TableHead>
-                      <TableHead className="w-[80px]">類型</TableHead>
+                      <TableHead>借方科目</TableHead>
+                      <TableHead>貸方科目</TableHead>
                       <TableHead className="w-[80px]">狀態</TableHead>
                       <TableHead className="w-[100px] text-right">操作</TableHead>
                     </TableRow>
@@ -535,17 +537,21 @@ export default function FinanceSettingsPage() {
                         <TableRow key={category.id}>
                           <TableCell className="font-medium">{category.name}</TableCell>
                           <TableCell>
-                            {category.accounting_subject ? (
+                            {category.debit_account ? (
                               <span className="text-sm">
-                                {category.accounting_subject.code} {category.accounting_subject.name}
+                                {category.debit_account.code} {category.debit_account.name}
                               </span>
                             ) : (
                               <span className="text-morandi-muted text-sm">未設定</span>
                             )}
                           </TableCell>
                           <TableCell>
-                            {category.is_system && (
-                              <Badge variant="secondary" className="text-xs">系統</Badge>
+                            {category.credit_account ? (
+                              <span className="text-sm">
+                                {category.credit_account.code} {category.credit_account.name}
+                              </span>
+                            ) : (
+                              <span className="text-morandi-muted text-sm">未設定</span>
                             )}
                           </TableCell>
                           <TableCell>
@@ -962,17 +968,21 @@ function CategoryDialog({
   chartOfAccounts: ChartOfAccount[]
 }) {
   const [name, setName] = useState('')
-  const [accountingSubjectId, setAccountingSubjectId] = useState<string>('')
+  const [debitAccountId, setDebitAccountId] = useState<string>('')
+  const [creditAccountId, setCreditAccountId] = useState<string>('')
   const [sortOrder, setSortOrder] = useState(100)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 篩選費用類科目（5 開頭）
+  // 篩選費用類科目（5 開頭）- 借方
   const expenseAccounts = chartOfAccounts.filter(a => a.code.startsWith('5'))
+  // 篩選負債類科目（2 開頭）- 貸方
+  const liabilityAccounts = chartOfAccounts.filter(a => a.code.startsWith('2'))
 
   useEffect(() => {
     if (open) {
       setName(category?.name || '')
-      setAccountingSubjectId(category?.accounting_subject_id || '')
+      setDebitAccountId(category?.debit_account_id || '')
+      setCreditAccountId(category?.credit_account_id || '')
       setSortOrder(category?.sort_order || 100)
     }
   }, [open, category])
@@ -986,7 +996,8 @@ function CategoryDialog({
     try {
       await onSave({
         name,
-        accounting_subject_id: accountingSubjectId || null,
+        debit_account_id: debitAccountId || null,
+        credit_account_id: creditAccountId || null,
         sort_order: sortOrder,
       })
     } finally {
@@ -1009,24 +1020,41 @@ function CategoryDialog({
               placeholder="例：住宿、交通、餐食"
             />
           </div>
-          <div className="space-y-2">
-            <Label>會計科目</Label>
-            <select
-              value={accountingSubjectId}
-              onChange={e => setAccountingSubjectId(e.target.value)}
-              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
-            >
-              <option value="">請選擇會計科目</option>
-              {expenseAccounts.map(account => (
-                <option key={account.id} value={account.id}>
-                  {account.code} {account.name}
-                </option>
-              ))}
-            </select>
-            <p className="text-xs text-morandi-muted">
-              選擇後，建立請款單時會自動帶入此科目
-            </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>借方科目（費用）</Label>
+              <select
+                value={debitAccountId}
+                onChange={e => setDebitAccountId(e.target.value)}
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              >
+                <option value="">請選擇</option>
+                {expenseAccounts.map(account => (
+                  <option key={account.id} value={account.id}>
+                    {account.code} {account.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>貸方科目（負債）</Label>
+              <select
+                value={creditAccountId}
+                onChange={e => setCreditAccountId(e.target.value)}
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
+              >
+                <option value="">請選擇</option>
+                {liabilityAccounts.map(account => (
+                  <option key={account.id} value={account.id}>
+                    {account.code} {account.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
+          <p className="text-xs text-morandi-muted">
+            建立請款單時自動生成傳票：借 費用科目 / 貸 應付帳款
+          </p>
           <div className="space-y-2">
             <Label>排序</Label>
             <Input
