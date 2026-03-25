@@ -36,6 +36,9 @@ export function PrintableAccommodationQuote({
 }: PrintableAccommodationQuoteProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [note, setNote] = useState('')
+  const [contact, setContact] = useState('')
+  const [phone, setPhone] = useState('')
+  const [fax, setFax] = useState('')
   const printContentRef = useRef<HTMLDivElement>(null)
   const ws = useWorkspaceSettings()
 
@@ -214,30 +217,51 @@ export function PrintableAccommodationQuote({
               <div
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '80px 1fr 80px 1fr',
-                  gap: '12px 16px',
+                  gridTemplateColumns: '70px 1fr',
+                  gap: '10px 12px',
                   alignItems: 'center',
                   fontSize: '13px',
                 }}
               >
                 <span style={{ fontWeight: 600, color: '#78716c' }}>致：</span>
-                <span style={{ padding: '4px 8px', backgroundColor: '#f3f4f6', borderRadius: '4px', border: '1px solid #a8a29e' }}>
+                <span style={{ padding: '6px 10px', backgroundColor: '#f3f4f6', borderRadius: '4px', border: '1px solid #a8a29e' }}>
                   {supplierName || ''}
                 </span>
+
                 <span style={{ fontWeight: 600, color: '#78716c' }}>聯絡人：</span>
-                <span style={{ padding: '4px 8px', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #a8a29e' }}></span>
+                <input
+                  type="text"
+                  value={contact}
+                  onChange={e => setContact(e.target.value)}
+                  placeholder="請輸入聯絡人"
+                  style={{ padding: '6px 10px', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #a8a29e', fontSize: '13px' }}
+                />
 
                 <span style={{ fontWeight: 600, color: '#78716c' }}>聯絡電話：</span>
-                <span style={{ padding: '4px 8px', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #a8a29e' }}></span>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  placeholder="請輸入電話"
+                  style={{ padding: '6px 10px', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #a8a29e', fontSize: '13px' }}
+                />
+
                 <span style={{ fontWeight: 600, color: '#78716c' }}>傳真號碼：</span>
-                <span style={{ padding: '4px 8px', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #a8a29e' }}></span>
+                <input
+                  type="text"
+                  value={fax}
+                  onChange={e => setFax(e.target.value)}
+                  placeholder="請輸入傳真"
+                  style={{ padding: '6px 10px', backgroundColor: 'white', borderRadius: '4px', border: '1px solid #a8a29e', fontSize: '13px' }}
+                />
 
                 <span style={{ fontWeight: 600, color: '#78716c' }}>團體名稱：</span>
-                <span style={{ padding: '4px 8px', backgroundColor: '#f3f4f6', borderRadius: '4px', border: '1px solid #a8a29e' }}>
+                <span style={{ padding: '6px 10px', backgroundColor: '#f3f4f6', borderRadius: '4px', border: '1px solid #a8a29e' }}>
                   {tour?.name || ''}
                 </span>
+
                 <span style={{ fontWeight: 600, color: '#78716c' }}>人數預估：</span>
-                <span style={{ padding: '4px 8px', backgroundColor: '#f3f4f6', borderRadius: '4px', border: '1px solid #a8a29e' }}>
+                <span style={{ padding: '6px 10px', backgroundColor: '#f3f4f6', borderRadius: '4px', border: '1px solid #a8a29e' }}>
                   {totalPax !== null && totalPax !== undefined ? `${totalPax} 人` : ''}
                 </span>
               </div>
