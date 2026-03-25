@@ -1561,30 +1561,16 @@ export function RequirementsList({
                                     r.status === 'draft'
                                 )
 
-                                // 住宿：有 draft → 列印，沒有 → 新增需求 or 同上
+                                // 住宿：有房型 → 不需要新增，沒房型 → 新增需求
                                 if (cat.key === 'accommodation') {
-                                  if (draft) {
-                                    return (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                          setSelectedHotel({
-                                            name: supplierName,
-                                            resourceId: item.resourceId ?? null,
-                                            serviceDate: item.serviceDate ?? null,
-                                            nights: item.quantity || 1,
-                                          })
-                                          setShowAccommodationDialog(true)
-                                        }}
-                                        className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
-                                      >
-                                        <Printer size={12} className="mr-1" />
-                                        新增需求單
-                                      </Button>
-                                    )
+                                  const hasRoomTypes = draft?.items && draft.items.length > 0
+                                  
+                                  // 有房型了 → 不需要新增需求
+                                  if (hasRoomTypes) {
+                                    return null
                                   }
-                                  // 找其他飯店已有的 draft（同上來源 = 換飯店但房型通常一樣）
+                                  
+                                  // 沒房型 → 顯示「同上」或「新增需求」
                                   const sameHotelDraft = existingRequests.find(
                                     r =>
                                       r.request_type === 'accommodation' &&
