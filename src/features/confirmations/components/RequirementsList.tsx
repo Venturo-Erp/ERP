@@ -1607,9 +1607,27 @@ export function RequirementsList({
                                   const hotelName = supplierName || ''
                                   const roomsFromAssignment = tourRoomsByHotel[hotelName]
                                   
-                                  // 有房型了（從分房系統）→ 不需要新增需求
+                                  // 有房型了（從分房系統）→ 顯示「發送需求」
                                   if (roomsFromAssignment && roomsFromAssignment.length > 0) {
-                                    return null
+                                    return (
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          setSelectedHotel({
+                                            name: hotelName,
+                                            resourceId: item.resourceId ?? null,
+                                            serviceDate: item.serviceDate ?? null,
+                                            nights: item.quantity || 1,
+                                          })
+                                          setShowAccommodationDialog(true)
+                                        }}
+                                        className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
+                                      >
+                                        <Send size={12} className="mr-1" />
+                                        發送需求
+                                      </Button>
+                                    )
                                   }
                                   
                                   // 沒房型 → 顯示「同上」或「新增需求」
