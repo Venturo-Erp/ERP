@@ -166,7 +166,45 @@ export function ContractViewDialog({ isOpen, onClose, tour }: ContractViewDialog
         return
       }
 
-      printWindow.document.write(contractHtml)
+      // 包裝成完整的可列印 HTML
+      const printHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>合約列印</title>
+          <style>
+            @page {
+              size: A4;
+              margin: 15mm;
+            }
+            body {
+              font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+              font-size: 12pt;
+              line-height: 1.6;
+              color: #000;
+              background: #fff;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            td, th {
+              padding: 4px 8px;
+              vertical-align: top;
+            }
+            @media print {
+              body { -webkit-print-color-adjust: exact; }
+            }
+          </style>
+        </head>
+        <body>
+          ${contractHtml}
+        </body>
+        </html>
+      `
+
+      printWindow.document.write(printHtml)
       printWindow.document.close()
 
       // 等待內容載入後列印
