@@ -551,7 +551,7 @@ export function AddReceiptDialog({
                           onUpdate={updatePaymentItem}
                           onRemove={removePaymentItem}
                           canRemove={paymentItems.length > 1}
-                          isNewRow={index === paymentItems.length - 1}
+                          isNewRow={!isEditMode && index === paymentItems.length - 1}
                           orderInfo={
                             selectedOrder
                               ? {
@@ -684,7 +684,7 @@ export function AddReceiptDialog({
                           onUpdate={updatePaymentItem}
                           onRemove={removePaymentItem}
                           canRemove={paymentItems.length > 1}
-                          isNewRow={index === paymentItems.length - 1}
+                          isNewRow={!isEditMode && index === paymentItems.length - 1}
                           mode="company"
                           readonly={isConfirmed}
                         />
