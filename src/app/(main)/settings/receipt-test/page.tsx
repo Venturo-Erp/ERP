@@ -86,12 +86,16 @@ export default function ReceiptTestPage() {
           @page { size: 214mm 140mm; margin: 0; }
           * { box-sizing: border-box; margin: 0; padding: 0; }
           body {
-            font-family: monospace;
+            font-family: "MS Gothic", "Noto Sans Mono CJK TC", monospace;
             font-size: 12px;
+            font-weight: normal;
             background: white;
             width: 214mm;
             height: 140mm;
             position: relative;
+          }
+          div {
+            white-space: nowrap;
           }
         </style>
       </head>
