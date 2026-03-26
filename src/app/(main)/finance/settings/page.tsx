@@ -41,6 +41,7 @@ import {
   Trash2,
   Building2,
   Tag,
+  TrendingUp,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { alert, confirm } from '@/lib/ui/alert-dialog'
@@ -93,7 +94,7 @@ interface ExpenseCategory {
 }
 
 export default function FinanceSettingsPage() {
-  const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank' | 'category'>('receipt')
+  const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank' | 'category' | 'company_expense' | 'company_income'>('receipt')
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
   const [chartOfAccounts, setChartOfAccounts] = useState<ChartOfAccount[]>([])
@@ -236,8 +237,16 @@ export default function FinanceSettingsPage() {
     }
   }
 
-  // 儲存請款類別
+  // 儲存請款類別（根據 activeSection 決定 type）
   const handleSaveCategory = async (category: Partial<ExpenseCategory>) => {
+    // 決定 category type
+    let categoryType = 'expense'
+    if (activeSection === 'company_expense') {
+      categoryType = 'company_expense'
+    } else if (activeSection === 'company_income') {
+      categoryType = 'company_income'
+    }
+
     try {
       const res = await fetch('/api/finance/expense-categories', {
         method: editingCategory?.id ? 'PUT' : 'POST',
@@ -246,6 +255,7 @@ export default function FinanceSettingsPage() {
           ...category,
           id: editingCategory?.id,
           workspace_id: workspaceId,
+          type: editingCategory?.id ? undefined : categoryType, // 新增時設定 type，編輯時不改
         }),
       })
       if (!res.ok) throw new Error('儲存失敗')
@@ -283,10 +293,19 @@ export default function FinanceSettingsPage() {
     }
   }
 
+  // 公司支出項目
+  const companyExpenseCategories = expenseCategories.filter(c => c.type === 'company_expense')
+  // 公司收入項目
+  const companyIncomeCategories = expenseCategories.filter(c => c.type === 'company_income')
+  // 團體請款類別（原本的 expense 類型）
+  const tourExpenseCategories = expenseCategories.filter(c => c.type === 'expense' || c.type === 'both')
+
   const sections = [
     { key: 'receipt', label: '收款方式', icon: CreditCard },
     { key: 'payment', label: '付款方式', icon: Banknote },
-    { key: 'category', label: '請款類別', icon: Tag },
+    { key: 'category', label: '團體請款類別', icon: Tag },
+    { key: 'company_expense', label: '公司支出項目', icon: Building2 },
+    { key: 'company_income', label: '公司收入項目', icon: TrendingUp },
     { key: 'bank', label: '銀行帳戶', icon: Building2 },
   ] as const
 
@@ -331,6 +350,28 @@ export default function FinanceSettingsPage() {
           >
             <Plus className="h-4 w-4 mr-2" />
             新增請款類別
+          </Button>
+        ) : activeSection === 'company_expense' ? (
+          <Button
+            onClick={() => {
+              setEditingCategory(null)
+              setIsCategoryDialogOpen(true)
+            }}
+            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            新增支出項目
+          </Button>
+        ) : activeSection === 'company_income' ? (
+          <Button
+            onClick={() => {
+              setEditingCategory(null)
+              setIsCategoryDialogOpen(true)
+            }}
+            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            新增收入項目
           </Button>
         ) : activeSection === 'bank' ? (
           <Button
@@ -526,15 +567,181 @@ export default function FinanceSettingsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {expenseCategories.length === 0 ? (
+                    {tourExpenseCategories.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
                           尚未設定請款類別
                         </TableCell>
                       </TableRow>
                     ) : (
-                      expenseCategories.map(category => (
+                      tourExpenseCategories.map(category => (
                         <TableRow key={category.id}>
+                          <TableCell className="font-medium">{category.name}</TableCell>
+                          <TableCell>
+                            {category.debit_account ? (
+                              <span className="text-sm">
+                                {category.debit_account.code} {category.debit_account.name}
+                              </span>
+                            ) : (
+                              <span className="text-morandi-muted text-sm">未設定</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {category.credit_account ? (
+                              <span className="text-sm">
+                                {category.credit_account.code} {category.credit_account.name}
+                              </span>
+                            ) : (
+                              <span className="text-morandi-muted text-sm">未設定</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={category.is_active ? 'default' : 'secondary'}>
+                              {category.is_active ? '啟用' : '停用'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setEditingCategory(category)
+                                  setIsCategoryDialogOpen(true)
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              {!category.is_system && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteCategory(category)}
+                                  className="text-status-danger hover:text-status-danger/80"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </Card>
+            </div>
+          )}
+
+          {/* 公司支出項目 */}
+          {activeSection === 'company_expense' && (
+            <div className="space-y-4">
+              <Card className="rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[60px]">排序</TableHead>
+                      <TableHead>名稱</TableHead>
+                      <TableHead>借方科目</TableHead>
+                      <TableHead>貸方科目</TableHead>
+                      <TableHead className="w-[80px]">狀態</TableHead>
+                      <TableHead className="w-[100px] text-right">操作</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {companyExpenseCategories.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                          尚未設定公司支出項目
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      companyExpenseCategories.map(category => (
+                        <TableRow key={category.id}>
+                          <TableCell className="text-morandi-muted">{category.sort_order}</TableCell>
+                          <TableCell className="font-medium">{category.name}</TableCell>
+                          <TableCell>
+                            {category.debit_account ? (
+                              <span className="text-sm">
+                                {category.debit_account.code} {category.debit_account.name}
+                              </span>
+                            ) : (
+                              <span className="text-morandi-muted text-sm">未設定</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {category.credit_account ? (
+                              <span className="text-sm">
+                                {category.credit_account.code} {category.credit_account.name}
+                              </span>
+                            ) : (
+                              <span className="text-morandi-muted text-sm">未設定</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={category.is_active ? 'default' : 'secondary'}>
+                              {category.is_active ? '啟用' : '停用'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setEditingCategory(category)
+                                  setIsCategoryDialogOpen(true)
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              {!category.is_system && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteCategory(category)}
+                                  className="text-status-danger hover:text-status-danger/80"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </Card>
+            </div>
+          )}
+
+          {/* 公司收入項目 */}
+          {activeSection === 'company_income' && (
+            <div className="space-y-4">
+              <Card className="rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[60px]">排序</TableHead>
+                      <TableHead>名稱</TableHead>
+                      <TableHead>借方科目</TableHead>
+                      <TableHead>貸方科目</TableHead>
+                      <TableHead className="w-[80px]">狀態</TableHead>
+                      <TableHead className="w-[100px] text-right">操作</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {companyIncomeCategories.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                          尚未設定公司收入項目
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      companyIncomeCategories.map(category => (
+                        <TableRow key={category.id}>
+                          <TableCell className="text-morandi-muted">{category.sort_order}</TableCell>
                           <TableCell className="font-medium">{category.name}</TableCell>
                           <TableCell>
                             {category.debit_account ? (
@@ -679,13 +886,17 @@ export default function FinanceSettingsPage() {
         onSave={handleSaveBank}
       />
 
-      {/* 請款類別編輯對話框 */}
+      {/* 類別編輯對話框（請款類別 / 公司支出 / 公司收入） */}
       <CategoryDialog
         open={isCategoryDialogOpen}
         onOpenChange={setIsCategoryDialogOpen}
         category={editingCategory}
         onSave={handleSaveCategory}
         chartOfAccounts={chartOfAccounts}
+        categoryType={
+          activeSection === 'company_expense' ? 'company_expense' :
+          activeSection === 'company_income' ? 'company_income' : 'expense'
+        }
       />
 
     </ContentPageLayout>
@@ -969,12 +1180,14 @@ function CategoryDialog({
   category,
   onSave,
   chartOfAccounts,
+  categoryType = 'expense',
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   category: ExpenseCategory | null
   onSave: (category: Partial<ExpenseCategory>) => Promise<void>
   chartOfAccounts: ChartOfAccount[]
+  categoryType?: 'expense' | 'company_expense' | 'company_income'
 }) {
   const [name, setName] = useState('')
   const [debitAccountId, setDebitAccountId] = useState<string>('')
@@ -982,10 +1195,19 @@ function CategoryDialog({
   const [sortOrder, setSortOrder] = useState(100)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 篩選費用類科目（5 開頭）- 借方
-  const expenseAccounts = chartOfAccounts.filter(a => a.code.startsWith('5'))
-  // 篩選負債類科目（2 開頭）- 貸方
-  const liabilityAccounts = chartOfAccounts.filter(a => a.code.startsWith('2'))
+  // 根據類型決定科目篩選
+  // 費用/公司支出: 借方=費用(5), 貸方=負債(2)
+  // 公司收入: 借方=資產(1), 貸方=收入(4)
+  const debitAccounts = categoryType === 'company_income' 
+    ? chartOfAccounts.filter(a => a.code.startsWith('1'))  // 資產類
+    : chartOfAccounts.filter(a => a.code.startsWith('5'))  // 費用類
+  const creditAccounts = categoryType === 'company_income'
+    ? chartOfAccounts.filter(a => a.code.startsWith('4'))  // 收入類
+    : chartOfAccounts.filter(a => a.code.startsWith('2'))  // 負債類
+  
+  // 舊變數保留向後相容
+  const expenseAccounts = debitAccounts
+  const liabilityAccounts = creditAccounts
 
   useEffect(() => {
     if (open) {
@@ -1018,7 +1240,11 @@ function CategoryDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{category ? '編輯請款類別' : '新增請款類別'}</DialogTitle>
+          <DialogTitle>
+            {category ? '編輯' : '新增'}
+            {categoryType === 'company_expense' ? '公司支出項目' : 
+             categoryType === 'company_income' ? '公司收入項目' : '請款類別'}
+          </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="space-y-2">

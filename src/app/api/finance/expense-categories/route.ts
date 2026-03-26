@@ -11,16 +11,27 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: '缺少 workspace_id' }, { status: 400 })
   }
 
-  const { data, error } = await supabase
+  // 支援多種 type: expense, company_expense, company_income
+  const typeFilter = searchParams.get('type')
+  
+  let query = supabase
     .from('expense_categories')
     .select(`
       *,
       debit_account:chart_of_accounts!debit_account_id(id, code, name),
       credit_account:chart_of_accounts!credit_account_id(id, code, name)
     `)
-    .eq('type', 'expense') // 只取請款類別
     .or(`user_id.is.null,user_id.eq.${workspaceId}`) // 系統預設或該工作區的
     .order('sort_order', { ascending: true })
+
+  // 如果有指定 type，只取該類型；否則取所有財務相關類型
+  if (typeFilter) {
+    query = query.eq('type', typeFilter)
+  } else {
+    query = query.in('type', ['expense', 'company_expense', 'company_income', 'both'])
+  }
+
+  const { data, error } = await query
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -33,10 +44,17 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient()
   const body = await request.json()
-  const { name, icon, color, workspace_id, sort_order, debit_account_id, credit_account_id } = body
+  const { name, icon, color, workspace_id, sort_order, debit_account_id, credit_account_id, type } = body
 
   if (!name || !workspace_id) {
     return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
+  }
+
+  // 支援多種類型，預設為 expense
+  const categoryType = type || 'expense'
+  const validTypes = ['expense', 'company_expense', 'company_income', 'both']
+  if (!validTypes.includes(categoryType)) {
+    return NextResponse.json({ error: '無效的類型' }, { status: 400 })
   }
 
   const { data, error} = await supabase
@@ -45,7 +63,7 @@ export async function POST(request: NextRequest) {
       name,
       icon: icon || '💰',
       color: color || '#c9aa7c',
-      type: 'expense',
+      type: categoryType,
       user_id: workspace_id,
       is_active: true,
       is_system: false,

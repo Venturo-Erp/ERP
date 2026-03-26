@@ -15,12 +15,13 @@ import { useCallback, useState, useMemo } from 'react'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Eye, Pencil, Trash2 } from 'lucide-react'
 import {
   usePaymentRequests,
   usePaymentRequestItems,
   useDisbursementOrders,
   deleteDisbursementOrder as deleteDisbursementOrderApi,
+  updateDisbursementOrder as updateDisbursementOrderApi,
+  updatePaymentRequest as updatePaymentRequestApi,
   invalidatePaymentRequests,
   invalidateDisbursementOrders,
 } from '@/data'
@@ -29,10 +30,13 @@ import { DisbursementOrder, PaymentRequest } from '@/stores/types'
 import { cn } from '@/lib/utils'
 import { CreateDisbursementDialog } from './CreateDisbursementDialog'
 import { DisbursementDetailDialog } from './DisbursementDetailDialog'
+import { DisbursementPrintDialog } from './DisbursementPrintDialog'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { DISBURSEMENT_STATUS } from '../constants'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
+import { useAuthStore } from '@/stores/auth-store'
+import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
 
 export function DisbursementPage() {
   // 使用 @/data hooks（SWR 自動載入）
@@ -40,11 +44,15 @@ export function DisbursementPage() {
   const { items: payment_requests } = usePaymentRequests()
   const { items: payment_request_items } = usePaymentRequestItems()
 
+  const user = useAuthStore(state => state.user)
+
   // 狀態
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editingOrder, setEditingOrder] = useState<DisbursementOrder | null>(null)
   const [selectedOrder, setSelectedOrder] = useState<DisbursementOrder | null>(null)
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
+  const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false)
+  const [printOrder, setPrintOrder] = useState<DisbursementOrder | null>(null)
 
   // 取得待出帳的請款單（狀態為 pending，且尚未加入任何出納單）
   const pendingRequests = useMemo(() => {
@@ -156,11 +164,61 @@ export function DisbursementPage() {
     }
   }, [])
 
-  // 查看詳情（Eye 按鈕，永遠可用）
+  // 查看詳情
   const handleViewDetail = useCallback((order: DisbursementOrder) => {
     setSelectedOrder(order)
     setIsDetailDialogOpen(true)
   }, [])
+
+  // 列印預覽
+  const handlePreview = useCallback((order: DisbursementOrder) => {
+    setPrintOrder(order)
+    setIsPrintDialogOpen(true)
+  }, [])
+
+  // 確認出帳（直接從列表操作）
+  const handleConfirmPaid = useCallback(async (order: DisbursementOrder) => {
+    const confirmed = await confirm(DISBURSEMENT_LABELS.確定要將此出納單標記為_已出帳_嗎, {
+      title: DISBURSEMENT_LABELS.確認出帳,
+      type: 'warning',
+    })
+    if (!confirmed) return
+
+    try {
+      // 更新出納單狀態
+      await updateDisbursementOrderApi(order.id, {
+        status: 'paid',
+        confirmed_by: user?.id || null,
+        confirmed_at: new Date().toISOString(),
+      })
+
+      // 更新所有請款單狀態為 billed
+      const requestIds = order.payment_request_ids || []
+      const tour_ids_to_recalculate = new Set<string>()
+      for (const requestId of requestIds) {
+        await updatePaymentRequestApi(requestId, {
+          status: 'billed',
+        })
+        const req = payment_requests.find(r => r.id === requestId)
+        if (req?.tour_id) {
+          tour_ids_to_recalculate.add(req.tour_id)
+        }
+      }
+
+      // 重算相關團的成本
+      for (const tour_id of tour_ids_to_recalculate) {
+        await recalculateExpenseStats(tour_id)
+      }
+
+      // SWR 快取失效
+      await Promise.all([invalidateDisbursementOrders(), invalidatePaymentRequests()])
+
+      await alert(DISBURSEMENT_LABELS.出納單已標記為已出帳, 'success')
+    } catch (error) {
+      logger.error(DISBURSEMENT_LABELS.更新出納單失敗_2, error)
+      await alert(DISBURSEMENT_LABELS.更新出納單失敗, 'error')
+    }
+  }, [user, payment_requests])
 
   // 刪除出納單
   const handleDelete = useCallback(async (order: DisbursementOrder) => {
@@ -260,7 +318,7 @@ export function DisbursementPage() {
           </div>
         }
         renderActions={(row: DisbursementOrder) => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {row.status === 'pending' && (
               <Button
                 variant="ghost"
@@ -270,9 +328,9 @@ export function DisbursementPage() {
                   setEditingOrder(row)
                   setIsCreateDialogOpen(true)
                 }}
-                className="h-8 w-8 p-0"
+                className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
               >
-                <Pencil size={16} className="text-morandi-secondary" />
+                編輯
               </Button>
             )}
             <Button
@@ -280,12 +338,25 @@ export function DisbursementPage() {
               size="sm"
               onClick={e => {
                 e.stopPropagation()
-                handleViewDetail(row)
+                handlePreview(row)
               }}
-              className="h-8 w-8 p-0"
+              className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
             >
-              <Eye size={16} className="text-morandi-secondary" />
+              預覽
             </Button>
+            {row.status === 'pending' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={e => {
+                  e.stopPropagation()
+                  handleConfirmPaid(row)
+                }}
+                className="h-7 px-2 text-xs text-morandi-green hover:text-morandi-green/80"
+              >
+                出帳
+              </Button>
+            )}
             {row.status === 'pending' && (
               <Button
                 variant="ghost"
@@ -294,9 +365,9 @@ export function DisbursementPage() {
                   e.stopPropagation()
                   handleDelete(row)
                 }}
-                className="h-8 w-8 p-0"
+                className="h-7 px-2 text-xs text-status-danger hover:text-status-danger/80"
               >
-                <Trash2 size={16} className="text-status-danger" />
+                刪除
               </Button>
             )}
           </div>
@@ -317,6 +388,13 @@ export function DisbursementPage() {
         order={selectedOrder}
         open={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
+      />
+
+      {/* 列印預覽對話框 */}
+      <DisbursementPrintDialog
+        order={printOrder}
+        open={isPrintDialogOpen}
+        onOpenChange={setIsPrintDialogOpen}
       />
     </>
   )
