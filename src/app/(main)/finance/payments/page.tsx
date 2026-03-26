@@ -114,6 +114,16 @@ export default function PaymentsPage() {
     setIsDialogOpen(true)
   }, [])
 
+  // 同步 selectedReceipt（確認後更新狀態）
+  useEffect(() => {
+    if (selectedReceipt && receipts.length > 0) {
+      const updated = receipts.find(r => r.id === selectedReceipt.id)
+      if (updated && updated.status !== selectedReceipt.status) {
+        setSelectedReceipt(updated)
+      }
+    }
+  }, [receipts, selectedReceipt])
+
   // 事件處理（會計確認對話框用）
   const handleViewDetail = useCallback((receipt: Receipt) => {
     setSelectedReceipt(receipt)
