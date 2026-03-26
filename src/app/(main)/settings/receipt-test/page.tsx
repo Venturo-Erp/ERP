@@ -158,6 +158,8 @@ export default function ReceiptTestPage() {
             width: 214mm;
             height: 140mm;
             position: relative;
+            transform: rotate(180deg);
+            transform-origin: center center;
           }
           div {
             white-space: nowrap !important;
