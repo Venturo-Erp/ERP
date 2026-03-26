@@ -22,10 +22,11 @@ export function usePaymentForm() {
   })
 
   // 收款項目列表
+  // 預設收款方式：匯款-國泰（DB 存的是名稱字串）
   const [paymentItems, setPaymentItems] = useState<PaymentItem[]>([
     {
       id: '1',
-      receipt_type: RECEIPT_TYPES.BANK_TRANSFER,
+      receipt_type: '匯款-國泰' as unknown as number, // DB 存名稱，型別暫時 cast
       amount: 0,
       transaction_date: getTodayString(),
     },
@@ -51,7 +52,7 @@ export function usePaymentForm() {
   const addPaymentItem = useCallback(() => {
     const newItem: PaymentItem = {
       id: Date.now().toString(),
-      receipt_type: RECEIPT_TYPES.BANK_TRANSFER,
+      receipt_type: '匯款-國泰' as unknown as number, // DB 存名稱
       amount: 0,
       transaction_date: getTodayString(),
     }
