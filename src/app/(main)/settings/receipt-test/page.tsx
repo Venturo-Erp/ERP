@@ -87,9 +87,9 @@ export default function ReceiptTestPage() {
       const topPos = 48 + idx * 8
       return `
         <div style="position: absolute; top: ${topPos}mm; left: 15mm; width: 38mm; overflow: hidden;">${item.desc}</div>
-        <div style="position: absolute; top: ${topPos}mm; left: 53mm; width: 12mm; text-align: center;">${item.qty || ''}</div>
-        <div style="position: absolute; top: ${topPos}mm; left: 65mm; width: 25mm; text-align: right;">${item.price || ''}</div>
-        <div style="position: absolute; top: ${topPos}mm; left: 90mm; width: 20mm; text-align: right;">${item.amount || ''}</div>
+        <div style="position: absolute; top: ${topPos}mm; left: 53mm; width: 12mm; text-align: left;">${item.qty || ''}</div>
+        <div style="position: absolute; top: ${topPos}mm; left: 65mm; width: 25mm; text-align: left;">${item.price || ''}</div>
+        <div style="position: absolute; top: ${topPos}mm; left: 90mm; width: 20mm; text-align: left;">${item.amount || ''}</div>
         <div style="position: absolute; top: ${topPos}mm; left: 110mm; width: 85mm;">${item.note}</div>
       `
     }).join('')
@@ -109,7 +109,7 @@ export default function ReceiptTestPage() {
         <!-- 明細 -->
         ${itemsHtml}
         <!-- 總計 -->
-        <div style="position: absolute; top: ${totalTopPos}mm; left: 90mm; width: 20mm; text-align: right;">${total || ''}</div>
+        <div style="position: absolute; top: ${totalTopPos}mm; left: 90mm; width: 20mm; text-align: left;">${total || ''}</div>
         <!-- 大寫金額 -->
         <div style="position: absolute; top: 116mm; left: 23.5mm;">${chineseAmount.千萬}</div>
         <div style="position: absolute; top: 116mm; left: 40mm;">${chineseAmount.百萬}</div>
@@ -359,15 +359,15 @@ export default function ReceiptTestPage() {
               return (
                 <div key={item.id}>
                   <div style={{ position: 'absolute', top: `${topPos}mm`, left: '15mm', width: '38mm', overflow: 'hidden', whiteSpace: 'nowrap' }}>{item.desc}</div>
-                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '53mm', width: '12mm', textAlign: 'center' }}>{item.qty || ''}</div>
-                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '65mm', width: '25mm', textAlign: 'right' }}>{item.price || ''}</div>
-                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '90mm', width: '20mm', textAlign: 'right' }}>{item.amount || ''}</div>
+                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '53mm', width: '12mm', textAlign: 'left' }}>{item.qty || ''}</div>
+                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '65mm', width: '25mm', textAlign: 'left' }}>{item.price || ''}</div>
+                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '90mm', width: '20mm', textAlign: 'left' }}>{item.amount || ''}</div>
                   <div style={{ position: 'absolute', top: `${topPos}mm`, left: '110mm', width: '85mm', whiteSpace: 'nowrap' }}>{item.note}</div>
                 </div>
               )
             })}
             {/* 總計 */}
-            <div style={{ position: 'absolute', top: '104mm', left: '90mm', width: '20mm', textAlign: 'right' }}>{total || ''}</div>
+            <div style={{ position: 'absolute', top: '104mm', left: '90mm', width: '20mm', textAlign: 'left' }}>{total || ''}</div>
             {/* 大寫金額 */}
             <div style={{ position: 'absolute', top: '116mm', left: '23.5mm' }}>{chineseAmount.千萬}</div>
             <div style={{ position: 'absolute', top: '116mm', left: '40mm' }}>{chineseAmount.百萬}</div>
