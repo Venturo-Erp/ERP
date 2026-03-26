@@ -16,6 +16,7 @@ import {
   createSupplier,
   updateSupplier,
   deleteSupplier as deleteSupplierApi,
+  invalidateSuppliers,
 } from '@/data'
 import type { Supplier } from '@/types/supplier.types'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
@@ -186,6 +187,8 @@ export const SuppliersPage: React.FC = () => {
           notes: formData.notes || null,
         })
         await alert(SUPPLIERS_PAGE_LABELS.UPDATE_SUCCESS, 'success')
+        // 重新載入供應商列表
+        await invalidateSuppliers()
       } else {
         // 新增模式：自動產生編號（如果沒填）
         const finalCode = formData.code || (await generateSupplierCode())

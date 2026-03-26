@@ -44,6 +44,24 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
   const { items: tours } = useToursSlim()
   const { items: suppliers } = useSuppliersSlim()
   const { items: employees } = useEmployeesSlim()
+  
+  // 付款方式
+  const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string }>>([])
+  
+  useEffect(() => {
+    if (open && request?.workspace_id) {
+      supabase
+        .from('payment_methods')
+        .select('id, name')
+        .eq('workspace_id', request.workspace_id)
+        .eq('type', 'payment')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true })
+        .then(({ data }) => {
+          setPaymentMethods(data || [])
+        })
+    }
+  }, [open, request?.workspace_id])
 
   // 合併供應商和員工
   const combinedSuppliers = useMemo(() => {
@@ -477,6 +495,10 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
                 className="font-semibold text-morandi-gold"
               />
             </div>
+            <InfoItem
+              label="付款方式"
+              value={paymentMethods.find((m: { id: string; name: string }) => m.id === currentRequest.payment_method_id)?.name || '-'}
+            />
           </div>
 
           {/* 請款項目 */}
