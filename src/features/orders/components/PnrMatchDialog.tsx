@@ -623,10 +623,16 @@ export function PnrMatchDialog({
     return matchedCount + selectedCount
   }, [finalResults])
 
-  // 未配對的團員
+  // 未配對的團員（排除已經有 PNR 的人）
   const unmatchedMembers = useMemo(() => {
     const matchedIds = new Set(finalResults.map(r => r.matchedMember?.id).filter(Boolean))
-    return members.filter(m => !matchedIds.has(m.id))
+    return members.filter(m => {
+      // 已配對的不顯示
+      if (matchedIds.has(m.id)) return false
+      // 已經有 PNR 的不顯示
+      if (m.pnr) return false
+      return true
+    })
   }, [members, finalResults])
 
   return (
