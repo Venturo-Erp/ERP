@@ -151,9 +151,7 @@ export default function ReceiptTestPage() {
           @page { size: 214mm 140mm; margin: 0; }
           * { box-sizing: border-box; margin: 0; padding: 0; }
           body {
-            font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
             font-size: 14px;
-            font-weight: 300;
             background: white;
             width: 214mm;
             height: 140mm;
