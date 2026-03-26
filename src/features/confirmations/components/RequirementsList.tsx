@@ -30,7 +30,7 @@ import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores'
 import type { Tour } from '@/stores/types'
-import { RoomRequirementDialog } from './RoomRequirementDialog'
+
 import { TransportQuoteDialog } from './TransportQuoteDialog'
 import { AccommodationQuoteDialog } from './AccommodationQuoteDialog'
 import { MealQuoteDialog } from './MealQuoteDialog'
@@ -94,7 +94,7 @@ export function RequirementsList({
   const [startDate, setStartDate] = useState<string | null>(null)
   const [outboundFlight, setOutboundFlight] = useState<FlightInfo | null>(null)
   const [returnFlight, setReturnFlight] = useState<FlightInfo | null>(null)
-  const [showRoomDialog, setShowRoomDialog] = useState(false)
+
   const [selectedHotel, setSelectedHotel] = useState<{
     name: string
     resourceId: string | null
@@ -1516,11 +1516,11 @@ export function RequirementsList({
                                             serviceDate: item.serviceDate ?? null,
                                             nights: item.quantity || 1,
                                           })
-                                          setShowRoomDialog(true)
+                                          setShowAccommodationDialog(true)
                                         }}
                                         className="h-7 px-2 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10"
                                       >
-                                        新增需求
+                                        發送需求
                                       </Button>
                                     </div>
                                   )
@@ -2029,23 +2029,6 @@ export function RequirementsList({
             }))}
           supplierName={selectedTransport.name}
           resourceId={selectedTransport.resourceId}
-        />
-      )}
-
-      {/* 住宿需求 Dialog（新增用）*/}
-      {selectedHotel && (
-        <RoomRequirementDialog
-          open={showRoomDialog}
-          onClose={() => {
-            setShowRoomDialog(false)
-            setSelectedHotel(null)
-          }}
-          hotelName={selectedHotel.name}
-          hotelResourceId={selectedHotel.resourceId}
-          tourId={tourId || ''}
-          serviceDate={selectedHotel.serviceDate}
-          nights={selectedHotel.nights}
-          onSaved={() => loadData(false)}
         />
       )}
 
