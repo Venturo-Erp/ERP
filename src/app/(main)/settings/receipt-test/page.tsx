@@ -182,9 +182,9 @@ export default function ReceiptTestPage() {
   }
 
   return (
-    <div className="p-6 flex gap-6">
+    <div className="p-6 grid grid-cols-2 gap-6">
       {/* 左邊：輸入區 */}
-      <div className="flex-1 max-w-2xl">
+      <div>
         <h1 className="text-2xl font-bold mb-6">收據列印測試</h1>
         
         {/* 基本資料 */}
@@ -324,7 +324,7 @@ export default function ReceiptTestPage() {
       </div>
 
       {/* 右邊：預覽區 */}
-      <div className="flex-shrink-0">
+      <div>
         <h2 className="font-semibold mb-4">列印預覽</h2>
         <div 
           className="bg-white border-2 border-dashed border-gray-300 overflow-hidden"
