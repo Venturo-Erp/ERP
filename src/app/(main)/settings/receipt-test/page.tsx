@@ -160,7 +160,7 @@ export default function ReceiptTestPage() {
             position: relative;
           }
           div {
-            white-space: nowrap;
+            white-space: nowrap !important;
           }
         </style>
       </head>
@@ -329,21 +329,22 @@ export default function ReceiptTestPage() {
           style={{
             width: '214mm',
             height: '140mm',
-            transform: 'scale(0.5)',
+            transform: 'scale(0.7)',
             transformOrigin: 'top left',
             position: 'relative',
             fontFamily: '"PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif',
             fontSize: '14px',
             fontWeight: 300,
+            whiteSpace: 'nowrap',
           }}
         >
           <div 
             style={{ position: 'absolute', left: `${10 + offsetLeft}mm`, top: `${offsetTop}mm` }}
           >
             {/* 買受人 */}
-            <div style={{ position: 'absolute', top: '20mm', left: '15mm' }}>{buyer}</div>
+            <div style={{ position: 'absolute', top: '20mm', left: '15mm', whiteSpace: 'nowrap' }}>{buyer}</div>
             {/* 統編 */}
-            <div style={{ position: 'absolute', top: '25mm', left: '15mm' }}>{taxId}</div>
+            <div style={{ position: 'absolute', top: '25mm', left: '15mm', whiteSpace: 'nowrap' }}>{taxId}</div>
             {/* 年月日 */}
             <div style={{ position: 'absolute', top: '20mm', left: '100mm' }}>{year}</div>
             <div style={{ position: 'absolute', top: '20mm', left: '115mm' }}>{month}</div>
@@ -373,10 +374,10 @@ export default function ReceiptTestPage() {
             <div style={{ position: 'absolute', top: '116mm', left: '112mm' }}>{chineseAmount.十}</div>
             <div style={{ position: 'absolute', top: '116mm', left: '125mm' }}>{chineseAmount.元}</div>
             {/* 經手人 */}
-            <div style={{ position: 'absolute', top: '128mm', left: '170mm' }}>{handler}</div>
+            <div style={{ position: 'absolute', top: '128mm', left: '170mm', whiteSpace: 'nowrap' }}>{handler}</div>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-2">* 預覽為 50% 縮放</p>
+        <p className="text-xs text-muted-foreground mt-2">* 預覽為 70% 縮放</p>
       </div>
     </div>
   )
