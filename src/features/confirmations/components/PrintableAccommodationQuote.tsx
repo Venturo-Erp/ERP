@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { X, Printer, Plus, Trash2 } from 'lucide-react'
 import { useWorkspaceSettings } from '@/hooks/useWorkspaceSettings'
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
+import { printElement } from '@/lib/print'
 
 interface RoomRow {
   id: string
@@ -105,60 +106,11 @@ export function PrintableAccommodationQuote({
 
   const handlePrint = useCallback(() => {
     if (!printContentRef.current) return
-
-    const originalTitle = document.title
-    const printTitle = `${supplierName}-住宿需求單`
-    document.title = printTitle
-
-    const iframe = document.createElement('iframe')
-    iframe.style.position = 'absolute'
-    iframe.style.width = '0'
-    iframe.style.height = '0'
-    iframe.style.border = 'none'
-    iframe.style.left = '-9999px'
-    document.body.appendChild(iframe)
-
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
-    if (!iframeDoc) {
-      document.body.removeChild(iframe)
-      return
-    }
-
-    iframeDoc.open()
-    iframeDoc.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>${printTitle}</title>
-        <style>
-          @page { size: A4; margin: 15mm; }
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
-            font-size: 13px;
-            line-height: 1.5;
-            color: #333;
-            background: white;
-            print-color-adjust: exact;
-            -webkit-print-color-adjust: exact;
-          }
-        </style>
-      </head>
-      <body>
-        ${printContentRef.current.innerHTML}
-      </body>
-      </html>
-    `)
-    iframeDoc.close()
-
-    setTimeout(() => {
-      iframe.contentWindow?.print()
-      setTimeout(() => {
-        document.body.removeChild(iframe)
-        document.title = originalTitle
-      }, 1000)
-    }, 100)
+    printElement(printContentRef.current, {
+      title: `${supplierName}-住宿需求單`,
+      margin: 15,
+      fontSize: 13,
+    })
   }, [supplierName])
 
   if (!open || !isMounted) return null
