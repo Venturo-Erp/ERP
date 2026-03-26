@@ -387,27 +387,15 @@ export function PrintableAccommodationQuote({
             style={{
               padding: '10px 20px',
               borderRadius: '9999px',
-              border: '1px solid #e5e7eb',
+              border: '1px solid #06c755',
               fontSize: '14px',
               fontWeight: 500,
               cursor: 'pointer',
               backgroundColor: 'white',
+              color: '#06c755',
             }}
           >
             LINE
-          </button>
-          <button
-            style={{
-              padding: '10px 20px',
-              borderRadius: '9999px',
-              border: '1px solid #e5e7eb',
-              fontSize: '14px',
-              fontWeight: 500,
-              cursor: 'pointer',
-              backgroundColor: 'white',
-            }}
-          >
-            Email
           </button>
         </div>
       </div>
