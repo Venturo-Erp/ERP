@@ -191,9 +191,18 @@ export function useTourEdit(params: UseTourEditParams) {
 
       toast.success(COMP_TOURS_LABELS.旅遊團資料已更新)
 
+      // 同步更新相關訂單的 tour_name
+      if (tour.name !== formData.name.trim()) {
+        await supabase
+          .from('orders')
+          .update({ tour_name: formData.name.trim() })
+          .eq('tour_id', tour.id)
+      }
+
       // Reload data
       mutate(`tour-${tour.id}`)
       mutate('tours')
+      mutate('orders') // 新增：刷新訂單快取
       mutate(
         (key: string) => typeof key === 'string' && key.startsWith('tours-paginated-'),
         undefined,
