@@ -4,6 +4,13 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Trash2, Layers, Save } from 'lucide-react'
 import { EditableRequestItemList } from './RequestItemList'
 import { CreateSupplierDialog } from './CreateSupplierDialog'
@@ -98,6 +105,7 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
 
   // === 本地編輯狀態（不即時寫 DB，按存檔才寫） ===
   const [localItems, setLocalItems] = useState<RequestItem[]>([])
+  const [localPaymentMethodId, setLocalPaymentMethodId] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
   const [deletedItemIds, setDeletedItemIds] = useState<string[]>([])
   const [newItemIds, setNewItemIds] = useState<string[]>([])
@@ -209,7 +217,8 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
     setIsDirty(false)
     setDeletedItemIds([])
     setNewItemIds([])
-  }, [selectedRequestId])
+    setLocalPaymentMethodId(currentRequest?.payment_method_id || null)
+  }, [selectedRequestId, currentRequest?.payment_method_id])
 
   // === 本地操作（不寫 DB） ===
   const handleUpdateItem = useCallback((itemId: string, updates: Partial<RequestItem>) => {
@@ -298,11 +307,14 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
           .eq('id', item.id)
       }
 
-      // 4. 更新請款單總金額
+      // 4. 更新請款單總金額和付款方式
       const newTotal = localItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0)
       const { error: amountError } = await supabase
         .from('payment_requests')
-        .update({ amount: newTotal })
+        .update({ 
+          amount: newTotal,
+          payment_method_id: localPaymentMethodId || null,
+        })
         .eq('id', currentRequest.id)
       if (amountError) {
         logger.error('更新請款單金額失敗:', amountError)
@@ -495,10 +507,33 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
                 className="font-semibold text-morandi-gold"
               />
             </div>
-            <InfoItem
-              label="付款方式"
-              value={paymentMethods.find((m: { id: string; name: string }) => m.id === currentRequest.payment_method_id)?.name || '-'}
-            />
+            <div>
+              <p className="text-xs text-morandi-muted mb-1">付款方式</p>
+              {canEdit ? (
+                <Select
+                  value={localPaymentMethodId || ''}
+                  onValueChange={value => {
+                    setLocalPaymentMethodId(value || null)
+                    setIsDirty(true)
+                  }}
+                >
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue placeholder="選擇付款方式" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paymentMethods.map((m: { id: string; name: string }) => (
+                      <SelectItem key={m.id} value={m.id}>
+                        {m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p className="text-sm font-medium text-morandi-primary">
+                  {paymentMethods.find((m: { id: string; name: string }) => m.id === currentRequest.payment_method_id)?.name || '-'}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* 請款項目 */}

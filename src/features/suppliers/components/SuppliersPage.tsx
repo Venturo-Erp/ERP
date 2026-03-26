@@ -211,6 +211,8 @@ export const SuppliersPage: React.FC = () => {
           type: 'other', // 預設類別
         })
         await alert(SUPPLIERS_PAGE_LABELS.CREATE_SUCCESS, 'success')
+        // 重新載入供應商列表
+        await invalidateSuppliers()
       }
       handleCloseDialog()
     } catch (error) {
