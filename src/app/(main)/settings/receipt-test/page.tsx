@@ -88,7 +88,7 @@ export default function ReceiptTestPage() {
       {/* 列印內容 - 只顯示填入的文字，不顯示框線 */}
       <div
         ref={printRef}
-        className="bg-white border border-dashed border-gray-300 print:border-none"
+        className="print-area bg-white border border-dashed border-gray-300"
         style={{
           width: '214mm',
           height: '140mm',
@@ -173,8 +173,8 @@ export default function ReceiptTestPage() {
           </div>
         </div>
 
-        {/* 校正標記（只在螢幕顯示，列印時可選擇顯示） */}
-        <div className="print:hidden absolute inset-0 pointer-events-none">
+        {/* 校正標記（只在螢幕顯示） */}
+        <div className="no-print absolute inset-0 pointer-events-none">
           {/* 左邊界線 */}
           <div style={{ position: 'absolute', left: '25mm', top: 0, bottom: 0, borderLeft: '1px dashed red' }} />
           {/* 上邊界線 - 買受人 */}
@@ -191,13 +191,27 @@ export default function ReceiptTestPage() {
             size: 214mm 140mm;
             margin: 0;
           }
-          body * {
-            visibility: hidden;
+          
+          /* 隱藏不需要的元素 */
+          body > *:not(.print-area) {
+            display: none !important;
           }
-          #print-content, #print-content * {
-            visibility: visible;
+          
+          .print-area {
+            display: block !important;
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 214mm !important;
+            height: 140mm !important;
+            background: white !important;
           }
-          .print\\:hidden {
+          
+          .print-area * {
+            visibility: visible !important;
+          }
+          
+          .no-print {
             display: none !important;
           }
         }
