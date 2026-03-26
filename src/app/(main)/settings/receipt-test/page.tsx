@@ -151,7 +151,9 @@ export default function ReceiptTestPage() {
           @page { size: 214mm 140mm; margin: 0; }
           * { box-sizing: border-box; margin: 0; padding: 0; }
           body {
-            font-size: 14px;
+            font-family: "Courier New", "Source Han Mono", monospace;
+            font-size: 12px;
+            font-weight: 400;
             background: white;
             width: 214mm;
             height: 140mm;
