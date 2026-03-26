@@ -146,10 +146,32 @@ export function AddReceiptDialog({
           )
         } else {
           // 舊資料：從 receipt 主表載入（向下相容）
+          // 需要用 payment_method_id 去查詢對應的收款方式名稱
+          const extReceipt = editingReceipt as { payment_method_id?: string; payment_method?: string }
+          let receiptTypeValue: string | number = editingReceipt.receipt_type ?? 0
+          
+          // 如果有 payment_method_id，先查詢對應名稱
+          if (extReceipt.payment_method_id) {
+            try {
+              const { useAuthStore } = await import('@/stores')
+              const workspaceId = useAuthStore.getState().user?.workspace_id
+              const methodsRes = await fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}&type=receipt`)
+              if (methodsRes.ok) {
+                const methods = await methodsRes.json()
+                const matched = methods.find((m: { id: string; name: string }) => m.id === extReceipt.payment_method_id)
+                if (matched) {
+                  receiptTypeValue = matched.name
+                }
+              }
+            } catch {
+              // fallback to receipt_type
+            }
+          }
+          
           setPaymentItems([
             {
               id: editingReceipt.id,
-              receipt_type: editingReceipt.receipt_type ?? 0,
+              receipt_type: receiptTypeValue as number,
               transaction_date: editingReceipt.receipt_date || getTodayString(),
               receipt_account: editingReceipt.receipt_account || '',
               notes: editingReceipt.notes || '',
