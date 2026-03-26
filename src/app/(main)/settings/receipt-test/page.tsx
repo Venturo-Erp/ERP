@@ -3,7 +3,7 @@
 import { useState, useRef, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Printer, Plus, Trash2 } from 'lucide-react'
+import { Printer } from 'lucide-react'
 
 interface ReceiptItem {
   id: string
@@ -30,9 +30,15 @@ export default function ReceiptTestPage() {
   const [day, setDay] = useState('26')
   const [handler, setHandler] = useState('王小明')
   
-  // 明細（最多 7 行）
+  // 明細（固定 7 行）
   const [items, setItems] = useState<ReceiptItem[]>([
-    { id: '1', desc: '日本大阪住宿費用', qty: 1, price: 15000, note: 'A001' },
+    { id: '1', desc: '', qty: 0, price: 0, note: '' },
+    { id: '2', desc: '', qty: 0, price: 0, note: '' },
+    { id: '3', desc: '', qty: 0, price: 0, note: '' },
+    { id: '4', desc: '', qty: 0, price: 0, note: '' },
+    { id: '5', desc: '', qty: 0, price: 0, note: '' },
+    { id: '6', desc: '', qty: 0, price: 0, note: '' },
+    { id: '7', desc: '', qty: 0, price: 0, note: '' },
   ])
 
   const printRef = useRef<HTMLDivElement>(null)
@@ -66,17 +72,6 @@ export default function ReceiptTestPage() {
   }
 
   const chineseAmount = numToChinese(total)
-
-  // 新增明細行
-  const addItem = () => {
-    if (items.length >= 7) return
-    setItems([...items, { id: Date.now().toString(), desc: '', qty: 1, price: 0, note: '' }])
-  }
-
-  // 刪除明細行
-  const removeItem = (id: string) => {
-    setItems(items.filter(item => item.id !== id))
-  }
 
   // 更新明細
   const updateItem = (id: string, field: keyof ReceiptItem, value: string | number) => {
@@ -213,13 +208,7 @@ export default function ReceiptTestPage() {
 
       {/* 明細 */}
       <div className="bg-card p-4 rounded-lg mb-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold">明細（最多 7 行）</h2>
-          <Button onClick={addItem} disabled={items.length >= 7} variant="outline" size="sm">
-            <Plus size={14} className="mr-1" />
-            新增
-          </Button>
-        </div>
+        <h2 className="font-semibold mb-4">明細（固定 7 行）</h2>
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b">
@@ -228,7 +217,6 @@ export default function ReceiptTestPage() {
               <th className="text-right py-2 w-24">單價</th>
               <th className="text-right py-2 w-24">金額</th>
               <th className="text-left py-2">備註</th>
-              <th className="w-10"></th>
             </tr>
           </thead>
           <tbody>
@@ -267,18 +255,7 @@ export default function ReceiptTestPage() {
                     className="h-8"
                   />
                 </td>
-                <td className="py-2">
-                  {items.length > 1 && (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => removeItem(item.id)}
-                      className="h-8 w-8 p-0"
-                    >
-                      <Trash2 size={14} />
-                    </Button>
-                  )}
-                </td>
+
               </tr>
             ))}
           </tbody>
@@ -286,7 +263,7 @@ export default function ReceiptTestPage() {
             <tr className="font-bold">
               <td colSpan={3} className="py-2 text-right">總計：</td>
               <td className="py-2 text-right">{total.toLocaleString()}</td>
-              <td colSpan={2}></td>
+              <td></td>
             </tr>
           </tfoot>
         </table>
