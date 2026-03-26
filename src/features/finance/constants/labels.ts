@@ -469,7 +469,7 @@ export const REQUEST_TYPE_LABELS = {
   CAT_ACCOMMODATION: '住宿',
   CAT_TRANSPORTATION: '交通',
   CAT_MEAL: '餐食',
-  CAT_TICKET: '門票',
+  CAT_TICKET: '活動',
   CAT_GUIDE: '導遊',
   CAT_INSURANCE: '保險',
   CAT_TOUR_ADVANCE: '出團款',

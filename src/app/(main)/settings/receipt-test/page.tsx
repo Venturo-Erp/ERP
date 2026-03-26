@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Printer } from 'lucide-react'
@@ -44,8 +44,6 @@ export default function ReceiptTestPage() {
   // 顯示用：0 顯示為空
   const displayValue = (val: number) => val === 0 ? '' : val
 
-  const printRef = useRef<HTMLDivElement>(null)
-
   // 計算金額和總計
   const itemsWithAmount = useMemo(() => 
     items.map(item => ({
@@ -83,10 +81,10 @@ export default function ReceiptTestPage() {
     ))
   }
 
-  const handlePrint = () => {
-    // 生成明細行 HTML（7 行，從 4.8cm 開始，每行 0.8cm）
+  // 生成列印 HTML（共用於預覽和列印）
+  const generatePrintHtml = () => {
     const itemsHtml = itemsWithAmount.map((item, idx) => {
-      const topPos = 48 + idx * 8 // mm
+      const topPos = 48 + idx * 8
       return `
         <div style="position: absolute; top: ${topPos}mm; left: 15mm; width: 38mm; overflow: hidden;">${item.desc}</div>
         <div style="position: absolute; top: ${topPos}mm; left: 53mm; width: 27mm; text-align: center;">${item.qty || ''}</div>
@@ -96,10 +94,38 @@ export default function ReceiptTestPage() {
       `
     }).join('')
 
-    // 總計位置：最後一行 + 0.8cm = 48 + 7*8 + 8 = 112mm，再往下 0.8cm = 112.8mm → 約 113mm
-    // 原本大寫金額在 108mm，改成 108 + 8 = 116mm
-    const totalTopPos = 104 // 總計數字位置
+    const totalTopPos = 104
 
+    return `
+      <div style="position: absolute; left: ${10 + offsetLeft}mm; top: ${offsetTop}mm;">
+        <!-- 買受人 -->
+        <div style="position: absolute; top: 20mm; left: 15mm;">${buyer}</div>
+        <!-- 統編 -->
+        <div style="position: absolute; top: 25mm; left: 15mm;">${taxId}</div>
+        <!-- 年月日 -->
+        <div style="position: absolute; top: 20mm; left: 100mm;">${year}</div>
+        <div style="position: absolute; top: 20mm; left: 115mm;">${month}</div>
+        <div style="position: absolute; top: 20mm; left: 130mm;">${day}</div>
+        <!-- 明細 -->
+        ${itemsHtml}
+        <!-- 總計 -->
+        <div style="position: absolute; top: ${totalTopPos}mm; left: 105mm; width: 15mm; text-align: right;">${total || ''}</div>
+        <!-- 大寫金額 -->
+        <div style="position: absolute; top: 116mm; left: 23.5mm;">${chineseAmount.千萬}</div>
+        <div style="position: absolute; top: 116mm; left: 40mm;">${chineseAmount.百萬}</div>
+        <div style="position: absolute; top: 116mm; left: 55mm;">${chineseAmount.十萬}</div>
+        <div style="position: absolute; top: 116mm; left: 68mm;">${chineseAmount.萬}</div>
+        <div style="position: absolute; top: 116mm; left: 83mm;">${chineseAmount.千}</div>
+        <div style="position: absolute; top: 116mm; left: 98mm;">${chineseAmount.百}</div>
+        <div style="position: absolute; top: 116mm; left: 112mm;">${chineseAmount.十}</div>
+        <div style="position: absolute; top: 116mm; left: 125mm;">${chineseAmount.元}</div>
+        <!-- 經手人 -->
+        <div style="position: absolute; top: 128mm; left: 170mm;">${handler}</div>
+      </div>
+    `
+  }
+
+  const handlePrint = () => {
     const iframe = document.createElement('iframe')
     iframe.style.position = 'absolute'
     iframe.style.width = '0'
@@ -125,9 +151,9 @@ export default function ReceiptTestPage() {
           @page { size: 214mm 140mm; margin: 0; }
           * { box-sizing: border-box; margin: 0; padding: 0; }
           body {
-            font-family: "MS Gothic", "Noto Sans Mono CJK TC", monospace;
-            font-size: 12px;
-            font-weight: normal;
+            font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+            font-size: 14px;
+            font-weight: 300;
             background: white;
             width: 214mm;
             height: 140mm;
@@ -139,32 +165,7 @@ export default function ReceiptTestPage() {
         </style>
       </head>
       <body>
-        <!-- 偏移容器 -->
-        <div style="position: absolute; left: ${10 + offsetLeft}mm; top: ${offsetTop}mm;">
-          <!-- 買受人 -->
-          <div style="position: absolute; top: 20mm; left: 15mm;">${buyer}</div>
-          <!-- 統編 -->
-          <div style="position: absolute; top: 25mm; left: 15mm;">${taxId}</div>
-          <!-- 年月日 -->
-          <div style="position: absolute; top: 20mm; left: 100mm;">${year}</div>
-          <div style="position: absolute; top: 20mm; left: 115mm;">${month}</div>
-          <div style="position: absolute; top: 20mm; left: 130mm;">${day}</div>
-          <!-- 明細 -->
-          ${itemsHtml}
-          <!-- 總計 -->
-          <div style="position: absolute; top: ${totalTopPos}mm; left: 105mm; width: 15mm; text-align: right;">${total}</div>
-          <!-- 大寫金額 -->
-          <div style="position: absolute; top: 116mm; left: 23.5mm;">${chineseAmount.千萬}</div>
-          <div style="position: absolute; top: 116mm; left: 40mm;">${chineseAmount.百萬}</div>
-          <div style="position: absolute; top: 116mm; left: 55mm;">${chineseAmount.十萬}</div>
-          <div style="position: absolute; top: 116mm; left: 68mm;">${chineseAmount.萬}</div>
-          <div style="position: absolute; top: 116mm; left: 83mm;">${chineseAmount.千}</div>
-          <div style="position: absolute; top: 116mm; left: 98mm;">${chineseAmount.百}</div>
-          <div style="position: absolute; top: 116mm; left: 112mm;">${chineseAmount.十}</div>
-          <div style="position: absolute; top: 116mm; left: 125mm;">${chineseAmount.元}</div>
-          <!-- 經手人 -->
-          <div style="position: absolute; top: 128mm; left: 170mm;">${handler}</div>
-        </div>
+        ${generatePrintHtml()}
       </body>
       </html>
     `)
@@ -179,143 +180,203 @@ export default function ReceiptTestPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6">收據列印測試</h1>
-      
-      {/* 基本資料 */}
-      <div className="bg-card p-4 rounded-lg mb-4">
-        <h2 className="font-semibold mb-4">基本資料</h2>
-        <div className="grid grid-cols-4 gap-4">
-          <div>
-            <label className="text-sm text-muted-foreground">買受人</label>
-            <Input value={buyer} onChange={e => setBuyer(e.target.value)} />
-          </div>
-          <div>
-            <label className="text-sm text-muted-foreground">統編</label>
-            <Input value={taxId} onChange={e => setTaxId(e.target.value)} />
-          </div>
-          <div>
-            <label className="text-sm text-muted-foreground">日期（民國）</label>
-            <div className="flex gap-1">
-              <Input value={year} onChange={e => setYear(e.target.value)} className="w-16" placeholder="年" />
-              <Input value={month} onChange={e => setMonth(e.target.value)} className="w-12" placeholder="月" />
-              <Input value={day} onChange={e => setDay(e.target.value)} className="w-12" placeholder="日" />
+    <div className="p-6 flex gap-6">
+      {/* 左邊：輸入區 */}
+      <div className="flex-1 max-w-2xl">
+        <h1 className="text-2xl font-bold mb-6">收據列印測試</h1>
+        
+        {/* 基本資料 */}
+        <div className="bg-card p-4 rounded-lg mb-4">
+          <h2 className="font-semibold mb-4">基本資料</h2>
+          <div className="grid grid-cols-4 gap-4">
+            <div>
+              <label className="text-sm text-muted-foreground">買受人</label>
+              <Input value={buyer} onChange={e => setBuyer(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm text-muted-foreground">統編</label>
+              <Input value={taxId} onChange={e => setTaxId(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm text-muted-foreground">日期（民國）</label>
+              <div className="flex gap-1">
+                <Input value={year} onChange={e => setYear(e.target.value)} className="w-16" placeholder="年" />
+                <Input value={month} onChange={e => setMonth(e.target.value)} className="w-12" placeholder="月" />
+                <Input value={day} onChange={e => setDay(e.target.value)} className="w-12" placeholder="日" />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm text-muted-foreground">經手人</label>
+              <Input value={handler} onChange={e => setHandler(e.target.value)} />
             </div>
           </div>
-          <div>
-            <label className="text-sm text-muted-foreground">經手人</label>
-            <Input value={handler} onChange={e => setHandler(e.target.value)} />
-          </div>
         </div>
-      </div>
 
-      {/* 明細 */}
-      <div className="bg-card p-4 rounded-lg mb-4">
-        <h2 className="font-semibold mb-4">明細（固定 7 行）</h2>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left py-2">摘要</th>
-              <th className="text-center py-2 w-20">數量</th>
-              <th className="text-right py-2 w-24">單價</th>
-              <th className="text-right py-2 w-24">金額</th>
-              <th className="text-left py-2">備註</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map(item => (
-              <tr key={item.id} className="border-b">
-                <td className="py-2">
-                  <Input 
-                    value={item.desc} 
-                    onChange={e => updateItem(item.id, 'desc', e.target.value)}
-                    className="h-8"
-                  />
-                </td>
-                <td className="py-2">
-                  <Input 
-                    type="number"
-                    value={displayValue(item.qty)} 
-                    onChange={e => updateItem(item.id, 'qty', parseInt(e.target.value) || 0)}
-                    className="h-8 text-center"
-                    placeholder=""
-                  />
-                </td>
-                <td className="py-2">
-                  <Input 
-                    type="number"
-                    value={displayValue(item.price)} 
-                    onChange={e => updateItem(item.id, 'price', parseInt(e.target.value) || 0)}
-                    className="h-8 text-right"
-                    placeholder=""
-                  />
-                </td>
-                <td className="py-2 text-right font-medium">
-                  {item.qty * item.price > 0 ? (item.qty * item.price).toLocaleString() : ''}
-                </td>
-                <td className="py-2">
-                  <Input 
-                    value={item.note} 
-                    onChange={e => updateItem(item.id, 'note', e.target.value)}
-                    className="h-8"
-                  />
-                </td>
-
+        {/* 明細 */}
+        <div className="bg-card p-4 rounded-lg mb-4">
+          <h2 className="font-semibold mb-4">明細（固定 7 行）</h2>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left py-2">摘要</th>
+                <th className="text-center py-2 w-20">數量</th>
+                <th className="text-right py-2 w-24">單價</th>
+                <th className="text-right py-2 w-24">金額</th>
+                <th className="text-left py-2">備註</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="font-bold">
-              <td colSpan={3} className="py-2 text-right">總計：</td>
-              <td className="py-2 text-right">{total.toLocaleString()}</td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-      
-      {/* 調整面板 */}
-      <div className="bg-card p-4 rounded-lg mb-6">
-        <h2 className="font-semibold mb-4">位置微調（mm）</h2>
-        <div className="flex gap-4 mb-4">
-          <div>
-            <label className="text-sm text-muted-foreground">左偏移</label>
-            <Input
-              type="number"
-              value={offsetLeft}
-              onChange={e => setOffsetLeft(parseFloat(e.target.value) || 0)}
-              className="w-24"
-            />
+            </thead>
+            <tbody>
+              {items.map(item => (
+                <tr key={item.id} className="border-b">
+                  <td className="py-2">
+                    <Input 
+                      value={item.desc} 
+                      onChange={e => updateItem(item.id, 'desc', e.target.value)}
+                      className="h-8"
+                    />
+                  </td>
+                  <td className="py-2">
+                    <Input 
+                      type="number"
+                      value={displayValue(item.qty)} 
+                      onChange={e => updateItem(item.id, 'qty', parseInt(e.target.value) || 0)}
+                      className="h-8 text-center"
+                      placeholder=""
+                    />
+                  </td>
+                  <td className="py-2">
+                    <Input 
+                      type="number"
+                      value={displayValue(item.price)} 
+                      onChange={e => updateItem(item.id, 'price', parseInt(e.target.value) || 0)}
+                      className="h-8 text-right"
+                      placeholder=""
+                    />
+                  </td>
+                  <td className="py-2 text-right font-medium">
+                    {item.qty * item.price > 0 ? (item.qty * item.price).toLocaleString() : ''}
+                  </td>
+                  <td className="py-2">
+                    <Input 
+                      value={item.note} 
+                      onChange={e => updateItem(item.id, 'note', e.target.value)}
+                      className="h-8"
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="font-bold">
+                <td colSpan={3} className="py-2 text-right">總計：</td>
+                <td className="py-2 text-right">{total > 0 ? total.toLocaleString() : ''}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        
+        {/* 調整面板 */}
+        <div className="bg-card p-4 rounded-lg mb-6">
+          <h2 className="font-semibold mb-4">位置微調（mm）</h2>
+          <div className="flex gap-4 mb-4">
+            <div>
+              <label className="text-sm text-muted-foreground">左偏移</label>
+              <Input
+                type="number"
+                value={offsetLeft}
+                onChange={e => setOffsetLeft(parseFloat(e.target.value) || 0)}
+                className="w-24"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-muted-foreground">上偏移</label>
+              <Input
+                type="number"
+                value={offsetTop}
+                onChange={e => setOffsetTop(parseFloat(e.target.value) || 0)}
+                className="w-24"
+              />
+            </div>
           </div>
-          <div>
-            <label className="text-sm text-muted-foreground">上偏移</label>
-            <Input
-              type="number"
-              value={offsetTop}
-              onChange={e => setOffsetTop(parseFloat(e.target.value) || 0)}
-              className="w-24"
-            />
+          <Button onClick={handlePrint} className="gap-2">
+            <Printer size={16} />
+            列印測試
+          </Button>
+        </div>
+
+        {/* 大寫金額預覽 */}
+        <div className="bg-muted p-4 rounded-lg">
+          <h2 className="font-semibold mb-2">大寫金額預覽</h2>
+          <div className="flex gap-4 text-lg">
+            <span>{chineseAmount.千萬}</span>
+            <span>{chineseAmount.百萬}</span>
+            <span>{chineseAmount.十萬}</span>
+            <span>{chineseAmount.萬}</span>
+            <span>{chineseAmount.千}</span>
+            <span>{chineseAmount.百}</span>
+            <span>{chineseAmount.十}</span>
+            <span>{chineseAmount.元}</span>
           </div>
         </div>
-        <Button onClick={handlePrint} className="gap-2">
-          <Printer size={16} />
-          列印測試
-        </Button>
       </div>
 
-      {/* 大寫金額預覽 */}
-      <div className="bg-muted p-4 rounded-lg">
-        <h2 className="font-semibold mb-2">大寫金額預覽</h2>
-        <div className="flex gap-4 text-lg">
-          <span>{chineseAmount.千萬}</span>
-          <span>{chineseAmount.百萬}</span>
-          <span>{chineseAmount.十萬}</span>
-          <span>{chineseAmount.萬}</span>
-          <span>{chineseAmount.千}</span>
-          <span>{chineseAmount.百}</span>
-          <span>{chineseAmount.十}</span>
-          <span>{chineseAmount.元}</span>
+      {/* 右邊：預覽區 */}
+      <div className="flex-shrink-0">
+        <h2 className="font-semibold mb-4">列印預覽</h2>
+        <div 
+          className="bg-white border-2 border-dashed border-gray-300 overflow-hidden"
+          style={{
+            width: '214mm',
+            height: '140mm',
+            transform: 'scale(0.5)',
+            transformOrigin: 'top left',
+            position: 'relative',
+            fontFamily: '"PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif',
+            fontSize: '14px',
+            fontWeight: 300,
+          }}
+        >
+          <div 
+            style={{ position: 'absolute', left: `${10 + offsetLeft}mm`, top: `${offsetTop}mm` }}
+          >
+            {/* 買受人 */}
+            <div style={{ position: 'absolute', top: '20mm', left: '15mm' }}>{buyer}</div>
+            {/* 統編 */}
+            <div style={{ position: 'absolute', top: '25mm', left: '15mm' }}>{taxId}</div>
+            {/* 年月日 */}
+            <div style={{ position: 'absolute', top: '20mm', left: '100mm' }}>{year}</div>
+            <div style={{ position: 'absolute', top: '20mm', left: '115mm' }}>{month}</div>
+            <div style={{ position: 'absolute', top: '20mm', left: '130mm' }}>{day}</div>
+            {/* 明細 */}
+            {itemsWithAmount.map((item, idx) => {
+              const topPos = 48 + idx * 8
+              return (
+                <div key={item.id}>
+                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '15mm', width: '38mm', overflow: 'hidden', whiteSpace: 'nowrap' }}>{item.desc}</div>
+                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '53mm', width: '27mm', textAlign: 'center' }}>{item.qty || ''}</div>
+                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '80mm', width: '25mm', textAlign: 'right' }}>{item.price || ''}</div>
+                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '105mm', width: '15mm', textAlign: 'right' }}>{item.amount || ''}</div>
+                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '120mm', width: '75mm', whiteSpace: 'nowrap' }}>{item.note}</div>
+                </div>
+              )
+            })}
+            {/* 總計 */}
+            <div style={{ position: 'absolute', top: '104mm', left: '105mm', width: '15mm', textAlign: 'right' }}>{total || ''}</div>
+            {/* 大寫金額 */}
+            <div style={{ position: 'absolute', top: '116mm', left: '23.5mm' }}>{chineseAmount.千萬}</div>
+            <div style={{ position: 'absolute', top: '116mm', left: '40mm' }}>{chineseAmount.百萬}</div>
+            <div style={{ position: 'absolute', top: '116mm', left: '55mm' }}>{chineseAmount.十萬}</div>
+            <div style={{ position: 'absolute', top: '116mm', left: '68mm' }}>{chineseAmount.萬}</div>
+            <div style={{ position: 'absolute', top: '116mm', left: '83mm' }}>{chineseAmount.千}</div>
+            <div style={{ position: 'absolute', top: '116mm', left: '98mm' }}>{chineseAmount.百}</div>
+            <div style={{ position: 'absolute', top: '116mm', left: '112mm' }}>{chineseAmount.十}</div>
+            <div style={{ position: 'absolute', top: '116mm', left: '125mm' }}>{chineseAmount.元}</div>
+            {/* 經手人 */}
+            <div style={{ position: 'absolute', top: '128mm', left: '170mm' }}>{handler}</div>
+          </div>
         </div>
+        <p className="text-xs text-muted-foreground mt-2">* 預覽為 50% 縮放</p>
       </div>
     </div>
   )
