@@ -11,7 +11,7 @@ import type { PaymentRequest } from '@/stores/types'
 export const paymentRequestEntity = createEntityHook<PaymentRequest>('payment_requests', {
   list: {
     select:
-      'id,code,request_number,request_date,request_type,request_category,expense_type,tour_id,tour_code,tour_name,order_id,order_number,supplier_id,supplier_name,amount,total_amount,status,is_special_billing,batch_id,notes,approved_at,approved_by,paid_at,paid_by,created_by_name,workspace_id,created_at,created_by,updated_at,updated_by,items:payment_request_items(*)',
+      'id,code,request_number,request_date,request_type,request_category,expense_type,tour_id,tour_code,tour_name,order_id,order_number,supplier_id,supplier_name,amount,total_amount,status,is_special_billing,batch_id,notes,payment_method_id,approved_at,approved_by,paid_at,paid_by,created_by_name,workspace_id,created_at,created_by,updated_at,updated_by,items:payment_request_items(*)',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {
