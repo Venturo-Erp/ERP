@@ -49,7 +49,17 @@ export default function ReceiptTestPage() {
   const chineseAmount = numToChinese(testData.total)
 
   const handlePrint = () => {
-    if (!printRef.current) return
+    // 生成明細行 HTML
+    const itemsHtml = testData.items.map((item, idx) => {
+      const topPos = 48 + idx * 8
+      return `
+        <div style="position: absolute; top: ${topPos}mm; left: 15mm; width: 38mm; overflow: hidden;">${item.desc}</div>
+        <div style="position: absolute; top: ${topPos}mm; left: 53mm; width: 27mm; text-align: center;">${item.qty}</div>
+        <div style="position: absolute; top: ${topPos}mm; left: 80mm; width: 25mm; text-align: right;">${item.price}</div>
+        <div style="position: absolute; top: ${topPos}mm; left: 105mm; width: 15mm; text-align: right;">${item.amount}</div>
+        <div style="position: absolute; top: ${topPos}mm; left: 120mm; width: 75mm;">${item.note}</div>
+      `
+    }).join('')
 
     const iframe = document.createElement('iframe')
     iframe.style.position = 'absolute'
@@ -79,11 +89,37 @@ export default function ReceiptTestPage() {
             font-family: monospace;
             font-size: 12px;
             background: white;
+            width: 214mm;
+            height: 140mm;
+            position: relative;
           }
         </style>
       </head>
       <body>
-        ${printRef.current.innerHTML}
+        <!-- 偏移容器 -->
+        <div style="position: absolute; left: ${10 + offsetLeft}mm; top: ${offsetTop}mm;">
+          <!-- 買受人 -->
+          <div style="position: absolute; top: 20mm; left: 15mm;">${testData.buyer}</div>
+          <!-- 統編 -->
+          <div style="position: absolute; top: 25mm; left: 15mm;">${testData.taxId}</div>
+          <!-- 年月日 -->
+          <div style="position: absolute; top: 20mm; left: 100mm;">${testData.year}</div>
+          <div style="position: absolute; top: 20mm; left: 115mm;">${testData.month}</div>
+          <div style="position: absolute; top: 20mm; left: 130mm;">${testData.day}</div>
+          <!-- 明細 -->
+          ${itemsHtml}
+          <!-- 大寫金額 -->
+          <div style="position: absolute; top: 108mm; left: 23.5mm;">${chineseAmount.千萬}</div>
+          <div style="position: absolute; top: 108mm; left: 40mm;">${chineseAmount.百萬}</div>
+          <div style="position: absolute; top: 108mm; left: 55mm;">${chineseAmount.十萬}</div>
+          <div style="position: absolute; top: 108mm; left: 68mm;">${chineseAmount.萬}</div>
+          <div style="position: absolute; top: 108mm; left: 83mm;">${chineseAmount.千}</div>
+          <div style="position: absolute; top: 108mm; left: 98mm;">${chineseAmount.百}</div>
+          <div style="position: absolute; top: 108mm; left: 112mm;">${chineseAmount.十}</div>
+          <div style="position: absolute; top: 108mm; left: 125mm;">${chineseAmount.元}</div>
+          <!-- 經手人 -->
+          <div style="position: absolute; top: 128mm; left: 170mm;">${testData.handler}</div>
+        </div>
       </body>
       </html>
     `)
