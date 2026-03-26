@@ -12,7 +12,7 @@ import { SuppliersList } from './SuppliersList'
 import { SuppliersDialog } from './SuppliersDialog'
 import { ImportSuppliersDialog } from './ImportSuppliersDialog'
 import {
-  useSuppliersSlim,
+  useSuppliers,
   createSupplier,
   updateSupplier,
   deleteSupplier as deleteSupplierApi,
@@ -63,7 +63,7 @@ export const SuppliersPage: React.FC = () => {
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
 
-  const { items: suppliers } = useSuppliersSlim()
+  const { items: suppliers } = useSuppliers()
 
   // 完整的表單狀態
   const [formData, setFormData] = useState({
