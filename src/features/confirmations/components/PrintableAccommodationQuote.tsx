@@ -397,6 +397,20 @@ export function PrintableAccommodationQuote({
           >
             LINE
           </button>
+          <button
+            style={{
+              padding: '10px 20px',
+              borderRadius: '9999px',
+              border: '1px solid #5d5348',
+              fontSize: '14px',
+              fontWeight: 500,
+              cursor: 'pointer',
+              backgroundColor: 'white',
+              color: '#5d5348',
+            }}
+          >
+            指派員工
+          </button>
         </div>
       </div>
     </div>,
