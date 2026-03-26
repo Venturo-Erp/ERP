@@ -49,7 +49,52 @@ export default function ReceiptTestPage() {
   const chineseAmount = numToChinese(testData.total)
 
   const handlePrint = () => {
-    window.print()
+    if (!printRef.current) return
+
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'absolute'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = 'none'
+    iframe.style.left = '-9999px'
+    document.body.appendChild(iframe)
+
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
+    if (!iframeDoc) {
+      document.body.removeChild(iframe)
+      return
+    }
+
+    iframeDoc.open()
+    iframeDoc.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>收據列印</title>
+        <style>
+          @page { size: 214mm 140mm; margin: 0; }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body {
+            font-family: monospace;
+            font-size: 12px;
+            background: white;
+          }
+        </style>
+      </head>
+      <body>
+        ${printRef.current.innerHTML}
+      </body>
+      </html>
+    `)
+    iframeDoc.close()
+
+    setTimeout(() => {
+      iframe.contentWindow?.print()
+      setTimeout(() => {
+        document.body.removeChild(iframe)
+      }, 1000)
+    }, 100)
   }
 
   return (
