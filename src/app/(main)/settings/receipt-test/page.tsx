@@ -41,6 +41,9 @@ export default function ReceiptTestPage() {
     { id: '7', desc: '', qty: 0, price: 0, note: '' },
   ])
 
+  // 顯示用：0 顯示為空
+  const displayValue = (val: number) => val === 0 ? '' : val
+
   const printRef = useRef<HTMLDivElement>(null)
 
   // 計算金額和總計
@@ -232,21 +235,23 @@ export default function ReceiptTestPage() {
                 <td className="py-2">
                   <Input 
                     type="number"
-                    value={item.qty} 
+                    value={displayValue(item.qty)} 
                     onChange={e => updateItem(item.id, 'qty', parseInt(e.target.value) || 0)}
                     className="h-8 text-center"
+                    placeholder=""
                   />
                 </td>
                 <td className="py-2">
                   <Input 
                     type="number"
-                    value={item.price} 
+                    value={displayValue(item.price)} 
                     onChange={e => updateItem(item.id, 'price', parseInt(e.target.value) || 0)}
                     className="h-8 text-right"
+                    placeholder=""
                   />
                 </td>
                 <td className="py-2 text-right font-medium">
-                  {(item.qty * item.price).toLocaleString()}
+                  {item.qty * item.price > 0 ? (item.qty * item.price).toLocaleString() : ''}
                 </td>
                 <td className="py-2">
                   <Input 
