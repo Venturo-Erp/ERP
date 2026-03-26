@@ -15,6 +15,7 @@ import { Tour } from '@/types/tour.types'
 import { ContractData } from '@/lib/contract-utils'
 import DOMPurify from 'dompurify'
 import { alert } from '@/lib/ui/alert-dialog'
+import { printHtml } from '@/lib/print'
 import { COMP_CONTRACTS_LABELS } from './constants/labels'
 
 interface ContractViewDialogProps {
@@ -150,71 +151,20 @@ export function ContractViewDialog({ isOpen, onClose, tour }: ContractViewDialog
     loadContract()
   }, [isOpen, tour.contract_template, tour.contract_content, contractData])
 
-  const handlePrint = async () => {
+  const handlePrint = () => {
     if (!contractHtml) {
       void alert(COMP_CONTRACTS_LABELS.無合約資料可列印, 'warning')
       return
     }
 
+    setPrinting(true)
     try {
-      setPrinting(true)
-
-      // 開啟新視窗並列印
-      const printWindow = window.open('', '_blank')
-      if (!printWindow) {
-        void alert(COMP_CONTRACTS_LABELS.請允許彈出視窗以進行列印, 'warning')
-        return
-      }
-
-      // 包裝成完整的可列印 HTML
-      const printHtml = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>合約列印</title>
-          <style>
-            @page {
-              size: A4;
-              margin: 15mm;
-            }
-            body {
-              font-family: "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
-              font-size: 12pt;
-              line-height: 1.6;
-              color: #000;
-              background: #fff;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-            }
-            td, th {
-              padding: 4px 8px;
-              vertical-align: top;
-            }
-            @media print {
-              body { -webkit-print-color-adjust: exact; }
-            }
-          </style>
-        </head>
-        <body>
-          ${contractHtml}
-        </body>
-        </html>
-      `
-
-      printWindow.document.write(printHtml)
-      printWindow.document.close()
-
-      // 等待內容載入後列印
-      printWindow.onload = () => {
-        printWindow.print()
-        // 列印後關閉視窗
-        printWindow.onafterprint = () => {
-          printWindow.close()
-        }
-      }
+      printHtml(contractHtml, {
+        title: `合約 - ${tour.name}`,
+        orientation: 'portrait',
+        margin: 15,
+        fontSize: 12,
+      })
     } catch (error) {
       logger.error(COMP_CONTRACTS_LABELS.列印錯誤, error)
       void alert(COMP_CONTRACTS_LABELS.列印合約時發生錯誤_請稍後再試, 'error')
