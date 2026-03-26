@@ -39,6 +39,9 @@ export function AccommodationQuoteDialog({
   supplierName,
 }: AccommodationQuoteDialogProps) {
   const [note, setNote] = useState('')
+  const [contact, setContact] = useState('')
+  const [phone, setPhone] = useState('')
+  const [fax, setFax] = useState('')
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string }[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [sending, setSending] = useState(false)
@@ -72,6 +75,28 @@ export function AccommodationQuoteDialog({
   useEffect(() => {
     if (open) setSelectedMethod(null)
   }, [open])
+
+  // 自動帶入供應商聯絡資訊
+  useEffect(() => {
+    if (!open || !supplierName) return
+    
+    const fetchSupplierInfo = async () => {
+      const { data } = await supabase
+        .from('suppliers')
+        .select('contact_person, phone, fax')
+        .eq('name', supplierName)
+        .limit(1)
+        .single()
+      
+      if (data) {
+        setContact(data.contact_person || '')
+        setPhone(data.phone || '')
+        setFax(data.fax || '')
+      }
+    }
+    
+    fetchSupplierInfo()
+  }, [open, supplierName, supabase])
 
   // LINE 發送
   const handleSendLine = async () => {
@@ -403,9 +428,17 @@ export function AccommodationQuoteDialog({
               tour={tour}
               totalPax={totalPax}
               supplierName={supplierName}
+              contact={contact}
+              phone={phone}
+              fax={fax}
               items={accommodations}
               note={note}
               setNote={setNote}
+              onInfoChange={(field, value) => {
+                if (field === 'contact') setContact(value)
+                else if (field === 'phone') setPhone(value)
+                else if (field === 'fax') setFax(value)
+              }}
             />
           </div>
         </div>
