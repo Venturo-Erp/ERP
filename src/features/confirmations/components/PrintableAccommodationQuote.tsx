@@ -7,9 +7,19 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Button } from '@/components/ui/button'
-import { X, Printer } from 'lucide-react'
+import { X, Printer, Plus, Trash2 } from 'lucide-react'
 import { useWorkspaceSettings } from '@/hooks/useWorkspaceSettings'
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
+
+interface RoomRow {
+  id: string
+  checkIn: string
+  roomType: string
+  bedType: string
+  clientPrice: string
+  netPrice: string
+  quantity: number
+}
 
 interface PrintableAccommodationQuoteProps {
   open: boolean
@@ -39,12 +49,59 @@ export function PrintableAccommodationQuote({
   const [contact, setContact] = useState('')
   const [phone, setPhone] = useState('')
   const [fax, setFax] = useState('')
+  const [rows, setRows] = useState<RoomRow[]>([])
   const printContentRef = useRef<HTMLDivElement>(null)
   const ws = useWorkspaceSettings()
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // 初始化：從分房資料帶入，或建立空行
+  useEffect(() => {
+    if (open && accommodations.length > 0) {
+      setRows(accommodations.map((a, i) => ({
+        id: `row-${i}`,
+        checkIn: a.checkIn || '',
+        roomType: a.roomType || '',
+        bedType: a.bedType || '',
+        clientPrice: '',
+        netPrice: '',
+        quantity: a.quantity || 1,
+      })))
+    } else if (open && accommodations.length === 0) {
+      // 沒有分房資料，建立一個空行
+      setRows([{
+        id: `row-${Date.now()}`,
+        checkIn: tour?.departure_date || '',
+        roomType: '',
+        bedType: '',
+        clientPrice: '',
+        netPrice: '',
+        quantity: 1,
+      }])
+    }
+  }, [open, accommodations, tour?.departure_date])
+
+  const addRow = () => {
+    setRows(prev => [...prev, {
+      id: `row-${Date.now()}`,
+      checkIn: tour?.departure_date || '',
+      roomType: '',
+      bedType: '',
+      clientPrice: '',
+      netPrice: '',
+      quantity: 1,
+    }])
+  }
+
+  const removeRow = (id: string) => {
+    setRows(prev => prev.filter(r => r.id !== id))
+  }
+
+  const updateRow = (id: string, field: keyof RoomRow, value: string | number) => {
+    setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r))
+  }
 
   const handlePrint = useCallback(() => {
     if (!printContentRef.current) return
@@ -269,9 +326,30 @@ export function PrintableAccommodationQuote({
 
             {/* 住宿表 */}
             <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#78716c', marginBottom: '12px' }}>
-                住宿表 ▽
-              </h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 600, color: '#78716c', margin: 0 }}>
+                  住宿表
+                </h3>
+                <button
+                  onClick={addRow}
+                  className="no-print"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    padding: '6px 12px',
+                    fontSize: '13px',
+                    color: '#5d5348',
+                    backgroundColor: 'white',
+                    border: '1px solid #a8a29e',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Plus size={14} />
+                  新增房型
+                </button>
+              </div>
               <table
                 style={{
                   width: '100%',
@@ -287,27 +365,77 @@ export function PrintableAccommodationQuote({
                     <th style={{ border: '1px solid #a8a29e', padding: '10px 12px', textAlign: 'left', fontWeight: 600, color: '#5d5348' }}>客報價</th>
                     <th style={{ border: '1px solid #a8a29e', padding: '10px 12px', textAlign: 'left', fontWeight: 600, color: '#5d5348' }}>NET價</th>
                     <th style={{ border: '1px solid #a8a29e', padding: '10px 12px', textAlign: 'left', fontWeight: 600, color: '#5d5348', width: '60px' }}>數量</th>
+                    <th className="no-print" style={{ border: '1px solid #a8a29e', padding: '10px 12px', textAlign: 'center', fontWeight: 600, color: '#5d5348', width: '40px' }}></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {accommodations.length > 0 ? (
-                    accommodations.map((item, idx) => (
-                      <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#fafaf8' }}>
-                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.checkIn || '—'}</td>
-                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.roomType || '—'}</td>
-                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.bedType || '—'}</td>
-                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}></td>
-                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}></td>
-                        <td style={{ border: '1px solid #a8a29e', padding: '8px 12px' }}>{item.quantity || ''}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={6} style={{ border: '1px solid #a8a29e', padding: '20px', textAlign: 'center', color: '#a8a29e' }}>
-                        尚未設定房型需求
+                  {rows.map((row, idx) => (
+                    <tr key={row.id} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#fafaf8' }}>
+                      <td style={{ border: '1px solid #a8a29e', padding: '4px' }}>
+                        <input
+                          type="date"
+                          value={row.checkIn}
+                          onChange={e => updateRow(row.id, 'checkIn', e.target.value)}
+                          style={{ width: '100%', padding: '4px 8px', border: 'none', backgroundColor: 'transparent', fontSize: '13px' }}
+                        />
+                      </td>
+                      <td style={{ border: '1px solid #a8a29e', padding: '4px' }}>
+                        <input
+                          type="text"
+                          value={row.roomType}
+                          onChange={e => updateRow(row.id, 'roomType', e.target.value)}
+                          placeholder="雙人房"
+                          style={{ width: '100%', padding: '4px 8px', border: 'none', backgroundColor: 'transparent', fontSize: '13px' }}
+                        />
+                      </td>
+                      <td style={{ border: '1px solid #a8a29e', padding: '4px' }}>
+                        <input
+                          type="text"
+                          value={row.bedType}
+                          onChange={e => updateRow(row.id, 'bedType', e.target.value)}
+                          placeholder="一大床"
+                          style={{ width: '100%', padding: '4px 8px', border: 'none', backgroundColor: 'transparent', fontSize: '13px' }}
+                        />
+                      </td>
+                      <td style={{ border: '1px solid #a8a29e', padding: '4px' }}>
+                        <input
+                          type="text"
+                          value={row.clientPrice}
+                          onChange={e => updateRow(row.id, 'clientPrice', e.target.value)}
+                          placeholder=""
+                          style={{ width: '100%', padding: '4px 8px', border: 'none', backgroundColor: 'transparent', fontSize: '13px' }}
+                        />
+                      </td>
+                      <td style={{ border: '1px solid #a8a29e', padding: '4px' }}>
+                        <input
+                          type="text"
+                          value={row.netPrice}
+                          onChange={e => updateRow(row.id, 'netPrice', e.target.value)}
+                          placeholder=""
+                          style={{ width: '100%', padding: '4px 8px', border: 'none', backgroundColor: 'transparent', fontSize: '13px' }}
+                        />
+                      </td>
+                      <td style={{ border: '1px solid #a8a29e', padding: '4px' }}>
+                        <input
+                          type="number"
+                          value={row.quantity}
+                          onChange={e => updateRow(row.id, 'quantity', parseInt(e.target.value) || 1)}
+                          min={1}
+                          style={{ width: '100%', padding: '4px 8px', border: 'none', backgroundColor: 'transparent', fontSize: '13px', textAlign: 'center' }}
+                        />
+                      </td>
+                      <td className="no-print" style={{ border: '1px solid #a8a29e', padding: '4px', textAlign: 'center' }}>
+                        {rows.length > 1 && (
+                          <button
+                            onClick={() => removeRow(row.id)}
+                            style={{ padding: '4px', color: '#a8a29e', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        )}
                       </td>
                     </tr>
-                  )}
+                  ))}
                 </tbody>
               </table>
             </div>

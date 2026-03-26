@@ -341,10 +341,17 @@ export async function searchFlightAction(
       return { error: '無法查詢航班資訊，請稍後再試。' }
     }
 
-    // 🔧 修復：JSON 解析加上錯誤處理
+    // 🔧 修復：先檢查 body 是否為空，再解析 JSON
     let apiData
     try {
-      apiData = await response.json()
+      const responseText = await response.text()
+      if (!responseText || responseText.trim().length === 0) {
+        logger.warn(`⚠️ AeroDataBox 回傳空 body: ${cleanFlightNumber} on ${flightDate}`)
+        return { error: '找不到該航班的資訊。' }
+      }
+      const rawData = JSON.parse(responseText)
+      // AeroDataBox API 可能回傳陣列或單一物件，統一轉為陣列
+      apiData = Array.isArray(rawData) ? rawData : [rawData]
     } catch (jsonError) {
       logger.error('航班 API JSON 解析失敗:', jsonError)
       return { error: 'API 回應格式錯誤，請稍後再試或手動輸入航班資訊。' }
