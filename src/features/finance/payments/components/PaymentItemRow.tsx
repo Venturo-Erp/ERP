@@ -78,6 +78,11 @@ export function PaymentItemRow({
       if (response.ok) {
         const data = await response.json()
         setPaymentMethods(data || [])
+        
+        // 如果有收款方式且當前 item 是預設值（數字 0 = 匯款），自動設為第一個收款方式的名稱
+        if (data && data.length > 0 && typeof item.receipt_type === 'number' && item.receipt_type === 0) {
+          onUpdate(item.id, { receipt_type: data[0].name as unknown as number })
+        }
       }
     }
     loadPaymentMethods()
