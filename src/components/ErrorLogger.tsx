@@ -43,20 +43,22 @@ export function ErrorLogger() {
     }
 
     // 捕獲 React Hydration 錯誤
-    const originalConsoleError = console.error
+    const originalConsoleError = console.error?.bind(console)
     let isLoggingError = false // 防止無限循環的標誌
+
+    if (!originalConsoleError) return // 如果沒有 console.error，直接返回
 
     console.error = function (...args) {
       // 如果正在記錄錯誤，直接使用原始 console.error 並返回
       if (isLoggingError) {
-        originalConsoleError.apply(console, args)
+        originalConsoleError(...args)
         return
       }
 
       // 先輸出到原始的 console.error
       try {
-        originalConsoleError.apply(console, args)
-      } catch (err) {
+        originalConsoleError(...args)
+      } catch {
         // 如果輸出失敗，靜默處理
       }
 
