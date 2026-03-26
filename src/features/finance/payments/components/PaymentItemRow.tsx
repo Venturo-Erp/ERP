@@ -67,6 +67,9 @@ export function PaymentItemRow({
   // 從 DB 讀取收款方式
   const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string }>>([])
   
+  // 追蹤是否已設定過預設值（避免編輯舊資料時閃爍）
+  const [hasSetDefault, setHasSetDefault] = useState(false)
+
   useEffect(() => {
     // 讀取收款方式（從 payment_methods 表）
     const loadPaymentMethods = async () => {
@@ -79,8 +82,18 @@ export function PaymentItemRow({
         const data = await response.json()
         setPaymentMethods(data || [])
         
-        // 如果有收款方式且當前 item 是預設值（數字 0 = 匯款），自動設為第一個收款方式的名稱
-        if (data && data.length > 0 && typeof item.receipt_type === 'number' && item.receipt_type === 0) {
+        // 只有「新建項目」（金額=0、receipt_type=0、未設定過預設值）才自動設為第一個
+        // 編輯舊資料時不自動改變
+        if (
+          data && 
+          data.length > 0 && 
+          !hasSetDefault &&
+          isNewRow &&
+          item.amount === 0 &&
+          typeof item.receipt_type === 'number' && 
+          item.receipt_type === 0
+        ) {
+          setHasSetDefault(true)
           onUpdate(item.id, { receipt_type: data[0].name as unknown as number })
         }
       }
