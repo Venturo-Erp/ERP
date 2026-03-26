@@ -11,6 +11,7 @@ import { X, Printer, Plus, Trash2 } from 'lucide-react'
 import { useWorkspaceSettings } from '@/hooks/useWorkspaceSettings'
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { printElement } from '@/lib/print'
+import { supabase } from '@/lib/supabase/client'
 
 interface RoomRow {
   id: string
@@ -57,6 +58,28 @@ export function PrintableAccommodationQuote({
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // 自動帶入供應商聯絡資訊
+  useEffect(() => {
+    if (!open || !supplierName) return
+    
+    const fetchSupplierInfo = async () => {
+      const { data } = await supabase
+        .from('suppliers')
+        .select('contact_person, phone, fax')
+        .eq('name', supplierName)
+        .limit(1)
+        .single()
+      
+      if (data) {
+        setContact(data.contact_person || '')
+        setPhone(data.phone || '')
+        setFax(data.fax || '')
+      }
+    }
+    
+    fetchSupplierInfo()
+  }, [open, supplierName])
 
   // 初始化：從分房資料帶入，或建立空行
   useEffect(() => {
