@@ -159,6 +159,9 @@ export function AddRequestDialog({
   const [batchDescription, setBatchDescription] = useState('')
   const [batchTotalAmount, setBatchTotalAmount] = useState(0)
   const [batchNote, setBatchNote] = useState('')
+  const [batchPaymentMethodId, setBatchPaymentMethodId] = useState<string | undefined>(
+    'e554fee7-412f-4b58-a7b3-c08602c624d2' // 預設：匯款
+  )
   const [tourAllocations, setTourAllocations] = useState<TourAllocation[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -502,7 +505,7 @@ export function AddRequestDialog({
               request_type: ADD_REQUEST_DIALOG_LABELS.供應商支出,
               request_category: 'tour',
               batch_id: batchId, // 批次 ID：同批請款單共用此 ID
-              payment_method_id: 'd6e2b71f-0d06-4119-9047-c709f31dfc31', // 預設：匯款（付款方式）
+              payment_method_id: batchPaymentMethodId || 'd6e2b71f-0d06-4119-9047-c709f31dfc31',
             })
 
             // 建立品項（帶獨立編號如 HND260328A-I01-1）
@@ -810,6 +813,24 @@ export function AddRequestDialog({
                     onChange={e => setBatchDescription(e.target.value)}
                   />
                 </div>
+                <div>
+                  <Label>付款方式</Label>
+                  <Select
+                    value={batchPaymentMethodId || ''}
+                    onValueChange={value => setBatchPaymentMethodId(value || undefined)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="選擇付款方式（選填）" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {paymentMethods.map(method => (
+                        <SelectItem key={method.id} value={method.id}>
+                          {method.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="space-y-3 pt-4 border-t border-morandi-container/30">
@@ -979,6 +1000,26 @@ export function AddRequestDialog({
                       }))
                     }
                   />
+                  <div>
+                    <label className="text-sm font-medium text-morandi-primary">
+                      付款方式
+                    </label>
+                    <Select
+                      value={formData.payment_method_id || ''}
+                      onValueChange={value => setFormData(prev => ({ ...prev, payment_method_id: value || undefined }))}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="選擇付款方式（選填）" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {paymentMethods.map(method => (
+                          <SelectItem key={method.id} value={method.id}>
+                            {method.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div>
                     <label className="text-sm font-medium text-morandi-primary">
                       {ADD_REQUEST_FORM_LABELS.備註}
