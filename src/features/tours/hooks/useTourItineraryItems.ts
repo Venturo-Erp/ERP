@@ -187,10 +187,10 @@ export function useSyncItineraryToCore() {
       logger.log(SYNC_LABELS.SYNC_START, { itinerary_id, tour_id, days: daily_itinerary.length })
 
       try {
-        // 1. 取得所有舊項目（檢查需求單狀態）
+        // 1. 取得所有舊項目（檢查需求單狀態 + 報價欄位）
         const { data: old_items, error: fetch_error } = await supabase
           .from('tour_itinerary_items')
-          .select('id,title,category,request_id,supplier_name,service_date,resource_id,unit_price')
+          .select('id,title,category,request_id,supplier_name,service_date,resource_id,unit_price,quantity,total_cost,quote_status,quote_note,pricing_type,adult_price,child_price,infant_price,estimated_cost,quoted_cost,sub_category,show_on_quote,day_number')
           .eq('itinerary_id', itinerary_id)
 
         if (fetch_error) throw fetch_error
@@ -235,32 +235,29 @@ export function useSyncItineraryToCore() {
         // 3. 分類舊項目：刪除 vs 修改
         const deletedItems: typeof old_items = []
         const modifiedRequestIds = new Set<string>()
-        // 記錄有估價的舊項目（用於加備註提示）
-        const oldItemsWithPrice = new Map<string, { title: string; unit_price: number }>()
+        // 建立舊項目的報價資料 Map（用 category:day_number 做 key，確保續住也能匹配）
+        type OldItemData = NonNullable<typeof old_items>[number]
+        const oldPricingByDayCategory = new Map<string, OldItemData>()
 
         if (old_items) {
           for (const oldItem of old_items) {
-            let fingerprint = ''
+            // 住宿：用 category:day_number 做 key
+            if (oldItem.category === 'accommodation' && oldItem.day_number) {
+              oldPricingByDayCategory.set(`accommodation:${oldItem.day_number}`, oldItem)
+            }
+            // 餐食：用 category:day_number:sub_category 做 key
+            if (oldItem.category === 'meals' && oldItem.day_number && oldItem.sub_category) {
+              oldPricingByDayCategory.set(`meals:${oldItem.day_number}:${oldItem.sub_category}`, oldItem)
+            }
 
+            // 刪除判斷仍用指紋
+            let fingerprint = ''
             if (oldItem.category === 'activities' && oldItem.resource_id) {
               fingerprint = `activities:${oldItem.resource_id}`
             } else if (oldItem.category === 'accommodation') {
               fingerprint = `accommodation:${oldItem.title}`
             } else if (oldItem.category === 'meals') {
               fingerprint = `meal:${oldItem.title}`
-            }
-
-            // 記錄有估價的項目
-            if (
-              fingerprint &&
-              oldItem.unit_price &&
-              oldItem.unit_price > 0 &&
-              !oldItem.request_id
-            ) {
-              oldItemsWithPrice.set(fingerprint, {
-                title: oldItem.title || '',
-                unit_price: oldItem.unit_price,
-              })
             }
 
             if (!newItemFingerprints.has(fingerprint)) {
@@ -270,6 +267,34 @@ export function useSyncItineraryToCore() {
               // 還在新行程中，但有需求單 → 修改（標記 outdated）
               modifiedRequestIds.add(oldItem.request_id)
             }
+          }
+        }
+
+        /** 將舊報價欄位複製到新項目（價格永遠保留） */
+        function carryOverPricing(
+          newItem: TourItineraryItemInsert,
+          oldItem: OldItemData,
+          newTitle: string
+        ) {
+          newItem.unit_price = oldItem.unit_price
+          newItem.quantity = oldItem.quantity
+          newItem.total_cost = oldItem.total_cost
+          newItem.quote_status = oldItem.quote_status
+          newItem.pricing_type = oldItem.pricing_type
+          newItem.adult_price = oldItem.adult_price
+          newItem.child_price = oldItem.child_price
+          newItem.infant_price = oldItem.infant_price
+          newItem.estimated_cost = oldItem.estimated_cost
+          newItem.quoted_cost = oldItem.quoted_cost
+          newItem.sub_category = oldItem.sub_category || newItem.sub_category
+          newItem.show_on_quote = oldItem.show_on_quote
+
+          // 名稱有變 → 加備註提醒（但價格保留）
+          if (oldItem.title && oldItem.title !== newTitle) {
+            newItem.quote_note = `⚠️ 行程變更：原為「${oldItem.title}」，價格已保留，請確認是否需要調整`
+          } else {
+            // 名稱沒變 → 保留原本的備註
+            newItem.quote_note = oldItem.quote_note
           }
         }
 
@@ -344,9 +369,6 @@ export function useSyncItineraryToCore() {
           // Activities（從景點資料庫）
           if (day.activities && day.activities.length > 0) {
             for (const activity of day.activities) {
-              const fingerprint = `activities:${activity.id}`
-              const oldItem = oldItemsWithPrice.get(fingerprint)
-              
               const newItem = activityToItem(
                 activity,
                 day_number,
@@ -356,12 +378,7 @@ export function useSyncItineraryToCore() {
                 tour_id,
                 workspace_id
               )
-              
-              // 如果有舊估價且項目改變，加上備註提示
-              if (oldItem && oldItem.title !== activity.title) {
-                newItem.quote_note = `⚠️ 行程變更：原為「${oldItem.title}」($${oldItem.unit_price.toLocaleString()})，請重新確認價格`
-              }
-              
+
               new_items.push(newItem)
               sort++
             }
@@ -379,9 +396,6 @@ export function useSyncItineraryToCore() {
               [meals.dinner, MEAL_SUB_CATEGORIES.DINNER, mealIds?.dinner],
             ]
             for (const [meal_name, sub_cat, meal_resource_id] of meal_entries) {
-              const fingerprint = `meal:${meal_name.trim()}`
-              const oldItem = oldItemsWithPrice.get(fingerprint)
-              
               const item = mealToItem(
                 meal_name,
                 sub_cat,
@@ -393,11 +407,12 @@ export function useSyncItineraryToCore() {
                 workspace_id,
                 meal_resource_id
               )
-              
+
               if (item) {
-                // 如果有舊估價且餐廳名稱改變，加上備註提示
-                if (oldItem && oldItem.title !== meal_name.trim()) {
-                  item.quote_note = `⚠️ 行程變更：原為「${oldItem.title}」($${oldItem.unit_price.toLocaleString()})，請重新確認價格`
+                // 🔧 用 day_number + sub_category 比對，保留舊報價資料
+                const oldItem = oldPricingByDayCategory.get(`meals:${day_number}:${sub_cat}`)
+                if (oldItem) {
+                  carryOverPricing(item, oldItem, meal_name.trim())
                 }
                 new_items.push(item)
               }
@@ -438,9 +453,6 @@ export function useSyncItineraryToCore() {
               }
             }
 
-            const fingerprint = `accommodation:${resolvedAccommodation}`
-            const oldItem = oldItemsWithPrice.get(fingerprint)
-            
             const item = accommodationToItem(
               resolvedAccommodation,
               day_number,
@@ -451,11 +463,12 @@ export function useSyncItineraryToCore() {
               workspace_id,
               resolvedAccommodationId
             )
-            
+
             if (item) {
-              // 如果有舊估價且飯店名稱改變，加上備註提示
-              if (oldItem && oldItem.title !== resolvedAccommodation) {
-                item.quote_note = `⚠️ 行程變更：原為「${oldItem.title}」($${oldItem.unit_price.toLocaleString()})，請重新確認價格`
+              // 🔧 用 day_number 比對，保留舊報價資料（價格永遠保留，飯店換了加備註）
+              const oldItem = oldPricingByDayCategory.get(`accommodation:${day_number}`)
+              if (oldItem) {
+                carryOverPricing(item, oldItem, resolvedAccommodation)
               }
               new_items.push(item)
             }

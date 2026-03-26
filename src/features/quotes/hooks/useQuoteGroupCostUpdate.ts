@@ -56,11 +56,17 @@ export const useQuoteGroupCostUpdate = ({
                   total = Math.ceil(effectiveQuantity * (item.unit_price || 0))
                 }
               } else if (
+                category.id === 'guide' &&
+                !item.is_group_cost
+              ) {
+                // 領隊導遊個人費用（小費）：不分攤，total = unit_price
+                total = item.unit_price || 0
+              } else if (
                 (category.id === 'transport' || category.id === 'guide') &&
                 item.is_group_cost &&
                 currentGroupSize > 1
               ) {
-                // 交通和領隊導遊的團體分攤邏輯：小計 = (數量 × 單價) ÷ 團體人數
+                // 交通和領隊導遊的團體分攤邏輯（出差費）：小計 = (數量 × 單價) ÷ 團體人數
                 const total_cost = effectiveQuantity * (item.unit_price || 0)
                 total = Math.ceil(total_cost / currentGroupSize)
               } else {

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Save, Printer, Plus, X } from 'lucide-react'
+import { Save, Printer, Plus, X, ChevronDown, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import {
@@ -30,6 +30,7 @@ import {
   PRICE_SUMMARY_CARD_LABELS,
   SELLING_PRICE_SECTION_LABELS,
 } from '../constants/labels'
+import { QUOTATION_INCLUSIONS_LABELS } from '@/constants/labels'
 
 interface LocalTier {
   id: string
@@ -89,6 +90,9 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
   const [localTierPricings, setLocalTierPricings] = useState<TierPricing[]>([])
   const tierPricings = externalTierPricings ?? localTierPricings
   const setTierPricings = externalSetTierPricings ?? setLocalTierPricings
+  // 展開/收合狀態
+  const [baseExpanded, setBaseExpanded] = useState(true)
+  const [tierExpanded, setTierExpanded] = useState<Record<string, boolean>>({})
 
   const handlePriceChange = (identity: keyof SellingPrices, value: string) => {
     const normalized = normalizeNumber(value)
@@ -253,9 +257,22 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* 目前人數檻次卡片 */}
         <div className="bg-card border border-morandi-gold/40 rounded-xl overflow-hidden shadow-sm">
-          <div className="bg-morandi-gold/15 px-4 py-2 flex items-center justify-between border-b border-morandi-gold/30">
+          <div
+            className={cn(
+              "bg-morandi-gold/15 px-4 py-2 flex items-center justify-between cursor-pointer select-none",
+              baseExpanded && "border-b border-morandi-gold/30"
+            )}
+            onClick={() => setBaseExpanded(prev => !prev)}
+          >
             <div className="flex items-center gap-1">
+              {baseExpanded ? <ChevronDown size={14} className="text-morandi-gold" /> : <ChevronRight size={14} className="text-morandi-gold" />}
+              {tierPricings.length > 0 && (
+                <span className="text-xs font-semibold text-morandi-gold mr-1">
+                  砍次 1
+                </span>
+              )}
               <input
+                onClick={e => e.stopPropagation()}
                 type="text"
                 inputMode="decimal"
                 value={currentTotalCount}
@@ -281,6 +298,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
               </span>
             </div>
           </div>
+          {baseExpanded && (
           <table className="w-full text-sm">
             <thead className="border-b border-morandi-container/60">
               <tr>
@@ -396,17 +414,29 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                 ))}
             </tbody>
           </table>
+          )}
         </div>
 
         {/* 檻次表列表 */}
-        {tierPricings.map(tier => (
+        {tierPricings.map((tier, tierIndex) => (
           <div
             key={tier.id}
             className="bg-card border border-border rounded-xl overflow-hidden shadow-sm"
           >
-            <div className="bg-morandi-container/30 px-4 py-2 flex items-center justify-between border-b border-border">
+            <div
+              className={cn(
+                "bg-morandi-container/30 px-4 py-2 flex items-center justify-between cursor-pointer select-none",
+                (tierExpanded[tier.id] ?? true) && "border-b border-border"
+              )}
+              onClick={() => setTierExpanded(prev => ({ ...prev, [tier.id]: !(prev[tier.id] ?? true) }))}
+            >
               <div className="flex items-center gap-1">
+                {(tierExpanded[tier.id] ?? true) ? <ChevronDown size={14} className="text-morandi-secondary" /> : <ChevronRight size={14} className="text-morandi-secondary" />}
+                <span className="text-xs font-semibold text-morandi-secondary mr-1">
+                  砍次 {tierIndex + 2}
+                </span>
                 <input
+                  onClick={e => e.stopPropagation()}
                   type="text"
                   inputMode="decimal"
                   value={tier.participant_count}
@@ -424,7 +454,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                   {SELLING_PRICE_SECTION_LABELS.LABEL_2543}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                 <Button
                   onClick={() => {
                     const tierLabel = `${SELLING_PRICE_SECTION_LABELS.TIER_QUOTE_PREFIX}${tier.participant_count}${SELLING_PRICE_SECTION_LABELS.TIER_QUOTE_SUFFIX}`
@@ -447,6 +477,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                 )}
               </div>
             </div>
+            {(tierExpanded[tier.id] ?? true) && (
             <table className="w-full text-sm">
               <thead className="border-b border-border/60">
                 <tr>
@@ -507,8 +538,38 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                 />
               </tbody>
             </table>
+            )}
           </div>
         ))}
+
+        {/* 費用包含 */}
+        <div className="bg-card border border-morandi-green/30 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-morandi-green/10 px-4 py-2 border-b border-morandi-green/20">
+            <span className="text-sm font-semibold text-morandi-green">費用包含</span>
+          </div>
+          <ul className="px-4 py-3 space-y-1.5 text-sm text-morandi-secondary">
+            <li>• 行程表所列之交通費用</li>
+            <li>• 行程表所列之住宿費用</li>
+            <li>• 行程表所列之餐食費用</li>
+            <li>• 行程表所列之門票費用</li>
+            <li>• 專業導遊服務</li>
+            <li>• {QUOTATION_INCLUSIONS_LABELS.旅遊責任險}</li>
+          </ul>
+        </div>
+
+        {/* 費用不含 */}
+        <div className="bg-card border border-morandi-red/30 rounded-xl overflow-hidden shadow-sm">
+          <div className="bg-morandi-red/10 px-4 py-2 border-b border-morandi-red/20">
+            <span className="text-sm font-semibold text-morandi-red">費用不含</span>
+          </div>
+          <ul className="px-4 py-3 space-y-1.5 text-sm text-morandi-secondary">
+            <li>• 個人護照及簽證費用</li>
+            <li>• 行程外之自費行程</li>
+            <li>• 個人消費及小費</li>
+            <li>• 行李超重費用</li>
+            <li>• 單人房差價</li>
+          </ul>
+        </div>
       </div>
     </div>
   )

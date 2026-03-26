@@ -172,7 +172,7 @@ export function RequirementsList({
 
           // 讀取行程表（包含 daily_itinerary 的完整行程描述）
           const { data: itineraryData } = await supabase
-            .from('itinerary')
+            .from('itineraries')
             .select('id, daily_itinerary')
             .eq('tour_id', tourId)
             .single()

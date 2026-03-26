@@ -64,9 +64,13 @@ export function coreItemsToCostCategories(items: TourItineraryItem[]): CostCateg
       costItem.room_type = item.sub_category
     }
 
-    // 團體分攤 / 領隊導遊：推斷 is_group_cost
-    if (item.category === 'group-transport' || item.category === 'guide') {
+    // 團體分攤：推斷 is_group_cost
+    if (item.category === 'group-transport') {
       costItem.is_group_cost = true
+    }
+    // 領隊導遊：有數量的才是團體分攤（出差費），無數量的是個人費用（小費）
+    if (item.category === 'guide') {
+      costItem.is_group_cost = !!(item.quantity && item.quantity > 0)
     }
 
     targetCategory.items.push(costItem)

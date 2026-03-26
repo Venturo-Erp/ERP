@@ -89,12 +89,13 @@ export const useQuoteSave = ({
       // 砍次表資料
       const tierPricingsData = tierPricings || []
 
-      // 報價單只存非定價 header + 快速報價欄位 + 砍次表
+      // 報價單存 header + 售價 + 人數 + 快速報價欄位 + 砍次表
       const quoteHeaderData: Partial<Quote> = {
         name: quoteName,
         total_cost,
         group_size: groupSize,
         participant_counts: participantCounts, // 人數明細
+        selling_prices: sellingPrices, // 各身份售價
         tier_pricings: tierPricingsData,
         ...quickQuoteData,
       }

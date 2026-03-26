@@ -99,19 +99,35 @@ export function calculateTierPricingCosts(
         costs.child_with_bed += itemCost
         costs.child_no_bed += itemCost
         costs.single_room += itemCost
-      } else if (category.id === 'group-transport' || category.id === 'guide') {
-        // 團體分攤、領隊導遊 - 關鍵：用新的總人數重新計算分攤費用
-        // item.total 是原始人數分攤過的每人費用，需要還原成總費用
+      } else if (category.id === 'group-transport') {
+        // 團體分攤 - 用新的總人數重新計算分攤費用
         const originalCostPerPerson = item.total || 0
         const totalCost = originalCostPerPerson * originalTotalParticipants
-
-        // 用新人數重新分攤
         const newCostPerPerson = newTotalParticipants > 0 ? totalCost / newTotalParticipants : 0
 
         costs.adult += newCostPerPerson
         costs.child_with_bed += newCostPerPerson
         costs.child_no_bed += newCostPerPerson
         costs.single_room += newCostPerPerson
+      } else if (category.id === 'guide') {
+        if (item.is_group_cost) {
+          // 出差費（團體分攤）- 用新的總人數重新計算
+          const originalCostPerPerson = item.total || 0
+          const totalCost = originalCostPerPerson * originalTotalParticipants
+          const newCostPerPerson = newTotalParticipants > 0 ? totalCost / newTotalParticipants : 0
+
+          costs.adult += newCostPerPerson
+          costs.child_with_bed += newCostPerPerson
+          costs.child_no_bed += newCostPerPerson
+          costs.single_room += newCostPerPerson
+        } else {
+          // 小費（個人費用）- 不隨人數變動，固定每人金額
+          const itemCost = item.unit_price || 0
+          costs.adult += itemCost
+          costs.child_with_bed += itemCost
+          costs.child_no_bed += itemCost
+          costs.single_room += itemCost
+        }
       }
     })
   })

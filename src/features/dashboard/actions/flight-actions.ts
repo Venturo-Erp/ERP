@@ -330,6 +330,12 @@ export async function searchFlightAction(
       // Next.js fetch 有內建 timeout，不需要手動 AbortController
     })
 
+    // 🔧 修復：先攔截 204 No Content（API 無資料時回傳 204）
+    if (response.status === 204) {
+      logger.warn(`⚠️ AeroDataBox 回傳 204 No Content: ${cleanFlightNumber} on ${flightDate}`)
+      return { error: `找不到 ${cleanFlightNumber} 在 ${flightDate} 的航班資訊，可能尚未排班。` }
+    }
+
     if (!response.ok) {
       if (response.status === 404) {
         return { error: '找不到該航班的資訊。' }
@@ -341,47 +347,47 @@ export async function searchFlightAction(
       return { error: '無法查詢航班資訊，請稍後再試。' }
     }
 
-    // 🔧 修復：先檢查 body 是否為空，再解析 JSON
-    let apiData
+    // 解析 JSON 回應
+    let apiData: ApiFlightData[]
     try {
       const responseText = await response.text()
       if (!responseText || responseText.trim().length === 0) {
         logger.warn(`⚠️ AeroDataBox 回傳空 body: ${cleanFlightNumber} on ${flightDate}`)
-        return { error: '找不到該航班的資訊。' }
+        return { error: `找不到 ${cleanFlightNumber} 在 ${flightDate} 的航班資訊。` }
       }
       const rawData = JSON.parse(responseText)
       // AeroDataBox API 可能回傳陣列或單一物件，統一轉為陣列
       apiData = Array.isArray(rawData) ? rawData : [rawData]
     } catch (jsonError) {
-      logger.error('航班 API JSON 解析失敗:', jsonError)
-      return { error: 'API 回應格式錯誤，請稍後再試或手動輸入航班資訊。' }
+      logger.error(`航班 API JSON 解析失敗 (${cleanFlightNumber} on ${flightDate}):`, jsonError)
+      return { error: `航班 ${cleanFlightNumber} 查詢失敗（API 回應異常），請手動輸入航班資訊。` }
     }
 
     if (!apiData || apiData.length === 0) {
       return { error: '找不到該航班的資訊。' }
     }
 
+    // 轉換所有航段資料
+    const allSegments = apiData.map((flight: ApiFlightData) =>
+      transformFlightData(flight, flightDate, cleanFlightNumber)
+    )
+
     // 如果只有一筆結果，直接返回
-    if (apiData.length === 1) {
+    if (allSegments.length === 1) {
       const missingFields = validateFlightData(apiData[0])
-      const transformedData = transformFlightData(apiData[0], flightDate, cleanFlightNumber)
-      logger.log(`✅ 航班查詢成功: ${cleanFlightNumber}`)
+      logger.log(`✅ 航班查詢成功（單一航段）: ${cleanFlightNumber}`)
 
       // 如果資料不完整，返回警告
       if (missingFields.length > 0) {
         const warning = `航班資料不完整，缺少：${missingFields.join('、')}。可能是日期太遠，建議手動輸入。`
         logger.warn(`⚠️ ${cleanFlightNumber} 資料不完整: ${missingFields.join(', ')}`)
-        return { data: transformedData, warning }
+        return { data: allSegments[0], warning }
       }
 
-      return { data: transformedData }
+      return { data: allSegments[0] }
     }
 
     // 多航段：返回所有航段讓用戶選擇
-    const segments = apiData.map((flight: ApiFlightData) =>
-      transformFlightData(flight, flightDate, cleanFlightNumber)
-    )
-
     // 檢查是否有航段資料不完整
     const incompleteSegments = apiData.filter(
       (flight: ApiFlightData) => validateFlightData(flight).length > 0
@@ -391,8 +397,8 @@ export async function searchFlightAction(
         ? `部分航段資料不完整，可能是日期太遠，請確認後手動補充。`
         : undefined
 
-    logger.log(`✅ 航班查詢成功: ${cleanFlightNumber}，共 ${segments.length} 個航段`)
-    return { segments, warning }
+    logger.log(`✅ 航班查詢成功: ${cleanFlightNumber}，共 ${allSegments.length} 個航段`)
+    return { segments: allSegments, warning }
   } catch (error) {
     logger.error('Failed to fetch flight data:', error)
     return { error: '查詢航班時發生網路錯誤。' }

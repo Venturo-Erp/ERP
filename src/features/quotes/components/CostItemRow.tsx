@@ -154,7 +154,7 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
             type="text"
             value={item.note || ''}
             onChange={e => handleUpdateItem(categoryId, item.id, 'note', e.target.value)}
-            className={`${inputClass} flex-1 ${isLocalPricing ? 'cursor-not-allowed opacity-80' : ''}`}
+            className={`${inputClass} flex-1 ${isLocalPricing ? 'cursor-not-allowed opacity-80' : ''} ${item.note?.startsWith('⚠️') ? 'text-amber-600 font-medium' : ''}`}
             placeholder={ACCOMMODATION_ITEM_ROW_LABELS.備註}
             disabled={isLocalPricing}
             title={isLocalPricing ? 'Local 報價階梯資訊（自動產生）' : undefined}

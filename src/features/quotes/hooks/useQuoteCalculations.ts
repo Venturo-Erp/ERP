@@ -200,14 +200,30 @@ export const useQuoteCalculations = ({
             costs.child_no_bed += itemCost
             costs.single_room += itemCost
             // 嬰兒不含餐飲和活動
-          } else if (category.id === 'group-transport' || category.id === 'guide') {
-            // 團體分攤、領隊導遊：不含嬰兒的身份分攤
+          } else if (category.id === 'group-transport') {
+            // 團體分攤：已均攤的費用直接加到每個身份
             const itemCost = item.total || 0
             costs.adult += itemCost
             costs.child_with_bed += itemCost
             costs.child_no_bed += itemCost
             costs.single_room += itemCost
-            // 嬰兒不分攤導遊費用
+          } else if (category.id === 'guide') {
+            if (item.is_group_cost) {
+              // 出差費（團體分攤）：item.total 已經是均攤後的每人金額
+              const itemCost = item.total || 0
+              costs.adult += itemCost
+              costs.child_with_bed += itemCost
+              costs.child_no_bed += itemCost
+              costs.single_room += itemCost
+            } else {
+              // 小費（個人費用）：每人都要付，用 unit_price
+              const itemCost = item.unit_price || 0
+              costs.adult += itemCost
+              costs.child_with_bed += itemCost
+              costs.child_no_bed += itemCost
+              costs.single_room += itemCost
+            }
+            // 嬰兒不含導遊費用
           }
         })
       }
