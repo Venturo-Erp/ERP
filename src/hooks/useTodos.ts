@@ -72,12 +72,8 @@ export function useTodos() {
     swrKey,
     // SWR fetcher 接收 key，我們需要從 key 中提取 workspaceId
     async () => {
-      // DEBUG: 追蹤 fetcher 被呼叫的時機
-      logger.log('[useTodos] 🔄 fetcher 被呼叫，workspaceId:', workspaceId)
       if (!workspaceId) return []
-      const result = await getAllTodos(workspaceId)
-      logger.log('[useTodos] ✅ fetcher 完成，共', result.length, '筆')
-      return result
+      return getAllTodos(workspaceId)
     },
     {
       ...CACHE_STRATEGY.REALTIME,
