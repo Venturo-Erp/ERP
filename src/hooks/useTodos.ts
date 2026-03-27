@@ -151,8 +151,7 @@ export function useTodos() {
         notes: newTodo.notes,
       } as unknown as Parameters<typeof createTodoEntity>[0])
 
-      // 成功後重新驗證
-      mutate(swrKey)
+      // 成功後不需要 revalidate，樂觀更新已經是正確的資料
       return newTodo
     } catch (err) {
       // 失敗時回滾
@@ -180,6 +179,7 @@ export function useTodos() {
     }
 
     // 樂觀更新：使用 functional update 避免 stale closure 問題
+    // 第三個參數 false = 不 revalidate（不重新 fetch）
     mutate(
       swrKey,
       (currentTodos: Todo[] | undefined) =>
@@ -189,9 +189,9 @@ export function useTodos() {
 
     try {
       await updateTodoEntity(id, updatedTodo as Parameters<typeof updateTodoEntity>[1])
-
-      mutate(swrKey)
+      // 成功後不需要 revalidate，樂觀更新已經是正確的資料
     } catch (err) {
+      // 失敗才需要 revalidate 回復正確狀態
       mutate(swrKey)
       throw err
     }
@@ -208,9 +208,9 @@ export function useTodos() {
 
     try {
       await deleteTodoEntity(id)
-
-      mutate(swrKey)
+      // 成功後不需要 revalidate，樂觀更新已經是正確的資料
     } catch (err) {
+      // 失敗才需要 revalidate 回復正確狀態
       mutate(swrKey)
       throw err
     }

@@ -190,6 +190,20 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
       updated_at: new Date().toISOString(),
     }
 
+    // 樂觀更新（非封存情況）
+    if (!('archived' in updates)) {
+      await mutateSelf(
+        prev =>
+          prev
+            ? {
+                ...prev,
+                tours: prev.tours.map(t => (t.id === id ? { ...t, ...updatedData } : t)),
+              }
+            : prev,
+        { revalidate: false }
+      )
+    }
+
     try {
       const { data: updated, error: updateError } = await supabase
         .from('tours')
@@ -211,14 +225,13 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
                   count: prev.count - 1,
                 }
               : prev,
-          { revalidate: true }
+          { revalidate: false }
         )
-        await mutate('tours')
-      } else {
-        await invalidateAllPaginatedQueries()
       }
+      // 成功後不需要 revalidate，樂觀更新已經是正確的資料
       return updated as Tour
     } catch (err) {
+      // 失敗才需要 revalidate 回復正確狀態
       await invalidateAllPaginatedQueries()
       throw err
     }
@@ -226,11 +239,25 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
 
   // Delete tour
   const deleteTour = async (id: string): Promise<boolean> => {
+    // 樂觀更新：先從列表移除
+    await mutateSelf(
+      prev =>
+        prev
+          ? {
+              ...prev,
+              tours: prev.tours.filter(t => t.id !== id),
+              count: prev.count - 1,
+            }
+          : prev,
+      { revalidate: false }
+    )
+
     try {
       await deleteTourEntity(id)
-      await invalidateAllPaginatedQueries()
+      // 成功後不需要 revalidate，樂觀更新已經是正確的資料
       return true
     } catch (err) {
+      // 失敗才需要 revalidate 回復正確狀態
       await invalidateAllPaginatedQueries()
       throw err
     }
