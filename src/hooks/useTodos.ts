@@ -81,7 +81,11 @@ export function useTodos() {
       if (!workspaceId) return []
       return getAllTodos(workspaceId)
     },
-    CACHE_STRATEGY.REALTIME
+    {
+      ...CACHE_STRATEGY.REALTIME,
+      revalidateOnFocus: false, // 關閉 focus 時的 revalidate，避免閃爍
+      revalidateIfStale: false, // 關閉 stale 時的 revalidate
+    }
   )
 
   // Realtime 訂閱：暫時關閉
