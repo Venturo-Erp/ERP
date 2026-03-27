@@ -2,7 +2,7 @@
 // Phase 1: 純雲端架構的 Todos Hook (使用 SWR)
 // 使用資料存取層 (DAL) 進行資料查詢
 
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import { supabase } from '@/lib/supabase/client'
 import {
@@ -52,20 +52,17 @@ function generateUUID(): string {
 
 // ===== 主要 Hook =====
 export function useTodos() {
-  // 直接從 auth store 取得 user，確保資料是最新的
+  // 直接從 auth store 取得 user，確保資料是最新的（reactive）
   const { user } = useAuthStore()
 
-  // 取得當前 workspace ID
-  // 注意：super_admin 的 getCurrentWorkspaceId() 會返回 null（可跨 workspace）
-  // 但我們仍需要一個 workspace 來查詢，使用 user.workspace_id 作為備用
-  let workspaceId = getCurrentWorkspaceId()
+  // 使用 useMemo 穩定 workspaceId，避免不必要的 re-render
+  const workspaceId = React.useMemo(() => {
+    // 優先使用 user.workspace_id（已經是 reactive 的）
+    return user?.workspace_id || null
+  }, [user?.workspace_id])
 
-  // 如果是 super_admin（workspaceId 為 null），使用 auth store 的 user.workspace_id
-  if (!workspaceId && user?.workspace_id) {
-    workspaceId = user.workspace_id
-  }
-
-  const swrKey = getTodosKey(workspaceId)
+  // 使用 useMemo 穩定 swrKey
+  const swrKey = React.useMemo(() => getTodosKey(workspaceId), [workspaceId])
 
   // 使用 DAL 的 getAllTodos 作為 SWR fetcher
   // Todos 使用 REALTIME 策略（即時更新）
