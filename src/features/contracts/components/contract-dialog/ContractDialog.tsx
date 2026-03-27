@@ -58,6 +58,9 @@ export function ContractDialog({ isOpen, onClose, tour, mode }: ContractDialogPr
   const [viewMode, setViewMode] = useState<'main' | 'form' | 'select-members'>('main')
   // 多選旅客的 IDs
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
+  // 附件選項
+  const [includeMemberList, setIncludeMemberList] = useState(false)
+  const [includeItinerary, setIncludeItinerary] = useState(false)
 
   const {
     selectedTemplate,
@@ -552,6 +555,33 @@ export function ContractDialog({ isOpen, onClose, tour, mode }: ContractDialogPr
                     placeholder={COMP_CONTRACTS_LABELS.請輸入備註}
                     className="w-full h-20 p-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50 resize-none text-sm"
                   />
+                </div>
+
+                {/* 附件選項 */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-morandi-primary block">
+                    合約附件
+                  </label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={includeMemberList}
+                        onChange={e => setIncludeMemberList(e.target.checked)}
+                        className="w-4 h-4 text-morandi-gold focus:ring-morandi-gold/50 rounded"
+                      />
+                      <span className="text-sm text-morandi-primary">附上團員名單</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={includeItinerary}
+                        onChange={e => setIncludeItinerary(e.target.checked)}
+                        className="w-4 h-4 text-morandi-gold focus:ring-morandi-gold/50 rounded"
+                      />
+                      <span className="text-sm text-morandi-primary">附上行程表</span>
+                    </label>
+                  </div>
                 </div>
 
                 {/* 完成狀態 */}

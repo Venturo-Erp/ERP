@@ -16,6 +16,9 @@ interface Contract {
   member_ids: string[]
   contract_data: Record<string, unknown>
   status: string
+  // 附件選項
+  include_member_list?: boolean
+  include_itinerary?: boolean
   tours: {
     id: string
     code: string
@@ -281,6 +284,33 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   className="p-8"
                   dangerouslySetInnerHTML={{ __html: contractHtml }}
                 />
+                
+                {/* 附件區域 */}
+                {(contract.include_itinerary || contract.include_member_list) && (
+                  <div className="border-t border-gray-200 p-8 bg-gray-50">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4">📎 合約附件</h3>
+                    <div className="space-y-3">
+                      {contract.include_itinerary && (
+                        <a
+                          href={`/public/itinerary/${contract.tours.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-amber-600 hover:text-amber-700 underline"
+                        >
+                          📋 行程表
+                        </a>
+                      )}
+                      {contract.include_member_list && contract.member_ids.length > 1 && (
+                        <div className="text-gray-700">
+                          👥 簽約團員名單（{contract.member_ids.length} 人）
+                          <div className="text-sm text-gray-500 mt-1">
+                            {(contract.contract_data?.memberNames as string[])?.join('、') || ''}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
