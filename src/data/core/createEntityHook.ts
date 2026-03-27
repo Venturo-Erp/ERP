@@ -591,7 +591,7 @@ export function createEntityHook<T extends BaseEntity>(
           .single()
 
         if (!error) {
-          await invalidate()
+          // 成功：樂觀更新已生效，不需要 invalidate（避免閃爍）
           return created as unknown as T
         }
 
@@ -683,7 +683,7 @@ export function createEntityHook<T extends BaseEntity>(
         throw error
       }
 
-      await invalidate()
+      // 成功：樂觀更新已生效，不需要 invalidate（避免閃爍）
       return true
     } catch (err) {
       await invalidate()
@@ -717,7 +717,7 @@ export function createEntityHook<T extends BaseEntity>(
         throw error
       }
 
-      await invalidate()
+      // 成功：樂觀更新已生效，不需要 invalidate（避免閃爍）
       return true
     } catch (err) {
       await invalidate()
