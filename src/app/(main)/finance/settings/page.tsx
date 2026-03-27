@@ -313,84 +313,34 @@ export default function FinanceSettingsPage() {
   const currentSection = sections.find(s => s.key === activeSection)
   const sectionTitle = currentSection?.label || ''
 
+  // 新增按鈕
+  const renderAddButton = () => {
+    const buttonConfig: Record<string, { label: string; onClick: () => void }> = {
+      receipt: { label: '新增收款方式', onClick: () => { setEditingMethod(null); setIsMethodDialogOpen(true) } },
+      payment: { label: '新增付款方式', onClick: () => { setEditingMethod(null); setIsMethodDialogOpen(true) } },
+      category: { label: '新增請款類別', onClick: () => { setEditingCategory(null); setIsCategoryDialogOpen(true) } },
+      company_expense: { label: '新增支出項目', onClick: () => { setEditingCategory(null); setIsCategoryDialogOpen(true) } },
+      company_income: { label: '新增收入項目', onClick: () => { setEditingCategory(null); setIsCategoryDialogOpen(true) } },
+      bank: { label: '新增銀行帳戶', onClick: () => { setEditingBank(null); setIsBankDialogOpen(true) } },
+    }
+    const config = buttonConfig[activeSection]
+    if (!config) return null
+    return (
+      <Button onClick={config.onClick} className="bg-morandi-gold hover:bg-morandi-gold/90 text-white">
+        <Plus className="h-4 w-4 mr-2" />
+        {config.label}
+      </Button>
+    )
+  }
+
   return (
     <ContentPageLayout 
-      title={`財務設定 > ${sectionTitle}管理`} 
+      title="財務設定"
       icon={Settings}
       headerActions={
-        activeSection === 'receipt' ? (
-          <Button
-            onClick={() => {
-              setEditingMethod(null)
-              setIsMethodDialogOpen(true)
-            }}
-            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            新增收款方式
-          </Button>
-        ) : activeSection === 'payment' ? (
-          <Button
-            onClick={() => {
-              setEditingMethod(null)
-              setIsMethodDialogOpen(true)
-            }}
-            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            新增付款方式
-          </Button>
-        ) : activeSection === 'category' ? (
-          <Button
-            onClick={() => {
-              setEditingCategory(null)
-              setIsCategoryDialogOpen(true)
-            }}
-            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            新增請款類別
-          </Button>
-        ) : activeSection === 'company_expense' ? (
-          <Button
-            onClick={() => {
-              setEditingCategory(null)
-              setIsCategoryDialogOpen(true)
-            }}
-            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            新增支出項目
-          </Button>
-        ) : activeSection === 'company_income' ? (
-          <Button
-            onClick={() => {
-              setEditingCategory(null)
-              setIsCategoryDialogOpen(true)
-            }}
-            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            新增收入項目
-          </Button>
-        ) : activeSection === 'bank' ? (
-          <Button
-            onClick={() => {
-              setEditingBank(null)
-              setIsBankDialogOpen(true)
-            }}
-            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            新增銀行帳戶
-          </Button>
-        ) : null
-      }
-    >
-      <div className="flex h-full">
-        {/* 左側選單 */}
-        <div className="w-[180px] border-r border-border bg-morandi-background/30">
-          <div className="p-3 space-y-1">
+        <div className="flex items-center gap-4">
+          {/* 分頁切換 - 標題右邊 */}
+          <div className="flex gap-1">
             {sections.map(section => {
               const Icon = section.icon
               const isActive = activeSection === section.key
@@ -398,22 +348,25 @@ export default function FinanceSettingsPage() {
                 <button
                   key={section.key}
                   onClick={() => setActiveSection(section.key)}
-                  className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-morandi-gold text-white'
                       : 'text-morandi-secondary hover:bg-morandi-container'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                   {section.label}
                 </button>
               )
             })}
           </div>
+          {/* 新增按鈕 */}
+          {renderAddButton()}
         </div>
-
-        {/* 右側內容 */}
-        <div className="flex-1 p-4">
+      }
+    >
+      {/* 內容區 */}
+      <div className="p-4">
           {/* 收款方式 */}
           {activeSection === 'receipt' && (
             <div className="space-y-4">
@@ -864,7 +817,6 @@ export default function FinanceSettingsPage() {
             </div>
           )}
 
-        </div>
       </div>
 
       {/* 付款方式編輯對話框 */}

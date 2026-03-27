@@ -75,7 +75,10 @@ export default function SettingsPage() {
     <ContentPageLayout
       title={LABELS.SYSTEM_SETTINGS}
       headerActions={
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
+          {/* 分頁切換 - 移到標題右邊 */}
+          {hasSettingsAccess && <SettingsTabs />}
+          
           {/* 用戶資訊 */}
           {user && (
             <div className="flex items-center gap-2 px-3 py-2 bg-morandi-container rounded-lg">
@@ -103,8 +106,6 @@ export default function SettingsPage() {
       }
     >
       <div className="max-w-4xl mx-auto space-y-8 p-6">
-        {/* 分頁切換 */}
-        {hasSettingsAccess && <SettingsTabs />}
 
         {/* 首次設定提示 */}
         {isSetupMode && (

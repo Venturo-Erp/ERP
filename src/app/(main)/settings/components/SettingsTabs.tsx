@@ -31,7 +31,7 @@ export function SettingsTabs() {
   const activeTab = getActiveTab()
 
   return (
-    <div className="flex gap-2 border-b border-border pb-4 mb-6">
+    <div className="flex gap-2">
       {tabs.map(tab => {
         const Icon = tab.icon
         const isActive = activeTab === tab.value
