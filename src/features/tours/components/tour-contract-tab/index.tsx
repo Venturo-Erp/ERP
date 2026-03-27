@@ -409,13 +409,19 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                       <FileText className="w-4 h-4" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" onClick={() => copyLink(contract)}>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => copyLink(contract)}
+                    title="複製簽約連結"
+                  >
                     <Copy className="w-4 h-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => window.open(`/public/contract/sign/${contract.code}`, '_blank')}
+                    title="開啟簽約頁面"
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>
@@ -467,7 +473,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   <span className="font-medium text-morandi-primary">{member.name}</span>
                   {member.id_number && (
                     <span className="text-sm text-morandi-secondary ml-2">
-                      {member.id_number.slice(0, 4)}****
+                      {member.id_number}
                     </span>
                   )}
                 </div>
