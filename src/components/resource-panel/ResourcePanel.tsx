@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import { createSupabaseBrowserClient, supabase } from '@/lib/supabase/client'
 import { Search, MapPin, Building2, UtensilsCrossed, Loader2, Plus } from 'lucide-react'
 import { QuickAddResource } from './QuickAddResource'
 import { ResourceDetailDialog } from './ResourceDetailDialog'
@@ -273,7 +273,8 @@ export function ResourcePanel({
       // 簡化版：只用國家篩選
       if (resolvedCountryId) query = query.eq('country_id', resolvedCountryId)
 
-      const { data, error } = await query.order('name').limit(1000)
+      // 只載入前 50 筆作為預設顯示，搜尋時會重新查詢
+      const { data, error } = await query.order('name').limit(50)
 
       if (error) {
         logger.error(`[ResourcePanel] 載入${type}失敗:`, error)
@@ -306,17 +307,81 @@ export function ResourcePanel({
     void fetchResources('restaurants', 'restaurant')
   }, [resolvedCountryId, isResolving])
 
-  // 搜尋過濾
-  const filteredResources = useMemo(() => {
-    const items = resources[activeTab]
-    if (!searchQuery.trim()) return items
-    const q = searchQuery.toLowerCase()
-    return items.filter(
-      item =>
-        item.name.toLowerCase().includes(q) ||
-        (item.category && item.category.toLowerCase().includes(q))
-    )
-  }, [resources, activeTab, searchQuery])
+  // 搜尋結果（從資料庫查詢）
+  const [searchResults, setSearchResults] = useState<ResourceItem[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // 搜尋時查詢資料庫（debounce 300ms）
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    if (!searchQuery.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      setIsSearching(true)
+      try {
+        const tableMap = {
+          attraction: 'attractions',
+          hotel: 'hotels',
+          restaurant: 'restaurants',
+        } as const
+        const table = tableMap[activeTab] as 'attractions' | 'hotels' | 'restaurants'
+        const extraSelect = activeTab === 'hotel' ? ', star_rating' : ''
+        const selectStr = `id, name, category, thumbnail, data_verified, latitude, longitude, address, description, region_id${extraSelect}`
+
+        let query = supabase
+          .from(table)
+          .select(selectStr as 'id, name, category, thumbnail')
+          .eq('is_active', true)
+          .ilike('name', `%${searchQuery}%`)
+
+        if (resolvedCountryId) {
+          query = query.eq('country_id', resolvedCountryId)
+        }
+
+        const { data, error } = await query.order('name').limit(50)
+
+        if (!error && data) {
+          setSearchResults(
+            data.map((item: Record<string, unknown>) => ({
+              id: item.id as string,
+              name: item.name as string,
+              type: activeTab,
+              category:
+                activeTab === 'hotel' && item.star_rating
+                  ? `${item.star_rating}星`
+                  : (item.category as string | null),
+              thumbnail: item.thumbnail as string | null,
+              latitude: item.latitude as number | null,
+              longitude: item.longitude as number | null,
+              address: item.address as string | null,
+              description: item.description as string | null,
+              region_id: item.region_id as string | null,
+            }))
+          )
+        }
+      } catch (err) {
+        logger.error('[ResourcePanel] 搜尋失敗:', err)
+      } finally {
+        setIsSearching(false)
+      }
+    }, 300)
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+    }
+  }, [searchQuery, activeTab, resolvedCountryId])
+
+  // 顯示的資源：有搜尋時用搜尋結果，沒搜尋時用預載資料
+  const filteredResources = searchQuery.trim() ? searchResults : resources[activeTab]
 
   // 取得當前選擇的國家名稱
   const selectedCountryName = countries.find(c => c.id === resolvedCountryId)?.name || ''
@@ -448,7 +513,7 @@ export function ResourcePanel({
 
       {/* 資源列表（雙欄佈局）*/}
       <div className="flex-1 overflow-y-auto p-2">
-        {loading[activeTab] ? (
+        {(loading[activeTab] || isSearching) ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 size={20} className="animate-spin text-muted-foreground" />
           </div>
