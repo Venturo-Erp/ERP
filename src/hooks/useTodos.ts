@@ -122,7 +122,11 @@ export function useTodos() {
     })
 
     // 樂觀更新：使用 functional update 避免 stale closure 問題
-    mutate(swrKey, (currentTodos: Todo[] | undefined) => [...(currentTodos || []), newTodo], false)
+    mutate(
+      swrKey,
+      (currentTodos: Todo[] | undefined) => [...(currentTodos || []), newTodo],
+      { revalidate: false }
+    )
 
     try {
       // 確保 workspace_id 存在（Supabase 必填欄位）
@@ -169,12 +173,11 @@ export function useTodos() {
     }
 
     // 樂觀更新：使用 functional update 避免 stale closure 問題
-    // 第三個參數 false = 不 revalidate（不重新 fetch）
     mutate(
       swrKey,
       (currentTodos: Todo[] | undefined) =>
         (currentTodos || []).map(t => (t.id === id ? { ...t, ...updatedTodo } : t)),
-      false
+      { revalidate: false }
     )
 
     try {
@@ -193,7 +196,7 @@ export function useTodos() {
     mutate(
       swrKey,
       (currentTodos: Todo[] | undefined) => (currentTodos || []).filter(t => t.id !== id),
-      false
+      { revalidate: false }
     )
 
     try {
