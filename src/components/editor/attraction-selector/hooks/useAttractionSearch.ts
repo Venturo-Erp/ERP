@@ -219,15 +219,7 @@ export function useAttractionSearch({
 
         const { data, error } = await query
 
-        if (error) {
-          console.error(`[AttractionSearch] 載入失敗:`, error)
-          throw error
-        }
-        
-        // Debug: 確認載入數量和是否有清水寺
-        console.log(`[AttractionSearch] 載入 ${data?.length || 0} 個景點，country_id=${selectedCountryId}`)
-        const hasKiyomizu = data?.some(a => a.name.includes('清水寺'))
-        console.log(`[AttractionSearch] 包含清水寺: ${hasKiyomizu}`)
+        if (error) throw error
 
         const formatted = (data || []).map(
           (item: {

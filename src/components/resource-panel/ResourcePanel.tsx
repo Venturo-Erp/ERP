@@ -273,7 +273,7 @@ export function ResourcePanel({
       // 簡化版：只用國家篩選
       if (resolvedCountryId) query = query.eq('country_id', resolvedCountryId)
 
-      const { data, error } = await query.order('name').limit(200)
+      const { data, error } = await query.order('name').limit(1000)
 
       if (error) {
         logger.error(`[ResourcePanel] 載入${type}失敗:`, error)
@@ -372,11 +372,6 @@ export function ResourcePanel({
               <MapPin size={14} />
               <span>{selectedCountryName || '地區'}</span>
             </div>
-            {resolvedCountryId && (
-              <span className="text-[10px] text-muted-foreground mt-0.5">
-                {resources.attraction.length + resources.hotel.length + resources.restaurant.length}
-              </span>
-            )}
           </button>
           
           {/* 下拉選單 */}
@@ -431,9 +426,6 @@ export function ResourcePanel({
               {tab.icon}
               {tab.label}
             </div>
-            <span className="text-[10px] text-muted-foreground mt-0.5">
-              {resources[tab.key].length}
-            </span>
           </button>
         ))}
       </div>
