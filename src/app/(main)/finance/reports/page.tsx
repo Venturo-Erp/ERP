@@ -2,101 +2,125 @@
 
 import Link from 'next/link'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
-import { ContentContainer } from '@/components/layout/content-container'
-import { Card } from '@/components/ui/card'
-import { FileDown, TrendingUp, AlertCircle, ArrowRight, Wallet, BarChart3 } from 'lucide-react'
-import { REPORTS_LABELS } from './constants/labels'
+import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
+import { ActionCell } from '@/components/table-cells'
+import { 
+  FileDown, 
+  TrendingUp, 
+  AlertCircle, 
+  Wallet, 
+  BarChart3,
+  ExternalLink 
+} from 'lucide-react'
 
-// 報表卡片組件
-function ReportCard({
-  title,
-  description,
-  href,
-  icon: Icon,
-  iconColor,
-}: {
-  title: string
+interface ReportItem {
+  id: string
+  name: string
   description: string
   href: string
-  icon: React.ComponentType<{ size?: number; className?: string }>
+  icon: React.ComponentType<{ className?: string }>
   iconColor: string
-}) {
-  return (
-    <Link href={href}>
-      <Card className="p-6 border border-border hover:border-morandi-gold hover:shadow-md transition-all cursor-pointer group">
-        <div className="flex items-start gap-4">
-          <div className={`p-3 rounded-lg bg-opacity-10 ${iconColor.replace('text-', 'bg-')}/10`}>
-            <Icon size={24} className={iconColor} />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-morandi-primary mb-1 group-hover:text-morandi-gold transition-colors">
-              {title}
-            </h3>
-            <p className="text-sm text-morandi-secondary">{description}</p>
-          </div>
-          <ArrowRight
-            size={20}
-            className="text-morandi-secondary group-hover:text-morandi-gold transition-colors"
-          />
-        </div>
-      </Card>
-    </Link>
-  )
 }
 
+const reports: ReportItem[] = [
+  {
+    id: '1',
+    name: '月請款報表',
+    description: '依月份檢視所有請款單及出納單明細',
+    href: '/finance/reports/monthly-disbursement',
+    icon: FileDown,
+    iconColor: 'text-morandi-gold',
+  },
+  {
+    id: '2',
+    name: '月收款報表',
+    description: '依月份檢視收款明細與統計',
+    href: '/finance/reports/monthly-income',
+    icon: TrendingUp,
+    iconColor: 'text-morandi-green',
+  },
+  {
+    id: '3',
+    name: '未結團旅遊團',
+    description: '顯示已出發但尚未結團的旅遊團列表',
+    href: '/finance/reports/unclosed-tours',
+    icon: AlertCircle,
+    iconColor: 'text-morandi-red',
+  },
+  {
+    id: '4',
+    name: '未收款訂單',
+    description: '顯示有尾款尚未收取的訂單',
+    href: '/finance/reports/unpaid-orders',
+    icon: Wallet,
+    iconColor: 'text-morandi-red',
+  },
+  {
+    id: '5',
+    name: '旅遊團損益表',
+    description: '依團別檢視收支與利潤分析',
+    href: '/finance/reports/tour-pnl',
+    icon: BarChart3,
+    iconColor: 'text-morandi-blue',
+  },
+]
+
 export default function ReportsPage() {
+  const columns: TableColumn<ReportItem>[] = [
+    {
+      key: 'name',
+      label: '報表名稱',
+      render: (_, row) => {
+        const Icon = row.icon
+        return (
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg bg-morandi-container`}>
+              <Icon className={`w-4 h-4 ${row.iconColor}`} />
+            </div>
+            <span className="font-medium text-morandi-primary">{row.name}</span>
+          </div>
+        )
+      },
+    },
+    {
+      key: 'description',
+      label: '說明',
+      render: value => (
+        <span className="text-sm text-morandi-secondary">{String(value)}</span>
+      ),
+    },
+  ]
+
+  const renderActions = (report: ReportItem) => (
+    <ActionCell
+      actions={[
+        {
+          icon: ExternalLink,
+          label: '開啟報表',
+          onClick: () => {
+            window.location.href = report.href
+          },
+        },
+      ]}
+    />
+  )
+
   return (
     <ContentPageLayout
-      title={REPORTS_LABELS.MANAGE_3253}
-      breadcrumb={[
-        { label: REPORTS_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-        { label: REPORTS_LABELS.BREADCRUMB_FINANCE, href: '/finance' },
-        { label: REPORTS_LABELS.BREADCRUMB_REPORTS, href: '/finance/reports' },
-      ]}
-      className="space-y-6"
+      title="財務報表"
+      icon={BarChart3}
     >
-      <ContentContainer>
-        <h3 className="text-lg font-semibold text-morandi-primary mb-4">
-          {REPORTS_LABELS.LABEL_8192}
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <ReportCard
-            title={REPORTS_LABELS.LABEL_3446}
-            description={REPORTS_LABELS.TOTAL_6998}
-            href="/finance/reports/monthly-disbursement"
-            icon={FileDown}
-            iconColor="text-morandi-gold"
-          />
-          <ReportCard
-            title={REPORTS_LABELS.LABEL_120}
-            description={REPORTS_LABELS.LABEL_7786}
-            href="/finance/reports/monthly-income"
-            icon={TrendingUp}
-            iconColor="text-morandi-green"
-          />
-          <ReportCard
-            title={REPORTS_LABELS.LABEL_996}
-            description={REPORTS_LABELS.LABEL_4844}
-            href="/finance/reports/unclosed-tours"
-            icon={AlertCircle}
-            iconColor="text-morandi-red"
-          />
-          <ReportCard
-            title={REPORTS_LABELS.LABEL_1474}
-            description={REPORTS_LABELS.LABEL_5090}
-            href="/finance/reports/unpaid-orders"
-            icon={Wallet}
-            iconColor="text-morandi-red"
-          />
-          <ReportCard
-            title={REPORTS_LABELS.TOTAL_2832}
-            description={REPORTS_LABELS.LABEL_7727}
-            href="/finance/reports/tour-pnl"
-            icon={BarChart3}
-            iconColor="text-morandi-blue"
-          />
-        </div>
-      </ContentContainer>
+      <div className="p-4">
+        <EnhancedTable
+          columns={columns}
+          data={reports}
+          actions={renderActions}
+          onRowClick={(report) => {
+            window.location.href = report.href
+          }}
+          bordered
+        />
+      </div>
     </ContentPageLayout>
   )
 }
