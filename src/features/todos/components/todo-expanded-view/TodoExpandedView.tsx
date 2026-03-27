@@ -57,12 +57,10 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
           </div>
         )}
 
-        {/* 主要內容區 */}
+        {/* 主要內容區 - 永遠左右兩邊 */}
         <div className="flex flex-col lg:flex-row flex-1 overflow-hidden pt-2">
           {/* 左半部：待辦詳情 */}
-          <div
-            className={`${todo.task_type ? 'w-full lg:w-1/2' : 'w-full'} px-4 sm:px-6 py-3 sm:py-4 flex flex-col overflow-y-auto`}
-          >
+          <div className="w-full lg:w-1/2 px-4 sm:px-6 py-3 sm:py-4 flex flex-col overflow-y-auto">
             {/* 標題與星級 */}
             <div className="mb-4 bg-card border border-border rounded-xl p-4 shadow-sm">
               <div className="flex items-center justify-between gap-4">
@@ -136,14 +134,35 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
             )}
           </div>
 
-          {/* 右半部：任務專屬表單（根據 task_type 自動顯示）*/}
-          {todo.task_type && (
-            <div className="w-full lg:w-1/2 px-4 sm:px-6 py-3 sm:py-4 flex flex-col overflow-y-auto border-l border-border/40">
-              {canEdit ? (
+          {/* 右半部：任務專屬表單或快速操作分頁 */}
+          <div className="w-full lg:w-1/2 px-4 sm:px-6 py-3 sm:py-4 flex flex-col overflow-y-auto border-l border-border/40">
+            {todo.task_type ? (
+              /* 有 task_type：強制顯示專屬表單 */
+              canEdit ? (
+                <div className="flex-1 bg-card border border-border rounded-xl p-4 overflow-y-auto shadow-sm">
+                  <TaskTypeForm
+                    taskType={todo.task_type}
+                    todo={todo}
+                    onUpdate={onUpdate}
+                    onClose={onClose}
+                  />
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center text-morandi-secondary">
+                    <Eye size={32} className="mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">{COMMON_LABELS.readOnlyMode}</p>
+                  </div>
+                </div>
+              )
+            ) : (
+              /* 沒有 task_type：顯示快速操作分頁 */
+              canEdit ? (
                 <>
+                  <QuickActionsSection activeTab={activeTab} onTabChange={setActiveTab} />
                   <div className="flex-1 bg-card border border-border rounded-xl p-4 overflow-y-auto shadow-sm">
-                    <TaskTypeForm
-                      taskType={todo.task_type}
+                    <QuickActionContent
+                      activeTab={activeTab}
                       todo={todo}
                       onUpdate={onUpdate}
                       onClose={onClose}
@@ -157,9 +176,9 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
                     <p className="text-sm">{COMMON_LABELS.readOnlyMode}</p>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
+              )
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
