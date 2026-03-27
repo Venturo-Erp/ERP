@@ -2,7 +2,7 @@
 // Phase 1: 純雲端架構的 Todos Hook (使用 SWR)
 // 使用資料存取層 (DAL) 進行資料查詢
 
-import { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import useSWR, { mutate } from 'swr'
 import { supabase } from '@/lib/supabase/client'
 import {
@@ -85,19 +85,38 @@ export function useTodos() {
   )
 
   // Realtime 訂閱：當其他人新增/修改/刪除待辦時，自動更新
+  // 追蹤最近操作的 ID，避免自己的操作觸發 revalidate
+  const recentOpsRef = useRef<Set<string>>(new Set())
+
   useEffect(() => {
     if (!swrKey) return
+
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
     const channel = supabase
       .channel('todos_realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'todos' }, payload => {
-        logger.log('[Todos] Realtime 收到更新:', payload.eventType)
-        // 重新抓取資料
-        mutate(swrKey)
+        const recordId = (payload.new as { id?: string })?.id || (payload.old as { id?: string })?.id
+        
+        // 如果是自己剛操作的，跳過
+        if (recordId && recentOpsRef.current.has(recordId)) {
+          logger.log('[Todos] Realtime 跳過自己的操作:', payload.eventType, recordId)
+          recentOpsRef.current.delete(recordId)
+          return
+        }
+
+        logger.log('[Todos] Realtime 收到他人更新:', payload.eventType)
+        
+        // Debounce: 300ms 內只觸發一次
+        if (debounceTimer) clearTimeout(debounceTimer)
+        debounceTimer = setTimeout(() => {
+          mutate(swrKey)
+        }, 300)
       })
       .subscribe()
 
     return () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
       supabase.removeChannel(channel)
     }
   }, [swrKey])
@@ -130,6 +149,10 @@ export function useTodos() {
       hook_workspaceId: workspaceId,
       user_workspace_id: user?.workspace_id,
     })
+
+    // 記錄這次操作的 ID，避免 Realtime 重複觸發
+    recentOpsRef.current.add(newTodo.id)
+    setTimeout(() => recentOpsRef.current.delete(newTodo.id), 3000)
 
     // 樂觀更新：使用 functional update 避免 stale closure 問題
     mutate(swrKey, (currentTodos: Todo[] | undefined) => [...(currentTodos || []), newTodo], false)
@@ -178,6 +201,10 @@ export function useTodos() {
       updated_at: new Date().toISOString(),
     }
 
+    // 記錄這次操作的 ID，避免 Realtime 重複觸發
+    recentOpsRef.current.add(id)
+    setTimeout(() => recentOpsRef.current.delete(id), 3000)
+
     // 樂觀更新：使用 functional update 避免 stale closure 問題
     // 第三個參數 false = 不 revalidate（不重新 fetch）
     mutate(
@@ -199,6 +226,10 @@ export function useTodos() {
 
   // 刪除待辦
   const remove = async (id: string) => {
+    // 記錄這次操作的 ID，避免 Realtime 重複觸發
+    recentOpsRef.current.add(id)
+    setTimeout(() => recentOpsRef.current.delete(id), 3000)
+
     // 樂觀更新：使用 functional update 避免 stale closure 問題
     mutate(
       swrKey,
