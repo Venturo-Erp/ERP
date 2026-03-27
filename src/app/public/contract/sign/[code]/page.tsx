@@ -21,10 +21,7 @@ export default async function Page({ params }: PageProps) {
     .eq('code', code)
     .single()
 
-  console.log('[簽約頁面] 查詢合約:', { code, contract: !!contract, error: error?.message })
-
   if (error || !contract) {
-    console.error('[簽約頁面] 查詢合約失敗:', error)
     notFound()
   }
 
@@ -35,16 +32,12 @@ export default async function Page({ params }: PageProps) {
     .eq('id', contract.tour_id)
     .single()
 
-  console.log('[簽約頁面] 查詢團:', { tourId: contract.tour_id, tour: !!tour, error: tourError?.message })
-
   // 查詢公司資料
   const { data: workspace, error: workspaceError } = await supabase
     .from('workspaces')
     .select('id, name, seal_image_url')
     .eq('id', contract.workspace_id)
     .single()
-
-  console.log('[簽約頁面] 查詢公司:', { workspaceId: contract.workspace_id, workspace: !!workspace, error: workspaceError?.message })
 
   // 組合資料
   const contractWithRelations = {

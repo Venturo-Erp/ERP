@@ -206,9 +206,6 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     setError(null)
 
     try {
-      console.log('[簽名] 開始提交，contractId:', contract.id)
-      console.log('[簽名] signature 長度:', signaturePreview.length)
-      
       const response = await fetch('/api/contracts/sign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -218,10 +215,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
         }),
       })
 
-      console.log('[簽名] API 回應狀態:', response.status)
-      
       const data = await response.json()
-      console.log('[簽名] API 回應內容:', data)
 
       if (!response.ok) {
         throw new Error(data.error || '簽署失敗')
@@ -229,7 +223,6 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
 
       setStep('success')
     } catch (err) {
-      console.error('[簽名] 錯誤:', err)
       setError((err as Error).message)
     } finally {
       setSigning(false)
