@@ -5,11 +5,8 @@
 import React, { useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import { supabase } from '@/lib/supabase/client'
-import {
-  createTodo as createTodoEntity,
-  updateTodo as updateTodoEntity,
-  deleteTodo as deleteTodoEntity,
-} from '@/data/entities/todos'
+// 不使用 entity layer 的 create/update/delete，因為它們會呼叫 invalidate() 導致重新 fetch
+// 直接用 Supabase client 操作
 import { getAllTodos } from '@/lib/data/todos'
 import { CACHE_STRATEGY } from '@/lib/swr'
 import type { Todo } from '@/stores/types'
@@ -75,8 +72,12 @@ export function useTodos() {
     swrKey,
     // SWR fetcher 接收 key，我們需要從 key 中提取 workspaceId
     async () => {
+      // DEBUG: 追蹤 fetcher 被呼叫的時機
+      logger.log('[useTodos] 🔄 fetcher 被呼叫，workspaceId:', workspaceId)
       if (!workspaceId) return []
-      return getAllTodos(workspaceId)
+      const result = await getAllTodos(workspaceId)
+      logger.log('[useTodos] ✅ fetcher 完成，共', result.length, '筆')
+      return result
     },
     {
       ...CACHE_STRATEGY.REALTIME,
@@ -131,16 +132,15 @@ export function useTodos() {
         throw new Error('無法取得 workspace_id，請重新登入')
       }
 
-      // 轉換為 Supabase Insert 類型（Json 欄位需要轉型）
-      // 排除 creator 欄位（todos 表沒有此欄位，改用 created_by_legacy）
+      // 直接用 Supabase client 新增（不經過 entity layer，避免 invalidate）
       const { creator, ...todoWithoutCreator } = newTodo
-      await createTodoEntity({
+      const { error } = await supabase.from('todos').insert({
         ...todoWithoutCreator,
+        workspace_id: workspace_id!, // 確保有值
         created_by_legacy: creator,
-        related_items: newTodo.related_items,
-        sub_tasks: newTodo.sub_tasks,
-        notes: newTodo.notes,
-      } as unknown as Parameters<typeof createTodoEntity>[0])
+      } as any)
+
+      if (error) throw error
 
       // 成功後不需要 revalidate，樂觀更新已經是正確的資料
       return newTodo
@@ -178,7 +178,9 @@ export function useTodos() {
     )
 
     try {
-      await updateTodoEntity(id, updatedTodo as Parameters<typeof updateTodoEntity>[1])
+      // 直接用 Supabase client 更新（不經過 entity layer，避免 invalidate）
+      const { error } = await supabase.from('todos').update(updatedTodo).eq('id', id)
+      if (error) throw error
       // 成功後不需要 revalidate，樂觀更新已經是正確的資料
     } catch (err) {
       // 失敗才需要 revalidate 回復正確狀態
@@ -197,7 +199,9 @@ export function useTodos() {
     )
 
     try {
-      await deleteTodoEntity(id)
+      // 直接用 Supabase client 刪除（不經過 entity layer，避免 invalidate）
+      const { error } = await supabase.from('todos').delete().eq('id', id)
+      if (error) throw error
       // 成功後不需要 revalidate，樂觀更新已經是正確的資料
     } catch (err) {
       // 失敗才需要 revalidate 回復正確狀態
