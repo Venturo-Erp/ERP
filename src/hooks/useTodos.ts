@@ -84,67 +84,9 @@ export function useTodos() {
     CACHE_STRATEGY.REALTIME
   )
 
-  // Realtime 訂閱：當其他人新增/修改/刪除待辦時，直接更新快取
-  // 不重新 fetch 整個列表，避免閃爍
-  useEffect(() => {
-    if (!swrKey || !workspaceId) return
-
-    const channel = supabase
-      .channel(`todos_realtime_${workspaceId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'todos', filter: `workspace_id=eq.${workspaceId}` },
-        payload => {
-          const newTodo = payload.new as Todo
-          logger.log('[Todos] Realtime INSERT:', newTodo.id)
-          // 直接加到快取，不 revalidate
-          mutate(
-            swrKey,
-            (current: Todo[] | undefined) => {
-              if (!current) return [newTodo]
-              // 避免重複（樂觀更新可能已經加過）
-              if (current.some(t => t.id === newTodo.id)) return current
-              return [...current, newTodo]
-            },
-            { revalidate: false }
-          )
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'todos', filter: `workspace_id=eq.${workspaceId}` },
-        payload => {
-          const updated = payload.new as Todo
-          logger.log('[Todos] Realtime UPDATE:', updated.id)
-          // 直接更新快取中的那一筆
-          mutate(
-            swrKey,
-            (current: Todo[] | undefined) =>
-              (current || []).map(t => (t.id === updated.id ? { ...t, ...updated } : t)),
-            { revalidate: false }
-          )
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: 'DELETE', schema: 'public', table: 'todos', filter: `workspace_id=eq.${workspaceId}` },
-        payload => {
-          const deleted = payload.old as { id: string }
-          logger.log('[Todos] Realtime DELETE:', deleted.id)
-          // 直接從快取移除
-          mutate(
-            swrKey,
-            (current: Todo[] | undefined) => (current || []).filter(t => t.id !== deleted.id),
-            { revalidate: false }
-          )
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [swrKey, workspaceId])
+  // Realtime 訂閱：暫時關閉
+  // 目前以單人操作為主，純樂觀更新即可
+  // 之後需要多人協作時再啟用（參考 docs/SWR_BEST_PRACTICES.md）
 
   // 新增待辦
   const create = async (todoData: Omit<Todo, 'id' | 'created_at' | 'updated_at'>) => {
