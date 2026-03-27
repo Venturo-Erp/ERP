@@ -136,12 +136,15 @@ export function SignaturePad({
     <div className={`flex flex-col gap-3 ${className}`}>
       <div className="text-sm text-morandi-secondary mb-1">請在下方簽名：</div>
       
-      {/* 簽名區域 */}
-      <div className="border-2 border-dashed border-morandi-gold/50 rounded-lg overflow-hidden bg-white">
+      {/* 簽名區域 - touch-none 防止觸控時縮放/滾動 */}
+      <div 
+        className="border-2 border-dashed border-morandi-gold/50 rounded-lg overflow-hidden bg-white touch-none"
+        style={{ touchAction: 'none' }}
+      >
         <canvas
           ref={canvasRef}
           className="touch-none cursor-crosshair"
-          style={{ width, height }}
+          style={{ width, height, touchAction: 'none' }}
           onMouseDown={startDrawing}
           onMouseMove={draw}
           onMouseUp={stopDrawing}

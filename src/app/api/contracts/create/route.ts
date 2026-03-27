@@ -55,6 +55,9 @@ export async function POST(request: NextRequest) {
       emergencyContactPhone,
       contractData,
       createdBy,
+      // 附件選項
+      includeMemberList = false,
+      includeItinerary = false,
     } = body
 
     if (!tourId || !workspaceId || !memberIds?.length) {
@@ -95,6 +98,12 @@ export async function POST(request: NextRequest) {
     const today = new Date()
     const departureDate = tour.departure_date ? new Date(tour.departure_date) : today
     
+    // 計算旅客名稱（多人時加「等 N 人」）
+    const baseTravelerName = signerName || firstMember?.chinese_name || ''
+    const travelerNameWithCount = memberIds.length > 1
+      ? `${baseTravelerName} 等 ${memberIds.length} 人`
+      : baseTravelerName
+
     const generatedContractData = {
       // 審閱日期（今天）
       reviewYear: (today.getFullYear() - 1911).toString(),
@@ -102,7 +111,7 @@ export async function POST(request: NextRequest) {
       reviewDay: today.getDate().toString(),
       
       // 旅客資訊
-      travelerName: signerName || firstMember?.chinese_name || '',
+      travelerName: travelerNameWithCount,
       travelerIdNumber: signerIdNumber || firstMember?.id_number || '',
       travelerPhone: signerPhone || '',
       travelerAddress: signerAddress || '',
@@ -166,6 +175,9 @@ export async function POST(request: NextRequest) {
         contract_data: generatedContractData,
         status: 'draft',
         created_by: createdBy,
+        // 附件選項
+        include_member_list: includeMemberList,
+        include_itinerary: includeItinerary,
       })
       .select()
       .single()
