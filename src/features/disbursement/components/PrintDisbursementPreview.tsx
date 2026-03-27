@@ -436,11 +436,7 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                     const { payee: groupPayee, supplier: groupSupplier } = splitPayFor(group.payFor)
                     const subtotalRowSpan = (group as any).subtotalRowSpan || 0
                     const showSubtotalCell = subtotalRowSpan > 0 && isFirstInGroup
-                    if (isFirstInGroup) {
-                      console.log(
-                        `[Tour] Group ${groupIdx}: payFor=${group.payFor}, subtotalRowSpan=${subtotalRowSpan}, showSubtotalCell=${showSubtotalCell}, showTotal=${group.showTotal}, total=${group.total}`
-                      )
-                    }
+
                     return (
                       <tr key={`tour-${groupIdx}-${itemIdx}`}>
                         {isFirstInGroup && (

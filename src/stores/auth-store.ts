@@ -209,12 +209,6 @@ export const useAuthStore = create<AuthState>()(
           })
 
           const validateResult = await validateResponse.json()
-          console.log(
-            '[LOGIN DEBUG] Step 1 response status:',
-            validateResponse.status,
-            'result:',
-            JSON.stringify(validateResult).substring(0, 200)
-          )
 
           if (!validateResult.success) {
             logger.warn(`⚠️ 登入驗證失敗: ${validateResult.message}`)
@@ -226,20 +220,10 @@ export const useAuthStore = create<AuthState>()(
 
           // 2. 用真實 auth email 建立客戶端 Supabase session
           const authEmail = (validateResult.data?.authEmail ?? validateResult.authEmail) as string
-          console.log(
-            '[LOGIN DEBUG] Step 2: authEmail =',
-            authEmail,
-            'password length =',
-            password.length
-          )
           const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
             email: authEmail,
             password,
           })
-          console.log(
-            '[LOGIN DEBUG] Step 2 result:',
-            authError ? 'FAIL: ' + authError.message + ' status=' + authError.status : 'OK'
-          )
 
           if (authError || !authData) {
             logger.warn(`⚠️ Supabase Auth 登入失敗: ${authError?.message}`)
