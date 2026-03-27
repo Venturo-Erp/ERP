@@ -1,187 +1,135 @@
-# SWR 最佳實踐規範
+# SWR 樂觀更新規範
 
-## 原則：避免畫面閃爍
+## 核心原則
 
-**問題**：操作後整個列表重新 fetch，導致畫面閃爍。
+**樂觀更新 = 先改 UI，再同步 Server**
 
-**解法**：樂觀更新（Optimistic Update）
+| 時機 | 動作 |
+|------|------|
+| 操作前 | 樂觀更新 UI（`mutate(key, updater, { revalidate: false })`） |
+| 成功後 | **不做任何事**（樂觀更新已經是正確的） |
+| 失敗時 | `invalidate()` 或 `mutate(key)` 回滾 |
 
 ---
 
-## 樂觀更新模式
-
-### ✅ 正確做法
+## ❌ 錯誤做法（會閃爍）
 
 ```typescript
-// 1. 樂觀更新：先更新本地狀態
-mutate(
-  swrKey,
-  (current) => /* 更新後的資料 */,
-  { revalidate: false }  // 不重新 fetch
-)
+// 樂觀更新
+mutate(key, newData, { revalidate: false })
 
-// 2. 呼叫 API
+// API 成功後又 invalidate → 閃爍！
+await api.create(data)
+await invalidate()  // ❌ 不要這樣
+```
+
+## ✅ 正確做法
+
+```typescript
+// 樂觀更新
+mutate(key, newData, { revalidate: false })
+
 try {
-  await apiCall()
-  // 成功後不需要 revalidate
+  await api.create(data)
+  // 成功：不做任何事，樂觀更新已生效
 } catch (err) {
-  // 失敗才需要 revalidate 回復正確狀態
-  mutate(swrKey)
+  // 失敗：invalidate 回滾到正確狀態
+  await invalidate()
   throw err
 }
 ```
 
-### ❌ 錯誤做法
+---
 
-```typescript
-// 樂觀更新
-mutate(swrKey, ..., false)
+## Entity Layer（createEntityHook）
 
-// API 成功後又 revalidate → 畫面閃爍！
-await apiCall()
-mutate(swrKey)  // ❌ 不要這樣
-```
+我們的 entity layer 已經遵循這個規範：
+
+| 方法 | 樂觀更新 | 成功後 | 失敗後 |
+|------|---------|--------|--------|
+| `create()` | ✅ | 不 invalidate | invalidate |
+| `update()` | ✅ | 不 invalidate | invalidate |
+| `delete()` | ✅ | 不 invalidate | invalidate |
+| `batchRemove()` | ✅ | 不 invalidate | invalidate |
+
+**所有使用 entity layer 的地方自動遵循這個規範。**
 
 ---
 
-## 各種操作的標準寫法
+## 自定義 Hook（如 useTodos）
 
-### 新增
+如果你不使用 entity layer，需要自己實作：
 
 ```typescript
-const create = async (item: Item) => {
-  const newItem = { id: generateUUID(), ...item }
+const create = async (data) => {
+  const newItem = { id: generateUUID(), ...data }
   
-  // 樂觀更新：加到列表
+  // 1. 樂觀更新
   mutate(
     swrKey,
-    (current: Item[] | undefined) => [...(current || []), newItem],
+    (current) => [...(current || []), newItem],
     { revalidate: false }
   )
 
   try {
-    await createEntity(newItem)
-    // 成功：不 revalidate
+    // 2. 呼叫 API（直接用 Supabase，不經過 entity layer）
+    const { error } = await supabase.from('table').insert(newItem)
+    if (error) throw error
+    
+    // 3. 成功：不做任何事
     return newItem
   } catch (err) {
-    mutate(swrKey)  // 失敗：revalidate 回復
+    // 4. 失敗：回滾
+    mutate(swrKey)
     throw err
   }
 }
 ```
-
-### 更新
-
-```typescript
-const update = async (id: string, updates: Partial<Item>) => {
-  // 樂觀更新：修改列表中的項目
-  mutate(
-    swrKey,
-    (current: Item[] | undefined) =>
-      (current || []).map(item =>
-        item.id === id ? { ...item, ...updates } : item
-      ),
-    { revalidate: false }
-  )
-
-  try {
-    await updateEntity(id, updates)
-    // 成功：不 revalidate
-  } catch (err) {
-    mutate(swrKey)  // 失敗：revalidate 回復
-    throw err
-  }
-}
-```
-
-### 刪除
-
-```typescript
-const remove = async (id: string) => {
-  // 樂觀更新：從列表移除
-  mutate(
-    swrKey,
-    (current: Item[] | undefined) =>
-      (current || []).filter(item => item.id !== id),
-    { revalidate: false }
-  )
-
-  try {
-    await deleteEntity(id)
-    // 成功：不 revalidate
-  } catch (err) {
-    mutate(swrKey)  // 失敗：revalidate 回復
-    throw err
-  }
-}
-```
-
----
-
-## 分頁列表的樂觀更新
-
-```typescript
-const remove = async (id: string) => {
-  // 樂觀更新：從分頁列表移除 + 更新 count
-  await mutateSelf(
-    prev => prev ? {
-      ...prev,
-      items: prev.items.filter(item => item.id !== id),
-      count: prev.count - 1,
-    } : prev,
-    { revalidate: false }
-  )
-
-  try {
-    await deleteEntity(id)
-  } catch (err) {
-    await invalidateAllPaginatedQueries()
-    throw err
-  }
-}
-```
-
----
-
-## 何時需要 revalidate
-
-| 情況 | revalidate |
-|------|------------|
-| 操作成功 | ❌ 不需要 |
-| 操作失敗 | ✅ 需要回復 |
-| 其他 session 更新（Realtime） | ✅ 自動觸發 |
-| 使用者手動重整 | ✅ 自動觸發 |
 
 ---
 
 ## Realtime 訂閱
 
-如果有 Realtime 訂閱，其他人的操作會自動觸發 revalidate：
+### 單人操作為主
+關閉 Realtime，純樂觀更新即可。
+
+### 多人協作
+Realtime 收到事件時，**直接更新快取**，不要 `mutate(key)` 重新 fetch：
 
 ```typescript
-useEffect(() => {
-  const channel = supabase
-    .channel('table_realtime')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'table' }, () => {
-      mutate(swrKey)  // 其他人的操作會觸發這裡
-    })
-    .subscribe()
+// ✅ 正確：直接更新快取
+.on('INSERT', (payload) => {
+  mutate(key, (current) => {
+    if (current?.some(item => item.id === payload.new.id)) return current
+    return [...(current || []), payload.new]
+  }, { revalidate: false })
+})
 
-  return () => { channel.unsubscribe() }
-}, [swrKey])
+// ❌ 錯誤：觸發重新 fetch
+.on('INSERT', () => {
+  mutate(key)  // 會閃爍！
+})
 ```
 
 ---
 
 ## 檢查清單
 
-開發新的 CRUD hook 時：
+新增 CRUD 功能時：
 
-- [ ] create: 樂觀新增，成功不 revalidate
-- [ ] update: 樂觀更新，成功不 revalidate
-- [ ] delete: 樂觀刪除，成功不 revalidate
-- [ ] 所有操作失敗時 revalidate 回復
+- [ ] 樂觀更新用 `{ revalidate: false }`
+- [ ] 成功後**不** invalidate
+- [ ] 只有失敗時 invalidate
+- [ ] 如果有 Realtime，用直接更新快取的方式
 - [ ] 測試：操作後畫面不閃爍
+
+---
+
+## 相關檔案
+
+- `src/data/core/createEntityHook.ts` — Entity layer 核心
+- `src/hooks/useTodos.ts` — 自定義 hook 範例
+- `src/lib/swr/config.ts` — SWR 全域設定
 
 ---
 
