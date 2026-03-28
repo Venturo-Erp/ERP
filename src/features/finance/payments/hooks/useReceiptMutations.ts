@@ -199,7 +199,7 @@ export function useReceiptMutations() {
       const firstItemReceiptType = resolveReceiptType(paymentItems[0]?.receipt_type)
       const firstPaymentMethod = PAYMENT_METHOD_MAP[firstItemReceiptType] || 'transfer'
       const firstPaymentMethodId = getPaymentMethodId(firstItemReceiptType, paymentItems[0]?.receipt_type)
-      logger.info('[createReceiptWithItems] Step 1: Creating receipt...', { tourCode, receiptNumber, totalAmount, firstPaymentMethodId })
+      logger.info('[createReceiptWithItems] Step 1: Creating receipt...', { tourCode, receiptNumber, totalAmount, firstPaymentMethodId, paymentItemsCount: paymentItems.length })
       const createdReceipt = await createReceipt({
         receipt_number: receiptNumber,
         workspace_id: workspaceId,
@@ -271,7 +271,7 @@ export function useReceiptMutations() {
           const receiptTypeNum = resolveReceiptType(item.receipt_type)
           const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
           const itemPaymentMethodId = getPaymentMethodId(receiptTypeNum, item.receipt_type)
-          const itemReceiptNumber = `${receiptNumber}-${String.fromCharCode(65 + i)}` // -A, -B, -C...
+          const itemReceiptNumber = `${receiptNumber}-${String.fromCharCode(64 + i)}` // i=1→A, i=2→B, i=3→C...
 
           logger.info('[createReceiptWithItems] Creating additional receipt...', { i, receiptTypeNum, amount: item.amount })
 
