@@ -793,7 +793,7 @@ export function AddReceiptDialog({
                   : ADD_RECEIPT_DIALOG_LABELS.取消}
             </Button>
             
-            {/* 會計專用：確認/異常按鈕 */}
+            {/* 會計專用：儲存 + 標記異常 / 儲存 + 確認 */}
             {canConfirm && (
               <>
                 <Button
@@ -802,11 +802,14 @@ export function AddReceiptDialog({
                     if (!editingReceipt) return
                     setIsSubmitting(true)
                     try {
+                      // 先儲存編輯內容
+                      await handleSubmit()
+                      // 再更新狀態為異常
                       await onUpdate?.(editingReceipt.id, { 
                         status: '2',
                         updated_by: user?.id,
                       })
-                      toast({ title: '已標記為異常' })
+                      toast({ title: '已儲存並標記為異常' })
                       onSuccess?.()
                       onOpenChange(false)
                     } catch (error) {
@@ -816,10 +819,10 @@ export function AddReceiptDialog({
                     }
                   }}
                   disabled={isSubmitting}
-                  className="gap-2 text-red-600 border-red-300 hover:bg-red-50"
+                  className="gap-2 text-morandi-red border-morandi-red/30 hover:bg-morandi-red/10"
                 >
                   <AlertCircle size={16} />
-                  標記異常
+                  儲存並標記異常
                 </Button>
                 <Button
                   onClick={async () => {
@@ -831,9 +834,9 @@ export function AddReceiptDialog({
                       // 再更新狀態為已確認
                       await onUpdate?.(editingReceipt.id, { 
                         status: '1',
-                        actual_amount: editingReceipt.receipt_amount,
+                        actual_amount: totalAmount,
                       } as Partial<Receipt>)
-                      toast({ title: '收款已確認' })
+                      toast({ title: '已儲存並確認收款' })
                       onSuccess?.()
                       onOpenChange(false)
                     } catch (error) {
@@ -843,15 +846,15 @@ export function AddReceiptDialog({
                     }
                   }}
                   disabled={isSubmitting}
-                  className="gap-2 bg-green-600 hover:bg-green-700 text-white"
+                  className="gap-2 bg-morandi-green hover:bg-morandi-green/90 text-white"
                 >
                   <Check size={16} />
-                  確認收款
+                  儲存並確認
                 </Button>
               </>
             )}
 
-            {/* 一般儲存按鈕 */}
+            {/* 一般儲存按鈕（非會計角色） */}
             {linkPayResults.length === 0 && canEdit && !canConfirm && (
               <Button
                 onClick={handleSubmit}
