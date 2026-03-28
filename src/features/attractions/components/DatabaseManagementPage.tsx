@@ -125,18 +125,21 @@ export default function DatabaseManagementPage() {
             </select>
             {/* 分類篩選 - 只在景點活動顯示 */}
             {activeTab === 'attractions' && (
-              <select
-                value={selectedCategory}
-                onChange={e => setSelectedCategory(e.target.value)}
-                className="px-3 py-1 text-sm border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-morandi-primary bg-card text-morandi-primary min-w-[120px]"
-              >
-                <option value="all">{DATABASE_MANAGEMENT_PAGE_LABELS.LABEL_3573}</option>
-                {categoryOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <>
+                <select
+                  value={selectedCategory}
+                  onChange={e => setSelectedCategory(e.target.value)}
+                  className="px-3 py-1 text-sm border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-morandi-primary bg-card text-morandi-primary min-w-[120px]"
+                >
+                  <option value="all">{DATABASE_MANAGEMENT_PAGE_LABELS.LABEL_3573}</option>
+                  <option value="unverified">⚠ 待驗證</option>
+                  {categoryOptions.map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </>
             )}
           </>
         ) : undefined

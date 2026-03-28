@@ -64,7 +64,10 @@ export function useAttractionsFilters({
       }
 
       // 類別過濾
-      if (selectedCategory !== 'all') {
+      if (selectedCategory === 'unverified') {
+        // 只看待驗證
+        if (attr.data_verified !== false) return false
+      } else if (selectedCategory !== 'all') {
         if (attr.category !== selectedCategory) return false
       }
 
@@ -72,10 +75,19 @@ export function useAttractionsFilters({
     })
   }, [attractions, searchTerm, selectedCountry, selectedRegion, selectedCity, selectedCategory])
 
-  // 排序資料
+  // 排序資料（預設：待驗證優先 → 名稱）
   const sortedAttractions = useMemo(() => {
     return [...filteredAttractions].sort((a, b) => {
-      if (!sortField || !sortDirection) return 0
+      // 預設排序：待驗證（data_verified=false）優先
+      if (!sortField || !sortDirection) {
+        const aVerified = a.data_verified ?? true
+        const bVerified = b.data_verified ?? true
+        if (aVerified !== bVerified) {
+          return aVerified ? 1 : -1  // false 排前面
+        }
+        // 同樣驗證狀態，按名稱
+        return a.name.localeCompare(b.name, 'zh-TW')
+      }
 
       let compareA: string | number
       let compareB: string | number
