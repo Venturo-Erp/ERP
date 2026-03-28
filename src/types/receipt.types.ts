@@ -53,6 +53,9 @@ export interface Receipt {
   // 會計科目（選填）
   accounting_subject_id: string | null | undefined
 
+  // 批量收款關聯（同一筆進帳的多張收款）
+  batch_id: string | null | undefined
+
   // 系統欄位
   created_at: string
   created_by: string | null | undefined

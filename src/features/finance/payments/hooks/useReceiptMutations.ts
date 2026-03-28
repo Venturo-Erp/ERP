@@ -148,7 +148,7 @@ export function useReceiptMutations() {
     async (params: CreateReceiptWithItemsParams): Promise<CreateReceiptWithItemsResult> => {
       const { formData, paymentItems, orderInfo, tourInfo, userId, workspaceId } = params
 
-      const { createReceipt, createReceiptItem, updateReceiptItem } = await import('@/data')
+      const { createReceipt, updateReceipt, createReceiptItem, updateReceiptItem } = await import('@/data')
       const { generateReceiptNumber } = await import('@/lib/utils/receipt-number-generator')
       const { supabase } = await import('@/lib/supabase/client')
 
@@ -243,59 +243,89 @@ export function useReceiptMutations() {
       }
       logger.info('[createReceiptWithItems] Step 1 OK, receiptId:', createdReceipt.id)
 
-      // 2. 為每個項目建立 receipt_item
+      // 2. 多付款方式 → 建立額外的 receipts（共用 batch_id）
+      // ADR-001: 不再用 receipt_items，改建多張 receipts
       const linkPayResults: LinkPayResult[] = []
+      const batchId = paymentItems.length > 1 ? createdReceipt.id : null // 用第一張的 id 當 batch_id
 
-      for (const item of paymentItems) {
-        const receiptTypeNum = resolveReceiptType(item.receipt_type)
-        const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
-        logger.info('[createReceiptWithItems] Step 2: Creating item...', { receiptTypeNum, paymentMethod, amount: item.amount, originalReceiptType: item.receipt_type })
+      // 第一張已建立，處理 LinkPay
+      if (firstItemReceiptType === RECEIPT_TYPES.LINK_PAY) {
+        const linkPayResult = await handleLinkPayIntegration(
+          receiptNumber,
+          paymentItems[0],
+          userId,
+          tourCode
+        )
+        if (linkPayResult) {
+          linkPayResults.push(linkPayResult)
+          await updateReceipt(createdReceipt.id, { link: linkPayResult.link })
+        }
+      }
 
-        const createdItem = await createReceiptItem({
-          receipt_id: createdReceipt.id,
-          workspace_id: workspaceId,
-          tour_id: tourId || null,
-          order_id: formData.order_id || null,
-          customer_id: orderInfo?.customer_id || null,
-          amount: item.amount,
-          actual_amount: 0,
-          payment_method: paymentMethod,
-          receipt_type: receiptTypeNum,
-          receipt_account: item.receipt_account || null,
-          handler_name: item.handler_name || null,
-          account_info: item.account_info || null,
-          fees: item.fees || null,
-          card_last_four: item.card_last_four || null,
-          auth_code: item.auth_code || null,
-          check_number: item.check_number || null,
-          check_bank: item.check_bank || null,
-          check_date: null,
-          email: item.email || null,
-          payment_name: item.payment_name || null,
-          pay_dateline: item.pay_dateline || null,
-          link: null,
-          linkpay_order_number: null,
-          notes: item.notes || null,
-          status: '0',
-          created_by: userId,
-          updated_by: userId,
-          deleted_at: null,
-        })
+      // 如果有多筆，更新第一張的 batch_id 並建立其餘的
+      if (paymentItems.length > 1) {
+        await updateReceipt(createdReceipt.id, { batch_id: batchId })
 
-        logger.info('[createReceiptWithItems] Step 2 OK, itemId:', createdItem?.id)
+        for (let i = 1; i < paymentItems.length; i++) {
+          const item = paymentItems[i]
+          const receiptTypeNum = resolveReceiptType(item.receipt_type)
+          const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
+          const itemPaymentMethodId = getPaymentMethodId(receiptTypeNum, item.receipt_type)
+          const itemReceiptNumber = `${receiptNumber}-${String.fromCharCode(65 + i)}` // -A, -B, -C...
 
-        // 如果是 LinkPay，呼叫 API 產生付款連結
-        if (receiptTypeNum === RECEIPT_TYPES.LINK_PAY && createdItem?.id) {
-          const linkPayResult = await handleLinkPayIntegration(
-            receiptNumber,
-            item,
-            userId,
-            tourCode
-          )
+          logger.info('[createReceiptWithItems] Creating additional receipt...', { i, receiptTypeNum, amount: item.amount })
 
-          if (linkPayResult) {
-            linkPayResults.push(linkPayResult)
-            await updateReceiptItem(createdItem.id, { link: linkPayResult.link })
+          const additionalReceipt = await createReceipt({
+            receipt_number: itemReceiptNumber,
+            workspace_id: workspaceId,
+            order_id: formData.order_id || null,
+            tour_id: tourId || null,
+            customer_id: orderInfo?.customer_id || null,
+            order_number: orderInfo?.order_number || '',
+            tour_name: orderInfo?.tour_name || tourInfo?.name || '',
+            payment_date: item.transaction_date || new Date().toISOString().split('T')[0],
+            payment_method: paymentMethod,
+            payment_method_id: itemPaymentMethodId,
+            receipt_date: item.transaction_date || new Date().toISOString().split('T')[0],
+            receipt_type: receiptTypeNum,
+            receipt_amount: item.amount,
+            amount: item.amount,
+            total_amount: item.amount,
+            actual_amount: 0,
+            status: '0',
+            batch_id: batchId,
+            receipt_account: item.receipt_account || null,
+            email: item.email || null,
+            payment_name: item.payment_name || null,
+            pay_dateline: item.pay_dateline || null,
+            handler_name: item.handler_name || null,
+            account_info: item.account_info || null,
+            fees: item.fees || null,
+            card_last_four: item.card_last_four || null,
+            auth_code: item.auth_code || null,
+            check_number: item.check_number || null,
+            check_bank: item.check_bank || null,
+            notes: item.notes || null,
+            check_date: null,
+            created_by: userId,
+            updated_by: userId,
+            deleted_at: null,
+            link: null,
+            linkpay_order_number: null,
+          })
+
+          // 如果是 LinkPay
+          if (receiptTypeNum === RECEIPT_TYPES.LINK_PAY && additionalReceipt?.id) {
+            const linkPayResult = await handleLinkPayIntegration(
+              itemReceiptNumber,
+              item,
+              userId,
+              tourCode
+            )
+            if (linkPayResult) {
+              linkPayResults.push(linkPayResult)
+              await updateReceipt(additionalReceipt.id, { link: linkPayResult.link })
+            }
           }
         }
       }
