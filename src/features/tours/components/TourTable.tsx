@@ -47,7 +47,7 @@ export const TourTable: React.FC<TourTableProps> = ({
           loading={loading}
           onSort={onSort}
           actions={renderActions}
-          actionsWidth="50px"
+          actionsWidth="140px"
           onRowClick={onRowClick}
           bordered={true}
         />
