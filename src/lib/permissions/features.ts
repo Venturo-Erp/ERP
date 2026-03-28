@@ -2,6 +2,7 @@
  * 功能模組定義
  * 
  * 用於租戶功能權限管理
+ * 對應側邊欄路由
  */
 
 export interface FeatureDefinition {
@@ -12,7 +13,7 @@ export interface FeatureDefinition {
   routes: string[]  // 這個功能包含哪些路由
 }
 
-// 所有功能模組
+// 所有功能模組（對應側邊欄）
 export const FEATURES: FeatureDefinition[] = [
   // ===== 基本功能（免費） =====
   {
@@ -24,43 +25,49 @@ export const FEATURES: FeatureDefinition[] = [
   },
   {
     code: 'tours',
-    name: '旅遊團',
-    description: '團務管理、行程規劃',
+    name: '旅遊團管理',
+    description: '團務管理、行程規劃、團員管理',
     category: 'basic',
     routes: ['/tours', '/tours/[code]'],
   },
   {
     code: 'orders',
-    name: '訂單',
-    description: '客戶訂單管理',
+    name: '訂單管理',
+    description: '客戶訂單、團員報名',
     category: 'basic',
     routes: ['/orders'],
   },
   {
-    code: 'quotes',
-    name: '報價單',
-    description: '報價單管理',
-    category: 'basic',
-    routes: ['/quotes', '/quotes/[id]', '/quotes/quick/[id]'],
-  },
-  {
     code: 'finance',
     name: '財務系統',
-    description: '收款、請款、會計',
+    description: '收款、請款、出納、財務報表',
     category: 'basic',
     routes: [
       '/finance',
       '/finance/payments',
       '/finance/requests',
       '/finance/treasury',
+      '/finance/treasury/disbursement',
       '/finance/reports',
+      '/finance/settings',
+    ],
+  },
+  {
+    code: 'accounting',
+    name: '會計系統',
+    description: '傳票、帳務、損益表',
+    category: 'basic',
+    routes: [
       '/accounting',
+      '/accounting/vouchers',
+      '/accounting/accounts',
+      '/accounting/reports',
     ],
   },
   {
     code: 'database',
     name: '資料管理',
-    description: '景點、供應商、資源庫',
+    description: '景點、供應商、封存管理',
     category: 'basic',
     routes: [
       '/database',
@@ -72,16 +79,16 @@ export const FEATURES: FeatureDefinition[] = [
   {
     code: 'hr',
     name: '人資管理',
-    description: '員工、出勤、薪資',
+    description: '員工、出勤、請假、薪資',
     category: 'basic',
     routes: ['/hr', '/hr/attendance', '/hr/leave', '/hr/payroll'],
   },
   {
     code: 'settings',
-    name: '設定',
-    description: '公司設定、系統設定',
+    name: '系統設定',
+    description: '公司設定、角色權限、選單配置',
     category: 'basic',
-    routes: ['/settings', '/settings/company', '/settings/line', '/settings/permissions'],
+    routes: ['/settings', '/settings/company', '/settings/roles', '/settings/menu'],
   },
 
   // ===== 進階功能（付費） =====
@@ -97,19 +104,19 @@ export const FEATURES: FeatureDefinition[] = [
     name: '工作空間',
     description: '團隊頻道、協作空間',
     category: 'premium',
-    routes: ['/workspace'],
+    routes: ['/channel'],
   },
   {
     code: 'todos',
     name: '待辦事項',
-    description: '任務管理',
+    description: '任務管理、提醒',
     category: 'premium',
     routes: ['/todos'],
   },
   {
     code: 'customers',
     name: '顧客管理',
-    description: '客戶資料、客戶群組',
+    description: '客戶資料、公司客戶、客戶群組',
     category: 'premium',
     routes: ['/customers', '/customers/companies', '/customer-groups'],
   },
@@ -121,27 +128,76 @@ export const FEATURES: FeatureDefinition[] = [
     routes: ['/itinerary', '/itinerary/new', '/itinerary/block-editor'],
   },
   {
+    code: 'quotes',
+    name: '報價單',
+    description: '快速報價、報價管理',
+    category: 'premium',
+    routes: ['/quotes', '/quotes/[id]', '/quotes/quick/[id]'],
+  },
+  {
+    code: 'contracts',
+    name: '合約管理',
+    description: '電子簽約、合約範本',
+    category: 'premium',
+    routes: ['/contracts'],
+  },
+  {
+    code: 'confirmations',
+    name: '團確單',
+    description: '供應商確認單管理',
+    category: 'premium',
+    routes: ['/confirmations', '/confirmations/[id]'],
+  },
+  {
+    code: 'visas',
+    name: '簽證管理',
+    description: '簽證申請、進度追蹤',
+    category: 'premium',
+    routes: ['/visas'],
+  },
+  {
     code: 'design',
-    name: '設計',
+    name: '設計工具',
     description: '手冊設計、行銷素材',
     category: 'premium',
     routes: ['/design', '/brochures', '/marketing'],
   },
   {
     code: 'office',
-    name: '文件',
-    description: '文件管理',
+    name: '文件管理',
+    description: '文件編輯、檔案管理',
     category: 'premium',
-    routes: ['/office', '/office/editor'],
+    routes: ['/office', '/office/editor', '/files'],
   },
 
   // ===== 企業功能 =====
   {
     code: 'fleet',
     name: '車隊管理',
-    description: '車輛、司機管理',
+    description: '車輛、司機、車趟管理',
     category: 'enterprise',
     routes: ['/database/fleet', '/supplier/trips'],
+  },
+  {
+    code: 'local',
+    name: 'Local 案件',
+    description: '地接案件、委託管理',
+    category: 'enterprise',
+    routes: ['/local', '/local/cases', '/local/requests'],
+  },
+  {
+    code: 'supplier_portal',
+    name: '供應商入口',
+    description: '供應商專用介面',
+    category: 'enterprise',
+    routes: ['/supplier', '/supplier/requests', '/supplier/finance', '/supplier/dispatch'],
+  },
+  {
+    code: 'esims',
+    name: 'eSIM 管理',
+    description: '網卡管理、派發',
+    category: 'enterprise',
+    routes: ['/esims'],
   },
 ]
 
