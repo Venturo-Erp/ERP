@@ -92,15 +92,15 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
             行程
           </Button>
 
-          {/* 複製連結 */}
+          {/* 分享 */}
           <Button
             variant="ghost"
             size="sm"
             onClick={handleCopyLink}
-            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-            title="複製行程連結"
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
           >
-            <Share2 size={14} />
+            <Share2 size={12} />
+            分享
           </Button>
 
           {/* 編輯 */}
@@ -108,10 +108,10 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
             variant="ghost"
             size="sm"
             onClick={() => onEditTour(tour)}
-            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-            title="編輯"
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
           >
-            <Edit size={14} />
+            <Edit size={12} />
+            編輯
           </Button>
 
           {/* 封存/取消封存 */}
@@ -127,10 +127,10 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
                 operations.handleArchiveTour(tour)
               }
             }}
-            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-            title={tour.archived ? TOUR_ACTIONS.unarchive : TOUR_ACTIONS.archive}
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1"
           >
-            {tour.archived ? <ArchiveRestore size={14} /> : <Archive size={14} />}
+            {tour.archived ? <ArchiveRestore size={12} /> : <Archive size={12} />}
+            {tour.archived ? '還原' : '封存'}
           </Button>
 
           {/* 刪除 */}
@@ -138,10 +138,10 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
             variant="ghost"
             size="sm"
             onClick={() => setDeleteConfirm({ isOpen: true, tour })}
-            className="h-7 px-2 text-xs text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
-            title={TOUR_ACTIONS.delete}
+            className="h-7 px-2 text-xs text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10 gap-1"
           >
-            <Trash2 size={14} />
+            <Trash2 size={12} />
+            刪除
           </Button>
         </div>
       )
