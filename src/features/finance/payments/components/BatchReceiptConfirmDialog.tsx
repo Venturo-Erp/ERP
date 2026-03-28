@@ -292,6 +292,8 @@ export function BatchReceiptConfirmDialog({
                     <th className="text-left py-2.5 px-3 font-medium">編號</th>
                     <th className="text-left py-2.5 px-3 font-medium">收款方式</th>
                     <th className="text-left py-2.5 px-3 font-medium">日期</th>
+                    <th className="text-left py-2.5 px-3 font-medium">付款人</th>
+                    <th className="text-left py-2.5 px-3 font-medium">備註</th>
                     <th className="text-right py-2.5 px-3 font-medium">應收金額</th>
                     <th className="text-right py-2.5 px-3 font-medium">實收金額</th>
                     <th className="text-center py-2.5 px-3 font-medium" style={{ width: 120 }}>
@@ -316,6 +318,10 @@ export function BatchReceiptConfirmDialog({
                         {getReceiptTypeLabel(item.receipt.receipt_type)}
                       </td>
                       <td className="py-3 px-3 text-sm">{item.receipt.receipt_date || '-'}</td>
+                      <td className="py-3 px-3 text-sm">{item.receipt.receipt_account || '-'}</td>
+                      <td className="py-3 px-3 text-sm text-muted-foreground max-w-[150px] truncate" title={item.receipt.notes || ''}>
+                        {item.receipt.notes || '-'}
+                      </td>
                       <td className="py-3 px-3 text-sm text-right font-medium">
                         ${(item.receipt.receipt_amount || 0).toLocaleString()}
                       </td>
@@ -407,7 +413,7 @@ export function BatchReceiptConfirmDialog({
                 {items.length > 1 && (
                   <tfoot>
                     <tr className="border-t bg-muted/30">
-                      <td colSpan={3} className="py-2.5 px-3 text-sm font-medium">
+                      <td colSpan={5} className="py-2.5 px-3 text-sm font-medium">
                         合計
                       </td>
                       <td className="py-2.5 px-3 text-right font-medium">
