@@ -194,4 +194,18 @@ payment_requests → 彙整成 disbursement_orders → 會計確認 → 付款
 
 ---
 
-**更新**：2026-03-28 12:30
+## 🏛️ 架構決策（ADR）
+
+重要的設計決策已記錄在 `docs/ARCHITECTURE_DECISIONS.md`：
+
+- **ADR-001**：收款單統一用 `receipts` + `batch_id`
+- **ADR-002**：請款單統一用 `payment_requests` + `batch_id`
+
+### 要刪除的表
+- `receipt_items` — 功能整合進 receipts
+- `receipt_orders` — 舊設計，0 筆資料
+- `receipt_payment_items` — 不明用途，0 筆資料
+
+---
+
+**更新**：2026-03-28 13:05
