@@ -12,13 +12,13 @@ import { RECEIPT_TYPES } from '../types'
 import type { Receipt } from '@/types/receipt.types'
 import { recalculateReceiptStats } from '../services/receipt-core.service'
 
-/** receipt_type 數字 → payment_method 字串（舊欄位向下相容） */
+/** receipt_type 數字 → payment_method 字串（DB constraint 限定英文） */
 const PAYMENT_METHOD_MAP: Record<number, string> = {
-  0: '匯款',
-  1: '現金',
-  2: '刷卡',
-  3: '支票',
-  4: 'LinkPay',
+  0: 'transfer',
+  1: 'cash',
+  2: 'card',
+  3: 'check',
+  4: 'linkpay',
 }
 
 /** 將 DB 收款方式名稱轉回 receipt_type 數字（用於舊欄位向下相容） */
