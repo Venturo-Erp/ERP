@@ -196,8 +196,14 @@ export function DayRow({
                   {(day.attractions || []).map(a => (
                     <span
                       key={a.id}
-                      className="inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] whitespace-nowrap bg-morandi-gold/10 text-morandi-gold"
+                      className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] whitespace-nowrap ${
+                        a.verified === false
+                          ? 'bg-amber-100 text-amber-700 border border-amber-300'
+                          : 'bg-morandi-gold/10 text-morandi-gold'
+                      }`}
+                      title={a.verified === false ? '資料待完善' : undefined}
                     >
+                      {a.verified === false && <span className="mr-0.5">⚠</span>}
                       <MapPin size={8} />
                       <span>{a.name}</span>
                       <button

@@ -21,7 +21,7 @@ const DEFAULT_ZOOM = 12
  */
 export function useMapPreferences(tourId: string | null) {
   const [preferences, setPreferences] = useState<MapPreferences>({
-    expanded: true, // 預設展開
+    expanded: false, // 預設收合
     center: null,
   })
   const [isLoaded, setIsLoaded] = useState(false)
@@ -37,7 +37,7 @@ export function useMapPreferences(tourId: string | null) {
       // 讀取展開狀態
       const expandedKey = `map_expanded_${tourId}`
       const expandedValue = localStorage.getItem(expandedKey)
-      const expanded = expandedValue === null ? true : expandedValue === 'true'
+      const expanded = expandedValue === null ? false : expandedValue === 'true'
 
       // 讀取最後位置
       const centerKey = `map_center_${tourId}`

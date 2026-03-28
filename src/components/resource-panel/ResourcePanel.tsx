@@ -590,12 +590,14 @@ export function ResourcePanel({
             category: '',
             data_verified: false,
           }
+          // 先清空搜尋框，再加入主列表（確保顯示）
+          setSearchQuery('')
+          setSearchResults([])
           setResources(prev => ({
             ...prev,
             [activeTab]: [newItem, ...(prev[activeTab] || [])],
           }))
           setQuickAddOpen(false)
-          setSearchQuery('') // 清空搜尋框
         }}
       />
     </div>

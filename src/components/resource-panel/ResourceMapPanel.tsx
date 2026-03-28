@@ -226,6 +226,7 @@ export function ResourceMapPanel({
                 attractions={attractions}
                 selectedAttraction={selectedAttraction}
                 radiusKm={5}
+                onCenterChange={setCenter}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground bg-muted/30">

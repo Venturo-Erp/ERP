@@ -11,6 +11,7 @@ interface AttractionsMapProps {
   attractions: Attraction[]
   selectedAttraction: Attraction | null
   radiusKm?: number
+  onCenterChange?: (center: { latitude: number; longitude: number; zoom: number }) => void
 }
 
 // 計算兩點間距離
@@ -52,6 +53,7 @@ export function AttractionsMap({
   attractions,
   selectedAttraction,
   radiusKm = 5,
+  onCenterChange,
 }: AttractionsMapProps) {
   const mapRef = useRef<L.Map | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -144,17 +146,30 @@ export function AttractionsMap({
         dashArray: '8, 8',
       }).addTo(map)
 
-      // 地圖移動時更新圓圈位置 + 重新計算附近景點（延遲避免 popup 被關閉）
+      // 地圖移動時更新圓圈位置 + 重新計算附近景點
       let moveTimeout: ReturnType<typeof setTimeout> | null = null
+      let saveTimeout: ReturnType<typeof setTimeout> | null = null
+      
       map.on('moveend', () => {
         const center = map.getCenter()
+        const zoom = map.getZoom()
         searchCircle.setLatLng(center)
         
-        // 延遲更新，讓 popup 有時間顯示
+        // 800ms 延遲更新附近景點（讓 popup 有時間顯示）
         if (moveTimeout) clearTimeout(moveTimeout)
         moveTimeout = setTimeout(() => {
           setMapCenter({ lat: center.lat, lng: center.lng })
         }, 800)
+        
+        // 5 秒 debounce 存 localStorage（減少寫入頻率）
+        if (saveTimeout) clearTimeout(saveTimeout)
+        saveTimeout = setTimeout(() => {
+          onCenterChange?.({
+            latitude: center.lat,
+            longitude: center.lng,
+            zoom,
+          })
+        }, 5000)
       })
 
       // 創建自訂標記（圓角方形 + 圖片）
