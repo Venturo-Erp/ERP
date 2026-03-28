@@ -13,8 +13,10 @@ import { AttractionImageUpload } from './attraction-dialog/AttractionImageUpload
 import { useAuthStore } from '@/stores/auth-store'
 import { isFeatureAvailable } from '@/lib/feature-restrictions'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Loader2 } from 'lucide-react'
+import { Sparkles, Loader2, CheckCircle2 } from 'lucide-react'
 import { ATTRACTIONS_DIALOG_LABELS } from '../constants/labels'
+import { updateAttraction } from '@/data'
+import { toast } from 'sonner'
 
 interface AttractionsDialogProps {
   open: boolean
@@ -62,9 +64,28 @@ export function AttractionsDialog({
 
   const { user } = useAuthStore()
   const [isAiLoading, setIsAiLoading] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [isVerified, setIsVerified] = useState(attraction?.data_verified ?? false)
 
   // 檢查是否顯示 AI 補充按鈕（僅 TP/TC）
   const showAiSuggest = isFeatureAvailable('ai_suggest', user?.workspace_code)
+
+  // 標記已驗證
+  const handleMarkVerified = async () => {
+    if (!attraction?.id) return
+    
+    setIsVerifying(true)
+    try {
+      await updateAttraction(attraction.id, { data_verified: true })
+      setIsVerified(true)
+      toast.success('已標記為已驗證')
+    } catch (err) {
+      logger.error('標記已驗證失敗:', err)
+      toast.error('標記失敗，請稍後再試')
+    } finally {
+      setIsVerifying(false)
+    }
+  }
 
   // AI 補充景點資料
   const handleAiSuggest = async () => {
@@ -291,10 +312,31 @@ export function AttractionsDialog({
       ? getCitiesByCountry(formData.country_id)
       : []
 
-  // 自訂標題（包含 AI 補充按鈕）
+  // 自訂標題（包含 AI 補充按鈕 + 標記已驗證按鈕）
   const dialogTitle = (
     <div className="flex items-center gap-3">
       <span>{attraction ? '編輯景點' : ATTRACTIONS_DIALOG_LABELS.新增景點}</span>
+      {/* 待驗證警示 + 標記按鈕 */}
+      {attraction && !isVerified && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleMarkVerified}
+          disabled={isVerifying}
+          className="h-7 text-xs gap-1.5 text-amber-600 border-amber-400 bg-amber-50 hover:bg-amber-100"
+        >
+          {isVerifying ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+          標記已驗證
+        </Button>
+      )}
+      {/* 已驗證標示 */}
+      {attraction && isVerified && (
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs text-green-600 bg-green-50 border border-green-200 rounded-full">
+          <CheckCircle2 size={12} />
+          已驗證
+        </span>
+      )}
       {showAiSuggest && attraction && (
         <Button
           type="button"
