@@ -148,7 +148,7 @@ export function useReceiptMutations() {
     async (params: CreateReceiptWithItemsParams): Promise<CreateReceiptWithItemsResult> => {
       const { formData, paymentItems, orderInfo, tourInfo, userId, workspaceId } = params
 
-      const { createReceipt, updateReceipt, createReceiptItem, updateReceiptItem } = await import('@/data')
+      const { createReceipt, updateReceipt } = await import('@/data')
       const { generateReceiptNumber } = await import('@/lib/utils/receipt-number-generator')
       const { supabase } = await import('@/lib/supabase/client')
 
@@ -363,12 +363,13 @@ export function useReceiptMutations() {
 
   /**
    * 更新收款單 + 管理收款項目
+   * @deprecated 待遷移到多張 receipts 架構（ADR-001）
    */
   const updateReceiptWithItems = useCallback(
     async (params: UpdateReceiptWithItemsParams): Promise<UpdateReceiptWithItemsResult> => {
       const { receipt, formData, paymentItems, orderInfo, userId, workspaceId, onUpdate } = params
 
-      const { createReceiptItem, updateReceiptItem, deleteReceiptItem } = await import('@/data')
+      const { createReceiptItem, updateReceiptItem, deleteReceiptItem } = await import('@/data/entities/receipt-items')
       const { supabase } = await import('@/lib/supabase/client')
 
       // 計算總金額
