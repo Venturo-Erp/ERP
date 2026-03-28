@@ -635,9 +635,6 @@ export {
   invalidateQuoteItems,
 } from './quote-items'
 
-// Receipt Items
-export * from './receipt-items'
-
 // Company Assets
 export * from './company-assets'
 

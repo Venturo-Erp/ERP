@@ -362,88 +362,43 @@ export function useReceiptMutations() {
   )
 
   /**
-   * 更新收款單 + 管理收款項目
-   * @deprecated 待遷移到多張 receipts 架構（ADR-001）
+   * 更新收款單
+   * ADR-001: 簡化版，只更新主表
    */
   const updateReceiptWithItems = useCallback(
     async (params: UpdateReceiptWithItemsParams): Promise<UpdateReceiptWithItemsResult> => {
-      const { receipt, formData, paymentItems, orderInfo, userId, workspaceId, onUpdate } = params
-
-      const { createReceiptItem, updateReceiptItem, deleteReceiptItem } = await import('@/data/entities/receipt-items')
-      const { supabase } = await import('@/lib/supabase/client')
+      const { receipt, formData, paymentItems, onUpdate } = params
 
       // 計算總金額
       const totalAmount = paymentItems.reduce((sum, item) => sum + (item.amount || 0), 0)
 
-      // 1. 更新收款單主表
+      // 取第一個項目的收款方式
+      const firstItem = paymentItems[0]
+      const receiptTypeNum = firstItem ? resolveReceiptType(firstItem.receipt_type) : 0
+      const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
+
+      // 更新收款單主表
       await onUpdate(receipt.id, {
         tour_id: formData.tour_id || null,
         order_id: formData.order_id || null,
         receipt_amount: totalAmount,
         amount: totalAmount,
         total_amount: totalAmount,
+        payment_method: paymentMethod,
+        receipt_type: receiptTypeNum,
+        receipt_account: firstItem?.receipt_account || null,
+        handler_name: firstItem?.handler_name || null,
+        account_info: firstItem?.account_info || null,
+        fees: firstItem?.fees || null,
+        card_last_four: firstItem?.card_last_four || null,
+        auth_code: firstItem?.auth_code || null,
+        check_number: firstItem?.check_number || null,
+        check_bank: firstItem?.check_bank || null,
+        email: firstItem?.email || null,
+        payment_name: firstItem?.payment_name || null,
+        pay_dateline: firstItem?.pay_dateline || null,
+        notes: firstItem?.notes || null,
       })
-
-      // 2. 取得現有的 receipt_items
-      const { data: existingItems } = await supabase
-        .from('receipt_items')
-        .select('id')
-        .eq('receipt_id', receipt.id)
-        .is('deleted_at', null)
-
-      const existingItemIds = new Set(existingItems?.map(i => i.id) || [])
-
-      // 3. 處理每個項目
-      for (const item of paymentItems) {
-        const receiptTypeNum = resolveReceiptType(item.receipt_type)
-        const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
-        const itemData = {
-          tour_id: formData.tour_id || null,
-          order_id: formData.order_id || null,
-          customer_id: orderInfo?.customer_id || null,
-          amount: item.amount,
-          payment_method: paymentMethod,
-          receipt_type: receiptTypeNum,
-          receipt_account: item.receipt_account || null,
-          handler_name: item.handler_name || null,
-          account_info: item.account_info || null,
-          fees: item.fees || null,
-          card_last_four: item.card_last_four || null,
-          auth_code: item.auth_code || null,
-          check_number: item.check_number || null,
-          check_bank: item.check_bank || null,
-          email: item.email || null,
-          payment_name: item.payment_name || null,
-          pay_dateline: item.pay_dateline || null,
-          notes: item.notes || null,
-          updated_by: userId,
-        }
-
-        if (item.id && existingItemIds.has(item.id)) {
-          // 更新現有項目
-          await updateReceiptItem(item.id, itemData)
-          existingItemIds.delete(item.id)
-        } else {
-          // 新增項目
-          await createReceiptItem({
-            receipt_id: receipt.id,
-            workspace_id: workspaceId,
-            ...itemData,
-            actual_amount: 0,
-            status: '0',
-            created_by: userId,
-            deleted_at: null,
-            link: null,
-            linkpay_order_number: null,
-            check_date: null,
-          })
-        }
-      }
-
-      // 4. 刪除被移除的項目
-      for (const itemId of existingItemIds) {
-        await deleteReceiptItem(itemId)
-      }
 
       return {
         success: true,
