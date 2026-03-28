@@ -483,7 +483,7 @@ export function AddReceiptDialog({
                   }}
                   placeholder={ADD_RECEIPT_DIALOG_LABELS.請選擇團體}
                   emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
-                  className="w-[280px]"
+                  className="w-[350px]"
                   maxHeight="300px"
                 />
               </div>
