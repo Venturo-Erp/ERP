@@ -25,6 +25,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { confirm } from '@/lib/ui/alert-dialog'
 import { usePaymentForm } from '../hooks/usePaymentForm'
 import { useReceiptMutations, type LinkPayResult } from '../hooks/useReceiptMutations'
+import { recalculateReceiptStats } from '../services/receipt-core.service'
 import { PaymentItemRow } from './PaymentItemRow'
 import { Input } from '@/components/ui/input'
 import type { Receipt } from '@/stores'
@@ -817,6 +818,8 @@ export function AddReceiptDialog({
                         status: '2',
                         updated_by: user?.id,
                       })
+                      // 重算團財務數據
+                      await recalculateReceiptStats(editingReceipt.order_id, editingReceipt.tour_id || null)
                       toast({ title: '已標記為異常' })
                       onSuccess?.()
                       onOpenChange(false)
@@ -842,6 +845,8 @@ export function AddReceiptDialog({
                         status: '1',
                         actual_amount: totalAmount,
                       } as Partial<Receipt>)
+                      // 重算團財務數據
+                      await recalculateReceiptStats(editingReceipt.order_id, editingReceipt.tour_id || null)
                       toast({ title: '已確認收款' })
                       onSuccess?.()
                       onOpenChange(false)
