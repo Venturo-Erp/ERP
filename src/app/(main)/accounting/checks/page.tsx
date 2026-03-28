@@ -149,7 +149,7 @@ export default function ChecksPage() {
 
   const handleViewDetail = (check: Check) => {
     // TODO: 開啟詳細對話框
-    console.log('查看票據:', check)
+    // TODO: 票據詳情 modal
   }
 
   const handleClearCheck = async (check: Check) => {
@@ -167,7 +167,7 @@ export default function ChecksPage() {
       //   .eq('id', check.id)
       // if (error) throw error
       // loadChecks()
-      console.log('TODO: 標記已兌現', check.id)
+      // TODO: 實作兌現功能
     } catch (error) {
       console.error('更新票據狀態失敗:', error)
       alert('操作失敗')
@@ -189,7 +189,7 @@ export default function ChecksPage() {
       //   .eq('id', check.id)
       // if (error) throw error
       // loadChecks()
-      console.log('TODO: 作廢支票', check.id)
+      // TODO: 實作作廢功能
     } catch (error) {
       console.error('更新票據狀態失敗:', error)
       alert('操作失敗')

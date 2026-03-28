@@ -83,7 +83,7 @@ export default function AccountingPage() {
           }
 
           const result = await response.json()
-          console.log('自動初始化完成:', result)
+          // 初始化完成
 
           setIsInitializing(false)
         }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/utils/logger'
 
 const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || ''
 
@@ -61,7 +62,7 @@ async function processGroupEvent(groupId: string) {
   try {
     const groupName = await getGroupName(groupId)
     const memberCount = await getGroupMemberCount(groupId)
-    console.log(`[LINE] Group: ${groupId} | Name: ${groupName} | Members: ${memberCount}`)
+    logger.info(`[LINE] Group: ${groupId} | Name: ${groupName} | Members: ${memberCount}`)
     await saveGroupToDb(groupId, groupName, memberCount)
   } catch (err) {
     console.error('[LINE] Background process error:', err)
@@ -146,7 +147,7 @@ async function processEmployeeBinding(event: any) {
       }),
     })
 
-    console.log(`[LINE] Employee binding: ${employeeCode} -> ${userId}`)
+    logger.info(`[LINE] Employee binding: ${employeeCode} -> ${userId}`)
     return true
   } catch (err) {
     console.error('[LINE] Employee binding error:', err)
@@ -166,7 +167,7 @@ async function processInsurancePDF(event: any) {
     })
 
     const result = await res.json()
-    console.log('[LINE] Insurance result:', result)
+    logger.info('[LINE] Insurance result:', result)
   } catch (err) {
     console.error('[LINE] Insurance process error:', err)
   }

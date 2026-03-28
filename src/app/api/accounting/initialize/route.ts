@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { DEFAULT_ACCOUNTS } from '@/types/accounting.types'
+import { logger } from '@/lib/utils/logger'
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
         }
       })
 
-      console.log(`準備插入 ${accountsToInsert.length} 個科目到 workspace ${workspaceId}`)
+      logger.info(`準備插入 ${accountsToInsert.length} 個科目到 workspace ${workspaceId}`)
 
       const { error: accountsError, data: insertedAccounts } = await supabase
         .from('chart_of_accounts')
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      console.log(`成功插入 ${insertedAccounts?.length || 0} 個科目`)
+      logger.info(`成功插入 ${insertedAccounts?.length || 0} 個科目`)
       stats.accounts_created = insertedAccounts?.length || accountsToInsert.length
     }
 

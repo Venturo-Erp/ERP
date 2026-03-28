@@ -63,7 +63,7 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
           file,
           `requests/${request.id}/documents`,
           progress => {
-            console.log(`Uploading ${file.name}: ${progress}%`)
+            // 上傳進度（可用於 UI 顯示）
           }
         )
 
@@ -107,8 +107,8 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
 
       for (const file of files) {
         // 上傳到 Storage
-        const { url, size } = await uploadFile(file, `requests/${request.id}/replies`, progress => {
-          console.log(`Uploading ${file.name}: ${progress}%`)
+        const { url, size } = await uploadFile(file, `requests/${request.id}/replies`, () => {
+          // 上傳進度
         })
 
         // 建立供應商回覆記錄（reply_type = 'received'）
@@ -146,8 +146,8 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
 
       for (const file of files) {
         // 上傳到 Storage
-        const { url, size } = await uploadFile(file, `requests/${request.id}/related`, progress => {
-          console.log(`Uploading ${file.name}: ${progress}%`)
+        const { url, size } = await uploadFile(file, `requests/${request.id}/related`, () => {
+          // 上傳進度
         })
 
         // 建立檔案記錄

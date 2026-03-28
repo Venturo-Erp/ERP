@@ -85,7 +85,7 @@ export async function updateAllTourStatuses(): Promise<{ updated: number; errors
         errors.push(`${tour.code}: ${updateError.message}`)
       } else {
         updated++
-        console.log(`團 ${tour.code} 狀態更新: ${tour.status} → ${newStatus}`)
+        // 狀態更新記錄
       }
     }
   }

@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/utils/logger'
 
 const LINE_API_URL = 'https://api-data.line.me/v2/bot/message'
 const INSURANCE_GROUP_ID = 'C03f53517dc822913b394411981a100bf' // 喜多里保代
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
 
     // 2. 檢查發送者
     if (!isTrustedSender(userId)) {
-      console.log(`[insurance] ⚠️  非保險公司發送: ${fileName} (${userId})`)
+      logger.warn(`[insurance] 非保險公司發送: ${fileName} (${userId})`)
       return NextResponse.json({ ok: true, skipped: '非保險公司發送' })
     }
 
@@ -97,7 +98,7 @@ export async function POST(request: Request) {
 
     if (tourError || !tour) {
       // ERP 查不到 → 可能是舊團或台中的團
-      console.log(`[insurance] ⚠️  團號 ${parsed.tourCode} 不在 ERP（可能是舊團或台中）`)
+      logger.warn(`[insurance] 團號 ${parsed.tourCode} 不在 ERP（可能是舊團或台中）`)
 
       // 簡單記錄 log，不發 Telegram（避免太吵）
       // William 可以從 Vercel logs 查看

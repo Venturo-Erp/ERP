@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/utils/logger'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -119,7 +120,7 @@ export async function POST(request: NextRequest) {
       }))
 
       await supabase.from('channel_members').insert(memberInserts)
-      console.log(`[API] 已加入 ${membersToAdd.length} 位成員到頻道 ${channelName}`)
+      logger.info(`[API] 已加入 ${membersToAdd.length} 位成員到頻道 ${channelName}`)
     }
 
     return NextResponse.json({ success: true, channelId: newChannel.id })
