@@ -12,12 +12,14 @@ import {
   ExternalLink,
   Mail,
   FileText,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tour, Order } from '@/stores/types'
 import { ContractTemplate } from '@/types/tour.types'
 import { useToast } from '@/components/ui/use-toast'
+import { supabase } from '@/lib/supabase/client'
 import {
   Dialog,
   DialogContent,
@@ -173,12 +175,14 @@ export function TourContractTab({ tour }: TourContractTabProps) {
     })
   }, [orders])
 
-  // 根據已建立的合約判斷哪些團員已簽約
+  // 根據已建立的合約判斷哪些團員已簽約（排除已取消的合約）
   const memberIdsWithContract = useMemo(() => {
     const ids = new Set<string>()
-    contracts.forEach(c => {
-      c.member_ids?.forEach((id: string) => ids.add(id))
-    })
+    contracts
+      .filter(c => c.status !== 'cancelled')
+      .forEach(c => {
+        c.member_ids?.forEach((id: string) => ids.add(id))
+      })
     return ids
   }, [contracts])
 
@@ -291,6 +295,30 @@ export function TourContractTab({ tour }: TourContractTabProps) {
     toast({ title: '已複製連結' })
   }
 
+  // 取消合約
+  const handleCancelContract = async (contract: Contract) => {
+    if (!confirm(`確定要取消合約「${contract.code}」嗎？\n取消後團員可重新被選擇建立新合約。`)) {
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('contracts')
+        .update({ 
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', contract.id)
+
+      if (error) throw error
+
+      toast({ title: '合約已取消' })
+      loadData() // 重新載入
+    } catch {
+      toast({ title: '取消失敗', variant: 'destructive' })
+    }
+  }
+
   // 紙本簽署狀態
   const [paperSignDialogOpen, setPaperSignDialogOpen] = useState(false)
   const [paperSignContract, setPaperSignContract] = useState<Contract | null>(null)
@@ -354,16 +382,16 @@ export function TourContractTab({ tour }: TourContractTabProps) {
       </div>
 
       {/* 已建立的合約 */}
-      {contracts.length > 0 && (
+      {contracts.filter(c => c.status !== 'cancelled').length > 0 && (
         <div className="bg-white border border-border rounded-lg">
           <div className="px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
               <FileSignature className="w-4 h-4 text-morandi-gold" />
-              <span className="font-medium text-morandi-primary">已建立合約 ({contracts.length})</span>
+              <span className="font-medium text-morandi-primary">已建立合約 ({contracts.filter(c => c.status !== 'cancelled').length})</span>
             </div>
           </div>
           <div className="divide-y divide-border bg-white">
-            {contracts.map(contract => (
+            {contracts.filter(c => c.status !== 'cancelled').map(contract => (
               <div key={contract.id} className="px-4 py-3 flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
@@ -425,6 +453,17 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>
+                  {contract.status !== 'signed' && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCancelContract(contract)}
+                      title="取消合約"
+                      className="text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
