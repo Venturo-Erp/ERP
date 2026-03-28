@@ -52,6 +52,7 @@ interface PaymentMethod {
   name: string
   type: 'receipt' | 'payment' // 收款 or 請款
   description: string | null
+  placeholder: string | null // 付款資訊提示文字
   is_active: boolean
   sort_order: number
   debit_account_id: string | null
@@ -875,6 +876,7 @@ function MethodDialog({
 }) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
+  const [placeholder, setPlaceholder] = useState('')
   const [debitAccountId, setDebitAccountId] = useState('')
   const [creditAccountId, setCreditAccountId] = useState('')
   const [sortOrder, setSortOrder] = useState(0)
@@ -884,6 +886,7 @@ function MethodDialog({
     if (open) {
       setName(method?.name || '')
       setDescription(method?.description || '')
+      setPlaceholder(method?.placeholder || '')
       setDebitAccountId(method?.debit_account_id || '')
       setCreditAccountId(method?.credit_account_id || '')
       // 新增時自動取下一個排序數字
@@ -906,6 +909,7 @@ function MethodDialog({
       await onSave({ 
         name, 
         description,
+        placeholder: placeholder || null,
         debit_account_id: debitAccountId || null,
         credit_account_id: creditAccountId || null,
         sort_order: sortOrder,
@@ -953,6 +957,19 @@ function MethodDialog({
               />
             </div>
           </div>
+          {type === 'receipt' && (
+            <div className="space-y-2">
+              <Label>付款資訊提示</Label>
+              <Input
+                value={placeholder}
+                onChange={e => setPlaceholder(e.target.value)}
+                placeholder="例：帳號後五碼、收款人、調閱編號"
+              />
+              <p className="text-xs text-morandi-muted">
+                💡 收款時「付款資訊」欄位會顯示這段提示文字
+              </p>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>借方科目（選填）</Label>

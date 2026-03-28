@@ -65,7 +65,7 @@ export function PaymentItemRow({
   const [incomeSubjects, setIncomeSubjects] = useState<Array<{ id: string; code: string; name: string }>>([])
   
   // 從 DB 讀取收款方式
-  const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string }>>([])
+  const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string; placeholder?: string | null }>>([])
   
   useEffect(() => {
     // 讀取收款方式（從 payment_methods 表）
@@ -256,32 +256,11 @@ export function PaymentItemRow({
               type="text"
               value={item.receipt_account || ''}
               onChange={e => {
-                // LinkPay 限制五字內，匯款限制五碼
-                const value =
-                  item.receipt_type === RECEIPT_TYPES.LINK_PAY ||
-                  item.receipt_type === RECEIPT_TYPES.BANK_TRANSFER
-                    ? e.target.value.slice(0, 5)
-                    : e.target.value
-                onUpdate(item.id, { receipt_account: value })
+                onUpdate(item.id, { receipt_account: e.target.value })
               }}
               placeholder={
-                item.receipt_type === RECEIPT_TYPES.LINK_PAY
-                  ? PAYMENT_ITEM_ROW_LABELS.收款對象_五字內
-                  : item.receipt_type === RECEIPT_TYPES.BANK_TRANSFER
-                    ? PAYMENT_ITEM_ROW_LABELS.帳號後五碼
-                    : item.receipt_type === RECEIPT_TYPES.CREDIT_CARD
-                      ? PAYMENT_ITEM_ROW_LABELS.調閱編號
-                      : item.receipt_type === RECEIPT_TYPES.CHECK
-                        ? PAYMENT_ITEM_ROW_LABELS.到期日
-                        : item.receipt_type === RECEIPT_TYPES.CASH
-                          ? PAYMENT_ITEM_ROW_LABELS.收款人
-                          : ''
-              }
-              maxLength={
-                item.receipt_type === RECEIPT_TYPES.LINK_PAY ||
-                item.receipt_type === RECEIPT_TYPES.BANK_TRANSFER
-                  ? 5
-                  : undefined
+                // 從 DB 讀取的 placeholder，沒有就用預設
+                paymentMethods.find(m => m.name === String(item.receipt_type))?.placeholder || ''
               }
               disabled={readonly}
               className="input-no-focus w-full bg-transparent text-sm"
