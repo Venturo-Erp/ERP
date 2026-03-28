@@ -18,7 +18,7 @@ import { FinanceLabels, PAYMENT_METHOD_MAP } from '../constants/labels'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
 import { TableColumn } from '@/components/ui/enhanced-table'
-import { Plus, FileDown, Layers, Edit2, CheckSquare, Loader2 } from 'lucide-react'
+import { Plus, FileDown, Layers, Edit2, CheckSquare, Loader2, Check } from 'lucide-react'
 import { alert } from '@/lib/ui/alert-dialog'
 import { DateCell, StatusCell, ActionCell, CurrencyCell } from '@/components/table-cells'
 
@@ -27,8 +27,8 @@ const BatchConfirmReceiptDialog = dynamic(
   () => import('./components').then(m => m.BatchConfirmReceiptDialog),
   { loading: () => null }
 )
-const ReceiptConfirmDialog = dynamic(
-  () => import('@/features/finance/payments').then(m => m.ReceiptConfirmDialog),
+const BatchReceiptConfirmDialog = dynamic(
+  () => import('@/features/finance/payments').then(m => m.BatchReceiptConfirmDialog),
   /* eslint-disable venturo/no-custom-modal -- 動態載入時的 loading 狀態 */
   {
     loading: () => (
@@ -195,6 +195,14 @@ export default function PaymentsPage() {
         <ActionCell
           actions={[
             { icon: Edit2, label: FinanceLabels.edit, onClick: () => loadReceiptForEdit(row) },
+            ...(row.status !== '1' ? [{ 
+              icon: Check, 
+              label: '確認', 
+              onClick: () => {
+                setSelectedReceipt(row)
+                setIsDetailDialogOpen(true)
+              }
+            }] : []),
           ]}
         />
       ),
@@ -276,12 +284,11 @@ export default function PaymentsPage() {
         onSuccess={invalidateReceipts}
       />
 
-      {/* 收款單確認對話框 */}
-      <ReceiptConfirmDialog
+      {/* 收款單確認對話框（支援批次逐筆確認） */}
+      <BatchReceiptConfirmDialog
         open={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
         receipt={selectedReceipt}
-        onConfirm={handleConfirmReceipt}
         onSuccess={invalidateReceipts}
       />
     </>
