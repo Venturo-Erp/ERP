@@ -411,18 +411,8 @@ export function AddReceiptDialog({
       <DialogContent level={2} className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col">
         {/* 收款類型 Tab - 包住整個 header 和內容 */}
         <Tabs defaultValue="tour" className="flex-1 flex flex-col overflow-hidden">
-          {/* Header: 左邊 Tab，右邊標題 */}
-          <DialogHeader className="flex-row items-center justify-between pb-4">
-            <TabsList className="w-fit">
-              <TabsTrigger value="tour" className="gap-2">
-                <Users size={14} />
-                團體收款
-              </TabsTrigger>
-              <TabsTrigger value="company" className="gap-2">
-                <Building2 size={14} />
-                公司收款
-              </TabsTrigger>
-            </TabsList>
+          {/* Header: 標題在右上角 */}
+          <DialogHeader className="flex-row items-center justify-end pb-2">
             <div className="text-right">
               <DialogTitle className="flex items-center justify-end gap-2">
                 {isEditMode
@@ -448,12 +438,24 @@ export function AddReceiptDialog({
           </DialogHeader>
 
           {/* 團體收款 */}
-          <TabsContent value="tour" className="flex-1 flex flex-col overflow-hidden mt-4">
-            {/* 基本資訊 */}
-            <div className="flex items-end gap-4">
+          <TabsContent value="tour" className="flex-1 flex flex-col overflow-hidden mt-2">
+            {/* Tab + 選擇器同一行 */}
+            <div className="flex items-end gap-4 pb-4">
+              {/* Tab 切換 */}
+              <TabsList className="w-fit h-10">
+                <TabsTrigger value="tour" className="gap-2">
+                  <Users size={14} />
+                  團體收款
+                </TabsTrigger>
+                <TabsTrigger value="company" className="gap-2">
+                  <Building2 size={14} />
+                  公司收款
+                </TabsTrigger>
+              </TabsList>
+
               {/* 選擇團體 */}
-              <div className="w-[300px]">
-                <Label className="text-sm font-medium text-muted-foreground">
+              <div className="w-[280px]">
+                <Label className="text-xs text-muted-foreground">
                   {ADD_RECEIPT_DIALOG_LABELS.LABEL_3406}
                 </Label>
                 <Combobox
@@ -476,8 +478,8 @@ export function AddReceiptDialog({
               </div>
 
               {/* 選擇訂單 */}
-              <div className="w-[350px]">
-                <Label className="text-sm font-medium text-muted-foreground">
+              <div className="w-[300px]">
+                <Label className="text-xs text-muted-foreground">
                   {ADD_RECEIPT_DIALOG_LABELS.LABEL_3874}
                 </Label>
                 <Select
@@ -653,8 +655,22 @@ export function AddReceiptDialog({
           </TabsContent>
 
           {/* 公司收款 */}
-          <TabsContent value="company" className="flex-1 flex flex-col overflow-hidden mt-4">
-            {/* 收款項目 - 跟團體收款一樣的結構 */}
+          <TabsContent value="company" className="flex-1 flex flex-col overflow-hidden mt-2">
+            {/* Tab 切換（公司收款不需要團體/訂單選擇） */}
+            <div className="flex items-center gap-4 pb-4">
+              <TabsList className="w-fit h-10">
+                <TabsTrigger value="tour" className="gap-2">
+                  <Users size={14} />
+                  團體收款
+                </TabsTrigger>
+                <TabsTrigger value="company" className="gap-2">
+                  <Building2 size={14} />
+                  公司收款
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            {/* 收款項目 */}
             <div className="flex-1 flex flex-col overflow-hidden">
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-medium text-morandi-primary">
