@@ -186,8 +186,8 @@ export function useReceiptMutations() {
         .select('receipt_number')
         .like('receipt_number', `${tourCode}-R%`)
 
-      // 生成收款單號
-      const receiptNumber = generateReceiptNumber(
+      // 生成收款單基礎編號（R01, R02...）
+      const baseReceiptNumber = generateReceiptNumber(
         tourCode,
         existingReceipts?.filter(r => r.receipt_number?.startsWith(`${tourCode}-R`)) || []
       )
@@ -195,137 +195,95 @@ export function useReceiptMutations() {
       // 計算總金額
       const totalAmount = paymentItems.reduce((sum, item) => sum + (item.amount || 0), 0)
 
-      // 1. 建立收款單主表
-      const firstItemReceiptType = resolveReceiptType(paymentItems[0]?.receipt_type)
-      const firstPaymentMethod = PAYMENT_METHOD_MAP[firstItemReceiptType] || 'transfer'
-      const firstPaymentMethodId = getPaymentMethodId(firstItemReceiptType, paymentItems[0]?.receipt_type)
-      logger.info('[createReceiptWithItems] Step 1: Creating receipt...', { tourCode, receiptNumber, totalAmount, firstPaymentMethodId, paymentItemsCount: paymentItems.length })
-      const createdReceipt = await createReceipt({
-        receipt_number: receiptNumber,
-        workspace_id: workspaceId,
-        order_id: formData.order_id || null,
-        tour_id: tourId || null,
-        customer_id: orderInfo?.customer_id || null,
-        order_number: orderInfo?.order_number || '',
-        tour_name: orderInfo?.tour_name || tourInfo?.name || '',
-        payment_date: paymentItems[0]?.transaction_date || new Date().toISOString().split('T')[0],
-        payment_method: firstPaymentMethod,
-        payment_method_id: firstPaymentMethodId,
-        receipt_date: paymentItems[0]?.transaction_date || new Date().toISOString().split('T')[0],
-        receipt_type: firstItemReceiptType,
-        receipt_amount: totalAmount,
-        amount: totalAmount,
-        total_amount: totalAmount,
-        actual_amount: 0,
-        status: '0',
-        receipt_account: null,
-        email: null,
-        payment_name: null,
-        pay_dateline: null,
-        handler_name: null,
-        account_info: null,
-        fees: null,
-        card_last_four: null,
-        auth_code: null,
-        check_number: null,
-        check_bank: null,
-        notes: null,
-        check_date: null,
-        created_by: userId,
-        updated_by: userId,
-        deleted_at: null,
-        link: null,
-        linkpay_order_number: null,
-      })
-
-      if (!createdReceipt?.id) {
-        throw new Error(RECEIPT_MUTATION_LABELS.CREATE_FAILED)
-      }
-      logger.info('[createReceiptWithItems] Step 1 OK, receiptId:', createdReceipt.id)
-
-      // 2. 多付款方式 → 建立額外的 receipts（共用 batch_id）
-      // ADR-001: 不再用 receipt_items，改建多張 receipts
+      // 判斷是否為多筆收款（需要 -A, -B 後綴）
+      const isMultipleItems = paymentItems.length > 1
       const linkPayResults: LinkPayResult[] = []
-      const batchId = paymentItems.length > 1 ? createdReceipt.id : null // 用第一張的 id 當 batch_id
+      let firstReceiptId: string | null = null
 
-      // 第一張已建立，處理 LinkPay
-      if (firstItemReceiptType === RECEIPT_TYPES.LINK_PAY) {
-        const linkPayResult = await handleLinkPayIntegration(
-          receiptNumber,
-          paymentItems[0],
-          userId,
-          tourCode
-        )
-        if (linkPayResult) {
-          linkPayResults.push(linkPayResult)
-          await updateReceipt(createdReceipt.id, { link: linkPayResult.link })
+      // 統一處理所有收款項目
+      for (let i = 0; i < paymentItems.length; i++) {
+        const item = paymentItems[i]
+        const receiptTypeNum = resolveReceiptType(item.receipt_type)
+        const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
+        const paymentMethodId = getPaymentMethodId(receiptTypeNum, item.receipt_type)
+        
+        // 編號規則：單筆 = R01，多筆 = R01-A, R01-B...
+        const itemReceiptNumber = isMultipleItems 
+          ? `${baseReceiptNumber}-${String.fromCharCode(65 + i)}` // A=65, B=66...
+          : baseReceiptNumber
+
+        logger.info('[createReceiptWithItems] Creating receipt...', { 
+          index: i, 
+          receiptNumber: itemReceiptNumber, 
+          receiptType: receiptTypeNum, 
+          amount: item.amount,
+          isMultipleItems,
+          paymentItemsCount: paymentItems.length 
+        })
+
+        const createdReceipt = await createReceipt({
+          receipt_number: itemReceiptNumber,
+          workspace_id: workspaceId,
+          order_id: formData.order_id || null,
+          tour_id: tourId || null,
+          customer_id: orderInfo?.customer_id || null,
+          order_number: orderInfo?.order_number || '',
+          tour_name: orderInfo?.tour_name || tourInfo?.name || '',
+          payment_date: item.transaction_date || new Date().toISOString().split('T')[0],
+          payment_method: paymentMethod,
+          payment_method_id: paymentMethodId,
+          receipt_date: item.transaction_date || new Date().toISOString().split('T')[0],
+          receipt_type: receiptTypeNum,
+          receipt_amount: item.amount,
+          amount: item.amount,
+          total_amount: item.amount,
+          actual_amount: 0,
+          status: '0',
+          batch_id: isMultipleItems && firstReceiptId ? firstReceiptId : null,
+          receipt_account: item.receipt_account || null,
+          email: item.email || null,
+          payment_name: item.payment_name || null,
+          pay_dateline: item.pay_dateline || null,
+          handler_name: item.handler_name || null,
+          account_info: item.account_info || null,
+          fees: item.fees || null,
+          card_last_four: item.card_last_four || null,
+          auth_code: item.auth_code || null,
+          check_number: item.check_number || null,
+          check_bank: item.check_bank || null,
+          notes: item.notes || null,
+          check_date: null,
+          created_by: userId,
+          updated_by: userId,
+          deleted_at: null,
+          link: null,
+          linkpay_order_number: null,
+        })
+
+        if (!createdReceipt?.id) {
+          throw new Error(RECEIPT_MUTATION_LABELS.CREATE_FAILED)
         }
-      }
 
-      // 如果有多筆，更新第一張的 batch_id 並建立其餘的
-      if (paymentItems.length > 1) {
-        await updateReceipt(createdReceipt.id, { batch_id: batchId })
+        // 第一筆的 ID 作為 batch_id（多筆時）
+        if (i === 0) {
+          firstReceiptId = createdReceipt.id
+          // 多筆時，第一筆也要設 batch_id（指向自己）
+          if (isMultipleItems) {
+            await updateReceipt(createdReceipt.id, { batch_id: firstReceiptId })
+          }
+        }
 
-        for (let i = 1; i < paymentItems.length; i++) {
-          const item = paymentItems[i]
-          const receiptTypeNum = resolveReceiptType(item.receipt_type)
-          const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
-          const itemPaymentMethodId = getPaymentMethodId(receiptTypeNum, item.receipt_type)
-          const itemReceiptNumber = `${receiptNumber}-${String.fromCharCode(64 + i)}` // i=1→A, i=2→B, i=3→C...
-
-          logger.info('[createReceiptWithItems] Creating additional receipt...', { i, receiptTypeNum, amount: item.amount })
-
-          const additionalReceipt = await createReceipt({
-            receipt_number: itemReceiptNumber,
-            workspace_id: workspaceId,
-            order_id: formData.order_id || null,
-            tour_id: tourId || null,
-            customer_id: orderInfo?.customer_id || null,
-            order_number: orderInfo?.order_number || '',
-            tour_name: orderInfo?.tour_name || tourInfo?.name || '',
-            payment_date: item.transaction_date || new Date().toISOString().split('T')[0],
-            payment_method: paymentMethod,
-            payment_method_id: itemPaymentMethodId,
-            receipt_date: item.transaction_date || new Date().toISOString().split('T')[0],
-            receipt_type: receiptTypeNum,
-            receipt_amount: item.amount,
-            amount: item.amount,
-            total_amount: item.amount,
-            actual_amount: 0,
-            status: '0',
-            batch_id: batchId,
-            receipt_account: item.receipt_account || null,
-            email: item.email || null,
-            payment_name: item.payment_name || null,
-            pay_dateline: item.pay_dateline || null,
-            handler_name: item.handler_name || null,
-            account_info: item.account_info || null,
-            fees: item.fees || null,
-            card_last_four: item.card_last_four || null,
-            auth_code: item.auth_code || null,
-            check_number: item.check_number || null,
-            check_bank: item.check_bank || null,
-            notes: item.notes || null,
-            check_date: null,
-            created_by: userId,
-            updated_by: userId,
-            deleted_at: null,
-            link: null,
-            linkpay_order_number: null,
-          })
-
-          // 如果是 LinkPay
-          if (receiptTypeNum === RECEIPT_TYPES.LINK_PAY && additionalReceipt?.id) {
-            const linkPayResult = await handleLinkPayIntegration(
-              itemReceiptNumber,
-              item,
-              userId,
-              tourCode
-            )
-            if (linkPayResult) {
-              linkPayResults.push(linkPayResult)
-              await updateReceipt(additionalReceipt.id, { link: linkPayResult.link })
-            }
+        // 處理 LinkPay
+        if (receiptTypeNum === RECEIPT_TYPES.LINK_PAY) {
+          const linkPayResult = await handleLinkPayIntegration(
+            itemReceiptNumber,
+            item,
+            userId,
+            tourCode
+          )
+          if (linkPayResult) {
+            linkPayResults.push(linkPayResult)
+            await updateReceipt(createdReceipt.id, { link: linkPayResult.link })
           }
         }
       }
@@ -333,26 +291,28 @@ export function useReceiptMutations() {
       // 3. 重算訂單付款狀態 + 團財務數據 + 刷新快取
       await recalculateReceiptStats(formData.order_id, tourId || null)
 
-      // 4. 自動產生傳票
-      try {
-        await fetch('/api/accounting/vouchers/auto-create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            source_type: 'receipt',
-            source_id: createdReceipt.id,
-            workspace_id: workspaceId,
-          }),
-        })
-      } catch (error) {
-        console.error('自動產生收款傳票失敗:', error)
-        // 不中斷流程，傳票可手動補建
+      // 4. 自動產生傳票（只為第一筆建立，或之後改成每筆都建）
+      if (firstReceiptId) {
+        try {
+          await fetch('/api/accounting/vouchers/auto-create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              source_type: 'receipt',
+              source_id: firstReceiptId,
+              workspace_id: workspaceId,
+            }),
+          })
+        } catch (error) {
+          console.error('自動產生收款傳票失敗:', error)
+          // 不中斷流程，傳票可手動補建
+        }
       }
 
       return {
         success: true,
-        receiptId: createdReceipt.id,
-        receiptNumber,
+        receiptId: firstReceiptId || '',
+        receiptNumber: baseReceiptNumber,
         linkPayResults,
         totalAmount,
         itemCount: paymentItems.length,
