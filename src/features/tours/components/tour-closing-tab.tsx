@@ -2,22 +2,18 @@
 
 /**
  * TourClosingTab - 結案頁籤
- *
- * 從核心表 tour_itinerary_items 讀取資料，按類別分組顯示成本對照，
- * 底部彙總估價 vs 實際成本差異，並可生成結案報告 PDF。
+ * 顯示團的收支明細、利潤計算
  */
 
 import { useMemo, useState, useCallback } from 'react'
-import { FileDown, Loader2, Lock, Unlock } from 'lucide-react'
+import { FileDown, Loader2, Lock, Unlock, TrendingUp, TrendingDown, DollarSign, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 import { formatCurrency } from '@/lib/utils/format-currency'
-import { useTourItineraryItemsByTour } from '@/features/tours/hooks/useTourItineraryItems'
 import { generateTourClosingPDF } from '@/lib/pdf/tour-closing-pdf'
 import type { TourClosingPDFData } from '@/lib/pdf/tour-closing-pdf'
 import type { Tour } from '@/stores/types'
-import type { TourItineraryItem } from '../types/tour-itinerary-item.types'
 import { ProfitTab } from './ProfitTab'
 import { BonusSettingTab } from './BonusSettingTab'
 import {
@@ -34,49 +30,19 @@ import { useAuthStore } from '@/stores'
 
 // === 結案狀態 ===
 const CLOSING_STATUS_MAP: Record<string, { label: string; color: string }> = {
-  open: { label: '進行中', color: 'bg-blue-100 text-blue-700' },
-  closing: { label: '結團中', color: 'bg-yellow-100 text-yellow-700' },
-  closed: { label: '已結團', color: 'bg-green-100 text-green-700' },
-}
-
-// === 類別標籤 ===
-const CATEGORY_LABELS: Record<string, string> = {
-  transport: '交通',
-  'group-transport': '團體交通',
-  accommodation: '住宿',
-  meals: '餐食',
-  activities: '活動',
-  others: '其他',
-  guide: '導遊',
+  open: { label: '進行中', color: 'bg-morandi-gold/20 text-morandi-gold' },
+  closing: { label: '結團中', color: 'bg-morandi-gold/20 text-morandi-gold' },
+  closed: { label: '已結團', color: 'bg-morandi-green/20 text-morandi-green' },
 }
 
 interface TourClosingTabProps {
   tour: Tour
 }
 
-interface CategoryGroup {
-  category: string
-  label: string
-  items: TourItineraryItem[]
-  estimatedTotal: number
-  actualTotal: number
-}
-
-function getEstimatedCost(item: TourItineraryItem): number {
-  // 統一邏輯：unit_price = 當前真實成本（覆蓋式管理）
-  return item.unit_price ?? item.total_cost ?? 0
-}
-
-function getActualCost(item: TourItineraryItem): number | null {
-  // 統一邏輯：actual_expense = 領隊實際支出
-  return item.actual_expense ?? null
-}
-
 export function TourClosingTab({ tour }: TourClosingTabProps) {
-  const { items, loading } = useTourItineraryItemsByTour(tour.id)
   const [pdfLoading, setPdfLoading] = useState(false)
 
-  // 同 ProfitTab 的資料取法
+  // 資料取得
   const { items: allReceipts } = useReceipts()
   const { items: allPaymentRequests } = usePaymentRequests()
   const { items: allBonusSettings } = useTourBonusSettings()
@@ -92,13 +58,24 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
 
   const orderIds = useMemo(() => new Set(orders.map(o => o.id)), [orders])
 
+  // 收款明細（已確認的）
   const receipts = useMemo(
-    () => (allReceipts ?? []).filter(r => r.order_id && orderIds.has(r.order_id)),
-    [allReceipts, orderIds]
+    () => (allReceipts ?? [])
+      .filter(r => r.tour_id === tour.id || (r.order_id && orderIds.has(r.order_id)))
+      .filter(r => r.status === '1') // 只顯示已確認
+      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()),
+    [allReceipts, tour.id, orderIds]
   )
 
+  // 請款明細
   const paymentRequests = useMemo(
-    () => (allPaymentRequests ?? []).filter(pr => pr.tour_id === tour.id),
+    () => (allPaymentRequests ?? [])
+      .filter(pr => pr.tour_id === tour.id)
+      .filter(pr => {
+        const rt = (pr.request_type || '').toLowerCase()
+        return !rt.includes('bonus') && !rt.includes('獎金')
+      })
+      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()),
     [allPaymentRequests, tour.id]
   )
 
@@ -123,14 +100,18 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     return dict
   }, [bonusSettings, getEmployee])
 
-  const normalExpenses = useMemo(
-    () =>
-      paymentRequests.filter(pr => {
-        const rt = (pr.request_type || '').toLowerCase()
-        return !rt.includes('bonus') && !rt.includes('獎金')
-      }),
+  // 計算總額
+  const totalIncome = useMemo(
+    () => receipts.reduce((sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0), 0),
+    [receipts]
+  )
+
+  const totalExpense = useMemo(
+    () => paymentRequests.reduce((sum, pr) => sum + (Number(pr.amount) || 0), 0),
     [paymentRequests]
   )
+
+  const profit = totalIncome - totalExpense
 
   // 結案狀態
   const closingStatus = tour.closing_status ?? 'open'
@@ -156,39 +137,6 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     }
   }, [closingStatus, tour.id])
 
-  // 按 category 分組
-  const groups = useMemo<CategoryGroup[]>(() => {
-    if (!items.length) return []
-
-    const map = new Map<string, TourItineraryItem[]>()
-    for (const item of items) {
-      const cat = item.category ?? 'others'
-      if (!map.has(cat)) map.set(cat, [])
-      map.get(cat)!.push(item)
-    }
-
-    return Array.from(map.entries()).map(([category, catItems]) => ({
-      category,
-      label: CATEGORY_LABELS[category] ?? category,
-      items: catItems,
-      estimatedTotal: catItems.reduce((sum, it) => sum + getEstimatedCost(it), 0),
-      actualTotal: catItems.reduce(
-        (sum, it) => sum + (getActualCost(it) ?? getEstimatedCost(it)),
-        0
-      ),
-    }))
-  }, [items])
-
-  // 彙總
-  const summary = useMemo(() => {
-    const estimatedTotal = groups.reduce((s, g) => s + g.estimatedTotal, 0)
-    const actualTotal = groups.reduce((s, g) => s + g.actualTotal, 0)
-    const diff = actualTotal - estimatedTotal
-    const participantCount = tour.current_participants ?? tour.max_participants ?? 0
-    const perPerson = participantCount > 0 ? actualTotal / participantCount : null
-    return { estimatedTotal, actualTotal, diff, participantCount, perPerson }
-  }, [groups, tour.current_participants, tour.max_participants])
-
   // PDF 生成
   const handleGeneratePDF = async () => {
     setPdfLoading(true)
@@ -207,7 +155,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
 
       const profitResult = calculateFullProfit({
         receipts: adaptedReceipts,
-        expenses: normalExpenses.map(pr => ({ amount: pr.amount ?? 0 })),
+        expenses: paymentRequests.map(pr => ({ amount: pr.amount ?? 0 })),
         settings: bonusSettings,
         memberCount,
         employeeDict,
@@ -243,126 +191,186 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     }
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    )
+  // 格式化日期
+  const formatDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return '-'
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
+  }
+
+  const formatDateTime = (dateStr: string | null | undefined) => {
+    if (!dateStr) return '-'
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
+  }
+
+  // 收款方式對照
+  const PAYMENT_METHOD_LABELS: Record<string, string> = {
+    transfer: '匯款',
+    cash: '現金',
+    card: '刷卡',
+    check: '支票',
+    linkpay: 'LinkPay',
   }
 
   return (
     <div className="space-y-6">
-      {/* 成本對照表 */}
-      <div className="border rounded-lg">
-        <div className="px-4 py-3 border-b bg-muted/30">
-          <h3 className="text-sm font-semibold">成本對照（核心表）</h3>
+      {/* 總覽卡片 */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-white border border-border rounded-lg p-4">
+          <div className="flex items-center gap-2 text-morandi-green mb-2">
+            <TrendingUp className="w-4 h-4" />
+            <span className="text-sm font-medium">總收入</span>
+          </div>
+          <div className="text-2xl font-bold text-morandi-green">
+            {formatCurrency(totalIncome)}
+          </div>
+          <div className="text-xs text-morandi-secondary mt-1">
+            {receipts.length} 筆收款
+          </div>
         </div>
 
-        {groups.length === 0 ? (
-          <div className="px-4 py-8 text-center text-muted-foreground text-sm">
-            尚無行程項目資料
+        <div className="bg-white border border-border rounded-lg p-4">
+          <div className="flex items-center gap-2 text-morandi-red mb-2">
+            <TrendingDown className="w-4 h-4" />
+            <span className="text-sm font-medium">總支出</span>
+          </div>
+          <div className="text-2xl font-bold text-morandi-red">
+            {formatCurrency(totalExpense)}
+          </div>
+          <div className="text-xs text-morandi-secondary mt-1">
+            {paymentRequests.length} 筆請款
+          </div>
+        </div>
+
+        <div className="bg-white border border-border rounded-lg p-4">
+          <div className="flex items-center gap-2 text-morandi-primary mb-2">
+            <DollarSign className="w-4 h-4" />
+            <span className="text-sm font-medium">淨利潤</span>
+          </div>
+          <div className={`text-2xl font-bold ${profit >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}>
+            {profit >= 0 ? '+' : ''}{formatCurrency(profit)}
+          </div>
+          <div className="text-xs text-morandi-secondary mt-1">
+            利潤率 {totalIncome > 0 ? ((profit / totalIncome) * 100).toFixed(1) : 0}%
+          </div>
+        </div>
+      </div>
+
+      {/* 收支明細表 */}
+      <div className="bg-white border border-border rounded-lg overflow-hidden">
+        <div className="px-4 py-3 border-b border-border bg-morandi-bg">
+          <h3 className="text-sm font-semibold text-morandi-primary">收支明細</h3>
+        </div>
+
+        {receipts.length === 0 && paymentRequests.length === 0 ? (
+          <div className="px-4 py-12 text-center text-morandi-secondary text-sm">
+            尚無收支紀錄
           </div>
         ) : (
-          <div className="divide-y">
-            {groups.map(group => (
-              <div key={group.category}>
-                <div className="px-4 py-2 bg-muted/10 text-xs font-semibold text-muted-foreground">
-                  {group.label}
+          <div className="divide-y divide-border">
+            {/* 收入區塊 */}
+            {receipts.length > 0 && (
+              <div>
+                <div className="px-4 py-2 bg-morandi-green/10 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-morandi-green" />
+                  <span className="text-sm font-medium text-morandi-green">收入 ({receipts.length})</span>
                 </div>
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b text-xs text-muted-foreground">
-                      <th className="px-4 py-2 text-left font-medium">項目</th>
-                      <th className="px-4 py-2 text-right font-medium">估價成本</th>
-                      <th className="px-4 py-2 text-right font-medium">實際成本</th>
-                      <th className="px-4 py-2 text-right font-medium">差異</th>
+                    <tr className="border-b border-border text-xs text-morandi-secondary">
+                      <th className="px-4 py-2 text-left font-medium">單號</th>
+                      <th className="px-4 py-2 text-left font-medium">收款日期</th>
+                      <th className="px-4 py-2 text-left font-medium">收款方式</th>
+                      <th className="px-4 py-2 text-left font-medium">付款人</th>
+                      <th className="px-4 py-2 text-left font-medium">備註</th>
+                      <th className="px-4 py-2 text-right font-medium">金額</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {group.items.map(item => {
-                      const est = getEstimatedCost(item)
-                      const act = getActualCost(item)
-                      const diff = act != null ? act - est : null
-                      return (
-                        <tr key={item.id} className="border-b last:border-b-0">
-                          <td className="px-4 py-2">
-                            {item.title ?? '-'}
-                            {item.sub_category && (
-                              <span className="ml-1 text-xs text-muted-foreground">
-                                ({item.sub_category})
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-2 text-right font-mono tabular-nums">
-                            {formatCurrency(est)}
-                          </td>
-                          <td className="px-4 py-2 text-right font-mono tabular-nums">
-                            {act != null ? (
-                              formatCurrency(act)
-                            ) : (
-                              <span className="text-muted-foreground">—</span>
-                            )}
-                          </td>
-                          <td
-                            className={`px-4 py-2 text-right font-mono tabular-nums ${
-                              diff != null && diff > 0
-                                ? 'text-red-600'
-                                : diff != null && diff < 0
-                                  ? 'text-green-600'
-                                  : ''
-                            }`}
-                          >
-                            {diff != null ? (
-                              `${diff > 0 ? '+' : ''}${formatCurrency(diff)}`
-                            ) : (
-                              <span className="text-muted-foreground">—</span>
-                            )}
-                          </td>
-                        </tr>
-                      )
-                    })}
+                    {receipts.map(r => (
+                      <tr key={r.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
+                        <td className="px-4 py-2 font-medium text-morandi-primary">{r.receipt_number || '-'}</td>
+                        <td className="px-4 py-2 text-morandi-secondary">{formatDate(r.receipt_date)}</td>
+                        <td className="px-4 py-2 text-morandi-secondary">
+                          {PAYMENT_METHOD_LABELS[r.payment_method || ''] || r.payment_method || '-'}
+                        </td>
+                        <td className="px-4 py-2 text-morandi-secondary">{r.payment_name || r.receipt_account || '-'}</td>
+                        <td className="px-4 py-2 text-morandi-secondary">{r.notes || '-'}</td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-green font-medium">
+                          +{formatCurrency(Number(r.actual_amount) || Number(r.receipt_amount) || 0)}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
-            ))}
+            )}
+
+            {/* 支出區塊 */}
+            {paymentRequests.length > 0 && (
+              <div>
+                <div className="px-4 py-2 bg-morandi-red/10 flex items-center gap-2">
+                  <TrendingDown className="w-4 h-4 text-morandi-red" />
+                  <span className="text-sm font-medium text-morandi-red">支出 ({paymentRequests.length})</span>
+                </div>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-xs text-morandi-secondary">
+                      <th className="px-4 py-2 text-left font-medium">單號</th>
+                      <th className="px-4 py-2 text-left font-medium">請款日期</th>
+                      <th className="px-4 py-2 text-left font-medium">類型</th>
+                      <th className="px-4 py-2 text-left font-medium">供應商/說明</th>
+                      <th className="px-4 py-2 text-left font-medium">狀態</th>
+                      <th className="px-4 py-2 text-right font-medium">金額</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paymentRequests.map(pr => (
+                      <tr key={pr.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
+                        <td className="px-4 py-2 font-medium text-morandi-primary">{pr.request_number || '-'}</td>
+                        <td className="px-4 py-2 text-morandi-secondary">{formatDate(pr.created_at)}</td>
+                        <td className="px-4 py-2 text-morandi-secondary">{pr.request_type || '-'}</td>
+                        <td className="px-4 py-2 text-morandi-secondary">{pr.supplier_name || pr.notes || '-'}</td>
+                        <td className="px-4 py-2">
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                            pr.status === 'paid' ? 'bg-morandi-green/20 text-morandi-green' :
+                            pr.status === 'approved' ? 'bg-morandi-gold/20 text-morandi-gold' :
+                            'bg-morandi-secondary/20 text-morandi-secondary'
+                          }`}>
+                            {pr.status === 'paid' ? '已付' : pr.status === 'approved' ? '已核准' : '待審'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">
+                          -{formatCurrency(Number(pr.amount) || 0)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
-        {/* 彙總 */}
-        {groups.length > 0 && (
-          <div className="px-4 py-3 border-t bg-muted/20 space-y-1">
-            <div className="flex justify-between text-sm">
-              <span>估價總成本</span>
-              <span className="font-mono tabular-nums font-medium">
-                {formatCurrency(summary.estimatedTotal)}
-              </span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>實際總成本</span>
-              <span className="font-mono tabular-nums font-medium">
-                {formatCurrency(summary.actualTotal)}
-              </span>
-            </div>
-            <div
-              className={`flex justify-between text-sm font-semibold ${
-                summary.diff > 0 ? 'text-red-600' : summary.diff < 0 ? 'text-green-600' : ''
-              }`}
-            >
-              <span>差異</span>
-              <span className="font-mono tabular-nums">
-                {summary.diff > 0 ? '+' : ''}
-                {formatCurrency(summary.diff)}
-              </span>
-            </div>
-            {summary.perPerson != null && (
-              <div className="flex justify-between text-sm text-muted-foreground pt-1 border-t">
-                <span>人均成本（{summary.participantCount} 人）</span>
-                <span className="font-mono tabular-nums">
-                  {formatCurrency(Math.round(summary.perPerson))}
+        {/* 總計 */}
+        {(receipts.length > 0 || paymentRequests.length > 0) && (
+          <div className="px-4 py-3 border-t border-border bg-morandi-bg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 text-sm">
+                <span className="text-morandi-green font-medium">
+                  收入 {formatCurrency(totalIncome)}
+                </span>
+                <ArrowRight className="w-4 h-4 text-morandi-secondary" />
+                <span className="text-morandi-red font-medium">
+                  支出 {formatCurrency(totalExpense)}
+                </span>
+                <ArrowRight className="w-4 h-4 text-morandi-secondary" />
+                <span className={`font-bold ${profit >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}>
+                  淨利 {profit >= 0 ? '+' : ''}{formatCurrency(profit)}
                 </span>
               </div>
-            )}
+            </div>
           </div>
         )}
       </div>
@@ -372,12 +380,10 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
       <BonusSettingTab tour={tour} />
 
       {/* 結案狀態 + PDF */}
-      <div className="flex items-center justify-between border rounded-lg px-4 py-3 bg-muted/10">
+      <div className="flex items-center justify-between bg-white border border-border rounded-lg px-4 py-3">
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium">結案狀態</span>
-          <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusInfo.color}`}
-          >
+          <span className="text-sm font-medium text-morandi-primary">結案狀態</span>
+          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${statusInfo.color}`}>
             {statusInfo.label}
           </span>
         </div>
@@ -394,6 +400,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
             variant={closingStatus === 'closed' ? 'outline' : 'default'}
             onClick={handleToggleClosingStatus}
             disabled={statusUpdating}
+            className={closingStatus === 'closed' ? '' : 'bg-morandi-gold hover:bg-morandi-gold-hover text-white'}
           >
             {statusUpdating ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
