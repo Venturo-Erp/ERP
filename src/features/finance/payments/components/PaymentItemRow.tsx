@@ -97,35 +97,19 @@ export function PaymentItemRow({
     }
   }, [mode])
 
-  // 收款方式選項：優先使用 DB 的資料，fallback 到 hardcoded
-  const useDbMethods = paymentMethods.length > 0
+  // 收款方式選項：使用 DB 的資料（必須等載入完成）
+  const isLoading = paymentMethods.length === 0
   
-  // receipt_type (數字) → payment method name 映射
-  const receiptTypeToName: Record<number, string> = {
-    0: '匯款',
-    1: '現金',
-    2: '信用卡',
-    3: '支票',
-    4: 'LINE Pay',
-  }
-  
-  const receiptTypeOptions = useDbMethods
-    ? paymentMethods.map(m => ({ value: m.name, label: m.name }))
-    : (mode === 'company'
-        ? RECEIPT_TYPE_OPTIONS.filter(opt => opt.value !== RECEIPT_TYPES.LINK_PAY)
-        : RECEIPT_TYPE_OPTIONS)
+  const receiptTypeOptions = paymentMethods.map(m => ({ value: m.name, label: m.name }))
 
-  // 計算 Select value：如果是 DB 模式，從數字映射到名稱
-  const selectValue = useDbMethods
-    ? (typeof item.receipt_type === 'number' 
-        ? receiptTypeToName[item.receipt_type] || String(item.receipt_type)
-        : String(item.receipt_type))
-    : item.receipt_type.toString()
+  // 計算 Select value：直接用字串
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const selectValue = (item.receipt_type as any) === '' || item.receipt_type === undefined 
+    ? '' 
+    : String(item.receipt_type)
 
   const receiptTypeLabel =
-    receiptTypeOptions.find(opt => String(opt.value) === selectValue)?.label ||
-    item.receipt_type ||
-    BATCH_RECEIPT_DIALOG_LABELS.現金
+    receiptTypeOptions.find(opt => String(opt.value) === selectValue)?.label || ''
 
   // 產生 LinkPay 連結
   const handleGenerateLink = async () => {
@@ -185,9 +169,9 @@ export function PaymentItemRow({
     }
   }
 
-  // 當收款方式變更時（支援 DB 字串值和 hardcoded 數字值）
+  // 當收款方式變更時（使用 DB 字串值）
   const handleReceiptTypeChange = (value: string) => {
-    const newType = useDbMethods ? (value as unknown as ReceiptType) : (Number(value) as ReceiptType)
+    const newType = value as unknown as ReceiptType
     const updates: Partial<PaymentItem> = { receipt_type: newType }
 
     // 如果切換到 LinkPay，自動帶入預設值
@@ -224,10 +208,10 @@ export function PaymentItemRow({
           <Select
             value={selectValue}
             onValueChange={handleReceiptTypeChange}
-            disabled={readonly}
+            disabled={readonly || isLoading}
           >
             <SelectTrigger className="h-8 text-sm w-full border-0 shadow-none bg-transparent px-0">
-              <SelectValue placeholder="請選擇" />
+              <SelectValue placeholder={isLoading ? '載入中...' : '請選擇'} />
             </SelectTrigger>
             <SelectContent align="start" className="min-w-0 w-[var(--radix-select-trigger-width)]">
               {receiptTypeOptions.map(option => (

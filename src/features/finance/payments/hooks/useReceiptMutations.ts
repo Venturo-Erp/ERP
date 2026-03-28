@@ -12,27 +12,27 @@ import { RECEIPT_TYPES } from '../types'
 import type { Receipt } from '@/types/receipt.types'
 import { recalculateReceiptStats } from '../services/receipt-core.service'
 
-/** 收款方式對應 payment_method 字串 */
+/** receipt_type 數字 → payment_method 字串（舊欄位向下相容） */
 const PAYMENT_METHOD_MAP: Record<number, string> = {
-  0: 'transfer',
-  1: 'cash',
-  2: 'card',
-  3: 'check',
-  4: 'linkpay',
+  0: '匯款',
+  1: '現金',
+  2: '刷卡',
+  3: '支票',
+  4: 'LinkPay',
 }
 
-/** 將 DB 收款方式名稱轉回 receipt_type 數字（用於存入資料庫） */
+/** 將 DB 收款方式名稱轉回 receipt_type 數字（用於舊欄位向下相容） */
 function resolveReceiptType(receiptType: unknown): number {
   // 已經是數字就直接回傳
   if (typeof receiptType === 'number' && !isNaN(receiptType)) return receiptType
   // DB 字串名稱 → 對應的數字
   const name = String(receiptType).toLowerCase()
-  if (name.includes('匯款') || name.includes('transfer')) return 0
   if (name.includes('現金') || name.includes('cash')) return 1
+  if (name.includes('匯款') || name.includes('transfer')) return 0
   if (name.includes('信用卡') || name.includes('刷卡') || name.includes('card')) return 2
   if (name.includes('支票') || name.includes('check')) return 3
   if (name.includes('linkpay') || name.includes('line pay')) return 4
-  return 0 // 預設匯款
+  return 1 // 預設現金（比較常見）
 }
 
 export interface LinkPayResult {

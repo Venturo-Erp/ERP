@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
         {
           key: 'Content-Security-Policy',
           value:
-            "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.taishinbank.com.tw https://tspg.taishinbank.com.tw https://*.sentry.io https://va.vercel-scripts.com;",
+            "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.taishinbank.com.tw https://tspg.taishinbank.com.tw https://*.sentry.io https://va.vercel-scripts.com https://api.open-meteo.com;",
         },
       ],
     },

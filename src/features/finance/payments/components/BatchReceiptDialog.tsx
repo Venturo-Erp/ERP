@@ -49,13 +49,8 @@ interface BatchReceiptDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
-// 收款方式選項（fallback，優先從 DB 讀取）
-const defaultPaymentMethods = [
-  { value: 'cash', label: BATCH_RECEIPT_DIALOG_LABELS.現金 },
-  { value: 'transfer', label: BATCH_RECEIPT_DIALOG_LABELS.匯款 },
-  { value: 'card', label: BATCH_RECEIPT_DIALOG_LABELS.刷卡 },
-  { value: 'check', label: BATCH_RECEIPT_DIALOG_LABELS.支票 },
-]
+// 收款方式選項（從 DB 讀取）
+// 不再使用 hardcoded fallback — 新租戶會透過 trigger 自動建立預設值
 
 export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogProps) {
   const { items: orders } = useOrdersSlim()
@@ -69,7 +64,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
   const [orderAllocations, setOrderAllocations] = useState<OrderAllocationWithNote[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   // 從 DB 讀取的收款方式
-  const [paymentMethods, setPaymentMethods] = useState(defaultPaymentMethods)
+  const [paymentMethods, setPaymentMethods] = useState<{ value: string; label: string }[]>([])
   // 會計科目（選填）
   const [accountingSubjectId, setAccountingSubjectId] = useState<string>('')
   const [accountingSubjects, setAccountingSubjects] = useState<{ value: string; label: string }[]>([])
@@ -307,19 +302,20 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
       )
       const paymentMethodId = selectedPaymentMethod?.id || null
       
-      // 收款方式名稱映射到舊格式（向下相容）
-      const nameToOldFormat: Record<string, string> = {
-        '現金': 'cash',
-        '匯款': 'transfer',
-        '匯款-國泰': 'transfer',
-        '匯款-合庫': 'transfer',
-        '信用卡': 'card',
-        '支票': 'check',
-        'LINE Pay': 'linkpay',
+      // 收款方式名稱（新格式直接用 name）
+      const paymentMethodName = selectedPaymentMethod?.name || '現金'
+      
+      // 映射到 receipt_type 數字（用於舊欄位向下相容）
+      const nameToReceiptType: Record<string, number> = {
+        '現金': 1,
+        '匯款': 0,
+        '刷卡': 2,
+        '信用卡': 2,
+        '支票': 3,
+        'LinkPay': 4,
+        'LINE Pay': 4,
       }
-      const oldFormatMethod = selectedPaymentMethod?.name 
-        ? (nameToOldFormat[selectedPaymentMethod.name] || 'transfer')
-        : 'transfer'
+      const receiptTypeNum = nameToReceiptType[paymentMethodName] ?? 0
 
       // 為每個訂單分配建立一筆收款單
       for (const allocation of validAllocations) {
@@ -348,9 +344,9 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           tour_name: order.tour_name || tour?.name || '',
           receipt_date: receiptDate,
           payment_date: receiptDate,
-          payment_method: oldFormatMethod,
-          payment_method_id: paymentMethodId, // 新增：關聯到 payment_methods 表
-          receipt_type: oldFormatMethod === 'cash' ? 1 : 0,
+          payment_method: paymentMethodName,
+          payment_method_id: paymentMethodId,
+          receipt_type: receiptTypeNum,
           receipt_amount: allocation.allocated_amount,
           amount: allocation.allocated_amount,
           actual_amount: 0,

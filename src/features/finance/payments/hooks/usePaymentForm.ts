@@ -81,7 +81,7 @@ export function usePaymentForm() {
     setPaymentItems([
       {
         id: '1',
-        receipt_type: RECEIPT_TYPES.BANK_TRANSFER,
+        receipt_type: '' as unknown as number, // 讓使用者自己選
         amount: 0,
         transaction_date: getTodayString(),
       },
