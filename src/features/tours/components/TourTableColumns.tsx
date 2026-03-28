@@ -66,28 +66,7 @@ export function useTourTableColumns({ ordersByTourId }: UseTourTableColumnsParam
           return <DateCell date={tour.return_date} showIcon={false} />
         },
       },
-      {
-        key: 'salesperson',
-        label: TOUR_TABLE.col_salesperson,
-        width: '80px',
-        render: (_value, row) => {
-          const tour = row as Tour
-          const orderInfo = ordersByTourId?.get(tour.id)
-          return (
-            <span className="text-sm text-morandi-primary">{orderInfo?.sales_person || '-'}</span>
-          )
-        },
-      },
-      {
-        key: 'assistant',
-        label: TOUR_TABLE.col_assistant,
-        width: '80px',
-        render: (_value, row) => {
-          const tour = row as Tour
-          const orderInfo = ordersByTourId?.get(tour.id)
-          return <span className="text-sm text-morandi-primary">{orderInfo?.assistant || '-'}</span>
-        },
-      },
+
       {
         key: 'status',
         label: TOUR_TABLE.col_status,

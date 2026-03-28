@@ -9,16 +9,10 @@
  */
 
 import { useCallback } from 'react'
-import { MoreVertical, Archive, ArchiveRestore, Trash2, Edit, UserPlus, Route, Share2 } from 'lucide-react'
+import { Archive, ArchiveRestore, Trash2, Edit, Share2 } from 'lucide-react'
 import { Tour, User } from '@/stores/types'
 import { TOUR_ACTIONS } from '../constants'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -78,7 +72,7 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
 
       return (
         <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-          {/* 報名按鈕 */}
+          {/* 報名 */}
           <Button
             variant="ghost"
             size="sm"
@@ -88,7 +82,7 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
             報名
           </Button>
 
-          {/* 行程按鈕 */}
+          {/* 行程 */}
           <Button
             variant="ghost"
             size="sm"
@@ -98,65 +92,57 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
             行程
           </Button>
 
-          {/* 更多選單 */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="p-1 rounded hover:bg-morandi-container/50 transition-colors">
-                <MoreVertical size={14} className="text-morandi-secondary" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {/* 分享連結 */}
-              <DropdownMenuItem onClick={handleCopyLink}>
-                <Share2 size={14} className="mr-2" />
-                複製行程連結
-              </DropdownMenuItem>
+          {/* 複製連結 */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopyLink}
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+            title="複製行程連結"
+          >
+            <Share2 size={14} />
+          </Button>
 
-              <DropdownMenuSeparator />
+          {/* 編輯 */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onEditTour(tour)}
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+            title="編輯"
+          >
+            <Edit size={14} />
+          </Button>
 
-              {/* 編輯 */}
-              <DropdownMenuItem onClick={() => onEditTour(tour)}>
-                <Edit size={14} className="mr-2" />
-                編輯
-              </DropdownMenuItem>
+          {/* 封存/取消封存 */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              if (tour.archived) {
+                operations.handleArchiveTour(tour)
+              } else if (onOpenArchiveDialog) {
+                onOpenArchiveDialog(tour)
+              } else {
+                operations.handleArchiveTour(tour)
+              }
+            }}
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+            title={tour.archived ? TOUR_ACTIONS.unarchive : TOUR_ACTIONS.archive}
+          >
+            {tour.archived ? <ArchiveRestore size={14} /> : <Archive size={14} />}
+          </Button>
 
-              {/* 封存/取消封存 */}
-              <DropdownMenuItem
-                onClick={() => {
-                  if (tour.archived) {
-                    operations.handleArchiveTour(tour)
-                  } else if (onOpenArchiveDialog) {
-                    onOpenArchiveDialog(tour)
-                  } else {
-                    operations.handleArchiveTour(tour)
-                  }
-                }}
-              >
-                {tour.archived ? (
-                  <>
-                    <ArchiveRestore size={14} className="mr-2" />
-                    {TOUR_ACTIONS.unarchive}
-                  </>
-                ) : (
-                  <>
-                    <Archive size={14} className="mr-2" />
-                    {TOUR_ACTIONS.archive}
-                  </>
-                )}
-              </DropdownMenuItem>
-
-              <DropdownMenuSeparator />
-
-              {/* 刪除 */}
-              <DropdownMenuItem
-                onClick={() => setDeleteConfirm({ isOpen: true, tour })}
-                className="text-morandi-red focus:text-morandi-red"
-              >
-                <Trash2 size={14} className="mr-2" />
-                {TOUR_ACTIONS.delete}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* 刪除 */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setDeleteConfirm({ isOpen: true, tour })}
+            className="h-7 px-2 text-xs text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
+            title={TOUR_ACTIONS.delete}
+          >
+            <Trash2 size={14} />
+          </Button>
         </div>
       )
     },
