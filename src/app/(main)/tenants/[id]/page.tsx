@@ -46,6 +46,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
   const [features, setFeatures] = useState<WorkspaceFeature[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState<'basic' | 'premium' | 'enterprise'>('basic')
 
   // 載入資料
   useEffect(() => {
@@ -160,92 +161,95 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         { label: '租戶管理', href: '/tenants' },
         { label: workspace?.name || '詳情', href: `/tenants/${id}` },
       ]}
-    >
-      <div className="space-y-6">
-        {/* 頂部操作列 */}
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => router.push('/tenants')} className="text-morandi-secondary">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            返回列表
-          </Button>
-          <Button onClick={handleSave} disabled={saving} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
-            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-            儲存設定
-          </Button>
-        </div>
-
-        {/* 租戶資訊卡片 */}
-        <div className="bg-white border border-border rounded-lg p-6">
-          <div className="grid grid-cols-4 gap-6">
-            <div>
-              <div className="text-sm text-morandi-secondary mb-1">公司名稱</div>
-              <div className="font-semibold text-morandi-primary">{workspace?.name}</div>
-            </div>
-            <div>
-              <div className="text-sm text-morandi-secondary mb-1">公司代碼</div>
-              <div className="font-semibold text-morandi-primary">{workspace?.code}</div>
-            </div>
-            <div>
-              <div className="text-sm text-morandi-secondary mb-1">類型</div>
-              <Badge variant="outline" className="font-medium">{workspace?.type}</Badge>
-            </div>
-            <div>
-              <div className="text-sm text-morandi-secondary mb-1">狀態</div>
-              <Badge className={workspace?.is_active ? 'bg-morandi-green/20 text-morandi-green' : 'bg-morandi-secondary/20 text-morandi-secondary'}>
-                {workspace?.is_active ? '啟用中' : '已停用'}
-              </Badge>
-            </div>
-          </div>
-        </div>
-
-        {/* 功能模組分頁 */}
-        <Tabs defaultValue="basic" className="w-full">
-          <TabsList className="bg-morandi-bg p-1 rounded-lg mb-4">
-            <TabsTrigger 
-              value="basic" 
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+      showBackButton
+      onBack={() => router.push('/tenants')}
+      headerActions={
+        <div className="flex items-center gap-4">
+          {/* 分頁 */}
+          <div className="flex items-center bg-morandi-bg rounded-lg p-1">
+            <button
+              onClick={() => setActiveTab('basic')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'basic'
+                  ? 'bg-white text-morandi-primary shadow-sm'
+                  : 'text-morandi-secondary hover:text-morandi-primary'
+              }`}
             >
               <Shield className="h-4 w-4" />
               基本功能
-            </TabsTrigger>
-            <TabsTrigger 
-              value="premium" 
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            </button>
+            <button
+              onClick={() => setActiveTab('premium')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'premium'
+                  ? 'bg-white text-morandi-primary shadow-sm'
+                  : 'text-morandi-secondary hover:text-morandi-primary'
+              }`}
             >
               <Sparkles className="h-4 w-4" />
               付費功能
-            </TabsTrigger>
-            <TabsTrigger 
-              value="enterprise" 
-              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            </button>
+            <button
+              onClick={() => setActiveTab('enterprise')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'enterprise'
+                  ? 'bg-white text-morandi-primary shadow-sm'
+                  : 'text-morandi-secondary hover:text-morandi-primary'
+              }`}
             >
               <Building className="h-4 w-4" />
               企業功能
-            </TabsTrigger>
-          </TabsList>
+            </button>
+          </div>
 
-          <TabsContent value="basic">
-            <div className="bg-white border border-border rounded-lg p-4">
-              <div className="text-sm text-morandi-secondary mb-4">基本功能（免費）</div>
-              {renderFeatureList(getBasicFeatures())}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="premium">
-            <div className="bg-white border border-border rounded-lg p-4">
-              <div className="text-sm text-morandi-secondary mb-4">付費功能（需要訂閱）</div>
-              {renderFeatureList(getPremiumFeatures())}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="enterprise">
-            <div className="bg-white border border-border rounded-lg p-4">
-              <div className="text-sm text-morandi-secondary mb-4">企業功能（特殊訂閱）</div>
-              {renderFeatureList(getEnterpriseFeatures())}
-            </div>
-          </TabsContent>
-        </Tabs>
+          {/* 儲存按鈕 */}
+          <Button onClick={handleSave} disabled={saving} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
+            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            儲存
+          </Button>
+        </div>
+      }
+    >
+      {/* 租戶資訊卡片 */}
+      <div className="bg-white border border-border rounded-lg p-6 mb-6">
+        <div className="grid grid-cols-4 gap-6">
+          <div>
+            <div className="text-sm text-morandi-secondary mb-1">公司名稱</div>
+            <div className="font-semibold text-morandi-primary">{workspace?.name}</div>
+          </div>
+          <div>
+            <div className="text-sm text-morandi-secondary mb-1">公司代碼</div>
+            <div className="font-semibold text-morandi-primary">{workspace?.code}</div>
+          </div>
+          <div>
+            <div className="text-sm text-morandi-secondary mb-1">類型</div>
+            <Badge variant="outline" className="font-medium">{workspace?.type}</Badge>
+          </div>
+          <div>
+            <div className="text-sm text-morandi-secondary mb-1">狀態</div>
+            <Badge className={workspace?.is_active ? 'bg-morandi-green/20 text-morandi-green' : 'bg-morandi-secondary/20 text-morandi-secondary'}>
+              {workspace?.is_active ? '啟用中' : '已停用'}
+            </Badge>
+          </div>
+        </div>
       </div>
+
+      {/* 功能列表 */}
+      {activeTab === 'basic' && (
+        <div className="space-y-2">
+          {renderFeatureList(getBasicFeatures())}
+        </div>
+      )}
+      {activeTab === 'premium' && (
+        <div className="space-y-2">
+          {renderFeatureList(getPremiumFeatures())}
+        </div>
+      )}
+      {activeTab === 'enterprise' && (
+        <div className="space-y-2">
+          {renderFeatureList(getEnterpriseFeatures())}
+        </div>
+      )}
     </ContentPageLayout>
   )
 }
