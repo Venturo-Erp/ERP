@@ -784,78 +784,8 @@ export function AddReceiptDialog({
 
           {/* 右側：按鈕 */}
           <div className="flex space-x-2">
-            <Button variant="outline" onClick={handleCancel} className="gap-2">
-              <X size={16} />
-              {linkPayResults.length > 0
-                ? ADD_RECEIPT_DIALOG_LABELS.關閉
-                : isConfirmed && !isAccountant
-                  ? ADD_RECEIPT_DIALOG_LABELS.關閉
-                  : ADD_RECEIPT_DIALOG_LABELS.取消}
-            </Button>
-            
-            {/* 會計專用：儲存 + 標記異常 / 儲存 + 確認 */}
-            {canConfirm && (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    if (!editingReceipt) return
-                    setIsSubmitting(true)
-                    try {
-                      // 先儲存編輯內容
-                      await handleSubmit()
-                      // 再更新狀態為異常
-                      await onUpdate?.(editingReceipt.id, { 
-                        status: '2',
-                        updated_by: user?.id,
-                      })
-                      toast({ title: '已儲存並標記為異常' })
-                      onSuccess?.()
-                      onOpenChange(false)
-                    } catch (error) {
-                      toast({ title: '操作失敗', variant: 'destructive' })
-                    } finally {
-                      setIsSubmitting(false)
-                    }
-                  }}
-                  disabled={isSubmitting}
-                  className="gap-2 text-morandi-red border-morandi-red/30 hover:bg-morandi-red/10"
-                >
-                  <AlertCircle size={16} />
-                  儲存並標記異常
-                </Button>
-                <Button
-                  onClick={async () => {
-                    if (!editingReceipt) return
-                    setIsSubmitting(true)
-                    try {
-                      // 先儲存編輯內容
-                      await handleSubmit()
-                      // 再更新狀態為已確認
-                      await onUpdate?.(editingReceipt.id, { 
-                        status: '1',
-                        actual_amount: totalAmount,
-                      } as Partial<Receipt>)
-                      toast({ title: '已儲存並確認收款' })
-                      onSuccess?.()
-                      onOpenChange(false)
-                    } catch (error) {
-                      toast({ title: '確認失敗', variant: 'destructive' })
-                    } finally {
-                      setIsSubmitting(false)
-                    }
-                  }}
-                  disabled={isSubmitting}
-                  className="gap-2 bg-morandi-green hover:bg-morandi-green/90 text-white"
-                >
-                  <Check size={16} />
-                  儲存並確認
-                </Button>
-              </>
-            )}
-
-            {/* 一般儲存按鈕（非會計角色） */}
-            {linkPayResults.length === 0 && canEdit && !canConfirm && (
+            {/* 儲存按鈕（所有人都有） */}
+            {linkPayResults.length === 0 && canEdit && (
               <Button
                 onClick={handleSubmit}
                 disabled={
@@ -868,13 +798,66 @@ export function AddReceiptDialog({
               >
                 <Save size={16} />
                 {isSubmitting
-                  ? isEditMode
-                    ? ADD_RECEIPT_DIALOG_LABELS.更新中
-                    : ADD_RECEIPT_DIALOG_LABELS.建立中
-                  : isEditMode
-                    ? ADD_RECEIPT_DIALOG_LABELS.更新收款單
-                    : ADD_RECEIPT_TOAST_LABELS.ADD_TITLE(paymentItems.length)}
+                  ? ADD_RECEIPT_DIALOG_LABELS.更新中
+                  : ADD_RECEIPT_DIALOG_LABELS.更新收款單}
               </Button>
+            )}
+
+            {/* 會計專用：標記異常 / 確認 */}
+            {canConfirm && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    if (!editingReceipt) return
+                    setIsSubmitting(true)
+                    try {
+                      await handleSubmit()
+                      await onUpdate?.(editingReceipt.id, { 
+                        status: '2',
+                        updated_by: user?.id,
+                      })
+                      toast({ title: '已標記為異常' })
+                      onSuccess?.()
+                      onOpenChange(false)
+                    } catch (error) {
+                      toast({ title: '操作失敗', variant: 'destructive' })
+                    } finally {
+                      setIsSubmitting(false)
+                    }
+                  }}
+                  disabled={isSubmitting}
+                  className="gap-2 text-morandi-red border-morandi-red/30 hover:bg-morandi-red/10"
+                >
+                  <AlertCircle size={16} />
+                  異常
+                </Button>
+                <Button
+                  onClick={async () => {
+                    if (!editingReceipt) return
+                    setIsSubmitting(true)
+                    try {
+                      await handleSubmit()
+                      await onUpdate?.(editingReceipt.id, { 
+                        status: '1',
+                        actual_amount: totalAmount,
+                      } as Partial<Receipt>)
+                      toast({ title: '已確認收款' })
+                      onSuccess?.()
+                      onOpenChange(false)
+                    } catch (error) {
+                      toast({ title: '確認失敗', variant: 'destructive' })
+                    } finally {
+                      setIsSubmitting(false)
+                    }
+                  }}
+                  disabled={isSubmitting}
+                  className="gap-2 bg-morandi-green hover:bg-morandi-green/90 text-white"
+                >
+                  <Check size={16} />
+                  確認
+                </Button>
+              </>
             )}
           </div>
         </div>
