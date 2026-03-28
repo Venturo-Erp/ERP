@@ -411,36 +411,10 @@ export function AddReceiptDialog({
       <DialogContent level={2} className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col">
         {/* 收款類型 Tab - 包住整個 header 和內容 */}
         <Tabs defaultValue="tour" className="flex-1 flex flex-col overflow-hidden">
-          {/* Header: 標題在右上角 */}
-          <DialogHeader className="flex-row items-center justify-end pb-2">
-            <div className="text-right">
-              <DialogTitle className="flex items-center justify-end gap-2">
-                {isEditMode
-                  ? ADD_RECEIPT_DIALOG_LABELS.編輯收款單
-                  : ADD_RECEIPT_DIALOG_LABELS.新增收款單}
-                {isConfirmed && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-morandi-green/20 text-morandi-green text-xs font-medium">
-                    <Lock size={12} />
-                    {ADD_RECEIPT_DIALOG_LABELS.CONFIRM_469}
-                  </span>
-                )}
-              </DialogTitle>
-              <p className="text-sm text-muted-foreground">
-                {isConfirmed
-                  ? ADD_RECEIPT_TOAST_LABELS.CONFIRMED_READONLY(
-                      editingReceipt?.receipt_number || ''
-                    )
-                  : isEditMode
-                    ? ADD_RECEIPT_TOAST_LABELS.EDIT_TITLE(editingReceipt?.receipt_number || '')
-                    : ADD_RECEIPT_DIALOG_LABELS.收款單號將自動產生}
-              </p>
-            </div>
-          </DialogHeader>
-
-          {/* 團體收款 */}
-          <TabsContent value="tour" className="flex-1 flex flex-col overflow-hidden mt-2">
-            {/* Tab + 選擇器同一行 */}
-            <div className="flex items-end gap-4 pb-4">
+          {/* Header: Tab + 選擇器 + 標題 同一行 */}
+          <DialogHeader className="flex-row items-end justify-between pb-4">
+            {/* 左邊：Tab + 選擇器 */}
+            <div className="flex items-end gap-4">
               {/* Tab 切換 */}
               <TabsList className="w-fit h-10">
                 <TabsTrigger value="tour" className="gap-2">
@@ -509,6 +483,34 @@ export function AddReceiptDialog({
                 </Select>
               </div>
             </div>
+
+            {/* 右邊：標題 */}
+            <div className="text-right">
+              <DialogTitle className="flex items-center justify-end gap-2">
+                {isEditMode
+                  ? ADD_RECEIPT_DIALOG_LABELS.編輯收款單
+                  : ADD_RECEIPT_DIALOG_LABELS.新增收款單}
+                {isConfirmed && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-morandi-green/20 text-morandi-green text-xs font-medium">
+                    <Lock size={12} />
+                    {ADD_RECEIPT_DIALOG_LABELS.CONFIRM_469}
+                  </span>
+                )}
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground">
+                {isConfirmed
+                  ? ADD_RECEIPT_TOAST_LABELS.CONFIRMED_READONLY(
+                      editingReceipt?.receipt_number || ''
+                    )
+                  : isEditMode
+                    ? ADD_RECEIPT_TOAST_LABELS.EDIT_TITLE(editingReceipt?.receipt_number || '')
+                    : ADD_RECEIPT_DIALOG_LABELS.收款單號將自動產生}
+              </p>
+            </div>
+          </DialogHeader>
+
+          {/* 團體收款 */}
+          <TabsContent value="tour" className="flex-1 flex flex-col overflow-hidden">
 
             {/* 收款項目 - 文青風表格 */}
             <div className="flex-1 flex flex-col overflow-hidden pt-4 border-t border-morandi-container/30">
@@ -655,21 +657,7 @@ export function AddReceiptDialog({
           </TabsContent>
 
           {/* 公司收款 */}
-          <TabsContent value="company" className="flex-1 flex flex-col overflow-hidden mt-2">
-            {/* Tab 切換（公司收款不需要團體/訂單選擇） */}
-            <div className="flex items-center gap-4 pb-4">
-              <TabsList className="w-fit h-10">
-                <TabsTrigger value="tour" className="gap-2">
-                  <Users size={14} />
-                  團體收款
-                </TabsTrigger>
-                <TabsTrigger value="company" className="gap-2">
-                  <Building2 size={14} />
-                  公司收款
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
+          <TabsContent value="company" className="flex-1 flex flex-col overflow-hidden">
             {/* 收款項目 */}
             <div className="flex-1 flex flex-col overflow-hidden">
               <div className="flex items-center justify-between mb-3">
