@@ -4,22 +4,44 @@
  */
 
 import { getTodayString } from '@/lib/utils/format-date'
-import { useState, useCallback, useMemo } from 'react'
-import { useToursSlim, useOrdersSlim } from '@/data'
+import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useOrdersSlim } from '@/data'
 import type { PaymentFormData, PaymentItem } from '../types'
 import { RECEIPT_TYPES } from '../types'
 import { PAYMENT_FORM_LABELS } from '../../constants/labels'
 
+interface TourSlim {
+  id: string
+  code: string
+  name: string
+}
+
 export function usePaymentForm() {
-  const { items: allTours } = useToursSlim()
   const { items: orders } = useOrdersSlim()
   
-  // 過濾掉提案和模板，只保留正式團
-  const tours = useMemo(() => {
-    return allTours.filter(tour => 
-      !tour.tour_type || tour.tour_type === 'official'
-    )
-  }, [allTours])
+  // 只載入正式團（從 API 層過濾，省流量）
+  const [tours, setTours] = useState<TourSlim[]>([])
+  
+  useEffect(() => {
+    const loadOfficialTours = async () => {
+      const { useAuthStore } = await import('@/stores')
+      const { supabase } = await import('@/lib/supabase/client')
+      const workspaceId = useAuthStore.getState().user?.workspace_id
+      if (!workspaceId) return
+      
+      const { data } = await supabase
+        .from('tours')
+        .select('id, code, name')
+        .eq('workspace_id', workspaceId)
+        .or('tour_type.is.null,tour_type.eq.official')
+        .eq('archived', false)
+        .order('departure_date', { ascending: false })
+        .limit(50)
+      
+      setTours(data || [])
+    }
+    loadOfficialTours()
+  }, [])
 
   // 基本表單資料
   const [formData, setFormData] = useState<PaymentFormData>({
