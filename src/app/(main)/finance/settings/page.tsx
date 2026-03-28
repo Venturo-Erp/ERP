@@ -6,22 +6,22 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-// 簡易 Table 組件
+// 使用和 EnhancedTable 一致的表格樣式
 const Table = ({ children, className }: { children: React.ReactNode; className?: string }) => (
   <table className={`w-full text-sm ${className || ''}`}>{children}</table>
 )
 const TableHeader = ({ children }: { children: React.ReactNode }) => (
-  <thead className="bg-morandi-background/50">{children}</thead>
+  <thead className="bg-morandi-container/30 sticky top-0">{children}</thead>
 )
 const TableBody = ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>
 const TableRow = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <tr className={`border-b border-border/60 ${className || ''}`}>{children}</tr>
+  <tr className={`border-b border-border/50 hover:bg-morandi-container/20 transition-colors ${className || ''}`}>{children}</tr>
 )
 const TableHead = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <th className={`px-4 py-3 text-left font-medium text-morandi-muted ${className || ''}`}>{children}</th>
+  <th className={`px-4 py-3 text-left text-xs font-medium text-morandi-secondary uppercase tracking-wider ${className || ''}`}>{children}</th>
 )
 const TableCell = ({ children, className, colSpan }: { children: React.ReactNode; className?: string; colSpan?: number }) => (
-  <td className={`px-4 py-3 ${className || ''}`} colSpan={colSpan}>{children}</td>
+  <td className={`px-4 py-3 text-sm ${className || ''}`} colSpan={colSpan}>{children}</td>
 )
 import {
   Dialog,
@@ -366,7 +366,7 @@ export default function FinanceSettingsPage() {
       }
     >
       {/* 內容區 */}
-      <div className="p-4">
+      <div>
           {/* 收款方式 */}
           {activeSection === 'receipt' && (
             <div className="space-y-4">
