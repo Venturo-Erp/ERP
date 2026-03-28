@@ -7,7 +7,7 @@
 import { logger } from '@/lib/utils/logger'
 import { getTodayString } from '@/lib/utils/format-date'
 import { useEffect, useState } from 'react'
-import { Plus, Save, X, Copy, ExternalLink, Check, Trash2, Lock } from 'lucide-react'
+import { Plus, Save, X, Copy, ExternalLink, Check, Trash2, Lock, AlertCircle } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -28,6 +28,7 @@ import { useReceiptMutations, type LinkPayResult } from '../hooks/useReceiptMuta
 import { PaymentItemRow } from './PaymentItemRow'
 import { Input } from '@/components/ui/input'
 import type { Receipt } from '@/stores'
+import { useAuthStore } from '@/stores'
 import { ADD_RECEIPT_DIALOG_LABELS, ADD_RECEIPT_TOAST_LABELS } from '../../constants/labels'
 
 interface AddReceiptDialogProps {
@@ -78,8 +79,20 @@ export function AddReceiptDialog({
   // 是否為編輯模式
   const isEditMode = !!editingReceipt
 
-  // 是否為已確認狀態（已確認的收款單不可編輯或刪除）
+  // 是否為已確認狀態
   const isConfirmed = editingReceipt?.status === '1'
+  const isAbnormal = editingReceipt?.status === '2'
+
+  // 角色權限判斷
+  const { user } = useAuthStore()
+  const isAccountant = user?.roles?.some(role =>
+    ['super_admin', 'admin', 'accountant'].includes(role)
+  )
+  
+  // 是否可編輯（未確認 or 會計角色）
+  const canEdit = !isConfirmed || isAccountant
+  // 是否可確認（會計角色 + 編輯模式 + 未確認）
+  const canConfirm = isAccountant && isEditMode && !isConfirmed
 
   // 提交狀態（防止重複點擊）
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -775,11 +788,71 @@ export function AddReceiptDialog({
               <X size={16} />
               {linkPayResults.length > 0
                 ? ADD_RECEIPT_DIALOG_LABELS.關閉
-                : isConfirmed
+                : isConfirmed && !isAccountant
                   ? ADD_RECEIPT_DIALOG_LABELS.關閉
                   : ADD_RECEIPT_DIALOG_LABELS.取消}
             </Button>
-            {linkPayResults.length === 0 && !isConfirmed && (
+            
+            {/* 會計專用：確認/異常按鈕 */}
+            {canConfirm && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={async () => {
+                    if (!editingReceipt) return
+                    setIsSubmitting(true)
+                    try {
+                      await onUpdate?.(editingReceipt.id, { 
+                        status: '2',
+                        updated_by: user?.id,
+                      })
+                      toast({ title: '已標記為異常' })
+                      onSuccess?.()
+                      onOpenChange(false)
+                    } catch (error) {
+                      toast({ title: '操作失敗', variant: 'destructive' })
+                    } finally {
+                      setIsSubmitting(false)
+                    }
+                  }}
+                  disabled={isSubmitting}
+                  className="gap-2 text-red-600 border-red-300 hover:bg-red-50"
+                >
+                  <AlertCircle size={16} />
+                  標記異常
+                </Button>
+                <Button
+                  onClick={async () => {
+                    if (!editingReceipt) return
+                    setIsSubmitting(true)
+                    try {
+                      // 先儲存編輯內容
+                      await handleSubmit()
+                      // 再更新狀態為已確認
+                      await onUpdate?.(editingReceipt.id, { 
+                        status: '1',
+                        actual_amount: editingReceipt.receipt_amount,
+                      } as Partial<Receipt>)
+                      toast({ title: '收款已確認' })
+                      onSuccess?.()
+                      onOpenChange(false)
+                    } catch (error) {
+                      toast({ title: '確認失敗', variant: 'destructive' })
+                    } finally {
+                      setIsSubmitting(false)
+                    }
+                  }}
+                  disabled={isSubmitting}
+                  className="gap-2 bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Check size={16} />
+                  確認收款
+                </Button>
+              </>
+            )}
+
+            {/* 一般儲存按鈕 */}
+            {linkPayResults.length === 0 && canEdit && !canConfirm && (
               <Button
                 onClick={handleSubmit}
                 disabled={

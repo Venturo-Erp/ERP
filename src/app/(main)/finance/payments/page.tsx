@@ -18,7 +18,7 @@ import { FinanceLabels, PAYMENT_METHOD_MAP } from '../constants/labels'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
 import { TableColumn } from '@/components/ui/enhanced-table'
-import { Plus, FileDown, Layers, Edit2, CheckSquare, Loader2, Check } from 'lucide-react'
+import { Plus, FileDown, Layers, Edit2, CheckSquare, Loader2 } from 'lucide-react'
 import { alert } from '@/lib/ui/alert-dialog'
 import { DateCell, StatusCell, ActionCell, CurrencyCell } from '@/components/table-cells'
 
@@ -26,17 +26,6 @@ import { DateCell, StatusCell, ActionCell, CurrencyCell } from '@/components/tab
 const BatchConfirmReceiptDialog = dynamic(
   () => import('./components').then(m => m.BatchConfirmReceiptDialog),
   { loading: () => null }
-)
-const BatchReceiptConfirmDialog = dynamic(
-  () => import('@/features/finance/payments').then(m => m.BatchReceiptConfirmDialog),
-  /* eslint-disable venturo/no-custom-modal -- 動態載入時的 loading 狀態 */
-  {
-    loading: () => (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9000]">
-        <Loader2 className="animate-spin text-white" size={32} />
-      </div>
-    ),
-  }
 )
 const AddReceiptDialog = dynamic(
   () => import('@/features/finance/payments').then(m => m.AddReceiptDialog),
@@ -86,8 +75,6 @@ export default function PaymentsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false)
   const [isBatchConfirmDialogOpen, setIsBatchConfirmDialogOpen] = useState(false)
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
-  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null)
 
   // 如果有 URL 參數，自動開啟新增對話框
@@ -115,21 +102,7 @@ export default function PaymentsPage() {
     setIsDialogOpen(true)
   }, [])
 
-  // 同步 selectedReceipt（確認後更新狀態）
-  useEffect(() => {
-    if (selectedReceipt && receipts.length > 0) {
-      const updated = receipts.find(r => r.id === selectedReceipt.id)
-      if (updated && updated.status !== selectedReceipt.status) {
-        setSelectedReceipt(updated)
-      }
-    }
-  }, [receipts, selectedReceipt])
 
-  // 事件處理（會計確認對話框用）
-  const handleViewDetail = useCallback((receipt: Receipt) => {
-    setSelectedReceipt(receipt)
-    setIsDetailDialogOpen(true)
-  }, [])
 
   // 處理列點擊 - 開啟編輯對話框
   const handleRowClick = useCallback(
@@ -203,23 +176,8 @@ export default function PaymentsPage() {
             className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
           >
             <Edit2 size={14} className="mr-1" />
-            編輯
+            {row.status === '1' ? '檢視' : '編輯'}
           </Button>
-          {row.status !== '1' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={e => {
-                e.stopPropagation()
-                setSelectedReceipt(row)
-                setIsDetailDialogOpen(true)
-              }}
-              className="h-7 px-2 text-xs text-morandi-gold hover:text-morandi-gold-hover"
-            >
-              <Check size={14} className="mr-1" />
-              確認
-            </Button>
-          )}
         </div>
       ),
     },
@@ -297,14 +255,6 @@ export default function PaymentsPage() {
       <BatchConfirmReceiptDialog
         open={isBatchConfirmDialogOpen}
         onOpenChange={setIsBatchConfirmDialogOpen}
-        onSuccess={invalidateReceipts}
-      />
-
-      {/* 收款單確認對話框（支援批次逐筆確認） */}
-      <BatchReceiptConfirmDialog
-        open={isDetailDialogOpen}
-        onOpenChange={setIsDetailDialogOpen}
-        receipt={selectedReceipt}
         onSuccess={invalidateReceipts}
       />
     </>
