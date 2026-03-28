@@ -1,16 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { usePayments } from '@/features/payments/hooks/usePayments'
-import { Plus, Loader2 } from 'lucide-react'
+import { Plus, Loader2, Plane, Building2 } from 'lucide-react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { useRequestTable } from '@/features/finance/requests/hooks/useRequestTable'
 import { PaymentRequest } from '@/stores/types'
 import { REQUESTS_PAGE_LABELS } from '../constants/labels'
+import { useAuthStore } from '@/stores'
 
 // Dynamic imports for dialogs (reduce initial bundle)
 const AddRequestDialog = dynamic(
@@ -46,6 +47,11 @@ export default function RequestsPage() {
   const { payment_requests, loading, loadPaymentRequests } = usePayments()
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<PaymentRequest | null>(null)
+  const [activeTab, setActiveTab] = useState<'tour' | 'company'>('tour')
+  const { user } = useAuthStore()
+
+  // 判斷是否為管理員/會計
+  const isAccountant = user?.roles?.includes('admin') || user?.roles?.includes('accountant') || user?.roles?.includes('controller')
 
   // 讀取 URL 參數（從快速請款按鈕傳入）
   const urlTourId = searchParams.get('tour_id')
@@ -72,8 +78,19 @@ export default function RequestsPage() {
     }
   }
 
+  // 根據分頁篩選請款單
+  const filteredByTab = useMemo(() => {
+    if (activeTab === 'company') {
+      // 公司支出：request_category = 'company'
+      return payment_requests.filter(pr => pr.request_category === 'company')
+    } else {
+      // 團體請款：有 tour_id 或 request_category != 'company'
+      return payment_requests.filter(pr => pr.request_category !== 'company')
+    }
+  }, [payment_requests, activeTab])
+
   const { tableColumns, filteredAndSortedRequests, handleSort, handleFilter } =
-    useRequestTable(payment_requests)
+    useRequestTable(filteredByTab)
 
   // 點擊行打開詳細對話框
   const handleRowClick = (request: PaymentRequest) => {
@@ -91,13 +108,44 @@ export default function RequestsPage() {
         onRowClick={handleRowClick}
         onSort={handleSort}
         headerActions={
-          <button
-            onClick={() => setIsAddDialogOpen(true)}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white px-4 py-2 rounded-md text-sm font-medium flex items-center transition-colors"
-          >
-            <Plus size={16} className="mr-2" />
-            {REQUESTS_PAGE_LABELS.ADD_9640}
-          </button>
+          <div className="flex items-center gap-4">
+            {/* 分頁切換 */}
+            <div className="flex items-center bg-morandi-bg rounded-lg p-1">
+              <button
+                onClick={() => setActiveTab('tour')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  activeTab === 'tour'
+                    ? 'bg-white text-morandi-primary shadow-sm'
+                    : 'text-morandi-secondary hover:text-morandi-primary'
+                }`}
+              >
+                <Plane size={14} />
+                團體請款
+              </button>
+              {isAccountant && (
+                <button
+                  onClick={() => setActiveTab('company')}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    activeTab === 'company'
+                      ? 'bg-white text-morandi-primary shadow-sm'
+                      : 'text-morandi-secondary hover:text-morandi-primary'
+                  }`}
+                >
+                  <Building2 size={14} />
+                  公司支出
+                </button>
+              )}
+            </div>
+            
+            {/* 新增按鈕 */}
+            <button
+              onClick={() => setIsAddDialogOpen(true)}
+              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white px-4 py-2 rounded-md text-sm font-medium flex items-center transition-colors"
+            >
+              <Plus size={16} className="mr-2" />
+              {REQUESTS_PAGE_LABELS.ADD_9640}
+            </button>
+          </div>
         }
       />
 
