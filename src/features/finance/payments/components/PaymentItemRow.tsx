@@ -103,11 +103,12 @@ export function PaymentItemRow({
   const receiptTypeOptions = paymentMethods.map(m => ({ value: m.name, label: m.name }))
 
   // 計算 Select value：
-  // 1. 如果還在載入，顯示空值（讓 placeholder 顯示「載入中...」）
-  // 2. 如果已載入，檢查值是否在選項中，不在就清空
+  // 1. 如果還在載入，保留原值（顯示 placeholder「載入中...」但不清空）
+  // 2. 如果已載入，檢查值是否在選項中
   const rawValue = (item.receipt_type as unknown as string) ?? ''
-  const isValidValue = !isLoading && receiptTypeOptions.some(opt => opt.value === rawValue)
-  const selectValue = isLoading ? '' : (isValidValue ? rawValue : '')
+  const isValidValue = receiptTypeOptions.some(opt => opt.value === rawValue)
+  // 載入中時保留原值（避免清空編輯中的資料），載入完成後才驗證
+  const selectValue = rawValue && (isLoading || isValidValue) ? rawValue : ''
 
   // 產生 LinkPay 連結
   const handleGenerateLink = async () => {
