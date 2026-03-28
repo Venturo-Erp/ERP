@@ -91,27 +91,35 @@ export const FEATURES: FeatureDefinition[] = [
     routes: ['/settings', '/settings/company', '/settings/roles', '/settings/menu'],
   },
 
-  // ===== 進階功能（付費） =====
   {
     code: 'calendar',
     name: '行事曆',
     description: '出團日曆、排程管理',
-    category: 'premium',
+    category: 'basic',
     routes: ['/calendar'],
   },
+  {
+    code: 'todos',
+    name: '待辦事項',
+    description: '任務管理、提醒',
+    category: 'basic',
+    routes: ['/todos'],
+  },
+  {
+    code: 'visas',
+    name: '簽證管理',
+    description: '簽證申請、進度追蹤',
+    category: 'basic',
+    routes: ['/visas'],
+  },
+
+  // ===== 進階功能（付費） =====
   {
     code: 'workspace',
     name: '工作空間',
     description: '團隊頻道、協作空間',
     category: 'premium',
     routes: ['/channel'],
-  },
-  {
-    code: 'todos',
-    name: '待辦事項',
-    description: '任務管理、提醒',
-    category: 'premium',
-    routes: ['/todos'],
   },
   {
     code: 'customers',
@@ -148,13 +156,7 @@ export const FEATURES: FeatureDefinition[] = [
     category: 'premium',
     routes: ['/confirmations', '/confirmations/[id]'],
   },
-  {
-    code: 'visas',
-    name: '簽證管理',
-    description: '簽證申請、進度追蹤',
-    category: 'premium',
-    routes: ['/visas'],
-  },
+
   {
     code: 'design',
     name: '設計工具',
