@@ -428,24 +428,26 @@ export function AddReceiptDialog({
               </TabsList>
 
               {/* 選擇團體 */}
-              <Combobox
-                options={tours.map(tour => ({
-                  value: tour.id,
-                  label: `${tour.code || ''} - ${tour.name || ''}`,
-                }))}
-                value={formData.tour_id}
-                onChange={value => {
-                  setFormData(prev => ({
-                    ...prev,
-                    tour_id: value,
-                    order_id: '',
-                  }))
-                }}
-                placeholder={ADD_RECEIPT_DIALOG_LABELS.請選擇團體}
-                emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
-                className="w-[280px]"
-                maxHeight="20rem"
-              />
+              <div className="relative z-[10020]">
+                <Combobox
+                  options={tours.map(tour => ({
+                    value: tour.id,
+                    label: `${tour.code || ''} - ${tour.name || ''}`,
+                  }))}
+                  value={formData.tour_id}
+                  onChange={value => {
+                    setFormData(prev => ({
+                      ...prev,
+                      tour_id: value,
+                      order_id: '',
+                    }))
+                  }}
+                  placeholder={ADD_RECEIPT_DIALOG_LABELS.請選擇團體}
+                  emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
+                  className="w-[280px]"
+                  maxHeight="300px"
+                />
+              </div>
 
               {/* 選擇訂單 */}
               <Select
@@ -720,7 +722,7 @@ export function AddReceiptDialog({
               <span className="text-sm text-morandi-secondary">
                 {ADD_RECEIPT_DIALOG_LABELS.TOTAL_6550}
               </span>
-              <span className="text-lg font-semibold text-morandi-gold w-[120px]">
+              <span className="text-lg font-semibold text-morandi-gold whitespace-nowrap">
                 NT$ {totalAmount.toLocaleString()}
               </span>
             </div>
