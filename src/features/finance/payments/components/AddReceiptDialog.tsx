@@ -428,60 +428,50 @@ export function AddReceiptDialog({
               </TabsList>
 
               {/* 選擇團體 */}
-              <div className="w-[280px]">
-                <Label className="text-xs text-muted-foreground">
-                  {ADD_RECEIPT_DIALOG_LABELS.LABEL_3406}
-                </Label>
-                <Combobox
-                  options={tours.map(tour => ({
-                    value: tour.id,
-                    label: `${tour.code || ''} - ${tour.name || ''}`,
-                  }))}
-                  value={formData.tour_id}
-                  onChange={value => {
-                    setFormData(prev => ({
-                      ...prev,
-                      tour_id: value,
-                      order_id: '',
-                    }))
-                  }}
-                  placeholder={ADD_RECEIPT_DIALOG_LABELS.請選擇團體}
-                  emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
-                  className="mt-1 bg-card"
-                />
-              </div>
+              <Combobox
+                options={tours.map(tour => ({
+                  value: tour.id,
+                  label: `${tour.code || ''} - ${tour.name || ''}`,
+                }))}
+                value={formData.tour_id}
+                onChange={value => {
+                  setFormData(prev => ({
+                    ...prev,
+                    tour_id: value,
+                    order_id: '',
+                  }))
+                }}
+                placeholder={ADD_RECEIPT_DIALOG_LABELS.請選擇團體}
+                emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
+                className="w-[280px] bg-card border border-input"
+              />
 
               {/* 選擇訂單 */}
-              <div className="w-[300px]">
-                <Label className="text-xs text-muted-foreground">
-                  {ADD_RECEIPT_DIALOG_LABELS.LABEL_3874}
-                </Label>
-                <Select
-                  disabled={!formData.tour_id || filteredOrders.length === 0}
-                  value={formData.order_id}
-                  onValueChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
-                >
-                  <SelectTrigger className="mt-1 bg-card border-morandi-container/30">
-                    <SelectValue
-                      placeholder={
-                        !formData.tour_id
-                          ? ADD_RECEIPT_DIALOG_LABELS.請先選擇團體
-                          : filteredOrders.length === 0
-                            ? ADD_RECEIPT_DIALOG_LABELS.此團體沒有訂單
-                            : ADD_RECEIPT_DIALOG_LABELS.請選擇訂單
-                      }
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {filteredOrders.map(order => (
-                      <SelectItem key={order.id} value={order.id}>
-                        {order.order_number} -{' '}
-                        {order.contact_person || ADD_RECEIPT_DIALOG_LABELS.無聯絡人}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <Select
+                disabled={!formData.tour_id || filteredOrders.length === 0}
+                value={formData.order_id}
+                onValueChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
+              >
+                <SelectTrigger className="w-[300px] bg-card border border-input">
+                  <SelectValue
+                    placeholder={
+                      !formData.tour_id
+                        ? ADD_RECEIPT_DIALOG_LABELS.請先選擇團體
+                        : filteredOrders.length === 0
+                          ? ADD_RECEIPT_DIALOG_LABELS.此團體沒有訂單
+                          : ADD_RECEIPT_DIALOG_LABELS.請選擇訂單
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredOrders.map(order => (
+                    <SelectItem key={order.id} value={order.id}>
+                      {order.order_number} -{' '}
+                      {order.contact_person || ADD_RECEIPT_DIALOG_LABELS.無聯絡人}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* 右邊：標題 */}
