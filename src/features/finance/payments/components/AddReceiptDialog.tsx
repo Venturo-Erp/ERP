@@ -443,7 +443,7 @@ export function AddReceiptDialog({
                 }}
                 placeholder={ADD_RECEIPT_DIALOG_LABELS.請選擇團體}
                 emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
-                className="w-[280px] bg-card border border-input"
+                className="w-[280px]"
               />
 
               {/* 選擇訂單 */}
@@ -452,11 +452,11 @@ export function AddReceiptDialog({
                 value={formData.order_id}
                 onValueChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
               >
-                <SelectTrigger className="w-[300px] bg-card border border-input">
+                <SelectTrigger className="w-[300px] bg-card">
                   <SelectValue
                     placeholder={
                       !formData.tour_id
-                        ? ADD_RECEIPT_DIALOG_LABELS.請先選擇團體
+                        ? '選擇團體後選擇訂單'
                         : filteredOrders.length === 0
                           ? ADD_RECEIPT_DIALOG_LABELS.此團體沒有訂單
                           : ADD_RECEIPT_DIALOG_LABELS.請選擇訂單
