@@ -25,9 +25,12 @@ import { ReceiptType } from '@/types/receipt.types'
 import { PAYMENT_DATA_LABELS } from '../../constants/labels'
 
 export function usePaymentData() {
-  const { items: orders } = useOrdersSlim()
-  const { items: receipts } = useReceipts()
+  const { items: orders, loading: ordersLoading } = useOrdersSlim()
+  const { items: receipts, loading: receiptsLoading } = useReceipts()
   const { items: linkpayLogs } = useLinkPayLogs()
+  
+  // 合併 loading 狀態
+  const loading = ordersLoading || receiptsLoading
   const { get: getTour } = useTourDictionary()
   const { user } = useAuthStore()
   const { get: getEmployee } = useEmployeeDictionary()
@@ -263,6 +266,7 @@ export function usePaymentData() {
     availableOrders,
     linkpayLogs,
     user,
+    loading,
     invalidateReceipts,
     handleCreateReceipt,
     handleConfirmReceipt,

@@ -7,9 +7,9 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
 import { CurrencyCell, DateCell } from '@/components/table-cells'
-import { ChevronLeft, ChevronRight, TrendingUp, Receipt, Users } from 'lucide-react'
-import { useReceiptOrders } from '@/data'
-import { ReceiptOrder } from '@/types'
+import { ChevronLeft, ChevronRight, TrendingUp, Receipt as ReceiptIcon, Users } from 'lucide-react'
+import { useReceipts } from '@/data'
+import type { Receipt } from '@/types/receipt.types'
 import { RECEIPT_PAYMENT_METHOD_LABELS } from '@/types/receipt.types'
 import { MONTHLY_INCOME_LABELS } from './constants/labels'
 
@@ -98,46 +98,46 @@ function StatCard({
 
 export default function MonthlyIncomeReportPage() {
   const [selectedMonth, setSelectedMonth] = useState(getCurrentYearMonth())
-  const { items: receiptOrders } = useReceiptOrders()
+  const { items: receipts, loading } = useReceipts()
 
   // 篩選該月份的數據
   const { startDate, endDate } = getMonthRange(selectedMonth)
 
-  const filteredReceiptOrders = useMemo(() => {
-    return receiptOrders.filter(ro => {
-      const receiptDate = ro.receipt_date
-      return receiptDate >= startDate && receiptDate <= endDate
+  const filteredReceipts = useMemo(() => {
+    return receipts.filter(r => {
+      const receiptDate = r.receipt_date || r.created_at?.split('T')[0]
+      return receiptDate && receiptDate >= startDate && receiptDate <= endDate
     })
-  }, [receiptOrders, startDate, endDate])
+  }, [receipts, startDate, endDate])
 
   // 計算統計數據
   const stats = useMemo(() => {
-    const totalAmount = filteredReceiptOrders.reduce((sum, ro) => sum + (ro.amount || 0), 0)
+    const totalAmount = filteredReceipts.reduce((sum, r) => sum + (r.receipt_amount || r.amount || 0), 0)
     // 按付款方式分組統計
-    const byPaymentMethod = filteredReceiptOrders.reduce(
-      (acc, ro) => {
-        const method = ro.payment_method || 'other'
+    const byPaymentMethod = filteredReceipts.reduce(
+      (acc, r) => {
+        const method = r.payment_method || 'other'
         if (!acc[method]) {
           acc[method] = { count: 0, amount: 0 }
         }
         acc[method].count += 1
-        acc[method].amount += ro.amount || 0
+        acc[method].amount += r.receipt_amount || r.amount || 0
         return acc
       },
       {} as Record<string, { count: number; amount: number }>
     )
 
     return {
-      receiptCount: filteredReceiptOrders.length,
+      receiptCount: filteredReceipts.length,
       totalAmount,
       byPaymentMethod,
     }
-  }, [filteredReceiptOrders])
+  }, [filteredReceipts])
 
   // 收款單表格欄位
-  const columns: TableColumn<ReceiptOrder>[] = [
+  const columns: TableColumn<Receipt>[] = [
     {
-      key: 'code',
+      key: 'receipt_number',
       label: MONTHLY_INCOME_LABELS.COL_RECEIPT_CODE,
       width: '150',
       render: value => <span className="font-mono text-sm">{String(value || '')}</span>,
@@ -160,13 +160,13 @@ export default function MonthlyIncomeReportPage() {
       },
     },
     {
-      key: 'amount',
+      key: 'receipt_amount',
       label: MONTHLY_INCOME_LABELS.COL_AMOUNT,
       width: '120',
-      render: value => <CurrencyCell amount={Number(value) || 0} variant="income" />,
+      render: (value, row) => <CurrencyCell amount={Number(value) || Number(row.amount) || 0} variant="income" />,
     },
     {
-      key: 'handled_by',
+      key: 'handler_name',
       label: MONTHLY_INCOME_LABELS.COL_HANDLED_BY,
       width: '100',
       render: value => <span className="text-sm">{String(value || '-')}</span>,
@@ -197,7 +197,7 @@ export default function MonthlyIncomeReportPage() {
           <StatCard
             title={MONTHLY_INCOME_LABELS.LABEL_6326}
             value={stats.receiptCount}
-            icon={Receipt}
+            icon={ReceiptIcon}
             iconColor="text-morandi-green"
           />
           <StatCard
@@ -246,7 +246,8 @@ export default function MonthlyIncomeReportPage() {
         </h3>
         <EnhancedTable
           columns={columns}
-          data={filteredReceiptOrders}
+          data={filteredReceipts}
+          loading={loading}
           emptyMessage={MONTHLY_INCOME_LABELS.EMPTY_MESSAGE}
         />
       </ContentContainer>

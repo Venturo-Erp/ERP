@@ -21,7 +21,7 @@ import type { TourItineraryItem } from '../types/tour-itinerary-item.types'
 import { ProfitTab } from './ProfitTab'
 import { BonusSettingTab } from './BonusSettingTab'
 import {
-  useReceiptOrders,
+  useReceipts,
   usePaymentRequests,
   useTourBonusSettings,
   useEmployeeDictionary,
@@ -77,7 +77,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
   const [pdfLoading, setPdfLoading] = useState(false)
 
   // 同 ProfitTab 的資料取法
-  const { items: allReceipts } = useReceiptOrders()
+  const { items: allReceipts } = useReceipts()
   const { items: allPaymentRequests } = usePaymentRequests()
   const { items: allBonusSettings } = useTourBonusSettings()
   const { items: allMembers } = useMembers()
@@ -195,12 +195,12 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     try {
       const adaptedReceipts = receipts.map(r => ({
         ...r,
-        receipt_number: r.code ?? '',
+        receipt_number: r.receipt_number ?? '',
         allocation_mode: 'single' as const,
         payment_items: [],
-        total_amount: Number(r.amount) || 0,
-        status: 'received' as const,
-        created_by: '',
+        total_amount: Number(r.receipt_amount) || Number(r.amount) || 0,
+        status: r.status === '1' ? 'received' as const : 'pending' as const,
+        created_by: r.created_by ?? '',
         updated_at: r.updated_at ?? '',
         created_at: r.created_at ?? '',
       }))
@@ -222,10 +222,10 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
           total_amount: o.total_amount,
         })),
         receipts: receipts.map(r => ({
-          receipt_number: r.code,
+          receipt_number: r.receipt_number,
           receipt_date: r.receipt_date,
-          receipt_amount: Number(r.amount) || 0,
-          amount: Number(r.amount) || 0,
+          receipt_amount: Number(r.receipt_amount) || Number(r.amount) || 0,
+          amount: Number(r.receipt_amount) || Number(r.amount) || 0,
           payment_method: r.payment_method,
         })),
         costs: paymentRequests,

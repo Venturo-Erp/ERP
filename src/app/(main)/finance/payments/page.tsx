@@ -65,6 +65,7 @@ export default function PaymentsPage() {
   const {
     receipts,
     availableOrders,
+    loading,
     invalidateReceipts,
     handleCreateReceipt,
     handleConfirmReceipt,
@@ -205,6 +206,7 @@ export default function PaymentsPage() {
       <ListPageLayout
         title={FinanceLabels.paymentManagement}
         data={receipts}
+        loading={loading}
         columns={columns}
         searchFields={['receipt_number', 'order_number', 'tour_name']}
         searchPlaceholder={FinanceLabels.searchReceiptPlaceholder}

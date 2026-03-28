@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import type { Tour } from '@/stores/types'
 import {
-  useReceiptOrders,
+  useReceipts,
   usePaymentRequests,
   useTourBonusSettings,
   useEmployeeDictionary,
@@ -57,7 +57,7 @@ function ProfitTableColumn({ title, rows }: { title: string; rows: ProfitTableRo
 }
 
 export function ProfitTab({ tour }: ProfitTabProps) {
-  const { items: allReceipts } = useReceiptOrders()
+  const { items: allReceipts } = useReceipts()
   const { items: allMembers } = useMembers()
   const { items: allOrders } = useOrdersSlim()
   const { items: allPaymentRequests } = usePaymentRequests()
@@ -126,17 +126,16 @@ export function ProfitTab({ tour }: ProfitTabProps) {
     return { normalExpenses: normal, bonusExpenses: bonus }
   }, [paymentRequests])
 
-  // Calculate profit — adapt receipt_orders shape (code, amount) to service interface
+  // Calculate profit — receipts 已有正確欄位
   const profitResult = useMemo(() => {
-    // receipt_orders has { amount, code, receipt_date, ... }
     const adaptedReceipts = (receipts ?? []).map(r => ({
       ...r,
-      receipt_number: r.code ?? '',
+      receipt_number: r.receipt_number ?? '',
       allocation_mode: 'single' as const,
       payment_items: [],
-      total_amount: Number(r.amount) || 0,
-      status: 'received' as const,
-      created_by: '',
+      total_amount: Number(r.receipt_amount) || Number(r.amount) || 0,
+      status: r.status === '1' ? 'received' as const : 'pending' as const,
+      created_by: r.created_by ?? '',
       updated_at: r.updated_at ?? '',
       created_at: r.created_at ?? '',
     }))
@@ -172,10 +171,10 @@ export function ProfitTab({ tour }: ProfitTabProps) {
               <tbody>
                 {receipts.map(r => (
                   <tr key={r.id} className="border-t">
-                    <td className="px-3 py-2">{r.code}</td>
+                    <td className="px-3 py-2">{r.receipt_number}</td>
                     <td className="px-3 py-2">{r.receipt_date}</td>
                     <td className="px-3 py-2 text-right font-mono">
-                      ${formatAmount(Number(r.amount))}
+                      ${formatAmount(Number(r.receipt_amount) || Number(r.amount))}
                     </td>
                   </tr>
                 ))}

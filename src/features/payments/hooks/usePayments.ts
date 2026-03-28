@@ -10,13 +10,17 @@ import { PaymentRequest, PaymentRequestItem, DisbursementOrder } from '@/stores/
  */
 export const usePayments = () => {
   // 使用 @/data 的 SWR hooks（自動載入）
-  const { items: payment_requests } = usePaymentRequests()
-  const { items: disbursement_orders } = useDisbursementOrders()
+  const { items: payment_requests, loading: requestsLoading } = usePaymentRequests()
+  const { items: disbursement_orders, loading: ordersLoading } = useDisbursementOrders()
+  
+  // 合併 loading 狀態
+  const loading = requestsLoading || ordersLoading
 
   return {
     // ========== 資料 ==========
     payment_requests,
     disbursement_orders,
+    loading,
 
     // ========== PaymentRequest CRUD 操作 ==========
     createPaymentRequest: async (

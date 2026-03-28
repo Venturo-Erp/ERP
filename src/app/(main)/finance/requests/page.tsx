@@ -43,7 +43,7 @@ const RequestDetailDialog = dynamic(
 export default function RequestsPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { payment_requests, loadPaymentRequests } = usePayments()
+  const { payment_requests, loading, loadPaymentRequests } = usePayments()
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<PaymentRequest | null>(null)
 
@@ -85,6 +85,7 @@ export default function RequestsPage() {
       <ListPageLayout
         title={REQUESTS_PAGE_LABELS.MANAGE_3483}
         data={filteredAndSortedRequests}
+        loading={loading}
         columns={tableColumns}
         searchable={false}
         onRowClick={handleRowClick}
