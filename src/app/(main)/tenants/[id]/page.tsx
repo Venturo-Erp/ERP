@@ -15,12 +15,8 @@ import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/components/ui/use-toast'
 import { 
   Building2, 
-  Shield, 
-  ArrowLeft,
   Save,
   Loader2,
-  Sparkles,
-  Building
 } from 'lucide-react'
 import { FEATURES, getBasicFeatures, getPremiumFeatures, getEnterpriseFeatures } from '@/lib/permissions'
 
@@ -163,51 +159,18 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       ]}
       showBackButton
       onBack={() => router.push('/tenants')}
+      tabs={[
+        { value: 'basic', label: '基本功能' },
+        { value: 'premium', label: '付費功能' },
+        { value: 'enterprise', label: '企業功能' },
+      ]}
+      activeTab={activeTab}
+      onTabChange={(tab) => setActiveTab(tab as 'basic' | 'premium' | 'enterprise')}
       headerActions={
-        <div className="flex items-center gap-4">
-          {/* 分頁 */}
-          <div className="flex items-center bg-morandi-bg rounded-lg p-1">
-            <button
-              onClick={() => setActiveTab('basic')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                activeTab === 'basic'
-                  ? 'bg-white text-morandi-primary shadow-sm'
-                  : 'text-morandi-secondary hover:text-morandi-primary'
-              }`}
-            >
-              <Shield className="h-4 w-4" />
-              基本功能
-            </button>
-            <button
-              onClick={() => setActiveTab('premium')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                activeTab === 'premium'
-                  ? 'bg-white text-morandi-primary shadow-sm'
-                  : 'text-morandi-secondary hover:text-morandi-primary'
-              }`}
-            >
-              <Sparkles className="h-4 w-4" />
-              付費功能
-            </button>
-            <button
-              onClick={() => setActiveTab('enterprise')}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                activeTab === 'enterprise'
-                  ? 'bg-white text-morandi-primary shadow-sm'
-                  : 'text-morandi-secondary hover:text-morandi-primary'
-              }`}
-            >
-              <Building className="h-4 w-4" />
-              企業功能
-            </button>
-          </div>
-
-          {/* 儲存按鈕 */}
-          <Button onClick={handleSave} disabled={saving} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
-            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-            儲存
-          </Button>
-        </div>
+        <Button onClick={handleSave} disabled={saving} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
+          {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+          儲存
+        </Button>
       }
     >
       {/* 租戶資訊卡片 */}
