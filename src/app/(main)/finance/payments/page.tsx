@@ -192,19 +192,35 @@ export default function PaymentsPage() {
       key: 'actions',
       label: FinanceLabels.actions,
       render: (_, row) => (
-        <ActionCell
-          actions={[
-            { icon: Edit2, label: FinanceLabels.edit, onClick: () => loadReceiptForEdit(row) },
-            ...(row.status !== '1' ? [{ 
-              icon: Check, 
-              label: '確認', 
-              onClick: () => {
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={e => {
+              e.stopPropagation()
+              loadReceiptForEdit(row)
+            }}
+            className="h-7 px-2 text-xs text-morandi-secondary hover:text-morandi-primary"
+          >
+            <Edit2 size={14} className="mr-1" />
+            編輯
+          </Button>
+          {row.status !== '1' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={e => {
+                e.stopPropagation()
                 setSelectedReceipt(row)
                 setIsDetailDialogOpen(true)
-              }
-            }] : []),
-          ]}
-        />
+              }}
+              className="h-7 px-2 text-xs text-morandi-gold hover:text-morandi-gold-hover"
+            >
+              <Check size={14} className="mr-1" />
+              確認
+            </Button>
+          )}
+        </div>
       ),
     },
   ]
