@@ -8,19 +8,19 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
-import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
 import { useToast } from '@/components/ui/use-toast'
 import { 
   Building2, 
   Shield, 
   ArrowLeft,
   Save,
-  Loader2
+  Loader2,
+  Sparkles,
+  Building
 } from 'lucide-react'
 import { FEATURES, getBasicFeatures, getPremiumFeatures, getEnterpriseFeatures } from '@/lib/permissions'
 
@@ -52,7 +52,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
     const fetchData = async () => {
       setLoading(true)
 
-      // 取得租戶資料（注意：API 路徑是 [workspaceId] 不是 [id]）
+      // 取得租戶資料
       const wsRes = await fetch(`/api/workspaces/${id}`)
       if (!wsRes.ok) {
         toast({ title: '找不到租戶', variant: 'destructive' })
@@ -118,7 +118,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
 
   // 渲染功能列表
   const renderFeatureList = (featureList: ReturnType<typeof getBasicFeatures>) => (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {featureList.map(feature => {
         const current = features.find(f => f.feature_code === feature.code)
         const isEnabled = current?.enabled ?? false
@@ -126,11 +126,11 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         return (
           <div
             key={feature.code}
-            className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+            className="flex items-center justify-between p-3 rounded-lg border border-border bg-white hover:bg-morandi-bg/50 transition-colors"
           >
             <div className="flex-1">
-              <div className="font-medium">{feature.name}</div>
-              <div className="text-sm text-muted-foreground">{feature.description}</div>
+              <div className="font-medium text-morandi-primary">{feature.name}</div>
+              <div className="text-sm text-morandi-secondary">{feature.description}</div>
             </div>
             <Switch
               checked={isEnabled}
@@ -146,7 +146,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
     return (
       <ContentPageLayout title="載入中..." icon={Building2}>
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-morandi-gold" />
         </div>
       </ContentPageLayout>
     )
@@ -162,74 +162,87 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       ]}
     >
       <div className="space-y-6">
-        <Button variant="ghost" onClick={() => router.push('/tenants')}>
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          返回列表
-        </Button>
+        {/* 頂部操作列 */}
+        <div className="flex items-center justify-between">
+          <Button variant="ghost" onClick={() => router.push('/tenants')} className="text-morandi-secondary">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            返回列表
+          </Button>
+          <Button onClick={handleSave} disabled={saving} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
+            {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+            儲存設定
+          </Button>
+        </div>
 
-        <Card className="p-6">
-          <div className="grid grid-cols-4 gap-4">
+        {/* 租戶資訊卡片 */}
+        <div className="bg-white border border-border rounded-lg p-6">
+          <div className="grid grid-cols-4 gap-6">
             <div>
-              <Label className="text-muted-foreground">公司名稱</Label>
-              <div className="font-medium">{workspace?.name}</div>
+              <div className="text-sm text-morandi-secondary mb-1">公司名稱</div>
+              <div className="font-semibold text-morandi-primary">{workspace?.name}</div>
             </div>
             <div>
-              <Label className="text-muted-foreground">代碼</Label>
-              <div className="font-medium">{workspace?.code}</div>
+              <div className="text-sm text-morandi-secondary mb-1">公司代碼</div>
+              <div className="font-semibold text-morandi-primary">{workspace?.code}</div>
             </div>
             <div>
-              <Label className="text-muted-foreground">類型</Label>
-              <Badge variant="outline">{workspace?.type}</Badge>
+              <div className="text-sm text-morandi-secondary mb-1">類型</div>
+              <Badge variant="outline" className="font-medium">{workspace?.type}</Badge>
             </div>
             <div>
-              <Label className="text-muted-foreground">狀態</Label>
-              <Badge variant={workspace?.is_active ? 'default' : 'secondary'}>
-                {workspace?.is_active ? '啟用' : '停用'}
+              <div className="text-sm text-morandi-secondary mb-1">狀態</div>
+              <Badge className={workspace?.is_active ? 'bg-morandi-green/20 text-morandi-green' : 'bg-morandi-secondary/20 text-morandi-secondary'}>
+                {workspace?.is_active ? '啟用中' : '已停用'}
               </Badge>
             </div>
           </div>
-        </Card>
+        </div>
 
+        {/* 功能模組分頁 */}
         <Tabs defaultValue="basic" className="w-full">
-          <div className="flex items-center justify-between mb-4">
-            <TabsList>
-              <TabsTrigger value="basic" className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                基本功能
-              </TabsTrigger>
-              <TabsTrigger value="premium" className="flex items-center gap-2">
-                💰 付費功能
-              </TabsTrigger>
-              <TabsTrigger value="enterprise" className="flex items-center gap-2">
-                🏢 企業功能
-              </TabsTrigger>
-            </TabsList>
-
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-              儲存
-            </Button>
-          </div>
+          <TabsList className="bg-morandi-bg p-1 rounded-lg mb-4">
+            <TabsTrigger 
+              value="basic" 
+              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              <Shield className="h-4 w-4" />
+              基本功能
+            </TabsTrigger>
+            <TabsTrigger 
+              value="premium" 
+              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              <Sparkles className="h-4 w-4" />
+              付費功能
+            </TabsTrigger>
+            <TabsTrigger 
+              value="enterprise" 
+              className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm"
+            >
+              <Building className="h-4 w-4" />
+              企業功能
+            </TabsTrigger>
+          </TabsList>
 
           <TabsContent value="basic">
-            <Card className="p-4">
-              <h3 className="font-medium mb-4 text-muted-foreground">基本功能（免費）</h3>
+            <div className="bg-white border border-border rounded-lg p-4">
+              <div className="text-sm text-morandi-secondary mb-4">基本功能（免費）</div>
               {renderFeatureList(getBasicFeatures())}
-            </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="premium">
-            <Card className="p-4">
-              <h3 className="font-medium mb-4 text-muted-foreground">付費功能（需要訂閱）</h3>
+            <div className="bg-white border border-border rounded-lg p-4">
+              <div className="text-sm text-morandi-secondary mb-4">付費功能（需要訂閱）</div>
               {renderFeatureList(getPremiumFeatures())}
-            </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="enterprise">
-            <Card className="p-4">
-              <h3 className="font-medium mb-4 text-muted-foreground">企業功能（特殊訂閱）</h3>
+            <div className="bg-white border border-border rounded-lg p-4">
+              <div className="text-sm text-morandi-secondary mb-4">企業功能（特殊訂閱）</div>
               {renderFeatureList(getEnterpriseFeatures())}
-            </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
