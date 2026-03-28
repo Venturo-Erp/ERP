@@ -113,14 +113,21 @@ export function AddReceiptDialog({
           receipt_date: editingReceipt.receipt_date || getTodayString(),
         })
 
-        // 從 receipt_items 載入項目
-        const { data: receiptItems } = await supabase
-          .from('receipt_items')
-          .select('*')
-          .eq('receipt_id', editingReceipt.id)
-          .is('deleted_at', null)
-          .order('created_at', { ascending: true })
-          .limit(500)
+        // 從 receipt_items 載入項目（如果表存在）
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let receiptItems: any[] | null = null
+        try {
+          const { data } = await supabase
+            .from('receipt_items')
+            .select('*')
+            .eq('receipt_id', editingReceipt.id)
+            .is('deleted_at', null)
+            .order('created_at', { ascending: true })
+            .limit(500)
+          receiptItems = data
+        } catch {
+          // receipt_items 表可能不存在，用舊資料
+        }
 
         if (receiptItems && receiptItems.length > 0) {
           // 有 receipt_items，用新的結構

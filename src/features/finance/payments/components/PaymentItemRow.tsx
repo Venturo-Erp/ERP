@@ -283,10 +283,17 @@ export function PaymentItemRow({
         <td className="py-2 px-3 border-b border-border text-right">
           <div className="flex items-center justify-end gap-2">
             <input
-              type="number"
-              value={item.amount || ''}
-              onChange={e => onUpdate(item.id, { amount: Number(e.target.value) })}
+              type="text"
+              inputMode="numeric"
+              value={item.amount ? item.amount.toLocaleString() : ''}
+              onChange={e => {
+                // 移除逗號後轉數字
+                const raw = e.target.value.replace(/,/g, '')
+                const num = parseInt(raw, 10)
+                onUpdate(item.id, { amount: isNaN(num) ? 0 : num })
+              }}
               placeholder="0"
+              disabled={readonly}
               className="input-no-focus w-full bg-transparent text-sm text-right"
             />
             {canRemove && (
