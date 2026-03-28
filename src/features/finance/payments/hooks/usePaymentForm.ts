@@ -11,8 +11,15 @@ import { RECEIPT_TYPES } from '../types'
 import { PAYMENT_FORM_LABELS } from '../../constants/labels'
 
 export function usePaymentForm() {
-  const { items: tours } = useToursSlim()
+  const { items: allTours } = useToursSlim()
   const { items: orders } = useOrdersSlim()
+  
+  // 過濾掉提案和模板，只保留正式團
+  const tours = useMemo(() => {
+    return allTours.filter(tour => 
+      !tour.tour_type || tour.tour_type === 'official'
+    )
+  }, [allTours])
 
   // 基本表單資料
   const [formData, setFormData] = useState<PaymentFormData>({
