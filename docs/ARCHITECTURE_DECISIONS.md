@@ -62,11 +62,18 @@
 2. **一致**：跟 `payment_requests` 的 batch_id 邏輯一致
 3. **彈性**：batch_id 可選，單筆收款不需要
 
-### 被刪除的表
+### 表格狀態
 
-- `receipt_items` — 功能整合進 receipts
-- `receipt_orders` — 舊設計，0 筆資料
-- `receipt_payment_items` — 不明用途，0 筆資料
+| 表 | 狀態 | 行動 |
+|---|------|------|
+| `receipt_items` | ⚠️ Deprecated | 逐步遷移到多張 receipts |
+| `receipt_orders` | ❌ 已廢棄 | 0 筆資料，可刪除 |
+| `receipt_payment_items` | ❌ 已廢棄 | 0 筆資料，可刪除 |
+
+**遷移計畫**：
+1. ✅ 新的批量收款已直接建多張 receipts
+2. ⏳ AddReceiptDialog 的多付款方式待改
+3. ⏳ 舊資料讀取相容層待移除
 
 ---
 

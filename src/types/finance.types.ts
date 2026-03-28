@@ -137,6 +137,8 @@ export interface DisbursementOrder {
 }
 
 // === 收款單管理系統 ===
+// ⚠️ ReceiptOrder 已廢棄，改用 Receipt（見 ADR-001）
+// 保留 interface 供舊程式碼相容，新程式碼請用 Receipt
 export interface ReceiptOrder {
   id: string
   receipt_number: string // REC-2024001

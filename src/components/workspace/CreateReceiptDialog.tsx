@@ -13,9 +13,9 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { createReceiptOrder } from '@/data'
+import { createReceipt } from '@/data'
 import { useAuthStore } from '@/stores'
-import type { ReceiptOrder } from '@/types'
+import type { Receipt } from '@/types/receipt.types'
 import { alert } from '@/lib/ui/alert-dialog'
 import { DatePicker } from '@/components/ui/date-picker'
 import {
@@ -36,6 +36,8 @@ interface CreateReceiptDialogProps {
     total_amount: number
     paid_amount: number
     gap: number
+    tour_id?: string | null
+    customer_id?: string | null
   }
   open: boolean
   onClose: () => void
@@ -59,19 +61,25 @@ export function CreateReceiptDialog({ order, open, onClose, onSuccess }: CreateR
       }
 
       const receiptData = {
-        code: '',
+        receipt_number: '', // 會由後端生成
         order_id: order.id,
+        tour_id: order.tour_id || null,
+        customer_id: order.customer_id || null,
         receipt_date: receiptDate,
+        payment_date: receiptDate,
         payment_method: paymentMethodMap[paymentMethod] || 'transfer',
+        receipt_amount: parseFloat(amount),
         amount: parseFloat(amount),
+        actual_amount: 0,
+        status: '0',
         notes: note,
-        handled_by: null,
         workspace_id: user?.workspace_id || '',
+        created_by: user?.id || '',
+        updated_by: user?.id || '',
+        deleted_at: null,
       }
 
-      const receipt = await createReceiptOrder(
-        receiptData as Omit<ReceiptOrder, 'id' | 'created_at' | 'updated_at'>
-      )
+      const receipt = await createReceipt(receiptData as Parameters<typeof createReceipt>[0])
       onSuccess(receipt.id)
       onClose()
     } catch (error) {

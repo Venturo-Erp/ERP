@@ -28,7 +28,8 @@ export type Quote = Database['public']['Tables']['quotes']['Row']
 // export type QuoteItem = Database['public']['Tables']['quote_items']['Row']
 export type PaymentRequest = Database['public']['Tables']['payment_requests']['Row']
 export type DisbursementOrder = Database['public']['Tables']['disbursement_orders']['Row']
-export type ReceiptOrder = Database['public']['Tables']['receipt_orders']['Row']
+// ReceiptOrder 已廢棄，改用 Receipt（見 ADR-001）
+// export type ReceiptOrder = Database['public']['Tables']['receipt_orders']['Row']
 
 // ==================== 使用者相關 ====================
 

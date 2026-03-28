@@ -40,7 +40,7 @@ export type {
   Quote,
   PaymentRequest,
   DisbursementOrder,
-  ReceiptOrder,
+  // ReceiptOrder 已廢棄，改用 Receipt（見 ADR-001）
 
   // 使用者
   User,

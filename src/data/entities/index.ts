@@ -115,21 +115,7 @@ export {
   invalidatePaymentRequests,
 } from './payment-requests'
 
-// Receipt Orders
-export {
-  receiptOrderEntity,
-  useReceiptOrders,
-  useReceiptOrdersSlim,
-  useReceiptOrder,
-  useReceiptOrdersPaginated,
-  useReceiptOrderDictionary,
-  createReceiptOrder,
-  updateReceiptOrder,
-  deleteReceiptOrder,
-  invalidateReceiptOrders,
-} from './receipt-orders'
-
-// Receipts (收款明細)
+// Receipts (收款)
 export {
   receiptEntity,
   useReceipts,

@@ -10,7 +10,7 @@
  */
 
 import { useMemo, useCallback } from 'react'
-import { useMembers as useMembersCloud } from './cloudHooks' // Renamed to avoid conflict
+import { useMembers as useMembersData } from '@/data' // 使用 @/data 的 SWR hook
 import { useMemberActions } from './useMemberActions' // 使用有同步邏輯的 actions
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
@@ -73,17 +73,24 @@ interface UseMembersReturn {
  * ```
  */
 export function useMembers({ orderId, tourId }: UseMembersOptions = {}): UseMembersReturn {
-  // 使用 SWR-based cloud hook 取得所有成員
-  // 將 `useMembers` 從 `./cloudHooks` 重新命名為 `useMembersCloud` 以避免名稱衝突
+  // 使用 @/data 的 SWR hook
   const {
     items: allMembers,
-    isLoading,
-    isValidating,
-    error,
-    update,
-    fetchAll,
-    getById,
-  } = useMembersCloud() // Use useMembersCloud here
+    loading: isLoading,
+  } = useMembersData()
+  
+  // 相容舊 API
+  const isValidating = false
+  const error: Error | undefined = undefined
+  const update = async (id: string, data: Partial<Member>) => {
+    const { updateMember } = await import('@/data')
+    return updateMember(id, data)
+  }
+  const fetchAll = async () => {
+    const { invalidateMembers } = await import('@/data')
+    return invalidateMembers()
+  }
+  const getById = (id: string) => allMembers.find(m => m.id === id)
 
   // 使用 useMemberActions 來執行 create/delete，這樣會自動同步 order.member_count
   const { create, delete: remove } = useMemberActions()
@@ -124,7 +131,7 @@ export function useMembers({ orderId, tourId }: UseMembersOptions = {}): UseMemb
   // 更新成員
   const updateMember = useCallback(
     async (id: string, updates: Partial<Member>): Promise<void> => {
-      return update(id, updates)
+      await update(id, updates)
     },
     [update]
   )

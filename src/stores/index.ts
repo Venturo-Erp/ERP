@@ -21,7 +21,7 @@
 import { createStore } from './core/create-store'
 
 // 從 @/types 匯入（使用 types/ 目錄下的標準定義）
-import type { Tour, Order, Member, Customer, ReceiptOrder, Employee } from '@/types'
+import type { Tour, Order, Member, Customer, Employee } from '@/types'
 
 // 從本地 types 匯入
 import type {
@@ -125,7 +125,6 @@ export type {
   Payment,
   PaymentRequest,
   DisbursementOrder,
-  ReceiptOrder,
   Quote,
   QuoteItem,
   Employee,
