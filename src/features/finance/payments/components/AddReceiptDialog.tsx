@@ -88,6 +88,25 @@ export function AddReceiptDialog({
   // LinkPay 結果
   const [linkPayResults, setLinkPayResults] = useState<LinkPayResult[]>([])
   const [copiedLink, setCopiedLink] = useState<string | null>(null)
+  
+  // 收款方式（統一在 Dialog 層級載入，避免競爭）
+  const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string; placeholder?: string | null }>>([])
+  
+  // 載入收款方式
+  useEffect(() => {
+    if (!open) return
+    const loadPaymentMethods = async () => {
+      const { useAuthStore } = await import('@/stores')
+      const workspaceId = useAuthStore.getState().user?.workspace_id
+      if (!workspaceId) return
+      const response = await fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}&type=receipt`)
+      if (response.ok) {
+        const data = await response.json()
+        setPaymentMethods(data || [])
+      }
+    }
+    loadPaymentMethods()
+  }, [open])
 
   // 當對話框開啟時：載入資料、重置表單、設定預設值
   useEffect(() => {
@@ -577,6 +596,8 @@ export function AddReceiptDialog({
                           onRemove={removePaymentItem}
                           canRemove={paymentItems.length > 1}
                           isNewRow={!isEditMode && index === paymentItems.length - 1}
+                          readonly={isConfirmed}
+                          paymentMethods={paymentMethods}
                           orderInfo={
                             selectedOrder
                               ? {
@@ -711,6 +732,7 @@ export function AddReceiptDialog({
                           isNewRow={!isEditMode && index === paymentItems.length - 1}
                           mode="company"
                           readonly={isConfirmed}
+                          paymentMethods={paymentMethods}
                         />
                       ))}
                     </tbody>

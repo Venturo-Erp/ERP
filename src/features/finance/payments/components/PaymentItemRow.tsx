@@ -43,6 +43,8 @@ interface PaymentItemRowProps {
   mode?: 'tour' | 'company'
   /** 唯讀模式（已確認的收款單） */
   readonly?: boolean
+  /** 收款方式列表（從父組件傳入，避免重複載入） */
+  paymentMethods?: Array<{ id: string; name: string; placeholder?: string | null }>
 }
 
 export function PaymentItemRow({
@@ -55,6 +57,7 @@ export function PaymentItemRow({
   orderInfo,
   mode = 'tour',
   readonly = false,
+  paymentMethods: propPaymentMethods,
 }: PaymentItemRowProps) {
   const { toast } = useToast()
   const [isGenerating, setIsGenerating] = useState(false)
@@ -64,11 +67,14 @@ export function PaymentItemRow({
   // 讀取收入類會計科目（僅公司收款需要）
   const [incomeSubjects, setIncomeSubjects] = useState<Array<{ id: string; code: string; name: string }>>([])
   
-  // 從 DB 讀取收款方式
-  const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string; placeholder?: string | null }>>([])
+  // 從 DB 讀取收款方式（fallback，如果父組件沒有傳入）
+  const [localPaymentMethods, setLocalPaymentMethods] = useState<Array<{ id: string; name: string; placeholder?: string | null }>>([])
+  const paymentMethods = propPaymentMethods && propPaymentMethods.length > 0 ? propPaymentMethods : localPaymentMethods
   
   useEffect(() => {
-    // 讀取收款方式（從 payment_methods 表）
+    // 只有在父組件沒有傳入時才自己載入
+    if (propPaymentMethods && propPaymentMethods.length > 0) return
+    
     const loadPaymentMethods = async () => {
       const { useAuthStore } = await import('@/stores')
       const workspaceId = useAuthStore.getState().user?.workspace_id
@@ -77,7 +83,7 @@ export function PaymentItemRow({
       const response = await fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}&type=receipt`)
       if (response.ok) {
         const data = await response.json()
-        setPaymentMethods(data || [])
+        setLocalPaymentMethods(data || [])
       }
     }
     loadPaymentMethods()
