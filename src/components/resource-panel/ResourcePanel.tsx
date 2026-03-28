@@ -273,8 +273,8 @@ export function ResourcePanel({
       // 簡化版：只用國家篩選
       if (resolvedCountryId) query = query.eq('country_id', resolvedCountryId)
 
-      // 只載入前 50 筆作為預設顯示，搜尋時會重新查詢
-      const { data, error } = await query.order('name').limit(50)
+      // 只載入前 20 筆作為預設顯示，搜尋時會重新查詢
+      const { data, error } = await query.order('name').limit(20)
 
       if (error) {
         logger.error(`[ResourcePanel] 載入${type}失敗:`, error)
@@ -345,7 +345,7 @@ export function ResourcePanel({
           query = query.eq('country_id', resolvedCountryId)
         }
 
-        const { data, error } = await query.order('name').limit(50)
+        const { data, error } = await query.order('name').limit(20)
 
         if (!error && data) {
           setSearchResults(
