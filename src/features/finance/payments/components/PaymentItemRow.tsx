@@ -5,7 +5,7 @@
 
 import { formatDate } from '@/lib/utils/format-date'
 import { useState, useEffect } from 'react'
-import { Link2, Loader2 } from 'lucide-react'
+import { Link2, Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { useToast } from '@/components/ui/use-toast'
@@ -102,14 +102,12 @@ export function PaymentItemRow({
   
   const receiptTypeOptions = paymentMethods.map(m => ({ value: m.name, label: m.name }))
 
-  // 計算 Select value：直接用字串
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const selectValue = (item.receipt_type as any) === '' || item.receipt_type === undefined 
-    ? '' 
-    : String(item.receipt_type)
-
-  const receiptTypeLabel =
-    receiptTypeOptions.find(opt => String(opt.value) === selectValue)?.label || ''
+  // 計算 Select value：
+  // 1. 如果還在載入，顯示空值（讓 placeholder 顯示「載入中...」）
+  // 2. 如果已載入，檢查值是否在選項中，不在就清空
+  const rawValue = (item.receipt_type as unknown as string) ?? ''
+  const isValidValue = !isLoading && receiptTypeOptions.some(opt => opt.value === rawValue)
+  const selectValue = isLoading ? '' : (isValidValue ? rawValue : '')
 
   // 產生 LinkPay 連結
   const handleGenerateLink = async () => {
@@ -301,28 +299,26 @@ export function PaymentItemRow({
           />
         </td>
 
-        {/* 金額 */}
-        <td className="py-2 px-3 border-b border-r border-border text-right">
-          <input
-            type="number"
-            value={item.amount || ''}
-            onChange={e => onUpdate(item.id, { amount: Number(e.target.value) })}
-            placeholder="0"
-            className="input-no-focus w-full bg-transparent text-sm text-right"
-          />
-        </td>
-
-        {/* 操作 */}
-        <td className="py-2 px-3 border-b border-border text-center">
-          {canRemove && (
-            <span
-              onClick={() => onRemove(item.id)}
-              className="text-morandi-secondary cursor-pointer hover:text-morandi-red text-sm"
-              title={ADD_RECEIPT_DIALOG_LABELS.刪除}
-            >
-              ✕
-            </span>
-          )}
+        {/* 金額 + 刪除 */}
+        <td className="py-2 px-3 border-b border-border text-right">
+          <div className="flex items-center justify-end gap-2">
+            <input
+              type="number"
+              value={item.amount || ''}
+              onChange={e => onUpdate(item.id, { amount: Number(e.target.value) })}
+              placeholder="0"
+              className="input-no-focus w-full bg-transparent text-sm text-right"
+            />
+            {canRemove && (
+              <button
+                onClick={() => onRemove(item.id)}
+                className="text-morandi-secondary/50 hover:text-morandi-red transition-colors p-1 rounded hover:bg-morandi-red/10"
+                title={ADD_RECEIPT_DIALOG_LABELS.刪除}
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
+          </div>
         </td>
       </tr>
 

@@ -519,8 +519,8 @@ export function AddReceiptDialog({
                   <Button
                     onClick={addPaymentItem}
                     size="sm"
-                    variant="ghost"
-                    className="text-morandi-gold hover:bg-morandi-gold/10"
+                    variant="outline"
+                    className="text-morandi-gold border-morandi-gold/50 hover:bg-morandi-gold/10 hover:border-morandi-gold"
                   >
                     <Plus size={14} className="mr-2" />
                     {ADD_RECEIPT_DIALOG_LABELS.ADD_2089}
@@ -556,12 +556,11 @@ export function AddReceiptDialog({
                           {ADD_RECEIPT_DIALOG_LABELS.REMARKS}
                         </th>
                         <th
-                          className="text-right py-2.5 px-3 border-b border-r border-border"
-                          style={{ width: '120px' }}
+                          className="text-right py-2.5 px-3 border-b border-border"
+                          style={{ width: '140px' }}
                         >
                           {ADD_RECEIPT_DIALOG_LABELS.AMOUNT}
                         </th>
-                        <th className="border-b border-border" style={{ width: '50px' }}></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -665,8 +664,8 @@ export function AddReceiptDialog({
                   <Button
                     onClick={addPaymentItem}
                     size="sm"
-                    variant="ghost"
-                    className="text-morandi-gold hover:bg-morandi-gold/10"
+                    variant="outline"
+                    className="text-morandi-gold border-morandi-gold/50 hover:bg-morandi-gold/10 hover:border-morandi-gold"
                   >
                     <Plus size={14} className="mr-2" />
                     新增項目
@@ -691,10 +690,9 @@ export function AddReceiptDialog({
                         <th className="text-left py-2.5 px-3 border-b border-r border-border">
                           備註
                         </th>
-                        <th className="text-right py-2.5 px-3 border-b border-r border-border" style={{ width: '120px' }}>
+                        <th className="text-right py-2.5 px-3 border-b border-border" style={{ width: '140px' }}>
                           金額
                         </th>
-                        <th className="border-b border-border" style={{ width: '50px' }}></th>
                       </tr>
                     </thead>
                     <tbody>
