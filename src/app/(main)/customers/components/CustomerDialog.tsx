@@ -257,21 +257,35 @@ export function CustomerDialog({
               </FormField>
 
               <FormField label={L.label_passport_expiry} labelClassName="text-xs text-morandi-secondary">
-                <DatePicker
-                  value={formData.passport_expiry}
-                  onChange={date => updateField('passport_expiry', date)}
-                  disabled={!isEdit}
-                  className="h-10"
-                />
+                {isEdit ? (
+                  <DatePicker
+                    value={formData.passport_expiry}
+                    onChange={date => updateField('passport_expiry', date)}
+                    className="h-10"
+                  />
+                ) : (
+                  <Input
+                    value={formData.passport_expiry || ''}
+                    readOnly
+                    className="h-10 cursor-default"
+                  />
+                )}
               </FormField>
 
               <FormField label={L.label_birth_date} labelClassName="text-xs text-morandi-secondary">
-                <DatePicker
-                  value={formData.birth_date}
-                  onChange={date => updateField('birth_date', date)}
-                  disabled={!isEdit}
-                  className="h-10"
-                />
+                {isEdit ? (
+                  <DatePicker
+                    value={formData.birth_date}
+                    onChange={date => updateField('birth_date', date)}
+                    className="h-10"
+                  />
+                ) : (
+                  <Input
+                    value={formData.birth_date || ''}
+                    readOnly
+                    className="h-10 cursor-default"
+                  />
+                )}
               </FormField>
 
               <FormField label={L.label_national_id} labelClassName="text-xs text-morandi-secondary">
