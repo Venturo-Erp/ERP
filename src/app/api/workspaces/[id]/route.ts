@@ -9,9 +9,9 @@ import { createServiceClient } from '@/lib/supabase/api-client'
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ workspaceId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { workspaceId } = await params
+  const { id: workspaceId } = await params
   const supabase = createServiceClient()
 
   const { data, error } = await supabase

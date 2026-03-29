@@ -8,7 +8,7 @@ import { addChannelMembersSchema, removeChannelMemberSchema } from '@/lib/valida
 
 type RouteParams = {
   params: Promise<{
-    workspaceId: string
+    id: string
     channelId: string
   }>
 }
@@ -19,7 +19,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
     return ApiError.unauthorized()
   }
 
-  const { workspaceId, channelId } = await params
+  const { id: workspaceId, channelId } = await params
 
   if (!workspaceId || !channelId) {
     return ApiError.validation('workspaceId and channelId are required')
@@ -97,7 +97,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     return ApiError.unauthorized()
   }
 
-  const { workspaceId, channelId } = await params
+  const { id: workspaceId, channelId } = await params
 
   if (!workspaceId || !channelId) {
     return ApiError.validation('workspaceId and channelId are required')
@@ -160,7 +160,7 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     return ApiError.unauthorized()
   }
 
-  const { workspaceId, channelId } = await params
+  const { id: workspaceId, channelId } = await params
 
   if (!workspaceId || !channelId) {
     return ApiError.validation('workspaceId and channelId are required')

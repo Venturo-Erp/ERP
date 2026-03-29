@@ -87,6 +87,7 @@ export async function middleware(request: NextRequest) {
     '/api/storage', // Storage API（使用 service role key 驗證）
     '/api/bot', // 機器人 API（內部使用）
     '/api/cron', // Cron Job API（Vercel 排程使用）
+    '/api/workspaces', // 租戶 API（使用 service role key）
     '/test-supplier', // 供應商 UI 測試頁面（暫時）
     '/view', // 公開行程檢視頁面
     '/game', // 遊戲辦公室（隱藏彩蛋）
