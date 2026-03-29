@@ -158,14 +158,104 @@ async function processGroupEvent(groupId: string) {
   }
 }
 
+/** 處理客戶 LINE 綁定 */
+async function processCustomerBinding(event: any) {
+  const userId = event.source?.userId
+  const text = event.message?.text?.trim() || ''
+
+  // 檢查是否為客戶綁定指令：「綁定 C0001」
+  const bindMatch = text.match(/^綁定[:\s]*(C\d+)$/i)
+  if (!bindMatch || !userId) return false
+
+  const customerCode = bindMatch[1].toUpperCase()
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!supabaseUrl || !supabaseKey) return false
+
+  try {
+    // 查找客戶
+    const findRes = await fetch(
+      `${supabaseUrl}/rest/v1/customers?code=eq.${customerCode}&select=id,name,phone`,
+      {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+        },
+      }
+    )
+    const customers = await findRes.json()
+
+    if (!customers || customers.length === 0) {
+      await fetch('https://api.line.me/v2/bot/message/reply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${LINE_TOKEN}`,
+        },
+        body: JSON.stringify({
+          replyToken: event.replyToken,
+          messages: [{ type: 'text', text: `❌ 找不到客戶編號 ${customerCode}，請確認後重試` }],
+        }),
+      })
+      return true
+    }
+
+    const customer = customers[0]
+
+    // 更新客戶的 LINE User ID
+    await fetch(`${supabaseUrl}/rest/v1/customers?id=eq.${customer.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+      },
+      body: JSON.stringify({ 
+        line_user_id: userId,
+        line_linked_at: new Date().toISOString(),
+      }),
+    })
+
+    const custName = customer.name || customerCode
+
+    await fetch('https://api.line.me/v2/bot/message/reply', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${LINE_TOKEN}`,
+      },
+      body: JSON.stringify({
+        replyToken: event.replyToken,
+        messages: [
+          {
+            type: 'text',
+            text: `✅ ${custName}，LINE 綁定成功！\n\n之後有行程更新或報價回覆，會透過這裡通知您 📱`,
+          },
+        ],
+      }),
+    })
+
+    logger.info(`[LINE] Customer binding: ${customerCode} -> ${userId}`)
+    return true
+  } catch (error) {
+    logger.error('[LINE] Customer binding error:', error)
+    return false
+  }
+}
+
 /** 處理員工 LINE 綁定 */
 async function processEmployeeBinding(event: any) {
   const userId = event.source?.userId
   const text = event.message?.text?.trim() || ''
 
-  // 檢查是否為綁定指令：「綁定 E001」或「綁定:E001」
+  // 檢查是否為綁定指令：「綁定 E001」或「綁定:E001」（但不是 C 開頭的客戶）
   const bindMatch = text.match(/^綁定[:\s]*([A-Za-z0-9]+)$/i)
   if (!bindMatch || !userId) return false
+  
+  // C 開頭是客戶，交給 processCustomerBinding 處理
+  if (bindMatch[1].toUpperCase().startsWith('C')) return false
 
   const employeeCode = bindMatch[1].toUpperCase()
 
@@ -278,8 +368,9 @@ export async function POST(req: NextRequest) {
         bgTasks.push(processFollowEvent(event))
       }
 
-      // 私人訊息 → 檢查員工綁定指令
+      // 私人訊息 → 檢查綁定指令（客戶或員工）
       if (source.type === 'user' && event.type === 'message' && event.message?.type === 'text') {
+        bgTasks.push(processCustomerBinding(event).then(() => {}))
         bgTasks.push(processEmployeeBinding(event).then(() => {}))
       }
 

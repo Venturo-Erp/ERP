@@ -60,7 +60,15 @@ export function AirportImageLibrary({
 
   // 儲存新圖片到圖片庫
   const handleSaveNewImage = useCallback(async () => {
-    if (!newImageUrl || !airportCode) return
+    logger.log('[AirportImageLibrary] 🎯 開始儲存圖片到圖片庫')
+    logger.log('[AirportImageLibrary] - newImageUrl:', newImageUrl)
+    logger.log('[AirportImageLibrary] - airportCode:', airportCode)
+    logger.log('[AirportImageLibrary] - newImageLabel:', newImageLabel)
+    
+    if (!newImageUrl || !airportCode) {
+      logger.warn('[AirportImageLibrary] ❌ 缺少必要參數，取消儲存')
+      return
+    }
 
     setIsUploading(true)
     try {
@@ -74,14 +82,19 @@ export function AirportImageLibrary({
         workspace_id: user?.workspace_id || null,
       }
 
+      logger.log('[AirportImageLibrary] 📤 呼叫 create():', newImage)
       await create(newImage as Omit<AirportImage, 'id' | 'created_at' | 'updated_at'>)
+      logger.log('[AirportImageLibrary] ✅ create() 成功')
 
       setNewImageUrl('')
       setNewImageLabel('')
       setShowAddDialog(false)
+      
+      logger.log('[AirportImageLibrary] 📢 呼叫 onImageUpload:', newImageUrl)
       onImageUpload(newImageUrl)
+      logger.log('[AirportImageLibrary] 🎉 儲存完成！')
     } catch (error) {
-      logger.error(COMP_EDITOR_LABELS.儲存圖片失敗, error)
+      logger.error('[AirportImageLibrary] ❌ 儲存圖片失敗:', error)
     } finally {
       setIsUploading(false)
     }
