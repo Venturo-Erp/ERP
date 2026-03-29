@@ -68,22 +68,6 @@ export default function WishlistTemplatesPage() {
   const fetchTemplates = async () => {
     if (!user?.workspace_id) return
 
-    const { data, error } = await supabase
-      .from('wishlist_templates')
-      .select(`
-        *,
-        wishlist_template_items(count),
-        customer_inquiries(count)
-      `)
-      .eq('workspace_id', user.workspace_id)
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('載入失敗:', error)
-      toast.error('載入失敗')
-      return
-    }
-
     // 處理 count
     interface TemplateRow {
       id: string
@@ -96,8 +80,28 @@ export default function WishlistTemplatesPage() {
       wishlist_template_items?: { count: number }[]
       customer_inquiries?: { count: number }[]
     }
+
+    // 使用明確型別避免 TypeScript 型別推斷過深
+    const { data, error } = await (supabase
+      .from('wishlist_templates')
+      .select(`
+        *,
+        wishlist_template_items(count),
+        customer_inquiries(count)
+      `)
+      .eq('workspace_id', user.workspace_id)
+      .order('created_at', { ascending: false }) as unknown as Promise<{
+        data: TemplateRow[] | null
+        error: Error | null
+      }>)
+
+    if (error) {
+      console.error('載入失敗:', error)
+      toast.error('載入失敗')
+      return
+    }
     
-    const processed = (data || []).map((t: TemplateRow) => ({
+    const processed = (data || []).map((t) => ({
       id: t.id,
       name: t.name,
       slug: t.slug,

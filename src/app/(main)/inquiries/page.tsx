@@ -89,14 +89,18 @@ export default function InquiriesPage() {
   const fetchInquiries = async () => {
     if (!user?.workspace_id) return
 
-    const { data, error } = await supabase
+    // 使用明確型別避免 TypeScript 型別推斷過深
+    const { data, error } = await (supabase
       .from('customer_inquiries')
       .select(`
         *,
         wishlist_templates(name)
       `)
       .eq('workspace_id', user.workspace_id)
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false }) as unknown as Promise<{
+        data: Array<CustomerInquiry & { wishlist_templates: { name: string } | null }> | null
+        error: Error | null
+      }>)
 
     if (error) {
       console.error('載入失敗:', error)
@@ -104,23 +108,7 @@ export default function InquiriesPage() {
       return
     }
 
-    interface InquiryRow {
-      id: string
-      code: string
-      customer_name: string
-      phone: string | null
-      email: string | null
-      travel_date: string | null
-      people_count: number
-      notes: string | null
-      selected_items: SelectedItem[]
-      status: 'pending' | 'contacted' | 'quoted' | 'converted' | 'cancelled'
-      internal_notes: string | null
-      created_at: string
-      wishlist_templates?: { name: string } | null
-    }
-
-    const processed = (data || []).map((row: InquiryRow) => ({
+    const processed = (data || []).map((row) => ({
       ...row,
       template_name: row.wishlist_templates?.name,
     }))
