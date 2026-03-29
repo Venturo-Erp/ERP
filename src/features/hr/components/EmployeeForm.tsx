@@ -25,6 +25,7 @@ interface Role {
   name: string
   description?: string
   workspace_id: string
+  is_admin?: boolean
 }
 
 // 路由權限類型
@@ -34,6 +35,25 @@ interface RoutePermission {
   can_read: boolean
   can_write: boolean
 }
+
+// 所有可用功能（可以在這裡設定的權限）
+const ALL_AVAILABLE_ROUTES: { route: string; name: string }[] = [
+  { route: '/dashboard', name: '儀表板' },
+  { route: '/tours', name: '報價/開團' },
+  { route: '/orders', name: '訂單管理' },
+  { route: '/customers', name: '顧客管理' },
+  { route: '/itinerary', name: '行程管理' },
+  { route: '/finance/payments', name: '收款管理' },
+  { route: '/finance/requests', name: '請款管理' },
+  { route: '/finance/treasury', name: '金庫' },
+  { route: '/accounting', name: '會計系統' },
+  { route: '/hr', name: '人資管理' },
+  { route: '/database', name: '旅遊資料庫' },
+  { route: '/calendar', name: '行事曆' },
+  { route: '/todos', name: '待辦事項' },
+  { route: '/channel', name: '頻道' },
+  { route: '/settings', name: '設定' },
+]
 
 interface EmployeeFormProps {
   employeeId?: string
@@ -102,7 +122,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     fetchRoles()
   }, [user?.workspace_id])
 
-  // 當選擇職務時，載入該職務的權限
+  // 當選擇職務時，載入該職務的權限（合併所有可用功能）
   useEffect(() => {
     if (!formData.role_id) {
       setRolePermissions([])
@@ -114,7 +134,17 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         const res = await fetch(`/api/permissions/role-permissions?role_id=${formData.role_id}`)
         if (res.ok) {
           const data = await res.json()
-          setRolePermissions(data)
+          // 合併所有可用功能，標記已設定的權限
+          const merged = ALL_AVAILABLE_ROUTES.map(r => {
+            const existing = data.find((d: RoutePermission) => d.route === r.route)
+            return {
+              route: r.route,
+              name: r.name,
+              can_read: existing?.can_read || false,
+              can_write: existing?.can_write || false,
+            }
+          })
+          setRolePermissions(merged)
         }
       } catch (err) {
         logger.error('載入權限失敗:', err)
@@ -207,6 +237,22 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         await updateEmployee(employeeId, payload as unknown as Parameters<typeof updateEmployee>[1])
       } else {
         await createEmployee(payload as unknown as Parameters<typeof createEmployee>[0])
+      }
+
+      // 如果有修改權限設定（非管理員職務），更新 role_route_permissions
+      if (formData.role_id && !selectedRole?.is_admin && rolePermissions.length > 0) {
+        try {
+          await fetch('/api/permissions/role-permissions', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              role_id: formData.role_id,
+              permissions: rolePermissions,
+            }),
+          })
+        } catch (err) {
+          logger.warn('更新權限失敗:', err)
+        }
       }
 
       await alertSuccess(isEditMode ? '更新成功' : '員工建立成功')
@@ -473,63 +519,75 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                     <span className="px-3 py-1 bg-morandi-gold/20 text-morandi-primary font-medium rounded-lg">
                       {selectedRole?.name || '尚未設定'}
                     </span>
-                    {selectedRole?.description && (
-                      <span className="text-xs text-morandi-secondary">
-                        — {selectedRole.description}
+                    {selectedRole?.is_admin && (
+                      <span className="text-xs text-morandi-green bg-morandi-green/10 px-2 py-0.5 rounded">
+                        管理員擁有所有權限
                       </span>
                     )}
                   </div>
 
-                  {/* 權限列表（從 API 取得） */}
+                  {/* 權限列表 */}
                   {formData.role_id ? (
-                    <div>
-                      <h4 className="text-sm font-semibold text-morandi-primary mb-3">功能權限</h4>
-                      <div className="border border-morandi-border rounded-lg overflow-hidden">
-                        <table className="w-full text-sm">
-                          <thead className="bg-morandi-container/50">
-                            <tr>
-                              <th className="px-4 py-2.5 text-left font-semibold text-morandi-secondary text-xs uppercase">功能</th>
-                              <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-20">讀取</th>
-                              <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-20">寫入</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-morandi-border">
-                            {rolePermissions.length > 0 ? (
-                              rolePermissions.map((perm) => (
+                    selectedRole?.is_admin ? (
+                      <div className="text-center py-8 text-morandi-secondary">
+                        <Shield className="w-12 h-12 mx-auto mb-3 text-morandi-gold/50" />
+                        <p>管理員擁有系統所有權限</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <h4 className="text-sm font-semibold text-morandi-primary mb-3">功能權限設定</h4>
+                        <div className="border border-morandi-border rounded-lg overflow-hidden">
+                          <table className="w-full text-sm">
+                            <thead className="bg-morandi-container/50">
+                              <tr>
+                                <th className="px-4 py-2.5 text-left font-semibold text-morandi-secondary text-xs uppercase">功能</th>
+                                <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-20">讀取</th>
+                                <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-20">寫入</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-morandi-border">
+                              {rolePermissions.map((perm) => (
                                 <tr key={perm.route} className="hover:bg-morandi-container/30">
                                   <td className="px-4 py-3 text-morandi-primary">{perm.name}</td>
                                   <td className="px-4 py-3 text-center">
-                                    <span className={cn(
-                                      'inline-flex px-2 py-0.5 text-xs rounded-full',
-                                      perm.can_read ? 'bg-morandi-green/20 text-morandi-green' : 'bg-gray-100 text-gray-400'
-                                    )}>
-                                      {perm.can_read ? '✓' : '✕'}
-                                    </span>
+                                    <input
+                                      type="checkbox"
+                                      checked={perm.can_read}
+                                      onChange={(e) => {
+                                        setRolePermissions(prev => prev.map(p => 
+                                          p.route === perm.route 
+                                            ? { ...p, can_read: e.target.checked, can_write: e.target.checked ? p.can_write : false }
+                                            : p
+                                        ))
+                                      }}
+                                      className="w-4 h-4 text-morandi-gold border-morandi-border rounded focus:ring-morandi-gold"
+                                    />
                                   </td>
                                   <td className="px-4 py-3 text-center">
-                                    <span className={cn(
-                                      'inline-flex px-2 py-0.5 text-xs rounded-full',
-                                      perm.can_write ? 'bg-morandi-green/20 text-morandi-green' : 'bg-gray-100 text-gray-400'
-                                    )}>
-                                      {perm.can_write ? '✓' : '✕'}
-                                    </span>
+                                    <input
+                                      type="checkbox"
+                                      checked={perm.can_write}
+                                      disabled={!perm.can_read}
+                                      onChange={(e) => {
+                                        setRolePermissions(prev => prev.map(p => 
+                                          p.route === perm.route 
+                                            ? { ...p, can_write: e.target.checked }
+                                            : p
+                                        ))
+                                      }}
+                                      className="w-4 h-4 text-morandi-gold border-morandi-border rounded focus:ring-morandi-gold disabled:opacity-30"
+                                    />
                                   </td>
                                 </tr>
-                              ))
-                            ) : (
-                              <tr>
-                                <td colSpan={3} className="px-4 py-6 text-center text-morandi-secondary">
-                                  此職務尚未設定權限
-                                </td>
-                              </tr>
-                            )}
-                          </tbody>
-                        </table>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        <p className="text-xs text-morandi-secondary mt-2">
+                          勾選讀取後才能勾選寫入，儲存時會更新此職務的權限設定
+                        </p>
                       </div>
-                      <p className="text-xs text-morandi-secondary mt-2">
-                        權限由職務定義，如需調整請至「職務管理」編輯
-                      </p>
-                    </div>
+                    )
                   ) : (
                     <div className="text-center py-8 text-morandi-secondary">
                       請先在「基本資料」選擇職務
