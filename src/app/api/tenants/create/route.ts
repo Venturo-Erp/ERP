@@ -238,6 +238,29 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // 2.6 建立預設 workspace_features（開放所有基本功能）
+    const defaultFeatures = [
+      'dashboard', 'calendar', 'workspace', 'todos', 'tours', 'orders',
+      'quotes', 'finance', 'database', 'hr', 'settings', 'customers',
+      'itinerary', 'accounting', 'channel'
+    ]
+    
+    const featuresToInsert = defaultFeatures.map(code => ({
+      workspace_id: workspace.id,
+      feature_code: code,
+      enabled: true,
+    }))
+    
+    const { error: featuresError } = await supabaseAdmin
+      .from('workspace_features')
+      .insert(featuresToInsert)
+    
+    if (featuresError) {
+      logger.warn('Failed to create workspace features:', featuresError)
+    } else {
+      logger.log(`Workspace features created: ${defaultFeatures.length}`)
+    }
+
     // 3. 建立 auth 用戶
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: adminEmail.toLowerCase(),
