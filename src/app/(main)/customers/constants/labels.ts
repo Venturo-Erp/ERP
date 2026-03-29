@@ -78,6 +78,16 @@ export const CUSTOMER_ADD_LABELS = {
 }
 
 export const CUSTOMER_DETAIL_LABELS = {
+  title_detail: '顧客詳情',
+  section_customer: '顧客詳情',
+  section_contact: '聯絡資訊',
+  label_name: '中文姓名',
+  btn_change_photo: '更換照片',
+  btn_upload_photo: '上傳照片',
+  btn_cancel: '取消',
+  btn_confirm: '確認',
+  btn_saving: '儲存中...',
+  placeholder_dietary: '無特殊禁忌',
   passport_alt: (name: string) => `${name} 護照照片`,
   no_passport_photo: '尚無護照照片',
   label_phone: '電話',
