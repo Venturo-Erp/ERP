@@ -36,6 +36,14 @@ interface RoutePermission {
   can_write: boolean
 }
 
+// 個人覆寫類型
+interface PermissionOverride {
+  route: string
+  override_type: 'grant' | 'revoke' | null  // grant=額外開啟, revoke=關閉, null=跟隨職務
+  can_read: boolean
+  can_write: boolean
+}
+
 // 所有可用功能（可以在這裡設定的權限）
 const ALL_AVAILABLE_ROUTES: { route: string; name: string }[] = [
   { route: '/dashboard', name: '儀表板' },
@@ -85,6 +93,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
   // 從 API 載入的職務列表和權限
   const [roles, setRoles] = useState<Role[]>([])
   const [rolePermissions, setRolePermissions] = useState<RoutePermission[]>([])
+  const [personalOverrides, setPersonalOverrides] = useState<PermissionOverride[]>([])
 
   const [formData, setFormData] = useState({
     chinese_name: employee?.chinese_name || '',
@@ -122,7 +131,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     fetchRoles()
   }, [user?.workspace_id])
 
-  // 當選擇職務時，載入該職務的權限（合併所有可用功能）
+  // 當選擇職務時，載入該職務的權限
   useEffect(() => {
     if (!formData.role_id) {
       setRolePermissions([])
@@ -152,6 +161,37 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     }
     fetchPermissions()
   }, [formData.role_id])
+
+  // 載入個人權限覆寫
+  useEffect(() => {
+    if (!employeeId) {
+      setPersonalOverrides([])
+      return
+    }
+    
+    const fetchOverrides = async () => {
+      try {
+        const res = await fetch(`/api/permissions/employee-overrides?employee_id=${employeeId}`)
+        if (res.ok) {
+          const data = await res.json()
+          // 合併所有功能，標記有覆寫的
+          const merged = ALL_AVAILABLE_ROUTES.map(r => {
+            const existing = data.find((d: PermissionOverride) => d.route === r.route)
+            return {
+              route: r.route,
+              override_type: existing?.override_type || null,
+              can_read: existing?.can_read || false,
+              can_write: existing?.can_write || false,
+            }
+          })
+          setPersonalOverrides(merged)
+        }
+      } catch (err) {
+        logger.error('載入個人覆寫失敗:', err)
+      }
+    }
+    fetchOverrides()
+  }, [employeeId])
 
   // 當 employee 資料更新時，同步更新 formData
   useEffect(() => {
@@ -239,19 +279,20 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         await createEmployee(payload as unknown as Parameters<typeof createEmployee>[0])
       }
 
-      // 如果有修改權限設定（非管理員職務），更新 role_route_permissions
-      if (formData.role_id && !selectedRole?.is_admin && rolePermissions.length > 0) {
+      // 儲存個人權限覆寫（非管理員職務）
+      if (isEditMode && employeeId && !selectedRole?.is_admin) {
+        const overridesToSave = personalOverrides.filter(o => o.override_type)
         try {
-          await fetch('/api/permissions/role-permissions', {
+          await fetch('/api/permissions/employee-overrides', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              role_id: formData.role_id,
-              permissions: rolePermissions,
+              employee_id: employeeId,
+              overrides: overridesToSave,
             }),
           })
         } catch (err) {
-          logger.warn('更新權限失敗:', err)
+          logger.warn('更新個人權限覆寫失敗:', err)
         }
       }
 
@@ -535,56 +576,83 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                       </div>
                     ) : (
                       <div>
-                        <h4 className="text-sm font-semibold text-morandi-primary mb-3">功能權限設定</h4>
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-sm font-semibold text-morandi-primary">個人權限微調</h4>
+                          <div className="flex items-center gap-4 text-xs">
+                            <span className="flex items-center gap-1">
+                              <span className="w-3 h-3 bg-morandi-container rounded"></span>
+                              職務預設
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <span className="w-3 h-3 bg-morandi-green/30 rounded"></span>
+                              額外開啟
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <span className="w-3 h-3 bg-red-100 rounded"></span>
+                              已關閉
+                            </span>
+                          </div>
+                        </div>
                         <div className="border border-morandi-border rounded-lg overflow-hidden">
                           <table className="w-full text-sm">
                             <thead className="bg-morandi-container/50">
                               <tr>
                                 <th className="px-4 py-2.5 text-left font-semibold text-morandi-secondary text-xs uppercase">功能</th>
-                                <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-20">讀取</th>
-                                <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-20">寫入</th>
+                                <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-24">職務預設</th>
+                                <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-32">個人調整</th>
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-morandi-border">
-                              {rolePermissions.map((perm) => (
-                                <tr key={perm.route} className="hover:bg-morandi-container/30">
-                                  <td className="px-4 py-3 text-morandi-primary">{perm.name}</td>
-                                  <td className="px-4 py-3 text-center">
-                                    <input
-                                      type="checkbox"
-                                      checked={perm.can_read}
-                                      onChange={(e) => {
-                                        setRolePermissions(prev => prev.map(p => 
-                                          p.route === perm.route 
-                                            ? { ...p, can_read: e.target.checked, can_write: e.target.checked ? p.can_write : false }
-                                            : p
-                                        ))
-                                      }}
-                                      className="w-4 h-4 text-morandi-gold border-morandi-border rounded focus:ring-morandi-gold"
-                                    />
-                                  </td>
-                                  <td className="px-4 py-3 text-center">
-                                    <input
-                                      type="checkbox"
-                                      checked={perm.can_write}
-                                      disabled={!perm.can_read}
-                                      onChange={(e) => {
-                                        setRolePermissions(prev => prev.map(p => 
-                                          p.route === perm.route 
-                                            ? { ...p, can_write: e.target.checked }
-                                            : p
-                                        ))
-                                      }}
-                                      className="w-4 h-4 text-morandi-gold border-morandi-border rounded focus:ring-morandi-gold disabled:opacity-30"
-                                    />
-                                  </td>
-                                </tr>
-                              ))}
+                              {rolePermissions.map((perm) => {
+                                const override = personalOverrides.find(o => o.route === perm.route)
+                                const hasRolePerm = perm.can_read
+                                const isGranted = override?.override_type === 'grant'
+                                const isRevoked = override?.override_type === 'revoke'
+                                
+                                return (
+                                  <tr 
+                                    key={perm.route} 
+                                    className={cn(
+                                      'hover:bg-morandi-container/30',
+                                      isGranted && 'bg-morandi-green/10',
+                                      isRevoked && 'bg-red-50'
+                                    )}
+                                  >
+                                    <td className="px-4 py-3 text-morandi-primary">{perm.name}</td>
+                                    <td className="px-4 py-3 text-center">
+                                      <span className={cn(
+                                        'inline-flex px-2 py-0.5 text-xs rounded-full',
+                                        hasRolePerm ? 'bg-morandi-green/20 text-morandi-green' : 'bg-gray-100 text-gray-400'
+                                      )}>
+                                        {hasRolePerm ? '✓' : '—'}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-center">
+                                      <select
+                                        value={override?.override_type || ''}
+                                        onChange={(e) => {
+                                          const value = e.target.value as 'grant' | 'revoke' | ''
+                                          setPersonalOverrides(prev => prev.map(o => 
+                                            o.route === perm.route 
+                                              ? { ...o, override_type: value || null, can_read: value === 'grant', can_write: false }
+                                              : o
+                                          ))
+                                        }}
+                                        className="text-xs border border-morandi-border rounded px-2 py-1 bg-white"
+                                      >
+                                        <option value="">跟隨職務</option>
+                                        {!hasRolePerm && <option value="grant">額外開啟</option>}
+                                        {hasRolePerm && <option value="revoke">關閉</option>}
+                                      </select>
+                                    </td>
+                                  </tr>
+                                )
+                              })}
                             </tbody>
                           </table>
                         </div>
                         <p className="text-xs text-morandi-secondary mt-2">
-                          勾選讀取後才能勾選寫入，儲存時會更新此職務的權限設定
+                          「跟隨職務」使用職務預設權限，「額外開啟」可開放職務沒有的功能，「關閉」可暫時收回職務有的功能
                         </p>
                       </div>
                     )

@@ -72,7 +72,7 @@ async function fetchWorkspaceInfo(
  * @param workspaceInfo - Workspace 資訊
  * @param options - 額外選項
  */
-async function fetchRolePermissions(roleId: string): Promise<string[]> {
+async function fetchRolePermissions(roleId: string, employeeId?: string): Promise<string[]> {
   try {
     // 先查職務是否為管理員
     const roleRes = await fetch(`/api/permissions/roles`)
@@ -84,15 +84,33 @@ async function fetchRolePermissions(roleId: string): Promise<string[]> {
       }
     }
     
-    // 取得路由權限
+    // 取得職務權限
     const permRes = await fetch(`/api/permissions/role-permissions?role_id=${roleId}`)
+    const rolePerms: Set<string> = new Set()
     if (permRes.ok) {
       const perms = await permRes.json()
-      // 把 route 轉換成權限（例如 /accounting → accounting）
-      return perms
+      perms
         .filter((p: { can_read?: boolean }) => p.can_read)
-        .map((p: { route: string }) => p.route.replace(/^\//, ''))
+        .forEach((p: { route: string }) => rolePerms.add(p.route.replace(/^\//, '')))
     }
+
+    // 取得個人覆寫
+    if (employeeId) {
+      const overrideRes = await fetch(`/api/permissions/employee-overrides?employee_id=${employeeId}`)
+      if (overrideRes.ok) {
+        const overrides = await overrideRes.json()
+        overrides.forEach((o: { route: string; override_type: string }) => {
+          const permKey = o.route.replace(/^\//, '')
+          if (o.override_type === 'grant') {
+            rolePerms.add(permKey)  // 額外開啟
+          } else if (o.override_type === 'revoke') {
+            rolePerms.delete(permKey)  // 關閉
+          }
+        })
+      }
+    }
+
+    return Array.from(rolePerms)
   } catch (err) {
     console.error('載入職務權限失敗:', err)
   }
@@ -275,10 +293,10 @@ export const useAuthStore = create<AuthState>()(
           // 4. 查詢 workspace 資訊並構建 User 物件
           const workspaceInfo = await fetchWorkspaceInfo(employeeData.workspace_id)
 
-          // 5. 取得職務權限（從 job_info.role_id）
+          // 5. 取得職務權限（從 job_info.role_id）+ 個人覆寫
           const jobInfo = employeeData.job_info as { role_id?: string } | null
           const rolePermissions = jobInfo?.role_id 
-            ? await fetchRolePermissions(jobInfo.role_id)
+            ? await fetchRolePermissions(jobInfo.role_id, employeeData.id)
             : []
 
           const user = buildUserFromEmployee(employeeData, workspaceInfo, { rolePermissions })
