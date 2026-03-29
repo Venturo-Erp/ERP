@@ -44,23 +44,25 @@ interface PermissionOverride {
   can_write: boolean
 }
 
-// 所有可用功能（可以在這裡設定的權限）
+// 所有可用功能（可以在這裡設定的權限，需與 workspace_features 對應）
 const ALL_AVAILABLE_ROUTES: { route: string; name: string }[] = [
-  { route: '/dashboard', name: '儀表板' },
-  { route: '/tours', name: '報價/開團' },
-  { route: '/orders', name: '訂單管理' },
-  { route: '/customers', name: '顧客管理' },
-  { route: '/itinerary', name: '行程管理' },
+  { route: '/dashboard', name: '首頁' },
+  { route: '/tours', name: '旅遊團' },
+  { route: '/orders', name: '訂單' },
   { route: '/finance/payments', name: '收款管理' },
   { route: '/finance/requests', name: '請款管理' },
   { route: '/finance/treasury', name: '金庫' },
   { route: '/accounting', name: '會計系統' },
+  { route: '/database', name: '資料管理' },
+  { route: '/customers', name: '顧客管理' },
   { route: '/hr', name: '人資管理' },
-  { route: '/database', name: '旅遊資料庫' },
   { route: '/calendar', name: '行事曆' },
-  { route: '/todos', name: '待辦事項' },
   { route: '/channel', name: '頻道' },
+  { route: '/todos', name: '待辦事項' },
+  { route: '/itinerary', name: '行程管理' },
+  { route: '/visas', name: '簽證管理' },
   { route: '/settings', name: '設定' },
+  { route: '/tenants', name: '租戶管理' },
 ]
 
 interface EmployeeFormProps {

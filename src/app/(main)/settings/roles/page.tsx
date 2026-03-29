@@ -46,11 +46,11 @@ interface RoutePermission {
   can_write: boolean
 }
 
-// 可設定權限的路由列表
+// 可設定權限的路由列表（需與 workspace_features 對應）
 const PERMISSION_ROUTES = [
+  { route: '/dashboard', name: '首頁' },
   { route: '/tours', name: '旅遊團' },
   { route: '/orders', name: '訂單' },
-  { route: '/quotes', name: '報價單' },
   { route: '/finance/payments', name: '收款管理' },
   { route: '/finance/requests', name: '請款管理' },
   { route: '/finance/treasury', name: '金庫管理' },
@@ -59,10 +59,12 @@ const PERMISSION_ROUTES = [
   { route: '/customers', name: '顧客管理' },
   { route: '/hr', name: '人資管理' },
   { route: '/calendar', name: '行事曆' },
-  { route: '/channel', name: '工作空間' },
+  { route: '/channel', name: '頻道' },
   { route: '/todos', name: '待辦事項' },
   { route: '/itinerary', name: '行程管理' },
+  { route: '/visas', name: '簽證管理' },
   { route: '/settings', name: '設定' },
+  { route: '/tenants', name: '租戶管理' },
 ]
 
 export default function RolesPage() {
