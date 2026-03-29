@@ -50,6 +50,8 @@ import {
   Zap,
   FileEdit,
   MessageCircle,
+  Sparkles,
+  LayoutTemplate,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
@@ -326,6 +328,16 @@ const menuItems: MenuItem[] = [
       { href: '/hr/attendance', label: '出勤管理', icon: Clock, requiredPermission: 'hr' },
       { href: '/hr/leave', label: '請假管理', icon: Calendar, requiredPermission: 'hr' },
       { href: '/hr/payroll', label: '薪資管理', icon: Wallet, requiredPermission: 'hr' },
+    ],
+  },
+  {
+    href: '/wishlist-templates',
+    label: '紙娃娃系統',
+    icon: Sparkles,
+    requiredPermission: 'wishlist',
+    children: [
+      { href: '/wishlist-templates', label: '紙娃娃管理', icon: LayoutTemplate, requiredPermission: 'wishlist' },
+      { href: '/inquiries', label: '詢價單管理', icon: Inbox, requiredPermission: 'wishlist' },
     ],
   },
   {

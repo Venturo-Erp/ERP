@@ -13,14 +13,7 @@ interface Traveler {
   dateOfBirth: string
 }
 
-interface BookingDialogProps {
-  open: boolean
-  onClose: () => void
-  itinerary: any
-  salesPersonId?: string
-}
-
-export function BookingDialog({ open, onClose, itinerary, salesPersonId }: BookingDialogProps) {
+export function BookingDialog({ open, onClose, itinerary, salesPersonId }: any) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -29,12 +22,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
     memberCount: 1,
   })
   const [travelers, setTravelers] = useState<Traveler[]>([
-    {
-      id: '1',
-      chineseName: '',
-      pinyinName: '',
-      dateOfBirth: '',
-    },
+    { id: '1', chineseName: '', pinyinName: '', dateOfBirth: '' },
   ])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,14 +44,11 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
         }),
       })
 
-      if (!res.ok) {
-        throw new Error('建立訂單失敗')
-      }
-
+      if (!res.ok) throw new Error('建立訂單失敗')
       toast.success('報名成功！我們會盡快與您聯繫')
       onClose()
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : '報名失敗，請稍後再試')
+      toast.error('報名失敗，請稍後再試')
     } finally {
       setLoading(false)
     }
@@ -72,12 +57,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
   const addTraveler = () => {
     setTravelers([
       ...travelers,
-      {
-        id: String(Date.now()),
-        chineseName: '',
-        pinyinName: '',
-        dateOfBirth: '',
-      },
+      { id: String(Date.now()), chineseName: '', pinyinName: '', dateOfBirth: '' },
     ])
   }
 

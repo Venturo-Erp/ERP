@@ -1,28 +1,85 @@
 'use client'
 
-import { use } from 'react'
+import { use, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { useItineraries, useEmployeesSlim } from '@/data'
-import { useState } from 'react'
 import { BookingDialog } from './components/BookingDialog'
+
+interface Itinerary {
+  id: string
+  tour_id: string
+  title: string
+  subtitle?: string
+  tour_code?: string
+  daily_itinerary?: any[]
+}
+
+interface Employee {
+  id: string
+  display_name?: string
+  name?: string
+  email?: string
+  employee_number?: string
+}
 
 export default function PublicItineraryPage({
   params,
 }: {
-  params: Promise<{ itineraryId: string }>
+  params: Promise<{ tourCode: string }>
 }) {
-  const { itineraryId } = use(params)
+  const { tourCode } = use(params)
   const searchParams = useSearchParams()
-  const salesPersonRef = searchParams.get('ref') // 業務編號或名稱
+  const salesPersonRef = searchParams.get('ref')
 
-  const { items: itineraries } = useItineraries()
-  const { items: employees } = useEmployeesSlim()
+  const [itinerary, setItinerary] = useState<Itinerary | null>(null)
+  const [salesPerson, setSalesPerson] = useState<Employee | null>(null)
+  const [loading, setLoading] = useState(true)
   const [isBookingOpen, setIsBookingOpen] = useState(false)
 
-  const itinerary = itineraries.find((i) => i.id === itineraryId)
-  const salesPerson = employees.find(
-    (e) => e.employee_number === salesPersonRef || e.display_name === salesPersonRef
-  )
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // 1. 查詢旅遊團
+        const tourRes = await fetch(`/api/tours/by-code/${tourCode}`)
+        if (!tourRes.ok) {
+          setLoading(false)
+          return
+        }
+        const tour = await tourRes.json()
+
+        // 2. 查詢行程表
+        const itineraryRes = await fetch(`/api/itineraries/by-tour/${tour.id}`)
+        if (!itineraryRes.ok) {
+          setLoading(false)
+          return
+        }
+        const itineraryData = await itineraryRes.json()
+        setItinerary(itineraryData)
+
+        // 3. 查詢業務資訊
+        if (salesPersonRef) {
+          const empRes = await fetch(`/api/employees/by-ref/${salesPersonRef}`)
+          if (empRes.ok) {
+            const emp = await empRes.json()
+            setSalesPerson(emp)
+          }
+        }
+      } catch (error) {
+        console.error('載入失敗:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [tourCode, salesPersonRef])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#655d56]"></div>
+      </div>
+    )
+  }
 
   if (!itinerary) {
     return (
@@ -35,7 +92,7 @@ export default function PublicItineraryPage({
     )
   }
 
-  const dailyItinerary = (itinerary.daily_itinerary as any[]) || []
+  const dailyItinerary = itinerary.daily_itinerary || []
 
   return (
     <>
@@ -58,7 +115,7 @@ export default function PublicItineraryPage({
         {/* Hero */}
         <div className="pt-32 pb-12 px-6 md:px-12 max-w-7xl mx-auto">
           <p className="text-[#655d56] font-medium tracking-widest uppercase text-xs mb-4">
-            {itinerary.tour_code || 'Travel Package'}
+            {itinerary.tour_code || tourCode}
           </p>
           <h1 className="text-5xl md:text-6xl text-[#303331] tracking-tight leading-tight mb-6 font-serif">
             {itinerary.title}

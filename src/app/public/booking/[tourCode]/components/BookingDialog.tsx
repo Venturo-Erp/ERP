@@ -11,7 +11,6 @@ interface Traveler {
   chineseName: string
   pinyinName: string
   dateOfBirth: string
-  passportFile?: File
 }
 
 interface BookingDialogProps {

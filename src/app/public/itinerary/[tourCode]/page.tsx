@@ -4,23 +4,6 @@ import { use, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { BookingDialog } from './components/BookingDialog'
 
-interface Itinerary {
-  id: string
-  tour_id: string
-  title: string
-  subtitle?: string
-  tour_code?: string
-  daily_itinerary?: any[]
-}
-
-interface Employee {
-  id: string
-  display_name?: string
-  name?: string
-  email?: string
-  employee_number?: string
-}
-
 export default function PublicItineraryPage({
   params,
 }: {
@@ -30,15 +13,14 @@ export default function PublicItineraryPage({
   const searchParams = useSearchParams()
   const salesPersonRef = searchParams.get('ref')
 
-  const [itinerary, setItinerary] = useState<Itinerary | null>(null)
-  const [salesPerson, setSalesPerson] = useState<Employee | null>(null)
+  const [itinerary, setItinerary] = useState<any>(null)
+  const [salesPerson, setSalesPerson] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [isBookingOpen, setIsBookingOpen] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. 查詢旅遊團
         const tourRes = await fetch(`/api/tours/by-code/${tourCode}`)
         if (!tourRes.ok) {
           setLoading(false)
@@ -46,7 +28,6 @@ export default function PublicItineraryPage({
         }
         const tour = await tourRes.json()
 
-        // 2. 查詢行程表
         const itineraryRes = await fetch(`/api/itineraries/by-tour/${tour.id}`)
         if (!itineraryRes.ok) {
           setLoading(false)
@@ -55,7 +36,6 @@ export default function PublicItineraryPage({
         const itineraryData = await itineraryRes.json()
         setItinerary(itineraryData)
 
-        // 3. 查詢業務資訊
         if (salesPersonRef) {
           const empRes = await fetch(`/api/employees/by-ref/${salesPersonRef}`)
           if (empRes.ok) {
@@ -75,7 +55,7 @@ export default function PublicItineraryPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#fbf9f7]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#655d56]"></div>
       </div>
     )
@@ -83,7 +63,7 @@ export default function PublicItineraryPage({
 
   if (!itinerary) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#fbf9f7]">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">找不到行程</h1>
           <p className="text-gray-600">此行程可能已被刪除或連結錯誤</p>
@@ -125,6 +105,54 @@ export default function PublicItineraryPage({
           )}
         </div>
 
+        {/* 航班資訊（如果有的話） */}
+        {itinerary.flights && itinerary.flights.length > 0 && (
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+            <div className="mb-8">
+              <span className="text-[#C0B090] font-serif italic mb-2 block">Flight Details</span>
+              <h2 className="text-4xl font-serif font-medium text-[#303331]">航班資訊</h2>
+            </div>
+            <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-[#655d56] text-white">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest">
+                      航班
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest">
+                      起飛
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest">
+                      抵達
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest">
+                      航空公司
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {itinerary.flights.map((flight: any, index: number) => (
+                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-6 py-4 font-mono font-bold text-[#655d56]">
+                        {flight.flightNumber}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium">{flight.departure}</div>
+                        <div className="text-sm text-gray-500">{flight.departureTime}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-medium">{flight.arrival}</div>
+                        <div className="text-sm text-gray-500">{flight.arrivalTime}</div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{flight.airline}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
         {/* Day by Day 行程 */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
           <div className="flex items-center justify-between mb-16">
@@ -138,7 +166,7 @@ export default function PublicItineraryPage({
             {dailyItinerary.map((day: any, index: number) => (
               <article
                 key={index}
-                className="bg-white rounded-3xl shadow-lg overflow-hidden group"
+                className="bg-white rounded-3xl shadow-lg overflow-hidden group hover:shadow-2xl transition-shadow duration-300"
               >
                 <div className="grid lg:grid-cols-12">
                   {/* Day Number */}
@@ -146,7 +174,7 @@ export default function PublicItineraryPage({
                     <div className="absolute -right-4 top-1/2 -translate-y-1/2 text-9xl font-serif font-bold text-white/5 select-none">
                       {String(index + 1).padStart(2, '0')}
                     </div>
-                    <div>
+                    <div className="relative z-10">
                       <span className="inline-block px-2 py-1 mb-2 border border-white/30 text-[10px] tracking-widest uppercase">
                         {day.date || ''}
                       </span>
@@ -157,7 +185,9 @@ export default function PublicItineraryPage({
                   {/* Content */}
                   <div className="lg:col-span-7 p-8 lg:p-10 border-r border-gray-100">
                     <h3 className="text-2xl font-bold text-[#303331] mb-6">{day.title}</h3>
-                    <p className="text-[#5d605d] leading-loose mb-8">{day.description}</p>
+                    <p className="text-[#5d605d] leading-loose mb-8 whitespace-pre-line">
+                      {day.description}
+                    </p>
                   </div>
 
                   {/* Dining & Stay */}
@@ -211,7 +241,7 @@ export default function PublicItineraryPage({
           </div>
         </main>
 
-        {/* 底部業務資訊 */}
+        {/* 底部業務資訊 + CTA */}
         <section className="py-16 bg-white border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
             {salesPerson && (

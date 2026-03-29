@@ -112,6 +112,13 @@ export const FEATURES: FeatureDefinition[] = [
     category: 'basic',
     routes: ['/visas'],
   },
+  {
+    code: 'wishlist',
+    name: '紙娃娃系統',
+    description: '客製化行程選單、客戶詢價管理',
+    category: 'basic',
+    routes: ['/wishlist-templates', '/inquiries'],
+  },
 
   // ===== 進階功能（付費） =====
   {
