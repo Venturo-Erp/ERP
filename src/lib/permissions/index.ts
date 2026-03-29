@@ -2,6 +2,7 @@
 export * from './features'
 export * from './hooks'
 export * from './module-tabs'
+export * from './useTabPermissions'
 
 // ====================
 // 兼容舊系統的導出
