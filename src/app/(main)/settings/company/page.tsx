@@ -14,6 +14,8 @@ import {
   Upload,
   X,
   AlertCircle,
+  CreditCard,
+  Receipt,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -28,6 +30,7 @@ import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { COMPANY_LABELS } from '../constants/labels'
+import { NewebPaySettings } from '../components/NewebPaySettings'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
@@ -589,6 +592,29 @@ export default function CompanySettingsPage() {
               </>
             )}
           </Button>
+        </div>
+
+        {/* 金流設定區塊 */}
+        <div className="border-t border-border pt-8 mt-8">
+          <h2 className="text-xl font-semibold text-morandi-primary mb-6 flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-morandi-gold" />
+            金流與發票設定
+          </h2>
+
+          {/* 藍新金流 */}
+          <NewebPaySettings />
+
+          {/* 電子代轉發票（未來功能） */}
+          <Card className="rounded-xl shadow-lg border border-border p-8 mt-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Receipt className="h-6 w-6 text-morandi-gold" />
+              <h3 className="text-lg font-semibold">電子代轉發票</h3>
+              <span className="text-xs bg-morandi-container px-2 py-1 rounded">即將推出</span>
+            </div>
+            <p className="text-sm text-morandi-secondary">
+              整合電子發票系統，自動開立代收代付發票。此功能開發中，敬請期待。
+            </p>
+          </Card>
         </div>
       </div>
     </ContentPageLayout>
