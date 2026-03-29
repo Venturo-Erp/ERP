@@ -58,10 +58,14 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
         router.push(`/tours/${tour.code}?tab=itinerary`)
       }
 
-      // 複製行程連結
+      // 複製行程連結（帶業務 ref）
       const handleCopyLink = async (e: React.MouseEvent) => {
         e.stopPropagation()
-        const link = `${window.location.origin}/public/tour/${tour.code}`
+        // 帶入業務編號，讓客戶看到負責業務
+        const employeeCode = params.user?.employee_number || params.user?.id
+        const refParam = employeeCode ? `?ref=${employeeCode}` : ''
+        // 使用 tour.id（UUID）因為公開頁面用 tourId
+        const link = `${window.location.origin}/public/itinerary/${tour.id}${refParam}`
         try {
           await navigator.clipboard.writeText(link)
           toast.success('已複製行程連結')

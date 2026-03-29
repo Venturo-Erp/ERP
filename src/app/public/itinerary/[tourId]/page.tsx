@@ -26,7 +26,13 @@ interface DayData {
 
 const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
 
-async function getTourItinerary(tourId: string) {
+interface SalesInfo {
+  name: string
+  phone: string
+  email: string
+}
+
+async function getTourItinerary(tourId: string, refCode?: string) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -34,7 +40,7 @@ async function getTourItinerary(tourId: string) {
 
   const { data: tour } = await supabase
     .from('tours')
-    .select('code, name, departure_date, location')
+    .select('code, name, departure_date, location, workspace_id')
     .eq('id', tourId)
     .single()
 
@@ -42,10 +48,30 @@ async function getTourItinerary(tourId: string) {
 
   const { data: items } = await supabase
     .from('tour_itinerary_items')
-    .select('day_number, category, sub_category, title, resource_name, sort_order')
+    .select('day_number, category, sub_category, title, resource_name, sort_order, override_title, override_description')
     .eq('tour_id', tourId)
     .order('day_number', { ascending: true })
     .order('sort_order', { ascending: true })
+
+  // 查詢業務資訊（如果有 ref）
+  let salesInfo: SalesInfo | null = null
+  if (refCode && tour.workspace_id) {
+    const { data: employee } = await supabase
+      .from('employees')
+      .select('display_name, chinese_name, phone, personal_info')
+      .eq('workspace_id', tour.workspace_id)
+      .or(`code.eq.${refCode},id.eq.${refCode}`)
+      .single()
+
+    if (employee) {
+      const personalInfo = employee.personal_info as { email?: string } | null
+      salesInfo = {
+        name: employee.display_name || employee.chinese_name || '',
+        phone: employee.phone || '',
+        email: personalInfo?.email || '',
+      }
+    }
+  }
 
   return {
     tour: {
@@ -55,6 +81,7 @@ async function getTourItinerary(tourId: string) {
       destination: ((tour as Record<string, unknown>).location as string) || '',
     },
     items: (items || []) as ItineraryItem[],
+    salesInfo,
   }
 }
 
@@ -128,14 +155,15 @@ export default async function PublicItineraryPage({
 }) {
   const { tourId } = await params
   const query = await searchParams
+  const refCode = query.ref as string | undefined
 
-  const data = await getTourItinerary(tourId)
+  const data = await getTourItinerary(tourId, refCode)
 
   if (!data) {
     notFound()
   }
 
-  const { tour, items } = data
+  const { tour, items, salesInfo } = data
   const days = buildDays(items, tour.departureDate)
 
   // 讀取梯次和備註
@@ -174,6 +202,17 @@ export default async function PublicItineraryPage({
             </div>
             <div style={{ textAlign: 'right', fontSize: 14 }}>
               <p style={{ fontWeight: 600, color: '#c9a96e' }}>{COMPANY_NAME}</p>
+              {salesInfo && (
+                <div style={{ marginTop: 8, padding: '8px 12px', background: '#f8f5f0', borderRadius: 6 }}>
+                  <p style={{ fontSize: 12, color: '#666', marginBottom: 2 }}>您的專屬業務</p>
+                  <p style={{ fontWeight: 600, color: '#333' }}>{salesInfo.name}</p>
+                  {salesInfo.phone && (
+                    <p style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
+                      📞 <a href={`tel:${salesInfo.phone}`} style={{ color: '#c9a96e' }}>{salesInfo.phone}</a>
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
