@@ -14,23 +14,39 @@ import { getServerAuth } from '@/lib/auth/server-auth'
 import { validateBody } from '@/lib/api/validation'
 import { voidInvoiceSchema } from '@/lib/validations/api-schemas'
 
-const VOID_INVOICE_ALLOWED_ROLES = ['admin', 'super_admin', 'accountant']
-
 /**
  * 檢查員工是否有作廢發票的權限
+ * 檢查 job_info.role_id 對應的職務是否為管理員
  */
 async function checkVoidPermission(employeeId: string): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
-  const { data, error } = await adminClient
+  
+  // 取得員工的職務 ID
+  const { data: employee, error } = await adminClient
     .from('employees')
-    .select('roles')
+    .select('job_info, permissions')
     .eq('id', employeeId)
     .single()
 
-  if (error || !data) return false
+  if (error || !employee) return false
 
-  const roles = data.roles as string[] | null
-  return roles?.some(r => VOID_INVOICE_ALLOWED_ROLES.includes(r)) ?? false
+  // 檢查 permissions 是否有 admin 或 * 或 accounting
+  const permissions = employee.permissions as string[] | null
+  if (permissions?.includes('*') || permissions?.includes('admin') || permissions?.includes('accounting')) {
+    return true
+  }
+
+  // 檢查職務是否為管理員
+  const jobInfo = employee.job_info as { role_id?: string } | null
+  if (!jobInfo?.role_id) return false
+
+  const { data: role } = await adminClient
+    .from('workspace_roles')
+    .select('is_admin')
+    .eq('id', jobInfo.role_id)
+    .single()
+
+  return role?.is_admin === true
 }
 
 export async function POST(request: NextRequest) {

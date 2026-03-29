@@ -136,11 +136,13 @@ export function AddRequestDialog({
   // === 共用狀態 ===
   const [activeTab, setActiveTab] = useState<RequestMode>('tour')
 
-  // 檢查用戶是否有公司請款權限
+  // 檢查用戶是否有公司請款權限（管理員或有 accounting 權限）
   const canCreateCompanyPayment = useMemo(() => {
-    if (!currentUser?.roles) return false
-    return currentUser.roles.some(role => COMPANY_PAYMENT_ROLES.includes(role as UserRole))
-  }, [currentUser?.roles])
+    if (!currentUser?.permissions) return false
+    return currentUser.permissions.includes('*') || 
+           currentUser.permissions.includes('admin') ||
+           currentUser.permissions.includes('accounting')
+  }, [currentUser?.permissions])
 
   // === 團體請款狀態 ===
   const [importFromRequests, setImportFromRequests] = useState(false)

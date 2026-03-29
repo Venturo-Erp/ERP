@@ -37,11 +37,11 @@ export const CompanyAssetsPage: React.FC = () => {
   })
 
   // 判斷是否為管理者或會計
+  // 管理員或有 accounting 權限的可以存取
   const isAdminOrAccountant =
     user?.permissions?.includes('admin') ||
     user?.permissions?.includes('*') ||
-    user?.roles?.includes('admin') ||
-    user?.roles?.includes('accountant')
+    user?.permissions?.includes('accounting')
 
   // 載入資料
   const fetchAssets = useCallback(async () => {
