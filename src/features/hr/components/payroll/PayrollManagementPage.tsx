@@ -310,16 +310,7 @@ export function PayrollManagementPage() {
         renderActions={renderPeriodActions}
         searchable={false}
         headerActions={
-          <Button
-            onClick={() => setShowCreateDialog(true)}
-            className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-          >
-            <Plus size={16} />
-            {L.btn_create}
-          </Button>
-        }
-        beforeTable={
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <Calendar size={16} className="text-morandi-secondary" />
               <select
@@ -334,6 +325,13 @@ export function PayrollManagementPage() {
                 ))}
               </select>
             </div>
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            >
+              <Plus size={16} />
+              {L.btn_create}
+            </Button>
           </div>
         }
         emptyMessage={L.empty_message}

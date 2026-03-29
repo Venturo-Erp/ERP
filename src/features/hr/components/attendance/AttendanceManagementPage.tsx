@@ -291,79 +291,76 @@ export function AttendanceManagementPage() {
         renderActions={renderActions}
         searchable={false}
         headerActions={
-          <Button
-            onClick={handleAdd}
-            className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-          >
-            <Plus size={16} />
-            {L.btn_add}
-          </Button>
-        }
-        beforeTable={
-          <div className="space-y-4">
-            {/* 篩選區 */}
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Calendar size={16} className="text-morandi-secondary" />
-                <DatePicker
-                  value={startDate}
-                  onChange={setStartDate}
-                  placeholder={L.placeholder_start_date}
-                />
-                <span className="text-morandi-secondary">{L.range_separator}</span>
-                <DatePicker
-                  value={endDate}
-                  onChange={setEndDate}
-                  placeholder={L.placeholder_end_date}
-                />
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Filter size={16} className="text-morandi-secondary" />
-                <select
-                  value={selectedEmployeeId}
-                  onChange={e => setSelectedEmployeeId(e.target.value)}
-                  className="px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-morandi-gold"
-                >
-                  <option value="">{L.all_employees}</option>
-                  {employees.map(emp => (
-                    <option key={emp.id} value={emp.id}>
-                      {emp.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Calendar size={16} className="text-morandi-secondary" />
+              <DatePicker
+                value={startDate}
+                onChange={setStartDate}
+                placeholder={L.placeholder_start_date}
+              />
+              <span className="text-morandi-secondary">{L.range_separator}</span>
+              <DatePicker
+                value={endDate}
+                onChange={setEndDate}
+                placeholder={L.placeholder_end_date}
+              />
             </div>
 
-            {/* 統計區 */}
-            <div className="grid grid-cols-6 gap-4 p-4 bg-morandi-container/30 rounded-lg">
-              <div className="text-center">
-                <div className="text-sm text-morandi-secondary">{L.summary_total_days}</div>
-                <div className="text-xl font-bold text-morandi-primary">{summary.total_days}</div>
+            <div className="flex items-center gap-2">
+              <Filter size={16} className="text-morandi-secondary" />
+              <select
+                value={selectedEmployeeId}
+                onChange={e => setSelectedEmployeeId(e.target.value)}
+                className="px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-morandi-gold"
+              >
+                <option value="">{L.all_employees}</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>
+                    {emp.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Button
+              onClick={handleAdd}
+              className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            >
+              <Plus size={16} />
+              {L.btn_add}
+            </Button>
+          </div>
+        }
+        beforeTable={
+          /* 統計區 */
+          <div className="grid grid-cols-6 gap-4 p-4 bg-morandi-container/30 rounded-lg">
+            <div className="text-center">
+              <div className="text-sm text-morandi-secondary">{L.summary_total_days}</div>
+              <div className="text-xl font-bold text-morandi-primary">{summary.total_days}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-morandi-secondary">{L.summary_present}</div>
+              <div className="text-xl font-bold text-green-600">{summary.present_days}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-morandi-secondary">{L.summary_late}</div>
+              <div className="text-xl font-bold text-yellow-600">{summary.late_days}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-morandi-secondary">{L.summary_absent}</div>
+              <div className="text-xl font-bold text-red-600">{summary.absent_days}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-morandi-secondary">{L.summary_total_hours}</div>
+              <div className="text-xl font-bold text-morandi-primary">
+                {summary.total_work_hours.toFixed(1)} h
               </div>
-              <div className="text-center">
-                <div className="text-sm text-morandi-secondary">{L.summary_present}</div>
-                <div className="text-xl font-bold text-green-600">{summary.present_days}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-morandi-secondary">{L.summary_late}</div>
-                <div className="text-xl font-bold text-yellow-600">{summary.late_days}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-morandi-secondary">{L.summary_absent}</div>
-                <div className="text-xl font-bold text-red-600">{summary.absent_days}</div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-morandi-secondary">{L.summary_total_hours}</div>
-                <div className="text-xl font-bold text-morandi-primary">
-                  {summary.total_work_hours.toFixed(1)} h
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-sm text-morandi-secondary">{L.summary_total_overtime}</div>
-                <div className="text-xl font-bold text-morandi-gold">
-                  {summary.total_overtime_hours.toFixed(1)} h
-                </div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-morandi-secondary">{L.summary_total_overtime}</div>
+              <div className="text-xl font-bold text-morandi-gold">
+                {summary.total_overtime_hours.toFixed(1)} h
               </div>
             </div>
           </div>
