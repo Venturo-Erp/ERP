@@ -3,6 +3,7 @@
  */
 export { CustomerAddDialog } from './CustomerAddDialog'
 export { CustomerDetailDialog } from './CustomerDetailDialog'
+export { CustomerDialog } from './CustomerDialog'
 export { CustomerVerifyDialog } from './CustomerVerifyDialog'
 export { ResetPasswordDialog } from './ResetPasswordDialog'
 export { ImportCustomersDialog } from './ImportCustomersDialog'

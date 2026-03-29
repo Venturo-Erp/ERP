@@ -30,11 +30,10 @@ import { syncPassportImageToMembers } from '@/lib/utils/sync-passport-image'
 import { useRouter } from 'next/navigation'
 
 // 本地組件和 Hooks
-import { useCustomerSearch, useCustomerVerify } from './hooks'
+import { useCustomerSearch } from './hooks'
 import {
   CustomerAddDialog,
-  CustomerVerifyDialog,
-  CustomerDetailDialog,
+  CustomerDialog,
   ResetPasswordDialog,
   ImportCustomersDialog,
 } from './components'
@@ -49,17 +48,11 @@ export default function CustomersPage() {
   const { searchParams, setSearchParams, filteredCustomers, hasActiveFilters, clearFilters } =
     useCustomerSearch(customers)
 
-  // 驗證 Hook
-  const customerVerify = useCustomerVerify({
-    onSuccess: () => {
-      // 驗證成功後重新載入客戶資料（由 store 自動處理）
-    },
-  })
-
   // 對話框狀態
   const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
+  const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false)
+  const [customerDialogMode, setCustomerDialogMode] = useState<'view' | 'edit'>('view')
   const [isResetPasswordDialogOpen, setIsResetPasswordDialogOpen] = useState(false)
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
@@ -115,7 +108,8 @@ export default function CustomersPage() {
       ...customer,
       passport_image_url: passportImageUrl,
     })
-    setIsDetailDialogOpen(true)
+    setCustomerDialogMode('view')
+    setIsCustomerDialogOpen(true)
   }, [])
 
   // 處理刪除
@@ -399,7 +393,9 @@ export default function CustomersPage() {
                     title={L.title_verify}
                     onClick={e => {
                       e.stopPropagation()
-                      customerVerify.openDialog(customer)
+                      setSelectedCustomer(customer)
+                      setCustomerDialogMode('edit')
+                      setIsCustomerDialogOpen(true)
                     }}
                   >
                     <AlertTriangle size={14} />
@@ -410,7 +406,9 @@ export default function CustomersPage() {
                   title={L.title_edit}
                   onClick={e => {
                     e.stopPropagation()
-                    customerVerify.openDialog(customer)
+                    setSelectedCustomer(customer)
+                    setCustomerDialogMode('edit')
+                    setIsCustomerDialogOpen(true)
                   }}
                 >
                   <Edit size={14} />
@@ -451,26 +449,17 @@ export default function CustomersPage() {
         addCustomer={addCustomer as (data: Partial<Customer>) => Promise<Customer>}
       />
 
-      {/* 驗證/編輯對話框 */}
-      <CustomerVerifyDialog
-        open={customerVerify.isOpen}
-        onOpenChange={open => {
-          if (!open) customerVerify.closeDialog()
-        }}
-        customer={customerVerify.customer}
-        onUpdate={
-          updateCustomer as unknown as (id: string, data: Partial<Customer>) => Promise<void>
-        }
-      />
-
-      {/* 顧客詳情對話框 */}
-      <CustomerDetailDialog
-        open={isDetailDialogOpen}
-        onOpenChange={setIsDetailDialogOpen}
+      {/* 顧客詳情/編輯對話框（統一組件） */}
+      <CustomerDialog
+        open={isCustomerDialogOpen}
+        onOpenChange={setIsCustomerDialogOpen}
         customer={selectedCustomer}
-        onEdit={customer => {
-          setIsDetailDialogOpen(false)
-          customerVerify.openDialog(customer)
+        mode={customerDialogMode}
+        onModeChange={setCustomerDialogMode}
+        onSave={async (data) => {
+          if (selectedCustomer) {
+            await updateCustomer(selectedCustomer.id, data as Partial<Customer>)
+          }
         }}
       />
 
