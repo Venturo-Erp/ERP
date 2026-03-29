@@ -18,6 +18,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { alertSuccess, alertError } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
+import { useWorkspaceFeatures } from '@/lib/permissions'
 
 // 職務類型（從 API 取得）
 interface Role {
@@ -44,25 +45,25 @@ interface PermissionOverride {
   can_write: boolean
 }
 
-// 所有可用功能（可以在這裡設定的權限，需與 workspace_features 對應）
-const ALL_AVAILABLE_ROUTES: { route: string; name: string }[] = [
-  { route: '/dashboard', name: '首頁' },
-  { route: '/tours', name: '旅遊團' },
-  { route: '/orders', name: '訂單' },
-  { route: '/finance/payments', name: '收款管理' },
-  { route: '/finance/requests', name: '請款管理' },
-  { route: '/finance/treasury', name: '金庫' },
-  { route: '/accounting', name: '會計系統' },
-  { route: '/database', name: '資料管理' },
-  { route: '/customers', name: '顧客管理' },
-  { route: '/hr', name: '人資管理' },
-  { route: '/calendar', name: '行事曆' },
-  { route: '/channel', name: '頻道' },
-  { route: '/todos', name: '待辦事項' },
-  { route: '/itinerary', name: '行程管理' },
-  { route: '/visas', name: '簽證管理' },
-  { route: '/settings', name: '設定' },
-  { route: '/tenants', name: '租戶管理' },
+// 所有可用功能（對應 workspace_features）
+const ALL_PERMISSION_ROUTES = [
+  { route: '/dashboard', name: '首頁', featureCode: 'dashboard' },
+  { route: '/tours', name: '旅遊團', featureCode: 'tours' },
+  { route: '/orders', name: '訂單', featureCode: 'orders' },
+  { route: '/finance/payments', name: '收款管理', featureCode: 'finance' },
+  { route: '/finance/requests', name: '請款管理', featureCode: 'finance' },
+  { route: '/finance/treasury', name: '金庫', featureCode: 'finance' },
+  { route: '/accounting', name: '會計系統', featureCode: 'accounting' },
+  { route: '/database', name: '資料管理', featureCode: 'database' },
+  { route: '/customers', name: '顧客管理', featureCode: 'customers' },
+  { route: '/hr', name: '人資管理', featureCode: 'hr' },
+  { route: '/calendar', name: '行事曆', featureCode: 'calendar' },
+  { route: '/channel', name: '頻道', featureCode: 'workspace' },
+  { route: '/todos', name: '待辦事項', featureCode: 'todos' },
+  { route: '/itinerary', name: '行程管理', featureCode: 'itinerary' },
+  { route: '/visas', name: '簽證管理', featureCode: 'visas' },
+  { route: '/settings', name: '設定', featureCode: 'settings' },
+  { route: '/tenants', name: '租戶管理', featureCode: 'tenants' },
 ]
 
 interface EmployeeFormProps {
@@ -77,6 +78,10 @@ type TabType = 'basic' | 'permissions' | 'salary'
 export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: EmployeeFormProps) {
   const { items: employees, create: createEmployee, update: updateEmployee, fetchAll } = useUserStore()
   const { user } = useAuthStore()
+  const { isFeatureEnabled } = useWorkspaceFeatures()
+  
+  // 只顯示公司有開啟的功能
+  const ALL_AVAILABLE_ROUTES = ALL_PERMISSION_ROUTES.filter(r => isFeatureEnabled(r.featureCode))
   
   // 確保員工資料已載入
   useEffect(() => {

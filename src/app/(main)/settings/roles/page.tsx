@@ -31,6 +31,7 @@ import {
   Star
 } from 'lucide-react'
 import { useAuthStore } from '@/stores'
+import { useWorkspaceFeatures } from '@/lib/permissions'
 
 interface Role {
   id: string
@@ -46,30 +47,31 @@ interface RoutePermission {
   can_write: boolean
 }
 
-// 可設定權限的路由列表（需與 workspace_features 對應）
-const PERMISSION_ROUTES = [
-  { route: '/dashboard', name: '首頁' },
-  { route: '/tours', name: '旅遊團' },
-  { route: '/orders', name: '訂單' },
-  { route: '/finance/payments', name: '收款管理' },
-  { route: '/finance/requests', name: '請款管理' },
-  { route: '/finance/treasury', name: '金庫管理' },
-  { route: '/accounting', name: '會計系統' },
-  { route: '/database', name: '資料管理' },
-  { route: '/customers', name: '顧客管理' },
-  { route: '/hr', name: '人資管理' },
-  { route: '/calendar', name: '行事曆' },
-  { route: '/channel', name: '頻道' },
-  { route: '/todos', name: '待辦事項' },
-  { route: '/itinerary', name: '行程管理' },
-  { route: '/visas', name: '簽證管理' },
-  { route: '/settings', name: '設定' },
-  { route: '/tenants', name: '租戶管理' },
+// 所有可設定權限的路由（對應 workspace_features）
+const ALL_PERMISSION_ROUTES = [
+  { route: '/dashboard', name: '首頁', featureCode: 'dashboard' },
+  { route: '/tours', name: '旅遊團', featureCode: 'tours' },
+  { route: '/orders', name: '訂單', featureCode: 'orders' },
+  { route: '/finance/payments', name: '收款管理', featureCode: 'finance' },
+  { route: '/finance/requests', name: '請款管理', featureCode: 'finance' },
+  { route: '/finance/treasury', name: '金庫管理', featureCode: 'finance' },
+  { route: '/accounting', name: '會計系統', featureCode: 'accounting' },
+  { route: '/database', name: '資料管理', featureCode: 'database' },
+  { route: '/customers', name: '顧客管理', featureCode: 'customers' },
+  { route: '/hr', name: '人資管理', featureCode: 'hr' },
+  { route: '/calendar', name: '行事曆', featureCode: 'calendar' },
+  { route: '/channel', name: '頻道', featureCode: 'workspace' },
+  { route: '/todos', name: '待辦事項', featureCode: 'todos' },
+  { route: '/itinerary', name: '行程管理', featureCode: 'itinerary' },
+  { route: '/visas', name: '簽證管理', featureCode: 'visas' },
+  { route: '/settings', name: '設定', featureCode: 'settings' },
+  { route: '/tenants', name: '租戶管理', featureCode: 'tenants' },
 ]
 
 export default function RolesPage() {
   const { user } = useAuthStore()
   const { toast } = useToast()
+  const { isFeatureEnabled } = useWorkspaceFeatures()
   
   const [roles, setRoles] = useState<Role[]>([])
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
@@ -79,6 +81,9 @@ export default function RolesPage() {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingRole, setEditingRole] = useState({ name: '', description: '' })
+  
+  // 只顯示公司有開啟的功能
+  const PERMISSION_ROUTES = ALL_PERMISSION_ROUTES.filter(r => isFeatureEnabled(r.featureCode))
 
   // 載入角色
   useEffect(() => {
