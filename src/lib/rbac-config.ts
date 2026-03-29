@@ -16,6 +16,7 @@ export type UserRole =
   | 'assistant' // 助理
   | 'controller' // 團控
   | 'staff' // 一般員工
+  | 'bot' // 機器人帳號
 
 export interface RoleConfig {
   id: UserRole
