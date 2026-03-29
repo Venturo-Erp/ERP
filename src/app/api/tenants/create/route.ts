@@ -167,6 +167,77 @@ export async function POST(request: NextRequest) {
 
     logger.log(`Employee created: ${employee.id}`)
 
+    // 2.5 建立預設職務並設定管理員
+    const defaultRoles = [
+      { name: '管理員', is_admin: true },
+      { name: '業務', is_admin: false },
+      { name: '會計', is_admin: false },
+      { name: '助理', is_admin: false },
+    ]
+
+    const { data: createdRoles, error: rolesError } = await supabaseAdmin
+      .from('workspace_roles')
+      .insert(defaultRoles.map(r => ({ ...r, workspace_id: workspace.id })))
+      .select('id, name')
+
+    if (rolesError) {
+      logger.warn('Failed to create default roles:', rolesError)
+    } else {
+      logger.log(`Default roles created: ${createdRoles?.length}`)
+      
+      // 找到管理員職務的 ID
+      const adminRole = createdRoles?.find(r => r.name === '管理員')
+      if (adminRole) {
+        // 更新第一個管理員的 job_info.role_id
+        await supabaseAdmin
+          .from('employees')
+          .update({ job_info: { role_id: adminRole.id } })
+          .eq('id', employee.id)
+        logger.log(`Admin employee role_id set: ${adminRole.id}`)
+
+        // 設定預設權限（會計、業務、助理）
+        const accountingRole = createdRoles?.find(r => r.name === '會計')
+        const salesRole = createdRoles?.find(r => r.name === '業務')
+        const assistantRole = createdRoles?.find(r => r.name === '助理')
+
+        const defaultPermissions = [
+          // 會計權限
+          ...(accountingRole ? [
+            { role_id: accountingRole.id, route: '/accounting', can_read: true, can_write: true },
+            { role_id: accountingRole.id, route: '/dashboard', can_read: true, can_write: false },
+            { role_id: accountingRole.id, route: '/calendar', can_read: true, can_write: true },
+            { role_id: accountingRole.id, route: '/todos', can_read: true, can_write: true },
+            { role_id: accountingRole.id, route: '/settings', can_read: true, can_write: true },
+          ] : []),
+          // 業務權限
+          ...(salesRole ? [
+            { role_id: salesRole.id, route: '/tours', can_read: true, can_write: true },
+            { role_id: salesRole.id, route: '/orders', can_read: true, can_write: true },
+            { role_id: salesRole.id, route: '/customers', can_read: true, can_write: true },
+            { role_id: salesRole.id, route: '/dashboard', can_read: true, can_write: false },
+            { role_id: salesRole.id, route: '/calendar', can_read: true, can_write: true },
+            { role_id: salesRole.id, route: '/todos', can_read: true, can_write: true },
+            { role_id: salesRole.id, route: '/settings', can_read: true, can_write: true },
+          ] : []),
+          // 助理權限（同業務）
+          ...(assistantRole ? [
+            { role_id: assistantRole.id, route: '/tours', can_read: true, can_write: true },
+            { role_id: assistantRole.id, route: '/orders', can_read: true, can_write: true },
+            { role_id: assistantRole.id, route: '/customers', can_read: true, can_write: true },
+            { role_id: assistantRole.id, route: '/dashboard', can_read: true, can_write: false },
+            { role_id: assistantRole.id, route: '/calendar', can_read: true, can_write: true },
+            { role_id: assistantRole.id, route: '/todos', can_read: true, can_write: true },
+            { role_id: assistantRole.id, route: '/settings', can_read: true, can_write: true },
+          ] : []),
+        ]
+
+        if (defaultPermissions.length > 0) {
+          await supabaseAdmin.from('role_route_permissions').insert(defaultPermissions)
+          logger.log(`Default permissions created: ${defaultPermissions.length}`)
+        }
+      }
+    }
+
     // 3. 建立 auth 用戶
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: adminEmail.toLowerCase(),
