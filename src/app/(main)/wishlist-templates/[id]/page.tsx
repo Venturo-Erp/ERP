@@ -1,18 +1,16 @@
 'use client'
 
 /**
- * 紙娃娃編輯頁面 - 左右佈局
+ * 紙娃娃編輯頁面 - 使用 ContentPageLayout 規範
  * 左側：已選景點列表 + 基本資訊
- * 右側：景點庫
+ * 右側：景點庫（含國家篩選）
  */
 
 import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { 
-  ArrowLeft, 
   Plus, 
   Trash2, 
-  GripVertical, 
   MapPin,
   Search,
   X,
@@ -21,11 +19,11 @@ import {
   Link as LinkIcon,
   Globe,
   Settings,
+  Sparkles,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -43,6 +41,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
+import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase/client'
 
@@ -71,12 +70,24 @@ interface Attraction {
   images?: string[] | null
   description: string | null
   category?: string | null
+  country_id?: string | null
+}
+
+interface Country {
+  id: string
+  name: string
 }
 
 // 預設地區選項
 const REGIONS = [
   '曼谷', '清邁', '清萊', '芭達雅', '普吉島', '蘇美島', '華欣', '大城', '其他',
 ]
+
+// 頁籤定義
+const TEMPLATE_TABS = [
+  { value: 'items', label: '景點管理' },
+  { value: 'settings', label: '基本設定' },
+] as const
 
 export default function WishlistTemplateEditPage({ 
   params 
@@ -90,8 +101,17 @@ export default function WishlistTemplateEditPage({
   const [template, setTemplate] = useState<WishlistTemplate | null>(null)
   const [items, setItems] = useState<TemplateItem[]>([])
   const [attractions, setAttractions] = useState<Attraction[]>([])
+  const [countries, setCountries] = useState<Country[]>([])
   const [loading, setLoading] = useState(true)
+  
+  // 篩選
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCountry, setSelectedCountry] = useState<string>('all')
+  
+  // 頁籤
+  const [activeTab, setActiveTab] = useState<string>('items')
+  
+  // 設定 Dialog
   const [settingsOpen, setSettingsOpen] = useState(false)
   
   // 編輯表單
@@ -134,10 +154,18 @@ export default function WishlistTemplateEditPage({
 
     setItems(itemsData || [])
 
+    // 載入國家列表
+    const { data: countriesData } = await supabase
+      .from('countries')
+      .select('id, name')
+      .order('name')
+
+    setCountries(countriesData || [])
+
     // 載入景點庫（包含公共景點 + 自己 workspace 的景點）
     const { data: attractionsData } = await supabase
       .from('attractions')
-      .select('id, name, images, description, category')
+      .select('id, name, images, description, category, country_id')
       .or(`workspace_id.eq.${user.workspace_id},workspace_id.is.null`)
       .eq('is_active', true)
       .order('name')
@@ -148,6 +176,7 @@ export default function WishlistTemplateEditPage({
       images: a.images as string[] | null,
       description: a.description,
       category: a.category,
+      country_id: a.country_id,
     }))
     setAttractions(mappedAttractions)
     setLoading(false)
@@ -159,7 +188,6 @@ export default function WishlistTemplateEditPage({
 
   // 從景點庫新增
   const handleAddAttraction = async (attraction: Attraction) => {
-    // 檢查是否已加入
     if (items.some(i => i.attraction_id === attraction.id)) {
       toast.error('此景點已加入')
       return
@@ -274,6 +302,9 @@ export default function WishlistTemplateEditPage({
 
   // 搜尋過濾景點庫
   const filteredAttractions = attractions.filter(a => {
+    // 國家篩選
+    if (selectedCountry !== 'all' && a.country_id !== selectedCountry) return false
+    // 搜尋
     if (!searchTerm) return true
     return a.name.toLowerCase().includes(searchTerm.toLowerCase())
   })
@@ -281,28 +312,46 @@ export default function WishlistTemplateEditPage({
   // 已加入的景點 ID
   const addedIds = new Set(items.map(i => i.attraction_id).filter(Boolean))
 
+  // 取得國家名稱
+  const getCountryName = (countryId: string | null | undefined) => {
+    if (!countryId) return ''
+    return countries.find(c => c.id === countryId)?.name || ''
+  }
+
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-48" />
-          <div className="h-[600px] bg-gray-200 rounded" />
+      <ContentPageLayout
+        title="載入中..."
+        icon={Sparkles}
+        breadcrumb={[
+          { label: '紙娃娃管理', href: '/wishlist-templates' },
+          { label: '...', href: '#' },
+        ]}
+      >
+        <div className="flex-1 flex items-center justify-center">
+          <div className="animate-pulse text-muted-foreground">載入中...</div>
         </div>
-      </div>
+      </ContentPageLayout>
     )
   }
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col">
-      {/* Header */}
-      <div className="flex items-center gap-4 px-6 py-4 border-b bg-white">
-        <Button variant="ghost" size="icon" onClick={() => router.push('/wishlist-templates')}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-xl font-bold">{template?.name}</h1>
-          <p className="text-sm text-muted-foreground">/{template?.slug}</p>
-        </div>
+    <ContentPageLayout
+      title={template?.name || '紙娃娃'}
+      icon={Sparkles}
+      breadcrumb={[
+        { label: '紙娃娃管理', href: '/wishlist-templates' },
+        { label: template?.name || '', href: '#' },
+      ]}
+      badge={
+        <Badge variant={template?.status === 'published' ? 'default' : 'secondary'}>
+          {template?.status === 'published' ? '已發佈' : '草稿'}
+        </Badge>
+      }
+      tabs={[...TEMPLATE_TABS]}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      headerActions={
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}>
             <Settings className="w-4 h-4 mr-1" />
@@ -329,179 +378,248 @@ export default function WishlistTemplateEditPage({
             {template?.status === 'published' ? '取消發佈' : '發佈'}
           </Button>
         </div>
-      </div>
-
-      {/* 主要內容區：左右分割 */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* 左側：已選景點 */}
-        <div className="w-1/2 border-r overflow-y-auto p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-primary" />
-              已選景點（{items.length}）
-            </h2>
-          </div>
-
-          {items.length === 0 ? (
-            <div className="text-center py-20 text-muted-foreground">
-              <MapPin className="w-16 h-16 mx-auto mb-4 opacity-20" />
-              <p className="text-lg mb-2">還沒有景點</p>
-              <p className="text-sm">從右側景點庫點擊「+」加入景點</p>
+      }
+    >
+      {activeTab === 'items' ? (
+        /* 景點管理頁籤 */
+        <div className="flex h-[calc(100vh-180px)] overflow-hidden">
+          {/* 左側：已選景點 */}
+          <div className="w-1/2 border-r overflow-y-auto p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-primary" />
+                已選景點（{items.length}）
+              </h2>
             </div>
-          ) : (
-            <div className="space-y-3">
-              {items.map((item, index) => (
-                <div
-                  key={item.id}
-                  className="flex gap-3 p-3 bg-white border rounded-lg shadow-sm group hover:shadow-md transition-shadow"
-                >
-                  {/* 序號 */}
-                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
-                    {index + 1}
-                  </div>
-                  
-                  {/* 圖片 */}
-                  <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                    {item.image_url ? (
-                      <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <ImageIcon className="w-6 h-6 text-muted-foreground/30" />
-                      </div>
-                    )}
-                  </div>
 
-                  {/* 資訊 */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{item.name}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Select
-                        value={item.region || ''}
-                        onValueChange={(v) => handleUpdateRegion(item, v)}
-                      >
-                        <SelectTrigger className="w-28 h-7 text-xs">
-                          <SelectValue placeholder="選地區" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {REGIONS.map(r => (
-                            <SelectItem key={r} value={r}>{r}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {item.category && (
-                        <Badge variant="outline" className="text-xs">{item.category}</Badge>
+            {items.length === 0 ? (
+              <div className="text-center py-20 text-muted-foreground">
+                <MapPin className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                <p className="text-lg mb-2">還沒有景點</p>
+                <p className="text-sm">從右側景點庫點擊「+」加入景點</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {items.map((item, index) => (
+                  <div
+                    key={item.id}
+                    className="flex gap-3 p-3 bg-white border rounded-lg shadow-sm group hover:shadow-md transition-shadow"
+                  >
+                    {/* 序號 */}
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                      {index + 1}
+                    </div>
+                    
+                    {/* 圖片 */}
+                    <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                      {item.image_url ? (
+                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageIcon className="w-6 h-6 text-muted-foreground/30" />
+                        </div>
                       )}
                     </div>
-                  </div>
 
-                  {/* 刪除 */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="opacity-0 group-hover:opacity-100 text-destructive h-8 w-8"
-                    onClick={() => handleDeleteItem(item)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* 右側：景點庫 */}
-        <div className="w-1/2 overflow-y-auto p-6 bg-muted/30">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold mb-3">景點庫</h2>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="搜尋景點..."
-                className="pl-10 bg-white"
-              />
-              {searchTerm && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                  onClick={() => setSearchTerm('')}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {filteredAttractions.map(attraction => {
-              const isAdded = addedIds.has(attraction.id)
-              
-              return (
-                <div
-                  key={attraction.id}
-                  className={`
-                    relative flex gap-3 p-3 bg-white border rounded-lg cursor-pointer transition-all
-                    ${isAdded 
-                      ? 'opacity-50 cursor-not-allowed border-green-300 bg-green-50' 
-                      : 'hover:border-primary hover:shadow-md'
-                    }
-                  `}
-                  onClick={() => !isAdded && handleAddAttraction(attraction)}
-                >
-                  {/* 圖片 */}
-                  {attraction.images?.[0] ? (
-                    <img
-                      src={attraction.images[0]}
-                      alt={attraction.name}
-                      className="w-14 h-14 rounded object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-14 h-14 rounded bg-muted flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5 text-muted-foreground/30" />
+                    {/* 資訊 */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium truncate">{item.name}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Select
+                          value={item.region || ''}
+                          onValueChange={(v) => handleUpdateRegion(item, v)}
+                        >
+                          <SelectTrigger className="w-28 h-7 text-xs">
+                            <SelectValue placeholder="選地區" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {REGIONS.map(r => (
+                              <SelectItem key={r} value={r}>{r}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {item.category && (
+                          <Badge variant="outline" className="text-xs">{item.category}</Badge>
+                        )}
+                      </div>
                     </div>
-                  )}
-                  
-                  {/* 資訊 */}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{attraction.name}</p>
-                    <p className="text-xs text-muted-foreground">{attraction.category || '未分類'}</p>
-                  </div>
 
-                  {/* 加入按鈕或已加入標記 */}
-                  {isAdded ? (
-                    <Badge variant="outline" className="absolute top-2 right-2 text-xs bg-green-100 text-green-700 border-green-300">
-                      已加入
-                    </Badge>
-                  ) : (
+                    {/* 刪除 */}
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="absolute top-2 right-2 h-7 w-7 bg-primary text-white hover:bg-primary/90"
+                      className="opacity-0 group-hover:opacity-100 text-destructive h-8 w-8"
+                      onClick={() => handleDeleteItem(item)}
                     >
-                      <Plus className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 右側：景點庫 */}
+          <div className="w-1/2 overflow-y-auto p-6 bg-muted/30">
+            <div className="mb-4 space-y-3">
+              <h2 className="text-lg font-semibold">景點庫</h2>
+              
+              {/* 國家篩選 */}
+              <div className="flex gap-2">
+                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                  <SelectTrigger className="w-40 bg-white">
+                    <SelectValue placeholder="選擇國家" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">全部國家</SelectItem>
+                    {countries.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="搜尋景點..."
+                    className="pl-10 bg-white"
+                  />
+                  {searchTerm && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                      onClick={() => setSearchTerm('')}
+                    >
+                      <X className="w-4 h-4" />
                     </Button>
                   )}
                 </div>
-              )
-            })}
-          </div>
-
-          {filteredAttractions.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground">
-              <Search className="w-12 h-12 mx-auto mb-4 opacity-20" />
-              <p>找不到符合的景點</p>
+              </div>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* 設定 Dialog */}
+            <div className="grid grid-cols-2 gap-3">
+              {filteredAttractions.map(attraction => {
+                const isAdded = addedIds.has(attraction.id)
+                
+                return (
+                  <div
+                    key={attraction.id}
+                    className={`
+                      relative flex gap-3 p-3 bg-white border rounded-lg cursor-pointer transition-all
+                      ${isAdded 
+                        ? 'opacity-50 cursor-not-allowed border-green-300 bg-green-50' 
+                        : 'hover:border-primary hover:shadow-md'
+                      }
+                    `}
+                    onClick={() => !isAdded && handleAddAttraction(attraction)}
+                  >
+                    {/* 圖片 */}
+                    {attraction.images?.[0] ? (
+                      <img
+                        src={attraction.images[0]}
+                        alt={attraction.name}
+                        className="w-14 h-14 rounded object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded bg-muted flex items-center justify-center flex-shrink-0">
+                        <MapPin className="w-5 h-5 text-muted-foreground/30" />
+                      </div>
+                    )}
+                    
+                    {/* 資訊 */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{attraction.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {getCountryName(attraction.country_id) || attraction.category || '未分類'}
+                      </p>
+                    </div>
+
+                    {/* 加入按鈕或已加入標記 */}
+                    {isAdded ? (
+                      <Badge variant="outline" className="absolute top-2 right-2 text-xs bg-green-100 text-green-700 border-green-300">
+                        已加入
+                      </Badge>
+                    ) : (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-2 right-2 h-7 w-7 bg-primary text-white hover:bg-primary/90"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {filteredAttractions.length === 0 && (
+              <div className="text-center py-12 text-muted-foreground">
+                <Search className="w-12 h-12 mx-auto mb-4 opacity-20" />
+                <p>找不到符合的景點</p>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        /* 基本設定頁籤 */
+        <div className="max-w-2xl mx-auto p-6">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label className="text-base">紙娃娃名稱 *</Label>
+              <Input
+                value={editForm.name}
+                onChange={(e) => setEditForm(p => ({ ...p, name: e.target.value }))}
+                placeholder="例：清邁精選景點"
+                className="text-lg"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-base">連結代碼</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground whitespace-nowrap px-3 py-2 bg-muted rounded-l-md border border-r-0">
+                  /p/wishlist/
+                </span>
+                <Input
+                  value={editForm.slug}
+                  onChange={(e) => setEditForm(p => ({ ...p, slug: e.target.value }))}
+                  placeholder="chiang-mai"
+                  className="rounded-l-none flex-1"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                發佈後的連結：{window.location.origin}/p/wishlist/{editForm.slug || 'your-slug'}
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-base">說明文字</Label>
+              <Textarea
+                value={editForm.description}
+                onChange={(e) => setEditForm(p => ({ ...p, description: e.target.value }))}
+                placeholder="這個紙娃娃包含哪些景點？給客戶看的簡介..."
+                rows={4}
+              />
+            </div>
+
+            <div className="pt-4 border-t">
+              <Button onClick={handleSaveSettings} size="lg">
+                儲存設定
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 設定 Dialog（保留快速設定入口） */}
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>紙娃娃設定</DialogTitle>
+            <DialogTitle>快速設定</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -548,6 +666,6 @@ export default function WishlistTemplateEditPage({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </ContentPageLayout>
   )
 }
