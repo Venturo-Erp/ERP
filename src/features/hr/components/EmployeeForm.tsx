@@ -12,13 +12,14 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Camera, Save, Mail, Phone, MapPin, Calendar, CreditCard, Heart, Loader2, User, DollarSign, Shield } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Camera, Save, Mail, Phone, MapPin, Calendar, CreditCard, Heart, Loader2, User, DollarSign, Shield, ChevronRight, ChevronDown } from 'lucide-react'
 import { useUserStore } from '@/stores/user-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { alertSuccess, alertError } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
-import { useWorkspaceFeatures } from '@/lib/permissions'
+import { useWorkspaceFeatures, MODULES, type ModuleDefinition } from '@/lib/permissions'
 
 // 職務類型（從 API 取得）
 interface Role {
@@ -29,43 +30,20 @@ interface Role {
   is_admin?: boolean
 }
 
-// 路由權限類型
-interface RoutePermission {
-  route: string
-  name: string
+// 模組分頁權限類型（新版）
+interface TabPermission {
+  module_code: string
+  tab_code: string | null
   can_read: boolean
   can_write: boolean
 }
 
-// 個人覆寫類型
+// 個人覆寫類型（新版）
 interface PermissionOverride {
-  route: string
-  override_type: 'grant' | 'revoke' | null  // grant=額外開啟, revoke=關閉, null=跟隨職務
-  can_read: boolean
-  can_write: boolean
+  module_code: string
+  tab_code: string | null
+  override_type: 'grant' | 'revoke' | null
 }
-
-// 所有可用功能（對應 workspace_features）
-// 注意：/settings（個人設定）不在這裡，因為所有人都能用
-const ALL_PERMISSION_ROUTES = [
-  { route: '/dashboard', name: '首頁', featureCode: 'dashboard' },
-  { route: '/tours', name: '旅遊團', featureCode: 'tours' },
-  { route: '/orders', name: '訂單', featureCode: 'orders' },
-  { route: '/finance/payments', name: '收款管理', featureCode: 'finance' },
-  { route: '/finance/requests', name: '請款管理', featureCode: 'finance' },
-  { route: '/finance/treasury', name: '金庫', featureCode: 'finance' },
-  { route: '/accounting', name: '會計系統', featureCode: 'accounting' },
-  { route: '/database', name: '資料管理', featureCode: 'database' },
-  { route: '/customers', name: '顧客管理', featureCode: 'customers' },
-  { route: '/hr', name: '人資管理', featureCode: 'hr' },
-  { route: '/calendar', name: '行事曆', featureCode: 'calendar' },
-  { route: '/channel', name: '頻道', featureCode: 'workspace' },
-  { route: '/todos', name: '待辦事項', featureCode: 'todos' },
-  { route: '/itinerary', name: '行程管理', featureCode: 'itinerary' },
-  { route: '/visas', name: '簽證管理', featureCode: 'visas' },
-  { route: '/tenants', name: '租戶管理', featureCode: 'tenants' },
-  // /settings 不需要權限控制，所有人都能進入個人設定
-]
 
 interface EmployeeFormProps {
   employeeId?: string
@@ -80,9 +58,6 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
   const { items: employees, create: createEmployee, update: updateEmployee, fetchAll } = useUserStore()
   const { user } = useAuthStore()
   const { isFeatureEnabled } = useWorkspaceFeatures()
-  
-  // 只顯示公司有開啟的功能
-  const ALL_AVAILABLE_ROUTES = ALL_PERMISSION_ROUTES.filter(r => isFeatureEnabled(r.featureCode))
   
   // 確保員工資料已載入
   useEffect(() => {
@@ -100,8 +75,9 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
   
   // 從 API 載入的職務列表和權限
   const [roles, setRoles] = useState<Role[]>([])
-  const [rolePermissions, setRolePermissions] = useState<RoutePermission[]>([])
+  const [roleTabPermissions, setRoleTabPermissions] = useState<TabPermission[]>([])
   const [personalOverrides, setPersonalOverrides] = useState<PermissionOverride[]>([])
+  const [expandedModules, setExpandedModules] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
     chinese_name: employee?.chinese_name || '',
@@ -139,29 +115,19 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     fetchRoles()
   }, [user?.workspace_id])
 
-  // 當選擇職務時，載入該職務的權限
+  // 當選擇職務時，載入該職務的分頁權限
   useEffect(() => {
     if (!formData.role_id) {
-      setRolePermissions([])
+      setRoleTabPermissions([])
       return
     }
     
     const fetchPermissions = async () => {
       try {
-        const res = await fetch(`/api/permissions/role-permissions?role_id=${formData.role_id}`)
+        const res = await fetch(`/api/roles/${formData.role_id}/tab-permissions`)
         if (res.ok) {
           const data = await res.json()
-          // 合併所有可用功能，標記已設定的權限
-          const merged = ALL_AVAILABLE_ROUTES.map(r => {
-            const existing = data.find((d: RoutePermission) => d.route === r.route)
-            return {
-              route: r.route,
-              name: r.name,
-              can_read: existing?.can_read || false,
-              can_write: existing?.can_write || false,
-            }
-          })
-          setRolePermissions(merged)
+          setRoleTabPermissions(data)
         }
       } catch (err) {
         logger.error('載入權限失敗:', err)
@@ -179,20 +145,10 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     
     const fetchOverrides = async () => {
       try {
-        const res = await fetch(`/api/permissions/employee-overrides?employee_id=${employeeId}`)
+        const res = await fetch(`/api/employees/${employeeId}/permission-overrides`)
         if (res.ok) {
           const data = await res.json()
-          // 合併所有功能，標記有覆寫的
-          const merged = ALL_AVAILABLE_ROUTES.map(r => {
-            const existing = data.find((d: PermissionOverride) => d.route === r.route)
-            return {
-              route: r.route,
-              override_type: existing?.override_type || null,
-              can_read: existing?.can_read || false,
-              can_write: existing?.can_write || false,
-            }
-          })
-          setPersonalOverrides(merged)
+          setPersonalOverrides(data)
         }
       } catch (err) {
         logger.error('載入個人覆寫失敗:', err)
@@ -287,17 +243,14 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         await createEmployee(payload as unknown as Parameters<typeof createEmployee>[0])
       }
 
-      // 儲存個人權限覆寫（非管理員職務）
-      if (isEditMode && employeeId && !selectedRole?.is_admin) {
+      // 儲存個人權限覆寫
+      if (isEditMode && employeeId) {
         const overridesToSave = personalOverrides.filter(o => o.override_type)
         try {
-          await fetch('/api/permissions/employee-overrides', {
+          await fetch(`/api/employees/${employeeId}/permission-overrides`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              employee_id: employeeId,
-              overrides: overridesToSave,
-            }),
+            body: JSON.stringify({ overrides: overridesToSave }),
           })
         } catch (err) {
           logger.warn('更新個人權限覆寫失敗:', err)
@@ -577,93 +530,216 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
 
                   {/* 權限列表 */}
                   {formData.role_id ? (
-                    selectedRole?.is_admin ? (
-                      <div className="text-center py-8 text-morandi-secondary">
-                        <Shield className="w-12 h-12 mx-auto mb-3 text-morandi-gold/50" />
-                        <p>管理員擁有系統所有權限</p>
-                      </div>
-                    ) : (
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <h4 className="text-sm font-semibold text-morandi-primary">個人權限微調</h4>
-                          <div className="flex items-center gap-4 text-xs">
-                            <span className="flex items-center gap-1">
-                              <span className="w-3 h-3 bg-morandi-container rounded"></span>
-                              職務預設
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className="w-3 h-3 bg-morandi-green/30 rounded"></span>
-                              額外開啟
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <span className="w-3 h-3 bg-red-100 rounded"></span>
-                              已關閉
-                            </span>
-                          </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="text-sm font-semibold text-morandi-primary">個人權限微調</h4>
+                        <div className="flex items-center gap-4 text-xs">
+                          <span className="flex items-center gap-1">
+                            <span className="w-3 h-3 bg-morandi-green rounded"></span>
+                            開啟
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-3 h-3 bg-gray-300 rounded"></span>
+                            關閉
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                            已覆寫
+                          </span>
                         </div>
-                        <div className="border border-morandi-border rounded-lg overflow-hidden">
-                          <table className="w-full text-sm">
-                            <thead className="bg-morandi-container/50">
-                              <tr>
-                                <th className="px-4 py-2.5 text-left font-semibold text-morandi-secondary text-xs uppercase">功能</th>
-                                <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-24">職務預設</th>
-                                <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-32">個人調整</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-morandi-border">
-                              {rolePermissions.map((perm) => {
-                                const override = personalOverrides.find(o => o.route === perm.route)
-                                const hasRolePerm = perm.can_read
-                                const isGranted = override?.override_type === 'grant'
-                                const isRevoked = override?.override_type === 'revoke'
-                                
-                                return (
-                                  <tr 
-                                    key={perm.route} 
-                                    className={cn(
-                                      'hover:bg-morandi-container/30',
-                                      isGranted && 'bg-morandi-green/10',
-                                      isRevoked && 'bg-red-50'
-                                    )}
-                                  >
-                                    <td className="px-4 py-3 text-morandi-primary">{perm.name}</td>
-                                    <td className="px-4 py-3 text-center">
+                      </div>
+                      <div className="border border-morandi-border rounded-lg overflow-hidden max-h-[400px] overflow-y-auto">
+                        {/* 表頭 */}
+                        <div className="flex items-center bg-morandi-container/50 sticky top-0 border-b border-morandi-border text-xs font-semibold text-morandi-secondary uppercase">
+                          <div className="flex-1 px-4 py-2.5">功能模組</div>
+                          <div className="w-20 px-4 py-2.5 text-center">職務</div>
+                          <div className="w-20 px-4 py-2.5 text-center">個人</div>
+                        </div>
+
+                        {/* 模組列表 */}
+                        {MODULES.map(module => {
+                          const hasTabs = module.tabs.length > 0
+                          const isExpanded = expandedModules.includes(module.code)
+                          const isAdmin = selectedRole?.is_admin
+
+                          // 檢查模組權限（無分頁）
+                          const moduleRolePerm = roleTabPermissions.find(
+                            p => p.module_code === module.code && p.tab_code === null
+                          )
+                          const moduleOverride = personalOverrides.find(
+                            o => o.module_code === module.code && o.tab_code === null
+                          )
+
+                          // 計算模組是否有任何分頁開啟
+                          const hasAnyTabEnabled = hasTabs && module.tabs.some(tab => {
+                            const perm = roleTabPermissions.find(
+                              p => p.module_code === module.code && p.tab_code === tab.code
+                            )
+                            const override = personalOverrides.find(
+                              o => o.module_code === module.code && o.tab_code === tab.code
+                            )
+                            if (override?.override_type === 'grant') return true
+                            if (override?.override_type === 'revoke') return false
+                            return perm?.can_read || false
+                          })
+
+                          // 判斷最終狀態
+                          const getEffectiveStatus = (rolePerm: boolean, override: PermissionOverride | undefined) => {
+                            if (isAdmin) return true
+                            if (override?.override_type === 'grant') return true
+                            if (override?.override_type === 'revoke') return false
+                            return rolePerm
+                          }
+
+                          const toggleOverride = (moduleCode: string, tabCode: string | null, currentRolePerm: boolean) => {
+                            const existing = personalOverrides.find(
+                              o => o.module_code === moduleCode && o.tab_code === tabCode
+                            )
+                            
+                            if (existing) {
+                              // 循環：null -> grant/revoke -> null
+                              if (!existing.override_type) {
+                                // 從 null 變成 grant 或 revoke
+                                setPersonalOverrides(prev => prev.map(o =>
+                                  o.module_code === moduleCode && o.tab_code === tabCode
+                                    ? { ...o, override_type: currentRolePerm ? 'revoke' : 'grant' }
+                                    : o
+                                ))
+                              } else {
+                                // 從 grant/revoke 變回 null
+                                setPersonalOverrides(prev => prev.map(o =>
+                                  o.module_code === moduleCode && o.tab_code === tabCode
+                                    ? { ...o, override_type: null }
+                                    : o
+                                ))
+                              }
+                            } else {
+                              // 新增覆寫
+                              setPersonalOverrides(prev => [
+                                ...prev,
+                                {
+                                  module_code: moduleCode,
+                                  tab_code: tabCode,
+                                  override_type: currentRolePerm ? 'revoke' : 'grant',
+                                }
+                              ])
+                            }
+                          }
+
+                          return (
+                            <div key={module.code}>
+                              {/* 模組行 */}
+                              <div className={cn(
+                                'flex items-center border-t border-morandi-border',
+                                hasTabs ? 'bg-morandi-bg/30' : 'bg-white'
+                              )}>
+                                <div className="flex-1 px-4 py-3 flex items-center gap-2">
+                                  {hasTabs ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => setExpandedModules(prev =>
+                                        prev.includes(module.code)
+                                          ? prev.filter(m => m !== module.code)
+                                          : [...prev, module.code]
+                                      )}
+                                      className="p-1 hover:bg-morandi-bg rounded"
+                                    >
+                                      {isExpanded ? (
+                                        <ChevronDown className="h-4 w-4 text-morandi-secondary" />
+                                      ) : (
+                                        <ChevronRight className="h-4 w-4 text-morandi-secondary" />
+                                      )}
+                                    </button>
+                                  ) : (
+                                    <div className="w-6" />
+                                  )}
+                                  <span className="font-medium text-morandi-primary text-sm">{module.name}</span>
+                                </div>
+                                {!hasTabs && (
+                                  <>
+                                    <div className="w-20 px-4 py-3 flex justify-center">
                                       <span className={cn(
-                                        'inline-flex px-2 py-0.5 text-xs rounded-full',
-                                        hasRolePerm ? 'bg-morandi-green/20 text-morandi-green' : 'bg-gray-100 text-gray-400'
+                                        'w-6 h-6 rounded flex items-center justify-center text-xs',
+                                        isAdmin || moduleRolePerm?.can_read
+                                          ? 'bg-morandi-green/20 text-morandi-green'
+                                          : 'bg-gray-100 text-gray-400'
                                       )}>
-                                        {hasRolePerm ? '✓' : '—'}
+                                        {isAdmin || moduleRolePerm?.can_read ? '✓' : '—'}
                                       </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-center">
-                                      <select
-                                        value={override?.override_type || ''}
-                                        onChange={(e) => {
-                                          const value = e.target.value as 'grant' | 'revoke' | ''
-                                          setPersonalOverrides(prev => prev.map(o => 
-                                            o.route === perm.route 
-                                              ? { ...o, override_type: value || null, can_read: value === 'grant', can_write: false }
-                                              : o
-                                          ))
-                                        }}
-                                        className="text-xs border border-morandi-border rounded px-2 py-1 bg-white"
-                                      >
-                                        <option value="">跟隨職務</option>
-                                        {!hasRolePerm && <option value="grant">額外開啟</option>}
-                                        {hasRolePerm && <option value="revoke">關閉</option>}
-                                      </select>
-                                    </td>
-                                  </tr>
+                                    </div>
+                                    <div className="w-20 px-4 py-3 flex justify-center">
+                                      {!isAdmin && (
+                                        <div className="relative">
+                                          <Switch
+                                            checked={getEffectiveStatus(moduleRolePerm?.can_read || false, moduleOverride)}
+                                            onCheckedChange={() => toggleOverride(module.code, null, moduleRolePerm?.can_read || false)}
+                                            className="data-[state=checked]:bg-morandi-green"
+                                          />
+                                          {moduleOverride?.override_type && (
+                                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </>
+                                )}
+                                {hasTabs && (
+                                  <div className="w-40 px-4 py-3 text-xs text-morandi-secondary text-center">
+                                    {hasAnyTabEnabled ? '部分開啟' : '全部關閉'}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* 分頁行 */}
+                              {hasTabs && isExpanded && module.tabs.map(tab => {
+                                const tabRolePerm = roleTabPermissions.find(
+                                  p => p.module_code === module.code && p.tab_code === tab.code
+                                )
+                                const tabOverride = personalOverrides.find(
+                                  o => o.module_code === module.code && o.tab_code === tab.code
+                                )
+
+                                return (
+                                  <div key={tab.code} className="flex items-center border-t border-morandi-border bg-white">
+                                    <div className="flex-1 px-4 py-2.5 pl-12 flex items-center gap-2">
+                                      <div className="w-1 h-4 bg-morandi-border rounded-full" />
+                                      <span className="text-sm text-morandi-primary">{tab.name}</span>
+                                    </div>
+                                    <div className="w-20 px-4 py-2.5 flex justify-center">
+                                      <span className={cn(
+                                        'w-6 h-6 rounded flex items-center justify-center text-xs',
+                                        isAdmin || tabRolePerm?.can_read
+                                          ? 'bg-morandi-green/20 text-morandi-green'
+                                          : 'bg-gray-100 text-gray-400'
+                                      )}>
+                                        {isAdmin || tabRolePerm?.can_read ? '✓' : '—'}
+                                      </span>
+                                    </div>
+                                    <div className="w-20 px-4 py-2.5 flex justify-center">
+                                      {!isAdmin && (
+                                        <div className="relative">
+                                          <Switch
+                                            checked={getEffectiveStatus(tabRolePerm?.can_read || false, tabOverride)}
+                                            onCheckedChange={() => toggleOverride(module.code, tab.code, tabRolePerm?.can_read || false)}
+                                            className="data-[state=checked]:bg-morandi-green"
+                                          />
+                                          {tabOverride?.override_type && (
+                                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
                                 )
                               })}
-                            </tbody>
-                          </table>
-                        </div>
-                        <p className="text-xs text-morandi-secondary mt-2">
-                          「跟隨職務」使用職務預設權限，「額外開啟」可開放職務沒有的功能，「關閉」可暫時收回職務有的功能
-                        </p>
+                            </div>
+                          )
+                        })}
                       </div>
-                    )
+                      <p className="text-xs text-morandi-secondary mt-2">
+                        藍點表示已覆寫職務預設。點擊開關可切換：職務預設 → 覆寫 → 職務預設
+                      </p>
+                    </div>
                   ) : (
                     <div className="text-center py-8 text-morandi-secondary">
                       請先在「基本資料」選擇職務
