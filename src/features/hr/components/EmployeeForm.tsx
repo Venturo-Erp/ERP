@@ -1,10 +1,9 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   Select,
@@ -13,56 +12,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Camera,
-  Save,
-  X,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  CreditCard,
-  Heart,
-  Shield,
-  AlertCircle,
-  Loader2,
-} from 'lucide-react'
+import { Camera, Save, Mail, Phone, MapPin, Calendar, CreditCard, Heart, Loader2, User, DollarSign, Shield } from 'lucide-react'
 import { useUserStore } from '@/stores/user-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { alertSuccess, alertError } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
-import { Employee } from '@/stores/types'
-
-interface WorkspaceRole {
-  id: string
-  name: string
-  description: string | null
-  is_admin: boolean
-}
-
-const PERMISSION_ROUTES = [
-  { route: '/tours', name: '旅遊團' },
-  { route: '/orders', name: '訂單' },
-  { route: '/quotes', name: '報價單' },
-  { route: '/finance/payments', name: '收款管理' },
-  { route: '/finance/requests', name: '請款管理' },
-  { route: '/finance/treasury', name: '金庫管理' },
-  { route: '/accounting', name: '會計系統' },
-  { route: '/database', name: '資料管理' },
-  { route: '/customers', name: '顧客管理' },
-  { route: '/hr', name: '人資管理' },
-  { route: '/calendar', name: '行事曆' },
-  { route: '/channel', name: '工作空間' },
-  { route: '/todos', name: '待辦事項' },
-  { route: '/itinerary', name: '行程管理' },
-  { route: '/settings', name: '設定' },
-]
+import { ROLES, type UserRole } from '@/lib/rbac-config'
+import { cn } from '@/lib/utils'
 
 interface EmployeeFormProps {
-  employeeId?: string // 如果有，就是編輯模式
+  employeeId?: string
   onSubmit: () => void
   onCancel: () => void
 }
+
+type TabType = 'basic' | 'permissions' | 'salary'
 
 export function EmployeeForm({ employeeId, onSubmit, onCancel }: EmployeeFormProps) {
   const { items: employees, create: createEmployee, update: updateEmployee } = useUserStore()
@@ -71,82 +35,34 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel }: EmployeeFormPro
   const isEditMode = !!employeeId
 
   const [submitting, setSubmitting] = useState(false)
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(
-    employee?.avatar_url || null
-  )
-  const [workspaceRoles, setWorkspaceRoles] = useState<WorkspaceRole[]>([])
-  const [loadingRoles, setLoadingRoles] = useState(true)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(employee?.avatar_url || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [activeTab, setActiveTab] = useState('basic')
+  const [activeTab, setActiveTab] = useState<TabType>('basic')
 
   const [formData, setFormData] = useState({
     chinese_name: employee?.chinese_name || '',
     english_name: employee?.english_name || '',
     display_name: employee?.display_name || '',
     email: employee?.personal_info?.email || employee?.email || '',
-    phone: (Array.isArray(employee?.personal_info?.phone)
-      ? employee.personal_info.phone[0]
-      : employee?.personal_info?.phone) || '',
+    phone: (Array.isArray(employee?.personal_info?.phone) ? employee.personal_info.phone[0] : employee?.personal_info?.phone) || '',
     address: employee?.personal_info?.address || '',
     birth_date: employee?.personal_info?.birth_date || '',
     id_number: employee?.personal_info?.national_id || '',
-    bank_account: '',
-    department: '',
     position: employee?.job_info?.position || '',
     emergency_contact_name: employee?.personal_info?.emergency_contact?.name || '',
     emergency_contact_relation: employee?.personal_info?.emergency_contact?.relationship || '',
     emergency_contact_phone: employee?.personal_info?.emergency_contact?.phone || '',
-    emergency_contact_address: '',
-    avatar_file: null as File | null,
-    role_id: '',
+    role: (employee?.roles?.[0] as UserRole) || '' as UserRole | '',
     base_salary: employee?.salary_info?.base_salary || 0,
-    custom_permissions: {} as Record<string, { can_read: boolean; can_write: boolean }>,
   })
-
-  // 載入角色列表
-  useEffect(() => {
-    async function loadRoles() {
-      if (!user?.workspace_id) return
-
-      try {
-        const res = await fetch(`/api/permissions/roles?workspace_id=${user.workspace_id}`)
-        if (res.ok) {
-          const data = await res.json()
-          setWorkspaceRoles(Array.isArray(data) ? data : [])
-        }
-      } catch (error) {
-        logger.error('載入角色失敗:', error)
-      }
-      setLoadingRoles(false)
-    }
-
-    loadRoles()
-  }, [user?.workspace_id])
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setFormData({ ...formData, avatar_file: file })
       const reader = new FileReader()
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string)
-      }
+      reader.onloadend = () => setAvatarPreview(reader.result as string)
       reader.readAsDataURL(file)
     }
-  }
-
-  const handlePermissionChange = (route: string, type: 'read' | 'write', checked: boolean) => {
-    const current = formData.custom_permissions[route] || { can_read: false, can_write: false }
-    setFormData({
-      ...formData,
-      custom_permissions: {
-        ...formData.custom_permissions,
-        [route]: {
-          ...current,
-          [`can_${type}`]: checked,
-        },
-      },
-    })
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -157,21 +73,20 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel }: EmployeeFormPro
       return
     }
 
-    if (!isEditMode && !formData.role_id) {
+    if (!isEditMode && !formData.role) {
       await alertError('請選擇職務')
       return
     }
 
     setSubmitting(true)
     try {
-      const defaultPassword = formData.birth_date
-        ? formData.birth_date.replace(/-/g, '')
-        : '00000000'
+      const defaultPassword = formData.birth_date?.replace(/-/g, '') || '00000000'
 
       const payload = {
         chinese_name: formData.chinese_name,
         english_name: formData.english_name,
         display_name: formData.display_name || formData.chinese_name,
+        roles: formData.role ? [formData.role] : employee?.roles || [],
         personal_info: {
           email: formData.email,
           phone: formData.phone,
@@ -182,7 +97,6 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel }: EmployeeFormPro
             name: formData.emergency_contact_name,
             relationship: formData.emergency_contact_relation,
             phone: formData.emergency_contact_phone,
-            address: formData.emergency_contact_address,
           },
         },
         job_info: {
@@ -192,18 +106,15 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel }: EmployeeFormPro
         salary_info: {
           base_salary: formData.base_salary,
           allowances: employee?.salary_info?.allowances || [],
-          salary_history: employee?.salary_info?.salary_history || [],
         },
         status: 'active' as const,
-        role_id: formData.role_id || undefined,
-        custom_permissions: formData.custom_permissions,
         default_password: !isEditMode ? defaultPassword : undefined,
       }
 
-      if (isEditMode) {
-        await updateEmployee(employeeId, payload)
+      if (isEditMode && employeeId) {
+        await updateEmployee(employeeId, payload as unknown as Parameters<typeof updateEmployee>[1])
       } else {
-        await createEmployee(payload)
+        await createEmployee(payload as unknown as Parameters<typeof createEmployee>[0])
       }
 
       await alertSuccess(isEditMode ? '更新成功' : '員工建立成功')
@@ -216,494 +127,290 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel }: EmployeeFormPro
     }
   }
 
+  const tabs = [
+    { key: 'basic' as const, label: '基本資料', icon: User },
+    { key: 'permissions' as const, label: '職務權限', icon: Shield },
+    { key: 'salary' as const, label: '薪資設定', icon: DollarSign },
+  ]
+
+  // RBAC 角色列表（排除 super_admin）
+  const availableRoles = Object.values(ROLES).filter(r => r.id !== 'super_admin')
+
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <TabsList className="grid w-full grid-cols-3 mb-4">
-          <TabsTrigger value="basic">基本資料</TabsTrigger>
-          <TabsTrigger value="permissions">權限調整</TabsTrigger>
-          <TabsTrigger value="salary">薪資設定</TabsTrigger>
-        </TabsList>
-
-        {/* Tab 1: 基本資料（角色卡） */}
-        <TabsContent value="basic" className="flex-1 overflow-y-auto">
-          <div className="bg-white overflow-hidden border-l-4 border-morandi-gold rounded-lg">
-            <div className="flex flex-col md:flex-row">
-              {/* Avatar */}
-              <div className="w-full md:w-80 bg-gradient-to-br from-morandi-container to-morandi-container/30 p-10 flex flex-col items-center justify-center">
-                <div className="relative group">
-                  <div
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-48 h-48 rounded-3xl bg-morandi-gold/10 border-4 border-dashed border-morandi-gold/30 flex items-center justify-center overflow-hidden cursor-pointer group-hover:border-morandi-gold transition-all"
-                  >
-                    {avatarPreview ? (
-                      <img src={avatarPreview} alt="預覽" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="flex flex-col items-center text-morandi-secondary">
-                        <Camera className="w-12 h-12 mb-2" />
-                        <span className="text-xs font-semibold uppercase tracking-wider">
-                          上傳照片
-                        </span>
-                        <p className="text-[10px] mt-1 opacity-60">JPG, PNG, GIF</p>
-                      </div>
-                    )}
-                  </div>
-                  <div className="absolute -bottom-4 -right-4 w-14 h-14 bg-morandi-gold rounded-full flex items-center justify-center text-white shadow-lg">
-                    <Camera className="w-6 h-6" />
-                  </div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    className="hidden"
-                  />
-                </div>
-
-                <div className="mt-6 text-center">
-                  <div className="inline-flex px-3 py-1 bg-morandi-green/20 text-morandi-green text-[10px] font-bold uppercase tracking-widest rounded-full mb-3">
-                    {isEditMode ? (employee?.employee_number || '員工') : '新員工'}
-                  </div>
-                  <h3 className="text-xl font-bold text-morandi-primary tracking-tight">
-                    {formData.display_name || formData.chinese_name || '未命名'}
-                  </h3>
-                  <p className="text-sm text-morandi-secondary mt-1">
-                    {isEditMode ? (employee?.job_info?.position || '職位未設定') : '系統將自動生成員工編號'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Quick Entry */}
-              <div className="flex-1 p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-1">
-                      中文姓名 <span className="text-morandi-red">*</span>
-                    </Label>
-                    <Input
-                      required
-                      value={formData.chinese_name}
-                      onChange={(e) => setFormData({ ...formData, chinese_name: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
-                      placeholder="例：簡威廉"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                      顯示名稱
-                    </Label>
-                    <Input
-                      value={formData.display_name}
-                      onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
-                      placeholder="例：William"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                      英文姓名
-                    </Label>
-                    <Input
-                      value={formData.english_name}
-                      onChange={(e) => setFormData({ ...formData, english_name: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
-                      placeholder="例：William Chien"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                      職位
-                    </Label>
-                    <Input
-                      value={formData.position}
-                      onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
-                      placeholder="例：業務專員"
-                    />
-                  </div>
-
-                  {/* 職務選擇（編輯模式用下拉） */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
-                      <Shield className="w-3.5 h-3.5 text-morandi-gold" />
-                      職務
-                    </Label>
-                    {loadingRoles ? (
-                      <div className="h-10 flex items-center text-sm text-morandi-secondary">
-                        載入中...
-                      </div>
-                    ) : (
-                      <Select
-                        value={formData.role_id}
-                        onValueChange={(value) => setFormData({ ...formData, role_id: value })}
-                      >
-                        <SelectTrigger className="border-morandi-gold/30 focus:border-morandi-gold">
-                          <SelectValue placeholder="選擇職務" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {workspaceRoles.map((role) => (
-                            <SelectItem key={role.id} value={role.id}>
-                              {role.name}
-                              {role.is_admin && (
-                                <span className="ml-2 text-xs text-morandi-gold">(管理員)</span>
-                              )}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
-                      <Mail className="w-3.5 h-3.5 text-morandi-gold" />
-                      Email <span className="text-morandi-red">*</span>
-                    </Label>
-                    <Input
-                      required
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
-                      placeholder="name@company.com"
-                    />
-                  </div>
-
-                  {/* Phone */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
-                      <Phone className="w-3.5 h-3.5 text-morandi-gold" />
-                      手機
-                    </Label>
-                    <Input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
-                      placeholder="0912-345-678"
-                    />
-                  </div>
-
-                  {/* Birth Date */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
-                      <Calendar className="w-3.5 h-3.5 text-morandi-gold" />
-                      生日
-                    </Label>
-                    <Input
-                      type="date"
-                      value={formData.birth_date}
-                      onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
-                    />
-                  </div>
-
-                  {/* ID Number */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
-                      <CreditCard className="w-3.5 h-3.5 text-morandi-gold" />
-                      身分證
-                    </Label>
-                    <Input
-                      value={formData.id_number}
-                      onChange={(e) => setFormData({ ...formData, id_number: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
-                      placeholder="A123456789"
-                    />
-                  </div>
-
-                  {/* Address */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-morandi-gold" />
-                      地址
-                    </Label>
-                    <Input
-                      value={formData.address}
-                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
-                      placeholder="完整地址"
-                    />
-                  </div>
-
-                  {/* Bank Account */}
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
-                      <CreditCard className="w-3.5 h-3.5 text-morandi-gold" />
-                      銀行帳戶
-                    </Label>
-                    <Input
-                      value={formData.bank_account}
-                      onChange={(e) => setFormData({ ...formData, bank_account: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
-                      placeholder="銀行代碼-帳號"
-                    />
-                  </div>
-                </div>
-
-
-              </div>
+      <div className="flex-1 flex overflow-hidden">
+        {/* 左側：照片 + 分頁按鈕 */}
+        <div className="w-56 bg-gradient-to-b from-morandi-container to-morandi-container/50 p-5 flex flex-col items-center border-r border-morandi-border flex-shrink-0">
+          {/* 照片 */}
+          <div className="relative group mb-4">
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="w-28 h-28 rounded-2xl bg-morandi-gold/10 border-3 border-dashed border-morandi-gold/40 flex items-center justify-center overflow-hidden cursor-pointer group-hover:border-morandi-gold transition-all"
+            >
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="預覽" className="w-full h-full object-cover" />
+              ) : (
+                <Camera className="w-8 h-8 text-morandi-secondary" />
+              )}
             </div>
+            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" />
+          </div>
 
-            {/* 緊急聯絡人 */}
-            <div className="p-6 bg-morandi-container/10">
-              <div className="flex items-center gap-2 mb-4">
-                <Heart className="w-4 h-4 text-morandi-red" />
-                <h3 className="text-sm font-bold text-morandi-primary uppercase">
-                  緊急聯絡人
-                </h3>
+          {/* 員工資訊 */}
+          <div className="text-center mb-6">
+            <span className="inline-block px-2 py-0.5 bg-morandi-green/20 text-morandi-green text-[10px] font-bold uppercase rounded-full mb-1">
+              {isEditMode ? employee?.employee_number : '新員工'}
+            </span>
+            <h3 className="text-base font-bold text-morandi-primary truncate max-w-full">
+              {formData.display_name || formData.chinese_name || '未命名'}
+            </h3>
+            {formData.role && (
+              <p className="text-xs text-morandi-secondary mt-0.5">
+                {ROLES[formData.role]?.label}
+              </p>
+            )}
+          </div>
+
+          {/* 分頁按鈕（垂直） */}
+          <div className="w-full space-y-2">
+            {tabs.map(tab => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={cn(
+                    'w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                    activeTab === tab.key
+                      ? 'bg-morandi-gold/20 text-morandi-primary border border-morandi-gold/50'
+                      : 'text-morandi-secondary hover:bg-morandi-container hover:text-morandi-primary'
+                  )}
+                >
+                  <Icon size={16} />
+                  {tab.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* 右側：表單內容 */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* 基本資料 */}
+          {activeTab === 'basic' && (
+            <div className="space-y-6">
+              {/* 姓名區塊 */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-morandi-secondary uppercase">
+                    中文姓名 <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    required
+                    value={formData.chinese_name}
+                    onChange={(e) => setFormData({ ...formData, chinese_name: e.target.value })}
+                    placeholder="例：簡威廉"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-morandi-secondary uppercase">顯示名稱</Label>
+                  <Input
+                    value={formData.display_name}
+                    onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+                    placeholder="例：William"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-morandi-secondary uppercase">英文姓名</Label>
+                  <Input
+                    value={formData.english_name}
+                    onChange={(e) => setFormData({ ...formData, english_name: e.target.value })}
+                    placeholder="例：William Chien"
+                  />
+                </div>
               </div>
-              <div className="grid grid-cols-4 gap-4">
+
+              {/* 聯絡資訊 */}
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                    姓名
+                  <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-1">
+                    <Mail size={12} /> Email <span className="text-red-500">*</span>
                   </Label>
                   <Input
-                    value={formData.emergency_contact_name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, emergency_contact_name: e.target.value })
-                    }
-                    className="border-morandi-gold/30 focus:border-morandi-gold"
+                    required
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="name@company.com"
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                    關係
-                  </Label>
-                  <Input
-                    value={formData.emergency_contact_relation}
-                    onChange={(e) =>
-                      setFormData({ ...formData, emergency_contact_relation: e.target.value })
-                    }
-                    className="border-morandi-gold/30 focus:border-morandi-gold"
-                    placeholder="例：配偶、父母"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                    電話
+                  <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-1">
+                    <Phone size={12} /> 手機
                   </Label>
                   <Input
                     type="tel"
-                    value={formData.emergency_contact_phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, emergency_contact_phone: e.target.value })
-                    }
-                    className="border-morandi-gold/30 focus:border-morandi-gold"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    placeholder="0912-345-678"
+                  />
+                </div>
+              </div>
+
+              {/* 個人資訊 */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-1">
+                    <Calendar size={12} /> 生日
+                  </Label>
+                  <Input
+                    type="date"
+                    value={formData.birth_date}
+                    onChange={(e) => setFormData({ ...formData, birth_date: e.target.value })}
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                    地址
+                  <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-1">
+                    <CreditCard size={12} /> 身分證
                   </Label>
                   <Input
-                    value={formData.emergency_contact_address}
-                    onChange={(e) =>
-                      setFormData({ ...formData, emergency_contact_address: e.target.value })
-                    }
-                    className="border-morandi-gold/30 focus:border-morandi-gold"
+                    value={formData.id_number}
+                    onChange={(e) => setFormData({ ...formData, id_number: e.target.value })}
+                    placeholder="A123456789"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-morandi-secondary uppercase">職位名稱</Label>
+                  <Input
+                    value={formData.position}
+                    onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                    placeholder="例：業務專員"
                   />
                 </div>
               </div>
-            </div>
-          </div>
-        </TabsContent>
 
-        {/* Tab 2: 權限調整 */}
-        <TabsContent value="permissions" className="flex-1 overflow-y-auto">
-          <div className="bg-white p-8 rounded-lg border border-morandi-border">
-            {!formData.role_id && !isEditMode ? (
-              <div className="text-center py-12">
-                <Shield className="w-16 h-16 text-morandi-secondary/30 mx-auto mb-4" />
-                <p className="text-morandi-secondary">請先在「基本資料」選擇職務</p>
-              </div>
-            ) : (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-morandi-border">
-                  <div className="flex items-center gap-3">
-                    <Shield className="w-5 h-5 text-morandi-gold" />
-                    <div>
-                      <h3 className="text-lg font-bold text-morandi-primary">個人權限調整</h3>
-                      <p className="text-sm text-morandi-secondary mt-1">
-                        {isEditMode ? (
-                          <>
-                            職務：
-                            <span className="font-semibold text-morandi-primary ml-1">
-                              {employee?.job_info?.position || '未設定'}
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            已選擇職務：
-                            <span className="font-semibold text-morandi-primary ml-1">
-                              {workspaceRoles.find((r) => r.id === formData.role_id)?.name}
-                            </span>
-                          </>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-morandi-blue/10 border border-morandi-blue/30 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-morandi-blue shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold text-morandi-primary mb-1">說明</p>
-                      <p className="text-xs text-morandi-secondary">
-                        員工會繼承職務的預設權限。這裡可以針對特定功能額外調整權限。
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border rounded-lg overflow-hidden">
-                  <table className="w-full">
-                    <thead className="bg-morandi-container/50">
-                      <tr>
-                        <th className="text-left p-4 font-semibold text-sm text-morandi-primary">
-                          功能模組
-                        </th>
-                        <th className="text-center p-4 font-semibold text-sm text-morandi-primary w-32">
-                          可讀取
-                        </th>
-                        <th className="text-center p-4 font-semibold text-sm text-morandi-primary w-32">
-                          可寫入
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {PERMISSION_ROUTES.map((route, index) => {
-                        const perm = formData.custom_permissions[route.route]
-                        return (
-                          <tr
-                            key={route.route}
-                            className={`${
-                              index % 2 === 0 ? 'bg-white' : 'bg-morandi-container/10'
-                            } hover:bg-morandi-gold/5 transition-colors`}
-                          >
-                            <td className="p-4">
-                              <span className="font-medium text-morandi-primary">{route.name}</span>
-                            </td>
-                            <td className="text-center p-4">
-                              <Checkbox
-                                checked={perm?.can_read || false}
-                                onCheckedChange={(v) =>
-                                  handlePermissionChange(route.route, 'read', v as boolean)
-                                }
-                              />
-                            </td>
-                            <td className="text-center p-4">
-                              <Checkbox
-                                checked={perm?.can_write || false}
-                                onCheckedChange={(v) =>
-                                  handlePermissionChange(route.route, 'write', v as boolean)
-                                }
-                              />
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-        </TabsContent>
-
-        {/* Tab 3: 薪資設定 */}
-        <TabsContent value="salary" className="flex-1">
-          <div className="bg-white p-8 rounded-lg border border-morandi-border">
-            <div className="max-w-2xl mx-auto space-y-6">
-              <div className="flex items-center gap-2 mb-6">
-                <CreditCard className="w-5 h-5 text-morandi-gold" />
-                <Label className="text-base font-bold text-morandi-primary">薪資資訊</Label>
+              {/* 地址 */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-1">
+                  <MapPin size={12} /> 地址
+                </Label>
+                <Input
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  placeholder="台北市..."
+                />
               </div>
 
-              <div className="space-y-6">
-                <div>
-                  <Label className="text-sm font-medium text-morandi-primary mb-2">
-                    底薪（月薪）
-                  </Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-morandi-secondary">
-                      NT$
-                    </span>
+              {/* 緊急聯絡人 */}
+              <div className="pt-4 border-t">
+                <h4 className="text-sm font-semibold text-morandi-primary mb-3 flex items-center gap-2">
+                  <Heart size={14} className="text-morandi-gold" />
+                  緊急聯絡人
+                </h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-morandi-secondary uppercase">姓名</Label>
                     <Input
-                      type="number"
-                      value={formData.base_salary}
-                      onChange={(e) =>
-                        setFormData({ ...formData, base_salary: Number(e.target.value) })
-                      }
-                      className="border-morandi-gold/30 focus:border-morandi-gold pl-12"
-                      placeholder="30000"
+                      value={formData.emergency_contact_name}
+                      onChange={(e) => setFormData({ ...formData, emergency_contact_name: e.target.value })}
                     />
                   </div>
-                  <p className="text-xs text-morandi-secondary mt-2">
-                    每月固定薪資（不含獎金/津貼）
-                  </p>
-                </div>
-
-                <div className="bg-morandi-blue/10 border border-morandi-blue/30 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-morandi-blue shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold text-morandi-primary mb-1">薪資說明</p>
-                      <ul className="text-xs text-morandi-secondary space-y-1">
-                        <li>• 底薪為每月固定薪資</li>
-                        <li>• 獎金/津貼可在員工詳情頁設定</li>
-                        <li>• 薪資資訊僅限人資/管理員查看</li>
-                      </ul>
-                    </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-morandi-secondary uppercase">關係</Label>
+                    <Input
+                      value={formData.emergency_contact_relation}
+                      onChange={(e) => setFormData({ ...formData, emergency_contact_relation: e.target.value })}
+                      placeholder="例：配偶"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-morandi-secondary uppercase">電話</Label>
+                    <Input
+                      type="tel"
+                      value={formData.emergency_contact_phone}
+                      onChange={(e) => setFormData({ ...formData, emergency_contact_phone: e.target.value })}
+                    />
                   </div>
                 </div>
-
-                {!isEditMode && (
-                  <div className="bg-morandi-container/30 rounded-lg p-4 border border-morandi-border">
-                    <p className="text-sm font-semibold text-morandi-primary mb-2">
-                      🔐 預設密碼
-                    </p>
-                    <p className="text-xs text-morandi-secondary">
-                      系統將自動使用員工的<strong>西元生日</strong>作為預設密碼
-                      <br />
-                      例：生日 1990/08/15 → 預設密碼{' '}
-                      <code className="bg-morandi-container px-1 py-0.5 rounded">19900815</code>
-                      <br />
-                      <br />
-                      員工首次登入後會被要求修改密碼
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+          )}
 
-      {/* Actions Bar - 統一風格 */}
-      <div className="px-6 py-4 flex justify-end items-center gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          className="text-morandi-secondary border-morandi-border"
-          onClick={onCancel}
-        >
+          {/* 職務權限 */}
+          {activeTab === 'permissions' && (
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-sm font-semibold text-morandi-primary mb-3">
+                  選擇職務 <span className="text-red-500">*</span>
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {availableRoles.map((role) => (
+                    <button
+                      key={role.id}
+                      type="button"
+                      onClick={() => setFormData({ ...formData, role: role.id })}
+                      className={cn(
+                        'p-4 rounded-lg border-2 text-left transition-all',
+                        formData.role === role.id
+                          ? 'border-morandi-gold bg-morandi-gold/10'
+                          : 'border-morandi-border hover:border-morandi-gold/50'
+                      )}
+                    >
+                      <div className="font-semibold text-morandi-primary">{role.label}</div>
+                      <div className="text-xs text-morandi-secondary mt-1">{role.description}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {formData.role && (
+                <div className="pt-4 border-t">
+                  <h4 className="text-sm font-semibold text-morandi-primary mb-3">預設權限</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {ROLES[formData.role]?.permissions.map((perm) => (
+                      <span
+                        key={perm}
+                        className="px-2 py-1 bg-morandi-gold/10 text-morandi-primary text-xs rounded"
+                      >
+                        {perm === '*' ? '所有權限' : perm}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 薪資設定 */}
+          {activeTab === 'salary' && (
+            <div className="space-y-6">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase">底薪</Label>
+                <Input
+                  type="number"
+                  value={formData.base_salary}
+                  onChange={(e) => setFormData({ ...formData, base_salary: Number(e.target.value) })}
+                  placeholder="0"
+                />
+              </div>
+              <p className="text-xs text-morandi-secondary">
+                津貼等詳細薪資設定，請在員工建立後於人資系統中編輯。
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 底部按鈕 */}
+      <div className="px-6 py-4 border-t border-morandi-border flex justify-end gap-3 bg-morandi-container/30">
+        <Button type="button" variant="outline" onClick={onCancel}>
           取消
         </Button>
         <Button
           type="submit"
-          disabled={
-            submitting ||
-            !formData.chinese_name ||
-            !formData.email ||
-            (!isEditMode && !formData.role_id)
-          }
-          className="bg-morandi-gold hover:bg-morandi-gold/90 text-white font-semibold"
+          disabled={submitting || !formData.chinese_name || !formData.email || (!isEditMode && !formData.role)}
+          className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
         >
           {submitting ? (
             <>

@@ -174,6 +174,16 @@ export const ROLES: Record<UserRole, RoleConfig> = {
     canManageWorkspace: false,
     canCrossWorkspace: false,
   },
+
+  bot: {
+    id: 'bot',
+    label: '機器人',
+    description: '系統自動化帳號',
+    color: 'text-purple-600 bg-purple-100 border-purple-200',
+    permissions: ['*'], // 機器人通常需要完整權限執行任務
+    canManageWorkspace: false,
+    canCrossWorkspace: false,
+  },
 }
 /**
  * 取得角色配置

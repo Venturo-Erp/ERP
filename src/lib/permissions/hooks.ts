@@ -80,32 +80,10 @@ export function useWorkspaceFeatures() {
  */
 export function useRolePermissions() {
   const { user } = useAuthStore()
-  const [permissions, setPermissions] = useState<RolePermission[]>([])
-  const [loading, setLoading] = useState(true)
+  const [permissions] = useState<RolePermission[]>([])
+  const loading = false // RBAC 不需要 API 載入
 
-  useEffect(() => {
-    if (!user?.role_id) {
-      setPermissions([])
-      setLoading(false)
-      return
-    }
-
-    const fetchPermissions = async () => {
-      setLoading(true)
-      try {
-        const res = await fetch(`/api/permissions/role-permissions?role_id=${user.role_id}`)
-        if (res.ok) {
-          const data = await res.json()
-          setPermissions(data)
-        }
-      } catch (err) {
-        console.error('Failed to fetch role permissions:', err)
-      }
-      setLoading(false)
-    }
-
-    fetchPermissions()
-  }, [user?.role_id])
+  // RBAC: 權限從 user.permissions 取得，不需要查詢 API
 
   // 檢查路由權限
   const canRead = useCallback((route: string): boolean => {

@@ -89,7 +89,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
         emergency_contact_name: currentEmployee.personal_info?.emergency_contact?.name || '',
         emergency_contact_relation: currentEmployee.personal_info?.emergency_contact?.relationship || '',
         emergency_contact_phone: currentEmployee.personal_info?.emergency_contact?.phone || '',
-        notes: '', // TODO: 從哪裡取？
+        emergency_contact_address: currentEmployee.personal_info?.emergency_contact?.address || '',
       })
       setCurrentAvatarUrl(currentEmployee.avatar_url || null)
     }

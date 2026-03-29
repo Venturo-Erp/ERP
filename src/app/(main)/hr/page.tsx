@@ -16,7 +16,7 @@ import {
   invalidatePaymentRequests,
 } from '@/data'
 import { Employee } from '@/stores/types'
-import { EmployeeFormNew as EmployeeForm } from '@/features/hr/components/EmployeeFormNew'
+import { EmployeeForm } from '@/features/hr/components/EmployeeForm'
 import {
   SalaryPaymentDialog,
   SalaryPaymentData,
