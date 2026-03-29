@@ -55,7 +55,10 @@ export const MODULES: ModuleDefinition[] = [
     description: '收款、請款、出納',
     tabs: [
       { code: 'payments', name: '收款管理', description: '客戶收款記錄' },
-      { code: 'requests', name: '請款管理', description: '團體請款、公司支出' },
+      { code: 'payments-company', name: '公司收款', description: '非團體的公司收款' },
+      { code: 'payments-confirm', name: '確認核帳', description: '收款確認與核帳' },
+      { code: 'requests', name: '請款管理', description: '團體請款' },
+      { code: 'requests-company', name: '公司請款', description: '非團體的公司支出' },
       { code: 'treasury', name: '金庫總覽', description: '資金狀況總覽' },
       { code: 'disbursement', name: '出納管理', description: '撥款作業' },
       { code: 'travel-invoice', name: '代轉發票', description: '代收代付發票' },
