@@ -115,12 +115,7 @@ export const MODULES: ModuleDefinition[] = [
     code: 'itinerary',
     name: '行程管理',
     description: '行程編輯與範本',
-    tabs: [
-      { code: 'list', name: '行程列表', description: '所有行程' },
-      { code: 'editor', name: '行程編輯器', description: '拖拉式編輯' },
-      { code: 'templates', name: '行程範本', description: '可重用範本' },
-      { code: 'blocks', name: '行程區塊', description: '區塊元件庫' },
-    ],
+    tabs: [], // 無分頁，只有行程列表
   },
   {
     code: 'visas',
