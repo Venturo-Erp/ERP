@@ -4870,6 +4870,44 @@ export type Database = {
           },
         ]
       }
+      employee_permission_overrides: {
+        Row: {
+          created_at: string | null
+          employee_id: string
+          id: string
+          module_code: string
+          override_type: string
+          tab_code: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          employee_id: string
+          id?: string
+          module_code: string
+          override_type: string
+          tab_code?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          employee_id?: string
+          id?: string
+          module_code?: string
+          override_type?: string
+          tab_code?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_permission_overrides_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employees: {
         Row: {
           attendance: Json | null
@@ -13041,41 +13079,6 @@ export type Database = {
           },
         ]
       }
-      role_route_permissions: {
-        Row: {
-          can_read: boolean | null
-          can_write: boolean | null
-          created_at: string | null
-          id: string
-          role_id: string | null
-          route: string
-        }
-        Insert: {
-          can_read?: boolean | null
-          can_write?: boolean | null
-          created_at?: string | null
-          id?: string
-          role_id?: string | null
-          route: string
-        }
-        Update: {
-          can_read?: boolean | null
-          can_write?: boolean | null
-          created_at?: string | null
-          id?: string
-          role_id?: string | null
-          route?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "role_route_permissions_role_id_fkey"
-            columns: ["role_id"]
-            isOneToOne: false
-            referencedRelation: "workspace_roles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       role_tab_permissions: {
         Row: {
           can_read: boolean | null
@@ -19235,6 +19238,7 @@ export type Database = {
           payment_config: Json | null
           personal_seal_url: string | null
           phone: string | null
+          premium_enabled: boolean | null
           subtitle: string | null
           tax_id: string | null
           type: string | null
@@ -19271,6 +19275,7 @@ export type Database = {
           payment_config?: Json | null
           personal_seal_url?: string | null
           phone?: string | null
+          premium_enabled?: boolean | null
           subtitle?: string | null
           tax_id?: string | null
           type?: string | null
@@ -19307,6 +19312,7 @@ export type Database = {
           payment_config?: Json | null
           personal_seal_url?: string | null
           phone?: string | null
+          premium_enabled?: boolean | null
           subtitle?: string | null
           tax_id?: string | null
           type?: string | null
