@@ -34,6 +34,13 @@ import { toast } from 'sonner'
 
 type EmployeeTab = 'active' | 'terminated' | 'bot'
 
+// 職務類型
+interface Role {
+  id: string
+  name: string
+  description?: string
+}
+
 export default function HRPage() {
   const { items: users, fetchAll, update: updateUser, delete: deleteUser } = useUserStore()
   const { workspaces, loadWorkspaces: fetchWorkspaces } = useWorkspaceChannels()
@@ -45,6 +52,7 @@ export default function HRPage() {
   const [activeTab, setActiveTab] = useState<EmployeeTab>('active')
   const [lineBindingEmployee, setLineBindingEmployee] = useState<Employee | null>(null)
   const { confirm, confirmDialogProps } = useConfirmDialog()
+  const [rolesData, setRolesData] = useState<Role[]>([])
 
   const isSuperAdmin = useMemo(() => {
     return currentUser?.roles?.includes('super_admin') || currentUser?.roles?.includes('admin')
@@ -53,7 +61,22 @@ export default function HRPage() {
   useEffect(() => {
     fetchAll()
     fetchWorkspaces()
-  }, [])
+    
+    // 載入職務列表
+    const loadRoles = async () => {
+      if (!currentUser?.workspace_id) return
+      try {
+        const res = await fetch(`/api/permissions/roles?workspace_id=${currentUser.workspace_id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setRolesData(data)
+        }
+      } catch (err) {
+        logger.error('載入職務失敗:', err)
+      }
+    }
+    loadRoles()
+  }, [currentUser?.workspace_id])
 
   const filteredEmployees = useMemo(() => {
     return users.filter(emp => {
@@ -223,35 +246,15 @@ export default function HRPage() {
       },
       {
         key: 'job_info',
-        label: LABELS.COL_POSITION,
-        sortable: false,
-        render: (_value, employee: Employee) => (
-          <span className="text-sm">{employee.job_info?.position || LABELS.NOT_SET}</span>
-        ),
-      },
-      {
-        key: 'roles',
-        label: LABELS.COL_ROLES,
+        label: '職務',
         sortable: false,
         render: (_value, employee: Employee) => {
-          const roles = employee.roles as UserRole[] | undefined
-          if (!roles || roles.length === 0) {
-            return <span className="text-morandi-muted text-sm">{LABELS.NOT_SET}</span>
-          }
+          // 從職務列表取得職務名稱
+          const role = rolesData.find(r => r.id === employee.job_info?.role_id)
           return (
-            <div className="flex flex-wrap gap-1">
-              {roles.map(role => {
-                const config = getRoleConfig(role)
-                return (
-                  <span
-                    key={role}
-                    className={`px-2 py-0.5 rounded-full text-xs font-medium border ${config?.color || 'text-morandi-secondary bg-muted border-border'}`}
-                  >
-                    {config?.label || role}
-                  </span>
-                )
-              })}
-            </div>
+            <span className={`text-sm ${role ? 'text-morandi-primary' : 'text-morandi-muted'}`}>
+              {role?.name || LABELS.NOT_SET}
+            </span>
           )
         },
       },
