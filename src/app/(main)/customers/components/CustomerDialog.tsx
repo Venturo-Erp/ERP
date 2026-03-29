@@ -8,12 +8,16 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Edit, Upload, ImageOff, Save, ExternalLink } from 'lucide-react'
+import { X, Edit, Upload, ImageOff, Save, Pencil } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DatePicker } from '@/components/ui/date-picker'
 import { FormField } from '@/components/ui/form-field'
 import { ManagedDialog, useDirtyState } from '@/components/dialog'
+import { ImageEditor, type ImageEditorSettings } from '@/components/ui/image-editor'
+import { supabase } from '@/lib/supabase/client'
+import { logger } from '@/lib/utils/logger'
 import type { Customer } from '@/types/customer.types'
 import { CUSTOMER_DETAIL_LABELS as L } from '../constants/labels'
 
@@ -49,6 +53,10 @@ export function CustomerDialog({
     dietary_restrictions: '',
   })
 
+  // 圖片編輯
+  const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [localImageUrl, setLocalImageUrl] = useState<string | null>(null)
+
   // 追蹤變更
   const { isDirty, resetDirty, setOriginalData, checkDirty } = useDirtyState()
   const [saving, setSaving] = useState(false)
@@ -69,6 +77,7 @@ export function CustomerDialog({
       }
       setFormData(data)
       setOriginalData(data)
+      setLocalImageUrl(null)
       resetDirty()
     }
   }, [open, customer, setOriginalData, resetDirty])
@@ -98,199 +107,276 @@ export function CustomerDialog({
     }
   }
 
+  // 圖片編輯存檔
+  const handleEditorSave = (_settings: ImageEditorSettings) => {
+    // 不需要單獨保存設定
+  }
+
+  // 圖片裁切並存檔
+  const handleEditorCropAndSave = async (blob: Blob, _settings: ImageEditorSettings) => {
+    if (!customer) return
+
+    try {
+      const oldUrl = localImageUrl || customer.passport_image_url
+
+      // 上傳裁切後的圖片
+      const random = Math.random().toString(36).substring(2, 8)
+      const fileName = `passport_${Date.now()}_${random}.jpg`
+
+      const { error: uploadError } = await supabase.storage
+        .from('passport-images')
+        .upload(fileName, blob, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      const { data: urlData, error: urlError } = await supabase.storage
+        .from('passport-images')
+        .createSignedUrl(fileName, 3600)
+
+      if (urlError || !urlData?.signedUrl) {
+        throw urlError || new Error('Failed to create signed URL')
+      }
+
+      // 更新本地顯示
+      setLocalImageUrl(urlData.signedUrl)
+
+      // 更新資料庫
+      await supabase
+        .from('customers')
+        .update({ passport_image_url: urlData.signedUrl })
+        .eq('id', customer.id)
+
+      // 刪除舊照片
+      if (oldUrl) {
+        try {
+          const match = oldUrl.match(/passport-images\/(.+)$/)
+          if (match) {
+            const oldFileName = decodeURIComponent(match[1])
+            await supabase.storage.from('passport-images').remove([oldFileName])
+          }
+        } catch (e) {
+          logger.error('Failed to delete old image:', e)
+        }
+      }
+
+      toast.success('照片已更新')
+      setIsEditorOpen(false)
+    } catch (error) {
+      logger.error('Failed to save edited image:', error)
+      toast.error('儲存失敗')
+    }
+  }
+
   if (!customer) return null
 
+  const currentImageUrl = localImageUrl || customer.passport_image_url
+
   return (
-    <ManagedDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={L.title_detail}
-      maxWidth="4xl"
-      showFooter={false}
-      confirmOnDirtyClose={isEdit}
-      externalDirty={isDirty}
-    >
-      <div className="grid grid-cols-2 gap-6 py-4">
-        {/* 左側：護照照片（橫向） */}
-        <div className="space-y-3">
-          <div className="aspect-[3/2] rounded-lg overflow-hidden bg-morandi-container relative group">
-            {customer.passport_image_url ? (
-              <>
-                <img
-                  src={customer.passport_image_url}
-                  alt={L.passport_alt(customer.name)}
-                  className="w-full h-full object-cover"
-                />
-                {isEdit && (
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Button size="sm" variant="secondary" className="gap-1.5">
+    <>
+      <ManagedDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        title={L.title_detail}
+        maxWidth="5xl"
+        showFooter={false}
+        confirmOnDirtyClose={isEdit}
+        externalDirty={isDirty}
+      >
+        <div className="grid grid-cols-2 gap-8 py-2">
+          {/* 左側：護照照片（橫向） */}
+          <div className="space-y-2">
+            <div className="aspect-[3/2] rounded-lg overflow-hidden bg-morandi-container relative group">
+              {currentImageUrl ? (
+                <>
+                  <img
+                    src={currentImageUrl}
+                    alt={L.passport_alt(customer.name)}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* 編輯按鈕 - 右下角 */}
+                  <button
+                    onClick={() => setIsEditorOpen(true)}
+                    className="absolute bottom-3 right-3 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-all opacity-70 hover:opacity-100"
+                    title="編輯照片"
+                  >
+                    <Pencil size={16} className="text-morandi-primary" />
+                  </button>
+                </>
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-morandi-muted">
+                  <ImageOff size={40} className="mb-2 opacity-50" />
+                  <span className="text-sm">{L.no_passport_photo}</span>
+                  {isEdit && (
+                    <Button size="sm" variant="outline" className="mt-3 gap-1.5">
                       <Upload size={14} />
-                      {L.btn_change_photo}
+                      {L.btn_upload_photo}
                     </Button>
-                  </div>
-                )}
-              </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 驗證狀態 */}
+            {customer.verification_status === 'verified' ? (
+              <div className="text-center text-sm text-morandi-green font-medium">
+                ✓ {L.status_verified}
+              </div>
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-morandi-muted">
-                <ImageOff size={32} className="mb-2 opacity-50" />
-                <span className="text-xs">{L.no_passport_photo}</span>
-                {isEdit && (
-                  <Button size="sm" variant="outline" className="mt-3 gap-1.5">
-                    <Upload size={14} />
-                    {L.btn_upload_photo}
-                  </Button>
-                )}
+              <div className="text-center text-sm text-status-warning font-medium">
+                ⚠ {L.status_unverified}
               </div>
             )}
           </div>
 
-          {/* 驗證狀態 */}
-          {customer.verification_status === 'verified' ? (
-            <div className="text-center text-xs text-morandi-green font-medium">
-              ✓ {L.status_verified}
+          {/* 右側：資料欄位 */}
+          <div className="space-y-4">
+            {/* 基本資料 - 2 欄 */}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+              <FormField label={L.label_name} labelClassName="text-xs text-morandi-secondary">
+                <Input
+                  value={formData.name}
+                  onChange={e => updateField('name', e.target.value)}
+                  disabled={!isEdit}
+                  className="h-10"
+                />
+              </FormField>
+
+              <FormField label={L.label_passport_name} labelClassName="text-xs text-morandi-secondary">
+                <Input
+                  value={formData.passport_name}
+                  onChange={e => updateField('passport_name', e.target.value.toUpperCase())}
+                  disabled={!isEdit}
+                  className="h-10 font-mono"
+                />
+              </FormField>
+
+              <FormField label={L.label_passport_number} labelClassName="text-xs text-morandi-secondary">
+                <Input
+                  value={formData.passport_number}
+                  onChange={e => updateField('passport_number', e.target.value)}
+                  disabled={!isEdit}
+                  className="h-10 font-mono"
+                />
+              </FormField>
+
+              <FormField label={L.label_passport_expiry} labelClassName="text-xs text-morandi-secondary">
+                <DatePicker
+                  value={formData.passport_expiry}
+                  onChange={date => updateField('passport_expiry', date)}
+                  disabled={!isEdit}
+                  className="h-10"
+                />
+              </FormField>
+
+              <FormField label={L.label_birth_date} labelClassName="text-xs text-morandi-secondary">
+                <DatePicker
+                  value={formData.birth_date}
+                  onChange={date => updateField('birth_date', date)}
+                  disabled={!isEdit}
+                  className="h-10"
+                />
+              </FormField>
+
+              <FormField label={L.label_national_id} labelClassName="text-xs text-morandi-secondary">
+                <Input
+                  value={formData.national_id}
+                  onChange={e => updateField('national_id', e.target.value)}
+                  disabled={!isEdit}
+                  className="h-10 font-mono"
+                />
+              </FormField>
+
+              <FormField label={L.label_phone} labelClassName="text-xs text-morandi-secondary">
+                <Input
+                  value={formData.phone}
+                  onChange={e => updateField('phone', e.target.value)}
+                  disabled={!isEdit}
+                  className="h-10"
+                />
+              </FormField>
+
+              <FormField label={L.label_email} labelClassName="text-xs text-morandi-secondary">
+                <Input
+                  type="email"
+                  value={formData.email}
+                  onChange={e => updateField('email', e.target.value)}
+                  disabled={!isEdit}
+                  className="h-10"
+                />
+              </FormField>
             </div>
-          ) : (
-            <div className="text-center text-xs text-status-warning font-medium">
-              ⚠ {L.status_unverified}
-            </div>
-          )}
-        </div>
 
-        {/* 右側：資料欄位 */}
-        <div className="space-y-3">
-          {/* 基本資料 - 2 欄 */}
-          <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-            <FormField label={L.label_name} labelClassName="text-xs text-morandi-secondary">
+            {/* 飲食禁忌 - 獨立一行 */}
+            <FormField label={L.label_dietary} labelClassName="text-xs text-morandi-secondary">
               <Input
-                value={formData.name}
-                onChange={e => updateField('name', e.target.value)}
+                value={formData.dietary_restrictions}
+                onChange={e => updateField('dietary_restrictions', e.target.value)}
                 disabled={!isEdit}
-                className="h-9"
-              />
-            </FormField>
-
-            <FormField label={L.label_passport_name} labelClassName="text-xs text-morandi-secondary">
-              <Input
-                value={formData.passport_name}
-                onChange={e => updateField('passport_name', e.target.value.toUpperCase())}
-                disabled={!isEdit}
-                className="h-9 font-mono"
-              />
-            </FormField>
-
-            <FormField label={L.label_passport_number} labelClassName="text-xs text-morandi-secondary">
-              <Input
-                value={formData.passport_number}
-                onChange={e => updateField('passport_number', e.target.value)}
-                disabled={!isEdit}
-                className="h-9 font-mono"
-              />
-            </FormField>
-
-            <FormField label={L.label_passport_expiry} labelClassName="text-xs text-morandi-secondary">
-              <DatePicker
-                value={formData.passport_expiry}
-                onChange={date => updateField('passport_expiry', date)}
-                disabled={!isEdit}
-                className="h-9"
-              />
-            </FormField>
-
-            <FormField label={L.label_birth_date} labelClassName="text-xs text-morandi-secondary">
-              <DatePicker
-                value={formData.birth_date}
-                onChange={date => updateField('birth_date', date)}
-                disabled={!isEdit}
-                className="h-9"
-              />
-            </FormField>
-
-            <FormField label={L.label_national_id} labelClassName="text-xs text-morandi-secondary">
-              <Input
-                value={formData.national_id}
-                onChange={e => updateField('national_id', e.target.value)}
-                disabled={!isEdit}
-                className="h-9 font-mono"
-              />
-            </FormField>
-
-            <FormField label={L.label_phone} labelClassName="text-xs text-morandi-secondary">
-              <Input
-                value={formData.phone}
-                onChange={e => updateField('phone', e.target.value)}
-                disabled={!isEdit}
-                className="h-9"
-              />
-            </FormField>
-
-            <FormField label={L.label_email} labelClassName="text-xs text-morandi-secondary">
-              <Input
-                type="email"
-                value={formData.email}
-                onChange={e => updateField('email', e.target.value)}
-                disabled={!isEdit}
-                className="h-9"
+                placeholder={isEdit ? L.placeholder_dietary : ''}
+                className="h-10"
               />
             </FormField>
           </div>
-
-          {/* 飲食禁忌 - 獨立一行 */}
-          <FormField label={L.label_dietary} labelClassName="text-xs text-morandi-secondary">
-            <Input
-              value={formData.dietary_restrictions}
-              onChange={e => updateField('dietary_restrictions', e.target.value)}
-              disabled={!isEdit}
-              placeholder={isEdit ? L.placeholder_dietary : ''}
-              className="h-9"
-            />
-          </FormField>
         </div>
-      </div>
 
-      {/* 底部按鈕 */}
-      <div className="flex justify-end gap-2 pt-4 border-t border-morandi-border">
-        {isEdit ? (
-          <>
-            <Button
-              variant="outline"
-              onClick={() => {
-                resetDirty()
-                onModeChange?.('view')
-              }}
-              className="gap-1.5"
-            >
-              <X size={14} />
-              {L.btn_cancel}
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving || !isDirty}
-              className="gap-1.5 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-            >
-              <Save size={14} />
-              {saving ? L.btn_saving : L.btn_confirm}
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="gap-1.5"
-            >
-              <X size={14} />
-              {L.btn_close}
-            </Button>
-            <Button
-              onClick={() => onModeChange?.('edit')}
-              className="gap-1.5 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-            >
-              <ExternalLink size={14} />
-              {L.btn_edit}
-            </Button>
-          </>
-        )}
-      </div>
-    </ManagedDialog>
+        {/* 底部按鈕 */}
+        <div className="flex justify-end gap-2 pt-4 border-t border-morandi-border">
+          {isEdit ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  resetDirty()
+                  onModeChange?.('view')
+                }}
+                className="gap-1.5"
+              >
+                <X size={14} />
+                {L.btn_cancel}
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={saving || !isDirty}
+                className="gap-1.5 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              >
+                <Save size={14} />
+                {saving ? L.btn_saving : L.btn_confirm}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="gap-1.5"
+              >
+                <X size={14} />
+                {L.btn_close}
+              </Button>
+              <Button
+                onClick={() => onModeChange?.('edit')}
+                className="gap-1.5 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              >
+                <Edit size={14} />
+                {L.btn_edit}
+              </Button>
+            </>
+          )}
+        </div>
+      </ManagedDialog>
+
+      {/* 圖片編輯器 */}
+      {currentImageUrl && (
+        <ImageEditor
+          open={isEditorOpen}
+          onClose={() => setIsEditorOpen(false)}
+          imageSrc={currentImageUrl}
+          aspectRatio={3 / 2}
+          onSave={handleEditorSave}
+          onCropAndSave={handleEditorCropAndSave}
+          showAi={false}
+        />
+      )}
+    </>
   )
 }

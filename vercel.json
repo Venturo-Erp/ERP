@@ -11,10 +11,6 @@
     {
       "path": "/api/cron/auto-insurance",
       "schedule": "0 1 * * *"
-    },
-    {
-      "path": "/api/cron/update-tour-status",
-      "schedule": "0 3 * * *"
     }
   ]
 }
