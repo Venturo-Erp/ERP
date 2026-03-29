@@ -1,13 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient } from '@/lib/supabase/api-client'
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createApiClient()
     const { searchParams } = new URL(request.url)
     const tourId = searchParams.get('tourId')
 
@@ -18,6 +14,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // RLS 會自動過濾，只回傳當前租戶的合約
     const { data, error } = await supabase
       .from('contracts')
       .select('id, code, template, signer_name, status, signed_at, member_ids')
@@ -25,7 +22,6 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('查詢合約失敗:', error)
       return NextResponse.json(
         { error: '查詢失敗' },
         { status: 500 }
@@ -33,8 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ contracts: data })
-  } catch (error) {
-    console.error('List contracts API 錯誤:', error)
+  } catch {
     return NextResponse.json(
       { error: '系統錯誤' },
       { status: 500 }

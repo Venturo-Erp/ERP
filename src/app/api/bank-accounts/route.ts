@@ -1,27 +1,16 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient, getCurrentWorkspaceId } from '@/lib/supabase/api-client'
 
 /**
- * GET /api/bank-accounts?workspace_id=xxx
- * 取得銀行帳戶列表
+ * GET /api/bank-accounts
+ * 取得銀行帳戶列表（RLS 自動過濾當前租戶）
  */
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const workspaceId = searchParams.get('workspace_id')
-
-  if (!workspaceId) {
-    return NextResponse.json({ error: '缺少 workspace_id' }, { status: 400 })
-  }
+export async function GET() {
+  const supabase = await createApiClient()
 
   const { data, error } = await supabase
     .from('bank_accounts')
     .select('*')
-    .eq('workspace_id', workspaceId)
     .eq('is_active', true)
     .order('is_default', { ascending: false })
     .order('name')
@@ -38,44 +27,46 @@ export async function GET(request: NextRequest) {
  * 新增銀行帳戶
  */
 export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { code, name, bank_name, account_number, is_default, workspace_id } = body
+  const supabase = await createApiClient()
+  const workspaceId = await getCurrentWorkspaceId()
 
-    if (!code || !name || !workspace_id) {
-      return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
-    }
-
-    // 如果設為預設，先把其他的取消預設
-    if (is_default) {
-      await supabase
-        .from('bank_accounts')
-        .update({ is_default: false })
-        .eq('workspace_id', workspace_id)
-    }
-
-    const { data, error } = await supabase
-      .from('bank_accounts')
-      .insert({
-        code,
-        name,
-        bank_name,
-        account_number,
-        is_default: is_default || false,
-        workspace_id,
-        is_active: true,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json(data)
-  } catch (error) {
-    return NextResponse.json({ error: '新增失敗' }, { status: 500 })
+  if (!workspaceId) {
+    return NextResponse.json({ error: '未登入' }, { status: 401 })
   }
+
+  const body = await request.json()
+  const { code, name, bank_name, account_number, is_default } = body
+
+  if (!code || !name) {
+    return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
+  }
+
+  // 如果設為預設，先把其他的取消預設
+  if (is_default) {
+    await supabase
+      .from('bank_accounts')
+      .update({ is_default: false })
+  }
+
+  const { data, error } = await supabase
+    .from('bank_accounts')
+    .insert({
+      code,
+      name,
+      bank_name,
+      account_number,
+      is_default: is_default || false,
+      workspace_id: workspaceId,
+      is_active: true,
+    })
+    .select()
+    .single()
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json(data)
 }
 
 /**
@@ -83,45 +74,41 @@ export async function POST(request: NextRequest) {
  * 更新銀行帳戶
  */
 export async function PUT(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { id, code, name, bank_name, account_number, is_default, workspace_id } = body
+  const supabase = await createApiClient()
+  const body = await request.json()
+  const { id, code, name, bank_name, account_number, is_default } = body
 
-    if (!id) {
-      return NextResponse.json({ error: '缺少 id' }, { status: 400 })
-    }
-
-    // 如果設為預設，先把其他的取消預設
-    if (is_default && workspace_id) {
-      await supabase
-        .from('bank_accounts')
-        .update({ is_default: false })
-        .eq('workspace_id', workspace_id)
-        .neq('id', id)
-    }
-
-    const { data, error } = await supabase
-      .from('bank_accounts')
-      .update({
-        code,
-        name,
-        bank_name,
-        account_number,
-        is_default,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id)
-      .select()
-      .single()
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json(data)
-  } catch (error) {
-    return NextResponse.json({ error: '更新失敗' }, { status: 500 })
+  if (!id) {
+    return NextResponse.json({ error: '缺少 id' }, { status: 400 })
   }
+
+  // 如果設為預設，先把其他的取消預設
+  if (is_default) {
+    await supabase
+      .from('bank_accounts')
+      .update({ is_default: false })
+      .neq('id', id)
+  }
+
+  const { data, error } = await supabase
+    .from('bank_accounts')
+    .update({
+      code,
+      name,
+      bank_name,
+      account_number,
+      is_default,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json(data)
 }
 
 /**
@@ -129,6 +116,7 @@ export async function PUT(request: NextRequest) {
  * 刪除銀行帳戶
  */
 export async function DELETE(request: NextRequest) {
+  const supabase = await createApiClient()
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
 

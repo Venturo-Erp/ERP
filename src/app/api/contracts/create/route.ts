@@ -1,11 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { nanoid } from 'nanoid'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient, getCurrentWorkspaceId } from '@/lib/supabase/api-client'
 
 // 自動判斷合約類型
 function getContractTemplate(location?: string): string {
@@ -36,10 +31,19 @@ function generateContractCode(tourCode: string): string {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createApiClient()
+    const workspaceId = await getCurrentWorkspaceId()
+
+    if (!workspaceId) {
+      return NextResponse.json(
+        { error: '未登入或無法取得租戶' },
+        { status: 401 }
+      )
+    }
+
     const body = await request.json()
     const {
       tourId,
-      workspaceId,
       memberIds,
       signerType = 'individual',
       signerName,
@@ -60,14 +64,14 @@ export async function POST(request: NextRequest) {
       includeItinerary = false,
     } = body
 
-    if (!tourId || !workspaceId || !memberIds?.length) {
+    if (!tourId || !memberIds?.length) {
       return NextResponse.json(
-        { error: '缺少必要參數：tourId, workspaceId, memberIds' },
+        { error: '缺少必要參數：tourId, memberIds' },
         { status: 400 }
       )
     }
 
-    // 取得團資訊
+    // 取得團資訊（RLS 會自動過濾）
     const { data: tour, error: tourError } = await supabase
       .from('tours')
       .select('id, code, name, location, departure_date, return_date')
@@ -183,7 +187,6 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (createError) {
-      console.error('建立合約失敗:', createError)
       return NextResponse.json(
         { error: '建立合約失敗' },
         { status: 500 }
@@ -191,14 +194,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 更新團員的 contract_id
-    const { error: updateMembersError } = await supabase
+    await supabase
       .from('order_members')
       .update({ contract_id: contract.id })
       .in('id', memberIds)
-
-    if (updateMembersError) {
-      console.error('更新團員合約關聯失敗:', updateMembersError)
-    }
 
     // 產生簽約連結
     const signUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cornertravel.com.tw'}/public/contract/sign/${contractCode}`
@@ -210,8 +209,7 @@ export async function POST(request: NextRequest) {
         signUrl,
       },
     })
-  } catch (error) {
-    console.error('產生合約 API 錯誤:', error)
+  } catch {
     return NextResponse.json(
       { error: '系統錯誤' },
       { status: 500 }

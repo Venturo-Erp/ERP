@@ -1,33 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient, getCurrentWorkspaceId } from '@/lib/supabase/api-client'
 
 /**
  * GET /api/finance/payment-methods
  * 取得收款/付款方式列表
  * 
  * Query params:
- * - workspace_id: 必填
  * - type: 'receipt' | 'payment' （選填）
  */
 export async function GET(request: NextRequest) {
+  const supabase = await createApiClient()
   const searchParams = request.nextUrl.searchParams
-  const workspace_id = searchParams.get('workspace_id')
   const type = searchParams.get('type') // 'receipt' | 'payment'
 
-  if (!workspace_id) {
-    return NextResponse.json({ error: 'workspace_id is required' }, { status: 400 })
-  }
-
-  // 先查詢 payment_methods（不 join accounting_subjects）
+  // RLS 會自動過濾當前租戶的資料
   let query = supabase
     .from('payment_methods')
     .select('*')
-    .eq('workspace_id', workspace_id)
     .eq('is_active', true)
     .order('sort_order')
 
@@ -38,7 +27,6 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query
 
   if (error) {
-    console.error('[payment-methods] Query error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
@@ -50,16 +38,22 @@ export async function GET(request: NextRequest) {
  * 新增收款/付款方式
  */
 export async function POST(request: NextRequest) {
+  const supabase = await createApiClient()
+  const workspaceId = await getCurrentWorkspaceId()
+
+  if (!workspaceId) {
+    return NextResponse.json({ error: '未登入' }, { status: 401 })
+  }
+
   const body = await request.json()
 
   const { data, error } = await supabase
     .from('payment_methods')
-    .insert(body)
+    .insert({ ...body, workspace_id: workspaceId })
     .select()
     .single()
 
   if (error) {
-    console.error('[payment-methods] Insert error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
@@ -71,6 +65,7 @@ export async function POST(request: NextRequest) {
  * 更新收款/付款方式
  */
 export async function PUT(request: NextRequest) {
+  const supabase = await createApiClient()
   const body = await request.json()
   const { id, ...updates } = body
 
@@ -78,6 +73,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: 'id is required' }, { status: 400 })
   }
 
+  // RLS 會確保只能更新自己租戶的資料
   const { data, error } = await supabase
     .from('payment_methods')
     .update(updates)
@@ -86,7 +82,6 @@ export async function PUT(request: NextRequest) {
     .single()
 
   if (error) {
-    console.error('[payment-methods] Update error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
@@ -98,6 +93,7 @@ export async function PUT(request: NextRequest) {
  * 刪除收款/付款方式（軟刪除，設為 is_active = false）
  */
 export async function DELETE(request: NextRequest) {
+  const supabase = await createApiClient()
   const searchParams = request.nextUrl.searchParams
   const id = searchParams.get('id')
 
@@ -105,14 +101,13 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: 'id is required' }, { status: 400 })
   }
 
-  // 軟刪除：設為 inactive
+  // RLS 會確保只能刪除自己租戶的資料
   const { error } = await supabase
     .from('payment_methods')
     .update({ is_active: false })
     .eq('id', id)
 
   if (error) {
-    console.error('[payment-methods] Delete error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
