@@ -133,7 +133,7 @@ export default function SettingsPage() {
         )}
 
         {/* 個人資料 - 用同一個 EmployeeForm，mode='self' */}
-        <div style={{ minHeight: '600px' }}>
+        <div className="-mt-4" style={{ minHeight: '600px' }}>
           <EmployeeForm
             employeeId={user?.id}
             mode="self"
