@@ -8,7 +8,7 @@ import { useSettingsState } from './hooks/useSettingsState'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { SettingsTabs } from './components/SettingsTabs'
-import { AccountSettings } from './components'
+import { EmployeeForm } from '@/features/hr/components/EmployeeForm'
 import { LABELS } from './constants/labels'
 
 export const dynamic = 'force-dynamic'
@@ -132,8 +132,19 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* 帳號安全設定 */}
-        <AccountSettings user={user} />
+        {/* 個人資料 - 用同一個 EmployeeForm，mode='self' */}
+        <div className="bg-white rounded-lg overflow-hidden" style={{ minHeight: '600px' }}>
+          <EmployeeForm
+            employeeId={user?.id}
+            mode="self"
+            onSubmit={() => {
+              window.location.reload()
+            }}
+            onCancel={() => {
+              router.back()
+            }}
+          />
+        </div>
       </div>
     </ContentPageLayout>
   )
