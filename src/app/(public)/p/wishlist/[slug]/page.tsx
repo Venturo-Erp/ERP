@@ -58,6 +58,11 @@ interface TemplateItem {
   category: string | null
 }
 
+interface CompanyInfo {
+  name: string
+  phone: string
+}
+
 interface SelectedItem {
   item_id: string
   name: string
@@ -98,6 +103,9 @@ export default function WishlistDetailPage({
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [trackingCode, setTrackingCode] = useState('')
   const [trackingUrl, setTrackingUrl] = useState('')
+  
+  // 公司資訊
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: '旅行社', phone: '' })
 
   // 載入資料
   useEffect(() => {
@@ -117,6 +125,20 @@ export default function WishlistDetailPage({
       }
 
       setTemplate(templateData)
+      
+      // 載入公司資訊
+      const { data: workspace } = await supabase
+        .from('workspaces')
+        .select('legal_name, phone')
+        .eq('id', templateData.workspace_id)
+        .single()
+      
+      if (workspace) {
+        setCompanyInfo({
+          name: workspace.legal_name || '旅行社',
+          phone: workspace.phone || '',
+        })
+      }
 
       // 載入景點
       const { data: itemsData } = await supabase
@@ -251,12 +273,14 @@ export default function WishlistDetailPage({
             <Link href="/p/wishlist" className="text-white/60 hover:text-white">
               <ChevronLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-xl font-bold text-white">角落旅行社</h1>
+            <h1 className="text-xl font-bold text-white">{companyInfo.name}</h1>
           </div>
-          <a href="tel:02-12345678" className="flex items-center gap-1 text-sm text-white/60 hover:text-white">
-            <Phone className="w-4 h-4" />
-            02-1234-5678
-          </a>
+          {companyInfo.phone && (
+            <a href={`tel:${companyInfo.phone}`} className="flex items-center gap-1 text-sm text-white/60 hover:text-white">
+              <Phone className="w-4 h-4" />
+              {companyInfo.phone}
+            </a>
+          )}
         </div>
       </header>
 

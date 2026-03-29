@@ -43,6 +43,12 @@ interface Inquiry {
   internal_notes: string | null
   created_at: string | null
   template_name?: string
+  workspace_id?: string
+}
+
+interface CompanyInfo {
+  name: string
+  phone: string
 }
 
 const STATUS_MAP = {
@@ -63,6 +69,7 @@ export default function TrackInquiryPage({
   const [inquiry, setInquiry] = useState<Inquiry | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: '旅行社', phone: '' })
   
   // 追加留言
   const [additionalNotes, setAdditionalNotes] = useState('')
@@ -75,7 +82,7 @@ export default function TrackInquiryPage({
         .from('customer_inquiries')
         .select(`
           *,
-          wishlist_templates(name)
+          wishlist_templates(name, workspace_id)
         `)
         .eq('code', code)
         .single()
@@ -86,6 +93,8 @@ export default function TrackInquiryPage({
         return
       }
 
+      const templateInfo = data.wishlist_templates as { name: string; workspace_id: string } | null
+      
       setInquiry({
         id: data.id,
         code: data.code,
@@ -98,8 +107,27 @@ export default function TrackInquiryPage({
         status: data.status as Inquiry['status'],
         internal_notes: data.internal_notes,
         created_at: data.created_at,
-        template_name: (data.wishlist_templates as { name: string } | null)?.name,
+        template_name: templateInfo?.name,
+        workspace_id: templateInfo?.workspace_id || data.workspace_id,
       })
+      
+      // 載入公司資訊
+      const workspaceId = templateInfo?.workspace_id || data.workspace_id
+      if (workspaceId) {
+        const { data: workspace } = await supabase
+          .from('workspaces')
+          .select('legal_name, phone')
+          .eq('id', workspaceId)
+          .single()
+        
+        if (workspace) {
+          setCompanyInfo({
+            name: workspace.legal_name || '旅行社',
+            phone: workspace.phone || '',
+          })
+        }
+      }
+      
       setLoading(false)
     }
 
@@ -167,12 +195,14 @@ export default function TrackInquiryPage({
             <Link href="/p/wishlist" className="text-white/60 hover:text-white">
               <ChevronLeft className="w-5 h-5" />
             </Link>
-            <h1 className="text-xl font-bold text-white">角落旅行社</h1>
+            <h1 className="text-xl font-bold text-white">{companyInfo.name}</h1>
           </div>
-          <a href="tel:02-12345678" className="flex items-center gap-1 text-sm text-white/60 hover:text-white">
-            <Phone className="w-4 h-4" />
-            02-1234-5678
-          </a>
+          {companyInfo.phone && (
+            <a href={`tel:${companyInfo.phone}`} className="flex items-center gap-1 text-sm text-white/60 hover:text-white">
+              <Phone className="w-4 h-4" />
+              {companyInfo.phone}
+            </a>
+          )}
         </div>
       </header>
 
@@ -272,7 +302,7 @@ export default function TrackInquiryPage({
           <div className="mt-6 bg-primary/10 border border-primary/20 rounded-2xl p-6">
             <h3 className="font-bold text-primary mb-4 flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
-              角落旅行社回覆
+              {companyInfo.name}回覆
             </h3>
             <div className="text-white/90 whitespace-pre-wrap">
               {inquiry.internal_notes}

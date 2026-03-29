@@ -12,6 +12,7 @@
 import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { MapPin, Globe } from 'lucide-react'
+import { COMPANY } from '@/lib/constants/company'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,9 +26,15 @@ interface WishlistTemplate {
   description: string | null
   cover_image: string | null
   items_count: number
+  workspace_id: string
 }
 
-async function getPublishedTemplates(): Promise<WishlistTemplate[]> {
+interface CompanyInfo {
+  name: string
+  phone: string
+}
+
+async function getPublishedTemplates(): Promise<{ templates: WishlistTemplate[], companyInfo: CompanyInfo }> {
   const { data, error } = await supabaseAdmin
     .from('wishlist_templates')
     .select(`
@@ -36,6 +43,7 @@ async function getPublishedTemplates(): Promise<WishlistTemplate[]> {
       slug,
       description,
       cover_image,
+      workspace_id,
       wishlist_template_items(count)
     `)
     .eq('status', 'published')
@@ -43,30 +51,50 @@ async function getPublishedTemplates(): Promise<WishlistTemplate[]> {
 
   if (error) {
     console.error('Error fetching templates:', error)
-    return []
+    return { templates: [], companyInfo: { name: COMPANY.legalName, phone: '02-1234-5678' } }
   }
 
-  return (data || []).map(t => ({
+  const templates = (data || []).map(t => ({
     id: t.id,
     name: t.name,
     slug: t.slug,
     description: t.description,
     cover_image: t.cover_image,
+    workspace_id: t.workspace_id,
     items_count: (t.wishlist_template_items as { count: number }[])?.[0]?.count || 0,
   }))
+
+  // 從第一個模板的 workspace 取得公司資訊
+  let companyInfo: CompanyInfo = { name: COMPANY.legalName, phone: '02-1234-5678' }
+  if (templates.length > 0) {
+    const { data: workspace } = await supabaseAdmin
+      .from('workspaces')
+      .select('legal_name, phone')
+      .eq('id', templates[0].workspace_id)
+      .single()
+    
+    if (workspace) {
+      companyInfo = {
+        name: workspace.legal_name || COMPANY.legalName,
+        phone: workspace.phone || '02-1234-5678',
+      }
+    }
+  }
+
+  return { templates, companyInfo }
 }
 
 export default async function WishlistIndexPage() {
-  const templates = await getPublishedTemplates()
+  const { templates, companyInfo } = await getPublishedTemplates()
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
       {/* Header */}
       <header className="bg-slate-900/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-white">角落旅行社</h1>
-          <a href="tel:02-12345678" className="text-sm text-white/60 hover:text-white">
-            02-1234-5678
+          <h1 className="text-xl font-bold text-white">{companyInfo.name}</h1>
+          <a href={`tel:${companyInfo.phone}`} className="text-sm text-white/60 hover:text-white">
+            {companyInfo.phone}
           </a>
         </div>
       </header>
@@ -139,7 +167,7 @@ export default async function WishlistIndexPage() {
       {/* Footer */}
       <footer className="border-t border-white/10 py-8">
         <div className="max-w-6xl mx-auto px-4 text-center text-sm text-white/40">
-          <p>© {new Date().getFullYear()} 角落旅行社. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {companyInfo.name}. All rights reserved.</p>
         </div>
       </footer>
     </div>
