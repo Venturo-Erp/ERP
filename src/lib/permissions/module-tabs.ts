@@ -160,9 +160,16 @@ export const MODULES: ModuleDefinition[] = [
     name: '系統設定',
     description: '公司與系統配置',
     tabs: [
-      { code: 'company', name: '公司設定', description: '公司資訊、Logo' },
-      { code: 'line', name: 'LINE 設定', description: 'LINE Bot 串接' },
-      { code: 'preferences', name: '偏好設定', description: '個人偏好' },
+      // 個人設定
+      { code: 'personal-preferences', name: '個人偏好', description: '語言、主題、通知' },
+      { code: 'personal-notifications', name: '通知設定', description: '通知方式與頻率' },
+      // 公司設定（租戶管理員）
+      { code: 'company-info', name: '公司資訊', description: '公司名稱、Logo、聯絡方式' },
+      { code: 'company-branding', name: '品牌設定', description: '報價單、合約樣式' },
+      // 機器人管理（付費功能）
+      { code: 'bot-line', name: 'LINE Bot', description: 'LINE 連線與群組管理' },
+      { code: 'bot-telegram', name: 'Telegram Bot', description: 'Telegram 機器人' },
+      // 開發工具
       { code: 'dev-tools', name: '開發工具', description: '開發者選項' },
     ],
   },

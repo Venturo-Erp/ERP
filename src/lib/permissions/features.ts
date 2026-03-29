@@ -157,6 +157,22 @@ export const FEATURES: FeatureDefinition[] = [
     routes: ['/office', '/office/editor', '/files'],
   },
 
+  // ===== 進階功能（付費）- 機器人管理 =====
+  {
+    code: 'bot_line',
+    name: 'LINE Bot 管理',
+    description: 'LINE 連線管理、群組綁定、自動通知',
+    category: 'premium',
+    routes: ['/settings/bot-line'],
+  },
+  {
+    code: 'bot_telegram',
+    name: 'Telegram Bot 管理',
+    description: 'Telegram 機器人、頻道管理',
+    category: 'premium',
+    routes: ['/settings/bot-telegram'],
+  },
+
   // ===== 企業功能 =====
   {
     code: 'fleet',
