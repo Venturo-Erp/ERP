@@ -28,6 +28,10 @@ import { TourClosingDialog } from './TourClosingDialog'
 import { ConvertToTourDialog } from './ConvertToTourDialog'
 import { TourEditDialog } from '@/features/tours/components/tour-edit-dialog'
 import { alert } from '@/lib/ui/alert-dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { AddOrderForm, OrderFormData } from '@/features/orders/components/add-order-form'
+import { createOrder } from '@/data/entities/orders'
+import { toast } from 'sonner'
 
 import { supabase } from '@/lib/supabase/client'
 
@@ -47,6 +51,9 @@ export const ToursPage: React.FC = () => {
 
   // Convert dialog state (提案/模板轉正式團)
   const [convertDialogTour, setConvertDialogTour] = useState<Tour | null>(null)
+
+  // Add order dialog state (報名訂單)
+  const [addOrderDialogTour, setAddOrderDialogTour] = useState<Tour | null>(null)
 
   // 🔧 優化：只保留 quotes（TourActionButtons 需要），其他由 useTourOperations 內部處理
   const { items: quotes } = useQuotesListSlim()
@@ -188,6 +195,25 @@ export const ToursPage: React.FC = () => {
     }
   }, [operations, deleteConfirm.tour, closeDeleteDialog])
 
+  // 處理報名（建立訂單）
+  const handleAddOrder = useCallback(async (orderData: OrderFormData) => {
+    try {
+      await createOrder({
+        tour_id: orderData.tour_id,
+        contact_person: orderData.contact_person,
+        sales_person: orderData.sales_person,
+        assistant: orderData.assistant,
+        member_count: orderData.member_count || 0,
+        total_amount: orderData.total_amount || 0,
+        workspace_id: user?.workspace_id,
+      })
+      toast.success('訂單建立成功')
+      setAddOrderDialogTour(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '建立訂單失敗')
+    }
+  }, [user?.workspace_id])
+
   const { handleCreateChannel } = useTourChannelOperations({
     actions: actions as unknown as TourStoreActions,
   })
@@ -200,6 +226,7 @@ export const ToursPage: React.FC = () => {
     onEditTour: handleOpenEditDialog,
     setSelectedTour,
     setDeleteConfirm: state => state.tour && openDeleteDialog(state.tour),
+    onAddOrder: setAddOrderDialogTour,
     handleCreateChannel,
     onOpenItineraryDialog: openItineraryDialog,
     onOpenQuoteDialog: openQuoteDialog,
@@ -417,6 +444,22 @@ export const ToursPage: React.FC = () => {
           onSuccess={closeClosingDialog}
         />
       )}
+
+      {/* 報名對話框（新增訂單） */}
+      <Dialog open={!!addOrderDialogTour} onOpenChange={open => !open && setAddOrderDialogTour(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>報名旅遊團 - {addOrderDialogTour?.name}</DialogTitle>
+          </DialogHeader>
+          {addOrderDialogTour && (
+            <AddOrderForm
+              tourId={addOrderDialogTour.id}
+              onSubmit={handleAddOrder}
+              onCancel={() => setAddOrderDialogTour(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -234,7 +234,7 @@ export function CustomerDialog({
                   value={formData.name}
                   onChange={e => updateField('name', e.target.value)}
                   readOnly={!isEdit}
-                  className={`h-10 ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 bg-white ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -243,7 +243,7 @@ export function CustomerDialog({
                   value={formData.passport_name}
                   onChange={e => updateField('passport_name', e.target.value.toUpperCase())}
                   readOnly={!isEdit}
-                  className={`h-10 font-mono ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 font-mono bg-white ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -252,7 +252,7 @@ export function CustomerDialog({
                   value={formData.passport_number}
                   onChange={e => updateField('passport_number', e.target.value)}
                   readOnly={!isEdit}
-                  className={`h-10 font-mono ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 font-mono bg-white ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -267,7 +267,7 @@ export function CustomerDialog({
                   <Input
                     value={formData.passport_expiry || ''}
                     readOnly
-                    className="h-10 cursor-default"
+                    className="h-10 bg-white cursor-default"
                   />
                 )}
               </FormField>
@@ -283,7 +283,7 @@ export function CustomerDialog({
                   <Input
                     value={formData.birth_date || ''}
                     readOnly
-                    className="h-10 cursor-default"
+                    className="h-10 bg-white cursor-default"
                   />
                 )}
               </FormField>
@@ -293,7 +293,7 @@ export function CustomerDialog({
                   value={formData.national_id}
                   onChange={e => updateField('national_id', e.target.value)}
                   readOnly={!isEdit}
-                  className={`h-10 font-mono ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 font-mono bg-white ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -302,7 +302,7 @@ export function CustomerDialog({
                   value={formData.phone}
                   onChange={e => updateField('phone', e.target.value)}
                   readOnly={!isEdit}
-                  className={`h-10 ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 bg-white ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -312,7 +312,7 @@ export function CustomerDialog({
                   value={formData.email}
                   onChange={e => updateField('email', e.target.value)}
                   readOnly={!isEdit}
-                  className={`h-10 ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 bg-white ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -324,7 +324,7 @@ export function CustomerDialog({
                     onChange={e => updateField('dietary_restrictions', e.target.value)}
                     readOnly={!isEdit}
                     placeholder={isEdit ? L.placeholder_dietary : ''}
-                    className={`h-10 ${!isEdit ? 'cursor-default' : ''}`}
+                    className={`h-10 bg-white ${!isEdit ? 'cursor-default' : ''}`}
                   />
                 </FormField>
               </div>

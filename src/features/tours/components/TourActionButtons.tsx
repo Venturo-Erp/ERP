@@ -34,10 +34,11 @@ interface UseTourActionButtonsParams {
   onCloseTour?: (tour: Tour) => void
   onOpenArchiveDialog?: (tour: Tour) => void
   onOpenRequirementsDialog?: ((tour: Tour) => void) | undefined
+  onAddOrder?: (tour: Tour) => void
 }
 
 export function useTourActionButtons(params: UseTourActionButtonsParams) {
-  const { operations, onEditTour, setDeleteConfirm, onOpenArchiveDialog } = params
+  const { operations, onEditTour, setDeleteConfirm, onOpenArchiveDialog, onAddOrder } = params
   const router = useRouter()
 
   const renderActions = useCallback(
@@ -47,8 +48,12 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
       // 報名（建立訂單）
       const handleSignUp = (e: React.MouseEvent) => {
         e.stopPropagation()
-        // 導航到訂單頁面並帶入團資訊
-        router.push(`/orders/new?tour_id=${tour.id}`)
+        if (onAddOrder) {
+          onAddOrder(tour)
+        } else {
+          // fallback: 導航到訂單頁面
+          router.push(`/orders/new?tour_id=${tour.id}`)
+        }
       }
 
       // 行程（查看/分享）
@@ -150,7 +155,7 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
         </div>
       )
     },
-    [operations, onEditTour, setDeleteConfirm, onOpenArchiveDialog, router]
+    [operations, onEditTour, setDeleteConfirm, onOpenArchiveDialog, onAddOrder, router]
   )
 
   return {
