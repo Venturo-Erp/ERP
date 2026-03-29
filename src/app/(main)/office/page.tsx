@@ -11,6 +11,8 @@ import { useOfficeDocument } from '@/features/office/hooks/useOfficeDocument'
 import { useState } from 'react'
 import type { Database } from '@/lib/supabase/types'
 import { OFFICE_LABELS } from './constants/labels'
+import { supabase } from '@/lib/supabase/client'
+import { toast } from 'sonner'
 
 type OfficeDocument = Database['public']['Tables']['office_documents']['Row']
 type DocumentType = 'spreadsheet' | 'document' | 'slides'
@@ -50,8 +52,27 @@ export default function OfficePage() {
     }
   }
 
-  const handleEdit = (doc: OfficeDocument) => {
+  const handleOpenEditor = (doc: OfficeDocument) => {
     router.push(`/office/editor?id=${doc.id}&name=${encodeURIComponent(doc.name)}&type=${doc.type}`)
+  }
+
+  const handleRename = async (doc: OfficeDocument) => {
+    const newName = prompt('請輸入新檔名', doc.name)
+    if (!newName || newName === doc.name) return
+    
+    try {
+      const { error } = await supabase
+        .from('office_documents')
+        .update({ name: newName })
+        .eq('id', doc.id)
+      
+      if (error) throw error
+      
+      toast.success('已更新檔名')
+      fetchDocuments()
+    } catch (error) {
+      toast.error('更新失敗')
+    }
   }
 
   const handleCreate = () => {
@@ -72,7 +93,7 @@ export default function OfficePage() {
       label: '檔名',
       render: (_: unknown, row: OfficeDocument) => (
         <button
-          onClick={() => handleEdit(row)}
+          onClick={() => handleOpenEditor(row)}
           className="font-medium text-morandi-primary hover:underline text-left"
         >
           {row.name}
@@ -100,7 +121,8 @@ export default function OfficePage() {
       render: (_: unknown, row: OfficeDocument) => (
         <ActionCell
           actions={[
-            { icon: Edit2, label: '編輯', onClick: () => handleEdit(row) },
+            { icon: Edit2, label: '重新命名', onClick: () => handleRename(row) },
+            { icon: FileText, label: '開啟編輯器', onClick: () => handleOpenEditor(row) },
             { icon: Trash2, label: '刪除', onClick: () => handleDelete(row.id), variant: 'danger' },
           ]}
         />
