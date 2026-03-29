@@ -104,17 +104,13 @@ export const MODULES: ModuleDefinition[] = [
       { code: 'archive', name: '封存管理', description: '封存資料查閱' },
     ],
   },
-  {
-    code: 'quotes',
-    name: '報價單',
-    description: '報價製作與管理',
-    tabs: [
-      { code: 'list', name: '報價列表', description: '所有報價單' },
-      { code: 'create', name: '新增報價', description: '建立新報價' },
-      { code: 'edit', name: '編輯報價', description: '修改報價內容' },
-      { code: 'templates', name: '報價範本', description: '常用報價範本' },
-    ],
-  },
+  // 報價單已整合到旅遊團管理中，不再獨立
+  // {
+  //   code: 'quotes',
+  //   name: '報價單',
+  //   description: '報價製作與管理',
+  //   tabs: [...],
+  // },
   {
     code: 'itinerary',
     name: '行程管理',
