@@ -232,15 +232,11 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
   const selectedRole = roles.find(r => r.id === formData.role_id)
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col h-full">
-      {/* 主內容區 */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Character Card 風格 */}
-        <div className="bg-white rounded-xl overflow-hidden border-l-4 border-morandi-gold">
-          {/* 頂部：照片 + 表單 */}
-          <div className="flex flex-col md:flex-row min-h-full">
-            {/* 左側：照片 */}
-            <div className="w-full md:w-72 bg-gradient-to-br from-morandi-container to-white p-8 flex flex-col items-center flex-shrink-0">
+    <form onSubmit={handleSubmit} className="h-full">
+      {/* Character Card 風格 */}
+      <div className="bg-white rounded-xl overflow-hidden border-l-4 border-morandi-gold h-full flex">
+        {/* 左側：照片（固定寬度，高度填滿） */}
+        <div className="w-72 bg-gradient-to-b from-morandi-container to-morandi-container/50 p-8 flex flex-col items-center flex-shrink-0">
               <div className="relative group mb-4">
                 <div
                   onClick={() => fileInputRef.current?.click()}
@@ -301,8 +297,9 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
               )}
             </div>
 
-            {/* 右側：表單內容 */}
-            <div className="flex-1 p-6">
+        {/* 右側：表單內容（可滾動） */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-6">
               {/* 基本資料 */}
               {activeTab === 'basic' && (
                 <div className="space-y-5">
@@ -636,31 +633,30 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                   </div>
                 </div>
               )}
-            </div>
           </div>
           
-          {/* 底部按鈕 - 在卡片內 */}
-          <div className="px-6 py-4 flex justify-end gap-3">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          取消
-        </Button>
-        <Button
-          type="submit"
-          disabled={submitting || !formData.chinese_name || !formData.email || (!isEditMode && !formData.role_id && mode === 'hr')}
-          className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              {isEditMode ? '儲存中...' : '建立中...'}
-            </>
-          ) : (
-            <>
-              <Save className="w-4 h-4 mr-2" />
-              {isEditMode ? '儲存變更' : '建立員工'}
-            </>
-          )}
-        </Button>
+          {/* 底部按鈕 */}
+          <div className="px-6 py-4 flex justify-end gap-3 flex-shrink-0">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              取消
+            </Button>
+            <Button
+              type="submit"
+              disabled={submitting || !formData.chinese_name || !formData.email || (!isEditMode && !formData.role_id && mode === 'hr')}
+              className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  {isEditMode ? '儲存中...' : '建立中...'}
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  {isEditMode ? '儲存變更' : '建立員工'}
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </div>
