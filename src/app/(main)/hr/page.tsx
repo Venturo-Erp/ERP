@@ -464,7 +464,7 @@ export default function HRPage() {
 
       {expandedEmployee && (
         <Dialog open={true} onOpenChange={() => setExpandedEmployee(null)}>
-          <DialogContent level={1} className="max-w-6xl h-[90vh] p-0">
+          <DialogContent level={1} className="max-w-6xl h-[90vh] p-0 bg-transparent shadow-none border-none">
             <DialogTitle className="sr-only">編輯員工</DialogTitle>
             <EmployeeForm
               employeeId={expandedEmployee}
@@ -479,7 +479,7 @@ export default function HRPage() {
       )}
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent level={1} className="max-w-6xl h-[90vh] p-0">
+        <DialogContent level={1} className="max-w-6xl h-[90vh] p-0 bg-transparent shadow-none border-none">
           <DialogTitle className="sr-only">新增員工</DialogTitle>
           <EmployeeForm
             onSubmit={() => {
