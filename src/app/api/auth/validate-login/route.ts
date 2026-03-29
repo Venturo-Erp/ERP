@@ -91,8 +91,59 @@ export async function POST(request: NextRequest) {
     // 6. 回傳員工資料（不含密碼）+ auth email
     const { password_hash: _, ...employeeData } = employee
 
-    // 7. 產生 JWT（server-side 簽名）
-    const mergedPermissions = [...(employeeData.permissions || []), ...(employeeData.roles || [])]
+    // 7. 從職務系統取得權限
+    let rolePermissions: string[] = []
+    const jobInfo = employee.job_info as { role_id?: string } | null
+    
+    if (jobInfo?.role_id) {
+      // 查職務是否為管理員
+      const { data: role } = await supabase
+        .from('workspace_roles')
+        .select('is_admin')
+        .eq('id', jobInfo.role_id)
+        .single()
+      
+      if (role?.is_admin) {
+        rolePermissions = ['*']
+      } else {
+        // 取得職務路由權限
+        const { data: perms } = await supabase
+          .from('role_route_permissions')
+          .select('route, can_read')
+          .eq('role_id', jobInfo.role_id)
+        
+        const permSet = new Set<string>()
+        perms?.filter(p => p.can_read).forEach(p => permSet.add(p.route.replace(/^\//, '')))
+        
+        // 取得個人覆寫（表尚未建立時跳過）
+        try {
+          const { data: overrides } = await supabase
+            .from('employee_route_overrides' as 'employees')  // 型別 workaround
+            .select('route, override_type')
+            .eq('employee_id', employee.id)
+          
+          ;(overrides as { route: string; override_type: string }[] | null)?.forEach(o => {
+            const permKey = o.route.replace(/^\//, '')
+            if (o.override_type === 'grant') {
+              permSet.add(permKey)
+            } else if (o.override_type === 'revoke') {
+              permSet.delete(permKey)
+            }
+          })
+        } catch {
+          // 表不存在時跳過
+        }
+        
+        rolePermissions = Array.from(permSet)
+      }
+    }
+    
+    // 如果沒有職務權限，fallback 到舊的 permissions
+    const mergedPermissions = rolePermissions.length > 0 
+      ? rolePermissions 
+      : [...(employeeData.permissions || []), ...(employeeData.roles || [])]
+    
+    // 8. 產生 JWT（server-side 簽名）
     const jwt = await new SignJWT({
       sub: employeeData.id,
       employee_number: employeeData.employee_number,

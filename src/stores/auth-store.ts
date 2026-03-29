@@ -72,50 +72,7 @@ async function fetchWorkspaceInfo(
  * @param workspaceInfo - Workspace 資訊
  * @param options - 額外選項
  */
-async function fetchRolePermissions(roleId: string, employeeId?: string): Promise<string[]> {
-  try {
-    // 先查職務是否為管理員
-    const roleRes = await fetch(`/api/permissions/roles`)
-    if (roleRes.ok) {
-      const roles = await roleRes.json()
-      const role = roles.find((r: { id: string; is_admin?: boolean }) => r.id === roleId)
-      if (role?.is_admin) {
-        return ['*'] // 管理員有所有權限
-      }
-    }
-    
-    // 取得職務權限
-    const permRes = await fetch(`/api/permissions/role-permissions?role_id=${roleId}`)
-    const rolePerms: Set<string> = new Set()
-    if (permRes.ok) {
-      const perms = await permRes.json()
-      perms
-        .filter((p: { can_read?: boolean }) => p.can_read)
-        .forEach((p: { route: string }) => rolePerms.add(p.route.replace(/^\//, '')))
-    }
 
-    // 取得個人覆寫
-    if (employeeId) {
-      const overrideRes = await fetch(`/api/permissions/employee-overrides?employee_id=${employeeId}`)
-      if (overrideRes.ok) {
-        const overrides = await overrideRes.json()
-        overrides.forEach((o: { route: string; override_type: string }) => {
-          const permKey = o.route.replace(/^\//, '')
-          if (o.override_type === 'grant') {
-            rolePerms.add(permKey)  // 額外開啟
-          } else if (o.override_type === 'revoke') {
-            rolePerms.delete(permKey)  // 關閉
-          }
-        })
-      }
-    }
-
-    return Array.from(rolePerms)
-  } catch (err) {
-    console.error('載入職務權限失敗:', err)
-  }
-  return []
-}
 
 function buildUserFromEmployee(
   employeeData: EmployeeRow,
@@ -293,16 +250,23 @@ export const useAuthStore = create<AuthState>()(
           // 4. 查詢 workspace 資訊並構建 User 物件
           const workspaceInfo = await fetchWorkspaceInfo(employeeData.workspace_id)
 
-          // 5. 取得職務權限（從 job_info.role_id）+ 個人覆寫
-          const jobInfo = employeeData.job_info as { role_id?: string } | null
-          const rolePermissions = jobInfo?.role_id 
-            ? await fetchRolePermissions(jobInfo.role_id, employeeData.id)
-            : []
+          // 5. 權限從 validate-login API 的 JWT 取得（server-side 已計算好）
+          // 解析 JWT payload 取得權限
+          // 5. 權限從 validate-login API 的 JWT 取得（server-side 已計算好）
+          const jwt = (validateResult.data?.jwt ?? validateResult.jwt) as string
+          let rolePermissions: string[] = []
+          if (jwt) {
+            try {
+              const payload = JSON.parse(atob(jwt.split('.')[1]))
+              rolePermissions = payload.permissions || []
+            } catch {
+              // JWT 解析失敗，使用空陣列
+            }
+          }
 
           const user = buildUserFromEmployee(employeeData, workspaceInfo, { rolePermissions })
 
-          // 5. 使用 API 回傳的 JWT（server-side 簽名）
-          const jwt = (validateResult.data?.jwt ?? validateResult.jwt) as string
+          // 6. 設定 JWT cookie
           if (jwt) {
             setSecureCookie(jwt, rememberMe)
           } else {
