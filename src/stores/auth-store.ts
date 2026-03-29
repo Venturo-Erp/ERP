@@ -72,13 +72,43 @@ async function fetchWorkspaceInfo(
  * @param workspaceInfo - Workspace 資訊
  * @param options - 額外選項
  */
+async function fetchRolePermissions(roleId: string): Promise<string[]> {
+  try {
+    // 先查職務是否為管理員
+    const roleRes = await fetch(`/api/permissions/roles`)
+    if (roleRes.ok) {
+      const roles = await roleRes.json()
+      const role = roles.find((r: { id: string; is_admin?: boolean }) => r.id === roleId)
+      if (role?.is_admin) {
+        return ['*'] // 管理員有所有權限
+      }
+    }
+    
+    // 取得路由權限
+    const permRes = await fetch(`/api/permissions/role-permissions?role_id=${roleId}`)
+    if (permRes.ok) {
+      const perms = await permRes.json()
+      // 把 route 轉換成權限（例如 /accounting → accounting）
+      return perms
+        .filter((p: { can_read?: boolean }) => p.can_read)
+        .map((p: { route: string }) => p.route.replace(/^\//, ''))
+    }
+  } catch (err) {
+    console.error('載入職務權限失敗:', err)
+  }
+  return []
+}
+
 function buildUserFromEmployee(
   employeeData: EmployeeRow,
   workspaceInfo: { code?: string; name?: string; type?: User['workspace_type'] },
-  options?: { mustChangePassword?: boolean }
+  options?: { mustChangePassword?: boolean; rolePermissions?: string[] }
 ): User {
   const userRoles = (employeeData.roles || []) as UserRole[]
-  const mergedPermissions = mergePermissionsWithRoles(employeeData.permissions || [], userRoles)
+  // 優先使用職務權限，否則用舊的 RBAC 權限
+  const mergedPermissions = options?.rolePermissions && options.rolePermissions.length > 0
+    ? options.rolePermissions
+    : mergePermissionsWithRoles(employeeData.permissions || [], userRoles)
 
   return {
     id: employeeData.id,
@@ -245,7 +275,13 @@ export const useAuthStore = create<AuthState>()(
           // 4. 查詢 workspace 資訊並構建 User 物件
           const workspaceInfo = await fetchWorkspaceInfo(employeeData.workspace_id)
 
-          const user = buildUserFromEmployee(employeeData, workspaceInfo)
+          // 5. 取得職務權限（從 job_info.role_id）
+          const jobInfo = employeeData.job_info as { role_id?: string } | null
+          const rolePermissions = jobInfo?.role_id 
+            ? await fetchRolePermissions(jobInfo.role_id)
+            : []
+
+          const user = buildUserFromEmployee(employeeData, workspaceInfo, { rolePermissions })
 
           // 5. 使用 API 回傳的 JWT（server-side 簽名）
           const jwt = (validateResult.data?.jwt ?? validateResult.jwt) as string
