@@ -64,9 +64,8 @@ export default function HRPage() {
     
     // 載入職務列表
     const loadRoles = async () => {
-      if (!currentUser?.workspace_id) return
       try {
-        const res = await fetch(`/api/permissions/roles?workspace_id=${currentUser.workspace_id}`)
+        const res = await fetch('/api/permissions/roles')
         if (res.ok) {
           const data = await res.json()
           setRolesData(data)
@@ -76,7 +75,7 @@ export default function HRPage() {
       }
     }
     loadRoles()
-  }, [currentUser?.workspace_id])
+  }, [])
 
   const filteredEmployees = useMemo(() => {
     return users.filter(emp => {
