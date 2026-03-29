@@ -1,14 +1,16 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { createServiceClient } from '@/lib/supabase/api-client'
 import { headers } from 'next/headers'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
+/**
+ * POST /api/contracts/sign
+ * 
+ * 公開 API：客戶簽署合約（無需登入）
+ * 注意：使用 service client 因為客戶不會登入
+ */
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createServiceClient()
     const body = await request.json()
     const { contractId, signature } = body
 
@@ -26,7 +28,7 @@ export async function POST(request: NextRequest) {
                'unknown'
     const userAgent = headersList.get('user-agent') || 'unknown'
 
-    // 檢查合約是否存在且未簽署（含相關資料用於通知）
+    // 檢查合約是否存在且未簽署
     const { data: contract, error: fetchError } = await supabase
       .from('contracts')
       .select(`
@@ -70,7 +72,6 @@ export async function POST(request: NextRequest) {
       .eq('id', contractId)
 
     if (updateError) {
-      console.error('更新合約失敗:', updateError)
       return NextResponse.json(
         { error: '簽署失敗，請稍後再試' },
         { status: 500 }
@@ -83,7 +84,6 @@ export async function POST(request: NextRequest) {
         ? contract.company_name 
         : contract.signer_name
       
-      // Supabase 使用 !inner 時，tours 是物件而非陣列
       const tours = contract.tours as unknown
       const tourInfo = tours as { code: string; name: string }
       
@@ -96,7 +96,6 @@ export async function POST(request: NextRequest) {
 
 請至系統查看完整合約內容。`
 
-      // 發送系統內通知給建立合約的業務人員
       if (contract.created_by) {
         await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/bot-notification`, {
           method: 'POST',
@@ -117,14 +116,12 @@ export async function POST(request: NextRequest) {
           }),
         })
       }
-    } catch (notifyError) {
+    } catch {
       // 通知失敗不影響簽署成功
-      console.error('發送通知失敗（不影響簽署）:', notifyError)
     }
 
     return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('簽署 API 錯誤:', error)
+  } catch {
     return NextResponse.json(
       { error: '系統錯誤' },
       { status: 500 }

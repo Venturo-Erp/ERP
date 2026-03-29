@@ -1,26 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createApiClient } from '@/lib/supabase/api-client'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
+/**
+ * POST /api/contracts/paper-sign
+ * 
+ * 標記合約為紙本簽署（需要登入）
+ */
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createApiClient()
     const { contractId, signedDate } = await request.json()
 
     if (!contractId) {
       return NextResponse.json({ error: '缺少合約 ID' }, { status: 400 })
     }
 
-    // 使用傳入的日期，或預設今天
     const signedAt = signedDate 
       ? new Date(signedDate).toISOString()
       : new Date().toISOString()
 
-    // 更新合約狀態為已簽署（紙本）
-    // 用 signature_ip = 'paper' 標記為紙本簽署
+    // 更新合約狀態為已簽署（紙本）（RLS 自動過濾）
     const { error } = await supabase
       .from('contracts')
       .update({
@@ -32,13 +31,11 @@ export async function POST(request: NextRequest) {
       .eq('id', contractId)
 
     if (error) {
-      console.error('標記紙本簽署失敗:', error)
       return NextResponse.json({ error: '標記失敗' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('紙本簽署 API 錯誤:', error)
-    return NextResponse.json({ error: String(error) }, { status: 500 })
+  } catch {
+    return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
   }
 }

@@ -1,12 +1,14 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { createServiceClient } from '@/lib/supabase/api-client'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
+/**
+ * GET /api/d/[code]
+ * 
+ * 公開 API：短網址下載團員名冊（無需登入）
+ * 透過團號取得最新的團員名冊並 redirect 到簽名 URL
+ */
 export async function GET(request: Request, { params }: { params: Promise<{ code: string }> }) {
+  const supabase = createServiceClient()
   const { code } = await params
 
   // 1. 先查團號對應的 tour UUID
