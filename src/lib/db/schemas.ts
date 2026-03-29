@@ -18,7 +18,7 @@ export const TABLES = {
   PAYMENT_REQUESTS: 'payment_requests',
   PAYMENT_REQUEST_ITEMS: 'payment_request_items',
   DISBURSEMENT_ORDERS: 'disbursement_orders',
-  RECEIPT_ORDERS: 'receipt_orders',
+  // RECEIPT_ORDERS: 'receipt_orders',  // 表尚未建立
   QUOTES: 'quotes',
   TODOS: 'todos',
   VISAS: 'visas',

@@ -146,47 +146,7 @@ export function AddReceiptDialog({
           receipt_date: editingReceipt.receipt_date || getTodayString(),
         })
 
-        // 從 receipt_items 載入項目（如果表存在）
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        let receiptItems: any[] | null = null
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data } = await (supabase as any)
-            .from('receipt_items')
-            .select('*')
-            .eq('receipt_id', editingReceipt.id)
-            .is('deleted_at', null)
-            .order('created_at', { ascending: true })
-            .limit(500)
-          receiptItems = data
-        } catch {
-          // receipt_items 表可能不存在，用舊資料
-        }
-
-        if (receiptItems && receiptItems.length > 0) {
-          // 有 receipt_items，用新的結構
-          setPaymentItems(
-            receiptItems.map(item => ({
-              id: item.id,
-              receipt_type: (item.receipt_type ?? 0) as 0 | 1 | 2 | 3 | 4,
-              transaction_date: item.created_at?.split('T')[0] || getTodayString(),
-              receipt_account: item.receipt_account || '',
-              notes: item.notes || '',
-              amount: Number(item.amount) || 0,
-              email: item.email || '',
-              payment_name: item.payment_name || '',
-              pay_dateline: item.pay_dateline || '',
-              handler_name: item.handler_name || '',
-              account_info: item.account_info || '',
-              fees: item.fees || 0,
-              card_last_four: item.card_last_four || '',
-              auth_code: item.auth_code || '',
-              check_number: item.check_number || '',
-              check_bank: item.check_bank || '',
-            }))
-          )
-        } else {
-          // 舊資料：從 receipt 主表載入（向下相容）
+        // 從 receipt 主表載入（receipt_items 表尚未建立）
           // 需要用 payment_method_id 去查詢對應的收款方式名稱
           const extReceipt = editingReceipt as { payment_method_id?: string; payment_method?: string }
           let receiptTypeValue: string | number = editingReceipt.receipt_type ?? 0
@@ -229,7 +189,6 @@ export function AddReceiptDialog({
               check_bank: editingReceipt.check_bank || '',
             },
           ])
-        }
         return
       }
 
