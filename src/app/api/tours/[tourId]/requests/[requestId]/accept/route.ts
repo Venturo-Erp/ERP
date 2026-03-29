@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createApiClient } from '@/lib/supabase/api-client'
 
 /**
  * POST /api/tours/[tourId]/requests/[requestId]/accept
@@ -11,6 +11,7 @@ export async function POST(
   { params }: { params: Promise<{ tourId: string; requestId: string }> }
 ) {
   try {
+    const supabase = await createApiClient()
     const { selectedTier } = await req.json()
     const { tourId, requestId } = await params
 
@@ -18,12 +19,7 @@ export async function POST(
       return NextResponse.json({ error: '缺少人數梯次' }, { status: 400 })
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    // 1. 更新 tour_requests 狀態為已成交
+    // 1. 更新 tour_requests 狀態為已成交（RLS 自動過濾）
     const { error: updateError } = await supabase
       .from('tour_requests')
       .update({
@@ -35,11 +31,10 @@ export async function POST(
       .eq('id', requestId)
 
     if (updateError) {
-      console.error('更新需求單失敗:', updateError)
       return NextResponse.json({ error: updateError.message }, { status: 500 })
     }
 
-    // 2. 從核心表抓取所有項目，產生協作確認單
+    // 2. 從核心表抓取所有項目
     const { data: coreItems, error: fetchError } = await supabase
       .from('tour_itinerary_items')
       .select('*')
@@ -48,7 +43,6 @@ export async function POST(
       .order('sort_order', { ascending: true })
 
     if (fetchError) {
-      console.error('讀取核心表失敗:', fetchError)
       return NextResponse.json({ error: fetchError.message }, { status: 500 })
     }
 
@@ -75,15 +69,14 @@ export async function POST(
       sort_order: item.sort_order || index,
       source: 'auto_generated',
       source_item_id: item.id,
-      handled_by: 'local', // 預設由 Local 處理
-      local_status: 'pending', // 預設待處理
+      handled_by: 'local',
+      local_status: 'pending',
     }))
 
     if (requestItems.length > 0) {
       const { error: insertError } = await supabase.from('tour_request_items').insert(requestItems)
 
       if (insertError) {
-        console.error('產生協作確認單失敗:', insertError)
         return NextResponse.json({ error: insertError.message }, { status: 500 })
       }
     }
@@ -107,8 +100,7 @@ export async function POST(
       success: true,
       itemsCreated: requestItems.length,
     })
-  } catch (error) {
-    console.error('成交處理失敗:', error)
-    return NextResponse.json({ error: String(error) }, { status: 500 })
+  } catch {
+    return NextResponse.json({ error: '成交處理失敗' }, { status: 500 })
   }
 }
