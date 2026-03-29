@@ -1,29 +1,30 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { createApiClient, getCurrentWorkspaceId } from '@/lib/supabase/api-client'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
+/**
+ * POST /api/tasks/create
+ * 建立任務
+ */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient(supabaseUrl, supabaseKey)
-    const body = await request.json()
+    const supabase = await createApiClient()
+    const workspaceId = await getCurrentWorkspaceId()
 
-    const { title, description, priority = 'P1', assignees = [], created_by = 'william' } = body
-
-    // 验证
-    if (!title) {
-      return NextResponse.json({ error: '缺少任务标题' }, { status: 400 })
+    if (!workspaceId) {
+      return NextResponse.json({ error: '未登入' }, { status: 401 })
     }
 
-    const workspace_id = '8ef05a74-1f87-48ab-afd3-9bfeb423935d' // Venturo workspace
+    const body = await request.json()
+    const { title, description, priority = 'P1', assignees = [], created_by = 'william' } = body
 
-    // 创建任务
+    if (!title) {
+      return NextResponse.json({ error: '缺少任務標題' }, { status: 400 })
+    }
+
     const { data, error } = await supabase
       .from('tasks')
       .insert({
-        workspace_id,
+        workspace_id: workspaceId,
         title,
         description: description || null,
         priority,
@@ -35,14 +36,15 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
 
     return NextResponse.json({
       success: true,
       task: data,
     })
-  } catch (error: any) {
-    console.error('创建任务失败:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+  } catch {
+    return NextResponse.json({ error: '建立任務失敗' }, { status: 500 })
   }
 }

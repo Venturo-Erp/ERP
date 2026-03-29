@@ -1,21 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createApiClient, getCurrentWorkspaceId } from '@/lib/supabase/api-client'
 
+/**
+ * POST /api/create-transport-request
+ * 建立遊覽車需求單
+ */
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const { tourId, supplierName, vehicleDesc, note, totalPax, workspaceId } = body
+    const supabase = await createApiClient()
+    const workspaceId = await getCurrentWorkspaceId()
 
-    if (!tourId || !workspaceId) {
-      return NextResponse.json({ error: '缺少必填欄位' }, { status: 400 })
+    if (!workspaceId) {
+      return NextResponse.json({ error: '未登入' }, { status: 401 })
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const body = await req.json()
+    const { tourId, supplierName, vehicleDesc, note } = body
 
-    // 檢查是否已有同廠商的遊覽車需求單
+    if (!tourId) {
+      return NextResponse.json({ error: '缺少 tourId' }, { status: 400 })
+    }
+
+    // 檢查是否已有同廠商的遊覽車需求單（RLS 自動過濾）
     const { data: existingRequest } = await supabase
       .from('tour_requests')
       .select('id, status, supplier_response, replied_at')
@@ -25,11 +31,9 @@ export async function POST(req: NextRequest) {
       .maybeSingle()
 
     if (existingRequest) {
-      // 已有需求單
       const hasReplied = existingRequest.supplier_response && existingRequest.replied_at
 
       if (hasReplied) {
-        // 已回覆 → 需要使用者確認是否重新發送
         return NextResponse.json({
           success: false,
           alreadyExists: true,
@@ -38,7 +42,7 @@ export async function POST(req: NextRequest) {
           message: '此廠商已報價',
         })
       } else {
-        // 未回覆 → 更新現有需求單（使用同一個 requestId）
+        // 未回覆 → 更新現有需求單
         const { error: updateError } = await supabase
           .from('tour_requests')
           .update({
@@ -47,7 +51,6 @@ export async function POST(req: NextRequest) {
           .eq('id', existingRequest.id)
 
         if (updateError) {
-          console.error('更新需求單失敗:', updateError)
           return NextResponse.json({ error: updateError.message }, { status: 500 })
         }
 
@@ -76,13 +79,14 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) {
-      console.error('建立需求單失敗:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, requestId: newRequest.id })
-  } catch (error) {
-    console.error('建立需求單錯誤:', error)
-    return NextResponse.json({ error: String(error) }, { status: 500 })
+    return NextResponse.json({
+      success: true,
+      requestId: newRequest.id,
+    })
+  } catch {
+    return NextResponse.json({ error: '建立需求單失敗' }, { status: 500 })
   }
 }

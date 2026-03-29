@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { FEATURES, getBasicFeatures } from '@/lib/permissions'
+import { createServiceClient } from '@/lib/supabase/api-client'
+import { getBasicFeatures } from '@/lib/permissions'
 import { MODULES } from '@/lib/permissions/module-tabs'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 /**
  * POST /api/workspaces
  * 建立新租戶 + 初始化權限
+ * 
+ * 注意：這是 Super Admin 操作，使用 service client
  * 
  * 會自動：
  * 1. 建立租戶 (workspaces)
@@ -19,6 +16,7 @@ const supabase = createClient(
  * 4. 設定管理員角色全開權限 (role_tab_permissions)
  */
 export async function POST(request: NextRequest) {
+  const supabase = createServiceClient()
   const body = await request.json()
   const { name, code, type = 'travel_agency' } = body
 

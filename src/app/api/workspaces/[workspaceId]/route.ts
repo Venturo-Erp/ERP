@@ -1,20 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createServiceClient } from '@/lib/supabase/api-client'
 
 /**
  * GET /api/workspaces/[workspaceId]
  * 取得租戶詳情
+ * 
+ * 注意：這是 Super Admin 操作，可以查看任何租戶
  */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ workspaceId: string }> }
 ) {
   const { workspaceId } = await params
+  const supabase = createServiceClient()
 
   const { data, error } = await supabase
     .from('workspaces')

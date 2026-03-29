@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createApiClient } from '@/lib/supabase/api-client'
 
+/**
+ * GET /api/line/groups
+ * 取得 LINE 群組列表（RLS 自動過濾）
+ */
 export async function GET() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const supabase = await createApiClient()
 
-  if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.json({ error: 'DB not configured' }, { status: 500 })
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseKey)
   const { data, error } = await supabase
     .from('line_groups')
     .select('*')
