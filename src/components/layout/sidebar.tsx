@@ -78,7 +78,7 @@ const menuItems: MenuItem[] = [
     href: '/channel',
     label: COMP_LAYOUT_LABELS.頻道,
     icon: Building2,
-    requiredPermission: 'channel',
+    requiredPermission: 'workspace',  // 對應 workspace_features.workspace
   },
   // 郵件系統暫時隱藏（目前使用 Google Workspace）
   // { href: '/mail', label: '郵件', icon: Mail, requiredPermission: 'workspace' },

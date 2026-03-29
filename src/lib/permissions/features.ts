@@ -116,7 +116,7 @@ export const FEATURES: FeatureDefinition[] = [
   // ===== 進階功能（付費） =====
   {
     code: 'workspace',
-    name: '工作空間',
+    name: '頻道',
     description: '團隊頻道、協作空間',
     category: 'premium',
     routes: ['/channel'],
@@ -135,13 +135,14 @@ export const FEATURES: FeatureDefinition[] = [
     category: 'premium',
     routes: ['/itinerary', '/itinerary/new', '/itinerary/block-editor'],
   },
-  {
-    code: 'quotes',
-    name: '報價單',
-    description: '快速報價、報價管理',
-    category: 'premium',
-    routes: ['/quotes', '/quotes/[id]', '/quotes/quick/[id]'],
-  },
+  // 報價單功能已整合到旅遊團管理中，不再獨立
+  // {
+  //   code: 'quotes',
+  //   name: '報價單',
+  //   description: '快速報價、報價管理',
+  //   category: 'premium',
+  //   routes: ['/quotes', '/quotes/[id]', '/quotes/quick/[id]'],
+  // },
   {
     code: 'design',
     name: '設計工具',
