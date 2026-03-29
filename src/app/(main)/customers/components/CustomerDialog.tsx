@@ -183,15 +183,15 @@ export function CustomerDialog({
         confirmOnDirtyClose={isEdit}
         externalDirty={isDirty}
       >
-        <div className="grid grid-cols-2 gap-8 items-stretch">
+        <div className="flex gap-8">
           {/* 左側：護照照片（橫向） */}
-          <div className="rounded-lg overflow-hidden bg-morandi-container relative min-h-[280px]">
+          <div className="w-1/2 rounded-lg overflow-hidden bg-morandi-container relative">
             {currentImageUrl ? (
               <>
                 <img
                   src={currentImageUrl}
                   alt={L.passport_alt(customer.name)}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover absolute inset-0"
                 />
                 {/* 驗證狀態 - 左上角 */}
                 <div className={`absolute top-3 left-3 px-2 py-1 rounded text-xs font-medium flex items-center gap-1 ${
@@ -226,7 +226,7 @@ export function CustomerDialog({
           </div>
 
           {/* 右側：資料欄位 */}
-          <div className="flex flex-col">
+          <div className="w-1/2">
             {/* 基本資料 - 2 欄 */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-4">
               <FormField label={L.label_name} labelClassName="text-xs text-morandi-secondary">
