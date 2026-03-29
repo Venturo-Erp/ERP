@@ -329,7 +329,7 @@ export default function HRPage() {
         },
       },
     ],
-    [getWorkspaceName]
+    [getWorkspaceName, rolesData]
   )
 
   const renderActions = useCallback(
