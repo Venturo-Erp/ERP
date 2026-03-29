@@ -66,11 +66,10 @@ export default function RolesPage() {
   // 載入角色列表
   useEffect(() => {
     const fetchRoles = async () => {
-      if (!user?.workspace_id) return
-      
       setLoading(true)
       try {
-        const res = await fetch(`/api/roles?workspace_id=${user.workspace_id}`)
+        // 不需要傳 workspace_id，API 會自動取得
+        const res = await fetch('/api/roles')
         if (res.ok) {
           const data = await res.json()
           setRoles(data)
@@ -85,7 +84,7 @@ export default function RolesPage() {
     }
 
     fetchRoles()
-  }, [user?.workspace_id])
+  }, [])
 
   // 載入選中角色的權限
   useEffect(() => {
@@ -217,15 +216,15 @@ export default function RolesPage() {
 
   // 建立新角色
   const handleCreateRole = async () => {
-    if (!editingRole.name || !user?.workspace_id) return
+    if (!editingRole.name) return
 
     setSaving(true)
     try {
+      // 不需要傳 workspace_id，API 會自動取得
       const res = await fetch('/api/roles', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          workspace_id: user.workspace_id,
           name: editingRole.name,
           description: editingRole.description || null,
         }),
