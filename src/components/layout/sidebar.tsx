@@ -321,8 +321,8 @@ const menuItems: MenuItem[] = [
     icon: UserCog, 
     requiredPermission: 'hr',
     children: [
-      { href: '/hr', label: '員工管理', icon: Users, requiredPermission: 'hr' },
       { href: '/hr/roles', label: '角色管理', icon: Shield, requiredPermission: 'hr' },
+      { href: '/hr', label: '員工管理', icon: Users, requiredPermission: 'hr' },
       { href: '/hr/attendance', label: '出勤管理', icon: Clock, requiredPermission: 'hr' },
       { href: '/hr/leave', label: '請假管理', icon: Calendar, requiredPermission: 'hr' },
       { href: '/hr/payroll', label: '薪資管理', icon: Wallet, requiredPermission: 'hr' },
