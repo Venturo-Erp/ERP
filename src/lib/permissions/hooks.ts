@@ -18,14 +18,22 @@ interface RolePermission {
 /**
  * 取得當前租戶的功能權限
  */
+// 付費功能代碼（需要付費大開關開啟才能用）
+const PREMIUM_FEATURE_CODES = [
+  'workspace', 'customers', 'itinerary', 'design', 'office', 
+  'bot_line', 'bot_telegram', 'fleet', 'local', 'supplier_portal', 'esims'
+]
+
 export function useWorkspaceFeatures() {
   const { user } = useAuthStore()
   const [features, setFeatures] = useState<WorkspaceFeature[]>([])
+  const [premiumEnabled, setPremiumEnabled] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!user?.workspace_id) {
       setFeatures([])
+      setPremiumEnabled(false)
       setLoading(false)
       return
     }
@@ -33,10 +41,18 @@ export function useWorkspaceFeatures() {
     const fetchFeatures = async () => {
       setLoading(true)
       try {
+        // 取得功能開關
         const res = await fetch(`/api/permissions/features?workspace_id=${user.workspace_id}`)
         if (res.ok) {
           const data = await res.json()
           setFeatures(data)
+        }
+        
+        // 取得付費大開關
+        const wsRes = await fetch(`/api/workspaces/${user.workspace_id}`)
+        if (wsRes.ok) {
+          const ws = await wsRes.json()
+          setPremiumEnabled(ws.premium_enabled ?? false)
         }
       } catch (err) {
         console.error('Failed to fetch workspace features:', err)
@@ -47,11 +63,18 @@ export function useWorkspaceFeatures() {
     fetchFeatures()
   }, [user?.workspace_id])
 
-  // 檢查功能是否啟用
+  // 檢查功能是否啟用（付費功能需要付費大開關 + 功能小開關都開啟）
   const isFeatureEnabled = useCallback((featureCode: string): boolean => {
     const feature = features.find(f => f.feature_code === featureCode)
-    return feature?.enabled ?? false
-  }, [features])
+    const featureOn = feature?.enabled ?? false
+    
+    // 付費功能需要付費大開關也開啟
+    if (PREMIUM_FEATURE_CODES.includes(featureCode)) {
+      return premiumEnabled && featureOn
+    }
+    
+    return featureOn
+  }, [features, premiumEnabled])
 
   // 檢查路由是否可用（根據功能權限）
   const isRouteAvailable = useCallback((route: string): boolean => {
