@@ -1,76 +1,550 @@
+'use client'
+
 /**
- * 紙娃娃公開頁面 - 客人選景點
+ * 紙娃娃詳情頁 - 客戶 DIY 選景點
  * 路由: /p/wishlist/[slug]
+ * 
+ * 🎯 流程：
+ * 1. 客人選景點（左側卡片）
+ * 2. 已選清單顯示在右側
+ * 3. 送出 → 3D 特效動畫（衛星發送到座標）
+ * 4. 生成專屬追蹤連結 /p/wishlist/track/[code]
+ * 5. 客人可用此連結查看進度、我們的回覆
  */
 
-import { notFound } from 'next/navigation'
-import { createClient } from '@supabase/supabase-js'
-import { WishlistSelector } from './wishlist-selector'
+import { useState, useEffect, use } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { 
+  MapPin, 
+  Check, 
+  X, 
+  Send,
+  ChevronLeft,
+  Phone,
+  Loader2,
+  Sparkles,
+  Copy,
+  CheckCircle,
+} from 'lucide-react'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { supabase } from '@/lib/supabase/client'
 
-// 建立 service role client（繞過 RLS）
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-interface PageProps {
-  params: Promise<{ slug: string }>
+interface WishlistTemplate {
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  workspace_id: string
 }
 
-export default async function WishlistPage({ params }: PageProps) {
-  const { slug } = await params
+interface TemplateItem {
+  id: string
+  name: string
+  image_url: string | null
+  description: string | null
+  region: string | null
+  category: string | null
+}
 
-  // 查詢紙娃娃模板
-  const { data: template, error } = await supabase
-    .from('wishlist_templates')
-    .select(`
-      id,
-      name,
-      slug,
-      cover_image,
-      description,
-      workspace_id,
-      wishlist_template_items (
-        id,
-        name,
-        image_url,
-        description,
-        region,
-        category,
-        display_order
-      )
-    `)
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .single()
+interface SelectedItem {
+  item_id: string
+  name: string
+  priority: number
+}
 
-  if (error || !template) {
-    notFound()
+export default function WishlistDetailPage({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> 
+}) {
+  const { slug } = use(params)
+  const router = useRouter()
+  
+  const [template, setTemplate] = useState<WishlistTemplate | null>(null)
+  const [items, setItems] = useState<TemplateItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
+  
+  // 已選景點
+  const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([])
+  
+  // 篩選
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+  
+  // 詢價表單
+  const [showInquiryForm, setShowInquiryForm] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [inquiryForm, setInquiryForm] = useState({
+    name: '',
+    phone: '',
+    travel_date: '',
+    people_count: 2,
+    notes: '',
+  })
+
+  // 成功畫面
+  const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [trackingCode, setTrackingCode] = useState('')
+  const [trackingUrl, setTrackingUrl] = useState('')
+
+  // 載入資料
+  useEffect(() => {
+    const fetchData = async () => {
+      // 載入模板
+      const { data: templateData, error: templateError } = await supabase
+        .from('wishlist_templates')
+        .select('id, name, slug, description, workspace_id')
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .single()
+
+      if (templateError || !templateData) {
+        setNotFound(true)
+        setLoading(false)
+        return
+      }
+
+      setTemplate(templateData)
+
+      // 載入景點
+      const { data: itemsData } = await supabase
+        .from('wishlist_template_items')
+        .select('id, name, image_url, description, region, category')
+        .eq('template_id', templateData.id)
+        .order('display_order')
+
+      setItems(itemsData || [])
+      setLoading(false)
+    }
+
+    fetchData()
+  }, [slug])
+
+  // 取得所有分類
+  const categories = [...new Set(items.map(i => i.category).filter(Boolean))]
+
+  // 篩選景點
+  const filteredItems = items.filter(item => {
+    if (selectedCategory === 'all') return true
+    return item.category === selectedCategory
+  })
+
+  // 選擇/取消選擇景點
+  const toggleItem = (item: TemplateItem) => {
+    setSelectedItems(prev => {
+      const exists = prev.find(s => s.item_id === item.id)
+      if (exists) {
+        return prev.filter(s => s.item_id !== item.id)
+      } else {
+        return [...prev, {
+          item_id: item.id,
+          name: item.name,
+          priority: prev.length + 1,
+        }]
+      }
+    })
   }
 
-  // 按 display_order 排序
-  const items = (template.wishlist_template_items || []).sort(
-    (a: { display_order: number }, b: { display_order: number }) => a.display_order - b.display_order
-  )
+  // 移除已選景點
+  const removeItem = (itemId: string) => {
+    setSelectedItems(prev => prev.filter(s => s.item_id !== itemId))
+  }
 
-  // 按地區分組
-  type ItemType = typeof items[number]
-  const groupedItems = items.reduce((acc: Record<string, ItemType[]>, item: ItemType) => {
-    const region = item.region || '其他'
-    if (!acc[region]) acc[region] = []
-    acc[region].push(item)
-    return acc
-  }, {} as Record<string, ItemType[]>)
+  // 複製連結
+  const copyTrackingUrl = () => {
+    navigator.clipboard.writeText(trackingUrl)
+    toast.success('已複製連結')
+  }
+
+  // 提交詢價
+  const handleSubmit = async () => {
+    if (selectedItems.length === 0) {
+      toast.error('請至少選擇一個景點')
+      return
+    }
+    if (!inquiryForm.name) {
+      toast.error('請輸入姓名')
+      return
+    }
+    if (!inquiryForm.phone) {
+      toast.error('請輸入電話')
+      return
+    }
+
+    setSubmitting(true)
+
+    // 產生追蹤碼（短碼，好記）
+    const code = `W${Date.now().toString(36).toUpperCase().slice(-6)}`
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any)
+      .from('customer_inquiries')
+      .insert({
+        workspace_id: template?.workspace_id,
+        template_id: template?.id,
+        code,
+        customer_name: inquiryForm.name,
+        phone: inquiryForm.phone,
+        email: null,
+        travel_date: inquiryForm.travel_date || null,
+        people_count: inquiryForm.people_count,
+        notes: inquiryForm.notes || null,
+        selected_items: selectedItems,
+        status: 'pending',
+      })
+
+    setSubmitting(false)
+
+    if (error) {
+      console.error('Submit error:', error)
+      toast.error('送出失敗，請稍後再試')
+      return
+    }
+
+    // 成功！顯示追蹤連結
+    const url = `${window.location.origin}/p/wishlist/track/${code}`
+    setTrackingCode(code)
+    setTrackingUrl(url)
+    setShowInquiryForm(false)
+    setSubmitSuccess(true)
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (notFound) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900">
+        <MapPin className="w-16 h-16 text-white/20 mb-4" />
+        <p className="text-xl font-medium mb-2 text-white">找不到此頁面</p>
+        <p className="text-white/60 mb-6">此頁面可能已下架或連結錯誤</p>
+        <Link href="/p/wishlist">
+          <Button>返回首頁</Button>
+        </Link>
+      </div>
+    )
+  }
 
   return (
-    <WishlistSelector
-      template={{
-        id: template.id,
-        name: template.name,
-        description: template.description,
-        workspaceId: template.workspace_id,
-      }}
-      groupedItems={groupedItems}
-    />
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+      {/* Header */}
+      <header className="bg-slate-900/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/p/wishlist" className="text-white/60 hover:text-white">
+              <ChevronLeft className="w-5 h-5" />
+            </Link>
+            <h1 className="text-xl font-bold text-white">角落旅行社</h1>
+          </div>
+          <a href="tel:02-12345678" className="flex items-center gap-1 text-sm text-white/60 hover:text-white">
+            <Phone className="w-4 h-4" />
+            02-1234-5678
+          </a>
+        </div>
+      </header>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex gap-8">
+          {/* 左側：景點列表 */}
+          <div className="flex-1">
+            {/* 標題 */}
+            <div className="mb-6">
+              <h2 className="text-3xl font-bold mb-2 text-white">{template?.name}</h2>
+              {template?.description && (
+                <p className="text-white/60">{template.description}</p>
+              )}
+            </div>
+
+            {/* 分類篩選 */}
+            {categories.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-6">
+                <Button
+                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                  size="sm"
+                  className={`rounded-full ${selectedCategory !== 'all' ? 'border-white/20 text-white hover:bg-white/10' : ''}`}
+                  onClick={() => setSelectedCategory('all')}
+                >
+                  全部景點
+                </Button>
+                {categories.map(cat => (
+                  <Button
+                    key={cat}
+                    variant={selectedCategory === cat ? 'default' : 'outline'}
+                    size="sm"
+                    className={`rounded-full ${selectedCategory !== cat ? 'border-white/20 text-white hover:bg-white/10' : ''}`}
+                    onClick={() => setSelectedCategory(cat!)}
+                  >
+                    {cat}
+                  </Button>
+                ))}
+              </div>
+            )}
+
+            {/* 景點卡片 */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {filteredItems.map(item => {
+                const isSelected = selectedItems.some(s => s.item_id === item.id)
+                
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => toggleItem(item)}
+                    className={`
+                      relative bg-white/5 backdrop-blur-sm border rounded-xl overflow-hidden cursor-pointer transition-all
+                      ${isSelected 
+                        ? 'ring-2 ring-primary border-primary bg-primary/10' 
+                        : 'border-white/10 hover:border-white/30 hover:bg-white/10'
+                      }
+                    `}
+                  >
+                    {/* 圖片 */}
+                    <div className="aspect-[4/3] bg-slate-800 relative">
+                      {item.image_url ? (
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <MapPin className="w-10 h-10 text-white/20" />
+                        </div>
+                      )}
+                      
+                      {/* 選中標記 */}
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                          <Check className="w-5 h-5 text-white" />
+                        </div>
+                      )}
+
+                      {/* 分類標籤 */}
+                      {item.category && (
+                        <Badge className="absolute bottom-2 left-2 bg-black/50 backdrop-blur-sm text-white text-xs border-0">
+                          {item.category}
+                        </Badge>
+                      )}
+                    </div>
+
+                    {/* 資訊 */}
+                    <div className="p-3">
+                      <h3 className="font-medium text-white line-clamp-1">{item.name}</h3>
+                      {item.region && (
+                        <p className="text-xs text-white/50">{item.region}</p>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* 右側：已選景點 */}
+          <div className="w-80 flex-shrink-0">
+            <div className="sticky top-24 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
+              <h3 className="font-bold text-lg mb-1 text-white">已選景點</h3>
+              <p className="text-sm text-white/50 mb-4">{selectedItems.length} 個景點</p>
+
+              {selectedItems.length === 0 ? (
+                <div className="py-8 text-center text-white/40">
+                  <p className="text-sm">點擊景點卡片加入清單</p>
+                </div>
+              ) : (
+                <div className="space-y-2 mb-4 max-h-64 overflow-y-auto">
+                  {selectedItems.map((item, index) => (
+                    <div
+                      key={item.item_id}
+                      className="flex items-center gap-2 p-2 bg-white/5 rounded-lg group"
+                    >
+                      <span className="w-6 h-6 rounded-full bg-primary/20 text-primary text-xs flex items-center justify-center font-medium">
+                        {index + 1}
+                      </span>
+                      <span className="flex-1 text-sm truncate text-white">{item.name}</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          removeItem(item.item_id)
+                        }}
+                        className="opacity-0 group-hover:opacity-100 text-white/40 hover:text-red-400 transition-opacity"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <Button
+                className="w-full"
+                size="lg"
+                disabled={selectedItems.length === 0}
+                onClick={() => setShowInquiryForm(true)}
+              >
+                <Send className="w-4 h-4 mr-2" />
+                送出詢價
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 詢價表單 Dialog */}
+      <Dialog open={showInquiryForm} onOpenChange={setShowInquiryForm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>填寫聯絡資訊</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label>姓名 *</Label>
+              <Input
+                value={inquiryForm.name}
+                onChange={(e) => setInquiryForm(p => ({ ...p, name: e.target.value }))}
+                placeholder="您的姓名"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>電話 *</Label>
+              <Input
+                value={inquiryForm.phone}
+                onChange={(e) => setInquiryForm(p => ({ ...p, phone: e.target.value }))}
+                placeholder="0912-345-678"
+              />
+              <p className="text-xs text-muted-foreground">我們會用此電話與您聯繫</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>預計出發日期</Label>
+                <Input
+                  type="date"
+                  value={inquiryForm.travel_date}
+                  onChange={(e) => setInquiryForm(p => ({ ...p, travel_date: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>人數</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={inquiryForm.people_count}
+                  onChange={(e) => setInquiryForm(p => ({ ...p, people_count: parseInt(e.target.value) || 1 }))}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>其他需求</Label>
+              <Textarea
+                value={inquiryForm.notes}
+                onChange={(e) => setInquiryForm(p => ({ ...p, notes: e.target.value }))}
+                placeholder="有什麼特別想要的行程安排嗎？"
+                rows={3}
+              />
+            </div>
+
+            {/* 已選景點預覽 */}
+            <div className="bg-muted/50 rounded-lg p-3">
+              <p className="text-sm font-medium mb-2">已選 {selectedItems.length} 個景點：</p>
+              <div className="flex flex-wrap gap-1">
+                {selectedItems.slice(0, 5).map(item => (
+                  <Badge key={item.item_id} variant="outline" className="text-xs">
+                    {item.name}
+                  </Badge>
+                ))}
+                {selectedItems.length > 5 && (
+                  <Badge variant="outline" className="text-xs">
+                    +{selectedItems.length - 5} 更多
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <Button variant="outline" className="flex-1" onClick={() => setShowInquiryForm(false)}>
+              取消
+            </Button>
+            <Button className="flex-1" onClick={handleSubmit} disabled={submitting}>
+              {submitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  送出中...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  送出詢價
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 成功畫面 Dialog */}
+      <Dialog open={submitSuccess} onOpenChange={setSubmitSuccess}>
+        <DialogContent className="max-w-md text-center">
+          <div className="py-6">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircle className="w-10 h-10 text-green-600" />
+            </div>
+            
+            <h2 className="text-2xl font-bold mb-2">詢價單已送出！</h2>
+            <p className="text-muted-foreground mb-6">
+              我們會盡快與您聯繫。您可以保存以下連結，隨時查看進度。
+            </p>
+
+            {/* 追蹤連結 */}
+            <div className="bg-muted rounded-lg p-4 mb-6">
+              <p className="text-sm text-muted-foreground mb-2">您的專屬追蹤連結：</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-sm bg-white px-3 py-2 rounded border truncate">
+                  {trackingUrl}
+                </code>
+                <Button size="icon" variant="outline" onClick={copyTrackingUrl}>
+                  <Copy className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                追蹤碼：<strong>{trackingCode}</strong>
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setSubmitSuccess(false)
+                setSelectedItems([])
+                setInquiryForm({ name: '', phone: '', travel_date: '', people_count: 2, notes: '' })
+              }}>
+                繼續選景點
+              </Button>
+              <Button className="flex-1" onClick={() => router.push(`/p/wishlist/track/${trackingCode}`)}>
+                查看進度
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
