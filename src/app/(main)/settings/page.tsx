@@ -81,8 +81,7 @@ export default function SettingsPage() {
         </div>
       }
     >
-      <div className="space-y-4 p-4">
-
+      <div>
         {/* 首次設定提示 */}
         {isSetupMode && (
           <div className="bg-gradient-to-r from-morandi-gold/10 to-morandi-gold/5 border border-morandi-gold/30 rounded-xl p-6 mb-6">
@@ -133,18 +132,16 @@ export default function SettingsPage() {
         )}
 
         {/* 個人資料 - 用同一個 EmployeeForm，mode='self' */}
-        <div style={{ minHeight: '600px' }}>
-          <EmployeeForm
-            employeeId={user?.id}
-            mode="self"
-            onSubmit={() => {
-              window.location.reload()
-            }}
-            onCancel={() => {
-              router.back()
-            }}
-          />
-        </div>
+        <EmployeeForm
+          employeeId={user?.id}
+          mode="self"
+          onSubmit={() => {
+            window.location.reload()
+          }}
+          onCancel={() => {
+            router.back()
+          }}
+        />
       </div>
     </ContentPageLayout>
   )

@@ -45,8 +45,15 @@ interface EmployeeFormProps {
 type TabType = 'basic' | 'permissions' | 'salary'
 
 export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: EmployeeFormProps) {
-  const { items: employees, create: createEmployee, update: updateEmployee } = useUserStore()
+  const { items: employees, create: createEmployee, update: updateEmployee, fetchAll } = useUserStore()
   const { user } = useAuthStore()
+  
+  // 確保員工資料已載入
+  useEffect(() => {
+    if (employees.length === 0) {
+      fetchAll()
+    }
+  }, [employees.length, fetchAll])
   const employee = employeeId ? employees.find((e) => e.id === employeeId) : null
   const isEditMode = !!employeeId
 
