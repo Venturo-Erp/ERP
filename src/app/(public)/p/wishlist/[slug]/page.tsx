@@ -110,6 +110,25 @@ export default function WishlistDetailPage({
   // LINE 用戶
   const [lineUser, setLineUser] = useState<{ userId: string; displayName: string; pictureUrl?: string } | null>(null)
   const [lineLoading, setLineLoading] = useState(true)
+  
+  // 客戶資料（綁定的）
+  const [linkedCustomer, setLinkedCustomer] = useState<{
+    id: string
+    code: string
+    name: string
+    phone: string | null
+    email: string | null
+  } | null>(null)
+  
+  // 客戶比對
+  const [matchingCustomers, setMatchingCustomers] = useState<{
+    id: string
+    code: string
+    name: string
+    phone: string | null
+  }[]>([])
+  const [showMatchDialog, setShowMatchDialog] = useState(false)
+  const [matchForm, setMatchForm] = useState({ name: '', birthDate: '' })
 
   // 載入資料
   useEffect(() => {
@@ -158,7 +177,7 @@ export default function WishlistDetailPage({
     fetchData()
   }, [slug])
 
-  // 檢查 LINE 登入狀態
+  // 檢查 LINE 登入狀態 + 查詢已綁定客戶
   useEffect(() => {
     const checkLineUser = async () => {
       try {
@@ -166,9 +185,24 @@ export default function WishlistDetailPage({
         const data = await res.json()
         if (data.user) {
           setLineUser(data.user)
-          // 自動填入 LINE 名稱
-          if (data.user.displayName && !inquiryForm.name) {
-            setInquiryForm(prev => ({ ...prev, name: data.user.displayName }))
+          
+          // 查詢是否已綁定客戶
+          const customerRes = await fetch(`/api/customers/by-line?lineUserId=${data.user.userId}`)
+          const customerData = await customerRes.json()
+          
+          if (customerData.customer) {
+            setLinkedCustomer(customerData.customer)
+            // 自動帶入客戶資料
+            setInquiryForm(prev => ({
+              ...prev,
+              name: customerData.customer.name || prev.name,
+              phone: customerData.customer.phone || prev.phone,
+            }))
+          } else {
+            // 沒綁定，用 LINE 名稱
+            if (data.user.displayName && !inquiryForm.name) {
+              setInquiryForm(prev => ({ ...prev, name: data.user.displayName }))
+            }
           }
         }
       } catch {
@@ -252,6 +286,7 @@ export default function WishlistDetailPage({
         selected_items: selectedItems,
         status: 'pending',
         line_user_id: lineUser?.userId || null,
+        customer_id: linkedCustomer?.id || null,
       })
 
     setSubmitting(false)
@@ -492,10 +527,24 @@ export default function WishlistDetailPage({
                 className="w-full"
                 size="lg"
                 disabled={selectedItems.length === 0}
-                onClick={() => setShowInquiryForm(true)}
+                onClick={() => {
+                  if (!lineUser) {
+                    // 強制 LINE 登入
+                    window.location.href = `/api/auth/line?redirect=/p/wishlist/${slug}`
+                    return
+                  }
+                  // 已登入，檢查是否已綁定客戶
+                  if (linkedCustomer) {
+                    // 已綁定，直接打開表單
+                    setShowInquiryForm(true)
+                  } else {
+                    // 未綁定，先進行客戶比對
+                    setShowMatchDialog(true)
+                  }
+                }}
               >
                 <Send className="w-4 h-4 mr-2" />
-                送出詢價
+                {!lineUser ? '登入 LINE 後送出' : '送出詢價'}
               </Button>
             </div>
           </div>
@@ -625,6 +674,161 @@ export default function WishlistDetailPage({
                   送出詢價
                 </>
               )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* 客戶比對 Dialog（首次使用者填姓名+生日比對） */}
+      <Dialog open={showMatchDialog} onOpenChange={setShowMatchDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>確認您的身份</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-muted-foreground">
+              請填寫您的姓名和生日，我們會確認您是否為老客戶
+            </p>
+            
+            <div className="space-y-2">
+              <Label>姓名 *</Label>
+              <Input
+                value={matchForm.name}
+                onChange={(e) => setMatchForm(p => ({ ...p, name: e.target.value }))}
+                placeholder="請輸入真實姓名"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>生日（選填，用於確認身份）</Label>
+              <Input
+                type="date"
+                value={matchForm.birthDate}
+                onChange={(e) => setMatchForm(p => ({ ...p, birthDate: e.target.value }))}
+              />
+            </div>
+
+            {/* 比對結果 */}
+            {matchingCustomers.length > 0 && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm font-medium text-blue-800 mb-2">找到可能是您的帳號：</p>
+                {matchingCustomers.map(c => (
+                  <div
+                    key={c.id}
+                    className="flex items-center justify-between p-2 bg-white rounded border cursor-pointer hover:border-primary"
+                    onClick={async () => {
+                      // 綁定到這個客戶
+                      const res = await fetch('/api/customers/link-line', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          customerId: c.id,
+                          lineUserId: lineUser?.userId,
+                        }),
+                      })
+                      const data = await res.json()
+                      if (data.customer) {
+                        setLinkedCustomer(data.customer)
+                        setInquiryForm(prev => ({
+                          ...prev,
+                          name: data.customer.name,
+                          phone: data.customer.phone || '',
+                        }))
+                        setShowMatchDialog(false)
+                        setShowInquiryForm(true)
+                        toast.success(`歡迎回來，${data.customer.name}！`)
+                      }
+                    }}
+                  >
+                    <div>
+                      <p className="font-medium">{c.name}</p>
+                      <p className="text-xs text-muted-foreground">{c.phone ? `電話：${c.phone.slice(0, 4)}****` : '客戶編號：' + c.code}</p>
+                    </div>
+                    <Button size="sm" variant="outline">這是我</Button>
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground mt-2">
+                  如果都不是您，請點「新客戶」建立新帳號
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={async () => {
+                if (!matchForm.name) {
+                  toast.error('請輸入姓名')
+                  return
+                }
+                // 查詢比對
+                const res = await fetch('/api/customers/match', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    name: matchForm.name,
+                    birthDate: matchForm.birthDate || undefined,
+                    workspaceId: template?.workspace_id,
+                  }),
+                })
+                const data = await res.json()
+                if (data.matches && data.matches.length > 0) {
+                  setMatchingCustomers(data.matches)
+                } else {
+                  toast.info('沒有找到符合的客戶，將為您建立新帳號')
+                  // 建立新客戶
+                  const createRes = await fetch('/api/customers/link-line', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      lineUserId: lineUser?.userId,
+                      name: matchForm.name,
+                      workspaceId: template?.workspace_id,
+                    }),
+                  })
+                  const createData = await createRes.json()
+                  if (createData.customer) {
+                    setLinkedCustomer(createData.customer)
+                    setInquiryForm(prev => ({ ...prev, name: createData.customer.name }))
+                    setShowMatchDialog(false)
+                    setShowInquiryForm(true)
+                  }
+                }
+              }}
+            >
+              查詢
+            </Button>
+            <Button
+              className="flex-1"
+              onClick={async () => {
+                if (!matchForm.name) {
+                  toast.error('請輸入姓名')
+                  return
+                }
+                // 直接建立新客戶
+                const res = await fetch('/api/customers/link-line', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    lineUserId: lineUser?.userId,
+                    name: matchForm.name,
+                    workspaceId: template?.workspace_id,
+                  }),
+                })
+                const data = await res.json()
+                if (data.customer) {
+                  setLinkedCustomer(data.customer)
+                  setInquiryForm(prev => ({ ...prev, name: data.customer.name }))
+                  setShowMatchDialog(false)
+                  setShowInquiryForm(true)
+                  toast.success('帳號已建立！')
+                }
+              }}
+            >
+              我是新客戶
             </Button>
           </div>
         </DialogContent>
