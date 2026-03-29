@@ -229,7 +229,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
       {/* 主內容區 */}
       <div className="flex-1 overflow-y-auto">
         {/* Character Card 風格 */}
-        <div className="bg-white overflow-hidden border-l-4 border-morandi-gold">
+        <div className="bg-white rounded-2xl shadow-md overflow-hidden border-l-4 border-morandi-gold">
           {/* 頂部：照片 + 表單 */}
           <div className="flex flex-col md:flex-row">
             {/* 左側：照片 */}
