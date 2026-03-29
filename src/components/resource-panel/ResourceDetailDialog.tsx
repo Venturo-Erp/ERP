@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Building2, UtensilsCrossed, Save, X, ExternalLink } from 'lucide-react'
+import { MapPin, Building2, UtensilsCrossed, Save, X, ExternalLink, FileEdit, Database } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { ResourceOverrideDialog } from './ResourceOverrideDialog'
 
 export type ResourceType = 'attraction' | 'hotel' | 'restaurant'
 
@@ -28,7 +29,13 @@ interface ResourceDetailDialogProps {
     description?: string | null
   } | null
   onSave?: (updated: { id: string; name: string; description?: string; address?: string }) => void
-  readOnly?: boolean // 未來用於權限控制
+  // 權限控制
+  canEditDatabase?: boolean  // 是否可以編輯資料庫
+  // 本團覆蓋相關
+  tourItineraryItemId?: string  // 行程項目 ID（有傳才顯示「編輯本團」按鈕）
+  currentOverride?: string | null  // 目前的覆蓋內容
+  onOverrideSave?: (description: string) => void
+  readOnly?: boolean // 完全唯讀（不顯示任何編輯按鈕）
 }
 
 export function ResourceDetailDialog({
@@ -36,6 +43,10 @@ export function ResourceDetailDialog({
   onOpenChange,
   resource,
   onSave,
+  canEditDatabase = false,
+  tourItineraryItemId,
+  currentOverride,
+  onOverrideSave,
   readOnly = false,
 }: ResourceDetailDialogProps) {
   const [isEditing, setIsEditing] = useState(false)
@@ -43,6 +54,7 @@ export function ResourceDetailDialog({
   const [fullData, setFullData] = useState<Record<string, unknown> | null>(null)
   const [loading, setLoading] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [showOverrideDialog, setShowOverrideDialog] = useState(false)
 
   // 編輯表單狀態
   const [editName, setEditName] = useState('')
@@ -376,9 +388,26 @@ export function ResourceDetailDialog({
                   </>
                 ) : (
                   !readOnly && (
-                    <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                      編輯資訊
-                    </Button>
+                    <>
+                      {/* 編輯本團按鈕（有 tourItineraryItemId 才顯示） */}
+                      {tourItineraryItemId && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setShowOverrideDialog(true)}
+                        >
+                          <FileEdit size={14} className="mr-1" />
+                          編輯本團
+                        </Button>
+                      )}
+                      {/* 編輯資料庫按鈕（有權限才顯示） */}
+                      {canEditDatabase && (
+                        <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                          <Database size={14} className="mr-1" />
+                          編輯資料庫
+                        </Button>
+                      )}
+                    </>
                   )
                 )}
               </div>
@@ -386,6 +415,22 @@ export function ResourceDetailDialog({
           </div>
         )}
       </DialogContent>
+
+      {/* 本團覆蓋對話框 */}
+      {tourItineraryItemId && resource && (
+        <ResourceOverrideDialog
+          open={showOverrideDialog}
+          onOpenChange={setShowOverrideDialog}
+          resourceName={resource.name}
+          tourItineraryItemId={tourItineraryItemId}
+          currentOverride={currentOverride}
+          originalDescription={fullData?.description as string | null}
+          onSave={(desc) => {
+            onOverrideSave?.(desc)
+            setShowOverrideDialog(false)
+          }}
+        />
+      )}
     </Dialog>
   )
 }

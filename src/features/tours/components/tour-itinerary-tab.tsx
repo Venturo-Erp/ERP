@@ -67,6 +67,11 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   const { syncToCore } = useSyncItineraryToCore()
   const { items: coreItems, refresh: refreshCoreItems } = useTourItineraryItemsByTour(tour.id)
 
+  // 權限：是否可以編輯資料庫
+  const canEditDatabase = currentUser?.permissions?.includes('super_admin') || 
+    currentUser?.permissions?.includes('database') || 
+    currentUser?.permissions?.includes('admin') || false
+
   // State
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -1821,6 +1826,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               locationName={tour.location || ''}
               tourId={tour.id}
               tourCode={tour.code || ''}
+              canEditDatabase={canEditDatabase}
             />
           </div>
         </div>

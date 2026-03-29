@@ -153,6 +153,7 @@ interface ResourcePanelProps {
   locationName?: string // 團的目的地名稱（用於反查地區，如「名古屋」）
   tourId?: string // 團 ID（用於地圖偏好儲存）
   tourCode?: string // 團代碼（用於推斷機場座標，如 FUK260702A）
+  canEditDatabase?: boolean // 是否可以編輯資料庫
 }
 
 export function ResourcePanel({
@@ -162,6 +163,7 @@ export function ResourcePanel({
   locationName,
   tourId,
   tourCode,
+  canEditDatabase = false,
 }: ResourcePanelProps) {
   const [activeTab, setActiveTab] = useState<ResourceType>('attraction')
   const [searchQuery, setSearchQuery] = useState('')
@@ -563,6 +565,7 @@ export function ResourcePanel({
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         resource={editingResource}
+        canEditDatabase={canEditDatabase}
         onSave={updated => {
           // 更新列表中的資源名稱
           setResources(prev => ({

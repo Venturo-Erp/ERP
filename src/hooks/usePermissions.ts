@@ -37,6 +37,9 @@ export const usePermissions = () => {
         userPermissions.includes('finance') ||
         userPermissions.includes('accounting'),
       canManageFinance: isSuperAdmin || userPermissions.includes('finance'),
+      // 資料庫編輯權限（景點、餐廳、飯店）
+      canEditDatabase:
+        isSuperAdmin || userPermissions.includes('database') || userPermissions.includes('admin'),
       isAdmin,
       isSuperAdmin,
       isAccountant:
