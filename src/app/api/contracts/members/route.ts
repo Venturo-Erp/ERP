@@ -1,13 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient } from '@/lib/supabase/api-client'
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createApiClient()
     const { searchParams } = new URL(request.url)
     const tourId = searchParams.get('tourId')
 
@@ -18,7 +14,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // 查詢訂單和團員（只查詢存在的欄位）
+    // 查詢訂單和團員（RLS 自動過濾）
     const { data: orders, error } = await supabase
       .from('orders')
       .select(`
@@ -36,7 +32,6 @@ export async function GET(request: NextRequest) {
       .order('code')
 
     if (error) {
-      console.error('查詢團員失敗:', error)
       return NextResponse.json(
         { error: '查詢失敗' },
         { status: 500 }
@@ -44,8 +39,7 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ orders })
-  } catch (error) {
-    console.error('Members API 錯誤:', error)
+  } catch {
     return NextResponse.json(
       { error: '系統錯誤' },
       { status: 500 }

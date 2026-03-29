@@ -1,14 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { createApiClient } from '@/lib/supabase/api-client'
 import { logger } from '@/lib/utils/logger'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createApiClient()
     const body = await request.json()
     const { tour, creatorId } = body
 
@@ -19,7 +15,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 1. 檢查是否已有頻道
+    // 1. 檢查是否已有頻道（RLS 自動過濾）
     const { data: existingChannel } = await supabase
       .from('channels')
       .select('id')
@@ -47,7 +43,6 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (channelError) {
-      console.error('[API] 建立頻道失敗:', channelError)
       return NextResponse.json(
         { success: false, error: channelError.message },
         { status: 500 }
@@ -80,7 +75,6 @@ export async function POST(request: NextRequest) {
 
       if (orders) {
         for (const order of orders) {
-          // assistant 可能是 employee_id 或名字，需要查詢
           if (order.assistant && !addedIds.has(order.assistant)) {
             // 先嘗試當作 employee_id
             const { data: emp } = await supabase
@@ -98,7 +92,6 @@ export async function POST(request: NextRequest) {
                 .from('employees')
                 .select('id')
                 .eq('chinese_name', order.assistant)
-                .eq('workspace_id', tour.workspace_id)
                 .maybeSingle()
 
               if (empByName && !addedIds.has(empByName.id)) {
@@ -125,7 +118,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, channelId: newChannel.id })
   } catch (error) {
-    console.error('[API] 建立頻道時發生錯誤:', error)
     return NextResponse.json(
       { success: false, error: String(error) },
       { status: 500 }

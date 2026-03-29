@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient } from '@/lib/supabase/api-client'
 
 /**
  * 合約 PDF 下載 API
@@ -19,7 +14,9 @@ export async function GET(
   const { id } = await params
 
   try {
-    // 1. 取得合約資料
+    const supabase = await createApiClient()
+
+    // 1. 取得合約資料（RLS 自動過濾）
     const { data: contract, error } = await supabase
       .from('contracts')
       .select(`
@@ -49,15 +46,13 @@ export async function GET(
     const html = generateContractHTML(contract)
 
     // 4. 暫時回傳 HTML（之後可用 puppeteer 轉 PDF）
-    // TODO: 整合 puppeteer 或 @react-pdf/renderer 產生真正的 PDF
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
         'Content-Disposition': `inline; filename="contract-${contract.code || id}.html"`,
       },
     })
-  } catch (err) {
-    console.error('PDF generation error:', err)
+  } catch {
     return NextResponse.json(
       { error: '產生 PDF 失敗' },
       { status: 500 }

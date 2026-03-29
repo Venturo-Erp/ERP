@@ -1,25 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createApiClient, getCurrentWorkspaceId } from '@/lib/supabase/api-client'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-// GET: 列出會計科目（使用 chart_of_accounts）
+// GET: 列出會計科目（RLS 自動過濾）
 export async function GET(request: NextRequest) {
+  const supabase = await createApiClient()
   const { searchParams } = new URL(request.url)
-  const workspaceId = searchParams.get('workspace_id')
   const type = searchParams.get('type') // revenue, expense, asset, liability
-
-  if (!workspaceId) {
-    return NextResponse.json({ error: '缺少 workspace_id' }, { status: 400 })
-  }
 
   let query = supabase
     .from('chart_of_accounts')
     .select('id, code, name, account_type, parent_id, is_system_locked, is_active, description')
-    .eq('workspace_id', workspaceId)
     .eq('is_active', true)
     .order('code')
 
@@ -44,19 +34,26 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(formattedData)
 }
 
-// POST: 新增會計科目（使用 chart_of_accounts）
+// POST: 新增會計科目
 export async function POST(request: NextRequest) {
-  const body = await request.json()
-  const { workspace_id, code, name, type, description, parent_id } = body
+  const supabase = await createApiClient()
+  const workspaceId = await getCurrentWorkspaceId()
 
-  if (!workspace_id || !code || !name || !type) {
+  if (!workspaceId) {
+    return NextResponse.json({ error: '未登入' }, { status: 401 })
+  }
+
+  const body = await request.json()
+  const { code, name, type, description, parent_id } = body
+
+  if (!code || !name || !type) {
     return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
   }
 
   const { data, error } = await supabase
     .from('chart_of_accounts')
     .insert({
-      workspace_id,
+      workspace_id: workspaceId,
       code,
       name,
       account_type: type,
@@ -75,8 +72,9 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(data)
 }
 
-// PUT: 更新會計科目（使用 chart_of_accounts）
+// PUT: 更新會計科目
 export async function PUT(request: NextRequest) {
+  const supabase = await createApiClient()
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
 
@@ -87,7 +85,6 @@ export async function PUT(request: NextRequest) {
   const body = await request.json()
   const { name, description, is_active } = body
 
-  // 不允許修改 code（代碼）
   const { data, error } = await supabase
     .from('chart_of_accounts')
     .update({
@@ -109,6 +106,7 @@ export async function PUT(request: NextRequest) {
 
 // DELETE: 刪除會計科目（系統科目不能刪）
 export async function DELETE(request: NextRequest) {
+  const supabase = await createApiClient()
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
 
