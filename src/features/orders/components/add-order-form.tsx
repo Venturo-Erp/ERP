@@ -88,7 +88,7 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
     return numA.localeCompare(numB, 'en', { numeric: true })
   }
 
-  // 篩選業務人員（job_info.role_id 對應「業務」職務）
+  // 篩選業務人員（業務 + 管理員）
   const salesPersons = useMemo(() => {
     const activeEmployees = employees.filter(emp => {
       const empWithSync = emp as EmployeeWithSync
@@ -101,16 +101,19 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
     })
 
     const salesRoleId = getRoleIdByName('業務')
-    const salesOnly = salesRoleId 
-      ? activeEmployees.filter(emp => emp.job_info?.role_id === salesRoleId)
-      : []
+    const adminRoleId = getRoleIdByName('管理員')
+    
+    // 業務 + 管理員都可以當業務
+    const qualified = activeEmployees.filter(emp => 
+      emp.job_info?.role_id === salesRoleId || emp.job_info?.role_id === adminRoleId
+    )
 
-    // 如果有業務職務的員工就只顯示他們，沒有就顯示所有人
-    const result = salesOnly.length > 0 ? salesOnly : activeEmployees
+    // 如果有符合的就顯示，沒有就顯示所有人
+    const result = qualified.length > 0 ? qualified : activeEmployees
     return result.sort(sortByEmployeeNumber)
   }, [employees, workspaceRoles])
 
-  // 篩選助理（job_info.role_id 對應「助理」職務）
+  // 篩選助理（助理 + 管理員）
   const assistants = useMemo(() => {
     const activeEmployees = employees.filter(emp => {
       const empWithSync = emp as EmployeeWithSync
@@ -123,12 +126,15 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
     })
 
     const assistantRoleId = getRoleIdByName('助理')
-    const assistantsOnly = assistantRoleId
-      ? activeEmployees.filter(emp => emp.job_info?.role_id === assistantRoleId)
-      : []
+    const adminRoleId = getRoleIdByName('管理員')
+    
+    // 助理 + 管理員都可以當助理
+    const qualified = activeEmployees.filter(emp => 
+      emp.job_info?.role_id === assistantRoleId || emp.job_info?.role_id === adminRoleId
+    )
 
-    // 如果有助理職務的員工就只顯示他們，沒有就顯示所有人
-    const result = assistantsOnly.length > 0 ? assistantsOnly : activeEmployees
+    // 如果有符合的就顯示，沒有就顯示所有人
+    const result = qualified.length > 0 ? qualified : activeEmployees
     return result.sort(sortByEmployeeNumber)
   }, [employees, workspaceRoles])
 
