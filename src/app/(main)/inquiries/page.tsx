@@ -5,7 +5,7 @@
  * 路由: /inquiries
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { format } from 'date-fns'
 import { zhTW } from 'date-fns/locale'
 import { 
@@ -23,8 +23,9 @@ import {
   Clock,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { ListPageLayout } from '@/components/layout/list-page-layout'
+import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
@@ -38,13 +39,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/stores/auth-store'
@@ -70,47 +64,39 @@ interface CustomerInquiry {
   status: 'pending' | 'contacted' | 'quoted' | 'converted' | 'cancelled'
   internal_notes: string | null
   created_at: string
-  wishlist_templates?: {
-    name: string
-    slug: string
-  }
+  template_name?: string
 }
 
-const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-  pending: { label: '待處理', icon: Clock, color: 'bg-yellow-100 text-yellow-800' },
-  contacted: { label: '已聯繫', icon: Phone, color: 'bg-blue-100 text-blue-800' },
-  quoted: { label: '已報價', icon: FileText, color: 'bg-purple-100 text-purple-800' },
-  converted: { label: '已成交', icon: CheckCircle, color: 'bg-green-100 text-green-800' },
-  cancelled: { label: '已取消', icon: XCircle, color: 'bg-gray-100 text-gray-800' },
+const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  pending: { label: '待處理', color: 'bg-yellow-100 text-yellow-800' },
+  contacted: { label: '已聯繫', color: 'bg-blue-100 text-blue-800' },
+  quoted: { label: '已報價', color: 'bg-purple-100 text-purple-800' },
+  converted: { label: '已成交', color: 'bg-green-100 text-green-800' },
+  cancelled: { label: '已取消', color: 'bg-gray-100 text-gray-800' },
 }
+
+type FilterTab = 'all' | 'pending' | 'contacted' | 'quoted' | 'converted' | 'cancelled'
 
 export default function InquiriesPage() {
   const { user } = useAuthStore()
   const [inquiries, setInquiries] = useState<CustomerInquiry[]>([])
   const [loading, setLoading] = useState(true)
-  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [activeTab, setActiveTab] = useState<FilterTab>('all')
+  const [searchTerm, setSearchTerm] = useState('')
   const [selectedInquiry, setSelectedInquiry] = useState<CustomerInquiry | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
-
-
 
   const fetchInquiries = async () => {
     if (!user?.workspace_id) return
 
-    let query = supabase
+    const { data, error } = await supabase
       .from('customer_inquiries')
       .select(`
         *,
-        wishlist_templates(name, slug)
+        wishlist_templates(name)
       `)
       .eq('workspace_id', user.workspace_id)
       .order('created_at', { ascending: false })
-
-    if (filterStatus !== 'all') {
-      query = query.eq('status', filterStatus)
-    }
-
-    const { data, error } = await query
 
     if (error) {
       console.error('載入失敗:', error)
@@ -118,13 +104,34 @@ export default function InquiriesPage() {
       return
     }
 
-    setInquiries(data || [])
+    interface InquiryRow {
+      id: string
+      code: string
+      customer_name: string
+      phone: string | null
+      email: string | null
+      travel_date: string | null
+      people_count: number
+      notes: string | null
+      selected_items: SelectedItem[]
+      status: 'pending' | 'contacted' | 'quoted' | 'converted' | 'cancelled'
+      internal_notes: string | null
+      created_at: string
+      wishlist_templates?: { name: string } | null
+    }
+
+    const processed = (data || []).map((row: InquiryRow) => ({
+      ...row,
+      template_name: row.wishlist_templates?.name,
+    }))
+
+    setInquiries(processed)
     setLoading(false)
   }
 
   useEffect(() => {
     fetchInquiries()
-  }, [user?.workspace_id, filterStatus])
+  }, [user?.workspace_id])
 
   const updateStatus = async (inquiry: CustomerInquiry, newStatus: string) => {
     const { error } = await supabase
@@ -139,6 +146,7 @@ export default function InquiriesPage() {
 
     toast.success(`已更新為「${STATUS_CONFIG[newStatus]?.label}」`)
     fetchInquiries()
+    setDetailOpen(false)
   }
 
   const updateNotes = async (inquiry: CustomerInquiry, notes: string) => {
@@ -153,7 +161,6 @@ export default function InquiriesPage() {
     }
 
     toast.success('已儲存備註')
-    fetchInquiries()
   }
 
   const openDetail = (inquiry: CustomerInquiry) => {
@@ -161,170 +168,180 @@ export default function InquiriesPage() {
     setDetailOpen(true)
   }
 
-  const pendingCount = inquiries.filter(i => i.status === 'pending').length
+  // 計算各狀態數量
+  const statusCounts = useMemo(() => {
+    return {
+      all: inquiries.length,
+      pending: inquiries.filter(i => i.status === 'pending').length,
+      contacted: inquiries.filter(i => i.status === 'contacted').length,
+      quoted: inquiries.filter(i => i.status === 'quoted').length,
+      converted: inquiries.filter(i => i.status === 'converted').length,
+      cancelled: inquiries.filter(i => i.status === 'cancelled').length,
+    }
+  }, [inquiries])
 
-  if (loading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-48" />
-          <div className="space-y-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-24 bg-gray-200 rounded-xl" />
-            ))}
-          </div>
+  // 篩選
+  const filteredInquiries = useMemo(() => {
+    let result = inquiries
+    
+    if (activeTab !== 'all') {
+      result = result.filter(i => i.status === activeTab)
+    }
+    
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      result = result.filter(i => 
+        i.customer_name.toLowerCase().includes(term) ||
+        i.code.toLowerCase().includes(term) ||
+        i.phone?.includes(term)
+      )
+    }
+    
+    return result
+  }, [inquiries, activeTab, searchTerm])
+
+  // 分頁標籤
+  const tabs = [
+    { key: 'all', label: '全部', count: statusCounts.all },
+    { key: 'pending', label: '待處理', count: statusCounts.pending },
+    { key: 'contacted', label: '已聯繫', count: statusCounts.contacted },
+    { key: 'quoted', label: '已報價', count: statusCounts.quoted },
+    { key: 'converted', label: '已成交', count: statusCounts.converted },
+  ]
+
+  // 表格欄位
+  const columns: TableColumn<CustomerInquiry>[] = [
+    {
+      key: 'code',
+      title: '編號',
+      width: '120px',
+      render: (row) => (
+        <span className="font-mono text-sm">{row.code}</span>
+      ),
+    },
+    {
+      key: 'customer_name',
+      title: '客人',
+      render: (row) => (
+        <div>
+          <div className="font-medium">{row.customer_name}</div>
+          <div className="text-xs text-muted-foreground">{row.phone}</div>
         </div>
-      </div>
-    )
-  }
+      ),
+    },
+    {
+      key: 'template_name',
+      title: '來源',
+      width: '150px',
+      render: (row) => row.template_name || '-',
+    },
+    {
+      key: 'selected_items',
+      title: '景點',
+      width: '80px',
+      align: 'center',
+      render: (row) => `${row.selected_items?.length || 0} 個`,
+    },
+    {
+      key: 'travel_date',
+      title: '出發日',
+      width: '100px',
+      render: (row) => row.travel_date 
+        ? format(new Date(row.travel_date), 'MM/dd')
+        : '-',
+    },
+    {
+      key: 'people_count',
+      title: '人數',
+      width: '60px',
+      align: 'center',
+      render: (row) => row.people_count,
+    },
+    {
+      key: 'status',
+      title: '狀態',
+      width: '90px',
+      render: (row) => (
+        <Badge className={STATUS_CONFIG[row.status]?.color}>
+          {STATUS_CONFIG[row.status]?.label}
+        </Badge>
+      ),
+    },
+    {
+      key: 'created_at',
+      title: '時間',
+      width: '100px',
+      render: (row) => format(new Date(row.created_at), 'MM/dd HH:mm'),
+    },
+  ]
+
+  // 操作欄
+  const renderActions = (row: CustomerInquiry) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="iconSm">
+          <MoreHorizontal className="w-4 h-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => openDetail(row)}>
+          <Eye className="w-4 h-4 mr-2" />
+          查看詳情
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => updateStatus(row, 'contacted')}>
+          <Phone className="w-4 h-4 mr-2" />
+          標記已聯繫
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => updateStatus(row, 'quoted')}>
+          <FileText className="w-4 h-4 mr-2" />
+          標記已報價
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => updateStatus(row, 'converted')}>
+          <CheckCircle className="w-4 h-4 mr-2" />
+          標記已成交
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => updateStatus(row, 'cancelled')}
+          className="text-destructive"
+        >
+          <XCircle className="w-4 h-4 mr-2" />
+          取消
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 
   return (
-    <div className="p-6 space-y-6">
-      {/* 標題區 */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Inbox className="text-primary" />
-            詢價單管理
-            {pendingCount > 0 && (
-              <Badge variant="destructive">{pendingCount}</Badge>
-            )}
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            客人透過紙娃娃送出的詢價單
-          </p>
-        </div>
-
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-36">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">全部</SelectItem>
-            <SelectItem value="pending">待處理</SelectItem>
-            <SelectItem value="contacted">已聯繫</SelectItem>
-            <SelectItem value="quoted">已報價</SelectItem>
-            <SelectItem value="converted">已成交</SelectItem>
-            <SelectItem value="cancelled">已取消</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* 列表 */}
-      {inquiries.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Inbox className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+    <ListPageLayout
+      title="詢價單管理"
+      icon={Inbox}
+      description="客人透過紙娃娃送出的詢價單"
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabChange={(tab) => setActiveTab(tab as FilterTab)}
+      searchPlaceholder="搜尋客人姓名、編號..."
+      searchValue={searchTerm}
+      onSearchChange={setSearchTerm}
+      badge={statusCounts.pending > 0 ? statusCounts.pending : undefined}
+    >
+      <EnhancedTable
+        columns={columns}
+        data={filteredInquiries}
+        loading={loading}
+        actions={renderActions}
+        actionsWidth="50px"
+        onRowClick={openDetail}
+        bordered
+        rowClassName={(row) => row.status === 'pending' ? 'bg-yellow-50' : ''}
+        emptyState={
+          <div className="flex flex-col items-center py-12">
+            <Inbox size={48} className="text-muted-foreground/30 mb-4" />
             <p className="text-muted-foreground">
-              {filterStatus === 'all' ? '還沒有詢價單' : '沒有符合條件的詢價單'}
+              {activeTab === 'all' ? '還沒有詢價單' : '沒有符合條件的詢價單'}
             </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {inquiries.map(inquiry => {
-            const statusConfig = STATUS_CONFIG[inquiry.status]
-            const StatusIcon = statusConfig?.icon || Clock
-            
-            return (
-              <Card 
-                key={inquiry.id} 
-                className={`hover:shadow-md transition-shadow cursor-pointer ${
-                  inquiry.status === 'pending' ? 'border-yellow-300 bg-yellow-50/50' : ''
-                }`}
-                onClick={() => openDetail(inquiry)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="font-mono text-sm text-muted-foreground">
-                          {inquiry.code}
-                        </span>
-                        <Badge className={statusConfig?.color}>
-                          <StatusIcon className="w-3 h-3 mr-1" />
-                          {statusConfig?.label}
-                        </Badge>
-                        {inquiry.wishlist_templates && (
-                          <Badge variant="outline">
-                            {inquiry.wishlist_templates.name}
-                          </Badge>
-                        )}
-                      </div>
-
-                      <h3 className="font-bold text-lg mb-2">{inquiry.customer_name}</h3>
-
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                        {inquiry.phone && (
-                          <span className="flex items-center gap-1">
-                            <Phone className="w-4 h-4" />
-                            {inquiry.phone}
-                          </span>
-                        )}
-                        {inquiry.email && (
-                          <span className="flex items-center gap-1">
-                            <Mail className="w-4 h-4" />
-                            {inquiry.email}
-                          </span>
-                        )}
-                        {inquiry.travel_date && (
-                          <span className="flex items-center gap-1">
-                            <Calendar className="w-4 h-4" />
-                            {format(new Date(inquiry.travel_date), 'yyyy/MM/dd')}
-                          </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Users className="w-4 h-4" />
-                          {inquiry.people_count} 人
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-4 h-4" />
-                          {inquiry.selected_items?.length || 0} 個景點
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(inquiry.created_at), 'MM/dd HH:mm', { locale: zhTW })}
-                      </span>
-                      
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={e => e.stopPropagation()}>
-                          <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="w-4 h-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); openDetail(inquiry) }}>
-                            <Eye className="w-4 h-4 mr-2" />
-                            查看詳情
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus(inquiry, 'contacted') }}>
-                            標記為已聯繫
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus(inquiry, 'quoted') }}>
-                            標記為已報價
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus(inquiry, 'converted') }}>
-                            標記為已成交
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={(e) => { e.stopPropagation(); updateStatus(inquiry, 'cancelled') }}
-                            className="text-destructive"
-                          >
-                            取消
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
-      )}
+          </div>
+        }
+      />
 
       {/* 詳情 Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
@@ -373,7 +390,7 @@ export default function InquiriesPage() {
                     <div>
                       <span className="text-muted-foreground">來源：</span>
                       <span className="font-medium">
-                        {selectedInquiry.wishlist_templates?.name || '-'}
+                        {selectedInquiry.template_name || '-'}
                       </span>
                     </div>
                   </div>
@@ -462,6 +479,6 @@ export default function InquiriesPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </ListPageLayout>
   )
 }
