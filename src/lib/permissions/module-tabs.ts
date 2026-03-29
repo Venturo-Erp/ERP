@@ -126,21 +126,13 @@ export const MODULES: ModuleDefinition[] = [
     code: 'visas',
     name: '簽證管理',
     description: '簽證申請與追蹤',
-    tabs: [
-      { code: 'list', name: '簽證列表', description: '所有簽證申請' },
-      { code: 'create', name: '新增申請', description: '建立簽證申請' },
-      { code: 'tracking', name: '進度追蹤', description: '申請進度' },
-    ],
+    tabs: [], // 無分頁
   },
   {
     code: 'design',
     name: '設計工具',
     description: '手冊、行銷素材',
-    tabs: [
-      { code: 'brochures', name: '手冊設計', description: '旅遊手冊' },
-      { code: 'marketing', name: '行銷素材', description: '廣告、DM' },
-      { code: 'templates', name: '設計範本', description: '可重用範本' },
-    ],
+    tabs: [], // 無分頁
   },
   {
     code: 'office',
