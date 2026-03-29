@@ -16,7 +16,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from('workspaces')
-    .select('id, name, code, type, is_active, premium_enabled, premium_expires_at')
+    .select('id, name, code, type, is_active, premium_enabled')
     .eq('id', workspaceId)
     .single()
 
