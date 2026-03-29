@@ -15,6 +15,7 @@
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { QRCodeSVG } from 'qrcode.react'
 import { 
   MapPin, 
   Check, 
@@ -23,7 +24,6 @@ import {
   ChevronLeft,
   Phone,
   Loader2,
-  Sparkles,
   Copy,
   CheckCircle,
 } from 'lucide-react'
@@ -538,15 +538,29 @@ export default function WishlistDetailPage({
               我們會盡快與您聯繫。您可以保存以下連結，隨時查看進度。
             </p>
 
+            {/* QR Code */}
+            <div className="bg-white rounded-xl p-6 mb-6 inline-block mx-auto">
+              <QRCodeSVG 
+                value={trackingUrl} 
+                size={180}
+                level="M"
+                includeMargin={false}
+              />
+            </div>
+            
+            <p className="text-sm text-muted-foreground mb-4">
+              用手機掃描 QR Code 保存追蹤連結
+            </p>
+
             {/* 追蹤連結 */}
             <div className="bg-muted rounded-lg p-4 mb-6">
-              <p className="text-sm text-muted-foreground mb-2">您的專屬追蹤連結：</p>
+              <p className="text-xs text-muted-foreground mb-2">或複製連結：</p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 text-sm bg-white px-3 py-2 rounded border truncate">
+                <code className="flex-1 text-xs bg-white px-2 py-1.5 rounded border truncate">
                   {trackingUrl}
                 </code>
-                <Button size="icon" variant="outline" onClick={copyTrackingUrl}>
-                  <Copy className="w-4 h-4" />
+                <Button size="icon" variant="outline" className="h-8 w-8" onClick={copyTrackingUrl}>
+                  <Copy className="w-3 h-3" />
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground mt-2">
