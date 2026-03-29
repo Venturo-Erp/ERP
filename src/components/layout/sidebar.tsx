@@ -314,7 +314,7 @@ const menuItems: MenuItem[] = [
   //     { href: '/local/cases', label: COMP_LAYOUT_LABELS.案件列表, icon: FolderOpen },
   //   ],
   // },
-  { href: '/war-room', label: '作戰會議室', icon: Target, requiredPermission: 'super_admin_only' },
+  { href: '/war-room', label: '作戰會議室', icon: Target, requiredPermission: 'war_room' },
   { 
     href: '/hr', 
     label: COMP_LAYOUT_LABELS.人資管理, 
@@ -332,7 +332,7 @@ const menuItems: MenuItem[] = [
     href: '/tenants',
     label: COMP_LAYOUT_LABELS.租戶管理,
     icon: Building,
-    requiredPermission: 'super_admin_only',
+    requiredPermission: 'tenants',
   },
   // 資源調度 - 威廉專屬
   // {
@@ -456,13 +456,8 @@ export function Sidebar() {
     [user?.preferred_features]
   )
 
-  // super_admin 只看 employees.roles，不看職務權限
-  // 職務管理員有 * 權限但不是 super_admin
-  const isSuperAdmin = userRoles.includes('super_admin')
-  
-  // 租戶內的管理員（有 * 或 admin 權限）
+  // 管理員：有 * 或 admin 權限（來自職務系統）
   const isAdmin =
-    userPermissions.includes('super_admin') ||
     userPermissions.includes('admin') ||
     userPermissions.includes('*')
 
@@ -477,7 +472,7 @@ export function Sidebar() {
 
     // Super Admin 看到所有功能（開發需要）
     // 不受租戶類型限制
-    if (isSuperAdmin) {
+    if (isAdmin) {
       // 直接進入完整選單過濾邏輯
     } 
     // 車行使用簡化選單（車趟管理為主）
@@ -495,8 +490,7 @@ export function Sidebar() {
           if (isMenuItemHidden(item.href, hiddenMenuItems)) return null
           
           // 🔧 檢查租戶功能權限（workspace_features）
-          // super_admin_only 不受 workspace_features 限制
-          if (item.requiredPermission && item.requiredPermission !== 'super_admin_only') {
+          if (item.requiredPermission) {
             if (!isFeatureEnabled(item.requiredPermission)) {
               return null
             }
@@ -509,18 +503,18 @@ export function Sidebar() {
           ) {
             return null
           }
-          if (!isSuperAdmin && preferredFeatures.length > 0 && item.requiredPermission) {
+          if (!isAdmin && preferredFeatures.length > 0 && item.requiredPermission) {
             if (!preferredFeatures.includes(item.requiredPermission)) return null
           }
           if (item.children) {
             const visibleChildren = filterMenuByPermissions(item.children)
-            if (visibleChildren.length > 0 || isSuperAdmin) {
+            if (visibleChildren.length > 0 || isAdmin) {
               return { ...item, children: visibleChildren }
             }
             return null
           }
           if (!item.requiredPermission) return item
-          if (isSuperAdmin) return item
+          if (isAdmin) return item
           return userPermissions.includes(item.requiredPermission) ? item : null
         })
         .filter((item): item is MenuItem => item !== null)
@@ -532,7 +526,7 @@ export function Sidebar() {
     user?.workspace_type,
     isLocal,
     isTransport,
-    isSuperAdmin,
+    isAdmin,
     preferredFeatures,
     hiddenMenuItems,
     userPermissions,
@@ -549,10 +543,10 @@ export function Sidebar() {
       if (!user) return !item.requiredPermission
       if (isMenuItemHidden(item.href, hiddenMenuItems)) return false
       if (!item.requiredPermission) return true
-      if (isSuperAdmin) return true
+      if (isAdmin) return true
       return userPermissions.includes(item.requiredPermission)
     })
-  }, [user?.id, isLocal, isTransport, isSuperAdmin, hiddenMenuItems, userPermissions])
+  }, [user?.id, isLocal, isTransport, isAdmin, hiddenMenuItems, userPermissions])
 
   // 渲染菜單項目
   const renderMenuItem = (item: MenuItem, isChild = false) => {
