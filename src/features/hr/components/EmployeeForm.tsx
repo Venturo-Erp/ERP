@@ -263,9 +263,6 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                 <h3 className="text-lg font-bold text-morandi-primary">
                   {formData.display_name || formData.chinese_name || '未命名'}
                 </h3>
-                <p className="text-sm text-morandi-secondary mt-0.5">
-                  {selectedRole?.name || formData.position || '尚未設定職務'}
-                </p>
               </div>
 
               {/* 分頁按鈕（如果有多個） */}
@@ -332,13 +329,19 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-morandi-secondary uppercase">職位名稱</Label>
-                      <Input
-                        value={formData.position}
-                        onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                        className="border-morandi-gold/30 focus:border-morandi-gold"
-                        placeholder="例：業務專員"
-                      />
+                      <Label className="text-xs font-semibold text-morandi-secondary uppercase">
+                        職務 {!isEditMode && mode === 'hr' && <span className="text-red-500">*</span>}
+                      </Label>
+                      <select
+                        value={formData.role_id}
+                        onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
+                        className="w-full px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-white text-morandi-primary"
+                      >
+                        <option value="">請選擇職務</option>
+                        {roles.map((role) => (
+                          <option key={role.id} value={role.id}>{role.name}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
@@ -449,31 +452,22 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
               {/* 職務權限 */}
               {activeTab === 'permissions' && (
                 <div className="space-y-5">
-                  {/* 職務選擇 */}
-                  <div>
-                    <Label className="text-xs font-semibold text-morandi-secondary uppercase mb-2 block">
-                      職務 {!isEditMode && <span className="text-red-500">*</span>}
-                    </Label>
-                    <select
-                      value={formData.role_id}
-                      onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
-                      className="w-full max-w-xs px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-white text-morandi-primary"
-                    >
-                      <option value="">請選擇職務</option>
-                      {roles.map((role) => (
-                        <option key={role.id} value={role.id}>{role.name}</option>
-                      ))}
-                    </select>
+                  {/* 顯示目前職務 */}
+                  <div className="flex items-center gap-3 pb-4 border-b border-morandi-border">
+                    <span className="text-sm text-morandi-secondary">目前職務：</span>
+                    <span className="px-3 py-1 bg-morandi-gold/20 text-morandi-primary font-medium rounded-lg">
+                      {selectedRole?.name || '尚未設定'}
+                    </span>
                     {selectedRole?.description && (
-                      <p className="text-xs text-morandi-secondary mt-1.5">
-                        {selectedRole.description}
-                      </p>
+                      <span className="text-xs text-morandi-secondary">
+                        — {selectedRole.description}
+                      </span>
                     )}
                   </div>
 
                   {/* 權限列表（從 API 取得） */}
-                  {formData.role_id && (
-                    <div className="pt-4 border-t border-morandi-border">
+                  {formData.role_id ? (
+                    <div>
                       <h4 className="text-sm font-semibold text-morandi-primary mb-3">功能權限</h4>
                       <div className="border border-morandi-border rounded-lg overflow-hidden">
                         <table className="w-full text-sm">
@@ -520,6 +514,10 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                       <p className="text-xs text-morandi-secondary mt-2">
                         權限由職務定義，如需調整請至「職務管理」編輯
                       </p>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-morandi-secondary">
+                      請先在「基本資料」選擇職務
                     </div>
                   )}
                 </div>
