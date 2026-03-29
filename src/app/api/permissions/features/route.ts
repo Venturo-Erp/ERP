@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   const body = await request.json()
-  const { workspace_id, features } = body
+  const { workspace_id, features, premium_enabled } = body
 
   // 如果沒傳 workspace_id，用當前登入者的
   let targetWorkspaceId = workspace_id
@@ -60,7 +60,19 @@ export async function PUT(request: NextRequest) {
   // 用 service client（super admin 操作）
   const serviceSupabase = createServiceClient()
 
-  // Upsert 所有功能
+  // 1. 更新付費大開關
+  if (typeof premium_enabled === 'boolean') {
+    const { error: wsError } = await serviceSupabase
+      .from('workspaces')
+      .update({ premium_enabled })
+      .eq('id', targetWorkspaceId)
+    
+    if (wsError) {
+      return NextResponse.json({ error: wsError.message }, { status: 500 })
+    }
+  }
+
+  // 2. Upsert 所有功能小開關
   const upsertData = features.map((f: { feature_code: string; enabled: boolean }) => ({
     workspace_id: targetWorkspaceId,
     feature_code: f.feature_code,
