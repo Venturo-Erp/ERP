@@ -46,6 +46,7 @@ interface PermissionOverride {
 }
 
 // 所有可用功能（對應 workspace_features）
+// 注意：/settings（個人設定）不在這裡，因為所有人都能用
 const ALL_PERMISSION_ROUTES = [
   { route: '/dashboard', name: '首頁', featureCode: 'dashboard' },
   { route: '/tours', name: '旅遊團', featureCode: 'tours' },
@@ -62,8 +63,8 @@ const ALL_PERMISSION_ROUTES = [
   { route: '/todos', name: '待辦事項', featureCode: 'todos' },
   { route: '/itinerary', name: '行程管理', featureCode: 'itinerary' },
   { route: '/visas', name: '簽證管理', featureCode: 'visas' },
-  { route: '/settings', name: '設定', featureCode: 'settings' },
   { route: '/tenants', name: '租戶管理', featureCode: 'tenants' },
+  // /settings 不需要權限控制，所有人都能進入個人設定
 ]
 
 interface EmployeeFormProps {
