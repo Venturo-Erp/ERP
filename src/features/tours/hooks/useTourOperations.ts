@@ -459,24 +459,6 @@ export function useTourOperations(params: UseTourOperationsParams) {
             newTourData
           )
           tourId = createdTour.id
-
-          // 🔧 複製行程表（如果模板有行程）
-          const { data: existingItinerary } = await supabase
-            .from('itineraries')
-            .select('*')
-            .eq('tour_id', tour.id)
-            .single()
-
-          if (existingItinerary && workspaceId) {
-            await supabase.from('itineraries').insert({
-              tour_id: tourId,
-              title: existingItinerary.title,
-              subtitle: existingItinerary.subtitle,
-              tour_code: code,
-              daily_itinerary: existingItinerary.daily_itinerary,
-              workspace_id: workspaceId,
-            })
-          }
         }
 
         // 有填訂單資料就建立訂單

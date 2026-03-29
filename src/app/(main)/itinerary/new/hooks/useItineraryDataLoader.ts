@@ -1,3 +1,34 @@
+/**
+ * 🎯 行程管理資料載入器（進階功能）
+ * 
+ * **功能說明**：
+ * 行程管理是「開團/報價/模板」的進階功能，用於製作精美的行程表。
+ * 
+ * **使用流程**：
+ * 1. 在旅遊團模組建立團（填日期、國家、天數）
+ * 2. 點「行程」按鈕 → 自動開啟行程管理
+ * 3. 自動帶入：日期、天數、國家、城市、航班資訊
+ * 4. 手動編輯：每日行程、住宿、餐飲、景點
+ * 
+ * **三種載入模式**：
+ * - 編輯現有行程：優先從 itinerary_id 載入（含完整 daily_itinerary JSON）
+ * - 從旅遊團建立：從 tour_id 載入基本資料 → 產生空白 daily_itinerary
+ * - 從報價單匯入：從 from_quote=true 載入參數（餐飲、住宿、活動）
+ * 
+ * **自動帶入的欄位**：
+ * - 標題：tour.name
+ * - 日期：tour.departure_date / return_date
+ * - 天數：自動計算（return_date - departure_date + 1）
+ * - 國家/城市：tour.country_id / airport_code
+ * - 航班：tour.outbound_flight / return_flight
+ * - 團號：tour.code（例如 TYO260421A）
+ * 
+ * **台灣團特殊處理**：
+ * - 預設 flightStyle = 'none'（無航班）
+ * - 集合地點：空白（不是機場）
+ * - 集合時間：08:00（不是凌晨）
+ */
+
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
@@ -360,7 +391,8 @@ export function useItineraryDataLoader({
         return
       }
 
-      // 有 tour_id，從旅遊團載入基本資料
+      // 🎯 有 tour_id，從旅遊團載入基本資料（自動帶入功能）
+      // 這是行程管理的核心邏輯：讀取旅遊團的日期、國家、城市、航班
       const tour = tours.find(t => t.id === tourId)
       if (!tour) {
         setLoading(false)
@@ -370,6 +402,7 @@ export function useItineraryDataLoader({
       const country = tour.country_id ? countries.find(c => c.id === tour.country_id) : null
       const city = tour.airport_code ? cities.find(c => c.id === tour.airport_code) : null
 
+      // 🎯 自動計算天數（從旅遊團的 departure_date 和 return_date）
       const departureDate = tour.departure_date ? new Date(tour.departure_date) : new Date()
       const returnDate = tour.return_date ? new Date(tour.return_date) : new Date()
       const days =
@@ -432,6 +465,8 @@ export function useItineraryDataLoader({
           location: isTaiwan ? '' : '桃園機場第二航廈',
         },
         itinerarySubtitle: `${days}天${days - 1}夜精彩旅程規劃`,
+        // 🎯 產生空白的每日行程（Day 1, Day 2, ...）
+        // 如果旅遊團已有 daily_itinerary，會優先使用（編輯模式）
         dailyItinerary: createDailyItineraryFromTour(
           tour,
           days,

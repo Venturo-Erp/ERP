@@ -20,7 +20,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { MessageCircle, Users, User, Building, RefreshCw, Search, Link2 } from 'lucide-react'
+import { MessageCircle, Users, User, Building, RefreshCw, Search, Link2, Settings, Key, ExternalLink } from 'lucide-react'
 import { toast } from 'sonner'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { SettingsTabs } from '../components/SettingsTabs'
@@ -263,8 +263,118 @@ export default function LineConnectionsPage() {
             <User className="h-4 w-4 mr-2" />
             好友 ({filteredUsers.length})
           </TabsTrigger>
+          <TabsTrigger value="settings">
+            <Settings className="h-4 w-4 mr-2" />
+            LINE 設定
+          </TabsTrigger>
         </TabsList>
 
+        {/* LINE 設定頁籤 */}
+        <TabsContent value="settings" className="mt-4">
+          <div className="grid gap-6">
+            {/* Messaging API */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" />
+                  Messaging API（機器人）
+                </CardTitle>
+                <CardDescription>
+                  用於接收/發送 LINE 訊息、群組通知等
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Channel ID</label>
+                    <div className="mt-1 font-mono text-sm bg-muted px-3 py-2 rounded">
+                      {process.env.NEXT_PUBLIC_LINE_CHANNEL_ID || '（未設定）'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">狀態</label>
+                    <div className="mt-1">
+                      <Badge className="bg-green-500">已連接</Badge>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <p>⚠️ Messaging API 設定需要在環境變數中配置：</p>
+                  <ul className="list-disc list-inside mt-1 space-y-1">
+                    <li><code>LINE_CHANNEL_ACCESS_TOKEN</code></li>
+                    <li><code>LINE_CHANNEL_SECRET</code></li>
+                  </ul>
+                </div>
+                <Button variant="outline" size="sm" asChild>
+                  <a href="https://developers.line.biz/console/" target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    開啟 LINE Developers Console
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* LINE Login */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Key className="h-5 w-5" />
+                  LINE Login（客戶登入）
+                </CardTitle>
+                <CardDescription>
+                  讓客戶用 LINE 登入網站，詢價後自動推播追蹤連結
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Channel ID</label>
+                    <div className="mt-1 font-mono text-sm bg-muted px-3 py-2 rounded">
+                      {process.env.NEXT_PUBLIC_LINE_LOGIN_CHANNEL_ID || '2009638032'}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Callback URL</label>
+                    <div className="mt-1 font-mono text-sm bg-muted px-3 py-2 rounded text-xs">
+                      https://app.cornertravel.com.tw/api/auth/line/callback
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-amber-800 font-medium">⚠️ 重要：連結 LINE OA</p>
+                  <p className="text-sm text-amber-700 mt-1">
+                    需要在 LINE Developers Console 將 LINE Login Channel 與 Messaging API Channel 連結，
+                    這樣登入取得的 userId 才能用來推播訊息。
+                  </p>
+                  <Button variant="outline" size="sm" className="mt-3" asChild>
+                    <a href="https://developers.line.biz/console/" target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="h-4 w-4 mr-2" />
+                      前往設定 Linked OA
+                    </a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 設定說明 */}
+            <Card>
+              <CardHeader>
+                <CardTitle>設定說明</CardTitle>
+              </CardHeader>
+              <CardContent className="prose prose-sm max-w-none">
+                <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                  <li>到 <a href="https://developers.line.biz/console/" className="text-primary underline" target="_blank">LINE Developers Console</a></li>
+                  <li>建立 Provider（如果還沒有）</li>
+                  <li>建立 Messaging API Channel（機器人）</li>
+                  <li>建立 LINE Login Channel（客戶登入）</li>
+                  <li>在 LINE Login Channel 設定 Callback URL</li>
+                  <li>將兩個 Channel 連結（Linked OA）</li>
+                  <li>把 Channel ID、Secret、Access Token 設定到環境變數</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
         <TabsContent value="groups" className="mt-4">
           <Card>
             <CardHeader>
