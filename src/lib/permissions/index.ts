@@ -1,6 +1,7 @@
 // 新權限系統
 export * from './features'
 export * from './hooks'
+export * from './module-tabs'
 
 // ====================
 // 兼容舊系統的導出

@@ -2,7 +2,7 @@
 
 /**
  * 角色管理頁面（HR 模組）
- * 定義公司內的職務角色及其權限
+ * 支援模組 + 分頁的細粒度權限設定
  */
 
 import { useState, useEffect } from 'react'
@@ -28,9 +28,12 @@ import {
   Loader2,
   Users,
   Star,
-  Check
+  Check,
+  ChevronRight,
+  ChevronDown,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores'
+import { MODULES, type ModuleDefinition } from '@/lib/permissions'
 
 interface Role {
   id: string
@@ -40,31 +43,12 @@ interface Role {
   sort_order: number
 }
 
-interface RoutePermission {
-  route: string
+interface TabPermission {
+  module_code: string
+  tab_code: string | null  // null = 整個模組
   can_read: boolean
   can_write: boolean
 }
-
-// 可設定權限的路由列表（對應租戶功能）
-const PERMISSION_ROUTES = [
-  { route: '/dashboard', name: '首頁', category: '基本' },
-  { route: '/tours', name: '旅遊團管理', category: '基本' },
-  { route: '/orders', name: '訂單管理', category: '基本' },
-  { route: '/finance', name: '財務系統', category: '基本' },
-  { route: '/accounting', name: '會計系統', category: '基本' },
-  { route: '/database', name: '資料管理', category: '基本' },
-  { route: '/hr', name: '人資管理', category: '基本' },
-  { route: '/settings', name: '系統設定', category: '基本' },
-  { route: '/calendar', name: '行事曆', category: '基本' },
-  { route: '/todos', name: '待辦事項', category: '基本' },
-  { route: '/visas', name: '簽證管理', category: '基本' },
-  { route: '/itinerary', name: '行程管理', category: '付費' },
-  { route: '/quotes', name: '報價單', category: '付費' },
-  { route: '/customers', name: '顧客管理', category: '付費' },
-  { route: '/design', name: '設計工具', category: '付費' },
-  { route: '/office', name: '文件管理', category: '付費' },
-]
 
 export default function RolesPage() {
   const { user } = useAuthStore()
@@ -72,7 +56,8 @@ export default function RolesPage() {
   
   const [roles, setRoles] = useState<Role[]>([])
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
-  const [permissions, setPermissions] = useState<RoutePermission[]>([])
+  const [permissions, setPermissions] = useState<TabPermission[]>([])
+  const [expandedModules, setExpandedModules] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -124,6 +109,112 @@ export default function RolesPage() {
     fetchPermissions()
   }, [selectedRole])
 
+  // 展開/收合模組
+  const toggleExpand = (moduleCode: string) => {
+    setExpandedModules(prev => 
+      prev.includes(moduleCode) 
+        ? prev.filter(m => m !== moduleCode)
+        : [...prev, moduleCode]
+    )
+  }
+
+  // 取得權限
+  const getPermission = (moduleCode: string, tabCode: string | null): TabPermission | undefined => {
+    return permissions.find(p => p.module_code === moduleCode && p.tab_code === tabCode)
+  }
+
+  // 檢查模組是否全開
+  const isModuleFullyEnabled = (module: ModuleDefinition, field: 'can_read' | 'can_write'): boolean => {
+    if (module.tabs.length === 0) {
+      const perm = getPermission(module.code, null)
+      return perm?.[field] ?? false
+    }
+    return module.tabs.every(tab => {
+      const perm = getPermission(module.code, tab.code)
+      return perm?.[field] ?? false
+    })
+  }
+
+  // 檢查模組是否部分開啟
+  const isModulePartiallyEnabled = (module: ModuleDefinition, field: 'can_read' | 'can_write'): boolean => {
+    if (module.tabs.length === 0) return false
+    const enabledCount = module.tabs.filter(tab => {
+      const perm = getPermission(module.code, tab.code)
+      return perm?.[field] ?? false
+    }).length
+    return enabledCount > 0 && enabledCount < module.tabs.length
+  }
+
+  // 切換模組全開/全關
+  const toggleModuleAll = (module: ModuleDefinition, field: 'can_read' | 'can_write') => {
+    const isFullyEnabled = isModuleFullyEnabled(module, field)
+    const newValue = !isFullyEnabled
+
+    setPermissions(prev => {
+      let updated = [...prev]
+
+      if (module.tabs.length === 0) {
+        // 沒有分頁的模組
+        const existing = updated.find(p => p.module_code === module.code && p.tab_code === null)
+        if (existing) {
+          updated = updated.map(p => 
+            p.module_code === module.code && p.tab_code === null 
+              ? { ...p, [field]: newValue }
+              : p
+          )
+        } else {
+          updated.push({
+            module_code: module.code,
+            tab_code: null,
+            can_read: field === 'can_read' ? newValue : false,
+            can_write: field === 'can_write' ? newValue : false,
+          })
+        }
+      } else {
+        // 有分頁的模組：更新所有分頁
+        module.tabs.forEach(tab => {
+          const existing = updated.find(p => p.module_code === module.code && p.tab_code === tab.code)
+          if (existing) {
+            updated = updated.map(p => 
+              p.module_code === module.code && p.tab_code === tab.code
+                ? { ...p, [field]: newValue }
+                : p
+            )
+          } else {
+            updated.push({
+              module_code: module.code,
+              tab_code: tab.code,
+              can_read: field === 'can_read' ? newValue : false,
+              can_write: field === 'can_write' ? newValue : false,
+            })
+          }
+        })
+      }
+
+      return updated
+    })
+  }
+
+  // 切換單一分頁
+  const toggleTabPermission = (moduleCode: string, tabCode: string, field: 'can_read' | 'can_write') => {
+    setPermissions(prev => {
+      const existing = prev.find(p => p.module_code === moduleCode && p.tab_code === tabCode)
+      if (existing) {
+        return prev.map(p => 
+          p.module_code === moduleCode && p.tab_code === tabCode
+            ? { ...p, [field]: !p[field] }
+            : p
+        )
+      }
+      return [...prev, {
+        module_code: moduleCode,
+        tab_code: tabCode,
+        can_read: field === 'can_read',
+        can_write: field === 'can_write',
+      }]
+    })
+  }
+
   // 建立新角色
   const handleCreateRole = async () => {
     if (!editingRole.name || !user?.workspace_id) return
@@ -155,24 +246,13 @@ export default function RolesPage() {
     setSaving(false)
   }
 
-  // 權限變更
-  const handlePermissionChange = (route: string, field: 'can_read' | 'can_write', value: boolean) => {
-    setPermissions(prev => {
-      const existing = prev.find(p => p.route === route)
-      if (existing) {
-        return prev.map(p => p.route === route ? { ...p, [field]: value } : p)
-      }
-      return [...prev, { route, can_read: field === 'can_read' ? value : false, can_write: field === 'can_write' ? value : false }]
-    })
-  }
-
   // 儲存權限
   const handleSavePermissions = async () => {
     if (!selectedRole) return
 
     setSaving(true)
     try {
-      const res = await fetch(`/api/roles/${selectedRole.id}/permissions`, {
+      const res = await fetch(`/api/roles/${selectedRole.id}/tab-permissions`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ permissions }),
@@ -212,6 +292,103 @@ export default function RolesPage() {
     }
   }
 
+  // 渲染模組行
+  const renderModuleRow = (module: ModuleDefinition) => {
+    const hasTabs = module.tabs.length > 0
+    const isExpanded = expandedModules.includes(module.code)
+    const isAdmin = selectedRole?.is_admin
+
+    const readFully = isModuleFullyEnabled(module, 'can_read')
+    const readPartial = isModulePartiallyEnabled(module, 'can_read')
+    const writeFully = isModuleFullyEnabled(module, 'can_write')
+    const writePartial = isModulePartiallyEnabled(module, 'can_write')
+
+    return (
+      <div key={module.code}>
+        {/* 模組行 */}
+        <div className={`flex items-center border-t border-border ${hasTabs ? 'bg-morandi-bg/30' : 'bg-white'}`}>
+          <div className="flex-1 p-4 flex items-center gap-2">
+            {hasTabs ? (
+              <button
+                onClick={() => toggleExpand(module.code)}
+                className="p-1 hover:bg-morandi-bg rounded"
+              >
+                {isExpanded ? (
+                  <ChevronDown className="h-4 w-4 text-morandi-secondary" />
+                ) : (
+                  <ChevronRight className="h-4 w-4 text-morandi-secondary" />
+                )}
+              </button>
+            ) : (
+              <div className="w-6" />
+            )}
+            <span className="font-medium text-morandi-primary">{module.name}</span>
+            {hasTabs && (
+              <Badge variant="outline" className="text-xs text-morandi-secondary">
+                {module.tabs.length} 個分頁
+              </Badge>
+            )}
+          </div>
+          <div className="w-32 p-4 flex justify-center">
+            <div className="relative">
+              <Switch
+                checked={isAdmin || readFully}
+                onCheckedChange={() => toggleModuleAll(module, 'can_read')}
+                disabled={isAdmin}
+                className="data-[state=checked]:bg-morandi-green"
+              />
+              {readPartial && !isAdmin && (
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-morandi-gold rounded-full" />
+              )}
+            </div>
+          </div>
+          <div className="w-32 p-4 flex justify-center">
+            <div className="relative">
+              <Switch
+                checked={isAdmin || writeFully}
+                onCheckedChange={() => toggleModuleAll(module, 'can_write')}
+                disabled={isAdmin}
+                className="data-[state=checked]:bg-morandi-gold"
+              />
+              {writePartial && !isAdmin && (
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-morandi-gold rounded-full" />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 分頁行 */}
+        {hasTabs && isExpanded && module.tabs.map(tab => {
+          const perm = getPermission(module.code, tab.code)
+          return (
+            <div key={tab.code} className="flex items-center border-t border-border bg-white">
+              <div className="flex-1 p-4 pl-12 flex items-center gap-2">
+                <div className="w-1 h-4 bg-morandi-border rounded-full" />
+                <span className="text-sm text-morandi-primary">{tab.name}</span>
+              </div>
+              <div className="w-32 p-4 flex justify-center">
+                <Switch
+                  checked={isAdmin || (perm?.can_read ?? false)}
+                  onCheckedChange={() => toggleTabPermission(module.code, tab.code, 'can_read')}
+                  disabled={isAdmin}
+                  className="data-[state=checked]:bg-morandi-green"
+                />
+              </div>
+              <div className="w-32 p-4 flex justify-center">
+                <Switch
+                  checked={isAdmin || (perm?.can_write ?? false)}
+                  onCheckedChange={() => toggleTabPermission(module.code, tab.code, 'can_write')}
+                  disabled={isAdmin}
+                  className="data-[state=checked]:bg-morandi-gold"
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
   return (
     <ContentPageLayout 
       title="角色管理" 
@@ -222,10 +399,9 @@ export default function RolesPage() {
       ]}
     >
       <div className="grid grid-cols-12 gap-6 h-[calc(100vh-180px)]">
-        {/* 左側：角色列表（固定高度） */}
-        <div className="col-span-4 flex flex-col">
+        {/* 左側：角色列表 */}
+        <div className="col-span-3 flex flex-col">
           <div className="bg-white border border-border rounded-lg flex flex-col h-full">
-            {/* 標題列 */}
             <div className="flex items-center justify-between p-4 border-b border-border">
               <h3 className="font-semibold text-morandi-primary">角色列表</h3>
               <Button 
@@ -238,7 +414,6 @@ export default function RolesPage() {
               </Button>
             </div>
 
-            {/* 角色列表 */}
             <div className="flex-1 overflow-y-auto p-4">
               {loading ? (
                 <div className="flex items-center justify-center py-8">
@@ -266,11 +441,10 @@ export default function RolesPage() {
                           {selectedRole?.id === role.id && (
                             <Check className="h-4 w-4 text-morandi-gold" />
                           )}
-                          <span className="font-medium text-morandi-primary">{role.name}</span>
+                          <span className="font-medium text-morandi-primary text-sm">{role.name}</span>
                           {role.is_admin && (
                             <Badge className="bg-morandi-gold/20 text-morandi-gold border-morandi-gold/30 text-xs">
-                              <Star className="h-3 w-3 mr-1" />
-                              管理員
+                              <Star className="h-3 w-3" />
                             </Badge>
                           )}
                         </div>
@@ -278,19 +452,16 @@ export default function RolesPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-8 w-8 p-0 hover:bg-morandi-red/10"
+                            className="h-6 w-6 p-0 hover:bg-morandi-red/10"
                             onClick={e => {
                               e.stopPropagation()
                               handleDeleteRole(role)
                             }}
                           >
-                            <Trash2 className="h-4 w-4 text-morandi-red" />
+                            <Trash2 className="h-3 w-3 text-morandi-red" />
                           </Button>
                         )}
                       </div>
-                      {role.description && (
-                        <p className="text-sm text-morandi-secondary mt-1 pl-6">{role.description}</p>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -300,13 +471,27 @@ export default function RolesPage() {
         </div>
 
         {/* 右側：權限設定 */}
-        <div className="col-span-8 flex flex-col">
+        <div className="col-span-9 flex flex-col">
           <div className="bg-white border border-border rounded-lg flex flex-col h-full">
-            {/* 標題列 */}
             <div className="flex items-center justify-between p-4 border-b border-border">
-              <h3 className="font-semibold text-morandi-primary">
-                {selectedRole ? `${selectedRole.name} 的權限` : '請選擇角色'}
-              </h3>
+              <div className="flex items-center gap-3">
+                <h3 className="font-semibold text-morandi-primary">
+                  {selectedRole ? `${selectedRole.name} 的權限` : '請選擇角色'}
+                </h3>
+                {selectedRole && (
+                  <div className="flex items-center gap-4 text-xs text-morandi-secondary">
+                    <span className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded bg-morandi-green" /> 可讀取
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <div className="w-3 h-3 rounded bg-morandi-gold" /> 可寫入
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-morandi-gold" /> 部分開啟
+                    </span>
+                  </div>
+                )}
+              </div>
               {selectedRole && (
                 <Button 
                   onClick={handleSavePermissions} 
@@ -319,60 +504,19 @@ export default function RolesPage() {
               )}
             </div>
 
-            {/* 權限表格 */}
             <div className="flex-1 overflow-y-auto">
               {selectedRole ? (
-                <table className="w-full">
-                  <thead className="bg-morandi-bg/50 sticky top-0">
-                    <tr>
-                      <th className="text-left p-4 font-semibold text-morandi-primary">功能模組</th>
-                      <th className="text-center p-4 font-semibold text-morandi-primary w-32">可讀取</th>
-                      <th className="text-center p-4 font-semibold text-morandi-primary w-32">可寫入</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {PERMISSION_ROUTES.map((route, index) => {
-                      const perm = permissions.find(p => p.route === route.route)
-                      const isAdmin = selectedRole.is_admin
-                      
-                      return (
-                        <tr 
-                          key={route.route} 
-                          className={`border-t border-border ${index % 2 === 0 ? 'bg-white' : 'bg-morandi-bg/20'}`}
-                        >
-                          <td className="p-4">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-morandi-primary">{route.name}</span>
-                              {route.category === '付費' && (
-                                <Badge variant="outline" className="text-xs text-morandi-secondary">付費</Badge>
-                              )}
-                            </div>
-                          </td>
-                          <td className="text-center p-4">
-                            <div className="flex justify-center">
-                              <Switch
-                                checked={isAdmin || (perm?.can_read ?? false)}
-                                onCheckedChange={v => handlePermissionChange(route.route, 'can_read', v)}
-                                disabled={isAdmin}
-                                className="data-[state=checked]:bg-morandi-green"
-                              />
-                            </div>
-                          </td>
-                          <td className="text-center p-4">
-                            <div className="flex justify-center">
-                              <Switch
-                                checked={isAdmin || (perm?.can_write ?? false)}
-                                onCheckedChange={v => handlePermissionChange(route.route, 'can_write', v)}
-                                disabled={isAdmin}
-                                className="data-[state=checked]:bg-morandi-gold"
-                              />
-                            </div>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
+                <div>
+                  {/* 表頭 */}
+                  <div className="flex items-center bg-morandi-bg/50 sticky top-0 border-b border-border">
+                    <div className="flex-1 p-4 font-semibold text-morandi-primary">功能模組</div>
+                    <div className="w-32 p-4 text-center font-semibold text-morandi-primary">可讀取</div>
+                    <div className="w-32 p-4 text-center font-semibold text-morandi-primary">可寫入</div>
+                  </div>
+
+                  {/* 模組列表 */}
+                  {MODULES.map(module => renderModuleRow(module))}
+                </div>
               ) : (
                 <div className="flex items-center justify-center h-full text-morandi-secondary">
                   <div className="text-center">
@@ -383,7 +527,6 @@ export default function RolesPage() {
               )}
             </div>
 
-            {/* 管理員提示 */}
             {selectedRole?.is_admin && (
               <div className="p-4 border-t border-border bg-morandi-bg/30">
                 <p className="text-sm text-morandi-secondary text-center">
