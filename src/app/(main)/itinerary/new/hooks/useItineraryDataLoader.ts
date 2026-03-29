@@ -432,7 +432,11 @@ export function useItineraryDataLoader({
           location: isTaiwan ? '' : '桃園機場第二航廈',
         },
         itinerarySubtitle: `${days}天${days - 1}夜精彩旅程規劃`,
-        dailyItinerary: [],
+        dailyItinerary: createDailyItineraryFromTour(
+          tour,
+          days,
+          departureDate
+        ),
       })
 
       setLoading(false)
@@ -456,6 +460,46 @@ export function useItineraryDataLoader({
     setTourData,
     setLoading,
   ])
+}
+
+/**
+ * 從旅遊團資料生成每日行程
+ */
+function createDailyItineraryFromTour(
+  tour: Tour,
+  days: number,
+  departureDate: Date
+): DailyItinerary[] {
+  const dailyItinerary: DailyItinerary[] = []
+  
+  // 如果旅遊團已有 daily_itinerary，直接使用
+  if (tour.daily_itinerary && Array.isArray(tour.daily_itinerary) && tour.daily_itinerary.length > 0) {
+    return tour.daily_itinerary as DailyItinerary[]
+  }
+  
+  // 否則生成空白行程（只帶標題）
+  for (let i = 0; i < days; i++) {
+    const dayNum = i + 1
+    const currentDate = new Date(departureDate)
+    currentDate.setDate(currentDate.getDate() + i)
+    
+    dailyItinerary.push({
+      dayLabel: `Day ${dayNum}`,
+      date: formatDateCompactPadded(currentDate),
+      title: `第${dayNum}天`, // 預設標題，等待用戶填寫
+      highlight: '',
+      description: '',
+      images: [],
+      activities: [],
+      recommendations: [],
+      breakfast: '',
+      lunch: '',
+      dinner: '',
+      accommodation: '',
+    })
+  }
+  
+  return dailyItinerary
 }
 
 function createDailyItineraryFromQuote(

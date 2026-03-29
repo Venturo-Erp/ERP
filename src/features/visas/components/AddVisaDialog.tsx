@@ -242,7 +242,7 @@ export function AddVisaDialog({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setContactInfo(prev => ({ ...prev, contact_person: e.target.value }))
               }
-              className="mt-1"
+              className="mt-1 bg-white"
               placeholder={L.placeholder_contact}
             />
           </div>
@@ -253,7 +253,7 @@ export function AddVisaDialog({
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setContactInfo(prev => ({ ...prev, contact_phone: e.target.value }))
               }
-              className="mt-1"
+              className="mt-1 bg-white"
               placeholder={L.placeholder_phone}
             />
           </div>
@@ -305,7 +305,7 @@ export function AddVisaDialog({
             return (
               <tr key={applicant.id}>
                 {/* 申請人 */}
-                <td className="py-2 px-3 border border-border">
+                <td className="py-2 px-3 border border-border bg-white">
                   {applicant.isAdditional ? (
                     <span className="text-morandi-secondary">-</span>
                   ) : (
@@ -314,18 +314,18 @@ export function AddVisaDialog({
                       value={applicant.name}
                       onChange={e => updateApplicant(applicant.id, 'name', e.target.value)}
                       placeholder={L.placeholder_applicant}
-                      className="w-full bg-transparent outline-none text-sm"
+                      className="w-full bg-white outline-none text-sm"
                     />
                   )}
                 </td>
 
                 {/* 簽證類型 */}
-                <td className="py-2 px-3 border border-border">
+                <td className="py-2 px-3 border border-border bg-white">
                   <Select
                     value={applicant.country}
                     onValueChange={value => updateApplicant(applicant.id, 'country', value)}
                   >
-                    <SelectTrigger className="h-auto p-0 border-0 shadow-none bg-transparent text-sm">
+                    <SelectTrigger className="h-auto p-0 border-0 shadow-none bg-white text-sm">
                       <SelectValue placeholder={L.placeholder_type} />
                     </SelectTrigger>
                     <SelectContent>
@@ -355,7 +355,7 @@ export function AddVisaDialog({
                 </td>
 
                 {/* 急件 */}
-                <td className="py-2 px-3 border border-border text-center">
+                <td className="py-2 px-3 border border-border text-center bg-white">
                   <Checkbox
                     checked={applicant.is_urgent}
                     onCheckedChange={checked =>
@@ -365,48 +365,48 @@ export function AddVisaDialog({
                 </td>
 
                 {/* 收件日期 */}
-                <td className="py-2 px-3 border border-border">
+                <td className="py-2 px-3 border border-border bg-white">
                   <DatePicker
                     value={applicant.received_date}
                     onChange={date => updateApplicant(applicant.id, 'received_date', date)}
                     placeholder={L.placeholder_received}
-                    buttonClassName="h-auto p-0 border-0 shadow-none bg-transparent"
+                    buttonClassName="h-auto p-0 border-0 shadow-none bg-white"
                   />
                 </td>
 
                 {/* 回件日期 */}
-                <td className="py-2 px-3 border border-border">
+                <td className="py-2 px-3 border border-border bg-white">
                   <DatePicker
                     value={applicant.expected_issue_date}
                     onChange={date => updateApplicant(applicant.id, 'expected_issue_date', date)}
                     placeholder={L.placeholder_return}
-                    buttonClassName="h-auto p-0 border-0 shadow-none bg-transparent"
+                    buttonClassName="h-auto p-0 border-0 shadow-none bg-white"
                   />
                 </td>
 
                 {/* 辦理費用 */}
-                <td className="py-2 px-3 border border-border text-center">
+                <td className="py-2 px-3 border border-border text-center bg-white">
                   <input
                     type="number"
                     value={baseFee}
                     onChange={e => updateApplicant(applicant.id, 'fee', Number(e.target.value))}
-                    className="w-full bg-transparent outline-none text-sm text-center"
+                    className="w-full bg-white outline-none text-sm text-center"
                   />
                 </td>
 
                 {/* 急件費用 */}
-                <td className="py-2 px-3 border border-border text-center text-sm text-morandi-secondary">
+                <td className="py-2 px-3 border border-border text-center text-sm text-morandi-secondary bg-white">
                   {urgentFee > 0 ? urgentFee.toLocaleString() : '0'}
                 </td>
 
                 {/* 應收費用 */}
-                <td className="py-2 px-3 border border-border text-center text-sm font-medium">
+                <td className="py-2 px-3 border border-border text-center text-sm font-medium bg-white">
                   {totalFee !== null ? totalFee.toLocaleString() : '-'}
                 </td>
 
                 {/* 追加辦理（只在新增模式顯示） */}
                 {!isEditMode && (
-                  <td className="py-2 px-3 border border-border text-center">
+                  <td className="py-2 px-3 border border-border text-center bg-white">
                     {!applicant.isAdditional && (
                       <span
                         onClick={() => addApplicantForSame(applicant.id, applicant.name)}
@@ -421,7 +421,7 @@ export function AddVisaDialog({
 
                 {/* 刪除（只在新增模式顯示） */}
                 {!isEditMode && (
-                  <td className="py-2 px-3 border border-border text-center">
+                  <td className="py-2 px-3 border border-border text-center bg-white">
                     <span
                       onClick={() => removeApplicant(applicant.id)}
                       className="text-morandi-secondary cursor-pointer hover:text-morandi-red text-sm"

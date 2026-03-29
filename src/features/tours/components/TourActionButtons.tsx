@@ -35,10 +35,11 @@ interface UseTourActionButtonsParams {
   onOpenArchiveDialog?: (tour: Tour) => void
   onOpenRequirementsDialog?: ((tour: Tour) => void) | undefined
   onAddOrder?: (tour: Tour) => void
+  itineraries?: any[] // 用來判斷該團是否有行程表
 }
 
 export function useTourActionButtons(params: UseTourActionButtonsParams) {
-  const { operations, onEditTour, setDeleteConfirm, onOpenArchiveDialog, onAddOrder } = params
+  const { operations, onEditTour, setDeleteConfirm, onOpenArchiveDialog, onAddOrder, itineraries = [] } = params
   const router = useRouter()
 
   const renderActions = useCallback(
@@ -56,11 +57,27 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
         }
       }
 
-      // 行程（查看/分享）
-      const handleItinerary = (e: React.MouseEvent) => {
+      // 行程（判斷是否有行程表 → 複製連結 or 開啟編輯器）
+      const handleItinerary = async (e: React.MouseEvent) => {
         e.stopPropagation()
-        // 導航到行程分頁
-        router.push(`/tours/${tour.code}?tab=itinerary`)
+        
+        // 檢查是否已有行程表
+        const hasItinerary = itineraries.find((i: any) => i.tour_id === tour.id)
+        
+        if (hasItinerary) {
+          // 有行程表 → 複製公開連結（用團號，不是 UUID）
+          const ref = params.user?.employee_number || params.user?.display_name || params.user?.id
+          const link = `${window.location.origin}/public/itinerary/${tour.code}?ref=${ref}`
+          try {
+            await navigator.clipboard.writeText(link)
+            toast.success('已複製行程連結')
+          } catch {
+            toast.error('複製失敗')
+          }
+        } else {
+          // 無行程表 → 導向編輯器
+          router.push(`/itinerary/new?tour_id=${tour.id}`)
+        }
       }
 
       // 複製行程連結（帶業務 ref）
