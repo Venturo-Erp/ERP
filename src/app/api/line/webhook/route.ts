@@ -3,6 +3,95 @@ import { logger } from '@/lib/utils/logger'
 
 const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || ''
 
+/** 取得用戶資料 */
+async function getUserProfile(userId: string): Promise<{
+  displayName: string | null
+  pictureUrl: string | null
+  statusMessage: string | null
+} | null> {
+  try {
+    const res = await fetch(`https://api.line.me/v2/bot/profile/${userId}`, {
+      headers: { Authorization: `Bearer ${LINE_TOKEN}` },
+    })
+    if (res.ok) {
+      const data = await res.json()
+      return {
+        displayName: data.displayName || null,
+        pictureUrl: data.pictureUrl || null,
+        statusMessage: data.statusMessage || null,
+      }
+    }
+  } catch {}
+  return null
+}
+
+/** 儲存用戶到 DB（follow 事件） */
+async function saveUserToDb(userId: string, profile: {
+  displayName: string | null
+  pictureUrl: string | null
+  statusMessage: string | null
+} | null) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseKey) return
+
+  await fetch(`${supabaseUrl}/rest/v1/line_users`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      Prefer: 'resolution=merge-duplicates',
+    },
+    body: JSON.stringify({
+      user_id: userId,
+      display_name: profile?.displayName,
+      picture_url: profile?.pictureUrl,
+      status_message: profile?.statusMessage,
+      followed_at: new Date().toISOString(),
+      unfollowed_at: null,  // 重新追蹤時清除
+      updated_at: new Date().toISOString(),
+    }),
+  })
+}
+
+/** 標記用戶取消追蹤 */
+async function markUserUnfollowed(userId: string) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseKey) return
+
+  await fetch(`${supabaseUrl}/rest/v1/line_users?user_id=eq.${userId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+    },
+    body: JSON.stringify({
+      unfollowed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }),
+  })
+}
+
+/** 處理 follow/unfollow 事件 */
+async function processFollowEvent(event: any) {
+  const userId = event.source?.userId
+  if (!userId) return
+
+  if (event.type === 'follow') {
+    const profile = await getUserProfile(userId)
+    logger.info(`[LINE] Follow: ${userId} | Name: ${profile?.displayName}`)
+    await saveUserToDb(userId, profile)
+  } else if (event.type === 'unfollow') {
+    logger.info(`[LINE] Unfollow: ${userId}`)
+    await markUserUnfollowed(userId)
+  }
+}
+
 async function getGroupName(groupId: string): Promise<string | null> {
   try {
     const res = await fetch(`https://api.line.me/v2/bot/group/${groupId}/summary`, {
@@ -183,6 +272,11 @@ export async function POST(req: NextRequest) {
 
     for (const event of events) {
       const source = event.source || {}
+
+      // follow/unfollow 事件 → 記錄用戶
+      if (event.type === 'follow' || event.type === 'unfollow') {
+        bgTasks.push(processFollowEvent(event))
+      }
 
       // 私人訊息 → 檢查員工綁定指令
       if (source.type === 'user' && event.type === 'message' && event.message?.type === 'text') {
