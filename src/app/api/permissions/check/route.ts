@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient } from '@/lib/supabase/api-client'
 
 /**
  * 權限檢查 API
@@ -14,20 +9,20 @@ const supabase = createClient(
  */
 export async function POST(request: NextRequest) {
   try {
-    const { workspaceId, roleId, route } = await request.json()
+    const supabase = await createApiClient()
+    const { roleId, route } = await request.json()
 
-    if (!workspaceId || !route) {
+    if (!route) {
       return NextResponse.json(
-        { error: '缺少必要參數' },
+        { error: '缺少 route 參數' },
         { status: 400 }
       )
     }
 
-    // 1. 檢查租戶功能權限
+    // 1. 檢查租戶功能權限（RLS 自動過濾）
     const { data: features } = await supabase
       .from('workspace_features')
       .select('feature_code, enabled')
-      .eq('workspace_id', workspaceId)
 
     // 2. 檢查角色路由權限（如果有 roleId）
     let canRead = true
@@ -52,8 +47,7 @@ export async function POST(request: NextRequest) {
       canWrite,
       features: features?.filter(f => f.enabled).map(f => f.feature_code) || [],
     })
-  } catch (err) {
-    console.error('[Permissions Check] Error:', err)
+  } catch {
     return NextResponse.json(
       { error: '權限檢查失敗' },
       { status: 500 }

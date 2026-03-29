@@ -1,10 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient } from '@/lib/supabase/api-client'
 
 interface TabPermission {
   module_code: string
@@ -15,13 +10,14 @@ interface TabPermission {
 
 /**
  * GET /api/roles/[roleId]/tab-permissions
- * 取得角色的分頁權限
+ * 取得角色的分頁權限（RLS 自動過濾）
  */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ roleId: string }> }
 ) {
   const { roleId } = await params
+  const supabase = await createApiClient()
 
   const { data, error } = await supabase
     .from('role_tab_permissions')
@@ -44,6 +40,7 @@ export async function PUT(
   { params }: { params: Promise<{ roleId: string }> }
 ) {
   const { roleId } = await params
+  const supabase = await createApiClient()
   const body = await request.json()
   const { permissions } = body as { permissions: TabPermission[] }
 

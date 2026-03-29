@@ -1,16 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient } from '@/lib/supabase/api-client'
 
 /**
  * GET /api/permissions/role-permissions?role_id=xxx
- * 取得角色的路由權限
+ * 取得角色的路由權限（RLS 自動過濾）
  */
 export async function GET(request: NextRequest) {
+  const supabase = await createApiClient()
   const roleId = request.nextUrl.searchParams.get('role_id')
   
   if (!roleId) {
@@ -34,6 +30,7 @@ export async function GET(request: NextRequest) {
  * 更新角色的路由權限（覆蓋式）
  */
 export async function PUT(request: NextRequest) {
+  const supabase = await createApiClient()
   const body = await request.json()
   const { role_id, permissions } = body
 

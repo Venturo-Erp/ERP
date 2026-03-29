@@ -1,26 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient, getCurrentWorkspaceId } from '@/lib/supabase/api-client'
 
 /**
- * GET /api/permissions/roles?workspace_id=xxx
- * 取得租戶的所有角色
+ * GET /api/permissions/roles
+ * 取得當前租戶的所有角色（RLS 自動過濾）
  */
-export async function GET(request: NextRequest) {
-  const workspaceId = request.nextUrl.searchParams.get('workspace_id')
-  
-  if (!workspaceId) {
-    return NextResponse.json({ error: '缺少 workspace_id' }, { status: 400 })
-  }
+export async function GET() {
+  const supabase = await createApiClient()
 
   const { data, error } = await supabase
     .from('workspace_roles')
     .select('id, name, description, is_admin, sort_order')
-    .eq('workspace_id', workspaceId)
     .order('sort_order')
 
   if (error) {
@@ -35,23 +25,29 @@ export async function GET(request: NextRequest) {
  * 建立角色
  */
 export async function POST(request: NextRequest) {
-  const body = await request.json()
-  const { workspace_id, name, description } = body
+  const supabase = await createApiClient()
+  const workspaceId = await getCurrentWorkspaceId()
 
-  if (!workspace_id || !name) {
-    return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
+  if (!workspaceId) {
+    return NextResponse.json({ error: '未登入' }, { status: 401 })
+  }
+
+  const body = await request.json()
+  const { name, description } = body
+
+  if (!name) {
+    return NextResponse.json({ error: '缺少角色名稱' }, { status: 400 })
   }
 
   // 取得目前角色數量作為 sort_order
   const { count } = await supabase
     .from('workspace_roles')
     .select('*', { count: 'exact', head: true })
-    .eq('workspace_id', workspace_id)
 
   const { data, error } = await supabase
     .from('workspace_roles')
     .insert({
-      workspace_id,
+      workspace_id: workspaceId,
       name,
       description: description || null,
       is_admin: false,
@@ -72,6 +68,7 @@ export async function POST(request: NextRequest) {
  * 刪除角色
  */
 export async function DELETE(request: NextRequest) {
+  const supabase = await createApiClient()
   const roleId = request.nextUrl.searchParams.get('id')
   
   if (!roleId) {

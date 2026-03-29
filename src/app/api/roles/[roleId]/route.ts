@@ -1,20 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient } from '@/lib/supabase/api-client'
 
 /**
  * GET /api/roles/[roleId]
- * 取得單一角色
+ * 取得單一角色（RLS 自動過濾）
  */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ roleId: string }> }
 ) {
   const { roleId } = await params
+  const supabase = await createApiClient()
 
   const { data, error } = await supabase
     .from('workspace_roles')
@@ -38,6 +34,7 @@ export async function DELETE(
   { params }: { params: Promise<{ roleId: string }> }
 ) {
   const { roleId } = await params
+  const supabase = await createApiClient()
 
   // 檢查是否為管理員角色
   const { data: role } = await supabase

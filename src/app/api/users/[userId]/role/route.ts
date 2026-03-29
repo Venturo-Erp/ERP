@@ -1,20 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { createApiClient } from '@/lib/supabase/api-client'
 
 /**
  * GET /api/users/[userId]/role
- * 取得用戶的角色資訊
+ * 取得用戶的角色資訊（RLS 自動過濾）
  */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
   const { userId } = await params
+  const supabase = await createApiClient()
 
   // 取得用戶的角色
   const { data: userRole, error: userRoleError } = await supabase
