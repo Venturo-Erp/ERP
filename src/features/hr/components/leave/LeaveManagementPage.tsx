@@ -1,7 +1,7 @@
 'use client'
 /**
  * 請假管理頁面
- * 整合假別設定、請假申請、假別餘額
+ * 整合假別設定、請假申請
  */
 
 import React, { useState, useEffect } from 'react'
@@ -9,19 +9,17 @@ import {
   Calendar,
   Settings,
   FileText,
-  Users,
   Plus,
   Check,
   X,
   Trash2,
   Edit2,
-  Clock,
   AlertCircle,
 } from 'lucide-react'
-import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { ListPageLayout, type TabItem } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
-import { EnhancedTable, type Column } from '@/components/ui/enhanced-table'
-import { DateCell, StatusCell, ActionCell } from '@/components/table-cells'
+import { TableColumn } from '@/components/ui/enhanced-table'
+import { DateCell, ActionCell } from '@/components/table-cells'
 import {
   Dialog,
   DialogContent,
@@ -55,7 +53,7 @@ const STATUS_COLORS: Record<LeaveRequestStatus, string> = {
   cancelled: 'bg-morandi-container text-morandi-secondary',
 }
 
-type TabType = 'requests' | 'types' | 'balances'
+type TabType = 'requests' | 'types'
 
 export function LeaveManagementPage() {
   const [activeTab, setActiveTab] = useState<TabType>('requests')
@@ -90,8 +88,14 @@ export function LeaveManagementPage() {
     fetchRequests()
   }, [fetchLeaveTypes, fetchRequests])
 
+  // Tab 定義
+  const tabs: TabItem[] = [
+    { value: 'requests', label: L.tab_requests, icon: FileText },
+    { value: 'types', label: L.tab_types, icon: Settings },
+  ]
+
   // 假別類型表格欄位
-  const typeColumns: Column<LeaveType>[] = [
+  const typeColumns: TableColumn<LeaveType>[] = [
     {
       key: 'code',
       label: L.col_code,
@@ -160,35 +164,10 @@ export function LeaveManagementPage() {
         </span>
       ),
     },
-    {
-      key: 'actions',
-      label: '',
-      width: '80px',
-      render: (_, row) => (
-        <ActionCell
-          actions={[
-            {
-              icon: Edit2,
-              label: L.action_edit,
-              onClick: () => {
-                setEditingType(row)
-                setShowTypeDialog(true)
-              },
-            },
-            {
-              icon: Trash2,
-              label: L.action_delete,
-              onClick: () => handleDeleteType(row),
-              variant: 'danger',
-            },
-          ]}
-        />
-      ),
-    },
   ]
 
   // 請假申請表格欄位
-  const requestColumns: Column<LeaveRequest>[] = [
+  const requestColumns: TableColumn<LeaveRequest>[] = [
     {
       key: 'employee_name',
       label: L.col_employee,
@@ -240,39 +219,6 @@ export function LeaveManagementPage() {
       label: L.col_applied_at,
       width: '120px',
       render: (_, row) => <DateCell date={row.created_at} />,
-    },
-    {
-      key: 'actions',
-      label: '',
-      width: '120px',
-      render: (_, row) => {
-        if (row.status !== 'pending') return null
-        return (
-          <div className="flex items-center gap-2">
-            <Button
-              size="sm"
-              onClick={() => handleApprove(row)}
-              className="gap-1 bg-morandi-green hover:bg-morandi-green/90 text-white"
-            >
-              <Check size={14} />
-              {L.btn_approve}
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => {
-                setRejectingRequest(row)
-                setRejectReason('')
-                setRejectDialogOpen(true)
-              }}
-              className="gap-1 text-morandi-red border-morandi-red hover:bg-morandi-red hover:text-white"
-            >
-              <X size={14} />
-              {L.btn_reject}
-            </Button>
-          </div>
-        )
-      },
     },
   ]
 
@@ -344,49 +290,108 @@ export function LeaveManagementPage() {
     }
   }
 
-  return (
-    <ContentPageLayout
-      title={L.page_title}
-      icon={Calendar}
-      breadcrumb={[
-        { label: L.breadcrumb_home, href: '/dashboard' },
-        { label: L.breadcrumb_hr, href: '/hr' },
-        { label: L.breadcrumb_leave, href: '/hr/leave' },
+  // 類型操作
+  const renderTypeActions = (row: LeaveType) => (
+    <ActionCell
+      actions={[
+        {
+          icon: Edit2,
+          label: L.action_edit,
+          onClick: () => {
+            setEditingType(row)
+            setShowTypeDialog(true)
+          },
+        },
+        {
+          icon: Trash2,
+          label: L.action_delete,
+          onClick: () => handleDeleteType(row),
+          variant: 'danger',
+        },
       ]}
-    >
-      {/* 頁籤 */}
-      <div className="p-4 bg-card border-b border-border">
-        <div className="flex gap-2">
-          <Button
-            variant={activeTab === 'requests' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('requests')}
-            className={
-              activeTab === 'requests'
-                ? 'bg-morandi-gold hover:bg-morandi-gold-hover text-white'
-                : ''
-            }
-          >
-            <FileText size={16} className="mr-2" />
-            {L.tab_requests}
-          </Button>
-          <Button
-            variant={activeTab === 'types' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('types')}
-            className={
-              activeTab === 'types' ? 'bg-morandi-gold hover:bg-morandi-gold-hover text-white' : ''
-            }
-          >
-            <Settings size={16} className="mr-2" />
-            {L.tab_types}
-          </Button>
-        </div>
-      </div>
+    />
+  )
 
-      {/* 內容區 */}
-      <div className="flex-1 overflow-auto p-4">
-        {activeTab === 'types' && (
-          <div className="space-y-4">
-            {leaveTypes.length === 0 && !typesLoading && (
+  // 請假操作
+  const renderRequestActions = (row: LeaveRequest) => {
+    if (row.status !== 'pending') return null
+    return (
+      <div className="flex items-center gap-2">
+        <Button
+          size="sm"
+          onClick={() => handleApprove(row)}
+          className="gap-1 bg-morandi-green hover:bg-morandi-green/90 text-white"
+        >
+          <Check size={14} />
+          {L.btn_approve}
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => {
+            setRejectingRequest(row)
+            setRejectReason('')
+            setRejectDialogOpen(true)
+          }}
+          className="gap-1 text-morandi-red border-morandi-red hover:bg-morandi-red hover:text-white"
+        >
+          <X size={14} />
+          {L.btn_reject}
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {activeTab === 'requests' ? (
+        <ListPageLayout
+          title={L.page_title}
+          icon={Calendar}
+          breadcrumb={[
+            { label: L.breadcrumb_hr, href: '/hr' },
+            { label: L.breadcrumb_leave, href: '/hr/leave' },
+          ]}
+          data={requests}
+          columns={requestColumns}
+          loading={requestsLoading}
+          renderActions={renderRequestActions}
+          searchable={false}
+          statusTabs={tabs}
+          activeStatusTab={activeTab}
+          onStatusTabChange={(tab) => setActiveTab(tab as TabType)}
+          emptyMessage={L.empty_requests}
+        />
+      ) : (
+        <ListPageLayout
+          title={L.page_title}
+          icon={Calendar}
+          breadcrumb={[
+            { label: L.breadcrumb_hr, href: '/hr' },
+            { label: L.breadcrumb_leave, href: '/hr/leave' },
+          ]}
+          data={leaveTypes}
+          columns={typeColumns}
+          loading={typesLoading}
+          renderActions={renderTypeActions}
+          searchable={false}
+          statusTabs={tabs}
+          activeStatusTab={activeTab}
+          onStatusTabChange={(tab) => setActiveTab(tab as TabType)}
+          headerActions={
+            <Button
+              onClick={() => {
+                setEditingType(null)
+                setShowTypeDialog(true)
+              }}
+              className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            >
+              <Plus size={16} />
+              {L.dialog_title_add}
+            </Button>
+          }
+          beforeTable={
+            leaveTypes.length === 0 && !typesLoading ? (
               <div className="bg-morandi-gold/10 border border-morandi-gold/30 rounded-lg p-4 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-morandi-gold">
                   <AlertCircle size={16} />
@@ -400,37 +405,10 @@ export function LeaveManagementPage() {
                   {L.btn_init}
                 </Button>
               </div>
-            )}
-
-            <div className="flex justify-between items-center">
-              <h3 className="font-medium text-morandi-primary">{L.type_section_title}</h3>
-              <Button
-                onClick={() => {
-                  setEditingType(null)
-                  setShowTypeDialog(true)
-                }}
-                className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-              >
-                <Plus size={16} />
-                {L.dialog_title_add}
-              </Button>
-            </div>
-
-            <EnhancedTable data={leaveTypes} columns={typeColumns} loading={typesLoading} />
-          </div>
-        )}
-
-        {activeTab === 'requests' && (
-          <EnhancedTable data={requests} columns={requestColumns} loading={requestsLoading} />
-        )}
-
-        {requests.length === 0 && activeTab === 'requests' && !requestsLoading && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <FileText size={48} className="text-morandi-muted mb-4" />
-            <p className="text-morandi-secondary">{L.empty_requests}</p>
-          </div>
-        )}
-      </div>
+            ) : undefined
+          }
+        />
+      )}
 
       {/* 假別類型編輯 Dialog */}
       <LeaveTypeDialog
@@ -488,7 +466,7 @@ export function LeaveManagementPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </ContentPageLayout>
+    </>
   )
 }
 

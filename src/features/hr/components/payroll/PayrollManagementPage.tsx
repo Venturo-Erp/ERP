@@ -16,10 +16,10 @@ import {
   CreditCard,
   Users,
 } from 'lucide-react'
-import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
-import { EnhancedTable, type Column } from '@/components/ui/enhanced-table'
-import { CurrencyCell, ActionCell, StatusCell } from '@/components/table-cells'
+import { TableColumn } from '@/components/ui/enhanced-table'
+import { CurrencyCell, ActionCell } from '@/components/table-cells'
 import {
   Dialog,
   DialogContent,
@@ -27,7 +27,6 @@ import {
   DialogTitle,
   DIALOG_SIZES,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
 import {
@@ -48,7 +47,6 @@ export function PayrollManagementPage() {
     createPeriod,
     fetchRecords,
     calculatePayroll,
-    updateRecord,
     confirmPeriod,
     markAsPaid,
     calculateSummary,
@@ -77,7 +75,7 @@ export function PayrollManagementPage() {
   }, [fetchPeriods, selectedYear])
 
   // 期間表格欄位
-  const periodColumns: Column<PayrollPeriod>[] = [
+  const periodColumns: TableColumn<PayrollPeriod>[] = [
     {
       key: 'period',
       label: L.col_period,
@@ -121,59 +119,10 @@ export function PayrollManagementPage() {
         </span>
       ),
     },
-    {
-      key: 'actions',
-      label: '',
-      width: '200px',
-      render: (_, row) => (
-        <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => handleViewRecords(row)}
-            className="gap-1"
-          >
-            <Eye size={14} />
-            {L.btn_view}
-          </Button>
-          {row.status === 'draft' && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => handleCalculate(row)}
-              className="gap-1"
-            >
-              <Calculator size={14} />
-              {L.btn_calculate}
-            </Button>
-          )}
-          {row.status === 'draft' && (
-            <Button
-              size="sm"
-              onClick={() => handleConfirm(row)}
-              className="gap-1 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-            >
-              <Check size={14} />
-              {L.btn_confirm}
-            </Button>
-          )}
-          {row.status === 'confirmed' && (
-            <Button
-              size="sm"
-              onClick={() => handleMarkPaid(row)}
-              className="gap-1 bg-morandi-green hover:opacity-80 text-white"
-            >
-              <CreditCard size={14} />
-              {L.btn_mark_paid}
-            </Button>
-          )}
-        </div>
-      ),
-    },
   ]
 
   // 薪資紀錄表格欄位
-  const recordColumns: Column<PayrollRecord>[] = [
+  const recordColumns: TableColumn<PayrollRecord>[] = [
     {
       key: 'employee_name',
       label: L.col_employee,
@@ -221,22 +170,6 @@ export function PayrollManagementPage() {
       label: L.col_net,
       width: '120px',
       render: (_, row) => <CurrencyCell amount={row.net_salary} variant="income" />,
-    },
-    {
-      key: 'actions',
-      label: '',
-      width: '80px',
-      render: (_, row) => (
-        <ActionCell
-          actions={[
-            {
-              icon: Printer,
-              label: L.action_payslip,
-              onClick: () => handlePrintPayslip(row),
-            },
-          ]}
-        />
-      ),
     },
   ]
 
@@ -303,63 +236,108 @@ export function PayrollManagementPage() {
   // 統計
   const summary = calculateSummary(records)
 
-  return (
-    <ContentPageLayout
-      title={L.page_title}
-      icon={DollarSign}
-      breadcrumb={[
-        { label: L.breadcrumb_home, href: '/dashboard' },
-        { label: L.breadcrumb_hr, href: '/hr' },
-        { label: L.breadcrumb_payroll, href: '/hr/payroll' },
-      ]}
-      headerActions={
+  // 期間操作按鈕
+  const renderPeriodActions = (row: PayrollPeriod) => (
+    <div className="flex items-center gap-2">
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => handleViewRecords(row)}
+        className="gap-1"
+      >
+        <Eye size={14} />
+        {L.btn_view}
+      </Button>
+      {row.status === 'draft' && (
         <Button
-          onClick={() => setShowCreateDialog(true)}
-          className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+          size="sm"
+          variant="outline"
+          onClick={() => handleCalculate(row)}
+          className="gap-1"
         >
-          <Plus size={16} />
-          {L.btn_create}
+          <Calculator size={14} />
+          {L.btn_calculate}
         </Button>
-      }
-    >
-      {/* 年度篩選 */}
-      <div className="p-4 bg-card border-b border-border">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Calendar size={16} className="text-morandi-secondary" />
-            <select
-              value={selectedYear}
-              onChange={e => setSelectedYear(Number(e.target.value))}
-              className="px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-morandi-gold"
-            >
-              {Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).map(year => (
-                <option key={year} value={year}>
-                  {year} {L.year_suffix}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
+      )}
+      {row.status === 'draft' && (
+        <Button
+          size="sm"
+          onClick={() => handleConfirm(row)}
+          className="gap-1 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+        >
+          <Check size={14} />
+          {L.btn_confirm}
+        </Button>
+      )}
+      {row.status === 'confirmed' && (
+        <Button
+          size="sm"
+          onClick={() => handleMarkPaid(row)}
+          className="gap-1 bg-morandi-green hover:opacity-80 text-white"
+        >
+          <CreditCard size={14} />
+          {L.btn_mark_paid}
+        </Button>
+      )}
+    </div>
+  )
 
-      {/* 表格 */}
-      <div className="flex-1 overflow-auto p-4">
-        <EnhancedTable data={periods} columns={periodColumns} loading={loading} />
+  // 薪資紀錄操作
+  const renderRecordActions = (row: PayrollRecord) => (
+    <ActionCell
+      actions={[
+        {
+          icon: Printer,
+          label: L.action_payslip,
+          onClick: () => handlePrintPayslip(row),
+        },
+      ]}
+    />
+  )
 
-        {periods.length === 0 && !loading && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <DollarSign size={48} className="text-morandi-muted mb-4" />
-            <p className="text-morandi-secondary">{L.empty_message}</p>
-            <Button
-              onClick={() => setShowCreateDialog(true)}
-              className="mt-4 gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-            >
-              <Plus size={16} />
-              {L.btn_create}
-            </Button>
+  return (
+    <>
+      <ListPageLayout
+        title={L.page_title}
+        icon={DollarSign}
+        breadcrumb={[
+          { label: L.breadcrumb_hr, href: '/hr' },
+          { label: L.breadcrumb_payroll, href: '/hr/payroll' },
+        ]}
+        data={periods}
+        columns={periodColumns}
+        loading={loading}
+        renderActions={renderPeriodActions}
+        searchable={false}
+        headerActions={
+          <Button
+            onClick={() => setShowCreateDialog(true)}
+            className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+          >
+            <Plus size={16} />
+            {L.btn_create}
+          </Button>
+        }
+        beforeTable={
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Calendar size={16} className="text-morandi-secondary" />
+              <select
+                value={selectedYear}
+                onChange={e => setSelectedYear(Number(e.target.value))}
+                className="px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-morandi-gold"
+              >
+                {Array.from({ length: 5 }, (_, i) => currentYear - 2 + i).map(year => (
+                  <option key={year} value={year}>
+                    {year} {L.year_suffix}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
-        )}
-      </div>
+        }
+        emptyMessage={L.empty_message}
+      />
 
       {/* 建立期間 Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
@@ -464,13 +442,38 @@ export function PayrollManagementPage() {
             </div>
 
             {/* 表格 */}
-            <div className="max-h-[400px] overflow-auto">
-              <EnhancedTable data={records} columns={recordColumns} loading={loading} />
-            </div>
+            <div className="max-h-[400px] overflow-auto border rounded-lg">
+              <table className="w-full text-sm">
+                <thead className="bg-morandi-container/50 sticky top-0">
+                  <tr>
+                    {recordColumns.map(col => (
+                      <th key={col.key} className="px-4 py-3 text-left font-medium text-morandi-primary" style={{ width: col.width }}>
+                        {col.label}
+                      </th>
+                    ))}
+                    <th className="px-4 py-3 text-left font-medium text-morandi-primary w-20"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {records.map(record => (
+                    <tr key={record.id} className="hover:bg-morandi-container/20">
+                      {recordColumns.map(col => (
+                        <td key={col.key} className="px-4 py-3">
+                          {col.render ? col.render(undefined, record) : '-'}
+                        </td>
+                      ))}
+                      <td className="px-4 py-3">
+                        {renderRecordActions(record)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
 
-            {records.length === 0 && !loading && (
-              <div className="text-center py-8 text-morandi-secondary">{L.empty_records}</div>
-            )}
+              {records.length === 0 && !loading && (
+                <div className="text-center py-8 text-morandi-secondary">{L.empty_records}</div>
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -486,7 +489,7 @@ export function PayrollManagementPage() {
           )}
         </DialogContent>
       </Dialog>
-    </ContentPageLayout>
+    </>
   )
 }
 

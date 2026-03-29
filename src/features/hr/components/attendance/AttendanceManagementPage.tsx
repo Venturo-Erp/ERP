@@ -4,10 +4,10 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { Clock, Calendar, Plus, Edit2, Trash2, Check, X, Filter, LogIn, LogOut } from 'lucide-react'
-import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { Clock, Calendar, Plus, Edit2, Trash2, Check, X, Filter } from 'lucide-react'
+import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
-import { EnhancedTable, type Column } from '@/components/ui/enhanced-table'
+import { TableColumn } from '@/components/ui/enhanced-table'
 import { DateCell, ActionCell } from '@/components/table-cells'
 import { DatePicker } from '@/components/ui/date-picker'
 import {
@@ -112,7 +112,7 @@ export function AttendanceManagementPage() {
   const summary = calculateSummary(records, selectedEmployeeId || undefined)
 
   // 表格欄位
-  const columns: Column<AttendanceRecord>[] = [
+  const columns: TableColumn<AttendanceRecord>[] = [
     {
       key: 'date',
       label: L.col_date,
@@ -188,28 +188,6 @@ export function AttendanceManagementPage() {
         <span className="text-sm text-morandi-secondary truncate">{row.notes || '-'}</span>
       ),
     },
-    {
-      key: 'actions',
-      label: '',
-      width: '80px',
-      render: (_, row) => (
-        <ActionCell
-          actions={[
-            {
-              icon: Edit2,
-              label: L.action_edit,
-              onClick: () => handleEdit(row),
-            },
-            {
-              icon: Trash2,
-              label: L.action_delete,
-              onClick: () => handleDelete(row),
-              variant: 'danger',
-            },
-          ]}
-        />
-      ),
-    },
   ]
 
   // 開啟新增 Dialog
@@ -279,106 +257,119 @@ export function AttendanceManagementPage() {
     }
   }
 
-  return (
-    <ContentPageLayout
-      title={L.page_title}
-      icon={Clock}
-      breadcrumb={[
-        { label: L.breadcrumb_home, href: '/dashboard' },
-        { label: L.breadcrumb_hr, href: '/hr' },
-        { label: L.breadcrumb_attendance, href: '/hr/attendance' },
+  // 操作按鈕
+  const renderActions = (row: AttendanceRecord) => (
+    <ActionCell
+      actions={[
+        {
+          icon: Edit2,
+          label: L.action_edit,
+          onClick: () => handleEdit(row),
+        },
+        {
+          icon: Trash2,
+          label: L.action_delete,
+          onClick: () => handleDelete(row),
+          variant: 'danger',
+        },
       ]}
-      headerActions={
-        <Button
-          onClick={handleAdd}
-          className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-        >
-          <Plus size={16} />
-          {L.btn_add}
-        </Button>
-      }
-    >
-      {/* 篩選區 */}
-      <div className="p-4 bg-card border-b border-border">
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex items-center gap-2">
-            <Calendar size={16} className="text-morandi-secondary" />
-            <DatePicker
-              value={startDate}
-              onChange={setStartDate}
-              placeholder={L.placeholder_start_date}
-            />
-            <span className="text-morandi-secondary">{L.range_separator}</span>
-            <DatePicker
-              value={endDate}
-              onChange={setEndDate}
-              placeholder={L.placeholder_end_date}
-            />
-          </div>
+    />
+  )
 
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-morandi-secondary" />
-            <select
-              value={selectedEmployeeId}
-              onChange={e => setSelectedEmployeeId(e.target.value)}
-              className="px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-morandi-gold"
-            >
-              <option value="">{L.all_employees}</option>
-              {employees.map(emp => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
+  return (
+    <>
+      <ListPageLayout
+        title={L.page_title}
+        icon={Clock}
+        breadcrumb={[
+          { label: L.breadcrumb_hr, href: '/hr' },
+          { label: L.breadcrumb_attendance, href: '/hr/attendance' },
+        ]}
+        data={records}
+        columns={columns}
+        loading={loading}
+        renderActions={renderActions}
+        searchable={false}
+        headerActions={
+          <Button
+            onClick={handleAdd}
+            className="gap-2 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+          >
+            <Plus size={16} />
+            {L.btn_add}
+          </Button>
+        }
+        beforeTable={
+          <div className="space-y-4">
+            {/* 篩選區 */}
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Calendar size={16} className="text-morandi-secondary" />
+                <DatePicker
+                  value={startDate}
+                  onChange={setStartDate}
+                  placeholder={L.placeholder_start_date}
+                />
+                <span className="text-morandi-secondary">{L.range_separator}</span>
+                <DatePicker
+                  value={endDate}
+                  onChange={setEndDate}
+                  placeholder={L.placeholder_end_date}
+                />
+              </div>
 
-      {/* 統計區 */}
-      <div className="p-4 bg-morandi-container/30 border-b border-border">
-        <div className="grid grid-cols-6 gap-4">
-          <div className="text-center">
-            <div className="text-sm text-morandi-secondary">{L.summary_total_days}</div>
-            <div className="text-xl font-bold text-morandi-primary">{summary.total_days}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-sm text-morandi-secondary">{L.summary_present}</div>
-            <div className="text-xl font-bold text-green-600">{summary.present_days}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-sm text-morandi-secondary">{L.summary_late}</div>
-            <div className="text-xl font-bold text-yellow-600">{summary.late_days}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-sm text-morandi-secondary">{L.summary_absent}</div>
-            <div className="text-xl font-bold text-red-600">{summary.absent_days}</div>
-          </div>
-          <div className="text-center">
-            <div className="text-sm text-morandi-secondary">{L.summary_total_hours}</div>
-            <div className="text-xl font-bold text-morandi-primary">
-              {summary.total_work_hours.toFixed(1)} h
+              <div className="flex items-center gap-2">
+                <Filter size={16} className="text-morandi-secondary" />
+                <select
+                  value={selectedEmployeeId}
+                  onChange={e => setSelectedEmployeeId(e.target.value)}
+                  className="px-3 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-morandi-gold"
+                >
+                  <option value="">{L.all_employees}</option>
+                  {employees.map(emp => (
+                    <option key={emp.id} value={emp.id}>
+                      {emp.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* 統計區 */}
+            <div className="grid grid-cols-6 gap-4 p-4 bg-morandi-container/30 rounded-lg">
+              <div className="text-center">
+                <div className="text-sm text-morandi-secondary">{L.summary_total_days}</div>
+                <div className="text-xl font-bold text-morandi-primary">{summary.total_days}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-morandi-secondary">{L.summary_present}</div>
+                <div className="text-xl font-bold text-green-600">{summary.present_days}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-morandi-secondary">{L.summary_late}</div>
+                <div className="text-xl font-bold text-yellow-600">{summary.late_days}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-morandi-secondary">{L.summary_absent}</div>
+                <div className="text-xl font-bold text-red-600">{summary.absent_days}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-morandi-secondary">{L.summary_total_hours}</div>
+                <div className="text-xl font-bold text-morandi-primary">
+                  {summary.total_work_hours.toFixed(1)} h
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="text-sm text-morandi-secondary">{L.summary_total_overtime}</div>
+                <div className="text-xl font-bold text-morandi-gold">
+                  {summary.total_overtime_hours.toFixed(1)} h
+                </div>
+              </div>
             </div>
           </div>
-          <div className="text-center">
-            <div className="text-sm text-morandi-secondary">{L.summary_total_overtime}</div>
-            <div className="text-xl font-bold text-morandi-gold">
-              {summary.total_overtime_hours.toFixed(1)} h
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 表格 */}
-      <div className="flex-1 overflow-auto p-4">
-        <EnhancedTable data={records} columns={columns} loading={loading} />
-
-        {records.length === 0 && !loading && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Clock size={48} className="text-morandi-muted mb-4" />
-            <p className="text-morandi-secondary">{L.empty_message}</p>
-          </div>
-        )}
-      </div>
+        }
+        emptyMessage={L.empty_message}
+      />
 
       {/* 編輯 Dialog */}
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
@@ -479,6 +470,6 @@ export function AttendanceManagementPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </ContentPageLayout>
+    </>
   )
 }
