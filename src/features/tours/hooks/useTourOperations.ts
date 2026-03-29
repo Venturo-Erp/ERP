@@ -337,6 +337,18 @@ export function useTourOperations(params: UseTourOperationsParams) {
           }
         }
 
+        // 刪除關聯的行事曆事件
+        const { error: deleteEventsError } = await supabase
+          .from('calendar_events')
+          .delete()
+          .eq('related_tour_id', tour.id)
+
+        if (deleteEventsError) {
+          logger.warn(`刪除旅遊團 ${tour.code} 的行事曆事件失敗:`, deleteEventsError)
+        } else {
+          logger.info(`已刪除旅遊團 ${tour.code} 的行事曆事件`)
+        }
+
         // 軟刪除：只標記為已刪除，不真正刪除資料
         const { error: softDeleteError } = await supabase
           .from('tours')

@@ -105,15 +105,15 @@ export function CustomerDialog({
       open={open}
       onOpenChange={onOpenChange}
       title={L.title_detail}
-      maxWidth="2xl"
+      maxWidth="4xl"
       showFooter={false}
       confirmOnDirtyClose={isEdit}
       externalDirty={isDirty}
     >
-      <div className="grid grid-cols-[200px,1fr] gap-6 py-4">
-        {/* 左側：護照照片 */}
+      <div className="grid grid-cols-2 gap-6 py-4">
+        {/* 左側：護照照片（橫向） */}
         <div className="space-y-3">
-          <div className="aspect-[4/5] rounded-lg overflow-hidden bg-morandi-container relative group">
+          <div className="aspect-[3/2] rounded-lg overflow-hidden bg-morandi-container relative group">
             {customer.passport_image_url ? (
               <>
                 <img
@@ -157,8 +157,8 @@ export function CustomerDialog({
         </div>
 
         {/* 右側：資料欄位 */}
-        <div className="space-y-4">
-          {/* 基本資料 */}
+        <div className="space-y-3">
+          {/* 基本資料 - 2 欄 */}
           <div className="grid grid-cols-2 gap-x-4 gap-y-3">
             <FormField label={L.label_name} labelClassName="text-xs text-morandi-secondary">
               <Input
