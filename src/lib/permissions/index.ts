@@ -59,7 +59,52 @@ export const FEATURE_PERMISSIONS: PermissionConfig[] = [
 const ALL_PERMISSIONS = [...SYSTEM_PERMISSIONS, ...FEATURE_PERMISSIONS]
 
 /**
- * 根據路由檢查是否有權限（兼容舊版）
+ * 路由到模組的對應表
+ * 用於將 URL 路由轉換成 module_code
+ */
+const ROUTE_TO_MODULE: Record<string, string> = {
+  '/tours': 'tours',
+  '/orders': 'orders',
+  '/finance': 'finance',
+  '/accounting': 'accounting',
+  '/hr': 'hr',
+  '/database': 'database',
+  '/data-management': 'database',
+  '/settings': 'settings',
+  '/calendar': 'calendar',
+  '/workspace': 'workspace',
+  '/todos': 'todos',
+  '/dashboard': 'dashboard',
+  '/itinerary': 'itinerary',
+  '/visas': 'visas',
+  '/design': 'design',
+  '/office': 'office',
+  '/quotes': 'tours', // 報價整合到旅遊團
+  '/customers': 'database', // 顧客在資料管理
+}
+
+/**
+ * 從路由取得模組代碼
+ */
+function getModuleFromRoute(route: string): string | null {
+  // 移除開頭的 /
+  const cleanRoute = route.startsWith('/') ? route : `/${route}`
+  
+  // 找最長匹配的路由
+  for (const [routePrefix, moduleCode] of Object.entries(ROUTE_TO_MODULE)) {
+    if (cleanRoute === routePrefix || cleanRoute.startsWith(`${routePrefix}/`)) {
+      return moduleCode
+    }
+  }
+  return null
+}
+
+/**
+ * 根據路由檢查是否有權限
+ * 
+ * 支援兩種權限格式：
+ * 1. 舊格式：permission_id（如 'tours', 'finance'）
+ * 2. 新格式：module_code 或 module_code:tab_code（如 'tours:overview', 'finance:payments'）
  */
 export function hasPermissionForRoute(
   userPermissions: string[] | undefined,
@@ -72,7 +117,42 @@ export function hasPermissionForRoute(
     return true
   }
 
-  // 找出需要哪個權限
+  // 無需特殊權限的路由
+  const publicRoutes = ['/dashboard', '/profile']
+  if (publicRoutes.some(r => route.startsWith(r))) {
+    return true
+  }
+
+  // 從路由取得模組代碼
+  const moduleCode = getModuleFromRoute(route)
+  if (!moduleCode) {
+    // 未知路由，檢查舊格式權限
+    for (const perm of ALL_PERMISSIONS) {
+      for (const permRoute of perm.routes) {
+        if (permRoute === '*' || route.startsWith(permRoute)) {
+          if (userPermissions.includes(perm.id)) {
+            return true
+          }
+        }
+      }
+    }
+    return false
+  }
+
+  // 新格式：檢查是否有該模組的任何權限
+  // 例如有 'tours' 或 'tours:overview' 或 'tours:orders' 都算有 tours 模組權限
+  for (const perm of userPermissions) {
+    // 完全匹配模組（無分頁的模組）
+    if (perm === moduleCode) {
+      return true
+    }
+    // 匹配 module:tab 格式
+    if (perm.startsWith(`${moduleCode}:`)) {
+      return true
+    }
+  }
+
+  // 兼容舊格式：檢查舊的權限 ID
   for (const perm of ALL_PERMISSIONS) {
     for (const permRoute of perm.routes) {
       if (permRoute === '*' || route.startsWith(permRoute)) {
@@ -81,12 +161,6 @@ export function hasPermissionForRoute(
         }
       }
     }
-  }
-
-  // 無需特殊權限的路由
-  const publicRoutes = ['/dashboard', '/profile']
-  if (publicRoutes.some(r => route.startsWith(r))) {
-    return true
   }
 
   return false
