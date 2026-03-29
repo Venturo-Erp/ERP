@@ -259,7 +259,7 @@ export default function TodosPage() {
       key: 'deadline',
       label: LABELS.COL_DEADLINE,
       sortable: true,
-      width: '140px',
+      width: '180px',
       render: (value: unknown) => (
         <div className={cn(getDeadlineColor(value ? String(value) : undefined))}>
           <DateCell date={value ? String(value) : null} fallback={LABELS.NOT_SET} showIcon />
@@ -487,8 +487,10 @@ export default function TodosPage() {
           }
           actions={
             ((todo: Todo) => (
-              <div className="flex items-center gap-1">
-                <button
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
                   onClick={e => {
                     e.stopPropagation()
                     const newStatus = todo.status === 'completed' ? 'pending' : 'completed'
@@ -498,34 +500,36 @@ export default function TodosPage() {
                     })
                   }}
                   className={cn(
-                    'p-1 rounded transition-colors',
+                    'h-7 px-2 gap-1 text-xs',
                     todo.status === 'completed'
                       ? 'text-status-success hover:text-status-success hover:bg-status-success-bg'
                       : 'text-morandi-secondary hover:text-status-success hover:bg-status-success-bg'
                   )}
-                  title={
-                    todo.status === 'completed' ? LABELS.UNMARK_COMPLETE : LABELS.MARK_COMPLETE
-                  }
                 >
                   <CheckCircle size={14} />
-                </button>
-                <button
+                  {todo.status === 'completed' ? '取消完成' : '完成'}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
                   onClick={e => {
                     e.stopPropagation()
                     setExpandedTodo(todo.id)
                   }}
-                  className="p-1 hover:bg-morandi-gold/10 rounded transition-colors"
-                  title={LABELS.EDIT}
+                  className="h-7 px-2 gap-1 text-xs hover:bg-morandi-gold/10"
                 >
                   <Edit2 size={14} />
-                </button>
-                <button
+                  編輯
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
                   onClick={e => handleDeleteTodo(todo, e)}
-                  className="p-1 text-morandi-red hover:bg-morandi-red/10 rounded transition-colors"
-                  title={LABELS.DELETE}
+                  className="h-7 px-2 gap-1 text-xs text-morandi-red hover:bg-morandi-red/10"
                 >
                   <Trash2 size={14} />
-                </button>
+                  刪除
+                </Button>
               </div>
             )) as unknown as Parameters<typeof EnhancedTable>[0]['actions']
           }

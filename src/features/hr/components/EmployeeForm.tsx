@@ -638,11 +638,9 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
               )}
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* 底部按鈕 */}
-      <div className="px-6 py-4 border-t border-morandi-border flex justify-end gap-3 bg-morandi-container/30 flex-shrink-0">
+          
+          {/* 底部按鈕 - 在卡片內 */}
+          <div className="px-6 py-4 border-t border-morandi-border flex justify-end gap-3 bg-morandi-container/30">
         <Button type="button" variant="outline" onClick={onCancel}>
           取消
         </Button>
@@ -663,6 +661,8 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
             </>
           )}
         </Button>
+          </div>
+        </div>
       </div>
     </form>
   )
