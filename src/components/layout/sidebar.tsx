@@ -491,8 +491,8 @@ export function Sidebar() {
           if (isMenuItemHidden(item.href, hiddenMenuItems)) return null
           
           // 🔧 檢查租戶功能權限（workspace_features）
-          // Super Admin 也受此限制（方便自己管理想看的功能）
-          if (item.requiredPermission) {
+          // super_admin_only 不受 workspace_features 限制
+          if (item.requiredPermission && item.requiredPermission !== 'super_admin_only') {
             if (!isFeatureEnabled(item.requiredPermission)) {
               return null
             }
