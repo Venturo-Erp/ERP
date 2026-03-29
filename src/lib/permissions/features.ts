@@ -143,21 +143,6 @@ export const FEATURES: FeatureDefinition[] = [
     routes: ['/quotes', '/quotes/[id]', '/quotes/quick/[id]'],
   },
   {
-    code: 'contracts',
-    name: '合約管理',
-    description: '電子簽約、合約範本',
-    category: 'premium',
-    routes: ['/contracts'],
-  },
-  {
-    code: 'confirmations',
-    name: '團確單',
-    description: '供應商確認單管理',
-    category: 'premium',
-    routes: ['/confirmations', '/confirmations/[id]'],
-  },
-
-  {
     code: 'design',
     name: '設計工具',
     description: '手冊設計、行銷素材',
