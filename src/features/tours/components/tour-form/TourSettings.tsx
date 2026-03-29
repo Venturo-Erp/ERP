@@ -18,20 +18,15 @@ interface TourSettingsProps {
 export function TourSettings({ newTour, setNewTour }: TourSettingsProps) {
   const { items: employees } = useEmployeesSlim()
 
-  // 篩選團控人員（roles 包含 'controller'，排除機器人）
+  // 篩選團控人員（目前顯示所有在職員工，未來可加「團控」職務）
   const controllers = useMemo(() => {
-    const activeEmployees = employees.filter(emp => {
+    return employees.filter(emp => {
       const empWithSync = emp as EmployeeWithSync
       const notDeleted = !empWithSync._deleted
       const isActive = emp.status === 'active'
       const isNotBot = emp.employee_type !== 'bot'
       return notDeleted && isActive && isNotBot
     })
-
-    const controllerOnly = activeEmployees.filter(emp => emp.roles?.includes('controller'))
-
-    // 如果有標記團控的就只顯示團控，沒有就顯示所有人
-    return controllerOnly.length > 0 ? controllerOnly : activeEmployees
   }, [employees])
 
   return (

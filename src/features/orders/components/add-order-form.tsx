@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Combobox } from '@/components/ui/combobox'
@@ -9,6 +9,12 @@ import { useEmployeesSlim } from '@/data'
 import type { Employee } from '@/stores/types'
 import type { SyncableEntity } from '@/types'
 import { COMP_ORDERS_LABELS } from '../constants/labels'
+
+// 職務類型
+interface WorkspaceRole {
+  id: string
+  name: string
+}
 
 // 型別守衛：檢查 Employee 是否包含同步欄位
 type EmployeeWithSync = Employee & Partial<SyncableEntity>
@@ -37,6 +43,28 @@ interface AddOrderFormProps {
 export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: AddOrderFormProps) {
   const { items: tours } = useToursListSlim()
   const { items: employees } = useEmployeesSlim()
+  const [workspaceRoles, setWorkspaceRoles] = useState<WorkspaceRole[]>([])
+
+  // 載入職務列表
+  useEffect(() => {
+    const loadRoles = async () => {
+      try {
+        const res = await fetch('/api/permissions/roles')
+        if (res.ok) {
+          const data = await res.json()
+          setWorkspaceRoles(data)
+        }
+      } catch (err) {
+        console.error('載入職務失敗:', err)
+      }
+    }
+    loadRoles()
+  }, [])
+
+  // 取得特定職務名稱的 role_id
+  const getRoleIdByName = (name: string) => {
+    return workspaceRoles.find(r => r.name === name)?.id
+  }
 
   // 判斷是否為嵌入模式
   const isEmbedded = !!onChange
@@ -60,7 +88,7 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
     return numA.localeCompare(numB, 'en', { numeric: true })
   }
 
-  // 篩選業務人員（roles 包含 'sales'）
+  // 篩選業務人員（job_info.role_id 對應「業務」職務）
   const salesPersons = useMemo(() => {
     const activeEmployees = employees.filter(emp => {
       const empWithSync = emp as EmployeeWithSync
@@ -72,14 +100,17 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
       return notDeleted && isActive && notBot
     })
 
-    const salesOnly = activeEmployees.filter(emp => emp.roles?.includes('sales'))
+    const salesRoleId = getRoleIdByName('業務')
+    const salesOnly = salesRoleId 
+      ? activeEmployees.filter(emp => emp.job_info?.role_id === salesRoleId)
+      : []
 
-    // 如果有標記業務的就只顯示業務，沒有就顯示所有人
+    // 如果有業務職務的員工就只顯示他們，沒有就顯示所有人
     const result = salesOnly.length > 0 ? salesOnly : activeEmployees
     return result.sort(sortByEmployeeNumber)
-  }, [employees])
+  }, [employees, workspaceRoles])
 
-  // 篩選助理（roles 包含 'assistant'）
+  // 篩選助理（job_info.role_id 對應「助理」職務）
   const assistants = useMemo(() => {
     const activeEmployees = employees.filter(emp => {
       const empWithSync = emp as EmployeeWithSync
@@ -91,12 +122,15 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
       return notDeleted && isActive && notBot
     })
 
-    const assistantsOnly = activeEmployees.filter(emp => emp.roles?.includes('assistant'))
+    const assistantRoleId = getRoleIdByName('助理')
+    const assistantsOnly = assistantRoleId
+      ? activeEmployees.filter(emp => emp.job_info?.role_id === assistantRoleId)
+      : []
 
-    // 如果有標記助理的就只顯示助理，沒有就顯示所有人
+    // 如果有助理職務的員工就只顯示他們，沒有就顯示所有人
     const result = assistantsOnly.length > 0 ? assistantsOnly : activeEmployees
     return result.sort(sortByEmployeeNumber)
-  }, [employees])
+  }, [employees, workspaceRoles])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
