@@ -29,7 +29,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/stores/auth-store'
-import { supabase } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client' // 用於 CRUD 操作
 import { format } from 'date-fns'
 
 interface WishlistTemplate {
@@ -67,36 +67,43 @@ export default function WishlistTemplatesPage() {
   const fetchTemplates = useCallback(async () => {
     if (!user?.workspace_id) return
 
-    const { data, error } = await supabase
-      .from('wishlist_templates')
-      .select(`
-        *,
-        wishlist_template_items(count),
-        customer_inquiries(count)
-      `)
-      .eq('workspace_id', user.workspace_id)
-      .order('created_at', { ascending: false })
+    try {
+      const res = await fetch('/api/wishlist-templates')
+      if (!res.ok) throw new Error('載入失敗')
+      
+      const data = await res.json()
 
-    if (error) {
+      interface ApiRow {
+        id: string
+        name: string
+        slug: string
+        description: string | null
+        cover_image: string | null
+        status: string
+        created_at: string | null
+        wishlist_template_items: { count: number }[]
+        customer_inquiries: { count: number }[]
+      }
+      
+      const processed: WishlistTemplate[] = (data || []).map((t: ApiRow) => ({
+        id: t.id,
+        name: t.name,
+        slug: t.slug,
+        description: t.description,
+        cover_image: t.cover_image,
+        status: t.status as 'draft' | 'published' | 'archived',
+        created_at: t.created_at || new Date().toISOString(),
+        items_count: t.wishlist_template_items?.[0]?.count || 0,
+        inquiries_count: t.customer_inquiries?.[0]?.count || 0,
+      }))
+
+      setTemplates(processed)
+    } catch (error) {
       console.error('載入失敗:', error)
       toast.error('載入失敗')
-      return
+    } finally {
+      setLoading(false)
     }
-    
-    const processed: WishlistTemplate[] = (data || []).map((t) => ({
-      id: t.id,
-      name: t.name,
-      slug: t.slug,
-      description: t.description,
-      cover_image: t.cover_image,
-      status: t.status as 'draft' | 'published' | 'archived',
-      created_at: t.created_at || new Date().toISOString(),
-      items_count: (t.wishlist_template_items as { count: number }[])?.[0]?.count || 0,
-      inquiries_count: (t.customer_inquiries as { count: number }[])?.[0]?.count || 0,
-    }))
-
-    setTemplates(processed)
-    setLoading(false)
   }, [user?.workspace_id])
 
   useEffect(() => {

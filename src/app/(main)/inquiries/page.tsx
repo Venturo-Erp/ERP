@@ -41,7 +41,7 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/stores/auth-store'
-import { supabase } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client' // 用於狀態更新
 
 interface SelectedItem {
   id: string
@@ -85,39 +85,51 @@ export default function InquiriesPage() {
   const fetchInquiries = useCallback(async () => {
     if (!user?.workspace_id) return
 
-    const { data, error } = await supabase
-      .from('customer_inquiries')
-      .select(`
-        *,
-        wishlist_templates(name)
-      `)
-      .eq('workspace_id', user.workspace_id)
-      .order('created_at', { ascending: false })
+    try {
+      const res = await fetch('/api/inquiries')
+      if (!res.ok) throw new Error('載入失敗')
+      
+      const data = await res.json()
 
-    if (error) {
+      interface ApiRow {
+        id: string
+        code: string | null
+        customer_name: string
+        phone: string | null
+        email: string | null
+        travel_date: string | null
+        people_count: number | null
+        notes: string | null
+        selected_items: unknown
+        status: string
+        internal_notes: string | null
+        created_at: string | null
+        wishlist_templates: { name: string } | null
+      }
+
+      const processed: CustomerInquiry[] = (data || []).map((row: ApiRow) => ({
+        id: row.id,
+        code: row.code || '',
+        customer_name: row.customer_name,
+        phone: row.phone,
+        email: row.email,
+        travel_date: row.travel_date,
+        people_count: row.people_count || 1,
+        notes: row.notes,
+        selected_items: (row.selected_items as SelectedItem[]) || [],
+        status: row.status as CustomerInquiry['status'],
+        internal_notes: row.internal_notes,
+        created_at: row.created_at || new Date().toISOString(),
+        template_name: row.wishlist_templates?.name,
+      }))
+
+      setInquiries(processed)
+    } catch (error) {
       console.error('載入失敗:', error)
       toast.error('載入失敗')
-      return
+    } finally {
+      setLoading(false)
     }
-
-    const processed: CustomerInquiry[] = (data || []).map((row) => ({
-      id: row.id,
-      code: row.code || '',
-      customer_name: row.customer_name,
-      phone: row.phone,
-      email: row.email,
-      travel_date: row.travel_date,
-      people_count: row.people_count || 1,
-      notes: row.notes,
-      selected_items: (row.selected_items as unknown as SelectedItem[]) || [],
-      status: row.status as CustomerInquiry['status'],
-      internal_notes: row.internal_notes,
-      created_at: row.created_at || new Date().toISOString(),
-      template_name: (row.wishlist_templates as { name: string } | null)?.name,
-    }))
-
-    setInquiries(processed)
-    setLoading(false)
   }, [user?.workspace_id])
 
   useEffect(() => {
