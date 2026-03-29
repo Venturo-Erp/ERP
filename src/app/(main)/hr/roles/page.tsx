@@ -96,7 +96,7 @@ export default function RolesPage() {
       }
 
       try {
-        const res = await fetch(`/api/roles/${selectedRole.id}/permissions`)
+        const res = await fetch(`/api/roles/${selectedRole.id}/tab-permissions`)
         if (res.ok) {
           const data = await res.json()
           setPermissions(data)
