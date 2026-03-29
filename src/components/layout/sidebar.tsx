@@ -456,11 +456,15 @@ export function Sidebar() {
     [user?.preferred_features]
   )
 
-  const isSuperAdmin =
+  // super_admin 只看 employees.roles，不看職務權限
+  // 職務管理員有 * 權限但不是 super_admin
+  const isSuperAdmin = userRoles.includes('super_admin')
+  
+  // 租戶內的管理員（有 * 或 admin 權限）
+  const isAdmin =
     userPermissions.includes('super_admin') ||
     userPermissions.includes('admin') ||
-    userPermissions.includes('*') ||
-    userRoles.includes('super_admin')
+    userPermissions.includes('*')
 
   // 判斷租戶類型
   const workspaceType = user?.workspace_type
