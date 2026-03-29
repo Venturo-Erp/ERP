@@ -21,8 +21,8 @@ import { cn } from '@/lib/utils'
 import { useWorkspaceFeatures } from '@/lib/permissions'
 import { 
   ModulePermissionTable, 
-  type TabPermission, 
-  type PermissionOverride 
+  type TabPermission,
+  type PermissionOverride,
 } from './ModulePermissionTable'
 
 // 職務類型（從 API 取得）
@@ -126,7 +126,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     fetchPermissions()
   }, [formData.role_id])
 
-  // 載入個人權限覆寫
+  // 載入員工的個人覆寫
   useEffect(() => {
     if (!employeeId) {
       setPersonalOverrides([])
@@ -233,7 +233,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         await createEmployee(payload as unknown as Parameters<typeof createEmployee>[0])
       }
 
-      // 儲存個人權限覆寫
+      // 儲存員工的個人覆寫
       if (isEditMode && employeeId) {
         const overridesToSave = personalOverrides.filter(o => o.override_type)
         try {
@@ -243,7 +243,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
             body: JSON.stringify({ overrides: overridesToSave }),
           })
         } catch (err) {
-          logger.warn('更新個人權限覆寫失敗:', err)
+          logger.warn('更新員工覆寫失敗:', err)
         }
       }
 
@@ -521,11 +521,10 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                   {/* 權限列表（使用共用組件） */}
                   {formData.role_id ? (
                     <ModulePermissionTable
-                      mode="override"
-                      permissions={roleTabPermissions}
+                      mode="employee"
+                      rolePermissions={roleTabPermissions}
                       overrides={personalOverrides}
                       onOverridesChange={setPersonalOverrides}
-                      isAdmin={selectedRole?.is_admin}
                       maxHeight="400px"
                     />
                   ) : (
