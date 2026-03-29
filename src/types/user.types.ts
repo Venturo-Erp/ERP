@@ -32,6 +32,7 @@ export interface User {
     supervisor?: string
     hire_date: string
     probation_end_date?: string
+    role_id?: string // 職務 ID（關聯到 roles 表）
   }
   salary_info: {
     base_salary: number

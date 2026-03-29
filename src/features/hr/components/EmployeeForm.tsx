@@ -14,10 +14,26 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Camera, Save, Mail, Phone, MapPin, Calendar, CreditCard, Heart, Loader2, User, DollarSign, Shield } from 'lucide-react'
 import { useUserStore } from '@/stores/user-store'
+import { useAuthStore } from '@/stores/auth-store'
 import { alertSuccess, alertError } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
-import { ROLES, type UserRole } from '@/lib/rbac-config'
 import { cn } from '@/lib/utils'
+
+// 職務類型（從 API 取得）
+interface Role {
+  id: string
+  name: string
+  description?: string
+  workspace_id: string
+}
+
+// 路由權限類型
+interface RoutePermission {
+  route: string
+  name: string
+  can_read: boolean
+  can_write: boolean
+}
 
 interface EmployeeFormProps {
   employeeId?: string
@@ -30,6 +46,7 @@ type TabType = 'basic' | 'permissions' | 'salary'
 
 export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: EmployeeFormProps) {
   const { items: employees, create: createEmployee, update: updateEmployee } = useUserStore()
+  const { user } = useAuthStore()
   const employee = employeeId ? employees.find((e) => e.id === employeeId) : null
   const isEditMode = !!employeeId
 
@@ -37,6 +54,10 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
   const [avatarPreview, setAvatarPreview] = useState<string | null>(employee?.avatar_url || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [activeTab, setActiveTab] = useState<TabType>('basic')
+  
+  // 從 API 載入的職務列表和權限
+  const [roles, setRoles] = useState<Role[]>([])
+  const [rolePermissions, setRolePermissions] = useState<RoutePermission[]>([])
 
   const [formData, setFormData] = useState({
     chinese_name: employee?.chinese_name || '',
@@ -51,9 +72,48 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     emergency_contact_name: employee?.personal_info?.emergency_contact?.name || '',
     emergency_contact_relation: employee?.personal_info?.emergency_contact?.relationship || '',
     emergency_contact_phone: employee?.personal_info?.emergency_contact?.phone || '',
-    role: (employee?.roles?.[0] as UserRole) || '' as UserRole | '',
+    role_id: employee?.job_info?.role_id || '',
     base_salary: employee?.salary_info?.base_salary || 0,
   })
+
+  // 載入職務列表
+  useEffect(() => {
+    if (!user?.workspace_id) return
+    
+    const fetchRoles = async () => {
+      try {
+        const res = await fetch(`/api/permissions/roles?workspace_id=${user.workspace_id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setRoles(data)
+        }
+      } catch (err) {
+        logger.error('載入職務失敗:', err)
+      }
+    }
+    fetchRoles()
+  }, [user?.workspace_id])
+
+  // 當選擇職務時，載入該職務的權限
+  useEffect(() => {
+    if (!formData.role_id) {
+      setRolePermissions([])
+      return
+    }
+    
+    const fetchPermissions = async () => {
+      try {
+        const res = await fetch(`/api/permissions/role-permissions?role_id=${formData.role_id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setRolePermissions(data)
+        }
+      } catch (err) {
+        logger.error('載入權限失敗:', err)
+      }
+    }
+    fetchPermissions()
+  }, [formData.role_id])
 
   // 當 employee 資料更新時，同步更新 formData
   useEffect(() => {
@@ -71,7 +131,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         emergency_contact_name: employee.personal_info?.emergency_contact?.name || '',
         emergency_contact_relation: employee.personal_info?.emergency_contact?.relationship || '',
         emergency_contact_phone: employee.personal_info?.emergency_contact?.phone || '',
-        role: (employee.roles?.[0] as UserRole) || '',
+        role_id: employee.job_info?.role_id || '',
         base_salary: employee.salary_info?.base_salary || 0,
       })
       setAvatarPreview(employee.avatar_url || null)
@@ -95,7 +155,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
       return
     }
 
-    if (!isEditMode && !formData.role && mode === 'hr') {
+    if (!isEditMode && !formData.role_id && mode === 'hr') {
       await alertError('請選擇職務')
       return
     }
@@ -108,7 +168,6 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         chinese_name: formData.chinese_name,
         english_name: formData.english_name,
         display_name: formData.display_name || formData.chinese_name,
-        roles: formData.role ? [formData.role] : employee?.roles || [],
         personal_info: {
           email: formData.email,
           phone: formData.phone,
@@ -123,6 +182,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         },
         job_info: {
           position: formData.position,
+          role_id: formData.role_id || undefined,
           hire_date: employee?.job_info?.hire_date || new Date().toISOString().split('T')[0],
         },
         salary_info: {
@@ -158,8 +218,8 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
   const tabs = allTabs.filter(t => t.showIn.includes(mode))
   const showTabs = tabs.length > 1
 
-  // RBAC 角色列表（排除 super_admin 和 bot）
-  const availableRoles = Object.values(ROLES).filter(r => r.id !== 'super_admin' && r.id !== 'bot')
+  // 取得選中職務的名稱
+  const selectedRole = roles.find(r => r.id === formData.role_id)
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col h-full">
@@ -203,9 +263,9 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                 <h3 className="text-lg font-bold text-morandi-primary">
                   {formData.display_name || formData.chinese_name || '未命名'}
                 </h3>
-                {formData.role && (
+                {selectedRole && (
                   <p className="text-xs text-morandi-secondary mt-0.5">
-                    {ROLES[formData.role]?.label}
+                    {selectedRole.name}
                   </p>
                 )}
               </div>
@@ -397,24 +457,24 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                       職務 {!isEditMode && <span className="text-red-500">*</span>}
                     </Label>
                     <select
-                      value={formData.role}
-                      onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
+                      value={formData.role_id}
+                      onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
                       className="w-full max-w-xs px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-white text-morandi-primary"
                     >
                       <option value="">請選擇職務</option>
-                      {availableRoles.map((role) => (
-                        <option key={role.id} value={role.id}>{role.label}</option>
+                      {roles.map((role) => (
+                        <option key={role.id} value={role.id}>{role.name}</option>
                       ))}
                     </select>
-                    {formData.role && (
+                    {selectedRole?.description && (
                       <p className="text-xs text-morandi-secondary mt-1.5">
-                        {ROLES[formData.role]?.description}
+                        {selectedRole.description}
                       </p>
                     )}
                   </div>
 
-                  {/* 權限開關列表 */}
-                  {formData.role && (
+                  {/* 權限列表（從 API 取得） */}
+                  {formData.role_id && (
                     <div className="pt-4 border-t border-morandi-border">
                       <h4 className="text-sm font-semibold text-morandi-primary mb-3">功能權限</h4>
                       <div className="border border-morandi-border rounded-lg overflow-hidden">
@@ -422,26 +482,39 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                           <thead className="bg-morandi-container/50">
                             <tr>
                               <th className="px-4 py-2.5 text-left font-semibold text-morandi-secondary text-xs uppercase">功能</th>
-                              <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-20">狀態</th>
+                              <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-20">讀取</th>
+                              <th className="px-4 py-2.5 text-center font-semibold text-morandi-secondary text-xs uppercase w-20">寫入</th>
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-morandi-border">
-                            {ROLES[formData.role]?.permissions[0] === '*' ? (
-                              <tr className="bg-morandi-gold/5">
-                                <td className="px-4 py-3 text-morandi-primary font-medium">所有功能</td>
-                                <td className="px-4 py-3 text-center">
-                                  <span className="inline-flex px-2 py-0.5 bg-morandi-green/20 text-morandi-green text-xs rounded-full">開啟</span>
-                                </td>
-                              </tr>
-                            ) : (
-                              ROLES[formData.role]?.permissions.map((perm) => (
-                                <tr key={perm} className="hover:bg-morandi-container/30">
-                                  <td className="px-4 py-3 text-morandi-primary">{perm}</td>
+                            {rolePermissions.length > 0 ? (
+                              rolePermissions.map((perm) => (
+                                <tr key={perm.route} className="hover:bg-morandi-container/30">
+                                  <td className="px-4 py-3 text-morandi-primary">{perm.name}</td>
                                   <td className="px-4 py-3 text-center">
-                                    <span className="inline-flex px-2 py-0.5 bg-morandi-green/20 text-morandi-green text-xs rounded-full">開啟</span>
+                                    <span className={cn(
+                                      'inline-flex px-2 py-0.5 text-xs rounded-full',
+                                      perm.can_read ? 'bg-morandi-green/20 text-morandi-green' : 'bg-gray-100 text-gray-400'
+                                    )}>
+                                      {perm.can_read ? '✓' : '✕'}
+                                    </span>
+                                  </td>
+                                  <td className="px-4 py-3 text-center">
+                                    <span className={cn(
+                                      'inline-flex px-2 py-0.5 text-xs rounded-full',
+                                      perm.can_write ? 'bg-morandi-green/20 text-morandi-green' : 'bg-gray-100 text-gray-400'
+                                    )}>
+                                      {perm.can_write ? '✓' : '✕'}
+                                    </span>
                                   </td>
                                 </tr>
                               ))
+                            ) : (
+                              <tr>
+                                <td colSpan={3} className="px-4 py-6 text-center text-morandi-secondary">
+                                  此職務尚未設定權限
+                                </td>
+                              </tr>
                             )}
                           </tbody>
                         </table>
@@ -561,7 +634,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         </Button>
         <Button
           type="submit"
-          disabled={submitting || !formData.chinese_name || !formData.email || (!isEditMode && !formData.role && mode === 'hr')}
+          disabled={submitting || !formData.chinese_name || !formData.email || (!isEditMode && !formData.role_id && mode === 'hr')}
           className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
         >
           {submitting ? (
