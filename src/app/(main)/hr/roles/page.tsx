@@ -10,8 +10,6 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/components/ui/use-toast'
 import {
   Dialog,
@@ -29,11 +27,13 @@ import {
   Users,
   Star,
   Check,
-  ChevronRight,
-  ChevronDown,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores'
+import { type TabPermission } from '@/features/hr/components/ModulePermissionTable'
 import { MODULES, type ModuleDefinition } from '@/lib/permissions'
+import { Badge } from '@/components/ui/badge'
+import { Switch } from '@/components/ui/switch'
+import { ChevronRight, ChevronDown } from 'lucide-react'
 
 interface Role {
   id: string
@@ -43,12 +43,7 @@ interface Role {
   sort_order: number
 }
 
-interface TabPermission {
-  module_code: string
-  tab_code: string | null  // null = 整個模組
-  can_read: boolean
-  can_write: boolean
-}
+
 
 export default function RolesPage() {
   const { user } = useAuthStore()

@@ -12,14 +12,18 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Camera, Save, Mail, Phone, MapPin, Calendar, CreditCard, Heart, Loader2, User, DollarSign, Shield, ChevronRight, ChevronDown } from 'lucide-react'
+import { Camera, Save, Loader2, User, DollarSign, Shield, Mail, Phone, Calendar, CreditCard, MapPin, Heart } from 'lucide-react'
 import { useUserStore } from '@/stores/user-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { alertSuccess, alertError } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
-import { useWorkspaceFeatures, MODULES, type ModuleDefinition } from '@/lib/permissions'
+import { useWorkspaceFeatures } from '@/lib/permissions'
+import { 
+  ModulePermissionTable, 
+  type TabPermission, 
+  type PermissionOverride 
+} from './ModulePermissionTable'
 
 // 職務類型（從 API 取得）
 interface Role {
@@ -30,20 +34,7 @@ interface Role {
   is_admin?: boolean
 }
 
-// 模組分頁權限類型（新版）
-interface TabPermission {
-  module_code: string
-  tab_code: string | null
-  can_read: boolean
-  can_write: boolean
-}
 
-// 個人覆寫類型（新版）
-interface PermissionOverride {
-  module_code: string
-  tab_code: string | null
-  override_type: 'grant' | 'revoke' | null
-}
 
 interface EmployeeFormProps {
   employeeId?: string
@@ -77,7 +68,6 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
   const [roles, setRoles] = useState<Role[]>([])
   const [roleTabPermissions, setRoleTabPermissions] = useState<TabPermission[]>([])
   const [personalOverrides, setPersonalOverrides] = useState<PermissionOverride[]>([])
-  const [expandedModules, setExpandedModules] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
     chinese_name: employee?.chinese_name || '',
@@ -528,218 +518,16 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                     )}
                   </div>
 
-                  {/* 權限列表 */}
+                  {/* 權限列表（使用共用組件） */}
                   {formData.role_id ? (
-                    <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-sm font-semibold text-morandi-primary">個人權限微調</h4>
-                        <div className="flex items-center gap-4 text-xs">
-                          <span className="flex items-center gap-1">
-                            <span className="w-3 h-3 bg-morandi-green rounded"></span>
-                            開啟
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <span className="w-3 h-3 bg-gray-300 rounded"></span>
-                            關閉
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                            已覆寫
-                          </span>
-                        </div>
-                      </div>
-                      <div className="border border-morandi-border rounded-lg overflow-hidden max-h-[400px] overflow-y-auto">
-                        {/* 表頭 */}
-                        <div className="flex items-center bg-morandi-container/50 sticky top-0 border-b border-morandi-border text-xs font-semibold text-morandi-secondary uppercase">
-                          <div className="flex-1 px-4 py-2.5">功能模組</div>
-                          <div className="w-20 px-4 py-2.5 text-center">職務</div>
-                          <div className="w-20 px-4 py-2.5 text-center">個人</div>
-                        </div>
-
-                        {/* 模組列表 */}
-                        {MODULES.map(module => {
-                          const hasTabs = module.tabs.length > 0
-                          const isExpanded = expandedModules.includes(module.code)
-                          const isAdmin = selectedRole?.is_admin
-
-                          // 檢查模組權限（無分頁）
-                          const moduleRolePerm = roleTabPermissions.find(
-                            p => p.module_code === module.code && p.tab_code === null
-                          )
-                          const moduleOverride = personalOverrides.find(
-                            o => o.module_code === module.code && o.tab_code === null
-                          )
-
-                          // 計算模組是否有任何分頁開啟
-                          const hasAnyTabEnabled = hasTabs && module.tabs.some(tab => {
-                            const perm = roleTabPermissions.find(
-                              p => p.module_code === module.code && p.tab_code === tab.code
-                            )
-                            const override = personalOverrides.find(
-                              o => o.module_code === module.code && o.tab_code === tab.code
-                            )
-                            if (override?.override_type === 'grant') return true
-                            if (override?.override_type === 'revoke') return false
-                            return perm?.can_read || false
-                          })
-
-                          // 判斷最終狀態
-                          const getEffectiveStatus = (rolePerm: boolean, override: PermissionOverride | undefined) => {
-                            if (isAdmin) return true
-                            if (override?.override_type === 'grant') return true
-                            if (override?.override_type === 'revoke') return false
-                            return rolePerm
-                          }
-
-                          const toggleOverride = (moduleCode: string, tabCode: string | null, currentRolePerm: boolean) => {
-                            const existing = personalOverrides.find(
-                              o => o.module_code === moduleCode && o.tab_code === tabCode
-                            )
-                            
-                            if (existing) {
-                              // 循環：null -> grant/revoke -> null
-                              if (!existing.override_type) {
-                                // 從 null 變成 grant 或 revoke
-                                setPersonalOverrides(prev => prev.map(o =>
-                                  o.module_code === moduleCode && o.tab_code === tabCode
-                                    ? { ...o, override_type: currentRolePerm ? 'revoke' : 'grant' }
-                                    : o
-                                ))
-                              } else {
-                                // 從 grant/revoke 變回 null
-                                setPersonalOverrides(prev => prev.map(o =>
-                                  o.module_code === moduleCode && o.tab_code === tabCode
-                                    ? { ...o, override_type: null }
-                                    : o
-                                ))
-                              }
-                            } else {
-                              // 新增覆寫
-                              setPersonalOverrides(prev => [
-                                ...prev,
-                                {
-                                  module_code: moduleCode,
-                                  tab_code: tabCode,
-                                  override_type: currentRolePerm ? 'revoke' : 'grant',
-                                }
-                              ])
-                            }
-                          }
-
-                          return (
-                            <div key={module.code}>
-                              {/* 模組行 */}
-                              <div className={cn(
-                                'flex items-center border-t border-morandi-border',
-                                hasTabs ? 'bg-morandi-bg/30' : 'bg-white'
-                              )}>
-                                <div className="flex-1 px-4 py-3 flex items-center gap-2">
-                                  {hasTabs ? (
-                                    <button
-                                      type="button"
-                                      onClick={() => setExpandedModules(prev =>
-                                        prev.includes(module.code)
-                                          ? prev.filter(m => m !== module.code)
-                                          : [...prev, module.code]
-                                      )}
-                                      className="p-1 hover:bg-morandi-bg rounded"
-                                    >
-                                      {isExpanded ? (
-                                        <ChevronDown className="h-4 w-4 text-morandi-secondary" />
-                                      ) : (
-                                        <ChevronRight className="h-4 w-4 text-morandi-secondary" />
-                                      )}
-                                    </button>
-                                  ) : (
-                                    <div className="w-6" />
-                                  )}
-                                  <span className="font-medium text-morandi-primary text-sm">{module.name}</span>
-                                </div>
-                                {!hasTabs && (
-                                  <>
-                                    <div className="w-20 px-4 py-3 flex justify-center">
-                                      <span className={cn(
-                                        'w-6 h-6 rounded flex items-center justify-center text-xs',
-                                        isAdmin || moduleRolePerm?.can_read
-                                          ? 'bg-morandi-green/20 text-morandi-green'
-                                          : 'bg-gray-100 text-gray-400'
-                                      )}>
-                                        {isAdmin || moduleRolePerm?.can_read ? '✓' : '—'}
-                                      </span>
-                                    </div>
-                                    <div className="w-20 px-4 py-3 flex justify-center">
-                                      {!isAdmin && (
-                                        <div className="relative">
-                                          <Switch
-                                            checked={getEffectiveStatus(moduleRolePerm?.can_read || false, moduleOverride)}
-                                            onCheckedChange={() => toggleOverride(module.code, null, moduleRolePerm?.can_read || false)}
-                                            className="data-[state=checked]:bg-morandi-green"
-                                          />
-                                          {moduleOverride?.override_type && (
-                                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
-                                          )}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </>
-                                )}
-                                {hasTabs && (
-                                  <div className="w-40 px-4 py-3 text-xs text-morandi-secondary text-center">
-                                    {hasAnyTabEnabled ? '部分開啟' : '全部關閉'}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* 分頁行 */}
-                              {hasTabs && isExpanded && module.tabs.map(tab => {
-                                const tabRolePerm = roleTabPermissions.find(
-                                  p => p.module_code === module.code && p.tab_code === tab.code
-                                )
-                                const tabOverride = personalOverrides.find(
-                                  o => o.module_code === module.code && o.tab_code === tab.code
-                                )
-
-                                return (
-                                  <div key={tab.code} className="flex items-center border-t border-morandi-border bg-white">
-                                    <div className="flex-1 px-4 py-2.5 pl-12 flex items-center gap-2">
-                                      <div className="w-1 h-4 bg-morandi-border rounded-full" />
-                                      <span className="text-sm text-morandi-primary">{tab.name}</span>
-                                    </div>
-                                    <div className="w-20 px-4 py-2.5 flex justify-center">
-                                      <span className={cn(
-                                        'w-6 h-6 rounded flex items-center justify-center text-xs',
-                                        isAdmin || tabRolePerm?.can_read
-                                          ? 'bg-morandi-green/20 text-morandi-green'
-                                          : 'bg-gray-100 text-gray-400'
-                                      )}>
-                                        {isAdmin || tabRolePerm?.can_read ? '✓' : '—'}
-                                      </span>
-                                    </div>
-                                    <div className="w-20 px-4 py-2.5 flex justify-center">
-                                      {!isAdmin && (
-                                        <div className="relative">
-                                          <Switch
-                                            checked={getEffectiveStatus(tabRolePerm?.can_read || false, tabOverride)}
-                                            onCheckedChange={() => toggleOverride(module.code, tab.code, tabRolePerm?.can_read || false)}
-                                            className="data-[state=checked]:bg-morandi-green"
-                                          />
-                                          {tabOverride?.override_type && (
-                                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
-                                          )}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          )
-                        })}
-                      </div>
-                      <p className="text-xs text-morandi-secondary mt-2">
-                        藍點表示已覆寫職務預設。點擊開關可切換：職務預設 → 覆寫 → 職務預設
-                      </p>
-                    </div>
+                    <ModulePermissionTable
+                      mode="override"
+                      permissions={roleTabPermissions}
+                      overrides={personalOverrides}
+                      onOverridesChange={setPersonalOverrides}
+                      isAdmin={selectedRole?.is_admin}
+                      maxHeight="400px"
+                    />
                   ) : (
                     <div className="text-center py-8 text-morandi-secondary">
                       請先在「基本資料」選擇職務
