@@ -146,11 +146,7 @@ export const MODULES: ModuleDefinition[] = [
     code: 'office',
     name: '文件管理',
     description: '文件編輯與儲存',
-    tabs: [
-      { code: 'list', name: '文件列表', description: '所有文件' },
-      { code: 'editor', name: '文件編輯', description: '線上編輯器' },
-      { code: 'files', name: '檔案管理', description: '檔案上傳下載' },
-    ],
+    tabs: [], // 無分頁，只有文件列表
   },
   {
     code: 'settings',
