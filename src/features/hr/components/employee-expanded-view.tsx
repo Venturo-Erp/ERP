@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useUserStore } from '@/stores/user-store'
 import { cn } from '@/lib/utils'
-import { User, DollarSign, Shield, X, Edit, Save, Check } from 'lucide-react'
+import { User, DollarSign, Shield, Edit, Save } from 'lucide-react'
 import { CurrencyCell } from '@/components/table-cells'
 import { alert } from '@/lib/ui/alert-dialog'
 
@@ -140,91 +140,90 @@ export function EmployeeExpandedView({ employee_id, onClose }: EmployeeExpandedV
   return (
     <Dialog open={true} onOpenChange={open => !open && onClose()}>
       <DialogContent level={1} className="max-w-6xl h-[90vh] flex flex-col overflow-hidden p-0">
-        {/* 標題列 */}
-        <DialogHeader className="flex-shrink-0 p-6 pb-0">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-morandi-container/30 flex items-center justify-center">
-              {employee.avatar ? (
-                <img
-                  src={employee.avatar}
-                  alt={employee.display_name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-              ) : (
-                <User size={24} className="text-morandi-secondary" />
-              )}
+        {/* 標題列：大頭照 + 名字 + 分頁按鈕 */}
+        <DialogHeader className="flex-shrink-0 p-6 pb-4 border-b border-border">
+          <div className="flex items-center justify-between">
+            {/* 左側：大頭照 + 名字 */}
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-morandi-container/30 flex items-center justify-center">
+                {employee.avatar ? (
+                  <img
+                    src={employee.avatar}
+                    alt={employee.display_name}
+                    className="w-14 h-14 rounded-full object-cover"
+                  />
+                ) : (
+                  <User size={28} className="text-morandi-secondary" />
+                )}
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-bold text-morandi-primary">
+                  {employee.display_name || employee.chinese_name || COMP_HR_LABELS.未命名員工}
+                </DialogTitle>
+                <p className="text-morandi-secondary text-sm">{employee.employee_number}</p>
+              </div>
             </div>
-            <div>
-              <DialogTitle className="text-xl font-bold text-morandi-primary">
-                {employee.display_name || employee.chinese_name || COMP_HR_LABELS.未命名員工}
-              </DialogTitle>
-              <p className="text-morandi-secondary">{employee.employee_number}</p>
+
+            {/* 右側：分頁按鈕 */}
+            <div className="flex items-center gap-2">
+              {tabs.map(tab => {
+                const Icon = tab.icon
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={cn(
+                      'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                      activeTab === tab.key
+                        ? 'bg-morandi-gold/20 text-morandi-primary border border-morandi-gold/50'
+                        : 'text-morandi-secondary hover:bg-morandi-container/30 hover:text-morandi-primary'
+                    )}
+                  >
+                    <Icon size={16} />
+                    {tab.label}
+                  </button>
+                )
+              })}
             </div>
           </div>
+
+          {/* 統計資訊（如果有） */}
+          {renderTabStats() && (
+            <div className="flex items-center gap-6 text-sm mt-3 pt-3 border-t border-border/50">
+              {renderTabStats()}
+            </div>
+          )}
         </DialogHeader>
 
-        {/* 分頁導航 */}
-        <div className="flex items-center justify-between border-b border-border px-6 flex-shrink-0">
-          <div className="flex">
-            {tabs.map(tab => {
-              const Icon = tab.icon
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={cn(
-                    'flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors relative',
-                    activeTab === tab.key
-                      ? 'text-morandi-primary border-b-2 border-morandi-gold'
-                      : 'text-morandi-secondary hover:text-morandi-primary'
-                  )}
-                >
-                  <Icon size={16} />
-                  {tab.label}
-                </button>
-              )
-            })}
-          </div>
+        {/* 分頁內容 */}
+        <div className="flex-1 overflow-y-auto">{renderTabContent()}</div>
 
-          {/* 中間統計資訊區域 */}
-          <div className="flex items-center gap-6 text-sm">{renderTabStats()}</div>
-
-          {/* 編輯按鈕區域（權限分頁不顯示） */}
-          {activeTab !== 'permissions' && (
-            <div className="py-3">
+        {/* 底部：儲存按鈕（權限分頁不顯示） */}
+        {activeTab !== 'permissions' && (
+          <div className="flex-shrink-0 border-t border-border px-6 py-4 bg-morandi-container/10">
+            <div className="flex justify-end gap-3">
               {isEditing ? (
-                <div className="flex gap-2">
-                  <Button size="sm" onClick={handleSave} className="gap-1">
-                    <Check size={14} />
-                    {COMP_HR_LABELS.SAVE}
-                  </Button>
+                <>
                   <Button
-                    size="sm"
                     variant="outline"
                     onClick={() => setIsEditing(false)}
-                    className="gap-1"
                   >
-                    <X size={14} />
                     {COMP_HR_LABELS.取消}
                   </Button>
-                </div>
+                  <Button onClick={handleSave}>
+                    <Save size={16} className="mr-2" />
+                    {COMP_HR_LABELS.SAVE}
+                  </Button>
+                </>
               ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => setIsEditing(true)}
-                  className="gap-1"
-                >
-                  <Edit size={14} />
+                <Button onClick={() => setIsEditing(true)}>
+                  <Edit size={16} className="mr-2" />
                   {COMP_HR_LABELS.EDIT}
                 </Button>
               )}
             </div>
-          )}
-        </div>
-
-        {/* 分頁內容 */}
-        <div className="flex-1 overflow-y-auto">{renderTabContent()}</div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )

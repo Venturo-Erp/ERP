@@ -22,6 +22,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { MessageCircle, Users, User, Building, RefreshCw, Search, Link2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { SettingsTabs } from '../components/SettingsTabs'
 
 interface LineGroup {
   id: string
@@ -89,9 +91,17 @@ export default function LineConnectionsPage() {
     try {
       const res = await fetch('/api/line/connections')
       const data = await res.json()
+      
+      console.log('LINE 連線資料:', data)
+      
+      if (data.error) {
+        toast.error(`載入失敗: ${data.error}`)
+      }
+      
       setGroups(data.groups || [])
       setUsers(data.users || [])
-    } catch {
+    } catch (error) {
+      console.error('載入 LINE 連線失敗:', error)
       toast.error('載入失敗')
     } finally {
       setLoading(false)
@@ -160,20 +170,20 @@ export default function LineConnectionsPage() {
   const unboundUsers = users.filter(u => !u.supplier_id && !u.employee_id)
 
   return (
-    <div className="space-y-6 p-6">
-      {/* 標題 */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#5a4a3f]">LINE 連線管理</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            管理 LINE Bot 的群組和好友，綁定供應商或分類
-          </p>
+    <ContentPageLayout 
+      title="管理 LINE Bot"
+      icon={MessageCircle}
+      headerActions={
+        <div className="flex items-center gap-4">
+          <SettingsTabs />
+          <Button onClick={loadData} variant="outline" disabled={loading} size="sm">
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            重新整理
+          </Button>
         </div>
-        <Button onClick={loadData} variant="outline" disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          重新整理
-        </Button>
-      </div>
+      }
+    >
+      <div className="max-w-6xl mx-auto space-y-6 p-6">
 
       {/* 統計卡片 */}
       <div className="grid grid-cols-4 gap-4">
@@ -473,6 +483,7 @@ export default function LineConnectionsPage() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </ContentPageLayout>
   )
 }

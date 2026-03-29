@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * 角色管理頁面
+ * 職務管理頁面
  * 使用 API Route 處理 DB 操作，避免 Supabase Client 型別問題
  */
 
@@ -241,7 +241,7 @@ export default function RolesPage() {
   }
 
   return (
-    <ContentPageLayout title="角色管理" icon={Shield}>
+    <ContentPageLayout title="職務管理" icon={Shield}>
       <div className="grid grid-cols-12 gap-6 h-[calc(100vh-12rem)]">
         {/* 左側：角色列表 */}
         <div className="col-span-4 h-full overflow-hidden flex flex-col">
@@ -264,7 +264,7 @@ export default function RolesPage() {
                 <p>尚未建立角色</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-[calc(100vh-24rem)] overflow-y-auto pr-2">
                 {roles.map(role => (
                   <div
                     key={role.id}

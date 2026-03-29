@@ -22,6 +22,7 @@ export interface User {
       name: string
       relationship: string
       phone: string
+      address?: string
     }
   }
   job_info: {

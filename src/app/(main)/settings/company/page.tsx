@@ -324,9 +324,11 @@ export default function CompanySettingsPage() {
   }
 
   return (
-    <ContentPageLayout title={COMPANY_LABELS.TITLE}>
+    <ContentPageLayout 
+      title={COMPANY_LABELS.TITLE}
+      headerActions={<SettingsTabs />}
+    >
       <div className="max-w-4xl mx-auto space-y-8 p-6">
-        <SettingsTabs />
         {/* 基本資訊 */}
         <Card className="rounded-xl shadow-lg border border-border p-8">
           <div className="flex items-center gap-3 mb-6">

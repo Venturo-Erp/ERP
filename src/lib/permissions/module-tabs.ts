@@ -85,7 +85,7 @@ export const MODULES: ModuleDefinition[] = [
     description: '員工、出勤、薪資',
     tabs: [
       { code: 'employees', name: '員工管理', description: '員工資料、到職離職' },
-      { code: 'roles', name: '角色管理', description: '職務角色與權限' },
+      { code: 'roles', name: '職務管理', description: '職務角色與權限' },
       { code: 'attendance', name: '出勤管理', description: '上下班打卡記錄' },
       { code: 'leave', name: '請假管理', description: '請假申請、審核' },
       { code: 'payroll', name: '薪資管理', description: '薪資計算、發放' },

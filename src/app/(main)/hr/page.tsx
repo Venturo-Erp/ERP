@@ -16,8 +16,7 @@ import {
   invalidatePaymentRequests,
 } from '@/data'
 import { Employee } from '@/stores/types'
-import { EmployeeExpandedView } from '@/features/hr/components/employee-expanded-view'
-import { AddEmployeeForm } from '@/features/hr/components/add-employee'
+import { EmployeeForm } from '@/features/hr/components/EmployeeForm'
 import {
   SalaryPaymentDialog,
   SalaryPaymentData,
@@ -464,15 +463,23 @@ export default function HRPage() {
       />
 
       {expandedEmployee && (
-        <EmployeeExpandedView
-          employee_id={expandedEmployee}
-          onClose={() => setExpandedEmployee(null)}
-        />
+        <Dialog open={true} onOpenChange={() => setExpandedEmployee(null)}>
+          <DialogContent level={1} className="max-w-6xl h-[90vh] p-0">
+            <EmployeeForm
+              employeeId={expandedEmployee}
+              onSubmit={() => {
+                setExpandedEmployee(null)
+                fetchAll()
+              }}
+              onCancel={() => setExpandedEmployee(null)}
+            />
+          </DialogContent>
+        </Dialog>
       )}
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent level={1} className="max-w-5xl max-h-[95vh] p-0">
-          <AddEmployeeForm
+        <DialogContent level={1} className="max-w-6xl h-[90vh] p-0">
+          <EmployeeForm
             onSubmit={() => {
               setIsAddDialogOpen(false)
               fetchAll()

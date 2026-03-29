@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { DateInput } from '@/components/ui/date-input'
 import {
   Camera,
   User,
@@ -22,7 +23,7 @@ import { PasswordData } from '../types'
 import { supabase } from '@/lib/supabase/client'
 import { compressAvatarImage } from '@/lib/image-utils'
 import { LABELS } from '../constants/labels'
-import { useEmployees } from '@/data/entities/employees'
+import { useUserStore } from '@/stores/user-store'
 
 interface AccountSettingsProps {
   user: {
@@ -36,24 +37,18 @@ interface AccountSettingsProps {
     avatar_url?: string | null
     workspace_code?: string
   } | null
-  showPasswordSection: boolean
-  setShowPasswordSection: (show: boolean) => void
-  passwordData: PasswordData
-  setPasswordData: (data: PasswordData) => void
-  showPassword: boolean
-  setShowPassword: (show: boolean) => void
-  passwordUpdateLoading: boolean
-  setPasswordUpdateLoading: (loading: boolean) => void
 }
 
 export function AccountSettings({ user }: AccountSettingsProps) {
-  const { items: employees, update: updateEmployee, fetchAll } = useEmployees()
+  const { items: employees, update: updateEmployee, fetchAll } = useUserStore()
   const [avatarUploading, setAvatarUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(user?.avatar_url || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const currentEmployee = employees.find((e) => e.id === user?.id)
+
+
 
   const [formData, setFormData] = useState({
     display_name: '',
@@ -68,7 +63,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
     emergency_contact_name: '',
     emergency_contact_relation: '',
     emergency_contact_phone: '',
-    notes: '',
+    emergency_contact_address: '',
   })
 
   // 載入員工資料
@@ -83,16 +78,18 @@ export function AccountSettings({ user }: AccountSettingsProps) {
         display_name: currentEmployee.display_name || '',
         chinese_name: currentEmployee.chinese_name || '',
         english_name: currentEmployee.english_name || '',
-        email: currentEmployee.email || '',
-        phone: currentEmployee.phone || '',
-        address: currentEmployee.address || '',
-        birth_date: currentEmployee.birth_date || '',
-        id_number: currentEmployee.id_number || '',
-        bank_account: currentEmployee.bank_account || '',
-        emergency_contact_name: currentEmployee.emergency_contact?.name || '',
-        emergency_contact_relation: currentEmployee.emergency_contact?.relation || '',
-        emergency_contact_phone: currentEmployee.emergency_contact?.phone || '',
-        notes: currentEmployee.notes || '',
+        email: currentEmployee.personal_info?.email || currentEmployee.email || '',
+        phone: (Array.isArray(currentEmployee.personal_info?.phone) 
+          ? currentEmployee.personal_info.phone[0] 
+          : currentEmployee.personal_info?.phone) || '',
+        address: currentEmployee.personal_info?.address || '',
+        birth_date: currentEmployee.personal_info?.birth_date || '',
+        id_number: currentEmployee.personal_info?.national_id || '',
+        bank_account: '', // TODO: 從哪裡取？
+        emergency_contact_name: currentEmployee.personal_info?.emergency_contact?.name || '',
+        emergency_contact_relation: currentEmployee.personal_info?.emergency_contact?.relationship || '',
+        emergency_contact_phone: currentEmployee.personal_info?.emergency_contact?.phone || '',
+        notes: '', // TODO: 從哪裡取？
       })
       setCurrentAvatarUrl(currentEmployee.avatar_url || null)
     }
@@ -129,16 +126,31 @@ export function AccountSettings({ user }: AccountSettingsProps) {
         body: formDataUpload,
       })
 
-      if (!response.ok) throw new Error(LABELS.UPLOAD_FAILED)
+      if (!response.ok) {
+        const errorText = await response.text()
+        logger.error('上傳失敗:', errorText)
+        throw new Error(LABELS.UPLOAD_FAILED)
+      }
 
-      const { publicUrl } = await response.json()
+      const result = await response.json()
+      const publicUrl = result.data?.publicUrl || result.publicUrl
 
-      await supabase
+      // 立即更新顯示
+      setCurrentAvatarUrl(publicUrl)
+
+      // 更新資料庫
+      const { error: updateError } = await supabase
         .from('employees')
         .update({ avatar_url: publicUrl })
         .eq('employee_number', user.employee_number)
 
-      setCurrentAvatarUrl(publicUrl)
+      if (updateError) {
+        logger.error('更新頭像 URL 失敗:', updateError)
+      }
+      
+      // 重新載入員工資料
+      await fetchAll()
+      
       await alertSuccess(LABELS.AVATAR_UPLOAD_SUCCESS)
     } catch (error) {
       logger.error('頭像上傳失敗:', error)
@@ -158,18 +170,19 @@ export function AccountSettings({ user }: AccountSettingsProps) {
         display_name: formData.display_name,
         chinese_name: formData.chinese_name,
         english_name: formData.english_name,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        birth_date: formData.birth_date,
-        id_number: formData.id_number,
-        bank_account: formData.bank_account,
-        emergency_contact: {
-          name: formData.emergency_contact_name,
-          relation: formData.emergency_contact_relation,
-          phone: formData.emergency_contact_phone,
+        personal_info: {
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          birth_date: formData.birth_date,
+          national_id: formData.id_number,
+          emergency_contact: {
+            name: formData.emergency_contact_name,
+            relationship: formData.emergency_contact_relation,
+            phone: formData.emergency_contact_phone,
+            address: formData.emergency_contact_address,
+          },
         },
-        notes: formData.notes,
       })
       await alertSuccess('資料更新成功')
     } catch (error) {
@@ -187,9 +200,9 @@ export function AccountSettings({ user }: AccountSettingsProps) {
       {/* Character Card */}
       <div className="bg-white rounded-2xl shadow-md overflow-hidden border-l-4 border-morandi-gold">
         {/* Top Section: Avatar & Quick Info */}
-        <div className="flex flex-col md:flex-row border-b border-morandi-border">
+        <div className="flex flex-col md:flex-row">
           {/* Avatar */}
-          <div className="w-full md:w-80 bg-gradient-to-br from-morandi-container to-white p-10 flex flex-col items-center justify-center border-r border-morandi-border">
+          <div className="w-full md:w-80 bg-gradient-to-br from-morandi-container to-white p-10 flex flex-col items-center justify-center">
             <div className="relative group">
               <div
                 onClick={() => fileInputRef.current?.click()}
@@ -232,7 +245,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
             </div>
 
             <div className="mt-6 text-center">
-              <div className="inline-flex px-3 py-1 bg-morandi-green/20 text-morandi-green text-[10px] font-bold uppercase tracking-widest rounded-full mb-3">
+              <div className="inline-flex px-3 py-1 bg-morandi-green/20 text-morandi-green text-xs font-semibold uppercase tracking-widest rounded-full mb-3">
                 在職中
               </div>
               <h3 className="text-xl font-bold text-morandi-primary tracking-tight">
@@ -243,35 +256,10 @@ export function AccountSettings({ user }: AccountSettingsProps) {
           </div>
 
           {/* Quick Entry */}
-          <div className="flex-1 p-8 lg:p-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest">
-                  顯示名稱
-                </Label>
-                <Input
-                  value={formData.display_name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, display_name: e.target.value })
-                  }
-                  className="bg-morandi-container/30 border-morandi-border rounded-xl"
-                  placeholder="例：William"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest">
-                  員工編號
-                </Label>
-                <Input
-                  value={user.employee_number}
-                  disabled
-                  className="bg-morandi-container/50 border-morandi-border rounded-xl"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest">
+          <div className="flex-1 p-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase">
                   中文姓名
                 </Label>
                 <Input
@@ -279,12 +267,26 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                   onChange={(e) =>
                     setFormData({ ...formData, chinese_name: e.target.value })
                   }
-                  className="bg-morandi-container/30 border-morandi-border rounded-xl"
+                  className="border-morandi-gold/30 focus:border-morandi-gold"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase">
+                  顯示名稱
+                </Label>
+                <Input
+                  value={formData.display_name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, display_name: e.target.value })
+                  }
+                  className="border-morandi-gold/30 focus:border-morandi-gold"
+                  placeholder="例：William"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase">
                   英文姓名
                 </Label>
                 <Input
@@ -292,175 +294,181 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                   onChange={(e) =>
                     setFormData({ ...formData, english_name: e.target.value })
                   }
-                  className="bg-morandi-container/30 border-morandi-border rounded-xl"
+                  className="border-morandi-gold/30 focus:border-morandi-gold"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase">
+                  員工編號
+                </Label>
+                <Input
+                  value={user.employee_number}
+                  disabled
+                  className="bg-morandi-container/50 border-morandi-border"
+                />
+              </div>
+
+              {/* Email */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
+                  <Mail className="w-3.5 h-3.5 text-morandi-gold" />
+                  Email
+                </Label>
+                <Input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="border-morandi-gold/30 focus:border-morandi-gold"
+                />
+              </div>
+
+              {/* Phone */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
+                  <Phone className="w-3.5 h-3.5 text-morandi-gold" />
+                  手機
+                </Label>
+                <Input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  className="border-morandi-gold/30 focus:border-morandi-gold"
+                />
+              </div>
+
+              {/* Birth Date */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
+                  <Calendar className="w-3.5 h-3.5 text-morandi-gold" />
+                  生日
+                </Label>
+                <Input
+                  type="date"
+                  value={formData.birth_date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, birth_date: e.target.value })
+                  }
+                  className="border-morandi-gold/30 focus:border-morandi-gold"
+                  placeholder="YYYY-MM-DD"
+                />
+              </div>
+
+              {/* ID Number */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
+                  <CreditCard className="w-3.5 h-3.5 text-morandi-gold" />
+                  身分證
+                </Label>
+                <Input
+                  value={formData.id_number}
+                  onChange={(e) =>
+                    setFormData({ ...formData, id_number: e.target.value })
+                  }
+                  className="border-morandi-gold/30 focus:border-morandi-gold"
+                />
+              </div>
+
+              {/* Address */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-morandi-gold" />
+                  地址
+                </Label>
+                <Input
+                  value={formData.address}
+                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  className="border-morandi-gold/30 focus:border-morandi-gold"
+                />
+              </div>
+
+              {/* Bank Account */}
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-2">
+                  <CreditCard className="w-3.5 h-3.5 text-morandi-gold" />
+                  銀行帳戶
+                </Label>
+                <Input
+                  value={formData.bank_account}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bank_account: e.target.value })
+                  }
+                  className="border-morandi-gold/30 focus:border-morandi-gold"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="p-8 lg:p-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Email */}
-            <div className="space-y-2">
-              <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest flex items-center gap-2">
-                <Mail className="w-3 h-3 text-morandi-gold" />
-                Email
+        {/* Bottom Section: 緊急聯絡人 */}
+        <div className="p-6 bg-morandi-container/10">
+          <div className="flex items-center gap-2 mb-4">
+            <Heart className="w-4 h-4 text-morandi-red" />
+            <h3 className="text-sm font-bold text-morandi-primary uppercase">
+              緊急聯絡人
+            </h3>
+          </div>
+          <div className="grid grid-cols-4 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-morandi-secondary uppercase">
+                姓名
               </Label>
               <Input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="bg-morandi-container/30 border-morandi-border rounded-xl"
+                value={formData.emergency_contact_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, emergency_contact_name: e.target.value })
+                }
+                className="border-morandi-gold/30 focus:border-morandi-gold"
               />
             </div>
-
-            {/* Phone */}
-            <div className="space-y-2">
-              <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest flex items-center gap-2">
-                <Phone className="w-3 h-3 text-morandi-gold" />
-                手機
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-morandi-secondary uppercase">
+                關係
+              </Label>
+              <Input
+                value={formData.emergency_contact_relation}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    emergency_contact_relation: e.target.value,
+                  })
+                }
+                className="border-morandi-gold/30 focus:border-morandi-gold"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-morandi-secondary uppercase">
+                電話
               </Label>
               <Input
                 type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="bg-morandi-container/30 border-morandi-border rounded-xl"
-              />
-            </div>
-
-            {/* Birth Date */}
-            <div className="space-y-2">
-              <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest flex items-center gap-2">
-                <Calendar className="w-3 h-3 text-morandi-gold" />
-                生日
-              </Label>
-              <Input
-                type="date"
-                value={formData.birth_date}
+                value={formData.emergency_contact_phone}
                 onChange={(e) =>
-                  setFormData({ ...formData, birth_date: e.target.value })
+                  setFormData({
+                    ...formData,
+                    emergency_contact_phone: e.target.value,
+                  })
                 }
-                className="bg-morandi-container/30 border-morandi-border rounded-xl"
+                className="border-morandi-gold/30 focus:border-morandi-gold"
               />
             </div>
-
-            {/* Address */}
-            <div className="col-span-1 md:col-span-2 lg:col-span-3 space-y-2">
-              <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest flex items-center gap-2">
-                <MapPin className="w-3 h-3 text-morandi-gold" />
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-morandi-secondary uppercase">
                 地址
               </Label>
               <Input
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                className="bg-morandi-container/30 border-morandi-border rounded-xl"
-              />
-            </div>
-
-            {/* ID Number */}
-            <div className="space-y-2">
-              <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest flex items-center gap-2">
-                <CreditCard className="w-3 h-3 text-morandi-gold" />
-                身分證
-              </Label>
-              <Input
-                value={formData.id_number}
+                value={formData.emergency_contact_address || ''}
                 onChange={(e) =>
-                  setFormData({ ...formData, id_number: e.target.value })
+                  setFormData({ ...formData, emergency_contact_address: e.target.value })
                 }
-                className="bg-morandi-container/30 border-morandi-border rounded-xl"
-              />
-            </div>
-
-            {/* Bank Account */}
-            <div className="col-span-1 md:col-span-2 space-y-2">
-              <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest flex items-center gap-2">
-                <CreditCard className="w-3 h-3 text-morandi-gold" />
-                銀行帳戶
-              </Label>
-              <Input
-                value={formData.bank_account}
-                onChange={(e) =>
-                  setFormData({ ...formData, bank_account: e.target.value })
-                }
-                className="bg-morandi-container/30 border-morandi-border rounded-xl"
-              />
-            </div>
-
-            {/* Emergency Contact */}
-            <div className="col-span-1 md:col-span-2 lg:col-span-3 pt-6 border-t border-morandi-border">
-              <div className="flex items-center gap-2 mb-4">
-                <Heart className="w-4 h-4 text-morandi-red" />
-                <h3 className="text-sm font-bold text-morandi-primary uppercase tracking-widest">
-                  緊急聯絡人
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest">
-                    姓名
-                  </Label>
-                  <Input
-                    value={formData.emergency_contact_name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, emergency_contact_name: e.target.value })
-                    }
-                    className="bg-morandi-container/30 border-morandi-border rounded-xl"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest">
-                    關係
-                  </Label>
-                  <Input
-                    value={formData.emergency_contact_relation}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        emergency_contact_relation: e.target.value,
-                      })
-                    }
-                    className="bg-morandi-container/30 border-morandi-border rounded-xl"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest">
-                    電話
-                  </Label>
-                  <Input
-                    type="tel"
-                    value={formData.emergency_contact_phone}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        emergency_contact_phone: e.target.value,
-                      })
-                    }
-                    className="bg-morandi-container/30 border-morandi-border rounded-xl"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Notes */}
-            <div className="col-span-1 md:col-span-2 lg:col-span-3 space-y-2">
-              <Label className="text-[10px] font-bold text-morandi-secondary uppercase tracking-widest">
-                備註
-              </Label>
-              <Textarea
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="bg-morandi-container/30 border-morandi-border rounded-xl resize-none"
-                rows={4}
+                className="border-morandi-gold/30 focus:border-morandi-gold"
               />
             </div>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="px-8 py-6 bg-morandi-container/30 border-t border-morandi-border flex justify-end">
+        <div className="px-6 py-4 flex justify-end">
           <Button
             onClick={handleSave}
             disabled={saving}

@@ -81,7 +81,7 @@ export default function SettingsPage() {
         </div>
       }
     >
-      <div className="max-w-4xl mx-auto space-y-8 p-6">
+      <div className="space-y-8 p-6">
 
         {/* 首次設定提示 */}
         {isSetupMode && (
@@ -133,17 +133,7 @@ export default function SettingsPage() {
         )}
 
         {/* 帳號安全設定 */}
-        <AccountSettings
-          user={user}
-          showPasswordSection={showPasswordSection}
-          setShowPasswordSection={setShowPasswordSection}
-          passwordData={passwordData}
-          setPasswordData={setPasswordData}
-          showPassword={showPassword}
-          setShowPassword={setShowPassword}
-          passwordUpdateLoading={passwordUpdateLoading}
-          setPasswordUpdateLoading={setPasswordUpdateLoading}
-        />
+        <AccountSettings user={user} />
       </div>
     </ContentPageLayout>
   )
