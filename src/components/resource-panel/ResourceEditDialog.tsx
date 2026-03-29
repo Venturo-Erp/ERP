@@ -1,286 +1,293 @@
 'use client'
 
+/**
+ * ResourceEditDialog - 資源編輯對話框
+ * 
+ * 兩種模式：
+ * 1. 編輯本團（覆蓋）- 業務可用，只影響當前團
+ * 2. 編輯資料庫 - 需要特定權限，影響所有團
+ */
+
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+// Alert 用 div 替代
+import { MapPin, Building2, UtensilsCrossed, Save, Database, FileEdit, AlertCircle, Lock } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
-import { Loader2, MapPin, Building2, UtensilsCrossed, ExternalLink, X, Save } from 'lucide-react'
-import { logger } from '@/lib/utils/logger'
-
-const supabase = createSupabaseBrowserClient()
+import { toast } from 'sonner'
+import { useAuthStore } from '@/stores/auth-store'
 
 export type ResourceType = 'attraction' | 'hotel' | 'restaurant'
 
 interface ResourceEditDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  resourceId: string | null
-  resourceType: ResourceType
-  onSaved?: () => void
-}
-
-interface ResourceData {
-  id: string
-  name: string
-  address?: string | null
-  latitude?: number | null
-  longitude?: number | null
-  category?: string | null
-  description?: string | null
-  phone?: string | null
-  website?: string | null
-  thumbnail?: string | null
-  data_verified?: boolean
+  resource: {
+    id: string
+    name: string
+    type: ResourceType
+    description?: string | null
+  } | null
+  // 覆蓋相關
+  tourItineraryItemId?: string  // 行程項目 ID（用於儲存覆蓋）
+  currentOverride?: {
+    title?: string | null
+    description?: string | null
+  }
+  onOverrideSave?: (data: { title?: string; description?: string }) => void
+  // 資料庫相關
+  onDatabaseSave?: (data: { id: string; name: string; description: string }) => void
+  // 權限
+  canEditDatabase?: boolean  // 是否可以編輯資料庫
 }
 
 export function ResourceEditDialog({
   open,
   onOpenChange,
-  resourceId,
-  resourceType,
-  onSaved,
+  resource,
+  tourItineraryItemId,
+  currentOverride,
+  onOverrideSave,
+  onDatabaseSave,
+  canEditDatabase = false,
 }: ResourceEditDialogProps) {
-  const [loading, setLoading] = useState(false)
+  const { user } = useAuthStore()
+  const [activeTab, setActiveTab] = useState<'override' | 'database'>('override')
   const [saving, setSaving] = useState(false)
-  const [data, setData] = useState<ResourceData | null>(null)
+  const [loading, setLoading] = useState(false)
 
-  // 載入資源詳細資料
+  // 覆蓋編輯狀態
+  const [overrideDescription, setOverrideDescription] = useState('')
+
+  // 資料庫編輯狀態
+  const [dbDescription, setDbDescription] = useState('')
+  const [originalDbDescription, setOriginalDbDescription] = useState('')
+
+  const supabase = createSupabaseBrowserClient()
+
+  // 載入資料
   useEffect(() => {
-    if (!open || !resourceId) return
+    if (!open || !resource) return
 
-    async function fetchData() {
-      if (!resourceId) return
+    // 初始化覆蓋內容
+    setOverrideDescription(currentOverride?.description || '')
 
+    // 載入資料庫原始內容
+    const fetchDbData = async () => {
       setLoading(true)
       try {
-        const tableName =
-          resourceType === 'attraction'
-            ? 'attractions'
-            : resourceType === 'hotel'
-              ? 'hotels'
-              : 'restaurants'
+        const table = resource.type === 'attraction' ? 'attractions' 
+          : resource.type === 'hotel' ? 'hotels' : 'restaurants'
 
-        const { data: result, error } = await supabase
-          .from(tableName)
-          .select('*')
-          .eq('id', resourceId)
+        const { data, error } = await supabase
+          .from(table)
+          .select('description')
+          .eq('id', resource.id)
           .single()
 
-        if (error) throw error
-        setData(result as ResourceData)
-      } catch (err) {
-        logger.error('載入資源失敗:', err)
+        if (!error && data) {
+          setDbDescription(data.description || '')
+          setOriginalDbDescription(data.description || '')
+        }
+      } catch {
+        // 忽略錯誤
       } finally {
         setLoading(false)
       }
     }
 
-    fetchData()
-  }, [open, resourceId, resourceType])
+    fetchDbData()
+  }, [open, resource?.id])
 
-  // 儲存
-  const handleSave = async () => {
-    if (!data) return
+  if (!resource) return null
+
+  const iconMap: Record<ResourceType, React.ReactNode> = {
+    attraction: <MapPin size={20} className="text-emerald-600" />,
+    hotel: <Building2 size={20} className="text-blue-600" />,
+    restaurant: <UtensilsCrossed size={20} className="text-orange-600" />,
+  }
+
+  const typeLabel: Record<ResourceType, string> = {
+    attraction: '景點',
+    hotel: '酒店',
+    restaurant: '餐廳',
+  }
+
+  // 儲存覆蓋（本團專用）
+  const handleSaveOverride = async () => {
+    if (!tourItineraryItemId) {
+      toast.error('缺少行程項目 ID')
+      return
+    }
 
     setSaving(true)
     try {
-      const tableName =
-        resourceType === 'attraction'
-          ? 'attractions'
-          : resourceType === 'hotel'
-            ? 'hotels'
-            : 'restaurants'
-
       const { error } = await supabase
-        .from(tableName)
+        .from('tour_itinerary_items')
         .update({
-          name: data.name,
-          address: data.address,
-          latitude: data.latitude,
-          longitude: data.longitude,
-          category: data.category,
-          description: data.description,
-          phone: data.phone,
-          website: data.website,
-          data_verified: true, // 編輯後標記為已驗證
-        } as any)
-        .eq('id', data.id)
+          override_description: overrideDescription || null,
+          override_by: user?.id,
+          override_at: new Date().toISOString(),
+        })
+        .eq('id', tourItineraryItemId)
 
       if (error) throw error
 
-      onSaved?.()
+      toast.success('已儲存（僅影響本團）')
+      onOverrideSave?.({ description: overrideDescription })
       onOpenChange(false)
     } catch (err) {
-      logger.error('儲存失敗:', err)
+      console.error('儲存覆蓋失敗:', err)
+      toast.error('儲存失敗')
     } finally {
       setSaving(false)
     }
   }
 
-  // 開啟 Google Maps
-  const openGoogleMaps = () => {
-    if (data?.latitude && data?.longitude) {
-      window.open(`https://www.google.com/maps?q=${data.latitude},${data.longitude}`, '_blank')
-    } else if (data?.name) {
-      window.open(`https://www.google.com/maps/search/${encodeURIComponent(data.name)}`, '_blank')
+  // 儲存資料庫（影響所有團）
+  const handleSaveDatabase = async () => {
+    if (!canEditDatabase) {
+      toast.error('您沒有編輯資料庫的權限')
+      return
     }
-  }
 
-  const iconMap: Record<ResourceType, React.ReactNode> = {
-    attraction: <MapPin size={18} className="text-emerald-600" />,
-    hotel: <Building2 size={18} className="text-blue-600" />,
-    restaurant: <UtensilsCrossed size={18} className="text-orange-600" />,
-  }
+    setSaving(true)
+    try {
+      const table = resource.type === 'attraction' ? 'attractions' 
+        : resource.type === 'hotel' ? 'hotels' : 'restaurants'
 
-  const titleMap: Record<ResourceType, string> = {
-    attraction: '景點資訊',
-    hotel: '酒店資訊',
-    restaurant: '餐廳資訊',
+      const { error } = await supabase
+        .from(table)
+        .update({
+          description: dbDescription,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', resource.id)
+
+      if (error) throw error
+
+      toast.success('已儲存到資料庫（影響所有團）')
+      onDatabaseSave?.({ id: resource.id, name: resource.name, description: dbDescription })
+      onOpenChange(false)
+    } catch (err) {
+      console.error('儲存資料庫失敗:', err)
+      toast.error('儲存失敗')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {iconMap[resourceType]}
-            {titleMap[resourceType]}
+            {iconMap[resource.type]}
+            <span>編輯{typeLabel[resource.type]}內容</span>
           </DialogTitle>
+          <DialogDescription>
+            {resource.name}
+          </DialogDescription>
         </DialogHeader>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="animate-spin text-muted-foreground" />
-          </div>
-        ) : data ? (
-          <div className="space-y-4">
-            {/* 名稱 */}
-            <div className="space-y-1.5">
-              <Label>名稱</Label>
-              <Input
-                value={data.name || ''}
-                onChange={e => setData({ ...data, name: e.target.value })}
-              />
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'override' | 'database')}>
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="override" className="gap-2">
+              <FileEdit size={16} />
+              編輯本團
+            </TabsTrigger>
+            <TabsTrigger value="database" className="gap-2" disabled={!canEditDatabase}>
+              <Database size={16} />
+              編輯資料庫
+              {!canEditDatabase && <Lock size={12} />}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* 編輯本團（覆蓋） */}
+          <TabsContent value="override" className="space-y-4 pt-4">
+            <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-blue-800">
+                此修改只會影響<strong>這一團</strong>的行程，不會改變資料庫原始內容。
+              </p>
             </div>
 
-            {/* 地址 */}
-            <div className="space-y-1.5">
-              <Label>地址</Label>
-              <Input
-                value={data.address || ''}
-                onChange={e => setData({ ...data, address: e.target.value })}
-                placeholder="輸入地址..."
-              />
-            </div>
-
-            {/* 座標 */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>緯度</Label>
-                <Input
-                  type="number"
-                  step="any"
-                  value={data.latitude ?? ''}
-                  onChange={e =>
-                    setData({
-                      ...data,
-                      latitude: e.target.value ? parseFloat(e.target.value) : null,
-                    })
-                  }
-                  placeholder="25.0330"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>經度</Label>
-                <Input
-                  type="number"
-                  step="any"
-                  value={data.longitude ?? ''}
-                  onChange={e =>
-                    setData({
-                      ...data,
-                      longitude: e.target.value ? parseFloat(e.target.value) : null,
-                    })
-                  }
-                  placeholder="121.5654"
-                />
-              </div>
-            </div>
-
-            {/* 查看地圖按鈕 */}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={openGoogleMaps}
-              className="w-full gap-2"
-            >
-              <ExternalLink size={14} />在 Google Maps 查看
-            </Button>
-
-            {/* 分類 */}
-            <div className="space-y-1.5">
-              <Label>分類</Label>
-              <Input
-                value={data.category || ''}
-                onChange={e => setData({ ...data, category: e.target.value })}
-                placeholder="如：購物、景點、餐廳..."
-              />
-            </div>
-
-            {/* 電話 */}
-            <div className="space-y-1.5">
-              <Label>電話</Label>
-              <Input
-                value={data.phone || ''}
-                onChange={e => setData({ ...data, phone: e.target.value })}
-                placeholder="+81-xxx-xxxx"
-              />
-            </div>
-
-            {/* 網站 */}
-            <div className="space-y-1.5">
-              <Label>網站</Label>
-              <Input
-                value={data.website || ''}
-                onChange={e => setData({ ...data, website: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
-
-            {/* 描述 */}
-            <div className="space-y-1.5">
-              <Label>描述</Label>
+            <div className="space-y-2">
+              <Label>內容描述（本團專用）</Label>
               <Textarea
-                value={data.description || ''}
-                onChange={e => setData({ ...data, description: e.target.value })}
-                placeholder="簡短描述..."
-                rows={2}
+                value={overrideDescription}
+                onChange={(e) => setOverrideDescription(e.target.value)}
+                placeholder={originalDbDescription || '輸入本團專用的描述內容...'}
+                rows={6}
               />
+              {originalDbDescription && (
+                <p className="text-xs text-muted-foreground">
+                  原始內容：{originalDbDescription.substring(0, 100)}
+                  {originalDbDescription.length > 100 ? '...' : ''}
+                </p>
+              )}
             </div>
 
-            {/* 按鈕 */}
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                <X className="h-4 w-4 mr-1" />
                 取消
               </Button>
-              <Button onClick={handleSave} disabled={saving}>
-                {saving ? (
-                  <Loader2 size={14} className="animate-spin mr-1" />
-                ) : (
-                  <Save className="h-4 w-4 mr-1" />
-                )}
-                儲存
+              <Button onClick={handleSaveOverride} disabled={saving}>
+                <Save size={16} className="mr-2" />
+                {saving ? '儲存中...' : '儲存（本團）'}
               </Button>
             </div>
-          </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">找不到資料</div>
-        )}
+          </TabsContent>
+
+          {/* 編輯資料庫 */}
+          <TabsContent value="database" className="space-y-4 pt-4">
+            {!canEditDatabase ? (
+              <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <Lock className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-amber-800">
+                  您沒有編輯資料庫的權限。如需修改，請聯繫管理員。
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-amber-800">
+                    此修改會影響<strong>所有使用此{typeLabel[resource.type]}的團</strong>，請謹慎編輯。
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>內容描述（資料庫）</Label>
+                  <Textarea
+                    value={dbDescription}
+                    onChange={(e) => setDbDescription(e.target.value)}
+                    placeholder="輸入描述內容..."
+                    rows={6}
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    取消
+                  </Button>
+                  <Button 
+                    onClick={handleSaveDatabase} 
+                    disabled={saving || loading}
+                    className="bg-amber-600 hover:bg-amber-700"
+                  >
+                    <Database size={16} className="mr-2" />
+                    {saving ? '儲存中...' : '儲存到資料庫'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   )

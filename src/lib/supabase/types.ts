@@ -3229,6 +3229,8 @@ export type Database = {
           emergency_contact_phone: string | null
           emergency_contact_relation: string | null
           id: string
+          include_itinerary: boolean | null
+          include_member_list: boolean | null
           member_ids: string[] | null
           sent_at: string | null
           sent_to: string | null
@@ -3261,6 +3263,8 @@ export type Database = {
           emergency_contact_phone?: string | null
           emergency_contact_relation?: string | null
           id?: string
+          include_itinerary?: boolean | null
+          include_member_list?: boolean | null
           member_ids?: string[] | null
           sent_at?: string | null
           sent_to?: string | null
@@ -3293,6 +3297,8 @@ export type Database = {
           emergency_contact_phone?: string | null
           emergency_contact_relation?: string | null
           id?: string
+          include_itinerary?: boolean | null
+          include_member_list?: boolean | null
           member_ids?: string[] | null
           sent_at?: string | null
           sent_to?: string | null
@@ -7636,36 +7642,109 @@ export type Database = {
       }
       line_groups: {
         Row: {
+          category: string | null
           group_id: string
           group_name: string | null
           id: string
           joined_at: string | null
           member_count: number | null
+          note: string | null
           supplier_id: string | null
           updated_at: string | null
           workspace_id: string | null
         }
         Insert: {
+          category?: string | null
           group_id: string
           group_name?: string | null
           id?: string
           joined_at?: string | null
           member_count?: number | null
+          note?: string | null
           supplier_id?: string | null
           updated_at?: string | null
           workspace_id?: string | null
         }
         Update: {
+          category?: string | null
           group_id?: string
           group_name?: string | null
           id?: string
           joined_at?: string | null
           member_count?: number | null
+          note?: string | null
           supplier_id?: string | null
           updated_at?: string | null
           workspace_id?: string | null
         }
         Relationships: []
+      }
+      line_users: {
+        Row: {
+          display_name: string | null
+          employee_id: string | null
+          followed_at: string | null
+          id: string
+          note: string | null
+          picture_url: string | null
+          status_message: string | null
+          supplier_id: string | null
+          unfollowed_at: string | null
+          updated_at: string | null
+          user_id: string
+          workspace_id: string | null
+        }
+        Insert: {
+          display_name?: string | null
+          employee_id?: string | null
+          followed_at?: string | null
+          id?: string
+          note?: string | null
+          picture_url?: string | null
+          status_message?: string | null
+          supplier_id?: string | null
+          unfollowed_at?: string | null
+          updated_at?: string | null
+          user_id: string
+          workspace_id?: string | null
+        }
+        Update: {
+          display_name?: string | null
+          employee_id?: string | null
+          followed_at?: string | null
+          id?: string
+          note?: string | null
+          picture_url?: string | null
+          status_message?: string | null
+          supplier_id?: string | null
+          unfollowed_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "line_users_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "line_users_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "line_users_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       linkpay_logs: {
         Row: {
@@ -9197,6 +9276,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           name: string
+          placeholder: string | null
           sort_order: number | null
           type: string
           updated_at: string | null
@@ -9211,6 +9291,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name: string
+          placeholder?: string | null
           sort_order?: number | null
           type: string
           updated_at?: string | null
@@ -9225,6 +9306,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           name?: string
+          placeholder?: string | null
           sort_order?: number | null
           type?: string
           updated_at?: string | null
@@ -11790,277 +11872,6 @@ export type Database = {
           },
         ]
       }
-      receipt_items: {
-        Row: {
-          account_info: string | null
-          actual_amount: number | null
-          amount: number
-          auth_code: string | null
-          card_last_four: string | null
-          check_bank: string | null
-          check_date: string | null
-          check_number: string | null
-          created_at: string | null
-          created_by: string | null
-          customer_id: string | null
-          deleted_at: string | null
-          email: string | null
-          fees: number | null
-          handler_name: string | null
-          id: string
-          link: string | null
-          linkpay_order_number: string | null
-          notes: string | null
-          order_id: string | null
-          pay_dateline: string | null
-          payment_method: string
-          payment_name: string | null
-          receipt_account: string | null
-          receipt_id: string
-          receipt_type: number
-          status: string | null
-          tour_id: string | null
-          updated_at: string | null
-          updated_by: string | null
-          workspace_id: string
-        }
-        Insert: {
-          account_info?: string | null
-          actual_amount?: number | null
-          amount?: number
-          auth_code?: string | null
-          card_last_four?: string | null
-          check_bank?: string | null
-          check_date?: string | null
-          check_number?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          customer_id?: string | null
-          deleted_at?: string | null
-          email?: string | null
-          fees?: number | null
-          handler_name?: string | null
-          id?: string
-          link?: string | null
-          linkpay_order_number?: string | null
-          notes?: string | null
-          order_id?: string | null
-          pay_dateline?: string | null
-          payment_method?: string
-          payment_name?: string | null
-          receipt_account?: string | null
-          receipt_id: string
-          receipt_type?: number
-          status?: string | null
-          tour_id?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-          workspace_id: string
-        }
-        Update: {
-          account_info?: string | null
-          actual_amount?: number | null
-          amount?: number
-          auth_code?: string | null
-          card_last_four?: string | null
-          check_bank?: string | null
-          check_date?: string | null
-          check_number?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          customer_id?: string | null
-          deleted_at?: string | null
-          email?: string | null
-          fees?: number | null
-          handler_name?: string | null
-          id?: string
-          link?: string | null
-          linkpay_order_number?: string | null
-          notes?: string | null
-          order_id?: string | null
-          pay_dateline?: string | null
-          payment_method?: string
-          payment_name?: string | null
-          receipt_account?: string | null
-          receipt_id?: string
-          receipt_type?: number
-          status?: string | null
-          tour_id?: string | null
-          updated_at?: string | null
-          updated_by?: string | null
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "receipt_items_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_items_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "customers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_items_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_items_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders_invoice_summary"
-            referencedColumns: ["order_id"]
-          },
-          {
-            foreignKeyName: "receipt_items_receipt_id_fkey"
-            columns: ["receipt_id"]
-            isOneToOne: false
-            referencedRelation: "receipts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_items_tour_id_fkey"
-            columns: ["tour_id"]
-            isOneToOne: false
-            referencedRelation: "my_erp_tours"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_items_tour_id_fkey"
-            columns: ["tour_id"]
-            isOneToOne: false
-            referencedRelation: "tours"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_items_updated_by_fkey"
-            columns: ["updated_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_items_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      receipt_orders: {
-        Row: {
-          amount: number
-          code: string
-          created_at: string | null
-          created_by: string | null
-          handled_by: string | null
-          id: string
-          notes: string | null
-          order_id: string | null
-          payment_method: string
-          receipt_date: string
-          updated_at: string | null
-          updated_by: string | null
-          workspace_id: string
-        }
-        Insert: {
-          amount: number
-          code: string
-          created_at?: string | null
-          created_by?: string | null
-          handled_by?: string | null
-          id: string
-          notes?: string | null
-          order_id?: string | null
-          payment_method: string
-          receipt_date: string
-          updated_at?: string | null
-          updated_by?: string | null
-          workspace_id: string
-        }
-        Update: {
-          amount?: number
-          code?: string
-          created_at?: string | null
-          created_by?: string | null
-          handled_by?: string | null
-          id?: string
-          notes?: string | null
-          order_id?: string | null
-          payment_method?: string
-          receipt_date?: string
-          updated_at?: string | null
-          updated_by?: string | null
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "fk_receipt_orders_workspace"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "workspaces"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_orders_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "receipt_orders_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders_invoice_summary"
-            referencedColumns: ["order_id"]
-          },
-        ]
-      }
-      receipt_payment_items: {
-        Row: {
-          amount: number
-          created_at: string | null
-          id: string
-          item_name: string
-          notes: string | null
-          receipt_id: string | null
-        }
-        Insert: {
-          amount: number
-          created_at?: string | null
-          id?: string
-          item_name: string
-          notes?: string | null
-          receipt_id?: string | null
-        }
-        Update: {
-          amount?: number
-          created_at?: string | null
-          id?: string
-          item_name?: string
-          notes?: string | null
-          receipt_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "receipt_payment_items_receipt_id_fkey"
-            columns: ["receipt_id"]
-            isOneToOne: false
-            referencedRelation: "receipts"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       receipts: {
         Row: {
           account_info: string | null
@@ -12070,6 +11881,7 @@ export type Database = {
           amount: number
           auth_code: string | null
           bank_name: string | null
+          batch_id: string | null
           card_last_four: string | null
           check_bank: string | null
           check_date: string | null
@@ -12118,6 +11930,7 @@ export type Database = {
           amount: number
           auth_code?: string | null
           bank_name?: string | null
+          batch_id?: string | null
           card_last_four?: string | null
           check_bank?: string | null
           check_date?: string | null
@@ -12166,6 +11979,7 @@ export type Database = {
           amount?: number
           auth_code?: string | null
           bank_name?: string | null
+          batch_id?: string | null
           card_last_four?: string | null
           check_bank?: string | null
           check_date?: string | null
@@ -13255,6 +13069,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "role_route_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_tab_permissions: {
+        Row: {
+          can_read: boolean | null
+          can_write: boolean | null
+          created_at: string | null
+          id: string
+          module_code: string
+          role_id: string
+          tab_code: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          can_read?: boolean | null
+          can_write?: boolean | null
+          created_at?: string | null
+          id?: string
+          module_code: string
+          role_id: string
+          tab_code?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          can_read?: boolean | null
+          can_write?: boolean | null
+          created_at?: string | null
+          id?: string
+          module_code?: string
+          role_id?: string
+          tab_code?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_tab_permissions_role_id_fkey"
             columns: ["role_id"]
             isOneToOne: false
             referencedRelation: "workspace_roles"
@@ -15183,6 +15038,10 @@ export type Database = {
           latitude: number | null
           leader_status: string | null
           longitude: number | null
+          override_at: string | null
+          override_by: string | null
+          override_description: string | null
+          override_title: string | null
           pricing_type: string | null
           quantity: number | null
           quote_item_id: string | null
@@ -15253,6 +15112,10 @@ export type Database = {
           latitude?: number | null
           leader_status?: string | null
           longitude?: number | null
+          override_at?: string | null
+          override_by?: string | null
+          override_description?: string | null
+          override_title?: string | null
           pricing_type?: string | null
           quantity?: number | null
           quote_item_id?: string | null
@@ -15323,6 +15186,10 @@ export type Database = {
           latitude?: number | null
           leader_status?: string | null
           longitude?: number | null
+          override_at?: string | null
+          override_by?: string | null
+          override_description?: string | null
+          override_title?: string | null
           pricing_type?: string | null
           quantity?: number | null
           quote_item_id?: string | null
@@ -15379,6 +15246,13 @@ export type Database = {
             columns: ["itinerary_id"]
             isOneToOne: false
             referencedRelation: "itineraries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tour_itinerary_items_override_by_fkey"
+            columns: ["override_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
           {

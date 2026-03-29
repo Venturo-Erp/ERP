@@ -150,7 +150,8 @@ export function AddReceiptDialog({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         let receiptItems: any[] | null = null
         try {
-          const { data } = await supabase
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data } = await (supabase as any)
             .from('receipt_items')
             .select('*')
             .eq('receipt_id', editingReceipt.id)
