@@ -207,6 +207,8 @@ export const ToursPage: React.FC = () => {
         assistant: orderData.assistant,
         member_count: orderData.member_count || 0,
         total_amount: orderData.total_amount || 0,
+        paid_amount: 0,
+        remaining_amount: orderData.total_amount || 0,
         workspace_id: user?.workspace_id,
       })
       toast.success('訂單建立成功')

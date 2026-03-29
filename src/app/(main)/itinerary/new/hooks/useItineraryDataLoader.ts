@@ -473,8 +473,9 @@ function createDailyItineraryFromTour(
   const dailyItinerary: DailyItinerary[] = []
   
   // 如果旅遊團已有 daily_itinerary，直接使用
-  if (tour.daily_itinerary && Array.isArray(tour.daily_itinerary) && tour.daily_itinerary.length > 0) {
-    return tour.daily_itinerary as DailyItinerary[]
+  const tourWithDailyItinerary = tour as Tour & { daily_itinerary?: DailyItinerary[] }
+  if (tourWithDailyItinerary.daily_itinerary && Array.isArray(tourWithDailyItinerary.daily_itinerary) && tourWithDailyItinerary.daily_itinerary.length > 0) {
+    return tourWithDailyItinerary.daily_itinerary
   }
   
   // 否則生成空白行程（只帶標題）
@@ -492,9 +493,11 @@ function createDailyItineraryFromTour(
       images: [],
       activities: [],
       recommendations: [],
-      breakfast: '',
-      lunch: '',
-      dinner: '',
+      meals: {
+        breakfast: '',
+        lunch: '',
+        dinner: '',
+      },
       accommodation: '',
     })
   }

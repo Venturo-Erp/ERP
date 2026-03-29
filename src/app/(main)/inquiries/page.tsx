@@ -5,9 +5,8 @@
  * 路由: /inquiries
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { format } from 'date-fns'
-import { zhTW } from 'date-fns/locale'
 import { 
   Inbox, 
   Phone, 
@@ -24,7 +23,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
-import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
+import { TableColumn } from '@/components/ui/enhanced-table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -75,32 +74,25 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   cancelled: { label: '已取消', color: 'bg-gray-100 text-gray-800' },
 }
 
-type FilterTab = 'all' | 'pending' | 'contacted' | 'quoted' | 'converted' | 'cancelled'
-
 export default function InquiriesPage() {
   const { user } = useAuthStore()
   const [inquiries, setInquiries] = useState<CustomerInquiry[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<FilterTab>('all')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [activeTab, setActiveTab] = useState<string>('all')
   const [selectedInquiry, setSelectedInquiry] = useState<CustomerInquiry | null>(null)
   const [detailOpen, setDetailOpen] = useState(false)
 
-  const fetchInquiries = async () => {
+  const fetchInquiries = useCallback(async () => {
     if (!user?.workspace_id) return
 
-    // 使用明確型別避免 TypeScript 型別推斷過深
-    const { data, error } = await (supabase
+    const { data, error } = await supabase
       .from('customer_inquiries')
       .select(`
         *,
         wishlist_templates(name)
       `)
       .eq('workspace_id', user.workspace_id)
-      .order('created_at', { ascending: false }) as unknown as Promise<{
-        data: Array<CustomerInquiry & { wishlist_templates: { name: string } | null }> | null
-        error: Error | null
-      }>)
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('載入失敗:', error)
@@ -108,18 +100,29 @@ export default function InquiriesPage() {
       return
     }
 
-    const processed = (data || []).map((row) => ({
-      ...row,
-      template_name: row.wishlist_templates?.name,
+    const processed: CustomerInquiry[] = (data || []).map((row) => ({
+      id: row.id,
+      code: row.code || '',
+      customer_name: row.customer_name,
+      phone: row.phone,
+      email: row.email,
+      travel_date: row.travel_date,
+      people_count: row.people_count || 1,
+      notes: row.notes,
+      selected_items: (row.selected_items as unknown as SelectedItem[]) || [],
+      status: row.status as CustomerInquiry['status'],
+      internal_notes: row.internal_notes,
+      created_at: row.created_at || new Date().toISOString(),
+      template_name: (row.wishlist_templates as { name: string } | null)?.name,
     }))
 
     setInquiries(processed)
     setLoading(false)
-  }
+  }, [user?.workspace_id])
 
   useEffect(() => {
     fetchInquiries()
-  }, [user?.workspace_id])
+  }, [fetchInquiries])
 
   const updateStatus = async (inquiry: CustomerInquiry, newStatus: string) => {
     const { error } = await supabase
@@ -168,49 +171,35 @@ export default function InquiriesPage() {
     }
   }, [inquiries])
 
-  // 篩選
+  // 篩選後的資料
   const filteredInquiries = useMemo(() => {
-    let result = inquiries
-    
-    if (activeTab !== 'all') {
-      result = result.filter(i => i.status === activeTab)
-    }
-    
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase()
-      result = result.filter(i => 
-        i.customer_name.toLowerCase().includes(term) ||
-        i.code.toLowerCase().includes(term) ||
-        i.phone?.includes(term)
-      )
-    }
-    
-    return result
-  }, [inquiries, activeTab, searchTerm])
+    if (activeTab === 'all') return inquiries
+    return inquiries.filter(i => i.status === activeTab)
+  }, [inquiries, activeTab])
 
   // 分頁標籤
-  const tabs = [
-    { key: 'all', label: '全部', count: statusCounts.all },
-    { key: 'pending', label: '待處理', count: statusCounts.pending },
-    { key: 'contacted', label: '已聯繫', count: statusCounts.contacted },
-    { key: 'quoted', label: '已報價', count: statusCounts.quoted },
-    { key: 'converted', label: '已成交', count: statusCounts.converted },
+  const statusTabs = [
+    { value: 'all', label: `全部 (${statusCounts.all})` },
+    { value: 'pending', label: `待處理 (${statusCounts.pending})` },
+    { value: 'contacted', label: `已聯繫 (${statusCounts.contacted})` },
+    { value: 'quoted', label: `已報價 (${statusCounts.quoted})` },
+    { value: 'converted', label: `已成交 (${statusCounts.converted})` },
   ]
 
   // 表格欄位
   const columns: TableColumn<CustomerInquiry>[] = [
     {
       key: 'code',
-      title: '編號',
+      label: '編號',
       width: '120px',
-      render: (row) => (
+      render: (_, row) => (
         <span className="font-mono text-sm">{row.code}</span>
       ),
     },
     {
       key: 'customer_name',
-      title: '客人',
-      render: (row) => (
+      label: '客人',
+      render: (_, row) => (
         <div>
           <div className="font-medium">{row.customer_name}</div>
           <div className="text-xs text-muted-foreground">{row.phone}</div>
@@ -219,37 +208,37 @@ export default function InquiriesPage() {
     },
     {
       key: 'template_name',
-      title: '來源',
+      label: '來源',
       width: '150px',
-      render: (row) => row.template_name || '-',
+      render: (_, row) => row.template_name || '-',
     },
     {
       key: 'selected_items',
-      title: '景點',
+      label: '景點',
       width: '80px',
       align: 'center',
-      render: (row) => `${row.selected_items?.length || 0} 個`,
+      render: (_, row) => `${row.selected_items?.length || 0} 個`,
     },
     {
       key: 'travel_date',
-      title: '出發日',
+      label: '出發日',
       width: '100px',
-      render: (row) => row.travel_date 
+      render: (_, row) => row.travel_date 
         ? format(new Date(row.travel_date), 'MM/dd')
         : '-',
     },
     {
       key: 'people_count',
-      title: '人數',
+      label: '人數',
       width: '60px',
       align: 'center',
-      render: (row) => row.people_count,
+      render: (_, row) => row.people_count,
     },
     {
       key: 'status',
-      title: '狀態',
+      label: '狀態',
       width: '90px',
-      render: (row) => (
+      render: (_, row) => (
         <Badge className={STATUS_CONFIG[row.status]?.color}>
           {STATUS_CONFIG[row.status]?.label}
         </Badge>
@@ -257,9 +246,9 @@ export default function InquiriesPage() {
     },
     {
       key: 'created_at',
-      title: '時間',
+      label: '時間',
       width: '100px',
-      render: (row) => format(new Date(row.created_at), 'MM/dd HH:mm'),
+      render: (_, row) => format(new Date(row.created_at), 'MM/dd HH:mm'),
     },
   ]
 
@@ -300,35 +289,23 @@ export default function InquiriesPage() {
   )
 
   return (
-    <ListPageLayout
-      title="詢價單管理"
-      icon={Inbox}
-      description="客人透過紙娃娃送出的詢價單"
-      tabs={tabs}
-      activeTab={activeTab}
-      onTabChange={(tab) => setActiveTab(tab as FilterTab)}
-      searchPlaceholder="搜尋客人姓名、編號..."
-      searchValue={searchTerm}
-      onSearchChange={setSearchTerm}
-      badge={statusCounts.pending > 0 ? statusCounts.pending : undefined}
-    >
-      <EnhancedTable
-        columns={columns}
+    <>
+      <ListPageLayout
+        title="詢價單管理"
+        icon={Inbox}
         data={filteredInquiries}
+        columns={columns}
         loading={loading}
-        actions={renderActions}
-        actionsWidth="50px"
+        renderActions={renderActions}
         onRowClick={openDetail}
         bordered
-        rowClassName={(row) => row.status === 'pending' ? 'bg-yellow-50' : ''}
-        emptyState={
-          <div className="flex flex-col items-center py-12">
-            <Inbox size={48} className="text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground">
-              {activeTab === 'all' ? '還沒有詢價單' : '沒有符合條件的詢價單'}
-            </p>
-          </div>
-        }
+        searchable
+        searchPlaceholder="搜尋客人姓名、編號..."
+        searchFields={['customer_name', 'code', 'phone']}
+        statusTabs={statusTabs}
+        activeStatusTab={activeTab}
+        onStatusTabChange={setActiveTab}
+        emptyMessage={activeTab === 'all' ? '還沒有詢價單' : '沒有符合條件的詢價單'}
       />
 
       {/* 詳情 Dialog */}
@@ -467,6 +444,6 @@ export default function InquiriesPage() {
           )}
         </DialogContent>
       </Dialog>
-    </ListPageLayout>
+    </>
   )
 }

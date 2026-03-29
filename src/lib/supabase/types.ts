@@ -3795,6 +3795,84 @@ export type Database = {
           },
         ]
       }
+      customer_inquiries: {
+        Row: {
+          assigned_to: string | null
+          code: string | null
+          converted_to_quote_id: string | null
+          converted_to_tour_id: string | null
+          created_at: string | null
+          customer_name: string
+          email: string | null
+          id: string
+          internal_notes: string | null
+          notes: string | null
+          people_count: number | null
+          phone: string | null
+          selected_items: Json | null
+          status: string | null
+          template_id: string | null
+          travel_date: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          code?: string | null
+          converted_to_quote_id?: string | null
+          converted_to_tour_id?: string | null
+          created_at?: string | null
+          customer_name: string
+          email?: string | null
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          people_count?: number | null
+          phone?: string | null
+          selected_items?: Json | null
+          status?: string | null
+          template_id?: string | null
+          travel_date?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          assigned_to?: string | null
+          code?: string | null
+          converted_to_quote_id?: string | null
+          converted_to_tour_id?: string | null
+          created_at?: string | null
+          customer_name?: string
+          email?: string | null
+          id?: string
+          internal_notes?: string | null
+          notes?: string | null
+          people_count?: number | null
+          phone?: string | null
+          selected_items?: Json | null
+          status?: string | null
+          template_id?: string | null
+          travel_date?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_inquiries_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "wishlist_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_inquiries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_travel_cards: {
         Row: {
           created_at: string | null
@@ -18958,6 +19036,107 @@ export type Database = {
             columns: ["tour_id"]
             isOneToOne: false
             referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishlist_template_items: {
+        Row: {
+          attraction_id: string | null
+          category: string | null
+          created_at: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          image_url: string | null
+          name: string
+          region: string | null
+          template_id: string
+        }
+        Insert: {
+          attraction_id?: string | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          name: string
+          region?: string | null
+          template_id: string
+        }
+        Update: {
+          attraction_id?: string | null
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          region?: string | null
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_template_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "wishlist_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wishlist_templates: {
+        Row: {
+          cover_image: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          slug: string
+          status: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          cover_image?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+          status?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          cover_image?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          status?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wishlist_templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]

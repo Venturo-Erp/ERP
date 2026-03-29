@@ -5,11 +5,11 @@
  * 路由: /wishlist-templates
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Plus, Edit, Trash2, Eye, Link as LinkIcon, MoreHorizontal, Sparkles, Globe, FileEdit } from 'lucide-react'
 import { toast } from 'sonner'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
-import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
+import { TableColumn } from '@/components/ui/enhanced-table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -40,8 +40,8 @@ interface WishlistTemplate {
   cover_image: string | null
   status: 'draft' | 'published' | 'archived'
   created_at: string
-  items_count?: number
-  inquiries_count?: number
+  items_count: number
+  inquiries_count: number
 }
 
 const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
@@ -56,7 +56,6 @@ export default function WishlistTemplatesPage() {
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<WishlistTemplate | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
   
   // 表單
   const [formData, setFormData] = useState({
@@ -65,24 +64,10 @@ export default function WishlistTemplatesPage() {
     description: '',
   })
 
-  const fetchTemplates = async () => {
+  const fetchTemplates = useCallback(async () => {
     if (!user?.workspace_id) return
 
-    // 處理 count
-    interface TemplateRow {
-      id: string
-      name: string
-      slug: string
-      description: string | null
-      cover_image: string | null
-      status: 'draft' | 'published' | 'archived'
-      created_at: string
-      wishlist_template_items?: { count: number }[]
-      customer_inquiries?: { count: number }[]
-    }
-
-    // 使用明確型別避免 TypeScript 型別推斷過深
-    const { data, error } = await (supabase
+    const { data, error } = await supabase
       .from('wishlist_templates')
       .select(`
         *,
@@ -90,10 +75,7 @@ export default function WishlistTemplatesPage() {
         customer_inquiries(count)
       `)
       .eq('workspace_id', user.workspace_id)
-      .order('created_at', { ascending: false }) as unknown as Promise<{
-        data: TemplateRow[] | null
-        error: Error | null
-      }>)
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('載入失敗:', error)
@@ -101,25 +83,25 @@ export default function WishlistTemplatesPage() {
       return
     }
     
-    const processed = (data || []).map((t) => ({
+    const processed: WishlistTemplate[] = (data || []).map((t) => ({
       id: t.id,
       name: t.name,
       slug: t.slug,
       description: t.description,
       cover_image: t.cover_image,
-      status: t.status,
-      created_at: t.created_at,
-      items_count: t.wishlist_template_items?.[0]?.count || 0,
-      inquiries_count: t.customer_inquiries?.[0]?.count || 0,
+      status: t.status as 'draft' | 'published' | 'archived',
+      created_at: t.created_at || new Date().toISOString(),
+      items_count: (t.wishlist_template_items as { count: number }[])?.[0]?.count || 0,
+      inquiries_count: (t.customer_inquiries as { count: number }[])?.[0]?.count || 0,
     }))
 
     setTemplates(processed)
     setLoading(false)
-  }
+  }, [user?.workspace_id])
 
   useEffect(() => {
     fetchTemplates()
-  }, [user?.workspace_id])
+  }, [fetchTemplates])
 
   const generateSlug = (name: string) => {
     return name
@@ -172,11 +154,11 @@ export default function WishlistTemplatesPage() {
       const { error } = await supabase
         .from('wishlist_templates')
         .insert({
-          workspace_id: user?.workspace_id,
+          workspace_id: user?.workspace_id as string,
           name: formData.name,
           slug,
           description: formData.description || null,
-          status: 'draft',
+          status: 'draft' as const,
           created_by: user?.id,
         })
 
@@ -235,22 +217,12 @@ export default function WishlistTemplatesPage() {
     toast.success('已複製連結')
   }
 
-  // 篩選
-  const filteredTemplates = useMemo(() => {
-    if (!searchTerm) return templates
-    const term = searchTerm.toLowerCase()
-    return templates.filter(t => 
-      t.name.toLowerCase().includes(term) ||
-      t.slug.toLowerCase().includes(term)
-    )
-  }, [templates, searchTerm])
-
   // 表格欄位
   const columns: TableColumn<WishlistTemplate>[] = [
     {
       key: 'name',
-      title: '名稱',
-      render: (row) => (
+      label: '名稱',
+      render: (_, row) => (
         <div>
           <div className="font-medium">{row.name}</div>
           <div className="text-xs text-muted-foreground">/{row.slug}</div>
@@ -259,9 +231,9 @@ export default function WishlistTemplatesPage() {
     },
     {
       key: 'status',
-      title: '狀態',
+      label: '狀態',
       width: '100px',
-      render: (row) => (
+      render: (_, row) => (
         <Badge variant={STATUS_CONFIG[row.status]?.variant}>
           {STATUS_CONFIG[row.status]?.label}
         </Badge>
@@ -269,23 +241,23 @@ export default function WishlistTemplatesPage() {
     },
     {
       key: 'items_count',
-      title: '景點數',
+      label: '景點數',
       width: '80px',
       align: 'center',
-      render: (row) => row.items_count || 0,
+      render: (_, row) => row.items_count || 0,
     },
     {
       key: 'inquiries_count',
-      title: '詢價數',
+      label: '詢價數',
       width: '80px',
       align: 'center',
-      render: (row) => row.inquiries_count || 0,
+      render: (_, row) => row.inquiries_count || 0,
     },
     {
       key: 'created_at',
-      title: '建立時間',
+      label: '建立時間',
       width: '120px',
-      render: (row) => format(new Date(row.created_at), 'yyyy/MM/dd'),
+      render: (_, row) => format(new Date(row.created_at), 'yyyy/MM/dd'),
     },
   ]
 
@@ -334,34 +306,22 @@ export default function WishlistTemplatesPage() {
   )
 
   return (
-    <ListPageLayout
-      title="紙娃娃管理"
-      icon={Sparkles}
-      description="建立客製化行程選單，讓客人自己挑選想去的景點"
-      primaryAction={{
-        label: '新增紙娃娃',
-        icon: Plus,
-        onClick: handleCreate,
-      }}
-      searchPlaceholder="搜尋名稱..."
-      searchValue={searchTerm}
-      onSearchChange={setSearchTerm}
-    >
-      <EnhancedTable
+    <>
+      <ListPageLayout
+        title="紙娃娃管理"
+        icon={Sparkles}
+        data={templates}
         columns={columns}
-        data={filteredTemplates}
         loading={loading}
-        actions={renderActions}
-        actionsWidth="50px"
+        renderActions={renderActions}
         onRowClick={(row) => window.location.href = `/wishlist-templates/${row.id}`}
         bordered
-        emptyState={
-          <div className="flex flex-col items-center py-12">
-            <Sparkles size={48} className="text-muted-foreground/30 mb-4" />
-            <p className="text-muted-foreground">還沒有紙娃娃</p>
-            <p className="text-sm text-muted-foreground/70">點擊「新增紙娃娃」開始建立</p>
-          </div>
-        }
+        searchable
+        searchPlaceholder="搜尋名稱..."
+        searchFields={['name', 'slug']}
+        onAdd={handleCreate}
+        addLabel="新增紙娃娃"
+        emptyMessage="還沒有紙娃娃，點擊「新增紙娃娃」開始建立"
       />
 
       {/* 新增/編輯 Dialog */}
@@ -426,6 +386,6 @@ export default function WishlistTemplatesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </ListPageLayout>
+    </>
   )
 }

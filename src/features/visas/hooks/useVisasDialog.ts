@@ -62,10 +62,10 @@ export function useVisasDialog(tours: Tour[]) {
     },
   ])
 
-  // 團號選項（過濾掉已封存和已刪除的）
+  // 團號選項（過濾掉已封存的）
   const tourOptions: ComboboxOption[] = useMemo(() => {
     return tours
-      .filter(tour => !tour.archived && !tour.is_deleted)
+      .filter(tour => !tour.archived)
       .map(tour => ({
         value: tour.id,
         label: `${tour.code} - ${tour.name}`,
