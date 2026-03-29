@@ -81,7 +81,7 @@ export default function SettingsPage() {
         </div>
       }
     >
-      <div className="space-y-8 p-6">
+      <div className="space-y-4 p-4">
 
         {/* 首次設定提示 */}
         {isSetupMode && (
@@ -133,7 +133,7 @@ export default function SettingsPage() {
         )}
 
         {/* 個人資料 - 用同一個 EmployeeForm，mode='self' */}
-        <div className="-mt-4" style={{ minHeight: '600px' }}>
+        <div style={{ minHeight: '600px' }}>
           <EmployeeForm
             employeeId={user?.id}
             mode="self"
