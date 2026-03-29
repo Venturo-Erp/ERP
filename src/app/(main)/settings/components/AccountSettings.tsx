@@ -245,13 +245,15 @@ export function AccountSettings({ user }: AccountSettingsProps) {
             </div>
 
             <div className="mt-6 text-center">
-              <div className="inline-flex px-3 py-1 bg-morandi-green/20 text-morandi-green text-xs font-semibold uppercase tracking-widest rounded-full mb-3">
-                在職中
+              <div className="inline-flex px-2 py-0.5 bg-morandi-gold/20 text-morandi-gold text-[10px] font-bold uppercase tracking-widest rounded-full mb-2">
+                {user.employee_number}
               </div>
               <h3 className="text-xl font-bold text-morandi-primary tracking-tight">
                 {user.display_name || user.chinese_name}
               </h3>
-              <p className="text-sm text-morandi-secondary mt-1">{user.employee_number}</p>
+              <p className="text-sm text-morandi-secondary mt-0.5">
+                {currentEmployee?.job_info?.position || '尚未設定職務'}
+              </p>
             </div>
           </div>
 

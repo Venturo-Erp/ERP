@@ -257,17 +257,15 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
 
               {/* 員工資訊 */}
               <div className="text-center mb-6">
-                <div className="inline-flex px-2 py-0.5 bg-morandi-green/20 text-morandi-green text-[10px] font-bold uppercase tracking-widest rounded-full mb-2">
+                <div className="inline-flex px-2 py-0.5 bg-morandi-gold/20 text-morandi-gold text-[10px] font-bold uppercase tracking-widest rounded-full mb-2">
                   {isEditMode ? employee?.employee_number : '新員工'}
                 </div>
                 <h3 className="text-lg font-bold text-morandi-primary">
                   {formData.display_name || formData.chinese_name || '未命名'}
                 </h3>
-                {selectedRole && (
-                  <p className="text-xs text-morandi-secondary mt-0.5">
-                    {selectedRole.name}
-                  </p>
-                )}
+                <p className="text-sm text-morandi-secondary mt-0.5">
+                  {selectedRole?.name || formData.position || '尚未設定職務'}
+                </p>
               </div>
 
               {/* 分頁按鈕（如果有多個） */}
