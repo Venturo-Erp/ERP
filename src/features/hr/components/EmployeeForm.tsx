@@ -72,6 +72,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     emergency_contact_name: employee?.personal_info?.emergency_contact?.name || '',
     emergency_contact_relation: employee?.personal_info?.emergency_contact?.relationship || '',
     emergency_contact_phone: employee?.personal_info?.emergency_contact?.phone || '',
+    emergency_contact_address: employee?.personal_info?.emergency_contact?.address || '',
     role_id: employee?.job_info?.role_id || '',
     base_salary: employee?.salary_info?.base_salary || 0,
   })
@@ -131,6 +132,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         emergency_contact_name: employee.personal_info?.emergency_contact?.name || '',
         emergency_contact_relation: employee.personal_info?.emergency_contact?.relationship || '',
         emergency_contact_phone: employee.personal_info?.emergency_contact?.phone || '',
+        emergency_contact_address: employee.personal_info?.emergency_contact?.address || '',
         role_id: employee.job_info?.role_id || '',
         base_salary: employee.salary_info?.base_salary || 0,
       })
@@ -178,6 +180,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
             name: formData.emergency_contact_name,
             relationship: formData.emergency_contact_relation,
             phone: formData.emergency_contact_phone,
+            address: formData.emergency_contact_address,
           },
         },
         job_info: {
@@ -226,7 +229,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
       {/* 主內容區 */}
       <div className="flex-1 overflow-y-auto">
         {/* Character Card 風格 */}
-        <div className="bg-white rounded-2xl shadow-md overflow-hidden border-l-4 border-morandi-gold m-6">
+        <div className="bg-white overflow-hidden border-l-4 border-morandi-gold">
           {/* 頂部：照片 + 表單 */}
           <div className="flex flex-col md:flex-row">
             {/* 左側：照片 */}
@@ -412,12 +415,12 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                   </div>
 
                   {/* 緊急聯絡人 */}
-                  <div className="pt-4 border-t border-morandi-border">
+                  <div className="pt-4">
                     <h4 className="text-sm font-semibold text-morandi-primary mb-3 flex items-center gap-2">
                       <Heart size={14} className="text-morandi-gold" />
                       緊急聯絡人
                     </h4>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-4 gap-4">
                       <div className="space-y-1.5">
                         <Label className="text-xs font-semibold text-morandi-secondary uppercase">姓名</Label>
                         <Input
@@ -441,6 +444,14 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                           type="tel"
                           value={formData.emergency_contact_phone}
                           onChange={(e) => setFormData({ ...formData, emergency_contact_phone: e.target.value })}
+                          className="border-morandi-gold/30 focus:border-morandi-gold"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-morandi-secondary uppercase">地址</Label>
+                        <Input
+                          value={formData.emergency_contact_address}
+                          onChange={(e) => setFormData({ ...formData, emergency_contact_address: e.target.value })}
                           className="border-morandi-gold/30 focus:border-morandi-gold"
                         />
                       </div>
