@@ -183,9 +183,9 @@ export function CustomerDialog({
         confirmOnDirtyClose={isEdit}
         externalDirty={isDirty}
       >
-        <div className="grid grid-cols-2 gap-8">
+        <div className="grid grid-cols-2 gap-8 items-stretch">
           {/* 左側：護照照片（橫向） */}
-          <div className="aspect-[3/2] rounded-lg overflow-hidden bg-morandi-container relative">
+          <div className="rounded-lg overflow-hidden bg-morandi-container relative min-h-[280px]">
             {currentImageUrl ? (
               <>
                 <img
@@ -226,7 +226,7 @@ export function CustomerDialog({
           </div>
 
           {/* 右側：資料欄位 */}
-          <div className="flex flex-col justify-between">
+          <div className="flex flex-col">
             {/* 基本資料 - 2 欄 */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-4">
               <FormField label={L.label_name} labelClassName="text-xs text-morandi-secondary">
