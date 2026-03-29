@@ -701,58 +701,28 @@ export function AddEmployeeFormTabs({ onSubmit, onCancel }: AddEmployeeFormProps
         </TabsContent>
       </Tabs>
 
-      {/* Actions Bar */}
-      <div className="px-8 py-6 bg-morandi-container/30 border-t border-morandi-border flex justify-between items-center mt-4">
+      {/* Actions Bar - 統一風格 */}
+      <div className="px-8 py-6 bg-morandi-container/30 border-t border-morandi-border flex justify-end items-center mt-4 gap-3">
         <Button
           type="button"
           variant="outline"
           className="text-morandi-secondary border-morandi-border"
           onClick={onCancel}
         >
-          <X className="w-4 h-4 mr-2" />
           取消
         </Button>
-        <div className="flex items-center gap-3">
-          {activeTab !== 'basic' && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                const tabs = ['basic', 'permissions', 'salary']
-                const currentIndex = tabs.indexOf(activeTab)
-                if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1])
-              }}
-            >
-              上一步
-            </Button>
+        <Button
+          type="submit"
+          disabled={submitting || !formData.chinese_name || !formData.email || !formData.role_id}
+          className="bg-morandi-gold hover:bg-morandi-gold/90 text-white font-semibold"
+        >
+          {submitting ? '建立中...' : (
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              建立員工
+            </>
           )}
-          {activeTab !== 'salary' ? (
-            <Button
-              type="button"
-              className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-              onClick={() => {
-                const tabs = ['basic', 'permissions', 'salary']
-                const currentIndex = tabs.indexOf(activeTab)
-                if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1])
-              }}
-            >
-              下一步
-            </Button>
-          ) : (
-            <Button
-              type="submit"
-              disabled={submitting || !formData.chinese_name || !formData.email || !formData.role_id}
-              className="bg-morandi-gold hover:bg-morandi-gold/90 text-white font-semibold"
-            >
-              {submitting ? '建立中...' : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  建立員工
-                </>
-              )}
-            </Button>
-          )}
-        </div>
+        </Button>
       </div>
     </form>
   )

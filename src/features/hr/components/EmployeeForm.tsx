@@ -685,68 +685,38 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel }: EmployeeFormPro
         </TabsContent>
       </Tabs>
 
-      {/* Actions Bar */}
-      <div className="px-6 py-4 flex justify-between items-center">
+      {/* Actions Bar - 統一風格 */}
+      <div className="px-6 py-4 flex justify-end items-center gap-3">
         <Button
           type="button"
           variant="outline"
           className="text-morandi-secondary border-morandi-border"
           onClick={onCancel}
         >
-          <X className="w-4 h-4 mr-2" />
           取消
         </Button>
-        <div className="flex items-center gap-3">
-          {activeTab !== 'basic' && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                const tabs = ['basic', 'permissions', 'salary']
-                const currentIndex = tabs.indexOf(activeTab)
-                if (currentIndex > 0) setActiveTab(tabs[currentIndex - 1])
-              }}
-            >
-              上一步
-            </Button>
-          )}
-          {activeTab !== 'salary' ? (
-            <Button
-              type="button"
-              className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
-              onClick={() => {
-                const tabs = ['basic', 'permissions', 'salary']
-                const currentIndex = tabs.indexOf(activeTab)
-                if (currentIndex < tabs.length - 1) setActiveTab(tabs[currentIndex + 1])
-              }}
-            >
-              下一步
-            </Button>
+        <Button
+          type="submit"
+          disabled={
+            submitting ||
+            !formData.chinese_name ||
+            !formData.email ||
+            (!isEditMode && !formData.role_id)
+          }
+          className="bg-morandi-gold hover:bg-morandi-gold/90 text-white font-semibold"
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              {isEditMode ? '儲存中...' : '建立中...'}
+            </>
           ) : (
-            <Button
-              type="submit"
-              disabled={
-                submitting ||
-                !formData.chinese_name ||
-                !formData.email ||
-                (!isEditMode && !formData.role_id)
-              }
-              className="bg-morandi-gold hover:bg-morandi-gold/90 text-white font-semibold"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  {isEditMode ? '儲存中...' : '建立中...'}
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  {isEditMode ? '儲存變更' : '建立員工'}
-                </>
-              )}
-            </Button>
+            <>
+              <Save className="w-4 h-4 mr-2" />
+              {isEditMode ? '儲存變更' : '建立員工'}
+            </>
           )}
-        </div>
+        </Button>
       </div>
     </form>
   )
