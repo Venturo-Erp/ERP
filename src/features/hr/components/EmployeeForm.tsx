@@ -238,9 +238,9 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         {/* Character Card 風格 */}
         <div className="bg-white rounded-2xl shadow-md overflow-hidden border-l-4 border-morandi-gold">
           {/* 頂部：照片 + 表單 */}
-          <div className="flex flex-col md:flex-row">
+          <div className="flex flex-col md:flex-row min-h-full">
             {/* 左側：照片 */}
-            <div className="w-full md:w-72 bg-gradient-to-br from-morandi-container to-white p-8 flex flex-col items-center justify-start">
+            <div className="w-full md:w-72 bg-gradient-to-br from-morandi-container to-white p-8 flex flex-col items-center flex-shrink-0">
               <div className="relative group mb-4">
                 <div
                   onClick={() => fileInputRef.current?.click()}

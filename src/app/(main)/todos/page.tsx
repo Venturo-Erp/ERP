@@ -489,7 +489,7 @@ export default function TodosPage() {
           }
           actions={
             ((todo: Todo) => (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <Button
                   size="sm"
                   variant="ghost"
@@ -502,14 +502,14 @@ export default function TodosPage() {
                     })
                   }}
                   className={cn(
-                    'h-7 px-2 gap-1 text-xs',
+                    'h-7 px-2 gap-1 text-xs whitespace-nowrap',
                     todo.status === 'completed'
                       ? 'text-status-success hover:text-status-success hover:bg-status-success-bg'
                       : 'text-morandi-secondary hover:text-status-success hover:bg-status-success-bg'
                   )}
                 >
                   <CheckCircle size={14} />
-                  {todo.status === 'completed' ? '取消完成' : '完成'}
+                  {todo.status === 'completed' ? '取消' : '完成'}
                 </Button>
                 <Button
                   size="sm"
@@ -518,7 +518,7 @@ export default function TodosPage() {
                     e.stopPropagation()
                     setExpandedTodo(todo.id)
                   }}
-                  className="h-7 px-2 gap-1 text-xs hover:bg-morandi-gold/10"
+                  className="h-7 px-2 gap-1 text-xs hover:bg-morandi-gold/10 whitespace-nowrap"
                 >
                   <Edit2 size={14} />
                   編輯
@@ -527,7 +527,7 @@ export default function TodosPage() {
                   size="sm"
                   variant="ghost"
                   onClick={e => handleDeleteTodo(todo, e)}
-                  className="h-7 px-2 gap-1 text-xs text-morandi-red hover:bg-morandi-red/10"
+                  className="h-7 px-2 gap-1 text-xs text-morandi-red hover:bg-morandi-red/10 whitespace-nowrap"
                 >
                   <Trash2 size={14} />
                   刪除
