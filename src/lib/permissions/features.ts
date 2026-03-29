@@ -112,15 +112,14 @@ export const FEATURES: FeatureDefinition[] = [
     category: 'basic',
     routes: ['/visas'],
   },
+  // ===== 進階功能（付費） =====
   {
     code: 'wishlist',
     name: '紙娃娃系統',
     description: '客製化行程選單、客戶詢價管理',
-    category: 'basic',
+    category: 'premium',
     routes: ['/wishlist-templates', '/inquiries'],
   },
-
-  // ===== 進階功能（付費） =====
   {
     code: 'workspace',
     name: '頻道',
