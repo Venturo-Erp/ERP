@@ -1827,6 +1827,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               tourId={tour.id}
               tourCode={tour.code || ''}
               canEditDatabase={canEditDatabase}
+              coreItems={coreItems}
+              onOverrideSave={refreshCoreItems}
             />
           </div>
         </div>

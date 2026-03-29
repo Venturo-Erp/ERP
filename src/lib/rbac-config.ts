@@ -34,34 +34,21 @@ export const ROLES: Record<UserRole, RoleConfig> = {
   super_admin: {
     id: 'super_admin',
     label: '超級管理員',
-    description: '擁有所有權限，管理所屬 workspace 的所有資料',
+    description: '擁有所有權限，可跨 workspace 管理（僅 Corner 有）',
     color: 'text-morandi-red bg-morandi-red/10 border-morandi-red/20',
     permissions: ['*'], // 所有權限
     canManageWorkspace: true,
-    canCrossWorkspace: false,
+    canCrossWorkspace: true, // ✅ 可以跨 workspace
   },
 
   admin: {
     id: 'admin',
     label: '管理員',
-    description: '擁有 workspace 內所有管理權限，包含人資和設定',
-    color: 'text-morandi-secondary bg-morandi-secondary/10 border-morandi-secondary/20',
-    permissions: [
-      'tours',
-      'orders',
-      'quotes',
-      'customers',
-      'finance',
-      'payments',
-      'hr',
-      'settings',
-      'calendar',
-      'workspace',
-      'todos',
-      'database',
-    ],
+    description: '擁有 workspace 內所有管理權限（所有租戶都有）',
+    color: 'text-morandi-gold bg-morandi-gold/10 border-morandi-gold/20',
+    permissions: ['*'], // ✅ 所有權限（功能全開）
     canManageWorkspace: true,
-    canCrossWorkspace: false,
+    canCrossWorkspace: false, // ❌ 不能跨 workspace
   },
 
   tour_leader: {

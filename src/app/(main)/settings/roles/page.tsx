@@ -242,10 +242,10 @@ export default function RolesPage() {
 
   return (
     <ContentPageLayout title="角色管理" icon={Shield}>
-      <div className="grid grid-cols-12 gap-6">
+      <div className="grid grid-cols-12 gap-6 h-[calc(100vh-12rem)]">
         {/* 左側：角色列表 */}
-        <div className="col-span-4">
-          <Card className="p-4">
+        <div className="col-span-4 h-full overflow-hidden flex flex-col">
+          <Card className="p-4 flex-1 flex flex-col overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-medium">角色列表</h3>
               <Button size="sm" onClick={() => setIsDialogOpen(true)}>
@@ -309,8 +309,8 @@ export default function RolesPage() {
         </div>
 
         {/* 右側：權限設定 */}
-        <div className="col-span-8">
-          <Card className="p-4">
+        <div className="col-span-8 h-full overflow-hidden flex flex-col">
+          <Card className="p-4 flex-1 flex flex-col overflow-hidden">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-medium">
                 {selectedRole ? `${selectedRole.name} 的權限` : '請選擇角色'}
@@ -324,7 +324,7 @@ export default function RolesPage() {
             </div>
 
             {selectedRole ? (
-              <div className="border rounded-lg overflow-hidden">
+              <div className="border rounded-lg overflow-hidden flex-1 overflow-y-auto">
                 <table className="w-full">
                   <thead className="bg-muted/50">
                     <tr>

@@ -146,6 +146,13 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
 // 資源庫面板主元件
 // ============================================
 
+interface TourItineraryItem {
+  id: string
+  resource_id?: string | null
+  resource_type?: string | null
+  override_description?: string | null
+}
+
 interface ResourcePanelProps {
   className?: string
   countryId?: string // 行程目的地國家 ID 或名稱
@@ -154,6 +161,8 @@ interface ResourcePanelProps {
   tourId?: string // 團 ID（用於地圖偏好儲存）
   tourCode?: string // 團代碼（用於推斷機場座標，如 FUK260702A）
   canEditDatabase?: boolean // 是否可以編輯資料庫
+  coreItems?: TourItineraryItem[] // 行程中的項目（用於判斷景點是否已加入）
+  onOverrideSave?: () => void // 覆蓋儲存後的 callback
 }
 
 export function ResourcePanel({
@@ -164,6 +173,8 @@ export function ResourcePanel({
   tourId,
   tourCode,
   canEditDatabase = false,
+  coreItems = [],
+  onOverrideSave,
 }: ResourcePanelProps) {
   const [activeTab, setActiveTab] = useState<ResourceType>('attraction')
   const [searchQuery, setSearchQuery] = useState('')
@@ -566,6 +577,24 @@ export function ResourcePanel({
         onOpenChange={setEditDialogOpen}
         resource={editingResource}
         canEditDatabase={canEditDatabase}
+        // 查找這個景點是否已在行程中
+        tourItineraryItemId={
+          editingResource
+            ? coreItems.find(
+                item => item.resource_id === editingResource.id && item.resource_type === editingResource.type
+              )?.id
+            : undefined
+        }
+        currentOverride={
+          editingResource
+            ? coreItems.find(
+                item => item.resource_id === editingResource.id && item.resource_type === editingResource.type
+              )?.override_description
+            : undefined
+        }
+        onOverrideSave={() => {
+          onOverrideSave?.()
+        }}
         onSave={updated => {
           // 更新列表中的資源名稱
           setResources(prev => ({

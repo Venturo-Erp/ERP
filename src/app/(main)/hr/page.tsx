@@ -471,13 +471,11 @@ export default function HRPage() {
       )}
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent level={1} className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{LABELS.ADD_EMPLOYEE}</DialogTitle>
-          </DialogHeader>
+        <DialogContent level={1} className="max-w-5xl max-h-[95vh] p-0">
           <AddEmployeeForm
             onSubmit={() => {
               setIsAddDialogOpen(false)
+              fetchAll()
             }}
             onCancel={() => {
               setIsAddDialogOpen(false)
