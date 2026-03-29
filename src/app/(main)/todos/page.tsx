@@ -233,6 +233,7 @@ export default function TodosPage() {
       key: 'priority',
       label: LABELS.COL_PRIORITY,
       sortable: true,
+      width: '120px',
       render: (value: unknown, todo: Todo) => (
         <div onClick={e => e.stopPropagation()}>
           <StarRating
@@ -249,6 +250,7 @@ export default function TodosPage() {
       key: 'status',
       label: LABELS.COL_STATUS,
       sortable: true,
+      width: '100px',
       render: (value: unknown) => (
         <span className={cn('text-sm font-medium', getStatusColor(value as Todo['status']))}>
           {getStatusLabel(value as Todo['status'])}
