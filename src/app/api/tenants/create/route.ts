@@ -200,40 +200,44 @@ export async function POST(request: NextRequest) {
         const salesRole = createdRoles?.find(r => r.name === '業務')
         const assistantRole = createdRoles?.find(r => r.name === '助理')
 
-        const defaultPermissions = [
+        // 設定預設權限（新版：用 role_tab_permissions）
+        const defaultTabPermissions = [
           // 會計權限
           ...(accountingRole ? [
-            { role_id: accountingRole.id, route: '/accounting', can_read: true, can_write: true },
-            { role_id: accountingRole.id, route: '/dashboard', can_read: true, can_write: false },
-            { role_id: accountingRole.id, route: '/calendar', can_read: true, can_write: true },
-            { role_id: accountingRole.id, route: '/todos', can_read: true, can_write: true },
-            { role_id: accountingRole.id, route: '/settings', can_read: true, can_write: true },
+            { role_id: accountingRole.id, module_code: 'accounting', tab_code: null, can_read: true, can_write: true },
+            { role_id: accountingRole.id, module_code: 'finance', tab_code: 'payments', can_read: true, can_write: true },
+            { role_id: accountingRole.id, module_code: 'finance', tab_code: 'requests', can_read: true, can_write: true },
+            { role_id: accountingRole.id, module_code: 'finance', tab_code: 'treasury', can_read: true, can_write: true },
+            { role_id: accountingRole.id, module_code: 'dashboard', tab_code: null, can_read: true, can_write: false },
+            { role_id: accountingRole.id, module_code: 'calendar', tab_code: null, can_read: true, can_write: true },
+            { role_id: accountingRole.id, module_code: 'todos', tab_code: null, can_read: true, can_write: true },
+            { role_id: accountingRole.id, module_code: 'settings', tab_code: 'personal', can_read: true, can_write: true },
           ] : []),
           // 業務權限
           ...(salesRole ? [
-            { role_id: salesRole.id, route: '/tours', can_read: true, can_write: true },
-            { role_id: salesRole.id, route: '/orders', can_read: true, can_write: true },
-            { role_id: salesRole.id, route: '/customers', can_read: true, can_write: true },
-            { role_id: salesRole.id, route: '/dashboard', can_read: true, can_write: false },
-            { role_id: salesRole.id, route: '/calendar', can_read: true, can_write: true },
-            { role_id: salesRole.id, route: '/todos', can_read: true, can_write: true },
-            { role_id: salesRole.id, route: '/settings', can_read: true, can_write: true },
+            { role_id: salesRole.id, module_code: 'tours', tab_code: null, can_read: true, can_write: true },
+            { role_id: salesRole.id, module_code: 'orders', tab_code: null, can_read: true, can_write: true },
+            { role_id: salesRole.id, module_code: 'database', tab_code: 'customers', can_read: true, can_write: true },
+            { role_id: salesRole.id, module_code: 'dashboard', tab_code: null, can_read: true, can_write: false },
+            { role_id: salesRole.id, module_code: 'calendar', tab_code: null, can_read: true, can_write: true },
+            { role_id: salesRole.id, module_code: 'todos', tab_code: null, can_read: true, can_write: true },
+            { role_id: salesRole.id, module_code: 'settings', tab_code: 'personal', can_read: true, can_write: true },
           ] : []),
           // 助理權限（同業務）
           ...(assistantRole ? [
-            { role_id: assistantRole.id, route: '/tours', can_read: true, can_write: true },
-            { role_id: assistantRole.id, route: '/orders', can_read: true, can_write: true },
-            { role_id: assistantRole.id, route: '/customers', can_read: true, can_write: true },
-            { role_id: assistantRole.id, route: '/dashboard', can_read: true, can_write: false },
-            { role_id: assistantRole.id, route: '/calendar', can_read: true, can_write: true },
-            { role_id: assistantRole.id, route: '/todos', can_read: true, can_write: true },
-            { role_id: assistantRole.id, route: '/settings', can_read: true, can_write: true },
+            { role_id: assistantRole.id, module_code: 'tours', tab_code: null, can_read: true, can_write: true },
+            { role_id: assistantRole.id, module_code: 'orders', tab_code: null, can_read: true, can_write: true },
+            { role_id: assistantRole.id, module_code: 'database', tab_code: 'customers', can_read: true, can_write: true },
+            { role_id: assistantRole.id, module_code: 'dashboard', tab_code: null, can_read: true, can_write: false },
+            { role_id: assistantRole.id, module_code: 'calendar', tab_code: null, can_read: true, can_write: true },
+            { role_id: assistantRole.id, module_code: 'todos', tab_code: null, can_read: true, can_write: true },
+            { role_id: assistantRole.id, module_code: 'settings', tab_code: 'personal', can_read: true, can_write: true },
           ] : []),
         ]
 
-        if (defaultPermissions.length > 0) {
-          await supabaseAdmin.from('role_route_permissions').insert(defaultPermissions)
-          logger.log(`Default permissions created: ${defaultPermissions.length}`)
+        if (defaultTabPermissions.length > 0) {
+          await supabaseAdmin.from('role_tab_permissions').insert(defaultTabPermissions)
+          logger.log(`Default tab permissions created: ${defaultTabPermissions.length}`)
         }
       }
     }
