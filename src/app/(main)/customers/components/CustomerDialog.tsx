@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Edit, Upload, ImageOff, Save, Pencil } from 'lucide-react'
+import { X, Edit, Upload, ImageOff, Save, Pencil, Check } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -170,6 +170,7 @@ export function CustomerDialog({
   if (!customer) return null
 
   const currentImageUrl = localImageUrl || customer.passport_image_url
+  const isVerified = customer.verification_status === 'verified'
 
   return (
     <>
@@ -182,54 +183,50 @@ export function CustomerDialog({
         confirmOnDirtyClose={isEdit}
         externalDirty={isDirty}
       >
-        <div className="grid grid-cols-2 gap-8 py-2">
+        <div className="grid grid-cols-2 gap-8">
           {/* 左側：護照照片（橫向） */}
-          <div className="space-y-2">
-            <div className="aspect-[3/2] rounded-lg overflow-hidden bg-morandi-container relative group">
-              {currentImageUrl ? (
-                <>
-                  <img
-                    src={currentImageUrl}
-                    alt={L.passport_alt(customer.name)}
-                    className="w-full h-full object-cover"
-                  />
-                  {/* 編輯按鈕 - 右下角 */}
-                  <button
-                    onClick={() => setIsEditorOpen(true)}
-                    className="absolute bottom-3 right-3 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-all opacity-70 hover:opacity-100"
-                    title="編輯照片"
-                  >
-                    <Pencil size={16} className="text-morandi-primary" />
-                  </button>
-                </>
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-morandi-muted">
-                  <ImageOff size={40} className="mb-2 opacity-50" />
-                  <span className="text-sm">{L.no_passport_photo}</span>
-                  {isEdit && (
-                    <Button size="sm" variant="outline" className="mt-3 gap-1.5">
-                      <Upload size={14} />
-                      {L.btn_upload_photo}
-                    </Button>
-                  )}
+          <div className="aspect-[3/2] rounded-lg overflow-hidden bg-morandi-container relative">
+            {currentImageUrl ? (
+              <>
+                <img
+                  src={currentImageUrl}
+                  alt={L.passport_alt(customer.name)}
+                  className="w-full h-full object-cover"
+                />
+                {/* 驗證狀態 - 左上角 */}
+                <div className={`absolute top-3 left-3 px-2 py-1 rounded text-xs font-medium flex items-center gap-1 ${
+                  isVerified 
+                    ? 'bg-morandi-green/90 text-white' 
+                    : 'bg-status-warning/90 text-white'
+                }`}>
+                  {isVerified ? <Check size={12} /> : '⚠'}
+                  {isVerified ? L.status_verified : L.status_unverified}
                 </div>
-              )}
-            </div>
-
-            {/* 驗證狀態 */}
-            {customer.verification_status === 'verified' ? (
-              <div className="text-center text-sm text-morandi-green font-medium">
-                ✓ {L.status_verified}
-              </div>
+                {/* 編輯按鈕 - 右下角 */}
+                <button
+                  onClick={() => setIsEditorOpen(true)}
+                  className="absolute bottom-3 right-3 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-all opacity-80 hover:opacity-100"
+                  title="編輯照片"
+                >
+                  <Pencil size={16} className="text-morandi-primary" />
+                </button>
+              </>
             ) : (
-              <div className="text-center text-sm text-status-warning font-medium">
-                ⚠ {L.status_unverified}
+              <div className="w-full h-full flex flex-col items-center justify-center text-morandi-muted">
+                <ImageOff size={40} className="mb-2 opacity-50" />
+                <span className="text-sm">{L.no_passport_photo}</span>
+                {isEdit && (
+                  <Button size="sm" variant="outline" className="mt-3 gap-1.5">
+                    <Upload size={14} />
+                    {L.btn_upload_photo}
+                  </Button>
+                )}
               </div>
             )}
           </div>
 
           {/* 右側：資料欄位 */}
-          <div className="space-y-4">
+          <div className="flex flex-col justify-between">
             {/* 基本資料 - 2 欄 */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-4">
               <FormField label={L.label_name} labelClassName="text-xs text-morandi-secondary">
@@ -304,23 +301,25 @@ export function CustomerDialog({
                   className="h-10"
                 />
               </FormField>
-            </div>
 
-            {/* 飲食禁忌 - 獨立一行 */}
-            <FormField label={L.label_dietary} labelClassName="text-xs text-morandi-secondary">
-              <Input
-                value={formData.dietary_restrictions}
-                onChange={e => updateField('dietary_restrictions', e.target.value)}
-                disabled={!isEdit}
-                placeholder={isEdit ? L.placeholder_dietary : ''}
-                className="h-10"
-              />
-            </FormField>
+              {/* 飲食禁忌 - 佔滿兩格 */}
+              <div className="col-span-2">
+                <FormField label={L.label_dietary} labelClassName="text-xs text-morandi-secondary">
+                  <Input
+                    value={formData.dietary_restrictions}
+                    onChange={e => updateField('dietary_restrictions', e.target.value)}
+                    disabled={!isEdit}
+                    placeholder={isEdit ? L.placeholder_dietary : ''}
+                    className="h-10"
+                  />
+                </FormField>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* 底部按鈕 */}
-        <div className="flex justify-end gap-2 pt-4 border-t border-morandi-border">
+        <div className="flex justify-end gap-2 pt-6 mt-6 border-t border-morandi-border/50">
           {isEdit ? (
             <>
               <Button
