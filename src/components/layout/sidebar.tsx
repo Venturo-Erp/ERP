@@ -478,9 +478,8 @@ export function Sidebar() {
           if (isMenuItemHidden(item.href, hiddenMenuItems)) return null
           
           // 🔧 檢查租戶功能權限（workspace_features）
-          // Super Admin 跳過此檢查
-          if (!isSuperAdmin && item.requiredPermission) {
-            // requiredPermission 對應到 feature_code
+          // Super Admin 也受此限制（方便自己管理想看的功能）
+          if (item.requiredPermission) {
             if (!isFeatureEnabled(item.requiredPermission)) {
               return null
             }
