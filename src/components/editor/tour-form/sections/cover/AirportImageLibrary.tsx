@@ -271,69 +271,11 @@ export function AirportImageLibrary({
         </div>
       )}
 
-      {/* 上傳或搜尋 - 三個選項 */}
-      <div className="grid grid-cols-3 gap-2">
-        {/* 直接上傳 → 自動存到 airport_images */}
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-1 text-[11px] text-morandi-secondary">
-            <Upload size={11} />
-            <span>{COMP_EDITOR_LABELS.UPLOAD}</span>
-          </div>
-          <ImageUploader
-            value={selectedImage}
-            onChange={handleDirectUpload}
-            position={position}
-            onPositionChange={onPositionChange}
-            bucket="city-backgrounds"
-            filePrefix={`airport/${airportCode}`}
-            previewHeight="70px"
-            aspectRatio={16 / 9}
-            placeholder={COMP_EDITOR_LABELS.本地圖片}
-          />
-        </div>
+      {/* 移除三個入口，統一用「新增」按鈕 */}
 
-        {/* Unsplash */}
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-1 text-[11px] text-morandi-secondary">
-            <Search size={11} />
-            <span>Unsplash</span>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setShowUnsplashDialog(true)}
-            className="w-full h-[70px] border-dashed border-2 hover:border-morandi-gold/50 hover:bg-morandi-gold/5 transition-all"
-          >
-            <div className="flex flex-col items-center gap-0.5 text-morandi-secondary">
-              <Search size={18} />
-              <span className="text-[10px]">{COMP_EDITOR_LABELS.SEARCH_4460}</span>
-            </div>
-          </Button>
-        </div>
-
-        {/* Pexels */}
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-1 text-[11px] text-morandi-secondary">
-            <Search size={11} />
-            <span>Pexels</span>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => setShowPexelsDialog(true)}
-            className="w-full h-[70px] border-dashed border-2 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all"
-          >
-            <div className="flex flex-col items-center gap-0.5 text-morandi-secondary">
-              <Search size={18} />
-              <span className="text-[10px]">{COMP_EDITOR_LABELS.SEARCH_4460}</span>
-            </div>
-          </Button>
-        </div>
-      </div>
-
-      {/* 新增圖片對話框 */}
+      {/* 新增圖片對話框 - 整合上傳 + Unsplash + Pexels */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent level={2} className="max-w-md">
+        <DialogContent level={2} className="max-w-lg">
           <DialogHeader>
             <DialogTitle>
               {COMP_EDITOR_LABELS.ADD_6489} {airportCode}
@@ -341,54 +283,105 @@ export function AirportImageLibrary({
           </DialogHeader>
 
           <div className="space-y-4">
-            <ImageUploader
-              value={newImageUrl}
-              onChange={handleUploadComplete}
-              bucket="city-backgrounds"
-              filePrefix={`airport/${airportCode}`}
-              previewHeight="120px"
-              aspectRatio={16 / 9}
-              placeholder={COMP_EDITOR_LABELS.上傳圖片}
-            />
-
+            {/* 上傳區 */}
             <div>
-              <label className="block text-sm font-medium text-morandi-primary mb-1">
-                {COMP_EDITOR_LABELS.LABEL_9093}
-              </label>
-              <Input
-                value={newImageLabel}
-                onChange={e => setNewImageLabel(e.target.value)}
-                placeholder={COMP_EDITOR_LABELS.如_春季_夏季_寺廟}
-                className="h-9"
+              <div className="flex items-center gap-2 text-sm font-medium text-morandi-primary mb-2">
+                <Upload size={14} />
+                上傳圖片
+              </div>
+              <ImageUploader
+                value={newImageUrl}
+                onChange={handleUploadComplete}
+                bucket="city-backgrounds"
+                filePrefix={`airport/${airportCode}`}
+                previewHeight="100px"
+                aspectRatio={16 / 9}
+                placeholder={COMP_EDITOR_LABELS.上傳圖片}
               />
             </div>
 
-            <div className="flex gap-2">
+            {/* 或分隔線 */}
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-morandi-container" />
+              <span className="text-xs text-morandi-secondary">或從圖庫搜尋</span>
+              <div className="flex-1 h-px bg-morandi-container" />
+            </div>
+
+            {/* Unsplash + Pexels 按鈕 */}
+            <div className="grid grid-cols-2 gap-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => {
                   setShowAddDialog(false)
-                  setNewImageUrl('')
-                  setNewImageLabel('')
+                  setShowUnsplashDialog(true)
                 }}
-                className="flex-1"
+                className="h-16 border-dashed border-2 hover:border-morandi-gold/50 hover:bg-morandi-gold/5"
               >
-                {COMP_EDITOR_LABELS.取消}
+                <div className="flex flex-col items-center gap-1">
+                  <Search size={18} className="text-morandi-secondary" />
+                  <span className="text-xs">Unsplash</span>
+                </div>
               </Button>
               <Button
                 type="button"
-                onClick={handleSaveNewImage}
-                disabled={!newImageUrl || isUploading}
-                className="flex-1 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                variant="outline"
+                onClick={() => {
+                  setShowAddDialog(false)
+                  setShowPexelsDialog(true)
+                }}
+                className="h-16 border-dashed border-2 hover:border-emerald-500/50 hover:bg-emerald-500/5"
               >
-                {isUploading ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  COMP_EDITOR_LABELS.加入圖片庫
-                )}
+                <div className="flex flex-col items-center gap-1">
+                  <Search size={18} className="text-morandi-secondary" />
+                  <span className="text-xs">Pexels</span>
+                </div>
               </Button>
             </div>
+
+            {/* 標籤和按鈕 */}
+            {newImageUrl && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-morandi-primary mb-1">
+                    {COMP_EDITOR_LABELS.LABEL_9093}
+                  </label>
+                  <Input
+                    value={newImageLabel}
+                    onChange={e => setNewImageLabel(e.target.value)}
+                    placeholder={COMP_EDITOR_LABELS.如_春季_夏季_寺廟}
+                    className="h-9"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setShowAddDialog(false)
+                      setNewImageUrl('')
+                      setNewImageLabel('')
+                    }}
+                    className="flex-1"
+                  >
+                    {COMP_EDITOR_LABELS.取消}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleSaveNewImage}
+                    disabled={!newImageUrl || isUploading}
+                    className="flex-1 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                  >
+                    {isUploading ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      COMP_EDITOR_LABELS.加入圖片庫
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </DialogContent>
       </Dialog>
