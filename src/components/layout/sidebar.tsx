@@ -461,17 +461,14 @@ export function Sidebar() {
 
   // 權限過濾（使用 useMemo 避免每次渲染時建立新陣列）
   const userPermissions = useMemo(() => user?.permissions || [], [user?.permissions])
-  const userRoles = useMemo(() => user?.roles || [], [user?.roles])
   const hiddenMenuItems = useMemo(() => user?.hidden_menu_items || [], [user?.hidden_menu_items])
   const preferredFeatures = useMemo(
     () => user?.preferred_features || [],
     [user?.preferred_features]
   )
 
-  // 管理員：有 * 或 admin 權限（來自職務系統）
-  const isAdmin =
-    userPermissions.includes('admin') ||
-    userPermissions.includes('*')
+  // 新系統：使用 store.isAdmin
+  const { isAdmin } = useAuthStore()
 
   // 判斷租戶類型
   const workspaceType = user?.workspace_type

@@ -43,13 +43,12 @@ export function CreateChannelDialog({
   onClose,
   onCreate,
 }: CreateChannelDialogProps) {
-  const { user } = useAuthStore()
+  const { user, isAdmin } = useAuthStore()
   const { items: employees } = useEmployeesSlim()
   const { workspaces, loadWorkspaces } = useWorkspaceStore()
 
-  // 檢查是否為超級管理員
-  const isSuperAdmin =
-    user?.roles?.includes('super_admin') || user?.permissions?.includes('super_admin')
+  // 新系統：使用 isAdmin
+  const isSuperAdmin = isAdmin
 
   // 載入工作空間資料（employees 由 SWR 自動載入）
   useEffect(() => {

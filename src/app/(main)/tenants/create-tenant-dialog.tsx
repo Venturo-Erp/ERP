@@ -154,8 +154,9 @@ export function CreateTenantDialog({
       const result = await response.json()
 
       if (!result.success) {
-        logger.error('Failed to create tenant:', result.message)
-        toast.error(result.message || LABELS.TOAST_CREATE_FAILED)
+        const errorMsg = result.message || result.error || LABELS.TOAST_CREATE_FAILED
+        logger.error('Failed to create tenant:', errorMsg, 'Full result:', result)
+        toast.error(errorMsg)
         setCreating(false)
         return
       }

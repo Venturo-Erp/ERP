@@ -32,9 +32,9 @@ export function getCurrentWorkspaceId(): string | null {
     return null
   }
 
-  // 檢查是否為可跨 workspace 的角色
-  const userRole = user.roles?.[0] as UserRole
-  if (canCrossWorkspace(userRole)) {
+  // 新系統：管理員可跨 workspace
+  const { isAdmin } = useAuthStore.getState()
+  if (isAdmin) {
     return null
   }
 
@@ -70,9 +70,9 @@ export function getCurrentWorkspaceCode(): string | null {
     return user.workspace_code
   }
 
-  // 可跨 workspace 的角色需要從前端選擇的 workspace 取得 code
-  const userRole = user.roles?.[0] as UserRole
-  if (canCrossWorkspace(userRole)) {
+  // 新系統：管理員可跨 workspace，需要從前端選擇的 workspace 取得 code
+  const { isAdmin } = useAuthStore.getState()
+  if (isAdmin) {
     // Super Admin 需要從 workspaces store 取得
     const workspaceStore = useWorkspaceStoreData.getState()
     let workspaces = (workspaceStore.items || []) as WorkspaceWithCode[]
@@ -146,9 +146,9 @@ export function getCurrentWorkspace() {
     return null
   }
 
-  // 可跨 workspace 的角色從選擇的 workspace 取得
-  const userRole = user.roles?.[0] as UserRole
-  if (canCrossWorkspace(userRole)) {
+  // 新系統：管理員可跨 workspace，從選擇的 workspace 取得
+  const { isAdmin } = useAuthStore.getState()
+  if (isAdmin) {
     const selectedWorkspaceId = user.selected_workspace_id
     if (selectedWorkspaceId) {
       return workspaces.find((w: WorkspaceWithCode) => w.id === selectedWorkspaceId) || null
@@ -166,43 +166,25 @@ export function getCurrentWorkspace() {
 }
 
 /**
- * 檢查當前使用者是否為 super_admin
- * 同時檢查 roles 和 permissions 陣列
+ * 檢查當前使用者是否為管理員
+ * 新系統：直接使用 store.isAdmin
  *
  * @returns boolean
  */
 export function isSuperAdmin(): boolean {
-  const { user } = useAuthStore.getState()
-  if (!user) return false
-
-  // 檢查 permissions 陣列（主要使用）
-  if (user.permissions?.includes('super_admin')) {
-    return true
-  }
-
-  // 也檢查 roles 陣列（備用）
-  const userRole = user.roles?.[0] as UserRole
-  return userRole === 'super_admin'
+  const { isAdmin } = useAuthStore.getState()
+  return isAdmin
 }
 
 /**
  * 檢查當前使用者是否為 admin（包含 super_admin）
- * 同時檢查 roles 和 permissions 陣列
+ * 新系統：直接使用 store.isAdmin
  *
  * @returns boolean
  */
-export function isAdmin(): boolean {
-  const { user } = useAuthStore.getState()
-  if (!user) return false
-
-  // 檢查 permissions 陣列（主要使用）
-  if (user.permissions?.includes('super_admin') || user.permissions?.includes('admin')) {
-    return true
-  }
-
-  // 也檢查 roles 陣列（備用）
-  const userRole = user.roles?.[0] as UserRole
-  return userRole === 'super_admin' || userRole === 'admin'
+export function isAdminUser(): boolean {
+  const { isAdmin } = useAuthStore.getState()
+  return isAdmin
 }
 
 /**
@@ -218,20 +200,17 @@ export function canManageWorkspace(targetWorkspaceId: string): boolean {
     return false
   }
 
-  const userRole = user.roles?.[0] as UserRole
+  // 新系統：使用 isAdmin 判斷
+  const { isAdmin } = useAuthStore.getState()
 
-  // 檢查是否有管理 workspace 的權限
-  if (!canManageWorkspaceByRole(userRole)) {
+  // 管理員可以管理 workspace
+  if (!isAdmin) {
     return false
   }
 
-  // super_admin 可以管理任何 workspace
-  if (canCrossWorkspace(userRole)) {
-    return true
-  }
-
-  // 一般 admin 只能管理自己的 workspace
-  return user.workspace_id === targetWorkspaceId
+  // 檢查是否能管理目標 workspace
+  // isAdmin = true 代表有管理權限，可以管理自己的 workspace
+  return user.workspace_id === targetWorkspaceId || isAdmin
 }
 
 /**
@@ -269,10 +248,11 @@ export function getAvailableWorkspaces() {
     return []
   }
 
-  const userRole = user.roles?.[0] as UserRole
+  // 新系統：使用 isAdmin 判斷
+  const { isAdmin } = useAuthStore.getState()
 
-  // 可跨 workspace 的角色可以看到所有 workspaces
-  if (canCrossWorkspace(userRole)) {
+  // 管理員可以看到所有 workspaces
+  if (isAdmin) {
     return workspaces
   }
 

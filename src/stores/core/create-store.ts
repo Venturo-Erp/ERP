@@ -65,12 +65,11 @@ function getCurrentUserContext(): { workspaceId: string | null; userRole: UserRo
     if (authData) {
       const parsed = JSON.parse(authData)
       const user = parsed?.state?.user
-      // 🔧 修正：User 類型存的是 roles（陣列），不是 role
-      // 優先檢查 roles 陣列中是否有 super_admin
-      const roles = user?.roles as UserRole[] | undefined
-      const userRole = roles?.includes('super_admin')
-        ? 'super_admin'
-        : (roles?.[0] as UserRole) || null
+      const isAdmin = parsed?.state?.isAdmin
+      // 新系統：使用 permissions 判斷管理員
+      const userRole = isAdmin 
+        ? 'super_admin' as UserRole
+        : ('staff' as UserRole)
       return {
         workspaceId: user?.workspace_id || null,
         userRole,

@@ -55,11 +55,11 @@ export function useToursForCalendar(dateRange: DateRange | null): ListResult<Tou
   const user = useAuthStore(state => state.user)
   const isAuthenticated = useAuthStore(state => state.isAuthenticated)
   const hasHydrated = useAuthStore(state => state._hasHydrated)
+  const isAdmin = useAuthStore(state => state.isAdmin)
 
   const isReady = hasHydrated && isAuthenticated && !!user?.id
-  const userRole = (
-    user?.roles?.includes('super_admin') ? 'super_admin' : user?.roles?.[0]
-  ) as UserRole | null
+  // 新系統：使用 isAdmin
+  const userRole = isAdmin ? ('super_admin' as UserRole) : ('staff' as UserRole)
   const workspaceId = user?.workspace_id
 
   // SWR key 包含日期範圍

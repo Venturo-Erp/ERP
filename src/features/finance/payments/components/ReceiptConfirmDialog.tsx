@@ -49,10 +49,9 @@ export function ReceiptConfirmDialog({
 
   if (!receipt) return null
 
-  // 檢查是否可以刪除：會計管理員或建立者
-  const isAccountant = user?.roles?.some(role =>
-    ['super_admin', 'admin', 'accountant'].includes(role)
-  )
+  // 檢查是否可以刪除：管理員、有會計權限、或建立者
+  const { isAdmin } = useAuthStore()
+  const isAccountant = isAdmin || user?.permissions?.includes('accounting')
   const isCreator = user?.id === receipt.created_by
   const canDelete = isAccountant || isCreator
 

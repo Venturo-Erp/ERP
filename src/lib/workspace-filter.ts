@@ -96,11 +96,11 @@ export async function getWorkspaceFilterForQuery(tableName: string): Promise<str
       return null // 未登入，不篩選
     }
 
-    // 取得使用者角色
-    const userRole = user.roles?.[0] as UserRole
+    // 新系統：使用 isAdmin 判斷是否可跨 workspace
+    const { isAdmin } = useAuthStore.getState()
 
-    // 檢查是否有跨 workspace 權限（super_admin）
-    if (canCrossWorkspace(userRole)) {
+    // 管理員可跨 workspace
+    if (isAdmin) {
       const manualFilter = getCurrentWorkspaceFilter()
 
       // 如果手動選擇了 workspace，使用該選擇

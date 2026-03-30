@@ -133,11 +133,12 @@ function getCurrentUserContext(): {
     if (authData) {
       const parsed = JSON.parse(authData)
       const user = parsed?.state?.user
-      const roles = user?.roles as UserRole[] | undefined
-      const userRole = roles?.includes('super_admin') ? 'super_admin' : roles?.[0] || null
+      const isAdmin = parsed?.state?.isAdmin
+      // 新系統：使用 isAdmin 判斷
+      const userRole = isAdmin ? 'super_admin' : 'staff'
       return {
         workspaceId: user?.workspace_id || null,
-        userRole,
+        userRole: userRole as UserRole,
         userId: user?.id || null,
       }
     }
@@ -185,13 +186,14 @@ export function createEntityHook<T extends BaseEntity>(
     const isAuthenticated = useAuthStore(state => state.isAuthenticated)
     const hasHydrated = useAuthStore(state => state._hasHydrated)
 
+    // 新系統：使用 isAdmin
+    const isAdmin = useAuthStore(state => state.isAdmin)
+    
     return {
       isReady: hasHydrated && isAuthenticated && !!user?.id,
       hasHydrated,
       workspaceId: user?.workspace_id || null,
-      userRole: (user?.roles?.includes('super_admin')
-        ? 'super_admin'
-        : user?.roles?.[0]) as UserRole | null,
+      userRole: isAdmin ? ('super_admin' as UserRole) : ('staff' as UserRole),
     }
   }
 

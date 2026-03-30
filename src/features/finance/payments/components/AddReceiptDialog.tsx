@@ -84,11 +84,9 @@ export function AddReceiptDialog({
   const isConfirmed = editingReceipt?.status === '1'
   const isAbnormal = editingReceipt?.status === '2'
 
-  // 角色權限判斷
-  const { user } = useAuthStore()
-  const isAccountant = user?.roles?.some(role =>
-    ['super_admin', 'admin', 'accountant'].includes(role)
-  )
+  // 權限判斷（新系統）
+  const { user, isAdmin } = useAuthStore()
+  const isAccountant = isAdmin || user?.permissions?.includes('accounting')
   
   // 是否可編輯（未確認 or 會計角色）
   const canEdit = !isConfirmed || isAccountant

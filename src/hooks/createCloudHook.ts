@@ -34,12 +34,12 @@ function getCurrentUserContext(): { workspaceId: string | null; userRole: UserRo
     if (authData) {
       const parsed = JSON.parse(authData)
       const user = parsed?.state?.user
-      // roles 是陣列，優先檢查 super_admin
-      const roles = user?.roles as UserRole[] | undefined
-      const userRole = roles?.includes('super_admin') ? 'super_admin' : roles?.[0] || null
+      const isAdmin = parsed?.state?.isAdmin
+      // 新系統：使用 isAdmin 判斷
+      const userRole = isAdmin ? 'super_admin' : 'staff'
       return {
         workspaceId: user?.workspace_id || null,
-        userRole,
+        userRole: userRole as UserRole,
       }
     }
   } catch {

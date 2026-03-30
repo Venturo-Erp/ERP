@@ -35,10 +35,9 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
   const { isRouteAvailable, loading, features } = useWorkspaceFeatures()
   const [checked, setChecked] = useState(false)
 
-  // 判斷是否為 Super Admin
-  const isSuperAdmin = user?.permissions?.includes('super_admin') || 
-                       user?.permissions?.includes('admin') ||
-                       user?.roles?.includes('super_admin')
+  // 新系統：使用 isAdmin
+  const { isAdmin } = useAuthStore()
+  const isSuperAdmin = isAdmin
 
   useEffect(() => {
     if (loading) return

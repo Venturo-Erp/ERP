@@ -79,10 +79,11 @@ export default function MobileProfilePage() {
             <div className="flex-1">
               <h2 className="text-lg font-bold text-morandi-primary">{user?.name || '使用者'}</h2>
               <p className="text-sm text-morandi-secondary">{user?.email}</p>
-              {user?.roles && user.roles.length > 0 && (
+              {/* 新系統：顯示管理員標籤或職務名稱 */}
+              {(user?.permissions?.includes('*') || user?.permissions?.includes('admin')) && (
                 <div className="mt-1">
                   <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-gold/10 text-morandi-gold">
-                    {user.roles[0]}
+                    管理員
                   </span>
                 </div>
               )}

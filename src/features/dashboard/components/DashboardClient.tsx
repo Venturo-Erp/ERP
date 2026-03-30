@@ -57,9 +57,9 @@ export function DashboardClient() {
   const [isLoading, setIsLoading] = useState(true)
   const { activeWidgets, toggleWidget, reorderWidgets, isLoading: widgetsLoading } = useWidgets()
 
-  // 是否為超級管理員
-  const userRoles = user?.roles || []
-  const isSuperAdmin = userRoles.includes('super_admin')
+  // 新系統：使用 isAdmin
+  const { isAdmin } = useAuthStore()
+  const isSuperAdmin = isAdmin
 
   // 過濾可渲染的 widgets（過濾掉沒權限的）
   const filteredActiveWidgets = useMemo(() => {

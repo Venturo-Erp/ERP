@@ -207,29 +207,11 @@ export function PreferredFeaturesSettings() {
   const handleResetToDefaults = () => {
     if (!user) return
 
-    // 根據角色重置為預設功能
-    const role = user.roles?.[0]
-    let defaultFeatures: string[] = []
-
-    switch (role) {
-      case 'admin':
-        defaultFeatures = AVAILABLE_FEATURES.map(f => f.id)
-        break
-      case 'tour_leader':
-        defaultFeatures = ['tours', 'orders', 'calendar']
-        break
-      case 'sales':
-        defaultFeatures = ['quotes', 'customers', 'orders', 'tours', 'calendar']
-        break
-      case 'accountant':
-        defaultFeatures = ['finance', 'payments', 'orders', 'tours', 'calendar']
-        break
-      case 'assistant':
-        defaultFeatures = ['orders', 'customers', 'calendar', 'todos']
-        break
-      default:
-        defaultFeatures = ['calendar', 'todos', 'workspace']
-    }
+    // 新系統：管理員給全部功能，其他人給基本功能
+    const { isAdmin } = useAuthStore.getState()
+    const defaultFeatures = isAdmin 
+      ? AVAILABLE_FEATURES.map(f => f.id)
+      : ['tours', 'orders', 'calendar', 'todos', 'workspace']
 
     // 更新本地狀態和 auth-store
     setSelectedFeatures(defaultFeatures)

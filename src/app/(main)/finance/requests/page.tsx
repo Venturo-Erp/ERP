@@ -48,27 +48,10 @@ export default function RequestsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [selectedRequest, setSelectedRequest] = useState<PaymentRequest | null>(null)
   const [activeTab, setActiveTab] = useState<'tour' | 'company'>('tour')
-  const { user } = useAuthStore()
+  const { user, isAdmin } = useAuthStore()
 
-  // 判斷是否為管理員/會計
-  // 檢查 roles（舊系統）或 permissions（新系統 workspace_roles.is_admin → '*'）
-  const isAccountant = 
-    user?.roles?.includes('super_admin') || 
-    user?.roles?.includes('admin') || 
-    user?.roles?.includes('accountant') || 
-    user?.roles?.includes('controller') ||
-    user?.permissions?.includes('*') // 新系統：workspace_roles.is_admin = true
-  
-  // DEBUG: 幫助 William 檢查權限
-  useEffect(() => {
-    if (user) {
-      console.log('🔍 DEBUG - 請款頁面權限檢查:', {
-        roles: user.roles,
-        permissions: user.permissions,
-        isAccountant,
-      })
-    }
-  }, [user, isAccountant])
+  // 判斷是否為管理員/會計（新系統：isAdmin 或有 accounting 權限）
+  const isAccountant = isAdmin || user?.permissions?.includes('accounting')
 
   // 讀取 URL 參數（從快速請款按鈕傳入）
   const urlTourId = searchParams.get('tour_id')

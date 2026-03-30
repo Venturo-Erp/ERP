@@ -20,9 +20,9 @@ export function useItineraryList() {
   const { items: countries } = useCountries()
   const { items: cities } = useCities()
 
-  // 檢查是否為超級管理員
-  const isSuperAdmin =
-    user?.roles?.includes('super_admin') || user?.permissions?.includes('super_admin')
+  // 檢查是否為管理員（新系統）
+  const { isAdmin } = useAuthStore.getState()
+  const isSuperAdmin = isAdmin
 
   // 篩選和搜尋狀態
   const [statusFilter, setStatusFilter] = useState<string>('全部')

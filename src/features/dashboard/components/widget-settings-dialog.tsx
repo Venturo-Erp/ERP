@@ -22,11 +22,9 @@ interface WidgetSettingsDialogProps {
 }
 
 export function WidgetSettingsDialog({ activeWidgets, onToggleWidget }: WidgetSettingsDialogProps) {
-  const { user } = useAuthStore()
-  const userRoles = user?.roles || []
-
-  // 是否為超級管理員
-  const isSuperAdmin = userRoles.includes('super_admin')
+  // 新系統：使用 isAdmin
+  const { isAdmin } = useAuthStore()
+  const isSuperAdmin = isAdmin
 
   // 過濾可見的 widgets
   const visibleWidgets = useMemo(() => {

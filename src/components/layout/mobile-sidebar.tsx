@@ -213,17 +213,14 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const { user } = useAuthStore()
   const [expandedItems, setExpandedItems] = useState<string[]>([])
 
-  // 權限相關
+  // 權限相關（新系統）
+  const { isAdmin } = useAuthStore()
   const userPermissions = user?.permissions || []
-  const userRoles = user?.roles || []
   const hiddenMenuItems = user?.hidden_menu_items || []
   const preferredFeatures = user?.preferred_features || []
 
-  const isSuperAdmin =
-    userPermissions.includes('super_admin') ||
-    userPermissions.includes('admin') ||
-    userPermissions.includes('*') ||
-    userRoles.includes('super_admin')
+  // 新系統：使用 store.isAdmin
+  const isSuperAdmin = isAdmin
 
   // 關閉側邊欄時重置展開狀態
   useEffect(() => {

@@ -61,12 +61,10 @@ export default function PaymentsPage() {
     handleUpdateReceipt,
     handleDeleteReceipt,
   } = usePaymentData()
-  const { user } = useAuthStore()
+  const { user, isAdmin } = useAuthStore()
 
-  // 檢查是否為可批量確認的角色（管理員、會計、超級管理員）
-  const canBatchConfirm = user?.roles?.some(role =>
-    ['super_admin', 'admin', 'accountant'].includes(role)
-  )
+  // 檢查是否為可批量確認的角色（管理員或有會計權限）
+  const canBatchConfirm = isAdmin || user?.permissions?.includes('accounting')
 
   // 讀取 URL 參數（從快速收款按鈕傳入）
   const urlOrderId = searchParams.get('order_id')

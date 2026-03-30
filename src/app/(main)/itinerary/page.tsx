@@ -63,13 +63,13 @@ export default function ItineraryPage() {
   const { items: quotes } = useQuotes()
   const { items: employees } = useEmployeesSlim()
   const { items: tours } = useToursSlim()
-  const { user } = useAuthStore()
+  const { user, isAdmin } = useAuthStore()
   const { workspaces, loadWorkspaces } = useWorkspaceStore()
   // 🔧 優化：countries 只用於新增對話框，cities 已不需要（Itinerary 有 denormalized 欄位）
   const { items: countries } = useCountries()
 
-  const isSuperAdmin =
-    user?.roles?.includes('super_admin') || user?.permissions?.includes('super_admin')
+  // 新系統：使用 isAdmin
+  const isSuperAdmin = isAdmin
 
   useEffect(() => {
     if (isSuperAdmin && workspaces.length === 0) {

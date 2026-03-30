@@ -86,10 +86,10 @@ export function useCalendarEvents() {
     { revalidateOnFocus: false }
   )
 
-  // Workspace 篩選狀態（只有超級管理員能用）
+  // Workspace 篩選狀態（只有管理員能用）
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null)
-  const isSuperAdmin =
-    user?.roles?.includes('super_admin') || user?.permissions?.includes('super_admin')
+  const { isAdmin } = useAuthStore.getState()
+  const isSuperAdmin = isAdmin
 
   // 初始化時從 localStorage 讀取篩選狀態
   const workspaceInitRef = useRef(false)
