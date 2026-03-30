@@ -16,6 +16,7 @@ import { Attraction } from '@/features/attractions/types'
 import { AttractionSearchBar } from './AttractionSearchBar'
 import { AttractionList } from './AttractionList'
 import { useAttractionSearch } from './hooks/useAttractionSearch'
+import { useTabPermissions } from '@/lib/permissions'
 import { ATTRACTION_SELECTOR_LABELS } from './constants/labels'
 
 // 使用 Next.js dynamic import 並禁用 SSR
@@ -81,11 +82,21 @@ export function AttractionSelector({
     dayTitle,
   })
 
+  // 權限檢查：是否能編輯資料庫（database.attractions 寫入權限）
+  const { canWrite } = useTabPermissions()
+  const canEditDatabase = canWrite('database', 'attractions')
+
   // 選擇狀態
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   // 景點詳情狀態
   const [detailAttraction, setDetailAttraction] = useState<AttractionWithCity | null>(null)
+  
+  // 編輯景點：直接跳轉到資料庫頁面
+  const handleEditAttraction = (attraction: AttractionWithCity) => {
+    // 在新分頁打開景點編輯頁面
+    window.open(`/database/attractions?edit=${attraction.id}`, '_blank')
+  }
 
   // 地圖相關狀態
   const [selectedMapAttraction, setSelectedMapAttraction] = useState<AttractionWithCity | null>(
@@ -190,9 +201,11 @@ export function AttractionSelector({
                 loading={loading}
                 selectedCountryId={selectedCountryId}
                 searchQuery={searchQuery}
+                canEditDatabase={canEditDatabase}
                 onToggleSelection={toggleSelection}
                 onViewOnMap={handleViewOnMap}
                 onViewDetail={setDetailAttraction}
+                onEdit={handleEditAttraction}
                 selectedMapAttractionId={selectedMapAttraction?.id}
               />
             </div>

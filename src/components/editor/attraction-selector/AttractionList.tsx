@@ -19,9 +19,11 @@ interface AttractionListProps {
   loading: boolean
   selectedCountryId: string
   searchQuery: string
+  canEditDatabase?: boolean
   onToggleSelection: (id: string) => void
   onViewOnMap?: (attraction: AttractionWithCity) => void
   onViewDetail?: (attraction: AttractionWithCity) => void
+  onEdit?: (attraction: AttractionWithCity) => void
   selectedMapAttractionId?: string
 }
 
@@ -33,9 +35,11 @@ export function AttractionList({
   loading,
   selectedCountryId,
   searchQuery,
+  canEditDatabase,
   onToggleSelection,
   onViewOnMap,
   onViewDetail,
+  onEdit,
   selectedMapAttractionId,
 }: AttractionListProps) {
   if (loading) {
@@ -73,9 +77,11 @@ export function AttractionList({
             isSelected={isSelected}
             isSuggested={isSuggested}
             isExisting={isExisting}
+            canEditDatabase={canEditDatabase}
             onToggleSelection={onToggleSelection}
             onViewOnMap={onViewOnMap}
             onViewDetail={onViewDetail}
+            onEdit={onEdit}
             selectedMapAttractionId={selectedMapAttractionId}
           />
         )

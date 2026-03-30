@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import { ImageIcon, Map, Sparkles } from 'lucide-react'
+import { ImageIcon, Map, Sparkles, Pencil } from 'lucide-react'
 import { Attraction } from '@/features/attractions/types'
 import { COMP_EDITOR_LABELS } from '../constants/labels'
 
@@ -16,9 +16,11 @@ interface AttractionCardProps {
   isSelected: boolean
   isSuggested: boolean
   isExisting: boolean
+  canEditDatabase?: boolean  // 是否有編輯資料庫權限
   onToggleSelection: (id: string) => void
   onViewOnMap?: (attraction: AttractionWithCity) => void
   onViewDetail?: (attraction: AttractionWithCity) => void
+  onEdit?: (attraction: AttractionWithCity) => void
   selectedMapAttractionId?: string
 }
 
@@ -27,9 +29,11 @@ export function AttractionCard({
   isSelected,
   isSuggested,
   isExisting,
+  canEditDatabase,
   onToggleSelection,
   onViewOnMap,
   onViewDetail,
+  onEdit,
   selectedMapAttractionId,
 }: AttractionCardProps) {
   const image =
@@ -104,19 +108,36 @@ export function AttractionCard({
         </div>
       </div>
 
-      {/* 查看地圖按鈕 */}
-      {hasCoordinates && onViewOnMap && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => onViewOnMap(attraction)}
-          className={`h-8 px-2 rounded-lg ${selectedMapAttractionId === attraction.id ? 'bg-status-info-bg text-status-info' : ''}`}
-          title={COMP_EDITOR_LABELS.查看附近景點}
-        >
-          <Map size={16} />
-        </Button>
-      )}
+      {/* 操作按鈕 */}
+      <div className="flex gap-1">
+        {/* 編輯按鈕（需要資料庫編輯權限） */}
+        {canEditDatabase && onEdit && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onEdit(attraction)}
+            className="h-8 px-2 rounded-lg hover:bg-morandi-gold/10 hover:text-morandi-gold"
+            title="編輯景點"
+          >
+            <Pencil size={16} />
+          </Button>
+        )}
+
+        {/* 查看地圖按鈕 */}
+        {hasCoordinates && onViewOnMap && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onViewOnMap(attraction)}
+            className={`h-8 px-2 rounded-lg ${selectedMapAttractionId === attraction.id ? 'bg-status-info-bg text-status-info' : ''}`}
+            title={COMP_EDITOR_LABELS.查看附近景點}
+          >
+            <Map size={16} />
+          </Button>
+        )}
+      </div>
     </div>
   )
 }

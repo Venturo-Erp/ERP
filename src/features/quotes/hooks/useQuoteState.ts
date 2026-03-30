@@ -150,6 +150,12 @@ export const useQuoteState = () => {
         expense_description:
           (quote as typeof quote & { expense_description?: string })?.expense_description || '',
       })
+      // 讀取保險和不包含項目
+      const metadata = (quote as typeof quote & { metadata?: any })?.metadata
+      if (metadata) {
+        if (metadata.insuranceText) setInsuranceText(metadata.insuranceText)
+        if (Array.isArray(metadata.excludedItems)) setExcludedItems(metadata.excludedItems)
+      }
     }
   }, [quote?.id, quote?.updated_at, relatedTour?.code])
 
@@ -344,6 +350,16 @@ export const useQuoteState = () => {
   // 砍次表狀態（由 effect 從 fullTour 或 quote 載入）
   const [tierPricings, setTierPricings] = useState<TierPricing[]>([])
 
+  // 保險文字和費用不包含項目
+  const [insuranceText, setInsuranceText] = useState('')
+  const [excludedItems, setExcludedItems] = useState<string[]>([
+    '個人護照及簽證費用',
+    '行程外之自費行程',
+    '個人消費及小費',
+    '行李超重費用',
+    '單人房差價',
+  ])
+
   // 檢查是否為 404 狀態（資料已載入但找不到對應的 quote）
   const [notFound, setNotFound] = useState(false)
   const [hasLoaded, setHasLoaded] = useState(false)
@@ -406,6 +422,11 @@ export const useQuoteState = () => {
     // 砍次表相關
     tierPricings,
     setTierPricings,
+    // 保險和不包含項目
+    insuranceText,
+    setInsuranceText,
+    excludedItems,
+    setExcludedItems,
     // 核心表
     coreItems,
     refreshCoreItems,
