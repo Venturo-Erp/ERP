@@ -197,7 +197,18 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     try {
       const defaultPassword = formData.birth_date?.replace(/-/g, '') || '00000000'
 
+      // 新增員工時自動產生員工編號
+      let employeeNumber = employee?.employee_number
+      if (!isEditMode) {
+        // 找出最大的員工編號
+        const maxNum = employees
+          .map(e => parseInt(e.employee_number?.replace(/\D/g, '') || '0'))
+          .reduce((max, n) => Math.max(max, n), 0)
+        employeeNumber = `E${String(maxNum + 1).padStart(3, '0')}`
+      }
+
       const payload = {
+        employee_number: employeeNumber,
         chinese_name: formData.chinese_name,
         english_name: formData.english_name,
         display_name: formData.display_name || formData.chinese_name,
