@@ -150,6 +150,13 @@ const DialogContent = React.forwardRef<
         ref={ref}
         aria-describedby={undefined}
         onOpenAutoFocus={e => e.preventDefault()}
+        onCloseAutoFocus={e => {
+          e.preventDefault()
+          // 移除焦點，避免 aria-hidden 警告
+          if (document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur()
+          }
+        }}
         onInteractOutside={e => e.preventDefault()}
         onPointerDownOutside={e => e.preventDefault()}
         aria-labelledby={undefined}

@@ -58,6 +58,17 @@ export default function RequestsPage() {
     user?.roles?.includes('accountant') || 
     user?.roles?.includes('controller') ||
     user?.permissions?.includes('*') // 新系統：workspace_roles.is_admin = true
+  
+  // DEBUG: 幫助 William 檢查權限
+  useEffect(() => {
+    if (user) {
+      console.log('🔍 DEBUG - 請款頁面權限檢查:', {
+        roles: user.roles,
+        permissions: user.permissions,
+        isAccountant,
+      })
+    }
+  }, [user, isAccountant])
 
   // 讀取 URL 參數（從快速請款按鈕傳入）
   const urlTourId = searchParams.get('tour_id')
