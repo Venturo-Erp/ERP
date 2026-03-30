@@ -224,7 +224,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
           allowances: employee?.salary_info?.allowances || [],
         },
         status: 'active' as const,
-        default_password: !isEditMode ? defaultPassword : undefined,
+        // default_password 由 API 處理，不直接存 DB
       }
 
       if (isEditMode && employeeId) {
