@@ -277,6 +277,12 @@ export function useAttractionSearch({
   console.log('[AttractionSearch] dayTitle:', dayTitle)
   console.log('[AttractionSearch] titleKeywords:', titleKeywords)
   console.log('[AttractionSearch] attractions count:', attractions.length)
+  
+  // Debug: 檢查有沒有武康路
+  if (attractions.length > 0) {
+    const wukang = attractions.filter(a => a.name.includes('武康'))
+    console.log('[AttractionSearch] 武康相關:', wukang.map(a => a.name))
+  }
 
   // 根據標題關鍵字匹配建議景點
   const suggestedAttractions = useMemo(() => {
@@ -304,6 +310,7 @@ export function useAttractionSearch({
       }
     }
 
+    console.log('[AttractionSearch] suggestedAttractions:', suggestions.map(s => s.name))
     return suggestions
   }, [titleKeywords, attractions])
 
