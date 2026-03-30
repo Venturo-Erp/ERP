@@ -3,7 +3,7 @@ import { createApiClient } from '@/lib/supabase/api-client'
 
 /**
  * GET /api/users/[userId]/role
- * 取得用戶的角色資訊（RLS 自動過濾）
+ * 取得用戶的角色資訊（從 employees.job_info 讀取）
  */
 export async function GET(
   request: NextRequest,
@@ -12,14 +12,21 @@ export async function GET(
   const { userId } = await params
   const supabase = await createApiClient()
 
-  // 取得用戶的角色
-  const { data: userRole, error: userRoleError } = await supabase
-    .from('user_roles')
-    .select('role_id')
-    .eq('user_id', userId)
+  // 從 employees.job_info 取得 role_id
+  const { data: employee, error: employeeError } = await supabase
+    .from('employees')
+    .select('job_info')
+    .eq('id', userId)
     .single()
 
-  if (userRoleError || !userRole) {
+  if (employeeError || !employee) {
+    return NextResponse.json({ role_id: null, is_admin: false })
+  }
+
+  const jobInfo = employee.job_info as { role_id?: string } | null
+  const roleId = jobInfo?.role_id
+
+  if (!roleId) {
     // 沒有指定角色，回傳空
     return NextResponse.json({ role_id: null, is_admin: false })
   }
@@ -28,7 +35,7 @@ export async function GET(
   const { data: role, error: roleError } = await supabase
     .from('workspace_roles')
     .select('id, name, is_admin')
-    .eq('id', userRole.role_id)
+    .eq('id', roleId)
     .single()
 
   if (roleError || !role) {

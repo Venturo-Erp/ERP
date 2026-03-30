@@ -11,7 +11,7 @@ import type { Supplier } from '@/stores/types'
 export const supplierEntity = createEntityHook<Supplier>('suppliers', {
   list: {
     select:
-      'id,code,name,english_name,category_id,contact,contact_person,phone,email,fax,address,country,country_id,region,currency,bank_name,bank_account,bank_branch,bank_code_legacy,tax_id,payment_terms,type,status,is_active,is_preferred,rating,display_order,total_orders,total_spent,website,workspace_id,created_at,created_by,updated_at,updated_by',
+      'id,code,name,english_name,category_id,contact,contact_person,phone,email,fax,address,country,country_id,region,currency,bank_name,bank_account,bank_account_name,bank_branch,bank_code_legacy,tax_id,payment_terms,type,status,is_active,is_preferred,rating,display_order,total_orders,total_spent,website,workspace_id,created_at,created_by,updated_at,updated_by',
     orderBy: { column: 'name', ascending: true },
   },
   slim: {
