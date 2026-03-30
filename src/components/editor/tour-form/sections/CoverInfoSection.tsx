@@ -92,24 +92,21 @@ export function CoverInfoSection({
   }
 
   // 生成預覽用資料
-  const getHeroData = () => {
-    console.log('[CoverInfoSection] getHeroData - coverImagePosition:', data.coverImagePosition)
-    return {
-      coverImage: data.coverImage,
-      coverImagePosition: data.coverImagePosition,  // 圖片位置調整
-      tagline: data.tagline || getWorkspaceCompanyName(),
-      title: data.title || COMP_EDITOR_LABELS.行程標題,
-      subtitle: data.subtitle || COMP_EDITOR_LABELS.副標題,
-      description: data.description || COMP_EDITOR_LABELS.此處顯示行程描述,
-      departureDate: data.departureDate || '2025/01/01',
-      tourCode: data.tourCode || 'CODE',
-      price: data.price || '',
-      priceNote: data.priceNote === '__hidden__' ? '' : data.priceNote || COMP_EDITOR_LABELS.人,
-      country: selectedCountry || '',
-      city: data.city || '',
-      dailyItinerary: data.dailyItinerary,
-    }
-  }
+  const getHeroData = () => ({
+    coverImage: data.coverImage,
+    coverImagePosition: data.coverImagePosition,  // 圖片位置調整
+    tagline: data.tagline || getWorkspaceCompanyName(),
+    title: data.title || COMP_EDITOR_LABELS.行程標題,
+    subtitle: data.subtitle || COMP_EDITOR_LABELS.副標題,
+    description: data.description || COMP_EDITOR_LABELS.此處顯示行程描述,
+    departureDate: data.departureDate || '2025/01/01',
+    tourCode: data.tourCode || 'CODE',
+    price: data.price || '',
+    priceNote: data.priceNote === '__hidden__' ? '' : data.priceNote || COMP_EDITOR_LABELS.人,
+    country: selectedCountry || '',
+    city: data.city || '',
+    dailyItinerary: data.dailyItinerary,
+  })
 
   // 根據風格渲染對應的 Hero 組件
   const renderHeroPreview = (viewMode: 'desktop' | 'mobile') => {

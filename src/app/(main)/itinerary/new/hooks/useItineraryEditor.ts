@@ -139,7 +139,7 @@ export function useItineraryEditor() {
       hotels: data.hotels || [],
       show_hotels: data.showHotels,
       show_pricing_details: data.showPricingDetails,
-      pricing_details: data.pricingDetails,
+      // pricing_details: 欄位不存在於 DB，由前端計算/顯示
       // price_tiers: 欄位已從 DB 移除，改用 tours.tier_pricings
       show_price_tiers: data.showPriceTiers || false,
       faqs: data.faqs || null,
