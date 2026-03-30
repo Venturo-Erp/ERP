@@ -273,6 +273,11 @@ export function useAttractionSearch({
   // 解析行程標題，找出可能的景點關鍵字
   const titleKeywords = useMemo(() => parseDayTitleForAttractions(dayTitle), [dayTitle])
 
+  // Debug: 檢查關鍵字解析
+  console.log('[AttractionSearch] dayTitle:', dayTitle)
+  console.log('[AttractionSearch] titleKeywords:', titleKeywords)
+  console.log('[AttractionSearch] attractions count:', attractions.length)
+
   // 根據標題關鍵字匹配建議景點
   const suggestedAttractions = useMemo(() => {
     if (titleKeywords.length === 0 || attractions.length === 0) return []
