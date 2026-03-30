@@ -241,7 +241,31 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
       if (isEditMode && employeeId) {
         await updateEmployee(employeeId, payload as unknown as Parameters<typeof updateEmployee>[1])
       } else {
-        await createEmployee(payload as unknown as Parameters<typeof createEmployee>[0])
+        // 新增員工：用 API 建立（包含 Supabase Auth）
+        const defaultPassword = '12345678'
+        const res = await fetch('/api/employees/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...payload,
+            password: defaultPassword,
+          }),
+        })
+        
+        if (!res.ok) {
+          const error = await res.json()
+          throw new Error(error.message || '建立員工失敗')
+        }
+        
+        // 顯示預設密碼通知
+        const { alert } = await import('@/lib/ui/alert-dialog')
+        await alert(
+          `員工建立成功！\n\n` +
+          `員工編號：${employeeNumber}\n` +
+          `預設密碼：${defaultPassword}\n\n` +
+          `請通知員工首次登入後修改密碼。`,
+          '新員工建立成功'
+        )
       }
 
       // 儲存員工的個人覆寫
