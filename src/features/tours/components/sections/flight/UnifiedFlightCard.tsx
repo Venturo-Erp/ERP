@@ -249,7 +249,7 @@ function OriginalFlightCard({
         <div className="flex-1 flex items-center justify-center">
           <div className="flex-1 h-px" style={{ backgroundColor: theme.colors.border }} />
           <Plane
-            className={`mx-2 transform ${type === 'outbound' ? 'rotate-90' : '-rotate-90'}`}
+            className="mx-2"
             size={20}
             style={{ color: theme.colors.primary }}
           />

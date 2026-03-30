@@ -8,6 +8,8 @@ import { useMapPreferences } from '@/hooks/useMapPreferences'
 import { getAirportCoordinate, inferAirportCode } from '@/lib/constants/airports'
 import dynamic from 'next/dynamic'
 import type { Attraction } from '@/features/attractions/types'
+import { useDraggable } from '@dnd-kit/core'
+import { CSS } from '@dnd-kit/utilities'
 
 // 動態載入地圖元件
 const AttractionsMap = dynamic(
