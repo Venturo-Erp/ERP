@@ -498,7 +498,7 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
               <p className="text-xs text-morandi-muted mb-1">
                 {REQUEST_DETAIL_FORM_LABELS.請款日期}
               </p>
-              <DateCell date={currentRequest.created_at} showIcon={false} />
+              <DateCell date={currentRequest.request_date || currentRequest.created_at} showIcon={false} />
             </div>
             <div>
               <p className="text-xs text-morandi-muted mb-1">{REQUEST_DETAIL_FORM_LABELS.總金額}</p>
