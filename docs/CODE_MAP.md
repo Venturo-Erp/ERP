@@ -28,7 +28,9 @@
 | **團詳情-網頁** | `src/features/tours/components/tour-webpage-tab.tsx` | 網頁分頁 |
 | **團詳情-獎金** | `src/features/tours/components/BonusSettingTab.tsx` | 獎金分頁 |
 | **團詳情-設計** | `src/features/tours/components/tour-designs-tab.tsx` | 設計分頁 |
-| **行程** | `src/features/tours/components/itinerary/` | 行程分頁
+| **行程** | `src/features/tours/components/itinerary/` | 行程分頁 |
+| **行程同步核心表** | `src/features/tours/hooks/useTourItineraryItems.ts` | syncToCore |
+| **核心表 Entity** | `src/data/entities/tour-itinerary-items.ts` | tour_itinerary_items |
 | **景點庫** | `src/features/tours/components/itinerary/AttractionLibrary.tsx` | 景點側邊欄 |
 | **景點資料庫** | `src/features/attractions/` | 資料管理 → 景點 |
 | **訂單** | `src/app/(main)/orders/` | 訂單列表 |
@@ -91,6 +93,8 @@ src/
 | `attractions` | `useAttractions` | `src/data/entities/attractions.ts` |
 | `members` | `useMembers` | `src/data/entities/members.ts` |
 | `employees` | `useEmployees` | `src/data/entities/employees.ts` |
+| `tour_itinerary_items` | `useTourItineraryItems` | `src/data/entities/tour-itinerary-items.ts` |
+| `workspace_roles` | — | `src/app/api/roles/route.ts` |
 
 ---
 
@@ -128,4 +132,39 @@ src/
 
 ---
 
-**更新**：2026-03-28 13:15
+---
+
+## 🔐 權限系統
+
+| 關鍵字 | 位置 | 說明 |
+|--------|------|------|
+| **權限定義** | `src/lib/permissions/` | 權限系統核心 |
+| **職務管理** | `src/app/(main)/hr/roles/page.tsx` | HR → 職務管理 |
+| **細粒度權限** | `src/lib/permissions/useTabPermissions.tsx` | canRead/canWrite hook |
+| **isAdmin 判斷** | `src/stores/auth-store.ts` | `permissions.includes('*')` |
+| **RLS 函數** | DB: `is_super_admin()` | 只檢查 `super_admin`（舊） |
+
+---
+
+## 🏢 租戶系統
+
+| 關鍵字 | 位置 | 說明 |
+|--------|------|------|
+| **租戶列表** | `src/app/(main)/tenants/page.tsx` | 租戶管理頁 |
+| **建立租戶** | `src/app/api/tenants/create/route.ts` | 建立租戶 API |
+| **workspace store** | `src/stores/workspace/` | workspace 狀態 |
+
+---
+
+## 👤 員工系統
+
+| 關鍵字 | 位置 | 說明 |
+|--------|------|------|
+| **員工列表** | `src/app/(main)/hr/page.tsx` | HR 頁面 |
+| **員工表單** | `src/features/hr/components/EmployeeForm.tsx` | 新增/編輯員工 |
+| **建立員工** | `src/app/api/employees/create/route.ts` | 建立員工 API |
+| **修改密碼** | `src/app/api/auth/change-password/route.ts` | 修改密碼 API |
+
+---
+
+**更新**：2026-03-30 14:12
