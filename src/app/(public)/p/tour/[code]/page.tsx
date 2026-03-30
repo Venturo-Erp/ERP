@@ -292,7 +292,7 @@ export default function PublicTourPage({
                       {/* 內容 */}
                       <div className="pb-8 flex-1">
                         <h3 className="text-lg md:text-xl font-bold text-[#191c1d] mb-2">
-                          {day.dayLabel}: {day.title}
+                          第{index + 1}天：{day.title}
                         </h3>
                         
                         {(day.description || day.highlight) && (
