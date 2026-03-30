@@ -8,11 +8,17 @@ import { createApiClient, getCurrentWorkspaceId } from '@/lib/supabase/api-clien
  */
 export async function GET() {
   const supabase = await createApiClient()
+  const workspaceId = await getCurrentWorkspaceId()
 
-  // RLS 會自動過濾，只回傳當前租戶的角色
+  if (!workspaceId) {
+    return NextResponse.json({ error: '未登入或無法取得租戶' }, { status: 401 })
+  }
+
+  // 明確過濾 workspace_id（避免管理員看到其他租戶的職務）
   const { data, error } = await supabase
     .from('workspace_roles')
     .select('*')
+    .eq('workspace_id', workspaceId)
     .order('sort_order', { ascending: true })
 
   if (error) {

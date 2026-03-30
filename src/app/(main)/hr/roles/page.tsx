@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * 角色管理頁面（HR 模組）
+ * 職務管理頁面（HR 模組）
  * 支援模組 + 分頁的細粒度權限設定
  */
 
@@ -58,7 +58,7 @@ export default function RolesPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingRole, setEditingRole] = useState({ name: '', description: '' })
 
-  // 載入角色列表
+  // 載入職務列表
   useEffect(() => {
     const fetchRoles = async () => {
       setLoading(true)
@@ -262,7 +262,7 @@ export default function RolesPage() {
     setSaving(false)
   }
 
-  // 刪除角色
+  // 刪除職務
   const handleDeleteRole = async (role: Role) => {
     if (role.is_admin) {
       toast({ title: '無法刪除管理員角色', variant: 'destructive' })
@@ -278,7 +278,7 @@ export default function RolesPage() {
         if (selectedRole?.id === role.id) {
           setSelectedRole(roles.find(r => r.id !== role.id) || null)
         }
-        toast({ title: '已刪除角色' })
+        toast({ title: '已刪除職務' })
       }
     } catch (err) {
       console.error('Failed to delete role:', err)
@@ -385,19 +385,19 @@ export default function RolesPage() {
 
   return (
     <ContentPageLayout 
-      title="角色管理" 
+      title="職務管理" 
       icon={Shield}
       breadcrumb={[
         { label: '人資管理', href: '/hr' },
-        { label: '角色管理', href: '/hr/roles' },
+        { label: '職務管理', href: '/hr/roles' },
       ]}
     >
       <div className="grid grid-cols-12 gap-6 h-[calc(100vh-180px)]">
-        {/* 左側：角色列表 */}
+        {/* 左側：職務列表 */}
         <div className="col-span-3 flex flex-col">
           <div className="bg-white border border-border rounded-lg flex flex-col h-full">
             <div className="flex items-center justify-between p-4 border-b border-border">
-              <h3 className="font-semibold text-morandi-primary">角色列表</h3>
+              <h3 className="font-semibold text-morandi-primary">職務列表</h3>
               <Button 
                 size="sm" 
                 onClick={() => setIsDialogOpen(true)}
@@ -470,7 +470,7 @@ export default function RolesPage() {
             <div className="flex items-center justify-between p-4 border-b border-border">
               <div className="flex items-center gap-3">
                 <h3 className="font-semibold text-morandi-primary">
-                  {selectedRole ? `${selectedRole.name} 的權限` : '請選擇角色'}
+                  {selectedRole ? `${selectedRole.name} 的權限` : '請選擇職務'}
                 </h3>
                 {selectedRole && (
                   <div className="flex items-center gap-4 text-xs text-morandi-secondary">
@@ -532,11 +532,11 @@ export default function RolesPage() {
         </div>
       </div>
 
-      {/* 新增角色 Dialog */}
+      {/* 新增職務 Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-morandi-primary">新增角色</DialogTitle>
+            <DialogTitle className="text-morandi-primary">新增職務</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
