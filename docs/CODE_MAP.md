@@ -17,7 +17,18 @@
 | **請款詳情** | `src/features/finance/requests/components/RequestDetailDialog.tsx` | 請款詳情 |
 | **旅遊團** | `src/app/(main)/tours/` | 旅遊團列表 |
 | **旅遊團詳情** | `src/app/(main)/tours/[code]/` | 旅遊團詳情頁 |
-| **行程** | `src/features/tours/components/itinerary/` | 行程分頁 |
+| **團詳情-總覽** | `src/features/tours/components/TourOverviewTab.tsx` | 總覽分頁 |
+| **團詳情-行程** | `src/features/tours/components/tour-itinerary-tab.tsx` | 行程分頁 |
+| **團詳情-報價** | `src/features/tours/components/tour-quote-tab-v2.tsx` | 報價分頁 |
+| **團詳情-需求單** | `src/features/tours/components/tour-requirements-tab.tsx` | 需求單分頁 |
+| **團詳情-需求列表** | `src/features/confirmations/components/RequirementsList.tsx` | 需求單主組件 |
+| **團詳情-結團** | `src/features/tours/components/tour-closing-tab.tsx` | 結團分頁 |
+| **團詳情-損益** | `src/features/tours/components/ProfitTab.tsx` | 損益分頁 |
+| **團詳情-合約** | `src/features/tours/components/tour-contract-tab/` | 合約分頁 |
+| **團詳情-網頁** | `src/features/tours/components/tour-webpage-tab.tsx` | 網頁分頁 |
+| **團詳情-獎金** | `src/features/tours/components/BonusSettingTab.tsx` | 獎金分頁 |
+| **團詳情-設計** | `src/features/tours/components/tour-designs-tab.tsx` | 設計分頁 |
+| **行程** | `src/features/tours/components/itinerary/` | 行程分頁
 | **景點庫** | `src/features/tours/components/itinerary/AttractionLibrary.tsx` | 景點側邊欄 |
 | **景點資料庫** | `src/features/attractions/` | 資料管理 → 景點 |
 | **訂單** | `src/app/(main)/orders/` | 訂單列表 |
