@@ -79,6 +79,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     birth_date: employee?.personal_info?.birth_date || '',
     id_number: employee?.personal_info?.national_id || '',
     position: employee?.job_info?.position || '',
+    hire_date: employee?.job_info?.hire_date || new Date().toISOString().split('T')[0],
     emergency_contact_name: employee?.personal_info?.emergency_contact?.name || '',
     emergency_contact_relation: employee?.personal_info?.emergency_contact?.relationship || '',
     emergency_contact_phone: employee?.personal_info?.emergency_contact?.phone || '',
@@ -228,7 +229,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         job_info: {
           position: formData.position,
           role_id: formData.role_id || undefined,
-          hire_date: employee?.job_info?.hire_date || new Date().toISOString().split('T')[0],
+          hire_date: formData.hire_date,
         },
         salary_info: {
           base_salary: formData.base_salary,
@@ -579,9 +580,8 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                       <Label className="text-xs font-semibold text-morandi-secondary uppercase">入職日期</Label>
                       <Input
                         type="date"
-                        value={employee?.job_info?.hire_date || ''}
-                        disabled={isEditMode}
-                        onChange={(e) => {/* hire_date 在 job_info 裡 */}}
+                        value={formData.hire_date}
+                        onChange={(e) => setFormData({ ...formData, hire_date: e.target.value })}
                         className="border-morandi-gold/30 focus:border-morandi-gold bg-morandi-container/30"
                       />
                     </div>
