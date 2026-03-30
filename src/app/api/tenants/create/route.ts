@@ -101,8 +101,8 @@ export async function POST(request: NextRequest) {
       adminPassword,
     } = body
 
-    // 驗證必填欄位
-    if (!workspaceName || !newWorkspaceCode || !adminName || !adminEmail || !adminPassword) {
+    // 驗證必填欄位（email 為選填）
+    if (!workspaceName || !newWorkspaceCode || !adminName || !adminPassword) {
       return errorResponse('缺少必填欄位', 400, ErrorCode.VALIDATION_ERROR)
     }
 
@@ -281,44 +281,7 @@ export async function POST(request: NextRequest) {
       logger.log(`Workspace features created: ${defaultFeatures.length}`)
     }
 
-    // 3. 建立 auth 用戶
-    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email: adminEmail.toLowerCase(),
-      password: adminPassword,
-      email_confirm: true,
-    })
-
-    if (authError || !authUser.user) {
-      logger.error('Failed to create auth user:', authError)
-      // Rollback
-      await supabaseAdmin.from('employees').delete().eq('id', employee.id)
-      await supabaseAdmin.from('workspaces').delete().eq('id', workspace.id)
-      return errorResponse('建立 auth 用戶失敗', 500, ErrorCode.OPERATION_FAILED)
-    }
-
-    logger.log(`Auth user created: ${authUser.user.id}`)
-
-    // 4. 更新 employee 的 supabase_user_id
-    await supabaseAdmin
-      .from('employees')
-      .update({ supabase_user_id: authUser.user.id })
-      .eq('id', employee.id)
-
-    // 5. 建立 profile
-    const { error: profileError } = await supabaseAdmin.from('profiles').insert({
-      id: authUser.user.id,
-      workspace_id: workspace.id,
-      employee_id: employee.id,
-      display_name: adminName,
-      is_employee: true,
-    })
-
-    if (profileError) {
-      logger.warn('Failed to create profile:', profileError)
-      // Profile 不是關鍵資料，不 rollback
-    }
-
-    // 6. 建立公告頻道
+    // 3. 建立公告頻道（不再建立 Supabase Auth 用戶，ERP 用員工編號+密碼登入）
     try {
       await supabaseAdmin.from('channels').insert({
         workspace_id: workspace.id,
@@ -361,7 +324,7 @@ export async function POST(request: NextRequest) {
 
     logger.log(`Tenant created successfully: ${newWorkspaceCode}`)
 
-    // 返回登入資訊
+    // 返回登入資訊（ERP 用員工編號+密碼登入，不需要 email）
     return successResponse({
       workspace: {
         id: workspace.id,
@@ -371,12 +334,10 @@ export async function POST(request: NextRequest) {
       admin: {
         employee_id: employee.id,
         employee_number: adminEmployeeNumber,
-        email: adminEmail,
       },
       login: {
         workspaceCode: newWorkspaceCode,
         employeeNumber: adminEmployeeNumber,
-        email: adminEmail,
         password: adminPassword, // 僅用於顯示給管理員，不要儲存
       },
     })

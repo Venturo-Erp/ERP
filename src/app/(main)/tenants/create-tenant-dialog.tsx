@@ -41,14 +41,13 @@ interface Step1Data {
 interface Step2Data {
   employeeNumber: string
   name: string
-  email: string
+  email: string  // 保留但選填
   password: string
 }
 
 interface LoginInfo {
   workspaceCode: string
   employeeNumber: string
-  email: string
   password: string
 }
 
@@ -129,7 +128,8 @@ export function CreateTenantDialog({
     step1.code.trim() !== '' &&
     !codeError &&
     /^[A-Z]+$/.test(step1.code)
-  const isStep2Valid = step2.name.trim() !== '' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(step2.email)
+  // Email 改為選填，只驗證名稱和密碼
+  const isStep2Valid = step2.name.trim() !== '' && step2.password.length >= 6
 
   const handleCreate = async () => {
     if (!user) return
@@ -165,11 +165,10 @@ export function CreateTenantDialog({
       toast.success(LABELS.TOAST_WORKSPACE_CREATED)
       toast.success(LABELS.TOAST_ADMIN_CREATED)
 
-      // Move to step 3 - show login info
+      // Move to step 3 - show login info（不再顯示 email）
       setLoginInfo({
         workspaceCode: result.data.login.workspaceCode,
         employeeNumber: result.data.login.employeeNumber,
-        email: result.data.login.email,
         password: result.data.login.password,
       })
       setStep(3)
@@ -186,7 +185,6 @@ export function CreateTenantDialog({
     const text = [
       `${LABELS.LOGIN_INFO_CODE}：${loginInfo.workspaceCode}`,
       `${LABELS.LOGIN_INFO_EMPLOYEE_NUMBER}：${loginInfo.employeeNumber}`,
-      `${LABELS.LOGIN_INFO_EMAIL}：${loginInfo.email}`,
       `${LABELS.LOGIN_INFO_PASSWORD}：${loginInfo.password}`,
     ].join('\n')
 
@@ -328,7 +326,7 @@ export function CreateTenantDialog({
 
               <div>
                 <label className="text-sm font-medium text-morandi-primary mb-2 block">
-                  {LABELS.FIELD_EMAIL} <span className="text-morandi-red">*</span>
+                  {LABELS.FIELD_EMAIL}（選填）
                 </label>
                 <Input
                   type="email"
@@ -337,7 +335,7 @@ export function CreateTenantDialog({
                   placeholder={LABELS.FIELD_EMAIL_PLACEHOLDER}
                   className="border-morandi-container/30"
                 />
-                <p className="text-xs text-morandi-muted mt-1">{LABELS.FIELD_EMAIL_HINT}</p>
+                <p className="text-xs text-morandi-muted mt-1">用於系統通知，非登入用</p>
               </div>
 
               <div>
@@ -386,12 +384,6 @@ export function CreateTenantDialog({
                 </span>
                 <span className="font-mono font-semibold text-morandi-primary">
                   {loginInfo.employeeNumber}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-morandi-secondary">{LABELS.LOGIN_INFO_EMAIL}</span>
-                <span className="font-mono font-semibold text-morandi-primary text-sm">
-                  {loginInfo.email}
                 </span>
               </div>
               <div className="flex justify-between items-center">
