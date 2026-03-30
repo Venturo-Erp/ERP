@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/api-client'
+import { createClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
 
 /**
@@ -10,7 +10,11 @@ import { headers } from 'next/headers'
  */
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServiceClient()
+    // 直接建立 service client，確保繞過 RLS
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
     const body = await request.json()
     const { contractId, signature } = body
 
