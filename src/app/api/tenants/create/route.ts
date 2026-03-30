@@ -52,25 +52,44 @@ export async function POST(request: NextRequest) {
       return errorResponse('找不到員工資料', 403, ErrorCode.FORBIDDEN)
     }
 
-    const roles = currentEmployee.roles as string[] | null
-    const isSuperAdmin = roles?.includes('super_admin') ?? false
-
-    // 查詢 workspace 取得 code
-    const { data: currentWorkspace } = await supabaseAdmin
-      .from('workspaces')
-      .select('code')
-      .eq('id', currentEmployee.workspace_id as string)
+    // 查詢員工詳細資訊（包含 workspace_role）
+    const { data: employeeDetail } = await supabaseAdmin
+      .from('employees')
+      .select('name, email, workspace_role_id')
+      .eq('id', auth.data.employeeId)
       .single()
 
-    const workspaceCode = currentWorkspace?.code
+    const employeeName = employeeDetail?.name || ''
+
+    // 🔒 權限檢查：只有有「租戶管理」權限的人可以建立租戶
+    // 新系統：檢查 workspace_roles 的分頁權限
+    let canManageTenants = false
+    
+    if (employeeDetail?.workspace_role_id) {
+      const { data: rolePermission } = await supabaseAdmin
+        .from('role_tab_permissions')
+        .select('can_write')
+        .eq('role_id', employeeDetail.workspace_role_id)
+        .eq('module_code', 'settings')
+        .eq('tab_code', 'tenants')
+        .single()
+      
+      canManageTenants = rolePermission?.can_write ?? false
+    }
+
+    // 備用：允許特定人員（William、Carson）
+    const allowedNames = ['William', 'Carson', 'William Chien']
+    const isAllowedPerson = allowedNames.some(name => employeeName.includes(name))
+
+    const isAllowed = canManageTenants || isAllowedPerson
 
     logger.log(
-      `Permission check: isSuperAdmin=${isSuperAdmin}, workspace=${workspaceCode || 'unknown'}`
+      `Permission check: canManageTenants=${canManageTenants}, name=${employeeName}, allowed=${isAllowed}`
     )
 
-    if (!isSuperAdmin || workspaceCode !== 'CORNER') {
-      logger.error(`Permission denied: isSuperAdmin=${isSuperAdmin}, workspace=${workspaceCode}`)
-      return errorResponse('只有 CORNER 的 super_admin 可以建立租戶', 403, ErrorCode.FORBIDDEN)
+    if (!isAllowed) {
+      logger.error(`Permission denied: canManageTenants=${canManageTenants}, name=${employeeName}`)
+      return errorResponse('只有有「租戶管理」權限的人可以建立租戶', 403, ErrorCode.FORBIDDEN)
     }
 
     // 解析請求
