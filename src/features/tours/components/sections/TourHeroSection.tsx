@@ -34,7 +34,12 @@ export function TourHeroSection({ data, viewMode }: TourHeroSectionProps) {
             src={data.coverImage}
             alt="Cover"
             className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-            style={{ filter: 'brightness(0.7)' }}
+            style={{ 
+              filter: 'brightness(0.7)',
+              objectPosition: data.coverImagePosition 
+                ? `${data.coverImagePosition.x}% ${data.coverImagePosition.y}%` 
+                : 'center',
+            }}
           />
         ) : (
           <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-morandi-primary via-morandi-gold/30 to-morandi-primary" />
