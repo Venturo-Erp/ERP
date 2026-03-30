@@ -126,8 +126,9 @@ export function useItineraryDataLoader({
           'original') as LocalTourData['itineraryStyle'],
         price: itinerary.price || '',
         priceNote: itinerary.price_note || '',
+        // 🎯 SSOT：country 和 city（機場代碼）從 tours 表繼承
         country: itinerary.country || '',
-        city: itinerary.city || '',
+        city: itinerary.city || '',  // 機場代碼，如 CNX、FUK
         status: itinerary.status || ITINERARY_DATA_LOADER_LABELS.STATUS_PROPOSAL,
         outboundFlight: (Array.isArray(itinerary.outbound_flight)
           ? itinerary.outbound_flight[0]
@@ -273,9 +274,16 @@ export function useItineraryDataLoader({
           logger.log('[ItineraryDataLoader] 直接從資料庫載入最新資料...')
 
           try {
+            // JOIN tours 表，從核心表讀取 airport_code 和 country_id（SSOT）
             const { data, error } = await supabase
               .from('itineraries')
-              .select('*')
+              .select(`
+                *,
+                tour:tours (
+                  airport_code,
+                  country_id
+                )
+              `)
               .eq('id', itineraryId)
               .single()
 
@@ -288,8 +296,28 @@ export function useItineraryDataLoader({
                 '[ItineraryDataLoader] daily_itinerary 長度:',
                 (data.daily_itinerary as unknown[])?.length || 0
               )
-              logger.log('[ItineraryDataLoader] country:', data.country, 'city:', data.city)
-              const itinerary = data as unknown as Itinerary
+              
+              // 🎯 SSOT：從 tour 繼承 airport_code 和 country_id
+              const tourData = data.tour as { airport_code?: string; country_id?: string } | null
+              const airportCode = tourData?.airport_code || ''
+              const countryId = tourData?.country_id || ''
+              
+              // 查詢國家名稱
+              let countryName = ''
+              if (countryId) {
+                const country = countries.find(c => c.id === countryId || c.code === countryId)
+                countryName = country?.name || ''
+              }
+              
+              logger.log('[ItineraryDataLoader] SSOT - airport_code:', airportCode, 'country:', countryName)
+              
+              // 合併資料：用 tour 的值覆蓋 itinerary 的舊欄位
+              const itinerary = {
+                ...data,
+                city: airportCode,  // city 欄位現在存機場代碼
+                country: countryName,
+              } as unknown as Itinerary
+              
               loadItineraryData(itinerary)
 
               // 檢查交接狀態（如果有關聯的 tour）

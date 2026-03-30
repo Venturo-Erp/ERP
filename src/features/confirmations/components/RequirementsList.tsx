@@ -1174,52 +1174,45 @@ export function RequirementsList({
           </div>
         ) : (
           <>
-            {/* 操作列：Local 報價 + 團確單（固定）+ 發給供應商（勾選後出現） */}
-            <div className="mb-3 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-2.5">
-              <Button
-                size="sm"
-                onClick={() => setShowLocalQuoteDialog(true)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white h-7 px-3 text-xs"
-              >
-                <Send size={12} className="mr-1" />給 Local 報價
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setShowTeamConfirmationSheet(true)}
-                className="bg-[#c9a96e] hover:bg-[#b8960e] text-white h-7 px-3 text-xs"
-              >
-                <FileText size={12} className="mr-1" />
-                產生團確單
-              </Button>
-              {checkedItems.size > 0 && (
-                <>
-                  <span className="text-sm font-medium text-blue-700 ml-2">
-                    已選 {checkedItems.size} 項
-                  </span>
-                  <Button
-                    size="sm"
-                    onClick={() => setShowAssignDialog(true)}
-                    className="bg-morandi-gold hover:bg-morandi-gold-hover text-white h-7 px-3 text-xs"
-                  >
-                    <Printer size={12} className="mr-1" />
-                    發給供應商
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setCheckedItems(new Set())}
-                    className="h-7 px-2 text-xs text-muted-foreground"
-                  >
-                    取消選取
-                  </Button>
-                </>
-              )}
-            </div>
+            {/* 勾選項目後顯示「發給供應商」按鈕 */}
+            {checkedItems.size > 0 && (
+              <div className="mb-3 flex items-center gap-3 bg-morandi-container/30 border border-morandi-border rounded-lg px-4 py-2.5">
+                <span className="text-sm font-medium text-morandi-primary ml-2">
+                  已選 {checkedItems.size} 項
+                </span>
+                <Button
+                  size="sm"
+                  onClick={() => setShowAssignDialog(true)}
+                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white h-7 px-3 text-xs"
+                >
+                  <Printer size={12} className="mr-1" />
+                  發給供應商
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setCheckedItems(new Set())}
+                  className="h-7 px-2 text-xs text-muted-foreground"
+                >
+                  取消選取
+                </Button>
+              </div>
+            )}
             <div className="border border-border rounded-lg overflow-hidden bg-card">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-morandi-container/50 border-b border-border h-1">
-                    <th colSpan={7}></th>
+                  <tr className="bg-morandi-container/50 border-b border-border">
+                    <th colSpan={7} className="px-3 py-2">
+                      <div className="flex justify-end">
+                        <Button 
+                          size="sm" 
+                          onClick={() => setShowLocalQuoteDialog(true)}
+                          className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                        >
+                          給 Local 報價
+                        </Button>
+                      </div>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>

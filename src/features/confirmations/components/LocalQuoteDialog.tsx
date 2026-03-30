@@ -76,7 +76,7 @@ export function LocalQuoteDialog({
 }: LocalQuoteDialogProps) {
   const [note, setNote] = useState('')
   const [paxInput, setPaxInput] = useState<string>(totalPax?.toString() || '')
-  const [paxTiers, setPaxTiers] = useState<number[]>([20, 30, 40]) // 人數梯次
+  const [paxTiers, setPaxTiers] = useState<number[]>([]) // 人數梯次（從報價單讀取，沒有就空白）
   const [newTierInput, setNewTierInput] = useState('')
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string }[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
@@ -85,10 +85,11 @@ export function LocalQuoteDialog({
   const { toast } = useToast()
   const supabase = createSupabaseBrowserClient()
 
-  // 載入 LINE 群組
+  // 載入 LINE 群組 + 砍次資料
   useEffect(() => {
     if (!open) return
     const load = async () => {
+      // 載入 LINE 群組
       const { data } = await supabase
         .from('line_groups')
         .select('group_id, group_name')
@@ -97,9 +98,30 @@ export function LocalQuoteDialog({
         setLineGroups(
           data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
         )
+
+      // 載入砍次資料（從 quotes 表）
+      if (tour?.id) {
+        const { data: quotes } = await supabase
+          .from('quotes')
+          .select('tier_pricings')
+          .eq('tour_id', tour.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single()
+
+        if (quotes?.tier_pricings && Array.isArray(quotes.tier_pricings)) {
+          // 提取人數（pax），忽略 0 和 1（可能是預設值）
+          const tiers = quotes.tier_pricings
+            .map((t: any) => t.pax)
+            .filter((p: any) => typeof p === 'number' && p > 1)
+          if (tiers.length > 0) {
+            setPaxTiers(tiers)
+          }
+        }
+      }
     }
     load()
-  }, [open])
+  }, [open, tour?.id])
 
   // 重置 method
   useEffect(() => {

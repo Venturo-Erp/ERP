@@ -337,6 +337,15 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
+                  {/* 第一列：原本的空白列，現在放按鈕 */}
+                  <tr className="border-b">
+                    <th colSpan={8} className="px-3 py-2">
+                      <Button size="sm" variant="default" className="bg-emerald-600 hover:bg-emerald-700">
+                        給 Local 報價
+                      </Button>
+                    </th>
+                  </tr>
+                  {/* 第二列：表頭 */}
                   <tr className="bg-muted/50 border-b">
                     <th className="text-left px-3 py-2 font-medium whitespace-nowrap">
                       {TOUR_TRACKING_LABELS.COL_DATE}
