@@ -60,6 +60,8 @@ export default function SettingsPage() {
       title="設定"
       headerActions={
         <div className="flex items-center gap-4">
+          {hasSettingsAccess && <SettingsTabs />}
+          
           {user && (
             <div className="flex items-center gap-2 px-3 py-2 bg-morandi-container rounded-lg">
               <User className="h-4 w-4 text-morandi-secondary" />
@@ -81,13 +83,6 @@ export default function SettingsPage() {
       }
     >
       <div>
-        {/* 分頁導航 */}
-        {hasSettingsAccess && (
-          <div className="mb-6">
-            <SettingsTabs />
-          </div>
-        )}
-
         {/* 首次設定提示 */}
         {isSetupMode && (
           <div className="bg-gradient-to-r from-morandi-gold/10 to-morandi-gold/5 border border-morandi-gold/30 rounded-xl p-6 mb-6">
