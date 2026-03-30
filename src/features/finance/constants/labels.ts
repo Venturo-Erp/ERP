@@ -36,7 +36,7 @@ export const ADD_RECEIPT_DIALOG_LABELS = {
   ADD_2089: '新增項目',
   LABEL_5187: '收款方式',
   LABEL_1182: '交易日期',
-  LABEL_6465: '付款資訊',
+  LABEL_6465: '收款金額',
   REMARKS: '備註',
   AMOUNT: '金額',
   COPYING_1937: '已複製',
