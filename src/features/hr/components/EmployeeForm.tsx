@@ -161,6 +161,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         birth_date: employee.personal_info?.birth_date || '',
         id_number: employee.personal_info?.national_id || '',
         position: employee.job_info?.position || '',
+        hire_date: employee.job_info?.hire_date || new Date().toISOString().split('T')[0],
         emergency_contact_name: employee.personal_info?.emergency_contact?.name || '',
         emergency_contact_relation: employee.personal_info?.emergency_contact?.relationship || '',
         emergency_contact_phone: employee.personal_info?.emergency_contact?.phone || '',
