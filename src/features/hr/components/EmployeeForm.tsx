@@ -266,6 +266,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
           `員工編號：${employeeNumber}\n` +
           `預設密碼：${defaultPassword}\n\n` +
           `請通知員工首次登入後修改密碼。`,
+          'success',
           '新員工建立成功'
         )
       }
