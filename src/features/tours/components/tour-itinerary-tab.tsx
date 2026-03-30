@@ -775,11 +775,13 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
       // 建立完整資料（給 syncToCore 用）
       const fullDailyItinerary = dailySchedule.map((day, idx) => {
         let dateLabel = ''
+        let dateISO = ''  // ISO 格式日期 (YYYY-MM-DD)
         if (tour.departure_date) {
           const date = new Date(tour.departure_date)
           date.setDate(date.getDate() + idx)
           const weekdays = TOUR_ITINERARY_TAB_LABELS.WEEKDAYS
           dateLabel = `${date.getMonth() + 1}/${date.getDate()} (${weekdays[date.getDay()]})`
+          dateISO = date.toISOString().split('T')[0]  // "2026-03-30"
         }
 
         const isFirst = idx === 0
@@ -802,7 +804,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         return {
           day: day.day, // 天數
           dayLabel: `Day ${day.day}`,
-          date: dateLabel,
+          date: dateISO || dateLabel,  // 優先用 ISO 格式
           title: dayTitle,
           route: day.route || '', // 路線描述
           highlight: '',
