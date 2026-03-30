@@ -134,8 +134,6 @@ export function AttractionSelector({
   const handleCancel = () => {
     setSelectedIds(new Set())
     setSearchQuery('')
-    setShowManualInput(false)
-    setManualAttractionName('')
     setSelectedMapAttraction(null)
     setShowMap(false)
     onClose()
