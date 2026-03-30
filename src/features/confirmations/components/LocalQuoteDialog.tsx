@@ -130,54 +130,30 @@ export function LocalQuoteDialog({
 
   // 把核心表資料組成每天行程
   const daySchedules: DaySchedule[] = useMemo(() => {
-    if (!coreItems.length) {
-      return transportDays.map(d => ({
-        dayNumber: d.dayNumber,
-        date: d.date,
+    // 優先使用 transportDays 的 route（來自行程表）
+    const dayMap = new Map<number, DaySchedule>()
+    
+    // 初始化每天的基礎資料（使用 transportDays 的 route）
+    for (const td of transportDays) {
+      dayMap.set(td.dayNumber, {
+        dayNumber: td.dayNumber,
+        date: td.date,
         weekday: '',
-        route: '',
+        route: td.route, // 直接使用行程表的標題
         breakfast: '',
         lunch: '',
         dinner: '',
         hotel: '',
-      }))
+      })
     }
 
-    const dayMap = new Map<number, DaySchedule>()
+    // 如果沒有 coreItems，直接返回
+    if (!coreItems.length) {
+      return Array.from(dayMap.values()).sort((a, b) => a.dayNumber - b.dayNumber)
+    }
 
+    // 補充餐飲和住宿資訊（不改 route）
     for (const item of coreItems) {
-      const dn = item.day_number
-      if (!dn) continue
-      if (!dayMap.has(dn)) {
-        let dateStr = ''
-        let weekday = ''
-        if (startDate) {
-          const d = new Date(startDate)
-          d.setDate(d.getDate() + dn - 1)
-          dateStr = `${d.getMonth() + 1}/${d.getDate()}`
-          weekday = WEEKDAYS[d.getDay()]
-        }
-        dayMap.set(dn, {
-          dayNumber: dn,
-          date: dateStr,
-          weekday,
-          route: '',
-          breakfast: '',
-          lunch: '',
-          dinner: '',
-          hotel: '',
-        })
-      }
-    }
-
-    const sorted = [...coreItems].sort((a, b) => {
-      const da = a.day_number || 0
-      const db = b.day_number || 0
-      if (da !== db) return da - db
-      return (a.sort_order || 0) - (b.sort_order || 0)
-    })
-
-    for (const item of sorted) {
       const dn = item.day_number
       if (!dn || !dayMap.has(dn)) continue
       const day = dayMap.get(dn)!
@@ -189,14 +165,6 @@ export function LocalQuoteDialog({
         if (item.sub_category === 'breakfast') day.breakfast = name
         else if (item.sub_category === 'lunch') day.lunch = name
         else if (item.sub_category === 'dinner') day.dinner = name
-      } else if (
-        item.category === 'activities' ||
-        item.category === 'transport' ||
-        item.category === 'group-transport'
-      ) {
-        if (item.title) {
-          day.route = day.route ? `${day.route} → ${item.title}` : item.title
-        }
       }
     }
 

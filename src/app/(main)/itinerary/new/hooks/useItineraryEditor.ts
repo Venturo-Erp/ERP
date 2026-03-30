@@ -122,8 +122,9 @@ export function useItineraryEditor() {
       cover_style: data.coverStyle || 'original',
       flight_style: data.flightStyle || 'original',
       itinerary_style: data.itineraryStyle || 'original',
-      price: data.price || null,
+      // price 從 tours.selling_price_per_person 繼承（SSOT）
       price_note: data.priceNote || null,
+      // country 和 city 從 tours 繼承（SSOT），但仍需存到 itineraries 供歷史版本使用
       country: data.country,
       city: data.city,
       status: (data.status || '開團') as '開團' | '待出發',
