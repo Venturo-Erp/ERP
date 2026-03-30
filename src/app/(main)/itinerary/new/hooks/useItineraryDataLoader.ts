@@ -266,6 +266,12 @@ export function useItineraryDataLoader({
 
       // 優先從 itineraries 載入（編輯現有行程）
       if (itineraryId && !tourId) {
+        // 等待 countries 載入完成，才能正確顯示國家名稱
+        if (countries.length === 0) {
+          logger.log('[ItineraryDataLoader] 等待 countries 載入...')
+          return
+        }
+        
         logger.log('[ItineraryDataLoader] 嘗試載入行程, itineraryId:', itineraryId)
 
         // 總是從資料庫載入最新資料（避免 SWR 快取過期問題）
@@ -302,7 +308,7 @@ export function useItineraryDataLoader({
               const airportCode = tourData?.airport_code || ''
               const countryId = tourData?.country_id || ''
               
-              // 查詢國家名稱
+              // 查詢國家名稱（countries 已確保載入完成）
               let countryName = ''
               if (countryId) {
                 const country = countries.find(c => c.id === countryId || c.code === countryId)
