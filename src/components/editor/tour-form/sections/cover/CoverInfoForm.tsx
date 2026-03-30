@@ -141,41 +141,32 @@ export function CoverInfoForm({
           />
         </div>
 
+        {/* 🎯 SSOT：國家和機場代碼從 tours 表繼承，唯讀顯示 */}
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-morandi-primary mb-1">
-              {COMP_EDITOR_LABELS.LABEL_5040}
+              國家
             </label>
-            <Combobox
-              value={selectedCountry}
-              onChange={newCountry => {
-                setSelectedCountry(newCountry)
-                const code = countryNameToCode[newCountry]
-                setSelectedCountryCode(code || '')
-                onChange({
-                  ...data,
-                  country: newCountry,
-                  city: '',
-                })
-              }}
-              options={allDestinations.map(dest => ({ value: dest.name, label: dest.name }))}
-              placeholder={COMP_EDITOR_LABELS.搜尋或選擇國家}
-              showSearchIcon
-              showClearButton
+            <Input
+              type="text"
+              value={selectedCountry || data.country || ''}
+              readOnly
+              disabled
+              className="h-9 bg-muted cursor-not-allowed"
+              placeholder="從旅遊團帶入"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-morandi-primary mb-1">
-              {COMP_EDITOR_LABELS.LABEL_5461}
+              機場代碼
             </label>
-            <Combobox
+            <Input
+              type="text"
               value={data.city || ''}
-              onChange={value => updateCity(value)}
-              options={availableCities.map(city => ({ value: city.code, label: city.name }))}
-              placeholder={COMP_EDITOR_LABELS.搜尋或選擇城市}
-              showSearchIcon
-              showClearButton
-              disabled={!selectedCountry}
+              readOnly
+              disabled
+              className="h-9 bg-muted cursor-not-allowed"
+              placeholder="從旅遊團帶入"
             />
           </div>
         </div>
