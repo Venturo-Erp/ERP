@@ -196,7 +196,7 @@ export function AirportImageLibrary({
       {selectedImage && (
         <div className="mb-4">
           <div className="flex items-center gap-2 text-[11px] text-morandi-secondary mb-2">
-            <span>已選封面（點擊調整位置）</span>
+            <span>已選封面（hover 顯示調整按鈕）</span>
           </div>
           <ImageUploader
             value={selectedImage}
@@ -208,7 +208,7 @@ export function AirportImageLibrary({
             previewHeight="140px"
             aspectRatio={16 / 9}
             placeholder=""
-            showUploadButton={false}
+            showPositionEditor={true}
           />
         </div>
       )}
