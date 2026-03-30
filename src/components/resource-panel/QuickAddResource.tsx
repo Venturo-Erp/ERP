@@ -138,17 +138,7 @@ export function QuickAddResource({
   }
 
   if (!isOpen) {
-    return (
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => handleOpenChange(true)}
-        className="gap-1 text-xs border-morandi-gold/30 text-morandi-gold hover:bg-morandi-gold/10"
-      >
-        <Plus size={14} />
-        新增
-      </Button>
-    )
+    return null // 移除「+ 新增」按鈕，改用拖拽
   }
 
   return (
