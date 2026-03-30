@@ -580,7 +580,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                       <Label className="text-xs font-semibold text-morandi-secondary uppercase">入職日期</Label>
                       <Input
                         type="date"
-                        value={formData.hire_date}
+                        value={formData.hire_date || ''}
                         onChange={(e) => setFormData({ ...formData, hire_date: e.target.value })}
                         className="border-morandi-gold/30 focus:border-morandi-gold bg-morandi-container/30"
                       />
