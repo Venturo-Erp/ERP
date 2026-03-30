@@ -240,8 +240,9 @@ export default function SettingsPage() {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                          currentPassword: passwordData.currentPassword,
-                          newPassword: passwordData.newPassword,
+                          employee_number: user?.employee_number,
+                          current_password: passwordData.currentPassword,
+                          new_password: passwordData.newPassword,
                         }),
                       })
                       const data = await res.json()
