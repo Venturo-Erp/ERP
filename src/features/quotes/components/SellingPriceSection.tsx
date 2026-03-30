@@ -67,6 +67,10 @@ interface SellingPriceSectionProps {
   tierPricings?: TierPricing[]
   setTierPricings?: React.Dispatch<React.SetStateAction<TierPricing[]>>
   localTiers?: LocalTier[]
+  insuranceText?: string
+  onInsuranceChange?: (text: string) => void
+  excludedItems?: string[]
+  onExcludedItemsChange?: (items: string[]) => void
 }
 
 export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
@@ -84,6 +88,10 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
   tierPricings: externalTierPricings,
   setTierPricings: externalSetTierPricings,
   localTiers,
+  insuranceText: externalInsuranceText = '',
+  onInsuranceChange,
+  excludedItems: externalExcludedItems = ['個人護照及簽證費用', '行程外之自費行程', '個人消費及小費', '行李超重費用', '單人房差價'],
+  onExcludedItemsChange,
 }) => {
   // 檢查是否有 Local 報價（人數欄位鎖定）
   const hasLocalPricing = localTiers && localTiers.length > 0
@@ -93,6 +101,10 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
   // 展開/收合狀態
   const [baseExpanded, setBaseExpanded] = useState(true)
   const [tierExpanded, setTierExpanded] = useState<Record<string, boolean>>({})
+  
+  // 保險文字和不包含項目
+  const [insuranceText, setInsuranceText] = useState(externalInsuranceText)
+  const [excludedItems, setExcludedItems] = useState(externalExcludedItems)
 
   const handlePriceChange = (identity: keyof SellingPrices, value: string) => {
     const normalized = normalizeNumber(value)
@@ -554,13 +566,20 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
               <span>•</span>
               <input
                 type="text"
+                value={insuranceText}
+                onChange={(e) => {
+                  setInsuranceText(e.target.value)
+                  onInsuranceChange?.(e.target.value)
+                }}
                 placeholder="輸入數字 (例如: 200/20)"
                 onBlur={(e) => {
                   const val = e.target.value.trim()
                   // 如果輸入格式是 "數字/數字"，自動轉換
                   const match = val.match(/^(\d+)\/(\d+)$/)
                   if (match) {
-                    e.target.value = `${match[1]}萬旅責險+${match[2]}萬意外醫療`
+                    const formatted = `${match[1]}萬旅責險+${match[2]}萬意外醫療`
+                    setInsuranceText(formatted)
+                    onInsuranceChange?.(formatted)
                   }
                 }}
                 className="flex-1 px-2 py-1 text-xs border rounded"
@@ -575,26 +594,23 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
             <span className="text-sm font-semibold text-morandi-red">費用不含</span>
           </div>
           <div className="px-4 py-3 space-y-1.5 text-sm text-morandi-secondary">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" defaultChecked className="w-4 h-4" />
-              <span>個人護照及簽證費用</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" defaultChecked className="w-4 h-4" />
-              <span>行程外之自費行程</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" defaultChecked className="w-4 h-4" />
-              <span>個人消費及小費</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" defaultChecked className="w-4 h-4" />
-              <span>行李超重費用</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" defaultChecked className="w-4 h-4" />
-              <span>單人房差價</span>
-            </label>
+            {['個人護照及簽證費用', '行程外之自費行程', '個人消費及小費', '行李超重費用', '單人房差價'].map(item => (
+              <label key={item} className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={excludedItems.includes(item)}
+                  onChange={(e) => {
+                    const newItems = e.target.checked
+                      ? [...excludedItems, item]
+                      : excludedItems.filter(i => i !== item)
+                    setExcludedItems(newItems)
+                    onExcludedItemsChange?.(newItems)
+                  }}
+                  className="w-4 h-4"
+                />
+                <span>{item}</span>
+              </label>
+            ))}
           </div>
         </div>
       </div>

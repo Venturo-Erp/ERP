@@ -21,6 +21,7 @@ interface AttractionListProps {
   searchQuery: string
   onToggleSelection: (id: string) => void
   onViewOnMap?: (attraction: AttractionWithCity) => void
+  onViewDetail?: (attraction: AttractionWithCity) => void
   selectedMapAttractionId?: string
 }
 
@@ -34,6 +35,7 @@ export function AttractionList({
   searchQuery,
   onToggleSelection,
   onViewOnMap,
+  onViewDetail,
   selectedMapAttractionId,
 }: AttractionListProps) {
   if (loading) {
@@ -73,6 +75,7 @@ export function AttractionList({
             isExisting={isExisting}
             onToggleSelection={onToggleSelection}
             onViewOnMap={onViewOnMap}
+            onViewDetail={onViewDetail}
             selectedMapAttractionId={selectedMapAttractionId}
           />
         )

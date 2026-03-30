@@ -84,7 +84,8 @@ export function AttractionSelector({
   // 選擇狀態
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
-
+  // 景點詳情狀態
+  const [detailAttraction, setDetailAttraction] = useState<AttractionWithCity | null>(null)
 
   // 地圖相關狀態
   const [selectedMapAttraction, setSelectedMapAttraction] = useState<AttractionWithCity | null>(
@@ -191,6 +192,7 @@ export function AttractionSelector({
                 searchQuery={searchQuery}
                 onToggleSelection={toggleSelection}
                 onViewOnMap={handleViewOnMap}
+                onViewDetail={setDetailAttraction}
                 selectedMapAttractionId={selectedMapAttraction?.id}
               />
             </div>
@@ -265,6 +267,63 @@ export function AttractionSelector({
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* 景點詳情 Modal */}
+      <Dialog
+        open={detailAttraction !== null}
+        onOpenChange={open => !open && setDetailAttraction(null)}
+      >
+        <DialogContent level={2} className="max-w-lg p-0 overflow-hidden rounded-2xl">
+          {detailAttraction && (
+            <>
+              {/* 圖片 */}
+              {(detailAttraction.thumbnail || detailAttraction.images?.[0]) && (
+                <div className="relative h-48">
+                  <img
+                    src={detailAttraction.thumbnail || detailAttraction.images?.[0]}
+                    alt={detailAttraction.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute bottom-4 left-4 text-white">
+                    <DialogTitle className="text-xl font-bold text-white">
+                      {detailAttraction.name}
+                    </DialogTitle>
+                    {detailAttraction.city_name && (
+                      <div className="text-sm text-white/80 mt-1 flex items-center gap-1">
+                        <MapPin size={12} />
+                        {detailAttraction.city_name}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* 內容 */}
+              <div className="p-6">
+                {!detailAttraction.thumbnail && !detailAttraction.images?.[0] && (
+                  <DialogTitle className="text-xl font-bold mb-3">
+                    {detailAttraction.name}
+                  </DialogTitle>
+                )}
+                {detailAttraction.category && (
+                  <div className="inline-block px-2 py-1 text-xs bg-morandi-container rounded mb-3">
+                    {detailAttraction.category}
+                  </div>
+                )}
+                {detailAttraction.description && (
+                  <p className="text-sm leading-relaxed text-morandi-secondary">
+                    {detailAttraction.description}
+                  </p>
+                )}
+                {!detailAttraction.description && (
+                  <p className="text-sm text-morandi-muted italic">暫無描述</p>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   )
 }
