@@ -40,38 +40,33 @@ export async function POST(request: NextRequest) {
 
     const supabaseAdmin = getSupabaseAdminClient()
 
-    // 檢查當前用戶是否為 Corner 的 super_admin
-    const { data: currentEmployee } = await supabaseAdmin
+    // 查詢員工資訊
+    const { data: currentEmployee, error: currentEmpError } = await supabaseAdmin
       .from('employees')
-      .select('roles, workspace_id')
+      .select('workspace_id, chinese_name, english_name, display_name, email, role_id')
       .eq('id', auth.data.employeeId)
       .single()
+
+    logger.log(`Employee query: id=${auth.data.employeeId}, data=${JSON.stringify(currentEmployee)}, error=${currentEmpError?.message}`)
 
     if (!currentEmployee || !currentEmployee.workspace_id) {
       logger.error('Employee not found or no workspace')
       return errorResponse('找不到員工資料', 403, ErrorCode.FORBIDDEN)
     }
 
-    // 查詢員工詳細資訊（包含 role）
-    const { data: employeeDetail } = await supabaseAdmin
-      .from('employees')
-      .select('chinese_name, english_name, display_name, email, role_id')
-      .eq('id', auth.data.employeeId)
-      .single()
-
-    const employeeName = employeeDetail?.display_name || employeeDetail?.chinese_name || employeeDetail?.english_name || ''
+    const employeeName = currentEmployee.display_name || currentEmployee.chinese_name || currentEmployee.english_name || ''
     
-    logger.log(`Employee detail: ${JSON.stringify(employeeDetail)}, employeeName=${employeeName}`)
+    logger.log(`Employee name resolved: ${employeeName}`)
 
     // 🔒 權限檢查：只有有「租戶管理」權限的人可以建立租戶
     // 新系統：檢查 workspace_roles 的分頁權限
     let canManageTenants = false
     
-    if (employeeDetail?.role_id) {
+    if (currentEmployee.role_id) {
       const { data: rolePermission } = await supabaseAdmin
         .from('role_tab_permissions')
         .select('can_write')
-        .eq('role_id', employeeDetail.role_id)
+        .eq('role_id', currentEmployee.role_id)
         .eq('module_code', 'settings')
         .eq('tab_code', 'tenants')
         .single()
