@@ -280,14 +280,16 @@ export function useItineraryDataLoader({
           logger.log('[ItineraryDataLoader] 直接從資料庫載入最新資料...')
 
           try {
-            // JOIN tours 表，從核心表讀取 airport_code 和 country_id（SSOT）
+            // JOIN tours 表，從核心表讀取 SSOT 資料
             const { data, error } = await supabase
               .from('itineraries')
               .select(`
                 *,
                 tour:tours (
                   airport_code,
-                  country_id
+                  country_id,
+                  outbound_flight,
+                  return_flight
                 )
               `)
               .eq('id', itineraryId)
@@ -303,10 +305,23 @@ export function useItineraryDataLoader({
                 (data.daily_itinerary as unknown[])?.length || 0
               )
               
-              // 🎯 SSOT：從 tour 繼承 airport_code 和 country_id
-              const tourData = data.tour as { airport_code?: string; country_id?: string } | null
+              // 🎯 SSOT：從 tour 繼承 airport_code、country_id、航班資訊
+              const tourData = data.tour as { 
+                airport_code?: string
+                country_id?: string
+                outbound_flight?: unknown
+                return_flight?: unknown
+              } | null
               const airportCode = tourData?.airport_code || ''
               const countryId = tourData?.country_id || ''
+              
+              // 航班資料（可能是陣列，取第一筆）
+              const tourOutboundFlight = Array.isArray(tourData?.outbound_flight) 
+                ? tourData.outbound_flight[0] 
+                : tourData?.outbound_flight
+              const tourReturnFlight = Array.isArray(tourData?.return_flight) 
+                ? tourData.return_flight[0] 
+                : tourData?.return_flight
               
               // 查詢國家名稱（countries 已確保載入完成）
               let countryName = ''
@@ -322,6 +337,9 @@ export function useItineraryDataLoader({
                 ...data,
                 city: airportCode,  // city 欄位現在存機場代碼
                 country: countryName,
+                // 🎯 SSOT：航班從 tours 表繼承
+                outbound_flight: tourOutboundFlight || data.outbound_flight,
+                return_flight: tourReturnFlight || data.return_flight,
               } as unknown as Itinerary
               
               loadItineraryData(itinerary)
