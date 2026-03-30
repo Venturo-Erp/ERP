@@ -588,7 +588,7 @@ export function ResourcePanel({
                     }
 
                     const { data, error: dbError } = await supabase
-                      .from(table)
+                      .from(table as 'attractions')
                       .insert(insertData as any)
                       .select('id, name')
                       .single()
@@ -600,8 +600,8 @@ export function ResourcePanel({
 
                     // 加入列表
                     const newItem: ResourceItem = {
-                      id: data.id,
-                      name: data.name,
+                      id: (data as any).id,
+                      name: (data as any).name,
                       type: activeTab,
                       category: '',
                       data_verified: false,

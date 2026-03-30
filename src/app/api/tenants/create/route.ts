@@ -52,24 +52,24 @@ export async function POST(request: NextRequest) {
       return errorResponse('找不到員工資料', 403, ErrorCode.FORBIDDEN)
     }
 
-    // 查詢員工詳細資訊（包含 workspace_role）
+    // 查詢員工詳細資訊（包含 role）
     const { data: employeeDetail } = await supabaseAdmin
       .from('employees')
-      .select('name, email, workspace_role_id')
+      .select('chinese_name, english_name, display_name, email, role_id')
       .eq('id', auth.data.employeeId)
       .single()
 
-    const employeeName = employeeDetail?.name || ''
+    const employeeName = employeeDetail?.display_name || employeeDetail?.chinese_name || employeeDetail?.english_name || ''
 
     // 🔒 權限檢查：只有有「租戶管理」權限的人可以建立租戶
     // 新系統：檢查 workspace_roles 的分頁權限
     let canManageTenants = false
     
-    if (employeeDetail?.workspace_role_id) {
+    if (employeeDetail?.role_id) {
       const { data: rolePermission } = await supabaseAdmin
         .from('role_tab_permissions')
         .select('can_write')
-        .eq('role_id', employeeDetail.workspace_role_id)
+        .eq('role_id', employeeDetail.role_id)
         .eq('module_code', 'settings')
         .eq('tab_code', 'tenants')
         .single()
