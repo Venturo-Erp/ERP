@@ -200,12 +200,14 @@ export function AirportImageLibrary({
       ) : airportImages.length > 0 ? (
         <div className="grid grid-cols-3 gap-2">
           {airportImages.map(image => (
-            <button
+            <div
               key={image.id}
-              type="button"
+              role="button"
+              tabIndex={0}
               onClick={() => onImageSelect(image.image_url)}
+              onKeyDown={(e) => e.key === 'Enter' && onImageSelect(image.image_url)}
               className={cn(
-                'relative group overflow-hidden rounded-lg border-2 transition-all aspect-video',
+                'relative group overflow-hidden rounded-lg border-2 transition-all aspect-video cursor-pointer',
                 selectedImage === image.image_url
                   ? 'border-morandi-gold ring-2 ring-morandi-gold/30'
                   : 'border-morandi-container hover:border-morandi-gold/50'
@@ -239,7 +241,7 @@ export function AirportImageLibrary({
               >
                 <Trash2 size={12} />
               </button>
-            </button>
+            </div>
           ))}
         </div>
       ) : (
