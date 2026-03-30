@@ -57,10 +57,12 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
         }
       }
 
-      // 行程 → 直接開啟公開頁面
+      // 行程 → 直接開啟公開頁面（帶入業務 ref）
       const handleItinerary = (e: React.MouseEvent) => {
         e.stopPropagation()
-        window.open(`/p/tour/${tour.code}`, '_blank')
+        const employeeCode = params.user?.employee_number || params.user?.id
+        const refParam = employeeCode ? `?ref=${employeeCode}` : ''
+        window.open(`/p/tour/${tour.code}${refParam}`, '_blank')
       }
 
       // 複製行程連結（帶業務 ref）

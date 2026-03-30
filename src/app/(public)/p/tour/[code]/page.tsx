@@ -1,28 +1,38 @@
 'use client'
 
 /**
- * 公開行程頁面 - Executive Terminal 風格
- * 路由: /p/tour/[code]
+ * 公開行程頁面 - Tokyo Sakura 風格
+ * 路由: /p/tour/[code]?ref=E001
+ * 
+ * 特色：
+ * - Sticky 日期導航（滾動自動高亮）
+ * - 時間軸佈局
+ * - 側邊欄報名卡片
+ * - 底部業務資訊（從 ref 參數帶入）
  */
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { 
   MapPin, 
   Calendar, 
   Users, 
   Clock,
-  ChevronLeft,
   Phone,
+  Mail,
   Utensils,
   Hotel,
-  Plane,
-  Car,
-  Shield,
+  Camera,
+  Ship,
+  TreePine,
+  Building,
+  Share2,
+  Heart,
   CheckCircle,
+  User,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { supabase } from '@/lib/supabase/client'
 
 interface TourData {
@@ -34,6 +44,7 @@ interface TourData {
   current_participants: number | null
   days_count: number | null
   airport_code: string | null
+  workspace_id: string | null
   itinerary: {
     id: string
     title: string | null
@@ -72,6 +83,13 @@ interface HotelInfo {
   image_url?: string
 }
 
+interface EmployeeInfo {
+  display_name: string | null
+  email: string | null
+  avatar_url: string | null
+  employee_number: string | null
+}
+
 interface CompanyInfo {
   name: string
   phone: string
@@ -83,12 +101,16 @@ export default function PublicTourPage({
   params: Promise<{ code: string }> 
 }) {
   const { code } = use(params)
+  const searchParams = useSearchParams()
+  const ref = searchParams.get('ref')
   
   const [tour, setTour] = useState<TourData | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [heroImage, setHeroImage] = useState<string | null>(null)
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: '旅行社', phone: '' })
+  const [employee, setEmployee] = useState<EmployeeInfo | null>(null)
+  const [activeDay, setActiveDay] = useState(0)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -123,7 +145,6 @@ export default function PublicTourPage({
         return
       }
 
-      // 處理 itinerary 可能是陣列的情況
       const itineraryData = Array.isArray(tourData.itinerary) 
         ? tourData.itinerary[0] 
         : tourData.itinerary
@@ -163,24 +184,59 @@ export default function PublicTourPage({
         }
       }
 
+      // 載入業務資訊
+      if (ref) {
+        const { data: empData } = await supabase
+          .from('employees')
+          .select('display_name, email, avatar_url, employee_number')
+          .or(`employee_number.eq.${ref},id.eq.${ref}`)
+          .single()
+        
+        if (empData) {
+          setEmployee(empData)
+        }
+      }
+
       setLoading(false)
     }
 
     fetchData()
-  }, [code])
+  }, [code, ref])
 
-  // 計算天數
+  // 滾動追蹤
+  useEffect(() => {
+    const handleScroll = () => {
+      const dailyItinerary = tour?.itinerary?.daily_itinerary || []
+      let current = 0
+      
+      dailyItinerary.forEach((_, index) => {
+        const element = document.getElementById(`day${index + 1}`)
+        if (element) {
+          const rect = element.getBoundingClientRect()
+          if (rect.top <= 200) {
+            current = index
+          }
+        }
+      })
+      
+      setActiveDay(current)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [tour])
+
+  // 計算
   const daysCount = tour?.days_count || tour?.itinerary?.daily_itinerary?.length || 0
   const nightsCount = daysCount > 0 ? daysCount - 1 : 0
-
-  // 計算剩餘名額
   const remainingSlots = (tour?.max_participants || 0) - (tour?.current_participants || 0)
+  const dailyItinerary = tour?.itinerary?.daily_itinerary || []
 
   // Loading
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
+      <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00113a]"></div>
       </div>
     )
   }
@@ -188,7 +244,7 @@ export default function PublicTourPage({
   // 404
   if (notFound || !tour) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">找不到行程</h1>
           <p className="text-gray-600 mb-8">此行程不存在或已被移除</p>
@@ -201,273 +257,319 @@ export default function PublicTourPage({
   }
 
   const itinerary = tour.itinerary
-  const dailyItinerary = itinerary?.daily_itinerary || []
+
+  // 取得活動圖標
+  const getActivityIcon = (icon?: string) => {
+    switch (icon) {
+      case '🍽️': case '🍴': return <Utensils className="w-5 h-5" />
+      case '🏨': case '🛏️': return <Hotel className="w-5 h-5" />
+      case '📷': case '📸': return <Camera className="w-5 h-5" />
+      case '🚢': case '⛵': return <Ship className="w-5 h-5" />
+      case '🌳': case '🌲': return <TreePine className="w-5 h-5" />
+      case '🏛️': case '🏢': return <Building className="w-5 h-5" />
+      default: return <MapPin className="w-5 h-5" />
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] text-[#191c1d]">
-      {/* Top Nav */}
-      <nav className="flex justify-between items-center px-8 h-16 w-full bg-slate-50 border-b border-slate-200/50 sticky top-0 z-50">
-        <Link href="/" className="text-xl font-bold tracking-tight text-blue-900">
-          {companyInfo.name}
-        </Link>
-        {companyInfo.phone && (
-          <a 
-            href={`tel:${companyInfo.phone}`}
-            className="flex items-center gap-2 text-slate-600 hover:text-blue-900 transition-colors"
-          >
-            <Phone size={16} />
-            <span className="text-sm">{companyInfo.phone}</span>
-          </a>
+      {/* Top Header */}
+      <header className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
+        <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+          <div className="text-xl font-bold tracking-tight text-[#00113a]">
+            {companyInfo.name}
+          </div>
+          <nav className="hidden md:flex gap-8 items-center">
+            {dailyItinerary.map((_, index) => (
+              <a
+                key={index}
+                href={`#day${index + 1}`}
+                className={`text-sm font-medium transition-all ${
+                  activeDay === index
+                    ? 'text-[#00113a] font-bold border-b-2 border-[#00113a] pb-1'
+                    : 'text-slate-500 hover:text-[#00113a]'
+                }`}
+              >
+                Day {index + 1}
+              </a>
+            ))}
+          </nav>
+          <div className="flex items-center gap-4">
+            <Share2 className="w-5 h-5 text-slate-600 hover:text-[#00113a] cursor-pointer transition-all" />
+            <Heart className="w-5 h-5 text-slate-600 hover:text-[#00113a] cursor-pointer transition-all" />
+            <Link href={`/p/tour/${code}/register${ref ? `?ref=${ref}` : ''}`}>
+              <Button className="bg-gradient-to-r from-[#00113a] to-[#002366] text-white px-6 py-2 rounded-md text-sm hover:opacity-90">
+                立即報名
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Sticky Day Navigation */}
+      {dailyItinerary.length > 0 && (
+        <nav className="sticky top-[72px] z-40 bg-white/60 backdrop-blur-md border-b border-slate-200/20 py-2">
+          <div className="max-w-7xl mx-auto px-6 flex justify-center md:justify-start gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            {dailyItinerary.map((day, index) => (
+              <a
+                key={index}
+                href={`#day${index + 1}`}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                  activeDay === index
+                    ? 'bg-[#00113a] text-white font-bold'
+                    : 'text-[#444650] hover:bg-slate-100 hover:text-[#00113a]'
+                }`}
+              >
+                Day {index + 1}
+              </a>
+            ))}
+          </div>
+        </nav>
+      )}
+
+      {/* Hero Section */}
+      <section className="relative h-[500px] md:h-[614px] w-full overflow-hidden flex items-end pb-24 px-8 md:px-24">
+        {heroImage ? (
+          <img 
+            src={heroImage} 
+            alt={itinerary?.title || '行程封面'}
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#00113a] via-[#002366] to-[#00113a]" />
         )}
-      </nav>
-
-      <main className="max-w-[1440px] mx-auto">
-        {/* Hero Section */}
-        <section className="relative w-full h-[500px] md:h-[614px] overflow-hidden">
-          {heroImage ? (
-            <img 
-              src={heroImage} 
-              alt={itinerary?.title || '行程封面'}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#00113a]/70 to-transparent"></div>
+        <div className="relative z-10 max-w-4xl">
+          {daysCount > 0 && (
+            <span className="bg-emerald-400 text-emerald-900 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-4 inline-block">
+              {daysCount} 天 {nightsCount} 夜
+            </span>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#00113a]/90 via-[#00113a]/40 to-transparent flex items-end p-8 md:p-12">
-            <div className="max-w-4xl">
-              {/* 標籤 */}
-              <div className="flex gap-2 mb-4 flex-wrap">
-                {daysCount > 0 && (
-                  <span className="bg-white/10 backdrop-blur-md text-white px-3 py-1 rounded-sm text-xs font-bold tracking-widest uppercase">
-                    {daysCount} 天 {nightsCount} 夜
-                  </span>
-                )}
-                {tour.departure_date && (
-                  <span className="bg-emerald-600/80 backdrop-blur-md text-white px-3 py-1 rounded-sm text-xs font-bold tracking-widest uppercase">
-                    {new Date(tour.departure_date).toLocaleDateString('zh-TW', { month: 'numeric', day: 'numeric' })} 出發
-                  </span>
-                )}
-              </div>
-              
-              {/* 標題 */}
-              <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-4">
-                {itinerary?.title || tour.code}
-              </h1>
-              
-              {/* 副標題 */}
-              {itinerary?.subtitle && (
-                <p className="text-white/80 text-lg max-w-2xl">
-                  {itinerary.subtitle}
-                </p>
-              )}
-            </div>
-          </div>
-        </section>
+          <h1 className="text-white text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight tracking-tight">
+            {itinerary?.title || tour.code}
+          </h1>
+          {itinerary?.subtitle && (
+            <p className="text-white/80 text-lg mt-4 max-w-2xl">
+              {itinerary.subtitle}
+            </p>
+          )}
+        </div>
+      </section>
 
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 px-4 md:px-8 py-12 md:py-16">
-          {/* Left Column: Details */}
-          <div className="flex-1 space-y-12 md:space-y-16">
-            
-            {/* 每日行程 */}
-            {dailyItinerary.length > 0 && (
-              <section>
-                <div className="flex items-center gap-4 mb-8">
-                  <h2 className="text-2xl md:text-3xl font-bold text-[#00113a]">行程詳情</h2>
-                  <div className="h-px flex-1 bg-slate-200"></div>
+      <main className="max-w-7xl mx-auto px-6 py-12 md:py-24 flex flex-col md:flex-row gap-12 relative">
+        {/* Main Itinerary Content */}
+        <div className="flex-1 space-y-24 md:space-y-32">
+          {dailyItinerary.length > 0 ? (
+            dailyItinerary.map((day, index) => (
+              <section 
+                key={index} 
+                id={`day${index + 1}`}
+                className="relative pl-12 scroll-mt-48"
+              >
+                {/* Timeline */}
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-slate-200 ml-4"></div>
+                <div className="absolute left-0 top-2 w-8 h-8 rounded-full bg-[#002366] flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">{String(index + 1).padStart(2, '0')}</span>
                 </div>
-                
-                <div className="space-y-8 md:space-y-12">
-                  {dailyItinerary.map((day, index) => (
-                    <div key={index} className="flex gap-4 md:gap-8 group">
-                      {/* 日期圓圈 + 連接線 */}
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#00113a] text-white flex items-center justify-center font-bold text-sm shrink-0">
-                          {String(index + 1).padStart(2, '0')}
-                        </div>
-                        {index < dailyItinerary.length - 1 && (
-                          <div className="w-0.5 h-full bg-slate-200 mt-4"></div>
-                        )}
-                      </div>
-                      
-                      {/* 內容 */}
-                      <div className="pb-8 flex-1">
-                        <h3 className="text-lg md:text-xl font-bold text-[#191c1d] mb-2">
-                          第{index + 1}天：{day.title}
-                        </h3>
-                        
-                        {(day.description || day.highlight) && (
-                          <p className="text-[#444650] leading-relaxed mb-4">
-                            {day.description || day.highlight}
-                          </p>
-                        )}
-                        
-                        {/* 活動列表 */}
-                        {day.activities && day.activities.length > 0 && (
-                          <div className="space-y-2 mb-4">
-                            {day.activities.map((activity, actIdx) => (
-                              <div key={actIdx} className="flex items-start gap-2">
-                                <span className="text-sm">{activity.icon || '📍'}</span>
-                                <span className="text-sm text-[#444650]">{activity.title}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        
-                        {/* 餐食 */}
-                        {day.meals && (day.meals.breakfast || day.meals.lunch || day.meals.dinner) && (
-                          <div className="bg-slate-50 rounded-xl p-4 mb-4">
-                            <div className="flex items-center gap-2 text-sm text-[#444650]">
-                              <Utensils size={14} className="text-amber-600" />
-                              <span className="font-medium">餐食：</span>
-                              {[
-                                day.meals.breakfast && `早：${day.meals.breakfast}`,
-                                day.meals.lunch && `午：${day.meals.lunch}`,
-                                day.meals.dinner && `晚：${day.meals.dinner}`,
-                              ].filter(Boolean).join(' / ')}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* 住宿 */}
-                        {day.accommodation && (
-                          <div className="bg-slate-50 rounded-xl p-4">
-                            <div className="flex items-center gap-2 text-sm text-[#444650]">
-                              <Hotel size={14} className="text-blue-600" />
-                              <span className="font-medium">住宿：</span>
-                              {day.accommodation}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
 
-            {/* 空狀態 */}
-            {dailyItinerary.length === 0 && (
-              <section className="text-center py-16">
-                <MapPin size={48} className="mx-auto text-slate-300 mb-4" />
-                <h2 className="text-xl font-bold text-slate-400 mb-2">行程規劃中</h2>
-                <p className="text-slate-400">詳細行程將於近期更新</p>
-              </section>
-            )}
-
-            {/* 住宿資訊 */}
-            {itinerary?.hotels && itinerary.hotels.length > 0 && (
-              <section className="bg-slate-50 rounded-2xl p-6 md:p-10">
-                <h2 className="text-xl md:text-2xl font-bold text-[#00113a] mb-6 flex items-center gap-2">
-                  <Hotel size={24} />
-                  住宿安排
+                {/* Day Title */}
+                <h2 className="text-2xl md:text-3xl font-bold text-[#00113a] mb-8 tracking-tight">
+                  {day.title}
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {itinerary.hotels.map((hotel, idx) => (
-                    <div key={idx} className="flex gap-4">
-                      {hotel.image_url && (
-                        <img 
-                          src={hotel.image_url} 
-                          alt={hotel.name}
-                          className="w-24 h-24 object-cover rounded-lg"
-                        />
-                      )}
-                      <div>
-                        <h4 className="font-bold">{hotel.name}</h4>
-                        {hotel.nights && (
-                          <p className="text-sm text-[#444650]">{hotel.nights} 晚</p>
-                        )}
-                        {hotel.description && (
-                          <p className="text-xs text-[#757682] mt-1">{hotel.description}</p>
-                        )}
+
+                <div className="space-y-12">
+                  {/* Activities */}
+                  {day.activities && day.activities.map((activity, actIdx) => (
+                    <div key={actIdx} className="group">
+                      <div className="flex items-center gap-4 mb-4">
+                        <span className="text-[#006970]">{getActivityIcon(activity.icon)}</span>
+                        <span className="text-sm font-bold tracking-widest text-[#006970] uppercase">
+                          {activity.icon || '景點'}
+                        </span>
                       </div>
+                      <h3 className="text-xl font-bold mb-4">{activity.title}</h3>
+                      {activity.description && (
+                        <p className="text-[#444650] leading-relaxed">{activity.description}</p>
+                      )}
                     </div>
                   ))}
-                </div>
-              </section>
-            )}
-          </div>
 
-          {/* Right Column: Registration Card */}
-          <div className="lg:w-96">
-            <div className="sticky top-24 bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-slate-100">
-              {/* 價格 */}
-              <div className="mb-6">
-                <p className="text-[#444650] text-sm font-semibold uppercase tracking-widest">每位起價</p>
-                <div className="flex items-baseline gap-2">
-                  {tour.selling_price_per_person ? (
-                    <>
-                      <span className="text-3xl md:text-4xl font-extrabold text-[#00113a]">
-                        TWD {tour.selling_price_per_person.toLocaleString()}
-                      </span>
-                      <span className="text-[#444650] text-sm">/ 人</span>
-                    </>
-                  ) : (
-                    <span className="text-2xl font-bold text-[#444650]">洽詢報價</span>
+                  {/* Meals */}
+                  {day.meals && (day.meals.breakfast || day.meals.lunch || day.meals.dinner) && (
+                    <div className="p-6 bg-amber-50 rounded-xl border border-amber-100">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Utensils className="w-5 h-5 text-amber-600" />
+                        <span className="text-sm font-bold text-amber-800 uppercase tracking-widest">餐食安排</span>
+                      </div>
+                      <div className="text-sm text-amber-900 space-y-1">
+                        {day.meals.breakfast && <p>早餐：{day.meals.breakfast}</p>}
+                        {day.meals.lunch && <p>午餐：{day.meals.lunch}</p>}
+                        {day.meals.dinner && <p>晚餐：{day.meals.dinner}</p>}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Accommodation */}
+                  {day.accommodation && (
+                    <div className="p-6 bg-slate-50 rounded-xl">
+                      <div className="flex items-center gap-4">
+                        <Hotel className="w-5 h-5 text-slate-400" />
+                        <span className="text-[#444650] font-medium">住宿：{day.accommodation}</span>
+                      </div>
+                    </div>
                   )}
                 </div>
+              </section>
+            ))
+          ) : (
+            <section className="text-center py-16">
+              <MapPin className="w-12 h-12 mx-auto text-slate-300 mb-4" />
+              <h2 className="text-xl font-bold text-slate-400 mb-2">行程規劃中</h2>
+              <p className="text-slate-400">詳細行程將於近期更新</p>
+            </section>
+          )}
+        </div>
+
+        {/* Sidebar */}
+        <aside className="md:w-[380px]">
+          <div className="sticky top-40 space-y-6">
+            {/* Price Card */}
+            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+              <div className="text-slate-500 text-xs font-bold tracking-widest uppercase mb-2">行程價格</div>
+              <div className="flex items-baseline gap-2 mb-8">
+                {tour.selling_price_per_person ? (
+                  <>
+                    <span className="text-4xl font-extrabold text-[#00113a]">
+                      TWD {tour.selling_price_per_person.toLocaleString()}
+                    </span>
+                    <span className="text-slate-400 text-sm">/ 人</span>
+                  </>
+                ) : (
+                  <span className="text-2xl font-bold text-slate-500">洽詢報價</span>
+                )}
               </div>
               
-              {/* 資訊列表 */}
-              <div className="space-y-4 mb-8">
-                {tour.departure_date && (
-                  <div className="flex items-center gap-3 text-sm text-[#444650]">
-                    <Calendar size={18} className="text-emerald-600" />
-                    <span>出發日期: {new Date(tour.departure_date).toLocaleDateString('zh-TW')}</span>
-                  </div>
-                )}
-                {tour.max_participants && (
-                  <div className="flex items-center gap-3 text-sm text-[#444650]">
-                    <Users size={18} className="text-emerald-600" />
-                    <span>剩餘名額: {remainingSlots > 0 ? `${remainingSlots} 位` : '已額滿'}</span>
-                  </div>
-                )}
-                {daysCount > 0 && (
-                  <div className="flex items-center gap-3 text-sm text-[#444650]">
-                    <Clock size={18} className="text-emerald-600" />
-                    <span>行程天數: {daysCount} 天 {nightsCount} 夜</span>
-                  </div>
-                )}
-              </div>
-              
-              {/* 按鈕 */}
-              <div className="space-y-4">
-                <Link href={`/p/tour/${code}/register`} className="block">
-                  <Button 
-                    className="w-full bg-gradient-to-r from-[#00113a] to-[#002366] text-white py-6 rounded-lg font-bold text-lg shadow-lg hover:opacity-90 transition-all"
-                    size="lg"
-                  >
-                    立即報名
+              <div className="space-y-3">
+                <Link href={`/p/tour/${code}/register${ref ? `?ref=${ref}` : ''}`} className="block">
+                  <Button className="w-full bg-gradient-to-r from-[#00113a] to-[#002366] text-white py-4 rounded-xl font-bold hover:shadow-lg transition-all">
+                    立即預約
                   </Button>
                 </Link>
                 {companyInfo.phone && (
                   <a href={`tel:${companyInfo.phone}`} className="block">
-                    <Button 
-                      variant="outline"
-                      className="w-full py-6 rounded-lg font-bold"
-                      size="lg"
-                    >
+                    <Button variant="outline" className="w-full border-[#00113a] text-[#00113a] py-4 rounded-xl font-bold hover:bg-slate-50 transition-all">
                       諮詢專屬顧問
                     </Button>
                   </a>
                 )}
               </div>
-              
-              {/* 小字 */}
-              <div className="mt-8 pt-6 border-t border-slate-100">
-                <p className="text-xs text-[#757682] leading-relaxed text-center">
-                  預訂受條款及細則約束。價格包含所有稅費與服務費。
-                </p>
+
+              {/* Info */}
+              <div className="mt-8 pt-8 border-t border-slate-100 space-y-4">
+                {tour.departure_date && (
+                  <div className="flex items-center gap-3 text-sm text-[#444650]">
+                    <Calendar className="w-4 h-4 text-emerald-600" />
+                    <span>出發日期：{new Date(tour.departure_date).toLocaleDateString('zh-TW')}</span>
+                  </div>
+                )}
+                {tour.max_participants && (
+                  <div className="flex items-center gap-3 text-sm text-[#444650]">
+                    <Users className="w-4 h-4 text-emerald-600" />
+                    <span>剩餘名額：{remainingSlots > 0 ? `${remainingSlots} 位` : '已額滿'}</span>
+                  </div>
+                )}
+                {daysCount > 0 && (
+                  <div className="flex items-center gap-3 text-sm text-[#444650]">
+                    <Clock className="w-4 h-4 text-emerald-600" />
+                    <span>行程天數：{daysCount} 天 {nightsCount} 夜</span>
+                  </div>
+                )}
               </div>
+
+              {/* Itinerary Summary */}
+              {dailyItinerary.length > 0 && (
+                <div className="mt-8 pt-8 border-t border-slate-100">
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">行程摘要</div>
+                  <ul className="space-y-3">
+                    {dailyItinerary.map((day, idx) => (
+                      <li key={idx} className="flex gap-3 text-sm">
+                        <span className="text-[#006970] font-bold">D{idx + 1}</span>
+                        <span className="text-[#444650] truncate">{day.title}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Features */}
+            <div className="bg-[#00113a] p-6 rounded-2xl text-white">
+              <div className="flex items-center gap-3 mb-4">
+                <CheckCircle className="w-5 h-5 text-emerald-400" />
+                <span className="font-bold">專屬服務</span>
+              </div>
+              <ul className="text-sm text-white/70 space-y-2">
+                <li>• 私人機場接送服務</li>
+                <li>• 專業中文嚮導隨行</li>
+                <li>• 精選優質住宿</li>
+                <li>• 旅遊平安保險</li>
+              </ul>
             </div>
           </div>
-        </div>
+        </aside>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-slate-50 border-t border-slate-200 mt-20">
-        <div className="flex flex-col md:flex-row justify-between items-center py-8 px-8 max-w-[1440px] mx-auto">
-          <div className="text-slate-500 text-sm">
-            © {new Date().getFullYear()} {companyInfo.name}. All rights reserved.
+      {/* Footer with Employee Info */}
+      <footer className="bg-slate-50 border-t border-slate-200 py-12 mt-24">
+        <div className="max-w-7xl mx-auto px-8">
+          {/* Employee Card */}
+          {employee && (
+            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 mb-8 max-w-xl mx-auto">
+              <div className="text-center mb-6">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">您的專屬顧問</span>
+              </div>
+              <div className="flex items-center gap-6">
+                {employee.avatar_url ? (
+                  <img 
+                    src={employee.avatar_url} 
+                    alt={employee.display_name || ''} 
+                    className="w-20 h-20 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-[#00113a] flex items-center justify-center">
+                    <User className="w-8 h-8 text-white" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-[#00113a]">
+                    {employee.display_name || '專屬顧問'}
+                  </h3>
+                  {employee.employee_number && (
+                    <p className="text-sm text-slate-500 mb-2">員工編號：{employee.employee_number}</p>
+                  )}
+                  {employee.email && (
+                    <a href={`mailto:${employee.email}`} className="flex items-center gap-2 text-sm text-[#006970] hover:underline mt-3">
+                      <Mail className="w-4 h-4" />
+                      {employee.email}
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Company Info */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-lg font-bold text-[#00113a]">{companyInfo.name}</div>
+            {companyInfo.phone && (
+              <a href={`tel:${companyInfo.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-[#00113a]">
+                <Phone className="w-4 h-4" />
+                {companyInfo.phone}
+              </a>
+            )}
+            <div className="text-slate-400 text-xs">
+              © {new Date().getFullYear()} {companyInfo.name}. All rights reserved.
+            </div>
           </div>
         </div>
       </footer>
