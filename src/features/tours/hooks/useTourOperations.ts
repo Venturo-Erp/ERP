@@ -439,6 +439,8 @@ export function useTourOperations(params: UseTourOperationsParams) {
           const newTourData = {
             name: tour.name,
             location: tour.location || '',
+            country_id: tour.country_id || null,  // ✅ 保留國家
+            airport_code: tour.airport_code || null,  // ✅ 保留機場代碼
             tour_type: 'official' as const,
             departure_date,
             return_date,
