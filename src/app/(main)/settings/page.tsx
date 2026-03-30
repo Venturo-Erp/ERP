@@ -60,8 +60,6 @@ export default function SettingsPage() {
       title="設定"
       headerActions={
         <div className="flex items-center gap-4">
-          {hasSettingsAccess && <SettingsTabs />}
-          
           {user && (
             <div className="flex items-center gap-2 px-3 py-2 bg-morandi-container rounded-lg">
               <User className="h-4 w-4 text-morandi-secondary" />
@@ -83,6 +81,13 @@ export default function SettingsPage() {
       }
     >
       <div>
+        {/* 分頁導航 */}
+        {hasSettingsAccess && (
+          <div className="mb-6">
+            <SettingsTabs />
+          </div>
+        )}
+
         {/* 首次設定提示 */}
         {isSetupMode && (
           <div className="bg-gradient-to-r from-morandi-gold/10 to-morandi-gold/5 border border-morandi-gold/30 rounded-xl p-6 mb-6">
@@ -143,6 +148,130 @@ export default function SettingsPage() {
             router.back()
           }}
         />
+
+        {/* 修改密碼區塊 */}
+        <div className="mt-8 bg-card rounded-xl border border-morandi-container/30 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-morandi-gold/10 rounded-full flex items-center justify-center">
+              <Lock className="w-5 h-5 text-morandi-gold" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-morandi-primary">修改密碼</h3>
+              <p className="text-sm text-morandi-secondary">更新您的登入密碼</p>
+            </div>
+          </div>
+
+          {!showPasswordSection ? (
+            <Button
+              variant="outline"
+              onClick={() => setShowPasswordSection(true)}
+              className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold hover:text-white"
+            >
+              修改密碼
+            </Button>
+          ) : (
+            <div className="space-y-4 max-w-md">
+              <div>
+                <label className="text-sm font-medium text-morandi-primary mb-2 block">
+                  目前密碼
+                </label>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={passwordData.currentPassword}
+                  onChange={e => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  className="w-full px-3 py-2 border border-morandi-container/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50"
+                  placeholder="輸入目前密碼"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-morandi-primary mb-2 block">
+                  新密碼
+                </label>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={passwordData.newPassword}
+                  onChange={e => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                  className="w-full px-3 py-2 border border-morandi-container/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50"
+                  placeholder="輸入新密碼（至少 6 位）"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-morandi-primary mb-2 block">
+                  確認新密碼
+                </label>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={passwordData.confirmPassword}
+                  onChange={e => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  className="w-full px-3 py-2 border border-morandi-container/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50"
+                  placeholder="再次輸入新密碼"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="showPassword"
+                  checked={showPassword}
+                  onChange={e => setShowPassword(e.target.checked)}
+                  className="rounded border-morandi-container/30"
+                />
+                <label htmlFor="showPassword" className="text-sm text-morandi-secondary">
+                  顯示密碼
+                </label>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowPasswordSection(false)
+                    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+                  }}
+                >
+                  取消
+                </Button>
+                <Button
+                  onClick={async () => {
+                    if (passwordData.newPassword !== passwordData.confirmPassword) {
+                      alert('新密碼與確認密碼不符')
+                      return
+                    }
+                    if (passwordData.newPassword.length < 6) {
+                      alert('新密碼至少需要 6 位')
+                      return
+                    }
+                    setPasswordUpdateLoading(true)
+                    try {
+                      const res = await fetch('/api/auth/change-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          currentPassword: passwordData.currentPassword,
+                          newPassword: passwordData.newPassword,
+                        }),
+                      })
+                      const data = await res.json()
+                      if (data.success) {
+                        alert('密碼修改成功')
+                        setShowPasswordSection(false)
+                        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' })
+                      } else {
+                        alert(data.error || '密碼修改失敗')
+                      }
+                    } catch (error) {
+                      alert('密碼修改失敗')
+                    } finally {
+                      setPasswordUpdateLoading(false)
+                    }
+                  }}
+                  disabled={passwordUpdateLoading}
+                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                >
+                  {passwordUpdateLoading ? '處理中...' : '確認修改'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </ContentPageLayout>
   )
