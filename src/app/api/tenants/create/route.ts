@@ -60,6 +60,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     const employeeName = employeeDetail?.display_name || employeeDetail?.chinese_name || employeeDetail?.english_name || ''
+    
+    logger.log(`Employee detail: ${JSON.stringify(employeeDetail)}, employeeName=${employeeName}`)
 
     // 🔒 權限檢查：只有有「租戶管理」權限的人可以建立租戶
     // 新系統：檢查 workspace_roles 的分頁權限
