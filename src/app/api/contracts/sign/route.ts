@@ -29,6 +29,8 @@ export async function POST(request: NextRequest) {
     const userAgent = headersList.get('user-agent') || 'unknown'
 
     // 檢查合約是否存在且未簽署
+    console.log('[Contract Sign] contractId:', contractId)
+    
     const { data: contract, error: fetchError } = await supabase
       .from('contracts')
       .select(`
@@ -45,9 +47,12 @@ export async function POST(request: NextRequest) {
       .eq('id', contractId)
       .single()
 
+    console.log('[Contract Sign] fetchError:', fetchError)
+    console.log('[Contract Sign] contract:', contract?.id, contract?.code)
+
     if (fetchError || !contract) {
       return NextResponse.json(
-        { error: '找不到合約' },
+        { error: '找不到合約', details: fetchError?.message },
         { status: 404 }
       )
     }
