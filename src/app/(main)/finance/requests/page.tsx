@@ -51,7 +51,13 @@ export default function RequestsPage() {
   const { user } = useAuthStore()
 
   // 判斷是否為管理員/會計
-  const isAccountant = user?.roles?.includes('super_admin') || user?.roles?.includes('admin') || user?.roles?.includes('accountant') || user?.roles?.includes('controller')
+  // 檢查 roles（舊系統）或 permissions（新系統 workspace_roles.is_admin → '*'）
+  const isAccountant = 
+    user?.roles?.includes('super_admin') || 
+    user?.roles?.includes('admin') || 
+    user?.roles?.includes('accountant') || 
+    user?.roles?.includes('controller') ||
+    user?.permissions?.includes('*') // 新系統：workspace_roles.is_admin = true
 
   // 讀取 URL 參數（從快速請款按鈕傳入）
   const urlTourId = searchParams.get('tour_id')
