@@ -20,10 +20,10 @@ export const reverseVoucherSchema = z.object({
 // ==========================================
 
 export const changePasswordSchema = z.object({
-  employee_number: z.string().min(1, '缺少員工編號'),
+  employee_number: z.string().optional(),  // 可選，API 會用 session 的 employeeId
   workspace_code: z.string().optional(),
   current_password: z.string().min(1, '請輸入目前密碼'),
-  new_password: z.string().min(8, '密碼至少需要 8 個字元'),
+  new_password: z.string().min(6, '密碼至少需要 6 個字元'),
 })
 
 // ==========================================

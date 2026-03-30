@@ -31,26 +31,13 @@ export async function POST(request: NextRequest) {
 
     const supabaseAdmin = getSupabaseAdminClient()
 
-    // 1. 查詢員工資料（取得 ID 和 supabase_user_id）
-    let query = supabaseAdmin
+    // 1. 用當前登入用戶的資訊查詢（已經有 session 了）
+    // 直接用 auth.data.employeeId 查，不需要 employee_number
+    const { data: employee, error: empError } = await supabaseAdmin
       .from('employees')
       .select('id, employee_number, supabase_user_id, workspace_id')
-      .ilike('employee_number', employee_number)
-
-    // 如果有 workspace_code，先查詢 workspace_id
-    if (workspace_code) {
-      const { data: workspace } = await supabaseAdmin
-        .from('workspaces')
-        .select('id')
-        .ilike('code', workspace_code)
-        .single()
-
-      if (workspace) {
-        query = query.eq('workspace_id', workspace.id)
-      }
-    }
-
-    const { data: employee, error: empError } = await query.single()
+      .eq('id', auth.data.employeeId)
+      .single()
 
     if (empError || !employee) {
       logger.error('Employee not found:', empError)
@@ -70,9 +57,8 @@ export async function POST(request: NextRequest) {
 
     if (!authEmail) {
       // fallback：向後兼容舊帳號
-      authEmail = workspace_code
-        ? `${workspace_code.toLowerCase()}_${employee_number.toLowerCase()}@venturo.com`
-        : `${employee_number.toLowerCase()}@venturo.com`
+      const empNum = employee.employee_number
+      authEmail = `corner_${empNum.toLowerCase()}@venturo.com`
     }
 
     const { error: signInError } = await supabaseAdmin.auth.signInWithPassword({
