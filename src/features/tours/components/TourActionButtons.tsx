@@ -57,27 +57,10 @@ export function useTourActionButtons(params: UseTourActionButtonsParams) {
         }
       }
 
-      // 行程（判斷是否有行程表 → 複製連結 or 開啟編輯器）
-      const handleItinerary = async (e: React.MouseEvent) => {
+      // 行程 → 直接開啟公開頁面
+      const handleItinerary = (e: React.MouseEvent) => {
         e.stopPropagation()
-        
-        // 檢查是否已有行程表
-        const hasItinerary = itineraries.find((i: any) => i.tour_id === tour.id)
-        
-        if (hasItinerary) {
-          // 有行程表 → 複製公開連結（用團號，不是 UUID）
-          const ref = params.user?.employee_number || params.user?.display_name || params.user?.id
-          const link = `${window.location.origin}/public/itinerary/${tour.code}?ref=${ref}`
-          try {
-            await navigator.clipboard.writeText(link)
-            toast.success('已複製行程連結')
-          } catch {
-            toast.error('複製失敗')
-          }
-        } else {
-          // 無行程表 → 導向編輯器
-          router.push(`/itinerary/new?tour_id=${tour.id}`)
-        }
+        window.open(`/p/tour/${tour.code}`, '_blank')
       }
 
       // 複製行程連結（帶業務 ref）
