@@ -14,6 +14,7 @@ export function useChannelSidebar(channels: Channel[], searchQuery: string, chan
     if (!user) return false
     const permissions = user.permissions || []
     return (
+      permissions.includes('*') ||
       permissions.includes('super_admin') ||
       permissions.includes('admin') ||
       permissions.includes('workspace:manage_members') ||

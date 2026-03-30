@@ -45,6 +45,7 @@ export default function SettingsPage() {
   }
 
   const hasSettingsAccess =
+    user?.permissions?.includes('*') ||
     user?.permissions?.includes('super_admin') ||
     user?.permissions?.includes('admin') ||
     user?.permissions?.includes('settings')

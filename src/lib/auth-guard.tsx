@@ -111,6 +111,7 @@ export function AuthGuard({ children, requiredPermission }: AuthGuardProps) {
       // 2. 檢查指定權限
       if (requiredPermission) {
         const hasPermission =
+          permissions.includes('*') ||
           permissions.includes(requiredPermission) ||
           permissions.includes('admin') ||
           permissions.includes('super_admin')
@@ -175,7 +176,7 @@ export function usePermissionCheck(requiredRoute?: string) {
   return {
     hasPermission,
     userPermissions: user?.permissions || [],
-    isAdmin: user?.permissions?.includes('admin') || user?.permissions?.includes('super_admin'),
-    isSuperAdmin: user?.permissions?.includes('super_admin'),
+    isAdmin: user?.permissions?.includes('*') || user?.permissions?.includes('admin') || user?.permissions?.includes('super_admin'),
+    isSuperAdmin: user?.permissions?.includes('*') || user?.permissions?.includes('super_admin'),
   }
 }

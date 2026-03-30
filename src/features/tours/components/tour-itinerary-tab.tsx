@@ -68,7 +68,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   const { items: coreItems, refresh: refreshCoreItems } = useTourItineraryItemsByTour(tour.id)
 
   // 權限：是否可以編輯資料庫
-  const canEditDatabase = currentUser?.permissions?.includes('super_admin') || 
+  const canEditDatabase = currentUser?.permissions?.includes('*') ||
+    currentUser?.permissions?.includes('super_admin') || 
     currentUser?.permissions?.includes('database') || 
     currentUser?.permissions?.includes('admin') || false
 

@@ -12,7 +12,7 @@ export function WorkspaceSwitcher() {
   const [currentWorkspace, setCurrentWorkspace] = useState<string | null>(null)
 
   // 檢查是否為 super_admin
-  const isSuperAdmin = user?.permissions?.includes('super_admin')
+  const isSuperAdmin = user?.permissions?.includes('*') || user?.permissions?.includes('super_admin') || user?.permissions?.includes('admin')
 
   // ⚠️ useEffect 必須在 return 之前（React Hooks 規則）
   useEffect(() => {
