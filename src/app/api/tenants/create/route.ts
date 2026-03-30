@@ -139,8 +139,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (wsError || !workspace) {
-      logger.error('Failed to create workspace:', wsError)
-      return errorResponse('建立 workspace 失敗', 500, ErrorCode.OPERATION_FAILED)
+      logger.error('Failed to create workspace:', JSON.stringify(wsError))
+      return errorResponse(`建立 workspace 失敗: ${wsError?.message || 'unknown'}`, 500, ErrorCode.OPERATION_FAILED)
     }
 
     logger.log(`Workspace created: ${workspace.id}`)
