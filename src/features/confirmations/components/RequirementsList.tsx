@@ -1934,7 +1934,10 @@ export function RequirementsList({
               const hotelItem = coreItems.find(
                 it => it.item_category === 'accommodation' && it.supplier_name === selectedHotel.name
               )
-              const checkInDate = hotelItem?.service_date || selectedHotel.serviceDate || ''
+              // 優先用 service_date，沒有的話用 day_number 計算
+              const checkInDate = hotelItem?.service_date 
+                || selectedHotel.serviceDate 
+                || (hotelItem?.day_number != null ? calculateDate(hotelItem.day_number) : '')
               return roomsFromAssignment.map(room => ({
                 checkIn: checkInDate,
                 roomType: room.room_type,
@@ -1949,7 +1952,7 @@ export function RequirementsList({
                 it => it.item_category === 'accommodation' && it.supplier_name === selectedHotel.name
               )
               .map(it => ({
-                checkIn: it.service_date || '',
+                checkIn: it.service_date || (it.day_number != null ? calculateDate(it.day_number) : ''),
                 roomType: it.item_name,
                 bedType: '',
                 quantity: it.quantity || 1,
