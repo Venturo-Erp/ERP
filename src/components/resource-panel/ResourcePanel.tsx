@@ -5,7 +5,7 @@ import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { createSupabaseBrowserClient, supabase } from '@/lib/supabase/client'
 import { Search, MapPin, Building2, UtensilsCrossed, Loader2, Plus } from 'lucide-react'
-import { QuickAddResource } from './QuickAddResource'
+
 import { ResourceDetailDialog } from './ResourceDetailDialog'
 import { ResourceMapPanel } from './ResourceMapPanel'
 import { Input } from '@/components/ui/input'
@@ -178,14 +178,11 @@ export function ResourcePanel({
 }: ResourcePanelProps) {
   const [activeTab, setActiveTab] = useState<ResourceType>('attraction')
   const [searchQuery, setSearchQuery] = useState('')
+  const [isCreating, setIsCreating] = useState(false) // 防止重複點擊
 
   // 編輯 Dialog
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [editingResource, setEditingResource] = useState<ResourceItem | null>(null)
-
-  // 快速新增 Dialog
-  const [quickAddOpen, setQuickAddOpen] = useState(false)
-  const [quickAddInitialName, setQuickAddInitialName] = useState('')
 
   // 篩選：只用國家（簡化版）
   const [resolvedCountryId, setResolvedCountryId] = useState<string | undefined>(undefined)
@@ -304,6 +301,7 @@ export function ResourcePanel({
               ? `${item.star_rating}星`
               : (item.category as string | null),
           thumbnail: item.thumbnail as string | null,
+          data_verified: item.data_verified as boolean | undefined,
           latitude: item.latitude as number | null,
           longitude: item.longitude as number | null,
           address: item.address as string | null,
@@ -371,6 +369,7 @@ export function ResourcePanel({
                   ? `${item.star_rating}星`
                   : (item.category as string | null),
               thumbnail: item.thumbnail as string | null,
+              data_verified: item.data_verified as boolean | undefined,
               latitude: item.latitude as number | null,
               longitude: item.longitude as number | null,
               address: item.address as string | null,
@@ -537,14 +536,90 @@ export function ResourcePanel({
             </p>
             {searchQuery && (
               <button
-                onClick={() => {
-                  setQuickAddInitialName(searchQuery)
-                  setQuickAddOpen(true)
+                disabled={isCreating}
+                onClick={async () => {
+                  if (isCreating) return // 防止重複點擊
+                  setIsCreating(true)
+
+                  try {
+                    // 直接建立資源
+                    const trimmed = searchQuery.trim()
+                    if (!trimmed) return
+
+                    const countryIdToUse = resolvedCountryId || countryId
+                    if (!countryIdToUse) {
+                      alert('缺少國家資訊')
+                      return
+                    }
+
+                    const workspaceId = (await supabase.auth.getUser()).data.user?.user_metadata?.workspace_id
+                    if (!workspaceId) {
+                      alert('未登入或缺少 workspace')
+                      return
+                    }
+
+                    const TABLE_MAP = {
+                      attraction: 'attractions',
+                      hotel: 'hotels',
+                      restaurant: 'restaurants',
+                    }
+                    const table = TABLE_MAP[activeTab]
+
+                    const insertData: Record<string, unknown> = {
+                      name: trimmed,
+                      country_id: countryIdToUse,
+                      data_verified: false,
+                      ...(activeTab === 'attraction' ? { workspace_id: workspaceId } : {}),
+                    }
+
+                    // 酒店/餐廳需要 city_id
+                    if (activeTab !== 'attraction') {
+                      const { data: cities } = await supabase
+                        .from('cities')
+                        .select('id')
+                        .eq('country_id', countryIdToUse)
+                        .limit(1)
+
+                      if (!cities || cities.length === 0) {
+                        alert('該國家尚無城市資料，請先建立城市')
+                        return
+                      }
+                      insertData.city_id = cities[0].id
+                    }
+
+                    const { data, error: dbError } = await supabase
+                      .from(table)
+                      .insert(insertData as any)
+                      .select('id, name')
+                      .single()
+
+                    if (dbError) {
+                      alert(`建立失敗：${dbError.message}`)
+                      return
+                    }
+
+                    // 加入列表
+                    const newItem: ResourceItem = {
+                      id: data.id,
+                      name: data.name,
+                      type: activeTab,
+                      category: '',
+                      data_verified: false,
+                    }
+                    setSearchQuery('')
+                    setSearchResults([])
+                    setResources(prev => ({
+                      ...prev,
+                      [activeTab]: [newItem, ...(prev[activeTab] || [])],
+                    }))
+                  } finally {
+                    setIsCreating(false)
+                  }
                 }}
-                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-morandi-gold hover:bg-morandi-gold/90 rounded-md transition-colors"
+                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-morandi-gold hover:bg-morandi-gold/90 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Plus size={14} />
-                新增「{searchQuery}」
+                {isCreating ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                {isCreating ? '建立中...' : `新增「${searchQuery}」`}
               </button>
             )}
           </div>
@@ -606,32 +681,7 @@ export function ResourcePanel({
         }}
       />
 
-      {/* 快速新增 Dialog */}
-      <QuickAddResource
-        type={activeTab}
-        countryId={resolvedCountryId || countryId}
-        open={quickAddOpen}
-        onOpenChange={setQuickAddOpen}
-        initialName={quickAddInitialName}
-        onCreated={resource => {
-          // 新增到當前 tab 的資源列表頂部
-          const newItem: ResourceItem = {
-            id: resource.id,
-            name: resource.name,
-            type: activeTab,
-            category: '',
-            data_verified: false,
-          }
-          // 先清空搜尋框，再加入主列表（確保顯示）
-          setSearchQuery('')
-          setSearchResults([])
-          setResources(prev => ({
-            ...prev,
-            [activeTab]: [newItem, ...(prev[activeTab] || [])],
-          }))
-          setQuickAddOpen(false)
-        }}
-      />
+
     </div>
   )
 }

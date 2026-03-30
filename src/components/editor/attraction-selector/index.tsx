@@ -84,9 +84,7 @@ export function AttractionSelector({
   // 選擇狀態
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
-  // 手動新增景點
-  const [showManualInput, setShowManualInput] = useState(false)
-  const [manualAttractionName, setManualAttractionName] = useState('')
+
 
   // 地圖相關狀態
   const [selectedMapAttraction, setSelectedMapAttraction] = useState<AttractionWithCity | null>(
@@ -143,36 +141,7 @@ export function AttractionSelector({
     onClose()
   }
 
-  // 手動新增景點
-  const handleManualAdd = () => {
-    if (!manualAttractionName.trim()) return
 
-    // 創建一個臨時的景點物件
-    const manualAttraction: AttractionWithCity = {
-      id: `manual_${Date.now()}`,
-      name: manualAttractionName.trim(),
-      english_name: undefined,
-      category: undefined,
-      description: undefined,
-      thumbnail: undefined,
-      images: undefined,
-      country_id: selectedCountryId || '',
-      region_id: undefined,
-      city_id: selectedCityId || '',
-      city_name: cities.find(c => c.id === selectedCityId)?.name || '',
-      is_active: true,
-      display_order: 0,
-      created_at: '',
-      updated_at: '',
-    }
-
-    onSelect([manualAttraction])
-    setManualAttractionName('')
-    setShowManualInput(false)
-    setSelectedIds(new Set())
-    setSearchQuery('')
-    onClose()
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel}>
@@ -205,19 +174,11 @@ export function AttractionSelector({
           <div className="w-1/2 flex flex-col border-r border-border">
             <AttractionSearchBar
               countries={countries}
-              cities={cities}
               selectedCountryId={selectedCountryId}
-              selectedCityId={selectedCityId}
               searchQuery={searchQuery}
-              showManualInput={showManualInput}
-              manualAttractionName={manualAttractionName}
               hideFilters={!!countryId}
               onCountryChange={handleCountryChange}
-              onCityChange={handleCityChange}
               onSearchChange={setSearchQuery}
-              onToggleManualInput={() => setShowManualInput(!showManualInput)}
-              onManualAttractionChange={setManualAttractionName}
-              onManualAdd={handleManualAdd}
             />
 
             {/* 景點列表 */}

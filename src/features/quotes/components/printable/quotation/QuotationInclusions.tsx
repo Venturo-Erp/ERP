@@ -8,7 +8,21 @@ import { MORANDI_COLORS } from '../shared/print-styles'
 import { QUOTATION_INCLUSIONS_LABELS } from '@/constants/labels'
 import { QUOTATION_LABELS } from './constants/labels'
 
-export const QuotationInclusions: React.FC = () => {
+interface QuotationInclusionsProps {
+  insuranceText?: string
+  excludedItems?: string[]
+}
+
+export const QuotationInclusions: React.FC<QuotationInclusionsProps> = ({ 
+  insuranceText = '200萬旅責險+20萬意外醫療',
+  excludedItems = [
+    '個人護照及簽證費用',
+    '行程外之自費行程',
+    '個人消費及小費',
+    '行李超重費用',
+    '單人房差價',
+  ]
+}) => {
   return (
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div>
@@ -16,12 +30,9 @@ export const QuotationInclusions: React.FC = () => {
           {QUOTATION_LABELS.LABEL_5450}
         </h4>
         <ul className="space-y-1 text-sm" style={{ color: MORANDI_COLORS.gray }}>
-          <li>• {QUOTATION_LABELS.TRANSPORTATION_COST}</li>
-          <li>• {QUOTATION_LABELS.ACCOMMODATION_COST}</li>
-          <li>• {QUOTATION_LABELS.MEAL_COST}</li>
-          <li>• {QUOTATION_LABELS.TICKET_COST}</li>
+          <li>• 交通、住宿、餐食、門票</li>
           <li>• {QUOTATION_LABELS.GUIDE_SERVICE}</li>
-          <li>• {QUOTATION_INCLUSIONS_LABELS.旅遊責任險}</li>
+          <li>• {insuranceText}</li>
         </ul>
       </div>
       <div>
@@ -29,11 +40,9 @@ export const QuotationInclusions: React.FC = () => {
           {QUOTATION_LABELS.LABEL_4561}
         </h4>
         <ul className="space-y-1 text-sm" style={{ color: MORANDI_COLORS.gray }}>
-          <li>• {QUOTATION_LABELS.PASSPORT_VISA_COST}</li>
-          <li>• {QUOTATION_LABELS.OPTIONAL_TOUR}</li>
-          <li>• {QUOTATION_LABELS.PERSONAL_EXPENSE}</li>
-          <li>• {QUOTATION_LABELS.OVERWEIGHT_LUGGAGE}</li>
-          <li>• {QUOTATION_LABELS.SINGLE_ROOM_SUPPLEMENT}</li>
+          {excludedItems.map((item, idx) => (
+            <li key={idx}>• {item}</li>
+          ))}
         </ul>
       </div>
     </div>

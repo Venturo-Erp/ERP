@@ -24,6 +24,46 @@ const AttractionsMap = dynamic(
   }
 )
 
+// 可拖曳的景點按鈕
+function DraggableAttractionButton({ 
+  attraction, 
+  isSelected,
+  onClick 
+}: { 
+  attraction: Attraction
+  isSelected: boolean
+  onClick: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
+    id: `map-attraction-${attraction.id}`,
+    data: {
+      type: 'attraction',
+      resourceId: attraction.id,
+      resourceName: attraction.name,
+      dataVerified: true,
+    },
+  })
+
+  const style = transform ? { transform: CSS.Translate.toString(transform) } : undefined
+
+  return (
+    <button
+      ref={setNodeRef}
+      style={style}
+      {...listeners}
+      {...attributes}
+      onClick={onClick}
+      className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${
+        isSelected
+          ? 'bg-primary text-primary-foreground border-primary'
+          : 'bg-background hover:bg-accent border-border'
+      } ${isDragging ? 'opacity-50' : 'cursor-grab active:cursor-grabbing'}`}
+    >
+      {attraction.name}
+    </button>
+  )
+}
+
 interface ResourceMapPanelProps {
   tourId: string | null
   tourCode: string | null
@@ -237,25 +277,20 @@ export function ResourceMapPanel({
             )}
           </div>
 
-          {/* 景點快速選擇 */}
+          {/* 景點快速選擇（可拖曳到左側 Day 卡片）*/}
           {attractions.length > 0 && (
             <div className="border-t p-2">
               <div className="text-xs text-muted-foreground mb-2">
-                點擊切換中心（{attractions.length} 個景點）
+                拖曳景點到左側 Day 卡片（{attractions.length} 個景點）
               </div>
               <div className="flex flex-wrap gap-1 max-h-[80px] overflow-y-auto">
                 {attractions.slice(0, 20).map(attraction => (
-                  <button
+                  <DraggableAttractionButton
                     key={attraction.id}
+                    attraction={attraction}
+                    isSelected={selectedAttraction?.id === attraction.id}
                     onClick={() => handleSelectAttraction(attraction)}
-                    className={`px-2 py-0.5 text-xs rounded-full border transition-colors ${
-                      selectedAttraction?.id === attraction.id
-                        ? 'bg-primary text-primary-foreground border-primary'
-                        : 'bg-background hover:bg-accent border-border'
-                    }`}
-                  >
-                    {attraction.name}
-                  </button>
+                  />
                 ))}
                 {attractions.length > 20 && (
                   <span className="px-2 py-0.5 text-xs text-muted-foreground">

@@ -547,14 +547,26 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
           <div className="bg-morandi-green/10 px-4 py-2 border-b border-morandi-green/20">
             <span className="text-sm font-semibold text-morandi-green">費用包含</span>
           </div>
-          <ul className="px-4 py-3 space-y-1.5 text-sm text-morandi-secondary">
-            <li>• 行程表所列之交通費用</li>
-            <li>• 行程表所列之住宿費用</li>
-            <li>• 行程表所列之餐食費用</li>
-            <li>• 行程表所列之門票費用</li>
-            <li>• 專業導遊服務</li>
-            <li>• {QUOTATION_INCLUSIONS_LABELS.旅遊責任險}</li>
-          </ul>
+          <div className="px-4 py-3 space-y-2 text-sm text-morandi-secondary">
+            <div>• 行程表所列交通、住宿、餐食、門票</div>
+            <div>• 專業導遊服務</div>
+            <div className="flex items-center gap-2">
+              <span>•</span>
+              <input
+                type="text"
+                placeholder="輸入數字 (例如: 200/20)"
+                onBlur={(e) => {
+                  const val = e.target.value.trim()
+                  // 如果輸入格式是 "數字/數字"，自動轉換
+                  const match = val.match(/^(\d+)\/(\d+)$/)
+                  if (match) {
+                    e.target.value = `${match[1]}萬旅責險+${match[2]}萬意外醫療`
+                  }
+                }}
+                className="flex-1 px-2 py-1 text-xs border rounded"
+              />
+            </div>
+          </div>
         </div>
 
         {/* 費用不含 */}
@@ -562,13 +574,28 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
           <div className="bg-morandi-red/10 px-4 py-2 border-b border-morandi-red/20">
             <span className="text-sm font-semibold text-morandi-red">費用不含</span>
           </div>
-          <ul className="px-4 py-3 space-y-1.5 text-sm text-morandi-secondary">
-            <li>• 個人護照及簽證費用</li>
-            <li>• 行程外之自費行程</li>
-            <li>• 個人消費及小費</li>
-            <li>• 行李超重費用</li>
-            <li>• 單人房差價</li>
-          </ul>
+          <div className="px-4 py-3 space-y-1.5 text-sm text-morandi-secondary">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" defaultChecked className="w-4 h-4" />
+              <span>個人護照及簽證費用</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" defaultChecked className="w-4 h-4" />
+              <span>行程外之自費行程</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" defaultChecked className="w-4 h-4" />
+              <span>個人消費及小費</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" defaultChecked className="w-4 h-4" />
+              <span>行李超重費用</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" defaultChecked className="w-4 h-4" />
+              <span>單人房差價</span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
