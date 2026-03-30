@@ -53,10 +53,47 @@ export function AirportImageLibrary({
       .sort((a, b) => a.display_order - b.display_order)
   }, [allImages, airportCode])
 
-  // 處理上傳新圖片
+  // 處理上傳新圖片（Dialog 內）
   const handleUploadComplete = useCallback((url: string) => {
     setNewImageUrl(url)
   }, [])
+
+  // 🎯 直接上傳 → 自動存到 airport_images 表
+  const handleDirectUpload = useCallback(async (url: string) => {
+    logger.log('[AirportImageLibrary] 🎯 直接上傳，自動存到圖片庫')
+    logger.log('[AirportImageLibrary] - url:', url)
+    logger.log('[AirportImageLibrary] - airportCode:', airportCode)
+    
+    if (!url || !airportCode) {
+      // 沒有 airportCode 時，直接設定封面（舊行為）
+      onImageUpload(url)
+      return
+    }
+
+    try {
+      const newImage: Partial<AirportImage> = {
+        airport_code: airportCode,
+        image_url: url,
+        label: null,
+        is_default: airportImages.length === 0,
+        display_order: airportImages.length,
+        uploaded_by: user?.id || null,
+        workspace_id: user?.workspace_id || null,
+      }
+
+      logger.log('[AirportImageLibrary] 📤 自動存到 airport_images:', newImage)
+      await create(newImage as Omit<AirportImage, 'id' | 'created_at' | 'updated_at'>)
+      logger.log('[AirportImageLibrary] ✅ 存檔成功')
+
+      // 同時更新封面
+      onImageUpload(url)
+      logger.log('[AirportImageLibrary] 🎉 直接上傳完成！')
+    } catch (error) {
+      logger.error('[AirportImageLibrary] ❌ 存到圖片庫失敗:', error)
+      // 失敗時仍然設定封面
+      onImageUpload(url)
+    }
+  }, [airportCode, airportImages.length, user, create, onImageUpload])
 
   // 儲存新圖片到圖片庫
   const handleSaveNewImage = useCallback(async () => {
@@ -213,7 +250,7 @@ export function AirportImageLibrary({
 
       {/* 上傳或搜尋 - 三個選項 */}
       <div className="grid grid-cols-3 gap-2">
-        {/* 直接上傳 */}
+        {/* 直接上傳 → 自動存到 airport_images */}
         <div className="space-y-1.5">
           <div className="flex items-center gap-1 text-[11px] text-morandi-secondary">
             <Upload size={11} />
@@ -221,11 +258,11 @@ export function AirportImageLibrary({
           </div>
           <ImageUploader
             value={selectedImage}
-            onChange={onImageUpload}
+            onChange={handleDirectUpload}
             position={position}
             onPositionChange={onPositionChange}
             bucket="city-backgrounds"
-            filePrefix="itinerary"
+            filePrefix={`airport/${airportCode}`}
             previewHeight="70px"
             aspectRatio={16 / 9}
             placeholder={COMP_EDITOR_LABELS.本地圖片}
