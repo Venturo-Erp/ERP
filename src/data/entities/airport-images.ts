@@ -18,6 +18,8 @@ export const airportImageEntity = createEntityHook<AirportImage>('airport_images
   },
   detail: { select: '*' },
   cache: CACHE_PRESETS.low,
+  // airport_images 沒有 created_by/updated_by 欄位
+  skipAuditFields: true,
 })
 
 export const useAirportImages = airportImageEntity.useList
