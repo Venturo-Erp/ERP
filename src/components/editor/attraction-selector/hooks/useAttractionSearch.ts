@@ -284,32 +284,38 @@ export function useAttractionSearch({
     console.log('[AttractionSearch] 武康相關:', wukang.map(a => a.name))
   }
 
-  // 根據標題關鍵字匹配建議景點
+  // 根據標題關鍵字匹配建議景點（完全匹配優先）
   const suggestedAttractions = useMemo(() => {
     if (titleKeywords.length === 0 || attractions.length === 0) return []
 
-    const suggestions: AttractionWithCity[] = []
+    const exactMatches: AttractionWithCity[] = []
+    const partialMatches: AttractionWithCity[] = []
+    const addedIds = new Set<string>()
 
+    // 按關鍵字順序處理
     for (const keyword of titleKeywords) {
       const keywordLower = keyword.toLowerCase()
-      // 找完全匹配或包含關鍵字的景點
-      const matches = attractions.filter(a => {
+      
+      for (const a of attractions) {
+        if (addedIds.has(a.id)) continue
+        
         const nameLower = a.name.toLowerCase()
-        // 完全匹配優先，其次包含
-        return (
-          nameLower === keywordLower ||
-          nameLower.includes(keywordLower) ||
-          keywordLower.includes(nameLower)
-        )
-      })
-
-      for (const match of matches) {
-        if (!suggestions.some(s => s.id === match.id)) {
-          suggestions.push(match)
+        
+        // 完全匹配
+        if (nameLower === keywordLower) {
+          exactMatches.push(a)
+          addedIds.add(a.id)
+        }
+        // 部分匹配（名稱包含關鍵字，或關鍵字包含名稱）
+        else if (nameLower.includes(keywordLower) || keywordLower.includes(nameLower)) {
+          partialMatches.push(a)
+          addedIds.add(a.id)
         }
       }
     }
 
+    // 完全匹配排前面，部分匹配排後面
+    const suggestions = [...exactMatches, ...partialMatches]
     console.log('[AttractionSearch] suggestedAttractions:', suggestions.map(s => s.name))
     return suggestions
   }, [titleKeywords, attractions])
