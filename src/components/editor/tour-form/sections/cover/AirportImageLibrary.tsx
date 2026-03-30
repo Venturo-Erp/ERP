@@ -192,6 +192,27 @@ export function AirportImageLibrary({
         </Button>
       </div>
 
+      {/* 🎯 已選封面 - 可調整位置 */}
+      {selectedImage && (
+        <div className="mb-4">
+          <div className="flex items-center gap-2 text-[11px] text-morandi-secondary mb-2">
+            <span>已選封面（點擊調整位置）</span>
+          </div>
+          <ImageUploader
+            value={selectedImage}
+            onChange={onImageUpload}
+            position={position}
+            onPositionChange={onPositionChange}
+            bucket="city-backgrounds"
+            filePrefix={`airport/${airportCode}`}
+            previewHeight="140px"
+            aspectRatio={16 / 9}
+            placeholder=""
+            showUploadButton={false}
+          />
+        </div>
+      )}
+
       {/* 圖片網格 */}
       {loading ? (
         <div className="flex items-center justify-center py-8">

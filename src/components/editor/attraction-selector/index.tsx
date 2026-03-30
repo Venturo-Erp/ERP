@@ -93,6 +93,9 @@ export function AttractionSelector({
     null
   )
   const [showMap, setShowMap] = useState(false)
+  
+  // 拖拽模式
+  const [dragMode, setDragMode] = useState(false)
 
   // 打開對話框時只清空勾選
   React.useEffect(() => {
@@ -178,10 +181,22 @@ export function AttractionSelector({
         className="w-[1200px] h-[700px] max-w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0"
       >
         <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-morandi-gold/10 to-transparent">
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <MapPin className="text-morandi-gold" size={22} />
-            {ATTRACTION_SELECTOR_LABELS.SELECT_6272}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="flex items-center gap-2 text-lg">
+              <MapPin className="text-morandi-gold" size={22} />
+              {ATTRACTION_SELECTOR_LABELS.SELECT_6272}
+            </DialogTitle>
+            {showMap && (
+              <Button
+                size="sm"
+                variant={dragMode ? "default" : "outline"}
+                onClick={() => setDragMode(!dragMode)}
+                className={dragMode ? "bg-morandi-gold hover:bg-morandi-gold-hover" : ""}
+              >
+                {dragMode ? "✓ 拖拽模式" : "啟用拖拽"}
+              </Button>
+            )}
+          </div>
         </DialogHeader>
 
         {/* 主要內容：左右分欄 */}
@@ -288,13 +303,6 @@ export function AttractionSelector({
         <DialogFooter className="px-6 py-3 border-t bg-muted/50">
           <Button variant="outline" onClick={handleCancel} className="rounded-xl">
             {ATTRACTION_SELECTOR_LABELS.CANCEL}
-          </Button>
-          <Button
-            onClick={handleConfirm}
-            disabled={selectedIds.size === 0}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white rounded-xl min-w-[120px]"
-          >
-            新增景點 ({selectedIds.size})
           </Button>
         </DialogFooter>
       </DialogContent>
