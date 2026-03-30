@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
         company_name,
         created_by,
         tour_id,
-        tours!inner(id, code, name)
+        tours(id, code, name)
       `)
       .eq('id', contractId)
       .single()
