@@ -95,6 +95,8 @@ export async function POST(request: NextRequest) {
     let rolePermissions: string[] = []
     const jobInfo = employee.job_info as { role_id?: string } | null
     
+    console.log('🔍 DEBUG - Login API jobInfo:', jobInfo)
+    
     if (jobInfo?.role_id) {
       // 查職務是否為管理員
       const { data: role } = await supabase
@@ -103,8 +105,11 @@ export async function POST(request: NextRequest) {
         .eq('id', jobInfo.role_id)
         .single()
       
+      console.log('🔍 DEBUG - workspace_roles query result:', role)
+      
       if (role?.is_admin) {
         rolePermissions = ['*']
+        console.log('✅ DEBUG - User is admin, rolePermissions:', rolePermissions)
       } else {
         // 取得模組分頁權限（統一使用 role_tab_permissions）
         const { data: tabPerms } = await supabase
