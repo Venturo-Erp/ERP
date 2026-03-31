@@ -8,7 +8,7 @@
  * 4. Seed 基礎資料 (countries, cities)
  * 5. 建立 workspace bot
  *
- * 權限：只有 Corner 的 super_admin 可以呼叫
+ * 權限：需要「租戶管理」功能權限（workspace_features + role_tab_permissions）
  */
 
 import { NextRequest } from 'next/server'
@@ -32,7 +32,7 @@ interface CreateTenantRequest {
 
 export async function POST(request: NextRequest) {
   try {
-    // 🔒 權限檢查：只有 Corner 的 super_admin 可以建立租戶
+    // 🔒 權限檢查：需要「租戶管理」功能權限
     const auth = await getServerAuth()
     if (!auth.success) {
       return errorResponse('請先登入', 401, ErrorCode.UNAUTHORIZED)
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     // 查詢員工資訊
     const { data: currentEmployee, error: currentEmpError } = await supabaseAdmin
       .from('employees')
-      .select('workspace_id, chinese_name, english_name, display_name, email, role_id')
+      .select('workspace_id, chinese_name, english_name, display_name, email, role_id, job_info')
       .eq('id', auth.data.employeeId)
       .single()
 
@@ -60,31 +60,28 @@ export async function POST(request: NextRequest) {
 
     // 🔒 權限檢查：只有有「租戶管理」權限的人可以建立租戶
     // 新系統：檢查 workspace_roles 的分頁權限
+    // role_id 可能在頂層或 job_info 裡
+    const effectiveRoleId = currentEmployee.role_id
+      || (currentEmployee.job_info as Record<string, unknown>)?.role_id as string | undefined
     let canManageTenants = false
-    
-    if (currentEmployee.role_id) {
+
+    if (effectiveRoleId) {
       const { data: rolePermission } = await supabaseAdmin
         .from('role_tab_permissions')
         .select('can_write')
-        .eq('role_id', currentEmployee.role_id)
+        .eq('role_id', effectiveRoleId)
         .eq('module_code', 'settings')
         .eq('tab_code', 'tenants')
         .single()
-      
+
       canManageTenants = rolePermission?.can_write ?? false
     }
 
-    // 備用：允許特定人員（William、Carson）
-    const allowedNames = ['William', 'Carson', 'William Chien']
-    const isAllowedPerson = allowedNames.some(name => employeeName.includes(name))
-
-    const isAllowed = canManageTenants || isAllowedPerson
-
     logger.log(
-      `Permission check: canManageTenants=${canManageTenants}, name=${employeeName}, allowed=${isAllowed}`
+      `Permission check: canManageTenants=${canManageTenants}, name=${employeeName}`
     )
 
-    if (!isAllowed) {
+    if (!canManageTenants) {
       logger.error(`Permission denied: canManageTenants=${canManageTenants}, name=${employeeName}`)
       return errorResponse('只有有「租戶管理」權限的人可以建立租戶', 403, ErrorCode.FORBIDDEN)
     }
@@ -134,6 +131,7 @@ export async function POST(request: NextRequest) {
         code: newWorkspaceCode,
         type: workspaceType,
         is_active: true,
+        premium_enabled: false,
       })
       .select('id')
       .single()
@@ -183,6 +181,32 @@ export async function POST(request: NextRequest) {
 
     logger.log(`Employee created: ${employee.id}`)
 
+    // 2.3 建立 Supabase Auth 帳號（登入需要）
+    const authEmail = adminEmail?.toLowerCase() || `${newWorkspaceCode.toLowerCase()}_${adminEmployeeNumber.toLowerCase()}@venturo.com`
+    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email: authEmail,
+      password: adminPassword,
+      email_confirm: true,
+      user_metadata: {
+        workspace_id: workspace.id,
+        employee_id: employee.id,
+        workspace_code: newWorkspaceCode,
+      },
+    })
+
+    if (authError || !authUser?.user) {
+      logger.error('Failed to create auth user:', authError)
+      // 不 rollback，employee 已建好，之後可手動建 auth
+      logger.warn('Auth user creation failed, employee created without auth')
+    } else {
+      // 更新 employee 的 supabase_user_id
+      await supabaseAdmin
+        .from('employees')
+        .update({ supabase_user_id: authUser.user.id })
+        .eq('id', employee.id)
+      logger.log(`Auth user created: ${authUser.user.id}, linked to employee ${employee.id}`)
+    }
+
     // 2.5 建立預設職務並設定管理員
     const defaultRoles = [
       { name: '管理員', is_admin: true },
@@ -211,13 +235,24 @@ export async function POST(request: NextRequest) {
           .eq('id', employee.id)
         logger.log(`Admin employee role_id set: ${adminRole.id}`)
 
-        // 設定預設權限（會計、業務、助理）
+        // 管理員權限（全開）
+        const adminModules = [
+          'dashboard', 'tours', 'orders', 'quotes', 'finance',
+          'database', 'hr', 'settings', 'calendar', 'todos',
+          'workspace', 'itinerary', 'visas', 'customers', 'channel',
+        ]
+        const adminPermissions = adminModules.map(mod => ({
+          role_id: adminRole.id, module_code: mod, tab_code: null, can_read: true, can_write: true,
+        }))
+
+        // 設定預設權限（其他職務）
         const accountingRole = createdRoles?.find(r => r.name === '會計')
         const salesRole = createdRoles?.find(r => r.name === '業務')
         const assistantRole = createdRoles?.find(r => r.name === '助理')
 
-        // 設定預設權限（新版：用 role_tab_permissions）
         const defaultTabPermissions = [
+          // 管理員權限
+          ...adminPermissions,
           // 會計權限
           ...(accountingRole ? [
             { role_id: accountingRole.id, module_code: 'accounting', tab_code: null, can_read: true, can_write: true },
@@ -259,16 +294,26 @@ export async function POST(request: NextRequest) {
     }
 
     // 2.6 建立預設 workspace_features（開放所有基本功能）
-    const defaultFeatures = [
+    // 免費功能（預設全開）
+    const freeFeatures = [
       'dashboard', 'calendar', 'workspace', 'todos', 'tours', 'orders',
       'quotes', 'finance', 'database', 'hr', 'settings', 'customers',
-      'itinerary', 'accounting', 'channel'
+      'itinerary', 'channel',
+    ]
+    // 付費功能（預設關閉）
+    const premiumFeatures = [
+      'accounting', 'design', 'office', 'bot_line', 'bot_telegram',
+      'fleet', 'local', 'supplier_portal', 'esims',
+    ]
+    const defaultFeatures = [
+      ...freeFeatures.map(code => ({ feature_code: code, enabled: true })),
+      ...premiumFeatures.map(code => ({ feature_code: code, enabled: false })),
     ]
     
-    const featuresToInsert = defaultFeatures.map(code => ({
+    const featuresToInsert = defaultFeatures.map(f => ({
       workspace_id: workspace.id,
-      feature_code: code,
-      enabled: true,
+      feature_code: f.feature_code,
+      enabled: f.enabled,
     }))
     
     const { error: featuresError } = await supabaseAdmin
@@ -296,15 +341,38 @@ export async function POST(request: NextRequest) {
       logger.warn('Failed to create announcement channel:', channelError)
     }
 
-    // 7. Seed 基礎資料 (countries, cities)
+    // 7. 從 CORNER 複製基礎資料（國家、城市/機場）給新租戶
     try {
-      const seedResponse = await fetch(`${request.nextUrl.origin}/api/tenants/seed-base-data`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ targetWorkspaceId: workspace.id }),
-      })
-      if (seedResponse.ok) {
-        logger.log('Base data seeded')
+      const CORNER_WS = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
+      // 複製國家
+      const { data: cornerCountries } = await supabaseAdmin
+        .from('countries')
+        .select('*')
+        .eq('workspace_id', CORNER_WS)
+      if (cornerCountries && cornerCountries.length > 0) {
+        const newCountries = cornerCountries.map(c => ({
+          ...c,
+          id: crypto.randomUUID(),
+          workspace_id: workspace.id,
+          usage_count: 0,
+        }))
+        await supabaseAdmin.from('countries').insert(newCountries)
+        logger.log(`Seeded ${newCountries.length} countries`)
+      }
+      // 複製城市/機場
+      const { data: cornerAirports } = await supabaseAdmin
+        .from('ref_airports')
+        .select('*')
+        .eq('workspace_id', CORNER_WS)
+      if (cornerAirports && cornerAirports.length > 0) {
+        const newAirports = cornerAirports.map(a => ({
+          ...a,
+          workspace_id: workspace.id,
+          is_favorite: false,
+          usage_count: 0,
+        }))
+        await supabaseAdmin.from('ref_airports').insert(newAirports)
+        logger.log(`Seeded ${newAirports.length} airports`)
       }
     } catch (seedError) {
       logger.warn('Failed to seed base data:', seedError)

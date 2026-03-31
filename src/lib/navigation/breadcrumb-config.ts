@@ -24,7 +24,7 @@ export interface BreadcrumbConfig {
  */
 export const BREADCRUMB_CONFIG: Record<string, BreadcrumbConfig> = {
   // ========== 首頁 ==========
-  '/': { label: '首頁' },
+  '/': { label: '首頁', hidden: true },
 
   // ========== 業務管理 ==========
   '/tours': { label: '團管理', parent: '/' },

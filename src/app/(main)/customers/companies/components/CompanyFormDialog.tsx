@@ -153,7 +153,7 @@ export function CompanyFormDialog({
       <div className="space-y-6">
         {/* 基本資訊 */}
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-morandi-primary border-b pb-2">
+          <h3 className="text-sm font-medium text-morandi-primary border-b border-border pb-2">
             {L.section_basic}
           </h3>
 
@@ -236,7 +236,7 @@ export function CompanyFormDialog({
 
         {/* 付款資訊 */}
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-morandi-primary border-b pb-2">
+          <h3 className="text-sm font-medium text-morandi-primary border-b border-border pb-2">
             {L.section_payment}
           </h3>
 
@@ -304,7 +304,7 @@ export function CompanyFormDialog({
 
         {/* 發票資訊 */}
         <div className="space-y-4">
-          <h3 className="text-sm font-medium text-morandi-primary border-b pb-2">
+          <h3 className="text-sm font-medium text-morandi-primary border-b border-border pb-2">
             {L.section_invoice}
           </h3>
 

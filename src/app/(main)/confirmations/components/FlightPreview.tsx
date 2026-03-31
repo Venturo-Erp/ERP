@@ -52,7 +52,7 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
       {data.segments && data.segments.length > 0 && (
         <div>
           <div
-            className="border-t border-b py-2"
+            className="border-t border-b border-border py-2"
             style={{ borderColor: '#d4af37', borderStyle: 'dashed' }}
           >
             <div

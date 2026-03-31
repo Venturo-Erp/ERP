@@ -417,7 +417,7 @@ function FlightRow({
           {/* 箭頭 */}
           <div className="h-px w-6 md:w-8 bg-border relative">
             <div
-              className="absolute -top-1 right-0 w-2 h-2 border-t border-r rotate-45"
+              className="absolute -top-1 right-0 w-2 h-2 border-t border-r border-border rotate-45"
               style={{ borderColor: '#d1d5db' }}
             />
           </div>

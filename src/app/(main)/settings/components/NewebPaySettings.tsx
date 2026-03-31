@@ -191,7 +191,7 @@ export function NewebPaySettings() {
         </div>
 
         {/* 環境切換 */}
-        <div className="flex items-center justify-between p-4 bg-morandi-background rounded-lg border border-morandi-border">
+        <div className="flex items-center justify-between p-4 bg-morandi-background rounded-lg border border-border">
           <div>
             <Label htmlFor="isProduction" className="text-sm font-medium">
               {NEWEBPAY_LABELS.LABEL_2112}
@@ -208,7 +208,7 @@ export function NewebPaySettings() {
         </div>
 
         {/* 儲存按鈕與訊息 */}
-        <div className="flex items-center justify-between pt-4 border-t border-morandi-border">
+        <div className="flex items-center justify-between pt-4 border-t border-border">
           {message && (
             <div
               className={`flex items-center gap-2 text-sm ${

@@ -5,7 +5,7 @@ import { Combobox } from '@/components/ui/combobox'
 import { Input } from '@/components/ui/input'
 import { FormDialog } from '@/components/dialog/form-dialog'
 import { useAirports, type Airport } from '@/features/tours/hooks/useAirports'
-import { useCountries } from '@/data' // 🔧 核心表架構
+import { useCountries, invalidateCountries } from '@/data' // 🔧 核心表架構
 import { SELECTORS_LABELS } from './constants/labels'
 
 // 判斷是否為台灣（支援多種寫法）
@@ -58,6 +58,13 @@ export function CountryAirportSelector({
 
   // 向下相容：優先用 countryName，fallback 到 country
   const displayCountryName = countryName || country || ''
+
+  // 新增國家 Dialog 狀態
+  const [createCountryDialogOpen, setCreateCountryDialogOpen] = useState(false)
+  const [newCountryName, setNewCountryName] = useState('')
+  const [newCountryNameEn, setNewCountryNameEn] = useState('')
+  const [newCountryCode, setNewCountryCode] = useState('')
+  const [isCountrySubmitting, setIsCountrySubmitting] = useState(false)
 
   // 新增機場 Dialog 狀態
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
@@ -124,6 +131,55 @@ export function CountryAirportSelector({
     [countriesData, countryNameToCode, onCountryChange]
   )
 
+  // 處理快速新增國家
+  const handleCreateCountry = useCallback(async (searchText: string) => {
+    setNewCountryName(searchText)
+    setNewCountryNameEn('')
+    setNewCountryCode('')
+    setCreateCountryDialogOpen(true)
+    return null
+  }, [])
+
+  // 提交新增國家
+  const handleCountryDialogSubmit = async () => {
+    const name = newCountryName.trim()
+    const code = newCountryCode.trim().toUpperCase()
+    if (!name || code.length !== 2) return
+
+    setIsCountrySubmitting(true)
+    try {
+      const { supabase } = await import('@/lib/supabase/client')
+      const { data: created, error } = await supabase
+        .from('countries')
+        .insert({
+          id: crypto.randomUUID(),
+          name,
+          name_en: newCountryNameEn.trim() || name,
+          code,
+          is_active: true,
+          has_regions: false,
+          display_order: 999,
+        })
+        .select('id, name, code')
+        .single()
+
+      if (error) {
+        console.error('Failed to create country:', error.message)
+        return
+      }
+
+      if (created) {
+        await invalidateCountries()
+        onCountryChange({ id: created.id, name: created.name, code: created.code || '' })
+      }
+      setCreateCountryDialogOpen(false)
+    } catch (err) {
+      console.error('Failed to create country:', err)
+    } finally {
+      setIsCountrySubmitting(false)
+    }
+  }
+
   // 處理機場代碼變更
   const handleAirportChange = useCallback(
     (code: string) => {
@@ -166,8 +222,6 @@ export function CountryAirportSelector({
     }
   }
 
-  const isTaiwan = isTaiwanCountry(displayCountryName)
-
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-4">
@@ -187,36 +241,30 @@ export function CountryAirportSelector({
             showSearchIcon
             showClearButton
             disablePortal={disablePortal}
+            onCreate={handleCreateCountry}
           />
         </div>
 
-        {/* 機場代碼選擇（台灣不需要） */}
-        {!isTaiwan ? (
-          <div>
-            {showLabels && (
-              <label className="text-sm font-medium text-morandi-primary mb-2 block">
-                {SELECTORS_LABELS.LABEL_5022}
-              </label>
-            )}
-            <Combobox
-              value={airportCode}
-              onChange={handleAirportChange}
-              options={availableAirports}
-              placeholder={!displayCountryName ? '請先選擇國家' : '搜尋城市或機場...'}
-              emptyMessage={loading ? '載入中...' : '找不到符合的機場'}
-              showSearchIcon
-              showClearButton
-              disabled={!displayCountryName}
-              disablePortal={disablePortal}
-              onCreate={displayCountryName ? handleCreateAirport : undefined}
-            />
-          </div>
-        ) : (
-          <div className="flex items-center">
-            {showLabels && <div className="mb-2 h-5" />}
-            <p className="text-sm text-morandi-secondary">{SELECTORS_LABELS.SELECT_7771}</p>
-          </div>
-        )}
+        {/* 城市（機場代碼）選擇 */}
+        <div>
+          {showLabels && (
+            <label className="text-sm font-medium text-morandi-primary mb-2 block">
+              {SELECTORS_LABELS.LABEL_5022}
+            </label>
+          )}
+          <Combobox
+            value={airportCode}
+            onChange={handleAirportChange}
+            options={availableAirports}
+            placeholder={!displayCountryName ? '請先選擇國家' : '搜尋城市或機場...'}
+            emptyMessage={loading ? '載入中...' : '找不到符合的機場'}
+            showSearchIcon
+            showClearButton
+            disabled={!displayCountryName}
+            disablePortal={disablePortal}
+            onCreate={displayCountryName ? handleCreateAirport : undefined}
+          />
+        </div>
       </div>
 
       {/* 顯示當前選擇的城市代碼（非台灣團）*/}
@@ -225,6 +273,46 @@ export function CountryAirportSelector({
           團號城市代碼：<span className="font-mono font-semibold">{airportCode}</span>
         </p>
       )}
+
+      {/* 新增國家 Dialog */}
+      <FormDialog
+        open={createCountryDialogOpen}
+        onOpenChange={setCreateCountryDialogOpen}
+        title="新增國家"
+        onSubmit={handleCountryDialogSubmit}
+        submitLabel="新增"
+        loading={isCountrySubmitting}
+        submitDisabled={!newCountryName.trim() || newCountryCode.trim().length !== 2}
+        maxWidth="sm"
+        level={2}
+      >
+        <div>
+          <label className="text-sm font-medium text-morandi-primary mb-2 block">
+            國家名稱
+          </label>
+          <Input value={newCountryName} onChange={e => setNewCountryName(e.target.value)} placeholder="例如：日本" />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-morandi-primary mb-2 block">
+            英文名稱
+          </label>
+          <Input value={newCountryNameEn} onChange={e => setNewCountryNameEn(e.target.value)} placeholder="例如：Japan" />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-morandi-primary mb-2 block">
+            國家代碼（ISO 2碼）
+          </label>
+          <Input
+            value={newCountryCode}
+            onChange={e => setNewCountryCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2))}
+            placeholder="例如：JP"
+            maxLength={2}
+          />
+          <p className="text-xs text-morandi-secondary mt-1">
+            2 碼大寫英文，例如 JP（日本）、TH（泰國）
+          </p>
+        </div>
+      </FormDialog>
 
       {/* 新增機場 Dialog */}
       <FormDialog

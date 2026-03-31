@@ -436,7 +436,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         {/* 頂部資訊列 */}
-        <div className="bg-white border-b shadow-sm sticky top-0 z-10">
+        <div className="bg-white border-b border-border shadow-sm sticky top-0 z-10">
           <div className="px-4 py-3">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -644,7 +644,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
         </div>
 
         {/* 底部按鈕區 */}
-        <div className="bg-white border-t shadow-lg px-4 py-4 sticky bottom-0">
+        <div className="bg-white border-t border-border shadow-lg px-4 py-4 sticky bottom-0">
           <div className="max-w-4xl mx-auto">
             {savedSignature ? (
               /* 簽署完成：顯示狀態 + 列印按鈕 */
@@ -705,7 +705,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
   if (step === 'fill-info') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex flex-col">
-        <div className="bg-white border-b px-4 py-4">
+        <div className="bg-white border-b border-border px-4 py-4">
           <div className="max-w-md mx-auto flex items-center">
             <button
               onClick={() => setStep('preview')}
@@ -811,7 +811,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex flex-col">
         {/* 頂部 */}
-        <div className="bg-white border-b px-4 py-4">
+        <div className="bg-white border-b border-border px-4 py-4">
           <div className="max-w-md mx-auto flex items-center">
             <button
               onClick={() => setStep('preview')}

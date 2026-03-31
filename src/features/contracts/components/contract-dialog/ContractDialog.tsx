@@ -614,7 +614,7 @@ export function ContractDialog({ isOpen, onClose, tour, mode }: ContractDialogPr
               </div>
             </div>
 
-            <DialogFooter className="flex-shrink-0 border-t pt-4">
+            <DialogFooter className="flex-shrink-0 border-t border-border pt-4">
               <Button
                 variant="outline"
                 onClick={handleBackToMain}

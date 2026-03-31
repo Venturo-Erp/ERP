@@ -102,7 +102,7 @@ export function DailyImageCarousel({ images, title, allTourImages = [] }: DailyI
         <div className="relative mb-6 sm:mb-8 mt-4 sm:mt-6">
           <div
             className={cn(
-              'overflow-hidden rounded-[20px] sm:rounded-[28px] border border-white/60 bg-card shadow-lg ring-1 ring-morandi-border/20',
+              'overflow-hidden rounded-[20px] sm:rounded-[28px] border border-white/60 bg-card shadow-lg ring-1 ring-border/20',
               allTourImages.length >= 4 && 'cursor-pointer'
             )}
             onClick={handleImageClick}
@@ -151,7 +151,7 @@ export function DailyImageCarousel({ images, title, allTourImages = [] }: DailyI
                 key={`${getImageUrl(image)}-${index}`}
                 data-card
                 className={cn(
-                  'flex-shrink-0 overflow-hidden rounded-[16px] sm:rounded-[20px] border border-white/60 bg-card shadow-lg ring-1 ring-morandi-border/20 transition-all duration-300',
+                  'flex-shrink-0 overflow-hidden rounded-[16px] sm:rounded-[20px] border border-white/60 bg-card shadow-lg ring-1 ring-border/20 transition-all duration-300',
                   allTourImages.length >= 4 && 'cursor-pointer',
                   index === currentIndex ? 'scale-100 opacity-100' : 'scale-[0.98] opacity-80'
                 )}

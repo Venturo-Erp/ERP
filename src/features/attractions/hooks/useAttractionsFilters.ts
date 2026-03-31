@@ -68,7 +68,8 @@ export function useAttractionsFilters({
         // 只看待驗證
         if (attr.data_verified !== false) return false
       } else if (selectedCategory !== 'all') {
-        if (attr.category !== selectedCategory) return false
+        // 支援模糊匹配（如 "住宿" 匹配 "住宿 / Accommodation"）
+        if (!attr.category?.startsWith(selectedCategory)) return false
       }
 
       return true

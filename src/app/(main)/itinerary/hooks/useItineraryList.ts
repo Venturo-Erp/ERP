@@ -20,21 +20,10 @@ export function useItineraryList() {
   const { items: countries } = useCountries()
   const { items: cities } = useCities()
 
-  // 檢查是否為管理員（新系統）
-  const { isAdmin } = useAuthStore.getState()
-  const isSuperAdmin = isAdmin
-
   // 篩選和搜尋狀態
   const [statusFilter, setStatusFilter] = useState<string>('全部')
   const [authorFilter, setAuthorFilter] = useState<string>('__mine__')
   const [searchTerm, setSearchTerm] = useState('')
-
-  // 超級管理員載入 workspaces
-  useEffect(() => {
-    if (isSuperAdmin && workspaces.length === 0) {
-      loadWorkspaces()
-    }
-  }, [isSuperAdmin])
 
   // SWR 自動載入地區資料，不需要手動 fetchAll
 
@@ -133,17 +122,6 @@ export function useItineraryList() {
     const effectiveAuthorFilter = authorFilter === '__mine__' ? user?.id : authorFilter
     if (effectiveAuthorFilter && effectiveAuthorFilter !== 'all') {
       filtered = filtered.filter(item => item.created_by === effectiveAuthorFilter)
-    }
-
-    // 超級管理員：分公司篩選
-    if (isSuperAdmin) {
-      const workspaceFilter =
-        typeof window !== 'undefined' ? localStorage.getItem('itinerary_workspace_filter') : null
-      if (workspaceFilter && workspaceFilter !== 'all') {
-        filtered = filtered.filter(
-          item => (item as Itinerary & { workspace_id?: string }).workspace_id === workspaceFilter
-        )
-      }
     }
 
     // 搜尋 - 搜尋所有文字欄位（移除 HTML 標籤後再搜尋）

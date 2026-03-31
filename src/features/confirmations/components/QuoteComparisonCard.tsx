@@ -191,7 +191,7 @@ export function QuoteComparisonCard({ itemTitle, quotes, onSelect }: QuoteCompar
 
               {/* 選擇原因輸入框 */}
               {showReasonInput === quote.requestId && (
-                <div className="mt-3 pt-3 border-t space-y-2">
+                <div className="mt-3 pt-3 border-t border-border space-y-2">
                   <Input
                     placeholder="選擇原因（例如：服務較好、價格便宜）"
                     value={reason}

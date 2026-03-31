@@ -470,39 +470,12 @@ export function ImageEditor({
 
               <div className="space-y-4">
                 <h4 className="text-xs uppercase tracking-wider text-morandi-muted font-semibold">
-                  {t('color')}
-                </h4>
-                <AdjustmentSlider
-                  label={t('saturation')}
-                  value={settings.adjustments.saturation}
-                  onChange={v => handleAdjustmentChange('saturation', v)}
-                />
-                <AdjustmentSlider
-                  label={t('temperature')}
-                  value={settings.adjustments.temperature}
-                  onChange={v => handleAdjustmentChange('temperature', v)}
-                />
-                <AdjustmentSlider
-                  label={t('tint')}
-                  value={settings.adjustments.tint}
-                  onChange={v => handleAdjustmentChange('tint', v)}
-                />
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-xs uppercase tracking-wider text-morandi-muted font-semibold">
                   {t('effects')}
                 </h4>
                 <AdjustmentSlider
                   label={t('clarity')}
                   value={settings.adjustments.clarity}
                   onChange={v => handleAdjustmentChange('clarity', v)}
-                />
-                <AdjustmentSlider
-                  label={t('vignette')}
-                  value={settings.adjustments.vignette}
-                  min={0}
-                  onChange={v => handleAdjustmentChange('vignette', v)}
                 />
               </div>
 

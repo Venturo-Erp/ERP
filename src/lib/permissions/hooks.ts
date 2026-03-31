@@ -20,8 +20,9 @@ interface RolePermission {
  */
 // 付費功能代碼（需要付費大開關開啟才能用）
 const PREMIUM_FEATURE_CODES = [
-  'workspace', 'customers', 'itinerary', 'design', 'office', 
-  'bot_line', 'bot_telegram', 'fleet', 'local', 'supplier_portal', 'esims'
+  'workspace', 'customers', 'itinerary', 'design', 'office',
+  'bot_line', 'bot_telegram', 'fleet', 'local', 'supplier_portal', 'esims',
+  'accounting', 'departments', 'tenants'
 ]
 
 export function useWorkspaceFeatures() {
@@ -135,29 +136,31 @@ export function usePermissions() {
   const workspaceFeatures = useWorkspaceFeatures()
   const rolePermissions = useRolePermissions()
 
-  const isSuperAdmin = 
-    user?.permissions?.includes('super_admin') ||
+  const isAdmin =
     user?.permissions?.includes('admin') ||
     user?.permissions?.includes('*')
 
+  // @deprecated 向下相容，等同 isAdmin
+  const isSuperAdmin = isAdmin
+
   const canAccess = useCallback((route: string): boolean => {
-    if (isSuperAdmin) return true
+    if (isAdmin) return true
     if (!workspaceFeatures.isRouteAvailable(route)) return false
     if (!rolePermissions.canRead(route)) return false
     return true
-  }, [isSuperAdmin, workspaceFeatures, rolePermissions])
+  }, [isAdmin, workspaceFeatures, rolePermissions])
 
   const canEdit = useCallback((route: string): boolean => {
-    if (isSuperAdmin) return true
+    if (isAdmin) return true
     if (!workspaceFeatures.isRouteAvailable(route)) return false
     if (!rolePermissions.canWrite(route)) return false
     return true
-  }, [isSuperAdmin, workspaceFeatures, rolePermissions])
+  }, [isAdmin, workspaceFeatures, rolePermissions])
 
   return {
     ...workspaceFeatures,
     ...rolePermissions,
-    isSuperAdmin,
+    isSuperAdmin, // @deprecated 向下相容
     canAccess,
     canEdit,
   }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/auth-store'
 import { hasPermissionForRoute } from '@/lib/permissions'
@@ -21,12 +21,63 @@ function hasAuthCookie(): boolean {
   return document.cookie.split(';').some(c => c.trim().startsWith('auth-token='))
 }
 
+/**
+ * 從 localStorage 直接讀取 auth-storage
+ * 用於處理 Chrome 複製分頁時 Zustand 還沒 hydrate 的情況
+ */
+function getAuthFromLocalStorage(): { isAuthenticated: boolean; userId?: string } | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const stored = localStorage.getItem('auth-storage')
+    if (!stored) return null
+    const data = JSON.parse(stored)
+    return {
+      isAuthenticated: data?.state?.isAuthenticated ?? false,
+      userId: data?.state?.user?.id,
+    }
+  } catch {
+    return null
+  }
+}
+
 export function AuthGuard({ children, requiredPermission }: AuthGuardProps) {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, _hasHydrated, isAuthenticated, logout } = useAuthStore()
+  const { user, _hasHydrated, isAuthenticated, logout, setUser } = useAuthStore()
   const redirectingRef = useRef(false) // 防止重複跳轉
-  const sessionCheckedRef = useRef(false) // 一次性 Supabase session 健康檢查
+  const [isRecovering, setIsRecovering] = useState(false)
+  const recoveryAttemptedRef = useRef(false)
+
+  // Chrome 複製分頁時，Zustand 可能沒有正確 hydrate
+  // 這個 effect 會嘗試從 localStorage 恢復 user 資料
+  useEffect(() => {
+    if (recoveryAttemptedRef.current) return
+    if (user?.id) return // 已經有 user，不需要恢復
+    if (!hasAuthCookie()) return // 沒有 cookie，不可能恢復
+
+    const localAuth = getAuthFromLocalStorage()
+    if (!localAuth?.isAuthenticated || !localAuth?.userId) return
+
+    // 嘗試從 localStorage 恢復完整的 user 資料
+    recoveryAttemptedRef.current = true
+    setIsRecovering(true)
+
+    try {
+      const stored = localStorage.getItem('auth-storage')
+      if (stored) {
+        const data = JSON.parse(stored)
+        const storedUser = data?.state?.user
+        if (storedUser?.id) {
+          logger.log('🔄 從 localStorage 恢復 user 資料（Chrome 複製分頁）')
+          setUser(storedUser)
+        }
+      }
+    } catch (err) {
+      logger.warn('⚠️ 恢復 user 資料失敗:', err)
+    } finally {
+      setIsRecovering(false)
+    }
+  }, [user?.id, setUser])
 
   // Token 過期同步：檢查 cookie 是否被 middleware 清除
   const syncTokenState = useCallback(() => {
@@ -54,26 +105,17 @@ export function AuthGuard({ children, requiredPermission }: AuthGuardProps) {
         return
       }
 
-      // 如果已認證（剛登入），不需要等待 hydration
-      // 但需要一次性驗證 Supabase session 是否仍有效
+      // 如果已認證（剛登入或從 localStorage hydrate），檢查 auth-token cookie
+      // 注意：不檢查 Supabase session，因為 Chrome 複製分頁時 cookie 會同步但
+      // Supabase client 可能還沒初始化。如果 Supabase 操作失敗，會在具體操作時處理。
       if (isAuthenticated && user?.id) {
-        if (!sessionCheckedRef.current) {
-          sessionCheckedRef.current = true
-          try {
-            const { supabase } = await import('@/lib/supabase/client')
-            const {
-              data: { session },
-            } = await supabase.auth.getSession()
-            if (!session) {
-              logger.warn(LIB_LABELS.SESSION_CHECK_EXPIRED)
-              redirectingRef.current = true
-              logout()
-              router.push('/login?reason=session_expired')
-              return
-            }
-          } catch (err) {
-            logger.warn(LIB_LABELS.SESSION_CHECK_FAILED, err)
-          }
+        // 只檢查 JWT cookie 是否存在（middleware 會驗證有效性）
+        if (!hasAuthCookie()) {
+          logger.warn('🔐 Auth cookie 不存在，登出')
+          redirectingRef.current = true
+          logout()
+          router.push('/login?reason=session_expired')
+          return
         }
         redirectingRef.current = false
         return
@@ -150,6 +192,18 @@ export function AuthGuard({ children, requiredPermission }: AuthGuardProps) {
   // 如果有 user（持久化的狀態），直接渲染
   if (user && user.id) {
     return <>{children}</>
+  }
+
+  // 如果正在恢復 user 資料，顯示載入畫面
+  if (isRecovering) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-morandi-gold/20 mx-auto mb-4"></div>
+          <p className="text-morandi-secondary">{LIB_LABELS.LOADING_6912}</p>
+        </div>
+      </div>
+    )
   }
 
   // 如果都沒有，顯示載入畫面（很快就會跳轉到登入頁）

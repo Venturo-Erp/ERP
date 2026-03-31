@@ -195,12 +195,9 @@ function NewItineraryPageContent() {
       <ContentPageLayout
         title={EDITOR_LABELS.ADD_9998}
         breadcrumb={[
-          { label: EDITOR_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
           { label: EDITOR_LABELS.BREADCRUMB_ITINERARY_MGMT, href: '/itinerary' },
           { label: EDITOR_LABELS.ADD_9998, href: '#' },
         ]}
-        showBackButton={true}
-        onBack={() => router.back()}
         headerActions={
           <Button
             onClick={() => window.print()}
@@ -223,7 +220,7 @@ function NewItineraryPageContent() {
           </div>
 
           <div className="w-1/2 bg-muted flex flex-col print:w-full">
-            <div className="h-14 bg-card border-b px-6 flex items-center justify-between print:hidden">
+            <div className="h-14 bg-card border-b border-border px-6 flex items-center justify-between print:hidden">
               <h2 className="text-lg font-semibold text-morandi-primary">
                 {EDITOR_LABELS.PRINT_PREVIEW}
               </h2>

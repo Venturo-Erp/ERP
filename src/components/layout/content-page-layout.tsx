@@ -153,7 +153,7 @@ export function ContentPageLayout({
       <ResponsiveHeader
         title={title}
         icon={icon}
-        breadcrumb={breadcrumb}
+        breadcrumb={breadcrumb?.filter(item => item.label !== '首頁')}
         autoBreadcrumb={autoBreadcrumb}
         breadcrumbLastLabel={breadcrumbLastLabel}
         showSearch={showSearch}

@@ -4,8 +4,11 @@ import { getTodayString } from '@/lib/utils/format-date'
 
 import React from 'react'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SimpleDateInput } from '@/components/ui/simple-date-input'
 import { CountryAirportSelector } from '@/components/selectors/CountryAirportSelector'
+import { useWorkspaceFeatures } from '@/lib/permissions'
+import { useDepartments } from '@/data'
 import type { NewTourData } from '../../types'
 import { TOUR_BASIC_INFO } from '../../constants'
 
@@ -16,6 +19,9 @@ interface TourBasicInfoProps {
 
 export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
   const isProposalOrTemplate = newTour.tour_type === 'proposal' || newTour.tour_type === 'template'
+  const { isFeatureEnabled } = useWorkspaceFeatures()
+  const hasDepartments = isFeatureEnabled('departments')
+  const { items: departments = [] } = useDepartments()
 
   // 🔧 核心表架構：接收完整國家資料
   const handleCountryChange = (data: { id: string; name: string; code: string }) => {
@@ -50,6 +56,31 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
           className="mt-1"
         />
       </div>
+
+      {/* 部門選擇（僅有 departments 功能的租戶顯示） */}
+      {hasDepartments && departments.length > 0 && (
+        <div>
+          <label className="text-sm font-medium text-morandi-primary">部門</label>
+          <Select
+            value={newTour.department_id || '_none_'}
+            onValueChange={value =>
+              setNewTour(prev => ({ ...prev, department_id: value === '_none_' ? undefined : value }))
+            }
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="選擇部門..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="_none_">不指定</SelectItem>
+              {departments.filter(d => d.is_active).map(d => (
+                <SelectItem key={d.id} value={d.id}>
+                  {d.code} - {d.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {/* 國家/機場選擇 - 使用共用組件 */}
       <CountryAirportSelector

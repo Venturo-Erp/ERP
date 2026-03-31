@@ -544,7 +544,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
               {activeTab === 'permissions' && (
                 <div className="space-y-5">
                   {/* 顯示目前職務 */}
-                  <div className="flex items-center gap-3 pb-4 border-b border-morandi-border">
+                  <div className="flex items-center gap-3 pb-4 border-b border-border">
                     <span className="text-sm text-morandi-secondary">目前職務：</span>
                     <span className="px-3 py-1 bg-morandi-gold/20 text-morandi-primary font-medium rounded-lg">
                       {selectedRole?.name || '尚未設定'}
@@ -615,9 +615,9 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                   </div>
 
                   {/* 調薪紀錄 */}
-                  <div className="pt-4 border-t border-morandi-border">
+                  <div className="pt-4 border-t border-border">
                     <h4 className="text-sm font-semibold text-morandi-primary mb-3">調薪紀錄</h4>
-                    <div className="border border-morandi-border rounded-lg overflow-hidden">
+                    <div className="border border-border rounded-lg overflow-hidden">
                       <table className="w-full text-sm">
                         <thead className="bg-morandi-container/50">
                           <tr>
@@ -628,7 +628,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                             <th className="px-4 py-2.5 text-left font-semibold text-morandi-secondary text-xs uppercase">備註</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-morandi-border">
+                        <tbody className="divide-y divide-border">
                           {employee?.salary_info?.salary_history && employee.salary_info.salary_history.length > 0 ? (
                             employee.salary_info.salary_history.map((record, idx, arr) => {
                               const prevSalary = idx < arr.length - 1 ? arr[idx + 1].base_salary : null

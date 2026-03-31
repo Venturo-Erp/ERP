@@ -140,23 +140,14 @@ export default function SupplierTripsPage() {
     <ContentPageLayout
       title="車趟管理"
       icon={Truck}
+      tabs={[
+        { value: 'pending', label: `收到的派車${pendingTrips.length > 0 ? ` (${pendingTrips.length})` : ''}`, icon: Inbox },
+        { value: 'confirmed', label: '已確認車趟', icon: CheckCircle },
+      ]}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
     >
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="pending" className="flex items-center gap-2">
-            <Inbox className="h-4 w-4" />
-            收到的派車
-            {pendingTrips.length > 0 && (
-              <Badge variant="destructive" className="ml-1">
-                {pendingTrips.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="confirmed" className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4" />
-            已確認車趟
-          </TabsTrigger>
-        </TabsList>
 
         <TabsContent value="pending">
           {loading ? (

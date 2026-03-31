@@ -512,18 +512,19 @@ export function Sidebar() {
           ) {
             return null
           }
-          if (!isAdmin && preferredFeatures.length > 0 && item.requiredPermission) {
+          if (preferredFeatures.length > 0 && item.requiredPermission) {
             if (!preferredFeatures.includes(item.requiredPermission)) return null
           }
           if (item.children) {
             const visibleChildren = filterMenuByPermissions(item.children)
-            if (visibleChildren.length > 0 || isAdmin) {
+            if (visibleChildren.length > 0) {
               return { ...item, children: visibleChildren }
             }
             return null
           }
           if (!item.requiredPermission) return item
-          if (isAdmin) return item
+          // '*' 代表擁有所有權限
+          if (userPermissions.includes('*')) return item
           return userPermissions.includes(item.requiredPermission) ? item : null
         })
         .filter((item): item is MenuItem => item !== null)

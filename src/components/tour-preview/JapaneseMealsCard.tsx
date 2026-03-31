@@ -64,7 +64,7 @@ export function JapaneseMealsCard({ meals, className }: JapaneseMealsCardProps) 
 
           {/* 餐別標籤 */}
           <span
-            className="text-[10px] sm:text-xs uppercase tracking-[0.1em] sm:tracking-[0.2em] mb-1.5 sm:mb-2 md:mb-3 border-b pb-0.5 sm:pb-1"
+            className="text-[10px] sm:text-xs uppercase tracking-[0.1em] sm:tracking-[0.2em] mb-1.5 sm:mb-2 md:mb-3 border-b border-border pb-0.5 sm:pb-1"
             style={{
               color: `${primaryColor}99`,
               borderColor: `${primaryColor}33`,

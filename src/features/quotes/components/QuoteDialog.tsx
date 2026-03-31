@@ -181,7 +181,7 @@ export const QuoteDialog: React.FC<QuoteDialogProps> = ({
                 id="is_pinned"
                 checked={formData.is_pinned}
                 onChange={e => setFormField('is_pinned', e.target.checked)}
-                className="h-4 w-4 rounded border-morandi-border text-morandi-gold focus:ring-morandi-gold"
+                className="h-4 w-4 rounded border-border text-morandi-gold focus:ring-morandi-gold"
               />
               <label htmlFor="is_pinned" className="text-sm text-morandi-primary cursor-pointer">
                 {QUOTE_DIALOG_LABELS.COPYING_2742}

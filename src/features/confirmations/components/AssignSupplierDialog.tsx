@@ -654,7 +654,7 @@ export function AssignSupplierDialog({
                   ))}
                   {(roomDetails[item.key] || []).filter(r => r.name.trim() && r.qty > 0).length >
                     0 && (
-                    <div className="text-xs text-muted-foreground border-t pt-1 mt-1">
+                    <div className="text-xs text-muted-foreground border-t border-border pt-1 mt-1">
                       小計：
                       {(roomDetails[item.key] || [])
                         .filter(r => r.name.trim() && r.qty > 0)

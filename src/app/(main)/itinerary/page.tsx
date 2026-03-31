@@ -51,10 +51,8 @@ import { LABELS } from './constants/labels'
 
 const statusFilters = [
   LABELS.ALL,
-  LABELS.STATUS_PROPOSAL,
-  LABELS.STATUS_ACTIVE,
   LABELS.STATUS_TEMPLATE,
-  LABELS.STATUS_CLOSED,
+  LABELS.STATUS_PROPOSAL,
 ]
 
 export default function ItineraryPage() {
@@ -64,18 +62,8 @@ export default function ItineraryPage() {
   const { items: employees } = useEmployeesSlim()
   const { items: tours } = useToursSlim()
   const { user, isAdmin } = useAuthStore()
-  const { workspaces, loadWorkspaces } = useWorkspaceStore()
   // 🔧 優化：countries 只用於新增對話框，cities 已不需要（Itinerary 有 denormalized 欄位）
   const { items: countries } = useCountries()
-
-  // 新系統：使用 isAdmin
-  const isSuperAdmin = isAdmin
-
-  useEffect(() => {
-    if (isSuperAdmin && workspaces.length === 0) {
-      loadWorkspaces()
-    }
-  }, [isSuperAdmin])
 
   // 🔧 優化：移除無條件 fetchAll，改為 Dialog 開啟時才載入
   // regionsStore.fetchAll() 移到 CreateItineraryDialog 內
@@ -128,7 +116,7 @@ export default function ItineraryPage() {
     authorFilter: pageState.authorFilter,
     viewMode: pageState.viewMode,
     userId: user?.id,
-    isSuperAdmin: !!isSuperAdmin,
+    isSuperAdmin: false,
     isItineraryClosed: actions.isItineraryClosed,
   })
 
@@ -176,17 +164,6 @@ export default function ItineraryPage() {
           {/* 分頁選擇 */}
           <div className="flex gap-2">
             <button
-              onClick={() => pageState.setViewMode('my')}
-              className={cn(
-                'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
-                pageState.viewMode === 'my'
-                  ? 'bg-morandi-gold text-white'
-                  : 'text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/30'
-              )}
-            >
-              我的行程
-            </button>
-            <button
               onClick={() => pageState.setViewMode('all')}
               className={cn(
                 'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
@@ -195,7 +172,7 @@ export default function ItineraryPage() {
                   : 'text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/30'
               )}
             >
-              全部
+              團體
             </button>
             <button
               onClick={() => pageState.setViewMode('templates')}
@@ -207,6 +184,17 @@ export default function ItineraryPage() {
               )}
             >
               模板
+            </button>
+            <button
+              onClick={() => pageState.setViewMode('proposals')}
+              className={cn(
+                'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
+                pageState.viewMode === 'proposals'
+                  ? 'bg-morandi-gold text-white'
+                  : 'text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/30'
+              )}
+            >
+              提案
             </button>
           </div>
 
@@ -227,34 +215,6 @@ export default function ItineraryPage() {
             </Select>
           </div>
 
-          {isSuperAdmin && workspaces.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Building2 size={14} className="text-morandi-blue" />
-              <Select
-                value={localStorage.getItem('itinerary_workspace_filter') || 'all'}
-                onValueChange={value => {
-                  if (value === 'all') {
-                    localStorage.removeItem('itinerary_workspace_filter')
-                  } else {
-                    localStorage.setItem('itinerary_workspace_filter', value)
-                  }
-                  window.location.reload()
-                }}
-              >
-                <SelectTrigger className="w-auto min-w-[100px] h-8 text-sm border-morandi-blue/30">
-                  <SelectValue placeholder={LABELS.ALL_COMPANIES} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{LABELS.ALL_COMPANIES}</SelectItem>
-                  {workspaces.map((ws: { id: string; name: string }) => (
-                    <SelectItem key={ws.id} value={ws.id}>
-                      {ws.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
         </div>
       }
     >
@@ -448,7 +408,7 @@ function CreateItineraryDialog({
           <div className="py-6 space-y-3">
             <button
               onClick={() => setStep('selectTour')}
-              className="w-full p-6 border border-morandi-border rounded-lg hover:bg-morandi-container/30 text-left transition-colors"
+              className="w-full p-6 border border-border rounded-lg hover:bg-morandi-container/30 text-left transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
                 <CalendarDays className="w-6 h-6 text-morandi-gold" />
@@ -459,7 +419,7 @@ function CreateItineraryDialog({
 
             <button
               onClick={() => setStep('createTemplate')}
-              className="w-full p-6 border border-morandi-border rounded-lg hover:bg-morandi-container/30 text-left transition-colors"
+              className="w-full p-6 border border-border rounded-lg hover:bg-morandi-container/30 text-left transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
                 <FileText className="w-6 h-6 text-morandi-gold" />

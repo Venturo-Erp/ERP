@@ -161,7 +161,7 @@ export function TourLeaderSectionArt({ data, viewMode }: TourLeaderSectionArtPro
 
                 {data.leader?.description && (
                   <p
-                    className="text-sm leading-relaxed mb-6 pb-6 border-b italic"
+                    className="text-sm leading-relaxed mb-6 pb-6 border-b border-border italic"
                     style={{
                       fontFamily: "'Noto Serif TC', serif",
                       color: colors.ink,

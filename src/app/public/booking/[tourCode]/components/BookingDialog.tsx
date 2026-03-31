@@ -94,7 +94,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
         <form onSubmit={handleSubmit} className="space-y-8 p-6">
           {/* Hero */}
-          <div className="text-center border-b pb-6">
+          <div className="text-center border-b border-border pb-6">
             <p className="text-[#655d56] font-medium tracking-widest uppercase text-xs mb-2">
               Registration Portal
             </p>
@@ -169,7 +169,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
 
           {/* Travelers */}
           <div className="space-y-6">
-            <div className="flex items-end justify-between border-b pb-4">
+            <div className="flex items-end justify-between border-b border-border pb-4">
               <h2 className="text-2xl font-serif italic">Traveler Dossiers</h2>
               <p className="text-sm text-gray-500">Entry {travelers.length} total</p>
             </div>

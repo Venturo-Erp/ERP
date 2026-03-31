@@ -155,7 +155,25 @@ export function useTourOperations(params: UseTourOperationsParams) {
             return
           }
           const departure_date = new Date(newTour.departure_date)
-          code = await tourService.generateTourCode(cityCode, departure_date, newTour.isSpecial)
+          let generatedCode = await tourService.generateTourCode(cityCode, departure_date, newTour.isSpecial)
+
+          // 部門代號前綴（如 JY-CNX250501A）
+          if (newTour.department_id) {
+            try {
+              const { supabase } = await import('@/lib/supabase/client')
+              const { data: dept } = await supabase
+                .from('departments')
+                .select('code')
+                .eq('id', newTour.department_id)
+                .single()
+              if (dept?.code) {
+                generatedCode = `${dept.code}-${generatedCode}`
+              }
+            } catch {
+              // 查不到部門就不加前綴
+            }
+          }
+          code = generatedCode
         }
 
         // 解析航班文字為 FlightInfo（簡單格式：航空公司 班次 時間）
@@ -208,6 +226,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
             ? undefined
             : parseFlightText(newTour.return_flight_text),
           workspace_id: workspaceId,
+          department_id: newTour.department_id || undefined,
         }
 
         const createdTour = await actions.create(tourData)

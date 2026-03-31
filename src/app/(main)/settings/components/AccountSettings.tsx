@@ -304,7 +304,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 <Input
                   value={user.employee_number}
                   disabled
-                  className="bg-morandi-container/50 border-morandi-border"
+                  className="bg-morandi-container/50 border-border"
                 />
               </div>
 

@@ -1,10 +1,8 @@
 export const LABELS = {
   // Status filters
-  ALL: '全部',
-  STATUS_PROPOSAL: '開團',
-  STATUS_ACTIVE: '待出發',
-  STATUS_TEMPLATE: '公司範例',
-  STATUS_CLOSED: '已結團',
+  ALL: '團體',
+  STATUS_TEMPLATE: '模板',
+  STATUS_PROPOSAL: '提案',
   SEARCH_ITINERARY: '搜尋行程...',
 
   // 页面标题和导航

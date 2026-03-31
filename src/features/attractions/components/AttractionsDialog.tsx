@@ -12,6 +12,7 @@ import { AttractionForm } from './attraction-dialog/AttractionForm'
 import { AttractionImageUpload } from './attraction-dialog/AttractionImageUpload'
 import { useAuthStore } from '@/stores/auth-store'
 import { isFeatureAvailable } from '@/lib/feature-restrictions'
+import { useRolePermissions } from '@/lib/permissions/hooks'
 import { Button } from '@/components/ui/button'
 import { Sparkles, Loader2, CheckCircle2 } from 'lucide-react'
 import { ATTRACTIONS_DIALOG_LABELS } from '../constants/labels'
@@ -30,6 +31,8 @@ interface AttractionsDialogProps {
   getCitiesByCountry: (countryId: string) => City[]
   getCitiesByRegion: (regionId: string) => City[]
   initialFormData: AttractionFormData
+  /** 固定分類（用於飯店/餐廳 tab，影響標題顯示） */
+  fixedCategory?: string
 }
 
 export function AttractionsDialog({
@@ -44,7 +47,11 @@ export function AttractionsDialog({
   getCitiesByCountry,
   getCitiesByRegion,
   initialFormData,
+  fixedCategory,
 }: AttractionsDialogProps) {
+  const { canWrite } = useRolePermissions()
+  const readOnly = !!attraction && !canWrite('/database')
+
   const {
     formData,
     setFormData,
@@ -315,7 +322,12 @@ export function AttractionsDialog({
   // 自訂標題（包含 AI 補充按鈕 + 標記已驗證按鈕）
   const dialogTitle = (
     <div className="flex items-center gap-3">
-      <span>{attraction ? '編輯景點' : ATTRACTIONS_DIALOG_LABELS.新增景點}</span>
+      <span>{attraction
+        ? `編輯${fixedCategory === '住宿' ? '飯店' : fixedCategory === '美食餐廳' ? '餐廳' : '景點'}`
+        : fixedCategory === '住宿' ? '新增飯店'
+        : fixedCategory === '美食餐廳' ? '新增餐廳'
+        : ATTRACTIONS_DIALOG_LABELS.新增景點
+      }</span>
       {/* 待驗證警示 + 標記按鈕 */}
       {attraction && !isVerified && (
         <Button
@@ -360,9 +372,9 @@ export function AttractionsDialog({
       title={dialogTitle}
       onSubmit={handleSubmit}
       submitLabel={attraction ? '更新' : ATTRACTIONS_DIALOG_LABELS.新增}
-      submitDisabled={!formData.name || !formData.country_id}
-      maxWidth="2xl"
-      contentClassName="max-h-[90vh] overflow-y-auto"
+      submitDisabled={readOnly || !formData.name || !formData.country_id}
+      maxWidth="5xl"
+      contentClassName=""
     >
       <AttractionForm
         formData={formData}
@@ -370,6 +382,7 @@ export function AttractionsDialog({
         availableRegions={availableRegions}
         availableCities={availableCities}
         onFormDataChange={setFormData}
+        readOnly={readOnly}
       />
 
       <AttractionImageUpload

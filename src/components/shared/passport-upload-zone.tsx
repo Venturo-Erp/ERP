@@ -83,7 +83,7 @@ export function PassportUploadZone({
         className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 ${
           isDragging
             ? 'border-primary bg-primary/10 scale-[1.02] shadow-lg'
-            : 'border-morandi-border hover:border-primary/50 bg-morandi-background'
+            : 'border-border hover:border-primary/50 bg-morandi-background'
         }`}
       >
         <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -116,7 +116,7 @@ export function PassportUploadZone({
             {files.map((file, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-2 bg-morandi-background border border-morandi-border rounded-lg"
+                className="flex items-center justify-between p-2 bg-morandi-background border border-border rounded-lg"
               >
                 <div className="flex items-center space-x-2 flex-1 min-w-0">
                   <FileImage size={16} className="text-morandi-secondary flex-shrink-0" />

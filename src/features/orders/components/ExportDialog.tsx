@@ -287,14 +287,14 @@ export function ExportDialog({
                   type="checkbox"
                   checked={columns[key]}
                   onChange={() => toggleColumn(key)}
-                  className="rounded border-morandi-border"
+                  className="rounded border-border"
                 />
                 <span className="text-sm">{COLUMN_LABELS[key]}</span>
               </label>
             ))}
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-morandi-border">
+          <div className="flex justify-end gap-2 pt-4 border-t border-border">
             <Button variant="outline" onClick={onClose}>
               <X size={16} className="mr-1" />
               {ORDERS_LABELS.CANCEL}

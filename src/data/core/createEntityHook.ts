@@ -98,6 +98,8 @@ const WORKSPACE_SCOPED_TABLES = [
   'request_responses',
   'request_response_items',
   // === 資料庫（景點/飯店等，需要 workspace 隔離寫入）===
+  'countries',
+  'ref_airports',
   'attractions',
   // === 獎金系統 ===
   'tour_bonus_settings',

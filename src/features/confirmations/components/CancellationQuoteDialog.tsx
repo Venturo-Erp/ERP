@@ -242,7 +242,7 @@ export function CancellationQuoteDialog({
         </div>
 
         {/* 固定底部：發送方式 */}
-        <div className="flex-shrink-0 border-t pt-4 mt-2 space-y-3">
+        <div className="flex-shrink-0 border-t border-border pt-4 mt-2 space-y-3">
           {/* LINE 群組選擇 */}
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground">LINE 群組：</span>

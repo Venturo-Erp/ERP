@@ -31,7 +31,6 @@ export function ItineraryHeader({
           : NEW_LABELS.NEW_WEB_ITINERARY
       }
       breadcrumb={[
-        { label: NEW_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
         { label: NEW_LABELS.BREADCRUMB_ITINERARY_MGMT, href: '/itinerary' },
         {
           label: tourData.tourCode
@@ -40,8 +39,6 @@ export function ItineraryHeader({
           href: '#',
         },
       ]}
-      showBackButton={true}
-      onBack={onBack}
       actions={
         <PublishButton
           data={{

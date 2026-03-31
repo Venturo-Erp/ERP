@@ -45,7 +45,7 @@ export function CustomerMatchDialog({
             {customers.map(customer => (
               <div
                 key={customer.id}
-                className="border border-morandi-border rounded-lg p-4 hover:bg-morandi-container/20 transition-colors cursor-pointer"
+                className="border border-border rounded-lg p-4 hover:bg-morandi-container/20 transition-colors cursor-pointer"
                 onClick={() => {
                   onSelect(customer)
                   onClose()

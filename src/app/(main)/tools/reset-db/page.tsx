@@ -198,7 +198,7 @@ export default function ResetDBPage() {
           </div>
 
           {/* 技術說明 */}
-          <details className="text-sm text-morandi-secondary border-t pt-4">
+          <details className="text-sm text-morandi-secondary border-t border-border pt-4">
             <summary className="cursor-pointer font-semibold hover:text-foreground">
               {RESET_DB_LABELS.LABEL_6860}
             </summary>

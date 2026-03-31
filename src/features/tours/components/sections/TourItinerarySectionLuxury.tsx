@@ -352,7 +352,7 @@ export function TourItinerarySectionLuxury({
                                 {/* 3. 說明文字 */}
                                 {day.activities?.[0]?.description && (
                                   <p
-                                    className="text-xs leading-relaxed border-t pt-3"
+                                    className="text-xs leading-relaxed border-t border-border pt-3"
                                     style={{
                                       color: LUXURY.muted,
                                       borderColor: '#e5e5e5',

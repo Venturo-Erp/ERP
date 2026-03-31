@@ -99,7 +99,7 @@ export function AddMemberDialog({
             </div>
           </div>
 
-          <div className="border-t border-morandi-border" />
+          <div className="border-t border-border" />
 
           {/* 護照批次上傳（使用共用組件，支援圖片增強） */}
           <PassportUploadZone

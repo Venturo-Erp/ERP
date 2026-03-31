@@ -212,7 +212,7 @@ export default function BalanceSheetPage() {
             {/* 左側：資產 */}
             <Card className="p-6">
               <div className="space-y-4">
-                <div className="text-center border-b pb-4">
+                <div className="text-center border-b border-border pb-4">
                   <h2 className="text-xl font-bold">資產</h2>
                   <p className="text-sm text-muted-foreground mt-1">截至 {asOfDate}</p>
                 </div>
@@ -242,7 +242,7 @@ export default function BalanceSheetPage() {
             {/* 右側：負債 + 權益 */}
             <Card className="p-6">
               <div className="space-y-4">
-                <div className="text-center border-b pb-4">
+                <div className="text-center border-b border-border pb-4">
                   <h2 className="text-xl font-bold">負債與權益</h2>
                   <p className="text-sm text-muted-foreground mt-1">截至 {asOfDate}</p>
                 </div>
@@ -261,7 +261,7 @@ export default function BalanceSheetPage() {
                   {data.liabilities.length === 0 && (
                     <div className="text-sm text-muted-foreground pl-4">無負債記錄</div>
                   )}
-                  <div className="flex justify-between py-2 border-t mt-2 font-semibold">
+                  <div className="flex justify-between py-2 border-t border-border mt-2 font-semibold">
                     <span>負債合計</span>
                     <span className="font-mono">${data.totalLiabilities.toLocaleString()}</span>
                   </div>
@@ -292,7 +292,7 @@ export default function BalanceSheetPage() {
                   {data.equity.length === 0 && data.netIncome === 0 && (
                     <div className="text-sm text-muted-foreground pl-4">無權益記錄</div>
                   )}
-                  <div className="flex justify-between py-2 border-t mt-2 font-semibold">
+                  <div className="flex justify-between py-2 border-t border-border mt-2 font-semibold">
                     <span>權益合計</span>
                     <span className="font-mono">${data.totalEquity.toLocaleString()}</span>
                   </div>

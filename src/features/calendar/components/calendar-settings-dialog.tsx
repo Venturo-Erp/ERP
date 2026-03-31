@@ -86,7 +86,7 @@ export function CalendarSettingsDialog() {
           </div>
         </div>
 
-        <div className="text-xs text-muted-foreground border-t pt-4">
+        <div className="text-xs text-muted-foreground border-t border-border pt-4">
           {CALENDAR_LABELS.LABEL_7348}
         </div>
       </DialogContent>

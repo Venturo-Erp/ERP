@@ -444,7 +444,7 @@ export function AccommodationQuoteDialog({
         </div>
 
         {/* 底部發送按鈕 */}
-        <div className="flex-shrink-0 border-t p-4 bg-white space-y-3">
+        <div className="flex-shrink-0 border-t border-border p-4 bg-white space-y-3">
           {/* LINE 群組選擇 */}
           {selectedMethod === 'line' && (
             <div className="flex items-center gap-3">

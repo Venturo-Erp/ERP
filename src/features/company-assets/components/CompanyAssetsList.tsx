@@ -72,7 +72,7 @@ export const CompanyAssetsList: React.FC<CompanyAssetsListProps> = ({
 
         return (
           <div
-            className="w-10 h-10 rounded border border-morandi-border overflow-hidden bg-morandi-container/20 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+            className="w-10 h-10 rounded border border-border overflow-hidden bg-morandi-container/20 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
             onClick={e => {
               e.stopPropagation()
               onThumbnailClick?.(asset)

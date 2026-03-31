@@ -73,7 +73,7 @@ export function ItineraryPreview({
   return (
     <div className="w-1/2 bg-card flex flex-col">
       {/* 標題列 */}
-      <div className="h-14 bg-card border-b px-6 flex items-center justify-between">
+      <div className="h-14 bg-card border-b border-border px-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h2 className="text-lg font-semibold text-morandi-primary">{NEW_LABELS.PREVIEW_2405}</h2>
           <div className="flex gap-2 bg-morandi-container/30 rounded-lg p-1">

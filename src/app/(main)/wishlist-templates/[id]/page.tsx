@@ -384,7 +384,7 @@ export default function WishlistTemplateEditPage({
         /* 景點管理頁籤 */
         <div className="flex h-[calc(100vh-180px)] overflow-hidden">
           {/* 左側：已選景點 */}
-          <div className="w-1/2 border-r overflow-y-auto p-6">
+          <div className="w-1/2 border-r border-border overflow-y-auto p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-primary" />

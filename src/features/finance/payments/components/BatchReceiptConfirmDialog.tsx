@@ -273,7 +273,7 @@ export function BatchReceiptConfirmDialog({
         ) : (
           <>
             {/* 基本資訊 */}
-            <div className="flex gap-6 text-sm border-b pb-3">
+            <div className="flex gap-6 text-sm border-b border-border pb-3">
               <div>
                 <span className="text-muted-foreground mr-2">團名</span>
                 <span className="font-medium">{receipt.tour_name || '-'}</span>

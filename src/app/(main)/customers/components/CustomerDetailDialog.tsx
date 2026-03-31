@@ -42,7 +42,7 @@ export function CustomerDetailDialog({
         <div className="flex gap-6 py-4">
           {/* 左側：護照照片 */}
           <div className="w-64 flex-shrink-0">
-            <div className="aspect-[3/4] rounded-lg overflow-hidden bg-morandi-background border border-morandi-border shadow-sm">
+            <div className="aspect-[3/4] rounded-lg overflow-hidden bg-morandi-background border border-border shadow-sm">
               {customer.passport_image_url ? (
                 <img
                   src={customer.passport_image_url}
@@ -81,7 +81,7 @@ export function CustomerDetailDialog({
           {/* 右側：資料欄位 */}
           <div className="flex-1 space-y-4">
             {/* 聯絡資訊 */}
-            <div className="bg-morandi-container rounded-lg p-4 border border-morandi-border">
+            <div className="bg-morandi-container rounded-lg p-4 border border-border">
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs text-morandi-muted">{L.label_phone}</label>
@@ -105,7 +105,7 @@ export function CustomerDetailDialog({
             </div>
 
             {/* 護照資料 */}
-            <div className="bg-morandi-container rounded-lg p-4 border border-morandi-border">
+            <div className="bg-morandi-container rounded-lg p-4 border border-border">
               <h4 className="text-sm font-medium text-morandi-primary mb-3">
                 {L.section_passport}
               </h4>
@@ -152,7 +152,7 @@ export function CustomerDetailDialog({
             </div>
 
             {/* 身分資料 */}
-            <div className="bg-morandi-container rounded-lg p-4 border border-morandi-border">
+            <div className="bg-morandi-container rounded-lg p-4 border border-border">
               <h4 className="text-sm font-medium text-morandi-primary mb-3">
                 {L.section_identity}
               </h4>

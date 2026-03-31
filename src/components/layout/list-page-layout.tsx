@@ -202,7 +202,7 @@ export function ListPageLayout<T extends Record<string, any>>({
       <ResponsiveHeader
         title={title}
         icon={icon}
-        breadcrumb={breadcrumb}
+        breadcrumb={breadcrumb?.filter(item => item.label !== '首頁')}
         showSearch={searchable}
         searchTerm={searchQuery}
         onSearchChange={setSearchQuery}

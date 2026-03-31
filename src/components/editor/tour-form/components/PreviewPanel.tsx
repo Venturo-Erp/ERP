@@ -31,7 +31,7 @@ export function PreviewPanel({
   return (
     <div className={cn('bg-card flex flex-col w-1/2 min-w-0', className)}>
       {/* 標題列（和主編輯器一致） */}
-      <div className="h-14 bg-card border-b px-6 flex items-center justify-between shrink-0">
+      <div className="h-14 bg-card border-b border-border px-6 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-4">
           <h2 className="text-lg font-semibold text-morandi-primary">
             {TOUR_FORM_LABELS.PREVIEW_2405}

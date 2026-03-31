@@ -128,7 +128,7 @@ export function ApiSettings() {
               {configs.map(config => (
                 <div
                   key={config.envKey}
-                  className="bg-morandi-background rounded-lg p-4 border border-morandi-border"
+                  className="bg-morandi-background rounded-lg p-4 border border-border"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">

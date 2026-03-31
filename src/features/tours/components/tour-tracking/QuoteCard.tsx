@@ -140,7 +140,7 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
 
         {/* 詳細資訊（展開） */}
         {showDetails && (
-          <div className="mt-3 pt-3 border-t text-sm">
+          <div className="mt-3 pt-3 border-t border-border text-sm">
             <p className="text-muted-foreground">完整報價資料</p>
             <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto max-h-40">
               {JSON.stringify(response, null, 2)}

@@ -133,7 +133,7 @@ function SaveAsDialog({
                 <SelectItem value="private">{LABELS.PRIVATE_FILES}</SelectItem>
                 {tours && tours.length > 0 && (
                   <>
-                    <div className="px-2 py-1.5 text-xs text-muted-foreground border-t mt-1 pt-1">
+                    <div className="px-2 py-1.5 text-xs text-muted-foreground border-t border-border mt-1 pt-1">
                       {LABELS.LABEL_7842}
                     </div>
                     {tours.map(tour => (

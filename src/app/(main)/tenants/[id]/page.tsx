@@ -208,7 +208,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
 
         {/* 付費功能卡片 */}
         <div className={`bg-white border rounded-lg overflow-hidden ${premiumEnabled ? 'border-morandi-gold' : 'border-border'}`}>
-          <div className={`px-6 py-4 border-b ${premiumEnabled ? 'bg-morandi-gold/10 border-morandi-gold/30' : 'bg-gray-50 border-border'}`}>
+          <div className={`px-6 py-4 border-b border-border ${premiumEnabled ? 'bg-morandi-gold/10 border-morandi-gold/30' : 'bg-gray-50 border-border'}`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles className={`h-4 w-4 ${premiumEnabled ? 'text-morandi-gold' : 'text-gray-400'}`} />

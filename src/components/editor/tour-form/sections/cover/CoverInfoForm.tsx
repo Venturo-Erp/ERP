@@ -17,7 +17,9 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { toHalfWidth } from '@/lib/utils/text'
 import { RichTextInput } from '@/components/ui/rich-text-input'
-import { CalendarIcon, Loader2 } from 'lucide-react'
+import { CalendarIcon, Loader2, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+import { toast } from 'sonner'
 import { COMP_EDITOR_LABELS } from '../../../constants/labels'
 
 interface CoverInfoFormProps {
@@ -130,9 +132,12 @@ export function CoverInfoForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-morandi-primary mb-1">
-            {COMP_EDITOR_LABELS.LABEL_3951}
-          </label>
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-sm font-medium text-morandi-primary">
+              {COMP_EDITOR_LABELS.LABEL_3951}
+            </label>
+            <AiCopyButton data={data} updateField={updateField} />
+          </div>
           <RichTextInput
             value={data.description || ''}
             onChange={value => updateField('description', value)}
@@ -266,5 +271,75 @@ export function CoverInfoForm({
         </div>
       </div>
     </div>
+  )
+}
+
+// AI 文案生成按鈕
+function AiCopyButton({ data, updateField }: { data: TourFormData; updateField: (field: string, value: unknown) => void }) {
+  const [loading, setLoading] = useState(false)
+
+  const handleGenerate = async () => {
+    if (!data.title && !data.dailyItinerary?.length) {
+      toast.error('請先填寫行程標題或每日行程')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const days = (data.dailyItinerary || [])
+        .filter(d => !d.isAlternative)
+        .map(d => ({
+          title: d.title || '',
+          activities: (d.activities || []).map(a => ({
+            name: a.name || '',
+            description: a.description || '',
+          })),
+        }))
+
+      const res = await fetch('/api/ai/generate-itinerary-copy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: data.title || '',
+          country: data.country || '',
+          city: data.city || '',
+          days,
+        }),
+      })
+
+      const result = await res.json()
+
+      if (result.success && result.data) {
+        // 先更新描述，再更新副標題（分開 render cycle 確保都生效）
+        if (result.data.description) {
+          updateField('description', result.data.description)
+        }
+        // 用 setTimeout 確保副標題在下一個 render cycle 更新
+        setTimeout(() => {
+          if (result.data.subtitle) {
+            updateField('subtitle', result.data.subtitle)
+          }
+        }, 50)
+        toast.success('文案已生成（副標題+描述）')
+      } else {
+        toast.error(result.error || '生成失敗')
+      }
+    } catch {
+      toast.error('生成失敗')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleGenerate}
+      disabled={loading}
+      className="flex items-center gap-1 px-2 py-0.5 text-xs text-morandi-gold hover:bg-morandi-gold/10 rounded transition-colors disabled:opacity-50"
+    >
+      {loading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+      {loading ? '生成中...' : 'AI 生成'}
+    </button>
   )
 }

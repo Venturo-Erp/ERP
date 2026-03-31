@@ -399,7 +399,7 @@ function FullHeroLayout({
             {day.activities.slice(0, 2).map((activity, i) => (
               <div key={i}>
                 <h4
-                  className={`${isMobile ? 'text-xl' : 'text-2xl'} mb-4 border-b pb-2`}
+                  className={`${isMobile ? 'text-xl' : 'text-2xl'} mb-4 border-b border-border pb-2`}
                   style={{ fontFamily: "'Cinzel', serif", borderColor: 'rgba(255,255,255,0.3)' }}
                 >
                   {activity.title}

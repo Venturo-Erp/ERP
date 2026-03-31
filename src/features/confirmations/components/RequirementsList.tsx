@@ -1176,7 +1176,7 @@ export function RequirementsList({
           <>
             {/* 勾選項目後顯示「發給供應商」按鈕 */}
             {checkedItems.size > 0 && (
-              <div className="mb-3 flex items-center gap-3 bg-morandi-container/30 border border-morandi-border rounded-lg px-4 py-2.5">
+              <div className="mb-3 flex items-center gap-3 bg-morandi-container/30 border border-border rounded-lg px-4 py-2.5">
                 <span className="text-sm font-medium text-morandi-primary ml-2">
                   已選 {checkedItems.size} 項
                 </span>

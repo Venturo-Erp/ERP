@@ -6,8 +6,10 @@
  */
 
 import { useState } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { Card } from '@/components/ui/card'
+import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { Monitor, LayoutDashboard, Bot, ClipboardList } from 'lucide-react'
 
 export default function MonitoringPage() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -19,22 +21,18 @@ export default function MonitoringPage() {
   const missionControlUrl = 'http://127.0.0.1:3100'
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      {/* 頁面標題 */}
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">監控中心</h2>
-          <p className="text-muted-foreground">即時監控 AI Agents 狀態和任務進度</p>
-        </div>
-      </div>
-
-      {/* 分頁切換 */}
+    <ContentPageLayout
+      title="監控中心"
+      icon={Monitor}
+      tabs={[
+        { value: 'overview', label: '總覽', icon: LayoutDashboard },
+        { value: 'agents', label: 'Agent 狀態', icon: Bot },
+        { value: 'tasks', label: '任務看板', icon: ClipboardList },
+      ]}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+    >
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">總覽</TabsTrigger>
-          <TabsTrigger value="agents">Agent 狀態</TabsTrigger>
-          <TabsTrigger value="tasks">任務看板</TabsTrigger>
-        </TabsList>
 
         {/* 總覽：兩個系統並排 */}
         <TabsContent value="overview" className="space-y-4">
@@ -127,6 +125,6 @@ export default function MonitoringPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </ContentPageLayout>
   )
 }

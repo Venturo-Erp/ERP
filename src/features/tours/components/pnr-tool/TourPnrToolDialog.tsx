@@ -618,10 +618,10 @@ export function TourPnrToolDialog({
                         className={cn(
                           'flex items-center gap-3 px-3 py-2 rounded-lg border text-sm transition-colors',
                           hasMatch
-                            ? 'border-l-[3px] border-l-[#7a9e7e] border-r-morandi-border border-y-morandi-border bg-white'
+                            ? 'border-l-[3px] border-l-[#7a9e7e] border-r-border border-y-border bg-white'
                             : hasSuggestion
-                              ? 'border-l-[3px] border-l-[#7b95b0] border-r-morandi-border border-y-morandi-border bg-[#f7fafd]'
-                              : 'border-l-[3px] border-l-morandi-gold border-r-morandi-border border-y-morandi-border bg-[#fdfaf6]'
+                              ? 'border-l-[3px] border-l-[#7b95b0] border-r-border border-y-border bg-[#f7fafd]'
+                              : 'border-l-[3px] border-l-morandi-gold border-r-border border-y-border bg-[#fdfaf6]'
                         )}
                       >
                         {/* 編號 */}
@@ -682,7 +682,7 @@ export function TourPnrToolDialog({
                             <div>
                               <div className="text-xs text-morandi-gold">{LABELS.查無此旅客}</div>
                               <select
-                                className="mt-1 text-xs border border-morandi-border rounded px-1.5 py-0.5 bg-white"
+                                className="mt-1 text-xs border border-border rounded px-1.5 py-0.5 bg-white"
                                 value=""
                                 onChange={e => handleMemberSelect(i, e.target.value || null)}
                               >
@@ -793,7 +793,7 @@ export function TourPnrToolDialog({
         </div>
 
         {/* 底部 */}
-        <div className="flex items-center justify-between pt-3 border-t border-morandi-border">
+        <div className="flex items-center justify-between pt-3 border-t border-border">
           <span className="text-xs text-morandi-secondary">
             {parsedPNR ? (
               matchStats.allMatched ? (

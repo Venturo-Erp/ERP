@@ -279,7 +279,7 @@ export function TeamConfirmationSheet({
         </div>
 
         {/* 底部按鈕 */}
-        <div className="flex-shrink-0 border-t pt-4 mt-2 flex items-center justify-between print:hidden">
+        <div className="flex-shrink-0 border-t border-border pt-4 mt-2 flex items-center justify-between print:hidden">
           <div className="text-sm text-morandi-secondary">
             總需求單：{confirmedRequests.length} 筆
             {statusCounts.confirmed && (

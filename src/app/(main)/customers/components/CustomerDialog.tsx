@@ -333,7 +333,7 @@ export function CustomerDialog({
         </div>
 
         {/* 底部按鈕 */}
-        <div className="flex justify-end gap-2 pt-6 mt-6 border-t border-morandi-border/50">
+        <div className="flex justify-end gap-2 pt-6 mt-6 border-t border-border/50">
           {isEdit ? (
             <>
               <Button

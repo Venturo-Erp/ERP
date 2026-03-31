@@ -95,7 +95,7 @@ export function PassportUploadZone({
         <label
           className={`
           flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-lg cursor-pointer transition-colors
-          ${isDragging ? 'border-morandi-blue bg-morandi-blue/5' : 'border-morandi-border hover:border-morandi-blue/50'}
+          ${isDragging ? 'border-morandi-blue bg-morandi-blue/5' : 'border-border hover:border-morandi-blue/50'}
           ${isProcessing ? 'opacity-50 pointer-events-none' : ''}
         `}
           onDragOver={onDragOver}
@@ -164,7 +164,7 @@ export function PassportUploadZone({
                   <img
                     src={pf.preview}
                     alt={pf.originalName}
-                    className="w-full h-16 object-cover rounded border border-morandi-border cursor-pointer hover:border-morandi-gold transition-colors"
+                    className="w-full h-16 object-cover rounded border border-border cursor-pointer hover:border-morandi-gold transition-colors"
                     onClick={() => !pf.isPdf && handleOpenEnhancer(index)}
                     title={
                       pf.isPdf

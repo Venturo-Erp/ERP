@@ -43,6 +43,8 @@ export interface AttractionsTabProps {
   isAddOpen: boolean
   closeAdd: () => void
   initialFormData: import('../../types').AttractionFormData
+  /** 固定分類篩選（用於飯店/餐廳獨立 tab） */
+  fixedCategory?: string
 }
 
 export default function AttractionsTab({
@@ -55,6 +57,7 @@ export default function AttractionsTab({
   isAddOpen,
   closeAdd,
   initialFormData,
+  fixedCategory,
 }: AttractionsTabProps) {
   // 排序模式控制
   const [isReorderMode, setIsReorderMode] = useState(false)
@@ -154,61 +157,8 @@ export default function AttractionsTab({
 
   return (
     <div className="h-full flex flex-col">
-      {/* 視圖切換按鈕 */}
-      <div className="flex justify-between mb-4 px-4">
-        {/* 左側：排序按鈕 */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleSortByName}
-          disabled={isSorting || attractions.length === 0}
-          className="h-8"
-        >
-          {isSorting ? (
-            <Loader2 size={14} className="mr-1.5 animate-spin" />
-          ) : (
-            <SortAsc size={14} className="mr-1.5" />
-          )}
-          {isSorting ? '排序中...' : ATTRACTIONS_TAB_LABELS.按名稱排序}
-        </Button>
-
-        {/* 右側：檢視切換 */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant={isReorderMode ? 'outline' : 'default'}
-            size="sm"
-            onClick={() => setIsReorderMode(false)}
-            className="h-8"
-          >
-            <List size={14} className="mr-1.5" />
-            {ATTRACTIONS_TAB_LABELS.LABEL_6756}
-          </Button>
-          <Button
-            variant={isReorderMode ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setIsReorderMode(true)}
-            className="h-8"
-          >
-            <ArrowUpDown size={14} className="mr-1.5" />
-            {ATTRACTIONS_TAB_LABELS.LABEL_3804}
-          </Button>
-        </div>
-      </div>
-
       <div className="flex-1 overflow-auto">
-        {/* 根據模式顯示不同的列表 */}
-        {isReorderMode ? (
-          <SortableAttractionsList
-            loading={loading}
-            attractions={sortedAttractions}
-            countries={displayCountries}
-            cities={displayCities}
-            onEdit={openEdit}
-            onToggleStatus={toggleStatus}
-            onDelete={deleteAttraction}
-            onReorder={reorderAttractions}
-          />
-        ) : (
+        {(
           <AttractionsList
             loading={loading}
             sortedAttractions={sortedAttractions}
@@ -238,6 +188,7 @@ export default function AttractionsTab({
           getCitiesByCountry={getCitiesByCountry}
           getCitiesByRegion={getCitiesByRegion}
           initialFormData={initialFormData}
+          fixedCategory={fixedCategory}
         />
       )}
 
@@ -254,6 +205,7 @@ export default function AttractionsTab({
         getCitiesByCountry={getCitiesByCountry}
         getCitiesByRegion={getCitiesByRegion}
         initialFormData={initialFormData}
+        fixedCategory={fixedCategory}
       />
     </div>
   )

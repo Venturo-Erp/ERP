@@ -29,6 +29,7 @@ export interface NewTourData {
   outbound_flight_text?: string // 去程航班文字 (如: BR 190 07:25-11:45)
   return_flight_number?: string // 回程航班號碼 (如: BR191)
   return_flight_text?: string // 回程航班文字 (如: BR 191 13:00-16:30)
+  department_id?: string // 部門 ID（有 departments 功能時）
 }
 
 export interface TourExtraFields {

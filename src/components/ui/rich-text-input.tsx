@@ -178,8 +178,8 @@ export function RichTextInput({
     <div
       ref={containerRef}
       className={cn(
-        'relative border border-morandi-border rounded-md bg-card',
-        'focus-within:ring-2 focus-within:ring-morandi-accent/20 focus-within:border-morandi-accent',
+        'relative border border-input rounded-md bg-card',
+        'focus-within:ring-2 focus-within:ring-morandi-gold/20 focus-within:border-morandi-gold',
         className
       )}
     >

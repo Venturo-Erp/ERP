@@ -171,7 +171,7 @@ export default function IncomeStatementPage() {
           <Card className="p-6">
             <div className="space-y-6">
               {/* 標題 */}
-              <div className="text-center border-b pb-4">
+              <div className="text-center border-b border-border pb-4">
                 <h2 className="text-xl font-bold">損益表</h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   {startDate} ~ {endDate}
@@ -192,7 +192,7 @@ export default function IncomeStatementPage() {
                 {data.revenue.length === 0 && (
                   <div className="text-sm text-muted-foreground pl-4">無收入記錄</div>
                 )}
-                <div className="flex justify-between py-2 border-t mt-2 font-semibold">
+                <div className="flex justify-between py-2 border-t border-border mt-2 font-semibold">
                   <span>收入合計</span>
                   <span className="font-mono">${data.totalRevenue.toLocaleString()}</span>
                 </div>
@@ -212,7 +212,7 @@ export default function IncomeStatementPage() {
                 {data.cost.length === 0 && (
                   <div className="text-sm text-muted-foreground pl-4">無成本記錄</div>
                 )}
-                <div className="flex justify-between py-2 border-t mt-2 font-semibold">
+                <div className="flex justify-between py-2 border-t border-border mt-2 font-semibold">
                   <span>成本合計</span>
                   <span className="font-mono text-red-600">
                     (${data.totalCost.toLocaleString()})
@@ -244,7 +244,7 @@ export default function IncomeStatementPage() {
                 {data.expense.length === 0 && (
                   <div className="text-sm text-muted-foreground pl-4">無費用記錄</div>
                 )}
-                <div className="flex justify-between py-2 border-t mt-2 font-semibold">
+                <div className="flex justify-between py-2 border-t border-border mt-2 font-semibold">
                   <span>費用合計</span>
                   <span className="font-mono text-red-600">
                     (${data.totalExpense.toLocaleString()})

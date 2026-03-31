@@ -204,15 +204,15 @@ export default async function AccommodationQuotePage({
                 </div>
 
                 <div className="space-y-3 text-sm">
-                  <div className="flex justify-between border-b pb-2">
+                  <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-morandi-secondary">聯絡人：</span>
                     <span className="font-medium">{quoteData.contact}</span>
                   </div>
-                  <div className="flex justify-between border-b pb-2">
+                  <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-morandi-secondary">聯絡電話：</span>
                     <span className="font-medium">{quoteData.phone}</span>
                   </div>
-                  <div className="flex justify-between border-b pb-2">
+                  <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-morandi-secondary">總金額：</span>
                     <span className="font-bold text-lg text-green-700">
                       ${quoteData.totalCost?.toLocaleString()} 元

@@ -338,13 +338,13 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
                     type="checkbox"
                     checked={columns[key]}
                     onChange={() => toggleColumn(key)}
-                    className="rounded border-morandi-border"
+                    className="rounded border-border"
                   />
                   <span className="text-sm">{COLUMN_LABELS[key]}</span>
                 </label>
               ))}
             </div>
-            <div className="flex justify-end gap-2 pt-4 border-t border-morandi-border">
+            <div className="flex justify-end gap-2 pt-4 border-t border-border">
               <Button variant="outline" onClick={onClose}>
                 <X size={16} className="mr-1" />
                 {TOUR_PRINT_DIALOG_LABELS.取消}
@@ -396,7 +396,7 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
                 member.ticket_number ? <Check size={14} className="text-morandi-green" /> : null
               }
             />
-            <div className="flex justify-end gap-2 pt-4 border-t border-morandi-border">
+            <div className="flex justify-end gap-2 pt-4 border-t border-border">
               <Button variant="outline" onClick={onClose}>
                 <X size={16} className="mr-1" />
                 {TOUR_PRINT_DIALOG_LABELS.取消}
@@ -432,7 +432,7 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
                 member.hotel_1_name ? <Check size={14} className="text-morandi-green" /> : null
               }
             />
-            <div className="flex justify-end gap-2 pt-4 border-t border-morandi-border">
+            <div className="flex justify-end gap-2 pt-4 border-t border-border">
               <Button variant="outline" onClick={onClose}>
                 <X size={16} className="mr-1" />
                 {TOUR_PRINT_DIALOG_LABELS.取消}
@@ -493,7 +493,7 @@ function MemberSelectionList({
               type="checkbox"
               checked={selectedMembers.has(member.id)}
               onChange={() => toggleMember(member.id)}
-              className="rounded border-morandi-border"
+              className="rounded border-border"
             />
             <div className="flex-1 min-w-0">
               <div className="font-medium truncate">

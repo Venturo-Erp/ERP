@@ -340,13 +340,13 @@ export function AddVisaDialog({
                       <SelectItem value={L.type_passport_child_lost}>
                         {L.type_passport_child_lost}
                       </SelectItem>
-                      <div className="px-2 py-1.5 text-xs font-semibold text-morandi-secondary border-t mt-1">
+                      <div className="px-2 py-1.5 text-xs font-semibold text-morandi-secondary border-t border-border mt-1">
                         {L.group_taiwan}
                       </div>
                       <SelectItem value={L.type_taiwan}>{L.type_taiwan}</SelectItem>
                       <SelectItem value={L.type_taiwan_lost}>{L.type_taiwan_lost}</SelectItem>
                       <SelectItem value={L.type_taiwan_first}>{L.type_taiwan_first}</SelectItem>
-                      <div className="px-2 py-1.5 text-xs font-semibold text-morandi-secondary border-t mt-1">
+                      <div className="px-2 py-1.5 text-xs font-semibold text-morandi-secondary border-t border-border mt-1">
                         {L.group_usa}
                       </div>
                       <SelectItem value={L.type_usa_esta}>{L.type_usa_esta}</SelectItem>

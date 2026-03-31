@@ -323,10 +323,16 @@ export const FleetPage: React.FC = () => {
       title={FLEET_LABELS.MANAGE_8153}
       icon={Bus}
       breadcrumb={[
-        { label: '首頁', href: '/dashboard' },
         { label: '資料庫管理', href: '/database' },
         { label: '車隊管理', href: '/database/fleet' },
       ]}
+      tabs={[
+        { value: 'vehicles', label: `車輛 (${vehicles.length})`, icon: Bus },
+        { value: 'drivers', label: `司機 (${drivers.length})`, icon: Users },
+        { value: 'logs', label: FLEET_LABELS.LABEL_9547, icon: Wrench },
+      ]}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
       showSearch
       searchTerm={searchQuery}
       onSearchChange={setSearchQuery}
@@ -336,31 +342,6 @@ export const FleetPage: React.FC = () => {
       contentClassName="flex-1 overflow-hidden flex flex-col"
     >
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-        <div className="px-4 border-b border-border">
-          <TabsList className="bg-transparent h-auto p-0 gap-4">
-            <TabsTrigger
-              value="vehicles"
-              className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-morandi-gold rounded-none px-1 pb-2"
-            >
-              <Bus size={16} className="mr-2" />
-              車輛 ({vehicles.length})
-            </TabsTrigger>
-            <TabsTrigger
-              value="drivers"
-              className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-morandi-gold rounded-none px-1 pb-2"
-            >
-              <Users size={16} className="mr-2" />
-              司機 ({drivers.length})
-            </TabsTrigger>
-            <TabsTrigger
-              value="logs"
-              className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-morandi-gold rounded-none px-1 pb-2"
-            >
-              <Wrench size={16} className="mr-2" />
-              {FLEET_LABELS.LABEL_9547}
-            </TabsTrigger>
-          </TabsList>
-        </div>
 
         <TabsContent value="vehicles" className="flex-1 overflow-auto mt-0 p-0">
           <FleetVehicleList

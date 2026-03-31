@@ -14,8 +14,10 @@ import {
   Upload,
   X,
   AlertCircle,
-  CreditCard,
-  Receipt,
+  FolderTree,
+  Plus,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -30,7 +32,9 @@ import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { COMPANY_LABELS } from '../constants/labels'
-import { NewebPaySettings } from '../components/NewebPaySettings'
+import { useWorkspaceFeatures } from '@/lib/permissions'
+import { useDepartments, createDepartment, updateDepartment, deleteDepartment, invalidateDepartments } from '@/data'
+import type { Department } from '@/data'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
@@ -596,29 +600,173 @@ export default function CompanySettingsPage() {
           </Button>
         </div>
 
-        {/* 金流設定區塊 */}
-        <div className="border-t border-border pt-8 mt-8">
-          <h2 className="text-xl font-semibold text-morandi-primary mb-6 flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-morandi-gold" />
-            金流與發票設定
-          </h2>
-
-          {/* 藍新金流 */}
-          <NewebPaySettings />
-
-          {/* 電子代轉發票（未來功能） */}
-          <Card className="rounded-xl shadow-lg border border-border p-8 mt-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Receipt className="h-6 w-6 text-morandi-gold" />
-              <h3 className="text-lg font-semibold">電子代轉發票</h3>
-              <span className="text-xs bg-morandi-container px-2 py-1 rounded">即將推出</span>
-            </div>
-            <p className="text-sm text-morandi-secondary">
-              整合電子發票系統，自動開立代收代付發票。此功能開發中，敬請期待。
-            </p>
-          </Card>
-        </div>
+        {/* 部門管理（僅有 departments 功能的租戶顯示） */}
+        <DepartmentsSection workspaceId={workspaceId} />
       </div>
     </ContentPageLayout>
+  )
+}
+
+// ============================================
+// 部門管理區塊（僅 departments 功能開啟時顯示）
+// ============================================
+function DepartmentsSection({ workspaceId }: { workspaceId: string }) {
+  const { isFeatureEnabled } = useWorkspaceFeatures()
+  const hasDepartments = isFeatureEnabled('departments')
+  const { items: departments = [], loading } = useDepartments()
+  const [editingDept, setEditingDept] = useState<Department | null>(null)
+  const [isAdding, setIsAdding] = useState(false)
+  const [name, setName] = useState('')
+  const [code, setCode] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  if (!hasDepartments) return null
+
+  const handleAdd = async () => {
+    if (!name.trim() || !code.trim()) return
+    setSaving(true)
+    try {
+      await createDepartment({ name: name.trim(), code: code.trim().toUpperCase() } as Parameters<typeof createDepartment>[0])
+      await invalidateDepartments()
+      setName('')
+      setCode('')
+      setIsAdding(false)
+      toast.success('部門已新增')
+    } catch {
+      toast.error('新增失敗')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleUpdate = async () => {
+    if (!editingDept || !name.trim() || !code.trim()) return
+    setSaving(true)
+    try {
+      await updateDepartment(editingDept.id, { name: name.trim(), code: code.trim().toUpperCase() })
+      await invalidateDepartments()
+      setEditingDept(null)
+      setName('')
+      setCode('')
+      toast.success('部門已更新')
+    } catch {
+      toast.error('更新失敗')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async (dept: Department) => {
+    if (!confirm(`確定要刪除「${dept.name}」嗎？`)) return
+    try {
+      await deleteDepartment(dept.id)
+      await invalidateDepartments()
+      toast.success('部門已刪除')
+    } catch {
+      toast.error('刪除失敗')
+    }
+  }
+
+  const startEdit = (dept: Department) => {
+    setEditingDept(dept)
+    setName(dept.name)
+    setCode(dept.code)
+    setIsAdding(false)
+  }
+
+  const startAdd = () => {
+    setIsAdding(true)
+    setEditingDept(null)
+    setName('')
+    setCode('')
+  }
+
+  const cancel = () => {
+    setIsAdding(false)
+    setEditingDept(null)
+    setName('')
+    setCode('')
+  }
+
+  return (
+    <Card className="rounded-xl shadow-lg border border-border p-8">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <FolderTree className="h-6 w-6 text-morandi-gold" />
+          <h2 className="text-xl font-semibold">部門管理</h2>
+        </div>
+        {!isAdding && !editingDept && (
+          <Button onClick={startAdd} size="sm" className="bg-morandi-gold hover:bg-morandi-gold/90 text-white">
+            <Plus className="h-4 w-4 mr-1" />
+            新增部門
+          </Button>
+        )}
+      </div>
+
+      {/* 部門列表 */}
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-morandi-gold" />
+        </div>
+      ) : departments.length === 0 && !isAdding ? (
+        <p className="text-sm text-morandi-secondary text-center py-8">尚未建立部門</p>
+      ) : (
+        <div className="space-y-2">
+          {departments.map(dept => (
+            <div key={dept.id} className="flex items-center justify-between px-4 py-3 bg-morandi-bg rounded-lg">
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-sm font-semibold bg-morandi-gold/10 text-morandi-gold px-2 py-1 rounded">
+                  {dept.code}
+                </span>
+                <span className="text-sm font-medium">{dept.name}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" onClick={() => startEdit(dept)}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => handleDelete(dept)} className="text-morandi-red hover:text-morandi-red">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 新增/編輯表單 */}
+      {(isAdding || editingDept) && (
+        <div className="mt-4 p-4 border border-morandi-gold/30 rounded-lg bg-morandi-gold/5">
+          <h3 className="text-sm font-semibold mb-3">{editingDept ? '編輯部門' : '新增部門'}</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-sm">部門名稱</Label>
+              <Input value={name} onChange={e => setName(e.target.value)} placeholder="例如：勁揚旅行社" className="mt-1" />
+            </div>
+            <div>
+              <Label className="text-sm">部門代號（團號前綴）</Label>
+              <Input
+                value={code}
+                onChange={e => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                placeholder="例如：JY"
+                className="mt-1"
+                maxLength={5}
+              />
+            </div>
+          </div>
+          <div className="flex gap-2 mt-3">
+            <Button variant="outline" size="sm" onClick={cancel}>取消</Button>
+            <Button
+              size="sm"
+              onClick={editingDept ? handleUpdate : handleAdd}
+              disabled={saving || !name.trim() || !code.trim()}
+              className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              {editingDept ? '更新' : '新增'}
+            </Button>
+          </div>
+        </div>
+      )}
+    </Card>
   )
 }

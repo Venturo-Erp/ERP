@@ -251,18 +251,19 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         if (item.restrictedFeature && !isFeatureAvailable(item.restrictedFeature, workspaceCode)) {
           return null
         }
-        if (!isSuperAdmin && preferredFeatures.length > 0 && item.requiredPermission) {
+        if (preferredFeatures.length > 0 && item.requiredPermission) {
           if (!preferredFeatures.includes(item.requiredPermission)) return null
         }
         if (item.children) {
           const visibleChildren = filterMenuByPermissions(item.children)
-          if (visibleChildren.length > 0 || isSuperAdmin) {
+          if (visibleChildren.length > 0) {
             return { ...item, children: visibleChildren }
           }
           return null
         }
         if (!item.requiredPermission) return item
-        if (isSuperAdmin) return item
+        // '*' 代表擁有所有權限
+        if (userPermissions.includes('*')) return item
         return userPermissions.includes(item.requiredPermission) ? item : null
       })
       .filter((item): item is MenuItem => item !== null)

@@ -771,7 +771,7 @@ export function BlockLibrary({ isOpen, onClose, onInsertBlock, insertY = 100 }: 
         </DialogHeader>
 
         {/* 分類選擇 */}
-        <div className="flex gap-2 border-b pb-3">
+        <div className="flex gap-2 border-b border-border pb-3">
           {CATEGORIES.map(cat => (
             <Button
               key={cat.id}

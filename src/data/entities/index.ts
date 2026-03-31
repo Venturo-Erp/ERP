@@ -296,6 +296,16 @@ export {
 } from './countries'
 export type { Country } from '@/stores/region-store'
 
+export {
+  useDepartments,
+  useDepartment,
+  createDepartment,
+  updateDepartment,
+  deleteDepartment,
+  invalidateDepartments,
+} from './departments'
+export type { Department } from './departments'
+
 // Regions
 export {
   regionEntity,

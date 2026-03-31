@@ -203,6 +203,20 @@ export const FEATURES: FeatureDefinition[] = [
     routes: ['/supplier', '/supplier/requests', '/supplier/finance', '/supplier/dispatch'],
   },
   {
+    code: 'departments',
+    name: '部門管理',
+    description: '部門分類、團號帶入部門代號',
+    category: 'premium',
+    routes: [],
+  },
+  {
+    code: 'tenants',
+    name: '租戶管理',
+    description: '建立與管理其他公司租戶',
+    category: 'enterprise',
+    routes: ['/tenants'],
+  },
+  {
     code: 'esims',
     name: 'eSIM 管理',
     description: '網卡管理、派發',

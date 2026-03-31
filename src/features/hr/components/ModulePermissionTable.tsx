@@ -287,7 +287,7 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
           return (
             <div key={tab.code} className="flex items-center border-t border-border bg-white">
               <div className="flex-1 p-4 pl-12 flex items-center gap-2">
-                <div className="w-1 h-4 bg-morandi-border rounded-full" />
+                <div className="w-1 h-4 bg-border rounded-full" />
                 <span className="text-sm text-morandi-primary">{tab.name}</span>
                 {mode === 'employee' && tabOverride?.override_type && (
                   <Badge 

@@ -9,7 +9,7 @@ interface UseItineraryFiltersProps {
   statusFilter: string
   searchTerm: string
   authorFilter: string
-  viewMode: 'my' | 'all' | 'templates'
+  viewMode: 'my' | 'all' | 'templates' | 'proposals'
   userId?: string
   isSuperAdmin: boolean
   isItineraryClosed: (itinerary: Itinerary) => boolean
@@ -30,16 +30,24 @@ export function useItineraryFilters({
 
     // 根據 viewMode 篩選
     if (viewMode === 'templates') {
-      // 模板分頁：只顯示模板
-      filtered = filtered.filter(item => item.template_id && !item.archived_at)
-    } else if (viewMode === 'my') {
-      // 我的行程：只顯示我建立的實際團（不含模板）
+      // 模板：只顯示模板
       filtered = filtered.filter(
-        item => !item.template_id && item.created_by === userId && !item.archived_at
+        item => !item.archived_at &&
+        (item.template_id || item.tour_code?.startsWith('TMPL-'))
+      )
+    } else if (viewMode === 'proposals') {
+      // 提案：只顯示提案（PROP- 開頭的團號）
+      filtered = filtered.filter(
+        item => !item.template_id && !item.archived_at &&
+        item.tour_code?.startsWith('PROP-')
       )
     } else {
-      // 全部：顯示所有實際團（不含模板）
-      filtered = filtered.filter(item => !item.template_id && !item.archived_at)
+      // 團體：顯示正式團（不含模板和提案）
+      filtered = filtered.filter(
+        item => !item.template_id && !item.archived_at &&
+        !item.tour_code?.startsWith('PROP-') &&
+        !item.tour_code?.startsWith('TMPL-')
+      )
     }
 
     const effectiveAuthorFilter = authorFilter === '__mine__' ? userId : authorFilter

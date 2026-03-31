@@ -11,7 +11,7 @@ export function PreviewContainer({ formData }: PreviewContainerProps) {
   return (
     <div className="w-1/2 bg-muted flex flex-col">
       {/* 標題列 */}
-      <div className="h-14 bg-card border-b px-6 flex items-center justify-between">
+      <div className="h-14 bg-card border-b border-border px-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h2 className="text-lg font-semibold text-morandi-primary">{LABELS.LIVE_PREVIEW}</h2>
           <span className="text-sm text-morandi-secondary">

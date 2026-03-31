@@ -17,7 +17,7 @@ export function useItineraryPageState() {
   const [statusFilter, setStatusFilter] = useState<string>('全部')
   const [authorFilter, setAuthorFilter] = useState<string>('__mine__')
   const [searchTerm, setSearchTerm] = useState('')
-  const [viewMode, setViewMode] = useState<'my' | 'all' | 'templates'>('my')
+  const [viewMode, setViewMode] = useState<'my' | 'all' | 'templates' | 'proposals'>('all')
 
   // Dialog states
   const [isTypeSelectOpen, setIsTypeSelectOpen] = useState(false)

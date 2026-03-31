@@ -338,7 +338,7 @@ function BlockEditorPageContent() {
 
         {/* 右側：即時預覽 */}
         <div className="w-1/2 bg-muted flex flex-col">
-          <div className="h-12 bg-card border-b px-4 flex items-center justify-between">
+          <div className="h-12 bg-card border-b border-border px-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-morandi-primary">
               {BLOCK_EDITOR_LABELS.LIVE_PREVIEW}
             </h2>
