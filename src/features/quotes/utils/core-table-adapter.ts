@@ -74,7 +74,7 @@ export function coreItemsToCostCategories(items: TourItineraryItem[]): CostCateg
       resource_longitude: item.longitude ?? undefined,
       resource_google_maps_url: item.google_maps_url ?? undefined,
       sub_category: item.sub_category ?? undefined,
-      show_on_quote: item.show_on_quote === false ? false : true,
+      show_on_quote: true, // 這裡的 item 一定是 show_on_quote !== false（false 已在上面分流到 hiddenItems）
     }
 
     // 住宿：sub_category → room_type
