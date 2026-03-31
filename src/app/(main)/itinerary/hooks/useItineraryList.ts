@@ -155,7 +155,6 @@ export function useItineraryList() {
     isItineraryClosed,
     authorFilter,
     user?.id,
-    isSuperAdmin,
   ])
 
   return {
@@ -163,7 +162,6 @@ export function useItineraryList() {
     itineraries: filteredItineraries,
     employees,
     workspaces,
-    isSuperAdmin,
     // 篩選狀態
     statusFilter,
     setStatusFilter,

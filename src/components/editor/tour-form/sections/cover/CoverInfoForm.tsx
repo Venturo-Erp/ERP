@@ -291,7 +291,7 @@ function AiCopyButton({ data, updateField }: { data: TourFormData; updateField: 
         .map(d => ({
           title: d.title || '',
           activities: (d.activities || []).map(a => ({
-            name: a.name || '',
+            name: a.title || '',
             description: a.description || '',
           })),
         }))

@@ -11,7 +11,6 @@ interface UseItineraryFiltersProps {
   authorFilter: string
   viewMode: 'my' | 'all' | 'templates' | 'proposals'
   userId?: string
-  isSuperAdmin: boolean
   isItineraryClosed: (itinerary: Itinerary) => boolean
 }
 
@@ -22,7 +21,6 @@ export function useItineraryFilters({
   authorFilter,
   viewMode,
   userId,
-  isSuperAdmin,
   isItineraryClosed,
 }: UseItineraryFiltersProps) {
   const filteredItineraries = useMemo(() => {
@@ -53,16 +51,6 @@ export function useItineraryFilters({
     const effectiveAuthorFilter = authorFilter === '__mine__' ? userId : authorFilter
     if (effectiveAuthorFilter && effectiveAuthorFilter !== 'all') {
       filtered = filtered.filter(item => item.created_by === effectiveAuthorFilter)
-    }
-
-    if (isSuperAdmin) {
-      const workspaceFilter =
-        typeof window !== 'undefined' ? localStorage.getItem('itinerary_workspace_filter') : null
-      if (workspaceFilter && workspaceFilter !== 'all') {
-        filtered = filtered.filter(
-          item => (item as Itinerary & { workspace_id?: string }).workspace_id === workspaceFilter
-        )
-      }
     }
 
     if (searchTerm) {
@@ -96,7 +84,6 @@ export function useItineraryFilters({
     authorFilter,
     viewMode,
     userId,
-    isSuperAdmin,
   ])
 
   return { filteredItineraries }

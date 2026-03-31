@@ -116,7 +116,6 @@ export default function ItineraryPage() {
     authorFilter: pageState.authorFilter,
     viewMode: pageState.viewMode,
     userId: user?.id,
-    isSuperAdmin: false,
     isItineraryClosed: actions.isItineraryClosed,
   })
 

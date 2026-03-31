@@ -36,13 +36,13 @@ export default function DatabaseManagementPage() {
   const isCorner = user?.workspace_id === CORNER_WORKSPACE_ID
 
   // 根據 workspace 決定可用 tabs
-  const validTabs = isCorner
+  const validTabs: readonly TabValue[] = isCorner
     ? ALL_TABS
-    : ALL_TABS.filter(t => t !== 'michelin' && t !== 'experiences')
+    : (['regions', 'attractions', 'hotels', 'restaurants'] as const)
 
   // 從 URL 讀取 tab，預設為 'regions'
   const tabFromUrl = searchParams.get('tab') as TabValue | null
-  const initialTab = tabFromUrl && validTabs.includes(tabFromUrl) ? tabFromUrl : 'regions'
+  const initialTab = tabFromUrl && (validTabs as readonly string[]).includes(tabFromUrl) ? tabFromUrl : 'regions'
 
   const [activeTab, setActiveTab] = useState<TabValue>(initialTab)
   const [loadedTabs, setLoadedTabs] = useState<Set<string>>(new Set([initialTab]))
@@ -76,7 +76,7 @@ export default function DatabaseManagementPage() {
 
   // 同步 URL 變化到 state（處理瀏覽器前進/後退）
   useEffect(() => {
-    if (tabFromUrl && validTabs.includes(tabFromUrl) && tabFromUrl !== activeTab) {
+    if (tabFromUrl && (validTabs as readonly string[]).includes(tabFromUrl) && tabFromUrl !== activeTab) {
       setActiveTab(tabFromUrl)
       setLoadedTabs(prev => new Set(prev).add(tabFromUrl))
     }

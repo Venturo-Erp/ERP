@@ -268,7 +268,7 @@ export function CountryAirportSelector({
       </div>
 
       {/* 顯示當前選擇的城市代碼（非台灣團）*/}
-      {airportCode && !isTaiwan && (
+      {airportCode && !isTaiwanCountry(displayCountryName) && (
         <p className="text-xs text-morandi-secondary">
           團號城市代碼：<span className="font-mono font-semibold">{airportCode}</span>
         </p>
@@ -284,7 +284,6 @@ export function CountryAirportSelector({
         loading={isCountrySubmitting}
         submitDisabled={!newCountryName.trim() || newCountryCode.trim().length !== 2}
         maxWidth="sm"
-        level={2}
       >
         <div>
           <label className="text-sm font-medium text-morandi-primary mb-2 block">
