@@ -42,6 +42,7 @@ interface PrintableQuotationProps {
   tierPricings?: TierPricingForPrint[]
   itinerary?: Itinerary | null
   departureDate?: string | null
+  excludedItems?: string[]
 }
 
 export const PrintableQuotation: React.FC<PrintableQuotationProps> = ({
@@ -56,6 +57,7 @@ export const PrintableQuotation: React.FC<PrintableQuotationProps> = ({
   tierPricings = [],
   itinerary,
   departureDate,
+  excludedItems,
 }) => {
   const totalParticipants =
     participantCounts.adult +
@@ -434,7 +436,7 @@ export const PrintableQuotation: React.FC<PrintableQuotationProps> = ({
       {/* 報價 + 費用包含/不含 保持同頁不拆開 */}
       <div style={{ breakInside: 'avoid', pageBreakInside: 'avoid' }}>
         <QuotationPricingTable sellingPrices={sellingPrices} tierPricings={tierPricings} />
-        <QuotationInclusions />
+        <QuotationInclusions excludedItems={excludedItems} />
       </div>
     </PrintableWrapper>
   )

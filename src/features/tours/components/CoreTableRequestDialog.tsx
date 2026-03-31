@@ -292,7 +292,19 @@ export function CoreTableRequestDialog({
         .map(
           item => `
       <tr>
-        <td>Day ${item.day_number || '-'}${item.sub_category ? ` ${item.sub_category === 'breakfast' ? '早' : item.sub_category === 'lunch' ? '午' : '晚'}` : ''}</td>
+        <td>${(() => {
+          // 優先用 service_date，沒有則用 departure_date + day_number 推算
+          let dateStr = ''
+          if (item.service_date) {
+            dateStr = item.service_date
+          } else if (tour.departure_date && item.day_number) {
+            const d = new Date(tour.departure_date)
+            d.setDate(d.getDate() + item.day_number - 1)
+            dateStr = d.toISOString().split('T')[0]
+          }
+          const label = dateStr ? dateStr.replace(/^\d{4}-/, '') : `Day ${item.day_number || '-'}`
+          return label + (item.sub_category ? ` ${item.sub_category === 'breakfast' ? '早' : item.sub_category === 'lunch' ? '午' : '晚'}` : '')
+        })()}</td>
         <td>${item.title || '-'}</td>
         <td>${item.unit_price ? `NT$ ${item.unit_price.toLocaleString()}` : '-'}</td>
         <td><span class="blank-field"></span></td>
@@ -437,7 +449,15 @@ export function CoreTableRequestDialog({
                 <div className="space-y-2">
                   {coreItems.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-2 text-sm">
-                      <span className="text-morandi-secondary">Day {item.day_number || '-'}</span>
+                      <span className="text-morandi-secondary">{(() => {
+                        if (item.service_date) return item.service_date.replace(/^\d{4}-/, '')
+                        if (tour.departure_date && item.day_number) {
+                          const d = new Date(tour.departure_date)
+                          d.setDate(d.getDate() + item.day_number - 1)
+                          return d.toISOString().split('T')[0].replace(/^\d{4}-/, '')
+                        }
+                        return `Day ${item.day_number || '-'}`
+                      })()}</span>
                       <span>{item.title || '-'}</span>
                       <span className="ml-auto text-morandi-primary">
                         NT$ {item.unit_price?.toLocaleString() || '-'}/人

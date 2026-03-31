@@ -141,17 +141,27 @@ export function TourRequestFormDialog({
   const { subtitle: companySubtitle } = useCompanyInfo()
   const { items: employees, fetchAll: fetchEmployees } = useEmployeeStore()
 
-  // 編輯狀態的項目
-  const [items, setItems] = useState<RequestItem[]>(() =>
-    initialItems.map((item, idx) => ({
-      id: item.id || `new-${idx}`,
-      date: item.serviceDate || '',
-      title: item.title,
-      quantity: item.quantity,
-      unitPrice: 0,
-      note: item.note || '',
-    }))
-  )
+  // 編輯狀態的項目（日期 fallback：用 departure_date + index 推算）
+  const [items, setItems] = useState<RequestItem[]>(() => {
+    const depDate = departureDate || tour?.departure_date || null
+    return initialItems.map((item, idx) => {
+      let date = item.serviceDate || ''
+      // 如果沒有日期，嘗試用出發日期 + 天數推算
+      if (!date && depDate) {
+        const d = new Date(depDate)
+        d.setDate(d.getDate() + idx)
+        date = d.toISOString().split('T')[0]
+      }
+      return {
+        id: item.id || `new-${idx}`,
+        date,
+        title: item.title,
+        quantity: item.quantity,
+        unitPrice: 0,
+        note: item.note || '',
+      }
+    })
+  })
 
   // 供應商資訊（可編輯）
   const [supplierInfo, setSupplierInfo] = useState({

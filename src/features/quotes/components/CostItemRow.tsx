@@ -17,6 +17,7 @@ interface CostItemRowProps {
     value: unknown
   ) => void
   handleRemoveItem: (categoryId: string, itemId: string) => void
+  handleToggleVisibility?: (categoryId: string, itemId: string) => void
 }
 
 export const CostItemRow: React.FC<CostItemRowProps> = ({
@@ -24,6 +25,7 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
   categoryId,
   handleUpdateItem,
   handleRemoveItem,
+  handleToggleVisibility,
 }) => {
   // 判斷是否為兒童或嬰兒（顯示為灰色）
   const isChildOrInfantTicket =
@@ -40,7 +42,7 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
 
   return (
     <tr
-      className={`border-b border-morandi-container/60 hover:bg-morandi-container/5 transition-colors ${isChildOrInfantTicket ? 'opacity-60' : ''}`}
+      className={`group border-b border-morandi-container/60 hover:bg-morandi-container/5 transition-colors ${isChildOrInfantTicket ? 'opacity-60' : ''}`}
     >
       <td
         colSpan={2}
@@ -160,14 +162,23 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
             title={isLocalPricing ? 'Local 報價階梯資訊（自動產生）' : undefined}
           />
           <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-            {/* 刪除按鈕 */}
-            <button
-              onClick={() => handleRemoveItem(categoryId, item.id)}
-              className="w-4 h-4 flex items-center justify-center text-xs text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 rounded transition-all"
-              title={ACCOMMODATION_ITEM_ROW_LABELS.刪除}
-            >
-              ×
-            </button>
+            {(categoryId === 'activities' || categoryId === 'meals') && handleToggleVisibility ? (
+              <button
+                onClick={() => handleToggleVisibility(categoryId, item.id)}
+                className="opacity-0 group-hover:opacity-100 px-2 py-0.5 text-xs text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 rounded transition-all whitespace-nowrap"
+                title={categoryId === 'activities' ? '此景點無需門票' : '本餐無需訂位'}
+              >
+                {categoryId === 'activities' ? '無需門票' : '無需訂位'}
+              </button>
+            ) : (
+              <button
+                onClick={() => handleRemoveItem(categoryId, item.id)}
+                className="opacity-0 group-hover:opacity-100 w-4 h-4 flex items-center justify-center text-xs text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 rounded transition-all"
+                title={ACCOMMODATION_ITEM_ROW_LABELS.刪除}
+              >
+                ×
+              </button>
+            )}
           </div>
         </div>
       </td>

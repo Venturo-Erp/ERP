@@ -13,16 +13,21 @@ interface QuotationInclusionsProps {
   excludedItems?: string[]
 }
 
-export const QuotationInclusions: React.FC<QuotationInclusionsProps> = ({ 
+export const QuotationInclusions: React.FC<QuotationInclusionsProps> = ({
   insuranceText = '200萬旅責險+20萬意外醫療',
   excludedItems = [
-    '個人護照及簽證費用',
+    '個人護照費用',
+    '簽證費用',
     '行程外之自費行程',
     '個人消費及小費',
     '行李超重費用',
     '單人房差價',
   ]
 }) => {
+  // 從「不包含」移到「包含」的項目
+  const allToggleItems = ['個人護照費用', '簽證費用', '行程外之自費行程', '個人消費及小費', '行李超重費用', '單人房差價']
+  const includedExtra = allToggleItems.filter(i => !excludedItems.includes(i))
+
   return (
     <div className="grid grid-cols-2 gap-6 mb-6">
       <div>
@@ -33,6 +38,9 @@ export const QuotationInclusions: React.FC<QuotationInclusionsProps> = ({
           <li>• 交通、住宿、餐食、門票</li>
           <li>• {QUOTATION_LABELS.GUIDE_SERVICE}</li>
           <li>• {insuranceText}</li>
+          {includedExtra.map((item, idx) => (
+            <li key={idx}>• {item}</li>
+          ))}
         </ul>
       </div>
       <div>

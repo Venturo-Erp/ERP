@@ -39,26 +39,47 @@ export default async function Page({ params }: PageProps) {
     .eq('id', contract.workspace_id)
     .single()
 
-  // 組合資料
-  const contractWithRelations = {
-    ...contract,
-    tours: tour || { id: '', code: '', name: '未知', location: '', departure_date: '', return_date: '' },
-    workspaces: workspace || { id: '', name: '未知', seal_image_url: '' },
+  // 查詢簽約團員詳細資料
+  let members: { id: string; chinese_name: string | null; id_number: string | null; birth_date: string | null }[] = []
+  if (contract.member_ids?.length > 0) {
+    const { data: memberData } = await supabase
+      .from('order_members')
+      .select('id, chinese_name, id_number, birth_date')
+      .in('id', contract.member_ids)
+    members = memberData || []
   }
 
-  // 已簽署的合約顯示完成頁面
-  if (contractWithRelations.status === 'signed') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
-          <div className="text-6xl mb-4">✅</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">合約已簽署</h1>
-          <p className="text-gray-600">
-            此合約已於 {new Date(contractWithRelations.signed_at).toLocaleString('zh-TW')} 完成簽署。
-          </p>
-        </div>
-      </div>
-    )
+  // 查詢行程資料（用於嵌入顯示）
+  // fallback: 舊合約的 include_itinerary 可能存在 contract_data 裡
+  const shouldIncludeItinerary = contract.include_itinerary || contract.contract_data?.includeItinerary
+  const shouldIncludeMemberList = contract.include_member_list || contract.contract_data?.includeMemberList
+
+  // 查詢行程資料（跟報價單用同一份 itineraries.daily_itinerary）
+  let itineraryData: unknown = null
+  let itineraryDepartureDate: string | null = null
+  if (shouldIncludeItinerary && contract.tour_id) {
+    const { data: itinerary } = await supabase
+      .from('itineraries')
+      .select('daily_itinerary, departure_date, outbound_flight, return_flight')
+      .eq('tour_id', contract.tour_id)
+      .limit(1)
+      .maybeSingle()
+    if (itinerary) {
+      itineraryData = itinerary
+      itineraryDepartureDate = itinerary.departure_date
+    }
+  }
+
+  // 組合資料（用 fallback 覆蓋舊合約的附件設定）
+  const contractWithRelations = {
+    ...contract,
+    include_itinerary: !!shouldIncludeItinerary,
+    include_member_list: !!shouldIncludeMemberList,
+    tours: tour || { id: '', code: '', name: '未知', location: '', departure_date: '', return_date: '' },
+    workspaces: workspace || { id: '', name: '未知', seal_image_url: '' },
+    members,
+    itineraryData,
+    itineraryDepartureDate,
   }
 
   return <ContractSignPage contract={contractWithRelations} />

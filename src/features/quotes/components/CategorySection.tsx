@@ -227,6 +227,26 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             <Icon size={16} className="text-morandi-gold" />
             <span>{category.name}</span>
 
+            {/* 已隱藏項目數量 + 展開恢復 */}
+            {category.hiddenItems && category.hiddenItems.length > 0 && (
+              <details className="inline">
+                <summary className="inline cursor-pointer text-xs text-morandi-secondary hover:text-blue-500 ml-2">
+                  （隱藏 {category.hiddenItems.length} 個）
+                </summary>
+                <div className="absolute mt-1 bg-white border border-border rounded-lg shadow-lg p-2 z-10 space-y-1">
+                  {category.hiddenItems.map(h => (
+                    <button
+                      key={h.id}
+                      onClick={() => handleToggleVisibility?.(category.id, h.id)}
+                      className="block w-full text-left px-2 py-1 text-xs text-blue-500 hover:bg-blue-50 rounded"
+                    >
+                      {h.day ? `D${h.day}${h.sub_category === 'breakfast' ? '早' : h.sub_category === 'lunch' ? '午' : h.sub_category === 'dinner' ? '晚' : ''} ` : ''}{h.name} — 恢復
+                    </button>
+                  ))}
+                </div>
+              </details>
+            )}
+
             {/* 參考報價圖示 - 僅顯示於團體分攤分類 */}
             {category.id === 'group-transport' && (
               <button
@@ -525,6 +545,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 categoryId={category.id}
                 handleUpdateItem={handleUpdateItem}
                 handleRemoveItem={handleRemoveItem}
+                handleToggleVisibility={handleToggleVisibility}
               />
             )))}
 

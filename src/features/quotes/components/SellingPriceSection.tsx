@@ -90,7 +90,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
   localTiers,
   insuranceText: externalInsuranceText = '',
   onInsuranceChange,
-  excludedItems: externalExcludedItems = ['個人護照及簽證費用', '行程外之自費行程', '個人消費及小費', '行李超重費用', '單人房差價'],
+  excludedItems: externalExcludedItems = ['個人護照費用', '簽證費用', '行程外之自費行程', '個人消費及小費', '行李超重費用', '單人房差價'],
   onExcludedItemsChange,
 }) => {
   // 檢查是否有 Local 報價（人數欄位鎖定）
@@ -554,65 +554,95 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
           </div>
         ))}
 
-        {/* 費用包含 */}
-        <div className="bg-card border border-morandi-green/30 rounded-xl overflow-hidden shadow-sm">
-          <div className="bg-morandi-green/10 px-4 py-2 border-b border-morandi-green/20">
-            <span className="text-sm font-semibold text-morandi-green">費用包含</span>
-          </div>
-          <div className="px-4 py-3 space-y-2 text-sm text-morandi-secondary">
-            <div>• 行程表所列交通、住宿、餐食、門票</div>
-            <div>• 專業導遊服務</div>
-            <div className="flex items-center gap-2">
-              <span>•</span>
-              <input
-                type="text"
-                value={insuranceText}
-                onChange={(e) => {
-                  setInsuranceText(e.target.value)
-                  onInsuranceChange?.(e.target.value)
-                }}
-                placeholder="輸入數字 (例如: 200/20)"
-                onBlur={(e) => {
-                  const val = e.target.value.trim()
-                  // 如果輸入格式是 "數字/數字"，自動轉換
-                  const match = val.match(/^(\d+)\/(\d+)$/)
-                  if (match) {
-                    const formatted = `${match[1]}萬旅責險+${match[2]}萬意外醫療`
-                    setInsuranceText(formatted)
-                    onInsuranceChange?.(formatted)
-                  }
-                }}
-                className="flex-1 px-2 py-1 text-xs border rounded"
-              />
-            </div>
-          </div>
-        </div>
+        {/* 費用包含 / 不含 — 勾選控制，取消勾選自動移到「包含」 */}
+        {(() => {
+          const allToggleItems = ['個人護照費用', '簽證費用', '行程外之自費行程', '個人消費及小費', '行李超重費用', '單人房差價']
+          const includedToggleItems = allToggleItems.filter(i => !excludedItems.includes(i))
+          const excludedToggleItems = allToggleItems.filter(i => excludedItems.includes(i))
 
-        {/* 費用不含 */}
-        <div className="bg-card border border-morandi-red/30 rounded-xl overflow-hidden shadow-sm">
-          <div className="bg-morandi-red/10 px-4 py-2 border-b border-morandi-red/20">
-            <span className="text-sm font-semibold text-morandi-red">費用不含</span>
-          </div>
-          <div className="px-4 py-3 space-y-1.5 text-sm text-morandi-secondary">
-            {['個人護照及簽證費用', '行程外之自費行程', '個人消費及小費', '行李超重費用', '單人房差價'].map(item => (
-              <label key={item} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={excludedItems.includes(item)}
-                  onChange={(e) => {
-                    const newItems = e.target.checked
-                      ? [...excludedItems, item]
-                      : excludedItems.filter(i => i !== item)
-                    setExcludedItems(newItems)
-                    onExcludedItemsChange?.(newItems)
-                  }}
-                  className="w-4 h-4"
-                />
-                <span>{item}</span>
-              </label>
-            ))}
-          </div>
-        </div>
+          const toggleItem = (item: string) => {
+            const newItems = excludedItems.includes(item)
+              ? excludedItems.filter(i => i !== item)
+              : [...excludedItems, item]
+            setExcludedItems(newItems)
+            onExcludedItemsChange?.(newItems)
+          }
+
+          return (
+            <>
+              {/* 費用包含 */}
+              <div className="bg-card border border-morandi-green/30 rounded-xl overflow-hidden shadow-sm">
+                <div className="bg-morandi-green/10 px-4 py-2 border-b border-morandi-green/20">
+                  <span className="text-sm font-semibold text-morandi-green">費用包含</span>
+                </div>
+                <div className="px-4 py-3 space-y-1.5 text-sm text-morandi-secondary">
+                  <div>• 行程表所列交通、住宿、餐食、門票</div>
+                  <div>• 專業導遊服務</div>
+                  <div className="flex items-center gap-2">
+                    <span>•</span>
+                    <input
+                      type="text"
+                      value={insuranceText}
+                      onChange={(e) => {
+                        setInsuranceText(e.target.value)
+                        onInsuranceChange?.(e.target.value)
+                      }}
+                      placeholder="輸入數字 (例如: 200/20)"
+                      onBlur={(e) => {
+                        const val = e.target.value.trim()
+                        const match = val.match(/^(\d+)\/(\d+)$/)
+                        if (match) {
+                          const formatted = `${match[1]}萬旅責險+${match[2]}萬意外醫療`
+                          setInsuranceText(formatted)
+                          onInsuranceChange?.(formatted)
+                        }
+                      }}
+                      className="flex-1 px-2 py-1 text-xs border rounded"
+                    />
+                  </div>
+                  {includedToggleItems.map(item => (
+                    <label key={item} className="flex items-center gap-2 cursor-pointer text-morandi-green">
+                      <span>•</span>
+                      <span>{item}</span>
+                      <button
+                        onClick={() => toggleItem(item)}
+                        className="ml-auto text-xs text-morandi-secondary hover:text-morandi-red"
+                        title="移到費用不含"
+                      >
+                        移除
+                      </button>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* 費用不含 */}
+              <div className="bg-card border border-morandi-red/30 rounded-xl overflow-hidden shadow-sm">
+                <div className="bg-morandi-red/10 px-4 py-2 border-b border-morandi-red/20">
+                  <span className="text-sm font-semibold text-morandi-red">費用不含</span>
+                </div>
+                <div className="px-4 py-3 space-y-1.5 text-sm text-morandi-secondary">
+                  {excludedToggleItems.map(item => (
+                    <label key={item} className="flex items-center gap-2 cursor-pointer">
+                      <span>•</span>
+                      <span>{item}</span>
+                      <button
+                        onClick={() => toggleItem(item)}
+                        className="ml-auto text-xs text-morandi-secondary hover:text-morandi-green"
+                        title="移到費用包含"
+                      >
+                        包含
+                      </button>
+                    </label>
+                  ))}
+                  {excludedToggleItems.length === 0 && (
+                    <div className="text-xs text-morandi-muted">（無）</div>
+                  )}
+                </div>
+              </div>
+            </>
+          )
+        })()}
       </div>
     </div>
   )

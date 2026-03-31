@@ -167,4 +167,148 @@ src/
 
 ---
 
-**更新**：2026-03-30 14:12
+---
+
+## 🧠 核心表架構 — tour_itinerary_items（一 row 走到底）
+
+### 設計理念
+
+一個旅遊團的所有項目（住宿、餐飲、活動、交通）都存在 `tour_itinerary_items` 這張核心表。
+從行程規劃 → 報價 → 發需求給廠商 → 廠商回覆 → 確認 → 結團，**同一筆 row 從頭走到尾**，不另開表。
+
+```
+行程表（寫入）→ 報價單（補價格）→ 需求單（發給廠商）→ 廠商回覆（寫回）→ 確認（定案）→ 結團（結算）
+    ↓               ↓                ↓                 ↓              ↓            ↓
+ 同一筆 tour_itinerary_items row，不同階段填不同欄位
+```
+
+### 核心欄位 — 各階段寫入什麼
+
+| 階段 | 寫入欄位 | 誰寫 |
+|------|---------|------|
+| **行程表** | `day_number`, `title`, `category`, `service_date`, `resource_id`, `resource_type` | 行程編輯器 syncToCore |
+| **報價單** | `unit_price`, `quantity`, `total_cost`, `pricing_type`, `adult_price`, `child_price` | writePricingToCore |
+| **需求單** | `request_status` → 'sent', `request_sent_at` | 發需求時更新 |
+| **廠商回覆** | `reply_content`(JSON), `reply_cost`, `request_reply_at`, `request_status` → 'replied' | markRequestReplied |
+| **確認** | `confirmed_cost`, `confirmation_status` → 'confirmed' | 確認操作 |
+| **結團** | `actual_expense`, `expense_note`, `expense_at` | 結團核銷 |
+
+### 各功能讀取核心表的方式
+
+| 功能 | 檔案 | 怎麼讀 |
+|------|------|--------|
+| **行程表寫入** | `src/features/tours/hooks/useTourItineraryItems.ts` | syncToCore: delete-then-insert |
+| **報價單** | `src/features/quotes/utils/core-table-adapter.ts` | writePricingToCore / coreItemsToCostCategories |
+| **需求單** | `src/features/confirmations/components/RequirementsList.tsx` | 讀 coreItems → coreItemsToQuoteItems 轉換 |
+| **需求單轉換器** | `src/features/confirmations/components/core-items-to-quote-items.ts` | 合併連續住宿、算日期 |
+| **住宿需求單 UI** | `src/features/confirmations/components/UnifiedTraditionalView.tsx` | AccommodationTable |
+| **住宿需求 Dialog** | `src/features/confirmations/components/AccommodationQuoteDialog.tsx` | 調用 UnifiedTraditionalView |
+| **核心表需求 Dialog** | `src/features/tours/components/CoreTableRequestDialog.tsx` | 直接讀 useCoreRequestItems |
+| **分房** | `src/features/tours/hooks/useAccommodationSegments.ts` | 合併連續住宿成 Segment |
+| **分房 Tab** | `src/features/tours/components/assignment-tabs/TourRoomTab.tsx` | 用 Segment 建房間 |
+
+---
+
+### 住宿的特殊邏輯 — 續住合併
+
+行程表裡連續住同一間飯店，核心表每晚存一筆 row：
+
+```
+Day 1 | accommodation | 上海外灘華爾道夫酒店 | resource_id: xxx
+Day 2 | accommodation | 上海外灘華爾道夫酒店 | resource_id: xxx  ← 續住
+Day 3 | accommodation | 上海外灘華爾道夫酒店 | resource_id: xxx  ← 續住
+Day 4 | accommodation | 上海外灘華爾道夫酒店 | resource_id: xxx  ← 續住
+```
+
+**下游功能需要合併**：連續同飯店 = 同一段住宿，不需要每晚分開處理。
+
+| 功能 | 合併？ | 原因 |
+|------|--------|------|
+| **報價單** | ❌ 每晚分開 | 每晚價格可能不同（淡旺季、房型差異），需逐晚報價 |
+| **需求單** | ✅ 合併成一段 | 發給飯店的需求是「入住 3/12，退房 3/16」，不用每晚分開發 |
+| **分房** | ✅ 合併成 Segment | 同一段住宿配一次房，不用每晚重複配 |
+
+### 住宿合併的共用 Hook
+
+`src/features/tours/hooks/useAccommodationSegments.ts`
+
+```typescript
+interface AccommodationSegment {
+  hotel_name: string      // 飯店名
+  start_night: number     // 開始晚數
+  end_night: number       // 結束晚數
+  nights: number[]        // [1, 2, 3, 4]
+  night_count: number     // 4
+}
+```
+
+分房已經用這個 Hook，需求單也應該用。
+
+---
+
+### ⚠️ 已知問題與待修項目
+
+#### 1. `supplier_name` 和 `resource_name` 未寫入
+
+**位置**：`src/features/tours/hooks/useTourItineraryItems.ts` → `accommodationToItem()`（第 139 行）
+
+**問題**：行程表同步到核心表時，只存了 `title` 和 `resource_id`，沒有存 `supplier_name` 和 `resource_name`。
+導致下游（需求單、分房）用 `supplier_name` 匹配時找不到資料。
+
+**影響**：
+- 需求單住宿匹配失敗 → 日期空白、items 為空
+- 已用 `title` 做 fallback 暫時修復，但根本解法是寫入時就補上
+
+**修法**：`accommodationToItem` 應該也存 `resource_name: accommodation`（飯店名）
+
+#### 2. 需求單住宿未用 Segment 合併
+
+**問題**：需求單的住宿資料傳入 `AccommodationQuoteDialog` 時，每晚獨立一筆，
+但廠商需求單應該是一整段（入住日~退房日）。
+
+**修法**：需求單也應該用 `useAccommodationSegments` 或同樣邏輯合併後再傳入。
+
+#### 3. 報價單的計價邏輯（重要）
+
+**檔案**：`src/features/quotes/hooks/useCategoryItems.ts` 第 60-130 行
+
+各類別的「小計（每人均價）」計算方式不同：
+
+| 類別 | quantity 意義 | 公式 | 範例 |
+|------|-------------|------|------|
+| **住宿** | 幾人房 | `unit_price ÷ quantity` | 房價 6000 ÷ 2人房 = 每人 3000 |
+| **餐飲** | 幾人一桌/一份 | `unit_price ÷ quantity` | 桌菜 10000 ÷ 10人 = 每人 1000 |
+| **活動** | 幾人分攤 | `unit_price ÷ quantity` | 團體導覽 4000 ÷ 20人 = 200/人；個人門票不填 quantity = 500/人 |
+| **交通(團體)** | 台數 | `(quantity × unit_price) ÷ groupSize` | 2台 × 8000 ÷ 20人 = 800/人 |
+| **領隊導遊** | 天數 | `(quantity × unit_price) ÷ groupSize` | 5天 × 3000 ÷ 20人 = 750/人 |
+
+**關鍵**：住宿和餐飲的 quantity 不是「買幾個」，而是「幾人分攤一份」。
+- 不填 quantity → 預設 1（個人餐 / 單人房）
+- 填 2 → 兩人分攤（雙人房 / 兩人套餐）
+- 填 10 → 十人分攤（桌菜 10 人一桌）
+
+#### 4. 行程表 syncToCore 是 delete-then-insert
+
+**問題**：每次同步行程表，會刪除所有舊 items 再重新 insert。
+已填的報價、需求狀態、廠商回覆會嘗試 carry over（`carryOverPricing`），
+但匹配靠 `day_number + category`，如果行程順序大幅調整可能丟失資料。
+
+**目前 carry over 邏輯**：第 468-472 行，用 `oldPricingByDayCategory` 匹配。
+
+---
+
+### 相關資料表
+
+| 資料表 | 用途 | 與核心表關係 |
+|--------|------|-------------|
+| `tour_itinerary_items` | 核心表 — 一 row 走到底 | 本尊 |
+| `itineraries` | 行程表 JSON（daily_itinerary） | SSOT，syncToCore 寫入核心表 |
+| `tour_rooms` | 分房：物理房間（房型、容量、晚數） | 靠 hotel_name + night_number 鬆散對應 |
+| `tour_room_assignments` | 分房：團員分配到房間 | FK → tour_rooms |
+| `tour_requests` | 需求單狀態（舊版，部分功能仍用） | 靠 tour_id 關聯 |
+| `suppliers` | 供應商資料庫 | 核心表的 supplier_id 指向 |
+| `hotels` / `restaurants` / `attractions` | 資源資料庫 | 核心表的 resource_id 指向 |
+
+---
+
+**更新**：2026-03-31

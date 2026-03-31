@@ -77,8 +77,12 @@ export const useCategoryItems = ({
                     updatedItem.total = updatedItem.child_price || 0
                   } else if (updatedItem.name === '嬰兒') {
                     updatedItem.total = updatedItem.infant_price || 0
-                  } else if (category_id === 'accommodation') {
-                    // 住宿特殊邏輯：小計 = 單價 ÷ 人數
+                  } else if (category_id === 'accommodation' || category_id === 'meals' || category_id === 'activities') {
+                    // 住宿 & 餐飲 & 活動：小計 = 單價 ÷ 單位人數
+                    // 住宿：quantity = 幾人房（2人房 → 房價 ÷ 2 = 每人價）
+                    // 餐飲：quantity = 幾人一桌（10人桌 → 桌價 ÷ 10 = 每人價）
+                    // 活動：quantity = 幾人分攤（團體導覽 4000 ÷ 20人 = 200/人）
+                    // 不填 quantity 預設 1（個人門票 / 個人餐 / 單人房）
                     updatedItem.total =
                       effectiveQuantity > 0
                         ? Math.ceil((updatedItem.unit_price || 0) / effectiveQuantity)

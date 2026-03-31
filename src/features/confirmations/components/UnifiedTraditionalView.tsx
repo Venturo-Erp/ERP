@@ -49,28 +49,43 @@ export function UnifiedTraditionalView({
         </div>
       </div>
 
-      {/* 固定資訊區 */}
-      <div className="info-grid mb-6 p-4 border-2 border-[#a8a29e] rounded-lg bg-gradient-to-br from-[#faf8f5] to-[#f5f1ea]">
-        <div className="grid grid-cols-[80px_1fr_80px_1fr] gap-x-4 gap-y-3 text-sm items-center">
-          {/* 第一行 */}
-          <span className="font-semibold text-[#78716c]">致：</span>
-          <input type="text" value={supplierName || ''} readOnly className="px-2 py-1 bg-gray-100 border border-[#a8a29e] rounded text-morandi-primary" />
-          <span className="font-semibold text-[#78716c]">聯絡人：</span>
-          <input type="text" value={contact || ''} onChange={e => onInfoChange?.('contact', e.target.value)} placeholder="聯絡人" className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary focus:ring-1 focus:ring-morandi-gold focus:outline-none" />
-          
-          {/* 第二行 */}
-          <span className="font-semibold text-[#78716c]">聯絡電話：</span>
-          <input type="text" value={phone || ''} onChange={e => onInfoChange?.('phone', e.target.value)} placeholder="電話" className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary focus:ring-1 focus:ring-morandi-gold focus:outline-none" />
-          <span className="font-semibold text-[#78716c]">傳真號碼：</span>
-          <input type="text" value={fax || ''} onChange={e => onInfoChange?.('fax', e.target.value)} placeholder="傳真" className="px-2 py-1 bg-white border border-[#a8a29e] rounded text-morandi-primary focus:ring-1 focus:ring-morandi-gold focus:outline-none" />
-          
-          {/* 第三行 */}
-          <span className="font-semibold text-[#78716c]">團體名稱：</span>
-          <input type="text" value={tour?.name || ''} readOnly className="px-2 py-1 bg-gray-100 border border-[#a8a29e] rounded text-morandi-primary" />
-          <span className="font-semibold text-[#78716c]">人數預估：</span>
-          <input type="text" value={totalPax ? `${totalPax} 人` : ''} readOnly className="px-2 py-1 bg-gray-100 border border-[#a8a29e] rounded text-morandi-primary" />
-        </div>
-      </div>
+      {/* 固定資訊區 - Excel 風格 */}
+      <table className="w-full border-collapse text-sm mb-6">
+        <tbody>
+          <tr>
+            <td className="border border-[#999] px-3 py-2 bg-[#f2f2f2] font-semibold w-[90px]">致</td>
+            <td className="border border-[#999] px-3 py-2">
+              <input type="text" value={supplierName || ''} readOnly className="w-full bg-transparent outline-none" />
+            </td>
+            <td className="border border-[#999] px-3 py-2 bg-[#f2f2f2] font-semibold w-[90px]">聯絡人</td>
+            <td className="border border-[#999] px-3 py-2">
+              <input type="text" value={contact || ''} onChange={e => onInfoChange?.('contact', e.target.value)} placeholder="" className="w-full bg-transparent outline-none focus:ring-0" />
+            </td>
+          </tr>
+          <tr>
+            <td className="border border-[#999] px-3 py-2 bg-[#f2f2f2] font-semibold">電話</td>
+            <td className="border border-[#999] px-3 py-2">
+              <input type="text" value={phone || ''} onChange={e => onInfoChange?.('phone', e.target.value)} placeholder="" className="w-full bg-transparent outline-none focus:ring-0" />
+            </td>
+            <td className="border border-[#999] px-3 py-2 bg-[#f2f2f2] font-semibold">傳真</td>
+            <td className="border border-[#999] px-3 py-2">
+              <input type="text" value={fax || ''} onChange={e => onInfoChange?.('fax', e.target.value)} placeholder="" className="w-full bg-transparent outline-none focus:ring-0" />
+            </td>
+          </tr>
+          <tr>
+            <td className="border border-[#999] px-3 py-2 bg-[#f2f2f2] font-semibold">團名</td>
+            <td className="border border-[#999] px-3 py-2">{tour?.name || ''}</td>
+            <td className="border border-[#999] px-3 py-2 bg-[#f2f2f2] font-semibold">出發日</td>
+            <td className="border border-[#999] px-3 py-2">{tour?.departure_date || ''}</td>
+          </tr>
+          <tr>
+            <td className="border border-[#999] px-3 py-2 bg-[#f2f2f2] font-semibold">人數</td>
+            <td className="border border-[#999] px-3 py-2">{totalPax ? `${totalPax} 人` : ''}</td>
+            <td className="border border-[#999] px-3 py-2 bg-[#f2f2f2] font-semibold">團號</td>
+            <td className="border border-[#999] px-3 py-2">{tour?.code || ''}</td>
+          </tr>
+        </tbody>
+      </table>
 
       {/* 根據類型顯示對應表格 */}
       {requestType === 'accommodation' && <AccommodationTable items={items} />}
@@ -113,170 +128,140 @@ export function UnifiedTraditionalView({
   )
 }
 
-// 住宿表
+// 住宿表 - Excel 風格
+// 欄位：入住日期 | 需求房型 | 床型安排 | 數量 | 報價（廠商回填）
 function AccommodationTable({ items }: { items: any[] }) {
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-semibold text-[#78716c] mb-3">住宿表 ▽</h3>
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full border-collapse text-sm table-fixed">
         <thead>
-          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-morandi-primary">
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">入住日期</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">需求房型</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">床型安排</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">客報價</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">NET價</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left w-20">數量</th>
+          <tr className="bg-[#f2f2f2]">
+            <th className="border border-[#999] px-3 py-2 text-left font-semibold" style={{width: '110px'}}>入住日期</th>
+            <th className="border border-[#999] px-3 py-2 text-left font-semibold">需求房型</th>
+            <th className="border border-[#999] px-3 py-2 text-left font-semibold" style={{width: '110px'}}>床型安排</th>
+            <th className="border border-[#999] px-3 py-2 text-center font-semibold" style={{width: '70px'}}>數量</th>
+            <th className="border border-[#999] px-3 py-2 text-right font-semibold" style={{width: '120px'}}>報價</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, idx) => (
-            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf8]'}>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.checkIn || '—'}</td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.roomType || '—'}</td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.bedType || '—'}</td>
-              <td className="border border-[#a8a29e] px-3 py-2"></td>
-              <td className="border border-[#a8a29e] px-3 py-2"></td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.quantity || ''}</td>
+            <tr key={idx}>
+              <td className="border border-[#999] px-3 py-2">{item.checkIn || ''}</td>
+              <td className="border border-[#999] px-3 py-2">{item.roomType || ''}</td>
+              <td className="border border-[#999] px-3 py-2">{item.bedType || ''}</td>
+              <td className="border border-[#999] px-3 py-2 text-center">{item.quantity || ''}</td>
+              <td className="border border-[#999] px-3 py-2 text-right"></td>
             </tr>
           ))}
+          {items.length === 0 && (
+            <tr><td colSpan={5} className="border border-[#999] px-3 py-4 text-center text-gray-400">無資料</td></tr>
+          )}
         </tbody>
       </table>
     </div>
   )
 }
 
-// 餐食表（可編輯）
+// 餐食表 - Excel 風格
+// 欄位：用餐日期 | 餐別 | 數量 | 報價（廠商回填）
 function MealTable({ items, onItemChange }: { items: any[]; onItemChange?: (idx: number, field: string, value: any) => void }) {
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-semibold text-[#78716c] mb-3">餐食表 ▽</h3>
       <table className="w-full border-collapse text-sm table-fixed">
         <thead>
-          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-morandi-primary">
-            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '100px'}}>用餐日期</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '120px'}}>用餐時段</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '140px'}}>餐標單價（桌／人）</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '80px'}}>訂金</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '70px'}}>數量</th>
+          <tr className="bg-[#f2f2f2]">
+            <th className="border border-[#999] px-3 py-2 text-left font-semibold" style={{width: '110px'}}>用餐日期</th>
+            <th className="border border-[#999] px-3 py-2 text-left font-semibold" style={{width: '120px'}}>餐別</th>
+            <th className="border border-[#999] px-3 py-2 text-left font-semibold">餐廳 / 說明</th>
+            <th className="border border-[#999] px-3 py-2 text-center font-semibold" style={{width: '70px'}}>數量</th>
+            <th className="border border-[#999] px-3 py-2 text-right font-semibold" style={{width: '120px'}}>報價</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, idx) => (
-            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf8]'}>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.date || '—'}</td>
-              <td className="border border-[#a8a29e] px-1 py-1">
-                <input
-                  type="text"
-                  value={item.time || ''}
-                  onChange={e => onItemChange?.(idx, 'time', e.target.value)}
-                  placeholder="午餐 12:00"
-                  className="w-full px-2 py-1 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold rounded"
-                />
+            <tr key={idx}>
+              <td className="border border-[#999] px-3 py-2">{item.date || ''}</td>
+              <td className="border border-[#999] px-1 py-1">
+                <input type="text" value={item.time || ''} onChange={e => onItemChange?.(idx, 'time', e.target.value)} placeholder="" className="w-full px-2 py-1 bg-transparent outline-none focus:ring-1 focus:ring-morandi-gold rounded" />
               </td>
-              <td className="border border-[#a8a29e] px-1 py-1">
-                <input
-                  type="text"
-                  value={item.price || ''}
-                  onChange={e => onItemChange?.(idx, 'price', e.target.value)}
-                  placeholder=""
-                  className="w-full px-2 py-1 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold rounded"
-                />
+              <td className="border border-[#999] px-3 py-2">{item.venue || item.title || ''}</td>
+              <td className="border border-[#999] px-1 py-1">
+                <input type="number" value={item.quantity || ''} onChange={e => onItemChange?.(idx, 'quantity', parseInt(e.target.value) || 0)} className="w-full px-2 py-1 bg-transparent outline-none focus:ring-1 focus:ring-morandi-gold rounded text-center" />
               </td>
-              <td className="border border-[#a8a29e] px-3 py-2"></td>
-              <td className="border border-[#a8a29e] px-1 py-1">
-                <input
-                  type="number"
-                  value={item.quantity || ''}
-                  onChange={e => onItemChange?.(idx, 'quantity', parseInt(e.target.value) || 0)}
-                  placeholder=""
-                  className="w-full px-2 py-1 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold rounded text-center"
-                />
-              </td>
+              <td className="border border-[#999] px-3 py-2 text-right"></td>
             </tr>
           ))}
+          {items.length === 0 && (
+            <tr><td colSpan={5} className="border border-[#999] px-3 py-4 text-center text-gray-400">無資料</td></tr>
+          )}
         </tbody>
       </table>
     </div>
   )
 }
 
-// 交通表
+// 交通表 - Excel 風格
+// 欄位：日期 | 路線 | 數量 | 報價（廠商回填）| 備註
 function TransportTable({ items }: { items: any[] }) {
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-semibold text-[#78716c] mb-3">交通表 ▽</h3>
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full border-collapse text-sm table-fixed">
         <thead>
-          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-morandi-primary">
-            <th className="border border-[#a8a29e] px-3 py-2 text-left w-24">訂車日期</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">接駁地點</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">車資（未稅）</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">訂金</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left w-20">數量</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">備註</th>
+          <tr className="bg-[#f2f2f2]">
+            <th className="border border-[#999] px-3 py-2 text-left font-semibold" style={{width: '110px'}}>日期</th>
+            <th className="border border-[#999] px-3 py-2 text-left font-semibold">接駁路線</th>
+            <th className="border border-[#999] px-3 py-2 text-center font-semibold" style={{width: '70px'}}>數量</th>
+            <th className="border border-[#999] px-3 py-2 text-right font-semibold" style={{width: '120px'}}>報價</th>
+            <th className="border border-[#999] px-3 py-2 text-left font-semibold" style={{width: '150px'}}>備註</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, idx) => (
-            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf8]'}>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.date || '—'}</td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.route || '—'}</td>
-              <td className="border border-[#a8a29e] px-3 py-2"></td>
-              <td className="border border-[#a8a29e] px-3 py-2"></td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.quantity || ''}</td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.note || ''}</td>
+            <tr key={idx}>
+              <td className="border border-[#999] px-3 py-2">{item.date || ''}</td>
+              <td className="border border-[#999] px-3 py-2">{item.route || ''}</td>
+              <td className="border border-[#999] px-3 py-2 text-center">{item.quantity || ''}</td>
+              <td className="border border-[#999] px-3 py-2 text-right"></td>
+              <td className="border border-[#999] px-3 py-2">{item.note || ''}</td>
             </tr>
           ))}
+          {items.length === 0 && (
+            <tr><td colSpan={5} className="border border-[#999] px-3 py-4 text-center text-gray-400">無資料</td></tr>
+          )}
         </tbody>
       </table>
     </div>
   )
 }
 
-// 活動表（可編輯）
+// 活動表 - Excel 風格
+// 欄位：日期 | 場地名稱 | 數量 | 報價（廠商回填）
 function ActivityTable({ items, onItemChange }: { items: any[]; onItemChange?: (idx: number, field: string, value: any) => void }) {
   return (
     <div className="mb-6">
-      <h3 className="text-lg font-semibold text-[#78716c] mb-3">活動表 ▽</h3>
       <table className="w-full border-collapse text-sm table-fixed">
         <thead>
-          <tr className="bg-gradient-to-r from-[#d4c5b9] to-[#c9b8a8] text-morandi-primary">
-            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '100px'}}>活動時間</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left">場地名稱</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '80px'}}>客報價</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '80px'}}>NET價</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '80px'}}>訂金</th>
-            <th className="border border-[#a8a29e] px-3 py-2 text-left" style={{width: '70px'}}>數量</th>
+          <tr className="bg-[#f2f2f2]">
+            <th className="border border-[#999] px-3 py-2 text-left font-semibold" style={{width: '110px'}}>日期</th>
+            <th className="border border-[#999] px-3 py-2 text-left font-semibold">場地名稱</th>
+            <th className="border border-[#999] px-3 py-2 text-center font-semibold" style={{width: '70px'}}>數量</th>
+            <th className="border border-[#999] px-3 py-2 text-right font-semibold" style={{width: '120px'}}>報價</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, idx) => (
-            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf8]'}>
-              <td className="border border-[#a8a29e] px-1 py-1">
-                <input
-                  type="text"
-                  value={item.time || ''}
-                  onChange={e => onItemChange?.(idx, 'time', e.target.value)}
-                  placeholder="—"
-                  className="w-full px-2 py-1 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold rounded"
-                />
+            <tr key={idx}>
+              <td className="border border-[#999] px-3 py-2">{item.time || item.date || ''}</td>
+              <td className="border border-[#999] px-3 py-2">{item.venue || ''}</td>
+              <td className="border border-[#999] px-1 py-1">
+                <input type="number" value={item.quantity || ''} onChange={e => onItemChange?.(idx, 'quantity', parseInt(e.target.value) || 0)} className="w-full px-2 py-1 bg-transparent outline-none focus:ring-1 focus:ring-morandi-gold rounded text-center" />
               </td>
-              <td className="border border-[#a8a29e] px-3 py-2">{item.venue || '—'}</td>
-              <td className="border border-[#a8a29e] px-3 py-2"></td>
-              <td className="border border-[#a8a29e] px-3 py-2"></td>
-              <td className="border border-[#a8a29e] px-3 py-2"></td>
-              <td className="border border-[#a8a29e] px-1 py-1">
-                <input
-                  type="number"
-                  value={item.quantity || ''}
-                  onChange={e => onItemChange?.(idx, 'quantity', parseInt(e.target.value) || 0)}
-                  placeholder=""
-                  className="w-full px-2 py-1 border-0 bg-transparent focus:outline-none focus:ring-1 focus:ring-morandi-gold rounded text-center"
-                />
-              </td>
+              <td className="border border-[#999] px-3 py-2 text-right"></td>
             </tr>
           ))}
+          {items.length === 0 && (
+            <tr><td colSpan={4} className="border border-[#999] px-3 py-4 text-center text-gray-400">無資料</td></tr>
+          )}
         </tbody>
       </table>
     </div>

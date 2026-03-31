@@ -29,8 +29,25 @@ export function coreItemsToCostCategories(items: TourItineraryItem[]): CostCateg
 
   for (const item of dedupedItems) {
     if (!item.category) continue
-    // 過濾掉在報價單隱藏的項目
-    if (item.show_on_quote === false) continue
+    // 隱藏的項目放到 hiddenItems（不在主列表顯示，但可恢復）
+    if (item.show_on_quote === false) {
+      const targetCategory = categories.find(c => c.id === item.category)
+      if (targetCategory) {
+        if (!targetCategory.hiddenItems) targetCategory.hiddenItems = []
+        targetCategory.hiddenItems.push({
+          id: `core-${item.id}`,
+          itinerary_item_id: item.id,
+          name: item.title || '',
+          quantity: null,
+          unit_price: null,
+          total: 0,
+          day: item.day_number ?? undefined,
+          sub_category: item.sub_category ?? undefined,
+          show_on_quote: false,
+        })
+      }
+      continue
+    }
 
     const targetCategory = categories.find(c => c.id === item.category)
     if (!targetCategory) continue
@@ -57,6 +74,7 @@ export function coreItemsToCostCategories(items: TourItineraryItem[]): CostCateg
       resource_longitude: item.longitude ?? undefined,
       resource_google_maps_url: item.google_maps_url ?? undefined,
       sub_category: item.sub_category ?? undefined,
+      show_on_quote: item.show_on_quote === false ? false : true,
     }
 
     // 住宿：sub_category → room_type

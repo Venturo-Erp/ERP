@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
     const body = await request.json()
-    const { contractId, signature } = body
+    const { contractId, signature, signerPhone, signerAddress, signerIdNumber } = body
 
     if (!contractId || !signature) {
       return NextResponse.json(
@@ -45,14 +45,24 @@ export async function POST(request: NextRequest) {
         signer_type,
         company_name,
         created_by,
-        tour_id,
-        tours(id, code, name)
+        tour_id
       `)
       .eq('id', contractId)
       .single()
 
     console.log('[Contract Sign] fetchError:', fetchError)
     console.log('[Contract Sign] contract:', contract?.id, contract?.code)
+
+    // 另外查詢 tour 資訊（避免 foreign key 問題）
+    let tourInfo: { code: string; name: string } | null = null
+    if (contract?.tour_id) {
+      const { data: tour } = await supabase
+        .from('tours')
+        .select('id, code, name')
+        .eq('id', contract.tour_id)
+        .single()
+      tourInfo = tour
+    }
 
     if (fetchError || !contract) {
       return NextResponse.json(
@@ -68,12 +78,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 更新合約狀態
+    // 更新合約狀態 + 簽約人補填資訊
     const { error: updateError } = await supabase
       .from('contracts')
       .update({
         status: 'signed',
         signature_image: signature,
+        ...(signerPhone && { signer_phone: signerPhone }),
+        ...(signerAddress && { signer_address: signerAddress }),
+        ...(signerIdNumber && { signer_id_number: signerIdNumber }),
         signature_ip: ip,
         signature_user_agent: userAgent,
         signed_at: new Date().toISOString(),
@@ -93,14 +106,11 @@ export async function POST(request: NextRequest) {
         ? contract.company_name 
         : contract.signer_name
       
-      const tours = contract.tours as unknown
-      const tourInfo = tours as { code: string; name: string }
-      
       const notificationMessage = `✅ 合約簽署完成
 
 合約編號：${contract.code}
 簽約人：${signerName}
-團名：${tourInfo.name}（${tourInfo.code}）
+團名：${tourInfo?.name ?? ''}（${tourInfo?.code ?? ''}）
 簽署時間：${new Date().toLocaleString('zh-TW')}
 
 請至系統查看完整合約內容。`

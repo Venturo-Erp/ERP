@@ -13,6 +13,7 @@ import {
   Mail,
   FileText,
   X,
+  RefreshCw,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -101,6 +102,8 @@ export function TourContractTab({ tour }: TourContractTabProps) {
   const [signerType, setSignerType] = useState<'individual' | 'company'>('individual')
   const [signerName, setSignerName] = useState('')
   const [signerPhone, setSignerPhone] = useState('')
+  const [signerAddress, setSignerAddress] = useState('')
+  const [signerIdNumber, setSignerIdNumber] = useState('')
   
   // 合約資訊欄位
   const [gatherLocation, setGatherLocation] = useState('桃園國際機場第一航廈')
@@ -163,12 +166,13 @@ export function TourContractTab({ tour }: TourContractTabProps) {
             }>
           }
         ).order_members || []
+      const contactPhone = (order as unknown as { contact_phone?: string }).contact_phone || ''
       return members.map(m => ({
         id: m.id,
         name: m.chinese_name || '',
         chinese_name: m.chinese_name,
         id_number: m.id_number,
-        phone: m.phone,
+        phone: contactPhone,
         order_code: order.code,
         order_id: order.id,
       }))
@@ -219,6 +223,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
     if (firstMember) {
       setSignerName(firstMember.name)
       setSignerPhone(firstMember.phone || '')
+      setSignerIdNumber(firstMember.id_number || '')
     }
     setCreateDialogOpen(true)
   }
@@ -245,15 +250,17 @@ export function TourContractTab({ tour }: TourContractTabProps) {
             ? allMembers.find(m => m.id === representativeId)?.name || ''
             : signerName.trim(),
           signerPhone: signerPhone.trim(),
+          signerAddress: signerAddress.trim() || undefined,
+          signerIdNumber: signerIdNumber.trim() || undefined,
           representativeId: selectedMemberIds.length > 1 ? representativeId : undefined,
+          // 附件選項（頂層，API 需要）
+          includeItinerary,
+          includeMemberList: selectedMemberIds.length > 1 ? includeMemberList : false,
           contractData: {
             gatherLocation,
             gatherTime,
             depositAmount: depositAmount || '0',
             balanceAmount: balanceAmount || '0',
-            includeItinerary,
-            includeQuote,
-            includeMemberList: selectedMemberIds.length > 1 ? includeMemberList : false,
             // 多人簽約時，顯示「XXX等N人」
             travelerDisplayName: selectedMemberIds.length > 1 && signerType === 'individual'
               ? `${allMembers.find(m => m.id === representativeId)?.name || ''}等${selectedMemberIds.length}人`
@@ -316,6 +323,46 @@ export function TourContractTab({ tour }: TourContractTabProps) {
       loadData() // 重新載入
     } catch {
       toast({ title: '取消失敗', variant: 'destructive' })
+    }
+  }
+
+  // 重新產生合約（取消舊的 → 帶入同樣團員開啟建立對話框）
+  const handleRecreateContract = async (contract: Contract) => {
+    if (!confirm(`確定要重新產生合約「${contract.code}」嗎？\n舊合約將被取消，並以相同團員建立新合約。`)) {
+      return
+    }
+
+    try {
+      // 取消舊合約
+      const { error } = await supabase
+        .from('contracts')
+        .update({
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', contract.id)
+
+      if (error) throw error
+
+      // 重新載入資料
+      await loadData()
+
+      // 帶入舊合約的團員，開啟建立對話框
+      setSelectedMemberIds(contract.member_ids || [])
+      setSignerName(contract.signer_name || '')
+
+      // 如果多人，預設代表人為原簽約人
+      if (contract.member_ids?.length > 1) {
+        const representative = allMembers.find(m => m.name === contract.signer_name)
+        if (representative) {
+          setRepresentativeId(representative.id)
+        }
+      }
+
+      setCreateDialogOpen(true)
+      toast({ title: '舊合約已取消，請確認後重新建立' })
+    } catch {
+      toast({ title: '操作失敗', variant: 'destructive' })
     }
   }
 
@@ -390,7 +437,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
               <span className="font-medium text-morandi-primary">已建立合約 ({contracts.filter(c => c.status !== 'cancelled').length})</span>
             </div>
           </div>
-          <div className="divide-y divide-border bg-white">
+          <div className="divide-y divide-border">
             {contracts.filter(c => c.status !== 'cancelled').map(contract => (
               <div key={contract.id} className="px-4 py-3 flex items-center justify-between">
                 <div>
@@ -453,6 +500,14 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRecreateContract(contract)}
+                    title="重新產生合約"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </Button>
                   {contract.status !== 'signed' && (
                     <Button
                       variant="ghost"
@@ -497,17 +552,19 @@ export function TourContractTab({ tour }: TourContractTabProps) {
               )}
             </div>
           </div>
-          <div className="divide-y divide-border bg-white">
+          <div className="divide-y divide-border">
             {membersWithoutContract.map(member => (
               <div
                 key={member.id}
                 className="px-4 py-3 flex items-center gap-3 hover:bg-morandi-primary/5 cursor-pointer"
                 onClick={() => toggleMember(member.id)}
               >
-                <Checkbox
-                  checked={selectedMemberIds.includes(member.id)}
-                  onCheckedChange={() => toggleMember(member.id)}
-                />
+                <div onClick={e => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selectedMemberIds.includes(member.id)}
+                    onCheckedChange={() => toggleMember(member.id)}
+                  />
+                </div>
                 <div className="flex-1">
                   <span className="font-medium text-morandi-primary">{member.name}</span>
                   {member.id_number && (
@@ -522,6 +579,37 @@ export function TourContractTab({ tour }: TourContractTabProps) {
         </div>
       )}
 
+      {/* 已取消合約歷史 */}
+      {contracts.filter(c => c.status === 'cancelled').length > 0 && (
+        <details className="bg-white border border-border rounded-lg">
+          <summary className="px-4 py-3 cursor-pointer text-sm text-morandi-secondary hover:text-morandi-primary select-none">
+            已取消合約（{contracts.filter(c => c.status === 'cancelled').length}）
+          </summary>
+          <div className="divide-y divide-border border-t">
+            {contracts.filter(c => c.status === 'cancelled').map(contract => (
+              <div key={contract.id} className="px-4 py-3 flex items-center justify-between opacity-60">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-morandi-primary line-through">{contract.signer_name}</span>
+                    {contract.member_ids?.length > 1 && (
+                      <span className="text-sm text-morandi-secondary">
+                        等 {contract.member_ids.length} 人
+                      </span>
+                    )}
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-400">
+                      已取消
+                    </span>
+                  </div>
+                  <div className="text-xs text-morandi-secondary mt-1">
+                    {CONTRACT_TEMPLATE_LABELS[contract.template as ContractTemplate]} · {contract.code}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+
       {/* 無團員 */}
       {allMembers.length === 0 && (
         <div className="text-center py-12 text-morandi-secondary">
@@ -533,102 +621,101 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
       {/* 產生合約對話框 */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+          <DialogHeader className="shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <FileSignature className="w-5 h-5 text-morandi-gold" />
               產生合約
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
-            <div>
-              <Label>簽約對象</Label>
-              <Select
-                value={signerType}
-                onValueChange={(v: 'individual' | 'company') => setSignerType(v)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="individual">個人</SelectItem>
-                  <SelectItem value="company">公司行號</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {signerType === 'company' ? (
+          <div className="grid grid-cols-2 gap-x-6 gap-y-4 py-4 overflow-y-auto">
+            {/* 左欄：簽約人資訊 */}
+            <div className="space-y-4">
               <div>
-                <Label>公司名稱</Label>
-                <Input
-                  value={signerName}
-                  onChange={e => setSignerName(e.target.value)}
-                  placeholder="公司名稱"
-                />
-              </div>
-            ) : selectedMemberIds.length > 1 ? (
-              <div>
-                <Label>代表人（合約顯示「XXX 等 {selectedMemberIds.length} 人」）</Label>
+                <Label>簽約對象</Label>
                 <Select
-                  value={representativeId}
-                  onValueChange={setRepresentativeId}
+                  value={signerType}
+                  onValueChange={(v: 'individual' | 'company') => setSignerType(v)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="選擇代表人" />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {allMembers
-                      .filter(m => selectedMemberIds.includes(m.id))
-                      .map(member => (
-                        <SelectItem key={member.id} value={member.id}>
-                          {member.name}
-                        </SelectItem>
-                      ))}
+                    <SelectItem value="individual">個人</SelectItem>
+                    <SelectItem value="company">公司行號</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            ) : (
+
+              {signerType === 'company' ? (
+                <div>
+                  <Label>公司名稱</Label>
+                  <Input
+                    value={signerName}
+                    onChange={e => setSignerName(e.target.value)}
+                    placeholder="公司名稱"
+                  />
+                </div>
+              ) : selectedMemberIds.length > 1 ? (
+                <div>
+                  <Label>代表人（顯示「XXX 等 {selectedMemberIds.length} 人」）</Label>
+                  <Select
+                    value={representativeId}
+                    onValueChange={setRepresentativeId}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="選擇代表人" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {allMembers
+                        .filter(m => selectedMemberIds.includes(m.id))
+                        .map(member => (
+                          <SelectItem key={member.id} value={member.id}>
+                            {member.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ) : (
+                <div>
+                  <Label>簽約人姓名</Label>
+                  <Input
+                    value={signerName}
+                    onChange={e => setSignerName(e.target.value)}
+                    placeholder="姓名"
+                  />
+                </div>
+              )}
+
               <div>
-                <Label>簽約人姓名</Label>
+                <Label>聯絡電話</Label>
                 <Input
-                  value={signerName}
-                  onChange={e => setSignerName(e.target.value)}
-                  placeholder="姓名"
+                  value={signerPhone}
+                  onChange={e => setSignerPhone(e.target.value)}
+                  placeholder="電話（客戶簽署時可補填）"
                 />
               </div>
-            )}
 
-            <div>
-              <Label>聯絡電話</Label>
-              <Input
-                value={signerPhone}
-                onChange={e => setSignerPhone(e.target.value)}
-                placeholder="電話"
-              />
-            </div>
-
-            {/* 行程資訊確認 */}
-            <div className="bg-morandi-container/50 rounded-lg p-3 text-sm space-y-2">
-              <div className="font-medium text-morandi-primary mb-2">行程資訊確認</div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-morandi-secondary">出發日期：</span>
-                  <span className="font-medium">{tour.departure_date || '未設定'}</span>
-                </div>
-                <div>
-                  <span className="text-morandi-secondary">回程日期：</span>
-                  <span className="font-medium">{tour.return_date || '未設定'}</span>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-morandi-secondary">目的地：</span>
-                  <span className="font-medium">{tour.location || '未設定'}</span>
-                </div>
+              <div>
+                <Label>身分證字號</Label>
+                <Input
+                  value={signerIdNumber}
+                  onChange={e => setSignerIdNumber(e.target.value)}
+                  placeholder="選填（客戶簽署時可補填）"
+                />
               </div>
-            </div>
 
-            {/* 集合資訊 */}
-            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>通訊地址</Label>
+                <Input
+                  value={signerAddress}
+                  onChange={e => setSignerAddress(e.target.value)}
+                  placeholder="選填（客戶簽署時可補填）"
+                />
+              </div>
+
               <div>
                 <Label>集合地點</Label>
                 <Input
@@ -637,83 +724,102 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   placeholder="例：桃園國際機場第一航廈"
                 />
               </div>
-              <div>
-                <Label>集合時間</Label>
-                <Input
-                  type="time"
-                  value={gatherTime}
-                  onChange={e => setGatherTime(e.target.value)}
-                />
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>集合時間</Label>
+                  <Input
+                    type="time"
+                    value={gatherTime}
+                    onChange={e => setGatherTime(e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 
-            {/* 費用資訊 */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>訂金金額</Label>
-                <Input
-                  type="number"
-                  value={depositAmount}
-                  onChange={e => setDepositAmount(e.target.value)}
-                  placeholder="輸入訂金"
-                />
+            {/* 右欄：費用、附件、摘要 */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>訂金金額</Label>
+                  <Input
+                    type="number"
+                    value={depositAmount}
+                    onChange={e => setDepositAmount(e.target.value)}
+                    placeholder="輸入訂金"
+                  />
+                </div>
+                <div>
+                  <Label>尾款金額</Label>
+                  <Input
+                    type="number"
+                    value={balanceAmount}
+                    onChange={e => setBalanceAmount(e.target.value)}
+                    placeholder="輸入尾款"
+                  />
+                </div>
               </div>
-              <div>
-                <Label>尾款金額</Label>
-                <Input
-                  type="number"
-                  value={balanceAmount}
-                  onChange={e => setBalanceAmount(e.target.value)}
-                  placeholder="輸入尾款"
-                />
-              </div>
-            </div>
 
-            {/* 附件勾選 */}
-            <div className="space-y-3 border-t pt-4">
-              <div className="text-sm font-medium text-morandi-primary">合約附件</div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="include-itinerary"
-                  checked={includeItinerary}
-                  onCheckedChange={(checked) => setIncludeItinerary(!!checked)}
-                />
-                <label htmlFor="include-itinerary" className="text-sm cursor-pointer">
-                  附上行程表
-                </label>
+              {/* 行程資訊 */}
+              <div className="bg-morandi-container/50 rounded-lg p-3 text-sm space-y-1">
+                <div className="font-medium text-morandi-primary mb-1">行程資訊</div>
+                <div className="flex justify-between">
+                  <span className="text-morandi-secondary">出發：</span>
+                  <span className="font-medium">{tour.departure_date || '未設定'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-morandi-secondary">回程：</span>
+                  <span className="font-medium">{tour.return_date || '未設定'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-morandi-secondary">目的地：</span>
+                  <span className="font-medium">{tour.location || '未設定'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-morandi-secondary">合約類型：</span>
+                  <span className="font-medium">{CONTRACT_TEMPLATE_LABELS[autoContractType]}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-morandi-secondary">簽約團員：</span>
+                  <span className="font-medium">{selectedMemberIds.length} 人</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="include-quote"
-                  checked={includeQuote}
-                  onCheckedChange={(checked) => setIncludeQuote(!!checked)}
-                />
-                <label htmlFor="include-quote" className="text-sm cursor-pointer">
-                  附上報價單
-                </label>
-              </div>
-              {selectedMemberIds.length > 1 && (
+
+              {/* 附件勾選 */}
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-morandi-primary">合約附件</div>
                 <div className="flex items-center gap-2">
                   <Checkbox
-                    id="include-member-list"
-                    checked={includeMemberList}
-                    onCheckedChange={(checked) => setIncludeMemberList(!!checked)}
+                    id="include-itinerary"
+                    checked={includeItinerary}
+                    onCheckedChange={(checked) => setIncludeItinerary(!!checked)}
                   />
-                  <label htmlFor="include-member-list" className="text-sm cursor-pointer">
-                    附上簽約團員名單（{selectedMemberIds.length} 人）
+                  <label htmlFor="include-itinerary" className="text-sm cursor-pointer">
+                    附上行程表
                   </label>
                 </div>
-              )}
-            </div>
-
-            <div className="bg-morandi-container/50 rounded-lg p-3 text-sm">
-              <div className="text-morandi-secondary mb-1">合約類型</div>
-              <div className="font-medium text-morandi-primary">
-                {CONTRACT_TEMPLATE_LABELS[autoContractType]}
-              </div>
-              <div className="text-morandi-secondary mt-2 mb-1">簽約團員</div>
-              <div className="font-medium text-morandi-primary">
-                {selectedMemberIds.length} 人
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="include-quote"
+                    checked={includeQuote}
+                    onCheckedChange={(checked) => setIncludeQuote(!!checked)}
+                  />
+                  <label htmlFor="include-quote" className="text-sm cursor-pointer">
+                    附上報價單
+                  </label>
+                </div>
+                {selectedMemberIds.length > 1 && (
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id="include-member-list"
+                      checked={includeMemberList}
+                      onCheckedChange={(checked) => setIncludeMemberList(!!checked)}
+                    />
+                    <label htmlFor="include-member-list" className="text-sm cursor-pointer">
+                      附上團員名單（{selectedMemberIds.length} 人）
+                    </label>
+                  </div>
+                )}
               </div>
             </div>
           </div>

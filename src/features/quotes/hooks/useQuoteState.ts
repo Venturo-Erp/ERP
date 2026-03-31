@@ -353,7 +353,8 @@ export const useQuoteState = () => {
   // 保險文字和費用不包含項目
   const [insuranceText, setInsuranceText] = useState('')
   const [excludedItems, setExcludedItems] = useState<string[]>([
-    '個人護照及簽證費用',
+    '個人護照費用',
+    '簽證費用',
     '行程外之自費行程',
     '個人消費及小費',
     '行李超重費用',

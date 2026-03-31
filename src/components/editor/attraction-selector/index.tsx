@@ -274,10 +274,18 @@ export function AttractionSelector({
           </div>
         </div>
 
-        <DialogFooter className="px-6 py-3 border-t bg-muted/50">
+        <DialogFooter className="shrink-0 px-6 py-3 border-t bg-muted/50 flex items-center justify-end gap-2">
           <Button variant="outline" onClick={handleCancel} className="rounded-xl">
             {ATTRACTION_SELECTOR_LABELS.CANCEL}
           </Button>
+          {selectedIds.size > 0 && (
+            <Button
+              onClick={handleConfirm}
+              className="rounded-xl bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            >
+              加入 {selectedIds.size} 個景點
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
 

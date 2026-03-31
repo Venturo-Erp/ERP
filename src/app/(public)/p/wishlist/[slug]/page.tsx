@@ -374,31 +374,6 @@ export default function WishlistDetailPage({
               )}
             </div>
 
-            {/* 分類篩選 */}
-            {categories.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-6">
-                <Button
-                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
-                  size="sm"
-                  className={`rounded-full ${selectedCategory !== 'all' ? 'border-white/20 text-white hover:bg-white/10' : ''}`}
-                  onClick={() => setSelectedCategory('all')}
-                >
-                  全部景點
-                </Button>
-                {categories.map(cat => (
-                  <Button
-                    key={cat}
-                    variant={selectedCategory === cat ? 'default' : 'outline'}
-                    size="sm"
-                    className={`rounded-full ${selectedCategory !== cat ? 'border-white/20 text-white hover:bg-white/10' : ''}`}
-                    onClick={() => setSelectedCategory(cat!)}
-                  >
-                    {cat}
-                  </Button>
-                ))}
-              </div>
-            )}
-
             {/* 景點卡片 */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {filteredItems.map(item => {

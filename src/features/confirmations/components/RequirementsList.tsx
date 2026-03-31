@@ -1927,37 +1927,43 @@ export function RequirementsList({
           }}
           totalPax={memberAgeBreakdown?.total || quoteGroupSize || 0}
           accommodations={(() => {
-            // 優先從分房系統讀取
-            const roomsFromAssignment = tourRoomsByHotel[selectedHotel.name]
-            if (roomsFromAssignment && roomsFromAssignment.length > 0) {
-              // 找這個飯店的入住日期
-              const hotelItem = coreItems.find(
-                it => it.item_category === 'accommodation' && it.supplier_name === selectedHotel.name
+            // 匹配飯店：supplier_name 或 title 都可能存飯店名
+            const hotelCoreItems = coreItems
+              .filter(it =>
+                it.category === 'accommodation' &&
+                (it.supplier_name === selectedHotel.name || it.title === selectedHotel.name)
               )
-              // 優先用 service_date，沒有的話用 day_number 計算
-              const checkInDate = hotelItem?.service_date 
-                || selectedHotel.serviceDate 
-                || (hotelItem?.day_number != null ? calculateDate(hotelItem.day_number) : '')
-              return roomsFromAssignment.map(room => ({
-                checkIn: checkInDate,
-                roomType: room.room_type,
-                bedType: room.capacity === 1 ? '一人房' : room.capacity === 2 ? '兩人房' : `${room.capacity}人房`,
-                quantity: room.quantity,
-                note: '',
-              }))
+              .sort((a, b) => (a.day_number || 0) - (b.day_number || 0))
+
+            if (hotelCoreItems.length === 0) return []
+
+            // 算入住日（第一晚）和退房日（最後一晚 + 1天）
+            const firstItem = hotelCoreItems[0]
+            const lastItem = hotelCoreItems[hotelCoreItems.length - 1]
+            const checkInDate = firstItem.service_date
+              || (firstItem.day_number != null ? calculateDate(firstItem.day_number) : '')
+              || ''
+            let checkOutDate = ''
+            if (lastItem.service_date) {
+              const d = new Date(lastItem.service_date)
+              d.setDate(d.getDate() + 1)
+              checkOutDate = d.toISOString().split('T')[0]
+            } else if (lastItem.day_number != null) {
+              checkOutDate = calculateDate(lastItem.day_number + 1) || ''
             }
-            // Fallback: 從 coreItems 讀取
-            return coreItems
-              .filter(
-                it => it.item_category === 'accommodation' && it.supplier_name === selectedHotel.name
-              )
-              .map(it => ({
-                checkIn: it.service_date || (it.day_number != null ? calculateDate(it.day_number) : ''),
-                roomType: it.item_name,
-                bedType: '',
-                quantity: it.quantity || 1,
-                note: it.note || '',
-              }))
+            const nights = hotelCoreItems.length
+            const dateRange = checkInDate && checkOutDate
+              ? `${checkInDate} ~ ${checkOutDate}（${nights}晚）`
+              : checkInDate || ''
+
+            // 一筆合併的住宿，房型和床型留空讓業務手填
+            return [{
+              checkIn: dateRange,
+              roomType: '',
+              bedType: '',
+              quantity: '',
+              note: '',
+            }]
           })()}
           supplierName={selectedHotel.name}
         />

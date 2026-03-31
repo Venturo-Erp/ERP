@@ -52,6 +52,9 @@ export interface CostItem {
   resource_address?: string
   resource_phone?: string
   resource_google_maps_url?: string
+
+  // === 顯示控制 ===
+  show_on_quote?: boolean // false = 已隱藏（無需門票/無需訂位）
 }
 
 export interface CostCategory {
@@ -59,6 +62,7 @@ export interface CostCategory {
   name: string
   items: CostItem[]
   total: number
+  hiddenItems?: CostItem[] // 已隱藏的項目（無需門票/無需訂位）
 }
 
 export interface ParticipantCounts {

@@ -200,10 +200,16 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
       const category = categories.find(c => c.id === categoryId)
       if (!category) return
 
-      const item = category.items.find(i => i.id === itemId)
+      // 從 items 或 hiddenItems 找到該項目
+      let item = category.items.find(i => i.id === itemId)
+      let currentlyVisible = true
+      if (!item) {
+        item = category.hiddenItems?.find(i => i.id === itemId)
+        currentlyVisible = false
+      }
       if (!item?.itinerary_item_id) return
 
-      const newVisibility = !item.show_on_quote
+      const newVisibility = !currentlyVisible
 
       // 更新資料庫
       const { error } = await supabase
@@ -216,9 +222,32 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
         return
       }
 
-      // 重新載入核心表
+      // 立即更新本地 categories state（不等 SWR revalidation）
+      setCategories(prev => prev.map(cat => {
+        if (cat.id !== categoryId) return cat
+        if (newVisibility) {
+          // 恢復：從 hiddenItems 移到 items
+          const restoredItem = cat.hiddenItems?.find(i => i.id === itemId)
+          return {
+            ...cat,
+            items: restoredItem ? [...cat.items, restoredItem] : cat.items,
+            hiddenItems: cat.hiddenItems?.filter(i => i.id !== itemId),
+            total: cat.items.reduce((sum, i) => sum + i.total, 0) + (restoredItem?.total || 0),
+          }
+        } else {
+          // 隱藏：從 items 移到 hiddenItems
+          const hiddenItem = cat.items.find(i => i.id === itemId)
+          return {
+            ...cat,
+            items: cat.items.filter(i => i.id !== itemId),
+            hiddenItems: [...(cat.hiddenItems || []), ...(hiddenItem ? [{ ...hiddenItem, show_on_quote: false }] : [])],
+            total: cat.items.filter(i => i.id !== itemId).reduce((sum, i) => sum + i.total, 0),
+          }
+        }
+      }))
+      // 背景同步 SWR cache
       refreshCoreItems()
-      toast.success(newVisibility ? '已顯示' : '已隱藏')
+      toast.success(newVisibility ? '已恢復顯示' : '已隱藏')
     },
     [categories, refreshCoreItems]
   )
@@ -268,6 +297,9 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
   // 報價單預覽
   const [showQuotationPreview, setShowQuotationPreview] = useState(false)
   const [showLinkTourDialog, setShowLinkTourDialog] = useState(false)
+  const [excludedItems, setExcludedItems] = useState<string[]>([
+    '個人護照費用', '簽證費用', '行程外之自費行程', '個人消費及小費', '行李超重費用', '單人房差價',
+  ])
   const [showLocalPricingDialog, setShowLocalPricingDialog] = useState(false)
   const [localTiers, setLocalTiers] = useState<LocalTier[]>([])
 
@@ -616,6 +648,8 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
             tierPricings={tierPricings}
             setTierPricings={setTierPricings}
             localTiers={localTiers}
+            excludedItems={excludedItems}
+            onExcludedItemsChange={setExcludedItems}
           />
         </div>
       </div>
@@ -644,6 +678,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
         tierPricings={previewTierPricings}
         itinerary={itinerary}
         departureDate={relatedTour?.departure_date || null}
+        excludedItems={excludedItems}
       />
 
       <LinkTourDialog
