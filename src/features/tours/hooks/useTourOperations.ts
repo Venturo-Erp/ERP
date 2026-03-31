@@ -161,7 +161,9 @@ export function useTourOperations(params: UseTourOperationsParams) {
           if (newTour.department_id) {
             try {
               const { supabase } = await import('@/lib/supabase/client')
-              const { data: dept } = await supabase
+              // 用 any 繞過型別檢查，因為 departments 表還沒加到 Supabase types
+              // TODO: 跑 regenerate-supabase-types.mjs 後移除 any
+              const { data: dept } = await (supabase as any)
                 .from('departments')
                 .select('code')
                 .eq('id', newTour.department_id)
