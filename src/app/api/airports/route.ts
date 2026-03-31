@@ -20,16 +20,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'IATA 代碼必須為 3 碼大寫英文' }, { status: 400 })
   }
 
+  // 取得用戶的 workspace_id
+  const workspace_id = auth.data.workspaceId
+  if (!workspace_id) {
+    return NextResponse.json({ error: '無法取得 workspace' }, { status: 400 })
+  }
+
   const supabase = getSupabaseAdminClient()
   const { error } = await supabase.from('ref_airports').upsert(
     {
       iata_code,
       city_name_zh,
       country_code,
+      workspace_id,
       usage_count: 1,
       is_favorite: false,
     },
-    { onConflict: 'iata_code' }
+    { onConflict: 'iata_code,workspace_id' }
   )
 
   if (error) {

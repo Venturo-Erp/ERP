@@ -3802,10 +3802,12 @@ export type Database = {
           converted_to_quote_id: string | null
           converted_to_tour_id: string | null
           created_at: string | null
+          customer_id: string | null
           customer_name: string
           email: string | null
           id: string
           internal_notes: string | null
+          line_user_id: string | null
           notes: string | null
           people_count: number | null
           phone: string | null
@@ -3822,10 +3824,12 @@ export type Database = {
           converted_to_quote_id?: string | null
           converted_to_tour_id?: string | null
           created_at?: string | null
+          customer_id?: string | null
           customer_name: string
           email?: string | null
           id?: string
           internal_notes?: string | null
+          line_user_id?: string | null
           notes?: string | null
           people_count?: number | null
           phone?: string | null
@@ -3842,10 +3846,12 @@ export type Database = {
           converted_to_quote_id?: string | null
           converted_to_tour_id?: string | null
           created_at?: string | null
+          customer_id?: string | null
           customer_name?: string
           email?: string | null
           id?: string
           internal_notes?: string | null
+          line_user_id?: string | null
           notes?: string | null
           people_count?: number | null
           phone?: string | null
@@ -3857,6 +3863,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "customer_inquiries_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "customer_inquiries_template_id_fkey"
             columns: ["template_id"]
@@ -3948,6 +3961,8 @@ export type Database = {
           is_active: boolean | null
           is_vip: boolean | null
           last_order_date: string | null
+          line_linked_at: string | null
+          line_user_id: string | null
           linked_at: string | null
           linked_method: string | null
           member_type: string
@@ -3996,6 +4011,8 @@ export type Database = {
           is_active?: boolean | null
           is_vip?: boolean | null
           last_order_date?: string | null
+          line_linked_at?: string | null
+          line_user_id?: string | null
           linked_at?: string | null
           linked_method?: string | null
           member_type?: string
@@ -4044,6 +4061,8 @@ export type Database = {
           is_active?: boolean | null
           is_vip?: boolean | null
           last_order_date?: string | null
+          line_linked_at?: string | null
+          line_user_id?: string | null
           linked_at?: string | null
           linked_method?: string | null
           member_type?: string
@@ -4217,6 +4236,56 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      departments: {
+        Row: {
+          code: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+          updated_by: string | null
+          workspace_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+          updated_by?: string | null
+          workspace_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "departments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]
@@ -6826,7 +6895,10 @@ export type Database = {
           notices: string[] | null
           outbound_flight: Json | null
           parent_id: string | null
+          price: number | null
           price_note: string | null
+          price_tiers: Json | null
+          pricing_details: Json | null
           pricing_style: string | null
           return_flight: Json | null
           show_cancellation_policy: boolean | null
@@ -6897,7 +6969,10 @@ export type Database = {
           notices?: string[] | null
           outbound_flight?: Json | null
           parent_id?: string | null
+          price?: number | null
           price_note?: string | null
+          price_tiers?: Json | null
+          pricing_details?: Json | null
           pricing_style?: string | null
           return_flight?: Json | null
           show_cancellation_policy?: boolean | null
@@ -6968,7 +7043,10 @@ export type Database = {
           notices?: string[] | null
           outbound_flight?: Json | null
           parent_id?: string | null
+          price?: number | null
           price_note?: string | null
+          price_tiers?: Json | null
+          pricing_details?: Json | null
           pricing_style?: string | null
           return_flight?: Json | null
           show_cancellation_policy?: boolean | null
@@ -12251,7 +12329,7 @@ export type Database = {
           name_zh: string | null
           timezone: string | null
           usage_count: number | null
-          workspace_id: string | null
+          workspace_id: string
         }
         Insert: {
           city_code?: string | null
@@ -12268,7 +12346,7 @@ export type Database = {
           name_zh?: string | null
           timezone?: string | null
           usage_count?: number | null
-          workspace_id?: string | null
+          workspace_id: string
         }
         Update: {
           city_code?: string | null
@@ -12285,7 +12363,7 @@ export type Database = {
           name_zh?: string | null
           timezone?: string | null
           usage_count?: number | null
-          workspace_id?: string | null
+          workspace_id?: string
         }
         Relationships: [
           {
@@ -16429,6 +16507,7 @@ export type Database = {
           days_count: number | null
           deleted_at: string | null
           deleted_by: string | null
+          department_id: string | null
           departure_date: string | null
           description: string | null
           enable_checkin: boolean | null
@@ -16496,6 +16575,7 @@ export type Database = {
           days_count?: number | null
           deleted_at?: string | null
           deleted_by?: string | null
+          department_id?: string | null
           departure_date?: string | null
           description?: string | null
           enable_checkin?: boolean | null
@@ -16563,6 +16643,7 @@ export type Database = {
           days_count?: number | null
           deleted_at?: string | null
           deleted_by?: string | null
+          department_id?: string | null
           departure_date?: string | null
           description?: string | null
           enable_checkin?: boolean | null
@@ -16635,6 +16716,13 @@ export type Database = {
             columns: ["deleted_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tours_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
             referencedColumns: ["id"]
           },
           {
@@ -20134,6 +20222,7 @@ export type Database = {
         | { Args: never; Returns: boolean }
         | { Args: { p_user_id: string }; Returns: boolean }
       is_employee: { Args: never; Returns: boolean }
+      is_service_role: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       is_traveler: { Args: never; Returns: boolean }
       mark_conversation_read: {
