@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { createSupplier, invalidateSuppliers } from '@/data'
+import { supabase } from '@/lib/supabase/client'
 import { useWorkspaceId } from '@/lib/workspace-context'
 import { alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
@@ -83,9 +84,20 @@ export function CreateSupplierDialog({
 
     setSubmitting(true)
     try {
+      // 自動產生流水號 S00001, S00002...
+      const { data: maxRow } = await supabase
+        .from('suppliers')
+        .select('code')
+        .like('code', 'S%')
+        .order('code', { ascending: false })
+        .limit(1)
+        .single()
+      const lastNum = maxRow?.code ? parseInt(maxRow.code.replace('S', ''), 10) : 0
+      const nextCode = `S${String((lastNum || 0) + 1).padStart(5, '0')}`
+
       const result = await createSupplier({
         name: formData.name.trim(),
-        code: formData.name.trim().substring(0, 10).toUpperCase(),
+        code: nextCode,
         type: formData.type,
         contact_person: formData.contact_person || null,
         phone: formData.phone || null,
