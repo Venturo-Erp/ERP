@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { logger } from '@/lib/utils/logger'
+import { handleAICustomerService } from '@/lib/line/ai-customer-service'
 
 const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || ''
 
@@ -352,6 +353,44 @@ async function processInsurancePDF(event: any) {
   }
 }
 
+/** 處理 AI 客服訊息 */
+async function handleAIMessage(event: any) {
+  try {
+    const userId = event.source?.userId
+    const userMessage = event.message?.text?.trim()
+    
+    if (!userId || !userMessage) return
+    
+    // 取得用戶資訊
+    const profile = await getUserProfile(userId)
+    
+    // 呼叫 AI 客服
+    const aiResponse = await handleAICustomerService(
+      'line',
+      userId,
+      profile?.displayName || null,
+      userMessage
+    )
+    
+    // 回覆用戶
+    await fetch('https://api.line.me/v2/bot/message/reply', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${LINE_TOKEN}`,
+      },
+      body: JSON.stringify({
+        replyToken: event.replyToken,
+        messages: [{ type: 'text', text: aiResponse }],
+      }),
+    })
+    
+    logger.info(`[LINE AI] User: ${userId} | Message: ${userMessage} | Response: ${aiResponse.substring(0, 50)}...`)
+  } catch (err) {
+    console.error('[LINE AI] Handle message error:', err)
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
@@ -368,10 +407,15 @@ export async function POST(req: NextRequest) {
         bgTasks.push(processFollowEvent(event))
       }
 
-      // 私人訊息 → 檢查綁定指令（客戶或員工）
+      // 私人訊息 → 檢查綁定指令（客戶或員工）或 AI 客服
       if (source.type === 'user' && event.type === 'message' && event.message?.type === 'text') {
-        bgTasks.push(processCustomerBinding(event).then(() => {}))
-        bgTasks.push(processEmployeeBinding(event).then(() => {}))
+        const isCustomerBinding = await processCustomerBinding(event)
+        const isEmployeeBinding = await processEmployeeBinding(event)
+        
+        // 如果不是綁定指令，就用 AI 客服回覆
+        if (!isCustomerBinding && !isEmployeeBinding) {
+          bgTasks.push(handleAIMessage(event))
+        }
       }
 
       if (source.type === 'group') {
