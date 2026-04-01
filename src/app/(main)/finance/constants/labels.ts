@@ -45,14 +45,14 @@ export const FinanceLabels = {
 
   // Payments Page
   paymentManagement: '收款管理',
-  searchReceiptPlaceholder: '搜尋收款單號、訂單編號、團名...',
+  searchReceiptPlaceholder: '搜尋收款單號、團名...',
   exportExcel: '匯出 Excel',
   batchConfirm: '批量確認',
   batchPayment: '批量收款',
   addPayment: '新增收款',
   receiptNumber: '收款單號',
   receiptDate: '收款日期',
-  orderNumber: '訂單編號',
+  orderNumber: '收款資訊',
   tourName: '團名',
   receiptAmount: '應收金額',
   actualAmount: '實收金額',

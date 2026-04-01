@@ -133,7 +133,32 @@ export default function PaymentsPage() {
       sortable: true,
       render: value => <DateCell date={String(value)} />,
     },
-    { key: 'order_number', label: FinanceLabels.orderNumber, sortable: true },
+    {
+      key: 'order_number',
+      label: FinanceLabels.orderNumber,
+      render: (_, row) => {
+        const r = row as Receipt & Record<string, unknown>
+        const method = String(r.payment_method || '')
+        // 根據收款方式顯示不同資訊
+        if (method === 'card' || method === '2') {
+          const last4 = r.card_last_four ? `末四碼 ${r.card_last_four}` : ''
+          const auth = r.auth_code ? `授權 ${r.auth_code}` : ''
+          return <span className="text-sm text-morandi-secondary">{[last4, auth].filter(Boolean).join(' / ') || '-'}</span>
+        }
+        if (method === 'transfer' || method === '1') {
+          const acct = String(r.account_info || r.receipt_account || '')
+          const last5 = acct.length > 5 ? `...${acct.slice(-5)}` : acct
+          return <span className="text-sm text-morandi-secondary">{last5 || '-'}</span>
+        }
+        if (method === 'cash' || method === '0') {
+          return <span className="text-sm text-morandi-secondary">{r.handler_name ? `經手 ${r.handler_name}` : '-'}</span>
+        }
+        if (method === 'check' || method === '3') {
+          return <span className="text-sm text-morandi-secondary">{r.check_number ? `支票 ${r.check_number}` : '-'}</span>
+        }
+        return <span className="text-sm text-morandi-secondary">-</span>
+      },
+    },
     { key: 'tour_name', label: FinanceLabels.tourName, sortable: true },
     {
       key: 'receipt_amount',
@@ -188,7 +213,7 @@ export default function PaymentsPage() {
         data={receipts}
         loading={loading}
         columns={columns}
-        searchFields={['receipt_number', 'order_number', 'tour_name']}
+        searchFields={['receipt_number', 'tour_name']}
         searchPlaceholder={FinanceLabels.searchReceiptPlaceholder}
         onRowClick={handleRowClick}
         defaultSort={{ key: 'receipt_date', direction: 'desc' }}
