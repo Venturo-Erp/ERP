@@ -186,39 +186,45 @@ export function useReceiptMutations() {
         .select('receipt_number')
         .like('receipt_number', `${tourCode}-R%`)
 
-      // 生成收款單基礎編號（R01, R02...）
-      const baseReceiptNumber = generateReceiptNumber(
-        tourCode,
-        existingReceipts?.filter(r => r.receipt_number?.startsWith(`${tourCode}-R`)) || []
-      )
+      // 取得現有收款單（用於計算下一個流水號）
+      const filteredReceipts = existingReceipts?.filter(r => r.receipt_number?.startsWith(`${tourCode}-R`)) || []
+
+      // 找出目前最大的 R 編號
+      const prefix = `${tourCode}-R`
+      let maxNumber = 0
+      filteredReceipts.forEach(receipt => {
+        const code = receipt.receipt_number
+        if (code?.startsWith(prefix)) {
+          // 取 R 後面的數字部分（忽略舊格式的 -A, -B 後綴）
+          const numberPart = code.substring(prefix.length).split('-')[0]
+          const num = parseInt(numberPart, 10)
+          if (!isNaN(num) && num > maxNumber) maxNumber = num
+        }
+      })
 
       // 計算總金額
       const totalAmount = paymentItems.reduce((sum, item) => sum + (item.amount || 0), 0)
 
-      // 判斷是否為多筆收款（需要 -A, -B 後綴）
-      const isMultipleItems = paymentItems.length > 1
       const linkPayResults: LinkPayResult[] = []
       let firstReceiptId: string | null = null
 
-      // 統一處理所有收款項目
+      // 統一處理所有收款項目 — 每個品項獨立流水號
       for (let i = 0; i < paymentItems.length; i++) {
         const item = paymentItems[i]
         const receiptTypeNum = resolveReceiptType(item.receipt_type)
         const paymentMethod = PAYMENT_METHOD_MAP[receiptTypeNum] || 'transfer'
         const paymentMethodId = getPaymentMethodId(receiptTypeNum, item.receipt_type)
-        
-        // 編號規則：單筆 = R01，多筆 = R01-A, R01-B...
-        const itemReceiptNumber = isMultipleItems 
-          ? `${baseReceiptNumber}-${String.fromCharCode(65 + i)}` // A=65, B=66...
-          : baseReceiptNumber
+
+        // 每個品項獨立編號：R01, R02, R03...（跨收款單全域遞增）
+        const nextNum = (maxNumber + 1 + i).toString().padStart(2, '0')
+        const itemReceiptNumber = `${prefix}${nextNum}`
 
         logger.info('[createReceiptWithItems] Creating receipt...', { 
           index: i, 
           receiptNumber: itemReceiptNumber, 
           receiptType: receiptTypeNum, 
           amount: item.amount,
-          isMultipleItems,
-          paymentItemsCount: paymentItems.length 
+          paymentItemsCount: paymentItems.length
         })
 
         const createdReceipt = await createReceipt({
@@ -239,7 +245,7 @@ export function useReceiptMutations() {
           total_amount: item.amount,
           actual_amount: 0,
           status: '0',
-          batch_id: isMultipleItems && firstReceiptId ? firstReceiptId : null,
+          batch_id: paymentItems.length > 1 && firstReceiptId ? firstReceiptId : null,
           receipt_account: item.receipt_account || null,
           email: item.email || null,
           payment_name: item.payment_name || null,
@@ -268,7 +274,7 @@ export function useReceiptMutations() {
         if (i === 0) {
           firstReceiptId = createdReceipt.id
           // 多筆時，第一筆也要設 batch_id（指向自己）
-          if (isMultipleItems) {
+          if (paymentItems.length > 1) {
             await updateReceipt(createdReceipt.id, { batch_id: firstReceiptId })
           }
         }
@@ -312,7 +318,7 @@ export function useReceiptMutations() {
       return {
         success: true,
         receiptId: firstReceiptId || '',
-        receiptNumber: baseReceiptNumber,
+        receiptNumber: `${prefix}${(maxNumber + 1).toString().padStart(2, '0')}`,
         linkPayResults,
         totalAmount,
         itemCount: paymentItems.length,
