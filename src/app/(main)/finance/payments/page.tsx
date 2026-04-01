@@ -139,24 +139,23 @@ export default function PaymentsPage() {
       render: (_, row) => {
         const r = row as Receipt & Record<string, unknown>
         const method = String(r.payment_method || '')
-        // 根據收款方式顯示不同資訊
-        if (method === 'card' || method === '2') {
-          const last4 = r.card_last_four ? `末四碼 ${r.card_last_four}` : ''
-          const auth = r.auth_code ? `授權 ${r.auth_code}` : ''
-          return <span className="text-sm text-morandi-secondary">{[last4, auth].filter(Boolean).join(' / ') || '-'}</span>
-        }
-        if (method === 'transfer' || method === '1') {
+        let info = '-'
+        if (method === 'card') {
+          const parts = []
+          if (r.card_last_four) parts.push(`末四碼 ${r.card_last_four}`)
+          if (r.auth_code) parts.push(`授權 ${r.auth_code}`)
+          info = parts.join(' / ') || '-'
+        } else if (method === 'transfer') {
           const acct = String(r.account_info || r.receipt_account || '')
-          const last5 = acct.length > 5 ? `...${acct.slice(-5)}` : acct
-          return <span className="text-sm text-morandi-secondary">{last5 || '-'}</span>
+          info = acct.length > 5 ? `...${acct.slice(-5)}` : acct || '-'
+        } else if (method === 'cash') {
+          info = r.handler_name ? `經手 ${r.handler_name}` : '-'
+        } else if (method === 'check') {
+          info = r.check_number ? `支票 ${r.check_number}` : '-'
+        } else if (method === 'linkpay') {
+          info = r.payment_name ? String(r.payment_name) : 'LinkPay'
         }
-        if (method === 'cash' || method === '0') {
-          return <span className="text-sm text-morandi-secondary">{r.handler_name ? `經手 ${r.handler_name}` : '-'}</span>
-        }
-        if (method === 'check' || method === '3') {
-          return <span className="text-sm text-morandi-secondary">{r.check_number ? `支票 ${r.check_number}` : '-'}</span>
-        }
-        return <span className="text-sm text-morandi-secondary">-</span>
+        return <span className="text-sm text-morandi-secondary">{info}</span>
       },
     },
     { key: 'tour_name', label: FinanceLabels.tourName, sortable: true },
@@ -188,7 +187,37 @@ export default function PaymentsPage() {
       key: 'actions',
       label: FinanceLabels.actions,
       render: (_, row) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          {/* 待確認狀態：顯示核准和異常按鈕 */}
+          {row.status === '0' && (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={async e => {
+                  e.stopPropagation()
+                  await handleConfirmReceipt(row.id, row.receipt_amount || 0)
+                  await invalidateReceipts()
+                }}
+                className="h-7 px-2 text-xs text-morandi-green hover:text-morandi-green hover:bg-morandi-green/10"
+              >
+                <CheckSquare size={14} className="mr-1" />
+                核准
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={async e => {
+                  e.stopPropagation()
+                  await handleConfirmReceipt(row.id, row.actual_amount || 0, true)
+                  await invalidateReceipts()
+                }}
+                className="h-7 px-2 text-xs text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
+              >
+                異常
+              </Button>
+            </>
+          )}
           <Button
             variant="ghost"
             size="sm"
