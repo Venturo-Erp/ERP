@@ -30,11 +30,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     let itinerary = null
     let error = null
 
+    // tier_pricings 在 quotes 表，需要透過 tours.quote_id 關聯
+    const selectFields = '*, tour:tours(quote:quotes(tier_pricings))'
+
     if (isUUID) {
       // 用完整 UUID 查詢
       const result = await supabaseAdmin
         .from('itineraries')
-        .select('*, tour:tours(tier_pricings)')
+        .select(selectFields)
         .eq('id', id)
         .single()
       itinerary = result.data
@@ -45,7 +48,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       const uuidPrefix = `${id.substring(0, 8)}`
       const result = await supabaseAdmin
         .from('itineraries')
-        .select('*, tour:tours(tier_pricings)')
+        .select(selectFields)
         .ilike('id', `${uuidPrefix}%`)
         .limit(1)
         .single()
@@ -55,7 +58,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       // 用 tour_code 查詢
       const result = await supabaseAdmin
         .from('itineraries')
-        .select('*, tour:tours(tier_pricings)')
+        .select(selectFields)
         .eq('tour_code', id)
         .single()
       itinerary = result.data
@@ -110,8 +113,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       // 詳細團費
       showPricingDetails: itinerary.show_pricing_details,
       pricingDetails: itinerary.pricing_details,
-      // 價格方案（從 tours 表讀取）
-      priceTiers: (itinerary as { tour?: { tier_pricings?: unknown } }).tour?.tier_pricings || null,
+      // 價格方案（從 quotes 表讀取，透過 tours.quote_id）
+      priceTiers: (itinerary as { tour?: { quote?: { tier_pricings?: unknown } } }).tour?.quote?.tier_pricings || null,
       showPriceTiers: itinerary.show_price_tiers,
       // 常見問題
       faqs: itinerary.faqs,
