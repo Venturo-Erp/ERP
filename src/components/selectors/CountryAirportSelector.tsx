@@ -72,14 +72,20 @@ export function CountryAirportSelector({
   const [newIataCode, setNewIataCode] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // 國家選項：優先用 countriesData（有完整 id），確保選國家時能取得 countryId
+  // 國家選項：優先用 countriesData（有完整 id），按 usage_count 排序（常用在前）
   const countryOptions = useMemo(() => {
     if (externalCountries) {
-      return externalCountries.filter(c => c.is_active).map(c => ({ value: c.name, label: c.name }))
+      return externalCountries
+        .filter(c => c.is_active)
+        .sort((a, b) => ((b as { usage_count?: number }).usage_count || 0) - ((a as { usage_count?: number }).usage_count || 0))
+        .map(c => ({ value: c.name, label: c.name }))
     }
     // 優先用 countriesData（有 id），fallback 到 hookCountries
     if (countriesData.length > 0) {
-      return countriesData.filter(c => c.is_active).map(c => ({ value: c.name, label: c.name }))
+      return countriesData
+        .filter(c => c.is_active)
+        .sort((a, b) => (b.usage_count || 0) - (a.usage_count || 0))
+        .map(c => ({ value: c.name, label: c.name }))
     }
     return hookCountries.map(c => ({ value: c, label: c }))
   }, [externalCountries, countriesData, hookCountries])
