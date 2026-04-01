@@ -344,7 +344,7 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-200px)] gap-4">
+    <div className="flex h-full min-h-[500px] gap-4">
       {/* 左側：資料夾列表 */}
       <div className="w-64 flex-shrink-0 border border-morandi-muted rounded-lg bg-morandi-container p-2 overflow-y-auto">
         <div className="space-y-1">
