@@ -224,8 +224,8 @@ export interface Visa {
   documents_returned_date?: string // 證件歸還時間（代辦商先還證件）
   pickup_date?: string // 取件時間
 
-  // 舊欄位保留向後相容
-  submission_date?: string // @deprecated 改用 received_date
+  // 計劃送件日期（送去大使館的預定日期）
+  submission_date?: string
 
   // 關聯資訊
   order_id: string // 關聯的訂單ID

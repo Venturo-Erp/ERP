@@ -41,16 +41,4 @@ export function getBrandTagline(season?: string): string {
   return season ? `${COMPANY_NAME} ${year} ${season}` : `${COMPANY_NAME} ${year}`
 }
 
-/**
- * @deprecated 使用 COMPANY_NAME 常數
- */
-export function getCompanyName(): string {
-  return COMPANY_NAME
-}
 
-/**
- * @deprecated 使用 COMPANY_NAME_EN 常數
- */
-export function getCompanyNameEn(): string {
-  return COMPANY_NAME_EN
-}

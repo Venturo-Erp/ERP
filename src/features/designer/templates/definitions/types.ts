@@ -156,7 +156,7 @@ export type GroupType = 'vehicle' | 'table'
  * 分車/分桌頁面的欄位顯示設定
  */
 export interface VehicleColumnSettings {
-  showSeatNumber?: boolean // 顯示座位號（已棄用，改用序號）
+  showSeatNumber?: boolean // 顯示座位號
   showOrderCode?: boolean // 顯示訂單編號
   showDestination?: boolean // 顯示目的地/備註
   showDriverInfo?: boolean // 顯示司機資訊

@@ -38,20 +38,7 @@ async function verifyAuthToken(token: string): Promise<boolean> {
     })
     return true
   } catch {
-    // JWT 失敗，fallback 嘗試 base64 解碼（舊格式，向下相容已登入的 session）
-    // TODO: 2026-04 移除 base64 fallback，屆時舊 session 會被強制重新登入
-    try {
-      const decoded = JSON.parse(atob(token))
-      if (decoded.iss !== 'venturo-app') {
-        return false
-      }
-      if (decoded.exp && Date.now() > decoded.exp) {
-        return false
-      }
-      return true
-    } catch {
-      return false
-    }
+    return false
   }
 }
 
