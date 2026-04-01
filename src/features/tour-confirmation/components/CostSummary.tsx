@@ -19,15 +19,15 @@ export function CostSummaryCard({ summary }: CostSummaryCardProps) {
   const formatCurrency = (value: number) => formatMoney(value) || '0'
 
   const categories = [
-    { key: 'transport', label: COST_SUMMARY_LABELS.交通, icon: Bus, color: 'text-blue-500' },
-    { key: 'meal', label: COST_SUMMARY_LABELS.餐食, icon: Utensils, color: 'text-orange-500' },
+    { key: 'transport', label: COST_SUMMARY_LABELS.交通, icon: Bus, color: 'text-status-info' },
+    { key: 'meal', label: COST_SUMMARY_LABELS.餐食, icon: Utensils, color: 'text-status-warning' },
     {
       key: 'accommodation',
       label: COST_SUMMARY_LABELS.住宿,
       icon: Hotel,
-      color: 'text-purple-500',
+      color: 'text-morandi-secondary',
     },
-    { key: 'activity', label: COST_SUMMARY_LABELS.活動, icon: Ticket, color: 'text-green-500' },
+    { key: 'activity', label: COST_SUMMARY_LABELS.活動, icon: Ticket, color: 'text-morandi-green' },
     {
       key: 'other',
       label: COST_SUMMARY_LABELS.其他,
@@ -118,7 +118,7 @@ export function CostSummaryCard({ summary }: CostSummaryCardProps) {
       {difference !== 0 && (
         <div
           className={`px-4 py-2 text-xs border-t border-border ${
-            difference > 0 ? 'bg-red-50 text-morandi-red' : 'bg-green-50 text-morandi-green'
+            difference > 0 ? 'bg-morandi-red/10 text-morandi-red' : 'bg-morandi-green/10 text-morandi-green'
           }`}
         >
           {difference > 0

@@ -50,7 +50,7 @@ export function GradientPicker({ value, onChange, className }: GradientPickerPro
   // 解析當前值來顯示預覽
   const previewStyle = value?.includes('gradient')
     ? { background: value }
-    : { backgroundColor: value || '#c9aa7c' }
+    : { backgroundColor: value || 'var(--morandi-gold)' }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

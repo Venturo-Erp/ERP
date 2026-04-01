@@ -73,15 +73,15 @@ export function PnrPreview({
               .map((v, idx) => (
                 <div
                   key={`age-${idx}`}
-                  className="bg-amber-50 border border-amber-200 p-2 rounded-lg"
+                  className="bg-status-warning-bg border border-status-warning/30 p-2 rounded-lg"
                 >
                   <div className="flex items-start gap-2">
-                    <Baby size={14} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                    <Baby size={14} className="text-status-warning mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-amber-900 text-xs">{v.passengerName}</div>
-                      <div className="text-amber-700 text-xs mt-0.5">{v.warning}</div>
+                      <div className="font-semibold text-morandi-primary text-xs">{v.passengerName}</div>
+                      <div className="text-status-warning text-xs mt-0.5">{v.warning}</div>
                       {v.suggestion && (
-                        <div className="text-amber-600 text-xs mt-1 flex items-start gap-1">
+                        <div className="text-status-warning text-xs mt-1 flex items-start gap-1">
                           <Info size={12} className="mt-0.5 flex-shrink-0" />
                           <span>{v.suggestion}</span>
                         </div>
@@ -93,14 +93,14 @@ export function PnrPreview({
 
             {/* 嬰兒/成人比例警告 */}
             {parsedData.infantRatioCheck && !parsedData.infantRatioCheck.isValid && (
-              <div className="bg-red-50 border border-red-200 p-2 rounded-lg">
+              <div className="bg-morandi-red/10 border border-morandi-red/30 p-2 rounded-lg">
                 <div className="flex items-start gap-2">
-                  <Users size={14} className="text-red-600 mt-0.5 flex-shrink-0" />
+                  <Users size={14} className="text-morandi-red mt-0.5 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-red-900 text-xs">
+                    <div className="font-semibold text-morandi-primary text-xs">
                       {PNR_LABELS.LABEL_2033}
                     </div>
-                    <div className="text-red-700 text-xs mt-0.5">
+                    <div className="text-morandi-red text-xs mt-0.5">
                       {parsedData.infantRatioCheck.error}
                     </div>
                   </div>
@@ -112,17 +112,17 @@ export function PnrPreview({
             {parsedData.connections
               ?.filter(c => !c.isSufficient)
               .map((c, idx) => (
-                <div key={`conn-${idx}`} className="bg-red-50 border border-red-200 p-2 rounded-lg">
+                <div key={`conn-${idx}`} className="bg-morandi-red/10 border border-morandi-red/30 p-2 rounded-lg">
                   <div className="flex items-start gap-2">
-                    <AlertTriangle size={14} className="text-red-600 mt-0.5 flex-shrink-0" />
+                    <AlertTriangle size={14} className="text-morandi-red mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-red-900 text-xs">
+                      <div className="font-semibold text-morandi-primary text-xs">
                         {PNR_LABELS.LABEL_7874}
                         {c.airportName}
                       </div>
-                      <div className="text-red-700 text-xs mt-0.5">{c.warning}</div>
+                      <div className="text-morandi-red text-xs mt-0.5">{c.warning}</div>
                       {c.suggestion && (
-                        <div className="text-red-600 text-xs mt-1 flex items-start gap-1">
+                        <div className="text-morandi-red text-xs mt-1 flex items-start gap-1">
                           <Info size={12} className="mt-0.5 flex-shrink-0" />
                           <span>{c.suggestion}</span>
                         </div>
@@ -138,16 +138,16 @@ export function PnrPreview({
               .map((c, idx) => (
                 <div
                   key={`conn-warn-${idx}`}
-                  className="bg-amber-50 border border-amber-200 p-2 rounded-lg"
+                  className="bg-status-warning-bg border border-status-warning/30 p-2 rounded-lg"
                 >
                   <div className="flex items-start gap-2">
-                    <Clock size={14} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                    <Clock size={14} className="text-status-warning mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-amber-900 text-xs">
+                      <div className="font-semibold text-morandi-primary text-xs">
                         {PNR_LABELS.LABEL_7874}
                         {c.airportName}
                       </div>
-                      <div className="text-amber-700 text-xs mt-0.5">{c.warning}</div>
+                      <div className="text-status-warning text-xs mt-0.5">{c.warning}</div>
                     </div>
                   </div>
                 </div>
@@ -159,21 +159,21 @@ export function PnrPreview({
               .map((tv, idx) => (
                 <div
                   key={`ticket-${idx}`}
-                  className="bg-amber-50 border border-amber-200 p-2 rounded-lg"
+                  className="bg-status-warning-bg border border-status-warning/30 p-2 rounded-lg"
                 >
                   <div className="flex items-start gap-2">
-                    <AlertCircle size={14} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                    <AlertCircle size={14} className="text-status-warning mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-amber-900 text-xs font-mono">
+                      <div className="font-semibold text-morandi-primary text-xs font-mono">
                         {tv.ticketNumber}
                       </div>
                       {tv.errors.map((err, errIdx) => (
-                        <div key={errIdx} className="text-red-700 text-xs mt-0.5">
+                        <div key={errIdx} className="text-morandi-red text-xs mt-0.5">
                           {err}
                         </div>
                       ))}
                       {tv.warnings.map((warn, warnIdx) => (
-                        <div key={warnIdx} className="text-amber-700 text-xs mt-0.5">
+                        <div key={warnIdx} className="text-status-warning text-xs mt-0.5">
                           {warn}
                         </div>
                       ))}

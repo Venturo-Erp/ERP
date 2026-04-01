@@ -133,9 +133,9 @@ export const ResourceSelectButton: React.FC<ResourceSelectButtonProps> = ({
 
   // 按鈕顏色根據資源類型
   const buttonColorMap: Record<string, string> = {
-    restaurant: 'text-rose-500 hover:bg-rose-50',
-    hotel: 'text-blue-500 hover:bg-blue-50',
-    attraction: 'text-emerald-500 hover:bg-emerald-50',
+    restaurant: 'text-morandi-red hover:bg-morandi-red/10',
+    hotel: 'text-status-info hover:bg-status-info-bg',
+    attraction: 'text-morandi-green hover:bg-morandi-green/10',
   }
   const buttonColor = buttonColorMap[resourceType]
 

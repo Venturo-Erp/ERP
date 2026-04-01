@@ -160,10 +160,6 @@ export default function OrdersPage() {
     <ContentPageLayout
       title={LABELS.MANAGE_949}
       icon={ShoppingCart}
-      breadcrumb={[
-        { label: ORDERS_PAGE_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-        { label: ORDERS_PAGE_LABELS.BREADCRUMB_ORDERS, href: '/orders' },
-      ]}
       showSearch={true}
       searchTerm={searchQuery}
       onSearchChange={setSearchQuery}

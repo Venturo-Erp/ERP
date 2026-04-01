@@ -89,7 +89,7 @@ export function ItinerarySyncDialog({ open, syncInfo, onSync, onClose }: Itinera
       <DialogContent level={2} className="max-w-lg" aria-describedby="sync-dialog-description">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-amber-500" />
+            <AlertTriangle className="h-5 w-5 text-status-warning" />
             {COMP_TOURS_LABELS.LABEL_5905}
           </DialogTitle>
           <DialogDescription id="sync-dialog-description">
@@ -124,7 +124,7 @@ export function ItinerarySyncDialog({ open, syncInfo, onSync, onClose }: Itinera
               <span className="text-muted-foreground">{COMP_TOURS_LABELS.LABEL_493}</span>
               <span
                 className={`font-medium flex items-center gap-1 ${
-                  syncInfo.action === 'increase' ? 'text-green-600' : 'text-amber-600'
+                  syncInfo.action === 'increase' ? 'text-morandi-green' : 'text-status-warning'
                 }`}
               >
                 {syncInfo.action === 'increase' ? (
@@ -181,7 +181,7 @@ export function ItinerarySyncDialog({ open, syncInfo, onSync, onClose }: Itinera
                 ))}
               </div>
               {selectedDays.length !== daysToRemoveCount && (
-                <p className="text-sm text-amber-600">
+                <p className="text-sm text-status-warning">
                   {COMP_TOURS_LABELS.SELECT_EXACT_DAYS(daysToRemoveCount, selectedDays.length)}
                 </p>
               )}
@@ -211,7 +211,7 @@ export function ItinerarySyncDialog({ open, syncInfo, onSync, onClose }: Itinera
           <Button
             onClick={handleConfirm}
             disabled={!isSelectionValid}
-            className={syncInfo.action === 'decrease' ? 'bg-amber-600 hover:bg-amber-700' : ''}
+            className={syncInfo.action === 'decrease' ? 'bg-status-warning hover:bg-status-warning/80' : ''}
           >
             {syncInfo.action === 'decrease'
               ? COMP_TOURS_LABELS.確認移除

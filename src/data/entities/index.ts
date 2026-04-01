@@ -17,6 +17,7 @@ export {
   useToursPaginated,
   useTourDictionary,
   useToursForCalendar,
+  fetchTourIdByCode,
   createTour,
   updateTour,
   deleteTour,

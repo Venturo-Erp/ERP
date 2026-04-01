@@ -43,7 +43,7 @@ function ProfitTableColumn({ title, rows }: { title: string; rows: ProfitTableRo
               <tr key={i} className={i > 0 ? 'border-t' : ''}>
                 <td className="px-3 py-2">{row.label}</td>
                 <td
-                  className={`px-3 py-2 text-right font-mono tabular-nums ${row.amount < 0 ? 'text-red-600' : ''}`}
+                  className={`px-3 py-2 text-right font-mono tabular-nums ${row.amount < 0 ? 'text-morandi-red' : ''}`}
                 >
                   ${formatAmount(row.amount)}
                 </td>
@@ -248,7 +248,7 @@ export function ProfitTab({ tour }: ProfitTabProps) {
       <section>
         <h3 className="text-base font-semibold mb-2">{PROFIT_TAB_LABELS.bonus_detail}</h3>
         {profitResult.net_profit < 0 ? (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-yellow-800 text-sm">
+          <div className="bg-status-warning-bg border border-status-warning/30 rounded-lg p-4 text-status-warning text-sm">
             {PROFIT_TABLE_LABELS.no_bonus}
           </div>
         ) : (

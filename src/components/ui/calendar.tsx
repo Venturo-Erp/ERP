@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { UI_LABELS } from './constants/labels'
 
@@ -39,6 +39,11 @@ export function Calendar({
   const [currentMonth, setCurrentMonth] = React.useState<Date>(
     defaultMonth || (selected instanceof Date ? selected : new Date())
   )
+  const [showYearPicker, setShowYearPicker] = React.useState(false)
+  const [yearRangeStart, setYearRangeStart] = React.useState(() => {
+    const year = (defaultMonth || (selected instanceof Date ? selected : new Date())).getFullYear()
+    return Math.floor(year / 12) * 12
+  })
 
   // 生成當月的所有日期（包含前後月份補齊，固定 6 行 42 天）
   const generateCalendarDays = (): DayInfo[] => {
@@ -206,6 +211,32 @@ export function Calendar({
     })
   }
 
+  // 年份導航
+  const navigateYear = (direction: 'prev' | 'next') => {
+    setCurrentMonth(prev => {
+      const newMonth = new Date(prev)
+      newMonth.setFullYear(newMonth.getFullYear() + (direction === 'prev' ? -1 : 1))
+      return newMonth
+    })
+  }
+
+  // 打開年份選擇器時，讓範圍對準當前年份
+  React.useEffect(() => {
+    if (showYearPicker) {
+      setYearRangeStart(Math.floor(currentMonth.getFullYear() / 12) * 12)
+    }
+  }, [showYearPicker])
+
+  // 選擇年份
+  const selectYear = (year: number) => {
+    setCurrentMonth(prev => {
+      const newMonth = new Date(prev)
+      newMonth.setFullYear(year)
+      return newMonth
+    })
+    setShowYearPicker(false)
+  }
+
   // 跳轉到今天
   const goToToday = () => {
     const today = new Date()
@@ -219,28 +250,100 @@ export function Calendar({
 
   return (
     <div className={cn('p-3', className)}>
-      {/* 月份導航 */}
-      <div className="flex items-center mb-6">
+      {/* 導航列 */}
+      <div className="flex items-center mb-4 gap-0.5">
+        {/* 上一年 */}
+        <button
+          type="button"
+          onClick={() => navigateYear('prev')}
+          className="flex items-center justify-center p-1.5 rounded-md text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/40 transition-colors"
+        >
+          <ChevronsLeft className="h-4 w-4" />
+        </button>
+        {/* 上一月 */}
         <button
           type="button"
           onClick={() => navigateMonth('prev')}
-          className="-m-1.5 flex flex-none items-center justify-center p-1.5 text-morandi-secondary hover:text-morandi-primary transition-colors"
+          className="flex items-center justify-center p-1.5 rounded-md text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/40 transition-colors"
         >
-          <span className="sr-only">{UI_LABELS.LABEL_8387}</span>
-          <ChevronLeft className="h-5 w-5" />
+          <ChevronLeft className="h-4 w-4" />
         </button>
-        <div className="flex-auto text-base font-semibold text-center text-morandi-primary">
+
+        {/* 年月標題 — 點擊切換年份選擇器 */}
+        <button
+          type="button"
+          onClick={() => setShowYearPicker(v => !v)}
+          className="flex-auto text-sm font-semibold text-center text-morandi-primary hover:text-morandi-gold transition-colors rounded-md py-1.5 hover:bg-morandi-container/20"
+        >
           {currentMonth.getFullYear()}年 {currentMonth.getMonth() + 1}月
-        </div>
+          <span className="ml-1 text-morandi-secondary text-xs">{showYearPicker ? '▲' : '▼'}</span>
+        </button>
+
+        {/* 下一月 */}
         <button
           type="button"
           onClick={() => navigateMonth('next')}
-          className="-m-1.5 flex flex-none items-center justify-center p-1.5 text-morandi-secondary hover:text-morandi-primary transition-colors"
+          className="flex items-center justify-center p-1.5 rounded-md text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/40 transition-colors"
         >
-          <span className="sr-only">{UI_LABELS.LABEL_2562}</span>
-          <ChevronRight className="h-5 w-5" />
+          <ChevronRight className="h-4 w-4" />
+        </button>
+        {/* 下一年 */}
+        <button
+          type="button"
+          onClick={() => navigateYear('next')}
+          className="flex items-center justify-center p-1.5 rounded-md text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/40 transition-colors"
+        >
+          <ChevronsRight className="h-4 w-4" />
         </button>
       </div>
+
+      {/* 年份選擇器 */}
+      {showYearPicker && (
+        <div className="mb-3">
+          {/* 年份範圍導航 */}
+          <div className="flex items-center justify-between mb-2">
+            <button
+              type="button"
+              onClick={() => setYearRangeStart(y => y - 12)}
+              className="p-1 rounded text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/40 transition-colors"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" />
+            </button>
+            <span className="text-xs text-morandi-secondary">
+              {yearRangeStart} – {yearRangeStart + 11}
+            </span>
+            <button
+              type="button"
+              onClick={() => setYearRangeStart(y => y + 12)}
+              className="p-1 rounded text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/40 transition-colors"
+            >
+              <ChevronRight className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          {/* 年份格子 */}
+          <div className="grid grid-cols-4 gap-1">
+            {Array.from({ length: 12 }, (_, i) => yearRangeStart + i).map(year => {
+              const isCurrentYear = year === currentMonth.getFullYear()
+              return (
+                <button
+                  key={year}
+                  type="button"
+                  onClick={() => selectYear(year)}
+                  className={cn(
+                    'rounded-md py-1.5 text-sm font-medium transition-colors',
+                    isCurrentYear
+                      ? 'bg-morandi-gold text-white'
+                      : 'text-morandi-primary hover:bg-morandi-container/40 hover:text-morandi-gold'
+                  )}
+                >
+                  {year}
+                </button>
+              )
+            })}
+          </div>
+          <div className="mt-2 border-t border-morandi-container/30" />
+        </div>
+      )}
 
       {/* 星期標題 */}
       <div className="mt-6 grid grid-cols-7 text-xs leading-6 text-morandi-secondary">

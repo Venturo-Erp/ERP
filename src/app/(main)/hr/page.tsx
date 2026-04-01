@@ -419,10 +419,6 @@ export default function HRPage() {
       <ListPageLayout
         title={LABELS.MANAGE_3470}
         icon={Users}
-        breadcrumb={[
-          { label: LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-          { label: LABELS.BREADCRUMB_HR, href: '/hr' },
-        ]}
         data={filteredEmployees}
         columns={columns}
         searchFields={['display_name', 'employee_number', 'personal_info'] as (keyof Employee)[]}

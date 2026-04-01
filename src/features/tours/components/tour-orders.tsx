@@ -184,15 +184,22 @@ export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
 
   return (
     <>
-      <SimpleOrderTable
-        orders={orders as OrderType[]}
-        showTourInfo={false}
-        onQuickReceipt={handleQuickReceipt}
-        onQuickPaymentRequest={handleQuickPaymentRequest}
-        onQuickInvoice={handleQuickInvoice}
-        onEdit={handleEdit}
-        onAdd={() => setAddDialogOpen(true)}
-      />
+      <div className="flex flex-col h-full gap-3">
+        <div className="flex justify-end">
+          <Button size="sm" onClick={() => setAddDialogOpen(true)}>
+            <Plus size={14} className="mr-1" />
+            {TOUR_ORDERS_LABELS.新增訂單}
+          </Button>
+        </div>
+        <SimpleOrderTable
+          orders={orders as OrderType[]}
+          showTourInfo={false}
+          onQuickReceipt={handleQuickReceipt}
+          onQuickPaymentRequest={handleQuickPaymentRequest}
+          onQuickInvoice={handleQuickInvoice}
+          onEdit={handleEdit}
+        />
+      </div>
 
       {/* 收款對話框 */}
       <AddReceiptDialog

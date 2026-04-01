@@ -70,7 +70,7 @@ export function TourLeaderSectionCollage({ data, viewMode }: TourLeaderSectionCo
               className="bg-card px-4 py-2 border border-[var(--morandi-primary)] shadow-sm absolute top-6 left-6 z-10"
             >
               <span
-                className="text-xl text-red-600"
+                className="text-xl text-morandi-red"
                 style={{ fontFamily: "'Permanent Marker', cursive" }}
               >
                 Leader Info
@@ -151,7 +151,7 @@ export function TourLeaderSectionCollage({ data, viewMode }: TourLeaderSectionCo
               style={{ boxShadow: '10px 10px 0px 0px rgba(0,0,0,1)' }}
             >
               {/* 圖釘 */}
-              <div className="absolute -top-3 right-1/2 translate-x-1/2 w-4 h-4 rounded-full bg-blue-500 border border-[var(--morandi-primary)] shadow-sm z-40" />
+              <div className="absolute -top-3 right-1/2 translate-x-1/2 w-4 h-4 rounded-full bg-status-info border border-[var(--morandi-primary)] shadow-sm z-40" />
 
               <h4
                 className="font-bold text-lg mb-2"

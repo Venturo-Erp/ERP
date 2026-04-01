@@ -138,6 +138,20 @@ export const useTourDictionary = tourEntity.useDictionary
 // useToursForCalendar 已在上方定義並匯出
 
 // ============================================
+// 單次查詢 helpers（非 SWR，用於頁面路由初始化）
+// ============================================
+
+/**
+ * 根據團號 code 查詢 tour id
+ * 設計為 SWR fetcher 使用，不應直接呼叫
+ */
+export async function fetchTourIdByCode(code: string): Promise<string | null> {
+  const { data, error } = await supabase.from('tours').select('id').eq('code', code).single()
+  if (error || !data) return null
+  return data.id
+}
+
+// ============================================
 // CRUD Export
 // ============================================
 

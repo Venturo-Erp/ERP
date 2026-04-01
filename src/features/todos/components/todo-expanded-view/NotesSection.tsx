@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+
 import { useEnterSubmitWithShift } from '@/hooks/useEnterSubmit'
 import { MessageSquare, Edit2, X, Save } from 'lucide-react'
 import { NotesSectionProps } from './types'

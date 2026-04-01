@@ -78,7 +78,7 @@ const DialogOverlay = React.forwardRef<
     onDragOver={e => e.preventDefault()}
     onDrop={e => e.preventDefault()}
     className={cn(
-      'fixed inset-0 z-[9000] bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      'fixed inset-0 z-[9000] bg-morandi-primary/40 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className
     )}
     {...props}
@@ -142,7 +142,7 @@ const DialogContent = React.forwardRef<
         onDrop={e => e.preventDefault()}
         className={cn(
           'fixed inset-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-          showOverlay ? 'bg-black/60 backdrop-blur-sm' : 'bg-black/30 backdrop-blur-sm'
+          showOverlay ? 'bg-morandi-primary/40 backdrop-blur-sm' : 'bg-morandi-primary/20 backdrop-blur-sm'
         )}
         style={{ zIndex: zIndex.overlay }}
       />
@@ -161,7 +161,7 @@ const DialogContent = React.forwardRef<
         onPointerDownOutside={e => e.preventDefault()}
         aria-labelledby={undefined}
         className={cn(
-          'fixed left-[50%] top-[50%] grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border border-border bg-white p-8 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-xl',
+          'fixed left-[50%] top-[50%] grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border border-morandi-container bg-card p-8 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-xl',
           DIALOG_SIZES[size],
           className
         )}
@@ -170,10 +170,10 @@ const DialogContent = React.forwardRef<
       >
         {children}
         <DialogPrimitive.Close
-          className="absolute right-4 top-4 rounded-md opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground cursor-pointer"
+          className="absolute right-1 top-1 h-7 w-7 flex items-center justify-center rounded-full text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/60 transition-all cursor-pointer focus:outline-none"
           style={{ zIndex: zIndex.close }}
         >
-          <X className="h-4 w-4" />
+          <X className="h-3.5 w-3.5" />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>

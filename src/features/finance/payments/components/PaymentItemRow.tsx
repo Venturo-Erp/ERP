@@ -397,18 +397,20 @@ export function PaymentItemRow({
             />
           </td>
           <td className="py-2 px-3 border-b border-border text-center" colSpan={2}>
-            <span
+            <button
+              type="button"
               onClick={handleCopyLink}
-              className="text-morandi-gold cursor-pointer hover:text-morandi-gold-hover text-sm mr-3"
+              className="text-morandi-gold hover:text-morandi-gold-hover text-sm mr-3"
             >
               {copied ? '✓ 已複製' : PAYMENT_ITEM_ROW_LABELS.複製}
-            </span>
-            <span
+            </button>
+            <button
+              type="button"
               onClick={() => window.open(generatedLink, '_blank')}
-              className="text-morandi-secondary cursor-pointer hover:text-morandi-primary text-sm"
+              className="text-morandi-secondary hover:text-morandi-primary text-sm"
             >
               {PAYMENT_ITEM_ROW_LABELS.LABEL_1670}
-            </span>
+            </button>
           </td>
         </tr>
       )}

@@ -330,7 +330,7 @@ export function ImportSuppliersDialog({ open, onOpenChange }: ImportSuppliersDia
           if (row.status === 'error') {
             return (
               <span
-                className="inline-flex items-center gap-1 text-xs text-red-600"
+                className="inline-flex items-center gap-1 text-xs text-morandi-red"
                 title={Object.values(row.errors).join('\n')}
               >
                 <AlertCircle size={12} />
@@ -341,7 +341,7 @@ export function ImportSuppliersDialog({ open, onOpenChange }: ImportSuppliersDia
           if (row.status === 'warning') {
             return (
               <span
-                className="inline-flex items-center gap-1 text-xs text-amber-600"
+                className="inline-flex items-center gap-1 text-xs text-status-warning"
                 title={row.warnings.join('\n')}
               >
                 <AlertTriangle size={12} />
@@ -350,7 +350,7 @@ export function ImportSuppliersDialog({ open, onOpenChange }: ImportSuppliersDia
             )
           }
           return (
-            <span className="inline-flex items-center gap-1 text-xs text-green-600">
+            <span className="inline-flex items-center gap-1 text-xs text-morandi-green">
               <CheckCircle2 size={12} />
               {row.status_text}
             </span>
@@ -362,7 +362,7 @@ export function ImportSuppliersDialog({ open, onOpenChange }: ImportSuppliersDia
         label: L.col_name,
         render: (_value: unknown, row: PreviewTableRow) => (
           <span
-            className={`text-sm ${row.errors['name'] ? 'text-red-600 font-medium' : 'text-morandi-primary'}`}
+            className={`text-sm ${row.errors['name'] ? 'text-morandi-red font-medium' : 'text-morandi-primary'}`}
           >
             {row.name || '-'}
           </span>
@@ -387,7 +387,7 @@ export function ImportSuppliersDialog({ open, onOpenChange }: ImportSuppliersDia
         label: L.col_phone,
         render: (_value: unknown, row: PreviewTableRow) => (
           <span
-            className={`text-xs ${row.errors['phone'] ? 'text-red-600' : 'text-morandi-primary'}`}
+            className={`text-xs ${row.errors['phone'] ? 'text-morandi-red' : 'text-morandi-primary'}`}
           >
             {row.phone || '-'}
           </span>
@@ -398,7 +398,7 @@ export function ImportSuppliersDialog({ open, onOpenChange }: ImportSuppliersDia
         label: L.col_email,
         render: (_value: unknown, row: PreviewTableRow) => (
           <span
-            className={`text-xs ${row.errors['email'] ? 'text-red-600' : 'text-morandi-primary'}`}
+            className={`text-xs ${row.errors['email'] ? 'text-morandi-red' : 'text-morandi-primary'}`}
           >
             {row.email || '-'}
           </span>
@@ -467,9 +467,9 @@ export function ImportSuppliersDialog({ open, onOpenChange }: ImportSuppliersDia
             <>
               {/* 全域錯誤 */}
               {global_errors.length > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <div className="bg-morandi-red/10 border border-morandi-red/30 rounded-lg p-3">
                   {global_errors.map((err, i) => (
-                    <p key={i} className="text-sm text-red-600 flex items-center gap-1">
+                    <p key={i} className="text-sm text-morandi-red flex items-center gap-1">
                       <AlertCircle size={14} />
                       {err}
                     </p>
@@ -497,9 +497,9 @@ export function ImportSuppliersDialog({ open, onOpenChange }: ImportSuppliersDia
                   initialPageSize={20}
                   rowClassName={(row: PreviewTableRow) =>
                     row.status === 'error'
-                      ? 'bg-red-50/50'
+                      ? 'bg-morandi-red/10'
                       : row.status === 'warning'
-                        ? 'bg-amber-50/50'
+                        ? 'bg-status-warning-bg'
                         : ''
                   }
                 />

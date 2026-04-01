@@ -9,10 +9,6 @@ export default function BrochuresPage() {
     <DesignPage
       title={COMP_LAYOUT_LABELS.手冊}
       icon={BookOpen}
-      breadcrumb={[
-        { label: COMP_LAYOUT_LABELS.首頁, href: '/dashboard' },
-        { label: COMP_LAYOUT_LABELS.手冊, href: '/brochures' },
-      ]}
       categoryFilter={['brochure']}
     />
   )

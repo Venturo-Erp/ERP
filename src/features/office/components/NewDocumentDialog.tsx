@@ -22,14 +22,14 @@ const documentTypes: DocumentTypeOption[] = [
     label: OFFICE_LABELS.試算表,
     description: OFFICE_LABELS.類似_Excel_適合數據計算_表格整理,
     icon: FileSpreadsheet,
-    color: 'text-green-600 bg-green-50 hover:bg-green-100',
+    color: 'text-morandi-green bg-morandi-green/10 hover:bg-morandi-green/10',
   },
   {
     type: 'document',
     label: OFFICE_LABELS.文件,
     description: OFFICE_LABELS.類似_Word_適合撰寫報告_合約,
     icon: FileText,
-    color: 'text-blue-600 bg-blue-50 hover:bg-blue-100',
+    color: 'text-status-info bg-status-info-bg hover:bg-status-info-bg',
   },
 ]
 

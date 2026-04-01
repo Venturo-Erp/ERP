@@ -131,7 +131,7 @@ const STATUS_COLORS = {
   draft: 'bg-morandi-secondary/60 border-morandi-secondary',
   pending: 'bg-morandi-gold/70 border-morandi-gold',
   confirmed: 'bg-morandi-green/70 border-morandi-green',
-  completed: 'bg-blue-400/70 border-blue-500',
+  completed: 'bg-status-info-bg border-status-info/30',
   cancelled: 'bg-morandi-red/50 border-morandi-red line-through',
 }
 

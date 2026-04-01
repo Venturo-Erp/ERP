@@ -95,7 +95,7 @@ function HighlightCard({ spot, totalCount }: { spot: HighlightSpot; totalCount: 
     <div
       className={cn(
         'group relative bg-[#FAFAF8] rounded-2xl overflow-hidden',
-        'border border-[#e8e5e0] hover:border-[#c9aa7c]/50',
+        'border border-morandi-container hover:border-morandi-gold/50',
         'shadow-sm hover:shadow-lg transition-all duration-500',
         'cursor-pointer h-full',
         // 單一項目時橫向排列
@@ -116,12 +116,12 @@ function HighlightCard({ spot, totalCount }: { spot: HighlightSpot; totalCount: 
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#9fa68f]/30 to-[#c9aa7c]/30 flex items-center justify-center">
-            <Sparkles size={40} className="text-[#c9aa7c]/50" />
+          <div className="w-full h-full bg-gradient-to-br from-[#9fa68f]/30 to-morandi-gold/30 flex items-center justify-center">
+            <Sparkles size={40} className="text-morandi-gold/50" />
           </div>
         )}
         {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#3a3633]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className="absolute inset-0 bg-gradient-to-t from-morandi-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Tags on Image */}
         {spot.tags && spot.tags.length > 0 && (
@@ -129,7 +129,7 @@ function HighlightCard({ spot, totalCount }: { spot: HighlightSpot; totalCount: 
             {spot.tags.slice(0, 2).map((tag, i) => (
               <span
                 key={i}
-                className="bg-[#c9aa7c] text-[#3a3633] text-[10px] font-bold px-2.5 py-1 rounded-full"
+                className="bg-morandi-gold text-morandi-primary text-[10px] font-bold px-2.5 py-1 rounded-full"
               >
                 {tag}
               </span>
@@ -145,11 +145,11 @@ function HighlightCard({ spot, totalCount }: { spot: HighlightSpot; totalCount: 
           totalCount === 1 && 'md:w-1/2 md:flex md:flex-col md:justify-center md:p-6'
         )}
       >
-        <h3 className="font-bold text-[#3a3633] text-lg mb-1 group-hover:text-[#c9aa7c] transition-colors">
+        <h3 className="font-bold text-morandi-primary text-lg mb-1 group-hover:text-morandi-gold transition-colors">
           {spot.name || '景點名稱'}
         </h3>
         {spot.nameEn && (
-          <p className="text-[10px] text-[#b8b2aa] mb-3 tracking-wider uppercase">{spot.nameEn}</p>
+          <p className="text-[10px] text-morandi-muted mb-3 tracking-wider uppercase">{spot.nameEn}</p>
         )}
         <p
           className={cn(
@@ -227,7 +227,7 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
           }}
         />
         {/* Elegant Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#3a3633]/90 via-[#3a3633]/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-morandi-primary/90 via-[#3a3633]/40 to-transparent" />
 
         {/* Subtle Pattern Overlay */}
         <div
@@ -242,14 +242,14 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
         <div className="relative h-full flex flex-col justify-end p-8 md:p-12 text-white max-w-5xl mx-auto">
           {/* Brand Tag */}
           <div className="mb-4">
-            <span className="inline-flex items-center gap-2 bg-[#c9aa7c] text-[#3a3633] text-xs font-bold px-5 py-2 rounded-full tracking-wider">
+            <span className="inline-flex items-center gap-2 bg-morandi-gold text-morandi-primary text-xs font-bold px-5 py-2 rounded-full tracking-wider">
               CORNER TRAVEL
             </span>
           </div>
 
           {/* Tagline */}
           {safeData.tagline && (
-            <p className="text-[#c9aa7c] text-sm md:text-base font-medium mb-2 tracking-wide">
+            <p className="text-morandi-gold text-sm md:text-base font-medium mb-2 tracking-wide">
               {safeData.tagline}
             </p>
           )}
@@ -268,7 +268,7 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
           <div className="flex flex-wrap items-center gap-6 text-sm">
             {safeData.country && (
               <div className="flex items-center gap-2 bg-card/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                <MapPin size={16} className="text-[#c9aa7c]" />
+                <MapPin size={16} className="text-morandi-gold" />
                 <span>
                   {safeData.country} · {safeData.city}
                 </span>
@@ -276,16 +276,16 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
             )}
             {days > 0 && (
               <div className="flex items-center gap-2 bg-card/10 backdrop-blur-sm px-4 py-2 rounded-full">
-                <Calendar size={16} className="text-[#c9aa7c]" />
+                <Calendar size={16} className="text-morandi-gold" />
                 <span>
                   {days} 天 {Math.max(0, days - 1)} 夜
                 </span>
               </div>
             )}
             {safeData.price && (
-              <div className="flex items-center gap-2 bg-[#c9aa7c] text-[#3a3633] px-5 py-2 rounded-full font-bold">
+              <div className="flex items-center gap-2 bg-morandi-gold text-morandi-primary px-5 py-2 rounded-full font-bold">
                 <span>NT$ {safeData.price}</span>
-                <span className="font-normal text-[#3a3633]/70 text-xs">
+                <span className="font-normal text-morandi-primary/70 text-xs">
                   {safeData.priceNote || '起'}
                 </span>
               </div>
@@ -300,13 +300,13 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
           <div className="max-w-5xl mx-auto">
             {/* Section Header */}
             <div className="text-center mb-12">
-              <p className="text-xs text-[#c9aa7c] tracking-[0.3em] mb-2 font-medium uppercase">
+              <p className="text-xs text-morandi-gold tracking-[0.3em] mb-2 font-medium uppercase">
                 Highlights
               </p>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#3a3633]">
+              <h2 className="text-2xl md:text-3xl font-bold text-morandi-primary">
                 {ITINERARY_LABELS.LABEL_3969}
               </h2>
-              <div className="w-16 h-1 bg-gradient-to-r from-transparent via-[#c9aa7c] to-transparent mx-auto mt-4" />
+              <div className="w-16 h-1 bg-gradient-to-r from-transparent via-morandi-gold to-transparent mx-auto mt-4" />
             </div>
 
             {/* 根據數量渲染不同佈局 */}
@@ -355,10 +355,10 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
           <div className="max-w-5xl mx-auto">
             {/* Section Header */}
             <div className="text-center mb-12">
-              <p className="text-xs text-[#9fa68f] tracking-[0.3em] mb-2 font-medium uppercase">
+              <p className="text-xs text-morandi-green tracking-[0.3em] mb-2 font-medium uppercase">
                 Itinerary
               </p>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#3a3633]">
+              <h2 className="text-2xl md:text-3xl font-bold text-morandi-primary">
                 {ITINERARY_LABELS.LABEL_2780}
               </h2>
               <div className="w-16 h-1 bg-gradient-to-r from-transparent via-[#9fa68f] to-transparent mx-auto mt-4" />
@@ -367,7 +367,7 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
             {/* Timeline Style Days */}
             <div className="relative">
               {/* Timeline Line */}
-              <div className="absolute left-[23px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-[#c9aa7c] via-[#9fa68f] to-[#c08374] rounded-full" />
+              <div className="absolute left-[23px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-morandi-gold via-[#9fa68f] to-[#c08374] rounded-full" />
 
               {/* Day Items */}
               <div className="space-y-8">
@@ -379,7 +379,7 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
                     <div key={index} className="relative pl-[72px] md:pl-[80px]">
                       {/* Day Badge */}
                       <div className="absolute left-0 top-0">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#c9aa7c] to-[#b8996b] flex items-center justify-center text-white shadow-md">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-morandi-gold to-[#b8996b] flex items-center justify-center text-white shadow-md">
                           <div className="text-center leading-none">
                             <div className="text-[7px] font-semibold tracking-wider opacity-90">
                               DAY
@@ -390,10 +390,10 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
                       </div>
 
                       {/* Day Content Card */}
-                      <div className="bg-card rounded-2xl overflow-hidden border border-[#e8e5e0] hover:border-[#c9aa7c]/40 transition-all duration-300 shadow-sm hover:shadow-md">
+                      <div className="bg-card rounded-2xl overflow-hidden border border-morandi-container hover:border-morandi-gold/40 transition-all duration-300 shadow-sm hover:shadow-md">
                         {/* Route Header */}
                         <div className="p-6 pb-4 border-b border-[#f0ede8]">
-                          <h3 className="text-lg md:text-xl font-bold text-[#3a3633] leading-relaxed">
+                          <h3 className="text-lg md:text-xl font-bold text-morandi-primary leading-relaxed">
                             {day.route || '待規劃行程路線'}
                           </h3>
                         </div>
@@ -403,7 +403,7 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Meals Card */}
                             <div className="bg-[#FAFAF8] rounded-xl p-4">
-                              <div className="flex items-center gap-2 text-[#c9aa7c] mb-3">
+                              <div className="flex items-center gap-2 text-morandi-gold mb-3">
                                 <Utensils size={16} />
                                 <span className="font-bold text-sm">
                                   {ITINERARY_LABELS.LABEL_9126}
@@ -411,29 +411,29 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
                               </div>
                               <div className="space-y-2.5">
                                 <div className="flex items-center justify-between text-sm">
-                                  <span className="flex items-center gap-2 text-[#8b8680]">
-                                    <Coffee size={14} className="text-[#c9aa7c]/60" />
+                                  <span className="flex items-center gap-2 text-morandi-secondary">
+                                    <Coffee size={14} className="text-morandi-gold/60" />
                                     {ITINERARY_LABELS.LABEL_1347}
                                   </span>
-                                  <span className="text-[#3a3633] font-medium">
+                                  <span className="text-morandi-primary font-medium">
                                     {day.meals.breakfast || '-'}
                                   </span>
                                 </div>
                                 <div className="flex items-center justify-between text-sm">
-                                  <span className="flex items-center gap-2 text-[#8b8680]">
-                                    <Sun size={14} className="text-[#c9aa7c]/60" />
+                                  <span className="flex items-center gap-2 text-morandi-secondary">
+                                    <Sun size={14} className="text-morandi-gold/60" />
                                     {ITINERARY_LABELS.LABEL_8515}
                                   </span>
-                                  <span className="text-[#3a3633] font-medium">
+                                  <span className="text-morandi-primary font-medium">
                                     {day.meals.lunch || '-'}
                                   </span>
                                 </div>
                                 <div className="flex items-center justify-between text-sm">
-                                  <span className="flex items-center gap-2 text-[#8b8680]">
-                                    <Moon size={14} className="text-[#c9aa7c]/60" />
+                                  <span className="flex items-center gap-2 text-morandi-secondary">
+                                    <Moon size={14} className="text-morandi-gold/60" />
                                     {ITINERARY_LABELS.LABEL_8227}
                                   </span>
-                                  <span className="text-[#3a3633] font-medium">
+                                  <span className="text-morandi-primary font-medium">
                                     {day.meals.dinner || '-'}
                                   </span>
                                 </div>
@@ -442,13 +442,13 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
 
                             {/* Hotel Card */}
                             <div className="bg-[#FAFAF8] rounded-xl p-4">
-                              <div className="flex items-center gap-2 text-[#9fa68f] mb-3">
+                              <div className="flex items-center gap-2 text-morandi-green mb-3">
                                 <Hotel size={16} />
                                 <span className="font-bold text-sm">
                                   {ITINERARY_LABELS.LABEL_9617}
                                 </span>
                               </div>
-                              <p className="text-[#3a3633] text-sm font-medium leading-relaxed">
+                              <p className="text-morandi-primary text-sm font-medium leading-relaxed">
                                 {day.accommodation || '溫暖的家'}
                               </p>
                             </div>
@@ -470,10 +470,10 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
           <div className="max-w-5xl mx-auto">
             {/* Section Header */}
             <div className="text-center mb-12">
-              <p className="text-xs text-[#c08374] tracking-[0.3em] mb-2 font-medium uppercase">
+              <p className="text-xs text-morandi-red tracking-[0.3em] mb-2 font-medium uppercase">
                 Attractions
               </p>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#3a3633]">
+              <h2 className="text-2xl md:text-3xl font-bold text-morandi-primary">
                 {ITINERARY_LABELS.LABEL_4014}
               </h2>
               <div className="w-16 h-1 bg-gradient-to-r from-transparent via-[#c08374] to-transparent mx-auto mt-4" />
@@ -490,7 +490,7 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
                     key={index}
                     className={cn(
                       'group bg-[#FAFAF8] rounded-2xl overflow-hidden',
-                      'border border-[#e8e5e0]',
+                      'border border-morandi-container',
                       'shadow-sm hover:shadow-lg transition-all duration-300',
                       // 交錯排列
                       index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse',
@@ -507,21 +507,21 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-[#e8e5e0] to-[#d8d5d0] flex items-center justify-center">
-                          <MapPin size={56} strokeWidth={1} className="text-[#c9aa7c]/40" />
+                          <MapPin size={56} strokeWidth={1} className="text-morandi-gold/40" />
                         </div>
                       )}
                       {/* Gradient Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#3a3633]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-morandi-primary/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </div>
 
                     {/* Content */}
                     <div className="md:w-3/5 p-6 md:p-8 flex flex-col justify-center">
                       {/* Title */}
-                      <h3 className="text-xl md:text-2xl font-bold text-[#3a3633] mb-1 group-hover:text-[#c08374] transition-colors">
+                      <h3 className="text-xl md:text-2xl font-bold text-morandi-primary mb-1 group-hover:text-morandi-red transition-colors">
                         {sight.name || '景點名稱'}
                       </h3>
                       {sight.nameEn && (
-                        <p className="text-sm text-[#c9aa7c] mb-4 tracking-wider">{sight.nameEn}</p>
+                        <p className="text-sm text-morandi-gold mb-4 tracking-wider">{sight.nameEn}</p>
                       )}
 
                       {/* Description with expand/collapse */}
@@ -539,7 +539,7 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
                         {isLongDescription && (
                           <button
                             onClick={() => toggleSightExpand(index)}
-                            className="mt-3 flex items-center gap-1 text-[#c9aa7c] hover:text-[#b8996b] text-sm font-medium transition-colors"
+                            className="mt-3 flex items-center gap-1 text-morandi-gold hover:text-morandi-gold-hover text-sm font-medium transition-colors"
                           >
                             {isExpanded ? (
                               <>
@@ -558,9 +558,9 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
 
                       {/* Note */}
                       {sight.note && (
-                        <div className="mt-4 pt-4 border-t border-[#e8e5e0]">
+                        <div className="mt-4 pt-4 border-t border-morandi-container">
                           <p className="text-xs text-[#9a958f] italic flex items-start gap-2">
-                            <span className="text-[#c9aa7c]">✦</span>
+                            <span className="text-morandi-gold">✦</span>
                             {sight.note}
                           </p>
                         </div>
@@ -580,10 +580,10 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
           <div className="max-w-5xl mx-auto">
             {/* Section Header */}
             <div className="text-center mb-12">
-              <p className="text-xs text-[#8b8680] tracking-[0.3em] mb-2 font-medium uppercase">
+              <p className="text-xs text-morandi-secondary tracking-[0.3em] mb-2 font-medium uppercase">
                 Flight Info
               </p>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#3a3633]">
+              <h2 className="text-2xl md:text-3xl font-bold text-morandi-primary">
                 {ITINERARY_LABELS.LABEL_5074}
               </h2>
               <div className="w-16 h-1 bg-gradient-to-r from-transparent via-[#8b8680] to-transparent mx-auto mt-4" />
@@ -594,12 +594,12 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
               {safeData.flightOptions.map((flight, index) => (
                 <div
                   key={index}
-                  className="bg-card rounded-2xl overflow-hidden border border-[#e8e5e0] shadow-sm"
+                  className="bg-card rounded-2xl overflow-hidden border border-morandi-container shadow-sm"
                 >
                   {/* Airline Header */}
-                  <div className="px-6 py-4 bg-gradient-to-r from-[#3a3633] to-[#4a4643] flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#c9aa7c] flex items-center justify-center">
-                      <Plane size={18} className="text-[#3a3633]" />
+                  <div className="px-6 py-4 bg-gradient-to-r from-morandi-primary to-[#4a4643] flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-morandi-gold flex items-center justify-center">
+                      <Plane size={18} className="text-morandi-primary" />
                     </div>
                     <span className="font-bold text-white text-lg">{flight.airline}</span>
                   </div>
@@ -609,80 +609,80 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Outbound */}
                       <div className="bg-[#FAFAF8] rounded-xl p-5">
-                        <div className="flex items-center gap-2 text-[#c9aa7c] font-bold text-sm mb-5">
+                        <div className="flex items-center gap-2 text-morandi-gold font-bold text-sm mb-5">
                           <Plane size={14} />
                           {ITINERARY_LABELS.LABEL_7790}
-                          <span className="ml-auto text-[#8b8680] font-normal">
+                          <span className="ml-auto text-morandi-secondary font-normal">
                             {flight.outbound.code}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="text-center">
-                            <div className="text-3xl font-bold text-[#3a3633]">
+                            <div className="text-3xl font-bold text-morandi-primary">
                               {flight.outbound.time || '--:--'}
                             </div>
-                            <div className="text-sm text-[#c9aa7c] font-bold mt-1">
+                            <div className="text-sm text-morandi-gold font-bold mt-1">
                               {flight.outbound.fromCode || 'TPE'}
                             </div>
-                            <div className="text-xs text-[#8b8680]">{flight.outbound.from}</div>
+                            <div className="text-xs text-morandi-secondary">{flight.outbound.from}</div>
                           </div>
                           <div className="flex-1 mx-6 flex flex-col items-center gap-2">
                             <div className="w-full flex items-center">
-                              <div className="w-2 h-2 rounded-full bg-[#c9aa7c]" />
-                              <div className="flex-1 border-t-2 border-dashed border-[#c9aa7c]/50" />
-                              <Plane size={20} className="mx-2 text-[#c9aa7c]" />
-                              <div className="flex-1 border-t-2 border-dashed border-[#c9aa7c]/50" />
-                              <div className="w-2 h-2 rounded-full bg-[#c9aa7c]" />
+                              <div className="w-2 h-2 rounded-full bg-morandi-gold" />
+                              <div className="flex-1 border-t-2 border-dashed border-morandi-gold/50" />
+                              <Plane size={20} className="mx-2 text-morandi-gold" />
+                              <div className="flex-1 border-t-2 border-dashed border-morandi-gold/50" />
+                              <div className="w-2 h-2 rounded-full bg-morandi-gold" />
                             </div>
                           </div>
                           <div className="text-center">
-                            <div className="text-3xl font-bold text-[#3a3633]">
+                            <div className="text-3xl font-bold text-morandi-primary">
                               {flight.outbound.arrivalTime || '--:--'}
                             </div>
-                            <div className="text-sm text-[#c9aa7c] font-bold mt-1">
+                            <div className="text-sm text-morandi-gold font-bold mt-1">
                               {flight.outbound.toCode || '---'}
                             </div>
-                            <div className="text-xs text-[#8b8680]">{flight.outbound.to}</div>
+                            <div className="text-xs text-morandi-secondary">{flight.outbound.to}</div>
                           </div>
                         </div>
                       </div>
 
                       {/* Return */}
                       <div className="bg-[#FAFAF8] rounded-xl p-5">
-                        <div className="flex items-center gap-2 text-[#9fa68f] font-bold text-sm mb-5">
+                        <div className="flex items-center gap-2 text-morandi-green font-bold text-sm mb-5">
                           <Plane size={14} className="rotate-180" />
                           {ITINERARY_LABELS.LABEL_2327}
-                          <span className="ml-auto text-[#8b8680] font-normal">
+                          <span className="ml-auto text-morandi-secondary font-normal">
                             {flight.return.code}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
                           <div className="text-center">
-                            <div className="text-3xl font-bold text-[#3a3633]">
+                            <div className="text-3xl font-bold text-morandi-primary">
                               {flight.return.time || '--:--'}
                             </div>
-                            <div className="text-sm text-[#9fa68f] font-bold mt-1">
+                            <div className="text-sm text-morandi-green font-bold mt-1">
                               {flight.return.fromCode || '---'}
                             </div>
-                            <div className="text-xs text-[#8b8680]">{flight.return.from}</div>
+                            <div className="text-xs text-morandi-secondary">{flight.return.from}</div>
                           </div>
                           <div className="flex-1 mx-6 flex flex-col items-center gap-2">
                             <div className="w-full flex items-center">
-                              <div className="w-2 h-2 rounded-full bg-[#9fa68f]" />
-                              <div className="flex-1 border-t-2 border-dashed border-[#9fa68f]/50" />
-                              <Plane size={20} className="mx-2 text-[#9fa68f] rotate-180" />
-                              <div className="flex-1 border-t-2 border-dashed border-[#9fa68f]/50" />
-                              <div className="w-2 h-2 rounded-full bg-[#9fa68f]" />
+                              <div className="w-2 h-2 rounded-full bg-morandi-green" />
+                              <div className="flex-1 border-t-2 border-dashed border-morandi-green/50" />
+                              <Plane size={20} className="mx-2 text-morandi-green rotate-180" />
+                              <div className="flex-1 border-t-2 border-dashed border-morandi-green/50" />
+                              <div className="w-2 h-2 rounded-full bg-morandi-green" />
                             </div>
                           </div>
                           <div className="text-center">
-                            <div className="text-3xl font-bold text-[#3a3633]">
+                            <div className="text-3xl font-bold text-morandi-primary">
                               {flight.return.arrivalTime || '--:--'}
                             </div>
-                            <div className="text-sm text-[#9fa68f] font-bold mt-1">
+                            <div className="text-sm text-morandi-green font-bold mt-1">
                               {flight.return.toCode || 'TPE'}
                             </div>
-                            <div className="text-xs text-[#8b8680]">{flight.return.to}</div>
+                            <div className="text-xs text-morandi-secondary">{flight.return.to}</div>
                           </div>
                         </div>
                       </div>
@@ -696,13 +696,13 @@ export function GeminiItineraryPreview({ data }: GeminiItineraryPreviewProps) {
       )}
 
       {/* ==================== Footer ==================== */}
-      <footer className="py-12 px-6 bg-[#3a3633]">
+      <footer className="py-12 px-6 bg-morandi-primary">
         <div className="max-w-5xl mx-auto text-center">
           <div className="mb-4">
-            <span className="text-[#c9aa7c] font-bold text-lg tracking-[0.2em]">CORNER TRAVEL</span>
+            <span className="text-morandi-gold font-bold text-lg tracking-[0.2em]">CORNER TRAVEL</span>
           </div>
           <p className="text-white/50 text-sm mb-2">{ITINERARY_LABELS.LABEL_9031}</p>
-          <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-[#c9aa7c]/50 to-transparent mx-auto mt-6 mb-6" />
+          <div className="w-20 h-0.5 bg-gradient-to-r from-transparent via-morandi-gold/50 to-transparent mx-auto mt-6 mb-6" />
           <p className="text-white/30 text-xs">{ITINERARY_LABELS.LABEL_5599}</p>
         </div>
       </footer>

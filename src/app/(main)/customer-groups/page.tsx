@@ -393,11 +393,6 @@ export default function CustomerGroupsPage() {
       <ListPageLayout
         title={LABELS.LABEL_6845}
         icon={Users}
-        breadcrumb={[
-          { label: LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-          { label: LABELS.BREADCRUMB_CUSTOMER_MGMT, href: '/customers' },
-          { label: LABELS.BREADCRUMB_CUSTOMER_GROUPS, href: '/customer-groups' },
-        ]}
         data={groups}
         columns={columns}
         searchFields={['name', 'notes']}

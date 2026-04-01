@@ -112,6 +112,7 @@ export function DatePicker({
           className={cn(
             'w-full h-10 justify-between text-left font-normal bg-card',
             !value && 'text-muted-foreground',
+            disabled && 'bg-input-disabled-bg opacity-60',
             buttonClassName,
             className
           )}

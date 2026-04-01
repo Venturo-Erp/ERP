@@ -163,10 +163,6 @@ export default function TenantsPage() {
       <ListPageLayout
         title={LABELS.PAGE_TITLE}
         icon={Building2}
-        breadcrumb={[
-          { label: LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-          { label: LABELS.BREADCRUMB_TENANTS, href: '/tenants' },
-        ]}
         data={data}
         columns={columns}
         searchFields={['name', 'code'] as (keyof WorkspaceRow)[]}

@@ -39,7 +39,7 @@ export function TourHeroGemini({ data, viewMode }: TourHeroGeminiProps) {
         }}
       />
       {/* Elegant Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#3a3633]/90 via-[#3a3633]/40 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-morandi-primary/90 via-[#3a3633]/40 to-transparent" />
 
       {/* Subtle Pattern Overlay */}
       <div
@@ -58,7 +58,7 @@ export function TourHeroGemini({ data, viewMode }: TourHeroGeminiProps) {
       >
         {/* Brand Tag */}
         <div className="mb-4">
-          <span className="inline-flex items-center gap-2 bg-[#c9aa7c] text-[#3a3633] text-xs font-bold px-5 py-2 rounded-full tracking-wider">
+          <span className="inline-flex items-center gap-2 bg-morandi-gold text-morandi-primary text-xs font-bold px-5 py-2 rounded-full tracking-wider">
             VENTURO
           </span>
         </div>
@@ -66,7 +66,7 @@ export function TourHeroGemini({ data, viewMode }: TourHeroGeminiProps) {
         {/* Tagline */}
         {data.tagline && (
           <p
-            className={`text-[#c9aa7c] font-medium mb-2 tracking-wide ${
+            className={`text-morandi-gold font-medium mb-2 tracking-wide ${
               viewMode === 'mobile' ? 'text-xs' : 'text-sm md:text-base'
             }`}
           >
@@ -102,7 +102,7 @@ export function TourHeroGemini({ data, viewMode }: TourHeroGeminiProps) {
                 viewMode === 'mobile' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2'
               }`}
             >
-              <MapPin size={viewMode === 'mobile' ? 12 : 16} className="text-[#c9aa7c]" />
+              <MapPin size={viewMode === 'mobile' ? 12 : 16} className="text-morandi-gold" />
               <span>
                 {data.country}
                 {data.city && ` · ${data.city}`}
@@ -115,7 +115,7 @@ export function TourHeroGemini({ data, viewMode }: TourHeroGeminiProps) {
                 viewMode === 'mobile' ? 'px-3 py-1.5 text-xs' : 'px-4 py-2'
               }`}
             >
-              <Calendar size={viewMode === 'mobile' ? 12 : 16} className="text-[#c9aa7c]" />
+              <Calendar size={viewMode === 'mobile' ? 12 : 16} className="text-morandi-gold" />
               <span>{data.departureDate}</span>
             </div>
           )}
@@ -130,7 +130,7 @@ export function TourHeroGemini({ data, viewMode }: TourHeroGeminiProps) {
           )}
           {data.price && (
             <div
-              className={`bg-[#c9aa7c] text-[#3a3633] font-bold rounded-full ${
+              className={`bg-morandi-gold text-morandi-primary font-bold rounded-full ${
                 viewMode === 'mobile' ? 'px-3 py-1.5 text-xs' : 'px-5 py-2'
               }`}
             >

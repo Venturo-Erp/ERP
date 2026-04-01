@@ -226,10 +226,6 @@ export default function ContractsPage() {
       <ListPageLayout
         title={CONTRACTS_LABELS.PAGE_TITLE}
         icon={FileSignature}
-        breadcrumb={[
-          { label: CONTRACTS_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-          { label: CONTRACTS_LABELS.BREADCRUMB_CONTRACTS, href: '/contracts' },
-        ]}
         data={contractTours}
         columns={columns}
         searchFields={['name', 'code', 'status']}

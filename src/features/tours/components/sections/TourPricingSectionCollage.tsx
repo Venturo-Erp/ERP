@@ -90,7 +90,7 @@ export function TourPricingSectionCollage({
                   style={{ boxShadow: '10px 10px 0px 0px rgba(0,0,0,1)' }}
                 >
                   {/* 圖釘 */}
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-red-500 border border-[var(--morandi-primary)] shadow-sm z-20" />
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-morandi-red border border-[var(--morandi-primary)] shadow-sm z-20" />
                   {/* 膠帶 */}
                   <div
                     className="absolute -top-2 left-1/2 -translate-x-1/2 w-20 h-6"
@@ -296,7 +296,7 @@ export function TourPricingSectionCollage({
               style={{ boxShadow: '6px 6px 0px 0px rgba(0,0,0,1)' }}
             >
               <h4
-                className="font-bold text-xl mb-4 flex items-center gap-2 text-green-600"
+                className="font-bold text-xl mb-4 flex items-center gap-2 text-morandi-green"
                 style={{ fontFamily: "'Permanent Marker', cursive" }}
               >
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -309,7 +309,7 @@ export function TourPricingSectionCollage({
                   .filter(item => item.included)
                   .map((item, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm">
-                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-2" />
+                      <span className="w-1.5 h-1.5 bg-morandi-green rounded-full mt-2" />
                       {item.text}
                     </li>
                   ))}

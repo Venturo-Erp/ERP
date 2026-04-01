@@ -297,7 +297,7 @@ export function TemplateSelector({
                       <div
                         className="w-full h-2 mt-1 mx-auto rounded-md"
                         style={{
-                          backgroundColor: styleInfo.colors[1] || '#c9aa7c',
+                          backgroundColor: styleInfo.colors[1] || 'var(--morandi-gold)',
                           width: '80%',
                           marginLeft: '10%',
                         }}
@@ -311,7 +311,7 @@ export function TemplateSelector({
                       <div className="flex flex-col items-center gap-0.5 mt-1 px-1">
                         <div
                           className="w-full h-1 rounded-md"
-                          style={{ backgroundColor: styleInfo.colors[1] || '#c9aa7c' }}
+                          style={{ backgroundColor: styleInfo.colors[1] || 'var(--morandi-gold)' }}
                         />
                         <div
                           className="w-3/4 h-0.5 rounded-md"

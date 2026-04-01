@@ -113,3 +113,4 @@ public/*.html
 !next.config.js
 !postcss.config.js
 !tailwind.config.js
+.gitnexus

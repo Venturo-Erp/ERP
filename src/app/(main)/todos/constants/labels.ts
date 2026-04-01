@@ -22,7 +22,7 @@ export const LABELS = {
   // 狀態篩選
   STATUS_ACTIVE: '未完成',
   STATUS_PENDING: '待辦',
-  STATUS_IN_PROGRESS: '待出發',
+  STATUS_IN_PROGRESS: '作業中',
   STATUS_COMPLETED: '已完成',
   STATUS_CANCELLED: '取消',
   STATUS_DONE: '完成',

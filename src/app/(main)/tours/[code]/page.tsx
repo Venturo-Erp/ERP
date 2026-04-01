@@ -8,7 +8,7 @@ import { useSearchParams } from 'next/navigation'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
 import { Loader2, MapPin, MessageSquare } from 'lucide-react'
-import { supabase } from '@/lib/supabase/client'
+import { fetchTourIdByCode } from '@/data'
 import { useTourDetails } from '@/features/tours/hooks/useTours-advanced'
 import { useWorkspaceChannels } from '@/stores/workspace-store'
 import { TOUR_TABS, TourTabContent } from '@/features/tours/components/TourTabs'
@@ -20,13 +20,6 @@ const TourRequestFormDialog = dynamic(
     import('@/features/tours/components/TourRequestFormDialog').then(m => m.TourRequestFormDialog),
   { ssr: false }
 )
-
-const fetchTourIdByCode = async (code: string): Promise<string | null> => {
-  const { data, error } = await supabase.from('tours').select('id').eq('code', code).single()
-
-  if (error || !data) return null
-  return data.id
-}
 
 export default function TourDetailPage() {
   const params = useParams()

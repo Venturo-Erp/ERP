@@ -140,19 +140,19 @@ export function TourConfirmationSheet({ tourId }: TourConfirmationSheetProps) {
       case 'hotel':
       case COMP_TOURS_LABELS.住宿:
       case 'accommodation':
-        return <Hotel size={14} className="text-blue-600" />
+        return <Hotel size={14} className="text-status-info" />
       case 'transportation':
       case COMP_TOURS_LABELS.交通:
       case 'transport':
-        return <Bus size={14} className="text-green-600" />
+        return <Bus size={14} className="text-morandi-green" />
       case 'activity':
       case 'ticket':
       case COMP_TOURS_LABELS.門票:
-        return <Ticket size={14} className="text-purple-600" />
+        return <Ticket size={14} className="text-morandi-secondary" />
       case 'restaurant':
       case 'meal':
       case COMP_TOURS_LABELS.餐食:
-        return <UtensilsCrossed size={14} className="text-orange-600" />
+        return <UtensilsCrossed size={14} className="text-status-warning" />
       default:
         return <Package size={14} className="text-morandi-secondary" />
     }
@@ -279,10 +279,10 @@ export function TourConfirmationSheet({ tourId }: TourConfirmationSheetProps) {
       {/* 住宿表 */}
       {hotelGroups.length > 0 && (
         <div className="border border-border rounded-lg overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 bg-blue-500 text-white">
+          <div className="flex items-center gap-2 px-4 py-3 bg-status-info-bg text-morandi-primary">
             <Hotel size={18} />
             <span className="font-medium">{COMP_TOURS_LABELS.LABEL_460}</span>
-            <span className="text-blue-100 text-sm">
+            <span className="text-morandi-secondary text-sm">
               {COMP_TOURS_LABELS.HOTEL_COUNT(hotelGroups.length)}
             </span>
           </div>
@@ -362,10 +362,10 @@ export function TourConfirmationSheet({ tourId }: TourConfirmationSheetProps) {
       {/* 餐食表 */}
       {restaurantGroups.length > 0 && (
         <div className="border border-border rounded-lg overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 bg-orange-500 text-white">
+          <div className="flex items-center gap-2 px-4 py-3 bg-status-warning-bg text-morandi-primary">
             <Utensils size={18} />
             <span className="font-medium">{COMP_TOURS_LABELS.LABEL_9767}</span>
-            <span className="text-orange-100 text-sm">
+            <span className="text-morandi-secondary text-sm">
               {COMP_TOURS_LABELS.RESTAURANT_COUNT(restaurantGroups.length)}
             </span>
           </div>

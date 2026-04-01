@@ -9,10 +9,6 @@ export default function MarketingPage() {
     <DesignPage
       title={COMP_LAYOUT_LABELS.行銷素材}
       icon={Megaphone}
-      breadcrumb={[
-        { label: COMP_LAYOUT_LABELS.首頁, href: '/dashboard' },
-        { label: COMP_LAYOUT_LABELS.行銷素材, href: '/marketing' },
-      ]}
       categoryFilter={['social', 'banner']}
     />
   )

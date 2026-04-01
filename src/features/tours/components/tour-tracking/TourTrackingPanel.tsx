@@ -46,20 +46,19 @@ function getQuoteStatusDisplay(status: string): StatusDisplay {
     case 'confirmed':
       return {
         label: TOUR_TRACKING_LABELS.QUOTE_CONFIRMED,
-        color: 'text-emerald-600 bg-emerald-50',
+        color: 'text-morandi-green bg-morandi-green/10',
         icon: '✅',
       }
     case 'drafted':
       return {
         label: TOUR_TRACKING_LABELS.QUOTE_DRAFTED,
-        color: 'text-amber-600 bg-amber-50',
+        color: 'text-status-warning bg-status-warning-bg',
         icon: '⏳',
       }
     default:
       return {
         label: TOUR_TRACKING_LABELS.QUOTE_NONE,
-        color: 'text-muted-foreground bg-morandi-container',
-        icon: '⬜',
+        color: 'text-muted-foreground bg-morandi-container',        icon: '⬜',
       }
   }
 }
@@ -69,32 +68,31 @@ function getRequestStatusDisplay(status: string): StatusDisplay {
     case 'confirmed':
       return {
         label: TOUR_TRACKING_LABELS.REQUEST_CONFIRMED,
-        color: 'text-emerald-600 bg-emerald-50',
+        color: 'text-morandi-green bg-morandi-green/10',
         icon: '✅',
       }
     case 'replied':
       return {
         label: TOUR_TRACKING_LABELS.REQUEST_REPLIED,
-        color: 'text-blue-600 bg-blue-50',
+        color: 'text-status-info bg-status-info-bg',
         icon: '💬',
       }
     case 'sent':
       return {
         label: TOUR_TRACKING_LABELS.REQUEST_SENT,
-        color: 'text-amber-600 bg-amber-50',
+        color: 'text-status-warning bg-status-warning-bg',
         icon: '⏳',
       }
     case 'cancelled':
       return {
         label: TOUR_TRACKING_LABELS.REQUEST_CANCELLED,
-        color: 'text-red-600 bg-red-50',
+        color: 'text-morandi-red bg-morandi-red/10',
         icon: '❌',
       }
     default:
       return {
         label: TOUR_TRACKING_LABELS.REQUEST_NONE,
-        color: 'text-muted-foreground bg-morandi-container',
-        icon: '⬜',
+        color: 'text-muted-foreground bg-morandi-container',        icon: '⬜',
       }
   }
 }
@@ -104,20 +102,19 @@ function getConfirmationStatusDisplay(status: string): StatusDisplay {
     case 'confirmed':
       return {
         label: TOUR_TRACKING_LABELS.CONFIRM_CONFIRMED,
-        color: 'text-emerald-600 bg-emerald-50',
+        color: 'text-morandi-green bg-morandi-green/10',
         icon: '✅',
       }
     case 'pending':
       return {
         label: TOUR_TRACKING_LABELS.CONFIRM_PENDING,
-        color: 'text-amber-600 bg-amber-50',
+        color: 'text-status-warning bg-status-warning-bg',
         icon: '⏳',
       }
     default:
       return {
         label: TOUR_TRACKING_LABELS.CONFIRM_NONE,
-        color: 'text-muted-foreground bg-morandi-container',
-        icon: '⬜',
+        color: 'text-muted-foreground bg-morandi-container',        icon: '⬜',
       }
   }
 }
@@ -127,20 +124,19 @@ function getLeaderStatusDisplay(status: string): StatusDisplay {
     case 'reviewed':
       return {
         label: TOUR_TRACKING_LABELS.LEADER_REVIEWED,
-        color: 'text-emerald-600 bg-emerald-50',
+        color: 'text-morandi-green bg-morandi-green/10',
         icon: '✅',
       }
     case 'filled':
       return {
         label: TOUR_TRACKING_LABELS.LEADER_FILLED,
-        color: 'text-blue-600 bg-blue-50',
+        color: 'text-status-info bg-status-info-bg',
         icon: '📝',
       }
     default:
       return {
         label: TOUR_TRACKING_LABELS.LEADER_NONE,
-        color: 'text-muted-foreground bg-morandi-container',
-        icon: '⬜',
+        color: 'text-muted-foreground bg-morandi-container',        icon: '⬜',
       }
   }
 }

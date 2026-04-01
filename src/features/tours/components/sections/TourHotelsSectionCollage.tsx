@@ -9,7 +9,7 @@ interface TourHotelsSectionCollageProps {
 }
 
 // 圖釘顏色
-const pushpinColors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500']
+const pushpinColors = ['bg-morandi-red', 'bg-status-info', 'bg-morandi-green', 'bg-status-warning']
 
 // 旋轉角度
 const rotations = ['rotate-1', '-rotate-2', 'rotate-2', '-rotate-1']

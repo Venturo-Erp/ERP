@@ -211,7 +211,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
           onBlur={() => handleExpressionCommit('quantity', quantityExpr, setQuantityExpr)}
           disabled={!isEditing}
           placeholder={QUICK_QUOTE_ITEMS_TABLE_LABELS.可輸入算式}
-          className={cn(inputClass, 'text-center', item.quantity_formula && '!text-blue-600')}
+          className={cn(inputClass, 'text-center', item.quantity_formula && '!text-status-info')}
           title={item.quantity_formula ? `公式: ${item.quantity_formula}` : undefined}
         />
       </td>
@@ -234,7 +234,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
             onFocus={() => handleFocus('cost', setCostExpr)}
             onBlur={() => handleExpressionCommit('cost', costExpr, setCostExpr)}
             placeholder={QUICK_QUOTE_ITEMS_TABLE_LABELS.可輸入算式}
-            className={cn(inputClass, 'text-right', item.cost_formula && '!text-blue-600')}
+            className={cn(inputClass, 'text-right', item.cost_formula && '!text-status-info')}
             title={item.cost_formula ? `公式: ${item.cost_formula}` : undefined}
           />
         </td>
@@ -258,7 +258,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
           onBlur={() => handleExpressionCommit('unit_price', unitPriceExpr, setUnitPriceExpr)}
           disabled={!isEditing}
           placeholder={QUICK_QUOTE_ITEMS_TABLE_LABELS.可輸入算式}
-          className={cn(inputClass, 'text-right', item.unit_price_formula && '!text-blue-600')}
+          className={cn(inputClass, 'text-right', item.unit_price_formula && '!text-status-info')}
           title={item.unit_price_formula ? `公式: ${item.unit_price_formula}` : undefined}
         />
       </td>

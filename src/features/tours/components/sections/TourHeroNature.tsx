@@ -142,7 +142,7 @@ export function TourHeroNature({ data, viewMode }: TourHeroNatureProps) {
                   className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-105"
                 />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-[#667a6e] via-[#8b9d83] to-[#c9aa7c] transition-transform duration-[2s] group-hover:scale-105" />
+                <div className="w-full h-full bg-gradient-to-br from-[#667a6e] via-[#8b9d83] to-morandi-gold transition-transform duration-[2s] group-hover:scale-105" />
               )}
 
               {/* 底部標籤區：位置 + tagline */}

@@ -93,10 +93,6 @@ export default function CalendarPage() {
     <>
       <ContentPageLayout
         title={CALENDAR_LABELS.PAGE_TITLE}
-        breadcrumb={[
-          { label: CALENDAR_LABELS.BREADCRUMB_HOME, href: '/dashboard' },
-          { label: CALENDAR_LABELS.BREADCRUMB_CALENDAR, href: '/calendar' },
-        ]}
         headerActions={
           <div className="flex items-center gap-3">
             {/* 月份切換 */}

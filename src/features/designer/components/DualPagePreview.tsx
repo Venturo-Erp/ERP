@@ -36,7 +36,7 @@ export function PageThumbnail({ page, scale }: { page: CanvasPage; scale: number
                 key={element.id}
                 style={{
                   ...style,
-                  backgroundColor: element.fill || '#c9aa7c',
+                  backgroundColor: element.fill || 'var(--morandi-gold)',
                   borderRadius:
                     element.variant === 'circle' ? '50%' : (element.cornerRadius || 0) * scale,
                 }}
