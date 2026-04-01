@@ -257,6 +257,14 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
     setIsDirty(true)
   }, [])
 
+  // 確保 supplierName 有值（新建供應商時 suppliers 可能還沒刷新）
+  const resolveSupplierName = (item: RequestItem): string | null => {
+    if (item.supplierName) return item.supplierName
+    const id = item.supplier_id || item.selected_id
+    if (!id) return null
+    return combinedSuppliers.find(s => s.id === id)?.name || null
+  }
+
   // === 存檔：一次寫入 DB ===
   const handleSave = async () => {
     if (!currentRequest || is_submitting) return
@@ -275,7 +283,7 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
           request_id: currentRequest.id,
           category: item.category || null,
           supplier_id: item.supplier_id || null,
-          supplier_name: item.supplierName || null,
+          supplier_name: resolveSupplierName(item),
           description: item.description,
           unitprice: item.unit_price,
           quantity: item.quantity,
@@ -293,7 +301,7 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
         const dbUpdates: Record<string, unknown> = {
           category: item.category,
           supplier_id: item.supplier_id || null,
-          supplier_name: item.supplierName || null,
+          supplier_name: resolveSupplierName(item),
           description: item.description,
           unitprice: item.unit_price,
           quantity: item.quantity,
