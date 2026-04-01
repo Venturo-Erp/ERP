@@ -111,6 +111,10 @@ export interface TourItineraryItem {
   confirmation_date: string | null
   confirmation_note: string | null
 
+  // 保留狀態
+  is_reserved: boolean
+  reserved_at: string | null
+
   // 交通（司機資訊）
   driver_name: string | null
   driver_phone: string | null

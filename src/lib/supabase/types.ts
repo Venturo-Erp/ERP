@@ -15193,6 +15193,7 @@ export type Database = {
           handled_by: string | null
           id: string
           infant_price: number | null
+          is_reserved: boolean | null
           itinerary_id: string | null
           latitude: number | null
           leader_status: string | null
@@ -15214,6 +15215,7 @@ export type Database = {
           request_reply_at: string | null
           request_sent_at: string | null
           request_status: string | null
+          reserved_at: string | null
           resource_id: string | null
           resource_name: string | null
           resource_type: string | null
@@ -15267,6 +15269,7 @@ export type Database = {
           handled_by?: string | null
           id?: string
           infant_price?: number | null
+          is_reserved?: boolean | null
           itinerary_id?: string | null
           latitude?: number | null
           leader_status?: string | null
@@ -15288,6 +15291,7 @@ export type Database = {
           request_reply_at?: string | null
           request_sent_at?: string | null
           request_status?: string | null
+          reserved_at?: string | null
           resource_id?: string | null
           resource_name?: string | null
           resource_type?: string | null
@@ -15341,6 +15345,7 @@ export type Database = {
           handled_by?: string | null
           id?: string
           infant_price?: number | null
+          is_reserved?: boolean | null
           itinerary_id?: string | null
           latitude?: number | null
           leader_status?: string | null
@@ -15362,6 +15367,7 @@ export type Database = {
           request_reply_at?: string | null
           request_sent_at?: string | null
           request_status?: string | null
+          reserved_at?: string | null
           resource_id?: string | null
           resource_name?: string | null
           resource_type?: string | null
