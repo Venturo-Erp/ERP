@@ -192,15 +192,10 @@ export function createStore<T extends BaseEntity>(
 
           // 🔒 Workspace 隔離：若啟用 workspaceScoped，自動過濾 workspace_id
           if (config.workspaceScoped) {
-            const { workspaceId, userRole } = getCurrentUserContext()
-            const isAdmin = canCrossWorkspace(userRole)
+            const { workspaceId } = getCurrentUserContext()
             
-            
-
-            // 只有 Super Admin 且明確開啟跨 workspace 模式才不過濾
-            if (shouldCrossWorkspace(isAdmin)) {
-              // 跨 workspace 模式：不加過濾
-            } else if (workspaceId) {
+            // 所有用戶都強制過濾到自己的 workspace
+            if (workspaceId) {
               // 驗證 workspaceId 格式（防止 SQL injection）
               if (!isValidUUID(workspaceId)) {
                 throw new Error(`Invalid workspace ID format: ${workspaceId}`)

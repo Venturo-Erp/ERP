@@ -193,13 +193,12 @@ export function createCloudHook<T extends BaseEntity>(
     // tableName 已被限制為有效的表格名稱
     let query = supabase.from(tableName).select(options?.select || '*')
 
-    // 🔒 Workspace 隔離：根據當前使用者過濾資料
+    // 🔒 Workspace 隔離：強制過濾到當前使用者的 workspace
     if (isWorkspaceScoped) {
-      const { workspaceId, userRole } = getCurrentUserContext()
-      const isAdmin = canCrossWorkspace(userRole)
+      const { workspaceId } = getCurrentUserContext()
 
-      // 只有 Super Admin 且明確開啟跨 workspace 模式才不過濾
-      if (!shouldCrossWorkspace(isAdmin) && workspaceId) {
+      // 所有用戶都強制過濾到自己的 workspace
+      if (workspaceId) {
         // 向後相容：同時查詢符合當前 workspace 或 workspace_id 為 NULL 的舊資料
         query = query.or(`workspace_id.eq.${workspaceId},workspace_id.is.null`)
       }

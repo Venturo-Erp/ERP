@@ -96,21 +96,8 @@ export async function getWorkspaceFilterForQuery(tableName: string): Promise<str
       return null // 未登入，不篩選
     }
 
-    // 新系統：使用 isAdmin 判斷是否可跨 workspace
-    const { isAdmin } = useAuthStore.getState()
-
-    // 管理員可跨 workspace
-    if (isAdmin) {
-      const manualFilter = getCurrentWorkspaceFilter()
-
-      // 如果手動選擇了 workspace，使用該選擇
-      if (manualFilter) {
-        return manualFilter
-      }
-
-      // 未選擇時，預設使用自己的 workspace
-      return user.workspace_id || null
-    }
+    // 跨 workspace 功能已停用
+    // 所有用戶（包括管理員）都只能看到自己 workspace 的資料
 
     // ✅ 一般使用者：強制使用自己的 workspace_id（不可切換）
     return user.workspace_id || null
