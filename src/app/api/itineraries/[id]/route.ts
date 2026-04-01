@@ -46,24 +46,35 @@ async function enrichDailyItinerary(
   // 批次查詢景點
   const { data: attractions } = await supabase
     .from('attractions')
-    .select('id, description')
+    .select('id, description, thumbnail, images')
     .in('id', Array.from(attractionIds))
 
   if (!attractions) return dailyItinerary
 
   // 建立對照表
-  const attractionMap = new Map<string, string>()
+  const attractionMap = new Map<string, { description?: string; thumbnail?: string; images?: string[] }>()
   for (const attr of attractions) {
-    if (attr.description) attractionMap.set(attr.id, attr.description)
+    attractionMap.set(attr.id, {
+      description: attr.description || undefined,
+      thumbnail: attr.thumbnail || undefined,
+      images: attr.images || undefined,
+    })
   }
 
-  // 補上描述
+  // 補上描述和圖片
   return dailyItinerary.map(day => ({
     ...day,
     activities: day.activities?.map(activity => {
-      if (activity.attraction_id && !activity.description) {
-        const desc = attractionMap.get(activity.attraction_id)
-        if (desc) return { ...activity, description: desc }
+      if (activity.attraction_id) {
+        const attr = attractionMap.get(activity.attraction_id)
+        if (attr) {
+          const enriched = { ...activity }
+          if (!activity.description && attr.description) enriched.description = attr.description
+          if (!activity.image && (attr.thumbnail || attr.images?.[0])) {
+            enriched.image = attr.thumbnail || attr.images?.[0]
+          }
+          return enriched
+        }
       }
       return activity
     })
