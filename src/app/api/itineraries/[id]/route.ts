@@ -5,6 +5,70 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
 import { successResponse, ApiError } from '@/lib/api/response'
 import { getServerAuth } from '@/lib/auth/server-auth'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+// 活動類型
+interface Activity {
+  attraction_id?: string
+  title?: string
+  description?: string
+  [key: string]: unknown
+}
+
+interface DayItinerary {
+  activities?: Activity[]
+  [key: string]: unknown
+}
+
+/**
+ * 用 attraction_id 從景點庫補上描述
+ */
+async function enrichDailyItinerary(
+  supabase: SupabaseClient,
+  dailyItinerary: DayItinerary[] | null
+): Promise<DayItinerary[] | null> {
+  if (!dailyItinerary || !Array.isArray(dailyItinerary)) return dailyItinerary
+
+  // 收集需要查詢的 attraction_id
+  const attractionIds = new Set<string>()
+  for (const day of dailyItinerary) {
+    if (day.activities && Array.isArray(day.activities)) {
+      for (const activity of day.activities) {
+        if (activity.attraction_id && !activity.description) {
+          attractionIds.add(activity.attraction_id)
+        }
+      }
+    }
+  }
+
+  if (attractionIds.size === 0) return dailyItinerary
+
+  // 批次查詢景點
+  const { data: attractions } = await supabase
+    .from('attractions')
+    .select('id, description')
+    .in('id', Array.from(attractionIds))
+
+  if (!attractions) return dailyItinerary
+
+  // 建立對照表
+  const attractionMap = new Map<string, string>()
+  for (const attr of attractions) {
+    if (attr.description) attractionMap.set(attr.id, attr.description)
+  }
+
+  // 補上描述
+  return dailyItinerary.map(day => ({
+    ...day,
+    activities: day.activities?.map(activity => {
+      if (activity.attraction_id && !activity.description) {
+        const desc = attractionMap.get(activity.attraction_id)
+        if (desc) return { ...activity, description: desc }
+      }
+      return activity
+    })
+  }))
+}
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -126,7 +190,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       cancellationPolicy: itinerary.cancellation_policy,
       showCancellationPolicy: itinerary.show_cancellation_policy,
       itinerarySubtitle: itinerary.itinerary_subtitle,
-      dailyItinerary: itinerary.daily_itinerary,
+      dailyItinerary: await enrichDailyItinerary(supabaseAdmin, itinerary.daily_itinerary as DayItinerary[]),
       versionRecords: itinerary.version_records,
       createdAt: itinerary.created_at,
       updatedAt: itinerary.updated_at,
