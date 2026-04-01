@@ -392,7 +392,7 @@ export default function RolesPage() {
         { label: '職務管理', href: '/hr/roles' },
       ]}
     >
-      <div className="grid grid-cols-12 gap-6 h-[calc(100vh-180px)]">
+      <div className="grid grid-cols-12 gap-6 h-full min-h-[500px]">
         {/* 左側：職務列表 */}
         <div className="col-span-3 flex flex-col">
           <div className="bg-white border border-border rounded-lg flex flex-col h-full">
