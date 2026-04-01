@@ -396,59 +396,43 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const events = body.events || []
 
-    // 先立即回 200，再背景處理
-    const bgTasks: Promise<void>[] = []
-
     for (const event of events) {
       const source = event.source || {}
 
       // follow/unfollow 事件 → 記錄用戶
       if (event.type === 'follow' || event.type === 'unfollow') {
-        bgTasks.push(processFollowEvent(event))
+        await processFollowEvent(event)
       }
 
       // 私人訊息 → 檢查綁定指令（客戶或員工）或 AI 客服
       if (source.type === 'user' && event.type === 'message' && event.message?.type === 'text') {
         console.log('[LINE] User message received:', event.message.text)
-        // 背景處理（檢查是否為綁定指令，否則用 AI 客服）
-        bgTasks.push((async () => {
-          try {
-            const isCustomerBinding = await processCustomerBinding(event)
-            const isEmployeeBinding = await processEmployeeBinding(event)
-            
-            console.log('[LINE] Binding check:', { isCustomerBinding, isEmployeeBinding })
-            
-            // 如果不是綁定指令，就用 AI 客服回覆
-            if (!isCustomerBinding && !isEmployeeBinding) {
-              console.log('[LINE] Starting AI customer service...')
-              await handleAIMessage(event)
-            }
-          } catch (err) {
-            console.error('[LINE] Message processing error:', err)
-          }
-        })())
+        
+        const isCustomerBinding = await processCustomerBinding(event)
+        const isEmployeeBinding = await processEmployeeBinding(event)
+        
+        console.log('[LINE] Binding check:', { isCustomerBinding, isEmployeeBinding })
+        
+        // 如果不是綁定指令，就用 AI 客服回覆
+        if (!isCustomerBinding && !isEmployeeBinding) {
+          console.log('[LINE] Starting AI customer service...')
+          await handleAIMessage(event)
+        }
       }
 
       if (source.type === 'group') {
         const groupId = source.groupId
 
-        // Bot 加入群組 or 群組訊息 → 背景記錄 groupId
+        // Bot 加入群組 or 群組訊息 → 記錄 groupId
         if (event.type === 'join' || event.type === 'message') {
-          bgTasks.push(processGroupEvent(groupId))
+          await processGroupEvent(groupId)
         }
 
         // 檔案訊息 → 檢查是否為保險 PDF
         if (event.type === 'message' && event.message?.type === 'file') {
-          bgTasks.push(processInsurancePDF(event))
+          await processInsurancePDF(event)
         }
       }
-    }
-
-    // 用 waitUntil 讓背景任務在回應後繼續執行（Vercel Edge/Serverless 支援）
-    if (bgTasks.length > 0) {
-      // Vercel serverless: 直接 await，但因為 LINE verify 用空 events，不影響
-      // 真實 event: 最多幾秒，Vercel function timeout 10s 足夠
-      Promise.allSettled(bgTasks).catch(() => {})
     }
 
     return NextResponse.json({ status: 'ok' })
