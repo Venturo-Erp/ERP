@@ -74,7 +74,7 @@ export function withWorkspaceId<T extends Record<string, unknown>>(
 // 跨 Workspace 設定（Super Admin 專用）
 // ============================================
 
-const CROSS_WORKSPACE_KEY = 'super_admin_cross_workspace_enabled'
+const CROSS_WORKSPACE_KEY = 'admin_cross_workspace_enabled'
 
 /**
  * 取得跨 workspace 模式狀態
@@ -100,7 +100,7 @@ export function setCrossWorkspaceEnabled(enabled: boolean): void {
 
 /**
  * 檢查是否應該跨 workspace 查詢
- * 只有 super_admin 且明確開啟跨 workspace 模式才返回 true
+ * 只有 admin 且明確開啟跨 workspace 模式才返回 true
  */
 export function shouldCrossWorkspace(isAdmin: boolean): boolean {
   return isAdmin && getCrossWorkspaceEnabled()

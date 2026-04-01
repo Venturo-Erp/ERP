@@ -12,7 +12,7 @@ import {
 describe('ROLES', () => {
   it('has all expected roles', () => {
     const roles: UserRole[] = [
-      'super_admin',
+      'admin',
       'admin',
       'tour_leader',
       'sales',
@@ -25,8 +25,8 @@ describe('ROLES', () => {
       expect(ROLES[r]).toBeDefined()
     }
   })
-  it('super_admin has wildcard permission', () => {
-    expect(ROLES.super_admin.permissions).toContain('*')
+  it('admin has wildcard permission', () => {
+    expect(ROLES.admin.permissions).toContain('*')
   })
   it('staff has minimal permissions', () => {
     expect(ROLES.staff.permissions).toContain('calendar')
@@ -47,8 +47,8 @@ describe('getRoleConfig', () => {
 })
 
 describe('hasPermission', () => {
-  it('super_admin has any permission', () => {
-    expect(hasPermission('super_admin', [], 'anything')).toBe(true)
+  it('admin has any permission', () => {
+    expect(hasPermission('admin', [], 'anything')).toBe(true)
   })
   it('admin has tours permission', () => {
     expect(hasPermission('admin', [], 'tours')).toBe(true)
@@ -74,8 +74,8 @@ describe('canManageWorkspace', () => {
   it('admin can manage', () => {
     expect(canManageWorkspace('admin')).toBe(true)
   })
-  it('super_admin can manage', () => {
-    expect(canManageWorkspace('super_admin')).toBe(true)
+  it('admin can manage', () => {
+    expect(canManageWorkspace('admin')).toBe(true)
   })
   it('staff cannot manage', () => {
     expect(canManageWorkspace('staff')).toBe(false)
@@ -86,8 +86,8 @@ describe('canManageWorkspace', () => {
 })
 
 describe('canCrossWorkspace', () => {
-  it('super_admin cannot cross (per config)', () => {
-    expect(canCrossWorkspace('super_admin')).toBe(false)
+  it('admin cannot cross (per config)', () => {
+    expect(canCrossWorkspace('admin')).toBe(false)
   })
   it('admin cannot cross', () => {
     expect(canCrossWorkspace('admin')).toBe(false)

@@ -21,7 +21,7 @@ export interface PermissionConfig {
  */
 export const SYSTEM_PERMISSIONS: PermissionConfig[] = [
   {
-    id: 'super_admin',
+    id: 'admin',
     label: '超級管理員',
     category: '全部',
     routes: ['*'],
@@ -113,7 +113,7 @@ export function hasPermissionForRoute(
   if (!userPermissions || userPermissions.length === 0) return false
   
   // Super admin 或 admin 有所有權限
-  if (userPermissions.includes('super_admin') || userPermissions.includes('admin') || userPermissions.includes('*')) {
+  if (userPermissions.includes('admin') || userPermissions.includes('admin') || userPermissions.includes('*')) {
     return true
   }
 

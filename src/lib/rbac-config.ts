@@ -8,7 +8,6 @@
  */
 
 export type UserRole =
-  | 'super_admin' // @deprecated 已棄用，保留向下相容
   | 'admin' // 管理員（workspace 內）
   | 'tour_leader' // 領隊
   | 'sales' // 業務
@@ -32,17 +31,6 @@ export interface RoleConfig {
  * 角色定義與預設權限
  */
 export const ROLES: Record<UserRole, RoleConfig> = {
-  // @deprecated 已棄用，等同 admin。保留向下相容
-  super_admin: {
-    id: 'super_admin',
-    label: '管理員',
-    description: '等同管理員（已棄用）',
-    color: 'text-morandi-red bg-morandi-red/10 border-morandi-red/20',
-    permissions: ['*'],
-    canManageWorkspace: true,
-    canCrossWorkspace: false,
-  },
-
   admin: {
     id: 'admin',
     label: '管理員',
@@ -207,7 +195,7 @@ export function hasPermission(
   const roleConfig = getRoleConfig(userRole)
   if (!roleConfig) return false
 
-  // super_admin 和 admin 有 '*' 萬用權限
+  // admin 和 admin 有 '*' 萬用權限
   if (roleConfig.permissions.includes('*')) return true
 
   // 檢查角色預設權限
