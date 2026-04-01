@@ -44,7 +44,32 @@ export function useTourItineraryItemsByTour(tour_id: string | null) {
         .order('sort_order', { ascending: true })
         .limit(500)
       if (error) throw error
-      return data as TourItineraryItem[]
+      
+      // 收集需要查詢的 attraction ids
+      const attractionIds = (data || [])
+        .filter(item => item.resource_type === 'attraction' && item.resource_id && !item.description)
+        .map(item => item.resource_id as string)
+      
+      // 批次查詢景點描述
+      let attractionMap = new Map<string, string>()
+      if (attractionIds.length > 0) {
+        const { data: attractions } = await supabase
+          .from('attractions')
+          .select('id, description')
+          .in('id', attractionIds)
+        
+        if (attractions) {
+          for (const attr of attractions) {
+            if (attr.description) attractionMap.set(attr.id, attr.description)
+          }
+        }
+      }
+      
+      // 把景點描述 merge 進來
+      return (data || []).map(item => ({
+        ...item,
+        description: item.description || (item.resource_id ? attractionMap.get(item.resource_id) : null) || null,
+      })) as TourItineraryItem[]
     }
   )
 
@@ -70,7 +95,32 @@ export function useTourItineraryItemsByItinerary(itinerary_id: string | null) {
         .order('sort_order', { ascending: true })
         .limit(500)
       if (error) throw error
-      return data as TourItineraryItem[]
+      
+      // 收集需要查詢的 attraction ids
+      const attractionIds = (data || [])
+        .filter(item => item.resource_type === 'attraction' && item.resource_id && !item.description)
+        .map(item => item.resource_id as string)
+      
+      // 批次查詢景點描述
+      let attractionMap = new Map<string, string>()
+      if (attractionIds.length > 0) {
+        const { data: attractions } = await supabase
+          .from('attractions')
+          .select('id, description')
+          .in('id', attractionIds)
+        
+        if (attractions) {
+          for (const attr of attractions) {
+            if (attr.description) attractionMap.set(attr.id, attr.description)
+          }
+        }
+      }
+      
+      // 把景點描述 merge 進來
+      return (data || []).map(item => ({
+        ...item,
+        description: item.description || (item.resource_id ? attractionMap.get(item.resource_id) : null) || null,
+      })) as TourItineraryItem[]
     }
   )
 
