@@ -1,8 +1,8 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { Tour } from '@/stores/types'
-import { DollarSign, Plus } from 'lucide-react'
+import { DollarSign, Plus, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTourPayments } from '../hooks/useTourPayments'
 import { PaymentSummary } from './PaymentSummary'
@@ -10,6 +10,9 @@ import { PaymentRow } from './PaymentRow'
 import { AddPaymentDialog } from './AddPaymentDialog'
 import { InvoiceDialog } from './InvoiceDialog'
 import { COMP_TOURS_LABELS } from '../constants/labels'
+import { useReceipts, useOrdersSlim } from '@/data'
+import { formatCurrency } from '@/lib/utils/format-currency'
+import { supabase } from '@/lib/supabase/client'
 
 interface TourPaymentsProps {
   tour: Tour
@@ -98,74 +101,8 @@ export const TourPayments = React.memo(function TourPayments({
         </div>
       )}
 
-      {/* 收款紀錄表格 */}
-      <div className="border border-border rounded-lg overflow-hidden bg-card">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              {/* 區塊標題行 */}
-              <tr className="bg-morandi-container/50 border-b border-border/60">
-                <th
-                  colSpan={8}
-                  className="text-left py-2 px-4 text-sm font-medium text-morandi-primary"
-                >
-                  {COMP_TOURS_LABELS.LABEL_8600}
-                </th>
-              </tr>
-              {/* 欄位標題行 */}
-              <tr className="bg-morandi-container/30">
-                <th className="text-left py-2.5 px-4 text-xs font-medium text-morandi-secondary">
-                  {COMP_TOURS_LABELS.日期}
-                </th>
-                <th className="text-left py-2.5 px-4 text-xs font-medium text-morandi-secondary">
-                  {COMP_TOURS_LABELS.TYPE}
-                </th>
-                <th className="text-left py-2.5 px-4 text-xs font-medium text-morandi-secondary">
-                  {COMP_TOURS_LABELS.AMOUNT}
-                </th>
-                <th className="text-left py-2.5 px-4 text-xs font-medium text-morandi-secondary">
-                  {COMP_TOURS_LABELS.LABEL_5591}
-                </th>
-                <th className="text-left py-2.5 px-4 text-xs font-medium text-morandi-secondary">
-                  {COMP_TOURS_LABELS.LABEL_7778}
-                </th>
-                <th className="text-left py-2.5 px-4 text-xs font-medium text-morandi-secondary">
-                  {COMP_TOURS_LABELS.訂單}
-                </th>
-                <th className="text-left py-2.5 px-4 text-xs font-medium text-morandi-secondary">
-                  {COMP_TOURS_LABELS.STATUS}
-                </th>
-                <th className="text-center py-2.5 px-4 text-xs font-medium text-morandi-secondary">
-                  {COMP_TOURS_LABELS.ACTIONS}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {tourPayments.length > 0 ? (
-                tourPayments.map(payment => {
-                  const relatedOrder = tourOrders.find(order => order.id === payment.order_id)
-                  return (
-                    <PaymentRow
-                      key={payment.id}
-                      payment={payment}
-                      relatedOrder={relatedOrder}
-                      onOpenInvoice={openInvoiceDialog}
-                    />
-                  )
-                })
-              ) : (
-                <tr>
-                  <td colSpan={8} className="py-12 text-center text-morandi-secondary">
-                    <DollarSign size={24} className="mx-auto mb-4 opacity-50" />
-                    <p>{COMP_TOURS_LABELS.EMPTY_3087}</p>
-                    <p className="text-sm mt-1">{COMP_TOURS_LABELS.ADD_6738}</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      {/* 收款總覽 */}
+      <ReceiptOverviewTable tour={tour} />
 
       {/* 新增收款對話框 */}
       <AddPaymentDialog
@@ -205,3 +142,107 @@ export const TourPayments = React.memo(function TourPayments({
     </div>
   )
 })
+
+// 收款總覽表格（與結案頁相同版型）
+function ReceiptOverviewTable({ tour }: { tour: Tour }) {
+  const { items: allReceipts } = useReceipts()
+  const { items: allOrders } = useOrdersSlim()
+
+  const [paymentMethodMap, setPaymentMethodMap] = useState<Record<string, string>>({})
+  useEffect(() => {
+    supabase.from('payment_methods').select('id,name').then(({ data }) => {
+      if (data) {
+        const map: Record<string, string> = {}
+        for (const pm of data) map[pm.id] = pm.name
+        setPaymentMethodMap(map)
+      }
+    })
+  }, [])
+
+  const orderIds = useMemo(() => new Set((allOrders ?? []).filter(o => o.tour_id === tour.id).map(o => o.id)), [allOrders, tour.id])
+
+  const receipts = useMemo(
+    () => (allReceipts ?? [])
+      .filter(r => !r.deleted_at && (r.tour_id === tour.id || (r.order_id && orderIds.has(r.order_id))))
+      .filter(r => r.status === '1')
+      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()),
+    [allReceipts, tour.id, orderIds]
+  )
+
+  const PAYMENT_METHOD_LABELS: Record<string, string> = {
+    transfer: '匯款', cash: '現金', card: '刷卡', check: '支票', linkpay: 'LinkPay',
+  }
+
+  const formatDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return '-'
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
+  }
+
+  return (
+    <div className="border border-border rounded-lg overflow-x-auto bg-card">
+      <div className="px-4 py-2 bg-morandi-green/10 flex items-center gap-2">
+        <TrendingUp className="w-4 h-4 text-morandi-green" />
+        <span className="text-sm font-medium text-morandi-green">收款總覽 ({receipts.length})</span>
+      </div>
+      <table className="w-full text-sm table-fixed" style={{ minWidth: 900 }}>
+        <colgroup>
+          <col style={{ width: '13%' }} />
+          <col style={{ width: '7%' }} />
+          <col style={{ width: '8%' }} />
+          <col style={{ width: '10%' }} />
+          <col style={{ width: '20%' }} />
+          <col style={{ width: '8%' }} />
+          <col style={{ width: '5%' }} />
+          <col style={{ width: '8%' }} />
+          <col style={{ width: '7%' }} />
+          <col style={{ width: '8%' }} />
+        </colgroup>
+        <thead>
+          <tr className="border-b border-border text-xs text-morandi-secondary">
+            <th className="px-4 py-2 text-left font-medium">單號</th>
+            <th className="px-4 py-2 text-left font-medium">收款日期</th>
+            <th className="px-4 py-2 text-left font-medium">收款方式</th>
+            <th className="px-4 py-2 text-left font-medium">收款明細</th>
+            <th className="px-4 py-2 text-left font-medium" colSpan={4}>備註</th>
+            <th className="px-4 py-2 text-left font-medium">狀態</th>
+            <th className="px-4 py-2 text-right font-medium">金額</th>
+          </tr>
+        </thead>
+        <tbody>
+          {receipts.length > 0 ? receipts.map(r => {
+            const receiptStatus = r.status === '1'
+              ? { label: '已確認', style: 'bg-morandi-green/20 text-morandi-green' }
+              : { label: '待確認', style: 'bg-morandi-secondary/20 text-morandi-secondary' }
+            return (
+              <tr key={r.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
+                <td className="px-4 py-2 font-medium text-morandi-primary">{r.receipt_number || '-'}</td>
+                <td className="px-4 py-2 text-morandi-secondary">{formatDate(r.receipt_date)}</td>
+                <td className="px-4 py-2 text-morandi-secondary">
+                  {(r.payment_method_id && paymentMethodMap[r.payment_method_id]) || PAYMENT_METHOD_LABELS[r.payment_method || ''] || r.payment_method || '-'}
+                </td>
+                <td className="px-4 py-2 text-morandi-secondary">{r.receipt_account || r.payment_name || '-'}</td>
+                <td className="px-4 py-2 text-morandi-secondary" colSpan={4}>{r.notes || '-'}</td>
+                <td className="px-4 py-2">
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${receiptStatus.style}`}>
+                    {receiptStatus.label}
+                  </span>
+                </td>
+                <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-green font-medium">
+                  +{formatCurrency(Number(r.actual_amount) || Number(r.receipt_amount) || 0)}
+                </td>
+              </tr>
+            )
+          }) : (
+            <tr>
+              <td colSpan={10} className="py-12 text-center text-morandi-secondary">
+                <DollarSign size={24} className="mx-auto mb-4 opacity-50" />
+                <p>尚無收款紀錄</p>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+}

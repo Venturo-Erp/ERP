@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { logger } from '@/lib/utils/logger'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,7 +33,8 @@ interface PaymentRequestWithItems {
   items?: PaymentRequestItem[]
   [key: string]: unknown
 }
-import { Receipt, Plus, Truck, Hotel, Utensils, MapPin, X } from 'lucide-react'
+import { Receipt, Plus, Truck, Hotel, Utensils, MapPin, X, TrendingDown } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils/format-currency'
 import { DateCell, CurrencyCell } from '@/components/table-cells'
 import { useToast } from '@/components/ui/use-toast'
 import { generateUUID } from '@/lib/utils/uuid'
@@ -320,87 +321,8 @@ export const TourCosts = React.memo(function TourCosts({
         </div>
       )}
 
-      {/* 成本列表 - 直接表格 */}
-      <div className="border border-border rounded-lg overflow-hidden bg-card">
-        {/* 區塊標題行 */}
-        <div className="bg-morandi-container/50 border-b border-border/60 px-4 py-2">
-          <span className="text-sm font-medium text-morandi-primary">
-            {COMP_TOURS_LABELS.成本支出}
-          </span>
-        </div>
-        {/* 欄位標題行 */}
-        <div className="grid grid-cols-12 gap-4 px-4 py-3 bg-morandi-container/30 text-xs font-medium text-morandi-secondary">
-          <div className="col-span-2">{COMP_TOURS_LABELS.日期}</div>
-          <div className="col-span-2">{COMP_TOURS_LABELS.金額}</div>
-          <div className="col-span-2">{COMP_TOURS_LABELS.類別}</div>
-          <div className="col-span-2">{COMP_TOURS_LABELS.說明}</div>
-          <div className="col-span-2">{COMP_TOURS_LABELS.供應商}</div>
-          <div className="col-span-1">{COMP_TOURS_LABELS.收據}</div>
-          <div className="col-span-1">{COMP_TOURS_LABELS.狀態}</div>
-        </div>
-
-        {/* 成本項目 */}
-        <div className="divide-y divide-border">
-          {costPayments.map(cost => {
-            const Icon = getCategoryIcon(cost.category || '')
-            const displayCategory = getCategoryDisplayName(cost.category || '')
-            const relatedOrder = tourOrders.find(order => order.id === cost.order_id)
-
-            return (
-              <div
-                key={cost.id}
-                className="grid grid-cols-12 gap-4 px-4 py-3 hover:bg-morandi-container/20"
-              >
-                <div className="col-span-2">
-                  <DateCell
-                    date={cost.created_at}
-                    showIcon
-                    className="text-sm text-morandi-primary"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <CurrencyCell amount={cost.amount} className="font-medium text-morandi-red" />
-                </div>
-                <div className="col-span-2">
-                  <div className="flex items-center text-sm text-morandi-primary">
-                    <Icon size={14} className="mr-1 text-morandi-gold" />
-                    {displayCategory}
-                  </div>
-                </div>
-                <div className="col-span-2">
-                  <div className="text-sm text-morandi-primary">{cost.description}</div>
-                </div>
-                <div className="col-span-2">
-                  <div className="text-sm text-morandi-primary">
-                    {cost.vendor || relatedOrder?.order_number || '-'}
-                  </div>
-                </div>
-                <div className="col-span-1">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getReceiptBadge(COMP_TOURS_LABELS.待上傳)}`}
-                  >
-                    {COMP_TOURS_LABELS.待上傳}
-                  </span>
-                </div>
-                <div className="col-span-1">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusBadge(cost.status)}`}
-                  >
-                    {getStatusLabel(cost.status)}
-                  </span>
-                </div>
-              </div>
-            )
-          })}
-
-          {costPayments.length === 0 && (
-            <div className="text-center py-12 text-morandi-secondary">
-              <Receipt size={24} className="mx-auto mb-4 opacity-50" />
-              <p>{COMP_TOURS_LABELS.尚無成本支出記錄}</p>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* 請款總覽 */}
+      <PaymentRequestOverviewTable tour={tour} />
 
       {/* 新增成本對話框 */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -494,3 +416,127 @@ export const TourCosts = React.memo(function TourCosts({
     </div>
   )
 })
+
+// 請款總覽表格（與結案頁相同版型）
+function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
+  const { items: allPaymentRequests } = usePaymentRequests()
+
+  const prList = useMemo(
+    () => (allPaymentRequests ?? [])
+      .filter(pr => pr.tour_id === tour.id)
+      .filter(pr => {
+        const rt = (pr.request_type || '').toLowerCase()
+        return !rt.includes('bonus') && !rt.includes('獎金')
+      })
+      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()),
+    [allPaymentRequests, tour.id]
+  )
+
+  const formatDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return '-'
+    const d = new Date(dateStr)
+    return d.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
+  }
+
+  const statusMap: Record<string, { label: string; style: string }> = {
+    pending: { label: '待處理', style: 'bg-morandi-secondary/20 text-morandi-secondary' },
+    confirmed: { label: '已確認', style: 'bg-morandi-gold/20 text-morandi-gold' },
+    billed: { label: '已出帳', style: 'bg-morandi-green/20 text-morandi-green' },
+    approved: { label: '已核准', style: 'bg-morandi-gold/20 text-morandi-gold' },
+    paid: { label: '已付', style: 'bg-morandi-green/20 text-morandi-green' },
+  }
+
+  return (
+    <div className="border border-border rounded-lg overflow-x-auto bg-card">
+      <div className="px-4 py-2 bg-morandi-red/10 flex items-center gap-2">
+        <TrendingDown className="w-4 h-4 text-morandi-red" />
+        <span className="text-sm font-medium text-morandi-red">請款總覽 ({prList.length})</span>
+      </div>
+      <table className="w-full text-sm table-fixed" style={{ minWidth: 900 }}>
+        <colgroup>
+          <col style={{ width: '13%' }} />
+          <col style={{ width: '7%' }} />
+          <col style={{ width: '8%' }} />
+          <col style={{ width: '10%' }} />
+          <col style={{ width: '20%' }} />
+          <col style={{ width: '8%' }} />
+          <col style={{ width: '5%' }} />
+          <col style={{ width: '8%' }} />
+          <col style={{ width: '7%' }} />
+          <col style={{ width: '8%' }} />
+        </colgroup>
+        <thead>
+          <tr className="border-b border-border text-xs text-morandi-secondary">
+            <th className="px-4 py-2 text-left font-medium">單號</th>
+            <th className="px-4 py-2 text-left font-medium">請款日期</th>
+            <th className="px-4 py-2 text-left font-medium">類別</th>
+            <th className="px-4 py-2 text-left font-medium">供應商</th>
+            <th className="px-4 py-2 text-left font-medium">項目描述</th>
+            <th className="px-4 py-2 text-right font-medium">單價</th>
+            <th className="px-4 py-2 text-right font-medium">數量</th>
+            <th className="px-4 py-2 text-right font-medium">小計</th>
+            <th className="px-4 py-2 text-left font-medium">狀態</th>
+            <th className="px-4 py-2 text-right font-medium">金額</th>
+          </tr>
+        </thead>
+        <tbody>
+          {prList.length > 0 ? prList.map(pr => {
+            const items = (pr as unknown as { items?: Array<{ id?: string; category?: string; supplier_name?: string; description?: string; unitprice?: number; quantity?: number; subtotal?: number }> }).items ?? []
+            const statusInfo = statusMap[pr.status || ''] ?? { label: pr.status || '待處理', style: 'bg-morandi-secondary/20 text-morandi-secondary' }
+
+            if (items.length === 0) {
+              return (
+                <tr key={pr.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
+                  <td className="px-4 py-2 font-medium text-morandi-primary">{pr.code || '-'}</td>
+                  <td className="px-4 py-2 text-morandi-secondary">{formatDate(pr.request_date)}</td>
+                  <td className="px-4 py-2 text-morandi-secondary">{pr.request_type || '-'}</td>
+                  <td className="px-4 py-2 text-morandi-secondary">{pr.supplier_name || '-'}</td>
+                  <td className="px-4 py-2 text-morandi-secondary">{pr.notes || '-'}</td>
+                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
+                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
+                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
+                  <td className="px-4 py-2">
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}>{statusInfo.label}</span>
+                  </td>
+                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">-{formatCurrency(Number(pr.amount) || 0)}</td>
+                </tr>
+              )
+            }
+
+            return items.map((item, idx) => (
+              <tr key={`${pr.id}-${item.id || idx}`} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
+                {idx === 0 ? (
+                  <>
+                    <td className="px-4 py-2 font-medium text-morandi-primary" rowSpan={items.length}>{pr.code || '-'}</td>
+                    <td className="px-4 py-2 text-morandi-secondary" rowSpan={items.length}>{formatDate(pr.request_date)}</td>
+                  </>
+                ) : null}
+                <td className="px-4 py-2 text-morandi-secondary">{item.category || '-'}</td>
+                <td className="px-4 py-2 text-morandi-secondary">{item.supplier_name || '-'}</td>
+                <td className="px-4 py-2 text-morandi-secondary">{item.description || '-'}</td>
+                <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{formatCurrency(item.unitprice ?? 0)}</td>
+                <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{item.quantity ?? '-'}</td>
+                <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{formatCurrency(item.subtotal ?? 0)}</td>
+                {idx === 0 ? (
+                  <>
+                    <td className="px-4 py-2" rowSpan={items.length}>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}>{statusInfo.label}</span>
+                    </td>
+                    <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium" rowSpan={items.length}>-{formatCurrency(Number(pr.amount) || 0)}</td>
+                  </>
+                ) : null}
+              </tr>
+            ))
+          }) : (
+            <tr>
+              <td colSpan={10} className="py-12 text-center text-morandi-secondary">
+                <Receipt size={24} className="mx-auto mb-4 opacity-50" />
+                <p>尚無請款紀錄</p>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  )
+}

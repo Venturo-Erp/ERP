@@ -679,7 +679,7 @@ export function AddReceiptDialog({
                           收款方式
                         </th>
                         <th className="text-left py-2.5 px-3 border-b border-r border-border" style={{ width: '150px' }}>
-                          交易日期
+                          收款日期
                         </th>
                         <th className="text-left py-2.5 px-3 border-b border-r border-border" style={{ width: '180px' }}>
                           收款項目
