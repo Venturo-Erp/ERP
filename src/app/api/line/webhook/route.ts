@@ -409,13 +409,16 @@ export async function POST(req: NextRequest) {
 
       // 私人訊息 → 檢查綁定指令（客戶或員工）或 AI 客服
       if (source.type === 'user' && event.type === 'message' && event.message?.type === 'text') {
-        const isCustomerBinding = await processCustomerBinding(event)
-        const isEmployeeBinding = await processEmployeeBinding(event)
-        
-        // 如果不是綁定指令，就用 AI 客服回覆
-        if (!isCustomerBinding && !isEmployeeBinding) {
-          bgTasks.push(handleAIMessage(event))
-        }
+        // 背景處理（檢查是否為綁定指令，否則用 AI 客服）
+        bgTasks.push((async () => {
+          const isCustomerBinding = await processCustomerBinding(event)
+          const isEmployeeBinding = await processEmployeeBinding(event)
+          
+          // 如果不是綁定指令，就用 AI 客服回覆
+          if (!isCustomerBinding && !isEmployeeBinding) {
+            await handleAIMessage(event)
+          }
+        })())
       }
 
       if (source.type === 'group') {
