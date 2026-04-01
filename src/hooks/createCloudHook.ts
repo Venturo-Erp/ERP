@@ -36,7 +36,7 @@ function getCurrentUserContext(): { workspaceId: string | null; userRole: UserRo
       const user = parsed?.state?.user
       const isAdmin = parsed?.state?.isAdmin
       // 新系統：使用 isAdmin 判斷
-      const userRole = isAdmin ? 'super_admin' : 'staff'
+      const userRole = isAdmin ? 'admin' : 'staff'
       return {
         workspaceId: user?.workspace_id || null,
         userRole: userRole as UserRole,
@@ -196,10 +196,10 @@ export function createCloudHook<T extends BaseEntity>(
     // 🔒 Workspace 隔離：根據當前使用者過濾資料
     if (isWorkspaceScoped) {
       const { workspaceId, userRole } = getCurrentUserContext()
-      const isSuperAdmin = canCrossWorkspace(userRole)
+      const isAdmin = canCrossWorkspace(userRole)
 
       // 只有 Super Admin 且明確開啟跨 workspace 模式才不過濾
-      if (!shouldCrossWorkspace(isSuperAdmin) && workspaceId) {
+      if (!shouldCrossWorkspace(isAdmin) && workspaceId) {
         // 向後相容：同時查詢符合當前 workspace 或 workspace_id 為 NULL 的舊資料
         query = query.or(`workspace_id.eq.${workspaceId},workspace_id.is.null`)
       }

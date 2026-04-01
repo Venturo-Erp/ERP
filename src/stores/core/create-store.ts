@@ -68,7 +68,7 @@ function getCurrentUserContext(): { workspaceId: string | null; userRole: UserRo
       const isAdmin = parsed?.state?.isAdmin
       // 新系統：使用 permissions 判斷管理員
       const userRole = isAdmin 
-        ? 'super_admin' as UserRole
+        ? 'admin' as UserRole
         : ('staff' as UserRole)
       return {
         workspaceId: user?.workspace_id || null,
@@ -193,12 +193,12 @@ export function createStore<T extends BaseEntity>(
           // 🔒 Workspace 隔離：若啟用 workspaceScoped，自動過濾 workspace_id
           if (config.workspaceScoped) {
             const { workspaceId, userRole } = getCurrentUserContext()
-            const isSuperAdmin = canCrossWorkspace(userRole)
+            const isAdmin = canCrossWorkspace(userRole)
             
             
 
             // 只有 Super Admin 且明確開啟跨 workspace 模式才不過濾
-            if (shouldCrossWorkspace(isSuperAdmin)) {
+            if (shouldCrossWorkspace(isAdmin)) {
               // 跨 workspace 模式：不加過濾
             } else if (workspaceId) {
               // 驗證 workspaceId 格式（防止 SQL injection）

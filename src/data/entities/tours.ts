@@ -59,7 +59,7 @@ export function useToursForCalendar(dateRange: DateRange | null): ListResult<Tou
 
   const isReady = hasHydrated && isAuthenticated && !!user?.id
   // 新系統：使用 isAdmin
-  const userRole = isAdmin ? ('super_admin' as UserRole) : ('staff' as UserRole)
+  const userRole = isAdmin ? ('admin' as UserRole) : ('staff' as UserRole)
   const workspaceId = user?.workspace_id
 
   // SWR key 包含日期範圍

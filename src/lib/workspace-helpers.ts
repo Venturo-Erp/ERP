@@ -167,18 +167,7 @@ export function getCurrentWorkspace() {
 
 /**
  * 檢查當前使用者是否為管理員
- * 新系統：直接使用 store.isAdmin
- *
- * @returns boolean
- */
-export function isSuperAdmin(): boolean {
-  const { isAdmin } = useAuthStore.getState()
-  return isAdmin
-}
-
-/**
- * 檢查當前使用者是否為 admin（包含 super_admin）
- * 新系統：直接使用 store.isAdmin
+ * 直接使用 store.isAdmin
  *
  * @returns boolean
  */

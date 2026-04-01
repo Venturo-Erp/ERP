@@ -54,8 +54,8 @@ export default function HRPage() {
   const { confirm, confirmDialogProps } = useConfirmDialog()
   const [rolesData, setRolesData] = useState<Role[]>([])
 
-  const isSuperAdmin = useMemo(() => {
-    return currentUser?.roles?.includes('super_admin') || currentUser?.roles?.includes('admin')
+  const isAdmin = useMemo(() => {
+    return currentUser?.roles?.includes('admin') || currentUser?.roles?.includes('admin')
   }, [currentUser?.roles])
 
   useEffect(() => {
@@ -88,12 +88,12 @@ export default function HRPage() {
         case 'terminated':
           return !isBot && isTerminated
         case 'bot':
-          return isBot && isSuperAdmin
+          return isBot && isAdmin
         default:
           return !isBot && !isTerminated
       }
     })
-  }, [users, activeTab, isSuperAdmin])
+  }, [users, activeTab, isAdmin])
 
   const tabOptions = useMemo(() => {
     const baseTabs: { value: EmployeeTab; label: string; count: number }[] = [
@@ -108,7 +108,7 @@ export default function HRPage() {
         count: users.filter(e => e.employee_type !== 'bot' && e.status === 'terminated').length,
       },
     ]
-    if (isSuperAdmin) {
+    if (isAdmin) {
       baseTabs.push({
         value: 'bot',
         label: LABELS.TAB_BOT,
@@ -116,7 +116,7 @@ export default function HRPage() {
       })
     }
     return baseTabs
-  }, [users, isSuperAdmin])
+  }, [users, isAdmin])
 
   const getStatusLabel = (status: Employee['status']) => {
     const statusMap = {

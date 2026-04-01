@@ -11,12 +11,12 @@ export function WorkspaceSwitcher() {
   const { user } = useAuthStore()
   const [currentWorkspace, setCurrentWorkspace] = useState<string | null>(null)
 
-  // 檢查是否為 super_admin
-  const isSuperAdmin = user?.permissions?.includes('*') || user?.permissions?.includes('super_admin') || user?.permissions?.includes('admin')
+  // 檢查是否為 admin
+  const isAdmin = user?.permissions?.includes('*') || user?.permissions?.includes('*') || user?.permissions?.includes('admin')
 
   // ⚠️ useEffect 必須在 return 之前（React Hooks 規則）
   useEffect(() => {
-    if (!isSuperAdmin) return
+    if (!isAdmin) return
 
     // 載入 workspaces 資料
     loadWorkspaces()
@@ -24,10 +24,10 @@ export function WorkspaceSwitcher() {
     // 從 localStorage 讀取當前選擇的 workspace
     const saved = localStorage.getItem('current_workspace_filter')
     setCurrentWorkspace(saved)
-  }, [isSuperAdmin])
+  }, [isAdmin])
 
-  // 如果不是 super_admin，不顯示切換器
-  if (!isSuperAdmin) {
+  // 如果不是 admin，不顯示切換器
+  if (!isAdmin) {
     return null
   }
 

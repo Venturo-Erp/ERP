@@ -102,6 +102,6 @@ export function setCrossWorkspaceEnabled(enabled: boolean): void {
  * 檢查是否應該跨 workspace 查詢
  * 只有 super_admin 且明確開啟跨 workspace 模式才返回 true
  */
-export function shouldCrossWorkspace(isSuperAdmin: boolean): boolean {
-  return isSuperAdmin && getCrossWorkspaceEnabled()
+export function shouldCrossWorkspace(isAdmin: boolean): boolean {
+  return isAdmin && getCrossWorkspaceEnabled()
 }

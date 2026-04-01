@@ -1,6 +1,6 @@
 /**
  * Workspace 篩選工具
- * 用於 super_admin 切換查看特定 workspace 的資料
+ * 用於 admin 切換查看特定 workspace 的資料
  */
 
 import { canCrossWorkspace, type UserRole } from './rbac-config'

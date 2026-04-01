@@ -220,7 +220,6 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const preferredFeatures = user?.preferred_features || []
 
   // 新系統：使用 store.isAdmin
-  const isSuperAdmin = isAdmin
 
   // 關閉側邊欄時重置展開狀態
   useEffect(() => {

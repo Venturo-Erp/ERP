@@ -14,36 +14,33 @@ export const usePermissions = () => {
         canViewFinance: false,
         canManageFinance: false,
         isAdmin: false,
-        isSuperAdmin: false,
         isAccountant: false,
       }
     }
 
     const userPermissions = user.permissions || []
-    const isSuperAdmin = userPermissions.includes('super_admin')
-    const isAdmin = userPermissions.includes('admin') || isSuperAdmin
+    const isAdmin = userPermissions.includes('admin') || userPermissions.includes('*')
 
     return {
       canViewReceipts:
-        isSuperAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
+        isAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
       canCreateReceipts:
-        isSuperAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
+        isAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
       canEditReceipts:
-        isSuperAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
+        isAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
       canConfirmReceipts:
-        isSuperAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
+        isAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
       canViewFinance:
-        isSuperAdmin ||
+        isAdmin ||
         userPermissions.includes('finance') ||
         userPermissions.includes('accounting'),
-      canManageFinance: isSuperAdmin || userPermissions.includes('finance'),
+      canManageFinance: isAdmin || userPermissions.includes('finance'),
       // 資料庫編輯權限（景點、餐廳、飯店）
       canEditDatabase:
-        isSuperAdmin || userPermissions.includes('database') || userPermissions.includes('admin'),
+        isAdmin || userPermissions.includes('database') || userPermissions.includes('admin'),
       isAdmin,
-      isSuperAdmin,
       isAccountant:
-        isSuperAdmin ||
+        isAdmin ||
         userPermissions.includes('accounting') ||
         userPermissions.includes('finance'),
     }

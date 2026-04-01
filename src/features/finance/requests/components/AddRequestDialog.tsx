@@ -48,7 +48,7 @@ import {
 /**
  * 可以建立公司請款的角色
  */
-const COMPANY_PAYMENT_ROLES: UserRole[] = ['super_admin', 'admin', 'accountant']
+const COMPANY_PAYMENT_ROLES: UserRole[] = ['admin', 'admin', 'accountant']
 
 interface AddRequestDialogProps {
   open: boolean

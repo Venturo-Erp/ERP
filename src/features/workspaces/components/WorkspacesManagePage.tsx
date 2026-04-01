@@ -1,7 +1,7 @@
 'use client'
 /**
  * WorkspacesManagePage - 公司管理頁面
- * 僅限 super_admin 存取
+ * 僅限 admin 存取
  */
 
 import { useState, useEffect, useCallback } from 'react'

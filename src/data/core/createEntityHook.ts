@@ -137,7 +137,7 @@ function getCurrentUserContext(): {
       const user = parsed?.state?.user
       const isAdmin = parsed?.state?.isAdmin
       // 新系統：使用 isAdmin 判斷
-      const userRole = isAdmin ? 'super_admin' : 'staff'
+      const userRole = isAdmin ? 'admin' : 'staff'
       return {
         workspaceId: user?.workspace_id || null,
         userRole: userRole as UserRole,
@@ -195,7 +195,7 @@ export function createEntityHook<T extends BaseEntity>(
       isReady: hasHydrated && isAuthenticated && !!user?.id,
       hasHydrated,
       workspaceId: user?.workspace_id || null,
-      userRole: isAdmin ? ('super_admin' as UserRole) : ('staff' as UserRole),
+      userRole: isAdmin ? ('admin' as UserRole) : ('staff' as UserRole),
     }
   }
 
@@ -208,8 +208,8 @@ export function createEntityHook<T extends BaseEntity>(
     const { workspaceId, userRole } = getCurrentUserContext()
 
     // 只有 Super Admin 且明確開啟跨 workspace 模式才不過濾
-    const isSuperAdmin = canCrossWorkspace(userRole)
-    if (shouldCrossWorkspace(isSuperAdmin)) return null
+    const isAdmin = canCrossWorkspace(userRole)
+    if (shouldCrossWorkspace(isAdmin)) return null
 
     if (workspaceId) {
       // 向後相容：同時查詢符合當前 workspace 或 workspace_id 為 NULL 的舊資料

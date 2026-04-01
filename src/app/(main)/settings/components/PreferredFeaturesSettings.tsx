@@ -130,7 +130,7 @@ export function PreferredFeaturesSettings() {
       const userPermissions = user?.permissions || []
       const isAdmin =
         userPermissions.includes('admin') ||
-        userPermissions.includes('super_admin') ||
+        userPermissions.includes('*') ||
         userPermissions.includes('*')
       if (isAdmin) {
         setSelectedFeatures(AVAILABLE_FEATURES.map(f => f.id))
@@ -252,8 +252,8 @@ export function PreferredFeaturesSettings() {
   // 檢查使用者是否有該功能的權限（與側邊欄邏輯一致）
   const hasPermission = (featureId: string) => {
     const userPermissions = user?.permissions || []
-    // 1. 超級管理員（有 admin 或 super_admin）→ 全部權限
-    if (userPermissions.includes('admin') || userPermissions.includes('super_admin')) {
+    // 1. 超級管理員（有 admin 或 admin）→ 全部權限
+    if (userPermissions.includes('admin') || userPermissions.includes('*')) {
       return true
     }
     // 2. 萬用權限

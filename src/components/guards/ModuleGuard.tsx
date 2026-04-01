@@ -35,9 +35,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
   const { isRouteAvailable, loading, features } = useWorkspaceFeatures()
   const [checked, setChecked] = useState(false)
 
-  // 新系統：使用 isAdmin
   const { isAdmin } = useAuthStore()
-  const isSuperAdmin = isAdmin
 
   useEffect(() => {
     if (loading) return
@@ -55,7 +53,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
     }
 
     // Super Admin 跳過檢查
-    if (isSuperAdmin) {
+    if (isAdmin) {
       setChecked(true)
       return
     }
@@ -73,7 +71,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
     }
 
     setChecked(true)
-  }, [pathname, loading, isRouteAvailable, router, isSuperAdmin, features.length])
+  }, [pathname, loading, isRouteAvailable, router, isAdmin, features.length])
 
   if (loading || !checked) {
     return (

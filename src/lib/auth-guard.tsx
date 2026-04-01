@@ -156,7 +156,7 @@ export function AuthGuard({ children, requiredPermission }: AuthGuardProps) {
           permissions.includes('*') ||
           permissions.includes(requiredPermission) ||
           permissions.includes('admin') ||
-          permissions.includes('super_admin')
+          permissions.includes('admin')
 
         if (!hasPermission) {
           logger.warn(`用戶無權限訪問 ${pathname}（需要 ${requiredPermission}）`)
@@ -230,7 +230,6 @@ export function usePermissionCheck(requiredRoute?: string) {
   return {
     hasPermission,
     userPermissions: user?.permissions || [],
-    isAdmin: user?.permissions?.includes('*') || user?.permissions?.includes('admin') || user?.permissions?.includes('super_admin'),
-    isSuperAdmin: user?.permissions?.includes('*') || user?.permissions?.includes('super_admin'),
+    isAdmin: user?.permissions?.includes('*') || user?.permissions?.includes('admin'),
   }
 }

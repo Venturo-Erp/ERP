@@ -48,14 +48,13 @@ export function CreateChannelDialog({
   const { workspaces, loadWorkspaces } = useWorkspaceStore()
 
   // 新系統：使用 isAdmin
-  const isSuperAdmin = isAdmin
 
   // 載入工作空間資料（employees 由 SWR 自動載入）
   useEffect(() => {
-    if (isOpen && isSuperAdmin && workspaces.length === 0) {
+    if (isOpen && isAdmin && workspaces.length === 0) {
       loadWorkspaces()
     }
-  }, [isOpen, isSuperAdmin, workspaces.length, loadWorkspaces])
+  }, [isOpen, isAdmin, workspaces.length, loadWorkspaces])
 
   // 根據範圍顯示員工列表
   const displayEmployees =
@@ -164,7 +163,7 @@ export function CreateChannelDialog({
           </div>
 
           {/* 超級管理員專用：頻道範圍選擇 */}
-          {isSuperAdmin && onChannelScopeChange && (
+          {isAdmin && onChannelScopeChange && (
             <div>
               <label className="block text-sm font-medium text-morandi-primary mb-2">
                 {COMP_WORKSPACE_LABELS.LABEL_6196}

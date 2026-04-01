@@ -29,7 +29,7 @@ async function checkIsAdmin(employeeId: string): Promise<boolean> {
   if (error || !data) return false
 
   const roles = data.roles as string[] | null
-  return roles?.some(r => r === 'admin' || r === 'super_admin') ?? false
+  return roles?.some(r => r === 'admin') ?? false
 }
 
 export async function POST(request: NextRequest) {
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     // 權限檢查
     const { data: employee } = await supabaseAdmin
       .from('employees')
-      .select('roles, workspace_id')
+      .select('permissions, workspace_id')
       .eq('id', auth.data.employeeId)
       .single()
 
@@ -82,9 +82,8 @@ export async function POST(request: NextRequest) {
       return errorResponse('找不到員工資料', 403, ErrorCode.FORBIDDEN)
     }
 
-    const roles = employee.roles as string[] | null
-    const isSuperAdmin = roles?.includes('super_admin') ?? false
-    const isAdmin = roles?.includes('admin') ?? false
+    const permissions = employee.permissions as string[] | null
+    const isAdmin = permissions?.includes('*') || permissions?.includes('admin') || false
 
     // 查詢 workspace 取得 code
     const { data: currentWorkspace } = await supabaseAdmin
@@ -94,24 +93,25 @@ export async function POST(request: NextRequest) {
       .single()
 
     const currentUserWorkspaceCode = currentWorkspace?.code
+    const isCornerAdmin = isAdmin && currentUserWorkspaceCode === 'CORNER'
 
     logger.log(
-      `Current user: workspace=${currentUserWorkspaceCode || 'unknown'}, isSuperAdmin=${isSuperAdmin}, isAdmin=${isAdmin}`
+      `Current user: workspace=${currentUserWorkspaceCode || 'unknown'}, isAdmin=${isAdmin}, isCornerAdmin=${isCornerAdmin}`
     )
 
-    // 建立新租戶的第一個管理員：只有 CORNER 的 super_admin 可以
+    // 建立新租戶的第一個管理員：只有 CORNER 的 admin 可以
     if (isNewTenant) {
       logger.log(`Creating first admin for new tenant: ${workspace_code}`)
-      if (!isSuperAdmin || currentUserWorkspaceCode !== 'CORNER') {
+      if (!isCornerAdmin) {
         logger.error(
-          `Permission denied: isSuperAdmin=${isSuperAdmin}, workspace=${currentUserWorkspaceCode}`
+          `Permission denied: isCornerAdmin=${isCornerAdmin}, workspace=${currentUserWorkspaceCode}`
         )
-        return errorResponse('建立新租戶需要 CORNER 的 super_admin 權限', 403, ErrorCode.FORBIDDEN)
+        return errorResponse('建立新租戶需要 CORNER 的管理員權限', 403, ErrorCode.FORBIDDEN)
       }
     } else {
       // 一般建立員工：需要該 workspace 的管理員權限
       logger.log(`Creating employee for existing tenant: ${workspace_code}`)
-      if (!isSuperAdmin && !isAdmin) {
+      if (!isAdmin) {
         logger.error(`Permission denied: not admin`)
         return errorResponse('需要管理員權限', 403, ErrorCode.FORBIDDEN)
       }

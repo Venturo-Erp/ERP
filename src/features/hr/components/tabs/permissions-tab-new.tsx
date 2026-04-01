@@ -14,8 +14,7 @@ interface PermissionsTabProps {
 
 // 職位定義（簡化版）
 const POSITIONS = [
-  { id: 'super_admin', name: '超級管理員', description: '所有功能完整權限' },
-  { id: 'admin', name: '管理員', description: '管理功能，不含系統設定' },
+  { id: 'admin', name: '管理員', description: '所有功能完整權限' },
   { id: 'sales', name: '業務', description: '團務、客戶、報價' },
   { id: 'accountant', name: '會計', description: '財務、請款、收款' },
   { id: 'assistant', name: '助理', description: '基本功能' },
@@ -42,13 +41,9 @@ type AccessLevel = 'full' | 'read' | 'none'
 
 // 職位預設權限
 const POSITION_DEFAULTS: Record<PositionId, Record<FeatureCode, AccessLevel>> = {
-  super_admin: {
-    calendar: 'full', tours: 'full', orders: 'full', finance: 'full',
-    hr: 'full', database: 'full', itinerary: 'full', visas: 'full', settings: 'full',
-  },
   admin: {
     calendar: 'full', tours: 'full', orders: 'full', finance: 'full',
-    hr: 'full', database: 'full', itinerary: 'full', visas: 'full', settings: 'read',
+    hr: 'full', database: 'full', itinerary: 'full', visas: 'full', settings: 'full',
   },
   sales: {
     calendar: 'full', tours: 'full', orders: 'full', finance: 'read',
@@ -161,8 +156,7 @@ export const PermissionsTabNew = forwardRef<{ handleSave: () => void }, Permissi
       setIsSaving(true)
       try {
         const permissions = toPermissionsArray(features)
-        const roles = selectedPosition === 'super_admin' ? ['super_admin'] : 
-                      selectedPosition === 'admin' ? ['admin'] :
+        const roles = selectedPosition === 'admin' ? ['admin'] : 
                       selectedPosition === 'custom' ? [] : [selectedPosition]
 
         await updateUser(employee.id, {

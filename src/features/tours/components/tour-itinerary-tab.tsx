@@ -69,7 +69,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
 
   // 權限：是否可以編輯資料庫
   const canEditDatabase = currentUser?.permissions?.includes('*') ||
-    currentUser?.permissions?.includes('super_admin') || 
+    currentUser?.permissions?.includes('*') || 
     currentUser?.permissions?.includes('database') || 
     currentUser?.permissions?.includes('admin') || false
 

@@ -53,7 +53,7 @@ export default function CalendarPage() {
   const {
     filteredEvents,
     onDatesChange,
-    isSuperAdmin,
+    isAdmin,
     workspaces,
     selectedWorkspaceId,
     onWorkspaceFilterChange,
@@ -180,7 +180,7 @@ export default function CalendarPage() {
             </div>
 
             {/* 超級管理員專用：Workspace 篩選器 */}
-            {isSuperAdmin && workspaces && workspaces.length > 0 && (
+            {isAdmin && workspaces && workspaces.length > 0 && (
               <Select
                 value={selectedWorkspaceId || 'all'}
                 onValueChange={value => onWorkspaceFilterChange(value === 'all' ? null : value)}

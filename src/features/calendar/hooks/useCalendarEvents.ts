@@ -89,18 +89,17 @@ export function useCalendarEvents() {
   // Workspace 篩選狀態（只有管理員能用）
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null)
   const { isAdmin } = useAuthStore.getState()
-  const isSuperAdmin = isAdmin
 
   // 初始化時從 localStorage 讀取篩選狀態
   const workspaceInitRef = useRef(false)
   useEffect(() => {
-    if (isSuperAdmin && !workspaceInitRef.current) {
+    if (isAdmin && !workspaceInitRef.current) {
       workspaceInitRef.current = true
       const saved = localStorage.getItem('calendar_workspace_filter')
       setSelectedWorkspaceId(saved)
       loadWorkspaces()
     }
-  }, [isSuperAdmin, loadWorkspaces])
+  }, [isAdmin, loadWorkspaces])
 
   // 當 FullCalendar 視圖日期改變時更新日期範圍
   const handleDatesChange = useCallback((arg: DatesSetArg) => {
@@ -241,7 +240,7 @@ export function useCalendarEvents() {
       .filter(event => {
         if (event.visibility !== 'company') return false
         // 超級管理員且有選擇特定 workspace，則只顯示該 workspace 的事項
-        if (isSuperAdmin && selectedWorkspaceId) {
+        if (isAdmin && selectedWorkspaceId) {
           return (event as CalendarEvent).workspace_id === selectedWorkspaceId
         }
         return true
@@ -289,7 +288,7 @@ export function useCalendarEvents() {
           },
         } as FullCalendarEvent
       })
-  }, [calendarEvents, getEventColor, employees, user, isSuperAdmin, selectedWorkspaceId])
+  }, [calendarEvents, getEventColor, employees, user, isAdmin, selectedWorkspaceId])
 
   // 轉換客戶生日為日曆事件
   // 🔧 優化：移除 memberBirthdayEvents，因不再載入 members 資料
@@ -400,7 +399,7 @@ export function useCalendarEvents() {
     // 日期範圍變更處理（給 FullCalendar 的 datesSet 使用）
     onDatesChange: handleDatesChange,
     // Workspace 篩選相關（只有超級管理員可用）
-    isSuperAdmin,
+    isAdmin,
     workspaces,
     selectedWorkspaceId,
     onWorkspaceFilterChange: handleWorkspaceFilterChange,

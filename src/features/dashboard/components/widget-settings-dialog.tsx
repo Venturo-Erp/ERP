@@ -24,20 +24,19 @@ interface WidgetSettingsDialogProps {
 export function WidgetSettingsDialog({ activeWidgets, onToggleWidget }: WidgetSettingsDialogProps) {
   // 新系統：使用 isAdmin
   const { isAdmin } = useAuthStore()
-  const isSuperAdmin = isAdmin
 
   // 過濾可見的 widgets
   const visibleWidgets = useMemo(() => {
     return AVAILABLE_WIDGETS.filter(widget => {
       // 沒有權限限制的 widget 所有人都看得到
       if (!widget.requiredPermission) return true
-      // super_admin_only 只有超級管理員看得到
-      if (widget.requiredPermission === 'super_admin_only') {
-        return isSuperAdmin
+      // admin_only 只有超級管理員看得到
+      if (widget.requiredPermission === 'admin_only') {
+        return isAdmin
       }
       return true
     })
-  }, [isSuperAdmin])
+  }, [isAdmin])
 
   return (
     <Dialog>

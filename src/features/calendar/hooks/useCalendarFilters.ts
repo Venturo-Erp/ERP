@@ -32,18 +32,17 @@ export function useCalendarFilters(calendarEvents: CalendarEvent[], settings: Ca
   // Workspace 篩選狀態（只有管理員能用）
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null)
   const { isAdmin } = useAuthStore.getState()
-  const isSuperAdmin = isAdmin
 
   // 初始化時從 localStorage 讀取篩選狀態
   const workspaceInitRef = useRef(false)
   useEffect(() => {
-    if (isSuperAdmin && !workspaceInitRef.current) {
+    if (isAdmin && !workspaceInitRef.current) {
       workspaceInitRef.current = true
       const saved = localStorage.getItem('calendar_workspace_filter')
       setSelectedWorkspaceId(saved)
       loadWorkspaces()
     }
-  }, [isSuperAdmin, loadWorkspaces])
+  }, [isAdmin, loadWorkspaces])
 
   // 切換 workspace 篩選
   const handleWorkspaceFilterChange = useCallback((workspaceId: string | null) => {
@@ -68,12 +67,12 @@ export function useCalendarFilters(calendarEvents: CalendarEvent[], settings: Ca
     return calendarEvents.filter(event => {
       if (event.visibility !== 'company') return false
       // 超級管理員且有選擇特定 workspace，則只顯示該 workspace 的事項
-      if (isSuperAdmin && selectedWorkspaceId) {
+      if (isAdmin && selectedWorkspaceId) {
         return event.workspace_id === selectedWorkspaceId
       }
       return true
     })
-  }, [calendarEvents, isSuperAdmin, selectedWorkspaceId])
+  }, [calendarEvents, isAdmin, selectedWorkspaceId])
 
   // 根據 settings 篩選事件類型
   const filterBySettings = useCallback(
@@ -99,7 +98,7 @@ export function useCalendarFilters(calendarEvents: CalendarEvent[], settings: Ca
     filterBySettings,
 
     // Workspace 篩選相關（只有超級管理員可用）
-    isSuperAdmin,
+    isAdmin,
     workspaces,
     selectedWorkspaceId,
     onWorkspaceFilterChange: handleWorkspaceFilterChange,

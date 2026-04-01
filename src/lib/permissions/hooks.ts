@@ -140,9 +140,6 @@ export function usePermissions() {
     user?.permissions?.includes('admin') ||
     user?.permissions?.includes('*')
 
-  // @deprecated 向下相容，等同 isAdmin
-  const isSuperAdmin = isAdmin
-
   const canAccess = useCallback((route: string): boolean => {
     if (isAdmin) return true
     if (!workspaceFeatures.isRouteAvailable(route)) return false
@@ -160,7 +157,7 @@ export function usePermissions() {
   return {
     ...workspaceFeatures,
     ...rolePermissions,
-    isSuperAdmin, // @deprecated 向下相容
+    isAdmin, // @deprecated 向下相容
     canAccess,
     canEdit,
   }

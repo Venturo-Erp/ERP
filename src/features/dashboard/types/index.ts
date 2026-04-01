@@ -16,7 +16,7 @@ export interface WidgetConfig {
   icon: React.ComponentType<{ size?: number; className?: string }>
   component: React.ComponentType
   span?: number // 佔據的列數（1 或 2）
-  requiredPermission?: string // 需要的權限（如 'super_admin_only'）
+  requiredPermission?: string // 需要的權限（如 'admin_only'）
 }
 
 // 統計項目類型
