@@ -67,7 +67,7 @@ export const FORM_LABELS = {
   orderOptional: '訂單（選填）',
   paymentMethod: '收款方式 *',
   amount: '金額 *',
-  transactionDate: '交易日期 *',
+  transactionDate: '收款日期 *',
   payerName: '付款人姓名',
   remarks: '備註',
   handler: '經手人',

@@ -33,24 +33,22 @@ function getNextThursday(): Date {
   return nextThursday
 }
 
-// 生成出納單號
-async function generateDisbursementNumber(existingOrders: DisbursementOrder[]): Promise<string> {
-  const now = new Date()
-  const year = String(now.getFullYear()).slice(-1)
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  const dateStr = `${year}${month}${day}`
-  const prefix = `DO${dateStr}`
+// 生成出納單號：DOYYMMDD-NNN（根據出帳日期，流水號從 001 開始）
+async function generateDisbursementNumber(existingOrders: DisbursementOrder[], disbursementDate?: string): Promise<string> {
+  const date = disbursementDate ? new Date(disbursementDate) : new Date()
+  const yy = String(date.getFullYear()).slice(-2)
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  const prefix = `DO${yy}${mm}${dd}`
 
-  const todayOrders = existingOrders.filter(o => o.order_number?.startsWith(prefix))
+  // 找出同一出帳日期的既有出納單，取最大流水號 +1
+  const sameDayOrders = existingOrders.filter(o => o.order_number?.startsWith(prefix))
   let nextNum = 1
-  if (todayOrders.length > 0) {
-    const lastOrder = todayOrders.sort((a, b) =>
-      (b.order_number || '').localeCompare(a.order_number || '')
-    )[0]
-    const match = lastOrder.order_number?.match(/-(\d+)$/)
+  for (const order of sameDayOrders) {
+    const match = order.order_number?.match(/-(\d+)$/)
     if (match) {
-      nextNum = parseInt(match[1], 10) + 1
+      const num = parseInt(match[1], 10)
+      if (num >= nextNum) nextNum = num + 1
     }
   }
 
@@ -167,7 +165,7 @@ export function useCreateDisbursement({
     setIsSubmitting(true)
     try {
       // 生成出納單號
-      const orderNumber = await generateDisbursementNumber(disbursement_orders)
+      const orderNumber = await generateDisbursementNumber(disbursement_orders, disbursementDate)
 
       // 直接使用 Supabase 建立出納單（繞過 store 的 workspace_id 檢查）
 
@@ -242,12 +240,20 @@ export function useCreateDisbursement({
       const addedIds = selectedRequestIds.filter(id => !oldIds.has(id))
       const removedIds = (editingOrder.payment_request_ids || []).filter(id => !newIds.has(id))
 
-      // 更新出納單
-      await updateDisbursementOrderApi(editingOrder.id, {
+      // 如果出帳日期改變，重新生成出納單號
+      const dateChanged = editingOrder.disbursement_date !== disbursementDate
+      let updatedFields: Record<string, unknown> = {
         payment_request_ids: selectedRequestIds,
         amount: selectedAmount,
         disbursement_date: disbursementDate,
-      })
+      }
+      if (dateChanged) {
+        const newOrderNumber = await generateDisbursementNumber(disbursement_orders, disbursementDate)
+        updatedFields = { ...updatedFields, order_number: newOrderNumber, code: newOrderNumber }
+      }
+
+      // 更新出納單
+      await updateDisbursementOrderApi(editingOrder.id, updatedFields)
 
       const tour_ids_to_recalculate = new Set<string>()
 

@@ -5,7 +5,7 @@
  * 顯示團的收支明細、利潤計算
  */
 
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback, useEffect } from 'react'
 import { FileDown, Loader2, Lock, Unlock, TrendingUp, TrendingDown, DollarSign, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -27,6 +27,7 @@ import {
 } from '@/data'
 import { calculateFullProfit } from '../services/profit-calculation.service'
 import { useAuthStore } from '@/stores'
+import { supabase } from '@/lib/supabase/client'
 
 // === 結案狀態 ===
 const CLOSING_STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -204,7 +205,18 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     return d.toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })
   }
 
-  // 收款方式對照
+  // 收款方式對照（從 payment_methods 表載入，以 id 為 key）
+  const [paymentMethodMap, setPaymentMethodMap] = useState<Record<string, string>>({})
+  useEffect(() => {
+    supabase.from('payment_methods').select('id,name').then(({ data }) => {
+      if (data) {
+        const map: Record<string, string> = {}
+        for (const pm of data) map[pm.id] = pm.name
+        setPaymentMethodMap(map)
+      }
+    })
+  }, [])
+
   const PAYMENT_METHOD_LABELS: Record<string, string> = {
     transfer: '匯款',
     cash: '現金',
@@ -258,7 +270,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
       </div>
 
       {/* 收支明細表 */}
-      <div className="bg-white border border-border rounded-lg overflow-hidden">
+      <div className="bg-white border border-border rounded-lg overflow-x-auto">
         <div className="px-4 py-3 border-b border-border bg-morandi-bg">
           <h3 className="text-sm font-semibold text-morandi-primary">收支明細</h3>
         </div>
@@ -269,83 +281,159 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
           </div>
         ) : (
           <div className="divide-y divide-border">
-            {/* 收入區塊 */}
+            {/* 收款區塊 */}
             {receipts.length > 0 && (
               <div>
                 <div className="px-4 py-2 bg-morandi-green/10 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-morandi-green" />
-                  <span className="text-sm font-medium text-morandi-green">收入 ({receipts.length})</span>
+                  <span className="text-sm font-medium text-morandi-green">收款 ({receipts.length})</span>
                 </div>
-                <table className="w-full text-sm">
+                <table className="w-full text-sm table-fixed" style={{ minWidth: 900 }}>
+                  <colgroup>
+                    <col style={{ width: '13%' }} />
+                    <col style={{ width: '7%' }} />
+                    <col style={{ width: '8%' }} />
+                    <col style={{ width: '10%' }} />
+                    <col style={{ width: '20%' }} />
+                    <col style={{ width: '8%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '8%' }} />
+                    <col style={{ width: '7%' }} />
+                    <col style={{ width: '8%' }} />
+                  </colgroup>
                   <thead>
                     <tr className="border-b border-border text-xs text-morandi-secondary">
                       <th className="px-4 py-2 text-left font-medium">單號</th>
                       <th className="px-4 py-2 text-left font-medium">收款日期</th>
                       <th className="px-4 py-2 text-left font-medium">收款方式</th>
-                      <th className="px-4 py-2 text-left font-medium">付款人</th>
-                      <th className="px-4 py-2 text-left font-medium">備註</th>
-                      <th className="px-4 py-2 text-right font-medium">金額</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {receipts.map(r => (
-                      <tr key={r.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
-                        <td className="px-4 py-2 font-medium text-morandi-primary">{r.receipt_number || '-'}</td>
-                        <td className="px-4 py-2 text-morandi-secondary">{formatDate(r.receipt_date)}</td>
-                        <td className="px-4 py-2 text-morandi-secondary">
-                          {PAYMENT_METHOD_LABELS[r.payment_method || ''] || r.payment_method || '-'}
-                        </td>
-                        <td className="px-4 py-2 text-morandi-secondary">{r.payment_name || r.receipt_account || '-'}</td>
-                        <td className="px-4 py-2 text-morandi-secondary">{r.notes || '-'}</td>
-                        <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-green font-medium">
-                          +{formatCurrency(Number(r.actual_amount) || Number(r.receipt_amount) || 0)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-            {/* 支出區塊 */}
-            {paymentRequests.length > 0 && (
-              <div>
-                <div className="px-4 py-2 bg-morandi-red/10 flex items-center gap-2">
-                  <TrendingDown className="w-4 h-4 text-morandi-red" />
-                  <span className="text-sm font-medium text-morandi-red">支出 ({paymentRequests.length})</span>
-                </div>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border text-xs text-morandi-secondary">
-                      <th className="px-4 py-2 text-left font-medium">單號</th>
-                      <th className="px-4 py-2 text-left font-medium">請款日期</th>
-                      <th className="px-4 py-2 text-left font-medium">類型</th>
-                      <th className="px-4 py-2 text-left font-medium">供應商/說明</th>
+                      <th className="px-4 py-2 text-left font-medium">收款明細</th>
+                      <th className="px-4 py-2 text-left font-medium" colSpan={4}>備註</th>
                       <th className="px-4 py-2 text-left font-medium">狀態</th>
                       <th className="px-4 py-2 text-right font-medium">金額</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {paymentRequests.map(pr => (
-                      <tr key={pr.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
-                        <td className="px-4 py-2 font-medium text-morandi-primary">{pr.request_number || '-'}</td>
-                        <td className="px-4 py-2 text-morandi-secondary">{formatDate(pr.created_at)}</td>
-                        <td className="px-4 py-2 text-morandi-secondary">{pr.request_type || '-'}</td>
-                        <td className="px-4 py-2 text-morandi-secondary">{pr.supplier_name || pr.notes || '-'}</td>
+                    {receipts.map(r => {
+                      const receiptStatus = r.status === '1'
+                        ? { label: '已確認', style: 'bg-morandi-green/20 text-morandi-green' }
+                        : { label: '待確認', style: 'bg-morandi-secondary/20 text-morandi-secondary' }
+                      return (
+                      <tr key={r.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
+                        <td className="px-4 py-2 font-medium text-morandi-primary">{r.receipt_number || '-'}</td>
+                        <td className="px-4 py-2 text-morandi-secondary">{formatDate(r.receipt_date)}</td>
+                        <td className="px-4 py-2 text-morandi-secondary">
+                          {(r.payment_method_id && paymentMethodMap[r.payment_method_id]) || PAYMENT_METHOD_LABELS[r.payment_method || ''] || r.payment_method || '-'}
+                        </td>
+                        <td className="px-4 py-2 text-morandi-secondary">{r.receipt_account || r.payment_name || '-'}</td>
+                        <td className="px-4 py-2 text-morandi-secondary" colSpan={4}>{r.notes || '-'}</td>
                         <td className="px-4 py-2">
-                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-                            pr.status === 'paid' ? 'bg-morandi-green/20 text-morandi-green' :
-                            pr.status === 'approved' ? 'bg-morandi-gold/20 text-morandi-gold' :
-                            'bg-morandi-secondary/20 text-morandi-secondary'
-                          }`}>
-                            {pr.status === 'paid' ? '已付' : pr.status === 'approved' ? '已核准' : '待審'}
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${receiptStatus.style}`}>
+                            {receiptStatus.label}
                           </span>
                         </td>
-                        <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">
-                          -{formatCurrency(Number(pr.amount) || 0)}
+                        <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-green font-medium">
+                          +{formatCurrency(Number(r.actual_amount) || Number(r.receipt_amount) || 0)}
                         </td>
                       </tr>
-                    ))}
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* 請款區塊 */}
+            {paymentRequests.length > 0 && (
+              <div>
+                <div className="px-4 py-2 bg-morandi-red/10 flex items-center gap-2">
+                  <TrendingDown className="w-4 h-4 text-morandi-red" />
+                  <span className="text-sm font-medium text-morandi-red">請款 ({paymentRequests.length})</span>
+                </div>
+                <table className="w-full text-sm table-fixed" style={{ minWidth: 900 }}>
+                  <colgroup>
+                    <col style={{ width: '13%' }} />
+                    <col style={{ width: '7%' }} />
+                    <col style={{ width: '8%' }} />
+                    <col style={{ width: '10%' }} />
+                    <col style={{ width: '20%' }} />
+                    <col style={{ width: '8%' }} />
+                    <col style={{ width: '5%' }} />
+                    <col style={{ width: '8%' }} />
+                    <col style={{ width: '7%' }} />
+                    <col style={{ width: '8%' }} />
+                  </colgroup>
+                  <thead>
+                    <tr className="border-b border-border text-xs text-morandi-secondary">
+                      <th className="px-4 py-2 text-left font-medium">單號</th>
+                      <th className="px-4 py-2 text-left font-medium">請款日期</th>
+                      <th className="px-4 py-2 text-left font-medium">類別</th>
+                      <th className="px-4 py-2 text-left font-medium">供應商</th>
+                      <th className="px-4 py-2 text-left font-medium">項目描述</th>
+                      <th className="px-4 py-2 text-right font-medium">單價</th>
+                      <th className="px-4 py-2 text-right font-medium">數量</th>
+                      <th className="px-4 py-2 text-right font-medium">小計</th>
+                      <th className="px-4 py-2 text-left font-medium">狀態</th>
+                      <th className="px-4 py-2 text-right font-medium">金額</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {paymentRequests.map(pr => {
+                      const items = (pr as unknown as { items?: Array<{ id?: string; category?: string; supplier_name?: string; description?: string; unitprice?: number; quantity?: number; subtotal?: number }> }).items ?? []
+
+                      // 狀態對應
+                      const statusMap: Record<string, { label: string; style: string }> = {
+                        pending: { label: '待處理', style: 'bg-morandi-secondary/20 text-morandi-secondary' },
+                        confirmed: { label: '已確認', style: 'bg-morandi-gold/20 text-morandi-gold' },
+                        billed: { label: '已出帳', style: 'bg-morandi-green/20 text-morandi-green' },
+                        approved: { label: '已核准', style: 'bg-morandi-gold/20 text-morandi-gold' },
+                        paid: { label: '已付', style: 'bg-morandi-green/20 text-morandi-green' },
+                      }
+                      const statusInfo = statusMap[pr.status || ''] ?? { label: pr.status || '待處理', style: 'bg-morandi-secondary/20 text-morandi-secondary' }
+
+                      if (items.length === 0) {
+                        return (
+                          <tr key={pr.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
+                            <td className="px-4 py-2 font-medium text-morandi-primary">{pr.code || '-'}</td>
+                            <td className="px-4 py-2 text-morandi-secondary">{formatDate(pr.request_date)}</td>
+                            <td className="px-4 py-2 text-morandi-secondary">{pr.request_type || '-'}</td>
+                            <td className="px-4 py-2 text-morandi-secondary">{pr.supplier_name || '-'}</td>
+                            <td className="px-4 py-2 text-morandi-secondary">{pr.notes || '-'}</td>
+                            <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
+                            <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
+                            <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
+                            <td className="px-4 py-2">
+                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}>{statusInfo.label}</span>
+                            </td>
+                            <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">-{formatCurrency(Number(pr.amount) || 0)}</td>
+                          </tr>
+                        )
+                      }
+
+                      return items.map((item, idx) => (
+                        <tr key={`${pr.id}-${item.id || idx}`} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
+                          {idx === 0 ? (
+                            <>
+                              <td className="px-4 py-2 font-medium text-morandi-primary" rowSpan={items.length}>{pr.code || '-'}</td>
+                              <td className="px-4 py-2 text-morandi-secondary" rowSpan={items.length}>{formatDate(pr.request_date)}</td>
+                            </>
+                          ) : null}
+                          <td className="px-4 py-2 text-morandi-secondary">{item.category || '-'}</td>
+                          <td className="px-4 py-2 text-morandi-secondary">{item.supplier_name || '-'}</td>
+                          <td className="px-4 py-2 text-morandi-secondary">{item.description || '-'}</td>
+                          <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{formatCurrency(item.unitprice ?? 0)}</td>
+                          <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{item.quantity ?? '-'}</td>
+                          <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{formatCurrency(item.subtotal ?? 0)}</td>
+                          {idx === 0 ? (
+                            <>
+                              <td className="px-4 py-2" rowSpan={items.length}>
+                                <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}>{statusInfo.label}</span>
+                              </td>
+                              <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium" rowSpan={items.length}>-{formatCurrency(Number(pr.amount) || 0)}</td>
+                            </>
+                          ) : null}
+                        </tr>
+                      ))
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -353,26 +441,6 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
           </div>
         )}
 
-        {/* 總計 */}
-        {(receipts.length > 0 || paymentRequests.length > 0) && (
-          <div className="px-4 py-3 border-t border-border bg-morandi-bg">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 text-sm">
-                <span className="text-morandi-green font-medium">
-                  收入 {formatCurrency(totalIncome)}
-                </span>
-                <ArrowRight className="w-4 h-4 text-morandi-secondary" />
-                <span className="text-morandi-red font-medium">
-                  支出 {formatCurrency(totalExpense)}
-                </span>
-                <ArrowRight className="w-4 h-4 text-morandi-secondary" />
-                <span className={`font-bold ${profit >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}>
-                  淨利 {profit >= 0 ? '+' : ''}{formatCurrency(profit)}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* 利潤總覽 + 獎金 */}
