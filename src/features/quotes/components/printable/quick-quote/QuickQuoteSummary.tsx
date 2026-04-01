@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { MORANDI_COLORS } from '../shared/print-styles'
+import { MORANDI_COLORS } from '@/lib/print'
 import { QUICK_QUOTE_LABELS } from './constants/labels'
 
 interface QuickQuoteSummaryProps {

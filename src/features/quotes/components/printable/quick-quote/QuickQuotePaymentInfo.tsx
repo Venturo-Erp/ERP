@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { MORANDI_COLORS } from '../shared/print-styles'
+import { MORANDI_COLORS } from '@/lib/print'
 import { PAYMENT_INFO_LABELS } from '@/constants/labels'
 import { QUICK_QUOTE_LABELS } from './constants/labels'
 import { useAuthStore } from '@/stores/auth-store'

@@ -5,7 +5,7 @@
 
 import React from 'react'
 import { QuickQuoteItem } from '@/types/quote.types'
-import { MORANDI_COLORS, TABLE_STYLES } from '../shared/print-styles'
+import { MORANDI_COLORS, TABLE_STYLES } from '@/lib/print'
 import { QUICK_QUOTE_LABELS } from './constants/labels'
 
 interface QuickQuoteItemsTableProps {

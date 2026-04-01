@@ -5,7 +5,7 @@
 
 import React from 'react'
 import { formatDateTW } from '@/lib/utils/format-date'
-import { MORANDI_COLORS } from '../shared/print-styles'
+import { MORANDI_COLORS } from '@/lib/print'
 import { QUOTATION_TERMS_LABELS } from '@/constants/labels'
 import { QUOTATION_LABELS } from './constants/labels'
 

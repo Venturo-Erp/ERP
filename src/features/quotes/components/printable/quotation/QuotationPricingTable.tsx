@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { MORANDI_COLORS, TABLE_STYLES } from '../shared/print-styles'
+import { MORANDI_COLORS, TABLE_STYLES } from '@/lib/print'
 import {
   CATEGORY_SECTION_LABELS,
   COST_ITEM_ROW_LABELS,

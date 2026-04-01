@@ -5,7 +5,7 @@
 
 import React from 'react'
 import { Quote, QuickQuoteItem } from '@/types/quote.types'
-import { PrintableWrapper } from '../shared/PrintableWrapper'
+import { PrintableWrapper } from '@/lib/print'
 import { QuickQuoteCustomerInfo } from './QuickQuoteCustomerInfo'
 import { QuickQuoteItemsTable } from './QuickQuoteItemsTable'
 import { QuickQuoteSummary } from './QuickQuoteSummary'

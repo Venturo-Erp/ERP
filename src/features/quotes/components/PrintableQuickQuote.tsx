@@ -12,7 +12,7 @@ import { X, Printer } from 'lucide-react'
 import { Quote, QuickQuoteItem } from '@/types/quote.types'
 import { supabase } from '@/lib/supabase/client'
 import { useCompanyInfo } from '@/hooks/useCompanyInfo'
-import { PrintFooter } from './printable/shared/PrintFooter'
+import { PrintFooter } from '@/lib/print'
 import {
   PRINTABLE_QUICK_QUOTE_LABELS,
   PAYMENT_INFO_LABELS,

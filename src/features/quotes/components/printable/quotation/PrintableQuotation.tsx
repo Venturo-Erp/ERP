@@ -5,14 +5,14 @@
 
 import React, { useMemo } from 'react'
 import { ParticipantCounts, SellingPrices } from '../../../types'
-import { PrintableWrapper } from '../shared/PrintableWrapper'
+import { PrintableWrapper } from '@/lib/print'
 import { QuotationInfo } from './QuotationInfo'
 import { QuotationPricingTable } from './QuotationPricingTable'
 import { QuotationInclusions } from './QuotationInclusions'
 import { Quote } from '@/types/models.types'
 import { PRINTABLE_QUOTATION_LABELS } from '../../../constants/labels'
 import { getPreviewDailyData } from '@/features/tours/components/itinerary-editor/format-itinerary'
-import { MORANDI_COLORS } from '../shared/print-styles'
+import { MORANDI_COLORS } from '@/lib/print'
 import type { Itinerary } from '@/stores/types'
 import type { FlightInfo } from '@/types/flight.types'
 

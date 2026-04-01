@@ -4,7 +4,7 @@
  */
 
 import React from 'react'
-import { MORANDI_COLORS } from '../shared/print-styles'
+import { MORANDI_COLORS } from '@/lib/print'
 import { QUOTATION_INCLUSIONS_LABELS } from '@/constants/labels'
 import { QUOTATION_LABELS } from './constants/labels'
 
