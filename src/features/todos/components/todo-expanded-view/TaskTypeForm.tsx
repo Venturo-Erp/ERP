@@ -353,8 +353,8 @@ function TransportForm({ todo, onUpdate, onClose }: FormProps) {
 
 function TicketForm({ todo, onUpdate, onClose }: FormProps) {
   const [flightInfo, setFlightInfo] = useState<{
-    outbound: any
-    return: any
+    outbound: Record<string, unknown> | null
+    return: Record<string, unknown> | null
     tourCode: string
     tourName: string
     departureDate: string
@@ -411,7 +411,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
           .eq('orders.tour_id', todo.tour_id)
 
         if (orderMembers) {
-          setMembers((orderMembers as any[]).map(m => ({
+          setMembers((orderMembers as unknown as Array<{ id: string; chinese_name: string | null; passport_name: string | null }>).map(m => ({
             id: m.id,
             chinese_name: m.chinese_name || '',
             english_name: m.passport_name || '',
@@ -428,7 +428,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
   }, [todo.tour_id])
 
   // 解析航班資訊
-  const parseFlight = (flight: any): {
+  const parseFlight = (flight: Record<string, unknown> | null): {
     display: string
     flightNumber: string
     airline: string

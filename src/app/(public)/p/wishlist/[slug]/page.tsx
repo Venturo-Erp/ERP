@@ -271,9 +271,8 @@ export default function WishlistDetailPage({
     // 產生追蹤碼（短碼，好記）
     const code = `W${Date.now().toString(36).toUpperCase().slice(-6)}`
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from('customer_inquiries')
+    const { error } = await supabase
+      .from('customer_inquiries' as never)
       .insert({
         workspace_id: template?.workspace_id,
         template_id: template?.id,
@@ -288,7 +287,7 @@ export default function WishlistDetailPage({
         status: 'pending',
         line_user_id: lineUser?.userId || null,
         customer_id: linkedCustomer?.id || null,
-      })
+      } as never)
 
     setSubmitting(false)
 
@@ -460,7 +459,7 @@ export default function WishlistDetailPage({
                           e.stopPropagation()
                           removeItem(item.item_id)
                         }}
-                        className="opacity-0 group-hover:opacity-100 text-white/40 hover:text-red-400 transition-opacity"
+                        className="opacity-0 group-hover:opacity-100 text-white/40 hover:text-morandi-red transition-opacity"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -473,13 +472,13 @@ export default function WishlistDetailPage({
               {!lineLoading && (
                 <div className="mb-4">
                   {lineUser ? (
-                    <div className="flex items-center gap-2 p-2 bg-green-500/10 border border-green-500/20 rounded-lg">
+                    <div className="flex items-center gap-2 p-2 bg-morandi-green/10 border border-morandi-green/20 rounded-lg">
                       {lineUser.pictureUrl && (
                         <img src={lineUser.pictureUrl} alt="" className="w-8 h-8 rounded-full" />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-green-400 truncate">{lineUser.displayName}</p>
-                        <p className="text-xs text-green-400/60">已連結 LINE</p>
+                        <p className="text-sm text-morandi-green truncate">{lineUser.displayName}</p>
+                        <p className="text-xs text-morandi-green/60">已連結 LINE</p>
                       </div>
                     </div>
                   ) : (
@@ -556,13 +555,13 @@ export default function WishlistDetailPage({
             )}
             
             {lineUser && (
-              <div className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-lg">
+              <div className="flex items-center gap-2 p-2 bg-morandi-green/10 border border-morandi-green/30 rounded-lg">
                 {lineUser.pictureUrl && (
                   <img src={lineUser.pictureUrl} alt="" className="w-8 h-8 rounded-full" />
                 )}
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-green-700">{lineUser.displayName}</p>
-                  <p className="text-xs text-green-600">送出後會自動傳送追蹤連結到您的 LINE</p>
+                  <p className="text-sm font-medium text-morandi-green">{lineUser.displayName}</p>
+                  <p className="text-xs text-morandi-green">送出後會自動傳送追蹤連結到您的 LINE</p>
                 </div>
               </div>
             )}
@@ -687,8 +686,8 @@ export default function WishlistDetailPage({
 
             {/* 比對結果 */}
             {matchingCustomers.length > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-sm font-medium text-blue-800 mb-2">找到可能是您的帳號：</p>
+              <div className="bg-status-info/10 border border-status-info/30 rounded-lg p-3">
+                <p className="text-sm font-medium text-morandi-primary mb-2">找到可能是您的帳號：</p>
                 {matchingCustomers.map(c => (
                   <div
                     key={c.id}
@@ -814,8 +813,8 @@ export default function WishlistDetailPage({
       <Dialog open={submitSuccess} onOpenChange={setSubmitSuccess}>
         <DialogContent className="max-w-md text-center">
           <div className="py-6">
-            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle className="w-10 h-10 text-green-600" />
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-morandi-green/10 flex items-center justify-center">
+              <CheckCircle className="w-10 h-10 text-morandi-green" />
             </div>
             
             <h2 className="text-2xl font-bold mb-2">詢價單已送出！</h2>

@@ -191,7 +191,7 @@ export default function LocalCaseDetailPage() {
               <h3 className="text-sm font-medium text-morandi-primary mb-3">Local 報價</h3>
 
               {caseData.quoted_cost != null && caseData.response_status === 'quoted' && (
-                <div className="mb-3 p-2 bg-green-50 rounded text-sm text-green-700">
+                <div className="mb-3 p-2 bg-morandi-green/10 rounded text-sm text-morandi-green">
                   已提交報價：{caseData.quoted_cost.toLocaleString()}
                   {caseData.reply_note && ` — ${caseData.reply_note}`}
                 </div>

@@ -260,11 +260,11 @@ function NewItineraryPageContent() {
 
       {/* 交接唯讀提示 */}
       {isHandedOff && (
-        <div className="bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-center gap-3">
-          <span className="material-symbols-outlined text-amber-600">lock</span>
+        <div className="bg-morandi-gold/10 border-b border-morandi-gold/30 px-4 py-3 flex items-center gap-3">
+          <span className="material-symbols-outlined text-morandi-gold">lock</span>
           <div>
-            <p className="text-sm font-medium text-amber-800">{EDITOR_LABELS.HANDOVER_NOTICE}</p>
-            <p className="text-xs text-amber-600">{EDITOR_LABELS.HANDOVER_DESC}</p>
+            <p className="text-sm font-medium text-morandi-primary">{EDITOR_LABELS.HANDOVER_NOTICE}</p>
+            <p className="text-xs text-morandi-gold">{EDITOR_LABELS.HANDOVER_DESC}</p>
           </div>
         </div>
       )}

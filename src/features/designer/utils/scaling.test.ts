@@ -44,7 +44,7 @@ describe('scaleFabricData', () => {
     const data = {
       objects: [{ left: 100, top: 200, width: 50, height: 60, scaleX: 1, scaleY: 1 }],
     }
-    const result = scaleFabricData(data, 2) as any
+    const result = scaleFabricData(data, 2) as unknown as { objects: Record<string, unknown>[] }
     expect(result.objects[0].left).toBe(200)
     expect(result.objects[0].top).toBe(400)
     expect(result.objects[0].width).toBe(100)
@@ -53,31 +53,31 @@ describe('scaleFabricData', () => {
 
   it('scales fontSize and strokeWidth', () => {
     const data = { objects: [{ fontSize: 12, strokeWidth: 2 }] }
-    const result = scaleFabricData(data, 3) as any
+    const result = scaleFabricData(data, 3) as unknown as { objects: Record<string, unknown>[] }
     expect(result.objects[0].fontSize).toBe(36)
     expect(result.objects[0].strokeWidth).toBe(6)
   })
 
   it('scales line endpoints', () => {
     const data = { objects: [{ x1: 10, y1: 20, x2: 30, y2: 40 }] }
-    const result = scaleFabricData(data, 2) as any
+    const result = scaleFabricData(data, 2) as unknown as { objects: Record<string, unknown>[] }
     expect(result.objects[0].x1).toBe(20)
     expect(result.objects[0].y2).toBe(80)
   })
 
   it('scales rounded corners', () => {
     const data = { objects: [{ rx: 5, ry: 10 }] }
-    const result = scaleFabricData(data, 2) as any
+    const result = scaleFabricData(data, 2) as unknown as { objects: Record<string, unknown>[] }
     expect(result.objects[0].rx).toBe(10)
     expect(result.objects[0].ry).toBe(20)
   })
 
   it('returns input for non-object data', () => {
-    expect(scaleFabricData(null as any, 2)).toBeNull()
+    expect(scaleFabricData(null as never, 2)).toBeNull()
   })
 
   it('handles empty objects array', () => {
-    const result = scaleFabricData({ objects: [] }, 2) as any
+    const result = scaleFabricData({ objects: [] }, 2) as unknown as { objects: Record<string, unknown>[] }
     expect(result.objects).toEqual([])
   })
 

@@ -15,7 +15,7 @@ import { logger } from '@/lib/utils/logger'
 
 // War Room 用的表（magic_library, bot_registry, tasks）不在 generated types 中
 // 統一用 untyped client 避免 TS 無限遞迴
-const supabase = typedSupabase as any
+const supabase = typedSupabase
 
 type TabType = 'magic' | 'bots' | 'tasks-individual' | 'tasks-workflow'
 

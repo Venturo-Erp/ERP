@@ -254,7 +254,7 @@ export default function MemberDetailPage() {
               <span className="text-morandi-secondary">
                 訂金 {member.deposit_receipt_no && `(${member.deposit_receipt_no})`}
               </span>
-              <span className="font-medium text-green-600">
+              <span className="font-medium text-morandi-green">
                 {member.deposit_amount !== null ? (
                   <CurrencyCell amount={member.deposit_amount} variant="income" />
                 ) : (
@@ -270,8 +270,8 @@ export default function MemberDetailPage() {
                 className={cn(
                   'font-medium',
                   member.balance_amount && member.balance_amount > 0
-                    ? 'text-orange-600'
-                    : 'text-green-600'
+                    ? 'text-status-warning'
+                    : 'text-morandi-green'
                 )}
               >
                 {member.balance_amount !== null ? (

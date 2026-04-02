@@ -219,7 +219,7 @@ export default function BalanceSheetPage() {
                 </div>
 
                 <div>
-                  <div className="font-semibold mb-2 text-blue-700">流動資產</div>
+                  <div className="font-semibold mb-2 text-status-info">流動資產</div>
                   {data.assets.map(item => (
                     <div key={item.code} className="flex justify-between py-1 pl-4">
                       <span className="text-sm">
@@ -233,7 +233,7 @@ export default function BalanceSheetPage() {
                   )}
                 </div>
 
-                <div className="flex justify-between py-3 border-t-2 font-bold text-lg text-blue-600">
+                <div className="flex justify-between py-3 border-t-2 font-bold text-lg text-status-info">
                   <span>資產總計</span>
                   <span className="font-mono">${data.totalAssets.toLocaleString()}</span>
                 </div>
@@ -250,7 +250,7 @@ export default function BalanceSheetPage() {
 
                 {/* 負債 */}
                 <div>
-                  <div className="font-semibold mb-2 text-red-700">負債</div>
+                  <div className="font-semibold mb-2 text-morandi-red">負債</div>
                   {data.liabilities.map(item => (
                     <div key={item.code} className="flex justify-between py-1 pl-4">
                       <span className="text-sm">
@@ -270,7 +270,7 @@ export default function BalanceSheetPage() {
 
                 {/* 權益 */}
                 <div>
-                  <div className="font-semibold mb-2 text-green-700">權益</div>
+                  <div className="font-semibold mb-2 text-morandi-green">權益</div>
                   {data.equity.map(item => (
                     <div key={item.code} className="flex justify-between py-1 pl-4">
                       <span className="text-sm">
@@ -284,7 +284,7 @@ export default function BalanceSheetPage() {
                     <div className="flex justify-between py-1 pl-4">
                       <span className="text-sm">本期損益</span>
                       <span
-                        className={`text-sm font-mono ${data.netIncome >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                        className={`text-sm font-mono ${data.netIncome >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}
                       >
                         ${data.netIncome.toLocaleString()}
                       </span>
@@ -299,7 +299,7 @@ export default function BalanceSheetPage() {
                   </div>
                 </div>
 
-                <div className="flex justify-between py-3 border-t-2 font-bold text-lg text-purple-600">
+                <div className="flex justify-between py-3 border-t-2 font-bold text-lg text-morandi-secondary">
                   <span>負債與權益總計</span>
                   <span className="font-mono">
                     ${(data.totalLiabilities + data.totalEquity).toLocaleString()}
@@ -315,15 +315,15 @@ export default function BalanceSheetPage() {
           <Card
             className={`p-4 ${
               Math.abs(data.totalAssets - (data.totalLiabilities + data.totalEquity)) < 0.01
-                ? 'bg-green-50 border-green-200'
-                : 'bg-red-50 border-red-200'
+                ? 'bg-morandi-green/10 border-morandi-green/30'
+                : 'bg-morandi-red/10 border-morandi-red/30'
             }`}
           >
             <div
               className={`text-sm ${
                 Math.abs(data.totalAssets - (data.totalLiabilities + data.totalEquity)) < 0.01
-                  ? 'text-green-800'
-                  : 'text-red-800'
+                  ? 'text-morandi-green'
+                  : 'text-morandi-red'
               }`}
             >
               <div className="font-semibold mb-2">會計等式驗證</div>

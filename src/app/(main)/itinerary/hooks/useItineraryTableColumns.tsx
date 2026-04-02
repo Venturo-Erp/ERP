@@ -249,7 +249,7 @@ export function useItineraryTableColumns({
                     e.stopPropagation()
                     handleSetTemplate(itinerary.id, false)
                   }}
-                  className="p-1 text-purple-600 hover:text-purple-600 hover:bg-purple-50 rounded transition-colors"
+                  className="p-1 text-morandi-secondary hover:text-morandi-secondary hover:bg-morandi-container rounded transition-colors"
                   title={ITINERARY_LABELS.LABEL_6743}
                 >
                   <Building2 size={14} />
@@ -275,7 +275,7 @@ export function useItineraryTableColumns({
                         e.stopPropagation()
                         handleSetTemplate(itinerary.id, true)
                       }}
-                      className="p-1 text-morandi-secondary hover:text-purple-600 hover:bg-purple-50 rounded transition-colors"
+                      className="p-1 text-morandi-secondary hover:text-morandi-secondary hover:bg-morandi-container rounded transition-colors"
                       title={ITINERARY_LABELS.LABEL_6187}
                     >
                       <Building2 size={14} />

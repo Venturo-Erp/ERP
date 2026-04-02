@@ -29,7 +29,7 @@ export async function createRequestFromQuote(input: {
   if (quoteError) throw quoteError
   if (!quote) throw new Error('報價單不存在')
 
-  const categories = quote.categories as any[]
+  const categories = quote.categories as Record<string, unknown>[]
 
   // 2. 按供應商分組
   const groupedBySupplier: Record<
@@ -79,11 +79,11 @@ export async function createRequestFromQuote(input: {
         code: `REQ-${quote.code || Date.now()}-${requestIds.length + 1}`,
         request_type: group.request_type,
         supplier_name: group.supplier_name,
-        items: group.items as any,
+        items: group.items as never,
         status: '草稿',
         created_by: input.userId,
         updated_by: input.userId,
-      } as any)
+      } as never)
       .select()
       .single()
 

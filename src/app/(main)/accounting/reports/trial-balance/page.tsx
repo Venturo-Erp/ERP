@@ -206,9 +206,9 @@ export default function TrialBalancePage() {
                             <td
                               className={`px-4 py-3 text-sm text-right font-mono font-semibold ${
                                 item.balance > 0
-                                  ? 'text-green-600'
+                                  ? 'text-morandi-green'
                                   : item.balance < 0
-                                    ? 'text-red-600'
+                                    ? 'text-morandi-red'
                                     : ''
                               }`}
                             >
@@ -235,8 +235,8 @@ export default function TrialBalancePage() {
                     </tr>
                     {/* 平衡檢查 */}
                     {Math.abs(totals.debit - totals.credit) > 0.01 && (
-                      <tr className="bg-red-50">
-                        <td colSpan={6} className="px-4 py-3 text-sm text-red-600 text-center">
+                      <tr className="bg-morandi-red/10">
+                        <td colSpan={6} className="px-4 py-3 text-sm text-morandi-red text-center">
                           ⚠️ 警告：借貸不平衡！差額：
                           {(totals.debit - totals.credit).toLocaleString()}
                         </td>
@@ -251,8 +251,8 @@ export default function TrialBalancePage() {
 
         {/* 說明 */}
         {balances.length > 0 && (
-          <Card className="p-4 bg-blue-50 border-blue-200">
-            <div className="text-sm text-blue-800">
+          <Card className="p-4 bg-status-info/10 border-status-info/30">
+            <div className="text-sm text-morandi-primary">
               <div className="font-semibold mb-2">試算表說明</div>
               <ul className="list-disc list-inside space-y-1">
                 <li>截止日期：{endDate}</li>

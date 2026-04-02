@@ -21,11 +21,11 @@ type DocumentType = 'spreadsheet' | 'document' | 'slides'
 function getDocTypeIcon(type: string) {
   switch (type) {
     case 'spreadsheet':
-      return <FileSpreadsheet className="w-5 h-5 text-green-600" />
+      return <FileSpreadsheet className="w-5 h-5 text-morandi-green" />
     case 'document':
-      return <FileText className="w-5 h-5 text-blue-600" />
+      return <FileText className="w-5 h-5 text-status-info" />
     case 'slides':
-      return <Presentation className="w-5 h-5 text-orange-600" />
+      return <Presentation className="w-5 h-5 text-status-warning" />
     default:
       return <FileText className="w-5 h-5 text-morandi-secondary" />
   }

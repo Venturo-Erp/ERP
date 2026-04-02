@@ -53,9 +53,9 @@ interface CompanyInfo {
 
 const STATUS_MAP = {
   pending: { label: '等待處理', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-  contacted: { label: '已聯繫', color: 'bg-blue-100 text-blue-800', icon: Phone },
-  quoted: { label: '已報價', color: 'bg-purple-100 text-purple-800', icon: MessageCircle },
-  converted: { label: '已成團', color: 'bg-green-100 text-green-800', icon: CheckCircle },
+  contacted: { label: '已聯繫', color: 'bg-status-info/10 text-status-info', icon: Phone },
+  quoted: { label: '已報價', color: 'bg-morandi-secondary/10 text-morandi-secondary', icon: MessageCircle },
+  converted: { label: '已成團', color: 'bg-morandi-green/10 text-morandi-green', icon: CheckCircle },
   cancelled: { label: '已取消', color: 'bg-gray-100 text-gray-800', icon: Clock },
 }
 

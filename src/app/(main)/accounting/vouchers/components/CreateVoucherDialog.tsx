@@ -417,9 +417,9 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
                     <td className="p-2 text-right">{totalCredit.toLocaleString()}</td>
                     <td className="p-2 text-center">
                       {isBalanced ? (
-                        <span className="text-green-600">✅ 平衡</span>
+                        <span className="text-morandi-green">✅ 平衡</span>
                       ) : (
-                        <span className="text-red-600">❌ 不平衡</span>
+                        <span className="text-morandi-red">❌ 不平衡</span>
                       )}
                     </td>
                   </tr>

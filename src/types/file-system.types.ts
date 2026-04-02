@@ -238,18 +238,18 @@ export const FILE_CATEGORY_INFO: Record<
   FileCategory,
   { label: string; icon: string; color: string }
 > = {
-  contract: { label: '合約', icon: 'FileSignature', color: '#8B5CF6' },
-  quote: { label: '報價單', icon: 'FileText', color: '#3B82F6' },
-  itinerary: { label: '行程表', icon: 'Map', color: '#10B981' },
-  passport: { label: '護照', icon: 'CreditCard', color: '#F59E0B' },
-  visa: { label: '簽證', icon: 'Stamp', color: '#EF4444' },
-  ticket: { label: '機票', icon: 'Plane', color: '#06B6D4' },
-  voucher: { label: '住宿憑證', icon: 'Building2', color: '#8B5CF6' },
-  invoice: { label: '發票收據', icon: 'Receipt', color: '#84CC16' },
-  insurance: { label: '保險', icon: 'Shield', color: '#F97316' },
-  photo: { label: '照片', icon: 'Image', color: '#EC4899' },
-  email_attachment: { label: '郵件附件', icon: 'Paperclip', color: '#6B7280' },
-  other: { label: '其他', icon: 'File', color: '#9CA3AF' },
+  contract: { label: '合約', icon: 'FileSignature', color: '#c9aa7c' },
+  quote: { label: '報價單', icon: 'FileText', color: '#8ba4b4' },
+  itinerary: { label: '行程表', icon: 'Map', color: '#9fa68f' },
+  passport: { label: '護照', icon: 'CreditCard', color: '#c9aa7c' },
+  visa: { label: '簽證', icon: 'Stamp', color: '#c08374' },
+  ticket: { label: '機票', icon: 'Plane', color: '#8ba4b4' },
+  voucher: { label: '住宿憑證', icon: 'Building2', color: '#8b8680' },
+  invoice: { label: '發票收據', icon: 'Receipt', color: '#9fa68f' },
+  insurance: { label: '保險', icon: 'Shield', color: '#d4a574' },
+  photo: { label: '照片', icon: 'Image', color: '#c08374' },
+  email_attachment: { label: '郵件附件', icon: 'Paperclip', color: '#8b8680' },
+  other: { label: '其他', icon: 'File', color: '#b8b2aa' },
 }
 
 // ============================================================================

@@ -331,7 +331,7 @@ export function ImportCustomersDialog({ open, onOpenChange }: ImportCustomersDia
           if (row.status === 'error') {
             return (
               <span
-                className="inline-flex items-center gap-1 text-xs text-red-600"
+                className="inline-flex items-center gap-1 text-xs text-morandi-red"
                 title={Object.values(row.errors).join('\n')}
               >
                 <AlertCircle size={12} />
@@ -342,7 +342,7 @@ export function ImportCustomersDialog({ open, onOpenChange }: ImportCustomersDia
           if (row.status === 'warning') {
             return (
               <span
-                className="inline-flex items-center gap-1 text-xs text-amber-600"
+                className="inline-flex items-center gap-1 text-xs text-status-warning"
                 title={row.warnings.join('\n')}
               >
                 <AlertTriangle size={12} />
@@ -351,7 +351,7 @@ export function ImportCustomersDialog({ open, onOpenChange }: ImportCustomersDia
             )
           }
           return (
-            <span className="inline-flex items-center gap-1 text-xs text-green-600">
+            <span className="inline-flex items-center gap-1 text-xs text-morandi-green">
               <CheckCircle2 size={12} />
               {row.status_text}
             </span>
@@ -363,7 +363,7 @@ export function ImportCustomersDialog({ open, onOpenChange }: ImportCustomersDia
         label: L.col_name,
         render: (_value: unknown, row: PreviewTableRow) => (
           <span
-            className={`text-sm ${row.errors['name'] ? 'text-red-600 font-medium' : 'text-morandi-primary'}`}
+            className={`text-sm ${row.errors['name'] ? 'text-morandi-red font-medium' : 'text-morandi-primary'}`}
           >
             {row.name || '-'}
           </span>
@@ -381,7 +381,7 @@ export function ImportCustomersDialog({ open, onOpenChange }: ImportCustomersDia
         label: L.col_phone,
         render: (_value: unknown, row: PreviewTableRow) => (
           <span
-            className={`text-xs ${row.errors['phone'] ? 'text-red-600' : 'text-morandi-primary'}`}
+            className={`text-xs ${row.errors['phone'] ? 'text-morandi-red' : 'text-morandi-primary'}`}
           >
             {row.phone || '-'}
           </span>
@@ -392,7 +392,7 @@ export function ImportCustomersDialog({ open, onOpenChange }: ImportCustomersDia
         label: L.col_email,
         render: (_value: unknown, row: PreviewTableRow) => (
           <span
-            className={`text-xs ${row.errors['email'] ? 'text-red-600' : 'text-morandi-primary'}`}
+            className={`text-xs ${row.errors['email'] ? 'text-morandi-red' : 'text-morandi-primary'}`}
           >
             {row.email || '-'}
           </span>
@@ -412,7 +412,7 @@ export function ImportCustomersDialog({ open, onOpenChange }: ImportCustomersDia
         label: L.col_passport_expiry,
         render: (_value: unknown, row: PreviewTableRow) => (
           <span
-            className={`text-xs ${row.errors['passport_expiry'] ? 'text-red-600' : 'text-morandi-secondary'}`}
+            className={`text-xs ${row.errors['passport_expiry'] ? 'text-morandi-red' : 'text-morandi-secondary'}`}
           >
             {row.passport_expiry || '-'}
           </span>
@@ -423,7 +423,7 @@ export function ImportCustomersDialog({ open, onOpenChange }: ImportCustomersDia
         label: L.col_birth_date,
         render: (_value: unknown, row: PreviewTableRow) => (
           <span
-            className={`text-xs ${row.errors['birth_date'] ? 'text-red-600' : 'text-morandi-secondary'}`}
+            className={`text-xs ${row.errors['birth_date'] ? 'text-morandi-red' : 'text-morandi-secondary'}`}
           >
             {row.birth_date || '-'}
           </span>
@@ -492,9 +492,9 @@ export function ImportCustomersDialog({ open, onOpenChange }: ImportCustomersDia
             <>
               {/* 全域錯誤 */}
               {global_errors.length > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <div className="bg-morandi-red/10 border border-morandi-red/30 rounded-lg p-3">
                   {global_errors.map((err, i) => (
-                    <p key={i} className="text-sm text-red-600 flex items-center gap-1">
+                    <p key={i} className="text-sm text-morandi-red flex items-center gap-1">
                       <AlertCircle size={14} />
                       {err}
                     </p>
@@ -522,9 +522,9 @@ export function ImportCustomersDialog({ open, onOpenChange }: ImportCustomersDia
                   initialPageSize={20}
                   rowClassName={(row: PreviewTableRow) =>
                     row.status === 'error'
-                      ? 'bg-red-50/50'
+                      ? 'bg-morandi-red/5'
                       : row.status === 'warning'
-                        ? 'bg-amber-50/50'
+                        ? 'bg-status-warning/5'
                         : ''
                   }
                 />

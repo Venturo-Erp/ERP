@@ -75,28 +75,28 @@ export function TransportConfirmForm({ itemId, defaultValues }: Props) {
         {/* 司機姓名 */}
         <div>
           <label className="block text-sm font-medium text-morandi-primary mb-1">
-            司機姓名 <span className="text-red-500">*</span>
+            司機姓名 <span className="text-morandi-red">*</span>
           </label>
           <input
             type="text"
             value={form.driver_name}
             onChange={e => setForm({ ...form, driver_name: e.target.value })}
             placeholder="例：田中太郎"
-            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold"
           />
         </div>
 
         {/* 司機電話 */}
         <div>
           <label className="block text-sm font-medium text-morandi-primary mb-1">
-            司機電話 <span className="text-red-500">*</span>
+            司機電話 <span className="text-morandi-red">*</span>
           </label>
           <input
             type="tel"
             value={form.driver_phone}
             onChange={e => setForm({ ...form, driver_phone: e.target.value })}
             placeholder="例：090-1234-5678"
-            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold"
           />
         </div>
 
@@ -108,7 +108,7 @@ export function TransportConfirmForm({ itemId, defaultValues }: Props) {
             value={form.vehicle_plate}
             onChange={e => setForm({ ...form, vehicle_plate: e.target.value })}
             placeholder="例：福岡 200 あ 1234"
-            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold"
           />
         </div>
 
@@ -120,14 +120,14 @@ export function TransportConfirmForm({ itemId, defaultValues }: Props) {
             value={form.vehicle_type}
             onChange={e => setForm({ ...form, vehicle_type: e.target.value })}
             placeholder="例：45人座大巴"
-            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold"
           />
         </div>
       </div>
 
       {/* 錯誤訊息 */}
       {error && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+        <div className="mt-4 p-3 bg-morandi-red/10 border border-morandi-red/30 rounded-lg text-morandi-red text-sm">
           {error}
         </div>
       )}
@@ -136,7 +136,7 @@ export function TransportConfirmForm({ itemId, defaultValues }: Props) {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-6 w-full py-4 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="mt-6 w-full py-4 bg-morandi-gold text-white font-bold rounded-lg hover:bg-morandi-gold-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         {isSubmitting ? '提交中...' : '✓ 確認提交'}
       </button>

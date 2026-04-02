@@ -45,9 +45,9 @@ function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
   const style = transform ? { transform: CSS.Translate.toString(transform) } : undefined
 
   const iconMap: Record<ResourceType, React.ReactNode> = {
-    attraction: <MapPin size={14} className="text-emerald-600" />,
-    hotel: <Building2 size={14} className="text-blue-600" />,
-    restaurant: <UtensilsCrossed size={14} className="text-orange-600" />,
+    attraction: <MapPin size={14} className="text-morandi-green" />,
+    hotel: <Building2 size={14} className="text-status-info" />,
+    restaurant: <UtensilsCrossed size={14} className="text-status-warning" />,
   }
 
   return (

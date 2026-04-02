@@ -144,22 +144,22 @@ describe('validateFile', () => {
 
 describe('resolveAttachmentUrl', () => {
   it('uses publicUrl first', () => {
-    const att = { publicUrl: 'https://pub.com/img.jpg', url: 'other', path: 'p' } as any
+    const att = { publicUrl: 'https://pub.com/img.jpg', url: 'other', path: 'p' } as never
     expect(resolveAttachmentUrl(att)).toBe('https://pub.com/img.jpg')
   })
 
   it('falls back to url', () => {
-    const att = { url: 'https://cdn.com/img.jpg', path: 'p' } as any
+    const att = { url: 'https://cdn.com/img.jpg', path: 'p' } as never
     expect(resolveAttachmentUrl(att)).toBe('https://cdn.com/img.jpg')
   })
 
   it('falls back to storage path', () => {
-    const att = { path: 'uploads/img.jpg' } as any
+    const att = { path: 'uploads/img.jpg' } as never
     expect(resolveAttachmentUrl(att)).toBe('https://storage.example.com/chat-files/uploads/img.jpg')
   })
 
   it('returns empty for no urls', () => {
-    const att = {} as any
+    const att = {} as never
     expect(resolveAttachmentUrl(att)).toBe('')
   })
 })

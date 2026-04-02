@@ -68,11 +68,11 @@ interface CustomerInquiry {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
-  pending: { label: '待處理', color: 'bg-yellow-100 text-yellow-800' },
-  contacted: { label: '已聯繫', color: 'bg-blue-100 text-blue-800' },
-  quoted: { label: '已報價', color: 'bg-purple-100 text-purple-800' },
-  converted: { label: '已成交', color: 'bg-green-100 text-green-800' },
-  cancelled: { label: '已取消', color: 'bg-gray-100 text-gray-800' },
+  pending: { label: '待處理', color: 'bg-morandi-gold/10 text-morandi-gold' },
+  contacted: { label: '已聯繫', color: 'bg-status-info/10 text-status-info' },
+  quoted: { label: '已報價', color: 'bg-morandi-secondary/10 text-morandi-secondary' },
+  converted: { label: '已成交', color: 'bg-morandi-green/10 text-morandi-green' },
+  cancelled: { label: '已取消', color: 'bg-morandi-muted/10 text-morandi-muted' },
 }
 
 export default function InquiriesPage() {

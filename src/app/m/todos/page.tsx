@@ -205,7 +205,7 @@ export default function MobileTodosPage() {
             {/* 緊急 */}
             {groupedTodos.urgent.length > 0 && (
               <section>
-                <h3 className="text-sm font-medium text-red-600 mb-2 flex items-center gap-2">
+                <h3 className="text-sm font-medium text-morandi-red mb-2 flex items-center gap-2">
                   🔴 緊急 ({groupedTodos.urgent.length})
                 </h3>
                 <div className="space-y-2">
@@ -223,7 +223,7 @@ export default function MobileTodosPage() {
             {/* 高優先 */}
             {groupedTodos.high.length > 0 && (
               <section>
-                <h3 className="text-sm font-medium text-orange-600 mb-2 flex items-center gap-2">
+                <h3 className="text-sm font-medium text-status-warning mb-2 flex items-center gap-2">
                   🟠 高優先 ({groupedTodos.high.length})
                 </h3>
                 <div className="space-y-2">

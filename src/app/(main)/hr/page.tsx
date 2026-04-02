@@ -306,7 +306,7 @@ export default function HRPage() {
           const lineUserId = (employee as unknown as { line_user_id?: string }).line_user_id
           if (lineUserId) {
             return (
-              <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
+              <span className="px-2 py-1 rounded text-xs font-medium bg-morandi-green/10 text-morandi-green">
                 ✅ 已綁定
               </span>
             )
@@ -503,7 +503,7 @@ export default function HRPage() {
         <DialogContent level={1} className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <span className="text-green-600">📱</span> LINE 綁定
+              <span className="text-morandi-green">📱</span> LINE 綁定
             </DialogTitle>
           </DialogHeader>
           {lineBindingEmployee && (

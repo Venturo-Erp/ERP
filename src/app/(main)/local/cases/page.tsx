@@ -99,7 +99,7 @@ export default function LocalCasesPage() {
                 >
                   <div
                     className={`w-2 h-2 rounded-full shrink-0 ${
-                      isCompleted ? 'bg-morandi-green' : 'bg-amber-400'
+                      isCompleted ? 'bg-morandi-green' : 'bg-morandi-gold'
                     }`}
                   />
                   <div className="flex-1 min-w-0">
@@ -127,7 +127,7 @@ export default function LocalCasesPage() {
                   <div className="text-right shrink-0">
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
-                        isCompleted ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                        isCompleted ? 'bg-morandi-green/10 text-morandi-green' : 'bg-morandi-gold/10 text-morandi-gold'
                       }`}
                     >
                       {isCompleted ? '已完成' : '進行中'}

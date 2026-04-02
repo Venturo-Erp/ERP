@@ -163,7 +163,7 @@ export function EditAccountDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {account.is_system_locked && (
-            <div className="p-3 bg-amber-50 text-amber-800 rounded-md text-sm">
+            <div className="p-3 bg-morandi-gold/10 text-morandi-primary rounded-md text-sm">
               ⚠️ 系統科目：僅可修改名稱和說明，不可刪除
             </div>
           )}

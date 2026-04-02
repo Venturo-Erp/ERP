@@ -76,7 +76,7 @@ export default function VouchersPage() {
 
       // 應用狀態篩選
       if (filters.status !== 'all') {
-        query = query.eq('status', filters.status as any)
+        query = query.eq('status', filters.status as never)
       }
 
       query = query
@@ -255,7 +255,7 @@ export default function VouchersPage() {
       <VoucherDetailDialog
         open={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
-        voucher={selectedVoucher as any}
+        voucher={selectedVoucher ? { ...selectedVoucher, status: selectedVoucher.status || 'draft', total_debit: selectedVoucher.total_debit || 0, total_credit: selectedVoucher.total_credit || 0 } : null}
       />
     </>
   )

@@ -80,16 +80,16 @@ export default async function TransportConfirmPage({ params }: PageProps) {
     )
   }
 
-  const tourData = item.tour as any
+  const tourData = item.tour as unknown as Record<string, unknown> | Record<string, unknown>[]
   const tour = Array.isArray(tourData) ? tourData[0] : tourData
 
   return (
     <div className="min-h-screen bg-morandi-container py-8 px-4">
       <div className="max-w-lg mx-auto">
         {/* Header */}
-        <div className="bg-blue-600 text-white rounded-t-lg p-6">
+        <div className="bg-morandi-gold text-white rounded-t-lg p-6">
           <h1 className="text-xl font-bold flex items-center gap-2">🚌 遊覽車預訂確認</h1>
-          <p className="text-blue-100 text-sm mt-1">請填寫司機資訊以完成預訂</p>
+          <p className="text-white/80 text-sm mt-1">請填寫司機資訊以完成預訂</p>
         </div>
 
         {/* 團資訊 */}
@@ -114,7 +114,7 @@ export default async function TransportConfirmPage({ params }: PageProps) {
             </div>
             <div>
               <span className="text-morandi-secondary">成交金額</span>
-              <div className="font-bold text-blue-600">
+              <div className="font-bold text-morandi-gold">
                 {item.estimated_cost ? `¥${item.estimated_cost.toLocaleString()}` : '-'}
               </div>
             </div>

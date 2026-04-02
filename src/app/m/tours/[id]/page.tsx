@@ -35,14 +35,14 @@ const TABS: { id: TabType; label: string; icon: typeof FileText }[] = [
 ]
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  開團: { label: ID_LABELS.STATUS_PROPOSAL, color: 'text-amber-700', bg: 'bg-amber-100' },
-  待出發: { label: ID_LABELS.STATUS_IN_PROGRESS, color: 'text-green-700', bg: 'bg-green-100' },
+  開團: { label: ID_LABELS.STATUS_PROPOSAL, color: 'text-morandi-gold', bg: 'bg-morandi-gold/10' },
+  待出發: { label: ID_LABELS.STATUS_IN_PROGRESS, color: 'text-morandi-green', bg: 'bg-morandi-green/10' },
   已結團: {
     label: ID_LABELS.STATUS_CLOSED,
     color: 'text-morandi-secondary',
     bg: 'bg-morandi-container',
   },
-  取消: { label: ID_LABELS.STATUS_CANCELLED, color: 'text-red-700', bg: 'bg-red-100' },
+  取消: { label: ID_LABELS.STATUS_CANCELLED, color: 'text-morandi-red', bg: 'bg-morandi-red/10' },
 }
 
 // 資料庫類型
@@ -555,7 +555,7 @@ export default function TourDetailPage() {
                   {room.assigned_members.map(m => (
                     <span
                       key={m.id}
-                      className="text-xs px-2 py-1 rounded-full bg-blue-50 text-blue-700"
+                      className="text-xs px-2 py-1 rounded-full bg-status-info/10 text-status-info"
                     >
                       {m.name}
                     </span>
@@ -599,7 +599,7 @@ export default function TourDetailPage() {
                   {vehicle.assigned_members.map(m => (
                     <span
                       key={m.id}
-                      className="text-xs px-2 py-1 rounded-full bg-green-50 text-green-700"
+                      className="text-xs px-2 py-1 rounded-full bg-morandi-green/10 text-morandi-green"
                     >
                       {m.name}
                       {m.seat_number && ` #${m.seat_number}`}
@@ -626,13 +626,13 @@ export default function TourDetailPage() {
               <h3 className="font-medium text-morandi-primary mb-3">{ID_LABELS.LABEL_2382}</h3>
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-lg font-bold text-green-600">
+                  <div className="text-lg font-bold text-morandi-green">
                     {payments.filter(p => p.status === 'billed').length}
                   </div>
                   <div className="text-xs text-morandi-secondary">{ID_LABELS.LABEL_9075}</div>
                 </div>
                 <div>
-                  <div className="text-lg font-bold text-amber-600">
+                  <div className="text-lg font-bold text-morandi-gold">
                     {
                       payments.filter(p => p.status === 'pending' || p.status === 'confirmed')
                         .length

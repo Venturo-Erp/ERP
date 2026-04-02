@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { computeRowSpans } from './compute-row-spans'
 
-const makeMembers = (ids: string[]) => ids.map(id => ({ id }) as any)
+const makeMembers = (ids: string[]) => ids.map(id => ({ id }) as never)
 
 describe('computeRowSpans', () => {
   it('computes room spans for consecutive same assignments', () => {

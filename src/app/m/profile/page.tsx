@@ -136,7 +136,7 @@ export default function MobileProfilePage() {
         <button
           onClick={handleLogout}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl
-                     bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                     bg-morandi-red/10 text-morandi-red hover:bg-morandi-red/20 transition-colors"
         >
           <LogOut size={18} />
           <span className="font-medium">{PROFILE_LABELS.LABEL_9863}</span>

@@ -151,10 +151,10 @@ export default function MobileHomePage() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Plane size={18} className="text-green-600" />
+              <Plane size={18} className="text-morandi-green" />
               <h2 className="font-bold text-morandi-primary">{M_LABELS.LABEL_5500}</h2>
               {todayDepartures.length > 0 && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-green/10 text-morandi-green">
                   {todayDepartures.length}
                 </span>
               )}
@@ -183,10 +183,10 @@ export default function MobileHomePage() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <PlaneLanding size={18} className="text-blue-600" />
+              <PlaneLanding size={18} className="text-status-info" />
               <h2 className="font-bold text-morandi-primary">{M_LABELS.LABEL_8173}</h2>
               {todayReturns.length > 0 && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-status-info/10 text-status-info">
                   {todayReturns.length}
                 </span>
               )}
@@ -215,10 +215,10 @@ export default function MobileHomePage() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <AlertCircle size={18} className="text-red-600" />
+              <AlertCircle size={18} className="text-morandi-red" />
               <h2 className="font-bold text-morandi-primary">{M_LABELS.LABEL_5382}</h2>
               {urgentTodos.length > 0 && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 text-red-700">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-red/10 text-morandi-red">
                   {urgentTodos.length}
                 </span>
               )}

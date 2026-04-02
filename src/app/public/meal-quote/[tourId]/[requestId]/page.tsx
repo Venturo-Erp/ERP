@@ -70,7 +70,7 @@ export default async function MealQuotePage({
 
   // 判斷是否已提交
   const isSubmitted = request.supplier_response && request.replied_at
-  const quoteData = request.supplier_response as any
+  const quoteData = request.supplier_response as { submitted_at?: string; contact?: string; phone?: string; pax?: number; unitPrice?: number; totalCost?: number; notes?: string } | null
 
   // 計算天數
   const totalDays =
@@ -113,7 +113,7 @@ export default async function MealQuotePage({
                       </tr>
                     </thead>
                     <tbody>
-                      {requestItems.map((item: any, idx: number) => (
+                      {requestItems.map((item: Record<string, unknown>, idx: number) => (
                         <tr key={idx} className="border-b border-border">
                           <td className="py-2">{(item.meal_time as string) || '—'}</td>
                           <td className="py-2">{(item.meal_content as string) || (item.name as string) || '—'}</td>
@@ -148,8 +148,8 @@ export default async function MealQuotePage({
                   <span className="text-xs text-morandi-secondary ml-2">（點擊展開）</span>
                 </summary>
                 <div className="p-4 space-y-3 border-t border-border">
-                  {history.map((h: any) => {
-                    const hQuote = h.supplier_response as any
+                  {history.map((h: (typeof history)[number]) => {
+                    const hQuote = h.supplier_response as { submitted_at?: string; contact?: string; phone?: string; pax?: number; unitPrice?: number; totalCost?: number; notes?: string } | null
                     return (
                       <div
                         key={h.id}

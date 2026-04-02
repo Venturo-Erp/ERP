@@ -510,7 +510,7 @@ export default function WishlistTemplateEditPage({
                     className={`
                       relative flex gap-3 p-3 bg-white border rounded-lg cursor-pointer transition-all
                       ${isAdded 
-                        ? 'opacity-50 cursor-not-allowed border-green-300 bg-green-50' 
+                        ? 'opacity-50 cursor-not-allowed border-morandi-green/30 bg-morandi-green/10'
                         : 'hover:border-primary hover:shadow-md'
                       }
                     `}
@@ -539,7 +539,7 @@ export default function WishlistTemplateEditPage({
 
                     {/* 加入按鈕或已加入標記 */}
                     {isAdded ? (
-                      <Badge variant="outline" className="absolute top-2 right-2 text-xs bg-green-100 text-green-700 border-green-300">
+                      <Badge variant="outline" className="absolute top-2 right-2 text-xs bg-morandi-green/10 text-morandi-green border-morandi-green/30">
                         已加入
                       </Badge>
                     ) : (

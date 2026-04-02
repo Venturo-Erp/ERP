@@ -157,7 +157,7 @@ describe('priceCalculations', () => {
         getRoomTypeProfit(
           'deluxe',
           'adult',
-          sellingPrices as any,
+          sellingPrices as never,
           accommodationSummary,
           identityCosts
         )
@@ -187,7 +187,7 @@ describe('priceCalculations', () => {
         getRoomTypeProfit(
           'standard',
           'adult',
-          sellingPrices as any,
+          sellingPrices as never,
           accommodationSummary,
           identityCosts
         )

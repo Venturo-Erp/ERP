@@ -18,11 +18,11 @@ interface TeamConfirmationSheetProps {
     id: string
     request_type: string
     supplier_name: string
-    items: any[]
+    items: Array<{ room_type?: string; quantity?: number; check_in_date?: string; meal_time?: string; meal_content?: string; name?: string; activity_name?: string; activity_time?: string; }>
     note?: string
     sent_to?: string
-    supplier_response?: any
-    metadata?: any
+    supplier_response?: Record<string, unknown>
+    metadata?: { vehicleDesc?: string; dayNumber?: number; [key: string]: unknown }
     status?: string
   }>
 }
@@ -51,7 +51,7 @@ export function TeamConfirmationSheet({
     // 嘗試從不同地方取得 day
     let day = 0
     if (req.metadata?.dayNumber) {
-      day = req.metadata.dayNumber
+      day = req.metadata.dayNumber as number
     } else if (req.items && req.items[0]) {
       // 從 items 的日期推斷
       const firstItem = req.items[0]
@@ -199,23 +199,23 @@ export function TeamConfirmationSheet({
                           </div>
 
                           {/* 需求明細 */}
-                          {req.request_type === 'accommodation' && req.items && (
+                          {req.request_type === 'accommodation' && req.items.length > 0 && (
                             <div className="text-sm space-y-1">
-                              {req.items.map((item: any, idx: number) => (
+                              {req.items.map((item, idx) => (
                                 <div key={idx} className="text-morandi-primary">
-                                  • {item.room_type} × {item.quantity} 間
-                                  {item.check_in_date && ` (入住 ${item.check_in_date})`}
+                                  • {String(item.room_type)} × {Number(item.quantity)} 間
+                                  {item.check_in_date ? ` (入住 ${String(item.check_in_date)})` : null}
                                 </div>
                               ))}
                             </div>
                           )}
 
-                          {req.request_type === 'meal' && req.items && (
+                          {req.request_type === 'meal' && req.items.length > 0 && (
                             <div className="text-sm space-y-1">
-                              {req.items.map((item: any, idx: number) => (
+                              {req.items.map((item, idx) => (
                                 <div key={idx} className="text-morandi-primary">
-                                  • {item.meal_time || ''} {item.meal_content || item.name || ''}
-                                  {item.quantity && ` (${item.quantity} 人)`}
+                                  • {String(item.meal_time || '')} {String(item.meal_content || item.name || '')}
+                                  {item.quantity ? ` (${Number(item.quantity)} 人)` : null}
                                 </div>
                               ))}
                             </div>
@@ -223,17 +223,17 @@ export function TeamConfirmationSheet({
 
                           {req.request_type === 'transport' && req.metadata?.vehicleDesc && (
                             <div className="text-sm text-morandi-primary">
-                              • {req.metadata.vehicleDesc}
+                              • {String(req.metadata?.vehicleDesc)}
                             </div>
                           )}
 
-                          {req.request_type === 'activity' && req.items && (
+                          {req.request_type === 'activity' && req.items.length > 0 && (
                             <div className="text-sm space-y-1">
-                              {req.items.map((item: any, idx: number) => (
+                              {req.items.map((item, idx) => (
                                 <div key={idx} className="text-morandi-primary">
-                                  • {item.activity_name || item.name || ''}
-                                  {item.activity_time && ` (${item.activity_time})`}
-                                  {item.quantity && ` (${item.quantity} 人)`}
+                                  • {String(item.activity_name || item.name || '')}
+                                  {item.activity_time ? ` (${String(item.activity_time)})` : null}
+                                  {item.quantity ? ` (${Number(item.quantity)} 人)` : null}
                                 </div>
                               ))}
                             </div>
@@ -242,12 +242,12 @@ export function TeamConfirmationSheet({
                           {/* 聯絡資訊 */}
                           {req.supplier_response && (
                             <div className="mt-2 text-sm text-morandi-secondary">
-                              {req.supplier_response.contact && (
-                                <div>聯絡人：{req.supplier_response.contact}</div>
-                              )}
-                              {req.supplier_response.phone && (
-                                <div>電話：{req.supplier_response.phone}</div>
-                              )}
+                              {(req.supplier_response as Record<string, unknown>)?.contact ? (
+                                <div>聯絡人：{String((req.supplier_response as Record<string, unknown>)?.contact)}</div>
+                              ) : null}
+                              {(req.supplier_response as Record<string, unknown>)?.phone ? (
+                                <div>電話：{String((req.supplier_response as Record<string, unknown>)?.phone)}</div>
+                              ) : null}
                             </div>
                           )}
 

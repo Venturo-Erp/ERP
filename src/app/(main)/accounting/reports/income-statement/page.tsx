@@ -181,7 +181,7 @@ export default function IncomeStatementPage() {
 
               {/* 收入 */}
               <div>
-                <div className="font-semibold mb-2 text-green-700">營業收入</div>
+                <div className="font-semibold mb-2 text-morandi-green">營業收入</div>
                 {data.revenue.map(item => (
                   <div key={item.code} className="flex justify-between py-1 pl-4">
                     <span className="text-sm">
@@ -201,7 +201,7 @@ export default function IncomeStatementPage() {
 
               {/* 成本 */}
               <div>
-                <div className="font-semibold mb-2 text-orange-700">營業成本</div>
+                <div className="font-semibold mb-2 text-status-warning">營業成本</div>
                 {data.cost.map(item => (
                   <div key={item.code} className="flex justify-between py-1 pl-4">
                     <span className="text-sm">
@@ -215,7 +215,7 @@ export default function IncomeStatementPage() {
                 )}
                 <div className="flex justify-between py-2 border-t border-border mt-2 font-semibold">
                   <span>成本合計</span>
-                  <span className="font-mono text-red-600">
+                  <span className="font-mono text-morandi-red">
                     (${data.totalCost.toLocaleString()})
                   </span>
                 </div>
@@ -224,7 +224,7 @@ export default function IncomeStatementPage() {
               {/* 毛利 */}
               <div
                 className={`flex justify-between py-3 border-y-2 font-bold text-lg ${
-                  data.grossProfit >= 0 ? 'text-green-600' : 'text-red-600'
+                  data.grossProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red'
                 }`}
               >
                 <span>毛利</span>
@@ -233,7 +233,7 @@ export default function IncomeStatementPage() {
 
               {/* 費用 */}
               <div>
-                <div className="font-semibold mb-2 text-purple-700">營業費用</div>
+                <div className="font-semibold mb-2 text-morandi-secondary">營業費用</div>
                 {data.expense.map(item => (
                   <div key={item.code} className="flex justify-between py-1 pl-4">
                     <span className="text-sm">
@@ -247,7 +247,7 @@ export default function IncomeStatementPage() {
                 )}
                 <div className="flex justify-between py-2 border-t border-border mt-2 font-semibold">
                   <span>費用合計</span>
-                  <span className="font-mono text-red-600">
+                  <span className="font-mono text-morandi-red">
                     (${data.totalExpense.toLocaleString()})
                   </span>
                 </div>
@@ -256,7 +256,7 @@ export default function IncomeStatementPage() {
               {/* 淨利 */}
               <div
                 className={`flex justify-between py-4 border-y-2 font-bold text-xl ${
-                  data.netIncome >= 0 ? 'text-green-600' : 'text-red-600'
+                  data.netIncome >= 0 ? 'text-morandi-green' : 'text-morandi-red'
                 }`}
               >
                 <span>本期損益（淨利）</span>
@@ -264,7 +264,7 @@ export default function IncomeStatementPage() {
               </div>
 
               {/* 說明 */}
-              <div className="bg-blue-50 p-4 rounded text-sm text-blue-800">
+              <div className="bg-status-info/10 p-4 rounded text-sm text-morandi-primary">
                 <div className="font-semibold mb-2">損益表公式</div>
                 <ul className="list-disc list-inside space-y-1">
                   <li>毛利 = 營業收入 - 營業成本 = ${data.grossProfit.toLocaleString()}</li>

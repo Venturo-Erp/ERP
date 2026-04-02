@@ -151,7 +151,7 @@ export const useQuoteState = () => {
           (quote as typeof quote & { expense_description?: string })?.expense_description || '',
       })
       // 讀取保險和不包含項目
-      const metadata = (quote as typeof quote & { metadata?: any })?.metadata
+      const metadata = (quote as typeof quote & { metadata?: Record<string, unknown> })?.metadata
       if (metadata) {
         if (metadata.insuranceText) setInsuranceText(metadata.insuranceText as string)
         if (Array.isArray(metadata.excludedItems)) setExcludedItems(metadata.excludedItems as string[])

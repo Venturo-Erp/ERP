@@ -246,7 +246,7 @@ export default function PeriodClosingPage() {
               <div className="flex justify-between">
                 <span className="text-muted-foreground">狀態：</span>
                 {isClosed ? (
-                  <Badge variant="outline" className="text-green-600">
+                  <Badge variant="outline" className="text-morandi-green">
                     <CheckCircle size={14} className="mr-1" />
                     已結轉
                   </Badge>
@@ -270,7 +270,7 @@ export default function PeriodClosingPage() {
               <li>計算所有損益科目（收入、費用、成本）的餘額</li>
               <li>將損益科目餘額結轉到「3200 本期損益」</li>
               {periodType === 'year' && (
-                <li className="text-orange-600 font-semibold">
+                <li className="text-status-warning font-semibold">
                   【年結特殊】將「3200 本期損益」結轉到「3300 保留盈餘」
                 </li>
               )}
@@ -308,7 +308,7 @@ export default function PeriodClosingPage() {
                   </div>
                   <div className="text-right">
                     <div
-                      className={`font-semibold ${closing.net_income >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                      className={`font-semibold ${closing.net_income >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}
                     >
                       {closing.net_income >= 0 ? '淨利' : '淨損'}
                     </div>

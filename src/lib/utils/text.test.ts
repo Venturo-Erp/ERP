@@ -28,7 +28,7 @@ describe('toHalfWidth', () => {
 
   it('handles empty/falsy input', () => {
     expect(toHalfWidth('')).toBe('')
-    expect(toHalfWidth(null as any)).toBe(null)
+    expect(toHalfWidth(null as never)).toBe(null)
   })
 })
 
@@ -59,7 +59,7 @@ describe('tryCalculateMath', () => {
 
   it('handles empty/falsy', () => {
     expect(tryCalculateMath('')).toBe('')
-    expect(tryCalculateMath(null as any)).toBe(null)
+    expect(tryCalculateMath(null as never)).toBe(null)
   })
 
   it('handles decimal results', () => {

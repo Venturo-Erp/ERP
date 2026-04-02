@@ -203,8 +203,8 @@ export default function LineConnectionsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-blue-100">
-                <User className="h-5 w-5 text-blue-600" />
+              <div className="p-3 rounded-full bg-status-info/10">
+                <User className="h-5 w-5 text-status-info" />
               </div>
               <div>
                 <div className="text-2xl font-bold">{users.length}</div>
@@ -216,8 +216,8 @@ export default function LineConnectionsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-orange-100">
-                <Link2 className="h-5 w-5 text-orange-600" />
+              <div className="p-3 rounded-full bg-status-warning/10">
+                <Link2 className="h-5 w-5 text-status-warning" />
               </div>
               <div>
                 <div className="text-2xl font-bold">{unboundGroups.length}</div>
@@ -229,8 +229,8 @@ export default function LineConnectionsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-purple-100">
-                <MessageCircle className="h-5 w-5 text-purple-600" />
+              <div className="p-3 rounded-full bg-morandi-secondary/10">
+                <MessageCircle className="h-5 w-5 text-morandi-secondary" />
               </div>
               <div>
                 <div className="text-2xl font-bold">{unboundUsers.length}</div>
@@ -294,7 +294,7 @@ export default function LineConnectionsPage() {
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">狀態</label>
                     <div className="mt-1">
-                      <Badge className="bg-green-500">已連接</Badge>
+                      <Badge className="bg-morandi-green">已連接</Badge>
                     </div>
                   </div>
                 </div>
@@ -340,9 +340,9 @@ export default function LineConnectionsPage() {
                     </div>
                   </div>
                 </div>
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-sm text-amber-800 font-medium">⚠️ 重要：連結 LINE OA</p>
-                  <p className="text-sm text-amber-700 mt-1">
+                <div className="p-4 bg-morandi-gold/10 border border-morandi-gold/30 rounded-lg">
+                  <p className="text-sm text-morandi-primary font-medium">⚠️ 重要：連結 LINE OA</p>
+                  <p className="text-sm text-morandi-secondary mt-1">
                     需要在 LINE Developers Console 將 LINE Login Channel 與 Messaging API Channel 連結，
                     這樣登入取得的 userId 才能用來推播訊息。
                   </p>
@@ -493,7 +493,7 @@ export default function LineConnectionsPage() {
                       </div>
                       <div className="flex items-center gap-3">
                         {user.employees ? (
-                          <Badge className="bg-blue-600">
+                          <Badge className="bg-status-info">
                             <User className="h-3 w-3 mr-1" />
                             {user.employees.display_name}
                           </Badge>

@@ -7,7 +7,7 @@ import { logger } from '@/lib/utils/logger'
 interface AccommodationQuoteFormProps {
   tourId: string
   requestId: string
-  requestItems: any[]
+  requestItems: Record<string, unknown>[]
 }
 
 export function AccommodationQuoteForm({
@@ -23,7 +23,7 @@ export function AccommodationQuoteForm({
 
   // 初始化房型報價（從 requestItems 複製）
   const [rooms, setRooms] = useState(
-    requestItems.map((item: any) => ({
+    requestItems.map((item: Record<string, unknown>) => ({
       roomType: (item.room_type as string) || '',
       quantity: (item.quantity as number) || 1,
       unitPrice: 0,

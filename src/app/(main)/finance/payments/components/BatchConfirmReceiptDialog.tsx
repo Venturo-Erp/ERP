@@ -245,13 +245,13 @@ export function BatchConfirmReceiptDialog({
                         onChange={e => updateActualAmount(receipt.id, parseFloat(e.target.value) || 0)}
                         className={cn(
                           'h-8 text-right',
-                          isAbnormal && 'border-orange-400 bg-orange-50'
+                          isAbnormal && 'border-status-warning bg-status-warning/10'
                         )}
                       />
                     </div>
                     <div className="w-20 flex justify-center">
                       {isAbnormal ? (
-                        <AlertCircle className="h-5 w-5 text-orange-500" />
+                        <AlertCircle className="h-5 w-5 text-status-warning" />
                       ) : (
                         <Check className="h-5 w-5 text-morandi-green" />
                       )}

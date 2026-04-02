@@ -35,12 +35,12 @@ function getAccountLevel(code: string): number {
 }
 
 const typeConfig = {
-  asset: { label: '資產', color: 'text-blue-600' },
-  liability: { label: '負債', color: 'text-red-600' },
-  equity: { label: '權益', color: 'text-purple-600' },
-  revenue: { label: '收入', color: 'text-green-600' },
-  expense: { label: '費用', color: 'text-orange-600' },
-  cost: { label: '成本', color: 'text-yellow-600' },
+  asset: { label: '資產', color: 'text-status-info' },
+  liability: { label: '負債', color: 'text-morandi-red' },
+  equity: { label: '權益', color: 'text-morandi-secondary' },
+  revenue: { label: '收入', color: 'text-morandi-green' },
+  expense: { label: '費用', color: 'text-status-warning' },
+  cost: { label: '成本', color: 'text-morandi-gold' },
 }
 
 export default function AccountsPage() {

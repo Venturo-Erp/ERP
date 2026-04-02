@@ -145,9 +145,8 @@ export function useQuoteLoader(
       logger.info(COMP_TOURS_LABELS.報價單載入成功, quote?.id, quote?.name)
 
       // TODO: quote_items 表已不存在，這個 hook 需要重構
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: quoteItems, error: itemsError } = await (supabase as any)
-        .from('quote_items')
+      const { data: quoteItems, error: itemsError } = await supabase
+        .from('quote_items' as never)
         .select('*')
         .eq('quote_id', quoteId)
         .order('display_order', { ascending: true })

@@ -305,7 +305,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
                   // 更新快速報價單
                   const { error } = await supabase
                     .from('quotes')
-                    .update(data as any)
+                    .update(data as never)
                     .eq('id', selectedQuote.id)
                   if (error) throw error
                   // 重新載入

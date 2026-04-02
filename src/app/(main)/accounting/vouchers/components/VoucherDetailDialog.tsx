@@ -111,7 +111,7 @@ export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDeta
 
           {/* 說明 */}
           {voucher.memo && (
-            <div className="p-3 bg-blue-50 rounded-lg">
+            <div className="p-3 bg-status-info/10 rounded-lg">
               <div className="text-xs text-muted-foreground mb-1">說明</div>
               <div className="text-sm leading-relaxed">{voucher.memo}</div>
             </div>

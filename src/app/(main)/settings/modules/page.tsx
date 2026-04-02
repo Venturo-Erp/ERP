@@ -60,9 +60,9 @@ const MODULE_INFO = {
     name: MODULES_PAGE_LABELS.BI_NAME,
     description: MODULES_PAGE_LABELS.BI_DESC,
     icon: BarChart3,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-600/30',
+    color: 'text-morandi-secondary',
+    bgColor: 'bg-morandi-container',
+    borderColor: 'border-morandi-secondary/30',
     features: [...MODULES_PAGE_LABELS.BI_FEATURES],
   },
 } as const

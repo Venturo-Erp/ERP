@@ -92,10 +92,10 @@ export function CollaborativeConfirmationSheet({
 
       mutate()
       toast({ title: '✅ 已更新' })
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: '更新失敗',
-        description: error.message,
+        description: (error instanceof Error ? error.message : String(error)),
         variant: 'destructive',
       })
     }
@@ -107,7 +107,7 @@ export function CollaborativeConfirmationSheet({
     if (!printWindow) return
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = request.supplier_response as any
+    const response = request.supplier_response as Record<string, unknown> | null
     const selectedPrice =
       request.selected_tier != null ? (response?.tierPrices as Record<number, number> | undefined)?.[request.selected_tier] : undefined
 

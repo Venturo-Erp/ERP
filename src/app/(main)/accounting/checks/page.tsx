@@ -24,10 +24,10 @@ interface Check {
 }
 
 const statusConfig = {
-  pending: { label: '未兌現', variant: 'secondary' as const, color: 'text-yellow-600' },
-  cleared: { label: '已兌現', variant: 'default' as const, color: 'text-green-600' },
+  pending: { label: '未兌現', variant: 'secondary' as const, color: 'text-morandi-gold' },
+  cleared: { label: '已兌現', variant: 'default' as const, color: 'text-morandi-green' },
   voided: { label: '作廢', variant: 'outline' as const, color: 'text-morandi-secondary' },
-  bounced: { label: '退票', variant: 'destructive' as const, color: 'text-red-600' },
+  bounced: { label: '退票', variant: 'destructive' as const, color: 'text-morandi-red' },
 }
 
 export default function ChecksPage() {
@@ -85,7 +85,7 @@ export default function ChecksPage() {
       width: '100px',
       render: (_: unknown, row: Check) => {
         const isOverdue = new Date(row.due_date) < new Date() && row.status === 'pending'
-        return <span className={isOverdue ? 'text-red-600 font-semibold' : ''}>{row.due_date}</span>
+        return <span className={isOverdue ? 'text-morandi-red font-semibold' : ''}>{row.due_date}</span>
       },
     },
     {
@@ -127,7 +127,7 @@ export default function ChecksPage() {
                 size="sm"
                 variant="ghost"
                 onClick={() => handleClearCheck(row)}
-                className="text-green-600 hover:text-green-700"
+                className="text-morandi-green hover:text-morandi-green"
                 title="標記已兌現"
               >
                 <CheckCircle size={14} />
@@ -136,7 +136,7 @@ export default function ChecksPage() {
                 size="sm"
                 variant="ghost"
                 onClick={() => handleVoidCheck(row)}
-                className="text-red-600 hover:text-red-700"
+                className="text-morandi-red hover:text-morandi-red"
                 title="作廢"
               >
                 <XCircle size={14} />
@@ -217,15 +217,15 @@ export default function ChecksPage() {
             <div className="text-sm text-yellow-700 mb-1">未兌現支票</div>
             <div className="text-2xl font-bold text-yellow-900">{stats.pending} 張</div>
           </div>
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="text-sm text-blue-700 mb-1">未兌現金額</div>
-            <div className="text-2xl font-bold text-blue-900">
+          <div className="bg-status-info/10 p-4 rounded-lg">
+            <div className="text-sm text-status-info mb-1">未兌現金額</div>
+            <div className="text-2xl font-bold text-morandi-primary">
               ${stats.pendingAmount.toLocaleString()}
             </div>
           </div>
-          <div className="bg-red-50 p-4 rounded-lg">
-            <div className="text-sm text-red-700 mb-1">逾期支票</div>
-            <div className="text-2xl font-bold text-red-900">{stats.overdue} 張</div>
+          <div className="bg-morandi-red/10 p-4 rounded-lg">
+            <div className="text-sm text-morandi-red mb-1">逾期支票</div>
+            <div className="text-2xl font-bold text-morandi-primary">{stats.overdue} 張</div>
           </div>
         </div>
 

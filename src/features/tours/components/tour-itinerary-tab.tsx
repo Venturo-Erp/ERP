@@ -934,8 +934,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 result.cancellations.length > 0
               ) {
                 const cancelList = result.cancellations
-                  .map((c: any) =>
-                    c.items.map((i: any) => `${(i.service_date as string) || ''} ${i.title as string}`).join('、')
+                  .map((c: Record<string, unknown>) =>
+                    (c.items as Record<string, unknown>[]).map((i: Record<string, unknown>) => `${(i.service_date as string) || ''} ${i.title as string}`).join('、')
                   )
                   .join('\n')
 

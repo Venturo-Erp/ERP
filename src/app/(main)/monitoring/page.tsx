@@ -75,15 +75,15 @@ export default function MonitoringPage() {
               <p className="text-xs text-muted-foreground">總 Agents</p>
             </Card>
             <Card className="p-4">
-              <div className="text-2xl font-bold text-green-600">3</div>
+              <div className="text-2xl font-bold text-morandi-green">3</div>
               <p className="text-xs text-muted-foreground">活躍中</p>
             </Card>
             <Card className="p-4">
-              <div className="text-2xl font-bold text-blue-600">12</div>
+              <div className="text-2xl font-bold text-status-info">12</div>
               <p className="text-xs text-muted-foreground">進行中任務</p>
             </Card>
             <Card className="p-4">
-              <div className="text-2xl font-bold text-purple-600">45</div>
+              <div className="text-2xl font-bold text-morandi-secondary">45</div>
               <p className="text-xs text-muted-foreground">今日完成</p>
             </Card>
           </div>

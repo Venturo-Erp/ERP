@@ -14,10 +14,10 @@ import type { Database } from '@/lib/supabase/types'
 type TourRequest = Database['public']['Tables']['tour_requests']['Row']
 
 const STATUS_BADGE: Record<string, { label: string; color: string }> = {
-  pending: { label: '待處理', color: 'bg-amber-100 text-amber-700' },
-  accepted: { label: '已接受', color: 'bg-green-100 text-green-700' },
-  rejected: { label: '已拒絕', color: 'bg-red-100 text-red-700' },
-  completed: { label: '已完成', color: 'bg-blue-100 text-blue-700' },
+  pending: { label: '待處理', color: 'bg-morandi-gold/10 text-morandi-gold' },
+  accepted: { label: '已接受', color: 'bg-morandi-green/10 text-morandi-green' },
+  rejected: { label: '已拒絕', color: 'bg-morandi-red/10 text-morandi-red' },
+  completed: { label: '已完成', color: 'bg-status-info/10 text-status-info' },
 }
 
 export default function LocalRequestsPage() {
