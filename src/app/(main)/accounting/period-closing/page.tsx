@@ -17,6 +17,7 @@ import { Calendar, CheckCircle, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'sonner'
+import { logger } from '@/lib/utils/logger'
 
 interface PeriodClosing {
   id: string
@@ -63,7 +64,7 @@ export default function PeriodClosingPage() {
       if (error) throw error
       setClosings(data || [])
     } catch (error) {
-      console.error('載入結轉記錄失敗:', error)
+      logger.error('載入結轉記錄失敗:', error)
     }
   }
 
@@ -140,7 +141,7 @@ export default function PeriodClosingPage() {
       )
       loadClosings()
     } catch (error) {
-      console.error('結轉失敗:', error)
+      logger.error('結轉失敗:', error)
       toast.error(error instanceof Error ? error.message : '結轉失敗')
     } finally {
       setIsLoading(false)

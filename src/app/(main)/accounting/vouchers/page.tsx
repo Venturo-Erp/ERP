@@ -19,6 +19,7 @@ import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { CreateVoucherDialog } from './components/CreateVoucherDialog'
 import { VoucherDetailDialog } from './components/VoucherDetailDialog'
+import { logger } from '@/lib/utils/logger'
 
 interface JournalVoucher {
   id: string
@@ -86,7 +87,7 @@ export default function VouchersPage() {
       if (error) throw error
       setVouchers(data || [])
     } catch (error) {
-      console.error('載入傳票失敗:', error)
+      logger.error('載入傳票失敗:', error)
     } finally {
       setIsLoading(false)
     }

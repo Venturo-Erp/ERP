@@ -6,6 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/utils/logger'
 
 const LINE_CHANNEL_ACCESS_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN!
 
@@ -36,13 +37,13 @@ export async function POST(request: NextRequest) {
 
     if (!res.ok) {
       const errorText = await res.text()
-      console.error('LINE Push failed:', errorText)
+      logger.error('LINE Push failed:', errorText)
       return NextResponse.json({ error: 'Push failed' }, { status: 500 })
     }
 
     return NextResponse.json({ ok: true })
   } catch (error) {
-    console.error('LINE Push error:', error)
+    logger.error('LINE Push error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

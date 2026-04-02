@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
         .select()
 
       if (accountsError) {
-        console.error('科目表插入失敗:', accountsError)
+        logger.error('科目表插入失敗:', accountsError)
         return NextResponse.json(
           {
             error: `科目表初始化失敗: ${accountsError.message}`,
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
       message: `科目表初始化完成：${stats.accounts_created} 個科目`,
     })
   } catch (error) {
-    console.error('Accounting initialization error:', error)
+    logger.error('Accounting initialization error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }

@@ -17,6 +17,7 @@ import {
 import { Check, X, Truck } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { logger } from '@/lib/utils/logger'
 
 interface TransportQuote {
   id: string
@@ -133,7 +134,7 @@ export function TransportQuoteActions({
       setOpen(false)
       onUpdate?.()
     } catch (error) {
-      console.error('Action failed:', error)
+      logger.error('Action failed:', error)
       toast.error('操作失敗，請稍後再試')
     } finally {
       setIsProcessing(false)
@@ -189,7 +190,7 @@ export function TransportQuoteActions({
       setShowCancel(false)
       onUpdate?.()
     } catch (error) {
-      console.error('Cancel failed:', error)
+      logger.error('Cancel failed:', error)
       toast.error('取消失敗')
     } finally {
       setIsProcessing(false)

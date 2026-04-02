@@ -22,14 +22,22 @@ async function checkIsAdmin(employeeId: string): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
   const { data, error } = await adminClient
     .from('employees')
-    .select('roles')
+    .select('job_info')
     .eq('id', employeeId)
     .single()
 
   if (error || !data) return false
 
-  const roles = data.roles as string[] | null
-  return roles?.some(r => r === 'admin') ?? false
+  const jobInfo = data.job_info as { role_id?: string } | null
+  if (!jobInfo?.role_id) return false
+
+  const { data: role } = await adminClient
+    .from('workspace_roles')
+    .select('is_admin')
+    .eq('id', jobInfo.role_id)
+    .single()
+
+  return role?.is_admin ?? false
 }
 
 export async function POST(request: NextRequest) {

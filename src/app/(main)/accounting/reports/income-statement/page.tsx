@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
+import { logger } from '@/lib/utils/logger'
 
 interface AccountBalance {
   code: string
@@ -134,7 +135,7 @@ export default function IncomeStatementPage() {
         netIncome,
       })
     } catch (error) {
-      console.error('載入損益表失敗:', error)
+      logger.error('載入損益表失敗:', error)
       alert('載入失敗')
     } finally {
       setIsLoading(false)

@@ -33,7 +33,6 @@ export async function POST(request: NextRequest) {
     const userAgent = headersList.get('user-agent') || 'unknown'
 
     // 檢查合約是否存在且未簽署
-    console.log('[Contract Sign] contractId:', contractId)
     
     const { data: contract, error: fetchError } = await supabase
       .from('contracts')
@@ -50,8 +49,6 @@ export async function POST(request: NextRequest) {
       .eq('id', contractId)
       .single()
 
-    console.log('[Contract Sign] fetchError:', fetchError)
-    console.log('[Contract Sign] contract:', contract?.id, contract?.code)
 
     // 另外查詢 tour 資訊（避免 foreign key 問題）
     let tourInfo: { code: string; name: string } | null = null

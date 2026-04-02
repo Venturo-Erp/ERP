@@ -155,7 +155,7 @@ async function processGroupEvent(groupId: string) {
     logger.info(`[LINE] Group: ${groupId} | Name: ${groupName} | Members: ${memberCount}`)
     await saveGroupToDb(groupId, groupName, memberCount)
   } catch (err) {
-    console.error('[LINE] Background process error:', err)
+    logger.error('[LINE] Background process error:', err)
   }
 }
 
@@ -330,7 +330,7 @@ async function processEmployeeBinding(event: any) {
     logger.info(`[LINE] Employee binding: ${employeeCode} -> ${userId}`)
     return true
   } catch (err) {
-    console.error('[LINE] Employee binding error:', err)
+    logger.error('[LINE] Employee binding error:', err)
     return false
   }
 }
@@ -349,7 +349,7 @@ async function processInsurancePDF(event: any) {
     const result = await res.json()
     logger.info('[LINE] Insurance result:', result)
   } catch (err) {
-    console.error('[LINE] Insurance process error:', err)
+    logger.error('[LINE] Insurance process error:', err)
   }
 }
 
@@ -387,7 +387,7 @@ async function handleAIMessage(event: any) {
     
     logger.info(`[LINE AI] User: ${userId} | Message: ${userMessage} | Response: ${aiResponse.substring(0, 50)}...`)
   } catch (err) {
-    console.error('[LINE AI] Handle message error:', err)
+    logger.error('[LINE AI] Handle message error:', err)
   }
 }
 
@@ -406,16 +406,13 @@ export async function POST(req: NextRequest) {
 
       // 私人訊息 → 檢查綁定指令（客戶或員工）或 AI 客服
       if (source.type === 'user' && event.type === 'message' && event.message?.type === 'text') {
-        console.log('[LINE] User message received:', event.message.text)
         
         const isCustomerBinding = await processCustomerBinding(event)
         const isEmployeeBinding = await processEmployeeBinding(event)
         
-        console.log('[LINE] Binding check:', { isCustomerBinding, isEmployeeBinding })
         
         // 如果不是綁定指令，就用 AI 客服回覆
         if (!isCustomerBinding && !isEmployeeBinding) {
-          console.log('[LINE] Starting AI customer service...')
           await handleAIMessage(event)
         }
       }
@@ -437,7 +434,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ status: 'ok' })
   } catch (error) {
-    console.error('[LINE] Webhook error:', error)
+    logger.error('[LINE] Webhook error:', error)
     return NextResponse.json({ status: 'error' }, { status: 500 })
   }
 }

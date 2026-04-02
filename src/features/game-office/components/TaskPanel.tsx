@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Play, Users, CheckCircle, Clock, MessageSquare, Code, Search } from 'lucide-react'
 import { useAgentStatusStore, Agent } from '@/stores/agent-status-store'
+import { logger } from '@/lib/utils/logger'
 
 export type TaskType = 'development' | 'meeting' | 'research'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed'
@@ -133,7 +134,7 @@ export function TaskPanel({ onTaskStart }: TaskPanelProps) {
         })
       }
     } catch (error) {
-      console.error('Task execution failed:', error)
+      logger.error('Task execution failed:', error)
       setAgentMessage(task.assignee, '❌ 執行失敗')
     }
   }

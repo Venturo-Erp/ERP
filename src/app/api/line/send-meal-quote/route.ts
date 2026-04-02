@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (insertError) {
-      console.error('建立需求單失敗:', insertError)
+      logger.error('建立需求單失敗:', insertError)
       return NextResponse.json({ error: insertError.message }, { status: 500 })
     }
 
@@ -239,13 +240,13 @@ export async function POST(req: NextRequest) {
 
     if (!lineResponse.ok) {
       const lineError = await lineResponse.text()
-      console.error('LINE API 錯誤:', lineError)
+      logger.error('LINE API 錯誤:', lineError)
       return NextResponse.json({ error: 'LINE 發送失敗' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, requestId, publicUrl })
   } catch (error) {
-    console.error('發送餐食需求單失敗:', error)
+    logger.error('發送餐食需求單失敗:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

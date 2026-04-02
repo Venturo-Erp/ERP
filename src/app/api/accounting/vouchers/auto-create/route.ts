@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/utils/logger'
 
 // Lazy initialization to avoid build-time errors
 let supabase: SupabaseClient
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, voucher })
   } catch (error) {
-    console.error('自動產生傳票失敗:', error)
+    logger.error('自動產生傳票失敗:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : '自動產生傳票失敗' },
       { status: 500 }

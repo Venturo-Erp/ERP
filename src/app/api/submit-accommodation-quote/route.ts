@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
       .eq('tour_id', tourId)
 
     if (error) {
-      console.error('Supabase update error:', error)
+      logger.error('Supabase update error:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('提交住宿報價失敗:', error)
+    logger.error('提交住宿報價失敗:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }

@@ -10,6 +10,7 @@ import { Search } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { Badge } from '@/components/ui/badge'
+import { logger } from '@/lib/utils/logger'
 
 interface AccountBalance {
   account_id: string
@@ -115,7 +116,7 @@ export default function TrialBalancePage() {
       const totalCredit = result.reduce((sum, item) => sum + item.credit_total, 0)
       setTotals({ debit: totalDebit, credit: totalCredit })
     } catch (error) {
-      console.error('載入試算表失敗:', error)
+      logger.error('載入試算表失敗:', error)
       alert('載入失敗')
     } finally {
       setIsLoading(false)

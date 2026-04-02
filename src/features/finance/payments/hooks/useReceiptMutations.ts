@@ -310,7 +310,7 @@ export function useReceiptMutations() {
             }),
           })
         } catch (error) {
-          console.error('自動產生收款傳票失敗:', error)
+          logger.error('自動產生收款傳票失敗:', error)
           // 不中斷流程，傳票可手動補建
         }
       }

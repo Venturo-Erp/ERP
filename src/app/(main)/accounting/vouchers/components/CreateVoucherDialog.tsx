@@ -17,6 +17,7 @@ import { Plus, Trash2, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'sonner'
+import { logger } from '@/lib/utils/logger'
 
 interface JournalLine {
   id: string
@@ -129,7 +130,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
         })))
       }
     } catch (error) {
-      console.error('載入單據失敗:', error)
+      logger.error('載入單據失敗:', error)
     } finally {
       setIsLoadingDocuments(false)
     }
@@ -149,7 +150,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
       if (error) throw error
       setAccounts(data || [])
     } catch (error) {
-      console.error('載入科目表失敗:', error)
+      logger.error('載入科目表失敗:', error)
       toast.error('載入科目表失敗')
     }
   }
@@ -234,7 +235,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
       onSuccess?.()
       handleClose()
     } catch (error) {
-      console.error('建立傳票失敗:', error)
+      logger.error('建立傳票失敗:', error)
       toast.error(error instanceof Error ? error.message : '建立傳票失敗')
     } finally {
       setIsLoading(false)

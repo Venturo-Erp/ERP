@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getServerAuth } from '@/lib/auth/server-auth'
+import { logger } from '@/lib/utils/logger'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,13 +36,13 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('查詢失敗:', error)
+      logger.error('查詢失敗:', error)
       return NextResponse.json({ error: '查詢失敗' }, { status: 500 })
     }
 
     return NextResponse.json(data || [])
   } catch (error) {
-    console.error('API 錯誤:', error)
+    logger.error('API 錯誤:', error)
     return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
   }
 }

@@ -24,6 +24,7 @@ import { MessageCircle, Users, User, Building, RefreshCw, Search, Link2, Setting
 import { toast } from 'sonner'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { SettingsTabs } from '../components/SettingsTabs'
+import { logger } from '@/lib/utils/logger'
 
 interface LineGroup {
   id: string
@@ -92,7 +93,6 @@ export default function LineConnectionsPage() {
       const res = await fetch('/api/line/connections')
       const data = await res.json()
       
-      console.log('LINE 連線資料:', data)
       
       if (data.error) {
         toast.error(`載入失敗: ${data.error}`)
@@ -101,7 +101,7 @@ export default function LineConnectionsPage() {
       setGroups(data.groups || [])
       setUsers(data.users || [])
     } catch (error) {
-      console.error('載入 LINE 連線失敗:', error)
+      logger.error('載入 LINE 連線失敗:', error)
       toast.error('載入失敗')
     } finally {
       setLoading(false)

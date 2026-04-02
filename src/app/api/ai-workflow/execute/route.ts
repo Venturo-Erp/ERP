@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { logger } from '@/lib/utils/logger'
 
 // AI Agent 角色對應
 const AGENT_INFO: Record<string, { name: string; emoji: string; role: string }> = {
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
       completedAt: new Date().toISOString(),
     })
   } catch (error) {
-    console.error('AI Workflow Execute Error:', error)
+    logger.error('AI Workflow Execute Error:', error)
     return NextResponse.json(
       { ok: false, error: 'Failed to execute task' },
       { status: 500 }

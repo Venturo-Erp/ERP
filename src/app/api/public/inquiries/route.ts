@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('建立詢價單失敗:', error)
+      logger.error('建立詢價單失敗:', error)
       return NextResponse.json(
         { error: '送出失敗，請稍後再試' },
         { status: 500 }
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
       code: data.code,
     })
   } catch (error) {
-    console.error('API 錯誤:', error)
+    logger.error('API 錯誤:', error)
     return NextResponse.json(
       { error: '系統錯誤' },
       { status: 500 }

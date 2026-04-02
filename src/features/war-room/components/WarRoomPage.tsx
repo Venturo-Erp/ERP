@@ -11,6 +11,7 @@ import { WarRoomHeader } from './WarRoomHeader'
 import { MagicLibraryView } from './MagicLibraryView'
 import { BotManagementView } from './BotManagementView'
 import { TasksView } from './TasksView'
+import { logger } from '@/lib/utils/logger'
 
 // War Room 用的表（magic_library, bot_registry, tasks）不在 generated types 中
 // 統一用 untyped client 避免 TS 無限遞迴
@@ -95,7 +96,7 @@ export const WarRoomPage: React.FC = () => {
       setTasksIndividualCount(individualCount || 0)
       setTasksWorkflowCount(workflowCount || 0)
     } catch (err) {
-      console.error('加载失败:', err)
+      logger.error('加载失败:', err)
     } finally {
       setLoading(false)
     }

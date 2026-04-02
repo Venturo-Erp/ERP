@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { EnhancedTable } from '@/components/ui/enhanced-table'
 import type { TableColumn } from '@/components/ui/enhanced-table'
+import { logger } from '@/lib/utils/logger'
 
 type TaskType = 'individual' | 'workflow'
 
@@ -57,7 +58,7 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
 
       if (data) setTasks(data as unknown as Task[])
     } catch (err) {
-      console.error('載入任務失敗:', err)
+      logger.error('載入任務失敗:', err)
     } finally {
       setLoading(false)
     }

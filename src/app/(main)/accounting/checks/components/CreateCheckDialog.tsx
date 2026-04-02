@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { createBrowserClient } from '@supabase/ssr'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'sonner'
+import { logger } from '@/lib/utils/logger'
 
 interface CreateCheckDialogProps {
   open: boolean
@@ -92,7 +93,7 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
         memo: '',
       })
     } catch (error: any) {
-      console.error('新增票據失敗:', error)
+      logger.error('新增票據失敗:', error)
       if (error.code === '23505') {
         toast.error('票據號碼已存在')
       } else {

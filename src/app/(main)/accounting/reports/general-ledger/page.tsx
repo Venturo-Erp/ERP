@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Search } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
+import { logger } from '@/lib/utils/logger'
 
 interface Account {
   id: string
@@ -78,7 +79,7 @@ export default function GeneralLedgerPage() {
         setSelectedAccountId(data[0].id)
       }
     } catch (error) {
-      console.error('載入科目失敗:', error)
+      logger.error('載入科目失敗:', error)
     }
   }
 
@@ -127,7 +128,7 @@ export default function GeneralLedgerPage() {
         net: totalDebit - totalCredit,
       })
     } catch (error) {
-      console.error('載入總帳失敗:', error)
+      logger.error('載入總帳失敗:', error)
     } finally {
       setIsLoading(false)
     }

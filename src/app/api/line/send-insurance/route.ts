@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import ExcelJS from 'exceljs'
+import { logger } from '@/lib/utils/logger'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
@@ -175,7 +176,7 @@ export async function POST(request: Request) {
       memberPageUrl,
     })
   } catch (error) {
-    console.error('[send-insurance]', error)
+    logger.error('[send-insurance]', error)
     return NextResponse.json({ success: false, error: String(error) }, { status: 500 })
   }
 }

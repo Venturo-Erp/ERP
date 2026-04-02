@@ -131,7 +131,7 @@ export function AttractionsMap({
           try {
             mapRef.current.invalidateSize()
           } catch (e) {
-            console.warn('地圖 invalidateSize 失敗:', e)
+            logger.warn('地圖 invalidateSize 失敗:', e)
           }
         }
       }, 300)

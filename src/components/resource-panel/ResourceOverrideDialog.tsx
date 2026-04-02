@@ -14,6 +14,7 @@ import { Save, Star } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
+import { logger } from '@/lib/utils/logger'
 
 interface ResourceOverrideDialogProps {
   open: boolean
@@ -70,7 +71,7 @@ export function ResourceOverrideDialog({
       onSave?.(description)
       onOpenChange(false)
     } catch (err) {
-      console.error('儲存失敗:', err)
+      logger.error('儲存失敗:', err)
       toast.error('儲存失敗')
     } finally {
       setSaving(false)

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { useAuthStore } from '@/stores'
+import { logger } from '@/lib/utils/logger'
 
 interface TabPermission {
   module_code: string
@@ -64,7 +65,7 @@ export function useTabPermissions() {
           setPermissions(data)
         }
       } catch (err) {
-        console.error('Failed to fetch tab permissions:', err)
+        logger.error('Failed to fetch tab permissions:', err)
       }
       setLoading(false)
     }

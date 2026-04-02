@@ -113,7 +113,7 @@ export function ResourceDetailDialog({
         setEditDescription(data.description || '')
         setEditAddress(data.address || '')
       } catch (err) {
-        console.error('載入資源失敗:', err)
+        logger.error('載入資源失敗:', err)
       } finally {
         setLoading(false)
       }
@@ -175,7 +175,7 @@ export function ResourceDetailDialog({
         address: editAddress,
       })
     } catch (err) {
-      console.error('儲存失敗:', err)
+      logger.error('儲存失敗:', err)
       toast.error('儲存失敗')
     } finally {
       setSaving(false)

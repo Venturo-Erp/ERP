@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic'
 import type { Attraction } from '@/features/attractions/types'
 import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
+import { logger } from '@/lib/utils/logger'
 
 // 動態載入地圖元件
 const AttractionsMap = dynamic(
@@ -185,7 +186,7 @@ export function ResourceMapPanel({
           }
         }
       } catch (err) {
-        console.error('載入景點失敗:', err)
+        logger.error('載入景點失敗:', err)
       } finally {
         setLoading(false)
       }

@@ -18,6 +18,7 @@ import { useToursSlim, useOrdersSlim, useEmployeesSlim } from '@/data'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
 import type { Todo, TodoTaskType } from '@/types/base.types'
+import { logger } from '@/lib/utils/logger'
 
 interface TaskTypeFormProps {
   taskType: TodoTaskType
@@ -181,7 +182,7 @@ function AccommodationForm({ todo, onUpdate, onClose }: FormProps) {
       toast.success('任務已完成')
       onClose()
     } catch (error) {
-      console.error('提交失敗:', error)
+      logger.error('提交失敗:', error)
       toast.error('提交失敗')
     } finally {
       setIsSubmitting(false)
@@ -417,7 +418,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
           })))
         }
       } catch (error) {
-        console.error('讀取訂票資料失敗:', error)
+        logger.error('讀取訂票資料失敗:', error)
       } finally {
         setLoading(false)
       }

@@ -55,7 +55,7 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
           setWorkspaceRoles(data)
         }
       } catch (err) {
-        console.error('載入職務失敗:', err)
+        logger.error('載入職務失敗:', err)
       }
     }
     loadRoles()

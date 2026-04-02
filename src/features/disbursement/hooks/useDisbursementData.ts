@@ -17,6 +17,7 @@ import {
 import { PaymentRequest, DisbursementOrder } from '../types'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
+import { logger } from '@/lib/utils/logger'
 
 // 計算下一個週四
 function getNextThursday(): Date {
@@ -261,7 +262,7 @@ export function useDisbursementData() {
             }),
           })
         } catch (error) {
-          console.error('自動產生傳票失敗:', error)
+          logger.error('自動產生傳票失敗:', error)
           // 不中斷流程，傳票可手動補建
         }
       }

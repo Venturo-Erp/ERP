@@ -19,6 +19,7 @@ import { Switch } from '@/components/ui/switch'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'sonner'
+import { logger } from '@/lib/utils/logger'
 
 interface ParentAccount {
   id: string
@@ -142,7 +143,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess, parentAccou
         parent_id: '',
       })
     } catch (error: any) {
-      console.error('新增科目失敗:', error)
+      logger.error('新增科目失敗:', error)
       if (error.code === '23505') {
         toast.error('科目代號已存在')
       } else {

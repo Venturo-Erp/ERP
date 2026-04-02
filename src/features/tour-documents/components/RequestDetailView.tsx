@@ -18,6 +18,7 @@ import { createRequestDocument, getNextVersion } from '../services/request-docum
 import { createTourFile } from '../services/tour-file.service'
 import type { TourRequestDetail, RequestDocument } from '@/types/tour-documents.types'
 import { useAuthStore } from '@/stores/auth-store'
+import { logger } from '@/lib/utils/logger'
 
 interface RequestDetailViewProps {
   requestId: string
@@ -44,7 +45,7 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
       setRequest(data)
     } catch (error) {
       toast.error('載入失敗')
-      console.error(error)
+      logger.error('操作失敗', error)
     } finally {
       setLoading(false)
     }
@@ -90,7 +91,7 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
       loadRequest()
     } catch (error) {
       toast.error('上傳失敗')
-      console.error(error)
+      logger.error('操作失敗', error)
     } finally {
       setUploading(false)
     }
@@ -131,7 +132,7 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
       loadRequest()
     } catch (error) {
       toast.error('上傳失敗')
-      console.error(error)
+      logger.error('操作失敗', error)
     } finally {
       setUploading(false)
     }
@@ -170,7 +171,7 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
       loadRequest()
     } catch (error) {
       toast.error('上傳失敗')
-      console.error(error)
+      logger.error('操作失敗', error)
     } finally {
       setUploading(false)
     }

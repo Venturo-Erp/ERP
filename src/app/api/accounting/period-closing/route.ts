@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { logger } from '@/lib/utils/logger'
 
 const periodClosingSchema = z.object({
   period_type: z.enum(['month', 'quarter', 'year']),
@@ -348,7 +349,7 @@ export async function POST(request: NextRequest) {
       period_type: validated.period_type,
     })
   } catch (error) {
-    console.error('Period closing error:', error)
+    logger.error('Period closing error:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

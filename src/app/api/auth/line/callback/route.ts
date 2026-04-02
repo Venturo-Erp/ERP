@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { logger } from '@/lib/utils/logger'
 
 const LINE_LOGIN_CHANNEL_ID = process.env.LINE_LOGIN_CHANNEL_ID!
 const LINE_LOGIN_CHANNEL_SECRET = process.env.LINE_LOGIN_CHANNEL_SECRET!
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
 
   // 用戶取消授權
   if (error) {
-    console.error('LINE Login error:', error)
+    logger.error('LINE Login error:', error)
     return NextResponse.redirect(new URL('/p/wishlist', request.url))
   }
 
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     if (!tokenRes.ok) {
       const errorText = await tokenRes.text()
-      console.error('Token exchange failed:', errorText)
+      logger.error('Token exchange failed:', errorText)
       return NextResponse.redirect(new URL(redirect, request.url))
     }
 
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
     })
 
     if (!profileRes.ok) {
-      console.error('Profile fetch failed')
+      logger.error('Profile fetch failed')
       return NextResponse.redirect(new URL(redirect, request.url))
     }
 
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL(redirect, request.url))
 
   } catch (error) {
-    console.error('LINE Login callback error:', error)
+    logger.error('LINE Login callback error:', error)
     return NextResponse.redirect(new URL(redirect, request.url))
   }
 }

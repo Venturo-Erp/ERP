@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { supabase } from '@/lib/supabase/client'
+import { logger } from '@/lib/utils/logger'
 
 interface JournalVoucher {
   id: string
@@ -70,7 +71,7 @@ export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDeta
       if (error) throw error
       setLines((data || []) as any)
     } catch (error) {
-      console.error('載入分錄失敗:', error)
+      logger.error('載入分錄失敗:', error)
     } finally {
       setIsLoading(false)
     }

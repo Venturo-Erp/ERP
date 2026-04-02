@@ -34,6 +34,7 @@ import { MODULES, type ModuleDefinition } from '@/lib/permissions'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { ChevronRight, ChevronDown } from 'lucide-react'
+import { logger } from '@/lib/utils/logger'
 
 interface Role {
   id: string
@@ -73,7 +74,7 @@ export default function RolesPage() {
           }
         }
       } catch (err) {
-        console.error('Failed to fetch roles:', err)
+        logger.error('Failed to fetch roles:', err)
       }
       setLoading(false)
     }
@@ -96,7 +97,7 @@ export default function RolesPage() {
           setPermissions(data)
         }
       } catch (err) {
-        console.error('Failed to fetch permissions:', err)
+        logger.error('Failed to fetch permissions:', err)
       }
     }
 
@@ -234,7 +235,7 @@ export default function RolesPage() {
         toast({ title: '已建立角色' })
       }
     } catch (err) {
-      console.error('Failed to create role:', err)
+      logger.error('Failed to create role:', err)
       toast({ title: '建立失敗', variant: 'destructive' })
     }
     setSaving(false)
@@ -256,7 +257,7 @@ export default function RolesPage() {
         toast({ title: '已儲存權限' })
       }
     } catch (err) {
-      console.error('Failed to save permissions:', err)
+      logger.error('Failed to save permissions:', err)
       toast({ title: '儲存失敗', variant: 'destructive' })
     }
     setSaving(false)
@@ -281,7 +282,7 @@ export default function RolesPage() {
         toast({ title: '已刪除職務' })
       }
     } catch (err) {
-      console.error('Failed to delete role:', err)
+      logger.error('Failed to delete role:', err)
       toast({ title: '刪除失敗', variant: 'destructive' })
     }
   }

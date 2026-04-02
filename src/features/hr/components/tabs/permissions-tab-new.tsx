@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { Check, Shield, Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
+import { logger } from '@/lib/utils/logger'
 
 interface PermissionsTabProps {
   employee: Employee
@@ -175,7 +176,7 @@ export const PermissionsTabNew = forwardRef<{ handleSave: () => void }, Permissi
 
         toast.success('權限已更新')
       } catch (error) {
-        console.error('儲存權限失敗:', error)
+        logger.error('儲存權限失敗:', error)
         toast.error('儲存失敗')
       } finally {
         setIsSaving(false)

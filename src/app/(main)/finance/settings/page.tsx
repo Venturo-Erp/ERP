@@ -45,6 +45,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { alert, confirm } from '@/lib/ui/alert-dialog'
+import { logger } from '@/lib/utils/logger'
 
 interface PaymentMethod {
   id: string
@@ -142,7 +143,7 @@ export default function FinanceSettingsPage() {
       const categoriesData = await categoriesRes.json()
       setExpenseCategories(categoriesData || [])
     } catch (error) {
-      console.error('載入資料失敗:', error)
+      logger.error('載入資料失敗:', error)
     } finally {
       setIsLoading(false)
     }

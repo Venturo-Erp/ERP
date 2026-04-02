@@ -9,6 +9,7 @@ import { useEmployeesSlim } from '@/data'
 import type { Employee } from '@/stores/types'
 import type { SyncableEntity } from '@/types'
 import { COMP_ORDERS_LABELS } from '../constants/labels'
+import { logger } from '@/lib/utils/logger'
 
 // 職務類型
 interface WorkspaceRole {
@@ -55,7 +56,7 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
           setWorkspaceRoles(data)
         }
       } catch (err) {
-        console.error('載入職務失敗:', err)
+        logger.error('載入職務失敗:', err)
       }
     }
     loadRoles()

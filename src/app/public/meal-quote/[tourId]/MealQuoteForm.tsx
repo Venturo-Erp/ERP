@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { logger } from '@/lib/utils/logger'
 
 interface MealQuoteFormProps {
   tourId: string
@@ -65,7 +66,7 @@ export function MealQuoteForm({ tourId, requestId, defaultPax }: MealQuoteFormPr
       alert('報價提交成功！')
       router.refresh()
     } catch (error) {
-      console.error('提交失敗:', error)
+      logger.error('提交失敗:', error)
       alert('提交失敗，請稍後再試')
     } finally {
       setSubmitting(false)

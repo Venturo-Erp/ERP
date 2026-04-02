@@ -18,6 +18,7 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { logger } from '@/lib/utils/logger'
 
 interface Account {
   id: string
@@ -102,7 +103,7 @@ export function EditAccountDialog({
       onOpenChange(false)
       onSuccess()
     } catch (error: any) {
-      console.error('更新科目失敗:', error)
+      logger.error('更新科目失敗:', error)
       if (error.code === '23505') {
         toast.error('科目代號已存在')
       } else {
@@ -138,7 +139,7 @@ export function EditAccountDialog({
       onOpenChange(false)
       onSuccess()
     } catch (error: any) {
-      console.error('刪除科目失敗:', error)
+      logger.error('刪除科目失敗:', error)
       if (error.code === '23503') {
         toast.error('此科目已被使用，無法刪除')
       } else {

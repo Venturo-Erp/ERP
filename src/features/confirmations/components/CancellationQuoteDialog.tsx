@@ -21,6 +21,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Send, Printer, Loader2 } from 'lucide-react'
 import type { Tour } from '@/stores/types'
+import { logger } from '@/lib/utils/logger'
 
 interface CancellationItem {
   name: string
@@ -131,7 +132,7 @@ export function CancellationQuoteDialog({
       toast.success('取消通知已發送')
       onClose()
     } catch (err) {
-      console.error('發送取消通知失敗:', err)
+      logger.error('發送取消通知失敗:', err)
       toast.error('發送失敗：' + String(err))
     } finally {
       setSending(false)

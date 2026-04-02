@@ -48,6 +48,7 @@ import { useItineraryTableColumns } from './hooks/useItineraryTableColumns'
 import { useItineraryFilters } from './hooks/useItineraryFilters'
 import { stripHtml } from '@/lib/utils/string-utils'
 import { LABELS } from './constants/labels'
+import { logger } from '@/lib/utils/logger'
 
 const statusFilters = [
   LABELS.ALL,
@@ -387,7 +388,7 @@ function CreateItineraryDialog({
 
       setStep('createItinerary')
     } catch (error) {
-      console.error('Failed to load tour data:', error)
+      logger.error('Failed to load tour data:', error)
     } finally {
       setLoadingTourData(false)
     }

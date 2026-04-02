@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/utils/logger'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
@@ -59,7 +60,7 @@ ${requestId ? `📎 線上報價：https://app.cornertravel.com.tw/public/reques
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[send-transport]', error)
+    logger.error('[send-transport]', error)
     return NextResponse.json({ success: false, error: String(error) }, { status: 500 })
   }
 }

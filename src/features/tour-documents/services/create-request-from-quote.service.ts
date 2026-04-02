@@ -6,6 +6,7 @@
 import { supabase } from '@/lib/supabase/client'
 import { dynamicFrom } from '@/lib/supabase/typed-client'
 import type { RequestItem } from '@/types/tour-documents.types'
+import { logger } from '@/lib/utils/logger'
 
 const tourRequestsDb = () => dynamicFrom('tour_requests')
 
@@ -87,7 +88,7 @@ export async function createRequestFromQuote(input: {
       .single()
 
     if (insertError) {
-      console.error('建立需求單失敗:', insertError)
+      logger.error('建立需求單失敗:', insertError)
       continue
     }
 

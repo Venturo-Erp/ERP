@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiClient } from '@/lib/supabase/api-client'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * GET /api/line/connections
@@ -26,7 +27,7 @@ export async function GET() {
       .order('updated_at', { ascending: false })
 
     if (groupsError) {
-      console.error('line_groups 查詢錯誤:', groupsError)
+      logger.error('line_groups 查詢錯誤:', groupsError)
       return NextResponse.json({ 
         error: `查詢群組失敗: ${groupsError.message}`,
         details: groupsError
@@ -52,7 +53,7 @@ export async function GET() {
       .order('updated_at', { ascending: false })
 
     if (usersError) {
-      console.error('line_users 查詢錯誤:', usersError)
+      logger.error('line_users 查詢錯誤:', usersError)
       return NextResponse.json({ 
         error: `查詢用戶失敗: ${usersError.message}`,
         details: usersError
@@ -64,7 +65,7 @@ export async function GET() {
       users: users || [],
     })
   } catch (error) {
-    console.error('API /api/line/connections 錯誤:', error)
+    logger.error('API /api/line/connections 錯誤:', error)
     return NextResponse.json({ 
       error: error instanceof Error ? error.message : '未知錯誤',
       stack: error instanceof Error ? error.stack : undefined

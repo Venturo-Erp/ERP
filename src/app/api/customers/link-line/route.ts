@@ -10,6 +10,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (error) {
-        console.error('Link error:', error)
+        logger.error('Link error:', error)
         return NextResponse.json({ error: 'Link failed' }, { status: 500 })
       }
 
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (error) {
-        console.error('Create error:', error)
+        logger.error('Create error:', error)
         return NextResponse.json({ error: 'Create failed' }, { status: 500 })
       }
 
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   } catch (error) {
-    console.error('Link-line error:', error)
+    logger.error('Link-line error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

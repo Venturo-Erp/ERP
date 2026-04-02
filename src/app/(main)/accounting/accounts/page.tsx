@@ -11,6 +11,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { CreateAccountDialog } from './components/CreateAccountDialog'
 import { EditAccountDialog } from './components/EditAccountDialog'
 import { toast } from 'sonner'
+import { logger } from '@/lib/utils/logger'
 
 interface Account {
   id: string
@@ -126,7 +127,7 @@ export default function AccountsPage() {
       // 補上 is_favorite 預設值（DB 可能沒有這個欄位）
       setAccounts((data || []).map(d => ({ ...d, is_favorite: (d as any).is_favorite ?? false })))
     } catch (error) {
-      console.error('載入科目失敗:', error)
+      logger.error('載入科目失敗:', error)
     } finally {
       setIsLoading(false)
     }
@@ -148,7 +149,7 @@ export default function AccountsPage() {
 
       toast.success(currentFavorite ? '已取消常用' : '已標記為常用')
     } catch (error) {
-      console.error('更新常用狀態失敗:', error)
+      logger.error('更新常用狀態失敗:', error)
       toast.error('更新失敗')
     }
   }

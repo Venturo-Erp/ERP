@@ -7,6 +7,7 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { logger } from '@/lib/utils/logger'
 
 const quickLinks = [
   {
@@ -65,7 +66,7 @@ export default function AccountingPage() {
           .limit(1)
 
         if (error) {
-          console.error('檢查科目表失敗:', error)
+          logger.error('檢查科目表失敗:', error)
           return
         }
 
@@ -88,7 +89,7 @@ export default function AccountingPage() {
           setIsInitializing(false)
         }
       } catch (error) {
-        console.error('自動初始化失敗:', error)
+        logger.error('自動初始化失敗:', error)
         setIsInitializing(false)
       }
     }

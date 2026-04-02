@@ -7,6 +7,7 @@ import { FormDialog } from '@/components/dialog/form-dialog'
 import { useAirports, type Airport } from '@/features/tours/hooks/useAirports'
 import { useCountries, invalidateCountries } from '@/data' // 🔧 核心表架構
 import { SELECTORS_LABELS } from './constants/labels'
+import { logger } from '@/lib/utils/logger'
 
 // 判斷是否為台灣（支援多種寫法）
 const isTaiwanCountry = (country: string | undefined | null): boolean => {
@@ -116,7 +117,7 @@ export function CountryAirportSelector({
       const countryData = countriesData.find(c => c.name === newCountryName)
 
       if (!countryData) {
-        console.warn(`找不到國家資料: ${newCountryName}，使用 fallback`)
+        logger.warn(`找不到國家資料: ${newCountryName}，使用 fallback`)
         // Fallback：仍然呼叫 onCountryChange，但用 countryNameToCode 取得 code
         const code = countryNameToCode[newCountryName] || ''
         onCountryChange({
@@ -170,7 +171,7 @@ export function CountryAirportSelector({
         .single()
 
       if (error) {
-        console.error('Failed to create country:', error.message)
+        logger.error('Failed to create country:', error.message)
         return
       }
 
@@ -180,7 +181,7 @@ export function CountryAirportSelector({
       }
       setCreateCountryDialogOpen(false)
     } catch (err) {
-      console.error('Failed to create country:', err)
+      logger.error('Failed to create country:', err)
     } finally {
       setIsCountrySubmitting(false)
     }

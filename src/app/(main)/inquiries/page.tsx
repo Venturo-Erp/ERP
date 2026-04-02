@@ -42,6 +42,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase/client' // 用於狀態更新
+import { logger } from '@/lib/utils/logger'
 
 interface SelectedItem {
   id: string
@@ -125,7 +126,7 @@ export default function InquiriesPage() {
 
       setInquiries(processed)
     } catch (error) {
-      console.error('載入失敗:', error)
+      logger.error('載入失敗:', error)
       toast.error('載入失敗')
     } finally {
       setLoading(false)

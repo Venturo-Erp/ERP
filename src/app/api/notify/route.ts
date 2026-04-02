@@ -8,6 +8,7 @@ import {
   notifyContractSigned,
   notifyPaymentReceived
 } from '@/lib/notifications'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * 頻道通知 API
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success })
   } catch (err) {
-    console.error('[Notify API] Error:', err)
+    logger.error('[Notify API] Error:', err)
     return NextResponse.json(
       { error: '通知失敗' },
       { status: 500 }

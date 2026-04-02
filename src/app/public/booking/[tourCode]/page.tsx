@@ -3,6 +3,7 @@
 import { use, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { BookingDialog } from './components/BookingDialog'
+import { logger } from '@/lib/utils/logger'
 
 interface Itinerary {
   id: string
@@ -64,7 +65,7 @@ export default function PublicItineraryPage({
           }
         }
       } catch (error) {
-        console.error('載入失敗:', error)
+        logger.error('載入失敗:', error)
       } finally {
         setLoading(false)
       }

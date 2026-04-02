@@ -11,6 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -47,13 +48,13 @@ export async function POST(request: NextRequest) {
     const { data, error } = await query.limit(5)
 
     if (error) {
-      console.error('Match query error:', error)
+      logger.error('Match query error:', error)
       return NextResponse.json({ error: 'Query failed' }, { status: 500 })
     }
 
     return NextResponse.json({ matches: data || [] })
   } catch (error) {
-    console.error('Match error:', error)
+    logger.error('Match error:', error)
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

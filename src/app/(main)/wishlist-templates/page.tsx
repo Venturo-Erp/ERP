@@ -31,6 +31,7 @@ import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase/client' // 用於 CRUD 操作
 import { format } from 'date-fns'
+import { logger } from '@/lib/utils/logger'
 
 interface WishlistTemplate {
   id: string
@@ -99,7 +100,7 @@ export default function WishlistTemplatesPage() {
 
       setTemplates(processed)
     } catch (error) {
-      console.error('載入失敗:', error)
+      logger.error('載入失敗:', error)
       toast.error('載入失敗')
     } finally {
       setLoading(false)

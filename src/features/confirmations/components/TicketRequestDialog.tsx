@@ -22,6 +22,7 @@ import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores'
 import { useEmployeesSlim } from '@/data'
 import { toast } from 'sonner'
+import { logger } from '@/lib/utils/logger'
 
 interface TicketRequestDialogProps {
   open: boolean
@@ -123,7 +124,7 @@ export function TicketRequestDialog({
       // 建立待辦
       await createTicketTodo()
     } catch (error) {
-      console.error('儲存航班失敗:', error)
+      logger.error('儲存航班失敗:', error)
       toast.error('儲存失敗')
       setSubmitting(false)
     }
@@ -185,13 +186,13 @@ export function TicketRequestDialog({
           }),
         })
       } catch (notifyError) {
-        console.error('通知失敗:', notifyError)
+        logger.error('通知失敗:', notifyError)
       }
 
       toast.success(`已建立訂票任務，指派給 ${empName}`)
       onClose()
     } catch (error) {
-      console.error('建立訂票任務失敗:', error)
+      logger.error('建立訂票任務失敗:', error)
       toast.error('建立失敗')
     } finally {
       setSubmitting(false)

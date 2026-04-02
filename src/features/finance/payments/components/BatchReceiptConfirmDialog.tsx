@@ -18,6 +18,7 @@ import { RECEIPT_TYPE_OPTIONS } from '../types'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores'
 import type { Receipt } from '@/types/receipt.types'
+import { logger } from '@/lib/utils/logger'
 
 interface BatchReceiptConfirmDialogProps {
   open: boolean
@@ -81,7 +82,7 @@ export function BatchReceiptConfirmDialog({
         }))
       )
     } catch (error) {
-      console.error('載入收款單失敗:', error)
+      logger.error('載入收款單失敗:', error)
       toast({
         title: '載入失敗',
         description: '無法載入收款單資料',
@@ -216,7 +217,7 @@ export function BatchReceiptConfirmDialog({
       onSuccess?.()
       onOpenChange(false)
     } catch (error) {
-      console.error('儲存失敗:', error)
+      logger.error('儲存失敗:', error)
       toast({
         title: '儲存失敗',
         description: '無法更新收款單',

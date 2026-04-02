@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * POST /api/orders/create-from-booking
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (orderError || !order) {
-      console.error('建立訂單失敗:', orderError)
+      logger.error('建立訂單失敗:', orderError)
       return NextResponse.json({ error: '建立訂單失敗' }, { status: 500 })
     }
 
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
       const { error: membersError } = await supabase.from('order_members').insert(members)
 
       if (membersError) {
-        console.error('建立團員失敗:', membersError)
+        logger.error('建立團員失敗:', membersError)
         // 不中斷，繼續
       }
     }
@@ -87,7 +88,7 @@ export async function POST(request: NextRequest) {
       order_number: order.order_number,
     })
   } catch (error) {
-    console.error('API 錯誤:', error)
+    logger.error('API 錯誤:', error)
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : '未知錯誤',

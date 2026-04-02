@@ -9,6 +9,7 @@ import type { TableColumn } from '@/components/ui/enhanced-table'
 import { createBrowserClient } from '@supabase/ssr'
 import { useAuthStore } from '@/stores/auth-store'
 import { CreateCheckDialog } from './components/CreateCheckDialog'
+import { logger } from '@/lib/utils/logger'
 
 interface Check {
   id: string
@@ -58,7 +59,7 @@ export default function ChecksPage() {
       // setChecks(data || [])
       setChecks([]) // 暫時空陣列
     } catch (error) {
-      console.error('載入票據失敗:', error)
+      logger.error('載入票據失敗:', error)
     } finally {
       setIsLoading(false)
     }
@@ -169,7 +170,7 @@ export default function ChecksPage() {
       // loadChecks()
       // TODO: 實作兌現功能
     } catch (error) {
-      console.error('更新票據狀態失敗:', error)
+      logger.error('更新票據狀態失敗:', error)
       alert('操作失敗')
     }
   }
@@ -191,7 +192,7 @@ export default function ChecksPage() {
       // loadChecks()
       // TODO: 實作作廢功能
     } catch (error) {
-      console.error('更新票據狀態失敗:', error)
+      logger.error('更新票據狀態失敗:', error)
       alert('操作失敗')
     }
   }

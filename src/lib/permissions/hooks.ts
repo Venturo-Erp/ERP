@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useAuthStore } from '@/stores'
 import { getFeaturesByRoute } from './features'
+import { logger } from '@/lib/utils/logger'
 
 interface WorkspaceFeature {
   feature_code: string
@@ -56,7 +57,7 @@ export function useWorkspaceFeatures() {
           setPremiumEnabled(ws.premium_enabled ?? false)
         }
       } catch (err) {
-        console.error('Failed to fetch workspace features:', err)
+        logger.error('Failed to fetch workspace features:', err)
       }
       setLoading(false)
     }

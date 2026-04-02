@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
+import { logger } from '@/lib/utils/logger'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
@@ -181,13 +182,13 @@ export async function POST(req: NextRequest) {
 
     if (!lineRes.ok) {
       const err = await lineRes.text()
-      console.error('[send-transport-quote] LINE API error:', err)
+      logger.error('[send-transport-quote] LINE API error:', err)
       return NextResponse.json({ error: 'LINE API failed' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('[send-transport-quote] Error:', error)
+    logger.error('[send-transport-quote] Error:', error)
     return NextResponse.json({ error: 'Internal error' }, { status: 500 })
   }
 }

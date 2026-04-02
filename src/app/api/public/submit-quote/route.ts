@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 export async function POST(req: NextRequest) {
   try {
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Submit quote error:', error)
+    logger.error('Submit quote error:', error)
     return NextResponse.json({ error: String(error) }, { status: 500 })
   }
 }

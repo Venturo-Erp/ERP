@@ -1,3 +1,4 @@
+import { logger } from '@/lib/utils/logger'
 /**
  * 通用列印服務
  * 
@@ -143,7 +144,7 @@ export function printElement(
   options: PrintOptions = {}
 ): void {
   if (!element) {
-    console.warn('[printElement] Element is null')
+    logger.warn('[printElement] Element is null')
     return
   }
   printHtml(element.innerHTML, options)

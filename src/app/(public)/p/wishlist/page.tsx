@@ -13,6 +13,7 @@ import { createClient } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { MapPin, Globe } from 'lucide-react'
 import { COMPANY } from '@/lib/constants/company'
+import { logger } from '@/lib/utils/logger'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -50,7 +51,7 @@ async function getPublishedTemplates(): Promise<{ templates: WishlistTemplate[],
     .order('name')
 
   if (error) {
-    console.error('Error fetching templates:', error)
+    logger.error('Error fetching templates:', error)
     return { templates: [], companyInfo: { name: COMPANY.legalName, phone: '02-1234-5678' } }
   }
 

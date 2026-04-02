@@ -6,6 +6,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -47,7 +48,7 @@ export async function sendChannelNotify(payload: NotifyPayload): Promise<boolean
       .single()
 
     if (!tour?.channel_id) {
-      console.warn(`[ChannelNotify] Tour ${payload.tourId} has no channel`)
+      logger.warn(`[ChannelNotify] Tour ${payload.tourId} has no channel`)
       return false
     }
 
@@ -71,13 +72,13 @@ export async function sendChannelNotify(payload: NotifyPayload): Promise<boolean
       })
 
     if (error) {
-      console.error('[ChannelNotify] Insert failed:', error)
+      logger.error('[ChannelNotify] Insert failed:', error)
       return false
     }
 
     return true
   } catch (err) {
-    console.error('[ChannelNotify] Error:', err)
+    logger.error('[ChannelNotify] Error:', err)
     return false
   }
 }

@@ -40,6 +40,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { supabase } from '@/lib/supabase/client'
+import { logger } from '@/lib/utils/logger'
 
 interface WishlistTemplate {
   id: string
@@ -292,7 +293,7 @@ export default function WishlistDetailPage({
     setSubmitting(false)
 
     if (error) {
-      console.error('Submit error:', error)
+      logger.error('Submit error:', error)
       toast.error('送出失敗，請稍後再試')
       return
     }

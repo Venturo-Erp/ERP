@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -170,7 +171,7 @@ export async function POST(request: NextRequest) {
 
     if (!lineResponse.ok) {
       const errorText = await lineResponse.text()
-      console.error('LINE API error:', errorText)
+      logger.error('LINE API error:', errorText)
       return NextResponse.json({ error: 'LINE 發送失敗', details: errorText }, { status: 500 })
     }
 
@@ -189,7 +190,7 @@ export async function POST(request: NextRequest) {
       confirmUrl,
     })
   } catch (error) {
-    console.error('Send booking error:', error)
+    logger.error('Send booking error:', error)
     return NextResponse.json({ error: '發送失敗', details: String(error) }, { status: 500 })
   }
 }

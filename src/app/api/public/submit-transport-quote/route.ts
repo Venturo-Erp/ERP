@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 export async function POST(req: NextRequest) {
   try {
@@ -62,7 +63,7 @@ export async function POST(req: NextRequest) {
         .eq('tour_id', tourId)
 
       if (error) {
-        console.error('更新需求單失敗:', error)
+        logger.error('更新需求單失敗:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
     }
@@ -102,7 +103,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('提交遊覽車報價失敗:', error)
+    logger.error('提交遊覽車報價失敗:', error)
     return NextResponse.json({ error: String(error) }, { status: 500 })
   }
 }

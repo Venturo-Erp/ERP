@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { logger } from '@/lib/utils/logger'
 
 // Zod schema
 const lineSchema = z.object({
@@ -141,7 +142,7 @@ export async function POST(request: NextRequest) {
       voucher_id: voucher.id,
     })
   } catch (error) {
-    console.error('Create voucher error:', error)
+    logger.error('Create voucher error:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

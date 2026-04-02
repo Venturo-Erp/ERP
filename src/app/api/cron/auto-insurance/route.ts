@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
+import { logger } from '@/lib/utils/logger'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
@@ -234,7 +235,7 @@ export async function GET() {
 
     return NextResponse.json({ status: 'ok', date: dateStr, results })
   } catch (error) {
-    console.error('[auto-insurance]', error)
+    logger.error('[auto-insurance]', error)
     return NextResponse.json({ status: 'error', error: String(error) }, { status: 500 })
   }
 }
@@ -253,7 +254,7 @@ export async function POST(request: Request) {
     const result = await sendInsuranceForTour(supabase, lineToken, tourId, true, isChange || false)
     return NextResponse.json(result)
   } catch (error) {
-    console.error('[send-insurance-manual]', error)
+    logger.error('[send-insurance-manual]', error)
     return NextResponse.json({ success: false, error: String(error) }, { status: 500 })
   }
 }

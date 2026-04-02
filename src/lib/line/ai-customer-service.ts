@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
@@ -99,7 +100,7 @@ async function queryTours(destination?: string, tourCode?: string): Promise<Tour
   const { data, error } = await query
   
   if (error) {
-    console.error('[LINE AI] Query error:', error)
+    logger.error('[LINE AI] Query error:', error)
     return []
   }
   
@@ -165,7 +166,7 @@ async function saveConversation(
     })
   
   if (error) {
-    console.error('[LINE AI] Save conversation error:', error)
+    logger.error('[LINE AI] Save conversation error:', error)
   }
 }
 
@@ -179,25 +180,17 @@ export async function handleAICustomerService(
   userMessage: string
 ): Promise<string> {
   try {
-    console.log('[LINE AI] Start processing:', { platform, userId, userMessage })
     
     // 1. 分析意圖
-    console.log('[LINE AI] Analyzing intent...')
     const { intent, destination, tourCode } = await analyzeIntent(userMessage)
-    console.log('[LINE AI] Intent:', { intent, destination, tourCode })
     
     // 2. 查詢相關行程
-    console.log('[LINE AI] Querying tours...')
     const tours = await queryTours(destination, tourCode)
-    console.log('[LINE AI] Tours found:', tours.length)
     
     // 3. 生成 AI 回覆
-    console.log('[LINE AI] Generating response...')
     const aiResponse = await generateAIResponse(userMessage, intent, tours)
-    console.log('[LINE AI] Response generated:', aiResponse.substring(0, 50))
     
     // 4. 儲存對話記錄
-    console.log('[LINE AI] Saving conversation...')
     const mentionedTours = tours.map(t => t.code)
     await saveConversation(
       platform,
@@ -208,11 +201,10 @@ export async function handleAICustomerService(
       intent,
       mentionedTours
     )
-    console.log('[LINE AI] Conversation saved')
     
     return aiResponse
   } catch (error) {
-    console.error('[LINE AI] Error:', error)
+    logger.error('[LINE AI] Error:', error)
     return '抱歉，系統暫時無法回應，請稍後再試或直接致電客服。'
   }
 }

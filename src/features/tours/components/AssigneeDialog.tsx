@@ -28,6 +28,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores'
 import { Loader2, User } from 'lucide-react'
+import { logger } from '@/lib/utils/logger'
 
 interface AssigneeDialogProps {
   open: boolean
@@ -136,7 +137,7 @@ export function AssigneeDialog({
       onSuccess?.()
       onOpenChange(false)
     } catch (err) {
-      console.error('指派失敗:', err)
+      logger.error('指派失敗:', err)
       toast({
         title: '指派失敗',
         description: '請重試',

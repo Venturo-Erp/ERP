@@ -29,7 +29,7 @@ function isTrustedSender(userId?: string): boolean {
 
   // 暫時：如果 TRUSTED_SENDERS 為空，允許所有人（測試用）
   if (TRUSTED_SENDERS.length === 0) {
-    console.warn('[insurance] ⚠️  TRUSTED_SENDERS 未設定，允許所有發送者')
+    logger.warn('[insurance] ⚠️  TRUSTED_SENDERS 未設定，允許所有發送者')
     return true
   }
 
@@ -168,7 +168,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ ok: true, tourCode: tour.code, fileName })
   } catch (error) {
-    console.error('[insurance-auto-save]', error)
+    logger.error('[insurance-auto-save]', error)
     return NextResponse.json({ ok: false, error: String(error) }, { status: 500 })
   }
 }
@@ -197,7 +197,7 @@ async function notifySuccess({
       body: JSON.stringify({ chat_id: chatId, text: message }),
     })
   } catch (err) {
-    console.error('[telegram]', err)
+    logger.error('[telegram]', err)
   }
 }
 
@@ -226,6 +226,6 @@ async function notifyError(params: {
       body: JSON.stringify({ chat_id: chatId, text: message }),
     })
   } catch (err) {
-    console.error('[telegram]', err)
+    logger.error('[telegram]', err)
   }
 }

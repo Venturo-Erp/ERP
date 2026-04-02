@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
+import { logger } from '@/lib/utils/logger'
 
 export async function GET(request: NextRequest) {
   const supabaseAdmin = getSupabaseAdminClient()
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
 
   if (error && error.code !== 'PGRST116') {
     // PGRST116 = no rows returned
-    console.error('Query error:', error)
+    logger.error('Query error:', error)
     return NextResponse.json({ error: 'Query failed' }, { status: 500 })
   }
 

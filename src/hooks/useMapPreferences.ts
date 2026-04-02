@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { logger } from '@/lib/utils/logger'
 
 interface MapCenter {
   latitude: number
@@ -46,7 +47,7 @@ export function useMapPreferences(tourId: string | null) {
 
       setPreferences({ expanded, center })
     } catch (error) {
-      console.error('讀取地圖偏好失敗:', error)
+      logger.error('讀取地圖偏好失敗:', error)
     } finally {
       setIsLoaded(true)
     }
@@ -61,7 +62,7 @@ export function useMapPreferences(tourId: string | null) {
         try {
           localStorage.setItem(`map_expanded_${tourId}`, String(expanded))
         } catch (error) {
-          console.error('儲存地圖展開狀態失敗:', error)
+          logger.error('儲存地圖展開狀態失敗:', error)
         }
       }
     },
@@ -77,7 +78,7 @@ export function useMapPreferences(tourId: string | null) {
         try {
           localStorage.setItem(`map_center_${tourId}`, JSON.stringify(center))
         } catch (error) {
-          console.error('儲存地圖位置失敗:', error)
+          logger.error('儲存地圖位置失敗:', error)
         }
       }
     },
@@ -92,7 +93,7 @@ export function useMapPreferences(tourId: string | null) {
       try {
         localStorage.removeItem(`map_center_${tourId}`)
       } catch (error) {
-        console.error('清除地圖位置失敗:', error)
+        logger.error('清除地圖位置失敗:', error)
       }
     }
   }, [tourId])

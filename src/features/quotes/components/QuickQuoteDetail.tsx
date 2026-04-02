@@ -17,6 +17,7 @@ import { QUICK_QUOTE_DETAIL_LABELS } from '../constants/labels'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { nanoid } from 'nanoid'
+import { logger } from '@/lib/utils/logger'
 
 interface QuickQuoteDetailProps {
   quote: Quote
@@ -108,7 +109,7 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
         toast.success(`已載入 ${itemsToAdd.length} 個項目`)
       }
     } catch (error) {
-      console.error('載入失敗:', error)
+      logger.error('載入失敗:', error)
       toast.error('載入行程項目失敗')
     } finally {
       setIsLoadingItems(false)

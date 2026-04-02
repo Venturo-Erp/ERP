@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import { createClient } from '@supabase/supabase-js'
+import { logger } from '@/lib/utils/logger'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
@@ -178,7 +179,7 @@ export async function POST(req: NextRequest) {
 
     if (!lineRes.ok) {
       const errText = await lineRes.text()
-      console.error('[send-cancel] LINE API error:', errText)
+      logger.error('[send-cancel] LINE API error:', errText)
       return NextResponse.json({ error: 'LINE API failed', detail: errText }, { status: 500 })
     }
 
@@ -201,7 +202,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (err) {
-    console.error('[send-cancel] Error:', err)
+    logger.error('[send-cancel] Error:', err)
     return NextResponse.json({ error: String(err) }, { status: 500 })
   }
 }
