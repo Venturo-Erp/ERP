@@ -154,8 +154,7 @@ export function AuthGuard({ children, requiredPermission }: AuthGuardProps) {
       if (requiredPermission) {
         const hasPermission =
           permissions.includes('*') ||
-          permissions.includes(requiredPermission) ||
-          permissions.includes('admin') ||
+          permissions.some(p => p === requiredPermission || p.startsWith(`${requiredPermission}:`)) ||
           permissions.includes('admin')
 
         if (!hasPermission) {

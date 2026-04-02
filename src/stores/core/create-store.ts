@@ -463,9 +463,10 @@ export function createStore<T extends BaseEntity>(
       try {
         set({ loading: true, error: null })
 
-        const { error } = await dynamicFrom(tableName).delete().eq('id', id)
+        const { error, count } = await dynamicFrom(tableName).delete({ count: 'exact' }).eq('id', id)
 
         if (error) throw error
+        if (count === 0) throw new Error('刪除失敗：資料不存在或沒有權限')
 
         // 樂觀更新 UI
         set(state => ({

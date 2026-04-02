@@ -144,7 +144,8 @@ export function MobileBottomNav() {
 
     return DEFAULT_NAV_ITEMS.filter(item => {
       if (!item.requiredPermission) return true
-      return isAdmin || permissions.includes(item.requiredPermission)
+      const perm = item.requiredPermission
+      return isAdmin || permissions.some(p => p === perm || p.startsWith(`${perm}:`))
     })
   }, [user?.permissions])
 
