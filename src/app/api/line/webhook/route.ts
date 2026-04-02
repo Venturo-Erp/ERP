@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createHmac, timingSafeEqual } from 'crypto'
 import { logger } from '@/lib/utils/logger'
 import { handleAICustomerService } from '@/lib/line/ai-customer-service'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 /** LINE Webhook event type (minimal) */
 interface LineEvent {
@@ -12,6 +14,18 @@ interface LineEvent {
 }
 
 const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || ''
+const LINE_SECRET = process.env.LINE_CHANNEL_SECRET || ''
+
+/** 驗證 LINE Webhook 簽名 */
+function validateSignature(rawBody: string, signature: string | null): boolean {
+  if (!signature || !LINE_SECRET) return false
+  try {
+    const hash = createHmac('SHA256', LINE_SECRET).update(rawBody).digest('base64')
+    return timingSafeEqual(Buffer.from(hash), Buffer.from(signature))
+  } catch {
+    return false
+  }
+}
 
 /** 取得用戶資料 */
 async function getUserProfile(userId: string): Promise<{
@@ -275,9 +289,9 @@ async function processEmployeeBinding(event: LineEvent) {
   if (!supabaseUrl || !supabaseKey) return false
 
   try {
-    // 查找員工
+    // 查找員工（欄位名是 employee_number）
     const findRes = await fetch(
-      `${supabaseUrl}/rest/v1/employees?code=eq.${employeeCode}&select=id,display_name,english_name`,
+      `${supabaseUrl}/rest/v1/employees?employee_number=eq.${employeeCode}&select=id,display_name,chinese_name,english_name`,
       {
         headers: {
           apikey: supabaseKey,
@@ -316,7 +330,7 @@ async function processEmployeeBinding(event: LineEvent) {
       body: JSON.stringify({ line_user_id: userId }),
     })
 
-    const empName = employee.display_name || employee.english_name || employeeCode
+    const empName = employee.chinese_name || employee.display_name || employee.english_name || employeeCode
 
     // 回覆成功
     await fetch('https://api.line.me/v2/bot/message/reply', {
@@ -402,7 +416,19 @@ async function handleAIMessage(event: LineEvent) {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
+    // Rate limiting
+    const rateLimited = checkRateLimit(req, 'line-webhook', 100, 60_000)
+    if (rateLimited) return rateLimited
+
+    // 簽名驗證
+    const rawBody = await req.text()
+    const signature = req.headers.get('x-line-signature')
+    if (!validateSignature(rawBody, signature)) {
+      logger.warn('[LINE] Invalid signature')
+      return NextResponse.json({ status: 'error', message: 'invalid signature' }, { status: 401 })
+    }
+
+    const body = JSON.parse(rawBody)
     const events = body.events || []
 
     for (const event of events) {
@@ -415,14 +441,15 @@ export async function POST(req: NextRequest) {
 
       // 私人訊息 → 檢查綁定指令（客戶或員工）或 AI 客服
       if (source.type === 'user' && event.type === 'message' && event.message?.type === 'text') {
-        
+        // 先嘗試客戶綁定（C 開頭）
         const isCustomerBinding = await processCustomerBinding(event)
-        const isEmployeeBinding = await processEmployeeBinding(event)
-        
-        
-        // 如果不是綁定指令，就用 AI 客服回覆
-        if (!isCustomerBinding && !isEmployeeBinding) {
-          await handleAIMessage(event)
+        if (!isCustomerBinding) {
+          // 再嘗試員工綁定（非 C 開頭）
+          const isEmployeeBinding = await processEmployeeBinding(event)
+          if (!isEmployeeBinding) {
+            // 都不是綁定 → AI 客服回覆
+            await handleAIMessage(event)
+          }
         }
       }
 
