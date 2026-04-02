@@ -183,50 +183,6 @@ export function getRoleConfig(role: UserRole | null): RoleConfig | null {
   return ROLES[role] || null
 }
 
-/**
- * 檢查使用者是否有特定權限
- */
-export function hasPermission(
-  userRole: UserRole | null,
-  userPermissions: string[],
-  requiredPermission: string
-): boolean {
-  if (!userRole) return false
-
-  const roleConfig = getRoleConfig(userRole)
-  if (!roleConfig) return false
-
-  // admin 和 admin 有 '*' 萬用權限
-  if (roleConfig.permissions.includes('*')) return true
-
-  // 檢查角色預設權限
-  if (roleConfig.permissions.includes(requiredPermission)) return true
-
-  // 檢查使用者額外權限（可能被管理員單獨賦予）
-  if (userPermissions.includes(requiredPermission)) return true
-
-  return false
-}
-
-/**
- * 檢查是否可以管理 workspace
- */
-export function canManageWorkspace(userRole: UserRole | null): boolean {
-  if (!userRole) return false
-  const roleConfig = getRoleConfig(userRole)
-  return roleConfig?.canManageWorkspace || false
-}
-
-/**
- * @deprecated 跨租戶功能已移除（2026-04-02），永遠回傳 false
- */
-export function canCrossWorkspace(_userRole: UserRole | null): boolean {
-  return false
-}
-
-/**
- * 取得所有可用角色列表
- */
-export function getAllRoles(): RoleConfig[] {
-  return Object.values(ROLES)
-}
+// hasPermission, canManageWorkspace, canCrossWorkspace, getAllRoles 已移除（2026-04-02）
+// 權限系統改用 role_tab_permissions 表 + module:tab 格式
+// 管理員判斷改用 workspace_roles.is_admin

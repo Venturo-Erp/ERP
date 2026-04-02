@@ -9,19 +9,33 @@ import { validateBody } from '@/lib/api/validation'
 import { adminResetPasswordSchema } from '@/lib/validations/api-schemas'
 
 /**
- * 檢查員工是否為管理員或超級管理員
+ * 檢查員工是否為管理員（透過職務系統）
  */
 async function checkIsAdmin(employeeId: string): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
-  const { data, error } = await adminClient
+
+  // 從 job_info.role_id 查 workspace_roles.is_admin
+  const { data: employee, error } = await adminClient
     .from('employees')
-    .select('roles')
+    .select('job_info, roles')
     .eq('id', employeeId)
     .single()
 
-  if (error || !data) return false
+  if (error || !employee) return false
 
-  const roles = data.roles as string[] | null
+  // 新系統：從 job_info.role_id 查職務是否為管理員
+  const jobInfo = employee.job_info as { role_id?: string } | null
+  if (jobInfo?.role_id) {
+    const { data: role } = await adminClient
+      .from('workspace_roles')
+      .select('is_admin')
+      .eq('id', jobInfo.role_id)
+      .single()
+    if (role?.is_admin) return true
+  }
+
+  // 舊系統 fallback：檢查 roles 陣列
+  const roles = employee.roles as string[] | null
   return roles?.some(r => r === 'admin') ?? false
 }
 

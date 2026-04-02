@@ -13,15 +13,27 @@ import { resetEmployeePasswordSchema } from '@/lib/validations/api-schemas'
  */
 async function checkIsAdmin(employeeId: string): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
-  const { data, error } = await adminClient
+  const { data: employee, error } = await adminClient
     .from('employees')
-    .select('roles')
+    .select('job_info, roles')
     .eq('id', employeeId)
     .single()
 
-  if (error || !data) return false
+  if (error || !employee) return false
 
-  const roles = data.roles as string[] | null
+  // 新系統：從 job_info.role_id 查職務是否為管理員
+  const jobInfo = employee.job_info as { role_id?: string } | null
+  if (jobInfo?.role_id) {
+    const { data: role } = await adminClient
+      .from('workspace_roles')
+      .select('is_admin')
+      .eq('id', jobInfo.role_id)
+      .single()
+    if (role?.is_admin) return true
+  }
+
+  // 舊系統 fallback
+  const roles = employee.roles as string[] | null
   return roles?.some(r => r === 'admin') ?? false
 }
 

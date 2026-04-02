@@ -1,6 +1,13 @@
 import { useMemo } from 'react'
 import { useAuthStore } from '@/stores/auth-store'
 
+/**
+ * 檢查是否有某模組的權限（支援 module:tab 格式）
+ */
+function hasModulePermission(permissions: string[], module: string): boolean {
+  return permissions.some(p => p === module || p.startsWith(`${module}:`))
+}
+
 export const usePermissions = () => {
   const { user } = useAuthStore()
 
@@ -13,36 +20,33 @@ export const usePermissions = () => {
         canConfirmReceipts: false,
         canViewFinance: false,
         canManageFinance: false,
+        canEditDatabase: false,
         isAdmin: false,
         isAccountant: false,
       }
     }
 
     const userPermissions = user.permissions || []
-    const isAdmin = userPermissions.includes('admin') || userPermissions.includes('*')
+    const isAdmin = userPermissions.includes('*') || userPermissions.includes('admin')
 
     return {
       canViewReceipts:
-        isAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
+        isAdmin || hasModulePermission(userPermissions, 'finance'),
       canCreateReceipts:
-        isAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
+        isAdmin || hasModulePermission(userPermissions, 'finance'),
       canEditReceipts:
-        isAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
+        isAdmin || hasModulePermission(userPermissions, 'finance'),
       canConfirmReceipts:
-        isAdmin || userPermissions.includes('payments') || userPermissions.includes('finance'),
+        isAdmin || hasModulePermission(userPermissions, 'finance'),
       canViewFinance:
-        isAdmin ||
-        userPermissions.includes('finance') ||
-        userPermissions.includes('accounting'),
-      canManageFinance: isAdmin || userPermissions.includes('finance'),
-      // 資料庫編輯權限（景點、餐廳、飯店）
+        isAdmin || hasModulePermission(userPermissions, 'finance') || hasModulePermission(userPermissions, 'accounting'),
+      canManageFinance:
+        isAdmin || hasModulePermission(userPermissions, 'finance'),
       canEditDatabase:
-        isAdmin || userPermissions.includes('database') || userPermissions.includes('admin'),
+        isAdmin || hasModulePermission(userPermissions, 'database'),
       isAdmin,
       isAccountant:
-        isAdmin ||
-        userPermissions.includes('accounting') ||
-        userPermissions.includes('finance'),
+        isAdmin || hasModulePermission(userPermissions, 'accounting') || hasModulePermission(userPermissions, 'finance'),
     }
   }, [user])
 
