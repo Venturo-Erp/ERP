@@ -108,12 +108,13 @@ function getModuleFromRoute(route: string): string | null {
  */
 export function hasPermissionForRoute(
   userPermissions: string[] | undefined,
-  route: string
+  route: string,
+  isAdmin?: boolean
 ): boolean {
   if (!userPermissions || userPermissions.length === 0) return false
-  
-  // Super admin 或 admin 有所有權限
-  if (userPermissions.includes('admin') || userPermissions.includes('admin') || userPermissions.includes('*')) {
+
+  // 管理員有所有權限（由 isAdmin flag 決定）
+  if (isAdmin) {
     return true
   }
 

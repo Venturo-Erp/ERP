@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     // 權限檢查
     const { data: employee } = await supabaseAdmin
       .from('employees')
-      .select('permissions, workspace_id')
+      .select('workspace_id')
       .eq('id', auth.data.employeeId)
       .single()
 
@@ -82,8 +82,7 @@ export async function POST(request: NextRequest) {
       return errorResponse('找不到員工資料', 403, ErrorCode.FORBIDDEN)
     }
 
-    const permissions = employee.permissions as string[] | null
-    const isAdmin = permissions?.includes('*') || permissions?.includes('admin') || false
+    const isAdmin = await checkIsAdmin(auth.data.employeeId)
 
     // 查詢 workspace 取得 code
     const { data: currentWorkspace } = await supabaseAdmin

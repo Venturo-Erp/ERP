@@ -44,10 +44,9 @@ export default function SettingsPage() {
     router.replace('/settings')
   }
 
+  const { isAdmin } = useAuthStore()
   const hasSettingsAccess =
-    user?.permissions?.includes('*') ||
-    user?.permissions?.includes('*') ||
-    user?.permissions?.includes('admin') ||
+    isAdmin ||
     user?.permissions?.includes('settings')
 
   const handleLogout = async () => {

@@ -10,6 +10,7 @@ function hasModulePermission(permissions: string[], module: string): boolean {
 
 export const usePermissions = () => {
   const { user } = useAuthStore()
+  const storeIsAdmin = useAuthStore(state => state.isAdmin)
 
   const permissions = useMemo(() => {
     if (!user) {
@@ -27,7 +28,7 @@ export const usePermissions = () => {
     }
 
     const userPermissions = user.permissions || []
-    const isAdmin = userPermissions.includes('*') || userPermissions.includes('admin')
+    const isAdmin = storeIsAdmin
 
     return {
       canViewReceipts:
@@ -48,7 +49,7 @@ export const usePermissions = () => {
       isAccountant:
         isAdmin || hasModulePermission(userPermissions, 'accounting') || hasModulePermission(userPermissions, 'finance'),
     }
-  }, [user])
+  }, [user, storeIsAdmin])
 
   return permissions
 }

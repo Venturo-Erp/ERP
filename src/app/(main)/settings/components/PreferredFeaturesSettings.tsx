@@ -128,11 +128,8 @@ export function PreferredFeaturesSettings() {
     } else {
       // 沒有設定時，預設全部顯示（管理員）
       const userPermissions = user?.permissions || []
-      const isAdmin =
-        userPermissions.includes('admin') ||
-        userPermissions.includes('*') ||
-        userPermissions.includes('*')
-      if (isAdmin) {
+      const { isAdmin: storeIsAdmin } = useAuthStore.getState()
+      if (storeIsAdmin) {
         setSelectedFeatures(AVAILABLE_FEATURES.map(f => f.id))
       } else {
         const defaultFeatures = AVAILABLE_FEATURES.filter(f => userPermissions.includes(f.id)).map(
@@ -251,16 +248,9 @@ export function PreferredFeaturesSettings() {
 
   // 檢查使用者是否有該功能的權限（與側邊欄邏輯一致）
   const hasPermission = (featureId: string) => {
+    const { isAdmin: storeIsAdmin } = useAuthStore.getState()
+    if (storeIsAdmin) return true
     const userPermissions = user?.permissions || []
-    // 1. 超級管理員（有 admin 或 admin）→ 全部權限
-    if (userPermissions.includes('admin') || userPermissions.includes('*')) {
-      return true
-    }
-    // 2. 萬用權限
-    if (userPermissions.includes('*')) {
-      return true
-    }
-    // 3. 個別功能權限
     return userPermissions.includes(featureId)
   }
 

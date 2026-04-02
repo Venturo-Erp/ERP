@@ -22,7 +22,7 @@ import { PROFILE_LABELS } from './constants/labels'
 
 export default function MobileProfilePage() {
   const router = useRouter()
-  const { user, logout } = useAuthStore()
+  const { user, logout, isAdmin } = useAuthStore()
 
   const handleLogout = async () => {
     await logout()
@@ -80,7 +80,7 @@ export default function MobileProfilePage() {
               <h2 className="text-lg font-bold text-morandi-primary">{user?.name || '使用者'}</h2>
               <p className="text-sm text-morandi-secondary">{user?.email}</p>
               {/* 新系統：顯示管理員標籤或職務名稱 */}
-              {(user?.permissions?.includes('*') || user?.permissions?.includes('admin')) && (
+              {isAdmin && (
                 <div className="mt-1">
                   <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-gold/10 text-morandi-gold">
                     管理員

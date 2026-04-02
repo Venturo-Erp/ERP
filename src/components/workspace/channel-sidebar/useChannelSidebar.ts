@@ -10,17 +10,17 @@ export function useChannelSidebar(channels: Channel[], searchQuery: string, chan
     ungrouped: true,
   })
 
+  const isAdmin = useAuthStore(state => state.isAdmin)
+
   const canManageMembers = useMemo(() => {
     if (!user) return false
+    if (isAdmin) return true
     const permissions = user.permissions || []
     return (
-      permissions.includes('*') ||
-      permissions.includes('admin') ||
-      permissions.includes('admin') ||
       permissions.includes('workspace:manage_members') ||
       permissions.includes('workspace:manage')
     )
-  }, [user])
+  }, [user, isAdmin])
 
   // 篩選頻道
   const filteredChannels = useMemo(() => {

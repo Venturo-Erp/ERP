@@ -8,11 +8,8 @@ import { WORKSPACE_SWITCHER_LABELS } from '../constants/labels'
 
 export function WorkspaceSwitcher() {
   const { workspaces, loadWorkspaces } = useWorkspaceChannels()
-  const { user } = useAuthStore()
+  const { user, isAdmin } = useAuthStore()
   const [currentWorkspace, setCurrentWorkspace] = useState<string | null>(null)
-
-  // 檢查是否為 admin
-  const isAdmin = user?.permissions?.includes('*') || user?.permissions?.includes('*') || user?.permissions?.includes('admin')
 
   // ⚠️ useEffect 必須在 return 之前（React Hooks 規則）
   useEffect(() => {

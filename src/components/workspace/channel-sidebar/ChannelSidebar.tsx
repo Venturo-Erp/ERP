@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useAuthStore } from '@/stores/auth-store'
 import type { ChannelSidebarProps } from './types'
 import { useChannelSidebar } from './useChannelSidebar'
 import { useChannelState } from './hooks/useChannelState'
@@ -122,7 +123,7 @@ export function ChannelSidebar({ selectedChannelId, onSelectChannel }: ChannelSi
     }
   }
 
-  const isAdmin = sidebarState.user?.permissions?.includes('admin') ?? false
+  const isAdmin = useAuthStore(state => state.isAdmin)
 
   return (
     <div className="w-[280px] bg-card border-r border-morandi-gold/20 flex flex-col shrink-0">

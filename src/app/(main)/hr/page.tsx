@@ -54,9 +54,7 @@ export default function HRPage() {
   const { confirm, confirmDialogProps } = useConfirmDialog()
   const [rolesData, setRolesData] = useState<Role[]>([])
 
-  const isAdmin = useMemo(() => {
-    return currentUser?.roles?.includes('admin') || currentUser?.roles?.includes('admin')
-  }, [currentUser?.roles])
+  const isAdmin = useAuthStore(state => state.isAdmin)
 
   useEffect(() => {
     fetchAll()

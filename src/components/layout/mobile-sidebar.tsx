@@ -261,8 +261,8 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
           return null
         }
         if (!item.requiredPermission) return item
-        // '*' 代表擁有所有權限
-        if (userPermissions.includes('*')) return item
+        // 管理員有所有權限
+        if (isAdmin) return item
         return userPermissions.includes(item.requiredPermission) ? item : null
       })
       .filter((item): item is MenuItem => item !== null)

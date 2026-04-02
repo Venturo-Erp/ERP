@@ -45,7 +45,7 @@ export function EventDetailDialog({
     // 公司事項：只有建立者或管理員可以
     if (event.extendedProps?.type === 'company') {
       const isCreator = event.extendedProps?.created_by === user?.id
-      const isAdmin = user?.permissions?.includes('admin')
+      const isAdmin = useAuthStore.getState().isAdmin
       return isCreator || isAdmin
     }
 

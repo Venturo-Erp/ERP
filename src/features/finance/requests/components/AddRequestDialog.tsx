@@ -31,6 +31,7 @@ import { cn } from '@/lib/utils'
 import { alert } from '@/lib/ui/alert-dialog'
 import { formatDate } from '@/lib/utils/format-date'
 import { useWorkspaceId } from '@/lib/workspace-context'
+import { useAuthStore } from '@/stores/auth-store'
 import { createSupplier, invalidateSuppliers } from '@/data'
 import { supabase } from '@/lib/supabase/client'
 import {
@@ -133,12 +134,12 @@ export function AddRequestDialog({
   const [activeTab, setActiveTab] = useState<RequestMode>('tour')
 
   // 檢查用戶是否有公司請款權限（管理員或有 accounting 權限）
+  const isAdmin = useAuthStore(state => state.isAdmin)
   const canCreateCompanyPayment = useMemo(() => {
     if (!currentUser?.permissions) return false
-    return currentUser.permissions.includes('*') || 
-           currentUser.permissions.includes('admin') ||
+    return isAdmin ||
            currentUser.permissions.includes('accounting')
-  }, [currentUser?.permissions])
+  }, [currentUser?.permissions, isAdmin])
 
   // === 團體請款狀態 ===
   const [importFromRequests, setImportFromRequests] = useState(false)

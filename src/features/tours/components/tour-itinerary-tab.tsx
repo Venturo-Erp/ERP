@@ -62,16 +62,14 @@ interface TourItineraryTabProps {
 // Main Component
 // ============================================================
 export function TourItineraryTab({ tour }: TourItineraryTabProps) {
-  const { user: currentUser } = useAuthStore()
+  const { user: currentUser, isAdmin } = useAuthStore()
   const { items: itineraries, refresh } = useItineraries()
   const { syncToCore } = useSyncItineraryToCore()
   const { items: coreItems, refresh: refreshCoreItems } = useTourItineraryItemsByTour(tour.id)
 
   // 權限：是否可以編輯資料庫
-  const canEditDatabase = currentUser?.permissions?.includes('*') ||
-    currentUser?.permissions?.includes('*') || 
-    currentUser?.permissions?.includes('database') || 
-    currentUser?.permissions?.includes('admin') || false
+  const canEditDatabase = isAdmin ||
+    currentUser?.permissions?.includes('database') || false
 
   // State
   const [loading, setLoading] = useState(true)

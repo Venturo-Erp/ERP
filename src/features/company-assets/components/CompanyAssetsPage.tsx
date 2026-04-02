@@ -20,6 +20,7 @@ import { COMPANY_ASSETS_LABELS } from '../constants/labels'
 
 export const CompanyAssetsPage: React.FC = () => {
   const user = useAuthStore(state => state.user)
+  const isAdmin = useAuthStore(state => state.isAdmin)
   const [searchQuery, setSearchQuery] = useState('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
@@ -39,8 +40,7 @@ export const CompanyAssetsPage: React.FC = () => {
   // 判斷是否為管理者或會計
   // 管理員或有 accounting 權限的可以存取
   const isAdminOrAccountant =
-    user?.permissions?.includes('admin') ||
-    user?.permissions?.includes('*') ||
+    isAdmin ||
     user?.permissions?.includes('accounting')
 
   // 載入資料

@@ -30,9 +30,9 @@ async function checkVoidPermission(employeeId: string): Promise<boolean> {
 
   if (error || !employee) return false
 
-  // 檢查 permissions 是否有 admin 或 * 或 accounting
+  // 檢查 permissions 是否有 accounting
   const permissions = employee.permissions as string[] | null
-  if (permissions?.includes('*') || permissions?.includes('admin') || permissions?.includes('accounting')) {
+  if (permissions?.includes('accounting')) {
     return true
   }
 

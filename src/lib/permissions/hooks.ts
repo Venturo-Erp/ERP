@@ -136,9 +136,7 @@ export function usePermissions() {
   const workspaceFeatures = useWorkspaceFeatures()
   const rolePermissions = useRolePermissions()
 
-  const isAdmin =
-    user?.permissions?.includes('admin') ||
-    user?.permissions?.includes('*')
+  const isAdmin = useAuthStore(state => state.isAdmin)
 
   const canAccess = useCallback((route: string): boolean => {
     if (isAdmin) return true

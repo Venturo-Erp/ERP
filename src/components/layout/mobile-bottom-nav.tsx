@@ -133,14 +133,13 @@ function saveNavItems(itemIds: string[]) {
 
 export function MobileBottomNav() {
   const pathname = usePathname()
-  const { user, _hasHydrated } = useAuthStore()
+  const { user, _hasHydrated, isAdmin } = useAuthStore()
   const [selectedItemIds, setSelectedItemIds] = useState<string[]>(DEFAULT_SELECTED_IDS)
   const [showAllItems, setShowAllItems] = useState(false)
 
   // 根據權限過濾可用的導航項目
   const availableNavItems = useMemo(() => {
     const permissions = user?.permissions || []
-    const isAdmin = permissions.includes('admin') || permissions.includes('*')
 
     return DEFAULT_NAV_ITEMS.filter(item => {
       if (!item.requiredPermission) return true

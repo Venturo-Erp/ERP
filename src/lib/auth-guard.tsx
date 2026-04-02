@@ -152,10 +152,10 @@ export function AuthGuard({ children, requiredPermission }: AuthGuardProps) {
 
       // 2. 檢查指定權限
       if (requiredPermission) {
+        const isAdmin = useAuthStore.getState().isAdmin
         const hasPermission =
-          permissions.includes('*') ||
-          permissions.some(p => p === requiredPermission || p.startsWith(`${requiredPermission}:`)) ||
-          permissions.includes('admin')
+          isAdmin ||
+          permissions.some(p => p === requiredPermission || p.startsWith(`${requiredPermission}:`))
 
         if (!hasPermission) {
           logger.warn(`用戶無權限訪問 ${pathname}（需要 ${requiredPermission}）`)
@@ -166,7 +166,8 @@ export function AuthGuard({ children, requiredPermission }: AuthGuardProps) {
       }
 
       // 3. 檢查路由權限
-      const hasRoutePermission = hasPermissionForRoute(permissions, pathname)
+      const storeIsAdmin = useAuthStore.getState().isAdmin
+      const hasRoutePermission = hasPermissionForRoute(permissions, pathname, storeIsAdmin)
       if (!hasRoutePermission && pathname !== '/dashboard') {
         logger.warn(`用戶無權限訪問路由 ${pathname}`)
         redirectingRef.current = true
@@ -224,11 +225,12 @@ export function usePermissionCheck(requiredRoute?: string) {
   const { user } = useAuthStore()
 
   const checkRoute = requiredRoute || pathname
-  const hasPermission = user ? hasPermissionForRoute(user.permissions || [], checkRoute) : false
+  const storeIsAdmin = useAuthStore(state => state.isAdmin)
+  const hasPermission = user ? hasPermissionForRoute(user.permissions || [], checkRoute, storeIsAdmin) : false
 
   return {
     hasPermission,
     userPermissions: user?.permissions || [],
-    isAdmin: user?.permissions?.includes('*') || user?.permissions?.includes('admin'),
+    isAdmin: useAuthStore.getState().isAdmin,
   }
 }

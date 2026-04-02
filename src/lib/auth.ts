@@ -61,9 +61,9 @@ export function getUserFromToken(token: string): AuthPayload | null {
   return verifyToken(token)
 }
 
-// 檢查權限
+// 檢查權限（支援 module:tab 前綴比對）
 export function hasPermission(userPermissions: string[], requiredPermission: string): boolean {
-  return userPermissions.includes(requiredPermission) || userPermissions.includes('admin') // 移除 super_admin，統一使用 admin
+  return userPermissions.some(p => p === requiredPermission || p.startsWith(`${requiredPermission}:`))
 }
 
 // 檢查角色
