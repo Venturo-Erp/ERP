@@ -73,34 +73,18 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
   const [roomTypeRows, setRoomTypeRows] = useState<RoomTypeRow[]>([])
   const [hasChanges, setHasChanges] = useState(false)
 
-  // 如果沒有區段（行程表沒有住宿），fallback 到按晚數（至少 1 晚）
-  const fallbackNights = useMemo(() => {
-    if (segments.length > 0) return []
-    const nights = Math.max(tourNights, 1)
-    return Array.from({ length: nights }, (_, i) => ({
-      id: `night-${i + 1}`,
-      hotel_name: '',
-      start_night: i + 1,
-      end_night: i + 1,
-      nights: [i + 1],
-      night_count: 1,
-    } as AccommodationSegment))
-  }, [segments, tourNights])
-
-  const effectiveSegments = segments.length > 0 ? segments : fallbackNights
-
-  // 選中的區段（從 effectiveSegments 查找，包含 fallback）
+  // 選中的區段
   const selectedSegment = useMemo(() =>
-    effectiveSegments.find(s => s.id === selectedSegmentId) || effectiveSegments[0] || null,
-    [effectiveSegments, selectedSegmentId]
+    segments.find(s => s.id === selectedSegmentId) || segments[0] || null,
+    [segments, selectedSegmentId]
   )
 
   // 初始化選中的區段
   useEffect(() => {
-    if (effectiveSegments.length > 0 && !selectedSegmentId) {
-      setSelectedSegmentId(effectiveSegments[0].id)
+    if (segments.length > 0 && !selectedSegmentId) {
+      setSelectedSegmentId(segments[0].id)
     }
-  }, [effectiveSegments, selectedSegmentId])
+  }, [segments, selectedSegmentId])
 
   useEffect(() => {
     loadRooms()
@@ -296,12 +280,25 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
   const totalAssigned = currentSegmentRooms.reduce((sum, r) => sum + r.assigned_count, 0)
   const totalRooms = currentSegmentRooms.length
 
+  // 沒有住宿資料時顯示提示
+  if (!segmentsLoading && segments.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
+        <Hotel className="h-10 w-10 text-morandi-muted opacity-40" />
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-morandi-primary">尚未設定住宿</p>
+          <p className="text-xs text-morandi-muted">請先到行程表設定每日住宿飯店，再回來分房</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <>
       {/* 區段選擇 + 飯店名稱 */}
       <div className="pb-3 border-b border-border space-y-2">
         <div className="flex items-center gap-2 flex-wrap">
-          {effectiveSegments.map(segment => {
+          {segments.map(segment => {
             const isSelected = selectedSegmentId === segment.id
             const roomCount = rooms.filter(r => r.night_number === segment.start_night).length
             
