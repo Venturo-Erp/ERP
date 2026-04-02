@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * 紙娃娃詳情頁 - 客戶 DIY 選景點
+ * 客製化詳情頁 - 客戶 DIY 選景點
  * 路由: /p/wishlist/[slug]
  * 
  * 🎯 流程：

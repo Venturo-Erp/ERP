@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * 紙娃娃選擇器 - 客人勾選景點
+ * 客製化選擇器 - 客人勾選景點
  */
 
 import { useState } from 'react'

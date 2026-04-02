@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * 紙娃娃編輯頁面 - 使用 ContentPageLayout 規範
+ * 客製化模板編輯頁面 - 使用 ContentPageLayout 規範
  * 左側：已選景點列表 + 基本資訊
  * 右側：景點庫（含國家篩選）
  */
@@ -133,7 +133,7 @@ export default function WishlistTemplateEditPage({
       .single()
 
     if (templateError || !templateData) {
-      toast.error('找不到紙娃娃')
+      toast.error('找不到客製化模板')
       router.push('/wishlist-templates')
       return
     }
@@ -324,7 +324,7 @@ export default function WishlistTemplateEditPage({
         title="載入中..."
         icon={Sparkles}
         breadcrumb={[
-          { label: '紙娃娃管理', href: '/wishlist-templates' },
+          { label: '客製化模板管理', href: '/wishlist-templates' },
           { label: '...', href: '#' },
         ]}
       >
@@ -337,10 +337,10 @@ export default function WishlistTemplateEditPage({
 
   return (
     <ContentPageLayout
-      title={template?.name || '紙娃娃'}
+      title={template?.name || '客製化模板'}
       icon={Sparkles}
       breadcrumb={[
-        { label: '紙娃娃管理', href: '/wishlist-templates' },
+        { label: '客製化模板管理', href: '/wishlist-templates' },
         { label: template?.name || '', href: '#' },
       ]}
       badge={
@@ -569,7 +569,7 @@ export default function WishlistTemplateEditPage({
         <div className="max-w-2xl mx-auto p-6">
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label className="text-base">紙娃娃名稱 *</Label>
+              <Label className="text-base">客製化模板名稱 *</Label>
               <Input
                 value={editForm.name}
                 onChange={(e) => setEditForm(p => ({ ...p, name: e.target.value }))}
@@ -601,7 +601,7 @@ export default function WishlistTemplateEditPage({
               <Textarea
                 value={editForm.description}
                 onChange={(e) => setEditForm(p => ({ ...p, description: e.target.value }))}
-                placeholder="這個紙娃娃包含哪些景點？給客戶看的簡介..."
+                placeholder="這個客製化模板包含哪些景點？給客戶看的簡介..."
                 rows={4}
               />
             </div>

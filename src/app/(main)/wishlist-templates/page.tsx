@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * 紙娃娃管理頁面
+ * 客製化模板管理頁面
  * 路由: /wishlist-templates
  */
 
@@ -315,7 +315,7 @@ export default function WishlistTemplatesPage() {
   return (
     <>
       <ListPageLayout
-        title="紙娃娃管理"
+        title="客製化模板管理"
         icon={Sparkles}
         data={templates}
         columns={columns}
@@ -327,8 +327,8 @@ export default function WishlistTemplatesPage() {
         searchPlaceholder="搜尋名稱..."
         searchFields={['name', 'slug']}
         onAdd={handleCreate}
-        addLabel="新增紙娃娃"
-        emptyMessage="還沒有紙娃娃，點擊「新增紙娃娃」開始建立"
+        addLabel="新增客製化模板"
+        emptyMessage="還沒有客製化模板，點擊「新增客製化模板」開始建立"
       />
 
       {/* 新增/編輯 Dialog */}
@@ -336,7 +336,7 @@ export default function WishlistTemplatesPage() {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingTemplate ? '編輯紙娃娃' : '新增紙娃娃'}
+              {editingTemplate ? '編輯客製化模板' : '新增客製化模板'}
             </DialogTitle>
           </DialogHeader>
 

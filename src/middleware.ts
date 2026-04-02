@@ -78,7 +78,7 @@ export async function middleware(request: NextRequest) {
     '/test-supplier', // 供應商 UI 測試頁面（暫時）
     '/view', // 公開行程檢視頁面
     '/game', // 遊戲辦公室（隱藏彩蛋）
-    '/p/', // 公開頁面（紙娃娃、行程、報名等）
+    '/p/', // 公開頁面（客製化、行程、報名等）
     '/_next',
     '/favicon.ico',
     '/manifest.json',

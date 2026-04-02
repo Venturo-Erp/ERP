@@ -1,5 +1,5 @@
 /**
- * 紙娃娃模板 API
+ * 客製化模板 API
  * GET /api/wishlist-templates - 取得列表
  */
 

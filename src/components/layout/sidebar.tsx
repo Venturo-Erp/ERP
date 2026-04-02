@@ -332,11 +332,11 @@ const menuItems: MenuItem[] = [
   },
   {
     href: '/wishlist-templates',
-    label: '紙娃娃系統',
+    label: '客製化管理',
     icon: Sparkles,
     requiredPermission: 'wishlist',
     children: [
-      { href: '/wishlist-templates', label: '紙娃娃管理', icon: LayoutTemplate, requiredPermission: 'wishlist' },
+      { href: '/wishlist-templates', label: '客製化模板', icon: LayoutTemplate, requiredPermission: 'wishlist' },
       { href: '/inquiries', label: '詢價單管理', icon: Inbox, requiredPermission: 'wishlist' },
     ],
   },
