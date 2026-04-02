@@ -589,6 +589,8 @@ export function ResourceDetailDialog({
                             if (error) throw error
                             setFullData(prev => prev ? { ...prev, data_verified: newVerified } : null)
                             toast.success(newVerified ? '已驗證' : '已取消驗證')
+                            // 通知父組件刷新列表
+                            onSave?.({ id: resource.id, name: String(fullData?.name || resource.name) })
                           } catch {
                             toast.error('操作失敗')
                           }

@@ -247,6 +247,26 @@ export function DayRow({
             <button
               type="button"
               onClick={() => {
+                const input = routeInputRef.current
+                if (input) {
+                  const pos = input.selectionStart || input.value.length
+                  const val = input.value
+                  const newVal = val.slice(0, pos) + ' ✈ ' + val.slice(pos)
+                  handleRouteChange(newVal)
+                  setTimeout(() => {
+                    input.focus()
+                    input.setSelectionRange(pos + 3, pos + 3)
+                  }, 0)
+                }
+              }}
+              className="px-1 py-0.5 text-[10px] hover:bg-morandi-gold/20 rounded text-muted-foreground"
+              title="插入飛機"
+            >
+              ✈
+            </button>
+            <button
+              type="button"
+              onClick={() => {
                 const hasNote = day.note !== undefined
                 updateDaySchedule(idx, 'note', hasNote ? undefined : '')
               }}
