@@ -38,7 +38,7 @@ export function useCustomerFamily(customerId: string | null | undefined) {
       // 2. 查詢群組詳情
       const { data: groupData, error: groupError } = await supabase
         .from('customer_groups')
-        .select('*')
+        .select('id, name, workspace_id, created_at, updated_at')
         .eq('id', memberData.group_id)
         .eq('type', 'family') // 只查家庭群組
         .single()

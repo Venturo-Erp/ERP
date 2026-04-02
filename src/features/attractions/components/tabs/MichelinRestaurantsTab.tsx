@@ -61,7 +61,7 @@ export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRest
     try {
       const { data, error } = await supabase
         .from('michelin_restaurants')
-        .select('*')
+        .select('id, name, english_name, description, country_id, city_id, michelin_stars, cuisine_type, address, images, is_active, created_at')
         .order('michelin_stars', { ascending: false })
         .order('name')
         .limit(1000)
@@ -77,7 +77,7 @@ export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRest
         if (countryIds.length > 0) {
           supabase
             .from('countries')
-            .select('*')
+            .select('id, name, emoji')
             .in('id', countryIds)
             .limit(500)
             .then(({ data }) => {
@@ -91,7 +91,7 @@ export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRest
         if (cityIds.length > 0) {
           supabase
             .from('cities')
-            .select('*')
+            .select('id, name')
             .in('id', cityIds)
             .limit(500)
             .then(({ data }) => {

@@ -45,36 +45,39 @@ export interface CacheConfig {
 }
 
 // 預設快取配置
+// 策略：快取永不過期，靠 Supabase Realtime 異動通知刷新
+// 參考：ERPNext 的 Redis + Socket.io 架構
 export const DEFAULT_CACHE_CONFIG: Required<CacheConfig> = {
-  ttl: 60000, // 1 分鐘
-  staleTime: 30000, // 30 秒
+  ttl: Infinity,
+  staleTime: Infinity,
   dedupe: true,
   revalidateOnFocus: false,
   revalidateOnReconnect: true,
 }
 
 // 快取配置預設值
+// 所有層級都改為 Infinity — 靠 Realtime 推播刷新，不靠定時重查
 export const CACHE_PRESETS = {
-  /** 高頻資料（tours, orders）*/
+  /** 高頻資料（tours, orders）— Realtime 即時刷新 */
   high: {
-    ttl: 60000,
-    staleTime: 30000,
+    ttl: Infinity,
+    staleTime: Infinity,
     dedupe: true,
     revalidateOnFocus: false,
     revalidateOnReconnect: true,
   },
-  /** 中頻資料（quotes, itineraries）*/
+  /** 中頻資料（quotes, itineraries）— Realtime 即時刷新 */
   medium: {
-    ttl: 300000,
-    staleTime: 60000,
+    ttl: Infinity,
+    staleTime: Infinity,
     dedupe: true,
     revalidateOnFocus: false,
     revalidateOnReconnect: true,
   },
-  /** 低頻資料（regions, settings）*/
+  /** 低頻資料（regions, settings）— Realtime 即時刷新 */
   low: {
-    ttl: 3600000,
-    staleTime: 300000,
+    ttl: Infinity,
+    staleTime: Infinity,
     dedupe: true,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,

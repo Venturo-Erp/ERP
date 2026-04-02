@@ -31,7 +31,7 @@ export function useNotes() {
         // 從 Supabase 讀取用戶筆記
         const { data, error } = await supabase
           .from('notes')
-          .select('*')
+          .select('id, content, tab_id, tab_name, tab_order, user_id, created_by, workspace_id, created_at, updated_at, updated_by')
           .eq('user_id', user.id)
           .order('tab_order', { ascending: true })
           .limit(500)

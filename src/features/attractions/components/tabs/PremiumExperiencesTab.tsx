@@ -72,7 +72,7 @@ export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperi
     try {
       const { data, error } = await supabase
         .from('premium_experiences')
-        .select('*')
+        .select('id, name, english_name, description, category, country_id, city_id, exclusivity_level, images, is_active, is_featured, created_at')
         .order('exclusivity_level', { ascending: false })
         .order('name')
         .limit(1000)
@@ -88,7 +88,7 @@ export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperi
         if (countryIds.length > 0) {
           supabase
             .from('countries')
-            .select('*')
+            .select('id, name, emoji')
             .in('id', countryIds)
             .limit(500)
             .then(({ data }) => {
@@ -102,7 +102,7 @@ export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperi
         if (cityIds.length > 0) {
           supabase
             .from('cities')
-            .select('*')
+            .select('id, name')
             .in('id', cityIds)
             .limit(500)
             .then(({ data }) => {

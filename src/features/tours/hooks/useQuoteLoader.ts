@@ -147,7 +147,7 @@ export function useQuoteLoader(
       // TODO: quote_items 表已不存在，這個 hook 需要重構
       const { data: quoteItems, error: itemsError } = await supabase
         .from('quote_items' as never)
-        .select('*')
+        .select('id, quote_id, category, item_name, unit_price, quantity, subtotal, notes, sort_order, created_at')
         .eq('quote_id', quoteId)
         .order('display_order', { ascending: true })
         .limit(500) as { data: QuoteItemRow[] | null; error: Error | null }

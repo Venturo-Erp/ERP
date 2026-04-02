@@ -47,7 +47,7 @@ const SWR_CONFIG = {
 async function fetchAirports(): Promise<Airport[]> {
   const { data, error } = await supabase
     .from('ref_airports')
-    .select('*')
+    .select('iata_code, icao_code, english_name, name_zh, city_code, city_name_en, city_name_zh, country_code, timezone, latitude, longitude, is_favorite, usage_count, workspace_id, created_at')
     .order('usage_count', { ascending: false, nullsFirst: true })
     .order('city_name_zh', { ascending: true })
     .limit(500)

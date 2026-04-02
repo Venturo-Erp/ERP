@@ -137,7 +137,7 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
       if (request.batch_id) {
         const { data, error } = await supabase
           .from('payment_requests')
-          .select('*')
+          .select('id, code, request_number, request_type, amount, total_amount, status, tour_id, tour_code, supplier_name, expense_type, notes, workspace_id, created_at')
           .eq('batch_id', request.batch_id)
           .order('code', { ascending: true })
           .limit(500)

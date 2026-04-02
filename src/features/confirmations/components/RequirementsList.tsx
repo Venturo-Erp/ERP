@@ -158,7 +158,7 @@ export function RequirementsList({
         if (tourId) {
           const { data: tourData } = await supabase
             .from('tours')
-            .select('*')
+            .select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by')
             .eq('id', tourId)
             .single()
           if (!tourData) return
@@ -208,7 +208,7 @@ export function RequirementsList({
           // 直接讀核心表（不依賴 quote_id）
           const { data: items } = await supabase
             .from('tour_itinerary_items')
-            .select('*')
+            .select('id, tour_id, day_number, sort_order, category, sub_category, title, description, resource_type, resource_name, resource_id, supplier_id, supplier_name, service_date, service_date_end, estimated_cost, confirmed_cost, actual_expense, booking_status, booking_reference, booking_confirmed_at, confirmation_status, confirmation_item_id, handled_by, request_status, request_id, quote_status, quoted_cost, show_on_brochure, show_on_quote, show_on_web, workspace_id, created_at, updated_at')
             .eq('tour_id', tourId)
             .order('day_number', { ascending: true })
             .order('sort_order', { ascending: true })
@@ -569,7 +569,7 @@ export function RequirementsList({
           const { data: newReq, error } = await supabase
             .from('tour_requests')
             .insert(insertData as never)
-            .select('*')
+            .select('id, code, tour_id, workspace_id, request_type, status, supplier_name, items, note, created_at')
             .single()
           if (error) throw error
           if (newReq) setExistingRequests(prev => [...prev, newReq as unknown as TourRequest])

@@ -27,7 +27,7 @@ export async function getAllTodos(workspaceId: string): Promise<Todo[]> {
 
   const { data, error } = await supabase
     .from('todos')
-    .select('*')
+    .select('id, title, description, status, priority, due_date, assigned_to, tour_id, category, workspace_id, created_at, created_by, updated_at')
     .eq('workspace_id', workspaceId) // 🔒 Workspace 過濾
     .order('created_at', { ascending: false })
     .limit(500)
@@ -52,7 +52,7 @@ export async function getTodoById(id: string, workspaceId: string): Promise<Todo
 
   const { data, error } = await supabase
     .from('todos')
-    .select('*')
+    .select('id, title, description, status, priority, due_date, assigned_to, tour_id, category, workspace_id, created_at, created_by, updated_at')
     .eq('id', id)
     .eq('workspace_id', workspaceId) // 🔒 Workspace 過濾
     .single()
@@ -77,7 +77,7 @@ export async function getTodosByStatus(status: string, workspaceId: string): Pro
 
   const { data, error } = await supabase
     .from('todos')
-    .select('*')
+    .select('id, title, description, status, priority, due_date, assigned_to, tour_id, category, workspace_id, created_at, created_by, updated_at')
     .eq('status', status)
     .eq('workspace_id', workspaceId) // 🔒 Workspace 過濾
     .order('created_at', { ascending: false })
@@ -103,7 +103,7 @@ export async function getTodosByAssignee(assigneeId: string, workspaceId: string
 
   const { data, error } = await supabase
     .from('todos')
-    .select('*')
+    .select('id, title, description, status, priority, due_date, assigned_to, tour_id, category, workspace_id, created_at, created_by, updated_at')
     .eq('assignee', assigneeId)
     .eq('workspace_id', workspaceId) // 🔒 Workspace 過濾
     .order('created_at', { ascending: false })
@@ -135,7 +135,7 @@ export async function getTodosByEntity(
   // 暫時用 contains 查詢，待確認 related_items 的結構後優化
   const { data, error } = await supabase
     .from('todos')
-    .select('*')
+    .select('id, title, description, status, priority, due_date, assigned_to, tour_id, category, workspace_id, created_at, created_by, updated_at')
     .contains('related_items', [{ type: entityType, id: entityId }])
     .eq('workspace_id', workspaceId) // 🔒 Workspace 過濾
     .order('created_at', { ascending: false })

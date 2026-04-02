@@ -125,7 +125,7 @@ export function MemberEditDialog({
     try {
       const { data: customer, error } = await supabase
         .from('customers')
-        .select('*')
+        .select('id, code, name, english_name, phone, email, national_id, birth_date, gender, address, passport_number, passport_expiry, passport_name, passport_name_print, passport_image_url, vip_level, is_vip, member_type, emergency_contact, notes, nickname, source, company, workspace_id, created_at, updated_at')
         .eq('id', editingMember.customer_id)
         .single()
 

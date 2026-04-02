@@ -126,7 +126,7 @@ export function useTourEdit(params: UseTourEditParams) {
       // Fetch linked itinerary
       const { data: itinerary, error } = await supabase
         .from('itineraries')
-        .select('*')
+        .select('id, tour_id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary, version_records, workspace_id, created_at, updated_at')
         .eq('tour_id', tourId)
         .single()
 

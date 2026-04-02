@@ -72,7 +72,7 @@ export async function getChannelMessagesSimple({
 
   const { data, error } = await supabase
     .from('messages')
-    .select('*')
+    .select('id, channel_id, content, author_id, author_name, type, metadata, reply_to, workspace_id, created_at, updated_at')
     .eq('channel_id', channelId)
     .order('created_at', { ascending: false })
     .limit(limit)

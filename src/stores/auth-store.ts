@@ -283,7 +283,7 @@ export const useAuthStore = create<AuthState>()(
           // 這可能發生在 supabase_user_id 還沒同步時
           const { data, error } = await supabase
             .from('employees')
-            .select('*')
+            .select('id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active, created_at, updated_at')
             .eq('id', currentUser.id)
             .maybeSingle()
 

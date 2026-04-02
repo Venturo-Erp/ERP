@@ -50,7 +50,7 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
     try {
       const { data } = await supabase
         .from('tasks')
-        .select('*')
+        .select('id, title, description, status, priority, due_date, assigned_to, category, tour_id, workspace_id, created_at, updated_at')
         .eq('task_type', taskType)
         .neq('status', 'completed')
         .order('priority')

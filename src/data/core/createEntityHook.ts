@@ -181,6 +181,31 @@ export function createEntityHook<T extends BaseEntity>(
   }
 
   // ============================================
+  // Supabase Realtime — 異動時自動刷新快取
+  // ============================================
+  function useRealtimeSync() {
+    useEffect(() => {
+      const channel = supabase
+        .channel(`realtime:${tableName}`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: tableName },
+          () => {
+            // 有人異動了這張表 → 刷新所有相關 SWR 快取
+            globalMutate((key: string) => typeof key === 'string' && key.startsWith(cacheKeyPrefix), undefined, { revalidate: true })
+            // 同步清 IndexedDB 快取
+            invalidate_cache_pattern(cacheKeyPrefix)
+          }
+        )
+        .subscribe()
+
+      return () => {
+        supabase.removeChannel(channel)
+      }
+    }, [])
+  }
+
+  // ============================================
   // 認證檢查 Hook
   // ============================================
   function useAuth() {
@@ -246,6 +271,7 @@ export function createEntityHook<T extends BaseEntity>(
   // ============================================
   function useList(options?: { enabled?: boolean }): ListResult<T> {
     const { isReady, hasHydrated } = useAuth()
+    useRealtimeSync()
     const enabled = options?.enabled !== false // 預設為 true
     const swrKey = isReady && enabled ? cacheKeyList : null
     const idb_fallback = useIdbFallback<T[]>(swrKey)
@@ -313,6 +339,7 @@ export function createEntityHook<T extends BaseEntity>(
   // ============================================
   function useListSlim(options?: { enabled?: boolean }): ListResult<T> {
     const { isReady, hasHydrated } = useAuth()
+    useRealtimeSync()
     const enabled = options?.enabled !== false // 預設為 true
     const swrKey = isReady && enabled ? cacheKeySlim : null
     const idb_fallback = useIdbFallback<T[]>(swrKey)

@@ -150,7 +150,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     setLoading(true)
 
     const { data } = await dynamicFrom('transportation_rates')
-      .select('*')
+      .select('id, country_id, country_name, vehicle_type, category, supplier, route, trip_type, cost_vnd, price_twd, kkday_selling_price, kkday_cost, kkday_profit, is_backup, price, currency, unit, notes, is_active, display_order, workspace_id, created_at, updated_at')
       .eq('country_name', countryName)
       .eq('is_active', true)
       .order('display_order')
@@ -169,7 +169,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     if (!selectedCountry) return
 
     const { data } = await dynamicFrom('transportation_rates')
-      .select('*')
+      .select('id, country_id, country_name, vehicle_type, category, supplier, route, trip_type, cost_vnd, price_twd, kkday_selling_price, kkday_cost, kkday_profit, is_backup, price, currency, unit, notes, is_active, display_order, workspace_id, created_at, updated_at')
       .eq('country_name', selectedCountry)
       .eq('is_active', true)
       .order('display_order')

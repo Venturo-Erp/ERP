@@ -21,7 +21,7 @@ export function useDesigns() {
       // 先取得所有設計文件
       const { data: docs, error: docsError } = await supabase
         .from('brochure_documents')
-        .select('*')
+        .select('id, name, tour_id, tour_name, tour_code, type, design_type, status, workspace_id, created_at, updated_at')
         .eq('workspace_id', workspaceId!)
         .order('created_at', { ascending: false })
         .limit(200)
@@ -227,7 +227,7 @@ export function useDesigns() {
     // 2. 複製最新版本
     const { data: latestVersion } = await supabase
       .from('brochure_versions')
-      .select('*')
+      .select('id, document_id, version_number, data, thumbnail_url, created_at')
       .eq('document_id', design.id)
       .order('version_number', { ascending: false })
       .limit(1)

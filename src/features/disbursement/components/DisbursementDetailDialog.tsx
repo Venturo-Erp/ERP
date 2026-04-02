@@ -95,7 +95,7 @@ export function DisbursementDetailDialog({
       try {
         const allItems = await supabase
           .from('payment_request_items')
-          .select('id, request_id, item_name, amount, quantity, unit_price, category, tour_id, description, workspace_id')
+          .select('id, request_id, description, quantity, unitprice, subtotal, category, tour_id, supplier_name, sort_order, item_number, notes, workspace_id')
           .in('request_id', requestIds)
         const blob = await generateDisbursementPDF({
           order: {

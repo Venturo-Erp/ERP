@@ -60,7 +60,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
   private async loadItems(): Promise<void> {
     const { data, error } = await supabase
       .from('payment_requests')
-      .select('*')
+      .select('id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, items, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by')
       .order('created_at', { ascending: false })
       .limit(1000)
     if (error) throw error
@@ -72,7 +72,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
   private async loadPaymentRequestItems(): Promise<PaymentRequestItem[]> {
     const { data, error } = await supabase
       .from('payment_request_items')
-      .select('*')
+      .select('id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by')
       .order('sort_order', { ascending: true })
       .limit(5000)
     if (error) throw error
@@ -105,7 +105,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
   async getItemsByRequestIdAsync(requestId: string): Promise<PaymentRequestItem[]> {
     const { data, error } = await supabase
       .from('payment_request_items')
-      .select('*')
+      .select('id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by')
       .eq('request_id', requestId)
       .order('sort_order', { ascending: true })
       .limit(500)
@@ -278,7 +278,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     // 取得現有項目
     const { data: existingItem, error: fetchError } = await supabase
       .from('payment_request_items')
-      .select('*')
+      .select('id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by')
       .eq('id', itemId)
       .single()
 
@@ -398,7 +398,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
   ): Promise<PaymentRequestItem[]> {
     const { data, error } = await supabase
       .from('payment_request_items')
-      .select('*')
+      .select('id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by')
       .eq('request_id', requestId)
       .eq('category', category)
       .order('sort_order', { ascending: true })
@@ -440,7 +440,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
   async getPendingRequests(): Promise<PaymentRequest[]> {
     const { data, error } = await supabase
       .from('payment_requests')
-      .select('*')
+      .select('id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, items, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by')
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(500)
@@ -455,7 +455,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
   async getBilledRequests(): Promise<PaymentRequest[]> {
     const { data, error } = await supabase
       .from('payment_requests')
-      .select('*')
+      .select('id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, items, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by')
       .eq('status', 'billed')
       .order('created_at', { ascending: false })
       .limit(500)
@@ -470,7 +470,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
   async getRequestsByTour(tourId: string): Promise<PaymentRequest[]> {
     const { data, error } = await supabase
       .from('payment_requests')
-      .select('*')
+      .select('id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, items, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by')
       .eq('tour_id', tourId)
       .order('created_at', { ascending: false })
       .limit(500)
@@ -485,7 +485,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
   async getRequestsByOrder(orderId: string): Promise<PaymentRequest[]> {
     const { data, error } = await supabase
       .from('payment_requests')
-      .select('*')
+      .select('id, code, request_number, request_type, request_category, request_date, amount, total_amount, status, tour_id, tour_code, tour_name, order_id, order_number, supplier_id, supplier_name, expense_type, accounting_subject_id, notes, items, batch_id, budget_warning, is_special_billing, created_by, created_by_name, approved_by, approved_at, paid_by, paid_at, workspace_id, created_at, updated_at, updated_by')
       .eq('order_id', orderId)
       .order('created_at', { ascending: false })
       .limit(500)

@@ -28,7 +28,7 @@ export function useTourDepartureData(tourId: string, open: boolean) {
 
       // 載入主表資料
       const { data: mainData, error: mainError } = await dynamicFrom('tour_departure_data')
-        .select('*')
+        .select('id, tour_id, day_number, date, description, workspace_id, created_at, updated_at')
         .eq('tour_id', tourId)
         .single()
 
@@ -41,7 +41,7 @@ export function useTourDepartureData(tourId: string, open: boolean) {
 
         // 載入餐食
         const { data: mealsData } = await dynamicFrom('tour_departure_meals')
-          .select('*')
+          .select('id, departure_data_id, meal_type, restaurant_name, menu, cost, workspace_id, created_at')
           .eq('departure_data_id', mainData.id)
           .order('date', { ascending: true })
           .order('display_order', { ascending: true })
@@ -50,7 +50,7 @@ export function useTourDepartureData(tourId: string, open: boolean) {
 
         // 載入住宿
         const { data: accomData } = await dynamicFrom('tour_departure_accommodations')
-          .select('*')
+          .select('id, departure_data_id, hotel_name, room_type, room_count, cost, workspace_id, created_at')
           .eq('departure_data_id', mainData.id)
           .order('date', { ascending: true })
           .order('display_order', { ascending: true })
@@ -59,7 +59,7 @@ export function useTourDepartureData(tourId: string, open: boolean) {
 
         // 載入活動
         const { data: activData } = await dynamicFrom('tour_departure_activities')
-          .select('*')
+          .select('id, departure_data_id, activity_name, description, cost, workspace_id, created_at')
           .eq('departure_data_id', mainData.id)
           .order('date', { ascending: true })
           .order('display_order', { ascending: true })
@@ -68,7 +68,7 @@ export function useTourDepartureData(tourId: string, open: boolean) {
 
         // 載入其他
         const { data: othersData } = await dynamicFrom('tour_departure_others')
-          .select('*')
+          .select('id, departure_data_id, item_name, description, cost, workspace_id, created_at')
           .eq('departure_data_id', mainData.id)
           .order('date', { ascending: true })
           .order('display_order', { ascending: true })

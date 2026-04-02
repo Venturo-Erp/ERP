@@ -60,7 +60,7 @@ export function BatchReceiptConfirmDialog({
       if (receipt.batch_id) {
         const { data, error } = await supabase
           .from('receipts')
-          .select('*')
+          .select('id, receipt_number, order_id, tour_id, amount, actual_amount, receipt_date, payment_method, status, notes, workspace_id, created_at, updated_at')
           .eq('batch_id', receipt.batch_id)
           .order('receipt_number', { ascending: true })
 

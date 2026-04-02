@@ -1062,7 +1062,7 @@ export function AssignSupplierDialog({
                       // 2. 查員工的 LINE User ID
                       const { data: empData } = await supabase
                         .from('employees')
-                        .select('*')
+                        .select('id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active, created_at, updated_at')
                         .eq('id', selectedEmployeeId)
                         .single()
 

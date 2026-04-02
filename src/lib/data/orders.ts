@@ -108,7 +108,7 @@ export async function getOrderById(id: string, workspaceId?: string): Promise<Or
 
   const { data, error } = await supabase
     .from('orders')
-    .select('*')
+    .select('id, code, order_number, tour_id, tour_name, customer_id, status, total_amount, paid_amount, remaining_amount, payment_status, contact_person, contact_phone, contact_email, sales_person, assistant, member_count, adult_count, child_count, infant_count, total_people, notes, identity_options, is_active, workspace_id, created_at, created_by, updated_at, updated_by')
     .eq('id', id)
     .eq('workspace_id', wsId) // 🔒 Workspace 過濾
     .single()
@@ -141,7 +141,7 @@ export async function getOrdersByTourId(tourId: string, workspaceId?: string): P
 
   const { data, error } = await supabase
     .from('orders')
-    .select('*')
+    .select('id, code, order_number, tour_id, tour_name, customer_id, status, total_amount, paid_amount, remaining_amount, payment_status, contact_person, contact_phone, contact_email, sales_person, assistant, member_count, adult_count, child_count, infant_count, total_people, notes, identity_options, is_active, workspace_id, created_at, created_by, updated_at, updated_by')
     .eq('tour_id', tourId)
     .eq('workspace_id', wsId) // 🔒 Workspace 過濾
     .order('created_at', { ascending: false })

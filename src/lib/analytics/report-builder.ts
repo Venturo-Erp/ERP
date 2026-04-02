@@ -112,7 +112,7 @@ export class ReportBuilder {
       { key: 'profit', label: '利潤', type: 'currency' },
     ]
 
-    let query = supabase.from('tours').select('*').eq('workspace_id', this.workspaceId).limit(500)
+    let query = supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by').eq('workspace_id', this.workspaceId).limit(500)
 
     if (this.dateRange) {
       query = query
@@ -163,7 +163,7 @@ export class ReportBuilder {
       { key: 'created_at', label: '建立日期', type: 'date' },
     ]
 
-    let query = supabase.from('orders').select('*').eq('workspace_id', this.workspaceId).limit(500)
+    let query = supabase.from('orders').select('id, code, order_number, tour_id, tour_name, customer_id, status, total_amount, paid_amount, remaining_amount, payment_status, contact_person, contact_phone, contact_email, sales_person, assistant, member_count, adult_count, child_count, infant_count, total_people, notes, identity_options, is_active, workspace_id, created_at, created_by, updated_at, updated_by').eq('workspace_id', this.workspaceId).limit(500)
 
     if (this.dateRange) {
       query = query

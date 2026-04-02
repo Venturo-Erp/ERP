@@ -90,7 +90,7 @@ export function LeaderMeetingSection({
       const sanitized = sanitizeInput(query)
       const { data, error } = await supabase
         .from('tour_leaders')
-        .select('*')
+        .select('id, tour_id, employee_id, role, status, workspace_id, created_at')
         .or(`name.ilike.%${sanitized}%,english_name.ilike.%${sanitized}%`)
         .eq('status', 'active')
         .limit(5)

@@ -62,7 +62,7 @@ export function useOfficeDocument(): UseOfficeDocumentReturn {
     try {
       const { data, error: fetchError } = await supabase
         .from('office_documents')
-        .select('*')
+        .select('id, name, data, type, tour_id, workspace_id, created_at, created_by, updated_at, updated_by')
         .is('tour_id', null)
         .order('updated_at', { ascending: false })
         .limit(500)
@@ -84,7 +84,7 @@ export function useOfficeDocument(): UseOfficeDocumentReturn {
     try {
       const { data, error: fetchError } = await supabase
         .from('office_documents')
-        .select('*')
+        .select('id, name, data, type, tour_id, workspace_id, created_at, created_by, updated_at, updated_by')
         .eq('tour_id', tourId)
         .order('updated_at', { ascending: false })
         .limit(500)
@@ -103,7 +103,7 @@ export function useOfficeDocument(): UseOfficeDocumentReturn {
     try {
       const { data, error: fetchError } = await supabase
         .from('office_documents')
-        .select('*')
+        .select('id, name, data, type, tour_id, workspace_id, created_at, created_by, updated_at, updated_by')
         .eq('id', id)
         .single()
 
