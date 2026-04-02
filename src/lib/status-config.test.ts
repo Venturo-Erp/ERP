@@ -52,7 +52,7 @@ describe('getStatusConfig', () => {
   })
 
   it('should return payment default for unknown type', () => {
-    const config = getStatusConfig('nonexistent' as any, 'pending')
+    const config = getStatusConfig('nonexistent' as never, 'pending')
     expect(config).toBeDefined()
   })
 
@@ -130,7 +130,7 @@ describe('getStatusOptions', () => {
   })
 
   it('should return empty array for nonexistent type', () => {
-    expect(getStatusOptions('nonexistent' as any)).toEqual([])
+    expect(getStatusOptions('nonexistent' as never)).toEqual([])
   })
 
   it('should return all invoice statuses', () => {

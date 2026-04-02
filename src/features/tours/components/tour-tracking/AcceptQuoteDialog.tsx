@@ -36,8 +36,8 @@ export function AcceptQuoteDialog({
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
-  const response = request.supplier_response
-  const tierPrices = response?.tierPrices || {}
+  const response = request.supplier_response as Record<string, unknown>
+  const tierPrices = (response?.tierPrices as Record<string, number>) || {}
 
   const handleAccept = async () => {
     if (!selectedTier) {
@@ -71,10 +71,10 @@ export function AcceptQuoteDialog({
 
       onOpenChange(false)
       onSuccess()
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: '成交失敗',
-        description: (error as Error).message,
+        description: error.message,
         variant: 'destructive',
       })
     } finally {
@@ -98,7 +98,7 @@ export function AcceptQuoteDialog({
           <div>
             <p className="text-sm text-muted-foreground mb-2">聯絡人</p>
             <p className="font-medium">
-              {response?.contact} / {response?.phone}
+              {String(response?.contact || '')} / {String(response?.phone || '')}
             </p>
           </div>
 

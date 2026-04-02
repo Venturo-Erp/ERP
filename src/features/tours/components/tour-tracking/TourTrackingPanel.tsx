@@ -254,7 +254,7 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
           </h3>
           <div className="space-y-3">
             {acceptedQuotes.map(quote => {
-              const response = quote.supplier_response
+              const response = quote.supplier_response as { tierPrices?: number[] } | null
               const selectedTier = quote.selected_tier ?? 0
               const selectedPrice = response?.tierPrices?.[selectedTier]
 

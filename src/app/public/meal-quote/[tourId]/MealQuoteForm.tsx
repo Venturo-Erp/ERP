@@ -7,7 +7,7 @@ import { logger } from '@/lib/utils/logger'
 interface MealQuoteFormProps {
   tourId: string
   requestId: string
-  requestItems: any[]
+  requestItems: Record<string, unknown>[]
   defaultPax: number
 }
 

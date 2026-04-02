@@ -98,19 +98,19 @@ export default async function TransportConfirmPage({ params }: PageProps) {
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>
               <span className="text-morandi-secondary">團號</span>
-              <div className="font-bold text-lg">{tour?.code || '-'}</div>
+              <div className="font-bold text-lg">{(tour?.code as string) || '-'}</div>
             </div>
             <div>
               <span className="text-morandi-secondary">出發日期</span>
-              <div className="font-medium">{tour?.departure_date || '-'}</div>
+              <div className="font-medium">{(tour?.departure_date as string) || '-'}</div>
             </div>
             <div className="col-span-2">
               <span className="text-morandi-secondary">團名</span>
-              <div className="font-medium">{tour?.name || '-'}</div>
+              <div className="font-medium">{(tour?.name as string) || '-'}</div>
             </div>
             <div>
               <span className="text-morandi-secondary">人數</span>
-              <div className="font-medium">{tour?.current_participants || 0} 人</div>
+              <div className="font-medium">{(tour?.current_participants as number) || 0} 人</div>
             </div>
             <div>
               <span className="text-morandi-secondary">成交金額</span>

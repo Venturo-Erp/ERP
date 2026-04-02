@@ -23,12 +23,20 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
   const [showRejectDialog, setShowRejectDialog] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
 
-  const response = request.supplier_response
+  const response = request.supplier_response as Record<string, unknown>
 
   if (!response) return null
 
   const { contact, phone, tierPrices, singleRoomSupplement, tipNote, supplierNote, submitted_at } =
-    response
+    response as {
+      contact?: string
+      phone?: string
+      tierPrices?: Record<number, number>
+      singleRoomSupplement?: number
+      tipNote?: string
+      supplierNote?: string
+      submitted_at?: string
+    }
 
   // 格式化日期
   const formatDate = (dateStr: string) => {

@@ -153,8 +153,8 @@ export const useQuoteState = () => {
       // 讀取保險和不包含項目
       const metadata = (quote as typeof quote & { metadata?: any })?.metadata
       if (metadata) {
-        if (metadata.insuranceText) setInsuranceText(metadata.insuranceText)
-        if (Array.isArray(metadata.excludedItems)) setExcludedItems(metadata.excludedItems)
+        if (metadata.insuranceText) setInsuranceText(metadata.insuranceText as string)
+        if (Array.isArray(metadata.excludedItems)) setExcludedItems(metadata.excludedItems as string[])
       }
     }
   }, [quote?.id, quote?.updated_at, relatedTour?.code])

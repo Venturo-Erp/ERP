@@ -42,8 +42,8 @@ export async function createRequestFromQuote(input: {
   > = {}
 
   for (const category of categories) {
-    const supplierName = category.supplier_name || category.name || '未指定供應商'
-    const requestType = getCategoryRequestType(category.name)
+    const supplierName = (category.supplier_name as string) || (category.name as string) || '未指定供應商'
+    const requestType = getCategoryRequestType(category.name as string)
 
     if (!groupedBySupplier[supplierName]) {
       groupedBySupplier[supplierName] = {
@@ -54,14 +54,14 @@ export async function createRequestFromQuote(input: {
     }
 
     // 轉換 category items 為 request items
-    for (const item of category.items || []) {
+    for (const item of (category.items as Record<string, unknown>[]) || []) {
       groupedBySupplier[supplierName].items.push({
-        service_date: item.service_date || null,
-        title: item.title || item.item_name || '',
-        quantity: item.quantity || item.unit || 1,
-        note: item.note || item.remarks || '',
-        unit_price: item.cost || item.unit_price || 0,
-        total_price: item.total || item.total_cost || 0,
+        service_date: (item.service_date as string) || null,
+        title: (item.title as string) || (item.item_name as string) || '',
+        quantity: (item.quantity as number) || (item.unit as number) || 1,
+        note: (item.note as string) || (item.remarks as string) || '',
+        unit_price: (item.cost as number) || (item.unit_price as number) || 0,
+        total_price: (item.total as number) || (item.total_cost as number) || 0,
       })
     }
   }
@@ -79,11 +79,11 @@ export async function createRequestFromQuote(input: {
         code: `REQ-${quote.code || Date.now()}-${requestIds.length + 1}`,
         request_type: group.request_type,
         supplier_name: group.supplier_name,
-        items: group.items as unknown,
+        items: group.items as any,
         status: '草稿',
         created_by: input.userId,
         updated_by: input.userId,
-      } as Record<string, unknown>)
+      } as any)
       .select()
       .single()
 

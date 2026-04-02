@@ -35,7 +35,7 @@ interface UseTourActionButtonsParams {
   onOpenArchiveDialog?: (tour: Tour) => void
   onOpenRequirementsDialog?: ((tour: Tour) => void) | undefined
   onAddOrder?: (tour: Tour) => void
-  itineraries?: any[] // 用來判斷該團是否有行程表
+  itineraries?: { id: string }[] // 用來判斷該團是否有行程表
 }
 
 export function useTourActionButtons(params: UseTourActionButtonsParams) {

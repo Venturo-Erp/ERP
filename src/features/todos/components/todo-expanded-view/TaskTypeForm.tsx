@@ -390,8 +390,8 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
 
         if (tour) {
           setFlightInfo({
-            outbound: tour.outbound_flight,
-            return: tour.return_flight,
+            outbound: tour.outbound_flight as unknown as Record<string, unknown> | null,
+            return: tour.return_flight as unknown as Record<string, unknown> | null,
             tourCode: tour.code,
             tourName: tour.name,
             departureDate: tour.departure_date || '',

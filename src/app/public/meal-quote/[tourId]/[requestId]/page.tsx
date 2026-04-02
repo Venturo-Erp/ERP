@@ -115,10 +115,10 @@ export default async function MealQuotePage({
                     <tbody>
                       {requestItems.map((item: any, idx: number) => (
                         <tr key={idx} className="border-b border-border">
-                          <td className="py-2">{item.meal_time || '—'}</td>
-                          <td className="py-2">{item.meal_content || item.name || '—'}</td>
+                          <td className="py-2">{(item.meal_time as string) || '—'}</td>
+                          <td className="py-2">{(item.meal_content as string) || (item.name as string) || '—'}</td>
                           <td className="text-center py-2">
-                            {item.quantity || tour.current_participants || '—'}
+                            {(item.quantity as number) || tour.current_participants || '—'}
                           </td>
                         </tr>
                       ))}
@@ -149,7 +149,7 @@ export default async function MealQuotePage({
                 </summary>
                 <div className="p-4 space-y-3 border-t border-border">
                   {history.map((h: any) => {
-                    const quoteData = h.supplier_response as any
+                    const hQuote = h.supplier_response as any
                     return (
                       <div
                         key={h.id}
@@ -160,15 +160,15 @@ export default async function MealQuotePage({
                             {new Date(h.replied_at).toLocaleString('zh-TW')}
                           </span>
                           <span className="font-bold text-lg text-[#c9a96e]">
-                            ${quoteData?.totalCost?.toLocaleString() || '—'}
+                            ${hQuote?.totalCost?.toLocaleString() || '—'}
                           </span>
                         </div>
                         <div className="text-xs text-morandi-secondary space-y-1">
-                          <div>聯絡人：{quoteData?.contact || '—'}</div>
-                          <div>單價：${quoteData?.unitPrice?.toLocaleString() || '—'} / 人</div>
-                          {quoteData?.notes && (
+                          <div>聯絡人：{hQuote?.contact || '—'}</div>
+                          <div>單價：${hQuote?.unitPrice?.toLocaleString() || '—'} / 人</div>
+                          {hQuote?.notes && (
                             <div className="mt-2 p-2 bg-morandi-container rounded text-xs">
-                              備註：{quoteData.notes}
+                              備註：{quoteData!.notes}
                             </div>
                           )}
                         </div>
@@ -186,39 +186,39 @@ export default async function MealQuotePage({
                   <div className="text-4xl mb-2">✅</div>
                   <h3 className="text-xl font-semibold text-green-900">報價已提交</h3>
                   <p className="text-sm text-green-700 mt-1">
-                    提交時間：{new Date(quoteData.submitted_at).toLocaleString('zh-TW')}
+                    提交時間：{new Date(quoteData!.submitted_at!).toLocaleString('zh-TW')}
                   </p>
                 </div>
 
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-morandi-secondary">聯絡人：</span>
-                    <span className="font-medium">{quoteData.contact}</span>
+                    <span className="font-medium">{quoteData!.contact}</span>
                   </div>
                   <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-morandi-secondary">聯絡電話：</span>
-                    <span className="font-medium">{quoteData.phone}</span>
+                    <span className="font-medium">{quoteData!.phone}</span>
                   </div>
                   <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-morandi-secondary">人數：</span>
-                    <span className="font-medium">{quoteData.pax} 人</span>
+                    <span className="font-medium">{quoteData!.pax} 人</span>
                   </div>
                   <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-morandi-secondary">單價：</span>
                     <span className="font-medium">
-                      ${quoteData.unitPrice?.toLocaleString()} 元/人
+                      ${quoteData!.unitPrice?.toLocaleString()} 元/人
                     </span>
                   </div>
                   <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-morandi-secondary">總金額：</span>
                     <span className="font-bold text-lg text-green-700">
-                      ${quoteData.totalCost?.toLocaleString()} 元
+                      ${quoteData!.totalCost?.toLocaleString()} 元
                     </span>
                   </div>
-                  {quoteData.notes && (
+                  {quoteData!.notes && (
                     <div className="mt-3 p-3 bg-morandi-container rounded">
                       <div className="text-morandi-secondary text-xs mb-1">供應商備註：</div>
-                      <div className="whitespace-pre-wrap">{quoteData.notes}</div>
+                      <div className="whitespace-pre-wrap">{quoteData!.notes}</div>
                     </div>
                   )}
                 </div>

@@ -63,12 +63,12 @@ export async function POST(request: NextRequest) {
 
     // 3. 建立團員資料
     if (travelers && Array.isArray(travelers) && travelers.length > 0) {
-      const members = travelers.map((t: any) => ({
+      const members = travelers.map((t: Record<string, unknown>) => ({
         order_id: order.id,
         workspace_id: tour.workspace_id,
-        chinese_name: t.chineseName,
-        pinyin_name: t.pinyinName,
-        date_of_birth: t.dateOfBirth || null,
+        chinese_name: t.chineseName as string,
+        pinyin_name: t.pinyinName as string,
+        date_of_birth: (t.dateOfBirth as string) || null,
       }))
 
       const { error: membersError } = await supabase.from('order_members').insert(members)

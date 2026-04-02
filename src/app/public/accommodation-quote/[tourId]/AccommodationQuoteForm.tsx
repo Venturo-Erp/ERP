@@ -24,11 +24,11 @@ export function AccommodationQuoteForm({
   // 初始化房型報價（從 requestItems 複製）
   const [rooms, setRooms] = useState(
     requestItems.map((item: any) => ({
-      roomType: item.room_type || '',
-      quantity: item.quantity || 1,
+      roomType: (item.room_type as string) || '',
+      quantity: (item.quantity as number) || 1,
       unitPrice: 0,
-      checkInDate: item.check_in_date || '',
-      checkOutDate: item.check_out_date || '',
+      checkInDate: (item.check_in_date as string) || '',
+      checkOutDate: (item.check_out_date as string) || '',
     }))
   )
 

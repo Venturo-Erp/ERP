@@ -112,8 +112,8 @@ export function LocalQuoteDialog({
         if (quotes?.tier_pricings && Array.isArray(quotes.tier_pricings)) {
           // 提取人數（pax），忽略 0 和 1（可能是預設值）
           const tiers = quotes.tier_pricings
-            .map((t: any) => t.pax)
-            .filter((p: any) => typeof p === 'number' && p > 1)
+            .map((t: unknown) => (t as Record<string, unknown>)?.pax)
+            .filter((p: unknown): p is number => typeof p === 'number' && p > 1)
           if (tiers.length > 0) {
             setPaxTiers(tiers)
           }

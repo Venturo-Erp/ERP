@@ -21,7 +21,7 @@ export interface TourRequest {
   sent_to: string | null
 
   // 報價回覆
-  supplier_response: any | null
+  supplier_response: Record<string, unknown> | null
   replied_at: string | null
   replied_by: string | null
 

@@ -58,9 +58,9 @@ describe('geo-utils', () => {
 
   describe('filterNearbyAttractions', () => {
     const attractions = [
-      { id: '1', name: 'Near', latitude: 25.01, longitude: 121.51 } as any,
-      { id: '2', name: 'Far', latitude: 26.0, longitude: 122.0 } as any,
-      { id: '3', name: 'NoCoords', latitude: null, longitude: null } as any,
+      { id: '1', name: 'Near', latitude: 25.01, longitude: 121.51 } as never,
+      { id: '2', name: 'Far', latitude: 26.0, longitude: 122.0 } as never,
+      { id: '3', name: 'NoCoords', latitude: null, longitude: null } as never,
     ]
 
     it('filters attractions within radius', () => {
@@ -76,8 +76,8 @@ describe('geo-utils', () => {
 
     it('sorts by distance', () => {
       const moreAttractions = [
-        { id: '1', name: 'Medium', latitude: 25.05, longitude: 121.55 } as any,
-        { id: '2', name: 'Close', latitude: 25.01, longitude: 121.51 } as any,
+        { id: '1', name: 'Medium', latitude: 25.05, longitude: 121.55 } as never,
+        { id: '2', name: 'Close', latitude: 25.01, longitude: 121.51 } as never,
       ]
       const result = filterNearbyAttractions(25.0, 121.5, moreAttractions, 20)
       expect(result[0].name).toBe('Close')
@@ -96,15 +96,15 @@ describe('geo-utils', () => {
     })
 
     it('returns single item unchanged', () => {
-      const input = [{ id: '1', name: 'A', latitude: 25, longitude: 121 } as any]
+      const input = [{ id: '1', name: 'A', latitude: 25, longitude: 121 } as never]
       expect(optimizeAttractionOrder(input)).toHaveLength(1)
     })
 
     it('reorders attractions by nearest neighbor', () => {
       const input = [
-        { id: '1', name: 'Far', latitude: 26, longitude: 122 } as any,
-        { id: '2', name: 'Near', latitude: 25.01, longitude: 121.01 } as any,
-        { id: '3', name: 'Mid', latitude: 25.5, longitude: 121.5 } as any,
+        { id: '1', name: 'Far', latitude: 26, longitude: 122 } as never,
+        { id: '2', name: 'Near', latitude: 25.01, longitude: 121.01 } as never,
+        { id: '3', name: 'Mid', latitude: 25.5, longitude: 121.5 } as never,
       ]
       const result = optimizeAttractionOrder(input, 25, 121)
       expect(result[0].name).toBe('Near')
@@ -117,15 +117,15 @@ describe('geo-utils', () => {
     })
 
     it('returns 0 for single attraction', () => {
-      const input = [{ id: '1', latitude: 25, longitude: 121 } as any]
+      const input = [{ id: '1', latitude: 25, longitude: 121 } as never]
       expect(calculateTotalDistance(input)).toBe(0)
     })
 
     it('calculates total distance for ordered attractions', () => {
       const input = [
-        { id: '1', latitude: 25.0, longitude: 121.0 } as any,
-        { id: '2', latitude: 25.1, longitude: 121.1 } as any,
-        { id: '3', latitude: 25.2, longitude: 121.2 } as any,
+        { id: '1', latitude: 25.0, longitude: 121.0 } as never,
+        { id: '2', latitude: 25.1, longitude: 121.1 } as never,
+        { id: '3', latitude: 25.2, longitude: 121.2 } as never,
       ]
       const dist = calculateTotalDistance(input)
       expect(dist).toBeGreaterThan(0)

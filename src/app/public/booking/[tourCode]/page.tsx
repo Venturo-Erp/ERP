@@ -11,7 +11,7 @@ interface Itinerary {
   title: string
   subtitle?: string
   tour_code?: string
-  daily_itinerary?: any[]
+  daily_itinerary?: Array<{ date?: string; dayLabel?: string; title?: string; description?: string; breakfast?: string; lunch?: string; dinner?: string; accommodation?: string }>
 }
 
 interface Employee {
@@ -136,7 +136,7 @@ export default function PublicItineraryPage({
           </div>
 
           <div className="space-y-12">
-            {dailyItinerary.map((day: any, index: number) => (
+            {dailyItinerary.map((day, index) => (
               <article
                 key={index}
                 className="bg-white rounded-3xl shadow-lg overflow-hidden group"

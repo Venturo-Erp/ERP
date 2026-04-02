@@ -16,7 +16,7 @@ interface Traveler {
 interface BookingDialogProps {
   open: boolean
   onClose: () => void
-  itinerary: any
+  itinerary: { tour_id?: string; title?: string }
   salesPersonId?: string
 }
 
@@ -85,7 +85,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
     setTravelers(travelers.filter((t) => t.id !== id))
   }
 
-  const updateTraveler = (id: string, field: keyof Traveler, value: any) => {
+  const updateTraveler = (id: string, field: keyof Traveler, value: string) => {
     setTravelers(travelers.map((t) => (t.id === id ? { ...t, [field]: value } : t)))
   }
 

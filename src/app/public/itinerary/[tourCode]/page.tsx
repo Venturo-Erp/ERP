@@ -14,8 +14,8 @@ export default function PublicItineraryPage({
   const searchParams = useSearchParams()
   const salesPersonRef = searchParams.get('ref')
 
-  const [itinerary, setItinerary] = useState<any>(null)
-  const [salesPerson, setSalesPerson] = useState<any>(null)
+  const [itinerary, setItinerary] = useState<{ tour_code?: string; title?: string; subtitle?: string; tour_id?: string; flights?: Array<Record<string, string>>; daily_itinerary?: Array<Record<string, string>> } | null>(null)
+  const [salesPerson, setSalesPerson] = useState<{ id?: string; display_name?: string; name?: string; email?: string } | null>(null)
   const [loading, setLoading] = useState(true)
   const [isBookingOpen, setIsBookingOpen] = useState(false)
 
@@ -132,7 +132,7 @@ export default function PublicItineraryPage({
                   </tr>
                 </thead>
                 <tbody>
-                  {itinerary.flights.map((flight: any, index: number) => (
+                  {itinerary.flights.map((flight, index) => (
                     <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="px-6 py-4 font-mono font-bold text-[#655d56]">
                         {flight.flightNumber}
@@ -164,7 +164,7 @@ export default function PublicItineraryPage({
           </div>
 
           <div className="space-y-12">
-            {dailyItinerary.map((day: any, index: number) => (
+            {dailyItinerary.map((day, index) => (
               <article
                 key={index}
                 className="bg-white rounded-3xl shadow-lg overflow-hidden group hover:shadow-2xl transition-shadow duration-300"

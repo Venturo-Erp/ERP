@@ -13,7 +13,7 @@ interface Traveler {
   dateOfBirth: string
 }
 
-export function BookingDialog({ open, onClose, itinerary, salesPersonId }: any) {
+export function BookingDialog({ open, onClose, itinerary, salesPersonId }: { open: boolean; onClose: () => void; itinerary: { tour_id?: string; title?: string }; salesPersonId?: string }) {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
@@ -65,7 +65,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: any) 
     setTravelers(travelers.filter((t) => t.id !== id))
   }
 
-  const updateTraveler = (id: string, field: keyof Traveler, value: any) => {
+  const updateTraveler = (id: string, field: keyof Traveler, value: string) => {
     setTravelers(travelers.map((t) => (t.id === id ? { ...t, [field]: value } : t)))
   }
 

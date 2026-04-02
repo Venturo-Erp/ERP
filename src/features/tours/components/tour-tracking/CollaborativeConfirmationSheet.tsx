@@ -92,10 +92,10 @@ export function CollaborativeConfirmationSheet({
 
       mutate()
       toast({ title: '✅ 已更新' })
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: '更新失敗',
-        description: (error as Error).message,
+        description: error.message,
         variant: 'destructive',
       })
     }
@@ -106,9 +106,10 @@ export function CollaborativeConfirmationSheet({
     const printWindow = window.open('', '_blank')
     if (!printWindow) return
 
-    const response = request.supplier_response
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const response = request.supplier_response as any
     const selectedPrice =
-      request.selected_tier != null ? response?.tierPrices?.[request.selected_tier] : undefined
+      request.selected_tier != null ? (response?.tierPrices as Record<number, number> | undefined)?.[request.selected_tier] : undefined
 
     const html = `
       <!DOCTYPE html>
@@ -215,7 +216,7 @@ export function CollaborativeConfirmationSheet({
                 {' '}
                 • {request.selected_tier} 人團{' '}
                 {Number(
-                  request.supplier_response?.tierPrices?.[request.selected_tier]
+                  ((request.supplier_response as Record<string, unknown>)?.tierPrices as Record<number, number> | undefined)?.[request.selected_tier!]
                 ).toLocaleString()}{' '}
                 元/人
               </>
