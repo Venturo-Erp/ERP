@@ -58,11 +58,13 @@ async function fetchWorkspaceInfo(
 function buildUserFromEmployee(
   employeeData: EmployeeRow,
   workspaceInfo: { code?: string; name?: string; type?: User['workspace_type'] },
-  options?: { mustChangePassword?: boolean; rolePermissions?: string[] }
+  options?: { mustChangePassword?: boolean; rolePermissions?: string[]; isAdmin?: boolean }
 ): User {
   const userRoles = (employeeData.roles || []) as UserRole[]
   // 權限完全由 JWT（role_tab_permissions）決定
   const mergedPermissions = options?.rolePermissions || []
+  // 管理員標記：從 JWT 的 is_admin 取得（不再靠 permissions.includes('*')）
+  const isAdminFlag = options?.isAdmin || false
 
   return {
     id: employeeData.id,
@@ -100,7 +102,7 @@ interface AuthState {
   _hasHydrated: boolean
 
   // Methods
-  setUser: (user: User | null) => void
+  setUser: (user: User | null, isAdmin?: boolean) => void
   logout: () => void
   validateLogin: (
     username: string,
@@ -136,10 +138,10 @@ export const useAuthStore = create<AuthState>()(
       sidebarCollapsed: true,
       _hasHydrated: false,
 
-      setUser: user => {
+      setUser: (user, adminFlag?: boolean) => {
         const isAuthenticated = !!user
-        const isAdmin =
-          isAuthenticated && (user.permissions.includes('admin') || user.permissions.includes('*'))
+        // isAdmin 由 JWT 的 is_admin 決定，不再從 permissions 推斷
+        const isAdmin = adminFlag ?? get().isAdmin ?? false
         set({ user, isAuthenticated, isAdmin })
       },
 
@@ -234,25 +236,27 @@ export const useAuthStore = create<AuthState>()(
           // 5. 權限從 validate-login API 的 JWT 取得（server-side 已計算好）
           const jwt = (validateResult.data?.jwt ?? validateResult.jwt) as string
           let rolePermissions: string[] = []
+          let jwtIsAdmin = false
           if (jwt) {
             try {
               const payload = JSON.parse(atob(jwt.split('.')[1]))
               rolePermissions = payload.permissions || []
+              jwtIsAdmin = payload.is_admin || false
             } catch {
-              // JWT 解析失敗，使用空陣列
+              // JWT 解析失敗
             }
           }
 
-          const user = buildUserFromEmployee(employeeData, workspaceInfo, { rolePermissions })
+          const user = buildUserFromEmployee(employeeData, workspaceInfo, { rolePermissions, isAdmin: jwtIsAdmin })
 
           // 6. 設定 JWT cookie
           if (jwt) {
             setSecureCookie(jwt, rememberMe)
           }
 
-          get().setUser(user)
+          get().setUser(user, jwtIsAdmin)
 
-          logger.log(`✅ 登入成功: ${employeeData.display_name}`)
+          logger.log(`✅ 登入成功: ${employeeData.display_name} (admin: ${jwtIsAdmin})`)
 
           return { success: true }
         } catch (error) {
@@ -264,8 +268,8 @@ export const useAuthStore = create<AuthState>()(
       checkPermission: (permission: string) => {
         const user = get().user
         if (!user) return false
-        // Updated to use the new isAdmin flag for simplicity
-        return get().isAdmin || user.permissions.includes(permission)
+        if (get().isAdmin) return true
+        return user.permissions.some(p => p === permission || p.startsWith(`${permission}:`))
       },
 
       refreshUserData: async () => {

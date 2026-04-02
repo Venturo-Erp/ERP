@@ -93,10 +93,9 @@ export async function POST(request: NextRequest) {
 
     // 7. 從職務系統取得權限（統一用 role_tab_permissions）
     let rolePermissions: string[] = []
+    let isAdmin = false
     const jobInfo = employee.job_info as { role_id?: string } | null
-    
-    console.log('🔍 DEBUG - Login API jobInfo:', jobInfo)
-    
+
     if (jobInfo?.role_id) {
       // 查職務是否為管理員
       const { data: role } = await supabase
@@ -104,69 +103,58 @@ export async function POST(request: NextRequest) {
         .select('is_admin')
         .eq('id', jobInfo.role_id)
         .single()
-      
-      console.log('🔍 DEBUG - workspace_roles query result:', role)
-      
-      if (role?.is_admin) {
-        rolePermissions = ['*']
-        console.log('✅ DEBUG - User is admin, rolePermissions:', rolePermissions)
-      } else {
-        // 取得模組分頁權限（統一使用 role_tab_permissions）
-        const { data: tabPerms } = await supabase
-          .from('role_tab_permissions')
-          .select('module_code, tab_code, can_read, can_write')
-          .eq('role_id', jobInfo.role_id)
-        
-        const permSet = new Set<string>()
-        
-        // 轉換成路由權限格式：module_code 或 module_code:tab_code
-        tabPerms?.filter(p => p.can_read).forEach(p => {
-          if (p.tab_code) {
-            // 有分頁：module_code:tab_code
-            permSet.add(`${p.module_code}:${p.tab_code}`)
-          } else {
-            // 無分頁：直接用 module_code
-            permSet.add(p.module_code)
+
+      isAdmin = role?.is_admin || false
+
+      // 不管是不是管理員，都從 role_tab_permissions 讀取權限
+      const { data: tabPerms } = await supabase
+        .from('role_tab_permissions')
+        .select('module_code, tab_code, can_read, can_write')
+        .eq('role_id', jobInfo.role_id)
+
+      const permSet = new Set<string>()
+
+      tabPerms?.filter(p => p.can_read).forEach(p => {
+        if (p.tab_code) {
+          permSet.add(`${p.module_code}:${p.tab_code}`)
+        } else {
+          permSet.add(p.module_code)
+        }
+      })
+
+      // 取得個人覆寫（表尚未建立時跳過）
+      try {
+        const { data: overrides } = await supabase
+          .from('employee_permission_overrides' as 'employees') // 型別 workaround
+          .select('module_code, tab_code, override_type')
+          .eq('employee_id', employee.id)
+
+        ;(overrides as { module_code: string; tab_code: string | null; override_type: string }[] | null)?.forEach(o => {
+          const permKey = o.tab_code ? `${o.module_code}:${o.tab_code}` : o.module_code
+          if (o.override_type === 'grant') {
+            permSet.add(permKey)
+          } else if (o.override_type === 'revoke') {
+            permSet.delete(permKey)
           }
         })
-        
-        // 取得個人覆寫（表尚未建立時跳過）
-        try {
-          const { data: overrides } = await supabase
-            .from('employee_permission_overrides' as 'employees') // 型別 workaround
-            .select('module_code, tab_code, override_type')
-            .eq('employee_id', employee.id)
-          
-          ;(overrides as { module_code: string; tab_code: string | null; override_type: string }[] | null)?.forEach(o => {
-            const permKey = o.tab_code ? `${o.module_code}:${o.tab_code}` : o.module_code
-            if (o.override_type === 'grant') {
-              permSet.add(permKey)
-            } else if (o.override_type === 'revoke') {
-              permSet.delete(permKey)
-            }
-          })
-        } catch {
-          // 表不存在時跳過
-        }
-        
-        rolePermissions = Array.from(permSet)
+      } catch {
+        // 表不存在時跳過
       }
+
+      rolePermissions = Array.from(permSet)
     }
-    
-    // 如果沒有職務權限，fallback 到舊的 permissions
-    const mergedPermissions = rolePermissions.length > 0 
-      ? rolePermissions 
-      : [...(employeeData.permissions || []), ...(employeeData.roles || [])]
-    
+
+    // 管理員：保留具體權限，但加上 '*' 讓所有權限檢查通過
+    if (isAdmin) {
+      rolePermissions.unshift('*')
+    }
+
     // 8. 產生 JWT（server-side 簽名）
     const jwt = await new SignJWT({
       sub: employeeData.id,
       employee_number: employeeData.employee_number,
-      permissions: mergedPermissions,
-      role:
-        mergedPermissions.includes('admin') || mergedPermissions.includes('*')
-          ? 'admin'
-          : 'employee',
+      permissions: rolePermissions,
+      is_admin: isAdmin,
       workspace_id: workspace.id,
     })
       .setProtectedHeader({ alg: 'HS256' })

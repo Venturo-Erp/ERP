@@ -524,7 +524,7 @@ export function Sidebar() {
           }
           if (!item.requiredPermission) return item
           // '*' 代表擁有所有權限
-          if (userPermissions.includes('*')) return item
+          if (isAdmin) return item
           // 精確比對或前綴比對（例如 requiredPermission='tours'，權限有 'tours:overview' 也算符合）
           const perm = item.requiredPermission
           return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`)) ? item : null
