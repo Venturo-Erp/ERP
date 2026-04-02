@@ -73,16 +73,11 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
   const [roomTypeRows, setRoomTypeRows] = useState<RoomTypeRow[]>([])
   const [hasChanges, setHasChanges] = useState(false)
 
-  // 選中的區段
-  const selectedSegment = useMemo(() => 
-    segments.find(s => s.id === selectedSegmentId) || segments[0] || null,
-    [segments, selectedSegmentId]
-  )
-
-  // 如果沒有區段（行程表沒有住宿），fallback 到按晚數
+  // 如果沒有區段（行程表沒有住宿），fallback 到按晚數（至少 1 晚）
   const fallbackNights = useMemo(() => {
     if (segments.length > 0) return []
-    return Array.from({ length: Math.max(tourNights, 1) }, (_, i) => ({
+    const nights = Math.max(tourNights, 1)
+    return Array.from({ length: nights }, (_, i) => ({
       id: `night-${i + 1}`,
       hotel_name: '',
       start_night: i + 1,
@@ -93,6 +88,12 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
   }, [segments, tourNights])
 
   const effectiveSegments = segments.length > 0 ? segments : fallbackNights
+
+  // 選中的區段（從 effectiveSegments 查找，包含 fallback）
+  const selectedSegment = useMemo(() =>
+    effectiveSegments.find(s => s.id === selectedSegmentId) || effectiveSegments[0] || null,
+    [effectiveSegments, selectedSegmentId]
+  )
 
   // 初始化選中的區段
   useEffect(() => {
