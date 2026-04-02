@@ -39,8 +39,9 @@ export function ColleaguesSection({
     }
   }, [workspaces.length, loadWorkspaces])
 
-  // 按辦公室分組員工（排除自己和機器人）
+  // 只顯示同 workspace 的同事（排除自己和機器人）
   const employeesByOffice = useMemo(() => {
+    const currentWorkspaceId = user?.workspace_id
     const grouped: Record<string, typeof employees> = {}
 
     employees.forEach(emp => {
@@ -49,6 +50,8 @@ export function ColleaguesSection({
       if (emp.id === user?.id) return
       // 排除離職員工
       if (emp.status === 'terminated') return
+      // 只顯示同 workspace 的員工
+      if (currentWorkspaceId && emp.workspace_id !== currentWorkspaceId) return
 
       const workspaceId = emp.workspace_id || 'unknown'
       if (!grouped[workspaceId]) {
