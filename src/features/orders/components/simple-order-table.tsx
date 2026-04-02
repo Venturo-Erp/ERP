@@ -118,15 +118,6 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
   ]
 
   return (
-    <div className="flex flex-col h-full">
-      {onAdd && (
-        <div className="flex justify-end mb-3">
-          <Button variant="default" size="sm" onClick={onAdd}>
-            <Plus size={14} className="mr-1" />
-            {COMP_ORDERS_LABELS.新增}
-          </Button>
-        </div>
-      )}
     <EnhancedTable<Order>
       className={className}
       columns={columns}
@@ -134,6 +125,16 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       striped
       showFilters={false}
       actionsWidth="230px"
+      actionsHeader={
+        onAdd ? (
+          <div className="flex justify-end">
+            <Button variant="default" size="sm" className="h-7 px-3 text-xs" onClick={onAdd}>
+              <Plus size={12} className="mr-1" />
+              {COMP_ORDERS_LABELS.新增}
+            </Button>
+          </div>
+        ) : undefined
+      }
       emptyState={
         <div className="flex flex-col items-center justify-center py-12 text-morandi-secondary">
           <FileText size={32} className="mb-2 opacity-30" />
@@ -278,6 +279,5 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
         </div>
       )}
     />
-    </div>
   )
 })
