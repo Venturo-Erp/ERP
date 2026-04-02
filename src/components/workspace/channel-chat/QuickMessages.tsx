@@ -220,7 +220,7 @@ export function QuickMessages({ onSend, disabled }: QuickMessagesProps) {
                   <div key={variable.key}>
                     <Label className="text-sm text-violet-300">
                       {variable.label}
-                      {variable.required && <span className="text-red-400 ml-1">*</span>}
+                      {variable.required && <span className="text-morandi-red ml-1">*</span>}
                     </Label>
                     <Input
                       value={variableValues[variable.key] || ''}
@@ -261,7 +261,7 @@ export function QuickMessages({ onSend, disabled }: QuickMessagesProps) {
               className={cn(
                 'gap-2',
                 sendSuccess
-                  ? 'bg-green-500 hover:bg-green-500'
+                  ? 'bg-morandi-green/100 hover:bg-morandi-green/100'
                   : 'bg-violet-500 hover:bg-violet-600'
               )}
             >

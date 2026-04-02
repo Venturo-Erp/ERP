@@ -78,7 +78,7 @@ function TourCard({ tour }: { tour: TourData }) {
       case 'ticketed':
         return 'text-morandi-green'
       case 'needs_ticketing':
-        return 'text-amber-600'
+        return 'text-morandi-gold'
       case 'no_record':
         return 'text-morandi-red'
       case 'self_arranged':
@@ -161,7 +161,7 @@ function TourCard({ tour }: { tour: TourData }) {
             </div>
           )}
           {stats.needs_ticketing > 0 && (
-            <div className="flex items-center gap-1 text-amber-600">
+            <div className="flex items-center gap-1 text-morandi-gold">
               <AlertTriangle size={14} />
               <span>{stats.needs_ticketing}</span>
             </div>
@@ -207,7 +207,7 @@ function TourCard({ tour }: { tour: TourData }) {
           {/* 待開票 */}
           {groupedMembers.needs_ticketing.length > 0 && (
             <div>
-              <div className="flex items-center gap-1.5 text-xs font-medium text-amber-600 mb-1">
+              <div className="flex items-center gap-1.5 text-xs font-medium text-morandi-gold mb-1">
                 <AlertTriangle size={12} />
                 <span>
                   {COMP_WORKSPACE_LABELS.LABEL_8022}
@@ -218,10 +218,10 @@ function TourCard({ tour }: { tour: TourData }) {
                 {groupedMembers.needs_ticketing.map(m => (
                   <span
                     key={m.id}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-amber-50 text-amber-700 rounded border border-amber-200"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 text-xs bg-morandi-gold/10 text-morandi-gold rounded border border-morandi-gold/30"
                   >
                     {m.name || COMP_WORKSPACE_LABELS.未知}
-                    {m.pnr && <span className="text-amber-500">({m.pnr})</span>}
+                    {m.pnr && <span className="text-morandi-gold">({m.pnr})</span>}
                   </span>
                 ))}
               </div>
@@ -242,7 +242,7 @@ function TourCard({ tour }: { tour: TourData }) {
                 {groupedMembers.no_record.map(m => (
                   <span
                     key={m.id}
-                    className="inline-flex items-center px-2 py-0.5 text-xs bg-red-50 text-morandi-red rounded border border-red-200"
+                    className="inline-flex items-center px-2 py-0.5 text-xs bg-morandi-red/10 text-morandi-red rounded border border-morandi-red/30"
                   >
                     {m.name || COMP_WORKSPACE_LABELS.未知}
                   </span>
@@ -265,7 +265,7 @@ function TourCard({ tour }: { tour: TourData }) {
                 {groupedMembers.ticketed.map(m => (
                   <span
                     key={m.id}
-                    className="inline-flex items-center px-2 py-0.5 text-xs bg-green-50 text-green-700 rounded border border-green-200"
+                    className="inline-flex items-center px-2 py-0.5 text-xs bg-morandi-green/10 text-morandi-green rounded border border-morandi-green/30"
                   >
                     {m.name || COMP_WORKSPACE_LABELS.未知}
                   </span>
@@ -337,7 +337,7 @@ export function TicketStatusCard({ tours, summary, generatedAt }: TicketStatusCa
             {COMP_WORKSPACE_LABELS.LABEL_5332} {tours.length} 個團
           </span>
           {summary.needs_ticketing > 0 && (
-            <span className="text-amber-600">
+            <span className="text-morandi-gold">
               {summary.needs_ticketing} {COMP_WORKSPACE_LABELS.待開票}
             </span>
           )}

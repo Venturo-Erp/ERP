@@ -139,7 +139,7 @@ export function MemberSurchargeCell({
   return (
     <>
       <td
-        className="border border-morandi-gold/20 px-2 py-1 bg-amber-50/50 cursor-pointer hover:bg-amber-100/50 transition-colors"
+        className="border border-morandi-gold/20 px-2 py-1 bg-morandi-gold/10/50 cursor-pointer hover:bg-morandi-gold/10/50 transition-colors"
         onClick={handleOpenDialog}
       >
         <div className="flex flex-col gap-1">

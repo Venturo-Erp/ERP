@@ -59,15 +59,15 @@ interface AddRequestDialogProps {
 
 // 類別對應的圖標和顏色
 const CATEGORY_CONFIG: Record<string, { icon: string; color: string }> = {
-  [REQUEST_TYPE_LABELS.CAT_ACCOMMODATION]: { icon: '🏨', color: 'text-blue-600' },
-  accommodation: { icon: '🏨', color: 'text-blue-600' },
-  [REQUEST_TYPE_LABELS.CAT_TRANSPORTATION]: { icon: '🚌', color: 'text-green-600' },
-  transportation: { icon: '🚌', color: 'text-green-600' },
-  [REQUEST_TYPE_LABELS.CAT_TICKET]: { icon: '🎫', color: 'text-purple-600' },
-  ticket: { icon: '🎫', color: 'text-purple-600' },
-  activity: { icon: '🎫', color: 'text-purple-600' },
-  [REQUEST_TYPE_LABELS.CAT_MEAL]: { icon: '🍽️', color: 'text-orange-600' },
-  meal: { icon: '🍽️', color: 'text-orange-600' },
+  [REQUEST_TYPE_LABELS.CAT_ACCOMMODATION]: { icon: '🏨', color: 'text-status-info' },
+  accommodation: { icon: '🏨', color: 'text-status-info' },
+  [REQUEST_TYPE_LABELS.CAT_TRANSPORTATION]: { icon: '🚌', color: 'text-morandi-green' },
+  transportation: { icon: '🚌', color: 'text-morandi-green' },
+  [REQUEST_TYPE_LABELS.CAT_TICKET]: { icon: '🎫', color: 'text-morandi-secondary' },
+  ticket: { icon: '🎫', color: 'text-morandi-secondary' },
+  activity: { icon: '🎫', color: 'text-morandi-secondary' },
+  [REQUEST_TYPE_LABELS.CAT_MEAL]: { icon: '🍽️', color: 'text-status-warning' },
+  meal: { icon: '🍽️', color: 'text-status-warning' },
   [REQUEST_TYPE_LABELS.CAT_OTHER]: { icon: '📦', color: 'text-morandi-secondary' },
 }
 

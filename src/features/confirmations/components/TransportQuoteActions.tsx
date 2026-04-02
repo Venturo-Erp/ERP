@@ -225,7 +225,7 @@ export function TransportQuoteActions({
           <div className="bg-morandi-container rounded-lg p-4 space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-morandi-secondary">車資</span>
-              <span className="text-xl font-bold text-blue-600">
+              <span className="text-xl font-bold text-status-info">
                 ¥{response?.totalFare?.toLocaleString() || '-'}
               </span>
             </div>
@@ -302,7 +302,7 @@ export function TransportQuoteActions({
                   返回
                 </Button>
                 <Button
-                  className="flex-1 bg-red-600 hover:bg-red-700"
+                  className="flex-1 bg-morandi-red hover:bg-morandi-red"
                   onClick={handleCancel}
                   disabled={isProcessing}
                 >
@@ -313,8 +313,8 @@ export function TransportQuoteActions({
           ) : isAccepted ? (
             // 已成交：顯示取消按鈕 + 發預訂確認（列印用）
             <div className="space-y-3">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                <span className="text-green-700 font-medium">✅ 已成交</span>
+              <div className="bg-morandi-green/10 border border-morandi-green/30 rounded-lg p-3 text-center">
+                <span className="text-morandi-green font-medium">✅ 已成交</span>
               </div>
               <div className="flex gap-3">
                 {sentVia !== 'line' && (
@@ -332,7 +332,7 @@ export function TransportQuoteActions({
                 )}
                 <Button
                   variant="outline"
-                  className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
+                  className="flex-1 border-morandi-red/30 text-morandi-red hover:bg-morandi-red/10"
                   onClick={() => setShowCancel(true)}
                   disabled={isProcessing}
                 >
@@ -346,7 +346,7 @@ export function TransportQuoteActions({
             <div className="flex gap-3">
               <Button
                 variant="outline"
-                className="flex-1 border-red-300 text-red-600 hover:bg-red-50"
+                className="flex-1 border-morandi-red/30 text-morandi-red hover:bg-morandi-red/10"
                 onClick={() => handleAction('reject')}
                 disabled={isProcessing}
               >
@@ -354,7 +354,7 @@ export function TransportQuoteActions({
                 拒絕
               </Button>
               <Button
-                className="flex-1 bg-green-600 hover:bg-green-700"
+                className="flex-1 bg-morandi-green hover:bg-morandi-green"
                 onClick={() => handleAction('accept')}
                 disabled={isProcessing}
               >

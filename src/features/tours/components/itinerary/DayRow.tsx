@@ -198,7 +198,7 @@ export function DayRow({
                       key={a.id}
                       className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] whitespace-nowrap ${
                         a.verified === false
-                          ? 'bg-amber-100 text-amber-700 border border-amber-300'
+                          ? 'bg-morandi-gold/10 text-morandi-gold border border-morandi-gold/30'
                           : 'bg-morandi-gold/10 text-morandi-gold'
                       }`}
                       title={a.verified === false ? '資料待完善' : undefined}
@@ -283,7 +283,7 @@ export function DayRow({
             <div className="relative">
               {!day.hotelBreakfast && day.meals.breakfast ? (
                 <div className="h-8 flex items-center px-2">
-                  <div className="inline-flex items-center gap-1 bg-orange-500/10 text-orange-600 rounded-full px-2 py-0.5 text-xs">
+                  <div className="inline-flex items-center gap-1 bg-status-warning/100/10 text-status-warning rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.breakfast}</span>
                     <button
                       type="button"
@@ -325,7 +325,7 @@ export function DayRow({
             <div className="relative">
               {!day.lunchSelf && day.meals.lunch ? (
                 <div className="h-8 flex items-center px-2">
-                  <div className="inline-flex items-center gap-1 bg-orange-500/10 text-orange-600 rounded-full px-2 py-0.5 text-xs">
+                  <div className="inline-flex items-center gap-1 bg-status-warning/100/10 text-status-warning rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.lunch}</span>
                     <button
                       type="button"
@@ -365,7 +365,7 @@ export function DayRow({
             <div className="relative">
               {!day.dinnerSelf && day.meals.dinner ? (
                 <div className="h-8 flex items-center px-2">
-                  <div className="inline-flex items-center gap-1 bg-orange-500/10 text-orange-600 rounded-full px-2 py-0.5 text-xs">
+                  <div className="inline-flex items-center gap-1 bg-status-warning/100/10 text-status-warning rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.dinner}</span>
                     <button
                       type="button"
@@ -414,7 +414,7 @@ export function DayRow({
                 </div>
               ) : day.accommodation ? (
                 <div className="h-7 flex items-center px-2">
-                  <div className="inline-flex items-center gap-1 bg-blue-500/10 text-blue-600 rounded-full px-2 py-0.5 text-xs">
+                  <div className="inline-flex items-center gap-1 bg-status-info/100/10 text-status-info rounded-full px-2 py-0.5 text-xs">
                     <Hotel size={10} />
                     <span>{day.accommodation}</span>
                     <button

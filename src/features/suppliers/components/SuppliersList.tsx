@@ -147,7 +147,7 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
         const groupName = getGroupName(supplier.id)
         if (groupName) {
           return (
-            <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700 flex items-center gap-1">
+            <span className="px-2 py-1 rounded text-xs font-medium bg-morandi-green/10 text-morandi-green flex items-center gap-1">
               <MessageCircle className="w-3 h-3" />
               {groupName}
             </span>
@@ -224,7 +224,7 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5 text-green-600" />
+              <MessageCircle className="w-5 h-5 text-morandi-green" />
               綁定 LINE 群組
             </DialogTitle>
           </DialogHeader>
@@ -246,8 +246,8 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
                       key={group.group_id}
                       className={`w-full text-left px-4 py-3 rounded-md border-2 transition-colors ${
                         selectedGroupId === group.group_id
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-border hover:border-green-300 hover:bg-green-50/50'
+                          ? 'border-morandi-green bg-morandi-green/10'
+                          : 'border-border hover:border-morandi-green/30 hover:bg-morandi-green/10/50'
                       }`}
                       onClick={() => setSelectedGroupId(group.group_id)}
                     >
@@ -268,7 +268,7 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
                   取消
                 </Button>
                 <Button
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  className="flex-1 bg-morandi-green hover:bg-morandi-green text-white"
                   disabled={!selectedGroupId}
                   onClick={handleBindGroup}
                 >

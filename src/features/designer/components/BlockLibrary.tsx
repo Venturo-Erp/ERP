@@ -794,8 +794,8 @@ export function BlockLibrary({ isOpen, onClose, onInsertBlock, insertY = 100 }: 
                 className="flex items-center gap-3 p-3 rounded-lg border hover:bg-morandi-container cursor-pointer transition-colors"
                 onClick={() => handleInsert(block)}
               >
-                <div className="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                  <block.icon className="w-5 h-5 text-amber-600" />
+                <div className="w-10 h-10 rounded-lg bg-morandi-gold/10 flex items-center justify-center">
+                  <block.icon className="w-5 h-5 text-morandi-gold" />
                 </div>
                 <div className="flex-1">
                   <div className="font-medium text-sm">{block.name}</div>

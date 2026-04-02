@@ -957,7 +957,7 @@ export function TourRequestFormDialog({
                         variant="ghost"
                         size="sm"
                         onClick={() => removeItem(item.id)}
-                        className="h-7 w-7 p-0 text-morandi-red hover:bg-red-50"
+                        className="h-7 w-7 p-0 text-morandi-red hover:bg-morandi-red/10"
                       >
                         <Trash2 size={14} />
                       </Button>
@@ -1013,7 +1013,7 @@ export function TourRequestFormDialog({
             <Button
               onClick={handleSendRequest}
               disabled={sending || saving}
-              className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+              className="gap-2 bg-morandi-green hover:bg-morandi-green text-white"
             >
               {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
               {TOUR_REQUEST_FORM_DIALOG_LABELS.發送}

@@ -72,11 +72,11 @@ export function BotSection({ onSelectBot, selectedBotId }: BotSectionProps) {
         <div
           className={cn(
             'w-6 h-6 rounded-full flex items-center justify-center',
-            aiAvailable ? 'bg-emerald-500/20' : 'bg-morandi-gold/20'
+            aiAvailable ? 'bg-morandi-green/100/20' : 'bg-morandi-gold/20'
           )}
         >
           {aiAvailable ? (
-            <Sparkles size={14} className="text-emerald-500" />
+            <Sparkles size={14} className="text-morandi-green" />
           ) : (
             <Bot size={14} className="text-morandi-gold" />
           )}
@@ -85,7 +85,7 @@ export function BotSection({ onSelectBot, selectedBotId }: BotSectionProps) {
           {bot.chinese_name || bot.display_name || COMP_WORKSPACE_LABELS.VENTURO_機器人}
         </span>
         {aiAvailable && (
-          <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+          <span className="text-[10px] text-morandi-green bg-morandi-green/100/10 px-1.5 py-0.5 rounded">
             AI
           </span>
         )}

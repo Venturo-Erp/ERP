@@ -39,7 +39,7 @@ export function UnifiedTraditionalView({
       {/* 標題區 */}
       <div className="flex justify-between items-start mb-6">
         <h2
-          className={`text-2xl font-bold ${isCancellation ? 'text-red-700' : 'text-morandi-primary'}`}
+          className={`text-2xl font-bold ${isCancellation ? 'text-morandi-red' : 'text-morandi-primary'}`}
         >
           {isCancellation ? '⚠️ 取消通知單' : '廠商需求單'}
         </h2>
@@ -272,26 +272,26 @@ function ActivityTable({ items, onItemChange }: { items: Array<Record<string, un
 function CancellationTable({ items }: { items: Array<Record<string, unknown>> }) {
   return (
     <div className="mb-6">
-      <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mb-4">
-        <h3 className="text-lg font-semibold text-red-700 mb-2">⚠️ 取消項目</h3>
-        <p className="text-sm text-red-600">因行程異動，需取消以下預訂項目：</p>
+      <div className="bg-morandi-red/10 border-2 border-morandi-red/30 rounded-lg p-4 mb-4">
+        <h3 className="text-lg font-semibold text-morandi-red mb-2">⚠️ 取消項目</h3>
+        <p className="text-sm text-morandi-red">因行程異動，需取消以下預訂項目：</p>
       </div>
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="bg-gradient-to-r from-red-200 to-red-300 text-red-900">
-            <th className="border border-red-400 px-3 py-2 text-left">項目名稱</th>
-            <th className="border border-red-400 px-3 py-2 text-left">日期</th>
-            <th className="border border-red-400 px-3 py-2 text-left w-20">數量</th>
-            <th className="border border-red-400 px-3 py-2 text-left">原備註</th>
+          <tr className="bg-gradient-to-r from-red-200 to-red-300 text-morandi-primary">
+            <th className="border border-morandi-red px-3 py-2 text-left">項目名稱</th>
+            <th className="border border-morandi-red px-3 py-2 text-left">日期</th>
+            <th className="border border-morandi-red px-3 py-2 text-left w-20">數量</th>
+            <th className="border border-morandi-red px-3 py-2 text-left">原備註</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, idx) => (
-            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-red-50'}>
-              <td className="border border-red-300 px-3 py-2 font-medium">{String(item.name || '—')}</td>
-              <td className="border border-red-300 px-3 py-2">{String(item.date || '—')}</td>
-              <td className="border border-red-300 px-3 py-2">{String(item.quantity || '—')}</td>
-              <td className="border border-red-300 px-3 py-2 text-morandi-secondary">
+            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-morandi-red/10'}>
+              <td className="border border-morandi-red/30 px-3 py-2 font-medium">{String(item.name || '—')}</td>
+              <td className="border border-morandi-red/30 px-3 py-2">{String(item.date || '—')}</td>
+              <td className="border border-morandi-red/30 px-3 py-2">{String(item.quantity || '—')}</td>
+              <td className="border border-morandi-red/30 px-3 py-2 text-morandi-secondary">
                 {String(item.note || '')}
               </td>
             </tr>

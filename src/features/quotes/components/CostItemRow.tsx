@@ -121,9 +121,9 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
                 // 價格變動顏色
                 item.estimated_cost && item.unit_price
                   ? item.unit_price < item.estimated_cost
-                    ? 'text-blue-600 font-semibold' // 降價 → 藍色
+                    ? 'text-status-info font-semibold' // 降價 → 藍色
                     : item.unit_price > item.estimated_cost
-                      ? 'text-red-600 font-semibold' // 漲價 → 紅色
+                      ? 'text-morandi-red font-semibold' // 漲價 → 紅色
                       : ''
                   : ''
               }`}
@@ -156,7 +156,7 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
             type="text"
             value={item.note || ''}
             onChange={e => handleUpdateItem(categoryId, item.id, 'note', e.target.value)}
-            className={`${inputClass} flex-1 ${isLocalPricing ? 'cursor-not-allowed opacity-80' : ''} ${item.note?.startsWith('⚠️') ? 'text-amber-600 font-medium' : ''}`}
+            className={`${inputClass} flex-1 ${isLocalPricing ? 'cursor-not-allowed opacity-80' : ''} ${item.note?.startsWith('⚠️') ? 'text-morandi-gold font-medium' : ''}`}
             placeholder={ACCOMMODATION_ITEM_ROW_LABELS.備註}
             disabled={isLocalPricing}
             title={isLocalPricing ? 'Local 報價階梯資訊（自動產生）' : undefined}

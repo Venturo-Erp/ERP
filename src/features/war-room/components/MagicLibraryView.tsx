@@ -28,9 +28,9 @@ interface MagicLibraryViewProps {
 
 const getStatusBadge = (status: string) => {
   const badges = {
-    latest: { text: '最新', class: 'bg-green-100 text-green-700' },
-    update_available: { text: '有更新', class: 'bg-amber-100 text-amber-700' },
-    outdated: { text: '過時', class: 'bg-red-100 text-red-700' },
+    latest: { text: '最新', class: 'bg-morandi-green/10 text-morandi-green' },
+    update_available: { text: '有更新', class: 'bg-morandi-gold/10 text-morandi-gold' },
+    outdated: { text: '過時', class: 'bg-morandi-red/10 text-morandi-red' },
     unknown: { text: '未知', class: 'bg-morandi-container text-morandi-secondary' },
   }
   return badges[status as keyof typeof badges] || badges.unknown
@@ -106,7 +106,7 @@ export const MagicLibraryView: React.FC<MagicLibraryViewProps> = ({ items, loadi
               href={row.official_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-700"
+              className="text-status-info hover:text-status-info"
               title="官網"
               onClick={e => e.stopPropagation()}
             >
@@ -118,7 +118,7 @@ export const MagicLibraryView: React.FC<MagicLibraryViewProps> = ({ items, loadi
               href={row.github_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 hover:text-blue-700"
+              className="text-status-info hover:text-status-info"
               title="GitHub"
               onClick={e => e.stopPropagation()}
             >

@@ -41,9 +41,9 @@ interface RequestTimelineProps {
 function StatusBadge({ status }: { status: string }) {
   const colors = {
     草稿: 'bg-morandi-container text-morandi-primary',
-    已發送: 'bg-blue-100 text-blue-700',
-    已收到: 'bg-green-100 text-green-700',
-    已確認: 'bg-emerald-100 text-emerald-700',
+    已發送: 'bg-status-info/10 text-status-info',
+    已收到: 'bg-morandi-green/10 text-morandi-green',
+    已確認: 'bg-morandi-green/10 text-morandi-green',
   }
 
   return (
@@ -64,9 +64,9 @@ function getDocTypeIcon(type: string) {
     case '需求單':
       return <FileText size={18} className="text-morandi-gold" />
     case '供應商回覆':
-      return <Mail size={18} className="text-blue-500" />
+      return <Mail size={18} className="text-status-info" />
     case '最終確認':
-      return <CheckCircle2 size={18} className="text-green-500" />
+      return <CheckCircle2 size={18} className="text-morandi-green" />
     default:
       return <FileText size={18} className="text-morandi-secondary" />
   }
@@ -130,7 +130,7 @@ function DocumentCard({
               <Download size={14} className="mr-2" />
               下載
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onDelete?.(doc)} className="text-red-600">
+            <DropdownMenuItem onClick={() => onDelete?.(doc)} className="text-morandi-red">
               <XCircle size={14} className="mr-2" />
               刪除
             </DropdownMenuItem>
@@ -153,7 +153,7 @@ function DocumentCard({
 
       {isPDF && (
         <div className="mb-3 rounded border border-morandi-muted bg-morandi-container p-4 text-center">
-          <FileText size={32} className="mx-auto mb-2 text-red-500" />
+          <FileText size={32} className="mx-auto mb-2 text-morandi-red" />
           <div className="text-xs text-morandi-secondary">PDF 文件</div>
         </div>
       )}
@@ -241,8 +241,8 @@ export function RequestTimeline({
 
             {/* 🆕 供應商回覆區塊 */}
             {group.replies.length > 0 && (
-              <div className="mt-4 ml-6 space-y-3 border-l-2 border-blue-200 pl-4">
-                <div className="text-xs font-medium text-blue-600 mb-2">
+              <div className="mt-4 ml-6 space-y-3 border-l-2 border-status-info/30 pl-4">
+                <div className="text-xs font-medium text-status-info mb-2">
                   📨 供應商回覆 ({group.replies.length})
                 </div>
                 {group.replies.map(reply => (
@@ -262,7 +262,7 @@ export function RequestTimeline({
               <div className="mt-3 ml-6">
                 <label
                   htmlFor={`upload-reply-${group.sent.id}`}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded cursor-pointer hover:bg-blue-100 transition-colors"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-status-info bg-status-info/10 rounded cursor-pointer hover:bg-status-info/10 transition-colors"
                 >
                   <Upload size={14} />
                   上傳供應商回覆

@@ -30,9 +30,9 @@ interface TasksViewProps {
 
 const getPriorityColor = (priority: string) => {
   const colors = {
-    P0: 'bg-red-100 text-red-700',
-    P1: 'bg-amber-100 text-amber-700',
-    P2: 'bg-green-100 text-green-700',
+    P0: 'bg-morandi-red/10 text-morandi-red',
+    P1: 'bg-morandi-gold/10 text-morandi-gold',
+    P2: 'bg-morandi-green/10 text-morandi-green',
   }
   return colors[priority as keyof typeof colors] || colors.P2
 }
@@ -96,7 +96,7 @@ export const TasksView: React.FC<TasksViewProps> = ({ taskType }) => {
         <div className="flex items-center gap-2">
           <div className="flex-1 bg-morandi-container rounded-full h-2">
             <div
-              className="bg-amber-600 h-2 rounded-full transition-all"
+              className="bg-morandi-gold h-2 rounded-full transition-all"
               style={{ width: `${row.progress}%` }}
             />
           </div>

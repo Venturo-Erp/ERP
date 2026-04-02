@@ -94,8 +94,8 @@ export function RejectQuoteDialog({
             />
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm">
-            <p className="text-amber-900">
+          <div className="bg-morandi-gold/10 border border-morandi-gold/30 rounded-lg p-3 text-sm">
+            <p className="text-morandi-primary">
               報價會被標記為「不成交」並歸檔，可在「未成交」區塊查看。
             </p>
           </div>

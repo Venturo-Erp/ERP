@@ -123,10 +123,10 @@ function getItemIcon(item: FinderItem): React.ReactNode {
 
   // 檔案類型顏色（保留語義化顏色）
   let colorClass = 'text-morandi-secondary'
-  if (ext === 'pdf') colorClass = 'text-red-500'
-  else if (['doc', 'docx'].includes(ext || '')) colorClass = 'text-blue-500'
-  else if (['xls', 'xlsx'].includes(ext || '')) colorClass = 'text-green-500'
-  else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext || '')) colorClass = 'text-pink-500'
+  if (ext === 'pdf') colorClass = 'text-morandi-red'
+  else if (['doc', 'docx'].includes(ext || '')) colorClass = 'text-status-info'
+  else if (['xls', 'xlsx'].includes(ext || '')) colorClass = 'text-morandi-green'
+  else if (['jpg', 'jpeg', 'png', 'gif'].includes(ext || '')) colorClass = 'text-morandi-red'
 
   return (
     <div className={cn('w-12 h-12 flex items-center justify-center', colorClass)}>

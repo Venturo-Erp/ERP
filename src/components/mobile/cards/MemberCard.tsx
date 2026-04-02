@@ -34,7 +34,7 @@ export function MemberCard({
 }: MemberCardProps) {
   const genderIcon = member.gender === 'M' ? '♂' : member.gender === 'F' ? '♀' : ''
   const genderColor =
-    member.gender === 'M' ? 'text-blue-500' : member.gender === 'F' ? 'text-pink-500' : ''
+    member.gender === 'M' ? 'text-status-info' : member.gender === 'F' ? 'text-morandi-red' : ''
 
   return (
     <div
@@ -48,7 +48,7 @@ export function MemberCard({
             className={cn(
               'w-12 h-12 rounded-full flex items-center justify-center text-lg font-medium',
               member.checked_in
-                ? 'bg-green-100 text-green-600'
+                ? 'bg-morandi-green/10 text-morandi-green'
                 : 'bg-morandi-container text-morandi-secondary'
             )}
           >
@@ -64,7 +64,7 @@ export function MemberCard({
               </span>
               {genderIcon && <span className={cn('text-sm', genderColor)}>{genderIcon}</span>}
               {member.checked_in && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-green/10 text-morandi-green">
                   {CARDS_LABELS.LABEL_3499}
                 </span>
               )}
@@ -121,7 +121,7 @@ export function MemberCard({
             className={cn(
               'flex-1 flex items-center justify-center gap-1.5 py-3 text-sm transition-colors',
               member.checked_in
-                ? 'text-green-600 bg-green-50'
+                ? 'text-morandi-green bg-morandi-green/10'
                 : 'text-morandi-secondary hover:bg-morandi-container/50 hover:text-morandi-primary'
             )}
           >

@@ -234,17 +234,17 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
             </span>
           )}
           {request.status === '已發送' && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-status-info/10 text-status-info">
               🔵 已發送
             </span>
           )}
           {request.status === '已回覆' && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-morandi-green/10 text-morandi-green">
               🟢 已回覆
             </span>
           )}
           {request.status === '結案' && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-morandi-green/10 text-morandi-green">
               ✅ 結案
             </span>
           )}
@@ -324,7 +324,7 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
 
             {request.sent_at && (
               <div className="flex items-start gap-3 text-sm">
-                <Send size={16} className="text-blue-500 mt-0.5" />
+                <Send size={16} className="text-status-info mt-0.5" />
                 <div>
                   <span className="font-medium">已發送</span>
                   <span className="text-morandi-secondary ml-2">
@@ -336,7 +336,7 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
 
             {request.replied_at && (
               <div className="flex items-start gap-3 text-sm">
-                <CheckCircle2 size={16} className="text-green-500 mt-0.5" />
+                <CheckCircle2 size={16} className="text-morandi-green mt-0.5" />
                 <div>
                   <span className="font-medium">已回覆</span>
                   <span className="text-morandi-secondary ml-2">
@@ -348,7 +348,7 @@ export function RequestDetailView({ requestId, onBack }: RequestDetailViewProps)
 
             {request.closed_at && (
               <div className="flex items-start gap-3 text-sm">
-                <XCircle size={16} className="text-emerald-500 mt-0.5" />
+                <XCircle size={16} className="text-morandi-green mt-0.5" />
                 <div>
                   <span className="font-medium">已結案</span>
                   <span className="text-morandi-secondary ml-2">

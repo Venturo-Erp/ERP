@@ -20,8 +20,8 @@ interface TodoCardProps {
 }
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  urgent: { label: '緊急', color: 'text-red-700', bg: 'bg-red-100' },
-  high: { label: '高', color: 'text-orange-700', bg: 'bg-orange-100' },
+  urgent: { label: '緊急', color: 'text-morandi-red', bg: 'bg-morandi-red/10' },
+  high: { label: '高', color: 'text-status-warning', bg: 'bg-status-warning/10' },
   medium: { label: '中', color: 'text-yellow-700', bg: 'bg-yellow-100' },
   low: { label: '低', color: 'text-morandi-secondary', bg: 'bg-morandi-container' },
 }
@@ -66,7 +66,7 @@ export function TodoCard({ todo, onToggle, onClick, className }: TodoCardProps) 
           }}
           className={cn(
             'mt-0.5 transition-colors',
-            isCompleted ? 'text-green-500' : 'text-morandi-secondary hover:text-morandi-gold'
+            isCompleted ? 'text-morandi-green' : 'text-morandi-secondary hover:text-morandi-gold'
           )}
         >
           {isCompleted ? <CheckCircle size={22} /> : <Circle size={22} />}
@@ -100,7 +100,7 @@ export function TodoCard({ todo, onToggle, onClick, className }: TodoCardProps) 
               </div>
             )}
             {dueInfo && (
-              <div className={cn('flex items-center gap-1', dueInfo.isOverdue && 'text-red-600')}>
+              <div className={cn('flex items-center gap-1', dueInfo.isOverdue && 'text-morandi-red')}>
                 {dueInfo.isOverdue ? <AlertCircle size={12} /> : <Clock size={12} />}
                 <span>{dueInfo.text}</span>
               </div>

@@ -310,7 +310,7 @@ function GuideLine({
           onClick={handleDeleteClick}
           className={cn(
             'absolute flex items-center justify-center',
-            'w-4 h-4 rounded-full bg-red-400 hover:bg-red-500',
+            'w-4 h-4 rounded-full bg-morandi-red hover:bg-morandi-red',
             'text-white text-xs font-bold',
             'transition-opacity duration-150',
             isHovering ? 'opacity-100' : 'opacity-0 pointer-events-none'
@@ -368,7 +368,7 @@ function GuideLine({
         onClick={handleDeleteClick}
         className={cn(
           'absolute flex items-center justify-center',
-          'w-4 h-4 rounded-full bg-red-400 hover:bg-red-500',
+          'w-4 h-4 rounded-full bg-morandi-red hover:bg-morandi-red',
           'text-white text-xs font-bold',
           'transition-opacity duration-150',
           isHovering ? 'opacity-100' : 'opacity-0 pointer-events-none'

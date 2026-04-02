@@ -583,13 +583,13 @@ export function TourItinerarySection({
                   {day.recommendations && day.recommendations.length > 0 && (
                     <div
                       className={cn(
-                        'rounded-xl sm:rounded-2xl border border-emerald-200 bg-emerald-50/80 shadow-inner',
+                        'rounded-xl sm:rounded-2xl border border-morandi-green/30 bg-morandi-green/10/80 shadow-inner',
                         viewMode === 'mobile' ? 'mb-4 p-3' : 'mb-8 p-6'
                       )}
                     >
                       <h4
                         className={cn(
-                          'flex items-center gap-2 font-semibold text-emerald-900',
+                          'flex items-center gap-2 font-semibold text-morandi-primary',
                           viewMode === 'mobile' ? 'mb-2 text-sm' : 'mb-3 text-lg'
                         )}
                       >
@@ -597,7 +597,7 @@ export function TourItinerarySection({
                       </h4>
                       <ul
                         className={cn(
-                          'text-emerald-800',
+                          'text-morandi-green',
                           viewMode === 'mobile' ? 'space-y-1.5' : 'space-y-2'
                         )}
                       >
@@ -611,7 +611,7 @@ export function TourItinerarySection({
                           >
                             <span
                               className={cn(
-                                'rounded-full bg-emerald-500 flex-shrink-0',
+                                'rounded-full bg-morandi-green/100 flex-shrink-0',
                                 viewMode === 'mobile' ? 'mt-1 h-1.5 w-1.5' : 'mt-1 h-2 w-2'
                               )}
                             ></span>

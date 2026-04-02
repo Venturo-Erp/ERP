@@ -35,11 +35,11 @@ const TASK_TYPE_CONFIG: Record<
     color: string
   }
 > = {
-  accommodation: { icon: Hotel, label: '訂房', color: 'text-blue-600' },
-  restaurant: { icon: Utensils, label: '訂餐廳', color: 'text-orange-600' },
-  transport: { icon: Bus, label: '訂交通', color: 'text-green-600' },
-  ticket: { icon: Ticket, label: '訂票', color: 'text-purple-600' },
-  activity: { icon: PartyPopper, label: '訂活動', color: 'text-pink-600' },
+  accommodation: { icon: Hotel, label: '訂房', color: 'text-status-info' },
+  restaurant: { icon: Utensils, label: '訂餐廳', color: 'text-status-warning' },
+  transport: { icon: Bus, label: '訂交通', color: 'text-morandi-green' },
+  ticket: { icon: Ticket, label: '訂票', color: 'text-morandi-secondary' },
+  activity: { icon: PartyPopper, label: '訂活動', color: 'text-morandi-red' },
   general: { icon: FileText, label: '一般任務', color: 'text-morandi-secondary' },
 }
 

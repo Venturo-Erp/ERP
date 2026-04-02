@@ -166,7 +166,7 @@ export function FilePreview({ onBack }: FilePreviewProps) {
           className="h-7 w-7"
           onClick={() => toggleFileStar(file.id)}
         >
-          <Star className={cn('w-4 h-4', file.is_starred && 'fill-amber-400 text-amber-400')} />
+          <Star className={cn('w-4 h-4', file.is_starred && 'fill-morandi-gold text-morandi-gold')} />
         </Button>
         {onBack && (
           <Button

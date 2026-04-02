@@ -118,7 +118,7 @@ export function RestaurantCard({ restaurant, isSelected, onToggle }: RestaurantC
             </span>
           )}
           {'private_room' in restaurant && restaurant.private_room && (
-            <span className="text-purple-600">{RESTAURANT_LABELS.LABEL_8522}</span>
+            <span className="text-morandi-secondary">{RESTAURANT_LABELS.LABEL_8522}</span>
           )}
           {restaurant.price_range && (
             <span className="text-status-success font-medium">

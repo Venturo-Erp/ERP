@@ -612,7 +612,7 @@ function TableRow({
         {((item as unknown as Record<string, unknown>).handled_by) === 'local' ? (
           // Local 負責 → 顯示標籤（不需填預算）
           <div className="text-right">
-            <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded print:bg-transparent print:text-blue-700">
+            <span className="px-2 py-0.5 text-xs bg-status-info/10 text-status-info rounded print:bg-transparent print:text-status-info">
               Local 負責
             </span>
           </div>
@@ -631,7 +631,7 @@ function TableRow({
             onKeyDown={e => e.key === 'Enter' && handleSaveEstimatedCost()}
             placeholder="填預算"
             disabled={isSavingEstimated}
-            className="w-24 px-2 py-1 text-right font-mono font-medium text-orange-600 border border-border rounded focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e] outline-none disabled:opacity-50 print:border-0 print:p-0"
+            className="w-24 px-2 py-1 text-right font-mono font-medium text-status-warning border border-border rounded focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e] outline-none disabled:opacity-50 print:border-0 print:p-0"
           />
         )}
       </td>
@@ -646,7 +646,7 @@ function TableRow({
           onKeyDown={e => e.key === 'Enter' && handleSaveActualExpense()}
           placeholder="-"
           disabled={isSaving}
-          className="w-24 px-2 py-1 text-right font-mono font-medium text-green-600 border border-border rounded focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e] outline-none disabled:opacity-50 print:border-0 print:p-0"
+          className="w-24 px-2 py-1 text-right font-mono font-medium text-morandi-green border border-border rounded focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e] outline-none disabled:opacity-50 print:border-0 print:p-0"
         />
       </td>
 
@@ -674,7 +674,7 @@ function PaymentStatusCell({ requestId }: { requestId: string | null }) {
   return (
     <div className="space-y-0.5 text-xs">
       {amounts.paidAmount > 0 && (
-        <div className="text-green-600 font-medium">
+        <div className="text-morandi-green font-medium">
           ✓ 已付款 ${amounts.paidAmount.toLocaleString()}
         </div>
       )}

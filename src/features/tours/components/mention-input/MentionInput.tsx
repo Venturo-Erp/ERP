@@ -476,7 +476,7 @@ export const MentionInput = forwardRef<MentionInputHandle, MentionInputProps>(fu
                         size={12}
                         className={cn(
                           'shrink-0',
-                          isDisabled ? 'text-muted-foreground' : 'text-blue-500'
+                          isDisabled ? 'text-muted-foreground' : 'text-status-info'
                         )}
                       />
                       <span className="truncate">{item.name}</span>

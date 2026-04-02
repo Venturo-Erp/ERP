@@ -217,7 +217,7 @@ export function MapExplorerDialog({
                         variant="secondary"
                         className={`shrink-0 text-xs ${
                           attraction.distance < 1
-                            ? 'bg-green-100 text-green-700'
+                            ? 'bg-morandi-green/10 text-morandi-green'
                             : attraction.distance < 3
                               ? 'bg-yellow-100 text-yellow-700'
                               : 'bg-morandi-container text-morandi-secondary'

@@ -24,10 +24,10 @@ interface TourCardProps {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  開團: { label: '開團', color: 'text-amber-700', bg: 'bg-amber-100' },
-  待出發: { label: '待出發', color: 'text-green-700', bg: 'bg-green-100' },
+  開團: { label: '開團', color: 'text-morandi-gold', bg: 'bg-morandi-gold/10' },
+  待出發: { label: '待出發', color: 'text-morandi-green', bg: 'bg-morandi-green/10' },
   已結團: { label: '已結團', color: 'text-morandi-secondary', bg: 'bg-morandi-container' },
-  取消: { label: '取消', color: 'text-red-700', bg: 'bg-red-100' },
+  取消: { label: '取消', color: 'text-morandi-red', bg: 'bg-morandi-red/10' },
 }
 
 export function TourCard({ tour, showActions = true, children, className }: TourCardProps) {
@@ -92,11 +92,11 @@ export function TourCard({ tour, showActions = true, children, className }: Tour
             {daysUntil !== null && daysUntil >= 0 && daysUntil <= 7 && (
               <div className="mb-2">
                 {daysUntil === 0 ? (
-                  <span className="text-xs font-bold text-white bg-green-500 px-2 py-1 rounded-full">
+                  <span className="text-xs font-bold text-white bg-morandi-green/100 px-2 py-1 rounded-full">
                     {CARDS_LABELS.LABEL_5500}
                   </span>
                 ) : (
-                  <span className="text-xs font-medium text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                  <span className="text-xs font-medium text-status-warning bg-status-warning/10 px-2 py-1 rounded-full">
                     {daysUntil}天後
                   </span>
                 )}

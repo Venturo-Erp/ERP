@@ -143,7 +143,7 @@ export function CancellationQuoteDialog({
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle className="text-red-700">⚠️ 取消通知單</DialogTitle>
+          <DialogTitle className="text-morandi-red">⚠️ 取消通知單</DialogTitle>
         </DialogHeader>
 
         {/* 中間可滾動內容 */}
@@ -170,9 +170,9 @@ export function CancellationQuoteDialog({
           ) : (
             <div className="space-y-4">
               {/* 警示區塊 */}
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <h3 className="font-semibold text-red-700 mb-2">⚠️ 取消通知</h3>
-                <div className="text-sm text-red-600">
+              <div className="bg-morandi-red/10 border border-morandi-red/30 rounded-lg p-4">
+                <h3 className="font-semibold text-morandi-red mb-2">⚠️ 取消通知</h3>
+                <div className="text-sm text-morandi-red">
                   <p>因行程異動，需取消以下項目</p>
                 </div>
               </div>
@@ -202,7 +202,7 @@ export function CancellationQuoteDialog({
                 <h3 className="font-semibold mb-2">取消項目</h3>
                 <table className="w-full border-collapse text-sm">
                   <thead>
-                    <tr className="bg-red-100">
+                    <tr className="bg-morandi-red/10">
                       <th className="border px-3 py-2 text-left">項目名稱</th>
                       <th className="border px-3 py-2 text-left">日期</th>
                       <th className="border px-3 py-2 text-left">數量</th>

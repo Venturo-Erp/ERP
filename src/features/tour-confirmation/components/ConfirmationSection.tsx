@@ -174,7 +174,7 @@ export function ConfirmationSection({
                             const url = getNavigationUrl(item)
                             if (url) window.open(url, '_blank')
                           }}
-                          className="h-7 w-7 p-0 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50"
+                          className="h-7 w-7 p-0 text-morandi-green hover:text-morandi-green hover:bg-morandi-green/10"
                           title={CONFIRMATION_SECTION_LABELS.開啟_Google_Maps_導航}
                         >
                           <Navigation size={14} />

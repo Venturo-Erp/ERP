@@ -118,7 +118,7 @@ export const AccommodationItemRow: React.FC<AccommodationItemRowProps> = ({
             type="text"
             value={isSameAsPrevious ? ACCOMMODATION_ITEM_ROW_LABELS.續住 : item.note || ''}
             onChange={e => handleUpdateItem(categoryId, item.id, 'note', e.target.value)}
-            className={`${inputClass} flex-1 ${item.note?.startsWith('⚠️') ? 'text-amber-600 font-medium' : ''}`}
+            className={`${inputClass} flex-1 ${item.note?.startsWith('⚠️') ? 'text-morandi-gold font-medium' : ''}`}
             placeholder={ACCOMMODATION_ITEM_ROW_LABELS.備註}
             disabled={isReadOnly || isSameAsPrevious}
           />

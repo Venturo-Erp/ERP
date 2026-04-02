@@ -222,7 +222,7 @@ export function GeminiItineraryForm({ data, onChange }: GeminiItineraryFormProps
   return (
     <div className="space-y-6 p-6">
       {/* AI 功能提示 */}
-      <div className="bg-gradient-to-r from-status-info-bg to-purple-50 border border-purple-600/30 rounded-lg p-4">
+      <div className="bg-gradient-to-r from-status-info-bg to-purple-50 border border-morandi-secondary/30 rounded-lg p-4">
         <div className="flex items-center gap-2 text-status-info font-medium mb-2">
           <Sparkles size={18} />
           <span>{ITINERARY_LABELS.GEMINI_AI_TITLE}</span>
@@ -601,7 +601,7 @@ export function GeminiItineraryForm({ data, onChange }: GeminiItineraryFormProps
                     disabled={generatingImage === `spot-${idx}` || !spot.name}
                     size="sm"
                     variant="ghost"
-                    className="h-6 px-2 text-purple-600 hover:text-purple-600 hover:bg-purple-50"
+                    className="h-6 px-2 text-morandi-secondary hover:text-morandi-secondary hover:bg-morandi-container"
                     title={ITINERARY_LABELS.GENERATING_7963}
                   >
                     {generatingImage === `spot-${idx}` ? (
@@ -715,7 +715,7 @@ export function GeminiItineraryForm({ data, onChange }: GeminiItineraryFormProps
                     disabled={generatingImage === `sight-${idx}` || !sight.name}
                     size="sm"
                     variant="ghost"
-                    className="h-6 px-2 text-purple-600 hover:text-purple-600 hover:bg-purple-50"
+                    className="h-6 px-2 text-morandi-secondary hover:text-morandi-secondary hover:bg-morandi-container"
                     title={ITINERARY_LABELS.AI_GENERATE_IMAGE}
                   >
                     {generatingImage === `sight-${idx}` ? (

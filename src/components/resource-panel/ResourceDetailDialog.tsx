@@ -125,9 +125,9 @@ export function ResourceDetailDialog({
   if (!resource) return null
 
   const iconMap: Record<ResourceType, React.ReactNode> = {
-    attraction: <MapPin size={20} className="text-emerald-600" />,
-    hotel: <Building2 size={20} className="text-blue-600" />,
-    restaurant: <UtensilsCrossed size={20} className="text-orange-600" />,
+    attraction: <MapPin size={20} className="text-morandi-green" />,
+    hotel: <Building2 size={20} className="text-status-info" />,
+    restaurant: <UtensilsCrossed size={20} className="text-status-warning" />,
   }
 
   const typeLabel: Record<ResourceType, string> = {
@@ -382,7 +382,7 @@ export function ResourceDetailDialog({
                         )}
                         <button
                           onClick={() => handleDeleteImage(allImages[currentImageIndex])}
-                          className="bg-black/60 hover:bg-red-600 text-white p-1.5 rounded transition-colors"
+                          className="bg-black/60 hover:bg-morandi-red text-white p-1.5 rounded transition-colors"
                           title="刪除照片"
                         >
                           <Trash2 size={14} />
@@ -507,7 +507,7 @@ export function ResourceDetailDialog({
                         href={String(fullData.website)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline truncate"
+                        className="text-status-info hover:underline truncate"
                       >
                         {String(fullData.website)}
                       </a>
@@ -561,7 +561,7 @@ export function ResourceDetailDialog({
                       href={googleMapsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                      className="text-xs text-status-info hover:underline flex items-center gap-1"
                     >
                       Google Maps <ExternalLink size={10} />
                     </a>

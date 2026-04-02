@@ -90,8 +90,8 @@ const VISA_STATUS = {
   'e-visa': {
     label: '電子簽證',
     icon: Globe,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
+    color: 'text-morandi-secondary',
+    bgColor: 'bg-morandi-container',
     description: '需事先上網申請電子簽證',
   },
   'visa-required': {

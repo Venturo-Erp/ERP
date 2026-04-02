@@ -46,7 +46,7 @@ export function AccommodationChangeDialog({
     >
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-amber-600">
+          <DialogTitle className="flex items-center gap-2 text-morandi-gold">
             <AlertTriangle size={20} />
             住宿變更警示
           </DialogTitle>
@@ -63,12 +63,12 @@ export function AccommodationChangeDialog({
               ))}
 
               {quoteChanges.length > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-md p-2">
-                  <p className="font-medium text-amber-800">⚠ 報價單影響</p>
-                  <p className="text-amber-700 text-xs mt-1">
+                <div className="bg-morandi-gold/10 border border-morandi-gold/30 rounded-md p-2">
+                  <p className="font-medium text-morandi-primary">⚠ 報價單影響</p>
+                  <p className="text-morandi-gold text-xs mt-1">
                     以下住宿已有報價成本，變更後將清除：
                   </p>
-                  <ul className="text-xs text-amber-700 mt-1 space-y-0.5">
+                  <ul className="text-xs text-morandi-gold mt-1 space-y-0.5">
                     {quoteChanges.map(c => (
                       <li key={c.dayNumber}>
                         第 {c.dayNumber} 天 — {c.oldHotel}
@@ -80,12 +80,12 @@ export function AccommodationChangeDialog({
               )}
 
               {requestChanges.length > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-2">
-                  <p className="font-medium text-red-800">🚨 需求單影響</p>
-                  <p className="text-red-700 text-xs mt-1">
+                <div className="bg-morandi-red/10 border border-morandi-red/30 rounded-md p-2">
+                  <p className="font-medium text-morandi-red">🚨 需求單影響</p>
+                  <p className="text-morandi-red text-xs mt-1">
                     以下住宿已發出需求單，變更後需通知供應商取消：
                   </p>
-                  <ul className="text-xs text-red-700 mt-1 space-y-0.5">
+                  <ul className="text-xs text-morandi-red mt-1 space-y-0.5">
                     {requestChanges.map(c => (
                       <li key={c.dayNumber}>
                         第 {c.dayNumber} 天 — {c.oldHotel}（{c.requestStatus || '已發出'}）
@@ -102,7 +102,7 @@ export function AccommodationChangeDialog({
             <X className="h-4 w-4 mr-1" />
             取消
           </Button>
-          <Button onClick={onConfirm} className="bg-amber-600 hover:bg-amber-700 text-white">
+          <Button onClick={onConfirm} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
             <Check className="h-4 w-4 mr-1" />
             確認變更
           </Button>

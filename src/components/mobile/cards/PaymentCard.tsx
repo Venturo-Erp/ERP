@@ -27,26 +27,26 @@ const STATUS_CONFIG: Record<
 > = {
   pending: {
     label: PAYMENT_CARD_LABELS.STATUS_PENDING,
-    color: 'text-amber-700',
-    bg: 'bg-amber-100',
+    color: 'text-morandi-gold',
+    bg: 'bg-morandi-gold/10',
     icon: Clock,
   },
   confirmed: {
     label: PAYMENT_CARD_LABELS.STATUS_CONFIRMED,
-    color: 'text-blue-700',
-    bg: 'bg-blue-100',
+    color: 'text-status-info',
+    bg: 'bg-status-info/10',
     icon: CheckCircle,
   },
   billed: {
     label: PAYMENT_CARD_LABELS.STATUS_BILLED,
-    color: 'text-green-700',
-    bg: 'bg-green-100',
+    color: 'text-morandi-green',
+    bg: 'bg-morandi-green/10',
     icon: CheckCircle,
   },
   rejected: {
     label: PAYMENT_CARD_LABELS.STATUS_REJECTED,
-    color: 'text-red-700',
-    bg: 'bg-red-100',
+    color: 'text-morandi-red',
+    bg: 'bg-morandi-red/10',
     icon: AlertCircle,
   },
 }

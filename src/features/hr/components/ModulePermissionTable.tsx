@@ -254,7 +254,7 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-morandi-gold rounded-full" />
               )}
               {mode === 'employee' && moduleOverride?.override_type && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-status-info/100 rounded-full" />
               )}
             </div>
           </div>
@@ -294,8 +294,8 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
                     variant="outline" 
                     className={`text-xs ${
                       tabOverride.override_type === 'grant' 
-                        ? 'bg-green-50 text-green-600 border-green-200' 
-                        : 'bg-red-50 text-red-600 border-red-200'
+                        ? 'bg-morandi-green/10 text-morandi-green border-morandi-green/30' 
+                        : 'bg-morandi-red/10 text-morandi-red border-morandi-red/30'
                     }`}
                   >
                     {tabOverride.override_type === 'grant' ? '+額外開啟' : '-已關閉'}
@@ -316,7 +316,7 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
                     className="data-[state=checked]:bg-morandi-green"
                   />
                   {mode === 'employee' && tabOverride?.override_type && (
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
+                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-status-info/100 rounded-full" />
                   )}
                 </div>
               </div>
@@ -356,7 +356,7 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
         )}
         {mode === 'employee' && (
           <span className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-blue-500" /> 已覆寫職務
+            <div className="w-2 h-2 rounded-full bg-status-info/100" /> 已覆寫職務
           </span>
         )}
       </div>

@@ -295,7 +295,7 @@ export function TransportRequirementDialog({
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium">選擇用車天數</Label>
               <div className="flex gap-2 text-xs">
-                <button onClick={selectAll} className="text-blue-600 hover:underline">
+                <button onClick={selectAll} className="text-status-info hover:underline">
                   全選
                 </button>
                 <button onClick={selectNone} className="text-muted-foreground hover:underline">

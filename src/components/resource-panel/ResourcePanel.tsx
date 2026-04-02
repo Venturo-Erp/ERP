@@ -61,9 +61,9 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
   const style = transform ? { transform: CSS.Translate.toString(transform) } : undefined
 
   const iconMap: Record<ResourceType, React.ReactNode> = {
-    attraction: <MapPin size={14} className="text-emerald-600" />,
-    hotel: <Building2 size={14} className="text-blue-600" />,
-    restaurant: <UtensilsCrossed size={14} className="text-orange-600" />,
+    attraction: <MapPin size={14} className="text-morandi-green" />,
+    hotel: <Building2 size={14} className="text-status-info" />,
+    restaurant: <UtensilsCrossed size={14} className="text-status-warning" />,
   }
 
   // 追蹤是否真的移動了（超過 5px 才算拖曳）
@@ -111,7 +111,7 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
         'hover:bg-accent/50 transition-colors',
         isDragging && 'opacity-50 shadow-lg z-50 cursor-grabbing',
         // 未驗證 = 橘色警示邊框
-        isUnverified ? 'border-amber-400/60 bg-amber-50/50' : 'border-border'
+        isUnverified ? 'border-morandi-gold/60 bg-morandi-gold/10/50' : 'border-border'
       )}
     >
       {/* 縮圖 */}
@@ -125,7 +125,7 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
         <div
           className={cn(
             'w-8 h-8 rounded flex items-center justify-center flex-shrink-0',
-            isUnverified ? 'bg-amber-100' : 'bg-muted'
+            isUnverified ? 'bg-morandi-gold/10' : 'bg-muted'
           )}
         >
           {iconMap[resource.type]}

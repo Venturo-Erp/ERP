@@ -21,7 +21,7 @@ export function PublishPreview({ shareUrl, copied, onCopy }: PublishPreviewProps
         <Button
           size="sm"
           variant="outline"
-          className="h-8 px-3 border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
+          className="h-8 px-3 border-morandi-green/30 bg-morandi-green/10 hover:bg-morandi-green/10 text-morandi-green"
         >
           <Link2 size={14} className="mr-1.5" />
           {PUBLISH_LABELS.LABEL_9893}

@@ -159,7 +159,7 @@ export const CalcInput: React.FC<CalcInputProps> = ({
       onKeyDown={handleKeyDown}
       onFocus={handleFocus}
       onBlur={handleBlur}
-      className={`${className || ''} ${isExpression ? '!bg-amber-50' : ''} ${hasFormula && !isFocused ? '!text-blue-600' : ''}`}
+      className={`${className || ''} ${isExpression ? '!bg-morandi-gold/10' : ''} ${hasFormula && !isFocused ? '!text-status-info' : ''}`}
       title={hasFormula ? `公式: ${formula}` : undefined}
     />
   )

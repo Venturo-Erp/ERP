@@ -231,10 +231,10 @@ export function BatchReceiptConfirmDialog({
   // 計算批次狀態
   const getBatchStatus = () => {
     const statuses = items.map(i => i.status)
-    if (statuses.every(s => s === 'confirmed')) return { label: '已確認', color: 'text-green-600' }
-    if (statuses.every(s => s === 'abnormal')) return { label: '異常', color: 'text-red-600' }
-    if (statuses.some(s => s === 'abnormal')) return { label: '部分異常', color: 'text-orange-600' }
-    if (statuses.some(s => s === 'confirmed')) return { label: '部分確認', color: 'text-blue-600' }
+    if (statuses.every(s => s === 'confirmed')) return { label: '已確認', color: 'text-morandi-green' }
+    if (statuses.every(s => s === 'abnormal')) return { label: '異常', color: 'text-morandi-red' }
+    if (statuses.some(s => s === 'abnormal')) return { label: '部分異常', color: 'text-status-warning' }
+    if (statuses.some(s => s === 'confirmed')) return { label: '部分確認', color: 'text-status-info' }
     return { label: '待確認', color: 'text-gray-600' }
   }
 
@@ -308,8 +308,8 @@ export function BatchReceiptConfirmDialog({
                       key={item.receipt.id}
                       className={cn(
                         'border-t',
-                        item.status === 'confirmed' && 'bg-green-50',
-                        item.status === 'abnormal' && 'bg-red-50'
+                        item.status === 'confirmed' && 'bg-morandi-green/10',
+                        item.status === 'abnormal' && 'bg-morandi-red/10'
                       )}
                     >
                       <td className="py-3 px-3 font-mono text-sm">
@@ -341,7 +341,7 @@ export function BatchReceiptConfirmDialog({
                               'font-medium',
                               item.status === 'abnormal' &&
                                 item.actualAmount !== item.receipt.receipt_amount &&
-                                'text-red-600'
+                                'text-morandi-red'
                             )}
                           >
                             ${item.actualAmount.toLocaleString()}
@@ -359,7 +359,7 @@ export function BatchReceiptConfirmDialog({
                               size="sm"
                               variant="ghost"
                               onClick={() => handleConfirmAbnormal(index)}
-                              className="h-7 w-7 p-0 text-red-600 hover:bg-red-100"
+                              className="h-7 w-7 p-0 text-morandi-red hover:bg-morandi-red/10"
                               title="確認異常"
                             >
                               <Check size={16} />
@@ -380,7 +380,7 @@ export function BatchReceiptConfirmDialog({
                               size="sm"
                               variant="ghost"
                               onClick={() => handleConfirm(index)}
-                              className="h-7 w-7 p-0 text-green-600 hover:bg-green-100"
+                              className="h-7 w-7 p-0 text-morandi-green hover:bg-morandi-green/10"
                               title="確認正確"
                             >
                               <Check size={16} />
@@ -389,7 +389,7 @@ export function BatchReceiptConfirmDialog({
                               size="sm"
                               variant="ghost"
                               onClick={() => handleMarkAbnormal(index)}
-                              className="h-7 w-7 p-0 text-red-600 hover:bg-red-100"
+                              className="h-7 w-7 p-0 text-morandi-red hover:bg-morandi-red/10"
                               title="標記異常"
                             >
                               <X size={16} />
@@ -399,8 +399,8 @@ export function BatchReceiptConfirmDialog({
                           <span
                             className={cn(
                               'text-xs font-medium px-2 py-1 rounded',
-                              item.status === 'confirmed' && 'bg-green-100 text-green-700',
-                              item.status === 'abnormal' && 'bg-red-100 text-red-700'
+                              item.status === 'confirmed' && 'bg-morandi-green/10 text-morandi-green',
+                              item.status === 'abnormal' && 'bg-morandi-red/10 text-morandi-red'
                             )}
                           >
                             {item.status === 'confirmed' ? '已確認' : '異常'}
@@ -423,7 +423,7 @@ export function BatchReceiptConfirmDialog({
                       <td
                         className={cn(
                           'py-2.5 px-3 text-right font-medium',
-                          totalActual !== totalAmount && 'text-red-600'
+                          totalActual !== totalAmount && 'text-morandi-red'
                         )}
                       >
                         ${totalActual.toLocaleString()}
@@ -437,10 +437,10 @@ export function BatchReceiptConfirmDialog({
 
             {/* 異常備註（如果有異常項目） */}
             {items.some(i => i.isEditing) && (
-              <div className="border border-red-200 bg-red-50 rounded-lg p-4">
+              <div className="border border-morandi-red/30 bg-morandi-red/10 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <AlertCircle size={16} className="text-red-600" />
-                  <span className="text-sm font-medium text-red-700">異常說明</span>
+                  <AlertCircle size={16} className="text-morandi-red" />
+                  <span className="text-sm font-medium text-morandi-red">異常說明</span>
                 </div>
                 <Textarea
                   placeholder="請說明金額異常的原因..."

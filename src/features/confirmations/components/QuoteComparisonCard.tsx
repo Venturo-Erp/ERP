@@ -131,7 +131,7 @@ export function QuoteComparisonCard({ itemTitle, quotes, onSelect }: QuoteCompar
               key={quote.requestId}
               className={`border rounded-lg p-3 ${
                 isSelected
-                  ? 'border-green-500 bg-green-50'
+                  ? 'border-morandi-green bg-morandi-green/10'
                   : isRejected
                     ? 'border-border bg-morandi-container opacity-60'
                     : 'border-border'
@@ -141,13 +141,13 @@ export function QuoteComparisonCard({ itemTitle, quotes, onSelect }: QuoteCompar
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{quote.supplierName}</span>
                   {isLowest && !isRejected && (
-                    <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded flex items-center gap-1">
+                    <span className="text-xs bg-status-info/10 text-status-info px-2 py-0.5 rounded flex items-center gap-1">
                       <Star size={12} />
                       最低
                     </span>
                   )}
                   {isSelected && (
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded flex items-center gap-1">
+                    <span className="text-xs bg-morandi-green/10 text-morandi-green px-2 py-0.5 rounded flex items-center gap-1">
                       <Check size={12} />
                       已選擇
                     </span>
@@ -169,7 +169,7 @@ export function QuoteComparisonCard({ itemTitle, quotes, onSelect }: QuoteCompar
                       <Button
                         size="sm"
                         variant="outline"
-                        className="h-8 border-green-600 text-green-700"
+                        className="h-8 border-morandi-green text-morandi-green"
                         onClick={() => setShowReasonInput(quote.requestId)}
                         disabled={selecting}
                       >
@@ -203,7 +203,7 @@ export function QuoteComparisonCard({ itemTitle, quotes, onSelect }: QuoteCompar
                       size="sm"
                       onClick={() => handleSelect(quote.requestId)}
                       disabled={selecting || !reason.trim()}
-                      className="bg-green-600 hover:bg-green-700"
+                      className="bg-morandi-green hover:bg-morandi-green"
                     >
                       {selecting ? '處理中...' : '確認選擇'}
                     </Button>
@@ -224,7 +224,7 @@ export function QuoteComparisonCard({ itemTitle, quotes, onSelect }: QuoteCompar
 
               {/* 已選擇的原因 */}
               {isSelected && quote.note && (
-                <div className="mt-2 text-sm text-green-700">選擇原因：{quote.note}</div>
+                <div className="mt-2 text-sm text-morandi-green">選擇原因：{quote.note}</div>
               )}
             </div>
           )

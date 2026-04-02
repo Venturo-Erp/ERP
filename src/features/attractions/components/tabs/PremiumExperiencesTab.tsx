@@ -195,7 +195,7 @@ export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperi
   const getExclusivityColor = (level: string) => {
     switch (level) {
       case 'ultra_exclusive':
-        return 'bg-purple-50 text-purple-600 border-purple-600/30'
+        return 'bg-morandi-container text-morandi-secondary border-morandi-secondary/30'
       case 'highly_exclusive':
         return 'bg-rose-100 text-rose-800 border-rose-300'
       case 'exclusive':

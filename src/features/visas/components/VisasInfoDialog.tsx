@@ -186,7 +186,7 @@ export function VisasInfoDialog({ open, onClose }: VisasInfoDialogProps) {
           <p
             className={cn(
               'text-xs',
-              copyStatus === 'success' ? 'text-emerald-600' : 'text-status-danger'
+              copyStatus === 'success' ? 'text-morandi-green' : 'text-status-danger'
             )}
           >
             {copyStatus === 'success'

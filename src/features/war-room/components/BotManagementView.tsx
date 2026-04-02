@@ -58,7 +58,7 @@ export const BotManagementView: React.FC<BotManagementViewProps> = ({ bots, load
       render: (_value: unknown, row: Bot) => (
         <span
           className={`px-2 py-1 rounded text-xs font-medium ${
-            row.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            row.status === 'active' ? 'bg-morandi-green/10 text-morandi-green' : 'bg-morandi-red/10 text-morandi-red'
           }`}
         >
           {row.status === 'active' ? '運行中' : '離線'}
@@ -86,7 +86,7 @@ export const BotManagementView: React.FC<BotManagementViewProps> = ({ bots, load
           <div className="flex items-center justify-center gap-1">
             <span className="font-medium">{row.groups?.length || 0}</span>
             {newGroupsCount > 0 && (
-              <span className="px-1.5 py-0.5 bg-amber-500 text-white rounded text-xs">
+              <span className="px-1.5 py-0.5 bg-morandi-gold/100 text-white rounded text-xs">
                 +{newGroupsCount}
               </span>
             )}

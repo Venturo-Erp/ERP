@@ -1048,18 +1048,18 @@ export function RequirementsList({
       <div className={cn('space-y-4', className)}>
         {/* 待處理取消通知（持久化提示）*/}
         {pendingCancellations.length > 0 && (
-          <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4">
+          <div className="bg-morandi-red/10 border-2 border-morandi-red/30 rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <AlertCircle className="text-red-600 mt-0.5" size={20} />
+              <AlertCircle className="text-morandi-red mt-0.5" size={20} />
               <div className="flex-1">
-                <h3 className="font-semibold text-red-700 mb-2">
+                <h3 className="font-semibold text-morandi-red mb-2">
                   ⚠️ 待處理取消通知（{pendingCancellations.length} 筆）
                 </h3>
                 <div className="space-y-2">
                   {pendingCancellations.map(req => (
                     <div
                       key={req.id}
-                      className="flex items-center gap-3 bg-white rounded px-3 py-2 border border-red-200"
+                      className="flex items-center gap-3 bg-white rounded px-3 py-2 border border-morandi-red/30"
                     >
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900">
@@ -1082,7 +1082,7 @@ export function RequirementsList({
                             await loadData(false)
                             toast({ title: `Line 取消通知已發送給 ${req.supplier_name}` })
                           }}
-                          className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded"
+                          className="px-3 py-1.5 text-xs font-medium text-white bg-morandi-green hover:bg-morandi-green rounded"
                         >
                           📱 發送 Line
                         </button>
@@ -1109,7 +1109,7 @@ export function RequirementsList({
                                 await loadData(false)
                                 toast({ title: `PDF 已下載，請${req.sent_via === 'fax' ? '傳真' : '列印'}後點擊確認` })
                               }}
-                              className="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 rounded"
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-status-info hover:bg-status-info rounded"
                             >
                               📄 下載 PDF
                             </button>
@@ -1126,7 +1126,7 @@ export function RequirementsList({
                                 await loadData(false)
                                 toast({ title: '已標記為已處理' })
                               }}
-                              className="px-3 py-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 rounded"
+                              className="px-3 py-1.5 text-xs font-medium text-white bg-morandi-green hover:bg-morandi-green rounded"
                             >
                               {confirmLabel}
                             </button>
@@ -1389,8 +1389,8 @@ export function RequirementsList({
                                 return (
                                   <span
                                     className={cn(
-                                      hasPriceChange && isExpensive && 'text-red-600',
-                                      hasPriceChange && isCheaper && 'text-blue-600',
+                                      hasPriceChange && isExpensive && 'text-morandi-red',
+                                      hasPriceChange && isCheaper && 'text-status-info',
                                       !hasPriceChange && 'text-morandi-primary'
                                     )}
                                     title={
@@ -1448,7 +1448,7 @@ export function RequirementsList({
                                           })
                                           setShowAccommodationDialog(true)
                                         }}
-                                        className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
+                                        className="h-7 px-2 text-xs border-status-info/30 text-status-info hover:bg-status-info/10"
                                       >
                                         <Send size={12} className="mr-1" />
                                         發送需求
@@ -1493,7 +1493,7 @@ export function RequirementsList({
                                               logger.error('同上需求失敗:', err)
                                             }
                                           }}
-                                          className="h-7 px-2 text-xs border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                                          className="h-7 px-2 text-xs border-morandi-green/30 text-morandi-green hover:bg-morandi-green/10"
                                         >
                                           同上
                                         </Button>
@@ -1570,7 +1570,7 @@ export function RequirementsList({
                                         })
                                         setShowMealDialog(true)
                                       }}
-                                      className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
+                                      className="h-7 px-2 text-xs border-status-info/30 text-status-info hover:bg-status-info/10"
                                     >
                                       <Printer size={12} className="mr-1" />
                                       新增需求單
@@ -1591,7 +1591,7 @@ export function RequirementsList({
                                         })
                                         setShowActivityDialog(true)
                                       }}
-                                      className="h-7 px-2 text-xs border-blue-300 text-blue-600 hover:bg-blue-50"
+                                      className="h-7 px-2 text-xs border-status-info/30 text-status-info hover:bg-status-info/10"
                                     >
                                       <Printer size={12} className="mr-1" />
                                       新增需求單
@@ -1606,7 +1606,7 @@ export function RequirementsList({
                                       variant="outline"
                                       size="sm"
                                       onClick={() => handleSendInsurance(item)}
-                                      className="h-7 px-2 text-xs border-emerald-300 text-emerald-600 hover:bg-emerald-50"
+                                      className="h-7 px-2 text-xs border-morandi-green/30 text-morandi-green hover:bg-morandi-green/10"
                                     >
                                       <Send size={12} className="mr-1" />
                                       發送保險

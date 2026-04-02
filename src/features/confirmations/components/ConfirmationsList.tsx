@@ -36,7 +36,7 @@ export const ConfirmationsList: React.FC<ConfirmationsListProps> = ({
         render: (_: unknown, row: unknown) => {
           const conf = row as Confirmation
           const typeConfig = {
-            flight: { label: '航班', icon: '✈️', colorClass: 'text-purple-600' },
+            flight: { label: '航班', icon: '✈️', colorClass: 'text-morandi-secondary' },
             accommodation: { label: '住宿', icon: '🏨', colorClass: 'text-status-warning' },
           }
           const config = typeConfig[conf.type]

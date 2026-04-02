@@ -644,7 +644,7 @@ export function AssignSupplierDialog({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 text-muted-foreground hover:text-red-500"
+                          className="h-6 w-6 p-0 text-muted-foreground hover:text-morandi-red"
                           onClick={() => removeRoom(item.key, idx)}
                         >
                           ✕
@@ -719,7 +719,7 @@ export function AssignSupplierDialog({
                   variant={sendMethod === 'line' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('line')}
                   className={
-                    sendMethod === 'line' ? 'bg-green-600 hover:bg-green-700 text-white' : ''
+                    sendMethod === 'line' ? 'bg-morandi-green hover:bg-morandi-green text-white' : ''
                   }
                 >
                   <MessageCircle size={14} className="mr-1.5" />
@@ -730,7 +730,7 @@ export function AssignSupplierDialog({
                   variant={sendMethod === 'email' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('email')}
                   className={
-                    sendMethod === 'email' ? 'bg-blue-600 hover:bg-blue-700 text-white' : ''
+                    sendMethod === 'email' ? 'bg-status-info hover:bg-status-info text-white' : ''
                   }
                 >
                   <Mail size={14} className="mr-1.5" />
@@ -752,7 +752,7 @@ export function AssignSupplierDialog({
                   variant={sendMethod === 'tenant' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('tenant')}
                   className={
-                    sendMethod === 'tenant' ? 'bg-purple-600 hover:bg-purple-700 text-white' : ''
+                    sendMethod === 'tenant' ? 'bg-morandi-secondary hover:bg-morandi-secondary text-white' : ''
                   }
                 >
                   <Globe size={14} className="mr-1.5" />
@@ -763,7 +763,7 @@ export function AssignSupplierDialog({
                   variant={sendMethod === 'assign' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('assign')}
                   className={
-                    sendMethod === 'assign' ? 'bg-orange-600 hover:bg-orange-700 text-white' : ''
+                    sendMethod === 'assign' ? 'bg-status-warning hover:bg-status-warning text-white' : ''
                   }
                 >
                   <Users size={14} className="mr-1.5" />
@@ -799,7 +799,7 @@ export function AssignSupplierDialog({
               ) : sendMethod === 'line' ? (
                 <Button
                   onClick={() => setStep('send')}
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="bg-morandi-green hover:bg-morandi-green text-white"
                 >
                   <MessageCircle size={14} className="mr-1.5" />
                   下一步：選群組發送
@@ -807,7 +807,7 @@ export function AssignSupplierDialog({
               ) : sendMethod === 'assign' ? (
                 <Button
                   onClick={() => setStep('send')}
-                  className="bg-orange-600 hover:bg-orange-700 text-white"
+                  className="bg-status-warning hover:bg-status-warning text-white"
                 >
                   <Users size={14} className="mr-1.5" />
                   下一步：選擇同事
@@ -829,11 +829,11 @@ export function AssignSupplierDialog({
               <DialogTitle className="flex items-center gap-2">
                 {sendMethod === 'line' ? (
                   <>
-                    <MessageCircle size={18} className="text-green-600" /> 💬 Line 發送
+                    <MessageCircle size={18} className="text-morandi-green" /> 💬 Line 發送
                   </>
                 ) : sendMethod === 'email' ? (
                   <>
-                    <Mail size={18} className="text-blue-600" /> 📧 Email 發送
+                    <Mail size={18} className="text-status-info" /> 📧 Email 發送
                   </>
                 ) : sendMethod === 'fax' ? (
                   <>
@@ -841,11 +841,11 @@ export function AssignSupplierDialog({
                   </>
                 ) : sendMethod === 'assign' ? (
                   <>
-                    <Users size={18} className="text-orange-600" /> 👤 指派同事
+                    <Users size={18} className="text-status-warning" /> 👤 指派同事
                   </>
                 ) : (
                   <>
-                    <Globe size={18} className="text-purple-600" /> 🌐 發給租戶
+                    <Globe size={18} className="text-morandi-secondary" /> 🌐 發給租戶
                   </>
                 )}
               </DialogTitle>
@@ -870,8 +870,8 @@ export function AssignSupplierDialog({
                             key={g.group_id}
                             className={`w-full text-left px-4 py-3 rounded-md border-2 transition-colors ${
                               selectedGroupId === g.group_id
-                                ? 'border-green-500 bg-green-50'
-                                : 'border-border hover:border-green-300 hover:bg-green-50/50'
+                                ? 'border-morandi-green bg-morandi-green/10'
+                                : 'border-border hover:border-morandi-green/30 hover:bg-morandi-green/10/50'
                             }`}
                             onClick={() => setSelectedGroupId(g.group_id)}
                           >
@@ -901,8 +901,8 @@ export function AssignSupplierDialog({
                           key={emp.id}
                           className={`w-full text-left px-4 py-3 rounded-md border-2 transition-colors ${
                             selectedEmployeeId === emp.id
-                              ? 'border-orange-500 bg-orange-50'
-                              : 'border-border hover:border-orange-300 hover:bg-orange-50/50'
+                              ? 'border-status-warning bg-status-warning/10'
+                              : 'border-border hover:border-status-warning/30 hover:bg-status-warning/10/50'
                           }`}
                           onClick={() => setSelectedEmployeeId(emp.id)}
                         >
@@ -965,8 +965,8 @@ export function AssignSupplierDialog({
                   )}
 
                   {selectedSupplier && (
-                    <div className="bg-blue-50/50 border border-blue-200 rounded-md p-2 text-xs space-y-0.5">
-                      <div className="font-medium text-blue-700">{selectedSupplier.name}</div>
+                    <div className="bg-status-info/10/50 border border-status-info/30 rounded-md p-2 text-xs space-y-0.5">
+                      <div className="font-medium text-status-info">{selectedSupplier.name}</div>
                       {selectedSupplier.contact_person && (
                         <div>窗口: {selectedSupplier.contact_person}</div>
                       )}
@@ -978,7 +978,7 @@ export function AssignSupplierDialog({
                   {loading && <div className="text-xs text-muted-foreground">搜尋中...</div>}
 
                   {sendMethod === 'email' && (
-                    <div className="text-xs text-blue-500 mt-2">
+                    <div className="text-xs text-status-info mt-2">
                       📧 功能開發中 — 需要設定 Email 寄件帳號
                     </div>
                   )}
@@ -988,7 +988,7 @@ export function AssignSupplierDialog({
                     </div>
                   )}
                   {sendMethod === 'tenant' && (
-                    <div className="text-xs text-purple-500 mt-2">
+                    <div className="text-xs text-morandi-secondary mt-2">
                       🌐 功能開發中 — 需要先建立附屬國租戶
                     </div>
                   )}
@@ -1244,9 +1244,9 @@ export function AssignSupplierDialog({
                 }}
                 className={
                   sendMethod === 'line'
-                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    ? 'bg-morandi-green hover:bg-morandi-green text-white'
                     : sendMethod === 'assign'
-                      ? 'bg-orange-600 hover:bg-orange-700 text-white'
+                      ? 'bg-status-warning hover:bg-status-warning text-white'
                       : 'bg-morandi-gold hover:bg-morandi-gold-hover text-white'
                 }
               >

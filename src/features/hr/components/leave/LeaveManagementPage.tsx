@@ -48,8 +48,8 @@ const STATUS_LABELS: Record<LeaveRequestStatus, string> = {
 
 const STATUS_COLORS: Record<LeaveRequestStatus, string> = {
   pending: 'bg-yellow-100 text-yellow-700',
-  approved: 'bg-green-100 text-green-700',
-  rejected: 'bg-red-100 text-red-700',
+  approved: 'bg-morandi-green/10 text-morandi-green',
+  rejected: 'bg-morandi-red/10 text-morandi-red',
   cancelled: 'bg-morandi-container text-morandi-secondary',
 }
 
@@ -125,7 +125,7 @@ export function LeaveManagementPage() {
       render: (_, row) => (
         <span
           className={`px-2 py-0.5 rounded text-xs ${
-            row.is_paid !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            row.is_paid !== false ? 'bg-morandi-green/10 text-morandi-green' : 'bg-morandi-red/10 text-morandi-red'
           }`}
         >
           {row.is_paid !== false ? L.yes : L.no}
@@ -156,7 +156,7 @@ export function LeaveManagementPage() {
         <span
           className={`px-2 py-0.5 rounded text-xs ${
             row.is_active !== false
-              ? 'bg-green-100 text-green-700'
+              ? 'bg-morandi-green/10 text-morandi-green'
               : 'bg-morandi-container text-morandi-secondary'
           }`}
         >

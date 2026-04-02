@@ -341,7 +341,7 @@ export default function PublicTourPage({
         <div className="absolute inset-0 bg-gradient-to-t from-[#00113a]/70 to-transparent"></div>
         <div className="relative z-10 max-w-4xl">
           {daysCount > 0 && (
-            <span className="bg-emerald-400 text-emerald-900 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-4 inline-block">
+            <span className="bg-morandi-green text-white px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-4 inline-block">
               {daysCount} 天 {nightsCount} 夜
             </span>
           )}
@@ -396,12 +396,12 @@ export default function PublicTourPage({
 
                   {/* Meals */}
                   {day.meals && (day.meals.breakfast || day.meals.lunch || day.meals.dinner) && (
-                    <div className="p-6 bg-amber-50 rounded-xl border border-amber-100">
+                    <div className="p-6 bg-morandi-gold/10 rounded-xl border border-morandi-gold/20">
                       <div className="flex items-center gap-3 mb-3">
-                        <Utensils className="w-5 h-5 text-amber-600" />
-                        <span className="text-sm font-bold text-amber-800 uppercase tracking-widest">餐食安排</span>
+                        <Utensils className="w-5 h-5 text-morandi-gold" />
+                        <span className="text-sm font-bold text-morandi-primary uppercase tracking-widest">餐食安排</span>
                       </div>
-                      <div className="text-sm text-amber-900 space-y-1">
+                      <div className="text-sm text-morandi-primary space-y-1">
                         {day.meals.breakfast && <p>早餐：{day.meals.breakfast}</p>}
                         {day.meals.lunch && <p>午餐：{day.meals.lunch}</p>}
                         {day.meals.dinner && <p>晚餐：{day.meals.dinner}</p>}
@@ -468,19 +468,19 @@ export default function PublicTourPage({
               <div className="mt-8 pt-8 border-t border-slate-100 space-y-4">
                 {tour.departure_date && (
                   <div className="flex items-center gap-3 text-sm text-[#444650]">
-                    <Calendar className="w-4 h-4 text-emerald-600" />
+                    <Calendar className="w-4 h-4 text-morandi-green" />
                     <span>出發日期：{new Date(tour.departure_date).toLocaleDateString('zh-TW')}</span>
                   </div>
                 )}
                 {tour.max_participants && (
                   <div className="flex items-center gap-3 text-sm text-[#444650]">
-                    <Users className="w-4 h-4 text-emerald-600" />
+                    <Users className="w-4 h-4 text-morandi-green" />
                     <span>剩餘名額：{remainingSlots > 0 ? `${remainingSlots} 位` : '已額滿'}</span>
                   </div>
                 )}
                 {daysCount > 0 && (
                   <div className="flex items-center gap-3 text-sm text-[#444650]">
-                    <Clock className="w-4 h-4 text-emerald-600" />
+                    <Clock className="w-4 h-4 text-morandi-green" />
                     <span>行程天數：{daysCount} 天 {nightsCount} 夜</span>
                   </div>
                 )}
@@ -505,7 +505,7 @@ export default function PublicTourPage({
             {/* Features */}
             <div className="bg-[#00113a] p-6 rounded-2xl text-white">
               <div className="flex items-center gap-3 mb-4">
-                <CheckCircle className="w-5 h-5 text-emerald-400" />
+                <CheckCircle className="w-5 h-5 text-morandi-green" />
                 <span className="font-bold">專屬服務</span>
               </div>
               <ul className="text-sm text-white/70 space-y-2">

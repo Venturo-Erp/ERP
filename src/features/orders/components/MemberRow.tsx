@@ -351,7 +351,7 @@ export function MemberRow({
       {/* 單欄位模式（沒有飯店欄位資訊時的後備） */}
       {mode === 'tour' && showRoomColumn && hotelColumns.length === 0 && roomRowSpan !== 0 && (
         <td
-          className="border border-morandi-gold/20 px-2 py-1 bg-emerald-50/50 text-xs align-middle"
+          className="border border-morandi-gold/20 px-2 py-1 bg-morandi-green/10/50 text-xs align-middle"
           rowSpan={roomRowSpan && roomRowSpan > 1 ? roomRowSpan : undefined}
         >
           {roomAssignment || '-'}
@@ -361,7 +361,7 @@ export function MemberRow({
       {/* 團體模式：分車欄位（支援合併儲存格） */}
       {mode === 'tour' && showVehicleColumn && vehicleRowSpan !== 0 && (
         <td
-          className="border border-morandi-gold/20 px-2 py-1 bg-amber-50/50 text-xs align-middle"
+          className="border border-morandi-gold/20 px-2 py-1 bg-morandi-gold/10/50 text-xs align-middle"
           rowSpan={vehicleRowSpan && vehicleRowSpan > 1 ? vehicleRowSpan : undefined}
         >
           {vehicleAssignment || '-'}
@@ -408,7 +408,7 @@ export function MemberRow({
 
       {/* 團體模式：開票期限 */}
       {mode === 'tour' && cv.ticketing_deadline && (
-        <td className="border border-morandi-gold/20 px-2 py-1 bg-orange-50/50">
+        <td className="border border-morandi-gold/20 px-2 py-1 bg-status-warning/10/50">
           {member.ticket_number ? (
             <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-morandi-green/20 text-morandi-green text-xs rounded-full font-medium">
               <Check size={10} />
@@ -431,7 +431,7 @@ export function MemberRow({
 
       {/* 團體模式：機票金額（成本，從機票訂單明細匯入） */}
       {mode === 'tour' && cv.flight_cost && (
-        <td className="border border-morandi-gold/20 px-2 py-1 bg-blue-50/50 text-xs text-right">
+        <td className="border border-morandi-gold/20 px-2 py-1 bg-status-info/10/50 text-xs text-right">
           {member.flight_cost ? member.flight_cost.toLocaleString() : '-'}
         </td>
       )}
@@ -450,7 +450,7 @@ export function MemberRow({
       {/* 團體模式：自訂費用欄位 */}
       {mode === 'tour' &&
         customCostFields.map(field => (
-          <td key={field.id} className="border border-morandi-gold/20 px-2 py-1 bg-emerald-50/50">
+          <td key={field.id} className="border border-morandi-gold/20 px-2 py-1 bg-morandi-green/10/50">
             <input
               type="text"
               value={field.values[member.id] || ''}

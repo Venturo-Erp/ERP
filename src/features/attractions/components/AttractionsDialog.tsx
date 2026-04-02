@@ -336,7 +336,7 @@ export function AttractionsDialog({
           size="sm"
           onClick={handleMarkVerified}
           disabled={isVerifying}
-          className="h-7 text-xs gap-1.5 text-amber-600 border-amber-400 bg-amber-50 hover:bg-amber-100"
+          className="h-7 text-xs gap-1.5 text-morandi-gold border-morandi-gold bg-morandi-gold/10 hover:bg-morandi-gold/10"
         >
           {isVerifying ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
           標記已驗證
@@ -344,7 +344,7 @@ export function AttractionsDialog({
       )}
       {/* 已驗證標示 */}
       {attraction && isVerified && (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs text-green-600 bg-green-50 border border-green-200 rounded-full">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs text-morandi-green bg-morandi-green/10 border border-morandi-green/30 rounded-full">
           <CheckCircle2 size={12} />
           已驗證
         </span>

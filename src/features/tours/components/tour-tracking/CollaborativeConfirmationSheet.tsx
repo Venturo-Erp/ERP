@@ -239,16 +239,16 @@ export function CollaborativeConfirmationSheet({
       </div>
 
       {/* 進度 */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+      <div className="bg-status-info/10 border border-status-info/30 rounded-lg p-3">
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">
             進度：{stats.confirmed}/{stats.total} 項已確認
           </span>
           <span className="text-sm text-muted-foreground">{stats.percentage}%</span>
         </div>
-        <div className="mt-2 h-2 bg-blue-100 rounded-full overflow-hidden">
+        <div className="mt-2 h-2 bg-status-info/10 rounded-full overflow-hidden">
           <div
-            className="h-full bg-blue-600 transition-all"
+            className="h-full bg-status-info transition-all"
             style={{ width: `${stats.percentage}%` }}
           />
         </div>
@@ -294,10 +294,10 @@ export function CollaborativeConfirmationSheet({
                       className={cn(
                         'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium',
                         item.local_status === 'confirmed'
-                          ? 'bg-green-100 text-green-700'
+                          ? 'bg-morandi-green/10 text-morandi-green'
                           : item.handled_by === 'customer' || item.handled_by === 'corner'
                             ? 'bg-morandi-container text-morandi-secondary'
-                            : 'bg-amber-100 text-amber-700'
+                            : 'bg-morandi-gold/10 text-morandi-gold'
                       )}
                     >
                       {item.local_status === 'confirmed'

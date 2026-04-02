@@ -99,7 +99,7 @@ export function HotelCard({ hotel, isSelected, onToggle }: HotelCardProps) {
             </span>
           )}
           {hotel.hotel_class && (
-            <span className="text-purple-600">{getHotelClassLabel(hotel.hotel_class)}</span>
+            <span className="text-morandi-secondary">{getHotelClassLabel(hotel.hotel_class)}</span>
           )}
           {hotel.price_range && (
             <span className="text-status-success font-medium">

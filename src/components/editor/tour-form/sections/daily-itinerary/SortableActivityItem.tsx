@@ -364,7 +364,7 @@ export function SortableActivityItem({
               <button
                 type="button"
                 onClick={() => setShowPexelsDialog(true)}
-                className="flex items-center gap-1 px-2 py-1 text-xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded transition-colors"
+                className="flex items-center gap-1 px-2 py-1 text-xs text-morandi-green hover:text-morandi-green hover:bg-morandi-green/10 rounded transition-colors"
               >
                 <Search size={12} />
                 Pexels

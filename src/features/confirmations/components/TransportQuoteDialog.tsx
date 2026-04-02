@@ -498,7 +498,7 @@ export function TransportQuoteDialog({
               )}
 
               {/* 報價資訊提示（車行填寫） */}
-              <div className="pt-2 bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <div className="pt-2 bg-morandi-gold/10 border border-morandi-gold/30 rounded-lg p-3">
                 <p className="text-sm font-medium mb-2">📋 供應商將填寫以下資訊：</p>
                 <ul className="text-xs text-muted-foreground space-y-1">
                   <li>• 車資（總金額）</li>
@@ -570,7 +570,7 @@ export function TransportQuoteDialog({
               <Button
                 onClick={handleSendLine}
                 disabled={!selectedGroupId || sending}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
+                className="bg-morandi-green hover:bg-morandi-green text-white px-6"
               >
                 {sending ? (
                   <Loader2 size={14} className="animate-spin mr-1" />

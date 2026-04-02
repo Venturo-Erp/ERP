@@ -228,8 +228,8 @@ export function GlobalSearch({ autoFocus, onResultClick, className }: GlobalSear
                         onClick={() => handleResultClick(result)}
                         className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-morandi-container/50 transition-colors text-left"
                       >
-                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <MapPin size={18} className="text-blue-600" />
+                        <div className="w-10 h-10 rounded-full bg-status-info/10 flex items-center justify-center">
+                          <MapPin size={18} className="text-status-info" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-morandi-primary truncate">
@@ -259,8 +259,8 @@ export function GlobalSearch({ autoFocus, onResultClick, className }: GlobalSear
                         onClick={() => handleResultClick(result)}
                         className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-morandi-container/50 transition-colors text-left"
                       >
-                        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                          <User size={18} className="text-purple-600" />
+                        <div className="w-10 h-10 rounded-full bg-morandi-container flex items-center justify-center">
+                          <User size={18} className="text-morandi-secondary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-morandi-primary truncate">

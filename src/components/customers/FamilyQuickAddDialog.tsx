@@ -206,7 +206,7 @@ export function FamilyQuickAddDialog({
                             </div>
                           )}
                           {missingInfo && (
-                            <div className="flex items-center gap-1 text-amber-600">
+                            <div className="flex items-center gap-1 text-morandi-gold">
                               <AlertCircle className="h-3 w-3" />
                               <span className="text-xs">{CUSTOMERS_LABELS.LABEL_2476}</span>
                             </div>
@@ -231,7 +231,7 @@ export function FamilyQuickAddDialog({
                         key={member.id}
                         className="flex items-start gap-3 rounded-lg border p-3 bg-muted/50 opacity-60"
                       >
-                        <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                        <CheckCircle2 className="h-5 w-5 text-morandi-green mt-0.5" />
                         <div className="flex-1 min-w-0">
                           <div className="font-medium">{customer.name}</div>
                           <div className="text-sm text-muted-foreground">

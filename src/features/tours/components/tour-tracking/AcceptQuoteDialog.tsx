@@ -120,9 +120,9 @@ export function AcceptQuoteDialog({
             </RadioGroup>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm">
-            <p className="font-medium text-blue-900 mb-1">確認後將：</p>
-            <ul className="list-disc list-inside text-blue-700 space-y-1">
+          <div className="bg-status-info/10 border border-status-info/30 rounded-lg p-3 text-sm">
+            <p className="font-medium text-morandi-primary mb-1">確認後將：</p>
+            <ul className="list-disc list-inside text-status-info space-y-1">
               <li>自動產生「協作確認單」</li>
               <li>從行程表抓取所有項目</li>
               <li>供應商可以開始確認細項</li>

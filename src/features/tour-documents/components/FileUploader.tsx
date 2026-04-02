@@ -133,7 +133,7 @@ export function FileUploader({
       return <ImageIcon size={20} className="text-morandi-gold" />
     }
     if (file.type === 'application/pdf') {
-      return <FileText size={20} className="text-red-500" />
+      return <FileText size={20} className="text-morandi-red" />
     }
     return <FileIcon size={20} className="text-morandi-secondary" />
   }
@@ -201,10 +201,10 @@ export function FileUploader({
               )}
 
               {/* 狀態 */}
-              {f.status === 'completed' && <div className="text-xs text-green-600">✓ 完成</div>}
+              {f.status === 'completed' && <div className="text-xs text-morandi-green">✓ 完成</div>}
 
               {f.status === 'error' && (
-                <div className="text-xs text-red-600" title={f.error}>
+                <div className="text-xs text-morandi-red" title={f.error}>
                   ✗ 失敗
                 </div>
               )}

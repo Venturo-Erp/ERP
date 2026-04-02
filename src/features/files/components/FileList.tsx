@@ -107,7 +107,7 @@ function FileItem({ file, isSelected, viewMode, onSelect, onToggleStar }: FileIt
           <Star
             className={cn(
               'w-4 h-4',
-              file.is_starred ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground'
+              file.is_starred ? 'fill-morandi-gold text-morandi-gold' : 'text-muted-foreground'
             )}
           />
         </button>
@@ -177,7 +177,7 @@ function FileItem({ file, isSelected, viewMode, onSelect, onToggleStar }: FileIt
           className={cn(
             'w-4 h-4',
             file.is_starred
-              ? 'fill-amber-400 text-amber-400'
+              ? 'fill-morandi-gold text-morandi-gold'
               : 'text-muted-foreground opacity-0 group-hover:opacity-100'
           )}
         />

@@ -91,10 +91,10 @@ export function TeamConfirmationSheet({
   // 狀態配置
   const STATUS_CONFIG: Record<string, { label: string; bgClass: string; textClass: string }> = {
     draft: { label: '草稿', bgClass: 'bg-morandi-container', textClass: 'text-morandi-primary' },
-    sent: { label: '已發送', bgClass: 'bg-blue-100', textClass: 'text-blue-700' },
-    replied: { label: '已回覆', bgClass: 'bg-orange-100', textClass: 'text-orange-700' },
-    confirmed: { label: '✓ 已確認', bgClass: 'bg-green-100', textClass: 'text-green-700' },
-    cancelled: { label: '已取消', bgClass: 'bg-red-100', textClass: 'text-red-700' },
+    sent: { label: '已發送', bgClass: 'bg-status-info/10', textClass: 'text-status-info' },
+    replied: { label: '已回覆', bgClass: 'bg-status-warning/10', textClass: 'text-status-warning' },
+    confirmed: { label: '✓ 已確認', bgClass: 'bg-morandi-green/10', textClass: 'text-morandi-green' },
+    cancelled: { label: '已取消', bgClass: 'bg-morandi-red/10', textClass: 'text-morandi-red' },
     outdated: { label: '需更新', bgClass: 'bg-yellow-100', textClass: 'text-yellow-700' },
   }
 
@@ -253,7 +253,7 @@ export function TeamConfirmationSheet({
 
                           {/* 備註 */}
                           {req.note && (
-                            <div className="mt-2 text-sm text-amber-700 bg-amber-50 p-2 rounded">
+                            <div className="mt-2 text-sm text-morandi-gold bg-morandi-gold/10 p-2 rounded">
                               備註：{req.note}
                             </div>
                           )}
@@ -283,7 +283,7 @@ export function TeamConfirmationSheet({
           <div className="text-sm text-morandi-secondary">
             總需求單：{confirmedRequests.length} 筆
             {statusCounts.confirmed && (
-              <span className="ml-3 text-green-600 font-medium">
+              <span className="ml-3 text-morandi-green font-medium">
                 已確認 {statusCounts.confirmed} 筆
               </span>
             )}

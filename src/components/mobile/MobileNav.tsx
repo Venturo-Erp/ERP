@@ -45,24 +45,24 @@ const WORKBENCH_CATEGORIES = [
   {
     title: MOBILE_NAV_LABELS.COMMON_FEATURES,
     items: [
-      { icon: MapPin, label: MOBILE_NAV_LABELS.TOURS, href: '/m/tours', color: 'text-blue-600' },
+      { icon: MapPin, label: MOBILE_NAV_LABELS.TOURS, href: '/m/tours', color: 'text-status-info' },
       {
         icon: ShoppingCart,
         label: MOBILE_NAV_LABELS.ORDERS,
         href: '/m/orders',
-        color: 'text-green-600',
+        color: 'text-morandi-green',
       },
       {
         icon: Users,
         label: MOBILE_NAV_LABELS.MEMBERS,
         href: '/m/members',
-        color: 'text-purple-600',
+        color: 'text-morandi-secondary',
       },
       {
         icon: CheckCircle,
         label: MOBILE_NAV_LABELS.CHECK_IN,
         href: '/m/checkin',
-        color: 'text-orange-600',
+        color: 'text-status-warning',
       },
     ],
   },
@@ -73,13 +73,13 @@ const WORKBENCH_CATEGORIES = [
         icon: CreditCard,
         label: MOBILE_NAV_LABELS.PAYMENT_REQUEST,
         href: '/m/payments',
-        color: 'text-emerald-600',
+        color: 'text-morandi-green',
       },
       {
         icon: FileText,
         label: MOBILE_NAV_LABELS.TREASURY,
         href: '/m/treasury',
-        color: 'text-cyan-600',
+        color: 'text-status-info',
       },
       {
         icon: FileCheck,
@@ -96,15 +96,15 @@ const WORKBENCH_CATEGORIES = [
         icon: Calendar,
         label: MOBILE_NAV_LABELS.CALENDAR,
         href: '/calendar',
-        color: 'text-red-600',
+        color: 'text-morandi-red',
       },
-      { icon: Stamp, label: MOBILE_NAV_LABELS.VISA, href: '/m/visas', color: 'text-amber-600' },
+      { icon: Stamp, label: MOBILE_NAV_LABELS.VISA, href: '/m/visas', color: 'text-morandi-gold' },
       { icon: Palette, label: MOBILE_NAV_LABELS.DESIGN, href: '/design', color: 'text-indigo-600' },
       {
         icon: FileSpreadsheet,
         label: MOBILE_NAV_LABELS.DOCUMENTS,
         href: '/office',
-        color: 'text-pink-600',
+        color: 'text-morandi-red',
       },
       {
         icon: Calendar,

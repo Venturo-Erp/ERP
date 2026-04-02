@@ -195,7 +195,7 @@ export function UploadDialog({ open, onClose }: UploadDialogProps) {
                 <div key={index} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                   {/* 狀態圖示 */}
                   {pending.status === 'success' ? (
-                    <Check className="w-5 h-5 text-green-500 shrink-0" />
+                    <Check className="w-5 h-5 text-morandi-green shrink-0" />
                   ) : pending.status === 'error' ? (
                     <AlertCircle className="w-5 h-5 text-destructive shrink-0" />
                   ) : (

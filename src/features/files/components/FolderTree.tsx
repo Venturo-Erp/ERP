@@ -75,9 +75,9 @@ function FolderNode({ node, level = 0 }: FolderNodeProps) {
 
         {/* 資料夾圖示 */}
         {isExpanded ? (
-          <FolderOpen className="w-4 h-4 text-amber-500 shrink-0" />
+          <FolderOpen className="w-4 h-4 text-morandi-gold shrink-0" />
         ) : (
-          <Folder className="w-4 h-4 text-amber-500 shrink-0" />
+          <Folder className="w-4 h-4 text-morandi-gold shrink-0" />
         )}
 
         {/* 名稱 */}

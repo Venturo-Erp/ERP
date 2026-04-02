@@ -451,9 +451,9 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
                         contract.status === 'signed'
-                          ? 'bg-green-100 text-green-700'
+                          ? 'bg-morandi-green/10 text-morandi-green'
                           : contract.status === 'sent'
-                            ? 'bg-blue-100 text-blue-700'
+                            ? 'bg-status-info/10 text-status-info'
                             : 'bg-gray-100 text-gray-600'
                       }`}
                     >
@@ -470,7 +470,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   {contract.signed_at && (
-                    <span className="text-xs text-green-600">
+                    <span className="text-xs text-morandi-green">
                       ✓ 簽於 {new Date(contract.signed_at).toLocaleDateString('zh-TW')}
                     </span>
                   )}
@@ -596,7 +596,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                         等 {contract.member_ids.length} 人
                       </span>
                     )}
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-400">
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-red/10 text-morandi-red">
                       已取消
                     </span>
                   </div>
@@ -852,10 +852,10 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
           {currentContract && (
             <div className="space-y-4 py-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
-                <Check className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                <div className="font-medium text-green-800">合約已建立</div>
-                <div className="text-sm text-green-600 mt-1">{currentContract.code}</div>
+              <div className="bg-morandi-green/10 border border-morandi-green/30 rounded-lg p-4 text-center">
+                <Check className="w-8 h-8 text-morandi-green mx-auto mb-2" />
+                <div className="font-medium text-morandi-green">合約已建立</div>
+                <div className="text-sm text-morandi-green mt-1">{currentContract.code}</div>
               </div>
 
               <div className="space-y-3">

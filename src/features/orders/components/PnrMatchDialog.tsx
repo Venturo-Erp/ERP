@@ -676,7 +676,7 @@ export function PnrMatchDialog({
             </div>
             {/* 提示：無團員時會搜尋客戶資料庫 */}
             {members.length === 0 && (
-              <p className="text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
+              <p className="text-xs text-morandi-gold bg-morandi-gold/10 px-3 py-2 rounded-lg">
                 <AlertCircle size={12} className="inline mr-1" />
                 {COMP_ORDERS_LABELS.無團員提示}
               </p>
@@ -689,22 +689,22 @@ export function PnrMatchDialog({
               {/* 統計 */}
               <div className="flex items-center gap-4 p-3 bg-morandi-container/30 rounded-lg flex-wrap">
                 <span className="text-sm font-medium">{COMP_ORDERS_LABELS.配對結果}</span>
-                <span className="flex items-center gap-1 text-sm text-green-600">
+                <span className="flex items-center gap-1 text-sm text-morandi-green">
                   <Check size={14} /> {stats.exact} {COMP_ORDERS_LABELS.完全符合}
                 </span>
-                <span className="flex items-center gap-1 text-sm text-amber-600">
+                <span className="flex items-center gap-1 text-sm text-morandi-gold">
                   <AlertCircle size={14} /> {stats.partial} {COMP_ORDERS_LABELS.部分符合}
                 </span>
-                <span className="flex items-center gap-1 text-sm text-red-600">
+                <span className="flex items-center gap-1 text-sm text-morandi-red">
                   <X size={14} /> {stats.none} {COMP_ORDERS_LABELS.未配對}
                 </span>
                 {stats.withSuggestions > 0 && (
-                  <span className="flex items-center gap-1 text-sm text-blue-600">
+                  <span className="flex items-center gap-1 text-sm text-status-info">
                     <Users size={14} /> {stats.withSuggestions} {COMP_ORDERS_LABELS.位有建議客戶}
                   </span>
                 )}
                 {stats.selectedCustomers > 0 && (
-                  <span className="flex items-center gap-1 text-sm text-purple-600">
+                  <span className="flex items-center gap-1 text-sm text-morandi-secondary">
                     <UserPlus size={14} /> {stats.selectedCustomers}{' '}
                     {COMP_ORDERS_LABELS.位已選擇客戶}
                   </span>
@@ -713,14 +713,14 @@ export function PnrMatchDialog({
 
               {/* 說明文字 */}
               {stats.withSuggestions > 0 && (orderId || isTourMode) && (
-                <div className="p-2 bg-blue-50 rounded-lg text-xs text-blue-700">
+                <div className="p-2 bg-status-info/10 rounded-lg text-xs text-status-info">
                   <Users size={12} className="inline mr-1" />
                   {COMP_ORDERS_LABELS.建議客戶說明}
                   {isTourMode && COMP_ORDERS_LABELS.請同時選擇每位旅客所屬的訂單}
                 </div>
               )}
               {stats.withSuggestions > 0 && !orderId && !isTourMode && (
-                <div className="p-2 bg-amber-50 rounded-lg text-xs text-amber-700">
+                <div className="p-2 bg-morandi-gold/10 rounded-lg text-xs text-morandi-gold">
                   <AlertCircle size={12} className="inline mr-1" />
                   {COMP_ORDERS_LABELS.建議客戶無訂單說明}
                 </div>
@@ -782,11 +782,11 @@ export function PnrMatchDialog({
                         key={index}
                         className={cn(
                           'border-t',
-                          result.selectedCustomerId && 'bg-purple-50',
-                          !result.selectedCustomerId && result.confidence === 'none' && 'bg-red-50',
+                          result.selectedCustomerId && 'bg-morandi-container',
+                          !result.selectedCustomerId && result.confidence === 'none' && 'bg-morandi-red/10',
                           !result.selectedCustomerId &&
                             result.confidence === 'partial' &&
-                            'bg-amber-50'
+                            'bg-morandi-gold/10'
                         )}
                       >
                         <td className="px-3 py-2 font-mono whitespace-nowrap">
@@ -794,19 +794,19 @@ export function PnrMatchDialog({
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap">
                           {result.selectedCustomerId ? (
-                            <span className="flex items-center gap-1 text-purple-600">
+                            <span className="flex items-center gap-1 text-morandi-secondary">
                               <UserPlus size={14} /> {COMP_ORDERS_LABELS.已選客戶}
                             </span>
                           ) : result.confidence === 'exact' ? (
-                            <span className="flex items-center gap-1 text-green-600">
+                            <span className="flex items-center gap-1 text-morandi-green">
                               <Check size={14} /> {COMP_ORDERS_LABELS.完全符合}
                             </span>
                           ) : result.confidence === 'partial' ? (
-                            <span className="flex items-center gap-1 text-amber-600">
+                            <span className="flex items-center gap-1 text-morandi-gold">
                               <AlertCircle size={14} /> {COMP_ORDERS_LABELS.部分符合}
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1 text-red-600">
+                            <span className="flex items-center gap-1 text-morandi-red">
                               <X size={14} /> {COMP_ORDERS_LABELS.未配對}
                             </span>
                           )}
@@ -848,7 +848,7 @@ export function PnrMatchDialog({
                               }
                               className={cn(
                                 'text-xs border rounded px-2 py-1 w-full max-w-[180px]',
-                                result.selectedCustomerId && 'border-purple-400 bg-purple-50'
+                                result.selectedCustomerId && 'border-morandi-secondary bg-morandi-container'
                               )}
                               disabled={!!result.matchedMember && !result.selectedCustomerId}
                             >
@@ -873,7 +873,7 @@ export function PnrMatchDialog({
                               className={cn(
                                 'text-xs border rounded px-2 py-1 w-full max-w-[150px]',
                                 selectedOrderIds[result.pnrPassenger] &&
-                                  'border-blue-400 bg-blue-50'
+                                  'border-status-info bg-status-info/10'
                               )}
                             >
                               <option value="">{COMP_ORDERS_LABELS.選擇訂單_placeholder}</option>
@@ -894,8 +894,8 @@ export function PnrMatchDialog({
 
               {/* 未配對的團員 */}
               {unmatchedMembers.length > 0 && (
-                <div className="p-3 bg-amber-50 rounded-lg">
-                  <p className="text-sm font-medium text-amber-700 mb-2">
+                <div className="p-3 bg-morandi-gold/10 rounded-lg">
+                  <p className="text-sm font-medium text-morandi-gold mb-2">
                     {COMP_ORDERS_LABELS.未在PNR中的團員} ({unmatchedMembers.length}{' '}
                     {COMP_ORDERS_LABELS.人})：
                   </p>
@@ -903,7 +903,7 @@ export function PnrMatchDialog({
                     {unmatchedMembers.map(m => (
                       <span
                         key={m.id}
-                        className="px-2 py-1 bg-card rounded text-xs border border-amber-200"
+                        className="px-2 py-1 bg-card rounded text-xs border border-morandi-gold/30"
                       >
                         {m.chinese_name || m.passport_name}
                       </span>
@@ -914,20 +914,20 @@ export function PnrMatchDialog({
 
               {/* 航班資訊 */}
               {parsedPnr && parsedPnr.segments.length > 0 && (
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm font-medium text-blue-700 mb-2">
+                <div className="p-3 bg-status-info/10 rounded-lg">
+                  <p className="text-sm font-medium text-status-info mb-2">
                     {COMP_ORDERS_LABELS.航班資訊}
                   </p>
                   <div className="space-y-1">
                     {parsedPnr.segments.map((seg, i) => (
-                      <div key={i} className="text-xs font-mono text-blue-600">
+                      <div key={i} className="text-xs font-mono text-status-info">
                         <span>
                           {seg.airline}
                           {seg.flightNumber} {seg.origin}→{seg.destination} {seg.departureDate}{' '}
                           {seg.departureTime}
                         </span>
                         {seg.via && seg.via.length > 0 && (
-                          <span className="ml-2 text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded">
+                          <span className="ml-2 text-status-warning bg-status-warning/10 px-1.5 py-0.5 rounded">
                             {COMP_ORDERS_LABELS.經停}{' '}
                             {seg.via
                               .map(v => `${v.city}${v.duration ? ` (${v.duration})` : ''}`)

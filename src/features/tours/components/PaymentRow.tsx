@@ -45,7 +45,7 @@ const getStatusBadge = (status: string) => {
 const getMethodBadge = (method: string) => {
   const badges: Record<string, string> = {
     bank_transfer: 'bg-status-info-bg text-status-info',
-    credit_card: 'bg-purple-50 text-purple-600',
+    credit_card: 'bg-morandi-container text-morandi-secondary',
     cash: 'bg-status-success-bg text-status-success',
     check: 'bg-status-warning-bg text-status-warning',
   }

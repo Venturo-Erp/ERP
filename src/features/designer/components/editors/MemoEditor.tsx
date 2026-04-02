@@ -285,8 +285,8 @@ export function MemoEditor({ templateData, onTemplateDataChange }: MemoEditorPro
               dragState.isDragging(idx) && 'opacity-30',
               dragState.isDragOver(idx) && 'border-morandi-gold border-dashed',
               // 不同類型可選擇不同背景色
-              item.type === 'season' && 'bg-blue-50/30',
-              item.type === 'info' && 'bg-amber-50/30'
+              item.type === 'season' && 'bg-status-info/10/30',
+              item.type === 'info' && 'bg-morandi-gold/10/30'
             )}
           >
             {/* 拖曳手柄 */}
@@ -306,12 +306,12 @@ export function MemoEditor({ templateData, onTemplateDataChange }: MemoEditorPro
 
             {/* 類型標籤（可選） */}
             {item.type === 'season' && (
-              <span className="text-[10px] text-blue-500 shrink-0">
+              <span className="text-[10px] text-status-info shrink-0">
                 {DESIGNER_LABELS.LABEL_270}
               </span>
             )}
             {item.type === 'info' && (
-              <span className="text-[10px] text-amber-600 shrink-0">
+              <span className="text-[10px] text-morandi-gold shrink-0">
                 {DESIGNER_LABELS.LABEL_2152}
               </span>
             )}

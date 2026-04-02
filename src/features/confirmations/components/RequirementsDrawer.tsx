@@ -57,26 +57,26 @@ const STATUS_CONFIG = {
   in_progress: {
     label: '作業中',
     icon: Send,
-    bgClass: 'bg-blue-50',
-    textClass: 'text-blue-700',
+    bgClass: 'bg-status-info/10',
+    textClass: 'text-status-info',
   },
   awaiting_confirmation: {
     label: '待確認',
     icon: AlertCircle,
-    bgClass: 'bg-amber-50',
-    textClass: 'text-amber-700',
+    bgClass: 'bg-morandi-gold/10',
+    textClass: 'text-morandi-gold',
   },
   confirmed: {
     label: '已確認',
     icon: CheckCircle,
-    bgClass: 'bg-green-50',
-    textClass: 'text-green-700',
+    bgClass: 'bg-morandi-green/10',
+    textClass: 'text-morandi-green',
   },
   completed: {
     label: '已完成',
     icon: CheckCircle,
-    bgClass: 'bg-emerald-50',
-    textClass: 'text-emerald-700',
+    bgClass: 'bg-morandi-green/10',
+    textClass: 'text-morandi-green',
   },
 } as const
 
@@ -168,7 +168,7 @@ export function RequirementsDrawer({
                         已發 {item.supplier_count || 0} 家
                       </span>
                     ) : item.status === 'awaiting_confirmation' ? (
-                      <span className="text-xs text-amber-600">
+                      <span className="text-xs text-morandi-gold">
                         {item.replied_count || 0} 家回覆
                       </span>
                     ) : null}

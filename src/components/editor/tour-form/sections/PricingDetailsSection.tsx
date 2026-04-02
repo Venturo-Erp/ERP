@@ -185,7 +185,7 @@ export function PricingDetailsSection({ data, updateField, onChange }: PricingDe
           {/* 旅遊責任險選擇 */}
           <div className="p-4 border border-morandi-container rounded-lg">
             <div className="flex items-center gap-2 mb-3">
-              <Shield className="h-4 w-4 text-emerald-600" />
+              <Shield className="h-4 w-4 text-morandi-green" />
               <Label className="font-medium">{COMP_EDITOR_LABELS.旅遊責任險}</Label>
             </div>
             <div className="flex items-center gap-3">
@@ -226,7 +226,7 @@ export function PricingDetailsSection({ data, updateField, onChange }: PricingDe
           <div className="p-4 border border-morandi-container rounded-lg">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-emerald-600" />
+                <Check className="h-4 w-4 text-morandi-green" />
                 <Label className="font-medium">{COMP_EDITOR_LABELS.LABEL_5450}</Label>
               </div>
               <Button
@@ -249,7 +249,7 @@ export function PricingDetailsSection({ data, updateField, onChange }: PricingDe
                     className={cn(
                       'flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors',
                       item.included
-                        ? 'bg-emerald-100 text-emerald-600'
+                        ? 'bg-morandi-green/10 text-morandi-green'
                         : 'bg-muted text-morandi-muted'
                     )}
                   >
@@ -302,7 +302,7 @@ export function PricingDetailsSection({ data, updateField, onChange }: PricingDe
                     className={cn(
                       'flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-colors',
                       item.included
-                        ? 'bg-emerald-100 text-emerald-600'
+                        ? 'bg-morandi-green/10 text-morandi-green'
                         : 'bg-status-danger-bg text-morandi-red'
                     )}
                   >

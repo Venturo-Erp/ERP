@@ -383,7 +383,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                        中文姓名 <span className="text-red-500">*</span>
+                        中文姓名 <span className="text-morandi-red">*</span>
                       </Label>
                       <Input
                         required
@@ -413,7 +413,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                        職務 {!isEditMode && mode === 'hr' && <span className="text-red-500">*</span>}
+                        職務 {!isEditMode && mode === 'hr' && <span className="text-morandi-red">*</span>}
                       </Label>
                       <select
                         value={formData.role_id}
@@ -432,7 +432,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-1">
-                        <Mail size={12} /> Email <span className="text-red-500">*</span>
+                        <Mail size={12} /> Email <span className="text-morandi-red">*</span>
                       </Label>
                       <Input
                         required

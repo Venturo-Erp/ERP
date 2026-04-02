@@ -82,7 +82,7 @@ export function RoomAssignmentCell({
   if (!isAssigned) {
     return (
       <td
-        className="border border-morandi-gold/20 px-1 py-1 bg-emerald-50/50 text-xs align-middle"
+        className="border border-morandi-gold/20 px-1 py-1 bg-morandi-green/10/50 text-xs align-middle"
         rowSpan={rowSpan && rowSpan > 1 ? rowSpan : undefined}
       >
         <select
@@ -104,7 +104,7 @@ export function RoomAssignmentCell({
   // 已分配：顯示房間名稱，點擊開啟 Popover
   return (
     <td
-      className="border border-morandi-gold/20 px-1 py-1 bg-emerald-50/50 text-xs align-middle"
+      className="border border-morandi-gold/20 px-1 py-1 bg-morandi-green/10/50 text-xs align-middle"
       rowSpan={rowSpan && rowSpan > 1 ? rowSpan : undefined}
     >
       <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -112,7 +112,7 @@ export function RoomAssignmentCell({
           <button
             type="button"
             className={cn(
-              'w-full h-6 text-left px-1 rounded hover:bg-emerald-100 transition-colors',
+              'w-full h-6 text-left px-1 rounded hover:bg-morandi-green/10 transition-colors',
               'text-morandi-primary cursor-pointer'
             )}
           >
@@ -145,7 +145,7 @@ export function RoomAssignmentCell({
                   )}
                 >
                   {member.name}
-                  {member.isChild && <span className="ml-1 text-xs text-orange-500">(不佔床)</span>}
+                  {member.isChild && <span className="ml-1 text-xs text-status-warning">(不佔床)</span>}
                 </span>
                 <button
                   type="button"

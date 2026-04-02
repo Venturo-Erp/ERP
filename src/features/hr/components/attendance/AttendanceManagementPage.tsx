@@ -341,7 +341,7 @@ export function AttendanceManagementPage() {
             </div>
             <div className="text-center">
               <div className="text-sm text-morandi-secondary">{L.summary_present}</div>
-              <div className="text-xl font-bold text-green-600">{summary.present_days}</div>
+              <div className="text-xl font-bold text-morandi-green">{summary.present_days}</div>
             </div>
             <div className="text-center">
               <div className="text-sm text-morandi-secondary">{L.summary_late}</div>
@@ -349,7 +349,7 @@ export function AttendanceManagementPage() {
             </div>
             <div className="text-center">
               <div className="text-sm text-morandi-secondary">{L.summary_absent}</div>
-              <div className="text-xl font-bold text-red-600">{summary.absent_days}</div>
+              <div className="text-xl font-bold text-morandi-red">{summary.absent_days}</div>
             </div>
             <div className="text-center">
               <div className="text-sm text-morandi-secondary">{L.summary_total_hours}</div>

@@ -487,7 +487,7 @@ export function LocalQuoteDialog({
                 <Button
                   onClick={handleSendLine}
                   disabled={!selectedGroupId || sending}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-6"
+                  className="bg-morandi-green hover:bg-morandi-green text-white px-6"
                 >
                   {sending ? (
                     <Loader2 size={14} className="animate-spin mr-1" />
