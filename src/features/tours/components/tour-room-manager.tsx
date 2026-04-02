@@ -99,7 +99,7 @@ export function TourRoomManager({
     try {
       const { data, error } = await supabase
         .from('tour_rooms_status')
-        .select('*')
+        .select('id, tour_id, room_number, room_type, hotel_name, night_number, capacity, assigned_count, remaining_beds, is_full, display_order, notes')
         .eq('tour_id', tourId)
         .order('night_number')
         .order('display_order')

@@ -309,7 +309,7 @@ export async function getPnrQueueItems(
   try {
     let query = supabase
       .from('pnr_queue_items')
-      .select('*')
+      .select('id, pnr_id, queue_type, status, priority, title, description, due_date, assigned_to, completed_at, completed_by, resolution_notes, reminder_at, metadata, workspace_id, created_at, created_by, updated_at')
       .eq('pnr_id', pnrId)
       .order('priority', { ascending: false })
       .order('created_at', { ascending: false })
@@ -354,7 +354,7 @@ export async function getDueItems(options?: {
 
     let query = supabase
       .from('pnr_queue_items')
-      .select('*')
+      .select('id, pnr_id, queue_type, status, priority, title, description, due_date, assigned_to, completed_at, completed_by, resolution_notes, reminder_at, metadata, workspace_id, created_at, created_by, updated_at')
       .in('status', ['pending', 'in_progress'])
       .or(`due_date.is.null,due_date.lte.${now}`)
       .order('priority', { ascending: false })
@@ -396,7 +396,7 @@ export async function getOverdueItems(limit: number = 50): Promise<PnrQueueItem[
 
     const { data, error } = await supabase
       .from('pnr_queue_items')
-      .select('*')
+      .select('id, pnr_id, queue_type, status, priority, title, description, due_date, assigned_to, completed_at, completed_by, resolution_notes, reminder_at, metadata, workspace_id, created_at, created_by, updated_at')
       .in('status', ['pending', 'in_progress'])
       .not('due_date', 'is', null)
       .lt('due_date', now)
@@ -498,7 +498,7 @@ async function getExistingQueueItem(
   try {
     const { data, error } = await supabase
       .from('pnr_queue_items')
-      .select('*')
+      .select('id, pnr_id, queue_type, status, priority, title, description, due_date, assigned_to, completed_at, completed_by, resolution_notes, reminder_at, metadata, workspace_id, created_at, created_by, updated_at')
       .eq('pnr_id', pnrId)
       .eq('queue_type', queueType)
       .in('status', ['pending', 'in_progress'])

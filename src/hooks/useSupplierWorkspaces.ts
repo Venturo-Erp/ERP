@@ -43,7 +43,7 @@ export function useSupplierWorkspaces(options?: UseSupplierWorkspacesOptions) {
   const fetcher = async (): Promise<SupplierWorkspace[]> => {
     let query = supabase
       .from('workspaces')
-      .select('*')
+      .select('id, name, code, description, legal_name, phone, email, address, tax_id, logo_url, is_active, type, created_at, updated_at')
       .in('type', targetTypes)
       .order('name')
       .limit(500)

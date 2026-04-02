@@ -56,7 +56,7 @@ async function fetchCountries(): Promise<Country[]> {
 async function fetchDestinations(): Promise<TourDestination[]> {
   const { data, error } = await supabase
     .from('tour_destinations')
-    .select('*')
+    .select('id, country, city, airport_code, created_at, updated_at')
     .order('country', { ascending: true })
     .order('city', { ascending: true })
     .limit(500)

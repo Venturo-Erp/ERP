@@ -141,7 +141,7 @@ export const useChatStore = () => {
         // 📌 author 資訊已存在 JSON 欄位中，不需要 join
         const { data, error } = await supabase
           .from('messages')
-          .select('*')
+          .select('id, channel_id, content, author, attachments, metadata, parent_message_id, reply_count, is_pinned, reactions, workspace_id, created_at, created_by, updated_at')
           .eq('channel_id', channelId)
           .order('created_at', { ascending: true })
           .limit(500)

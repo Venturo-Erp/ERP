@@ -74,7 +74,7 @@ export function usePnrFareHistory(pnrId?: string) {
   const fetcher = async (): Promise<PnrFareHistory[]> => {
     let query = supabase
       .from('pnr_fare_history')
-      .select('*')
+      .select('id, pnr_id, base_fare, taxes, total_fare, currency, fare_basis, source, raw_fare_data, recorded_at, recorded_by, workspace_id, created_at')
       .order('recorded_at', { ascending: false })
       .limit(500)
 
@@ -121,7 +121,7 @@ export function usePnrFareAlerts(pnrId?: string) {
   const fetcher = async (): Promise<PnrFareAlert[]> => {
     let query = supabase
       .from('pnr_fare_alerts')
-      .select('*')
+      .select('id, pnr_id, alert_type, threshold_amount, threshold_percent, last_fare, is_active, last_checked_at, notify_employee_ids, notify_channel_id, workspace_id, created_at, updated_at')
       .order('created_at', { ascending: false })
       .limit(500)
 
@@ -186,7 +186,7 @@ export function usePnrFlightStatusHistory(pnrId?: string) {
   const fetcher = async (): Promise<PnrFlightStatusHistory[]> => {
     let query = supabase
       .from('pnr_flight_status_history')
-      .select('*')
+      .select('id, pnr_id, segment_id, flight_number, airline_code, flight_date, operational_status, booking_status, delay_minutes, gate_info, new_departure_time, new_arrival_time, external_data, source, remarks, recorded_at, workspace_id')
       .order('recorded_at', { ascending: false })
       .limit(500)
 
@@ -239,7 +239,7 @@ export function usePnrQueue(options?: {
   const fetcher = async (): Promise<PnrQueueItem[]> => {
     let query = supabase
       .from('pnr_queue_items')
-      .select('*')
+      .select('id, pnr_id, queue_type, status, priority, title, description, due_date, assigned_to, completed_at, completed_by, resolution_notes, reminder_at, metadata, workspace_id, created_at, created_by, updated_at')
       .order('priority', { ascending: false })
       .order('due_date', { ascending: true })
       .limit(500)
@@ -355,7 +355,7 @@ export function usePnrScheduleChanges(options?: { pnrId?: string; status?: strin
   const fetcher = async (): Promise<PnrScheduleChange[]> => {
     let query = supabase
       .from('pnr_schedule_changes')
-      .select('*')
+      .select('id, pnr_id, segment_id, change_type, original_flight_number, new_flight_number, original_departure_date, new_departure_date, original_departure_time, new_departure_time, original_arrival_time, new_arrival_time, detected_at, processed_at, processed_by, status, requires_reissue, requires_revalidation, requires_refund, notes, workspace_id, created_at, updated_at')
       .order('detected_at', { ascending: false })
       .limit(500)
 
@@ -429,7 +429,7 @@ export function usePnrAiQueries(pnrId?: string) {
   const fetcher = async (): Promise<PnrAiQuery[]> => {
     let query = supabase
       .from('pnr_ai_queries')
-      .select('*')
+      .select('id, pnr_id, query_text, response_text, query_context, response_metadata, queried_by, workspace_id, created_at')
       .order('created_at', { ascending: false })
       .limit(50) // 只保留最近 50 筆
 

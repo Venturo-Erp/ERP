@@ -101,11 +101,11 @@ async function fetchAllReferenceData(): Promise<ReferenceData> {
       ssrCodesResult,
       statusCodesResult,
     ] = await Promise.all([
-      supabase.from('ref_airlines').select('*').eq('is_active', true).limit(500),
-      supabase.from('ref_airports').select('*').limit(2000),
-      supabase.from('ref_booking_classes').select('*').order('priority').limit(500),
-      supabase.from('ref_ssr_codes').select('*').limit(500),
-      supabase.from('ref_status_codes').select('*').limit(200),
+      supabase.from('ref_airlines').select('iata_code, icao_code, english_name, name_zh, country, alliance, is_active').eq('is_active', true).limit(500),
+      supabase.from('ref_airports').select('iata_code, icao_code, english_name, name_zh, city_code, city_name_en, city_name_zh, country_code, timezone, latitude, longitude, is_favorite, usage_count, workspace_id, created_at').limit(2000),
+      supabase.from('ref_booking_classes').select('code, cabin_type, description, priority').order('priority').limit(500),
+      supabase.from('ref_ssr_codes').select('code, category, description_en, description_zh').limit(500),
+      supabase.from('ref_status_codes').select('code, category, description_en, description_zh').limit(200),
     ])
 
     // 轉換為 Map

@@ -108,7 +108,7 @@ async function getNewebPayConfig(workspaceId: string): Promise<NewebPayConfig> {
   // 從 system_settings 表獲取設定（依 workspace_id 隔離）
   const { data, error } = await supabase
     .from('system_settings')
-    .select('*')
+    .select('id, category, description, settings, is_active, workspace_id, created_at, updated_at')
     .eq('category', 'newebpay')
     .eq('workspace_id', workspaceId)
     .single()

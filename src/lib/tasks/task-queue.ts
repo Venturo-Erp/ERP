@@ -108,7 +108,7 @@ export async function getPendingTasks(limit = 10): Promise<Task[]> {
 
   const { data, error } = await supabase
     .from('background_tasks')
-    .select('*')
+    .select('id, type, status, payload, result, error, priority, attempts, scheduled_at, started_at, completed_at, workspace_id, created_at, updated_at')
     .eq('status', 'pending')
     .lte('scheduled_at', now)
     .order('priority', { ascending: false }) // critical > high > normal > low

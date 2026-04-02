@@ -88,7 +88,7 @@ export function ResourceDetailDialog({
 
         const { data, error } = await supabase
           .from(table)
-          .select('*')
+          .select('id, name, english_name, description, category, images, thumbnail, address, latitude, longitude, city_id, country_id, is_active, created_at, updated_at')
           .eq('id', resource.id)
           .single()
 

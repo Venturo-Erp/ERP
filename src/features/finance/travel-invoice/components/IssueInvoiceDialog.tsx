@@ -80,7 +80,7 @@ export function IssueInvoiceDialog({
 
       const { data } = await supabase
         .from('orders_invoice_summary')
-        .select('*')
+        .select('order_id, order_number, tour_id, invoiceable_amount, total_amount, invoiced_amount, paid_amount, workspace_id')
         .eq('order_id', orderId)
         .single()
 

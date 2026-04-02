@@ -72,7 +72,7 @@ export function useLeaveTypes() {
     try {
       const { data, error: queryError } = await supabase
         .from('leave_types')
-        .select('*')
+        .select('id, name, code, description, days_per_year, is_paid, is_active, requires_proof, sort_order, workspace_id, created_at, updated_at')
         .limit(500)
 
         .order('code', { ascending: true })

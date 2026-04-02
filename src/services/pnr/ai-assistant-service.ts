@@ -423,7 +423,7 @@ export async function getQueryHistory(pnrId: string, limit: number = 20): Promis
   try {
     const { data, error } = await supabase
       .from('pnr_ai_queries')
-      .select('*')
+      .select('id, pnr_id, query_text, response_text, query_context, response_metadata, queried_by, workspace_id, created_at')
       .eq('pnr_id', pnrId)
       .order('created_at', { ascending: false })
       .limit(limit)

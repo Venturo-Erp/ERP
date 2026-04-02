@@ -145,7 +145,7 @@ export const useAccountingStore = create<AccountingStore>((set, get) => ({
 
     const { data, error } = await supabase
       .from('accounting_accounts')
-      .select('*')
+      .select('id, name, type, balance, currency, is_active, description, icon, color, created_at, updated_at')
       .eq('user_id', user.id)
       .eq('is_active', true)
       .order('created_at', { ascending: false })
@@ -237,7 +237,7 @@ export const useAccountingStore = create<AccountingStore>((set, get) => ({
   fetchCategories: async () => {
     const { data, error } = await supabase
       .from('accounting_categories')
-      .select('*')
+      .select('id, name, type, icon, color, is_system, created_at')
       .order('type', { ascending: true })
       .order('name', { ascending: true })
       .limit(200)

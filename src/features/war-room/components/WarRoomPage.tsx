@@ -68,7 +68,7 @@ export const WarRoomPage: React.FC = () => {
     setLoading(true)
     try {
       // 加载魔法库
-      const { data: magic } = await supabase.from('magic_library').select('*').order('category')
+      const { data: magic } = await supabase.from('magic_library').select('id, name, category, description, source_type, layer, github_url, official_url, current_version, latest_version, update_status, check_frequency, last_checked_at, workspace_id, created_at, updated_at').order('category')
 
       if (magic) setMagicItems(magic as MagicItem[])
 

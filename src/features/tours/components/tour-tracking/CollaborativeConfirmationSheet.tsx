@@ -30,13 +30,13 @@ interface RequestItem {
 async function fetchRequestItems(requestId: string): Promise<RequestItem[]> {
   const { data, error } = await supabase
     .from('tour_request_items')
-    .select('*')
+    .select('id, request_id, tour_id, workspace_id, item_name, item_category, service_date, day_number, sort_order, source, source_item_id, handled_by, local_status, created_at, updated_at')
     .eq('request_id', requestId)
     .order('day_number', { ascending: true })
     .order('sort_order', { ascending: true })
 
   if (error) throw error
-  return data || []
+  return (data || []) as unknown as RequestItem[]
 }
 
 interface CollaborativeConfirmationSheetProps {
