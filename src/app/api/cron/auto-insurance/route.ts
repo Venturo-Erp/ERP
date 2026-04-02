@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/utils/logger'
 
@@ -8,7 +8,7 @@ const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 const INSURANCE_GROUP_ID = 'C03f53517dc822913b394411981a100bf'
 
 async function sendInsuranceForTour(
-  supabase: any,
+  supabase: SupabaseClient,
   lineToken: string,
   tourId: string,
   isManual = false,
@@ -21,7 +21,7 @@ async function sendInsuranceForTour(
       'id, code, name, departure_date, return_date, days_count, airport_code, outbound_flight, return_flight, tour_leader_id, country_id'
     )
     .eq('id', tourId)
-    .single()) as { data: any }
+    .single()) as { data: { id: string; code: string; name: string; departure_date: string | null; return_date: string | null; days_count: number | null; airport_code: string | null; outbound_flight: unknown; return_flight: unknown; tour_leader_id: string | null; country_id: string | null } | null }
   if (!tour) return { success: false, error: 'Tour not found' }
 
   // 國家
@@ -65,8 +65,8 @@ async function sendInsuranceForTour(
   const { data: orders } = (await supabase
     .from('orders')
     .select('id, sales_person')
-    .eq('tour_id', tour.id)) as { data: any[] | null }
-  const orderIds = orders?.map((o: any) => o.id) || []
+    .eq('tour_id', tour.id)) as { data: Array<{ id: string; sales_person: string | null }> | null }
+  const orderIds = orders?.map(o => o.id) || []
   if (!orderIds.length) return { success: false, error: 'No orders' }
 
   const salesPerson = orders?.[0]?.sales_person || '-'
@@ -74,7 +74,7 @@ async function sendInsuranceForTour(
   const { data: members } = (await supabase
     .from('order_members')
     .select('customer:customer_id(name, national_id, birth_date)')
-    .in('order_id', orderIds)) as { data: any[] | null }
+    .in('order_id', orderIds)) as { data: Array<{ customer?: { name?: string; national_id?: string; birth_date?: string } }> | null }
 
   if (!members?.length) return { success: false, error: 'No members' }
 
@@ -105,7 +105,7 @@ async function sendInsuranceForTour(
     }
   })
 
-  members.forEach((m: any, i: number) => {
+  members.forEach((m: { customer?: { name?: string; national_id?: string; birth_date?: string } }, i: number) => {
     const row = ws.addRow([
       i + 1,
       m.customer?.name || '',

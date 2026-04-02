@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 /**
  * SupplierDispatchPage - 供應商派單管理
@@ -114,8 +113,9 @@ export function SupplierDispatchPage() {
           .eq('recipient_workspace_id', user.workspace_id)
           .eq('response_status', 'accepted')
 
-        // 整理需求資料
-        const confirmedRequests: ConfirmedRequest[] = (requestsData || []).map(r => {
+        // 整理需求資料（generated types are stale, cast to Record）
+        const rows = (requestsData || []) as unknown as Array<Record<string, unknown>>
+        const confirmedRequests: ConfirmedRequest[] = rows.map(r => {
           const replyContent = r.reply_content as {
             driver_id?: string
             driver_name?: string
@@ -123,19 +123,19 @@ export function SupplierDispatchPage() {
           } | null
 
           return {
-            id: r.id,
-            request_code: r.code || '',
-            tour_code: r.tour_code || null,
-            tour_name: r.tour_name || null,
-            category: r.category || 'other',
-            service_date: r.service_date || '',
-            title: r.title || '',
-            quantity: r.quantity || 1,
-            notes: r.notes || null,
+            id: r.id as string,
+            request_code: (r.code as string) || '',
+            tour_code: (r.tour_code as string | null) || null,
+            tour_name: (r.tour_name as string | null) || null,
+            category: (r.category as string) || 'other',
+            service_date: (r.service_date as string) || '',
+            title: (r.title as string) || '',
+            quantity: (r.quantity as number) || 1,
+            notes: (r.notes as string | null) || null,
             dispatch_status:
               (replyContent?.dispatch_status as 'pending' | 'assigned' | 'completed') || 'pending',
-            assigned_driver_id: replyContent?.driver_id || r.assigned_vehicle_id || null,
-            assigned_driver_name: replyContent?.driver_name || r.assignee_name || null,
+            assigned_driver_id: replyContent?.driver_id || (r.assigned_vehicle_id as string | null) || null,
+            assigned_driver_name: replyContent?.driver_name || (r.assignee_name as string | null) || null,
           }
         })
 
@@ -184,7 +184,7 @@ export function SupplierDispatchPage() {
         .eq('id', selectedRequest.id)
         .single()
 
-      const existingContent = (currentData?.reply_content || {}) as Record<string, unknown>
+      const existingContent = ((currentData as unknown as Record<string, unknown>)?.reply_content || {}) as Record<string, unknown>
 
       // 更新 reply_content 和 assignee_name（保留現有資料）
       const { error } = await supabase
@@ -199,7 +199,7 @@ export function SupplierDispatchPage() {
             dispatch_status: 'assigned',
             assigned_at: new Date().toISOString(),
           },
-        })
+        } as Record<string, unknown>)
         .eq('id', selectedRequest.id)
 
       if (error) throw error

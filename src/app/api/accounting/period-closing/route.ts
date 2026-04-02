@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { logger } from '@/lib/utils/logger'
 
@@ -19,7 +20,7 @@ interface AccountBalance {
 
 // 生成傳票編號
 async function generateVoucherNo(
-  supabase: any,
+  supabase: SupabaseClient,
   workspaceId: string,
   date: string
 ): Promise<string> {
@@ -48,7 +49,7 @@ async function generateVoucherNo(
 
 // 計算損益科目餘額
 async function calculateProfitLossBalances(
-  supabase: any,
+  supabase: SupabaseClient,
   workspaceId: string,
   startDate: string,
   endDate: string
@@ -231,7 +232,7 @@ export async function POST(request: NextRequest) {
     if (voucherError) throw voucherError
 
     // 生成分錄
-    const lines: any[] = []
+    const lines: Array<Record<string, unknown>> = []
     let lineNo = 1
 
     // 1. 將損益科目餘額結轉到「本期損益」

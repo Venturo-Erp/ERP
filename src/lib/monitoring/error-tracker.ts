@@ -18,9 +18,9 @@ export interface ErrorLog {
   workspaceId?: string
   details: {
     error?: string
-    state?: any
-    expectedState?: any
-    [key: string]: any
+    state?: unknown
+    expectedState?: unknown
+    [key: string]: unknown
   }
 }
 
@@ -115,7 +115,7 @@ class ErrorTracker {
     page: string
     entity: string
     error: Error
-    data?: any
+    data?: unknown
     userId?: string
     workspaceId?: string
   }) {
@@ -165,8 +165,8 @@ class ErrorTracker {
   trackStateError(params: {
     page: string
     action: string
-    actualState: any
-    expectedState: any
+    actualState: unknown
+    expectedState: unknown
     reason?: string
   }) {
     this.track({
@@ -282,5 +282,5 @@ export const errorTracker = new ErrorTracker()
 
 // 方便在 console 使用
 if (typeof window !== 'undefined') {
-  ;(window as any).errorTracker = errorTracker
+  ;(window as unknown as Record<string, unknown>).errorTracker = errorTracker
 }

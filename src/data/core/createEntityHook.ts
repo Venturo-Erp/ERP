@@ -15,6 +15,7 @@
 import { useState, useEffect } from 'react'
 import useSWR, { mutate as globalMutate } from 'swr'
 import { supabase } from '@/lib/supabase/client'
+import type { SupabaseTableName } from '@/lib/supabase/typed-client'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
 import { get_cache, set_cache, invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
@@ -254,7 +255,7 @@ export function createEntityHook<T extends BaseEntity>(
       async () => {
         const selectFields = config.list?.select || '*'
 
-        let query = supabase.from(tableName as any).select(selectFields)
+        let query = supabase.from(tableName as any /* dynamic table name requires runtime assertion */).select(selectFields)
 
         // 套用 workspace 過濾
         const workspaceFilter = getWorkspaceFilter()
@@ -321,7 +322,7 @@ export function createEntityHook<T extends BaseEntity>(
       async () => {
         const selectFields = config.slim?.select || 'id'
 
-        let query = supabase.from(tableName as any).select(selectFields)
+        let query = supabase.from(tableName as any /* dynamic table name requires runtime assertion */).select(selectFields)
 
         // 套用 workspace 過濾
         const workspaceFilter = getWorkspaceFilter()
@@ -375,7 +376,7 @@ export function createEntityHook<T extends BaseEntity>(
         const selectFields = config.detail?.select || '*'
 
         const { data, error } = await supabase
-          .from(tableName as any)
+          .from(tableName as any /* dynamic table name requires runtime assertion */)
           .select(selectFields)
           .eq('id', id)
           .maybeSingle()
@@ -430,7 +431,7 @@ export function createEntityHook<T extends BaseEntity>(
         const selectFields = config.list?.select || '*'
 
         let query = supabase
-          .from(tableName as any)
+          .from(tableName as any /* dynamic table name requires runtime assertion */)
           .select(selectFields, { count: 'exact' })
           .range(from, to)
 
@@ -541,7 +542,7 @@ export function createEntityHook<T extends BaseEntity>(
       // 每次重試都重新查詢並生成 code
       if (needsCodeGeneration) {
         const { data: maxCodeResults } = await supabase
-          .from(tableName as any)
+          .from(tableName as any /* dynamic table name requires runtime assertion */)
           .select('code')
           .like('code', `${codePrefix}%`)
           .order('code', { ascending: false })
@@ -584,7 +585,7 @@ export function createEntityHook<T extends BaseEntity>(
 
       try {
         const { data: created, error } = await supabase
-          .from(tableName as any)
+          .from(tableName as any /* dynamic table name requires runtime assertion */)
           .insert(newItem)
           .select()
           .single()
@@ -641,7 +642,7 @@ export function createEntityHook<T extends BaseEntity>(
 
     try {
       const { error } = await supabase
-        .from(tableName as any)
+        .from(tableName as any /* dynamic table name requires runtime assertion */)
         .update(updateData)
         .eq('id', id)
 
@@ -672,7 +673,7 @@ export function createEntityHook<T extends BaseEntity>(
 
     try {
       const { error } = await supabase
-        .from(tableName as any)
+        .from(tableName as any /* dynamic table name requires runtime assertion */)
         .delete()
         .eq('id', id)
 
@@ -706,7 +707,7 @@ export function createEntityHook<T extends BaseEntity>(
 
     try {
       const { error } = await supabase
-        .from(tableName as any)
+        .from(tableName as any /* dynamic table name requires runtime assertion */)
         .delete()
         .in('id', ids)
 

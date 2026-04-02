@@ -71,10 +71,10 @@ export function AcceptQuoteDialog({
 
       onOpenChange(false)
       onSuccess()
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: '成交失敗',
-        description: error.message,
+        description: (error as Error).message,
         variant: 'destructive',
       })
     } finally {

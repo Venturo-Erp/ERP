@@ -64,6 +64,9 @@ export interface TourRequest {
   sent_to?: string | null
   replied_at?: string | null
   confirmed_at?: string | null
+  source_id?: string | null
+  source_type?: string | null
+  supplier_response?: unknown | null
 }
 
 // ============================================

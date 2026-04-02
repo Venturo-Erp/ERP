@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 /**
@@ -30,6 +29,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTourRequests } from '@/stores/tour-request-store'
+import type { TourRequest as TourRequestEntity } from '@/data/entities/tour-requests'
 import { useAuthStore } from '@/stores/auth-store'
 import { useToast } from '@/components/ui/use-toast'
 import { QuickRequestFromItemDialog } from '@/features/finance/requests/components/QuickRequestFromItemDialog'
@@ -54,7 +54,8 @@ interface SupplierGroup {
 export function TourConfirmationSheet({ tourId }: TourConfirmationSheetProps) {
   const { toast } = useToast()
   const { user: currentUser } = useAuthStore()
-  const { items: existingRequests, fetchAll: refreshRequests } = useTourRequests()
+  const { items: rawRequests, fetchAll: refreshRequests } = useTourRequests()
+  const existingRequests = rawRequests as unknown as TourRequestEntity[]
 
   // 使用需求總覽的資料來源
   const { loading, tour, linkedQuoteId, quoteItems, changeTrackByCategory } = useRequirementsData({

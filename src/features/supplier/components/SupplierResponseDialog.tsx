@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 /**
  * SupplierResponseDialog - 供應商回覆需求 Dialog
@@ -179,7 +178,7 @@ export function SupplierResponseDialog({
       // 3. 更新需求單狀態
       const { error: updateError } = await supabase
         .from('tour_requests')
-        .update({ response_status: 'responded' })
+        .update({ response_status: 'responded' } as Record<string, unknown>)
         .eq('id', request.id)
 
       if (updateError) throw updateError

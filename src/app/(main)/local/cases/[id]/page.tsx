@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { useState } from 'react'
@@ -10,9 +9,7 @@ import { logger } from '@/lib/utils/logger'
 import { alert as showAlert } from '@/lib/ui/alert-dialog'
 import { FileText, Calendar, Package, Building2, DollarSign, ArrowLeft } from 'lucide-react'
 import useSWR, { mutate } from 'swr'
-import type { Database } from '@/lib/supabase/types'
-
-type TourRequest = Database['public']['Tables']['tour_requests']['Row']
+import type { TourRequest } from '@/data/entities/tour-requests'
 
 export default function LocalCaseDetailPage() {
   const params = useParams()
@@ -38,7 +35,7 @@ export default function LocalCaseDetailPage() {
       logger.error('[Local Case] 載入失敗:', error)
       return null
     }
-    return data as TourRequest
+    return data as unknown as TourRequest
   })
 
   // 初始化報價欄位

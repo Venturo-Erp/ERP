@@ -53,7 +53,7 @@ export function ActivityQuoteDialog({
     setEditableItems(activities)
   }, [activities])
 
-  const handleItemChange = (idx: number, field: string, value: any) => {
+  const handleItemChange = (idx: number, field: string, value: unknown) => {
     setEditableItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item))
   }
 
@@ -81,7 +81,7 @@ export function ActivityQuoteDialog({
           .from('attractions')
           .select('contact_name, phone, fax')
           .eq('id', resourceId)
-          .maybeSingle() as { data: { contact_name?: string; phone?: string; fax?: string } | null; error: any }
+          .maybeSingle() as { data: { contact_name?: string; phone?: string; fax?: string } | null; error: unknown }
         if (data) {
           const info = {
             contact: data.contact_name || undefined,

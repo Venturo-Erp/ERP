@@ -6,6 +6,8 @@
 import { dynamicFrom } from '@/lib/supabase/typed-client'
 import type {
   TourRequest,
+  RequestDocument,
+  TourFile,
   CreateTourRequestInput,
   UpdateTourRequestInput,
   TourRequestDetail,
@@ -55,8 +57,8 @@ export async function getTourRequestDetail(requestId: string): Promise<TourReque
 
   return {
     ...(request as unknown as TourRequest),
-    documents: (documents || []) as unknown as any[],
-    related_files: (related_files || []) as unknown as any[],
+    documents: (documents || []) as unknown as RequestDocument[],
+    related_files: (related_files || []) as unknown as TourFile[],
   }
 }
 
@@ -74,12 +76,12 @@ export async function createTourRequest(
       tour_id: input.tour_id,
       request_type: input.request_type,
       supplier_name: input.supplier_name,
-      items: input.items as any,
+      items: input.items as unknown,
       note: input.note,
       status: '草稿',
       created_by: userId,
       updated_by: userId,
-    } as any)
+    } as Record<string, unknown>)
     .select()
     .single()
 
@@ -99,7 +101,7 @@ export async function updateTourRequest(
     .update({
       ...input,
       updated_by: userId,
-    } as any)
+    } as Record<string, unknown>)
     .eq('id', requestId)
     .select()
     .single()
@@ -151,7 +153,7 @@ export async function markRequestAsReplied(
       replied_at: new Date().toISOString(),
       replied_by: repliedBy,
       updated_by: userId,
-    } as any)
+    } as Record<string, unknown>)
     .eq('id', requestId)
     .select()
     .single()
@@ -175,7 +177,7 @@ export async function closeTourRequest(
       closed_by: userId,
       close_note: closeNote,
       updated_by: userId,
-    } as any)
+    } as Record<string, unknown>)
     .eq('id', requestId)
     .select()
     .single()

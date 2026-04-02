@@ -1,5 +1,4 @@
 import { X } from 'lucide-react'
-// @ts-nocheck -- tour_requests table missing columns in generated types; pending DB migration
 import { useState, useEffect } from 'react'
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 import {

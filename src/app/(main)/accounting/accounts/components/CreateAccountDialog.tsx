@@ -142,12 +142,13 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess, parentAccou
         is_active: true,
         parent_id: '',
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('新增科目失敗:', error)
-      if (error.code === '23505') {
+      const err = error as { code?: string; message?: string }
+      if (err.code === '23505') {
         toast.error('科目代號已存在')
       } else {
-        toast.error('新增失敗：' + error.message)
+        toast.error('新增失敗：' + (err.message || '未知錯誤'))
       }
     } finally {
       setIsSubmitting(false)

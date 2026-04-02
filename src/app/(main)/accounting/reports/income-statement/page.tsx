@@ -86,7 +86,7 @@ export default function IncomeStatementPage() {
       // 3. 計算各科目餘額
       const balanceMap = new Map<string, number>()
 
-      lines.forEach((line: any) => {
+      ;(lines as Array<{ account_id: string; debit_amount: number; credit_amount: number }>).forEach((line) => {
         const existing = balanceMap.get(line.account_id) || 0
         // 收入：貸方增加（credit - debit）
         // 成本/費用：借方增加（debit - credit）

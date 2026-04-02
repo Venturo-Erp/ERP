@@ -1,4 +1,3 @@
-// @ts-nocheck -- tour_requests table missing columns in generated types; pending DB migration
 import { BaseService, StoreOperations } from '@/core/services/base.service'
 import { PaymentRequest, PaymentRequestItem } from '@/stores/types'
 import { ValidationError } from '@/core/errors/app-errors'
@@ -158,8 +157,8 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
       notes: itemData.notes,
       sort_order: itemData.sort_order,
       tour_request_id: itemData.tour_request_id || null, // 關聯需求單
-      advanced_by: (itemData as Record<string, unknown>).advanced_by || null,
-      advanced_by_name: (itemData as Record<string, unknown>).advanced_by_name || null,
+      advanced_by: ((itemData as Record<string, unknown>).advanced_by as string) || null,
+      advanced_by_name: ((itemData as Record<string, unknown>).advanced_by_name as string) || null,
       // workspace_id auto-set by DB trigger
       created_at: now,
       updated_at: now,

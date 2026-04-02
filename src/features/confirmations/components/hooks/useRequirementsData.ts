@@ -1,4 +1,3 @@
-// @ts-nocheck -- tour_requests table missing columns in generated types; pending DB migration
 /**
  * useRequirementsData - 需求清單資料 Hook
  * 處理需求資料的載入、計算和變更追蹤
@@ -163,7 +162,7 @@ export function useRequirementsData({ tourId, quoteId: propQuoteId }: UseRequire
             )
             .eq('tour_id', tourId)
             .order('created_at', { ascending: true })
-          setExistingRequests((requests as TourRequest[]) || [])
+          setExistingRequests((requests as unknown as TourRequest[]) || [])
         }
 
         setLinkedQuoteId(quoteId)

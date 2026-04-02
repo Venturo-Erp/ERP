@@ -1,4 +1,3 @@
-// @ts-nocheck -- tour_requests table missing columns in generated types; pending DB migration
 /**
  * 團確單相關資料載入 Hook
  *
@@ -9,10 +8,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import type { Itinerary } from '@/stores/types'
-import type { Database } from '@/lib/supabase/types'
-
-// tour_requests Row type
-type TourRequestRow = Database['public']['Tables']['tour_requests']['Row']
+import type { TourRequest as TourRequestRow } from '@/data/entities/tour-requests'
 
 // 報價單項目
 export interface QuoteItem {
@@ -135,7 +131,7 @@ export function useTourSheetData({ tourId, quoteId, departureDate }: UseTourShee
           .neq('status', 'cancelled')
           .order('service_date')
         if (data) {
-          setTourRequests(data)
+          setTourRequests(data as unknown as TourRequestRow[])
         }
       } finally {
         setRequestsLoading(false)

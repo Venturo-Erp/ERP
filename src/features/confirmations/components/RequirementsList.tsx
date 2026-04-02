@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 
@@ -369,8 +368,8 @@ export function RequirementsList({
       const dailyItinerary = itinerary.daily_itinerary as Array<{
         day?: number
         route?: string
-        activities?: any[]
-        meals?: any
+        activities?: Array<Record<string, unknown>>
+        meals?: Record<string, unknown>
         accommodation?: string
       }>
 
@@ -412,7 +411,7 @@ export function RequirementsList({
       for (const item of coreItems) {
         const dn = item.day_number
         if (!dn || !dayMap.has(dn)) continue
-        const title = item.supplierName || item.title || ''
+        const title = item.supplier_name || item.title || ''
         if (!title) continue
         const day = dayMap.get(dn)!
         // 避免重複（飯店早餐等跳過）
@@ -538,10 +537,10 @@ export function RequirementsList({
           // 更新 items 裡第一筆的欄位
           const updatedItems = [...(match.items || [])]
           if (updatedItems.length === 0) updatedItems.push({} as TourRequestItem)
-          ;(updatedItems[0] as any)[field] = value
+          ;(updatedItems[0] as unknown as Record<string, unknown>)[field] = value
           const { error } = await supabase
             .from('tour_requests')
-            .update({ items: updatedItems } as any)
+            .update({ items: updatedItems } as never)
             .eq('id', match.id)
           if (error) throw error
           setExistingRequests(prev =>
@@ -863,11 +862,11 @@ export function RequirementsList({
           if (otherRequests && otherRequests.length > 0) {
             const toReject: string[] = []
             for (const req of otherRequests) {
-              const reqItems = req.items || []
+              const reqItems = (Array.isArray(req.items) ? req.items : []) as Array<Record<string, unknown>>
               const hasOverlap = reqItems.some(
-                (ri: any) =>
-                  (ri.resource_id && confirmedResourceIds.has(ri.resource_id)) ||
-                  (ri.itinerary_item_id && confirmedItineraryItemIds.has(ri.itinerary_item_id))
+                (ri) =>
+                  (ri.resource_id && confirmedResourceIds.has(ri.resource_id as string)) ||
+                  (ri.itinerary_item_id && confirmedItineraryItemIds.has(ri.itinerary_item_id as string))
               )
               if (hasOverlap) {
                 toReject.push(req.id)
@@ -991,11 +990,11 @@ export function RequirementsList({
             code: `REQ-${Date.now()}`,
             request_type: category,
             supplier_name: supplierName,
-            items: requestItems as any,
+            items: requestItems as unknown,
             status: '草稿',
             created_by: user.id,
             updated_by: user.id,
-          } as any)
+          } as never)
           .select()
           .single()
 
@@ -1041,7 +1040,7 @@ export function RequirementsList({
 
   // 找出需要處理的取消通知
   const pendingCancellations = existingRequests.filter(
-    req => req.status === 'rejected' && (req as any).needs_cancellation_notice === true
+    req => req.status === 'rejected' && (req as unknown as Record<string, unknown>).needs_cancellation_notice === true
   )
 
   return (
@@ -1089,7 +1088,7 @@ export function RequirementsList({
                         </button>
                       ) : req.sent_via === 'print' || req.sent_via === 'fax' ? (
                         (() => {
-                          const downloaded = (req as any).cancellation_pdf_downloaded === true
+                          const downloaded = (req as unknown as Record<string, unknown>).cancellation_pdf_downloaded === true
                           const confirmLabel = req.sent_via === 'fax' ? '✓ 已傳真' : '✓ 已完成'
                           
                           return !downloaded ? (
@@ -1341,13 +1340,13 @@ export function RequirementsList({
                                 // 交通：顯示車型
                                 if (cat.key === 'transport') {
                                   const req = findMatchingRequest(item)
-                                  const vehicleDesc = (req?.items?.[0] as any)?.vehicle_desc
+                                  const vehicleDesc = ((req?.items?.[0] as Record<string, unknown> | undefined))?.vehicle_desc as string | undefined
                                   return vehicleDesc || item.title || '-'
                                 }
                                 // 餐食：顯示時間
                                 if (cat.key === 'meal') {
                                   const req = findMatchingRequest(item)
-                                  const mealTime = (req?.items?.[0] as any)?.meal_time
+                                  const mealTime = ((req?.items?.[0] as Record<string, unknown> | undefined))?.meal_time as string | undefined
                                   return mealTime ? `${item.title} ${mealTime}` : item.title || '-'
                                 }
                                 // 其他
@@ -1365,7 +1364,7 @@ export function RequirementsList({
                                   transport: 'transport_note',
                                 }
                                 const noteField = noteFieldMap[cat.key] || 'note'
-                                const noteValue = ((req?.items?.[0] as any)?.[noteField] as string) || req?.note || ''
+                                const noteValue = (((req?.items?.[0] as Record<string, unknown> | undefined))?.[noteField] as string) || req?.note || ''
                                 return (
                                   <span className="text-sm text-morandi-secondary truncate block">
                                     {noteValue || '-'}
@@ -1487,7 +1486,7 @@ export function RequirementsList({
                                                   status: 'draft',
                                                   items: sameHotelDraft.items,
                                                   note: `${item.serviceDate ? item.serviceDate + ' ' : ''}${item.quantity || 1}晚`,
-                                                } as any)
+                                                } as never)
                                               if (dbError) throw dbError
                                               loadData(false)
                                             } catch (err) {
@@ -1686,7 +1685,7 @@ export function RequirementsList({
                                                   _isComparisonGroup: true,
                                                   _comparisonRequests: requests,
                                                   _sourceId: requests[0].source_id,
-                                                } as any,
+                                                } as TourRequest & { _isComparisonGroup: boolean; _comparisonRequests: TourRequest[]; _sourceId: string | null | undefined },
                                               ]
                                             }
                                             return requests
@@ -1701,8 +1700,7 @@ export function RequirementsList({
                                             最新報價
                                           </h4>
                                           <RequirementsDrawer
-                                            requests={latestRequestDisplay as any}
-                                            onRefresh={() => loadData(false)}
+                                            items={latestRequestDisplay as unknown as Parameters<typeof RequirementsDrawer>[0]['items']}
                                           />
                                         </div>
 
@@ -1737,8 +1735,8 @@ export function RequirementsList({
                                                     'tour_request',
                                                     req.status || 'draft'
                                                   )
-                                                  const quotedCost = (req.supplier_response as any)
-                                                    ?.quotedCost
+                                                  const quotedCost = (req.supplier_response as Record<string, unknown> | null)
+                                                    ?.quotedCost as number | undefined
                                                   const time =
                                                     req.replied_at || req.sent_at || req.created_at
 
@@ -1883,10 +1881,10 @@ export function RequirementsList({
             id: tour.id,
             code: tour.code,
             name: tour.name,
-            departure_date: tour.departure_date,
-            return_date: tour.return_date,
-            current_participants: totalPax,
+            departure_date: tour.departure_date ?? undefined,
+            return_date: tour.return_date ?? undefined,
           }}
+          totalPax={totalPax}
           coreItems={coreItems}
           supplierName={selectedTransport.name}
           vehicleDesc=""
@@ -1902,12 +1900,12 @@ export function RequirementsList({
             id: tour.id,
             code: tour.code,
             name: tour.name,
-            departure_date: tour.departure_date,
-            return_date: tour.return_date,
-            outbound_flight: outboundFlight,
-            return_flight: returnFlight,
+            departure_date: tour.departure_date ?? undefined,
+            return_date: tour.return_date ?? undefined,
+            outbound_flight: (outboundFlight ?? undefined) as Record<string, unknown> | undefined,
+            return_flight: (returnFlight ?? undefined) as Record<string, unknown> | undefined,
           }}
-          totalPax={totalPax}
+          totalPax={totalPax ?? 0}
         />
       )}
 
@@ -1923,7 +1921,7 @@ export function RequirementsList({
             id: tour.id,
             code: tour.code,
             name: tour.name,
-            departure_date: tour.departure_date,
+            departure_date: tour.departure_date ?? undefined,
           }}
           totalPax={memberAgeBreakdown?.total || quoteGroupSize || 0}
           accommodations={(() => {
@@ -1961,7 +1959,7 @@ export function RequirementsList({
               checkIn: dateRange,
               roomType: '',
               bedType: '',
-              quantity: '',
+              quantity: 0,
               note: '',
             }]
           })()}
@@ -1981,7 +1979,7 @@ export function RequirementsList({
             id: tour.id,
             code: tour.code,
             name: tour.name,
-            departure_date: tour.departure_date,
+            departure_date: tour.departure_date ?? undefined,
           }}
           totalPax={totalPax}
           meals={coreItems
@@ -1990,7 +1988,7 @@ export function RequirementsList({
               return itemSupplierName === selectedTransport.name && it.category === 'meals'
             })
             .map(it => ({
-              date: it.service_date || (it.day_number != null ? calculateDate(it.day_number) : ''),
+              date: it.service_date || (it.day_number != null ? calculateDate(it.day_number) : '') || '',
               time: it.sub_category
                 ? { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' }[it.sub_category] ||
                   it.sub_category
@@ -2015,7 +2013,7 @@ export function RequirementsList({
             id: tour.id,
             code: tour.code,
             name: tour.name,
-            departure_date: tour.departure_date,
+            departure_date: tour.departure_date ?? undefined,
           }}
           totalPax={totalPax}
           activities={coreItems
@@ -2024,7 +2022,7 @@ export function RequirementsList({
               return itemSupplierName === selectedTransport.name && it.category === 'activities'
             })
             .map(it => ({
-              time: it.service_date || (it.day_number != null ? calculateDate(it.day_number) : ''),
+              time: it.service_date || (it.day_number != null ? calculateDate(it.day_number) : '') || '',
               venue: it.title || '',
               quantity: it.quantity || 1,
               note: it.quote_note || '',
@@ -2039,7 +2037,7 @@ export function RequirementsList({
         <LocalQuoteDialog
           open={showLocalQuoteDialog}
           onClose={() => setShowLocalQuoteDialog(false)}
-          tour={tour}
+          tour={tour as unknown as Parameters<typeof LocalQuoteDialog>[0]['tour']}
           transportDays={transportDays}
           totalPax={totalPax}
           coreItems={coreItems}
@@ -2059,7 +2057,7 @@ export function RequirementsList({
             return_date: tour.return_date || '',
             current_participants: totalPax || 0,
           }}
-          confirmedRequests={existingRequests}
+          confirmedRequests={existingRequests as unknown as Parameters<typeof TeamConfirmationSheet>[0]['confirmedRequests']}
         />
       )}
     </>

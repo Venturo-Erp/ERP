@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 /**
  * SchedulingPage - 資源調度主頁面
@@ -179,7 +178,7 @@ export const SchedulingPage: React.FC = () => {
 
       if (error) throw error
 
-      const requests = (data || []) as TourRequest[]
+      const requests = (data || []) as unknown as TourRequest[]
       setTransportRequests(requests.filter(r => r.category === 'transport'))
       setGuideRequests(requests.filter(r => r.category === 'guide'))
     } catch (error) {
@@ -200,7 +199,7 @@ export const SchedulingPage: React.FC = () => {
 
         const { error } = await supabase
           .from('tour_requests')
-          .update(updateData)
+          .update(updateData as Record<string, unknown>)
           .eq('id', requestId)
 
         if (error) throw error

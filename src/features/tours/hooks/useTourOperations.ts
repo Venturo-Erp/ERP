@@ -374,7 +374,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
           .update({
             is_deleted: true,
             deleted_at: new Date().toISOString(),
-          } as any) // TODO: 重新生成型別後移除 as any
+          } as Record<string, unknown>) // TODO: 重新生成型別後移除 as any
           .eq('id', tour.id)
 
         if (softDeleteError) {

@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { logger } from '@/lib/utils/logger'
 import { handleAICustomerService } from '@/lib/line/ai-customer-service'
 
+/** LINE Webhook event type (minimal) */
+interface LineEvent {
+  type: string
+  source?: { userId?: string; type?: string }
+  message?: { type?: string; text?: string; id?: string; contentProvider?: { type?: string } }
+  replyToken?: string
+  postback?: { data?: string }
+}
+
 const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || ''
 
 /** 取得用戶資料 */
@@ -79,7 +88,7 @@ async function markUserUnfollowed(userId: string) {
 }
 
 /** 處理 follow/unfollow 事件 */
-async function processFollowEvent(event: any) {
+async function processFollowEvent(event: LineEvent) {
   const userId = event.source?.userId
   if (!userId) return
 
@@ -160,7 +169,7 @@ async function processGroupEvent(groupId: string) {
 }
 
 /** 處理客戶 LINE 綁定 */
-async function processCustomerBinding(event: any) {
+async function processCustomerBinding(event: LineEvent) {
   const userId = event.source?.userId
   const text = event.message?.text?.trim() || ''
 
@@ -247,7 +256,7 @@ async function processCustomerBinding(event: any) {
 }
 
 /** 處理員工 LINE 綁定 */
-async function processEmployeeBinding(event: any) {
+async function processEmployeeBinding(event: LineEvent) {
   const userId = event.source?.userId
   const text = event.message?.text?.trim() || ''
 
@@ -336,7 +345,7 @@ async function processEmployeeBinding(event: any) {
 }
 
 /** 背景處理保險 PDF（不阻擋回應） */
-async function processInsurancePDF(event: any) {
+async function processInsurancePDF(event: LineEvent) {
   try {
     // 呼叫 insurance-auto-save API
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
@@ -354,7 +363,7 @@ async function processInsurancePDF(event: any) {
 }
 
 /** 處理 AI 客服訊息 */
-async function handleAIMessage(event: any) {
+async function handleAIMessage(event: LineEvent) {
   try {
     const userId = event.source?.userId
     const userMessage = event.message?.text?.trim()

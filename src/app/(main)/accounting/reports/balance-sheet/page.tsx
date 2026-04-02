@@ -79,7 +79,7 @@ export default function BalanceSheetPage() {
       // 3. 計算各科目餘額
       const balanceMap = new Map<string, number>()
 
-      lines.forEach((line: any) => {
+      ;(lines as Array<{ account_id: string; debit_amount: number; credit_amount: number }>).forEach((line) => {
         const existing = balanceMap.get(line.account_id) || 0
         // 資產：借方增加（debit - credit）
         // 負債/權益：貸方增加（credit - debit）
@@ -150,7 +150,7 @@ export default function BalanceSheetPage() {
       let revenueTotal = 0
       let costExpenseTotal = 0
 
-      plLines.forEach((line: any) => {
+      ;(plLines as Array<{ account_id: string; debit_amount: number; credit_amount: number }>).forEach((line) => {
         if (!plAccountIds.has(line.account_id)) return
 
         const account = plAccounts?.find(a => a.id === line.account_id)

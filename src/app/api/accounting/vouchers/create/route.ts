@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { logger } from '@/lib/utils/logger'
 
@@ -21,7 +22,7 @@ const createVoucherSchema = z.object({
 
 // 生成傳票編號
 async function generateVoucherNo(
-  supabase: any,
+  supabase: SupabaseClient,
   workspaceId: string,
   date: string
 ): Promise<string> {

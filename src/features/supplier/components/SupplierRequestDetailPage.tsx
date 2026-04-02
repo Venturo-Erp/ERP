@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 /**
  * SupplierRequestDetailPage - 供應商委託詳情 + 回覆報價
@@ -30,9 +29,7 @@ import { useAuthStore } from '@/stores'
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
 import { SUPPLIER_LABELS } from './constants/labels'
-import type { Database } from '@/lib/supabase/types'
-
-type TourRequest = Database['public']['Tables']['tour_requests']['Row']
+import type { TourRequest } from '@/data/entities/tour-requests'
 
 /** reply_content 中的項目結構 */
 interface QuoteItem {
@@ -89,26 +86,27 @@ export function SupplierRequestDetailPage({ paramsPromise }: SupplierRequestDeta
           .single()
 
         if (error) throw error
-        setRequest(data)
+        const requestData = data as unknown as TourRequest
+        setRequest(requestData)
 
         // 從 reply_content 取出已有的 items，或建立預設項目
-        const replyContent = data.reply_content as { items?: QuoteItem[] } | null
+        const replyContent = requestData.reply_content as { items?: QuoteItem[] } | null
         if (replyContent?.items && Array.isArray(replyContent.items)) {
           setQuoteItems(replyContent.items)
         } else {
           // 沒有 items 時，用委託本身作為一個項目
           setQuoteItems([
             {
-              name: data.title || data.category || '服務項目',
-              description: data.description || undefined,
-              quantity: data.quantity || 1,
+              name: requestData.title || requestData.category || '服務項目',
+              description: requestData.description || undefined,
+              quantity: requestData.quantity || 1,
               unit: '項',
-              quoted_cost: data.quoted_cost ?? null,
+              quoted_cost: requestData.quoted_cost ?? null,
             },
           ])
         }
 
-        setReplyNote(data.reply_note || '')
+        setReplyNote(requestData.reply_note || '')
       } catch (error) {
         logger.error('載入委託詳情失敗:', error)
         toast({ title: '載入失敗', variant: 'destructive' })
@@ -163,7 +161,7 @@ export function SupplierRequestDetailPage({ paramsPromise }: SupplierRequestDeta
           reply_content: updatedReplyContent as never,
           reply_note: replyNote || null,
           quoted_cost: totalQuotedCost,
-        })
+        } as Record<string, unknown>)
         .eq('id', request.id)
 
       if (error) throw error

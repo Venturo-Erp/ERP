@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 /**
@@ -10,9 +9,9 @@
 import useSWR from 'swr'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores'
-import type { Database } from '@/lib/supabase/types'
+import type { TourRequest } from '@/data/entities/tour-requests'
 
-export type SupplierRequest = Database['public']['Tables']['tour_requests']['Row']
+export type SupplierRequest = TourRequest
 
 export function useSupplierRequests() {
   const { user } = useAuthStore()
@@ -33,7 +32,7 @@ export function useSupplierRequests() {
       throw error
     }
 
-    return data || []
+    return (data || []) as unknown as SupplierRequest[]
   }
 
   const {

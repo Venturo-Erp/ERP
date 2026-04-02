@@ -6,12 +6,10 @@ import React from 'react'
 import { Check } from 'lucide-react'
 import type { Tour, Itinerary } from '@/stores/types'
 import type { TourConfirmationSheet } from '@/types/tour-confirmation-sheet.types'
-import type { Database } from '@/lib/supabase/types'
 import { formatFlightDate } from '../../constants/currency'
 import type { TourOrder, AgeGroups } from '../../hooks/useTourSheetData'
 import { TOUR_INFO_LABELS } from '../../constants/labels'
-
-type TourRequestRow = Database['public']['Tables']['tour_requests']['Row']
+import type { TourRequest as TourRequestRow } from '@/data/entities/tour-requests'
 
 interface FlightInfo {
   airline?: string

@@ -84,7 +84,7 @@ export default function TrialBalancePage() {
       // 3. 計算每個科目的餘額
       const balanceMap = new Map<string, { debit: number; credit: number }>()
 
-      lines.forEach((line: any) => {
+      ;(lines as Array<{ account_id: string; debit_amount: number; credit_amount: number }>).forEach((line) => {
         const existing = balanceMap.get(line.account_id) || { debit: 0, credit: 0 }
         existing.debit += line.debit_amount || 0
         existing.credit += line.credit_amount || 0

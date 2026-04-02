@@ -134,7 +134,7 @@ export function useTodos() {
         ...todoWithoutCreator,
         workspace_id: workspace_id!, // 確保有值
         created_by_legacy: creator,
-      } as any)
+      } as never)
 
       if (error) throw error
 

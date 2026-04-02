@@ -110,7 +110,7 @@ export function QuickAddResource({
 
       const { data, error: dbError } = await supabase
         .from(table)
-        .insert(insertData as any)
+        .insert(insertData as never)
         .select('id, name')
         .single()
 

@@ -1,4 +1,3 @@
-// @ts-nocheck -- tour_requests table missing columns in generated types; pending DB migration
 import { captureException } from '@/lib/error-tracking'
 import { NextRequest } from 'next/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'

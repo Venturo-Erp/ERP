@@ -48,7 +48,7 @@ export function MealQuoteDialog({
     setEditableItems(meals)
   }, [meals])
 
-  const handleItemChange = (idx: number, field: string, value: any) => {
+  const handleItemChange = (idx: number, field: string, value: unknown) => {
     setEditableItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item))
   }
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')

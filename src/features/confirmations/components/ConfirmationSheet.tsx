@@ -120,7 +120,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           .limit(1)
           .maybeSingle()
 
-        const leaderName = (leaderMember as any)?.chinese_name || null
+        const leaderName = ((leaderMember as unknown as Record<string, unknown>))?.chinese_name as string || null
 
         setHeaderInfo({
           code: tour.code,
@@ -526,7 +526,7 @@ function TableRow({
     try {
       const { error } = await supabase
         .from('tour_itinerary_items')
-        .update({ estimated_cost: newValue } as any)
+        .update({ estimated_cost: newValue } as Record<string, unknown>)
         .eq('id', item.id)
 
       if (error) throw error
@@ -553,7 +553,7 @@ function TableRow({
         .update({
           actual_expense: newValue,
           expense_at: newValue != null ? new Date().toISOString() : null,
-        } as any)
+        } as Record<string, unknown>)
         .eq('id', item.id)
 
       if (error) throw error
@@ -609,7 +609,7 @@ function TableRow({
 
       {/* 預計支出：Local 負責顯示標籤，有系統值顯示，沒有則可編輯 */}
       <td className="px-3 py-2">
-        {(item as any).handled_by === 'local' ? (
+        {((item as unknown as Record<string, unknown>).handled_by) === 'local' ? (
           // Local 負責 → 顯示標籤（不需填預算）
           <div className="text-right">
             <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded print:bg-transparent print:text-blue-700">

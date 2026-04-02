@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         .update({
           request_status: 'replied',
           reply_cost: totalCost,
-        } as any)
+        } as Record<string, unknown>)
         .eq('tour_id', tourId)
         .eq('supplier_name', reqData.supplier_name)
         .eq('category', 'accommodation')

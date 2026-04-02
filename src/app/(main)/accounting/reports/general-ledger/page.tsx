@@ -116,7 +116,7 @@ export default function GeneralLedgerPage() {
 
       if (error) throw error
 
-      const ledgerLines = (data || []) as any[]
+      const ledgerLines = (data || []) as unknown as typeof lines
       setLines(ledgerLines)
 
       // 計算總計

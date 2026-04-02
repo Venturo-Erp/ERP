@@ -79,7 +79,7 @@ export default async function TransportQuoteWithRequestPage({
 
   // 判斷是否已提交
   const isSubmitted = request.supplier_response && request.replied_at
-  const quoteData = request.supplier_response as any
+  const quoteData = request.supplier_response as { submitted_at?: string; totalFare?: number; contact?: string; phone?: string; driverName?: string; driverPhone?: string; vehiclePlate?: string; vehicleType?: string; includesParking?: boolean; includesToll?: boolean; includesAccommodation?: boolean; includesTip?: boolean; accommodationFee?: number; tipAmount?: number; supplierNote?: string; [key: string]: unknown } | null
 
   // 計算天數
   const totalDays =
@@ -91,7 +91,7 @@ export default async function TransportQuoteWithRequestPage({
       : null
 
   // 按天分組
-  const grouped = new Map<number, any>()
+  const grouped = new Map<number, { date: string; weekday: string; items: typeof coreItems; hotel: (typeof coreItems)[0] | null }>()
   const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 
   for (const item of coreItems) {
@@ -160,24 +160,24 @@ export default async function TransportQuoteWithRequestPage({
               </thead>
               <tbody>
                 {daySchedule.map((day, idx) => {
-                  const meals: any = { breakfast: '', lunch: '', dinner: '' }
+                  const meals: Record<string, string> = { breakfast: '', lunch: '', dinner: '' }
                   day.items
-                    .filter((i: any) => i.category === 'meals')
-                    .forEach((m: any) => {
+                    .filter((i) => i.category === 'meals')
+                    .forEach((m) => {
                       if (m.sub_category && meals[m.sub_category] !== undefined) {
                         meals[m.sub_category] = m.title || '-'
                       }
                     })
 
                   const activities = day.items
-                    .filter((i: any) => i.category === 'activities')
-                    .map((a: any) => a.title)
+                    .filter((i) => i.category === 'activities')
+                    .map((a) => a.title)
                     .filter(Boolean)
                     .join(' → ')
                   const content =
                     activities ||
                     day.items
-                      .map((i: any) => i.title)
+                      .map((i) => i.title)
                       .filter(Boolean)
                       .join('、')
 
@@ -228,8 +228,8 @@ export default async function TransportQuoteWithRequestPage({
                   <span className="text-xs text-morandi-secondary ml-2">（點擊展開）</span>
                 </summary>
                 <div className="p-4 space-y-3 border-t border-border">
-                  {history.map((h: any) => {
-                    const quoteData = h.supplier_response as any
+                  {(history as Array<{ id: string; replied_at: string; supplier_response: Record<string, unknown> | null }>).map((h) => {
+                    const quoteData = h.supplier_response as { totalFare?: number; contact?: string; includesParking?: boolean; includesToll?: boolean; includesAccommodation?: boolean; includesTip?: boolean; supplierNote?: string } | null
                     return (
                       <div
                         key={h.id}
@@ -281,13 +281,13 @@ export default async function TransportQuoteWithRequestPage({
             )}
 
             {/* 已提交：顯示報價結果 */}
-            {isSubmitted ? (
+            {isSubmitted && quoteData ? (
               <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                 <div className="text-center mb-4">
                   <div className="text-4xl mb-2">✅</div>
                   <h3 className="text-xl font-semibold text-green-900">報價已提交</h3>
                   <p className="text-sm text-green-700 mt-1">
-                    提交時間：{new Date(quoteData.submitted_at).toLocaleString('zh-TW')}
+                    提交時間：{quoteData?.submitted_at ? new Date(quoteData.submitted_at).toLocaleString('zh-TW') : '—'}
                   </p>
                 </div>
 
@@ -313,12 +313,12 @@ export default async function TransportQuoteWithRequestPage({
                       {quoteData.includesToll && <div>✓ 過路費</div>}
                       {quoteData.includesAccommodation && <div>✓ 司機住宿</div>}
                       {quoteData.includesTip && <div>✓ 小費</div>}
-                      {!quoteData.includesAccommodation && quoteData.accommodationFee > 0 && (
+                      {!quoteData.includesAccommodation && (quoteData.accommodationFee ?? 0) > 0 && (
                         <div className="text-amber-700">
                           司機住宿費：${quoteData.accommodationFee} 元
                         </div>
                       )}
-                      {!quoteData.includesTip && quoteData.tipAmount > 0 && (
+                      {!quoteData.includesTip && (quoteData.tipAmount ?? 0) > 0 && (
                         <div className="text-amber-700">小費：${quoteData.tipAmount} 元</div>
                       )}
                     </div>

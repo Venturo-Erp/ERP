@@ -102,12 +102,13 @@ export function EditAccountDialog({
       toast.success('科目更新成功')
       onOpenChange(false)
       onSuccess()
-    } catch (error: any) {
+    } catch (error) {
       logger.error('更新科目失敗:', error)
-      if (error.code === '23505') {
+      const err = error as { code?: string; message?: string }
+      if (err.code === '23505') {
         toast.error('科目代號已存在')
       } else {
-        toast.error('更新失敗：' + error.message)
+        toast.error('更新失敗：' + (err.message || '未知錯誤'))
       }
     } finally {
       setIsSubmitting(false)
@@ -138,12 +139,13 @@ export function EditAccountDialog({
       toast.success('科目已刪除')
       onOpenChange(false)
       onSuccess()
-    } catch (error: any) {
+    } catch (error) {
       logger.error('刪除科目失敗:', error)
-      if (error.code === '23503') {
+      const err = error as { code?: string; message?: string }
+      if (err.code === '23503') {
         toast.error('此科目已被使用，無法刪除')
       } else {
-        toast.error('刪除失敗：' + error.message)
+        toast.error('刪除失敗：' + (err.message || '未知錯誤'))
       }
     } finally {
       setIsSubmitting(false)

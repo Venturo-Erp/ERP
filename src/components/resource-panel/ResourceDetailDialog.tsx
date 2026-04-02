@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Building2, UtensilsCrossed, Save, X, ExternalLink, FileEdit, Database, Phone, Globe, Clock, Timer, Ticket, StickyNote, Trash2, Upload, Loader2, Star } from 'lucide-react'
+import { MapPin, Building2, UtensilsCrossed, Save, X, ExternalLink, FileEdit, Database, Phone, Globe, Clock, Timer, Ticket, StickyNote, Trash2, Upload, Loader2, Star, CheckCircle2 } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { ResourceOverrideDialog } from './ResourceOverrideDialog'
@@ -570,50 +570,88 @@ export function ResourceDetailDialog({
               )}
 
               {/* 按鈕區 */}
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-between gap-2 pt-2">
                 {isEditing ? (
                   <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setIsEditing(false)
-                        // 重置表單
-                        setEditName(String(fullData?.name || ''))
-                        setEditDescription(String(fullData?.description || ''))
-                        setEditAddress(String(fullData?.address || ''))
-                      }}
-                    >
-                      <X size={14} className="mr-1" />
-                      取消
-                    </Button>
-                    <Button size="sm" onClick={handleSave} disabled={saving}>
-                      <Save size={14} className="mr-1" />
-                      {saving ? '儲存中...' : '儲存'}
-                    </Button>
+                    {/* 左側：驗證 + 刪除 */}
+                    <div className="flex gap-2">
+                      {/* 驗證/取消驗證 */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          const newVerified = !fullData?.data_verified
+                          try {
+                            const { error } = await supabase
+                              .from(getTableName())
+                              .update({ data_verified: newVerified, updated_at: new Date().toISOString() })
+                              .eq('id', resource.id)
+                            if (error) throw error
+                            setFullData(prev => prev ? { ...prev, data_verified: newVerified } : null)
+                            toast.success(newVerified ? '已驗證' : '已取消驗證')
+                          } catch {
+                            toast.error('操作失敗')
+                          }
+                        }}
+                      >
+                        <CheckCircle2 size={14} className="mr-1" />
+                        {fullData?.data_verified ? '取消驗證' : '驗證'}
+                      </Button>
+                      {/* 刪除 */}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="text-morandi-secondary hover:text-destructive"
+                      >
+                        <Trash2 size={14} className="mr-1" />
+                        {deleting ? '刪除中...' : '刪除'}
+                      </Button>
+                    </div>
+                    {/* 右側：取消 + 儲存 */}
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setIsEditing(false)
+                          setEditName(String(fullData?.name || ''))
+                          setEditDescription(String(fullData?.description || ''))
+                          setEditAddress(String(fullData?.address || ''))
+                        }}
+                      >
+                        <X size={14} className="mr-1" />
+                        取消
+                      </Button>
+                      <Button size="sm" onClick={handleSave} disabled={saving}>
+                        <Save size={14} className="mr-1" />
+                        {saving ? '儲存中...' : '儲存'}
+                      </Button>
+                    </div>
                   </>
                 ) : (
                   !readOnly && (
-                    <>
-                      {/* 編輯本團按鈕（有 tourItineraryItemId 才顯示） */}
+                    <div className="flex gap-2 ml-auto">
+                      {/* 編輯本團按鈕 */}
                       {tourItineraryItemId && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => setShowOverrideDialog(true)}
                         >
                           <FileEdit size={14} className="mr-1" />
                           編輯本團
                         </Button>
                       )}
-                      {/* 編輯資料庫按鈕（有權限才顯示） */}
+                      {/* 編輯資料庫按鈕 */}
                       {canEditDatabase && (
                         <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
                           <Database size={14} className="mr-1" />
                           編輯資料庫
                         </Button>
                       )}
-                    </>
+                    </div>
                   )
                 )}
               </div>

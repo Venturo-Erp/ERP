@@ -359,26 +359,26 @@ function CreateItineraryDialog({
         }> = []
 
         for (let day = 1; day <= days; day++) {
-          const dayItems = itineraryItems.filter((item: any) => item.day_number === day)
+          const dayItems = itineraryItems.filter((item: Record<string, unknown>) => item.day_number === day)
 
           dailyData.push({
             title:
-              dayItems.find((item: any) => item.resource_type === 'attraction')?.resource_name ||
+              dayItems.find((item: Record<string, unknown>) => item.resource_type === 'attraction')?.resource_name ||
               '',
             breakfast:
               dayItems.find(
-                (item: any) => item.resource_type === 'meal' && item.meal_type === 'breakfast'
+                (item: Record<string, unknown>) => item.resource_type === 'meal' && item.meal_type === 'breakfast'
               )?.resource_name || '',
             lunch:
               dayItems.find(
-                (item: any) => item.resource_type === 'meal' && item.meal_type === 'lunch'
+                (item: Record<string, unknown>) => item.resource_type === 'meal' && item.meal_type === 'lunch'
               )?.resource_name || '',
             dinner:
               dayItems.find(
-                (item: any) => item.resource_type === 'meal' && item.meal_type === 'dinner'
+                (item: Record<string, unknown>) => item.resource_type === 'meal' && item.meal_type === 'dinner'
               )?.resource_name || '',
             accommodation:
-              dayItems.find((item: any) => item.resource_type === 'hotel')?.resource_name || '',
+              dayItems.find((item: Record<string, unknown>) => item.resource_type === 'hotel')?.resource_name || '',
             isSameAccommodation: false,
           })
         }

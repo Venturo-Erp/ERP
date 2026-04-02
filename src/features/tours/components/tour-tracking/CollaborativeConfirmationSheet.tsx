@@ -92,10 +92,10 @@ export function CollaborativeConfirmationSheet({
 
       mutate()
       toast({ title: '✅ 已更新' })
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: '更新失敗',
-        description: error.message,
+        description: (error as Error).message,
         variant: 'destructive',
       })
     }

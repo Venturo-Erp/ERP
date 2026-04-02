@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 /**
@@ -11,9 +10,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { TOUR_REQUEST_ITEMS_LABELS } from '../../constants/labels'
 import { logger } from '@/lib/utils/logger'
-import type { Database } from '@/lib/supabase/types'
-
-type TourRequest = Database['public']['Tables']['tour_requests']['Row']
+import type { TourRequest } from '@/data/entities/tour-requests'
 
 export interface TourRequestItem {
   id: string
@@ -92,7 +89,7 @@ export function useTourRequestItems(tourId: string | null): UseTourRequestItemsR
         throw fetchError
       }
 
-      const transformedItems = (data || [])
+      const transformedItems = ((data || []) as unknown as TourRequest[])
         .map(transformToRequestItem)
         .filter((item): item is TourRequestItem => item !== null)
 

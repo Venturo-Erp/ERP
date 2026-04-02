@@ -199,12 +199,12 @@ function splitLargeGroups(groups: PayForGroup[], maxSize = 5): PayForGroup[] {
     if (isFirstGroupOfPayee) {
       // 計算該收款人的所有行數
       const totalRows = pg.indices.reduce((sum, gIdx) => sum + result[gIdx].items.length, 0)
-      ;(group as any).subtotalRowSpan = totalRows
+      ;((group as unknown as Record<string, unknown>).subtotalRowSpan as number) = totalRows
       // 強制設定 showTotal=true（確保顯示小計）
       group.showTotal = true
       group.total = pg.total
     } else {
-      ;(group as any).subtotalRowSpan = 0 // 不顯示小計欄位
+      ;((group as unknown as Record<string, unknown>).subtotalRowSpan as number) = 0 // 不顯示小計欄位
     }
   })
 
@@ -434,7 +434,7 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                   group.items.map((item, itemIdx) => {
                     const isFirstInGroup = itemIdx === 0
                     const { payee: groupPayee, supplier: groupSupplier } = splitPayFor(group.payFor)
-                    const subtotalRowSpan = (group as any).subtotalRowSpan || 0
+                    const subtotalRowSpan = ((group as unknown as Record<string, unknown>).subtotalRowSpan as number) || 0
                     const showSubtotalCell = subtotalRowSpan > 0 && isFirstInGroup
 
                     return (
@@ -667,7 +667,7 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                   group.items.map((item, itemIdx) => {
                     const isFirstInGroup = itemIdx === 0
                     const { payee: groupPayee, supplier: groupSupplier } = splitPayFor(group.payFor)
-                    const subtotalRowSpan = (group as any).subtotalRowSpan || 0
+                    const subtotalRowSpan = ((group as unknown as Record<string, unknown>).subtotalRowSpan as number) || 0
                     const showSubtotalCell = subtotalRowSpan > 0 && isFirstInGroup
                     return (
                       <tr key={`company-${groupIdx}-${itemIdx}`}>

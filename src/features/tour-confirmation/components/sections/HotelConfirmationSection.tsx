@@ -1,11 +1,10 @@
-// @ts-nocheck -- tour_requests table missing columns in generated types; pending DB migration
 /**
  * 飯店確認區塊
  */
 
 import React from 'react'
 import type { Itinerary } from '@/stores/types'
-import type { Database } from '@/lib/supabase/types'
+import type { TourRequest as TourRequestEntity } from '@/data/entities/tour-requests'
 import type { TourRoom, QuoteRoomItem } from '../../hooks/useTourSheetData'
 import {
   CONFIRMATION_HEADER_LABELS,
@@ -13,8 +12,6 @@ import {
   HOTEL_CONFIRMATION_SECTION_LABELS,
   TOUR_CONFIRMATION_SHEET_PAGE_LABELS,
 } from '../../constants/labels'
-
-type TourRequestRow = Database['public']['Tables']['tour_requests']['Row']
 
 interface NightlyAccommodation {
   nightNumber: number
@@ -26,7 +23,7 @@ interface NightlyAccommodation {
 
 interface HotelConfirmationSectionProps {
   itinerary: Itinerary
-  tourRequests: TourRequestRow[]
+  tourRequests: TourRequestEntity[]
   tourRooms: TourRoom[]
   quoteRoomItems: QuoteRoomItem[]
 }

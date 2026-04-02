@@ -92,12 +92,13 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
         payee_name: '',
         memo: '',
       })
-    } catch (error: any) {
+    } catch (error) {
       logger.error('新增票據失敗:', error)
-      if (error.code === '23505') {
+      const err = error as { code?: string; message?: string }
+      if (err.code === '23505') {
         toast.error('票據號碼已存在')
       } else {
-        toast.error('新增失敗：' + error.message)
+        toast.error('新增失敗：' + (err.message || '未知錯誤'))
       }
     } finally {
       setIsSubmitting(false)

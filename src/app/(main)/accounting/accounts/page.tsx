@@ -125,7 +125,7 @@ export default function AccountsPage() {
 
       if (error) throw error
       // 補上 is_favorite 預設值（DB 可能沒有這個欄位）
-      setAccounts((data || []).map(d => ({ ...d, is_favorite: (d as any).is_favorite ?? false })))
+      setAccounts((data || []).map(d => ({ ...d, is_favorite: (d as Record<string, unknown>).is_favorite as boolean ?? false })))
     } catch (error) {
       logger.error('載入科目失敗:', error)
     } finally {
@@ -137,7 +137,7 @@ export default function AccountsPage() {
     try {
       const { error } = await supabase
         .from('chart_of_accounts')
-        .update({ is_favorite: !currentFavorite } as any)
+        .update({ is_favorite: !currentFavorite } as Record<string, unknown>)
         .eq('id', accountId)
 
       if (error) throw error
@@ -340,7 +340,7 @@ export default function AccountsPage() {
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         onSuccess={loadAccounts}
-        account={selectedAccount as any}
+        account={selectedAccount as unknown as Parameters<typeof EditAccountDialog>[0]['account']}
       />
     </>
   )

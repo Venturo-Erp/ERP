@@ -58,10 +58,10 @@ export function RejectQuoteDialog({
 
       onOpenChange(false)
       onSuccess()
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: '操作失敗',
-        description: error.message,
+        description: (error as Error).message,
         variant: 'destructive',
       })
     } finally {

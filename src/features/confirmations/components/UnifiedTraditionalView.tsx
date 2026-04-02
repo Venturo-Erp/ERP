@@ -10,10 +10,10 @@ interface UnifiedTraditionalViewProps {
   contact?: string
   phone?: string
   fax?: string
-  items: any[]
+  items: Array<Record<string, unknown>>
   note: string
   setNote: (note: string) => void
-  onItemChange?: (idx: number, field: string, value: any) => void
+  onItemChange?: (idx: number, field: string, value: unknown) => void
   onInfoChange?: (field: 'contact' | 'phone' | 'fax', value: string) => void
 }
 
@@ -130,7 +130,7 @@ export function UnifiedTraditionalView({
 
 // 住宿表 - Excel 風格
 // 欄位：入住日期 | 需求房型 | 床型安排 | 數量 | 報價（廠商回填）
-function AccommodationTable({ items }: { items: any[] }) {
+function AccommodationTable({ items }: { items: Array<Record<string, unknown>> }) {
   return (
     <div className="mb-6">
       <table className="w-full border-collapse text-sm table-fixed">
@@ -146,10 +146,10 @@ function AccommodationTable({ items }: { items: any[] }) {
         <tbody>
           {items.map((item, idx) => (
             <tr key={idx}>
-              <td className="border border-[#999] px-3 py-2">{item.checkIn || ''}</td>
-              <td className="border border-[#999] px-3 py-2">{item.roomType || ''}</td>
-              <td className="border border-[#999] px-3 py-2">{item.bedType || ''}</td>
-              <td className="border border-[#999] px-3 py-2 text-center">{item.quantity || ''}</td>
+              <td className="border border-[#999] px-3 py-2">{String(item.checkIn || '')}</td>
+              <td className="border border-[#999] px-3 py-2">{String(item.roomType || '')}</td>
+              <td className="border border-[#999] px-3 py-2">{String(item.bedType || '')}</td>
+              <td className="border border-[#999] px-3 py-2 text-center">{String(item.quantity || '')}</td>
               <td className="border border-[#999] px-3 py-2 text-right"></td>
             </tr>
           ))}
@@ -164,7 +164,7 @@ function AccommodationTable({ items }: { items: any[] }) {
 
 // 餐食表 - Excel 風格
 // 欄位：用餐日期 | 餐別 | 數量 | 報價（廠商回填）
-function MealTable({ items, onItemChange }: { items: any[]; onItemChange?: (idx: number, field: string, value: any) => void }) {
+function MealTable({ items, onItemChange }: { items: Array<Record<string, unknown>>; onItemChange?: (idx: number, field: string, value: unknown) => void }) {
   return (
     <div className="mb-6">
       <table className="w-full border-collapse text-sm table-fixed">
@@ -180,13 +180,13 @@ function MealTable({ items, onItemChange }: { items: any[]; onItemChange?: (idx:
         <tbody>
           {items.map((item, idx) => (
             <tr key={idx}>
-              <td className="border border-[#999] px-3 py-2">{item.date || ''}</td>
+              <td className="border border-[#999] px-3 py-2">{String(item.date || '')}</td>
               <td className="border border-[#999] px-1 py-1">
-                <input type="text" value={item.time || ''} onChange={e => onItemChange?.(idx, 'time', e.target.value)} placeholder="" className="w-full px-2 py-1 bg-transparent outline-none focus:ring-1 focus:ring-morandi-gold rounded" />
+                <input type="text" value={String(item.time || '')} onChange={e => onItemChange?.(idx, 'time', e.target.value)} placeholder="" className="w-full px-2 py-1 bg-transparent outline-none focus:ring-1 focus:ring-morandi-gold rounded" />
               </td>
-              <td className="border border-[#999] px-3 py-2">{item.venue || item.title || ''}</td>
+              <td className="border border-[#999] px-3 py-2">{String(item.venue || item.title || '')}</td>
               <td className="border border-[#999] px-1 py-1">
-                <input type="number" value={item.quantity || ''} onChange={e => onItemChange?.(idx, 'quantity', parseInt(e.target.value) || 0)} className="w-full px-2 py-1 bg-transparent outline-none focus:ring-1 focus:ring-morandi-gold rounded text-center" />
+                <input type="number" value={String(item.quantity || '')} onChange={e => onItemChange?.(idx, 'quantity', parseInt(e.target.value) || 0)} className="w-full px-2 py-1 bg-transparent outline-none focus:ring-1 focus:ring-morandi-gold rounded text-center" />
               </td>
               <td className="border border-[#999] px-3 py-2 text-right"></td>
             </tr>
@@ -202,7 +202,7 @@ function MealTable({ items, onItemChange }: { items: any[]; onItemChange?: (idx:
 
 // 交通表 - Excel 風格
 // 欄位：日期 | 路線 | 數量 | 報價（廠商回填）| 備註
-function TransportTable({ items }: { items: any[] }) {
+function TransportTable({ items }: { items: Array<Record<string, unknown>> }) {
   return (
     <div className="mb-6">
       <table className="w-full border-collapse text-sm table-fixed">
@@ -218,11 +218,11 @@ function TransportTable({ items }: { items: any[] }) {
         <tbody>
           {items.map((item, idx) => (
             <tr key={idx}>
-              <td className="border border-[#999] px-3 py-2">{item.date || ''}</td>
-              <td className="border border-[#999] px-3 py-2">{item.route || ''}</td>
-              <td className="border border-[#999] px-3 py-2 text-center">{item.quantity || ''}</td>
+              <td className="border border-[#999] px-3 py-2">{String(item.date || '')}</td>
+              <td className="border border-[#999] px-3 py-2">{String(item.route || '')}</td>
+              <td className="border border-[#999] px-3 py-2 text-center">{String(item.quantity || '')}</td>
               <td className="border border-[#999] px-3 py-2 text-right"></td>
-              <td className="border border-[#999] px-3 py-2">{item.note || ''}</td>
+              <td className="border border-[#999] px-3 py-2">{String(item.note || '')}</td>
             </tr>
           ))}
           {items.length === 0 && (
@@ -236,7 +236,7 @@ function TransportTable({ items }: { items: any[] }) {
 
 // 活動表 - Excel 風格
 // 欄位：日期 | 場地名稱 | 數量 | 報價（廠商回填）
-function ActivityTable({ items, onItemChange }: { items: any[]; onItemChange?: (idx: number, field: string, value: any) => void }) {
+function ActivityTable({ items, onItemChange }: { items: Array<Record<string, unknown>>; onItemChange?: (idx: number, field: string, value: unknown) => void }) {
   return (
     <div className="mb-6">
       <table className="w-full border-collapse text-sm table-fixed">
@@ -251,10 +251,10 @@ function ActivityTable({ items, onItemChange }: { items: any[]; onItemChange?: (
         <tbody>
           {items.map((item, idx) => (
             <tr key={idx}>
-              <td className="border border-[#999] px-3 py-2">{item.time || item.date || ''}</td>
-              <td className="border border-[#999] px-3 py-2">{item.venue || ''}</td>
+              <td className="border border-[#999] px-3 py-2">{String(item.time || item.date || '')}</td>
+              <td className="border border-[#999] px-3 py-2">{String(item.venue || '')}</td>
               <td className="border border-[#999] px-1 py-1">
-                <input type="number" value={item.quantity || ''} onChange={e => onItemChange?.(idx, 'quantity', parseInt(e.target.value) || 0)} className="w-full px-2 py-1 bg-transparent outline-none focus:ring-1 focus:ring-morandi-gold rounded text-center" />
+                <input type="number" value={String(item.quantity || '')} onChange={e => onItemChange?.(idx, 'quantity', parseInt(e.target.value) || 0)} className="w-full px-2 py-1 bg-transparent outline-none focus:ring-1 focus:ring-morandi-gold rounded text-center" />
               </td>
               <td className="border border-[#999] px-3 py-2 text-right"></td>
             </tr>
@@ -269,7 +269,7 @@ function ActivityTable({ items, onItemChange }: { items: any[]; onItemChange?: (
 }
 
 // 取消單表
-function CancellationTable({ items }: { items: any[] }) {
+function CancellationTable({ items }: { items: Array<Record<string, unknown>> }) {
   return (
     <div className="mb-6">
       <div className="bg-red-50 border-2 border-red-300 rounded-lg p-4 mb-4">
@@ -288,11 +288,11 @@ function CancellationTable({ items }: { items: any[] }) {
         <tbody>
           {items.map((item, idx) => (
             <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-red-50'}>
-              <td className="border border-red-300 px-3 py-2 font-medium">{item.name || '—'}</td>
-              <td className="border border-red-300 px-3 py-2">{item.date || '—'}</td>
-              <td className="border border-red-300 px-3 py-2">{item.quantity || '—'}</td>
+              <td className="border border-red-300 px-3 py-2 font-medium">{String(item.name || '—')}</td>
+              <td className="border border-red-300 px-3 py-2">{String(item.date || '—')}</td>
+              <td className="border border-red-300 px-3 py-2">{String(item.quantity || '—')}</td>
               <td className="border border-red-300 px-3 py-2 text-morandi-secondary">
-                {item.note || ''}
+                {String(item.note || '')}
               </td>
             </tr>
           ))}

@@ -38,16 +38,17 @@ export async function callOcrSpace(base64Image: string, apiKey: string): Promise
     }
 
     return data.ParsedResults?.[0]?.ParsedText || ''
-  } catch (error: any) {
+  } catch (error) {
     clearTimeout(timeoutId)
+    const err = error as { name?: string; message?: string }
 
     // 🔧 處理所有 OCR.space 錯誤：返回空字串讓 Google Vision 接手
-    if (error.name === 'AbortError') {
+    if (err.name === 'AbortError') {
       logger.warn('OCR.space fetch timeout (30s), 改用 Google Vision')
-    } else if (error.message?.includes('E101') || error.message?.includes('Timed out')) {
+    } else if (err.message?.includes('E101') || err.message?.includes('Timed out')) {
       logger.warn('OCR.space API timeout, 改用 Google Vision')
     } else {
-      logger.warn('OCR.space 辨識失敗:', error.message, '改用 Google Vision')
+      logger.warn('OCR.space 辨識失敗:', err.message, '改用 Google Vision')
     }
 
     // 所有錯誤都返回空字串，不中斷流程

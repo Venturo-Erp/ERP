@@ -79,11 +79,11 @@ export async function createRequestFromQuote(input: {
         code: `REQ-${quote.code || Date.now()}-${requestIds.length + 1}`,
         request_type: group.request_type,
         supplier_name: group.supplier_name,
-        items: group.items as any,
+        items: group.items as unknown,
         status: '草稿',
         created_by: input.userId,
         updated_by: input.userId,
-      } as any)
+      } as Record<string, unknown>)
       .select()
       .single()
 

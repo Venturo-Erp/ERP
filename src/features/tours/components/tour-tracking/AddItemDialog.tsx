@@ -86,10 +86,10 @@ export function AddItemDialog({
 
       onOpenChange(false)
       onSuccess()
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: '新增失敗',
-        description: error.message,
+        description: (error as Error).message,
         variant: 'destructive',
       })
     } finally {

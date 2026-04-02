@@ -33,8 +33,8 @@ interface TicketRequestDialogProps {
     name: string
     departure_date?: string
     return_date?: string
-    outbound_flight?: any
-    return_flight?: any
+    outbound_flight?: Record<string, unknown> | null
+    return_flight?: Record<string, unknown> | null
   } | null
   totalPax: number
 }
@@ -71,7 +71,7 @@ export function TicketRequestDialog({
   }, [tour?.id, open])
 
   // 格式化航班
-  const formatFlight = (flight: any) => {
+  const formatFlight = (flight: Record<string, unknown> | null | undefined) => {
     if (!flight) return '未設定'
     const f = Array.isArray(flight) ? flight[0] : flight
     return f?.flightNumber || '未設定'
@@ -166,8 +166,8 @@ export function TicketRequestDialog({
         .eq('id', selectedEmployee)
         .single()
       
-      const empName = (empData as any)?.display_name || (empData as any)?.chinese_name || '同事'
-      const lineUserId = (empData as any)?.line_user_id
+      const empName = (empData as Record<string, unknown>)?.display_name || (empData as Record<string, unknown>)?.chinese_name || '同事'
+      const lineUserId = (empData as Record<string, unknown>)?.line_user_id
 
       // 發送頻道通知
       try {
@@ -273,9 +273,9 @@ export function TicketRequestDialog({
               <div className="space-y-2">
                 <Label>指派給</Label>
                 <Combobox
-                  options={employees.map((e: any) => ({
+                  options={employees.map((e) => ({
                     value: e.id,
-                    label: e.display_name || e.chinese_name || e.id,
+                    label: (e as unknown as Record<string, unknown>).display_name as string || (e as unknown as Record<string, unknown>).chinese_name as string || e.id,
                   }))}
                   value={selectedEmployee}
                   onChange={setSelectedEmployee}
