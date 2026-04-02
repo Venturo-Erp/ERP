@@ -28,7 +28,8 @@ import { usePrintLogo } from '@/lib/print'
 import { useCompanyInfo } from '@/hooks/useCompanyInfo'
 import { supabase } from '@/lib/supabase/client'
 import { dynamicFrom } from '@/lib/supabase/typed-client'
-import { useAuthStore, useEmployeeStore } from '@/stores'
+import { useAuthStore } from '@/stores'
+import { useEmployeesSlim } from '@/data'
 import { useToast } from '@/components/ui/use-toast'
 import { logger } from '@/lib/utils/logger'
 import type { Tour } from '@/stores/types'
@@ -139,7 +140,7 @@ export function TourRequestFormDialog({
   const { user } = useAuthStore()
   const { toast } = useToast()
   const { subtitle: companySubtitle } = useCompanyInfo()
-  const { items: employees, fetchAll: fetchEmployees } = useEmployeeStore()
+  const { items: employees } = useEmployeesSlim()
 
   // 編輯狀態的項目（日期 fallback：用 departure_date + index 推算）
   const [items, setItems] = useState<RequestItem[]>(() => {
@@ -245,23 +246,19 @@ export function TourRequestFormDialog({
     fetchWorkspaces()
   }, [isOpen, user?.workspace_id])
 
-  // 載入員工清單並預設助理為當前登入者
+  // 預設助理為當前登入者
   useEffect(() => {
     if (isOpen) {
-      fetchEmployees()
-      // 預設助理為當前登入者
       const userName = user?.chinese_name || user?.display_name || user?.name || ''
       if (userName && !companyInfo.assistant) {
         setCompanyInfo(prev => ({ ...prev, assistant: userName }))
       }
     }
-  }, [isOpen, fetchEmployees, user?.chinese_name, user?.display_name, user?.name])
+  }, [isOpen, user?.chinese_name, user?.display_name, user?.name])
 
   // 員工選單：自己排最前面，其他依員工編號排序
   const sortedEmployees = React.useMemo(() => {
-    const filtered = employees.filter(
-      emp => emp.employee_type !== 'bot' && emp.workspace_id === user?.workspace_id
-    )
+    const filtered = employees.filter(emp => emp.employee_type !== 'bot')
     const currentUserName = user?.chinese_name || user?.display_name || user?.name || ''
     return filtered.sort((a, b) => {
       const aIsMe = a.chinese_name === currentUserName || a.display_name === currentUserName
@@ -271,7 +268,7 @@ export function TourRequestFormDialog({
       // 依員工編號排序
       return (a.employee_number || '').localeCompare(b.employee_number || '')
     })
-  }, [employees, user?.workspace_id, user?.chinese_name, user?.display_name, user?.name])
+  }, [employees, user?.chinese_name, user?.display_name, user?.name])
 
   // 取得欄位設定
   const columns = CATEGORY_COLUMNS[category] || CATEGORY_COLUMNS.other

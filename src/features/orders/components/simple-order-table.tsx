@@ -8,7 +8,7 @@ import { deleteOrder } from '@/data'
 import { recalculateParticipants } from '@/features/tours/services/tour-stats.service'
 import { recalculateReceiptStats } from '@/features/finance/payments/services/receipt-core.service'
 import { logger } from '@/lib/utils/logger'
-import { User, Trash2, FileText, Pencil, Stamp } from 'lucide-react'
+import { User, Trash2, FileText, Pencil, Stamp, Plus } from 'lucide-react'
 import { CurrencyCell } from '@/components/table-cells'
 import { cn } from '@/lib/utils'
 import { Order, Tour } from '@/stores/types'
@@ -28,6 +28,7 @@ interface SimpleOrderTableProps {
   onQuickInvoice?: (order: Order) => void
   onEdit?: (order: Order) => void
   onQuickVisa?: (order: Order) => void
+  onAdd?: () => void
 }
 
 export const SimpleOrderTable = React.memo(function SimpleOrderTable({
@@ -40,6 +41,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
   onQuickInvoice,
   onEdit,
   onQuickVisa,
+  onAdd,
 }: SimpleOrderTableProps) {
   const router = useRouter()
   const workspaceId = useAuthStore(state => state.user?.workspace_id) || ''
@@ -123,6 +125,14 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       striped
       showFilters={false}
       actionsWidth="230px"
+      actionsHeader={
+        onAdd ? (
+          <Button variant="default" size="sm" className="h-7 px-2 text-xs" onClick={onAdd}>
+            <Plus size={12} className="mr-1" />
+            {COMP_ORDERS_LABELS.新增}
+          </Button>
+        ) : undefined
+      }
       emptyState={
         <div className="flex flex-col items-center justify-center py-12 text-morandi-secondary">
           <FileText size={32} className="mb-2 opacity-30" />

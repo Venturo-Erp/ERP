@@ -1007,27 +1007,28 @@ export function OrderMembersExpandable({
           </span>
         </div>
         <div className="flex items-center gap-1">
-          {/* PNR 配對按鈕：在 tour 和 order 模式都顯示 */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2"
-            onClick={() => setShowPnrMatchDialog(true)}
-          >
-            <Plane size={14} className="mr-1" />
-            {COMP_ORDERS_LABELS.PNR_配對}
-          </Button>
-          {/* 分配按鈕（分房、分車、分桌）：僅在 tour 模式顯示 */}
+          {/* PNR 配對、分配按鈕：僅在 tour 模式顯示（訂單模式不做 PNR 配對） */}
           {mode === 'tour' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-2"
-              onClick={() => roomVehicle.setShowRoomManager(true)}
-            >
-              <Hotel size={14} className="mr-1" />
-              {COMP_ORDERS_LABELS.分配}
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2"
+                onClick={() => setShowPnrMatchDialog(true)}
+              >
+                <Plane size={14} className="mr-1" />
+                {COMP_ORDERS_LABELS.PNR_配對}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2"
+                onClick={() => roomVehicle.setShowRoomManager(true)}
+              >
+                <Hotel size={14} className="mr-1" />
+                {COMP_ORDERS_LABELS.分配}
+              </Button>
+            </>
           )}
           <Button
             variant="ghost"

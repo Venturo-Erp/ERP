@@ -12,7 +12,7 @@ import { createEntityHook } from '../core/createEntityHook'
 import { CACHE_PRESETS, type ListResult } from '../core/types'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
-import { canCrossWorkspace, type UserRole } from '@/lib/rbac-config'
+import type { UserRole } from '@/lib/rbac-config'
 import type { Tour } from '@/stores/types'
 
 // ============================================
@@ -86,8 +86,8 @@ export function useToursForCalendar(dateRange: DateRange | null): ListResult<Tou
         )
         .order('departure_date', { ascending: false })
 
-      // 套用 workspace 過濾（非 super_admin）
-      if (!canCrossWorkspace(userRole) && workspaceId) {
+      // 套用 workspace 過濾
+      if (workspaceId) {
         query = query.or(`workspace_id.eq.${workspaceId},workspace_id.is.null`)
       }
 

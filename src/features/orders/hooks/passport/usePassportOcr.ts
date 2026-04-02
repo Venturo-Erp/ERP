@@ -16,6 +16,8 @@ import { COMP_ORDERS_LABELS } from '../../constants/labels'
 interface OcrCustomerData {
   name?: string
   english_name?: string
+  passport_name?: string
+  passport_name_print?: string
   passport_romanization?: string
   passport_number?: string
   passport_expiry?: string | null
@@ -35,6 +37,7 @@ interface OcrApiResponse {
   successful: number
   total: number
   googleVisionError?: string | null
+  chineseNameWarning?: string | null
 }
 
 interface ExistingMember {
@@ -136,7 +139,7 @@ export function usePassportOcr(): UsePassportOcrReturn {
         return existingMembers.find(m => m[field] === value)
       }
 
-      // 1. 護照號碼完全符合 → 需要使用者確認是否更新
+      // 1. 護照號碼完全符合 → 確認是否更新照片和資料
       if (passportNumber && existingPassports.has(passportNumber)) {
         const matched = findMatchedMember('passport_number', passportNumber)
         const displayName = chineseName || matched?.chinese_name || ''
@@ -150,18 +153,21 @@ export function usePassportOcr(): UsePassportOcrReturn {
         }
       }
 
-      // 2. 身分證號完全符合 → 自動跳過（完全相同的人）
+      // 2. 身分證號完全符合 → 確認是否更新照片（新照片可能更清楚）
       if (idNumber && existingIdNumbers.has(idNumber)) {
         const matched = findMatchedMember('id_number', idNumber)
+        const displayName = chineseName || matched?.chinese_name || ''
         return {
-          isDuplicate: true,
+          isDuplicate: false,
+          needsConfirmation: true,
           reason: COMP_ORDERS_LABELS.身分證號重複,
           matchType: 'exact',
           matchedMember: matched,
+          confirmMessage: `${displayName} 已存在（身分證號相同）。是否更新護照照片？（新照片可能更清楚）`,
         }
       }
 
-      // 3. 姓名+生日完全符合 → 需要使用者確認（可能換了新護照）
+      // 3. 姓名+生日完全符合 → 確認是否更新（可能換了新護照）
       if (nameBirthKey && existingNameBirthKeys.has(nameBirthKey)) {
         const matched = existingMembers.find(
           m => m.chinese_name === cleanChineseName && m.birth_date === birthDate
@@ -177,17 +183,20 @@ export function usePassportOcr(): UsePassportOcrReturn {
         }
       }
 
-      // 4. 只有姓名符合（無生日比對） → 提示使用者選擇
+      // 4. 只有姓名符合（無生日比對） → 確認是否為同一人並更新
       if (cleanChineseName) {
         const nameOnlyMatch = existingMembers.find(
           m => m.chinese_name === cleanChineseName && !m.birth_date
         )
         if (nameOnlyMatch) {
+          const displayName = chineseName || nameOnlyMatch.chinese_name || ''
           return {
-            isDuplicate: false, // 不算重複，但需要使用者確認
+            isDuplicate: false,
+            needsConfirmation: true,
             reason: COMP_ORDERS_LABELS.發現同名成員_無生日資料,
             matchType: 'name_only',
             matchedMember: nameOnlyMatch,
+            confirmMessage: `${displayName} 已存在（同名，無生日資料）。是否為同一人？要更新嗎？`,
           }
         }
       }

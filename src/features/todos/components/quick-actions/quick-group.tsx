@@ -261,18 +261,6 @@ export function QuickGroup({ onSubmit }: QuickGroupProps) {
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="isSpecial-quick"
-            checked={newTour.isSpecial}
-            onChange={e => setNewTour(prev => ({ ...prev, isSpecial: e.target.checked }))}
-            className="rounded"
-          />
-          <label htmlFor="isSpecial-quick" className="text-sm text-morandi-primary">
-            {QUICK_ACTIONS_LABELS.LABEL_4558}
-          </label>
-        </div>
       </div>
 
       {/* 訂單資訊（選填） */}

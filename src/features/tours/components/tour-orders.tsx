@@ -23,7 +23,6 @@ import { AddOrderForm, type OrderFormData } from '@/features/orders/components/a
 import { OrderEditDialog } from '@/features/orders/components/order-edit-dialog'
 import { createOrder } from '@/data'
 import { recalculateParticipants } from '@/features/tours/services/tour-stats.service'
-import { Plus } from 'lucide-react'
 import type { Order as OrderType } from '@/types/order.types'
 import { logger } from '@/lib/utils/logger'
 import { COMP_TOURS_LABELS, TOUR_ORDERS_LABELS } from '../constants/labels'
@@ -184,13 +183,7 @@ export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
 
   return (
     <>
-      <div className="flex flex-col h-full gap-3">
-        <div className="flex justify-end">
-          <Button size="sm" onClick={() => setAddDialogOpen(true)}>
-            <Plus size={14} className="mr-1" />
-            {TOUR_ORDERS_LABELS.新增訂單}
-          </Button>
-        </div>
+      <div className="flex flex-col h-full">
         <SimpleOrderTable
           orders={orders as OrderType[]}
           showTourInfo={false}
@@ -198,6 +191,7 @@ export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
           onQuickPaymentRequest={handleQuickPaymentRequest}
           onQuickInvoice={handleQuickInvoice}
           onEdit={handleEdit}
+          onAdd={() => setAddDialogOpen(true)}
         />
       </div>
 

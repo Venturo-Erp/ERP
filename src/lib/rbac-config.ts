@@ -24,7 +24,8 @@ export interface RoleConfig {
   color: string
   permissions: string[] // 該角色預設擁有的功能權限
   canManageWorkspace: boolean
-  canCrossWorkspace: boolean
+  /** @deprecated 跨租戶功能已移除，永遠為 false */
+  canCrossWorkspace?: boolean
 }
 
 /**
@@ -38,7 +39,7 @@ export const ROLES: Record<UserRole, RoleConfig> = {
     color: 'text-morandi-gold bg-morandi-gold/10 border-morandi-gold/20',
     permissions: ['*'], // ✅ 所有權限（功能全開）
     canManageWorkspace: true,
-    canCrossWorkspace: false, // ❌ 不能跨 workspace
+    canCrossWorkspace: false, // deprecated // ❌ 不能跨 workspace
   },
 
   tour_leader: {
@@ -54,7 +55,7 @@ export const ROLES: Record<UserRole, RoleConfig> = {
       'workspace', // 工作空間
     ],
     canManageWorkspace: false,
-    canCrossWorkspace: false,
+    canCrossWorkspace: false, // deprecated
   },
 
   sales: {
@@ -81,7 +82,7 @@ export const ROLES: Record<UserRole, RoleConfig> = {
       'design', // 設計管理
     ],
     canManageWorkspace: false,
-    canCrossWorkspace: false,
+    canCrossWorkspace: false, // deprecated
   },
 
   accountant: {
@@ -109,7 +110,7 @@ export const ROLES: Record<UserRole, RoleConfig> = {
       'reports', // 報表管理
     ],
     canManageWorkspace: false,
-    canCrossWorkspace: false,
+    canCrossWorkspace: false, // deprecated
   },
 
   assistant: {
@@ -126,7 +127,7 @@ export const ROLES: Record<UserRole, RoleConfig> = {
       'todos', // 待辦事項
     ],
     canManageWorkspace: false,
-    canCrossWorkspace: false,
+    canCrossWorkspace: false, // deprecated
   },
 
   controller: {
@@ -147,7 +148,7 @@ export const ROLES: Record<UserRole, RoleConfig> = {
       'design', // 設計管理
     ],
     canManageWorkspace: false,
-    canCrossWorkspace: false,
+    canCrossWorkspace: false, // deprecated
   },
 
   staff: {
@@ -161,7 +162,7 @@ export const ROLES: Record<UserRole, RoleConfig> = {
       'todos', // 待辦事項
     ],
     canManageWorkspace: false,
-    canCrossWorkspace: false,
+    canCrossWorkspace: false, // deprecated
   },
 
   bot: {
@@ -171,7 +172,7 @@ export const ROLES: Record<UserRole, RoleConfig> = {
     color: 'text-purple-600 bg-purple-100 border-purple-200',
     permissions: ['*'], // 機器人通常需要完整權限執行任務
     canManageWorkspace: false,
-    canCrossWorkspace: false,
+    canCrossWorkspace: false, // deprecated
   },
 }
 /**
@@ -217,12 +218,10 @@ export function canManageWorkspace(userRole: UserRole | null): boolean {
 }
 
 /**
- * 檢查是否可以跨 workspace
+ * @deprecated 跨租戶功能已移除（2026-04-02），永遠回傳 false
  */
-export function canCrossWorkspace(userRole: UserRole | null): boolean {
-  if (!userRole) return false
-  const roleConfig = getRoleConfig(userRole)
-  return roleConfig?.canCrossWorkspace || false
+export function canCrossWorkspace(_userRole: UserRole | null): boolean {
+  return false
 }
 
 /**

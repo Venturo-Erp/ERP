@@ -136,7 +136,7 @@ export function CoverInfoForm({
             <label className="block text-sm font-medium text-morandi-primary">
               {COMP_EDITOR_LABELS.LABEL_3951}
             </label>
-            <AiCopyButton data={data} updateField={updateField} />
+            <AiCopyButton data={data} updateField={updateField} onChange={onChange} />
           </div>
           <RichTextInput
             value={data.description || ''}
@@ -275,7 +275,7 @@ export function CoverInfoForm({
 }
 
 // AI 文案生成按鈕
-function AiCopyButton({ data, updateField }: { data: TourFormData; updateField: (field: string, value: unknown) => void }) {
+function AiCopyButton({ data, updateField, onChange }: { data: TourFormData; updateField: (field: string, value: unknown) => void; onChange: (data: TourFormData) => void }) {
   const [loading, setLoading] = useState(false)
 
   const handleGenerate = async () => {
@@ -310,16 +310,12 @@ function AiCopyButton({ data, updateField }: { data: TourFormData; updateField: 
       const result = await res.json()
 
       if (result.success && result.data) {
-        // 先更新描述，再更新副標題（分開 render cycle 確保都生效）
-        if (result.data.description) {
-          updateField('description', result.data.description)
-        }
-        // 用 setTimeout 確保副標題在下一個 render cycle 更新
-        setTimeout(() => {
-          if (result.data.subtitle) {
-            updateField('subtitle', result.data.subtitle)
-          }
-        }, 50)
+        // 一次更新副標題+描述，避免預覽閃爍
+        onChange({
+          ...data,
+          ...(result.data.subtitle ? { subtitle: result.data.subtitle } : {}),
+          ...(result.data.description ? { description: result.data.description } : {}),
+        })
         toast.success('文案已生成（副標題+描述）')
       } else {
         toast.error(result.error || '生成失敗')

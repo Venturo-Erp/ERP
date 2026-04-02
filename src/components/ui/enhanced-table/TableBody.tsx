@@ -50,7 +50,7 @@ export const TableBody = React.memo(function TableBody({
   if (loading) {
     const skeletonRows = 5 // 預設顯示 5 行骨架
     const totalColumns =
-      columns.length + (selection ? 1 : 0) + (expandable ? 1 : 0) + (actions ? 1 : 0)
+      columns.length + (selection ? 1 : 0) + (actions ? 1 : 0)
 
     return (
       <tbody>
@@ -104,7 +104,7 @@ export const TableBody = React.memo(function TableBody({
         <tr className="h-[60vh]">
           <td
             colSpan={
-              columns.length + (selection ? 1 : 0) + (expandable ? 1 : 0) + (actions ? 1 : 0)
+              columns.length + (selection ? 1 : 0) + (actions ? 1 : 0)
             }
             className="py-12 px-6 text-center text-sm text-morandi-secondary align-middle"
           >
@@ -207,7 +207,7 @@ export const TableBody = React.memo(function TableBody({
               <tr>
                 <td
                   colSpan={
-                    columns.length + (selection ? 1 : 0) + (expandable ? 1 : 0) + (actions ? 1 : 0)
+                    columns.length + (selection ? 1 : 0) + (actions ? 1 : 0)
                   }
                   className="py-0 px-0"
                 >

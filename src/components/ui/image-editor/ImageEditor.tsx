@@ -66,13 +66,16 @@ export function ImageEditor({
   open,
   onClose,
   imageSrc,
-  aspectRatio = 16 / 9,
+  aspectRatio: aspectRatioProp,
   initialSettings,
   onSave,
   onCropAndSave,
   showAi = true,
   onAiReplace,
 }: ImageEditorProps) {
+  // 沒傳 aspectRatio 時使用自由模式（不裁切）
+  const freeMode = aspectRatioProp === undefined
+  const aspectRatio = aspectRatioProp ?? 16 / 9
   const t = useTranslations('imageEditor')
   const tCommon = useTranslations('common')
   const tMessages = useTranslations('messages')
@@ -308,14 +311,21 @@ export function ImageEditor({
 
     setIsProcessing(true)
     try {
-      // previewSrc 已經包含旋轉/翻轉，所以傳遞不含旋轉的設定給 cropImage
-      const settingsForCrop = {
-        ...settings,
-        rotation: 0,
-        flipH: false,
+      if (freeMode) {
+        // 自由模式：輸出完整圖片（含調整），不裁切
+        const response = await fetch(previewSrc)
+        const blob = await response.blob()
+        onCropAndSave(blob, settings)
+      } else {
+        // 裁切模式：previewSrc 已包含旋轉/翻轉，傳遞不含旋轉的設定給 cropImage
+        const settingsForCrop = {
+          ...settings,
+          rotation: 0,
+          flipH: false,
+        }
+        const blob = await cropImage(previewSrc, settingsForCrop, aspectRatio)
+        onCropAndSave(blob, settings)
       }
-      const blob = await cropImage(previewSrc, settingsForCrop, aspectRatio)
-      onCropAndSave(blob, settings)
       onClose()
     } catch (error) {
       logger.error('Crop failed:', error)
@@ -323,7 +333,7 @@ export function ImageEditor({
     } finally {
       setIsProcessing(false)
     }
-  }, [previewSrc, settings, aspectRatio, onCropAndSave, onClose])
+  }, [previewSrc, settings, aspectRatio, freeMode, onCropAndSave, onClose])
 
   // 檢查調整是否有變更
   const hasAdjustments = Object.entries(settings.adjustments).some(
@@ -346,14 +356,14 @@ export function ImageEditor({
                 'relative bg-black rounded-lg overflow-hidden select-none',
                 isDragging ? 'cursor-grabbing' : 'cursor-grab'
               )}
-              style={{ aspectRatio, width: '100%', maxHeight: '100%' }}
+              style={{ aspectRatio: freeMode ? undefined : aspectRatio, width: '100%', maxHeight: '100%' }}
               onWheel={handleWheel}
               onMouseDown={handleMouseDown}
             >
               <img
                 src={previewSrc}
                 alt={tCommon('preview')}
-                className="w-full h-full object-cover pointer-events-none"
+                className={cn('w-full h-full pointer-events-none', freeMode ? 'object-contain' : 'object-cover')}
                 style={{
                   objectPosition: `${settings.x}% ${settings.y}%`,
                   transform: `scale(${settings.scale})`,

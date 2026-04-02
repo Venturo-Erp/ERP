@@ -24,6 +24,7 @@ interface TableHeaderProps<T extends RowData = RowData> {
   showFilters: boolean
   selection?: SelectionConfig<T>
   actions?: (row: T) => React.ReactNode
+  actionsHeader?: React.ReactNode
   actionsWidth?: string
   allVisibleSelected: boolean
   someVisibleSelected: boolean
@@ -41,6 +42,7 @@ export const TableHeader = React.memo(function TableHeader({
   showFilters,
   selection,
   actions,
+  actionsHeader,
   actionsWidth = '100px',
   allVisibleSelected,
   someVisibleSelected,
@@ -125,9 +127,11 @@ export const TableHeader = React.memo(function TableHeader({
         {/* Actions column */}
         {actions && (
           <th className="text-left py-2.5 px-4 text-xs relative" style={{ width: actionsWidth }}>
-            <span className="font-medium text-morandi-secondary">
-              {ENHANCED_TABLE_LABELS.ACTIONS}
-            </span>
+            {actionsHeader || (
+              <span className="font-medium text-morandi-secondary">
+                {ENHANCED_TABLE_LABELS.ACTIONS}
+              </span>
+            )}
           </th>
         )}
       </tr>

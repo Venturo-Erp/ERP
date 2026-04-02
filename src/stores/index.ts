@@ -75,9 +75,11 @@ export const useQuoteStore = createStore<Quote>({
 /**
  * 團員 Store
  * 無獨立編號，依附於訂單
+ * 🔒 啟用 Workspace 隔離
  */
 export const useMemberStore = createStore<Member>({
   tableName: 'members',
+  workspaceScoped: true,
 })
 
 /**

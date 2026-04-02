@@ -36,6 +36,7 @@ export function EnhancedTable<T extends RowData = RowData>({
   selection,
   expandable,
   actions,
+  actionsHeader,
   actionsWidth,
   rowClassName,
   striped = false,
@@ -218,6 +219,7 @@ export function EnhancedTable<T extends RowData = RowData>({
             showFilters={showFilters}
             selection={typedSelection}
             actions={typedActions}
+            actionsHeader={actionsHeader}
             actionsWidth={actionsWidth}
             allVisibleSelected={allVisibleSelected}
             someVisibleSelected={someVisibleSelected}

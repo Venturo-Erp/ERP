@@ -3,7 +3,7 @@
  * 用於 admin 切換查看特定 workspace 的資料
  */
 
-import { canCrossWorkspace, type UserRole } from './rbac-config'
+import type { UserRole } from './rbac-config'
 import { logger } from '@/lib/utils/logger'
 
 /**

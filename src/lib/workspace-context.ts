@@ -71,37 +71,6 @@ export function withWorkspaceId<T extends Record<string, unknown>>(
 }
 
 // ============================================
-// 跨 Workspace 設定（Super Admin 專用）
+// 跨 Workspace 功能已移除（2026-04-02）
+// 所有用戶（包括管理員）都只能看到自己 workspace 的資料
 // ============================================
-
-const CROSS_WORKSPACE_KEY = 'admin_cross_workspace_enabled'
-
-/**
- * 取得跨 workspace 模式狀態
- * 預設為 false（只看自己 workspace）
- */
-export function getCrossWorkspaceEnabled(): boolean {
-  if (typeof window === 'undefined') return false
-  return localStorage.getItem(CROSS_WORKSPACE_KEY) === 'true'
-}
-
-/**
- * 設定跨 workspace 模式
- */
-export function setCrossWorkspaceEnabled(enabled: boolean): void {
-  if (typeof window === 'undefined') return
-
-  if (enabled) {
-    localStorage.setItem(CROSS_WORKSPACE_KEY, 'true')
-  } else {
-    localStorage.removeItem(CROSS_WORKSPACE_KEY)
-  }
-}
-
-/**
- * 檢查是否應該跨 workspace 查詢
- * 只有 admin 且明確開啟跨 workspace 模式才返回 true
- */
-export function shouldCrossWorkspace(isAdmin: boolean): boolean {
-  return isAdmin && getCrossWorkspaceEnabled()
-}

@@ -25,37 +25,34 @@ export function TourFlightInfo({
   handleSearchReturn,
 }: TourFlightInfoProps) {
   return (
-    <div className="border-t pt-4 mt-4">
+    <div className="pt-4 mt-4">
       <label className="text-sm font-medium text-morandi-primary mb-3 block">
         {TOUR_FLIGHT_INFO.section_title}
       </label>
       <div className="space-y-3">
         {/* 去程航班 */}
-        <div className="bg-morandi-container/20 p-3 rounded-lg">
+        <div>
           <label className="text-xs font-medium text-morandi-primary mb-2 block">
             {TOUR_FLIGHT_INFO.outbound_label}
           </label>
-          <div className="flex gap-2">
-            <div className="w-28">
-              <Input
-                value={newTour.outbound_flight_number || ''}
-                onChange={e =>
-                  setNewTour(prev => ({
-                    ...prev,
-                    outbound_flight_number: e.target.value.toUpperCase(),
-                  }))
-                }
-                placeholder={TOUR_FLIGHT_INFO.flight_number_placeholder}
-                className="text-sm"
-              />
-            </div>
+          <div className="flex gap-2 items-center">
+            <Input
+              value={newTour.outbound_flight_number || ''}
+              onChange={e =>
+                setNewTour(prev => ({
+                  ...prev,
+                  outbound_flight_number: e.target.value.toUpperCase(),
+                }))
+              }
+              placeholder={TOUR_FLIGHT_INFO.flight_number_placeholder}
+              className="text-sm w-32"
+            />
             <Button
               type="button"
-              size="sm"
               variant="outline"
               onClick={handleSearchOutbound}
               disabled={loadingOutbound || !newTour.outbound_flight_number}
-              className="h-9 gap-1"
+              className="gap-1 shrink-0"
             >
               {loadingOutbound ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -64,45 +61,40 @@ export function TourFlightInfo({
               )}
               {TOUR_FLIGHT_INFO.search_button}
             </Button>
-            <div className="flex-1">
-              <Input
-                value={newTour.outbound_flight_text || ''}
-                onChange={e =>
-                  setNewTour(prev => ({ ...prev, outbound_flight_text: e.target.value }))
-                }
-                placeholder={TOUR_FLIGHT_INFO.flight_text_placeholder}
-                className="text-sm"
-              />
-            </div>
+            <Input
+              value={newTour.outbound_flight_text || ''}
+              onChange={e =>
+                setNewTour(prev => ({ ...prev, outbound_flight_text: e.target.value }))
+              }
+              placeholder={TOUR_FLIGHT_INFO.flight_text_placeholder}
+              className="text-sm flex-1"
+            />
           </div>
         </div>
 
         {/* 回程航班 */}
-        <div className="bg-morandi-container/20 p-3 rounded-lg">
+        <div>
           <label className="text-xs font-medium text-morandi-primary mb-2 block">
             {TOUR_FLIGHT_INFO.return_label}
           </label>
-          <div className="flex gap-2">
-            <div className="w-28">
-              <Input
-                value={newTour.return_flight_number || ''}
-                onChange={e =>
-                  setNewTour(prev => ({
-                    ...prev,
-                    return_flight_number: e.target.value.toUpperCase(),
-                  }))
-                }
-                placeholder={TOUR_FLIGHT_INFO.flight_number_placeholder}
-                className="text-sm"
-              />
-            </div>
+          <div className="flex gap-2 items-center">
+            <Input
+              value={newTour.return_flight_number || ''}
+              onChange={e =>
+                setNewTour(prev => ({
+                  ...prev,
+                  return_flight_number: e.target.value.toUpperCase(),
+                }))
+              }
+              placeholder={TOUR_FLIGHT_INFO.flight_number_placeholder}
+              className="text-sm w-32"
+            />
             <Button
               type="button"
-              size="sm"
               variant="outline"
               onClick={handleSearchReturn}
               disabled={loadingReturn || !newTour.return_flight_number}
-              className="h-9 gap-1"
+              className="gap-1 shrink-0"
             >
               {loadingReturn ? (
                 <Loader2 size={14} className="animate-spin" />
@@ -111,16 +103,14 @@ export function TourFlightInfo({
               )}
               {TOUR_FLIGHT_INFO.search_button}
             </Button>
-            <div className="flex-1">
-              <Input
-                value={newTour.return_flight_text || ''}
-                onChange={e =>
-                  setNewTour(prev => ({ ...prev, return_flight_text: e.target.value }))
-                }
-                placeholder={TOUR_FLIGHT_INFO.flight_text_placeholder}
-                className="text-sm"
-              />
-            </div>
+            <Input
+              value={newTour.return_flight_text || ''}
+              onChange={e =>
+                setNewTour(prev => ({ ...prev, return_flight_text: e.target.value }))
+              }
+              placeholder={TOUR_FLIGHT_INFO.flight_text_placeholder}
+              className="text-sm flex-1"
+            />
           </div>
         </div>
       </div>

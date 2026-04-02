@@ -15,8 +15,7 @@ import { TableName } from '@/lib/db/schemas'
 import { memoryCache } from '@/lib/cache/memory-cache'
 import { supabase } from '@/lib/supabase/client'
 import { dynamicFrom, castRows, castRow } from '@/lib/supabase/typed-client'
-import { canCrossWorkspace, type UserRole } from '@/lib/rbac-config'
-import { shouldCrossWorkspace } from '@/lib/workspace-context'
+import type { UserRole } from '@/lib/rbac-config'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 
 // 型別定義

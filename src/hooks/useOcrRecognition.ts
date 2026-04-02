@@ -17,6 +17,7 @@ import { logger } from '@/lib/utils/logger'
  */
 export interface OcrParsedData {
   name?: string
+  passport_name?: string
   passport_romanization?: string
   birth_date?: string
   gender?: string
@@ -27,6 +28,7 @@ export interface OcrParsedData {
 
 interface OcrResult {
   name?: string
+  passport_name?: string
   passport_romanization?: string
   birth_date?: string
   sex?: string
@@ -95,6 +97,7 @@ export function useOcrRecognition() {
           // 組合辨識結果
           const recognizedData: OcrParsedData = {
             name: ocrData.name,
+            passport_name: ocrData.passport_name,
             passport_romanization: ocrData.passport_romanization,
             birth_date: ocrData.birth_date,
             gender,

@@ -18,8 +18,7 @@ import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
 import { get_cache, set_cache, invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
-import { canCrossWorkspace, type UserRole } from '@/lib/rbac-config'
-import { shouldCrossWorkspace } from '@/lib/workspace-context'
+import type { UserRole } from '@/lib/rbac-config'
 import {
   BaseEntity,
   EntityConfig,
@@ -205,11 +204,7 @@ export function createEntityHook<T extends BaseEntity>(
   function getWorkspaceFilter(): string | null {
     if (!isWorkspaceScoped) return null
 
-    const { workspaceId, userRole } = getCurrentUserContext()
-
-    // 只有 Super Admin 且明確開啟跨 workspace 模式才不過濾
-    const isAdmin = canCrossWorkspace(userRole)
-    if (shouldCrossWorkspace(isAdmin)) return null
+    const { workspaceId } = getCurrentUserContext()
 
     if (workspaceId) {
       // 向後相容：同時查詢符合當前 workspace 或 workspace_id 為 NULL 的舊資料

@@ -6,7 +6,7 @@
  * 功能：
  * - 檔案拖放上傳
  * - 檔案預覽
- * - 圖片增強（銳利化）
+ * - 圖片編輯（使用統一 ImageEditor）
  * - 批次辨識按鈕
  */
 
@@ -14,7 +14,7 @@ import React, { useState, useCallback } from 'react'
 import { Upload, X, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { ProcessedFile } from '../types/order-member.types'
-import { PassportImageEnhancer } from './PassportImageEnhancer'
+import { ImageEditor, type ImageEditorSettings } from '@/components/ui/image-editor'
 import { COMP_ORDERS_LABELS } from '../constants/labels'
 
 interface PassportUploadZoneProps {
@@ -45,43 +45,61 @@ export function PassportUploadZone({
   onBatchUpload,
   onUpdateFilePreview,
 }: PassportUploadZoneProps) {
-  // 圖片增強狀態
+  // 圖片編輯狀態
   const [enhancingIndex, setEnhancingIndex] = useState<number | null>(null)
-  const [showEnhancer, setShowEnhancer] = useState(false)
+  const [showEditor, setShowEditor] = useState(false)
 
-  // 開啟圖片增強
-  const handleOpenEnhancer = useCallback(
+  // 開啟圖片編輯
+  const handleOpenEditor = useCallback(
     (index: number) => {
       const file = processedFiles[index]
       if (file && !file.isPdf) {
         setEnhancingIndex(index)
-        setShowEnhancer(true)
+        setShowEditor(true)
       }
     },
     [processedFiles]
   )
 
-  // 儲存增強後的圖片
-  const handleSaveEnhanced = useCallback(
-    (enhancedSrc: string) => {
+  // 關閉編輯器
+  const handleCloseEditor = useCallback(() => {
+    setShowEditor(false)
+    setEnhancingIndex(null)
+  }, [])
+
+  // ImageEditor onSave（保留設定，此處不需要額外處理）
+  const handleEditorSave = useCallback((_settings: ImageEditorSettings) => {
+    // 設定保留由 ImageEditor 內部管理
+  }, [])
+
+  // ImageEditor onCropAndSave（裁切後更新預覽）
+  const handleEditorCropAndSave = useCallback(
+    (blob: Blob, _settings: ImageEditorSettings) => {
       if (enhancingIndex !== null && onUpdateFilePreview) {
-        onUpdateFilePreview(enhancingIndex, enhancedSrc)
+        const reader = new FileReader()
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            onUpdateFilePreview(enhancingIndex, reader.result)
+          }
+        }
+        reader.readAsDataURL(blob)
       }
-      setShowEnhancer(false)
-      setEnhancingIndex(null)
+      handleCloseEditor()
     },
-    [enhancingIndex, onUpdateFilePreview]
+    [enhancingIndex, onUpdateFilePreview, handleCloseEditor]
   )
 
   return (
     <>
-      {/* 圖片增強 Dialog */}
+      {/* 圖片編輯器（統一使用 ImageEditor） */}
       {enhancingIndex !== null && processedFiles[enhancingIndex] && (
-        <PassportImageEnhancer
-          open={showEnhancer}
-          onOpenChange={setShowEnhancer}
+        <ImageEditor
+          open={showEditor}
+          onClose={handleCloseEditor}
           imageSrc={processedFiles[enhancingIndex].preview}
-          onSave={handleSaveEnhanced}
+          onSave={handleEditorSave}
+          onCropAndSave={handleEditorCropAndSave}
+          showAi={false}
         />
       )}
       <div className="space-y-3">
@@ -165,7 +183,7 @@ export function PassportUploadZone({
                     src={pf.preview}
                     alt={pf.originalName}
                     className="w-full h-16 object-cover rounded border border-border cursor-pointer hover:border-morandi-gold transition-colors"
-                    onClick={() => !pf.isPdf && handleOpenEnhancer(index)}
+                    onClick={() => !pf.isPdf && handleOpenEditor(index)}
                     title={
                       pf.isPdf
                         ? COMP_ORDERS_LABELS.PDF_不支援增強
@@ -182,12 +200,12 @@ export function PassportUploadZone({
                   >
                     <X size={10} />
                   </button>
-                  {/* 增強按鈕（非 PDF） - 始終顯示以提高可發現性 */}
+                  {/* 編輯按鈕（非 PDF） */}
                   {!pf.isPdf && onUpdateFilePreview && (
                     <button
                       onClick={e => {
                         e.stopPropagation()
-                        handleOpenEnhancer(index)
+                        handleOpenEditor(index)
                       }}
                       className="absolute -top-1 -left-1 w-5 h-5 bg-morandi-gold text-white rounded-full flex items-center justify-center shadow-sm hover:bg-morandi-gold-hover transition-colors"
                       title={COMP_ORDERS_LABELS.圖片增強_銳利化}

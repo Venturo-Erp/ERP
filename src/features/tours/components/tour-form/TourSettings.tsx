@@ -54,21 +54,6 @@ export function TourSettings({ newTour, setNewTour }: TourSettingsProps) {
         />
       </div>
 
-      {/* 設定選項 */}
-      <div className="flex items-center space-x-4">
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            id="isSpecial"
-            checked={newTour.isSpecial}
-            onChange={e => setNewTour(prev => ({ ...prev, isSpecial: e.target.checked }))}
-            className="rounded"
-          />
-          <label htmlFor="isSpecial" className="text-sm text-morandi-primary">
-            {TOUR_SETTINGS.special_tour}
-          </label>
-        </div>
-      </div>
     </div>
   )
 }

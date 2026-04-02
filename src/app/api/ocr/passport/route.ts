@@ -71,6 +71,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 如果沒有 Google Vision Key，記錄警告（中文名辨識會失效）
+    if (googleVisionKeys.length === 0) {
+      logger.warn('⚠️ GOOGLE_VISION_API_KEYS 未設定，中文名辨識將無法使用。請在環境變數中設定。')
+    }
+
     // 檢查 Google Vision 使用量並取得可用的 Key
     const { canUseGoogleVision, availableKey, currentUsage, totalLimit, warning } =
       await checkGoogleVisionUsage(base64Images.length, googleVisionKeys)
@@ -125,6 +130,10 @@ export async function POST(request: NextRequest) {
       successful: results.filter(r => r.success).length,
       usageWarning: warning,
       googleVisionError,
+      // 當 Google Vision 不可用時，提示前端中文名辨識已關閉
+      chineseNameWarning: !canUseGoogleVision
+        ? '中文名辨識未啟用（Google Vision API Key 未設定或額度已滿），僅辨識 MRZ 資料。'
+        : null,
       googleVisionUsage: {
         current: currentUsage + (canUseGoogleVision ? base64Images.length : 0),
         limit: totalLimit,

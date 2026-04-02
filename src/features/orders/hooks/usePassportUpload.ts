@@ -143,13 +143,9 @@ export function usePassportUpload({
 
       // 統計
       let successCount = 0
-      let duplicateCount = 0
       let matchedCustomerCount = 0
       let newCustomerCount = 0
-      let updatedCount = 0 // 新增：更新現有成員的計數
       const failedItems: string[] = []
-      const duplicateItems: string[] = []
-      const updatedItems: string[] = [] // 新增：更新的成員列表
       const newPendingConfirmations: PendingConfirmation[] = []
 
       // 載入現有成員（包含 id）
@@ -166,15 +162,7 @@ export function usePassportUpload({
           // 檢查重複
           const duplicateCheck = ocrModule.checkDuplicate(item.customer, existingMembers || [])
 
-          // 完全重複（身分證號相同）→ 跳過
-          if (duplicateCheck.isDuplicate) {
-            duplicateCount++
-            const displayName = item.customer.name || item.fileName
-            duplicateItems.push(`${displayName} (${duplicateCheck.reason})`)
-            continue
-          }
-
-          // 需要使用者確認（護照號碼或姓名+生日相同）→ 收集待確認
+          // 任何匹配（護照號碼、身分證號、姓名+生日、同名）→ 統一收集待確認
           if (duplicateCheck.needsConfirmation && duplicateCheck.matchedMember) {
             newPendingConfirmations.push({
               customer: item.customer,
@@ -184,28 +172,6 @@ export function usePassportUpload({
               confirmMessage: duplicateCheck.confirmMessage || duplicateCheck.reason,
               matchType: duplicateCheck.matchType || 'exact',
             })
-            continue
-          }
-
-          // 姓名比對到（無生日資料）→ 更新現有成員
-          if (duplicateCheck.matchType === 'name_only' && duplicateCheck.matchedMember) {
-            const updateResult = await validationModule.updateOrderMember({
-              memberId: duplicateCheck.matchedMember.id,
-              orderId,
-              workspaceId,
-              customerData: item.customer,
-              file: compressedFiles[i],
-              fileIndex: i,
-            })
-
-            if (updateResult.success) {
-              updatedCount++
-              const displayName =
-                item.customer.name || duplicateCheck.matchedMember.chinese_name || item.fileName
-              updatedItems.push(displayName)
-            } else {
-              failedItems.push(PASSPORT_UPLOAD_LABELS.UPDATE_FAILED(item.fileName))
-            }
             continue
           }
 
@@ -246,7 +212,7 @@ export function usePassportUpload({
 
         let memberQuery = supabase
           .from('order_members')
-          .select('id, customer_id')
+          .select('id, customer_id, passport_image_url')
           .eq('order_id', orderId)
 
         if (passportNum) {
@@ -263,8 +229,9 @@ export function usePassportUpload({
           const pData: PassportDataForConflict = {
             passport_number: item.customer.passport_number || null,
             passport_name:
-              item.customer.passport_romanization || item.customer.english_name || null,
+              item.customer.passport_name || item.customer.english_name || null,
             passport_expiry: item.customer.passport_expiry || null,
+            passport_image_url: (member as Record<string, unknown>).passport_image_url as string | null,
             birth_date: item.customer.birth_date || null,
             gender:
               item.customer.sex === COMP_ORDERS_LABELS.男
@@ -314,22 +281,18 @@ export function usePassportUpload({
       if (successCount > 0) {
         message += PASSPORT_UPLOAD_LABELS.CREATED_MEMBERS(successCount)
       }
-      if (updatedCount > 0) {
-        message += `\n已更新 ${updatedCount} 位現有成員：\n${updatedItems.join('、')}`
-      }
       if (matchedCustomerCount > 0) {
         message += PASSPORT_UPLOAD_LABELS.MATCHED_CUSTOMERS(matchedCustomerCount)
       }
       if (newCustomerCount > 0) {
         message += PASSPORT_UPLOAD_LABELS.NEW_CUSTOMERS(newCustomerCount)
       }
-      if (duplicateCount > 0) {
-        message += `\n\n跳過 ${duplicateCount} 位重複成員：\n${duplicateItems.join('\n')}`
-      }
       if (newPendingConfirmations.length > 0) {
-        message += `\n\n⚠️ 發現 ${newPendingConfirmations.length} 筆重複資料，需要確認是否更新`
+        message += `\n\n⚠️ 發現 ${newPendingConfirmations.length} 筆重複資料，請確認是否更新照片`
       }
-      if (result.googleVisionError) {
+      if (result.chineseNameWarning) {
+        message += `\n\n⚠️ ${result.chineseNameWarning}`
+      } else if (result.googleVisionError) {
         message += `\n\n⚠️ 中文名辨識失敗：${result.googleVisionError}\n• 請至 Google Cloud Console 更新 API Key`
       }
       message += `\n\n重要提醒：\n• OCR 資料已標記為「待驗證」\n• 請務必人工檢查護照資訊`
