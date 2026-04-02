@@ -523,7 +523,7 @@ export default function CustomersPage() {
                 <>
                   <div className="bg-white p-4 rounded-lg shadow-sm">
                     <QRCodeSVG
-                      value={`https://line.me/R/oaMessage/@745gftqd?綁定 ${lineBindingCustomer.code}`}
+                      value={`https://line.me/R/oaMessage/${process.env.NEXT_PUBLIC_LINE_BOT_ID || '@745gftqd'}?綁定 ${lineBindingCustomer.code}`}
                       size={180}
                       level="M"
                     />
@@ -544,7 +544,7 @@ export default function CustomersPage() {
                       variant="outline"
                       className="flex-1"
                       onClick={() => {
-                        const url = `https://line.me/R/oaMessage/@745gftqd?綁定 ${lineBindingCustomer.code}`
+                        const url = `https://line.me/R/oaMessage/${process.env.NEXT_PUBLIC_LINE_BOT_ID || '@745gftqd'}?綁定 ${lineBindingCustomer.code}`
                         navigator.clipboard.writeText(url)
                         toast.success('連結已複製')
                       }}

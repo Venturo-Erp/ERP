@@ -510,7 +510,7 @@ export default function HRPage() {
             <div className="flex flex-col items-center gap-4 py-4">
               <div className="bg-white p-4 rounded-lg shadow-sm">
                 <QRCodeSVG
-                  value={`https://line.me/R/oaMessage/@745gftqd?綁定 ${lineBindingEmployee.employee_number || lineBindingEmployee.id.slice(0, 8)}`}
+                  value={`https://line.me/R/oaMessage/${process.env.NEXT_PUBLIC_LINE_BOT_ID || '@745gftqd'}?綁定 ${lineBindingEmployee.employee_number || lineBindingEmployee.id.slice(0, 8)}`}
                   size={180}
                   level="M"
                 />
@@ -528,7 +528,7 @@ export default function HRPage() {
                   onClick={() => {
                     const empCode =
                       lineBindingEmployee.employee_number || lineBindingEmployee.id.slice(0, 8)
-                    const url = `https://line.me/R/oaMessage/@745gftqd?綁定 ${empCode}`
+                    const url = `https://line.me/R/oaMessage/${process.env.NEXT_PUBLIC_LINE_BOT_ID || '@745gftqd'}?綁定 ${empCode}`
                     navigator.clipboard.writeText(url)
                     toast.success('連結已複製')
                   }}
