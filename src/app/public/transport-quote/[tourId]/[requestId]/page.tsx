@@ -38,33 +38,31 @@ export default async function TransportQuoteWithRequestPage({
     )
   }
 
-  // 🆕 查詢該供應商的歷史報價（排除當前這筆）
-  const { data: historyRequests } = await supabase
-    .from('tour_requests')
-    .select('*')
-    .eq('tour_id', tourId)
-    .eq('supplier_name', request.supplier_name)
-    .eq('request_type', 'transport')
-    .neq('id', requestId)
-    .order('replied_at', { ascending: false })
-    .order('created_at', { ascending: false })
+  // 查詢歷史報價 + 團資料 + 核心表項目（並行）
+  const [{ data: historyRequests }, { data: tour }, { data: coreItems }] = await Promise.all([
+    supabase
+      .from('tour_requests')
+      .select('*')
+      .eq('tour_id', tourId)
+      .eq('supplier_name', request.supplier_name)
+      .eq('request_type', 'transport')
+      .neq('id', requestId)
+      .order('replied_at', { ascending: false })
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('tours')
+      .select('code, name, departure_date, return_date, location, current_participants')
+      .eq('id', tourId)
+      .single(),
+    supabase
+      .from('tour_itinerary_items')
+      .select('*')
+      .eq('tour_id', tourId)
+      .order('day_number', { ascending: true })
+      .order('sort_order', { ascending: true }),
+  ])
 
   const history = (historyRequests || []).filter(r => r.supplier_response && r.replied_at)
-
-  // 查詢團資料
-  const { data: tour } = await supabase
-    .from('tours')
-    .select('code, name, departure_date, return_date, location, current_participants')
-    .eq('id', tourId)
-    .single()
-
-  // 查詢核心表項目
-  const { data: coreItems } = await supabase
-    .from('tour_itinerary_items')
-    .select('*')
-    .eq('tour_id', tourId)
-    .order('day_number', { ascending: true })
-    .order('sort_order', { ascending: true })
 
   if (!tour || !coreItems) {
     return (

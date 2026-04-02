@@ -213,7 +213,7 @@ export function TransportQuoteActions({
           查看報價
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-md">
+      <DialogContent level={1} className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             🚌 {quote.supplier_name} 報價

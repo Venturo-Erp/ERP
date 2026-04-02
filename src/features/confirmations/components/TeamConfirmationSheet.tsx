@@ -110,7 +110,7 @@ export function TeamConfirmationSheet({
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col print:max-w-none print:h-auto">
+      <DialogContent level={1} className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col print:max-w-none print:h-auto">
         <DialogHeader className="print:hidden">
           <DialogTitle>需求追蹤表（領隊核對用）</DialogTitle>
         </DialogHeader>

@@ -44,7 +44,7 @@ export function AccommodationChangeDialog({
         if (!v) onCancel()
       }}
     >
-      <DialogContent className="max-w-md">
+      <DialogContent level={1} className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-morandi-gold">
             <AlertTriangle size={20} />

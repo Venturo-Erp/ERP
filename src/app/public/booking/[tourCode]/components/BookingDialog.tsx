@@ -91,7 +91,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+      <DialogContent level={1} className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
         <form onSubmit={handleSubmit} className="space-y-8 p-6">
           {/* Hero */}
           <div className="text-center border-b border-border pb-6">

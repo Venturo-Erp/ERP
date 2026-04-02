@@ -524,7 +524,7 @@ export default function LineConnectionsPage() {
 
       {/* 編輯 Dialog */}
       <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
-        <DialogContent>
+        <DialogContent level={1}>
           <DialogHeader>
             <DialogTitle>
               {editingItem?.type === 'group' ? '編輯群組' : '編輯好友'}

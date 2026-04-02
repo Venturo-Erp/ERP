@@ -155,8 +155,7 @@ export function AttractionSelector({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel}>
-      <DialogContent
-        level={1}
+      <DialogContent level={1}
         className="w-[1200px] h-[700px] max-w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0"
       >
         <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-morandi-gold/10 to-transparent">

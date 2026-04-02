@@ -157,7 +157,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess, parentAccou
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent level={1} className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
             {parentAccount 

@@ -621,7 +621,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
       {/* 產生合約對話框 */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col">
+        <DialogContent level={1} className="max-w-2xl max-h-[90vh] flex flex-col">
           <DialogHeader className="shrink-0">
             <DialogTitle className="flex items-center gap-2">
               <FileSignature className="w-5 h-5 text-morandi-gold" />
@@ -842,7 +842,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
       {/* 發送合約對話框 */}
       <Dialog open={sendDialogOpen} onOpenChange={setSendDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent level={1} className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ExternalLink className="w-5 h-5 text-morandi-gold" />
@@ -895,7 +895,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
       {/* 紙本簽署對話框 */}
       <Dialog open={paperSignDialogOpen} onOpenChange={setPaperSignDialogOpen}>
-        <DialogContent>
+        <DialogContent level={1}>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-morandi-gold" />

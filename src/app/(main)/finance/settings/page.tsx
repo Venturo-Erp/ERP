@@ -926,7 +926,7 @@ function MethodDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg">
+      <DialogContent level={1} className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -1074,7 +1074,7 @@ function BankDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent level={1}>
         <DialogHeader>
           <DialogTitle>{bank ? '編輯銀行帳戶' : '新增銀行帳戶'}</DialogTitle>
         </DialogHeader>
@@ -1208,7 +1208,7 @@ function CategoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent level={1}>
         <DialogHeader>
           <DialogTitle>
             {category ? '編輯' : '新增'}

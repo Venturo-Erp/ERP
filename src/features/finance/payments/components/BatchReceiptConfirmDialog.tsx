@@ -253,7 +253,7 @@ export function BatchReceiptConfirmDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[900px]">
+      <DialogContent level={1} className="max-w-[900px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
             <span>收款確認</span>

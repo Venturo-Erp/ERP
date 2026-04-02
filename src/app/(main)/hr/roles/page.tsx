@@ -535,7 +535,7 @@ export default function RolesPage() {
 
       {/* 新增職務 Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent level={1} className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-morandi-primary">新增職務</DialogTitle>
           </DialogHeader>

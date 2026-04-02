@@ -518,8 +518,7 @@ export function DocumentVersionPicker({
     <>
       {/* 主對話框：使用 level={2}（作為 TourDetailDialog 的子 Dialog） */}
       <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
-        <DialogContent
-          level={2}
+        <DialogContent level={2}
           className="h-[70vh] max-h-[800px] max-w-[500px] flex flex-col overflow-hidden"
         >
           {/* 標題區 */}

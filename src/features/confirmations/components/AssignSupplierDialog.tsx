@@ -587,6 +587,7 @@ export function AssignSupplierDialog({
       }}
     >
       <DialogContent
+        level={1}
         className={
           step === 'preview' || step === 'send'
             ? 'max-w-4xl max-h-[90vh] overflow-hidden flex flex-col'

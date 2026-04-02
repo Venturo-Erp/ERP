@@ -334,7 +334,7 @@ export default function WishlistTemplatesPage() {
 
       {/* 新增/編輯 Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent level={1} className="max-w-md">
           <DialogHeader>
             <DialogTitle>
               {editingTemplate ? '編輯客製化模板' : '新增客製化模板'}

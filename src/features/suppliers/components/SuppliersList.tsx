@@ -221,7 +221,7 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
 
       {/* LINE 群組綁定 Dialog */}
       <Dialog open={!!bindingSupplier} onOpenChange={() => setBindingSupplier(null)}>
-        <DialogContent className="max-w-sm">
+        <DialogContent level={1} className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <MessageCircle className="w-5 h-5 text-morandi-green" />

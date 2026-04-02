@@ -107,7 +107,7 @@ export function CreateCheckDialog({ open, onOpenChange, onSuccess }: CreateCheck
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent level={1} className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>新增票據/支票</DialogTitle>
         </DialogHeader>

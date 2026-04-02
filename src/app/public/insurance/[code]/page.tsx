@@ -25,49 +25,49 @@ async function getTourMembers(code: string) {
 
   if (!tour) return null
 
-  // 查公司名稱
-  let companyName = COMPANY_NAME
-  if (tour.workspace_id) {
-    const { data: ws } = (await supabase
-      .from('workspaces')
-      .select('name')
-      .eq('id', tour.workspace_id)
-      .single()) as { data: { name: string } | null }
-    if (ws?.name) companyName = ws.name
-  }
+  // 2. 查公司名稱 + 團員訂單 + Excel 連結（並行）
+  const [wsResult, { data: orders }, docResult] = await Promise.all([
+    tour.workspace_id
+      ? supabase
+          .from('workspaces')
+          .select('name')
+          .eq('id', tour.workspace_id)
+          .single()
+          .then(r => r as unknown as { data: { name: string } | null })
+      : Promise.resolve({ data: null } as { data: { name: string } | null }),
+    supabase.from('orders').select('id').eq('tour_id', tour.id),
+    supabase
+      .from('tour_documents')
+      .select('file_path')
+      .eq('tour_id', tour.id)
+      .like('file_name', `${code}_members%`)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+      .then(r => r as unknown as { data: { file_path: string } | null }),
+  ])
 
-  // 2. 查團員
-  const { data: orders } = await supabase.from('orders').select('id').eq('tour_id', tour.id)
+  let companyName = COMPANY_NAME
+  if (wsResult.data?.name) companyName = wsResult.data.name
 
   const orderIds = orders?.map(o => o.id) || []
 
-  let members: Member[] = []
-  if (orderIds.length > 0) {
-    const { data } = (await supabase
-      .from('order_members')
-      .select('customer:customer_id(name, national_id, birth_date)')
-      .in('order_id', orderIds)) as { data: { customer: Member | null }[] | null }
+  // 3. 查團員 + Excel 簽名 URL（並行）
+  const [membersResult, signedUrlResult] = await Promise.all([
+    orderIds.length > 0
+      ? supabase
+          .from('order_members')
+          .select('customer:customer_id(name, national_id, birth_date)')
+          .in('order_id', orderIds)
+          .then(r => r as unknown as { data: { customer: Member | null }[] | null })
+      : Promise.resolve({ data: null } as { data: { customer: Member | null }[] | null }),
+    docResult.data
+      ? supabase.storage.from('documents').createSignedUrl(docResult.data.file_path, 86400)
+      : Promise.resolve({ data: null }),
+  ])
 
-    members = (data || []).map(m => m.customer).filter((c): c is Member => c !== null)
-  }
-
-  // 3. 查 Excel 下載連結
-  const { data: doc } = (await supabase
-    .from('tour_documents')
-    .select('file_path')
-    .eq('tour_id', tour.id)
-    .like('file_name', `${code}_members%`)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()) as { data: { file_path: string } | null }
-
-  let excelUrl: string | null = null
-  if (doc) {
-    const { data: signedData } = await supabase.storage
-      .from('documents')
-      .createSignedUrl(doc.file_path, 86400)
-    excelUrl = signedData?.signedUrl || null
-  }
+  const members = (membersResult.data || []).map(m => m.customer).filter((c): c is Member => c !== null)
+  const excelUrl = signedUrlResult.data?.signedUrl || null
 
   return { tour, members, excelUrl, companyName }
 }

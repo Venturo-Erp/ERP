@@ -323,7 +323,7 @@ export default function InquiriesPage() {
 
       {/* 詳情 Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent level={1} className="max-w-2xl max-h-[80vh] overflow-y-auto">
           {selectedInquiry && (
             <>
               <DialogHeader>

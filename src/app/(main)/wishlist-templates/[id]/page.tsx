@@ -617,7 +617,7 @@ export default function WishlistTemplateEditPage({
 
       {/* 設定 Dialog（保留快速設定入口） */}
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent level={1} className="max-w-md">
           <DialogHeader>
             <DialogTitle>快速設定</DialogTitle>
           </DialogHeader>

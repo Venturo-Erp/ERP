@@ -37,25 +37,25 @@ export default async function MealQuotePage({
     )
   }
 
-  // 🆕 查詢該供應商的歷史報價
-  const { data: historyRequests } = await supabase
-    .from('tour_requests')
-    .select('*')
-    .eq('tour_id', tourId)
-    .eq('supplier_name', request.supplier_name)
-    .eq('request_type', 'meal')
-    .neq('id', requestId)
-    .order('replied_at', { ascending: false })
-    .order('created_at', { ascending: false })
+  // 查詢歷史報價 + 團資料（並行）
+  const [{ data: historyRequests }, { data: tour }] = await Promise.all([
+    supabase
+      .from('tour_requests')
+      .select('*')
+      .eq('tour_id', tourId)
+      .eq('supplier_name', request.supplier_name)
+      .eq('request_type', 'meal')
+      .neq('id', requestId)
+      .order('replied_at', { ascending: false })
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('tours')
+      .select('code, name, departure_date, return_date, location, current_participants')
+      .eq('id', tourId)
+      .single(),
+  ])
 
   const history = (historyRequests || []).filter(r => r.supplier_response && r.replied_at)
-
-  // 查詢團資料
-  const { data: tour } = await supabase
-    .from('tours')
-    .select('code, name, departure_date, return_date, location, current_participants')
-    .eq('id', tourId)
-    .single()
 
   if (!tour) {
     return (

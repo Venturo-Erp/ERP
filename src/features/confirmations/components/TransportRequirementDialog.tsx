@@ -277,7 +277,7 @@ export function TransportRequirementDialog({
         if (!v) onClose()
       }}
     >
-      <DialogContent className="max-w-lg">
+      <DialogContent level={1} className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Bus size={18} className="text-morandi-gold" />

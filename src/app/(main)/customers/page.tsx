@@ -494,7 +494,7 @@ export default function CustomersPage() {
 
       {/* LINE 綁定 Dialog */}
       <Dialog open={!!lineBindingCustomer} onOpenChange={() => setLineBindingCustomer(null)}>
-        <DialogContent className="max-w-sm">
+        <DialogContent level={1} className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <span className="text-[#06C755]">📱</span> LINE 綁定

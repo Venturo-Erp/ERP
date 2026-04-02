@@ -528,7 +528,7 @@ export default function WishlistDetailPage({
 
       {/* 詢價表單 Dialog */}
       <Dialog open={showInquiryForm} onOpenChange={setShowInquiryForm}>
-        <DialogContent className="max-w-md">
+        <DialogContent level={1} className="max-w-md">
           <DialogHeader>
             <DialogTitle>填寫聯絡資訊</DialogTitle>
           </DialogHeader>
@@ -656,7 +656,7 @@ export default function WishlistDetailPage({
 
       {/* 客戶比對 Dialog（首次使用者填姓名+生日比對） */}
       <Dialog open={showMatchDialog} onOpenChange={setShowMatchDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent level={1} className="max-w-md">
           <DialogHeader>
             <DialogTitle>確認您的身份</DialogTitle>
           </DialogHeader>
@@ -811,7 +811,7 @@ export default function WishlistDetailPage({
 
       {/* 成功畫面 Dialog */}
       <Dialog open={submitSuccess} onOpenChange={setSubmitSuccess}>
-        <DialogContent className="max-w-md text-center">
+        <DialogContent level={1} className="max-w-md text-center">
           <div className="py-6">
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-morandi-green/10 flex items-center justify-center">
               <CheckCircle className="w-10 h-10 text-morandi-green" />

@@ -257,7 +257,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+      <DialogContent level={1} className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>新增傳票</DialogTitle>
         </DialogHeader>

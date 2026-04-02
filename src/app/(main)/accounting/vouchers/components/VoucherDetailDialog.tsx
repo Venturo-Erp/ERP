@@ -83,7 +83,7 @@ export function VoucherDetailDialog({ open, onOpenChange, voucher }: VoucherDeta
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl">
+      <DialogContent level={1} className="max-w-5xl">
         <DialogHeader>
           <DialogTitle>傳票明細</DialogTitle>
         </DialogHeader>

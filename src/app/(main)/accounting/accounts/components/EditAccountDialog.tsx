@@ -156,7 +156,7 @@ export function EditAccountDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent level={1} className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>編輯會計科目</DialogTitle>
         </DialogHeader>

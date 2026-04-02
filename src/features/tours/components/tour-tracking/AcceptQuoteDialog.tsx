@@ -84,7 +84,7 @@ export function AcceptQuoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent level={1} className="max-w-md">
         <DialogHeader>
           <DialogTitle>✅ 確認成交</DialogTitle>
         </DialogHeader>

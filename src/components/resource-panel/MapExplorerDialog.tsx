@@ -161,7 +161,7 @@ export function MapExplorerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] w-[1200px] h-[80vh] p-0 gap-0">
+      <DialogContent level={1} className="max-w-[95vw] w-[1200px] h-[80vh] p-0 gap-0">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b bg-[#f5f0e8]">
           <div className="flex items-center gap-3">

@@ -452,7 +452,7 @@ export const ToursPage: React.FC = () => {
 
       {/* 報名對話框（新增訂單） */}
       <Dialog open={!!addOrderDialogTour} onOpenChange={open => !open && setAddOrderDialogTour(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent level={1} className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>報名旅遊團 - {addOrderDialogTour?.name}</DialogTitle>
           </DialogHeader>

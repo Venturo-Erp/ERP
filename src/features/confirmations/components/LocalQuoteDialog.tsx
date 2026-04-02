@@ -313,7 +313,7 @@ export function LocalQuoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent level={1} className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="text-lg">給 Local 報價 — 建議行程表</DialogTitle>
         </DialogHeader>
