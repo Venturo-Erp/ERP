@@ -1,9 +1,11 @@
 'use client'
 
 import * as React from 'react'
+import { createPortal } from 'react-dom'
 import { cn } from '@/lib/utils'
 
 const DropdownMenuItemContext = React.createContext<{ onOpenChange?: (open: boolean) => void }>({})
+const DropdownMenuTriggerRefContext = React.createContext<React.RefObject<HTMLElement | null>>({ current: null })
 
 const DropdownMenu = React.forwardRef<
   HTMLDivElement,
@@ -14,6 +16,7 @@ const DropdownMenu = React.forwardRef<
   }
 >(({ className, open, onOpenChange, children, ...props }, ref) => {
   const [isOpen, setIsOpen] = React.useState(open || false)
+  const triggerRef = React.useRef<HTMLElement | null>(null)
 
   React.useEffect(() => {
     if (open !== undefined) {
@@ -27,6 +30,7 @@ const DropdownMenu = React.forwardRef<
   }
 
   return (
+    <DropdownMenuTriggerRefContext.Provider value={triggerRef}>
     <div ref={ref} className={cn('relative', className)} {...props}>
       {React.Children.map(children, child =>
         React.isValidElement(child)
@@ -43,6 +47,7 @@ const DropdownMenu = React.forwardRef<
           : child
       )}
     </div>
+    </DropdownMenuTriggerRefContext.Provider>
   )
 })
 DropdownMenu.displayName = 'DropdownMenu'
@@ -55,10 +60,19 @@ const DropdownMenuTrigger = React.forwardRef<
     asChild?: boolean
   }
 >(({ className, children, isOpen, onOpenChange, asChild, ...props }, ref) => {
+  const triggerRef = React.useContext(DropdownMenuTriggerRefContext)
+
+  const setRef = React.useCallback((el: HTMLElement | null) => {
+    if (triggerRef) triggerRef.current = el
+    if (typeof ref === 'function') ref(el as HTMLButtonElement | null)
+    else if (ref) (ref as React.MutableRefObject<HTMLButtonElement | null>).current = el as HTMLButtonElement | null
+  }, [ref, triggerRef])
+
   if (asChild && React.isValidElement(children)) {
-    type ChildProps = { onClick?: React.MouseEventHandler<HTMLElement> }
+    type ChildProps = { onClick?: React.MouseEventHandler<HTMLElement>; ref?: React.Ref<HTMLElement> }
     const childElement = children as React.ReactElement<ChildProps>
     return React.cloneElement(childElement, {
+      ref: setRef,
       onClick: (e: React.MouseEvent<HTMLElement>) => {
         onOpenChange?.(!isOpen)
         childElement.props.onClick?.(e)
@@ -69,7 +83,7 @@ const DropdownMenuTrigger = React.forwardRef<
 
   return (
     <button
-      ref={ref}
+      ref={setRef}
       className={cn(
         'flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors',
         'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
@@ -94,10 +108,43 @@ const DropdownMenuContent = React.forwardRef<
   }
 >(({ className, children, isOpen, onOpenChange, align = 'start', ...props }, _ref) => {
   const contentRef = React.useRef<HTMLDivElement>(null)
+  const triggerRef = React.useContext(DropdownMenuTriggerRefContext)
+  const [position, setPosition] = React.useState<{ top: number; left: number } | null>(null)
+
+  React.useEffect(() => {
+    if (!isOpen || !triggerRef?.current) {
+      setPosition(null)
+      return
+    }
+
+    const updatePosition = () => {
+      const trigger = triggerRef.current
+      const content = contentRef.current
+      if (!trigger || !content) return
+
+      const rect = trigger.getBoundingClientRect()
+      const contentWidth = content.offsetWidth || 192
+
+      let left = rect.left
+      if (align === 'end') left = rect.right - contentWidth
+      else if (align === 'center') left = rect.left + rect.width / 2 - contentWidth / 2
+
+      left = Math.min(left, window.innerWidth - contentWidth - 8)
+      left = Math.max(left, 8)
+
+      setPosition({ top: rect.bottom + 4, left })
+    }
+
+    // 先渲染再定位
+    requestAnimationFrame(updatePosition)
+  }, [isOpen, align, triggerRef])
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
+      if (
+        contentRef.current && !contentRef.current.contains(event.target as Node) &&
+        triggerRef?.current && !triggerRef.current.contains(event.target as Node)
+      ) {
         onOpenChange?.(false)
       }
     }
@@ -109,28 +156,29 @@ const DropdownMenuContent = React.forwardRef<
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
-  }, [isOpen, onOpenChange])
+  }, [isOpen, onOpenChange, triggerRef])
 
   if (!isOpen) return null
 
-  return (
+  const portalContent = (
     <DropdownMenuItemContext.Provider value={{ onOpenChange }}>
       <div
         ref={contentRef}
         className={cn(
-          'absolute top-full z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-card p-1 shadow-md',
-          'animate-in fade-in-0 zoom-in-95 data-[side=bottom]:slide-in-from-top-2',
-          align === 'start' && 'left-0',
-          align === 'center' && 'left-1/2 -translate-x-1/2',
-          align === 'end' && 'right-0',
+          'fixed z-[9999] min-w-[8rem] max-h-[70vh] overflow-y-auto rounded-md border border-border bg-card p-1 shadow-md',
+          'animate-in fade-in-0 zoom-in-95',
           className
         )}
+        style={position ? { top: position.top, left: position.left } : { visibility: 'hidden', top: 0, left: 0 }}
         {...props}
       >
         {children}
       </div>
     </DropdownMenuItemContext.Provider>
   )
+
+  if (typeof document === 'undefined') return null
+  return createPortal(portalContent, document.body)
 })
 DropdownMenuContent.displayName = 'DropdownMenuContent'
 

@@ -1086,7 +1086,7 @@ export function OrderMembersExpandable({
                 <Settings size={14} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48 max-h-[70vh] overflow-y-auto">
               <DropdownMenuLabel className="text-xs">
                 {COMP_ORDERS_LABELS.顯示欄位}
               </DropdownMenuLabel>
