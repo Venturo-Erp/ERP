@@ -525,7 +525,9 @@ export function Sidebar() {
           if (!item.requiredPermission) return item
           // '*' 代表擁有所有權限
           if (userPermissions.includes('*')) return item
-          return userPermissions.includes(item.requiredPermission) ? item : null
+          // 精確比對或前綴比對（例如 requiredPermission='tours'，權限有 'tours:overview' 也算符合）
+          const perm = item.requiredPermission
+          return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`)) ? item : null
         })
         .filter((item): item is MenuItem => item !== null)
     }
@@ -554,7 +556,8 @@ export function Sidebar() {
       if (isMenuItemHidden(item.href, hiddenMenuItems)) return false
       if (!item.requiredPermission) return true
       if (isAdmin) return true
-      return userPermissions.includes(item.requiredPermission)
+      const perm = item.requiredPermission
+      return userPermissions.some(p => p === perm || p.startsWith(`${perm}:`))
     })
   }, [user?.id, isLocal, isTransport, isAdmin, hiddenMenuItems, userPermissions])
 
