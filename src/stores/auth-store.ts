@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { User } from './types'
-import { generateToken, type AuthPayload } from '@/lib/auth'
+// generateToken, AuthPayload 已移除 — 不再需要舊的 token 格式
 import { logger } from '@/lib/utils/logger'
-import { getRoleConfig, type UserRole } from '@/lib/rbac-config'
+import type { UserRole } from '@/lib/rbac-config'
 import type { Database } from '@/lib/supabase/types'
 import { ensureAuthSync, resetAuthSyncState } from '@/lib/auth/auth-sync'
 
@@ -13,27 +13,8 @@ import { ensureAuthSync, resetAuthSyncState } from '@/lib/auth/auth-sync'
  */
 type EmployeeRow = Database['public']['Tables']['employees']['Row']
 
-/**
- * 根據員工的角色，合併角色預設權限和資料庫中的額外權限
- * 這確保了當 rbac-config.ts 更新時，員工會自動獲得新的權限
- */
-function mergePermissionsWithRoles(dbPermissions: string[], roles: UserRole[]): string[] {
-  const allPermissions = new Set<string>(dbPermissions)
-
-  // 合併所有角色的預設權限
-  roles.forEach(role => {
-    const roleConfig = getRoleConfig(role)
-    if (roleConfig) {
-      if (roleConfig.permissions.includes('*')) {
-        allPermissions.add('*')
-      } else {
-        roleConfig.permissions.forEach(p => allPermissions.add(p))
-      }
-    }
-  })
-
-  return Array.from(allPermissions)
-}
+// mergePermissionsWithRoles 已移除（2026-04-02）
+// 權限完全由 role_tab_permissions + JWT 決定，不再讀 employees.roles/permissions
 
 /**
  * 查詢 workspace 資訊
@@ -80,10 +61,8 @@ function buildUserFromEmployee(
   options?: { mustChangePassword?: boolean; rolePermissions?: string[] }
 ): User {
   const userRoles = (employeeData.roles || []) as UserRole[]
-  // 優先使用職務權限，否則用舊的 RBAC 權限
-  const mergedPermissions = options?.rolePermissions && options.rolePermissions.length > 0
-    ? options.rolePermissions
-    : mergePermissionsWithRoles(employeeData.permissions || [], userRoles)
+  // 權限完全由 JWT（role_tab_permissions）決定
+  const mergedPermissions = options?.rolePermissions || []
 
   return {
     id: employeeData.id,
@@ -269,24 +248,6 @@ export const useAuthStore = create<AuthState>()(
           // 6. 設定 JWT cookie
           if (jwt) {
             setSecureCookie(jwt, rememberMe)
-          } else {
-            // fallback: 舊格式（向下相容，待移除）
-            const userRoles = (employeeData.roles || []) as UserRole[]
-            const mergedPermissions = mergePermissionsWithRoles(
-              employeeData.permissions || [],
-              userRoles
-            )
-            const authPayload: AuthPayload = {
-              id: employeeData.id,
-              employee_number: employeeData.employee_number,
-              permissions: mergedPermissions,
-              role:
-                mergedPermissions.includes('admin') || mergedPermissions.includes('*')
-                  ? 'admin'
-                  : 'employee',
-            }
-            const token = generateToken(authPayload, rememberMe)
-            setSecureCookie(token, rememberMe)
           }
 
           get().setUser(user)

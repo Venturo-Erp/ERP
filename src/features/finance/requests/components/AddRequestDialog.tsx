@@ -33,7 +33,6 @@ import { formatDate } from '@/lib/utils/format-date'
 import { useWorkspaceId } from '@/lib/workspace-context'
 import { createSupplier, invalidateSuppliers } from '@/data'
 import { supabase } from '@/lib/supabase/client'
-import type { UserRole } from '@/lib/rbac-config'
 import {
   ADD_RECEIPT_DIALOG_LABELS,
   ADD_REQUEST_DIALOG_LABELS,
@@ -45,10 +44,7 @@ import {
   ADD_REQUEST_EXTRA_LABELS,
 } from '../../constants/labels'
 
-/**
- * 可以建立公司請款的角色
- */
-const COMPANY_PAYMENT_ROLES: UserRole[] = ['admin', 'admin', 'accountant']
+// COMPANY_PAYMENT_ROLES 已移除 — 權限改用 role_tab_permissions
 
 interface AddRequestDialogProps {
   open: boolean

@@ -23,7 +23,7 @@ import {
 } from '@/features/hr/components/salary-payment-dialog'
 import { Users, Edit2, Trash2, UserX, DollarSign, Bot, Copy, Download } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { getRoleConfig, type UserRole } from '@/lib/rbac-config'
+import type { UserRole } from '@/lib/rbac-config'
 import { TableColumn } from '@/components/ui/enhanced-table'
 import { DateCell, ActionCell } from '@/components/table-cells'
 import { ConfirmDialog } from '@/components/dialog/confirm-dialog'
