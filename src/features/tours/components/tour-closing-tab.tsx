@@ -6,10 +6,14 @@
  */
 
 import { useMemo, useState, useCallback, useEffect } from 'react'
-import { FileDown, Loader2, Lock, Unlock, TrendingUp, TrendingDown, DollarSign, ArrowRight } from 'lucide-react'
+import { FileDown, FileText, Loader2, Lock, Unlock, TrendingUp, TrendingDown, DollarSign, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
+import { AddReceiptDialog } from '@/features/finance/payments/components/AddReceiptDialog'
+import { RequestDetailDialog } from '@/features/finance/requests/components/RequestDetailDialog'
+import type { Receipt } from '@/types/receipt.types'
+import type { PaymentRequest } from '@/types/finance.types'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { generateTourClosingPDF } from '@/lib/pdf/tour-closing-pdf'
 import type { TourClosingPDFData } from '@/lib/pdf/tour-closing-pdf'
@@ -23,6 +27,7 @@ import {
   useEmployeeDictionary,
   useMembers,
   useOrdersSlim,
+  useSuppliersSlim,
   updateTour,
 } from '@/data'
 import { calculateFullProfit } from '../services/profit-calculation.service'
@@ -42,6 +47,10 @@ interface TourClosingTabProps {
 
 export function TourClosingTab({ tour }: TourClosingTabProps) {
   const [pdfLoading, setPdfLoading] = useState(false)
+  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
+  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false)
+  const [selectedRequest, setSelectedRequest] = useState<PaymentRequest | null>(null)
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false)
 
   // 資料取得
   const { items: allReceipts } = useReceipts()
@@ -49,8 +58,16 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
   const { items: allBonusSettings } = useTourBonusSettings()
   const { items: allMembers } = useMembers()
   const { items: allOrders } = useOrdersSlim()
+  const { items: allSuppliers } = useSuppliersSlim()
   const { get: getEmployee } = useEmployeeDictionary()
   const { user } = useAuthStore()
+
+  // 供應商 ID → 最新名稱 lookup
+  const supplierMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    for (const s of allSuppliers ?? []) map[s.id] = s.name
+    return map
+  }, [allSuppliers])
 
   const orders = useMemo(
     () => allOrders?.filter(o => o.tour_id === tour.id) ?? [],
@@ -59,11 +76,10 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
 
   const orderIds = useMemo(() => new Set(orders.map(o => o.id)), [orders])
 
-  // 收款明細（已確認的）
+  // 收款明細（全部顯示，狀態依核帳結果）
   const receipts = useMemo(
     () => (allReceipts ?? [])
       .filter(r => r.tour_id === tour.id || (r.order_id && orderIds.has(r.order_id)))
-      .filter(r => r.status === '1') // 只顯示已確認
       .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()),
     [allReceipts, tour.id, orderIds]
   )
@@ -102,7 +118,11 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
   }, [bonusSettings, getEmployee])
 
   // 計算總額
-  const totalIncome = useMemo(
+  const confirmedIncome = useMemo(
+    () => receipts.filter(r => r.status === '1').reduce((sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0), 0),
+    [receipts]
+  )
+  const estimatedIncome = useMemo(
     () => receipts.reduce((sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0), 0),
     [receipts]
   )
@@ -112,7 +132,8 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     [paymentRequests]
   )
 
-  const profit = totalIncome - totalExpense
+  const confirmedProfit = confirmedIncome - totalExpense
+  const estimatedProfit = estimatedIncome - totalExpense
 
   // 結案狀態
   const closingStatus = tour.closing_status ?? 'open'
@@ -227,62 +248,43 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* 總覽卡片 */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white border border-border rounded-lg p-4">
-          <div className="flex items-center gap-2 text-morandi-green mb-2">
-            <TrendingUp className="w-4 h-4" />
-            <span className="text-sm font-medium">總收入</span>
+      {/* 總覽卡片 — 與總覽頁相同格式 */}
+      <div className="bg-white border border-border rounded-lg px-5 py-3">
+        <div className="flex items-stretch">
+          <div className="flex-1 flex items-center gap-2.5 px-3">
+            <TrendingUp size={16} className="text-morandi-green shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] text-morandi-secondary leading-tight">總收入（預估／實收）</p>
+              <p className="text-sm font-semibold text-morandi-primary">{formatCurrency(estimatedIncome)} / {formatCurrency(confirmedIncome)}</p>
+            </div>
           </div>
-          <div className="text-2xl font-bold text-morandi-green">
-            {formatCurrency(totalIncome)}
+          <div className="flex-1 flex items-center gap-2.5 px-3">
+            <TrendingDown size={16} className="text-morandi-red shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] text-morandi-secondary leading-tight">總支出</p>
+              <p className="text-sm font-semibold text-morandi-primary">{formatCurrency(totalExpense)}</p>
+            </div>
           </div>
-          <div className="text-xs text-morandi-secondary mt-1">
-            {receipts.length} 筆收款
+          <div className="flex-1 flex items-center gap-2.5 px-3">
+            <DollarSign size={16} className={`shrink-0 ${confirmedProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`} />
+            <div className="min-w-0">
+              <p className="text-[11px] text-morandi-secondary leading-tight">總利潤（預估／實收）</p>
+              <p className="text-sm font-semibold text-morandi-primary">{formatCurrency(estimatedProfit)} / {formatCurrency(confirmedProfit)}</p>
+            </div>
           </div>
-        </div>
-
-        <div className="bg-white border border-border rounded-lg p-4">
-          <div className="flex items-center gap-2 text-morandi-red mb-2">
-            <TrendingDown className="w-4 h-4" />
-            <span className="text-sm font-medium">總支出</span>
-          </div>
-          <div className="text-2xl font-bold text-morandi-red">
-            {formatCurrency(totalExpense)}
-          </div>
-          <div className="text-xs text-morandi-secondary mt-1">
-            {paymentRequests.length} 筆請款
-          </div>
-        </div>
-
-        <div className="bg-white border border-border rounded-lg p-4">
-          <div className="flex items-center gap-2 text-morandi-primary mb-2">
-            <DollarSign className="w-4 h-4" />
-            <span className="text-sm font-medium">淨利潤</span>
-          </div>
-          <div className={`text-2xl font-bold ${profit >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}>
-            {profit >= 0 ? '+' : ''}{formatCurrency(profit)}
-          </div>
-          <div className="text-xs text-morandi-secondary mt-1">
-            利潤率 {totalIncome > 0 ? ((profit / totalIncome) * 100).toFixed(1) : 0}%
+          <div className="flex-1 flex items-center gap-2.5 px-3">
+            <FileText size={16} className="text-morandi-gold shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] text-morandi-secondary leading-tight">總訂單數</p>
+              <p className="text-sm font-semibold text-morandi-primary">{(allOrders ?? []).filter(o => o.tour_id === tour.id).length} 筆</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* 收支明細表 */}
-      <div className="bg-white border border-border rounded-lg overflow-x-auto">
-        <div className="px-4 py-3 border-b border-border bg-morandi-bg">
-          <h3 className="text-sm font-semibold text-morandi-primary">收支明細</h3>
-        </div>
-
-        {receipts.length === 0 && paymentRequests.length === 0 ? (
-          <div className="px-4 py-12 text-center text-morandi-secondary text-sm">
-            尚無收支紀錄
-          </div>
-        ) : (
-          <div className="divide-y divide-border">
-            {/* 收款區塊 */}
-            {receipts.length > 0 && (
+      {/* 收款總覽 */}
+      {receipts.length > 0 && (
+        <div className="border border-border rounded-lg overflow-x-auto bg-card">
               <div>
                 <div className="px-4 py-2 bg-morandi-green/10 flex items-center gap-2">
                   <TrendingUp className="w-4 h-4 text-morandi-green" />
@@ -290,16 +292,16 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                 </div>
                 <table className="w-full text-sm table-fixed" style={{ minWidth: 900 }}>
                   <colgroup>
-                    <col style={{ width: '13%' }} />
-                    <col style={{ width: '7%' }} />
+                    <col style={{ width: '12%' }} />
+                    <col style={{ width: '6%' }} />
                     <col style={{ width: '8%' }} />
-                    <col style={{ width: '10%' }} />
-                    <col style={{ width: '20%' }} />
+                    <col style={{ width: '9%' }} />
+                    <col style={{ width: '18%' }} />
                     <col style={{ width: '8%' }} />
                     <col style={{ width: '5%' }} />
                     <col style={{ width: '8%' }} />
-                    <col style={{ width: '7%' }} />
-                    <col style={{ width: '8%' }} />
+                    <col style={{ width: '10%' }} />
+                    <col style={{ width: '9%' }} />
                   </colgroup>
                   <thead>
                     <tr className="border-b border-border text-xs text-morandi-secondary">
@@ -307,8 +309,9 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                       <th className="px-4 py-2 text-left font-medium">收款日期</th>
                       <th className="px-4 py-2 text-left font-medium">收款方式</th>
                       <th className="px-4 py-2 text-left font-medium">收款明細</th>
-                      <th className="px-4 py-2 text-left font-medium" colSpan={4}>備註</th>
-                      <th className="px-4 py-2 text-left font-medium">狀態</th>
+                      <th className="px-4 py-2 text-left font-medium" colSpan={3}>備註</th>
+                      <th className="px-4 py-2 text-right font-medium">待核金額</th>
+                      <th className="px-4 py-2 text-center font-medium">狀態</th>
                       <th className="px-4 py-2 text-right font-medium">金額</th>
                     </tr>
                   </thead>
@@ -319,20 +322,27 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                         : { label: '待確認', style: 'bg-morandi-secondary/20 text-morandi-secondary' }
                       return (
                       <tr key={r.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
-                        <td className="px-4 py-2 font-medium text-morandi-primary">{r.receipt_number || '-'}</td>
+                        <td className="px-4 py-2 font-medium text-morandi-primary">
+                          <button className="text-morandi-gold hover:underline cursor-pointer" onClick={() => { setSelectedReceipt(r as unknown as Receipt); setReceiptDialogOpen(true) }}>
+                            {r.receipt_number || '-'}
+                          </button>
+                        </td>
                         <td className="px-4 py-2 text-morandi-secondary">{formatDate(r.receipt_date)}</td>
                         <td className="px-4 py-2 text-morandi-secondary">
                           {(r.payment_method_id && paymentMethodMap[r.payment_method_id]) || PAYMENT_METHOD_LABELS[r.payment_method || ''] || r.payment_method || '-'}
                         </td>
                         <td className="px-4 py-2 text-morandi-secondary">{r.receipt_account || r.payment_name || '-'}</td>
-                        <td className="px-4 py-2 text-morandi-secondary" colSpan={4}>{r.notes || '-'}</td>
-                        <td className="px-4 py-2">
+                        <td className="px-4 py-2 text-morandi-secondary" colSpan={3}>{r.notes || '-'}</td>
+                        <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">
+                          {r.status !== '1' ? formatCurrency(Number(r.actual_amount) || Number(r.receipt_amount) || 0) : formatCurrency(0)}
+                        </td>
+                        <td className="px-4 py-2 text-center">
                           <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${receiptStatus.style}`}>
                             {receiptStatus.label}
                           </span>
                         </td>
                         <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-green font-medium">
-                          +{formatCurrency(Number(r.actual_amount) || Number(r.receipt_amount) || 0)}
+                          {r.status === '1' ? `+${formatCurrency(Number(r.actual_amount) || Number(r.receipt_amount) || 0)}` : ''}
                         </td>
                       </tr>
                       )
@@ -340,10 +350,12 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                   </tbody>
                 </table>
               </div>
-            )}
+        </div>
+      )}
 
-            {/* 請款區塊 */}
-            {paymentRequests.length > 0 && (
+      {/* 請款總覽 */}
+      {paymentRequests.length > 0 && (
+        <div className="border border-border rounded-lg overflow-x-auto bg-card">
               <div>
                 <div className="px-4 py-2 bg-morandi-red/10 flex items-center gap-2">
                   <TrendingDown className="w-4 h-4 text-morandi-red" />
@@ -351,16 +363,16 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                 </div>
                 <table className="w-full text-sm table-fixed" style={{ minWidth: 900 }}>
                   <colgroup>
-                    <col style={{ width: '13%' }} />
-                    <col style={{ width: '7%' }} />
+                    <col style={{ width: '12%' }} />
+                    <col style={{ width: '6%' }} />
                     <col style={{ width: '8%' }} />
-                    <col style={{ width: '10%' }} />
-                    <col style={{ width: '20%' }} />
+                    <col style={{ width: '9%' }} />
+                    <col style={{ width: '18%' }} />
                     <col style={{ width: '8%' }} />
                     <col style={{ width: '5%' }} />
                     <col style={{ width: '8%' }} />
-                    <col style={{ width: '7%' }} />
-                    <col style={{ width: '8%' }} />
+                    <col style={{ width: '10%' }} />
+                    <col style={{ width: '9%' }} />
                   </colgroup>
                   <thead>
                     <tr className="border-b border-border text-xs text-morandi-secondary">
@@ -372,13 +384,19 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                       <th className="px-4 py-2 text-right font-medium">單價</th>
                       <th className="px-4 py-2 text-right font-medium">數量</th>
                       <th className="px-4 py-2 text-right font-medium">小計</th>
-                      <th className="px-4 py-2 text-left font-medium">狀態</th>
+                      <th className="px-4 py-2 text-center font-medium">狀態</th>
                       <th className="px-4 py-2 text-right font-medium">金額</th>
                     </tr>
                   </thead>
                   <tbody>
                     {paymentRequests.map(pr => {
-                      const items = (pr as unknown as { items?: Array<{ id?: string; category?: string; supplier_name?: string; description?: string; unitprice?: number; quantity?: number; subtotal?: number }> }).items ?? []
+                      const CATEGORY_ORDER = ['住宿','交通','餐食','活動','導遊','保險','出團款','回團款','ESIM','同業','其他']
+                      const rawItems = (pr as unknown as { items?: Array<{ id?: string; category?: string; supplier_id?: string; supplier_name?: string; description?: string; unitprice?: number; quantity?: number; subtotal?: number }> }).items ?? []
+                      const items = [...rawItems].sort((a, b) => {
+                        const ai = CATEGORY_ORDER.indexOf(a.category || '')
+                        const bi = CATEGORY_ORDER.indexOf(b.category || '')
+                        return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
+                      })
 
                       // 狀態對應
                       const statusMap: Record<string, { label: string; style: string }> = {
@@ -393,7 +411,11 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                       if (items.length === 0) {
                         return (
                           <tr key={pr.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
-                            <td className="px-4 py-2 font-medium text-morandi-primary">{pr.code || '-'}</td>
+                            <td className="px-4 py-2 font-medium text-morandi-primary">
+                              <button className="text-morandi-gold hover:underline cursor-pointer" onClick={() => { setSelectedRequest(pr as unknown as PaymentRequest); setRequestDialogOpen(true) }}>
+                                {pr.code || '-'}
+                              </button>
+                            </td>
                             <td className="px-4 py-2 text-morandi-secondary">{formatDate(pr.request_date)}</td>
                             <td className="px-4 py-2 text-morandi-secondary">{pr.request_type || '-'}</td>
                             <td className="px-4 py-2 text-morandi-secondary">{pr.supplier_name || '-'}</td>
@@ -401,7 +423,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                             <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
                             <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
                             <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
-                            <td className="px-4 py-2">
+                            <td className="px-4 py-2 text-center">
                               <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}>{statusInfo.label}</span>
                             </td>
                             <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">-{formatCurrency(Number(pr.amount) || 0)}</td>
@@ -413,19 +435,23 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                         <tr key={`${pr.id}-${item.id || idx}`} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
                           {idx === 0 ? (
                             <>
-                              <td className="px-4 py-2 font-medium text-morandi-primary" rowSpan={items.length}>{pr.code || '-'}</td>
+                              <td className="px-4 py-2 font-medium text-morandi-primary" rowSpan={items.length}>
+                                <button className="text-morandi-gold hover:underline cursor-pointer" onClick={() => { setSelectedRequest(pr as unknown as PaymentRequest); setRequestDialogOpen(true) }}>
+                                  {pr.code || '-'}
+                                </button>
+                              </td>
                               <td className="px-4 py-2 text-morandi-secondary" rowSpan={items.length}>{formatDate(pr.request_date)}</td>
                             </>
                           ) : null}
                           <td className="px-4 py-2 text-morandi-secondary">{item.category || '-'}</td>
-                          <td className="px-4 py-2 text-morandi-secondary">{item.supplier_name || '-'}</td>
+                          <td className="px-4 py-2 text-morandi-secondary">{(item.supplier_id && supplierMap[item.supplier_id]) || item.supplier_name || '-'}</td>
                           <td className="px-4 py-2 text-morandi-secondary">{item.description || '-'}</td>
                           <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{formatCurrency(item.unitprice ?? 0)}</td>
                           <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{item.quantity ?? '-'}</td>
                           <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{formatCurrency(item.subtotal ?? 0)}</td>
                           {idx === 0 ? (
                             <>
-                              <td className="px-4 py-2" rowSpan={items.length}>
+                              <td className="px-4 py-2 text-center" rowSpan={items.length}>
                                 <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}>{statusInfo.label}</span>
                               </td>
                               <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium" rowSpan={items.length}>-{formatCurrency(Number(pr.amount) || 0)}</td>
@@ -437,11 +463,8 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
                   </tbody>
                 </table>
               </div>
-            )}
-          </div>
-        )}
-
-      </div>
+        </div>
+      )}
 
       {/* 利潤總覽 + 獎金 */}
       <ProfitTab tour={tour} />
@@ -481,6 +504,20 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
           </Button>
         </div>
       </div>
+
+      {/* 收款單 Dialog */}
+      <AddReceiptDialog
+        open={receiptDialogOpen}
+        onOpenChange={setReceiptDialogOpen}
+        editingReceipt={selectedReceipt}
+      />
+
+      {/* 請款單 Dialog */}
+      <RequestDetailDialog
+        open={requestDialogOpen}
+        onOpenChange={setRequestDialogOpen}
+        request={selectedRequest}
+      />
     </div>
   )
 }

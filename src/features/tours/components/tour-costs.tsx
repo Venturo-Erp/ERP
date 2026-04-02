@@ -35,6 +35,8 @@ interface PaymentRequestWithItems {
 }
 import { Receipt, Plus, Truck, Hotel, Utensils, MapPin, X, TrendingDown } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format-currency'
+import { RequestDetailDialog } from '@/features/finance/requests/components/RequestDetailDialog'
+import type { PaymentRequest } from '@/types/finance.types'
 import { DateCell, CurrencyCell } from '@/components/table-cells'
 import { useToast } from '@/components/ui/use-toast'
 import { generateUUID } from '@/lib/utils/uuid'
@@ -420,6 +422,15 @@ export const TourCosts = React.memo(function TourCosts({
 // 請款總覽表格（與結案頁相同版型）
 function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
   const { items: allPaymentRequests } = usePaymentRequests()
+  const { items: allSuppliers } = useSuppliersSlim()
+  const [selectedRequest, setSelectedRequest] = useState<PaymentRequest | null>(null)
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false)
+
+  const supplierMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    for (const s of allSuppliers ?? []) map[s.id] = s.name
+    return map
+  }, [allSuppliers])
 
   const prList = useMemo(
     () => (allPaymentRequests ?? [])
@@ -454,16 +465,16 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
       </div>
       <table className="w-full text-sm table-fixed" style={{ minWidth: 900 }}>
         <colgroup>
-          <col style={{ width: '13%' }} />
-          <col style={{ width: '7%' }} />
+          <col style={{ width: '12%' }} />
+          <col style={{ width: '6%' }} />
           <col style={{ width: '8%' }} />
-          <col style={{ width: '10%' }} />
-          <col style={{ width: '20%' }} />
+          <col style={{ width: '9%' }} />
+          <col style={{ width: '18%' }} />
           <col style={{ width: '8%' }} />
           <col style={{ width: '5%' }} />
           <col style={{ width: '8%' }} />
-          <col style={{ width: '7%' }} />
-          <col style={{ width: '8%' }} />
+          <col style={{ width: '10%' }} />
+          <col style={{ width: '9%' }} />
         </colgroup>
         <thead>
           <tr className="border-b border-border text-xs text-morandi-secondary">
@@ -475,19 +486,29 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
             <th className="px-4 py-2 text-right font-medium">單價</th>
             <th className="px-4 py-2 text-right font-medium">數量</th>
             <th className="px-4 py-2 text-right font-medium">小計</th>
-            <th className="px-4 py-2 text-left font-medium">狀態</th>
+            <th className="px-4 py-2 text-center font-medium">狀態</th>
             <th className="px-4 py-2 text-right font-medium">金額</th>
           </tr>
         </thead>
         <tbody>
           {prList.length > 0 ? prList.map(pr => {
-            const items = (pr as unknown as { items?: Array<{ id?: string; category?: string; supplier_name?: string; description?: string; unitprice?: number; quantity?: number; subtotal?: number }> }).items ?? []
+            const CATEGORY_ORDER = ['住宿','交通','餐食','活動','導遊','保險','出團款','回團款','ESIM','同業','其他']
+            const rawItems = (pr as unknown as { items?: Array<{ id?: string; category?: string; supplier_id?: string; supplier_name?: string; description?: string; unitprice?: number; quantity?: number; subtotal?: number }> }).items ?? []
+            const items = [...rawItems].sort((a, b) => {
+              const ai = CATEGORY_ORDER.indexOf(a.category || '')
+              const bi = CATEGORY_ORDER.indexOf(b.category || '')
+              return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
+            })
             const statusInfo = statusMap[pr.status || ''] ?? { label: pr.status || '待處理', style: 'bg-morandi-secondary/20 text-morandi-secondary' }
 
             if (items.length === 0) {
               return (
                 <tr key={pr.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
-                  <td className="px-4 py-2 font-medium text-morandi-primary">{pr.code || '-'}</td>
+                  <td className="px-4 py-2 font-medium text-morandi-primary">
+                    <button className="text-morandi-gold hover:underline cursor-pointer" onClick={() => { setSelectedRequest(pr as unknown as PaymentRequest); setRequestDialogOpen(true) }}>
+                      {pr.code || '-'}
+                    </button>
+                  </td>
                   <td className="px-4 py-2 text-morandi-secondary">{formatDate(pr.request_date)}</td>
                   <td className="px-4 py-2 text-morandi-secondary">{pr.request_type || '-'}</td>
                   <td className="px-4 py-2 text-morandi-secondary">{pr.supplier_name || '-'}</td>
@@ -495,7 +516,7 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
                   <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
                   <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
                   <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2 text-center">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}>{statusInfo.label}</span>
                   </td>
                   <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">-{formatCurrency(Number(pr.amount) || 0)}</td>
@@ -507,19 +528,23 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
               <tr key={`${pr.id}-${item.id || idx}`} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
                 {idx === 0 ? (
                   <>
-                    <td className="px-4 py-2 font-medium text-morandi-primary" rowSpan={items.length}>{pr.code || '-'}</td>
+                    <td className="px-4 py-2 font-medium text-morandi-primary" rowSpan={items.length}>
+                      <button className="text-morandi-gold hover:underline cursor-pointer" onClick={() => { setSelectedRequest(pr as unknown as PaymentRequest); setRequestDialogOpen(true) }}>
+                        {pr.code || '-'}
+                      </button>
+                    </td>
                     <td className="px-4 py-2 text-morandi-secondary" rowSpan={items.length}>{formatDate(pr.request_date)}</td>
                   </>
                 ) : null}
                 <td className="px-4 py-2 text-morandi-secondary">{item.category || '-'}</td>
-                <td className="px-4 py-2 text-morandi-secondary">{item.supplier_name || '-'}</td>
+                <td className="px-4 py-2 text-morandi-secondary">{(item.supplier_id && supplierMap[item.supplier_id]) || item.supplier_name || '-'}</td>
                 <td className="px-4 py-2 text-morandi-secondary">{item.description || '-'}</td>
                 <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{formatCurrency(item.unitprice ?? 0)}</td>
                 <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{item.quantity ?? '-'}</td>
                 <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{formatCurrency(item.subtotal ?? 0)}</td>
                 {idx === 0 ? (
                   <>
-                    <td className="px-4 py-2" rowSpan={items.length}>
+                    <td className="px-4 py-2 text-center" rowSpan={items.length}>
                       <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}>{statusInfo.label}</span>
                     </td>
                     <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium" rowSpan={items.length}>-{formatCurrency(Number(pr.amount) || 0)}</td>
@@ -537,6 +562,11 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
           )}
         </tbody>
       </table>
+      <RequestDetailDialog
+        open={requestDialogOpen}
+        onOpenChange={setRequestDialogOpen}
+        request={selectedRequest}
+      />
     </div>
   )
 }
