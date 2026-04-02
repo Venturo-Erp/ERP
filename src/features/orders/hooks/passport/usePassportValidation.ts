@@ -141,15 +141,18 @@ export function usePassportValidation(): UsePassportValidationReturn {
         const passportNumber = customerData.passport_number || ''
         const idNumber = customerData.national_id || ''
         const birthDate = customerData.birth_date || null
-        const chineseName = customerData.name || ''
-        const cleanChineseName = chineseName.replace(/\([^)]+\)$/, '').trim()
+        const rawName = customerData.name || ''
+        const cleanName = rawName.replace(/\([^)]+\)$/, '').replace(/⚠️/g, '').trim()
+        // 只有包含中文字元才當作中文名，否則留空
+        const hasChinese = /[\u4e00-\u9fff]/.test(cleanName)
+        const chineseName = hasChinese ? cleanName : ''
 
         // 建立訂單成員
         const memberData = {
           order_id: orderId,
           workspace_id: workspaceId,
           customer_id: null,
-          chinese_name: cleanChineseName || '',
+          chinese_name: chineseName,
           passport_name: customerData.passport_name || customerData.english_name || '',
           passport_name_print: customerData.passport_name_print || null,
           passport_number: passportNumber,
@@ -195,9 +198,9 @@ export function usePassportValidation(): UsePassportValidationReturn {
             if (isValidIdNumber && c.national_id === idNumber) return true
             // 也比對姓名+生日（作為輔助比對，但不會因為這個而建立新顧客）
             if (
-              cleanChineseName &&
+              chineseName &&
               birthDate &&
-              c.name?.replace(/\([^)]+\)$/, '').trim() === cleanChineseName &&
+              c.name?.replace(/\([^)]+\)$/, '').trim() === chineseName &&
               c.birth_date === birthDate
             )
               return true
@@ -215,7 +218,7 @@ export function usePassportValidation(): UsePassportValidationReturn {
 
             await supabase.from('order_members').update(updateData).eq('id', newMember.id)
 
-            if (passportImageUrl && !existingCustomer.passport_image_url) {
+            if (passportImageUrl) {
               await supabase
                 .from('customers')
                 .update({ passport_image_url: passportImageUrl })
@@ -318,8 +321,10 @@ export function usePassportValidation(): UsePassportValidationReturn {
         const passportNumber = customerData.passport_number || ''
         const idNumber = customerData.national_id || ''
         const birthDate = customerData.birth_date || null
-        const chineseName = customerData.name || ''
-        const cleanChineseName = chineseName.replace(/\([^)]+\)$/, '').trim()
+        const rawName = customerData.name || ''
+        const cleanName = rawName.replace(/\([^)]+\)$/, '').replace(/⚠️/g, '').trim()
+        const hasChinese = /[\u4e00-\u9fff]/.test(cleanName)
+        const chineseName = hasChinese ? cleanName : ''
 
         // 更新成員資料（保留原有的 chinese_name，補上 OCR 辨識到的資料）
         const updateData: Record<string, unknown> = {
@@ -338,16 +343,15 @@ export function usePassportValidation(): UsePassportValidationReturn {
           passport_image_url: passportImageUrl,
         }
 
-        // 如果 OCR 有辨識到中文名，且與現有名稱相同，就不更新（避免覆蓋）
-        // 只有在現有名稱為空時才補上
+        // 只有辨識到中文名且現有名稱為空時才補上
         const { data: existingMember } = await supabase
           .from('order_members')
           .select('chinese_name')
           .eq('id', memberId)
           .single()
 
-        if (!existingMember?.chinese_name && cleanChineseName) {
-          updateData.chinese_name = cleanChineseName
+        if (!existingMember?.chinese_name && chineseName) {
+          updateData.chinese_name = chineseName
         }
 
         const { error } = await supabase.from('order_members').update(updateData).eq('id', memberId)
