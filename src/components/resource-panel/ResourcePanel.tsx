@@ -110,8 +110,8 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
         'flex items-center gap-1.5 px-2 py-1.5 rounded-md border bg-card cursor-grab select-none',
         'hover:bg-accent/50 transition-colors',
         isDragging && 'opacity-50 shadow-lg z-50 cursor-grabbing',
-        // 未驗證 = 橘色警示邊框
-        isUnverified ? 'border-morandi-gold/60 bg-morandi-gold/10/50' : 'border-border'
+        // 未驗證 = 警示邊框
+        isUnverified ? 'border-status-warning/50 bg-status-warning-bg' : 'border-border'
       )}
     >
       {/* 縮圖 */}
@@ -134,9 +134,13 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
       {/* 名稱和分類 */}
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium truncate">{resource.name}</p>
-        <p className="text-[10px] text-muted-foreground truncate">
-          {isUnverified ? '⚠ 待驗證' : resource.category || resource.city_name || ''}
-        </p>
+        {isUnverified ? (
+          <p className="text-[10px] text-status-warning truncate">⚠ 待驗證</p>
+        ) : (
+          <p className="text-[10px] text-muted-foreground truncate">
+            {resource.category || resource.city_name || ''}
+          </p>
+        )}
       </div>
     </div>
   )
