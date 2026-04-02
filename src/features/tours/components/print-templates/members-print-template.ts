@@ -101,7 +101,7 @@ export function generateMembersPrintContent({
         <table>
           <thead>
             <tr>
-              <th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5; width: 40px;">#</th>
+              <th style="border: 1px solid #ddd; padding: 8px; background: #f5f5f5; width: 40px;">序</th>
               ${headerCells}
             </tr>
           </thead>
