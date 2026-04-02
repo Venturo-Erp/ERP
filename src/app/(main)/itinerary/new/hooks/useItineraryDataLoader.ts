@@ -96,9 +96,46 @@ export function useItineraryDataLoader({
   const lastIdRef = useRef<string | null>(null)
   const isFetchingRef = useRef(false)
 
+  // 用 attraction_id 從景點庫補上描述和圖片
+  const enrichActivities = useCallback(async (dailyItinerary: DailyItinerary[]): Promise<DailyItinerary[]> => {
+    if (!dailyItinerary || dailyItinerary.length === 0) return dailyItinerary
+
+    const attractionIds = new Set<string>()
+    for (const day of dailyItinerary) {
+      for (const activity of day.activities || []) {
+        if (activity.attraction_id && !activity.description) {
+          attractionIds.add(activity.attraction_id)
+        }
+      }
+    }
+    if (attractionIds.size === 0) return dailyItinerary
+
+    const { data: attractions } = await supabase
+      .from('attractions')
+      .select('id, description, thumbnail, images')
+      .in('id', Array.from(attractionIds))
+
+    if (!attractions) return dailyItinerary
+
+    const attrMap = new Map(attractions.map(a => [a.id, a]))
+    return dailyItinerary.map(day => ({
+      ...day,
+      activities: day.activities?.map(activity => {
+        if (!activity.attraction_id) return activity
+        const attr = attrMap.get(activity.attraction_id)
+        if (!attr) return activity
+        return {
+          ...activity,
+          description: activity.description || attr.description || '',
+          image: activity.image || attr.thumbnail || (attr.images as string[])?.[0] || '',
+        }
+      }),
+    }))
+  }, [])
+
   // 載入行程表資料的輔助函數
   const loadItineraryData = useCallback(
-    (itinerary: Itinerary) => {
+    async (itinerary: Itinerary) => {
       logger.log('[ItineraryDataLoader] 載入行程表資料:', itinerary.id)
       logger.log(
         '[ItineraryDataLoader] 行程 daily_itinerary 長度:',
@@ -180,7 +217,7 @@ export function useItineraryDataLoader({
         hotels: (itinerary.hotels as HotelInfo[]) || [],
         showHotels: itinerary.show_hotels || false,
         itinerarySubtitle: itinerary.itinerary_subtitle || '',
-        dailyItinerary: (itinerary.daily_itinerary || []).map(day => {
+        dailyItinerary: await enrichActivities((itinerary.daily_itinerary || []).map(day => {
           const d = day as DailyItinerary
           return {
             ...d,
@@ -189,7 +226,7 @@ export function useItineraryDataLoader({
             images: Array.isArray(d.images) ? d.images : [],
             meals: d.meals || { breakfast: '', lunch: '', dinner: '' },
           }
-        }),
+        })),
         showPricingDetails: itinerary.pricing_details?.show_pricing_details || false,
         pricingDetails: itinerary.pricing_details || {
           show_pricing_details: false,
@@ -247,7 +284,7 @@ export function useItineraryDataLoader({
       hasInitializedRef.current = true
       lastIdRef.current = itinerary.id
     },
-    [setTourData, setCurrentVersionIndex, setQuoteTierPricings, setLoading, quotes]
+    [setTourData, setCurrentVersionIndex, setQuoteTierPricings, setLoading, quotes, enrichActivities]
   )
 
   useEffect(() => {
@@ -342,7 +379,7 @@ export function useItineraryDataLoader({
                 return_flight: tourReturnFlight || data.return_flight,
               } as unknown as Itinerary
               
-              loadItineraryData(itinerary)
+              await loadItineraryData(itinerary)
 
               // 檢查交接狀態（如果有關聯的 tour）
               if (setIsHandedOff && itinerary.tour_id) {

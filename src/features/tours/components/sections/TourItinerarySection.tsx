@@ -17,7 +17,8 @@ import {
 import { ArrowRight, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import { SectionTitle } from './SectionTitle'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import type {
   TourPageData,
   CoverStyleType,
@@ -806,6 +807,7 @@ export function TourItinerarySection({
         onOpenChange={open => !open && setSelectedActivity(null)}
       >
         <DialogContent level={1} className="max-w-[85vw] max-h-[70vh] w-auto p-0 overflow-hidden">
+          <VisuallyHidden><DialogTitle>景點詳情</DialogTitle></VisuallyHidden>
           <AnimatePresence mode="wait">
             {selectedActivity && (
               <motion.div

@@ -20,6 +20,7 @@ import { useItineraries, createItinerary, updateItinerary } from '@/data'
 import { toast } from 'sonner'
 import { Cloud, CloudOff, Sparkles } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
+import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 
 // 區塊編輯器
 import { BlockEditor, tourDataToBlocks, blocksToTourData } from '@/components/editor/block-editor'
@@ -52,12 +53,54 @@ function BlockEditorPageContent() {
   const [currentVersionIndex] = useState(-1)
   const initialLoadDone = useRef(false)
 
+  // 用 attraction_id 從景點庫補上描述和圖片
+  const enrichDailyItinerary = useCallback(async (dailyItinerary: TourFormData['dailyItinerary']) => {
+    if (!dailyItinerary || dailyItinerary.length === 0) return dailyItinerary
+
+    const attractionIds = new Set<string>()
+    for (const day of dailyItinerary) {
+      for (const activity of day.activities || []) {
+        if (activity.attraction_id && !activity.description) {
+          attractionIds.add(activity.attraction_id)
+        }
+      }
+    }
+    if (attractionIds.size === 0) return dailyItinerary
+
+    const supabase = createSupabaseBrowserClient()
+    const { data: attractions } = await supabase
+      .from('attractions')
+      .select('id, description, thumbnail, images')
+      .in('id', Array.from(attractionIds))
+
+    if (!attractions) return dailyItinerary
+
+    const attrMap = new Map(attractions.map(a => [a.id, a]))
+    return dailyItinerary.map(day => ({
+      ...day,
+      activities: day.activities?.map(activity => {
+        if (!activity.attraction_id) return activity
+        const attr = attrMap.get(activity.attraction_id)
+        if (!attr) return activity
+        return {
+          ...activity,
+          description: activity.description || attr.description || '',
+          image: activity.image || attr.thumbnail || (attr.images as string[])?.[0] || undefined,
+        }
+      }),
+    }))
+  }, [])
+
   // 載入現有行程或創建新行程
   useEffect(() => {
     if (initialLoadDone.current) return
+    const loadItinerary = async () => {
     if (itineraryId && itineraries.length > 0) {
       const itinerary = itineraries.find(i => i.id === itineraryId)
       if (itinerary) {
+        // 用 attraction_id 補上景點描述和圖片
+        const enrichedDailyItinerary = await enrichDailyItinerary(itinerary.daily_itinerary || [])
+
         // 將現有資料轉換為 TourFormData 格式
         const tourData: TourFormData = {
           tagline: itinerary.tagline || '',
@@ -105,7 +148,7 @@ function BlockEditorPageContent() {
           showLeaderMeeting: itinerary.show_leader_meeting !== false,
           showHotels: itinerary.show_hotels || false,
           itinerarySubtitle: itinerary.itinerary_subtitle || '',
-          dailyItinerary: itinerary.daily_itinerary || [],
+          dailyItinerary: enrichedDailyItinerary || [],
           itineraryStyle: itinerary.itinerary_style as TourFormData['itineraryStyle'],
           pricingDetails: itinerary.pricing_details,
           showPricingDetails: itinerary.show_pricing_details || false,
@@ -163,7 +206,9 @@ function BlockEditorPageContent() {
     }
     initialLoadDone.current = true
     setLoading(false)
-  }, [itineraryId, itineraries])
+    }
+    loadItinerary()
+  }, [itineraryId, itineraries, enrichDailyItinerary])
 
   // 轉換區塊為 TourFormData 用於預覽
   const tourData = blocksToTourData(blocks)

@@ -7,10 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Building2, UtensilsCrossed, Save, X, ExternalLink, FileEdit, Database } from 'lucide-react'
+import { MapPin, Building2, UtensilsCrossed, Save, X, ExternalLink, FileEdit, Database, Phone, Globe, Clock, Timer, Ticket, StickyNote, Trash2, Upload, Loader2, Star } from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { ResourceOverrideDialog } from './ResourceOverrideDialog'
+import { logger } from '@/lib/utils/logger'
 
 export type ResourceType = 'attraction' | 'hotel' | 'restaurant'
 
@@ -29,6 +30,7 @@ interface ResourceDetailDialogProps {
     description?: string | null
   } | null
   onSave?: (updated: { id: string; name: string; description?: string; address?: string }) => void
+  onDelete?: (id: string) => void
   // 權限控制
   canEditDatabase?: boolean  // 是否可以編輯資料庫
   // 本團覆蓋相關
@@ -43,6 +45,7 @@ export function ResourceDetailDialog({
   onOpenChange,
   resource,
   onSave,
+  onDelete,
   canEditDatabase = false,
   tourItineraryItemId,
   currentOverride,
@@ -55,6 +58,8 @@ export function ResourceDetailDialog({
   const [loading, setLoading] = useState(false)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [showOverrideDialog, setShowOverrideDialog] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [uploading, setUploading] = useState(false)
 
   // 編輯表單狀態
   const [editName, setEditName] = useState('')
@@ -88,6 +93,19 @@ export function ResourceDetailDialog({
           .single()
 
         if (error) throw error
+
+        // 清理 DB 資料：移除 images 裡與 thumbnail 重複的 URL
+        if (data.thumbnail && Array.isArray(data.images)) {
+          const cleanImages = data.images.filter((img: string) => img !== data.thumbnail)
+          if (cleanImages.length !== data.images.length) {
+            data.images = cleanImages
+            await supabase
+              .from(table)
+              .update({ images: cleanImages, updated_at: new Date().toISOString() })
+              .eq('id', resource.id)
+          }
+        }
+
         setFullData(data)
 
         // 初始化編輯表單
@@ -164,10 +182,145 @@ export function ResourceDetailDialog({
     }
   }
 
-  const thumbnail = (fullData?.thumbnail as string) || resource.thumbnail
-  const images = (fullData?.images as string[]) || []
-  // 合併所有圖片：thumbnail + images
-  const allImages = [thumbnail, ...images].filter(Boolean) as string[]
+  const getTableName = () =>
+    resource.type === 'attraction' ? 'attractions' : resource.type === 'hotel' ? 'hotels' : 'restaurants'
+
+  const handleDelete = async () => {
+    if (!confirm(`確定要刪除「${resource.name}」嗎？此操作無法還原。`)) return
+
+    setDeleting(true)
+    try {
+      const { error } = await supabase.from(getTableName()).delete().eq('id', resource.id)
+      if (error) throw error
+
+      toast.success('已刪除')
+      onOpenChange(false)
+      onDelete?.(resource.id)
+    } catch (err) {
+      logger.error('刪除失敗:', err)
+      toast.error('刪除失敗')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0) return
+
+    setUploading(true)
+    try {
+      const newImageUrls: string[] = []
+
+      for (const file of Array.from(files)) {
+        const ext = file.name.split('.').pop()
+        const filePath = `${resource.type}s/${resource.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
+
+        const { error: uploadError } = await supabase.storage
+          .from('resources')
+          .upload(filePath, file)
+
+        if (uploadError) throw uploadError
+
+        const { data: urlData } = supabase.storage.from('resources').getPublicUrl(filePath)
+        newImageUrls.push(urlData.publicUrl)
+      }
+
+      // 更新 DB：合併現有 images
+      const existingImages = (fullData?.images as string[]) || []
+      const updatedImages = [...existingImages, ...newImageUrls]
+
+      const { error } = await supabase
+        .from(getTableName())
+        .update({ images: updatedImages, updated_at: new Date().toISOString() })
+        .eq('id', resource.id)
+
+      if (error) throw error
+
+      setFullData(prev => (prev ? { ...prev, images: updatedImages } : null))
+      toast.success(`已上傳 ${newImageUrls.length} 張照片`)
+    } catch (err) {
+      logger.error('上傳失敗:', err)
+      toast.error('上傳照片失敗')
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  const handleDeleteImage = async (imageUrl: string) => {
+    const currentThumbnail = (fullData?.thumbnail as string) || resource.thumbnail
+    const existingImages = (fullData?.images as string[]) || []
+    const isThumbnail = imageUrl === currentThumbnail
+
+    const updates: Record<string, unknown> = {
+      updated_at: new Date().toISOString(),
+    }
+
+    if (isThumbnail) {
+      // 刪除封面：用 images 的第一張替補，或設為 null
+      // 先把 thumbnail URL 從 images 移除（避免資料重複時多刪）
+      const cleanImages = existingImages.filter(img => img !== imageUrl)
+      updates.thumbnail = cleanImages.length > 0 ? cleanImages[0] : null
+      updates.images = cleanImages.length > 0 ? cleanImages.slice(1) : []
+    } else {
+      // 刪除非封面：從 images 移除
+      updates.images = existingImages.filter(img => img !== imageUrl)
+    }
+
+    try {
+      const { error } = await supabase
+        .from(getTableName())
+        .update(updates)
+        .eq('id', resource.id)
+
+      if (error) throw error
+
+      setFullData(prev => (prev ? { ...prev, ...updates } : null))
+      setCurrentImageIndex(0)
+      toast.success('已刪除照片')
+    } catch (err) {
+      logger.error('刪除照片失敗:', err)
+      toast.error('刪除照片失敗')
+    }
+  }
+
+  const handleSetThumbnail = async (imageUrl: string) => {
+    const currentThumbnail = (fullData?.thumbnail as string) || null
+    const existingImages = (fullData?.images as string[]) || []
+
+    // 重組：新封面從 images 移除，舊封面放回 images
+    const newImages = existingImages.filter(img => img !== imageUrl)
+    if (currentThumbnail) {
+      newImages.unshift(currentThumbnail)
+    }
+
+    try {
+      const { error } = await supabase
+        .from(getTableName())
+        .update({
+          thumbnail: imageUrl,
+          images: newImages,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', resource.id)
+
+      if (error) throw error
+
+      setFullData(prev => (prev ? { ...prev, thumbnail: imageUrl, images: newImages } : null))
+      setCurrentImageIndex(0)
+      toast.success('已設為封面')
+    } catch (err) {
+      logger.error('設定封面失敗:', err)
+      toast.error('設定封面失敗')
+    }
+  }
+
+  // fullData 載入後以它為準（thumbnail 可能被刪成 null），未載入時才用 resource prop
+  const thumbnail = fullData ? (fullData.thumbnail as string | null) : resource.thumbnail
+  const images = fullData ? ((fullData.images as string[]) || []) : []
+  // 合併所有圖片：thumbnail + images（去重，避免 thumbnail 也出現在 images 陣列裡）
+  const allImages = [...new Set([thumbnail, ...images].filter(Boolean))] as string[]
   const hasImages = allImages.length > 0
   
   const hasCoordinates = resource.latitude && resource.longitude
@@ -177,7 +330,7 @@ export function ResourceDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={hasImages ? 'max-w-4xl' : 'max-w-md'}>
+      <DialogContent level={1} className={(hasImages || isEditing) ? 'max-w-4xl' : 'max-w-md'}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {iconMap[resource.type]}
@@ -191,24 +344,57 @@ export function ResourceDetailDialog({
         {loading ? (
           <div className="py-8 text-center text-muted-foreground">載入中...</div>
         ) : (
-          <div className={hasImages ? 'flex gap-6' : 'space-y-4'}>
+          <div className={(hasImages || isEditing) ? 'flex gap-6' : 'space-y-4'}>
             {/* 左側：圖片 */}
-            {hasImages && (
+            {(hasImages || isEditing) && (
               <div className="w-[320px] flex-shrink-0 space-y-2">
                 {/* 主圖 */}
-                <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted">
-                  <img 
-                    src={allImages[currentImageIndex]} 
-                    alt={resource.name} 
-                    className="w-full h-full object-cover" 
-                  />
-                  {/* 圖片計數 */}
-                  {allImages.length > 1 && (
-                    <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                      {currentImageIndex + 1} / {allImages.length}
-                    </div>
-                  )}
-                </div>
+                {allImages.length > 0 ? (
+                  <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted">
+                    <img
+                      src={allImages[currentImageIndex]}
+                      alt={resource.name}
+                      className="w-full h-full object-cover"
+                    />
+                    {/* 封面標記 */}
+                    {currentImageIndex === 0 && allImages.length > 1 && (
+                      <div className="absolute top-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                        <Star size={10} className="fill-current" /> 封面
+                      </div>
+                    )}
+                    {/* 圖片計數 */}
+                    {allImages.length > 1 && (
+                      <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                        {currentImageIndex + 1} / {allImages.length}
+                      </div>
+                    )}
+                    {/* 編輯模式：當前圖片操作 */}
+                    {isEditing && (
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        {currentImageIndex !== 0 && (
+                          <button
+                            onClick={() => handleSetThumbnail(allImages[currentImageIndex])}
+                            className="bg-black/60 hover:bg-black/80 text-white p-1.5 rounded transition-colors"
+                            title="設為封面"
+                          >
+                            <Star size={14} />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteImage(allImages[currentImageIndex])}
+                          className="bg-black/60 hover:bg-red-600 text-white p-1.5 rounded transition-colors"
+                          title="刪除照片"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : isEditing ? (
+                  <div className="aspect-[4/3] rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-sm">
+                    尚無照片
+                  </div>
+                ) : null}
                 {/* 縮圖列表 */}
                 {allImages.length > 1 && (
                   <div className="flex gap-1 overflow-x-auto">
@@ -216,20 +402,38 @@ export function ResourceDetailDialog({
                       <button
                         key={idx}
                         onClick={() => setCurrentImageIndex(idx)}
-                        className={`w-16 h-12 flex-shrink-0 rounded overflow-hidden border-2 transition-colors ${
+                        className={`relative w-16 h-12 flex-shrink-0 rounded overflow-hidden border-2 transition-colors ${
                           idx === currentImageIndex ? 'border-primary' : 'border-transparent'
                         }`}
                       >
                         <img src={img} alt="" className="w-full h-full object-cover" />
+                        {idx === 0 && (
+                          <Star size={8} className="absolute top-0.5 left-0.5 text-white fill-current drop-shadow" />
+                        )}
                       </button>
                     ))}
                   </div>
+                )}
+                {/* 上傳照片按鈕（編輯模式） */}
+                {isEditing && (
+                  <label className="flex items-center justify-center gap-1.5 px-3 py-2 border border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors text-sm text-muted-foreground">
+                    {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                    {uploading ? '上傳中...' : '上傳照片'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
                 )}
               </div>
             )}
 
             {/* 右側：資訊 */}
-            <div className={hasImages ? 'flex-1 space-y-3 max-h-[500px] overflow-y-auto pr-2' : 'space-y-4'}>
+            <div className={(hasImages || isEditing) ? 'flex-1 space-y-3 max-h-[500px] overflow-y-auto pr-2' : 'space-y-4'}>
               {/* 名稱 */}
               {isEditing ? (
                 <div className="space-y-1.5">
@@ -291,14 +495,14 @@ export function ResourceDetailDialog({
                   {/* 電話 */}
                   {fullData.phone ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <span className="text-xs">📞</span>
+                      <Phone size={14} className="shrink-0" />
                       <span>{String(fullData.phone)}</span>
                     </div>
                   ) : null}
                   {/* 網站 */}
                   {fullData.website ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <span className="text-xs">🌐</span>
+                      <Globe size={14} className="shrink-0" />
                       <a
                         href={String(fullData.website)}
                         target="_blank"
@@ -312,32 +516,34 @@ export function ResourceDetailDialog({
                   {/* 營業時間 */}
                   {fullData.opening_hours ? (
                     <div className="flex items-start gap-2 text-muted-foreground">
-                      <span className="text-xs">🕐</span>
+                      <Clock size={14} className="shrink-0 mt-0.5" />
                       <span>
                         {typeof fullData.opening_hours === 'string'
                           ? fullData.opening_hours
-                          : JSON.stringify(fullData.opening_hours)}
+                          : Object.entries(fullData.opening_hours as Record<string, string>)
+                              .map(([key, val]) => (key === 'daily' ? val : `${key}: ${val}`))
+                              .join('、')}
                       </span>
                     </div>
                   ) : null}
                   {/* 建議遊玩時間 */}
                   {fullData.duration_minutes ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <span className="text-xs">⏱️</span>
+                      <Timer size={14} className="shrink-0" />
                       <span>建議 {String(fullData.duration_minutes)} 分鐘</span>
                     </div>
                   ) : null}
                   {/* 票價 */}
                   {fullData.ticket_price ? (
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <span className="text-xs">🎫</span>
+                      <Ticket size={14} className="shrink-0" />
                       <span>{String(fullData.ticket_price)}</span>
                     </div>
                   ) : null}
                   {/* 備註 */}
                   {fullData.notes ? (
                     <div className="flex items-start gap-2 text-muted-foreground">
-                      <span className="text-xs">📝</span>
+                      <StickyNote size={14} className="shrink-0 mt-0.5" />
                       <span>{String(fullData.notes)}</span>
                     </div>
                   ) : null}
@@ -347,8 +553,8 @@ export function ResourceDetailDialog({
               {/* 座標 & 地圖連結 */}
               {hasCoordinates && !isEditing && (
                 <div className="flex items-center gap-2 pt-2 border-t">
-                  <span className="text-xs text-muted-foreground">
-                    📍 {resource.latitude?.toFixed(4)}, {resource.longitude?.toFixed(4)}
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <MapPin size={12} /> {resource.latitude?.toFixed(4)}, {resource.longitude?.toFixed(4)}
                   </span>
                   {googleMapsUrl && (
                     <a
@@ -425,6 +631,7 @@ export function ResourceDetailDialog({
           tourItineraryItemId={tourItineraryItemId}
           currentOverride={currentOverride}
           originalDescription={fullData?.description as string | null}
+          images={allImages}
           onSave={(desc) => {
             onOverrideSave?.(desc)
             setShowOverrideDialog(false)
