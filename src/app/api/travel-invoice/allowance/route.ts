@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     // 取得發票資訊
     const { data: invoice, error: fetchError } = await supabase
       .from('travel_invoices')
-      .select('*')
+      .select('id, invoice_number, invoice_date, status, workspace_id')
       .eq('id', invoiceId)
       .single()
 

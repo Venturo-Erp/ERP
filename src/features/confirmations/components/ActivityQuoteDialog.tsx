@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Loader2, X } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import { UnifiedTraditionalView } from './UnifiedTraditionalView'
@@ -70,13 +71,16 @@ export function ActivityQuoteDialog({
 
   // 原始資料（用於比對是否有變化）
   const [originalInfo, setOriginalInfo] = useState<typeof supplierInfo>({})
+  const [loadingData, setLoadingData] = useState(false)
 
-  // 從 attractions 表讀取活動資料
+  // 並行載入：活動資料 + LINE 群組
   useEffect(() => {
     if (!open) return
+    setSelectedMethod(null)
+    setLoadingData(true)
+
     const loadAttractionInfo = async () => {
       if (resourceId) {
-        // 有 resourceId，從 attractions 表讀取
         const { data } = await supabase
           .from('attractions')
           .select('contact_name, phone, fax')
@@ -93,16 +97,11 @@ export function ActivityQuoteDialog({
           return
         }
       }
-      // 沒有 resourceId 或找不到，清空
       setSupplierInfo({})
       setOriginalInfo({})
     }
-    loadAttractionInfo()
-  }, [open, resourceId, supabase])
 
-  useEffect(() => {
-    if (!open) return
-    const load = async () => {
+    const loadLineGroups = async () => {
       const { data } = await supabase
         .from('line_groups')
         .select('group_id, group_name')
@@ -112,12 +111,9 @@ export function ActivityQuoteDialog({
           data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
         )
     }
-    load()
-  }, [open, supabase])
 
-  useEffect(() => {
-    if (open) setSelectedMethod(null)
-  }, [open])
+    Promise.all([loadAttractionInfo(), loadLineGroups()]).finally(() => setLoadingData(false))
+  }, [open, resourceId, supabase])
 
   const handleSendLine = async () => {
     if (!selectedGroupId || !tour) return
@@ -208,7 +204,17 @@ export function ActivityQuoteDialog({
         </DialogHeader>
         {/* 中間可滾動內容 */}
         <div className="flex-1 overflow-y-auto pr-1 space-y-3">
-          {viewMode === 'traditional' ? (
+          {loadingData ? (
+            <div className="space-y-4 py-4">
+              <Skeleton className="h-8 w-[200px]" />
+              <div className="grid grid-cols-2 gap-4">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          ) : viewMode === 'traditional' ? (
             <UnifiedTraditionalView
               requestType="activity"
               tour={tour}

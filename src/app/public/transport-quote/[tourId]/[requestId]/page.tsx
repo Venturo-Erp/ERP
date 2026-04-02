@@ -22,7 +22,7 @@ export default async function TransportQuoteWithRequestPage({
   // 查詢需求單
   const { data: request } = await supabase
     .from('tour_requests')
-    .select('*')
+    .select('id, tour_id, supplier_name, supplier_response, replied_at, note, metadata, items, status, request_type')
     .eq('id', requestId)
     .eq('tour_id', tourId)
     .single()
@@ -42,7 +42,7 @@ export default async function TransportQuoteWithRequestPage({
   const [{ data: historyRequests }, { data: tour }, { data: coreItems }] = await Promise.all([
     supabase
       .from('tour_requests')
-      .select('*')
+      .select('id, supplier_response, replied_at, created_at')
       .eq('tour_id', tourId)
       .eq('supplier_name', request.supplier_name)
       .eq('request_type', 'transport')
@@ -56,7 +56,7 @@ export default async function TransportQuoteWithRequestPage({
       .single(),
     supabase
       .from('tour_itinerary_items')
-      .select('*')
+      .select('id, tour_id, day_number, sort_order, category, sub_category, title')
       .eq('tour_id', tourId)
       .order('day_number', { ascending: true })
       .order('sort_order', { ascending: true }),

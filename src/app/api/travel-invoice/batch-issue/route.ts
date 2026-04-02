@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     // 查詢訂單並計算可開金額
     const { data: ordersData, error: ordersError } = await supabase
       .from('orders_invoice_summary')
-      .select('*')
+      .select('order_id, order_number, invoiceable_amount, workspace_id')
       .in('order_id', order_ids)
       .limit(500)
 

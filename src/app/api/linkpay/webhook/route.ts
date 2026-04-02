@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     // ============================================
     const { data: linkpayLog, error: findError } = await supabase
       .from('linkpay_logs')
-      .select('*')
+      .select('id, linkpay_order_number, price, status')
       .eq('linkpay_order_number', order_no)
       .single()
 

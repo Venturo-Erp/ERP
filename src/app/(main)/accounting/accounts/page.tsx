@@ -119,7 +119,7 @@ export default function AccountsPage() {
     try {
       const { data, error } = await supabase
         .from('chart_of_accounts')
-        .select('*')
+        .select('id, code, name, account_type, description, is_system_locked, is_active, workspace_id, parent_id, created_at, updated_at')
         .eq('workspace_id', user.workspace_id)
         .order('code', { ascending: true })
 

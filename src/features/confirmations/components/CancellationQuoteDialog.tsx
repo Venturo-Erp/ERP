@@ -20,6 +20,7 @@ import { UnifiedTraditionalView } from './UnifiedTraditionalView'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Send, Printer, Loader2 } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import type { Tour } from '@/stores/types'
 import { logger } from '@/lib/utils/logger'
 
@@ -58,12 +59,14 @@ export function CancellationQuoteDialog({
   // LINE 群組
   const [lineGroups, setLineGroups] = useState<{ group_id: string; group_name: string }[]>([])
   const [selectedGroupId, setSelectedGroupId] = useState<string>(defaultLineGroupId || '')
+  const [loadingGroups, setLoadingGroups] = useState(false)
 
   const supabase = createSupabaseBrowserClient()
 
   // 載入 LINE 群組
   useEffect(() => {
     if (!open) return
+    setLoadingGroups(true)
     const load = async () => {
       const { data } = await supabase
         .from('line_groups')
@@ -81,6 +84,7 @@ export function CancellationQuoteDialog({
           setSelectedGroupId(defaultLineGroupId)
         }
       }
+      setLoadingGroups(false)
     }
     void load()
   }, [open, defaultLineGroupId])
@@ -247,18 +251,22 @@ export function CancellationQuoteDialog({
           {/* LINE 群組選擇 */}
           <div className="flex items-center gap-3">
             <span className="text-sm text-muted-foreground">LINE 群組：</span>
-            <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
-              <SelectTrigger className="w-[250px]">
-                <SelectValue placeholder="選擇群組" />
-              </SelectTrigger>
-              <SelectContent>
-                {lineGroups.map(g => (
-                  <SelectItem key={g.group_id} value={g.group_id}>
-                    {g.group_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {loadingGroups ? (
+              <Skeleton className="h-10 w-[250px]" />
+            ) : (
+              <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+                <SelectTrigger className="w-[250px]">
+                  <SelectValue placeholder="選擇群組" />
+                </SelectTrigger>
+                <SelectContent>
+                  {lineGroups.map(g => (
+                    <SelectItem key={g.group_id} value={g.group_id}>
+                      {g.group_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           {/* 按鈕 */}

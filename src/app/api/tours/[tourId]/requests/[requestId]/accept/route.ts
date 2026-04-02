@@ -37,7 +37,7 @@ export async function POST(
     // 2. 從核心表抓取所有項目
     const { data: coreItems, error: fetchError } = await supabase
       .from('tour_itinerary_items')
-      .select('*')
+      .select('id, title, category, service_date, day_number, sort_order')
       .eq('tour_id', tourId)
       .order('day_number', { ascending: true })
       .order('sort_order', { ascending: true })

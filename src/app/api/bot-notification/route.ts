@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     // 1. 查找或建立機器人與接收者的 DM 頻道
     const { data: existingChannel } = await supabase
       .from('channels')
-      .select('*')
+      .select('id, name, type, workspace_id')
       .eq('type', 'direct')
       .or(
         `name.ilike.dm:${SYSTEM_BOT_ID}:${recipient_id},name.ilike.dm:${recipient_id}:${SYSTEM_BOT_ID}`

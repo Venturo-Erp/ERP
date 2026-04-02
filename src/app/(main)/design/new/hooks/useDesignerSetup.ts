@@ -86,7 +86,7 @@ export function useDesignerSetup({
         if (selectedItineraryId) {
           const { data: itineraryData } = await supabase
             .from('itineraries')
-            .select('*')
+            .select('id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary')
             .eq('id', selectedItineraryId)
             .single()
 
@@ -114,7 +114,7 @@ export function useDesignerSetup({
         } else if (selectedTourId) {
           const { data: tourData } = await supabase
             .from('tours')
-            .select('*')
+            .select('id, name, code, departure_date, return_date, outbound_flight, return_flight')
             .eq('id', selectedTourId)
             .single()
 

@@ -63,7 +63,7 @@ export default function TourClosingReportPage() {
       // 取得所有已結團的旅遊團
       const { data: tours, error } = await supabase
         .from('tours')
-        .select('*')
+        .select('id, code, name, departure_date, return_date, status, workspace_id, archived, current_participants, max_participants, contract_archived_date')
         .eq('workspace_id', workspace.id)
         .eq('archived', true)
         .order('return_date', { ascending: false })

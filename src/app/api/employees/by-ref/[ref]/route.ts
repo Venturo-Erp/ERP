@@ -15,13 +15,13 @@ export async function GET(
   // 先用 employee_number 查
   let { data, error } = await supabase
     .from('employees')
-    .select('*')
+    .select('id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active')
     .eq('employee_number', ref)
     .single()
 
   // 如果查不到，用 display_name 查
   if (!data) {
-    const result = await supabase.from('employees').select('*').eq('display_name', ref).single()
+    const result = await supabase.from('employees').select('id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active').eq('display_name', ref).single()
     data = result.data
     error = result.error
   }

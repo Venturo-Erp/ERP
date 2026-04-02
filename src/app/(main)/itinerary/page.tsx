@@ -343,7 +343,7 @@ function CreateItineraryDialog({
 
       const { data: itineraryItems } = await supabase
         .from('tour_itinerary_items')
-        .select('*')
+        .select('id, tour_id, day_number, sort_order, category, sub_category, title, resource_type, resource_name')
         .eq('tour_id', selectedTourId)
         .order('day_number', { ascending: true })
 

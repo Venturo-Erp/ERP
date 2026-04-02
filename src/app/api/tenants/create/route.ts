@@ -347,7 +347,7 @@ export async function POST(request: NextRequest) {
       // 複製國家
       const { data: cornerCountries } = await supabaseAdmin
         .from('countries')
-        .select('*')
+        .select('id, code, name, name_en, region, workspace_id, usage_count, emoji, has_regions, is_active, display_order')
         .eq('workspace_id', CORNER_WS)
       if (cornerCountries && cornerCountries.length > 0) {
         const newCountries = cornerCountries.map(c => ({
@@ -362,7 +362,7 @@ export async function POST(request: NextRequest) {
       // 複製城市/機場
       const { data: cornerAirports } = await supabaseAdmin
         .from('ref_airports')
-        .select('*')
+        .select('iata_code, icao_code, english_name, name_zh, city_code, city_name_en, city_name_zh, country_code, timezone, workspace_id, is_favorite, usage_count, latitude, longitude')
         .eq('workspace_id', CORNER_WS)
       if (cornerAirports && cornerAirports.length > 0) {
         const newAirports = cornerAirports.map(a => ({

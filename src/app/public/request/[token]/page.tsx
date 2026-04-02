@@ -51,7 +51,7 @@ export default function PublicRequestPage() {
       try {
         const { data, error: e } = await supabase
           .from('tour_requests')
-          .select('*')
+          .select('id, tour_id, supplier_name, items, note, status')
           .eq('id', token)
           .single()
         if (e || !data) {

@@ -17,7 +17,7 @@ export default async function Page({ params }: PageProps) {
   // 查詢合約
   const { data: contract, error } = await supabase
     .from('contracts')
-    .select('*')
+    .select('id, code, template, signer_type, signer_name, company_name, member_ids, contract_data, status, signer_phone, signer_address, signer_id_number, signature_image, signed_at, include_member_list, include_itinerary, tour_id, workspace_id')
     .eq('code', code)
     .single()
 
@@ -62,7 +62,7 @@ export default async function Page({ params }: PageProps) {
   ])
 
   const members = membersResult.data || []
-  let itineraryData: unknown = null
+  let itineraryData: { daily_itinerary: unknown; departure_date: string | null; outbound_flight: unknown; return_flight: unknown } | null = null
   let itineraryDepartureDate: string | null = null
   if (itineraryResult.data) {
     itineraryData = itineraryResult.data

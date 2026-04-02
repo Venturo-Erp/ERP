@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     // 查詢訂單及其發票資訊
     let query = supabase
       .from('orders_invoice_summary')
-      .select('*')
+      .select('order_id, order_number, tour_id, invoiceable_amount, total_amount, invoiced_amount, workspace_id')
       .order('order_number', { ascending: false })
       .limit(500)
 

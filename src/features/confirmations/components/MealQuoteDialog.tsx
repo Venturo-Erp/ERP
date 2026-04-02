@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Loader2, X } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import { UnifiedTraditionalView } from './UnifiedTraditionalView'
@@ -54,11 +55,14 @@ export function MealQuoteDialog({
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [sending, setSending] = useState(false)
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null)
+  const [loadingGroups, setLoadingGroups] = useState(false)
   const { toast } = useToast()
   const supabase = createSupabaseBrowserClient()
 
   useEffect(() => {
     if (!open) return
+    setSelectedMethod(null)
+    setLoadingGroups(true)
     const load = async () => {
       const { data } = await supabase
         .from('line_groups')
@@ -68,13 +72,10 @@ export function MealQuoteDialog({
         setLineGroups(
           data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
         )
+      setLoadingGroups(false)
     }
     load()
   }, [open, supabase])
-
-  useEffect(() => {
-    if (open) setSelectedMethod(null)
-  }, [open])
 
   const handleSendLine = async () => {
     if (!selectedGroupId || !tour) return
@@ -183,6 +184,9 @@ export function MealQuoteDialog({
           {selectedMethod === 'line' && (
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium">選擇 LINE 群組：</span>
+              {loadingGroups ? (
+                <Skeleton className="h-10 w-64" />
+              ) : (
               <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
                 <SelectTrigger className="w-64">
                   <SelectValue placeholder="請選擇群組" />
@@ -195,6 +199,7 @@ export function MealQuoteDialog({
                   ))}
                 </SelectContent>
               </Select>
+              )}
               <Button
                 onClick={handleSendLine}
                 disabled={!selectedGroupId || sending}

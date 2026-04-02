@@ -34,7 +34,7 @@ export default function LocalRequestsPage() {
     if (!workspaceId) return []
     const { data, error } = await supabase
       .from('tour_requests')
-      .select('*')
+      .select('id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, supplier_contact, items, note, replied_at, accepted_at, confirmed_at, rejected_at, rejection_reason, package_status, recipient_workspace_id, target_workspace_id, assigned_employee_id, assigned_employee_name, created_at, updated_at')
       .or(`recipient_workspace_id.eq.${workspaceId},target_workspace_id.eq.${workspaceId}`)
       .order('created_at', { ascending: false })
 

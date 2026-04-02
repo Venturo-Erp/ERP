@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Loader2, X, Printer } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import { UnifiedTraditionalView } from './UnifiedTraditionalView'
@@ -47,6 +48,7 @@ export function AccommodationQuoteDialog({
   const [sending, setSending] = useState(false)
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null)
   const [isMounted, setIsMounted] = useState(false)
+  const [loadingData, setLoadingData] = useState(false)
   const printContentRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
   const supabase = createSupabaseBrowserClient()
@@ -55,47 +57,40 @@ export function AccommodationQuoteDialog({
     setIsMounted(true)
   }, [])
 
-  // 載入 LINE 群組
+  // 載入 LINE 群組 + 供應商聯絡資訊（並行）
   useEffect(() => {
     if (!open) return
-    const load = async () => {
-      const { data } = await supabase
-        .from('line_groups')
-        .select('group_id, group_name')
-        .not('group_name', 'is', null)
-      if (data)
-        setLineGroups(
-          data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
-        )
-    }
-    load()
-  }, [open, supabase])
+    setSelectedMethod(null)
+    setLoadingData(true)
 
-  // 重置 method
-  useEffect(() => {
-    if (open) setSelectedMethod(null)
-  }, [open])
+    const loadLineGroups = supabase
+      .from('line_groups')
+      .select('group_id, group_name')
+      .not('group_name', 'is', null)
+      .then(({ data }) => {
+        if (data)
+          setLineGroups(
+            data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
+          )
+      })
 
-  // 自動帶入供應商聯絡資訊
-  useEffect(() => {
-    if (!open || !supplierName) return
-    
-    const fetchSupplierInfo = async () => {
-      const { data } = await supabase
-        .from('suppliers')
-        .select('contact_person, phone, fax')
-        .eq('name', supplierName)
-        .limit(1)
-        .single()
-      
-      if (data) {
-        setContact(data.contact_person || '')
-        setPhone(data.phone || '')
-        setFax(data.fax || '')
-      }
-    }
-    
-    fetchSupplierInfo()
+    const loadSupplier = supplierName
+      ? supabase
+          .from('suppliers')
+          .select('contact_person, phone, fax')
+          .eq('name', supplierName)
+          .limit(1)
+          .single()
+          .then(({ data }) => {
+            if (data) {
+              setContact(data.contact_person || '')
+              setPhone(data.phone || '')
+              setFax(data.fax || '')
+            }
+          })
+      : Promise.resolve()
+
+    Promise.all([loadLineGroups, loadSupplier]).finally(() => setLoadingData(false))
   }, [open, supplierName, supabase])
 
   // LINE 發送
@@ -414,6 +409,18 @@ export function AccommodationQuoteDialog({
 
         {/* A4 預覽區 */}
         <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+          {loadingData ? (
+            <div className="bg-white mx-auto shadow-lg p-8 space-y-6" style={{ width: '210mm', minHeight: '297mm' }}>
+              <Skeleton className="h-8 w-[200px] mx-auto" />
+              <div className="grid grid-cols-2 gap-4">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+              <Skeleton className="h-6 w-[150px]" />
+              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          ) : (
           <div
             ref={printContentRef}
             className="bg-white mx-auto shadow-lg"
@@ -441,6 +448,7 @@ export function AccommodationQuoteDialog({
               }}
             />
           </div>
+          )}
         </div>
 
         {/* 底部發送按鈕 */}

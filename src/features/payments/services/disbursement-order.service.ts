@@ -3,6 +3,8 @@ import { BaseService, StoreOperations } from '@/core/services/base.service'
 import { DisbursementOrder, PaymentRequest } from '@/stores/types'
 import { supabase } from '@/lib/supabase/client'
 import { invalidateDisbursementOrders, invalidatePaymentRequests } from '@/data'
+
+const DO_COLS = 'id, order_number, status, payment_request_ids, total_amount, payment_method, bank_account, confirmed_by, confirmed_at, notes, workspace_id, created_at, created_by, updated_at'
 import { ValidationError } from '@/core/errors/app-errors'
 import { logger } from '@/lib/utils/logger'
 import { PAYMENTS_LABELS } from '../constants/labels'
@@ -46,7 +48,7 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
   private async loadItems(): Promise<DisbursementOrder[]> {
     const { data, error } = await supabase
       .from('disbursement_orders')
-      .select('*')
+      .select(DO_COLS)
       .order('created_at', { ascending: false })
       .limit(500)
     if (error) throw new Error(error.message)
@@ -102,7 +104,7 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
     const nextThursday = this.getNextThursday()
     const { data, error } = await supabase
       .from('disbursement_orders')
-      .select('*')
+      .select(DO_COLS)
       .eq('disbursement_date', nextThursday)
       .eq('status', 'pending')
       .single()
@@ -339,7 +341,7 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
   async getPendingOrdersAsync(): Promise<DisbursementOrder[]> {
     const { data, error } = await supabase
       .from('disbursement_orders')
-      .select('*')
+      .select(DO_COLS)
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(500)
@@ -353,7 +355,7 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
   async getConfirmedOrdersAsync(): Promise<DisbursementOrder[]> {
     const { data, error } = await supabase
       .from('disbursement_orders')
-      .select('*')
+      .select(DO_COLS)
       .eq('status', 'confirmed')
       .order('created_at', { ascending: false })
       .limit(500)
@@ -367,7 +369,7 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
   async getOrdersByDateAsync(date: string): Promise<DisbursementOrder[]> {
     const { data, error } = await supabase
       .from('disbursement_orders')
-      .select('*')
+      .select(DO_COLS)
       .eq('disbursement_date', date)
       .order('created_at', { ascending: false })
       .limit(500)

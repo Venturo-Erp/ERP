@@ -59,14 +59,14 @@ export function DisbursementPrintDialog({
         // 取得請款單
         const { data: requests } = await supabase
           .from('payment_requests')
-          .select('*')
+          .select('id, request_number, tour_id, supplier_name, amount, status, payment_type, description, created_at, workspace_id')
           .in('id', requestIds)
           .limit(500)
 
         // 取得請款項目
         const { data: items } = await supabase
           .from('payment_request_items')
-          .select('*')
+          .select('id, request_id, item_name, amount, quantity, unit_price, category, tour_id, description, workspace_id')
           .in('request_id', requestIds)
           .limit(500)
 

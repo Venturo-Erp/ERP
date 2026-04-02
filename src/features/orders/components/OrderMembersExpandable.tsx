@@ -66,6 +66,7 @@ import {
   PnrMatchDialog,
 } from './'
 import dynamic from 'next/dynamic'
+import { Skeleton } from '@/components/ui/skeleton'
 import { PassportConflictDialog } from './PassportConflictDialog'
 import { FamilyQuickAddDialog } from '@/components/customers/FamilyQuickAddDialog'
 import type { Customer } from '@/stores/types'
@@ -1236,6 +1237,15 @@ export function OrderMembersExpandable({
 
       {/* Table */}
       <div className="flex-1 overflow-auto">
+        {membersData.loading && sortedMembers.length === 0 ? (
+          <div className="space-y-3 p-4">
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-[80%]" />
+          </div>
+        ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <table className="border-collapse text-sm member-table-inline table-fixed w-full">
             <MemberTableHeader
@@ -1345,6 +1355,7 @@ export function OrderMembersExpandable({
             </SortableContext>
           </table>
         </DndContext>
+        )}
       </div>
 
       {/* Dialogs */}

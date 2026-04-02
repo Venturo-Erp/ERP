@@ -21,7 +21,7 @@ export default async function ActivityQuotePage({
   // 查詢需求單
   const { data: request } = await supabase
     .from('tour_requests')
-    .select('*')
+    .select('id, tour_id, supplier_name, supplier_response, replied_at, note, items, status, request_type')
     .eq('id', requestId)
     .eq('tour_id', tourId)
     .single()
@@ -41,7 +41,7 @@ export default async function ActivityQuotePage({
   const [{ data: historyRequests }, { data: tour }] = await Promise.all([
     supabase
       .from('tour_requests')
-      .select('*')
+      .select('id, supplier_response, replied_at, created_at')
       .eq('tour_id', tourId)
       .eq('supplier_name', request.supplier_name)
       .eq('request_type', 'activity')

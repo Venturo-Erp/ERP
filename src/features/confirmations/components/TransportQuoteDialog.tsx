@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Send, Loader2, Printer, Sun, Mail, Phone, Globe, Plus, X } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import { useAuthStore } from '@/stores'
@@ -95,35 +96,36 @@ export function TransportQuoteDialog({
   const { toast } = useToast()
   const supabase = createSupabaseBrowserClient()
 
-  // 載入 LINE 群組和供應商
+  const [loadingData, setLoadingData] = useState(false)
+
+  // 並行載入 LINE 群組和供應商
   useEffect(() => {
     if (!open) return
-    const load = async () => {
-      // LINE 群組
-      const { data: lineData } = await supabase
-        .from('line_groups')
-        .select('group_id, group_name')
-        .not('group_name', 'is', null)
-      if (lineData)
-        setLineGroups(
-          lineData.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
-        )
+    setSelectedMethod(null)
+    setLoadingData(true)
 
-      // 供應商（transport 類型）
-      const { data: supplierData } = await supabase
-        .from('suppliers')
-        .select('id, name, contact_person, phone, fax')
-        .eq('type', 'transport')
-        .eq('is_active', true)
-        .order('name')
-      if (supplierData) setSuppliers(supplierData)
-    }
-    load()
-  }, [open])
+    const loadLineGroups = supabase
+      .from('line_groups')
+      .select('group_id, group_name')
+      .not('group_name', 'is', null)
+      .then(({ data: lineData }) => {
+        if (lineData)
+          setLineGroups(
+            lineData.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
+          )
+      })
 
-  // 重置 method
-  useEffect(() => {
-    if (open) setSelectedMethod(null)
+    const loadSuppliers = supabase
+      .from('suppliers')
+      .select('id, name, contact_person, phone, fax')
+      .eq('type', 'transport')
+      .eq('is_active', true)
+      .order('name')
+      .then(({ data: supplierData }) => {
+        if (supplierData) setSuppliers(supplierData)
+      })
+
+    Promise.all([loadLineGroups, loadSuppliers]).finally(() => setLoadingData(false))
   }, [open])
 
   // 把核心表資料組成每天行程
@@ -393,7 +395,17 @@ export function TransportQuoteDialog({
         </DialogHeader>
         {/* 中間可滾動內容 */}
         <div className="flex-1 overflow-y-auto pr-1 space-y-3">
-          {viewMode === 'traditional' ? (
+          {loadingData ? (
+            <div className="space-y-4 py-4">
+              <Skeleton className="h-8 w-[200px]" />
+              <div className="grid grid-cols-2 gap-4">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          ) : viewMode === 'traditional' ? (
             <UnifiedTraditionalView
               requestType="transport"
               tour={tour}

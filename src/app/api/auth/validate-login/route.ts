@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     // 2. 查詢員工（大小寫不敏感）
     const { data: employee, error: empError } = await supabase
       .from('employees')
-      .select('*')
+      .select('id, employee_number, display_name, english_name, email, avatar, status, password_hash, supabase_user_id, workspace_id, job_info, permissions, is_active, created_at, updated_at')
       .ilike('employee_number', username)
       .eq('workspace_id', workspace.id)
       .maybeSingle()

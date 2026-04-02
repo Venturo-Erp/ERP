@@ -8,6 +8,7 @@ import { logger } from '@/lib/utils/logger'
 import { getTodayString } from '@/lib/utils/format-date'
 import { useEffect, useState } from 'react'
 import { Plus, Save, X, Copy, ExternalLink, Check, Trash2, Lock, AlertCircle } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -103,22 +104,7 @@ export function AddReceiptDialog({
   
   // 收款方式（統一在 Dialog 層級載入，避免競爭）
   const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string; placeholder?: string | null }>>([])
-  
-  // 載入收款方式
-  useEffect(() => {
-    if (!open) return
-    const loadPaymentMethods = async () => {
-      const { useAuthStore } = await import('@/stores')
-      const workspaceId = useAuthStore.getState().user?.workspace_id
-      if (!workspaceId) return
-      const response = await fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}&type=receipt`)
-      if (response.ok) {
-        const data = await response.json()
-        setPaymentMethods(data || [])
-      }
-    }
-    loadPaymentMethods()
-  }, [open])
+  const [dialogLoading, setDialogLoading] = useState(false)
 
   // 當對話框開啟時：載入資料、重置表單、設定預設值
   useEffect(() => {
@@ -128,13 +114,29 @@ export function AddReceiptDialog({
     setIsSubmitting(false)
     setLinkPayResults([])
     setCopiedLink(null)
+    setDialogLoading(true)
 
     const initialize = async () => {
       const { invalidateTours, invalidateOrders } = await import('@/data')
       const { supabase } = await import('@/lib/supabase/client')
+      const { useAuthStore } = await import('@/stores')
+      const workspaceId = useAuthStore.getState().user?.workspace_id
 
-      // 確保 SWR 快取已載入
-      await Promise.all([invalidateTours(), invalidateOrders()])
+      // 並行載入：SWR 快取 + 收款方式
+      const [, , methodsRes] = await Promise.all([
+        invalidateTours(),
+        invalidateOrders(),
+        workspaceId
+          ? fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}&type=receipt`)
+          : Promise.resolve(null),
+      ])
+
+      let loadedMethods: { id: string; name: string }[] = []
+      if (methodsRes && methodsRes.ok) {
+        const data = await methodsRes.json()
+        loadedMethods = data || []
+        setPaymentMethods(loadedMethods)
+      }
 
       // 編輯模式：載入收款單資料和項目
       if (editingReceipt) {
@@ -145,25 +147,15 @@ export function AddReceiptDialog({
         })
 
         // 從 receipt 主表載入（receipt_items 表尚未建立）
-          // 需要用 payment_method_id 去查詢對應的收款方式名稱
+          // 需要用 payment_method_id 去查詢對應的收款方式名稱（使用上方已載入的資料）
           const extReceipt = editingReceipt as { payment_method_id?: string; payment_method?: string }
           let receiptTypeValue: string | number = editingReceipt.receipt_type ?? 0
-          
-          // 如果有 payment_method_id，先查詢對應名稱
-          if (extReceipt.payment_method_id) {
-            try {
-              const { useAuthStore } = await import('@/stores')
-              const workspaceId = useAuthStore.getState().user?.workspace_id
-              const methodsRes = await fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}&type=receipt`)
-              if (methodsRes.ok) {
-                const methods = await methodsRes.json()
-                const matched = methods.find((m: { id: string; name: string }) => m.id === extReceipt.payment_method_id)
-                if (matched) {
-                  receiptTypeValue = matched.name
-                }
-              }
-            } catch {
-              // fallback to receipt_type
+
+          // 如果有 payment_method_id，從已載入的收款方式中查找
+          if (extReceipt.payment_method_id && loadedMethods.length > 0) {
+            const matched = loadedMethods.find((m) => m.id === extReceipt.payment_method_id)
+            if (matched) {
+              receiptTypeValue = matched.name
             }
           }
           
@@ -216,7 +208,9 @@ export function AddReceiptDialog({
       }
     }
 
-    initialize().catch(err => logger.error('[initialize]', err))
+    initialize()
+      .catch(err => logger.error('[initialize]', err))
+      .finally(() => setDialogLoading(false))
   }, [open, defaultTourId, defaultOrderId, resetForm, setFormData, editingReceipt, setPaymentItems])
 
   // 如果只有一個訂單，自動帶入（編輯模式除外）
@@ -502,7 +496,14 @@ export function AddReceiptDialog({
 
           {/* 團體收款 */}
           <TabsContent value="tour" className="flex-1 flex flex-col overflow-hidden">
-
+            {dialogLoading ? (
+              <div className="space-y-4 py-6 px-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-[60%]" />
+              </div>
+            ) : (<>
             {/* 收款項目 - 文青風表格 */}
             <div className="flex-1 flex flex-col overflow-hidden pt-4 border-t border-morandi-container/30">
               <div className="flex items-center justify-between mb-3">
@@ -647,6 +648,7 @@ export function AddReceiptDialog({
                 </div>
               </div>
             )}
+          </>)}
           </TabsContent>
 
           {/* 公司收款 */}

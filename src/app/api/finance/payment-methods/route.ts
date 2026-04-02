@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   // RLS 會自動過濾當前租戶的資料
   let query = supabase
     .from('payment_methods')
-    .select('*')
+    .select('id, name, code, type, is_active, sort_order, workspace_id, created_at, updated_at')
     .eq('is_active', true)
     .order('sort_order')
 

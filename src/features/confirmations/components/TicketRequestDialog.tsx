@@ -6,7 +6,7 @@
  * 簡單流程：選指派人 → 建立 ticket 待辦
  */
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -49,26 +49,9 @@ export function TicketRequestDialog({
   const { items: employees } = useEmployeesSlim()
   const [selectedEmployee, setSelectedEmployee] = useState<string>('')
   const [submitting, setSubmitting] = useState(false)
-  const [memberCount, setMemberCount] = useState(0)
   const [showFlightInput, setShowFlightInput] = useState(false)
   const [outboundInput, setOutboundInput] = useState('')
   const [returnInput, setReturnInput] = useState('')
-
-  // 讀取團員數量
-  useEffect(() => {
-    if (!tour?.id || !open) return
-
-    const fetchMembers = async () => {
-      const { count } = await supabase
-        .from('order_members')
-        .select('id', { count: 'exact', head: true })
-        .eq('orders.tour_id', tour.id)
-
-      setMemberCount(count || 0)
-    }
-
-    fetchMembers()
-  }, [tour?.id, open])
 
   // 格式化航班
   const formatFlight = (flight: Record<string, unknown> | null | undefined) => {
@@ -182,7 +165,7 @@ export function TicketRequestDialog({
             assigneeId: selectedEmployee,
             outboundFlight: formatFlight(tour.outbound_flight),
             returnFlight: formatFlight(tour.return_flight),
-            pax: totalPax || memberCount,
+            pax: totalPax,
           }),
         })
       } catch (notifyError) {
@@ -266,7 +249,7 @@ export function TicketRequestDialog({
               {/* 團員人數 */}
               <div className="flex items-center gap-2 text-sm">
                 <Users size={14} className="text-morandi-muted" />
-                <span>團員人數：{totalPax || memberCount} 人</span>
+                <span>團員人數：{totalPax} 人</span>
               </div>
 
               {/* 指派人 */}

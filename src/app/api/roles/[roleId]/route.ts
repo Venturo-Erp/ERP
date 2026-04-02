@@ -14,7 +14,7 @@ export async function GET(
 
   const { data, error } = await supabase
     .from('workspace_roles')
-    .select('*')
+    .select('id, name, description, is_admin, sort_order, workspace_id, created_at, updated_at')
     .eq('id', roleId)
     .single()
 

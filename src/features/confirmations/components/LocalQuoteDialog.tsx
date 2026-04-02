@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Send, Loader2, Printer, Sun, Mail, Phone, Globe, Plus, X } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
@@ -85,48 +86,47 @@ export function LocalQuoteDialog({
   const { toast } = useToast()
   const supabase = createSupabaseBrowserClient()
 
-  // 載入 LINE 群組 + 砍次資料
+  const [loadingData, setLoadingData] = useState(false)
+
+  // 並行載入 LINE 群組 + 砍次資料
   useEffect(() => {
     if (!open) return
-    const load = async () => {
-      // 載入 LINE 群組
-      const { data } = await supabase
-        .from('line_groups')
-        .select('group_id, group_name')
-        .not('group_name', 'is', null)
-      if (data)
-        setLineGroups(
-          data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
-        )
+    setSelectedMethod(null)
+    setLoadingData(true)
 
-      // 載入砍次資料（從 quotes 表）
-      if (tour?.id) {
-        const { data: quotes } = await supabase
+    const loadLineGroups = supabase
+      .from('line_groups')
+      .select('group_id, group_name')
+      .not('group_name', 'is', null)
+      .then(({ data }) => {
+        if (data)
+          setLineGroups(
+            data.filter((g): g is { group_id: string; group_name: string } => !!g.group_name)
+          )
+      })
+
+    const loadTiers = tour?.id
+      ? supabase
           .from('quotes')
           .select('tier_pricings')
           .eq('tour_id', tour.id)
           .order('created_at', { ascending: false })
           .limit(1)
           .single()
+          .then(({ data: quotes }) => {
+            if (quotes?.tier_pricings && Array.isArray(quotes.tier_pricings)) {
+              const tiers = quotes.tier_pricings
+                .map((t: unknown) => (t as Record<string, unknown>)?.pax)
+                .filter((p: unknown): p is number => typeof p === 'number' && p > 1)
+              if (tiers.length > 0) {
+                setPaxTiers(tiers)
+              }
+            }
+          })
+      : Promise.resolve()
 
-        if (quotes?.tier_pricings && Array.isArray(quotes.tier_pricings)) {
-          // 提取人數（pax），忽略 0 和 1（可能是預設值）
-          const tiers = quotes.tier_pricings
-            .map((t: unknown) => (t as Record<string, unknown>)?.pax)
-            .filter((p: unknown): p is number => typeof p === 'number' && p > 1)
-          if (tiers.length > 0) {
-            setPaxTiers(tiers)
-          }
-        }
-      }
-    }
-    load()
+    Promise.all([loadLineGroups, loadTiers]).finally(() => setLoadingData(false))
   }, [open, tour?.id])
-
-  // 重置 method
-  useEffect(() => {
-    if (open) setSelectedMethod(null)
-  }, [open])
 
   // 把核心表資料組成每天行程
   const daySchedules: DaySchedule[] = useMemo(() => {
@@ -319,6 +319,13 @@ export function LocalQuoteDialog({
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto pr-1 space-y-3">
+          {loadingData ? (
+            <div className="space-y-4 py-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-40 w-full" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          ) : (<>
           {/* 團資訊條 */}
           <div className="flex items-center gap-6 px-4 py-3 bg-[#faf8f5] rounded-lg border border-[#e8e0d4]">
             <div className="text-sm">
@@ -445,6 +452,7 @@ export function LocalQuoteDialog({
             />
           </div>
 
+          </>)}
           {/* 選擇發送方式 */}
           <div className="border-t border-[#c9a96e] pt-4 mt-2">
             <label className="text-sm font-medium mb-3 block">選擇發送方式</label>

@@ -148,7 +148,7 @@ export default function WishlistTemplateEditPage({
     // 載入模板內的景點
     const { data: itemsData } = await supabase
       .from('wishlist_template_items')
-      .select('*')
+      .select('id, template_id, attraction_id, display_order, name, image_url, description, region, category')
       .eq('template_id', id)
       .order('display_order')
 

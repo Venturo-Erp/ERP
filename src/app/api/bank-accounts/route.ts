@@ -10,7 +10,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('bank_accounts')
-    .select('*')
+    .select('id, code, name, bank_name, account_number, is_default, is_active, workspace_id, created_at, updated_at')
     .eq('is_active', true)
     .order('is_default', { ascending: false })
     .order('name')

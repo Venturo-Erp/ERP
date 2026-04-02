@@ -63,7 +63,7 @@ export default function VouchersPage() {
     try {
       let query = supabase
         .from('journal_vouchers')
-        .select('*')
+        .select('id, voucher_no, voucher_date, memo, status, total_debit, total_credit, created_by, workspace_id, created_at')
         .eq('workspace_id', user.workspace_id)
 
       // 應用日期範圍篩選

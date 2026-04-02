@@ -17,7 +17,7 @@ export async function GET() {
   // 明確過濾 workspace_id（避免管理員看到其他租戶的職務）
   const { data, error } = await supabase
     .from('workspace_roles')
-    .select('*')
+    .select('id, name, description, is_admin, sort_order, workspace_id, created_at, updated_at')
     .eq('workspace_id', workspaceId)
     .order('sort_order', { ascending: true })
 

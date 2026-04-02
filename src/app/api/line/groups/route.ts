@@ -10,7 +10,7 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('line_groups')
-    .select('*')
+    .select('id, group_id, group_name, tour_id, workspace_id, created_at, updated_at')
     .order('updated_at', { ascending: false })
 
   if (error) {

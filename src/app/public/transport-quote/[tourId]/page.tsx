@@ -69,7 +69,7 @@ export default async function TransportQuotePage({
   // 查詢核心表項目
   const { data: coreItems } = await supabase
     .from('tour_itinerary_items')
-    .select('*')
+    .select('id, tour_id, day_number, sort_order, category, sub_category, title')
     .eq('tour_id', tourId)
     .order('day_number', { ascending: true })
     .order('sort_order', { ascending: true })
