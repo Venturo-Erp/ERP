@@ -20,7 +20,7 @@ export const employeeEntity = createEntityHook<Employee>('employees', {
   },
   detail: { select: '*' },
   cache: CACHE_PRESETS.low,
-  workspaceScoped: false, // 員工是全域資料
+  workspaceScoped: true, // 員工按 workspace 隔離
 })
 
 export const useEmployees = employeeEntity.useList
