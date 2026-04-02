@@ -343,7 +343,10 @@ export const useAuthStore = create<AuthState>()(
             type: fetchedWorkspaceInfo.type || currentUser.workspace_type,
           }
 
-          const updatedUser = buildUserFromEmployee(employeeData, workspaceInfo)
+          // 保留現有的權限（從登入時的 JWT 取得），不要被 refreshUserData 覆蓋
+          const updatedUser = buildUserFromEmployee(employeeData, workspaceInfo, {
+            rolePermissions: currentUser.permissions,
+          })
           get().setUser(updatedUser)
         } catch (error) {
           logger.error('💥 Error refreshing user data:', error)
