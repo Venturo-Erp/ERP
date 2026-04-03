@@ -38,11 +38,11 @@ export function QuotePageLayout({
   const finalNoteTitle = noteTitle || `${COMPANY_NAME}備註`
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#faf8f5] to-[#f5f1ea] py-8">
+    <div className="min-h-screen bg-gradient-to-br from-background to-morandi-container/30 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-[#e8e0d4]">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-border">
           {/* 標頭區（統一格式） */}
-          <div className="bg-gradient-to-r from-[#c9a96e] to-[#b89960] px-6 py-4 text-white">
+          <div className="bg-gradient-to-r from-morandi-gold to-morandi-gold-hover px-6 py-4 text-white">
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-2xl font-bold">{tourName}</h1>

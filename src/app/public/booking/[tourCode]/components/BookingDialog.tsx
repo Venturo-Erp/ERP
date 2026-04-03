@@ -95,7 +95,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
         <form onSubmit={handleSubmit} className="space-y-8 p-6">
           {/* Hero */}
           <div className="text-center border-b border-border pb-6">
-            <p className="text-[#655d56] font-medium tracking-widest uppercase text-xs mb-2">
+            <p className="text-morandi-primary font-medium tracking-widest uppercase text-xs mb-2">
               Registration Portal
             </p>
             <h1 className="text-4xl font-serif tracking-tight leading-tight mb-4">
@@ -107,13 +107,13 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
           </div>
 
           {/* Contact Info */}
-          <section className="bg-gray-50 p-8 rounded-xl border-l-4 border-[#655d56]">
+          <section className="bg-gray-50 p-8 rounded-xl border-l-4 border-morandi-primary">
             <h2 className="text-xl font-serif mb-6 flex items-center gap-2">
               <span className="text-2xl">👤</span> Contact Intelligence
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-[#655d56] uppercase tracking-widest">
+                <label className="block text-xs font-bold text-morandi-primary uppercase tracking-widest">
                   Full Name
                 </label>
                 <Input
@@ -125,7 +125,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-[#655d56] uppercase tracking-widest">
+                <label className="block text-xs font-bold text-morandi-primary uppercase tracking-widest">
                   Email Address
                 </label>
                 <Input
@@ -138,7 +138,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-[#655d56] uppercase tracking-widest">
+                <label className="block text-xs font-bold text-morandi-primary uppercase tracking-widest">
                   Mobile Number
                 </label>
                 <Input
@@ -151,7 +151,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                 />
               </div>
               <div className="space-y-2">
-                <label className="block text-xs font-bold text-[#655d56] uppercase tracking-widest">
+                <label className="block text-xs font-bold text-morandi-primary uppercase tracking-widest">
                   Total Participants
                 </label>
                 <Input
@@ -184,7 +184,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                 </div>
                 <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-[#655d56] uppercase tracking-widest">
+                    <label className="block text-xs font-bold text-morandi-primary uppercase tracking-widest">
                       中文姓名
                     </label>
                     <Input
@@ -197,7 +197,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-[#655d56] uppercase tracking-widest">
+                    <label className="block text-xs font-bold text-morandi-primary uppercase tracking-widest">
                       Passport Pinyin
                     </label>
                     <Input
@@ -210,7 +210,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="block text-xs font-bold text-[#655d56] uppercase tracking-widest">
+                    <label className="block text-xs font-bold text-morandi-primary uppercase tracking-widest">
                       Date of Birth
                     </label>
                     <Input
@@ -239,7 +239,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
             <button
               type="button"
               onClick={addTraveler}
-              className="w-full py-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#655d56] hover:bg-gray-50 transition-all flex flex-col items-center justify-center gap-2"
+              className="w-full py-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-morandi-primary hover:bg-gray-50 transition-all flex flex-col items-center justify-center gap-2"
             >
               <span className="text-2xl">+</span>
               <span className="text-sm font-bold uppercase tracking-widest text-gray-600">
@@ -262,7 +262,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
             <Button
               type="submit"
               disabled={loading}
-              className="px-12 py-6 bg-[#655d56] text-white font-bold uppercase tracking-[0.2em] rounded-md shadow-lg hover:bg-[#59514b]"
+              className="px-12 py-6 bg-morandi-primary text-white font-bold uppercase tracking-[0.2em] rounded-md shadow-lg hover:bg-morandi-primary"
             >
               {loading ? '提交中...' : 'Finalize Booking'}
             </Button>

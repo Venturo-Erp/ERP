@@ -484,7 +484,7 @@ export default function WishlistDetailPage({
                   ) : (
                     <Button
                       variant="outline"
-                      className="w-full border-[#06C755] text-[#06C755] hover:bg-[#06C755] hover:text-white"
+                      className="w-full border-brand-line text-brand-line hover:bg-brand-line hover:text-white"
                       onClick={() => {
                         window.location.href = `/api/auth/line?redirect=/p/wishlist/${slug}`
                       }}
@@ -541,7 +541,7 @@ export default function WishlistDetailPage({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-[#06C755] text-[#06C755] hover:bg-[#06C755] hover:text-white"
+                  className="border-brand-line text-brand-line hover:bg-brand-line hover:text-white"
                   onClick={() => {
                     window.location.href = `/api/auth/line?redirect=/p/wishlist/${slug}`
                   }}

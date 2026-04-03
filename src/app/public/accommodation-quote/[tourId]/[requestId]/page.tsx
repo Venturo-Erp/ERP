@@ -84,11 +84,11 @@ export default async function AccommodationQuotePage({
   const requestItems = Array.isArray(request.items) ? request.items : []
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#faf8f5] to-[#f5f1ea] py-8">
+    <div className="min-h-screen bg-gradient-to-br from-background to-morandi-container/30 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-[#e8e0d4]">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-border">
           {/* 標頭 */}
-          <div className="bg-gradient-to-r from-[#c9a96e] to-[#b89960] px-6 py-4 text-white">
+          <div className="bg-gradient-to-r from-morandi-gold to-morandi-gold-hover px-6 py-4 text-white">
             <h1 className="text-2xl font-bold">{tour.name}</h1>
             <div className="mt-2 flex items-center gap-6 text-sm opacity-90">
               <span>飯店：{request.supplier_name}</span>
@@ -101,7 +101,7 @@ export default async function AccommodationQuotePage({
           <div className="p-6 space-y-6">
             {/* 住宿需求 */}
             <div>
-              <h3 className="font-semibold text-[#c9a96e] mb-3">住宿需求</h3>
+              <h3 className="font-semibold text-morandi-gold mb-3">住宿需求</h3>
               <div className="bg-morandi-container border border-border rounded-lg p-4">
                 {requestItems.length > 0 ? (
                   <table className="w-full text-sm">
@@ -159,7 +159,7 @@ export default async function AccommodationQuotePage({
                           <span className="text-morandi-secondary text-xs">
                             {new Date(h.replied_at).toLocaleString('zh-TW')}
                           </span>
-                          <span className="font-bold text-lg text-[#c9a96e]">
+                          <span className="font-bold text-lg text-morandi-gold">
                             ${hQuote?.totalCost?.toLocaleString() || '—'}
                           </span>
                         </div>

@@ -210,7 +210,7 @@ export function TransportQuoteForm({
   }
 
   return (
-    <div className="border-t-4 border-[#c9a96e] pt-6">
+    <div className="border-t-4 border-morandi-gold pt-6">
       <h2 className="text-xl font-bold text-morandi-primary mb-1 flex items-center gap-2">
         📋 供應商報價回填
       </h2>

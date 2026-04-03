@@ -129,11 +129,11 @@ export default async function TransportQuoteWithRequestPage({
   const totalPax = request.metadata?.totalPax || tour.current_participants
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#faf8f5] to-[#f5f1ea] py-8">
+    <div className="min-h-screen bg-gradient-to-br from-background to-morandi-container/30 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-[#e8e0d4]">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-border">
           {/* 標頭 */}
-          <div className="bg-gradient-to-r from-[#c9a96e] to-[#b89960] px-6 py-4 text-white">
+          <div className="bg-gradient-to-r from-morandi-gold to-morandi-gold-hover px-6 py-4 text-white">
             <h1 className="text-2xl font-bold">{tour.name}</h1>
             <div className="mt-2 flex items-center gap-6 text-sm opacity-90">
               <span>目的地：{tour.location || '—'}</span>
@@ -147,13 +147,13 @@ export default async function TransportQuoteWithRequestPage({
             {/* 行程表 */}
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="bg-[#c9a96e] text-white">
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-20">日期</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left">行程內容</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">早餐</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">午餐</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">晚餐</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-32">住宿</th>
+                <tr className="bg-morandi-gold text-white">
+                  <th className="border border-morandi-gold/50 px-3 py-2 text-left w-20">日期</th>
+                  <th className="border border-morandi-gold/50 px-3 py-2 text-left">行程內容</th>
+                  <th className="border border-morandi-gold/50 px-3 py-2 text-center w-16">早餐</th>
+                  <th className="border border-morandi-gold/50 px-3 py-2 text-center w-16">午餐</th>
+                  <th className="border border-morandi-gold/50 px-3 py-2 text-center w-16">晚餐</th>
+                  <th className="border border-morandi-gold/50 px-3 py-2 text-left w-32">住宿</th>
                 </tr>
               </thead>
               <tbody>
@@ -180,26 +180,26 @@ export default async function TransportQuoteWithRequestPage({
                       .join('、')
 
                   return (
-                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf5]'}>
-                      <td className="border border-[#e8e5e0] px-3 py-2">
-                        <div className="font-semibold text-[#c9a96e]">Day {day.dayNumber}</div>
+                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-background'}>
+                      <td className="border border-morandi-container px-3 py-2">
+                        <div className="font-semibold text-morandi-gold">Day {day.dayNumber}</div>
                         <div className="text-xs text-morandi-secondary">
                           {day.date} ({day.weekday})
                         </div>
                       </td>
-                      <td className="border border-[#e8e5e0] px-3 py-2 font-medium">
+                      <td className="border border-morandi-container px-3 py-2 font-medium">
                         {content || '—'}
                       </td>
-                      <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                      <td className="border border-morandi-container px-3 py-2 text-center text-xs">
                         {meals.breakfast || '-'}
                       </td>
-                      <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                      <td className="border border-morandi-container px-3 py-2 text-center text-xs">
                         {meals.lunch || '-'}
                       </td>
-                      <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                      <td className="border border-morandi-container px-3 py-2 text-center text-xs">
                         {meals.dinner || '-'}
                       </td>
-                      <td className="border border-[#e8e5e0] px-3 py-2 text-xs">
+                      <td className="border border-morandi-container px-3 py-2 text-xs">
                         {day.hotel?.title || '—'}
                       </td>
                     </tr>
@@ -237,7 +237,7 @@ export default async function TransportQuoteWithRequestPage({
                           <span className="text-morandi-secondary text-xs">
                             {new Date(h.replied_at).toLocaleString('zh-TW')}
                           </span>
-                          <span className="font-bold text-lg text-[#c9a96e]">
+                          <span className="font-bold text-lg text-morandi-gold">
                             ${quoteData?.totalFare?.toLocaleString() || '—'}
                           </span>
                         </div>

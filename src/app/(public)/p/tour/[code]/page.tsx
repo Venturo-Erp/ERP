@@ -235,8 +235,8 @@ export default function PublicTourPage({
   // Loading
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00113a]"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-public-primary"></div>
       </div>
     )
   }
@@ -244,7 +244,7 @@ export default function PublicTourPage({
   // 404
   if (notFound || !tour) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-800 mb-4">找不到行程</h1>
           <p className="text-gray-600 mb-8">此行程不存在或已被移除</p>
@@ -272,11 +272,11 @@ export default function PublicTourPage({
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-[#191c1d]">
+    <div className="min-h-screen bg-background text-morandi-primary">
       {/* Top Header */}
       <header className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
         <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
-          <div className="text-xl font-bold tracking-tight text-[#00113a]">
+          <div className="text-xl font-bold tracking-tight text-public-primary">
             {companyInfo.name}
           </div>
           <nav className="hidden md:flex gap-8 items-center">
@@ -286,8 +286,8 @@ export default function PublicTourPage({
                 href={`#day${index + 1}`}
                 className={`text-sm font-medium transition-all ${
                   activeDay === index
-                    ? 'text-[#00113a] font-bold border-b-2 border-[#00113a] pb-1'
-                    : 'text-slate-500 hover:text-[#00113a]'
+                    ? 'text-public-primary font-bold border-b-2 border-public-primary pb-1'
+                    : 'text-slate-500 hover:text-public-primary'
                 }`}
               >
                 Day {index + 1}
@@ -295,8 +295,8 @@ export default function PublicTourPage({
             ))}
           </nav>
           <div className="flex items-center gap-4">
-            <Share2 className="w-5 h-5 text-slate-600 hover:text-[#00113a] cursor-pointer transition-all" />
-            <Heart className="w-5 h-5 text-slate-600 hover:text-[#00113a] cursor-pointer transition-all" />
+            <Share2 className="w-5 h-5 text-slate-600 hover:text-public-primary cursor-pointer transition-all" />
+            <Heart className="w-5 h-5 text-slate-600 hover:text-public-primary cursor-pointer transition-all" />
             <Link href={`/p/tour/${code}/register${ref ? `?ref=${ref}` : ''}`}>
               <Button className="bg-gradient-to-r from-[#00113a] to-[#002366] text-white px-6 py-2 rounded-md text-sm hover:opacity-90">
                 立即報名
@@ -316,8 +316,8 @@ export default function PublicTourPage({
                 href={`#day${index + 1}`}
                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   activeDay === index
-                    ? 'bg-[#00113a] text-white font-bold'
-                    : 'text-[#444650] hover:bg-slate-100 hover:text-[#00113a]'
+                    ? 'bg-public-primary text-white font-bold'
+                    : 'text-morandi-primary hover:bg-slate-100 hover:text-public-primary'
                 }`}
               >
                 Day {index + 1}
@@ -368,12 +368,12 @@ export default function PublicTourPage({
               >
                 {/* Timeline */}
                 <div className="absolute left-0 top-0 bottom-0 w-px bg-slate-200 ml-4"></div>
-                <div className="absolute left-0 top-2 w-8 h-8 rounded-full bg-[#002366] flex items-center justify-center">
+                <div className="absolute left-0 top-2 w-8 h-8 rounded-full bg-public-accent flex items-center justify-center">
                   <span className="text-white text-xs font-bold">{String(index + 1).padStart(2, '0')}</span>
                 </div>
 
                 {/* Day Title */}
-                <h2 className="text-2xl md:text-3xl font-bold text-[#00113a] mb-8 tracking-tight">
+                <h2 className="text-2xl md:text-3xl font-bold text-public-primary mb-8 tracking-tight">
                   {day.title}
                 </h2>
 
@@ -382,14 +382,14 @@ export default function PublicTourPage({
                   {day.activities && day.activities.map((activity, actIdx) => (
                     <div key={actIdx} className="group">
                       <div className="flex items-center gap-4 mb-4">
-                        <span className="text-[#006970]">{getActivityIcon(activity.icon)}</span>
-                        <span className="text-sm font-bold tracking-widest text-[#006970] uppercase">
+                        <span className="text-public-secondary">{getActivityIcon(activity.icon)}</span>
+                        <span className="text-sm font-bold tracking-widest text-public-secondary uppercase">
                           {activity.icon || '景點'}
                         </span>
                       </div>
                       <h3 className="text-xl font-bold mb-4">{activity.title}</h3>
                       {activity.description && (
-                        <p className="text-[#444650] leading-relaxed">{activity.description}</p>
+                        <p className="text-morandi-primary leading-relaxed">{activity.description}</p>
                       )}
                     </div>
                   ))}
@@ -414,7 +414,7 @@ export default function PublicTourPage({
                     <div className="p-6 bg-slate-50 rounded-xl">
                       <div className="flex items-center gap-4">
                         <Hotel className="w-5 h-5 text-slate-400" />
-                        <span className="text-[#444650] font-medium">住宿：{day.accommodation}</span>
+                        <span className="text-morandi-primary font-medium">住宿：{day.accommodation}</span>
                       </div>
                     </div>
                   )}
@@ -439,7 +439,7 @@ export default function PublicTourPage({
               <div className="flex items-baseline gap-2 mb-8">
                 {tour.selling_price_per_person ? (
                   <>
-                    <span className="text-4xl font-extrabold text-[#00113a]">
+                    <span className="text-4xl font-extrabold text-public-primary">
                       TWD {tour.selling_price_per_person.toLocaleString()}
                     </span>
                     <span className="text-slate-400 text-sm">/ 人</span>
@@ -457,7 +457,7 @@ export default function PublicTourPage({
                 </Link>
                 {companyInfo.phone && (
                   <a href={`tel:${companyInfo.phone}`} className="block">
-                    <Button variant="outline" className="w-full border-[#00113a] text-[#00113a] py-4 rounded-xl font-bold hover:bg-slate-50 transition-all">
+                    <Button variant="outline" className="w-full border-public-primary text-public-primary py-4 rounded-xl font-bold hover:bg-slate-50 transition-all">
                       諮詢專屬顧問
                     </Button>
                   </a>
@@ -467,19 +467,19 @@ export default function PublicTourPage({
               {/* Info */}
               <div className="mt-8 pt-8 border-t border-slate-100 space-y-4">
                 {tour.departure_date && (
-                  <div className="flex items-center gap-3 text-sm text-[#444650]">
+                  <div className="flex items-center gap-3 text-sm text-morandi-primary">
                     <Calendar className="w-4 h-4 text-morandi-green" />
                     <span>出發日期：{new Date(tour.departure_date).toLocaleDateString('zh-TW')}</span>
                   </div>
                 )}
                 {tour.max_participants && (
-                  <div className="flex items-center gap-3 text-sm text-[#444650]">
+                  <div className="flex items-center gap-3 text-sm text-morandi-primary">
                     <Users className="w-4 h-4 text-morandi-green" />
                     <span>剩餘名額：{remainingSlots > 0 ? `${remainingSlots} 位` : '已額滿'}</span>
                   </div>
                 )}
                 {daysCount > 0 && (
-                  <div className="flex items-center gap-3 text-sm text-[#444650]">
+                  <div className="flex items-center gap-3 text-sm text-morandi-primary">
                     <Clock className="w-4 h-4 text-morandi-green" />
                     <span>行程天數：{daysCount} 天 {nightsCount} 夜</span>
                   </div>
@@ -493,8 +493,8 @@ export default function PublicTourPage({
                   <ul className="space-y-3">
                     {dailyItinerary.map((day, idx) => (
                       <li key={idx} className="flex gap-3 text-sm">
-                        <span className="text-[#006970] font-bold">D{idx + 1}</span>
-                        <span className="text-[#444650] truncate">{day.title}</span>
+                        <span className="text-public-secondary font-bold">D{idx + 1}</span>
+                        <span className="text-morandi-primary truncate">{day.title}</span>
                       </li>
                     ))}
                   </ul>
@@ -503,7 +503,7 @@ export default function PublicTourPage({
             </div>
 
             {/* Features */}
-            <div className="bg-[#00113a] p-6 rounded-2xl text-white">
+            <div className="bg-public-primary p-6 rounded-2xl text-white">
               <div className="flex items-center gap-3 mb-4">
                 <CheckCircle className="w-5 h-5 text-morandi-green" />
                 <span className="font-bold">專屬服務</span>
@@ -536,19 +536,19 @@ export default function PublicTourPage({
                     className="w-20 h-20 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-[#00113a] flex items-center justify-center">
+                  <div className="w-20 h-20 rounded-full bg-public-primary flex items-center justify-center">
                     <User className="w-8 h-8 text-white" />
                   </div>
                 )}
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-[#00113a]">
+                  <h3 className="text-xl font-bold text-public-primary">
                     {employee.display_name || '專屬顧問'}
                   </h3>
                   {employee.employee_number && (
                     <p className="text-sm text-slate-500 mb-2">員工編號：{employee.employee_number}</p>
                   )}
                   {employee.email && (
-                    <a href={`mailto:${employee.email}`} className="flex items-center gap-2 text-sm text-[#006970] hover:underline mt-3">
+                    <a href={`mailto:${employee.email}`} className="flex items-center gap-2 text-sm text-public-secondary hover:underline mt-3">
                       <Mail className="w-4 h-4" />
                       {employee.email}
                     </a>
@@ -560,9 +560,9 @@ export default function PublicTourPage({
 
           {/* Company Info */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="text-lg font-bold text-[#00113a]">{companyInfo.name}</div>
+            <div className="text-lg font-bold text-public-primary">{companyInfo.name}</div>
             {companyInfo.phone && (
-              <a href={`tel:${companyInfo.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-[#00113a]">
+              <a href={`tel:${companyInfo.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-public-primary">
                 <Phone className="w-4 h-4" />
                 {companyInfo.phone}
               </a>

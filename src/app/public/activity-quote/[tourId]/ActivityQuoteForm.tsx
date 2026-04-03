@@ -75,7 +75,7 @@ export function ActivityQuoteForm({ tourId, requestId, defaultPax }: ActivityQuo
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="font-semibold text-[#c9a96e] text-lg">填寫報價</h3>
+      <h3 className="font-semibold text-morandi-gold text-lg">填寫報價</h3>
 
       {/* 聯絡資訊 */}
       <div className="grid grid-cols-2 gap-4">
@@ -142,10 +142,10 @@ export function ActivityQuoteForm({ tourId, requestId, defaultPax }: ActivityQuo
       </div>
 
       {/* 總金額 */}
-      <div className="bg-[#c9a96e]/10 border border-[#c9a96e]/30 rounded-lg p-4">
+      <div className="bg-morandi-gold/10 border border-morandi-gold/30 rounded-lg p-4">
         <div className="flex items-center justify-between">
           <span className="text-lg font-semibold text-morandi-primary">總金額</span>
-          <span className="text-2xl font-bold text-[#c9a96e]">
+          <span className="text-2xl font-bold text-morandi-gold">
             ${totalCost.toLocaleString()} 元
           </span>
         </div>
@@ -170,7 +170,7 @@ export function ActivityQuoteForm({ tourId, requestId, defaultPax }: ActivityQuo
       <button
         type="submit"
         disabled={submitting}
-        className="w-full bg-gradient-to-r from-[#c9a96e] to-[#b89960] text-white font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-gradient-to-r from-morandi-gold to-morandi-gold-hover text-white font-semibold py-3 px-6 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {submitting ? '提交中...' : '提交報價'}
       </button>

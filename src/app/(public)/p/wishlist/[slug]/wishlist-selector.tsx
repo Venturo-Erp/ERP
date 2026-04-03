@@ -114,14 +114,14 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
   const regions = Object.keys(groupedItems)
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9]">
+    <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-white/70 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold tracking-tight text-[#006872]">
+          <div className="text-2xl font-bold tracking-tight text-public-secondary">
             御風旅遊
           </div>
-          <a href="tel:07-9585361" className="text-[#006872] font-medium hidden sm:block">
+          <a href="tel:07-9585361" className="text-public-secondary font-medium hidden sm:block">
             07-9585361
           </a>
         </div>
@@ -131,11 +131,11 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
         {/* 左側：景點列表 */}
         <section className="flex-1">
           <header className="mb-10">
-            <h1 className="text-4xl font-extrabold tracking-tight text-[#1a1c1c] mb-3">
+            <h1 className="text-4xl font-extrabold tracking-tight text-morandi-primary mb-3">
               {template.name}
             </h1>
             {template.description && (
-              <p className="text-[#3e494a] text-lg max-w-2xl">
+              <p className="text-morandi-primary text-lg max-w-2xl">
                 {template.description}
               </p>
             )}
@@ -144,7 +144,7 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
           {/* 分區顯示 */}
           {regions.map(region => (
             <div key={region} className="mb-12">
-              <h2 className="text-xl font-bold text-[#006872] mb-6 flex items-center gap-2">
+              <h2 className="text-xl font-bold text-public-secondary mb-6 flex items-center gap-2">
                 <MapPin size={20} />
                 {region}
               </h2>
@@ -161,7 +161,7 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
                         group relative rounded-xl overflow-hidden cursor-pointer
                         transition-all duration-300
                         ${selected 
-                          ? 'bg-[#92f1fe] ring-2 ring-[#006872] scale-[1.02]' 
+                          ? 'bg-status-info-bg ring-2 ring-public-secondary scale-[1.02]' 
                           : 'bg-white shadow-sm hover:shadow-md hover:scale-[1.01]'
                         }
                       `}
@@ -184,16 +184,16 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
                       {/* 內容 */}
                       <div className="p-5">
                         <div className="flex justify-between items-start mb-2">
-                          <h3 className={`text-lg font-bold ${selected ? 'text-[#004f56]' : 'text-[#1a1c1c]'}`}>
+                          <h3 className={`text-lg font-bold ${selected ? 'text-public-secondary' : 'text-morandi-primary'}`}>
                             {item.name}
                           </h3>
                           {selected && (
-                            <Check size={20} className="text-[#006872]" />
+                            <Check size={20} className="text-public-secondary" />
                           )}
                         </div>
                         
                         {item.description && (
-                          <p className={`text-sm leading-relaxed ${selected ? 'text-[#004f56]/80' : 'text-[#3e494a]'}`}>
+                          <p className={`text-sm leading-relaxed ${selected ? 'text-public-secondary/80' : 'text-morandi-primary'}`}>
                             {item.description}
                           </p>
                         )}
@@ -204,8 +204,8 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
                             flex items-center justify-center gap-2
                             transition-colors
                             ${selected
-                              ? 'bg-[#006872] text-white'
-                              : 'border-2 border-[#bdc9ca] text-[#3e494a] hover:border-[#006872] hover:text-[#006872]'
+                              ? 'bg-public-secondary text-white'
+                              : 'border-2 border-border text-morandi-primary hover:border-public-secondary hover:text-public-secondary'
                             }
                           `}
                         >
@@ -227,13 +227,13 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
         {/* 右側：已選清單 */}
         <aside className="w-80 hidden lg:block">
           <div className="sticky top-24 bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-xl font-bold text-[#006872] mb-2">已選景點</h2>
-            <p className="text-sm text-[#3e494a] mb-6">
+            <h2 className="text-xl font-bold text-public-secondary mb-2">已選景點</h2>
+            <p className="text-sm text-morandi-primary mb-6">
               {selectedItems.length} 個景點
             </p>
 
             {selectedItems.length === 0 ? (
-              <p className="text-center text-[#6e797b] py-8">
+              <p className="text-center text-morandi-secondary py-8">
                 點擊景點卡片加入清單
               </p>
             ) : (
@@ -241,7 +241,7 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
                 {selectedItems.map(item => (
                   <div
                     key={item.id}
-                    className="flex gap-3 p-3 bg-[#92f1fe]/20 rounded-xl"
+                    className="flex gap-3 p-3 bg-status-info-bg/20 rounded-xl"
                   >
                     {item.image_url && (
                       <img
@@ -251,16 +251,16 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-[#1a1c1c] truncate">
+                      <p className="text-sm font-bold text-morandi-primary truncate">
                         {item.name}
                       </p>
-                      <p className="text-xs text-[#3e494a]">{item.region}</p>
+                      <p className="text-xs text-morandi-primary">{item.region}</p>
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           toggleItem(item)
                         }}
-                        className="text-xs text-[#006872] underline mt-1"
+                        className="text-xs text-public-secondary underline mt-1"
                       >
                         移除
                       </button>
@@ -279,7 +279,7 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
                 transition-all
                 ${selectedItems.length > 0
                   ? 'bg-gradient-to-r from-[#006872] to-[#00838f] shadow-lg hover:shadow-xl'
-                  : 'bg-[#bdc9ca] cursor-not-allowed'
+                  : 'bg-morandi-muted cursor-not-allowed'
                 }
               `}
             >
@@ -300,7 +300,7 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
             flex items-center justify-center gap-2
             ${selectedItems.length > 0
               ? 'bg-gradient-to-r from-[#006872] to-[#00838f]'
-              : 'bg-[#bdc9ca] cursor-not-allowed'
+              : 'bg-morandi-muted cursor-not-allowed'
             }
           `}
         >
@@ -313,9 +313,9 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-[#e2e2e2] flex justify-between items-center">
-              <h2 className="text-xl font-bold text-[#1a1c1c]">填寫聯絡資料</h2>
-              <button onClick={() => setShowForm(false)} className="text-[#6e797b] hover:text-[#1a1c1c]">
+            <div className="p-6 border-b border-border flex justify-between items-center">
+              <h2 className="text-xl font-bold text-morandi-primary">填寫聯絡資料</h2>
+              <button onClick={() => setShowForm(false)} className="text-morandi-secondary hover:text-morandi-primary">
                 <X size={24} />
               </button>
             </div>
@@ -323,17 +323,17 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
               {/* 姓名 */}
               <div>
-                <label className="text-xs font-bold uppercase tracking-wide text-[#3e494a] mb-2 block">
+                <label className="text-xs font-bold uppercase tracking-wide text-morandi-primary mb-2 block">
                   姓名 *
                 </label>
                 <div className="relative">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6e797b]" />
+                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary" />
                   <input
                     type="text"
                     value={formData.name}
                     onChange={e => setFormData(p => ({ ...p, name: e.target.value }))}
                     placeholder="王小明"
-                    className="w-full pl-12 pr-4 py-4 bg-[#f3f3f3] rounded-xl focus:ring-2 focus:ring-[#006872] border-0"
+                    className="w-full pl-12 pr-4 py-4 bg-background rounded-xl focus:ring-2 focus:ring-public-secondary border-0"
                     required
                   />
                 </div>
@@ -341,17 +341,17 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
 
               {/* 電話 */}
               <div>
-                <label className="text-xs font-bold uppercase tracking-wide text-[#3e494a] mb-2 block">
+                <label className="text-xs font-bold uppercase tracking-wide text-morandi-primary mb-2 block">
                   電話 *
                 </label>
                 <div className="relative">
-                  <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6e797b]" />
+                  <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary" />
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={e => setFormData(p => ({ ...p, phone: e.target.value }))}
                     placeholder="0912-345-678"
-                    className="w-full pl-12 pr-4 py-4 bg-[#f3f3f3] rounded-xl focus:ring-2 focus:ring-[#006872] border-0"
+                    className="w-full pl-12 pr-4 py-4 bg-background rounded-xl focus:ring-2 focus:ring-public-secondary border-0"
                     required
                   />
                 </div>
@@ -359,17 +359,17 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
 
               {/* Email */}
               <div>
-                <label className="text-xs font-bold uppercase tracking-wide text-[#3e494a] mb-2 block">
+                <label className="text-xs font-bold uppercase tracking-wide text-morandi-primary mb-2 block">
                   Email
                 </label>
                 <div className="relative">
-                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6e797b]" />
+                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary" />
                   <input
                     type="email"
                     value={formData.email}
                     onChange={e => setFormData(p => ({ ...p, email: e.target.value }))}
                     placeholder="example@email.com"
-                    className="w-full pl-12 pr-4 py-4 bg-[#f3f3f3] rounded-xl focus:ring-2 focus:ring-[#006872] border-0"
+                    className="w-full pl-12 pr-4 py-4 bg-background rounded-xl focus:ring-2 focus:ring-public-secondary border-0"
                   />
                 </div>
               </div>
@@ -377,30 +377,30 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
               {/* 日期和人數 */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wide text-[#3e494a] mb-2 block">
+                  <label className="text-xs font-bold uppercase tracking-wide text-morandi-primary mb-2 block">
                     出發日期
                   </label>
                   <div className="relative">
-                    <Calendar size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6e797b]" />
+                    <Calendar size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary" />
                     <input
                       type="date"
                       value={formData.travelDate}
                       onChange={e => setFormData(p => ({ ...p, travelDate: e.target.value }))}
-                      className="w-full pl-12 pr-4 py-4 bg-[#f3f3f3] rounded-xl focus:ring-2 focus:ring-[#006872] border-0"
+                      className="w-full pl-12 pr-4 py-4 bg-background rounded-xl focus:ring-2 focus:ring-public-secondary border-0"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wide text-[#3e494a] mb-2 block">
+                  <label className="text-xs font-bold uppercase tracking-wide text-morandi-primary mb-2 block">
                     人數
                   </label>
                   <div className="relative">
-                    <Users size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#6e797b]" />
+                    <Users size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary" />
                     <select
                       value={formData.peopleCount}
                       onChange={e => setFormData(p => ({ ...p, peopleCount: e.target.value }))}
-                      className="w-full pl-12 pr-4 py-4 bg-[#f3f3f3] rounded-xl focus:ring-2 focus:ring-[#006872] border-0 appearance-none"
+                      className="w-full pl-12 pr-4 py-4 bg-background rounded-xl focus:ring-2 focus:ring-public-secondary border-0 appearance-none"
                     >
                       <option value="1">1 人</option>
                       <option value="2">2 人</option>
@@ -414,7 +414,7 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
 
               {/* 備註 */}
               <div>
-                <label className="text-xs font-bold uppercase tracking-wide text-[#3e494a] mb-2 block">
+                <label className="text-xs font-bold uppercase tracking-wide text-morandi-primary mb-2 block">
                   其他需求
                 </label>
                 <textarea
@@ -422,16 +422,16 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
                   onChange={e => setFormData(p => ({ ...p, notes: e.target.value }))}
                   placeholder="有任何特殊需求請在此說明..."
                   rows={3}
-                  className="w-full px-4 py-4 bg-[#f3f3f3] rounded-xl focus:ring-2 focus:ring-[#006872] border-0 resize-none"
+                  className="w-full px-4 py-4 bg-background rounded-xl focus:ring-2 focus:ring-public-secondary border-0 resize-none"
                 />
               </div>
 
               {/* 已選景點摘要 */}
-              <div className="bg-[#92f1fe]/20 rounded-xl p-4">
-                <p className="text-sm font-bold text-[#006872] mb-2">
+              <div className="bg-status-info-bg/20 rounded-xl p-4">
+                <p className="text-sm font-bold text-public-secondary mb-2">
                   已選 {selectedItems.length} 個景點
                 </p>
-                <p className="text-xs text-[#3e494a]">
+                <p className="text-xs text-morandi-primary">
                   {selectedItems.map(i => i.name).join('、')}
                 </p>
               </div>
@@ -449,11 +449,11 @@ export function WishlistSelector({ template, groupedItems }: WishlistSelectorPro
       )}
 
       {/* Footer */}
-      <footer className="bg-[#f3f3f3] py-12 px-6 mt-20">
+      <footer className="bg-background py-12 px-6 mt-20">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-[#1a1c1c] font-bold text-lg mb-2">御風旅遊</p>
-          <p className="text-[#6e797b] text-sm">高雄市楠梓區大學56街2號</p>
-          <p className="text-[#6e797b] text-sm">07-9585361</p>
+          <p className="text-morandi-primary font-bold text-lg mb-2">御風旅遊</p>
+          <p className="text-morandi-secondary text-sm">高雄市楠梓區大學56街2號</p>
+          <p className="text-morandi-secondary text-sm">07-9585361</p>
         </div>
       </footer>
     </div>
