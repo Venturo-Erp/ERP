@@ -143,10 +143,10 @@ export default function PublicRequestPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#f9f9f9',
+          background: 'var(--background)',
         }}
       >
-        <p style={{ color: '#999' }}>載入中...</p>
+        <p style={{ color: 'var(--morandi-muted)' }}>載入中...</p>
       </div>
     )
 
@@ -158,7 +158,7 @@ export default function PublicRequestPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#f9f9f9',
+          background: 'var(--background)',
         }}
       >
         <div
@@ -172,7 +172,7 @@ export default function PublicRequestPage() {
           }}
         >
           <h1 style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>找不到委託單</h1>
-          <p style={{ color: '#999' }}>{error}</p>
+          <p style={{ color: 'var(--morandi-muted)' }}>{error}</p>
         </div>
       </div>
     )
@@ -185,7 +185,7 @@ export default function PublicRequestPage() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#f9f9f9',
+          background: 'var(--background)',
         }}
       >
         <div
@@ -199,7 +199,7 @@ export default function PublicRequestPage() {
           }}
         >
           <h1 style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 8 }}>報價已送出</h1>
-          <p style={{ color: '#999' }}>感謝您的回覆，旅行社會盡快確認。</p>
+          <p style={{ color: 'var(--morandi-muted)' }}>感謝您的回覆，旅行社會盡快確認。</p>
           <button
             onClick={() => setSubmitted(false)}
             style={{
@@ -238,7 +238,7 @@ export default function PublicRequestPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f9f9f9', padding: '30px 16px' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--background)', padding: '30px 16px' }}>
       <div
         style={{
           maxWidth: 800,
@@ -264,7 +264,7 @@ export default function PublicRequestPage() {
 
         {/* 基本資訊 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-          <div style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15 }}>
+          <div style={{ border: '1px solid var(--border)', borderRadius: 5, padding: 15 }}>
             <h3
               style={{
                 margin: '0 0 8px 0',
@@ -300,7 +300,7 @@ export default function PublicRequestPage() {
               )}
             </div>
           </div>
-          <div style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15 }}>
+          <div style={{ border: '1px solid var(--border)', borderRadius: 5, padding: 15 }}>
             <h3
               style={{
                 margin: '0 0 8px 0',
@@ -330,7 +330,7 @@ export default function PublicRequestPage() {
           return (
             <div key={`acc-${idx}`} style={{ marginBottom: 24 }}>
               <div
-                style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15, marginBottom: 10 }}
+                style={{ border: '1px solid var(--border)', borderRadius: 5, padding: 15, marginBottom: 10 }}
               >
                 <h3
                   style={{
@@ -432,7 +432,7 @@ export default function PublicRequestPage() {
                       </td>
                     </tr>
                   ))}
-                  <tr style={{ background: '#fef3c7', fontWeight: 'bold' }}>
+                  <tr style={{ background: 'var(--status-warning-bg)', fontWeight: 'bold' }}>
                     <td style={{ ...cellStyle, textAlign: 'center' }}>合計</td>
                     <td style={{ ...cellStyle, textAlign: 'center' }}>{totalRooms} 間</td>
                     <td style={{ ...cellStyle, textAlign: 'center' }}>{nights} 晚</td>
@@ -515,7 +515,7 @@ export default function PublicRequestPage() {
         )}
 
         {/* 統包價格 */}
-        <div style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15, marginBottom: 20 }}>
+        <div style={{ border: '1px solid var(--border)', borderRadius: 5, padding: 15, marginBottom: 20 }}>
           <h3
             style={{
               margin: '0 0 10px 0',
@@ -535,7 +535,7 @@ export default function PublicRequestPage() {
                   left: 10,
                   top: '50%',
                   transform: 'translateY(-50%)',
-                  color: '#999',
+                  color: 'var(--morandi-muted)',
                   fontSize: 13,
                 }}
               >
@@ -550,13 +550,13 @@ export default function PublicRequestPage() {
               />
             </div>
           </div>
-          <p style={{ fontSize: 11, color: '#999', marginTop: 6 }}>
+          <p style={{ fontSize: 11, color: 'var(--morandi-muted)', marginTop: 6 }}>
             如為統包報價，可只填此欄，上方單項報價可留空
           </p>
         </div>
 
         {/* 整體備註 */}
-        <div style={{ border: '1px solid #ddd', borderRadius: 5, padding: 15, marginBottom: 20 }}>
+        <div style={{ border: '1px solid var(--border)', borderRadius: 5, padding: 15, marginBottom: 20 }}>
           <h3
             style={{
               margin: '0 0 8px 0',
@@ -614,12 +614,12 @@ export default function PublicRequestPage() {
           </button>
         </div>
         {lastSaved && (
-          <p style={{ textAlign: 'center', fontSize: 13, color: '#16a34a' }}>
+          <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--status-success)' }}>
             已暫存（{lastSaved}）— 可隨時回來繼續填寫
           </p>
         )}
 
-        <p style={{ textAlign: 'center', marginTop: 30, fontSize: 11, color: '#bbb' }}>
+        <p style={{ textAlign: 'center', marginTop: 30, fontSize: 11, color: 'var(--morandi-muted)' }}>
           此頁面由 Venturo ERP 產生 · {COMPANY_NAME}
         </p>
       </div>

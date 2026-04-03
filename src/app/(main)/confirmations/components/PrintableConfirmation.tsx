@@ -191,7 +191,7 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
             <thead>
               <tr>
                 <td>
-                  <div className="relative pb-4 mb-6" style={{ borderBottom: '1px solid #B8A99A' }}>
+                  <div className="relative pb-4 mb-6" style={{ borderBottom: '1px solid var(--morandi-container)' }}>
                     {/* Logo - 左上角 */}
                     {logoUrl ? (
                       <div
@@ -210,7 +210,7 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
                         />
                       </div>
                     ) : (
-                      <div className="absolute left-0 top-0 text-xs" style={{ color: '#9CA3AF' }}>
+                      <div className="absolute left-0 top-0 text-xs" style={{ color: 'var(--morandi-muted)' }}>
                         {workspaceName}
                       </div>
                     )}
@@ -219,7 +219,7 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
                     <div className="relative z-10 text-center py-2">
                       <div
                         className="text-sm tracking-widest mb-1"
-                        style={{ color: '#B8A99A', fontWeight: 500 }}
+                        style={{ color: 'var(--morandi-container)', fontWeight: 500 }}
                       >
                         CONFIRMATION
                       </div>
@@ -256,11 +256,11 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
                     }}
                   >
                     <div className="text-center" style={{ marginBottom: '12px' }}>
-                      <p className="text-sm italic" style={{ color: '#6B7280', margin: 0 }}>
+                      <p className="text-sm italic" style={{ color: 'var(--morandi-secondary)', margin: 0 }}>
                         {companySubtitle}
                       </p>
                     </div>
-                    <div className="text-center text-xs" style={{ color: '#9CA3AF' }}>
+                    <div className="text-center text-xs" style={{ color: 'var(--morandi-muted)' }}>
                       <span>
                         {workspaceName} © {new Date().getFullYear()}
                       </span>
@@ -300,7 +300,7 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
 
           {/* 非列印模式的內容 */}
           <div className="print:hidden">
-            <div className="relative pb-4 mb-6" style={{ borderBottom: '1px solid #B8A99A' }}>
+            <div className="relative pb-4 mb-6" style={{ borderBottom: '1px solid var(--morandi-container)' }}>
               {/* Logo - 左上角 */}
               {logoUrl ? (
                 <div className="absolute left-0 top-0" style={{ width: '120px', height: '40px' }}>
@@ -316,7 +316,7 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
                   />
                 </div>
               ) : (
-                <div className="absolute left-0 top-0 text-xs" style={{ color: '#9CA3AF' }}>
+                <div className="absolute left-0 top-0 text-xs" style={{ color: 'var(--morandi-muted)' }}>
                   {workspaceName}
                 </div>
               )}
@@ -325,7 +325,7 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
               <div className="relative z-10 text-center py-2">
                 <div
                   className="text-sm tracking-widest mb-1"
-                  style={{ color: '#B8A99A', fontWeight: 500 }}
+                  style={{ color: 'var(--morandi-container)', fontWeight: 500 }}
                 >
                   CONFIRMATION
                 </div>
@@ -371,11 +371,11 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
               }}
             >
               <div className="text-center" style={{ marginBottom: '12px' }}>
-                <p className="text-sm italic" style={{ color: '#6B7280', margin: 0 }}>
+                <p className="text-sm italic" style={{ color: 'var(--morandi-secondary)', margin: 0 }}>
                   {companySubtitle}
                 </p>
               </div>
-              <div className="text-center text-xs" style={{ color: '#9CA3AF' }}>
+              <div className="text-center text-xs" style={{ color: 'var(--morandi-muted)' }}>
                 <span>
                   {workspaceName} © {new Date().getFullYear()}
                 </span>
@@ -396,13 +396,13 @@ const FlightConfirmationContent: React.FC<{ data: FlightData }> = ({ data }) => 
       {/* 免責聲明 */}
       <div
         className="text-center text-xs italic py-2 bg-status-warning-bg rounded"
-        style={{ color: '#92400E' }}
+        style={{ color: 'var(--status-warning)' }}
       >
         {LABELS.DISCLAIMER}
       </div>
 
       {/* 旅客姓名列表 */}
-      <div className="text-sm" style={{ color: '#374151' }}>
+      <div className="text-sm" style={{ color: 'var(--morandi-primary)' }}>
         {data.passengers?.map((passenger, idx) => (
           <div key={idx} className="mb-1 font-medium">
             {LABELS.PASSENGER_NAME}: {String(idx + 1).padStart(2, '0')}. {passenger.nameEn}
@@ -454,13 +454,13 @@ const FlightConfirmationContent: React.FC<{ data: FlightData }> = ({ data }) => 
                 {/* 航空公司行 */}
                 <tr>
                   <td className="py-1.5"></td>
-                  <td className="py-1.5 font-semibold" style={{ color: '#374151' }}>
+                  <td className="py-1.5 font-semibold" style={{ color: 'var(--morandi-primary)' }}>
                     {segment.airline}({segment.flightNumber})
                   </td>
-                  <td className="py-1.5" style={{ color: '#6B7280' }}>
+                  <td className="py-1.5" style={{ color: 'var(--morandi-secondary)' }}>
                     {'duration' in segment ? (segment.duration as string) : ''}
                   </td>
-                  <td className="py-1.5" style={{ width: '110px', color: '#6B7280' }}>
+                  <td className="py-1.5" style={{ width: '110px', color: 'var(--morandi-secondary)' }}>
                     {'stops' in segment && typeof segment.stops === 'number'
                       ? segment.stops === 0
                         ? `/${LABELS.DIRECT_FLIGHT}`
@@ -472,20 +472,20 @@ const FlightConfirmationContent: React.FC<{ data: FlightData }> = ({ data }) => 
                 <tr>
                   <td
                     className="py-1.5"
-                    style={{ whiteSpace: 'nowrap', color: '#374151', fontWeight: 500 }}
+                    style={{ whiteSpace: 'nowrap', color: 'var(--morandi-primary)', fontWeight: 500 }}
                   >
                     {segment.departureDate}
                   </td>
-                  <td className="py-1.5" style={{ color: '#374151' }}>
+                  <td className="py-1.5" style={{ color: 'var(--morandi-primary)' }}>
                     {segment.departureTime} {LABELS.DEPARTURE}: {segment.departureAirport}
                   </td>
-                  <td className="py-1.5" style={{ width: '180px', color: '#6B7280' }}>
+                  <td className="py-1.5" style={{ width: '180px', color: 'var(--morandi-secondary)' }}>
                     {segment.departureTerminal
                       ? `${LABELS.TERMINAL}${segment.departureTerminal} `
                       : ''}
                     /{'cabin' in segment ? (segment.cabin as string) : LABELS.ECONOMY_CLASS} /OK
                   </td>
-                  <td className="py-1.5" style={{ width: '110px', color: '#6B7280' }}></td>
+                  <td className="py-1.5" style={{ width: '110px', color: 'var(--morandi-secondary)' }}></td>
                 </tr>
                 {/* 抵達行 */}
                 <tr
@@ -495,14 +495,14 @@ const FlightConfirmationContent: React.FC<{ data: FlightData }> = ({ data }) => 
                   }}
                 >
                   <td className="py-1.5 pb-3"></td>
-                  <td className="py-1.5 pb-3" style={{ color: '#374151' }}>
+                  <td className="py-1.5 pb-3" style={{ color: 'var(--morandi-primary)' }}>
                     {segment.arrivalTime} {LABELS.ARRIVAL}: {segment.arrivalAirport}
                   </td>
-                  <td className="py-1.5 pb-3" style={{ color: '#6B7280' }}>
+                  <td className="py-1.5 pb-3" style={{ color: 'var(--morandi-secondary)' }}>
                     {segment.arrivalTerminal ? `${LABELS.TERMINAL}${segment.arrivalTerminal} ` : ''}
                     /${LABELS.MEAL}
                   </td>
-                  <td className="py-1.5 pb-3" style={{ color: '#6B7280' }}></td>
+                  <td className="py-1.5 pb-3" style={{ color: 'var(--morandi-secondary)' }}></td>
                 </tr>
               </React.Fragment>
             ))}
@@ -515,7 +515,7 @@ const FlightConfirmationContent: React.FC<{ data: FlightData }> = ({ data }) => 
         {data.passengers?.map(
           (passenger, idx) =>
             passenger.ticketNumber && (
-              <div key={idx} style={{ color: '#374151' }}>
+              <div key={idx} style={{ color: 'var(--morandi-primary)' }}>
                 <span className="font-semibold">{LABELS.TICKET_NUMBER}:</span>{' '}
                 {passenger.ticketNumber} - {passenger.nameEn}
               </div>
@@ -529,7 +529,7 @@ const FlightConfirmationContent: React.FC<{ data: FlightData }> = ({ data }) => 
         data.airlineContacts.length > 0 && (
           <div className="text-sm bg-status-info-bg p-4 rounded-lg border border-status-info/30">
             <div className="font-semibold mb-2 text-status-info">{LABELS.AIRLINE_CONTACT}:</div>
-            <div className="space-y-1" style={{ color: '#374151' }}>
+            <div className="space-y-1" style={{ color: 'var(--morandi-primary)' }}>
               {(data.airlineContacts as string[]).map((contact: string, idx: number) => (
                 <div key={idx} className="pl-4">
                   {contact}
@@ -543,11 +543,11 @@ const FlightConfirmationContent: React.FC<{ data: FlightData }> = ({ data }) => 
       {data.importantNotes && data.importantNotes.length > 0 && (
         <div className="avoid-break">
           <div className="text-sm space-y-2 bg-status-warning-bg p-4 rounded-lg border-2 border-status-warning/30">
-            <div className="font-semibold mb-1" style={{ color: '#92400E' }}>
+            <div className="font-semibold mb-1" style={{ color: 'var(--status-warning)' }}>
               ⚠️ {LABELS.IMPORTANT_INFO}
             </div>
             {data.importantNotes.map((note, idx) => (
-              <div key={idx} className="flex gap-2" style={{ color: '#78350F' }}>
+              <div key={idx} className="flex gap-2" style={{ color: 'var(--status-warning)' }}>
                 <span>•</span>
                 <span>{note}</span>
               </div>

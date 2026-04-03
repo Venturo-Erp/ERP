@@ -67,7 +67,7 @@ export const QuickQuotePaymentInfo: React.FC = () => {
             {QUICK_QUOTE_LABELS.LABEL_5024_PREFIX}
             {fullName}
           </div>
-          <div className="font-semibold" style={{ color: '#DC2626' }}>
+          <div className="font-semibold" style={{ color: 'var(--status-danger)' }}>
             {QUICK_QUOTE_LABELS.LABEL_2697}
           </div>
           <div className="text-xs mt-2" style={{ color: MORANDI_COLORS.lightGray }}>

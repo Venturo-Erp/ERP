@@ -447,7 +447,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                   left: 0,
                   top: 0,
                   fontSize: '12px',
-                  color: '#9CA3AF',
+                  color: 'var(--morandi-muted)',
                 }}
               >
                 {ws?.name || ''}
@@ -500,7 +500,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               </span>
               <span
                 className="info-value"
-                style={{ flex: 1, borderBottom: '1px solid #ccc', paddingBottom: '2px' }}
+                style={{ flex: 1, borderBottom: '1px solid var(--border)', paddingBottom: '2px' }}
               >
                 {quote.customer_name}
               </span>
@@ -514,7 +514,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               </span>
               <span
                 className="info-value"
-                style={{ flex: 1, borderBottom: '1px solid #ccc', paddingBottom: '2px' }}
+                style={{ flex: 1, borderBottom: '1px solid var(--border)', paddingBottom: '2px' }}
               >
                 {quote.tour_code || ''}
               </span>
@@ -528,7 +528,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               </span>
               <span
                 className="info-value"
-                style={{ flex: 1, borderBottom: '1px solid #ccc', paddingBottom: '2px' }}
+                style={{ flex: 1, borderBottom: '1px solid var(--border)', paddingBottom: '2px' }}
               >
                 {quote.contact_phone || ''}
               </span>
@@ -542,7 +542,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               </span>
               <span
                 className="info-value"
-                style={{ flex: 1, borderBottom: '1px solid #ccc', paddingBottom: '2px' }}
+                style={{ flex: 1, borderBottom: '1px solid var(--border)', paddingBottom: '2px' }}
               >
                 {quote.handler_name || 'William'}
               </span>
@@ -556,7 +556,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               </span>
               <span
                 className="info-value"
-                style={{ flex: 1, borderBottom: '1px solid #ccc', paddingBottom: '2px' }}
+                style={{ flex: 1, borderBottom: '1px solid var(--border)', paddingBottom: '2px' }}
               >
                 {quote.contact_address || ''}
               </span>
@@ -570,7 +570,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               </span>
               <span
                 className="info-value"
-                style={{ flex: 1, borderBottom: '1px solid #ccc', paddingBottom: '2px' }}
+                style={{ flex: 1, borderBottom: '1px solid var(--border)', paddingBottom: '2px' }}
               >
                 {quote.issue_date || getTodayString()}
               </span>
@@ -595,7 +595,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               width: '100%',
               borderCollapse: 'separate',
               borderSpacing: 0,
-              border: '1px solid #E5E7EB',
+              border: '1px solid var(--border)',
               borderRadius: '8px',
               overflow: 'hidden',
               marginBottom: '20px',
@@ -603,14 +603,14 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
             }}
           >
             <thead>
-              <tr style={{ backgroundColor: '#FAF7F2' }}>
+              <tr style={{ backgroundColor: 'var(--background)' }}>
                 <th
                   style={{
                     padding: '10px 12px',
                     textAlign: 'left',
                     fontWeight: 600,
                     color: 'var(--morandi-primary)',
-                    borderBottom: '1px solid #E5E7EB',
+                    borderBottom: '1px solid var(--border)',
                     width: '35%',
                   }}
                 >
@@ -622,8 +622,8 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                     textAlign: 'center',
                     fontWeight: 600,
                     color: 'var(--morandi-primary)',
-                    borderBottom: '1px solid #E5E7EB',
-                    borderLeft: '1px solid #E5E7EB',
+                    borderBottom: '1px solid var(--border)',
+                    borderLeft: '1px solid var(--border)',
                     width: '10%',
                   }}
                 >
@@ -635,8 +635,8 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                     textAlign: 'center',
                     fontWeight: 600,
                     color: 'var(--morandi-primary)',
-                    borderBottom: '1px solid #E5E7EB',
-                    borderLeft: '1px solid #E5E7EB',
+                    borderBottom: '1px solid var(--border)',
+                    borderLeft: '1px solid var(--border)',
                     width: '15%',
                   }}
                 >
@@ -648,8 +648,8 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                     textAlign: 'center',
                     fontWeight: 600,
                     color: 'var(--morandi-primary)',
-                    borderBottom: '1px solid #E5E7EB',
-                    borderLeft: '1px solid #E5E7EB',
+                    borderBottom: '1px solid var(--border)',
+                    borderLeft: '1px solid var(--border)',
                     width: '15%',
                   }}
                 >
@@ -661,8 +661,8 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                     textAlign: 'left',
                     fontWeight: 600,
                     color: 'var(--morandi-primary)',
-                    borderBottom: '1px solid #E5E7EB',
-                    borderLeft: '1px solid #E5E7EB',
+                    borderBottom: '1px solid var(--border)',
+                    borderLeft: '1px solid var(--border)',
                     width: '25%',
                   }}
                 >
@@ -676,8 +676,8 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                   <td
                     style={{
                       padding: '8px 12px',
-                      color: '#4B5563',
-                      borderBottom: index === items.length - 1 ? 'none' : '1px solid #E5E7EB',
+                      color: 'var(--morandi-primary)',
+                      borderBottom: index === items.length - 1 ? 'none' : '1px solid var(--border)',
                     }}
                   >
                     {item.description || '\u00A0'}
@@ -686,9 +686,9 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                     style={{
                       padding: '8px 12px',
                       textAlign: 'center',
-                      color: '#4B5563',
-                      borderBottom: index === items.length - 1 ? 'none' : '1px solid #E5E7EB',
-                      borderLeft: '1px solid #E5E7EB',
+                      color: 'var(--morandi-primary)',
+                      borderBottom: index === items.length - 1 ? 'none' : '1px solid var(--border)',
+                      borderLeft: '1px solid var(--border)',
                     }}
                   >
                     {item.quantity && item.quantity !== 0 ? item.quantity : '\u00A0'}
@@ -697,9 +697,9 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                     style={{
                       padding: '8px 12px',
                       textAlign: 'right',
-                      color: '#4B5563',
-                      borderBottom: index === items.length - 1 ? 'none' : '1px solid #E5E7EB',
-                      borderLeft: '1px solid #E5E7EB',
+                      color: 'var(--morandi-primary)',
+                      borderBottom: index === items.length - 1 ? 'none' : '1px solid var(--border)',
+                      borderLeft: '1px solid var(--border)',
                     }}
                   >
                     {item.unit_price && item.unit_price !== 0
@@ -712,8 +712,8 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                       textAlign: 'right',
                       color: 'var(--morandi-primary)',
                       fontWeight: 600,
-                      borderBottom: index === items.length - 1 ? 'none' : '1px solid #E5E7EB',
-                      borderLeft: '1px solid #E5E7EB',
+                      borderBottom: index === items.length - 1 ? 'none' : '1px solid var(--border)',
+                      borderLeft: '1px solid var(--border)',
                     }}
                   >
                     {item.amount && item.amount !== 0
@@ -723,9 +723,9 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                   <td
                     style={{
                       padding: '8px 12px',
-                      color: '#4B5563',
-                      borderBottom: index === items.length - 1 ? 'none' : '1px solid #E5E7EB',
-                      borderLeft: '1px solid #E5E7EB',
+                      color: 'var(--morandi-primary)',
+                      borderBottom: index === items.length - 1 ? 'none' : '1px solid var(--border)',
+                      borderLeft: '1px solid var(--border)',
                     }}
                   >
                     {item.notes || '\u00A0'}
@@ -736,7 +736,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                 <tr>
                   <td
                     colSpan={5}
-                    style={{ padding: '32px 12px', textAlign: 'center', color: '#9CA3AF' }}
+                    style={{ padding: '32px 12px', textAlign: 'center', color: 'var(--morandi-muted)' }}
                   >
                     {PRINTABLE_QUICK_QUOTE_LABELS.尚無收費項目}
                   </td>
@@ -751,8 +751,8 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               style={{
                 marginBottom: '20px',
                 padding: '12px 16px',
-                backgroundColor: '#FAF7F2',
-                border: '1px solid #E5E7EB',
+                backgroundColor: 'var(--background)',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
               }}
             >
@@ -768,7 +768,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               </div>
               <div
                 style={{
-                  color: '#4B5563',
+                  color: 'var(--morandi-primary)',
                   fontSize: '13px',
                   lineHeight: 1.6,
                   whiteSpace: 'pre-wrap',
@@ -783,8 +783,8 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
           <div
             className="summary-box"
             style={{
-              backgroundColor: '#FAF7F2',
-              border: '1px solid #E5E7EB',
+              backgroundColor: 'var(--background)',
+              border: '1px solid var(--border)',
               borderRadius: '8px',
               padding: '12px 16px',
               display: 'flex',
@@ -819,7 +819,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                 </div>
                 <div
                   className="divider"
-                  style={{ width: '1px', height: '24px', backgroundColor: '#D1D5DB' }}
+                  style={{ width: '1px', height: '24px', backgroundColor: 'var(--morandi-container)' }}
                 />
                 <div
                   className="summary-item"
@@ -844,7 +844,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                 </div>
                 <div
                   className="divider"
-                  style={{ width: '1px', height: '24px', backgroundColor: '#D1D5DB' }}
+                  style={{ width: '1px', height: '24px', backgroundColor: 'var(--morandi-container)' }}
                 />
                 <div
                   className="summary-item"
@@ -906,7 +906,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               >
                 {PRINTABLE_QUICK_QUOTE_LABELS.匯款資訊}
               </div>
-              <div className="payment-info" style={{ color: '#4B5563', lineHeight: 1.8 }}>
+              <div className="payment-info" style={{ color: 'var(--morandi-primary)', lineHeight: 1.8 }}>
                 {hasBankInfo ? (
                   <>
                     <div>
@@ -933,7 +933,7 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                     )}
                   </>
                 ) : (
-                  <div style={{ color: '#9CA3AF', fontStyle: 'italic' }}>
+                  <div style={{ color: 'var(--morandi-muted)', fontStyle: 'italic' }}>
                     {PAYMENT_INFO_LABELS.未設定銀行資訊}
                   </div>
                 )}
@@ -946,17 +946,17 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               >
                 {PRINTABLE_QUICK_QUOTE_LABELS.支票資訊}
               </div>
-              <div className="payment-info" style={{ color: '#4B5563', lineHeight: 1.8 }}>
+              <div className="payment-info" style={{ color: 'var(--morandi-primary)', lineHeight: 1.8 }}>
                 <div>
                   {PRINTABLE_QUICK_QUOTE_LABELS.抬頭前綴}
                   {companyFullName}
                 </div>
-                <div className="warning" style={{ color: '#DC2626', fontWeight: 600 }}>
+                <div className="warning" style={{ color: 'var(--status-danger)', fontWeight: 600 }}>
                   {PRINTABLE_QUICK_QUOTE_LABELS.禁止背書轉讓}
                 </div>
                 <div
                   className="note"
-                  style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '8px' }}
+                  style={{ fontSize: '11px', color: 'var(--morandi-muted)', marginTop: '8px' }}
                 >
                   {PRINTABLE_QUICK_QUOTE_LABELS.請於出發日前付清餘額}
                 </div>
@@ -992,13 +992,13 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               <div className="receipt-row" style={{ display: 'flex' }}>
                 <span
                   className="receipt-label"
-                  style={{ fontWeight: 600, color: '#4B5563', width: '130px', flexShrink: 0 }}
+                  style={{ fontWeight: 600, color: 'var(--morandi-primary)', width: '130px', flexShrink: 0 }}
                 >
                   {PRINTABLE_QUICK_QUOTE_LABELS.開立代收轉付抬頭}
                 </span>
                 <span
                   className="receipt-value"
-                  style={{ flex: 1, borderBottom: '1px solid #E5E7EB' }}
+                  style={{ flex: 1, borderBottom: '1px solid var(--border)' }}
                 >
                   {'\u00A0'}
                 </span>
@@ -1006,13 +1006,13 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               <div className="receipt-row" style={{ display: 'flex' }}>
                 <span
                   className="receipt-label"
-                  style={{ fontWeight: 600, color: '#4B5563', width: '130px', flexShrink: 0 }}
+                  style={{ fontWeight: 600, color: 'var(--morandi-primary)', width: '130px', flexShrink: 0 }}
                 >
                   {PRINTABLE_QUICK_QUOTE_LABELS.開立代收轉付統編}
                 </span>
                 <span
                   className="receipt-value"
-                  style={{ flex: 1, borderBottom: '1px solid #E5E7EB' }}
+                  style={{ flex: 1, borderBottom: '1px solid var(--border)' }}
                 >
                   {'\u00A0'}
                 </span>

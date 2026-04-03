@@ -66,7 +66,7 @@ export const QuickQuoteSummary: React.FC<QuickQuoteSummaryProps> = ({
             </span>
             <span
               className="text-xl font-bold"
-              style={{ color: balanceAmount > 0 ? '#DC2626' : '#059669' }}
+              style={{ color: balanceAmount > 0 ? 'var(--status-danger)' : 'var(--status-success)' }}
             >
               NT$ {balanceAmount.toLocaleString()}
             </span>

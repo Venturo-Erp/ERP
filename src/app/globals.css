@@ -56,6 +56,16 @@
   --public-accent: #002366; /* 藍色強調 */
   --public-muted: #C0B090; /* 金棕 */
 
+  /* 行事曆狀態色 */
+  --cal-proposal: #9BB5D6;
+  --cal-in-progress: #A8C4A2;
+  --cal-pending-close: #D4B896;
+  --cal-closed: #B8B3AE;
+  --cal-special: #D4A5A5;
+  --cal-personal: #B8A9D1;
+  --cal-birthday: #E6B8C8;
+  --cal-company: #E0C3A0;
+
   /* 語義顏色系統 (替代硬編碼的 blue/red/green/amber) */
   --status-info: #8ba4b4; /* 資訊 - 柔和藍灰 */
   --status-info-bg: #f0f4f6; /* 資訊背景 */
@@ -182,6 +192,16 @@
   --color-public-secondary: var(--public-secondary);
   --color-public-accent: var(--public-accent);
   --color-public-muted: var(--public-muted);
+
+  /* 行事曆狀態色 */
+  --color-cal-proposal: var(--cal-proposal);
+  --color-cal-in-progress: var(--cal-in-progress);
+  --color-cal-pending-close: var(--cal-pending-close);
+  --color-cal-closed: var(--cal-closed);
+  --color-cal-special: var(--cal-special);
+  --color-cal-personal: var(--cal-personal);
+  --color-cal-birthday: var(--cal-birthday);
+  --color-cal-company: var(--cal-company);
 
   --font-sans: var(--font-noto-sans-tc), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

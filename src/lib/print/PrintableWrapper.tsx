@@ -221,7 +221,7 @@ export const PrintableWrapper: React.FC<PrintableWrapperProps> = ({
           <div className="screen-only">
             <PrintHeader logoUrl={logoUrl} title={title} subtitle={subtitle} />
             {children}
-            <div className="text-center mt-8 pt-4" style={{ borderTop: '1px solid #F3F4F6' }}>
+            <div className="text-center mt-8 pt-4" style={{ borderTop: '1px solid var(--border)' }}>
               <PrintFooter />
             </div>
           </div>

@@ -178,7 +178,7 @@ export const PrintableQuotation: React.FC<PrintableQuotationProps> = ({
             <tbody>
               {dailyData.map((day, idx) => (
                 <React.Fragment key={idx}>
-                  <tr style={{ backgroundColor: idx % 2 === 0 ? '#fff' : '#FAFAF8' }}>
+                  <tr style={{ backgroundColor: idx % 2 === 0 ? 'var(--card)' : 'var(--background)' }}>
                     <td
                       rowSpan={1 + (day.note ? 1 : 0) + 1 + (day.accommodation ? 1 : 0)}
                       style={{
@@ -204,7 +204,7 @@ export const PrintableQuotation: React.FC<PrintableQuotationProps> = ({
                     </td>
                   </tr>
                   {day.note && (
-                    <tr style={{ backgroundColor: idx % 2 === 0 ? '#fff' : '#FAFAF8' }}>
+                    <tr style={{ backgroundColor: idx % 2 === 0 ? 'var(--card)' : 'var(--background)' }}>
                       <td
                         style={{
                           padding: '4px 8px',
@@ -217,7 +217,7 @@ export const PrintableQuotation: React.FC<PrintableQuotationProps> = ({
                       </td>
                     </tr>
                   )}
-                  <tr style={{ backgroundColor: idx % 2 === 0 ? '#fff' : '#FAFAF8' }}>
+                  <tr style={{ backgroundColor: idx % 2 === 0 ? 'var(--card)' : 'var(--background)' }}>
                     <td
                       style={{ padding: '4px 0', borderTop: `1px solid ${MORANDI_COLORS.border}` }}
                     >
@@ -260,7 +260,7 @@ export const PrintableQuotation: React.FC<PrintableQuotationProps> = ({
                     </td>
                   </tr>
                   {day.accommodation && (
-                    <tr style={{ backgroundColor: idx % 2 === 0 ? '#fff' : '#FAFAF8' }}>
+                    <tr style={{ backgroundColor: idx % 2 === 0 ? 'var(--card)' : 'var(--background)' }}>
                       <td
                         style={{
                           padding: '4px 8px',
@@ -373,7 +373,7 @@ export const PrintableQuotation: React.FC<PrintableQuotationProps> = ({
               </thead>
               <tbody>
                 {allFlights.map((f, i) => (
-                  <tr key={i} style={{ backgroundColor: i % 2 === 0 ? '#fff' : '#FAFAF8' }}>
+                  <tr key={i} style={{ backgroundColor: i % 2 === 0 ? 'var(--card)' : 'var(--background)' }}>
                     <td
                       style={{
                         padding: '5px 8px',

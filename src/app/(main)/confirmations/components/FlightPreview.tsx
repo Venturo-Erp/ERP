@@ -18,10 +18,10 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
       {/* 頂部資訊 */}
       <div
         className="flex justify-between items-start pb-3 border-b"
-        style={{ borderColor: '#e5e7eb' }}
+        style={{ borderColor: 'var(--border)' }}
       >
         <div>
-          <div className="font-medium" style={{ color: '#374151' }}>
+          <div className="font-medium" style={{ color: 'var(--morandi-primary)' }}>
             {FLIGHT_PREVIEW_LABELS.COMPUTER_CODE}:{' '}
             {formData.booking_number || FLIGHT_PREVIEW_LABELS.NOT_FILLED}
           </div>
@@ -31,7 +31,7 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
       {/* 免責聲明 */}
       <div
         className="text-center text-xs italic py-2 bg-status-warning-bg rounded"
-        style={{ color: '#92400E' }}
+        style={{ color: 'var(--status-warning)' }}
       >
         {FLIGHT_PREVIEW_LABELS.DISCLAIMER}
       </div>
@@ -40,7 +40,7 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
       {data.passengers && data.passengers.length > 0 && (
         <div>
           {data.passengers.map((passenger, idx) => (
-            <div key={idx} className="mb-1" style={{ color: '#374151' }}>
+            <div key={idx} className="mb-1" style={{ color: 'var(--morandi-primary)' }}>
               {FLIGHT_PREVIEW_LABELS.PASSENGER_NAME}:{String(idx + 1).padStart(2, '0')}.{' '}
               {passenger.nameEn}
             </div>
@@ -53,7 +53,7 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
         <div>
           <div
             className="border-t border-b border-border py-2"
-            style={{ borderColor: '#d4af37', borderStyle: 'dashed' }}
+            style={{ borderColor: 'var(--morandi-gold)', borderStyle: 'dashed' }}
           >
             <div
               className="grid grid-cols-12 gap-2 font-medium"
@@ -70,24 +70,24 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
               {/* 航空公司行 */}
               <div className="grid grid-cols-12 gap-2 py-1.5">
                 <div className="col-span-2"></div>
-                <div className="col-span-6 font-medium" style={{ color: '#374151' }}>
+                <div className="col-span-6 font-medium" style={{ color: 'var(--morandi-primary)' }}>
                   {segment.airline}({segment.flightNumber})
                 </div>
-                <div className="col-span-4 text-right" style={{ color: '#6B7280' }}>
+                <div className="col-span-4 text-right" style={{ color: 'var(--morandi-secondary)' }}>
                   /{FLIGHT_PREVIEW_LABELS.DIRECT_FLIGHT}
                 </div>
               </div>
 
               {/* 出發行 */}
               <div className="grid grid-cols-12 gap-2 py-1">
-                <div className="col-span-2 text-center" style={{ color: '#374151' }}>
+                <div className="col-span-2 text-center" style={{ color: 'var(--morandi-primary)' }}>
                   {segment.departureDate}
                 </div>
-                <div className="col-span-6" style={{ color: '#374151' }}>
+                <div className="col-span-6" style={{ color: 'var(--morandi-primary)' }}>
                   {segment.departureTime} {FLIGHT_PREVIEW_LABELS.DEPARTURE_PREFIX}:{' '}
                   {segment.departureAirport}
                 </div>
-                <div className="col-span-4" style={{ color: '#6B7280' }}>
+                <div className="col-span-4" style={{ color: 'var(--morandi-secondary)' }}>
                   {segment.departureTerminal
                     ? `${FLIGHT_PREVIEW_LABELS.TERMINAL}${segment.departureTerminal} `
                     : ''}
@@ -104,11 +104,11 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
                 }}
               >
                 <div className="col-span-2"></div>
-                <div className="col-span-6" style={{ color: '#374151' }}>
+                <div className="col-span-6" style={{ color: 'var(--morandi-primary)' }}>
                   {segment.arrivalTime} {FLIGHT_PREVIEW_LABELS.ARRIVAL_PREFIX}:{' '}
                   {segment.arrivalAirport}
                 </div>
-                <div className="col-span-4" style={{ color: '#6B7280' }}>
+                <div className="col-span-4" style={{ color: 'var(--morandi-secondary)' }}>
                   {segment.arrivalTerminal
                     ? `${FLIGHT_PREVIEW_LABELS.TERMINAL}${segment.arrivalTerminal} `
                     : ''}
@@ -120,7 +120,7 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
 
           <div
             className="border-b py-1"
-            style={{ borderColor: '#d4af37', borderStyle: 'dashed' }}
+            style={{ borderColor: 'var(--morandi-gold)', borderStyle: 'dashed' }}
           ></div>
         </div>
       )}
@@ -133,7 +133,7 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
             {data.passengers.map(
               (passenger, idx) =>
                 passenger.ticketNumber && (
-                  <div key={idx} style={{ color: '#374151' }}>
+                  <div key={idx} style={{ color: 'var(--morandi-primary)' }}>
                     {FLIGHT_PREVIEW_LABELS.TICKET_NUMBER}: {passenger.ticketNumber} -{' '}
                     {passenger.nameEn}
                   </div>
@@ -145,10 +145,10 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
       {/* 航空公司確認電話 */}
       {extendedData.airlineContacts && extendedData.airlineContacts.length > 0 && (
         <div>
-          <div className="font-medium mb-1" style={{ color: '#374151' }}>
+          <div className="font-medium mb-1" style={{ color: 'var(--morandi-primary)' }}>
             {FLIGHT_PREVIEW_LABELS.AIRLINE_CONTACT}:
           </div>
-          <div className="space-y-1 pl-4" style={{ color: '#6B7280' }}>
+          <div className="space-y-1 pl-4" style={{ color: 'var(--morandi-secondary)' }}>
             {extendedData.airlineContacts.map((contact, idx) => (
               <div key={idx}>{contact}</div>
             ))}
@@ -159,10 +159,10 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
       {/* 重要資訊 */}
       {data.importantNotes && data.importantNotes.length > 0 && (
         <div className="mt-4 p-3 bg-status-warning-bg rounded border border-status-warning/30">
-          <div className="font-semibold mb-2" style={{ color: '#92400E' }}>
+          <div className="font-semibold mb-2" style={{ color: 'var(--status-warning)' }}>
             ⚠️ {FLIGHT_PREVIEW_LABELS.IMPORTANT_INFO}
           </div>
-          <div className="space-y-1" style={{ color: '#78350F' }}>
+          <div className="space-y-1" style={{ color: 'var(--status-warning)' }}>
             {data.importantNotes.map((note, idx) => (
               <div key={idx}>• {note}</div>
             ))}

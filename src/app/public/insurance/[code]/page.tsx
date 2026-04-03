@@ -130,13 +130,13 @@ export default async function InsuranceMemberPage({
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
           }}
         >
-          <div style={{ fontSize: '12px', color: '#888', marginBottom: '4px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--morandi-muted)', marginBottom: '4px' }}>
             🛡️ 旅遊責任險 團員名單
           </div>
-          <h1 style={{ margin: '0 0 12px', fontSize: '20px', color: '#2c2c2c' }}>
+          <h1 style={{ margin: '0 0 12px', fontSize: '20px', color: 'var(--morandi-primary)' }}>
             {tour.code} {tour.name}
           </h1>
-          <div style={{ fontSize: '14px', color: '#666', lineHeight: '1.6' }}>
+          <div style={{ fontSize: '14px', color: 'var(--morandi-secondary)', lineHeight: '1.6' }}>
             <div>📅 出發：{formatDate(tour.departure_date)}</div>
             <div>📅 回程：{formatDate(tour.return_date)}</div>
             <div>👥 人數：{members.length} 人</div>
@@ -160,7 +160,7 @@ export default async function InsuranceMemberPage({
             }}
           >
             <thead>
-              <tr style={{ backgroundColor: '#e8dcc8' }}>
+              <tr style={{ backgroundColor: 'var(--morandi-container)' }}>
                 <th style={{ padding: '10px 8px', textAlign: 'center', width: '36px' }}>#</th>
                 <th style={{ padding: '10px 8px', textAlign: 'left' }}>姓名</th>
                 <th style={{ padding: '10px 8px', textAlign: 'center' }}>出生日期</th>
@@ -170,7 +170,7 @@ export default async function InsuranceMemberPage({
             <tbody>
               {members.length === 0 ? (
                 <tr>
-                  <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: '#999' }}>
+                  <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--morandi-muted)' }}>
                     尚無團員資料
                   </td>
                 </tr>
@@ -183,7 +183,7 @@ export default async function InsuranceMemberPage({
                       backgroundColor: i % 2 === 0 ? '#fff' : '#faf8f5',
                     }}
                   >
-                    <td style={{ padding: '10px 8px', textAlign: 'center', color: '#999' }}>
+                    <td style={{ padding: '10px 8px', textAlign: 'center', color: 'var(--morandi-muted)' }}>
                       {i + 1}
                     </td>
                     <td style={{ padding: '10px 8px', fontWeight: 500 }}>{m.name}</td>

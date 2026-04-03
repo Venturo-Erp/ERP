@@ -54,7 +54,7 @@ export function JapaneseMealsCard({ meals, className }: JapaneseMealsCardProps) 
           {/* 頂部浮動圖標 */}
           <div
             className="absolute -top-2 sm:-top-3 left-1/2 transform -translate-x-1/2 px-1.5 sm:px-2"
-            style={{ backgroundColor: '#FDFCF8' }}
+            style={{ backgroundColor: 'var(--card)' }}
           >
             <UtensilsCrossed
               className="w-3 h-3 sm:w-4 sm:h-4"

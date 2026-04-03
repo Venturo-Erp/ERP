@@ -32,7 +32,7 @@ export const QuotationInfo: React.FC<QuotationInfoProps> = ({
       {tierLabel && (
         <div
           className="mb-3 px-3 py-2 rounded-md inline-block"
-          style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}
+          style={{ backgroundColor: 'var(--status-warning-bg)', color: 'var(--status-warning)' }}
         >
           <span className="text-sm font-semibold">{tierLabel}</span>
         </div>
