@@ -131,7 +131,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           leader_name: leaderName,
           sales_person: firstOrder?.sales_person ?? null,
           assistant: firstOrder?.assistant ?? null,
-          flight_info: null, // TODO: 之後可加航班資訊
+          flight_info: null,
         })
 
         // 讀取行程資料（daily_itinerary + hotels）

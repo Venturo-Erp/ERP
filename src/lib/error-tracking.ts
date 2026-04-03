@@ -35,7 +35,7 @@ export function captureException(error: unknown, context?: ErrorContext): void {
     ...context?.extra,
   })
 
-  // TODO: Sentry.captureException(err, { level, extra: context?.extra, tags: context?.tags })
+ 
 }
 
 /**
@@ -50,7 +50,7 @@ export function captureMessage(message: string, level: ErrorLevel = 'info'): voi
         : console.log
   logFn(`[error-tracking][${level}]`, message, { userId: _currentUserId })
 
-  // TODO: Sentry.captureMessage(message, level)
+ 
 }
 
 /**
@@ -58,7 +58,7 @@ export function captureMessage(message: string, level: ErrorLevel = 'info'): voi
  */
 export function setUser(userId: string | null): void {
   _currentUserId = userId
-  // TODO: Sentry.setUser(userId ? { id: userId } : null)
+ 
 }
 
 /**

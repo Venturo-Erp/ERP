@@ -131,7 +131,7 @@ export async function getTodosByEntity(
     return []
   }
 
-  // TODO: related_entity_type/id 欄位不存在，todos 用 related_items (jsonb)
+ 
   // 暫時用 contains 查詢，待確認 related_items 的結構後優化
   const { data, error } = await supabase
     .from('todos')

@@ -11,7 +11,6 @@ import { ApiError, successResponse } from '@/lib/api/response'
 import { validateBody } from '@/lib/api/validation'
 import { loganChatSchema } from '@/lib/validations/api-schemas'
 
-// TODO: withAuth 無法直接適用，因為此 route 需要 getServerAuth (workspaceId, employeeId)
 
 export async function POST(request: NextRequest) {
   // 全局 AI 開關

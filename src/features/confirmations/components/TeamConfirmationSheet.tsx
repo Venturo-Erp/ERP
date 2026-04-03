@@ -56,7 +56,7 @@ export function TeamConfirmationSheet({
       // 從 items 的日期推斷
       const firstItem = req.items[0]
       if (firstItem.check_in_date || firstItem.meal_time || firstItem.activity_time) {
-        // TODO: 從日期推斷 day number（需要 tour.departure_date 計算）
+       
         day = 1 // 暫時預設 Day 1
       }
     }

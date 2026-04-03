@@ -24,7 +24,6 @@ export type Todo = Database['public']['Tables']['todos']['Row']
 export type Visa = Database['public']['Tables']['visas']['Row']
 export type Supplier = Database['public']['Tables']['suppliers']['Row']
 export type Quote = Database['public']['Tables']['quotes']['Row']
-// TODO: quote_items 表已不存在，使用 quotes.quick_quote_items JSONB 欄位代替
 // export type QuoteItem = Database['public']['Tables']['quote_items']['Row']
 export type PaymentRequest = Database['public']['Tables']['payment_requests']['Row']
 export type DisbursementOrder = Database['public']['Tables']['disbursement_orders']['Row']

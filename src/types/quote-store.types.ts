@@ -2,7 +2,6 @@
 // 報價相關型別定義（Store 版本）
 // 這些是 client/store 使用的精簡版（無 BaseEntity）
 // 與 @/types/quote.types.ts 的 DAL 版本不同
-// TODO: 未來考慮統一為單一 Quote 型別
 // ============================
 
 export interface QuoteRegion {

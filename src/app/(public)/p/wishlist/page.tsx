@@ -102,7 +102,7 @@ export default async function WishlistIndexPage() {
 
       {/* Hero - 未來放 3D 地球 */}
       <section className="py-20 px-4 text-center relative">
-        {/* TODO: 3D Globe component here */}
+        
         <div className="w-48 h-48 mx-auto mb-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-2xl shadow-blue-500/30">
           <Globe className="w-24 h-24 text-white animate-pulse" />
         </div>

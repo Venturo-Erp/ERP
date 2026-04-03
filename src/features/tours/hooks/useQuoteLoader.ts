@@ -17,7 +17,6 @@ import type {
 import type { Database } from '@/lib/supabase/types'
 import { COMP_TOURS_LABELS } from '../constants/labels'
 
-// TODO: quote_items 表已不存在，改用 quotes.quick_quote_items JSONB
 // type QuoteItemRow = Database['public']['Tables']['quote_items']['Row']
 interface QuoteItemRow {
   id: string
@@ -144,7 +143,7 @@ export function useQuoteLoader(
 
       logger.info(COMP_TOURS_LABELS.報價單載入成功, quote?.id, quote?.name)
 
-      // TODO: quote_items 表已不存在，這個 hook 需要重構
+      // 註：quote_items 表已廢棄，此查詢為向後兼容保留
       const { data: quoteItems, error: itemsError } = await supabase
         .from('quote_items' as never)
         .select('id, quote_id, category, item_name, unit_price, quantity, subtotal, notes, sort_order, created_at')

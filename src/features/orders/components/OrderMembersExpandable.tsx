@@ -38,7 +38,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-// TODO: [品質優化] 進一步將顧客同步的 supabase 操作也搬到 service 層
 import { supabase } from '@/lib/supabase/client'
 import { updateMembersTicketingDeadline } from '@/features/orders/services/order_member.service'
 import { updateMember } from '@/data/entities/members'

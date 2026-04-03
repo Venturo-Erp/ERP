@@ -4,7 +4,6 @@ import { getServerAuth } from '@/lib/auth/server-auth'
 import { ApiError, successResponse } from '@/lib/api/response'
 import { addChannelMembersSchema, removeChannelMemberSchema } from '@/lib/validations/api-schemas'
 
-// TODO: withAuth 無法直接適用，因為此 route 需要 getServerAuth (workspaceId) + admin client
 
 type RouteParams = {
   params: Promise<{

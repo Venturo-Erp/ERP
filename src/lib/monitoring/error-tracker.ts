@@ -59,7 +59,7 @@ class ErrorTracker {
 
     // 嚴重錯誤：顯示 toast 通知（可選）
     if (log.type === 'save_failed' || log.type === 'rls_error') {
-      // TODO: 加入 toast 通知
+     
     }
   }
 

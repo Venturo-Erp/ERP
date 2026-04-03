@@ -536,7 +536,7 @@ function CreateItineraryDialog({
             </Button>
             <Button
               onClick={() => {
-                // TODO: 建立模板並進入行程規劃頁面
+               
                 formState.setNewItineraryTitle(templateName)
                 formState.setNewItineraryDays(templateDays)
                 setStep('createItinerary')

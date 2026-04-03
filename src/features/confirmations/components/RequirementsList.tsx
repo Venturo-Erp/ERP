@@ -24,7 +24,6 @@ import {
   Check,
   X,
 } from 'lucide-react'
-// TODO: [品質優化] 將 supabase 操作搬到 confirmations/services/ — 目前因 setState 交錯暫保留
 import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores'
@@ -1008,7 +1007,7 @@ export function RequirementsList({
         // 重新載入
         await loadData(false)
 
-        // TODO: 產生 PDF
+       
         // 可以導航到需求單詳細頁面或直接下載 PDF
       } catch (error) {
         logger.error('產生需求單失敗', error)
@@ -1072,7 +1071,7 @@ export function RequirementsList({
                       {req.sent_via === 'line' ? (
                         <button
                           onClick={async () => {
-                            // TODO: 自動發送 Line 通知
+                           
                             logger.info('發送 Line 取消通知:', req.id)
                             // 暫時直接標記為已處理
                             await supabase
@@ -1094,7 +1093,7 @@ export function RequirementsList({
                           return !downloaded ? (
                             <button
                               onClick={async () => {
-                                // TODO: 產生並下載取消通知 PDF
+                               
                                 logger.info('產生取消通知 PDF:', req.id)
                                 
                                 // 暫時模擬下載

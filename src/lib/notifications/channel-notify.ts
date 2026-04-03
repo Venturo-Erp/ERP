@@ -112,7 +112,7 @@ function formatMessage(
   let formatted = `${emoji} **${title}**\n${message}`
   
   if (mentionIds && mentionIds.length > 0) {
-    // TODO: 將 employee_id 轉成 @姓名
+   
     formatted += `\n\n📌 相關人員待確認`
   }
   

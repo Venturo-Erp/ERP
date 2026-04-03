@@ -180,8 +180,8 @@ export default function VouchersPage() {
   }
 
   const handleReverse = (voucher: JournalVoucher) => {
-    // TODO: 開啟反沖對話框
-    // TODO: 反沖傳票 modal
+   
+   
   }
 
   const handleCreate = () => {

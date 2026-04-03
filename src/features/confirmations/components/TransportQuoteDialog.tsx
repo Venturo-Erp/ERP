@@ -383,7 +383,7 @@ export function TransportQuoteDialog({
       })),
       vehicleType: vehicleDesc,
       note,
-      invoiceSealUrl: '', // TODO: 從 workspace 讀取
+      invoiceSealUrl: '',
     })
   }
 

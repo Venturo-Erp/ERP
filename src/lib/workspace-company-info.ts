@@ -22,7 +22,6 @@ export interface CompanyInfo {
 /**
  * 取得當前 workspace 的公司資訊
  * 目前從 auth store 讀 workspace_name
- * TODO: 未來從 workspace settings 讀取完整資訊
  */
 export function getCompanyInfo(): CompanyInfo {
   const user = useAuthStore.getState().user

@@ -115,7 +115,7 @@ export function SupplierFinancePage() {
 
         // 計算統計
         let totalRevenue = 0
-        const pendingPayment = 0 // TODO: 需要新增 payment_status 欄位
+        const pendingPayment = 0
         const completedPayment = 0
         const paymentRecords: PaymentRecord[] = []
 
@@ -136,7 +136,7 @@ export function SupplierFinancePage() {
             tour_name: req?.tours?.name || '-',
             service_date: req?.service_date || '',
             amount,
-            status: 'pending', // TODO: 需要新增 payment_status 欄位
+            status: 'pending',
             paid_at: null,
           })
         })
