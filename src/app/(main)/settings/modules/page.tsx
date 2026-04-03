@@ -183,7 +183,7 @@ export default function ModulesManagementPage() {
         <div className="p-6">
           <div className="max-w-6xl mx-auto space-y-6">
             {/* 工作空間資訊 */}
-            <Card className="bg-gradient-to-br from-[#F9F8F6] to-[#F9F8F6] border-[#E8E4E0]">
+            <Card className="bg-gradient-to-br from-[#F9F8F6] to-[#F9F8F6] border-morandi-container">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
@@ -194,7 +194,7 @@ export default function ModulesManagementPage() {
                 <div className="text-lg font-semibold text-[var(--morandi-primary)]">
                   {currentWorkspace?.name || MODULES_PAGE_LABELS.UNKNOWN_WORKSPACE}
                 </div>
-                <div className="text-sm text-[#8C8C8C] mt-1">
+                <div className="text-sm text-morandi-secondary mt-1">
                   {MODULES_PAGE_LABELS.WORKSPACE_ID_LABEL(user?.workspace_id || '')}
                 </div>
               </CardContent>
@@ -240,7 +240,7 @@ export default function ModulesManagementPage() {
                     <CardContent className="pt-4 space-y-4">
                       {/* 狀態 */}
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-[#8C8C8C]">
+                        <span className="text-sm font-medium text-morandi-secondary">
                           {MODULES_PAGE_LABELS.STATUS}
                         </span>
                         {status.enabled && !status.expired ? (
@@ -264,7 +264,7 @@ export default function ModulesManagementPage() {
                       {/* 到期日 */}
                       {status.enabled && status.expiresAt && (
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-[#8C8C8C]">{MODULES_PAGE_LABELS.EXPIRY_DATE}</span>
+                          <span className="text-morandi-secondary">{MODULES_PAGE_LABELS.EXPIRY_DATE}</span>
                           <DateCell
                             date={status.expiresAt}
                             showIcon={true}
@@ -280,14 +280,14 @@ export default function ModulesManagementPage() {
 
                       {/* 功能列表 */}
                       <div className="space-y-2">
-                        <div className="text-sm font-medium text-[#8C8C8C]">
+                        <div className="text-sm font-medium text-morandi-secondary">
                           {MODULES_PAGE_LABELS.FEATURES}
                         </div>
                         <ul className="space-y-1.5">
                           {info.features.map((feature, index) => (
                             <li
                               key={index}
-                              className="flex items-start gap-2 text-sm text-[#8C8C8C]"
+                              className="flex items-start gap-2 text-sm text-morandi-secondary"
                             >
                               <CheckCircle2 className="h-4 w-4 text-status-success mt-0.5 flex-shrink-0" />
                               <span>{feature}</span>
@@ -310,7 +310,7 @@ export default function ModulesManagementPage() {
                         ) : (
                           <Button
                             onClick={() => handleEnableModule(moduleName)}
-                            className="w-full bg-[#B8A99A] hover:bg-[#9E8C7A] text-white"
+                            className="w-full bg-morandi-container hover:bg-morandi-container text-white"
                             disabled={loading}
                           >
                             {status.enabled && status.expired
@@ -370,17 +370,17 @@ export default function ModulesManagementPage() {
                 placeholder={MODULES_PAGE_LABELS.SELECT_5234}
                 minDate={new Date()}
               />
-              <p className="text-sm text-[#8C8C8C]">{MODULES_PAGE_LABELS.EXPIRY_HINT}</p>
+              <p className="text-sm text-morandi-secondary">{MODULES_PAGE_LABELS.EXPIRY_HINT}</p>
             </div>
 
             {selectedModule && (
-              <div className="bg-[#F9F8F6] border border-[#E8E4E0] rounded-lg p-4">
-                <div className="text-sm font-medium text-[#8C8C8C] mb-2">
+              <div className="bg-background border border-morandi-container rounded-lg p-4">
+                <div className="text-sm font-medium text-morandi-secondary mb-2">
                   {MODULES_PAGE_LABELS.INCLUDED_FEATURES}
                 </div>
                 <ul className="space-y-1.5">
                   {MODULE_INFO[selectedModule].features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm text-[#8C8C8C]">
+                    <li key={index} className="flex items-start gap-2 text-sm text-morandi-secondary">
                       <CheckCircle2 className="h-4 w-4 text-status-success mt-0.5 flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
@@ -402,7 +402,7 @@ export default function ModulesManagementPage() {
             </Button>
             <Button
               onClick={handleConfirmEnable}
-              className="bg-[#B8A99A] hover:bg-[#9E8C7A] text-white"
+              className="bg-morandi-container hover:bg-morandi-container text-white"
               disabled={loading}
             >
               {loading ? MODULES_PAGE_LABELS.PROCESSING : MODULES_PAGE_LABELS.CONFIRM_ENABLE}

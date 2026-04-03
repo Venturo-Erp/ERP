@@ -55,7 +55,7 @@ const DEFAULT_WIDTHS: Record<string, number> = {
 const thBaseClass =
   'border border-morandi-gold/20 px-2 py-2 text-left text-xs font-medium text-morandi-primary bg-morandi-gold/10 relative'
 const thStickyClass =
-  'border border-morandi-gold/20 px-2 py-2 text-left text-xs font-medium text-morandi-primary bg-[#f0ebe3] sticky z-30 relative'
+  'border border-morandi-gold/20 px-2 py-2 text-left text-xs font-medium text-morandi-primary bg-background sticky z-30 relative'
 
 // 可調整寬度的表頭元件
 function ResizableTh({
@@ -165,7 +165,7 @@ export function MemberTableHeader({
   const nameLeft = 'left-[68px]'
 
   return (
-    <thead className="sticky top-0 z-20 bg-[#f6f4f1]">
+    <thead className="sticky top-0 z-20 bg-background">
       <tr>
         {/* 拖曳把手欄位（固定寬度，不可調整） */}
         <th className={`${thStickyClass} left-0`} style={{ width: '28px', minWidth: '28px' }}></th>

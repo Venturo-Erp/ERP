@@ -409,8 +409,8 @@ export default function CustomersPage() {
                 <button
                   className={`p-1 rounded transition-colors ${
                     (customer as unknown as Record<string, unknown>).line_user_id
-                      ? 'text-[#06C755] hover:bg-[#06C755]/10'
-                      : 'text-morandi-secondary hover:text-[#06C755] hover:bg-[#06C755]/10'
+                      ? 'text-brand-line hover:bg-brand-line/10'
+                      : 'text-morandi-secondary hover:text-brand-line hover:bg-brand-line/10'
                   }`}
                   title={(customer as unknown as Record<string, unknown>).line_user_id ? '已綁定 LINE' : '綁定 LINE'}
                   onClick={e => {
@@ -497,7 +497,7 @@ export default function CustomersPage() {
         <DialogContent level={1} className="max-w-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <span className="text-[#06C755]">📱</span> LINE 綁定
+              <span className="text-brand-line">📱</span> LINE 綁定
             </DialogTitle>
           </DialogHeader>
           {lineBindingCustomer && (
@@ -505,13 +505,13 @@ export default function CustomersPage() {
               {(lineBindingCustomer as unknown as Record<string, unknown>).line_user_id ? (
                 // 已綁定
                 <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#06C755]/10 flex items-center justify-center">
-                    <MessageCircle className="w-8 h-8 text-[#06C755]" />
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-line/10 flex items-center justify-center">
+                    <MessageCircle className="w-8 h-8 text-brand-line" />
                   </div>
                   <p className="font-medium text-morandi-primary">
                     {lineBindingCustomer.name}
                   </p>
-                  <p className="text-sm text-[#06C755] mt-1">✓ 已綁定 LINE</p>
+                  <p className="text-sm text-brand-line mt-1">✓ 已綁定 LINE</p>
                   <p className="text-xs text-morandi-secondary mt-2">
                     綁定時間：{(lineBindingCustomer as unknown as Record<string, unknown>).line_linked_at
                       ? new Date((lineBindingCustomer as unknown as Record<string, unknown>).line_linked_at as string).toLocaleDateString('zh-TW')

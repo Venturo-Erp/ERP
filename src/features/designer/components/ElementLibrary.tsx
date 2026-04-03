@@ -251,8 +251,8 @@ function StickerButton({ sticker, onClick }: { sticker: StickerDefinition; onCli
       <svg
         viewBox={`0 0 ${sticker.viewBox.width} ${sticker.viewBox.height}`}
         className="w-8 h-8"
-        fill={sticker.defaultColor || '#c9aa7c'}
-        stroke={sticker.defaultColor || '#c9aa7c'}
+        fill={sticker.defaultColor || 'var(--morandi-gold)'}
+        stroke={sticker.defaultColor || 'var(--morandi-gold)'}
         strokeWidth="1"
       >
         <path d={sticker.path} />

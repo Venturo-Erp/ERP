@@ -19,7 +19,7 @@ import { DESIGNER_LABELS } from './constants/labels'
 // 預設漸層色票
 const PRESET_GRADIENTS = [
   // 暖色系
-  'linear-gradient(90deg, #c9aa7c 0%, #e8d5b7 100%)', // 莫蘭迪金
+  'linear-gradient(90deg, var(--morandi-gold) 0%, #e8d5b7 100%)', // 莫蘭迪金
   'linear-gradient(90deg, #f5af19 0%, #f12711 100%)', // 日落橙
   'linear-gradient(90deg, #ee9ca7 0%, #ffdde1 100%)', // 粉嫩
   'linear-gradient(90deg, #c08374 0%, #e8b4a8 100%)', // 莫蘭迪紅
@@ -71,7 +71,7 @@ export function GradientPicker({ value, onChange, className }: GradientPickerPro
 
           <TabsContent value="solid" className="p-3">
             <SolidColorPicker
-              value={value?.includes('gradient') ? '#c9aa7c' : value}
+              value={value?.includes('gradient') ? 'var(--morandi-gold)' : value}
               onChange={color => onChange(color, true)}
             />
           </TabsContent>
@@ -105,7 +105,7 @@ export function GradientPicker({ value, onChange, className }: GradientPickerPro
                 value={
                   value?.includes('gradient')
                     ? value
-                    : 'linear-gradient(90deg, #c9aa7c 0%, #e8d5b7 100%)'
+                    : 'linear-gradient(90deg, var(--morandi-gold) 0%, #e8d5b7 100%)'
                 }
                 onChange={gradient => onChange(gradient, false)}
               />
@@ -131,7 +131,7 @@ function SolidColorPicker({
     '#8b8680',
     '#b8b2aa',
     '#d4c4b0',
-    '#c9aa7c',
+    'var(--morandi-gold)',
     '#b8996b',
     '#c08374',
     '#e8b4a8',
@@ -169,16 +169,16 @@ function SolidColorPicker({
       <div className="flex items-center gap-2">
         <input
           type="color"
-          value={value || '#c9aa7c'}
+          value={value || 'var(--morandi-gold)'}
           onChange={e => onChange(e.target.value)}
           className="w-8 h-8 rounded cursor-pointer"
         />
         <input
           type="text"
-          value={value || '#c9aa7c'}
+          value={value || 'var(--morandi-gold)'}
           onChange={e => onChange(e.target.value)}
           className="flex-1 px-2 py-1 text-sm border rounded"
-          placeholder="#c9aa7c"
+          placeholder="var(--morandi-gold)"
         />
       </div>
     </div>

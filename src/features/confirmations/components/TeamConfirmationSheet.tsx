@@ -119,8 +119,8 @@ export function TeamConfirmationSheet({
         <div className="flex-1 overflow-y-auto pr-2 print:overflow-visible">
           <div className="print:p-8">
             {/* 標頭 */}
-            <div className="mb-6 pb-4 border-b-2 border-[#c9a96e]">
-              <h1 className="text-2xl font-bold text-[#c9a96e] mb-2">需求追蹤表（領隊核對用）</h1>
+            <div className="mb-6 pb-4 border-b-2 border-[var(--morandi-gold)]">
+              <h1 className="text-2xl font-bold text-[var(--morandi-gold)] mb-2">需求追蹤表（領隊核對用）</h1>
               <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
                 <div>
                   <span className="font-medium">團號：</span>
@@ -173,20 +173,20 @@ export function TeamConfirmationSheet({
 
               return (
                 <div key={day} className="mb-6 break-inside-avoid">
-                  <h2 className="text-lg font-bold bg-[#c9a96e] text-white px-3 py-2 rounded-t">
+                  <h2 className="text-lg font-bold bg-[var(--morandi-gold)] text-white px-3 py-2 rounded-t">
                     {day === 0 ? '全程項目' : `Day ${day}`}
                   </h2>
 
-                  <div className="border border-[#c9a96e] border-t-0 rounded-b p-4 space-y-4">
+                  <div className="border border-[var(--morandi-gold)] border-t-0 rounded-b p-4 space-y-4">
                     {sortedRequests.map(req => {
                       const status = req.status || 'draft'
                       const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.draft
 
                       return (
-                        <div key={req.id} className="border-l-4 border-[#c9a96e]/30 pl-4">
+                        <div key={req.id} className="border-l-4 border-[var(--morandi-gold)]/30 pl-4">
                           <div className="flex items-start justify-between mb-2">
                             <div>
-                              <span className="font-semibold text-[#c9a96e]">
+                              <span className="font-semibold text-[var(--morandi-gold)]">
                                 {TYPE_LABELS[req.request_type] || req.request_type}
                               </span>
                               <span className="ml-3 font-medium">{req.supplier_name}</span>
@@ -292,7 +292,7 @@ export function TeamConfirmationSheet({
             <Button
               onClick={handlePrint}
               variant="default"
-              className="bg-[#c9a96e] hover:bg-[#b8960e]"
+              className="bg-[var(--morandi-gold)] hover:bg-morandi-gold-hover"
             >
               <Printer className="w-4 h-4 mr-2" />
               列印

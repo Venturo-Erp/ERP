@@ -47,7 +47,7 @@ interface BlockOptions {
 
 // 品牌色
 const COLORS = {
-  gold: '#c9aa7c',
+  gold: 'var(--morandi-gold)',
   black: '#181511',
   gray: '#8b8680',
   lightGray: '#e8e4df',

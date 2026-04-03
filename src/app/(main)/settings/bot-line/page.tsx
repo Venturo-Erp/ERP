@@ -190,8 +190,8 @@ export default function LineConnectionsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-[#B8860B]/10">
-                <Users className="h-5 w-5 text-[#B8860B]" />
+              <div className="p-3 rounded-full bg-morandi-gold/10">
+                <Users className="h-5 w-5 text-morandi-gold" />
               </div>
               <div>
                 <div className="text-2xl font-bold">{groups.length}</div>
@@ -403,7 +403,7 @@ export default function LineConnectionsPage() {
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-full bg-[#06C755] flex items-center justify-center text-white">
+                        <div className="h-10 w-10 rounded-full bg-brand-line flex items-center justify-center text-white">
                           <Users className="h-5 w-5" />
                         </div>
                         <div>
@@ -427,7 +427,7 @@ export default function LineConnectionsPage() {
                           </Badge>
                         )}
                         {group.suppliers ? (
-                          <Badge className="bg-[#B8860B]">
+                          <Badge className="bg-morandi-gold">
                             <Building className="h-3 w-3 mr-1" />
                             {group.suppliers.name}
                           </Badge>
@@ -505,7 +505,7 @@ export default function LineConnectionsPage() {
                             {user.employees.display_name}
                           </Badge>
                         ) : user.suppliers ? (
-                          <Badge className="bg-[#B8860B]">
+                          <Badge className="bg-morandi-gold">
                             <Building className="h-3 w-3 mr-1" />
                             {user.suppliers.name}
                           </Badge>

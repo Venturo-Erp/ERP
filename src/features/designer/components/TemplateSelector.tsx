@@ -27,11 +27,11 @@ import { DESIGNER_LABELS } from './constants/labels'
 const STYLE_DESCRIPTIONS: Record<string, { description: string; colors: string[] }> = {
   'japanese-style-v1': {
     description: '留白、優雅的日系排版，適合高品質旅遊手冊',
-    colors: ['#f5f0eb', '#c9aa7c', '#6b5b4a', '#e8dcc8'],
+    colors: ['#f5f0eb', 'var(--morandi-gold)', '#6b5b4a', '#e8dcc8'],
   },
   'corner-travel-v1': {
     description: '正式、專業的跨頁排版，旅行社官方風格',
-    colors: ['#1a365d', '#c9aa7c', '#f7f5f0', '#2d5a87'],
+    colors: ['#1a365d', 'var(--morandi-gold)', '#f7f5f0', '#2d5a87'],
   },
 }
 
@@ -274,7 +274,7 @@ export function TemplateSelector({
             {styleSeries.map(style => {
               const styleInfo = STYLE_DESCRIPTIONS[style.id] || {
                 description: '',
-                colors: ['#e8dcc8', '#c9aa7c', '#6b5b4a'],
+                colors: ['#e8dcc8', 'var(--morandi-gold)', '#6b5b4a'],
               }
               return (
                 <button

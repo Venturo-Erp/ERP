@@ -504,7 +504,7 @@ function isShapeType(type: string): boolean {
 
 // 取得填充值（處理漸層和純色）
 function getFillValue(fill: unknown): string {
-  if (!fill) return '#c9aa7c'
+  if (!fill) return 'var(--morandi-gold)'
 
   // 如果是字串（純色或 CSS 漸層）
   if (typeof fill === 'string') {
@@ -526,5 +526,5 @@ function getFillValue(fill: unknown): string {
     }
   }
 
-  return '#c9aa7c'
+  return 'var(--morandi-gold)'
 }

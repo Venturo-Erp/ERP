@@ -390,7 +390,7 @@ export function GeminiItineraryForm({ data, onChange }: GeminiItineraryFormProps
           {data.dailySchedule.map((day, idx) => (
             <div key={idx} className="bg-muted p-3 rounded border border-border">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xs font-bold text-[#F89520]">{day.day}</span>
+                <span className="text-xs font-bold text-morandi-gold">{day.day}</span>
                 <Button
                   onClick={() => {
                     updateField(

@@ -178,7 +178,7 @@ export function LocalQuoteDialog({
       .map((day, idx) => {
         return `<tr style="background: ${idx % 2 === 0 ? '#fff' : '#fafaf5'}">
         <td style="border: 1px solid #e8e5e0; padding: 8px 12px;">
-          <div style="font-weight: 600; color: #c9a96e;">Day ${day.dayNumber}</div>
+          <div style="font-weight: 600; color: var(--morandi-gold);">Day ${day.dayNumber}</div>
           <div style="font-size: 12px; color: #999;">${day.date}${day.weekday ? ` (${day.weekday})` : ''}</div>
         </td>
         <td style="border: 1px solid #e8e5e0; padding: 8px 12px; font-weight: 500;">${day.route || '—'}</td>
@@ -197,7 +197,7 @@ export function LocalQuoteDialog({
   @media print { @page { margin: 1.5cm; } body { margin: 0; } }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif; font-size: 14px; color: #333; max-width: 900px; margin: 0 auto; padding: 32px; }
-  .header { border-bottom: 2px solid #c9a96e; padding-bottom: 16px; margin-bottom: 24px; }
+  .header { border-bottom: 2px solid var(--morandi-gold); padding-bottom: 16px; margin-bottom: 24px; }
   .header h1 { font-size: 20px; font-weight: bold; margin-bottom: 16px; }
   .info-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; font-size: 14px; }
   .info-item { display: flex; gap: 8px; }
@@ -209,7 +209,7 @@ export function LocalQuoteDialog({
   <div class="header">
     <div style="display: flex; justify-content: space-between;">
       <h1>${tour?.name || '行程表'}</h1>
-      <div style="font-weight: 600; color: #c9a96e;">${COMPANY_NAME}</div>
+      <div style="font-weight: 600; color: var(--morandi-gold);">${COMPANY_NAME}</div>
     </div>
     <div class="info-grid">
       <div class="info-item"><span class="info-label">目的地：</span><span class="info-value">—</span></div>
@@ -219,7 +219,7 @@ export function LocalQuoteDialog({
   </div>
   <table>
     <thead>
-      <tr style="background: #c9a96e; color: #fff;">
+      <tr style="background: var(--morandi-gold); color: #fff;">
         <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: left; width: 80px;">日期</th>
         <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: left;">行程內容</th>
         <th style="border: 1px solid rgba(201, 169, 110, 0.5); padding: 8px 12px; text-align: center; width: 64px;">早餐</th>
@@ -327,7 +327,7 @@ export function LocalQuoteDialog({
             </div>
           ) : (<>
           {/* 團資訊條 */}
-          <div className="flex items-center gap-6 px-4 py-3 bg-[#faf8f5] rounded-lg border border-[#e8e0d4]">
+          <div className="flex items-center gap-6 px-4 py-3 bg-background rounded-lg border border-border">
             <div className="text-sm">
               <span className="text-muted-foreground mr-1">團號</span>
               <span className="font-semibold">{tour?.code || '-'}</span>
@@ -361,38 +361,38 @@ export function LocalQuoteDialog({
           ) : (
             <table className="w-full border-collapse text-sm mb-3">
               <thead>
-                <tr className="bg-[#c9a96e] text-white">
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-20">日期</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left">行程內容</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">早餐</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">午餐</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">晚餐</th>
-                  <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-32">住宿</th>
+                <tr className="bg-[var(--morandi-gold)] text-white">
+                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-20">日期</th>
+                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left">行程內容</th>
+                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">早餐</th>
+                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">午餐</th>
+                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">晚餐</th>
+                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-32">住宿</th>
                 </tr>
               </thead>
               <tbody>
                 {daySchedules.map((day, idx) => (
-                  <tr key={day.dayNumber} className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf5]'}>
-                    <td className="border border-[#e8e5e0] px-3 py-2">
-                      <div className="font-semibold text-[#c9a96e]">Day {day.dayNumber}</div>
+                  <tr key={day.dayNumber} className={idx % 2 === 0 ? 'bg-white' : 'bg-background'}>
+                    <td className="border border-morandi-container px-3 py-2">
+                      <div className="font-semibold text-[var(--morandi-gold)]">Day {day.dayNumber}</div>
                       <div className="text-xs text-muted-foreground">
                         {day.date}
                         {day.weekday ? ` (${day.weekday})` : ''}
                       </div>
                     </td>
-                    <td className="border border-[#e8e5e0] px-3 py-2 font-medium">
+                    <td className="border border-morandi-container px-3 py-2 font-medium">
                       {day.route || '—'}
                     </td>
-                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                    <td className="border border-morandi-container px-3 py-2 text-center text-xs">
                       {day.breakfast || '-'}
                     </td>
-                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                    <td className="border border-morandi-container px-3 py-2 text-center text-xs">
                       {day.lunch || '-'}
                     </td>
-                    <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                    <td className="border border-morandi-container px-3 py-2 text-center text-xs">
                       {day.dinner || '-'}
                     </td>
-                    <td className="border border-[#e8e5e0] px-3 py-2 text-xs">
+                    <td className="border border-morandi-container px-3 py-2 text-xs">
                       {day.hotel || '—'}
                     </td>
                   </tr>
@@ -410,7 +410,7 @@ export function LocalQuoteDialog({
               {paxTiers.map(num => (
                 <div
                   key={num}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-[#faf8f5] border border-[#c9a96e] rounded-full text-sm"
+                  className="inline-flex items-center gap-1 px-3 py-1 bg-background border border-[var(--morandi-gold)] rounded-full text-sm"
                 >
                   <span className="font-semibold">{num} 人團</span>
                   <button
@@ -454,7 +454,7 @@ export function LocalQuoteDialog({
 
           </>)}
           {/* 選擇發送方式 */}
-          <div className="border-t border-[#c9a96e] pt-4 mt-2">
+          <div className="border-t border-[var(--morandi-gold)] pt-4 mt-2">
             <label className="text-sm font-medium mb-3 block">選擇發送方式</label>
             <div className="flex items-center gap-3">
               {DELIVERY_METHODS.map(m => {
@@ -466,8 +466,8 @@ export function LocalQuoteDialog({
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium transition-all
                       ${
                         selectedMethod === m.key
-                          ? 'border-[#c9a96e] bg-[#faf8f5] text-[#8B6914]'
-                          : 'border-border hover:border-[#c9a96e] hover:bg-[#faf8f5] text-foreground'
+                          ? 'border-[var(--morandi-gold)] bg-background text-morandi-gold'
+                          : 'border-border hover:border-[var(--morandi-gold)] hover:bg-background text-foreground'
                       }`}
                   >
                     <Icon size={15} />

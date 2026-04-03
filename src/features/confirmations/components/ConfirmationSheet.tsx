@@ -631,7 +631,7 @@ function TableRow({
             onKeyDown={e => e.key === 'Enter' && handleSaveEstimatedCost()}
             placeholder="填預算"
             disabled={isSavingEstimated}
-            className="w-24 px-2 py-1 text-right font-mono font-medium text-status-warning border border-border rounded focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e] outline-none disabled:opacity-50 print:border-0 print:p-0"
+            className="w-24 px-2 py-1 text-right font-mono font-medium text-status-warning border border-border rounded focus:border-[var(--morandi-gold)] focus:ring-1 focus:ring-[var(--morandi-gold)] outline-none disabled:opacity-50 print:border-0 print:p-0"
           />
         )}
       </td>
@@ -646,7 +646,7 @@ function TableRow({
           onKeyDown={e => e.key === 'Enter' && handleSaveActualExpense()}
           placeholder="-"
           disabled={isSaving}
-          className="w-24 px-2 py-1 text-right font-mono font-medium text-morandi-green border border-border rounded focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e] outline-none disabled:opacity-50 print:border-0 print:p-0"
+          className="w-24 px-2 py-1 text-right font-mono font-medium text-morandi-green border border-border rounded focus:border-[var(--morandi-gold)] focus:ring-1 focus:ring-[var(--morandi-gold)] outline-none disabled:opacity-50 print:border-0 print:p-0"
         />
       </td>
 

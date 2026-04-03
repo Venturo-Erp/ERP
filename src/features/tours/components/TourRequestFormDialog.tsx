@@ -356,7 +356,7 @@ export function TourRequestFormDialog({
           .print-controls { padding: 16px; border-bottom: 1px solid #eee; text-align: right; }
           .print-controls button { padding: 8px 16px; margin-left: 8px; cursor: pointer; border-radius: 6px; }
           .btn-outline { background: white; border: 1px solid #ddd; }
-          .btn-primary { background: #c9aa7c; color: white; border: none; }
+          .btn-primary { background: var(--morandi-gold); color: white; border: none; }
           @media print { .print-controls { display: none; } }
         </style>
       </head>

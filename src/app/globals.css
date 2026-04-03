@@ -31,6 +31,12 @@
   --morandi-container: #e8e5e0;
   --morandi-muted: #b8b2aa;
 
+  /* 品牌色 */
+  --brand-line: #06C755; /* LINE 綠 */
+  --brand-line-hover: #05b34c;
+  --brand-telegram: #0088cc; /* Telegram 藍 */
+  --brand-facebook: #1877F2; /* Facebook 藍 */
+
   /* 語義顏色系統 (替代硬編碼的 blue/red/green/amber) */
   --status-info: #8ba4b4; /* 資訊 - 柔和藍灰 */
   --status-info-bg: #f0f4f6; /* 資訊背景 */
@@ -132,6 +138,12 @@
   --color-status-danger-bg: var(--status-danger-bg);
   --color-status-neutral: var(--status-neutral);
   --color-status-neutral-bg: var(--status-neutral-bg);
+
+  /* 品牌色 */
+  --color-brand-line: var(--brand-line);
+  --color-brand-line-hover: var(--brand-line-hover);
+  --color-brand-telegram: var(--brand-telegram);
+  --color-brand-facebook: var(--brand-facebook);
 
   --font-sans: var(--font-noto-sans-tc), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

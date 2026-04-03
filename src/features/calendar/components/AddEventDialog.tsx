@@ -75,7 +75,7 @@ const parseTimeRange = (value: string): { start: string; end: string | null } =>
 
 // 輸入框樣式
 const inputClassName =
-  'w-full px-4 py-2.5 rounded-lg border border-[#E8E4E0] bg-card text-[var(--morandi-primary)] placeholder:text-[var(--morandi-primary)]/30 focus:outline-none focus:ring-1 focus:ring-[#B8A99A] focus:border-[#B8A99A] transition-shadow text-sm shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]'
+  'w-full px-4 py-2.5 rounded-lg border border-morandi-container bg-card text-[var(--morandi-primary)] placeholder:text-[var(--morandi-primary)]/30 focus:outline-none focus:ring-1 focus:ring-[#B8A99A] focus:border-morandi-container transition-shadow text-sm shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]'
 
 export function AddEventDialog({
   dialog,
@@ -89,7 +89,7 @@ export function AddEventDialog({
     <Dialog open={dialog.open} onOpenChange={open => !open && onClose()}>
       <DialogContent
         level={1}
-        className="max-w-[600px] p-0 rounded-2xl border-[#E8E4E0] shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] overflow-hidden [&>button:last-child]:hidden"
+        className="max-w-[600px] p-0 rounded-2xl border-morandi-container shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] overflow-hidden [&>button:last-child]:hidden"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-6 pb-2">
@@ -219,7 +219,7 @@ export function AddEventDialog({
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2.5 rounded-lg border border-[#E8E4E0] text-[var(--morandi-primary)] bg-card hover:bg-[#F9F8F6] transition-colors text-sm font-medium"
+            className="px-6 py-2.5 rounded-lg border border-morandi-container text-[var(--morandi-primary)] bg-card hover:bg-background transition-colors text-sm font-medium"
           >
             {CALENDAR_LABELS.CANCEL}
           </button>
@@ -227,7 +227,7 @@ export function AddEventDialog({
             type="submit"
             disabled={!newEvent.title.trim()}
             onClick={() => newEvent.title.trim() && onSubmit()}
-            className="px-6 py-2.5 rounded-lg bg-[#B8A99A] hover:bg-[#9E8C7A] text-white shadow-md hover:shadow-lg transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2.5 rounded-lg bg-morandi-container hover:bg-morandi-container text-white shadow-md hover:shadow-lg transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {CALENDAR_LABELS.ADD_ENTER}
           </button>

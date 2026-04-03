@@ -472,7 +472,7 @@ export function AccommodationQuoteDialog({
               <Button
                 onClick={handleSendLine}
                 disabled={!selectedGroupId || sending}
-                className="bg-[#06c755] hover:bg-[#05b34c] text-white"
+                className="bg-brand-line hover:bg-brand-line-hover text-white"
               >
                 {sending ? (
                   <>

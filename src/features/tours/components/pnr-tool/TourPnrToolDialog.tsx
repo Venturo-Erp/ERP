@@ -553,7 +553,7 @@ export function TourPnrToolDialog({
 
           {/* 錯誤 */}
           {error && (
-            <div className="flex items-center gap-2 p-2.5 bg-[#fae8e5] rounded-lg text-[#c17b6e] text-xs">
+            <div className="flex items-center gap-2 p-2.5 bg-status-danger-bg rounded-lg text-status-danger text-xs">
               <AlertTriangle size={14} />
               {error}
             </div>
@@ -576,8 +576,8 @@ export function TourPnrToolDialog({
                     className={cn(
                       'ml-auto text-xs px-2 py-0.5 rounded-full flex items-center gap-1',
                       deadlineStatus.urgent
-                        ? 'bg-[#fae8e5] text-[#c17b6e]'
-                        : 'bg-[#e8f0e8] text-[#7a9e7e]'
+                        ? 'bg-status-danger-bg text-status-danger'
+                        : 'bg-status-success-bg text-status-success'
                     )}
                   >
                     <Clock size={11} />
@@ -594,7 +594,7 @@ export function TourPnrToolDialog({
                   <span className="text-xs text-morandi-secondary">{LABELS.旅客比對}</span>
                   <span className="text-xs text-morandi-secondary">
                     {matchStats.allMatched ? (
-                      <span className="text-[#7a9e7e] font-medium">
+                      <span className="text-status-success font-medium">
                         {matchStats.matched}/{matchStats.total} {LABELS.全部配對完成} ✓
                       </span>
                     ) : (
@@ -620,8 +620,8 @@ export function TourPnrToolDialog({
                           hasMatch
                             ? 'border-l-[3px] border-l-[#7a9e7e] border-r-border border-y-border bg-white'
                             : hasSuggestion
-                              ? 'border-l-[3px] border-l-[#7b95b0] border-r-border border-y-border bg-[#f7fafd]'
-                              : 'border-l-[3px] border-l-morandi-gold border-r-border border-y-border bg-[#fdfaf6]'
+                              ? 'border-l-[3px] border-l-status-info border-r-border border-y-border bg-status-info-bg'
+                              : 'border-l-[3px] border-l-morandi-gold border-r-border border-y-border bg-morandi-gold/5'
                         )}
                       >
                         {/* 編號 */}
@@ -629,9 +629,9 @@ export function TourPnrToolDialog({
                           className={cn(
                             'w-5 h-5 rounded-full text-[10px] font-semibold flex items-center justify-center flex-shrink-0',
                             hasMatch
-                              ? 'bg-[#e8f0e8] text-[#7a9e7e]'
+                              ? 'bg-status-success-bg text-status-success'
                               : hasSuggestion
-                                ? 'bg-[#e5edf5] text-[#7b95b0]'
+                                ? 'bg-status-info-bg text-status-info'
                                 : 'bg-morandi-gold/15 text-morandi-gold'
                           )}
                         >
@@ -643,13 +643,13 @@ export function TourPnrToolDialog({
                           <div className="font-mono text-xs font-semibold">{match.pnrName}</div>
                           <div className="text-[10px] text-morandi-secondary">
                             {match.passengerType === 'CHD' ? (
-                              <span className="text-[#7b95b0]">{LABELS.LABEL_475}</span>
+                              <span className="text-status-info">{LABELS.LABEL_475}</span>
                             ) : (
                               LABELS.成人
                             )}
                           </div>
                           {match.infant && (
-                            <div className="flex items-center gap-1 text-[10px] text-[#b07088] mt-0.5">
+                            <div className="flex items-center gap-1 text-[10px] text-morandi-red mt-0.5">
                               <Baby size={10} />
                               {match.infant.name}（{match.infant.birthDate}）
                             </div>
@@ -661,7 +661,7 @@ export function TourPnrToolDialog({
                           size={13}
                           className={cn(
                             'flex-shrink-0',
-                            hasMatch ? 'text-[#7a9e7e]' : 'text-morandi-muted'
+                            hasMatch ? 'text-status-success' : 'text-morandi-muted'
                           )}
                         />
 
@@ -673,7 +673,7 @@ export function TourPnrToolDialog({
                             </div>
                           ) : hasSuggestion ? (
                             <div>
-                              <div className="text-xs font-medium text-[#7b95b0]">
+                              <div className="text-xs font-medium text-status-info">
                                 💡 {LABELS.客戶庫找到}：
                                 {suggestion.name || suggestion.passport_name}
                               </div>
@@ -700,7 +700,7 @@ export function TourPnrToolDialog({
                         {/* 狀態/動作 */}
                         <div className="flex-shrink-0">
                           {hasMatch ? (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#e8f0e8] text-[#7a9e7e] font-medium">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-status-success-bg text-status-success font-medium">
                               <Check size={10} className="inline -mt-px" /> {LABELS.已配對}
                             </span>
                           ) : hasSuggestion ? (
@@ -709,7 +709,7 @@ export function TourPnrToolDialog({
                               size="sm"
                               disabled={isAdding}
                               onClick={() => handleAddFromCustomer(i, suggestion)}
-                              className="h-6 text-[11px] px-2 border-[#7b95b0] text-[#7b95b0] hover:bg-[#e5edf5]"
+                              className="h-6 text-[11px] px-2 border-status-info text-status-info hover:bg-status-info-bg"
                             >
                               {isAdding ? (
                                 <Loader2 size={12} className="animate-spin" />
@@ -778,7 +778,7 @@ export function TourPnrToolDialog({
                         <span
                           className={cn(
                             'ml-auto px-1.5 py-0.5 rounded text-[10px]',
-                            isOk ? 'bg-[#e8f0e8] text-[#7a9e7e]' : 'bg-[#fae8e5] text-[#c17b6e]'
+                            isOk ? 'bg-status-success-bg text-status-success' : 'bg-status-danger-bg text-status-danger'
                           )}
                         >
                           {statusLabel}
@@ -797,7 +797,7 @@ export function TourPnrToolDialog({
           <span className="text-xs text-morandi-secondary">
             {parsedPNR ? (
               matchStats.allMatched ? (
-                <span className="text-[#7a9e7e]">✅ {LABELS.全部配對完成}</span>
+                <span className="text-status-success">✅ {LABELS.全部配對完成}</span>
               ) : (
                 `✅ ${matchStats.matched} ${LABELS.已配對} · ➕ ${matchStats.total - matchStats.matched} ${LABELS.待處理}`
               )
@@ -814,7 +814,7 @@ export function TourPnrToolDialog({
                 size="sm"
                 onClick={handleSave}
                 disabled={isSaving}
-                className="text-xs bg-[#7a9e7e] hover:bg-[#6b8e6f] text-white gap-1"
+                className="text-xs bg-status-success hover:bg-status-success/80 text-white gap-1"
               >
                 {isSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
                 {LABELS.儲存並關聯}

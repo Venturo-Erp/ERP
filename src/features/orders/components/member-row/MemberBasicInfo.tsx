@@ -110,7 +110,7 @@ export function MemberBasicInfo({
       {/* 序號 - 凍結欄位（使用實色背景避免內容穿透） */}
       <td
         className={cn(
-          'border border-morandi-gold/20 px-2 py-1 bg-[#f5f3f0] text-center sticky z-10',
+          'border border-morandi-gold/20 px-2 py-1 bg-background text-center sticky z-10',
           seqLeft
         )}
       >
@@ -125,8 +125,8 @@ export function MemberBasicInfo({
           isEditMode
             ? 'bg-card'
             : member.customer_verification_status === 'unverified'
-              ? 'bg-[#fde8e8]'
-              : 'bg-[#f5f3f0]'
+              ? 'bg-status-danger-bg'
+              : 'bg-background'
         )}
       >
         <div className="flex items-center gap-1">

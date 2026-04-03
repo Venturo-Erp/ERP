@@ -212,7 +212,7 @@ export function createBlockInsertHandler(canvas: fabric.Canvas | null) {
           width: imgEl.width,
           height: imgEl.height,
           fill: '#e8e4df',
-          stroke: '#c9aa7c',
+          stroke: 'var(--morandi-gold)',
           strokeWidth: 1,
           rx: 4,
           ry: 4,

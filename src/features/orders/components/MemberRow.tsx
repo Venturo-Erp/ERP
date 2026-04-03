@@ -177,7 +177,7 @@ export function MemberRow({
     >
       {/* 拖曳把手（一直顯示） */}
       <td
-        className="border border-morandi-gold/20 px-1 py-1 bg-[#f5f3f0] sticky left-0 z-10 cursor-grab active:cursor-grabbing"
+        className="border border-morandi-gold/20 px-1 py-1 bg-background sticky left-0 z-10 cursor-grab active:cursor-grabbing"
         {...attributes}
         {...listeners}
       >

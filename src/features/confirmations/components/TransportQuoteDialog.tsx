@@ -426,7 +426,7 @@ export function TransportQuoteDialog({
           ) : (
             <>
               {/* 團資訊條 */}
-              <div className="flex items-center gap-6 px-4 py-3 bg-[#faf8f5] rounded-lg border border-[#e8e0d4]">
+              <div className="flex items-center gap-6 px-4 py-3 bg-background rounded-lg border border-border">
                 <div className="text-sm">
                   <span className="text-muted-foreground mr-1">團號</span>
                   <span className="font-semibold">{tour?.code || '-'}</span>
@@ -460,47 +460,47 @@ export function TransportQuoteDialog({
               ) : (
                 <table className="w-full border-collapse text-sm mb-3">
                   <thead>
-                    <tr className="bg-[#c9a96e] text-white">
-                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-20">日期</th>
-                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-left">行程內容</th>
-                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">
+                    <tr className="bg-[var(--morandi-gold)] text-white">
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-20">日期</th>
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left">行程內容</th>
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">
                         早餐
                       </th>
-                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">
                         午餐
                       </th>
-                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-center w-16">
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">
                         晚餐
                       </th>
-                      <th className="border border-[#c9a96e]/50 px-3 py-2 text-left w-32">住宿</th>
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-32">住宿</th>
                     </tr>
                   </thead>
                   <tbody>
                     {daySchedules.map((day, idx) => (
                       <tr
                         key={day.dayNumber}
-                        className={idx % 2 === 0 ? 'bg-white' : 'bg-[#fafaf5]'}
+                        className={idx % 2 === 0 ? 'bg-white' : 'bg-background'}
                       >
-                        <td className="border border-[#e8e5e0] px-3 py-2">
-                          <div className="font-semibold text-[#c9a96e]">Day {day.dayNumber}</div>
+                        <td className="border border-morandi-container px-3 py-2">
+                          <div className="font-semibold text-[var(--morandi-gold)]">Day {day.dayNumber}</div>
                           <div className="text-xs text-muted-foreground">
                             {day.date}
                             {day.weekday ? ` (${day.weekday})` : ''}
                           </div>
                         </td>
-                        <td className="border border-[#e8e5e0] px-3 py-2 font-medium">
+                        <td className="border border-morandi-container px-3 py-2 font-medium">
                           {day.route || '—'}
                         </td>
-                        <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                        <td className="border border-morandi-container px-3 py-2 text-center text-xs">
                           {day.breakfast || '-'}
                         </td>
-                        <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                        <td className="border border-morandi-container px-3 py-2 text-center text-xs">
                           {day.lunch || '-'}
                         </td>
-                        <td className="border border-[#e8e5e0] px-3 py-2 text-center text-xs">
+                        <td className="border border-morandi-container px-3 py-2 text-center text-xs">
                           {day.dinner || '-'}
                         </td>
-                        <td className="border border-[#e8e5e0] px-3 py-2 text-xs">
+                        <td className="border border-morandi-container px-3 py-2 text-xs">
                           {day.hotel || '—'}
                         </td>
                       </tr>
@@ -536,7 +536,7 @@ export function TransportQuoteDialog({
         </div>
 
         {/* 固定底部：發送方式按鈕 */}
-        <div className="flex-shrink-0 border-t border-[#c9a96e] pt-4 mt-2">
+        <div className="flex-shrink-0 border-t border-[var(--morandi-gold)] pt-4 mt-2">
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-3">
               {DELIVERY_METHODS.map(m => {
@@ -548,8 +548,8 @@ export function TransportQuoteDialog({
                     className={`flex items-center gap-2 px-5 py-2.5 rounded-full border text-sm font-medium transition-all
                       ${
                         selectedMethod === m.key
-                          ? 'border-[#c9a96e] bg-[#faf8f5] text-[#8B6914]'
-                          : 'border-border hover:border-[#c9a96e] hover:bg-[#faf8f5] text-foreground'
+                          ? 'border-[var(--morandi-gold)] bg-background text-morandi-gold'
+                          : 'border-border hover:border-[var(--morandi-gold)] hover:bg-background text-foreground'
                       }`}
                   >
                     <Icon size={15} />
