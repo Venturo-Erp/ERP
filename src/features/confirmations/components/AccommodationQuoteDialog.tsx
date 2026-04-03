@@ -408,7 +408,7 @@ export function AccommodationQuoteDialog({
         </div>
 
         {/* A4 預覽區 */}
-        <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
+        <div className="flex-1 overflow-y-auto p-6 bg-morandi-container/50">
           {loadingData ? (
             <div className="bg-white mx-auto shadow-lg p-8 space-y-6" style={{ width: '210mm', minHeight: '297mm' }}>
               <Skeleton className="h-8 w-[200px] mx-auto" />

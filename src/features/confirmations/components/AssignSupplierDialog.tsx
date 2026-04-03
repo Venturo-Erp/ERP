@@ -742,7 +742,7 @@ export function AssignSupplierDialog({
                   variant={sendMethod === 'fax' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('fax')}
                   className={
-                    sendMethod === 'fax' ? 'bg-gray-700 hover:bg-morandi-primary text-white' : ''
+                    sendMethod === 'fax' ? 'bg-morandi-primary hover:bg-morandi-primary/90 text-white' : ''
                   }
                 >
                   <Phone size={14} className="mr-1.5" />

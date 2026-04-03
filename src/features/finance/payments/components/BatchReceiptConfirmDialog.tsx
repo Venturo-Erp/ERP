@@ -235,7 +235,7 @@ export function BatchReceiptConfirmDialog({
     if (statuses.every(s => s === 'abnormal')) return { label: '異常', color: 'text-morandi-red' }
     if (statuses.some(s => s === 'abnormal')) return { label: '部分異常', color: 'text-status-warning' }
     if (statuses.some(s => s === 'confirmed')) return { label: '部分確認', color: 'text-status-info' }
-    return { label: '待確認', color: 'text-gray-600' }
+    return { label: '待確認', color: 'text-morandi-secondary' }
   }
 
   // 取得收款方式標籤

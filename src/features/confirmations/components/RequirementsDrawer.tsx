@@ -51,8 +51,8 @@ const STATUS_CONFIG = {
   pending: {
     label: '待作業',
     icon: Clock,
-    bgClass: 'bg-gray-100',
-    textClass: 'text-gray-600',
+    bgClass: 'bg-morandi-container/50',
+    textClass: 'text-morandi-secondary',
   },
   in_progress: {
     label: '作業中',

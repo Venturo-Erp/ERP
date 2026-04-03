@@ -208,18 +208,18 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
 
         {/* 付費功能卡片 */}
         <div className={`bg-white border rounded-lg overflow-hidden ${premiumEnabled ? 'border-morandi-gold' : 'border-border'}`}>
-          <div className={`px-6 py-4 border-b border-border ${premiumEnabled ? 'bg-morandi-gold/10 border-morandi-gold/30' : 'bg-gray-50 border-border'}`}>
+          <div className={`px-6 py-4 border-b border-border ${premiumEnabled ? 'bg-morandi-gold/10 border-morandi-gold/30' : 'bg-morandi-container/30 border-border'}`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles className={`h-4 w-4 ${premiumEnabled ? 'text-morandi-gold' : 'text-gray-400'}`} />
-                <h3 className={`font-semibold ${premiumEnabled ? 'text-morandi-primary' : 'text-gray-500'}`}>付費功能</h3>
+                <Sparkles className={`h-4 w-4 ${premiumEnabled ? 'text-morandi-gold' : 'text-morandi-muted'}`} />
+                <h3 className={`font-semibold ${premiumEnabled ? 'text-morandi-primary' : 'text-morandi-secondary'}`}>付費功能</h3>
                 {premiumEnabled ? (
                   <Badge className="bg-morandi-gold/20 text-morandi-gold border-morandi-gold/30">
                     <Unlock className="h-3 w-3 mr-1" />
                     已開通
                   </Badge>
                 ) : (
-                  <Badge variant="outline" className="text-gray-500 border-gray-300">
+                  <Badge variant="outline" className="text-morandi-secondary border-border">
                     <Lock className="h-3 w-3 mr-1" />
                     未開通
                   </Badge>

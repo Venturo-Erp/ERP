@@ -454,7 +454,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                           ? 'bg-morandi-green/10 text-morandi-green'
                           : contract.status === 'sent'
                             ? 'bg-status-info/10 text-status-info'
-                            : 'bg-gray-100 text-gray-600'
+                            : 'bg-morandi-container/50 text-morandi-secondary'
                       }`}
                     >
                       {contract.status === 'signed'

@@ -1061,10 +1061,10 @@ export function RequirementsList({
                       className="flex items-center gap-3 bg-white rounded px-3 py-2 border border-morandi-red/30"
                     >
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-morandi-primary">
                           {req.supplier_name || '供應商'}
                         </p>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs text-morandi-secondary">
                           {req.note || '已選擇其他供應商'}
                         </p>
                       </div>
@@ -1142,7 +1142,7 @@ export function RequirementsList({
                             await loadData(false)
                             toast({ title: '已標記為已通知' })
                           }}
-                          className="px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded"
+                          className="px-3 py-1.5 text-xs font-medium text-morandi-primary bg-morandi-container hover:bg-morandi-container rounded"
                         >
                           ✓ 已通知
                         </button>

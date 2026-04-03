@@ -154,7 +154,7 @@ function AccommodationTable({ items }: { items: Array<Record<string, unknown>> }
             </tr>
           ))}
           {items.length === 0 && (
-            <tr><td colSpan={5} className="border border-[#999] px-3 py-4 text-center text-gray-400">無資料</td></tr>
+            <tr><td colSpan={5} className="border border-[#999] px-3 py-4 text-center text-morandi-muted">無資料</td></tr>
           )}
         </tbody>
       </table>
@@ -192,7 +192,7 @@ function MealTable({ items, onItemChange }: { items: Array<Record<string, unknow
             </tr>
           ))}
           {items.length === 0 && (
-            <tr><td colSpan={5} className="border border-[#999] px-3 py-4 text-center text-gray-400">無資料</td></tr>
+            <tr><td colSpan={5} className="border border-[#999] px-3 py-4 text-center text-morandi-muted">無資料</td></tr>
           )}
         </tbody>
       </table>
@@ -226,7 +226,7 @@ function TransportTable({ items }: { items: Array<Record<string, unknown>> }) {
             </tr>
           ))}
           {items.length === 0 && (
-            <tr><td colSpan={5} className="border border-[#999] px-3 py-4 text-center text-gray-400">無資料</td></tr>
+            <tr><td colSpan={5} className="border border-[#999] px-3 py-4 text-center text-morandi-muted">無資料</td></tr>
           )}
         </tbody>
       </table>
@@ -260,7 +260,7 @@ function ActivityTable({ items, onItemChange }: { items: Array<Record<string, un
             </tr>
           ))}
           {items.length === 0 && (
-            <tr><td colSpan={4} className="border border-[#999] px-3 py-4 text-center text-gray-400">無資料</td></tr>
+            <tr><td colSpan={4} className="border border-[#999] px-3 py-4 text-center text-morandi-muted">無資料</td></tr>
           )}
         </tbody>
       </table>

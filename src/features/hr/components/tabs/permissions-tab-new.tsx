@@ -190,7 +190,7 @@ export const PermissionsTabNew = forwardRef<{ handleSave: () => void }, Permissi
       const colors = {
         full: isActive ? 'bg-morandi-green/10 text-morandi-green border-morandi-green/30' : 'hover:bg-morandi-green/10',
         read: isActive ? 'bg-status-info/10 text-status-info border-status-info/30' : 'hover:bg-status-info/10',
-        none: isActive ? 'bg-gray-100 text-gray-500 border-gray-300' : 'hover:bg-gray-50',
+        none: isActive ? 'bg-morandi-container/50 text-morandi-secondary border-border' : 'hover:bg-morandi-container/30',
       }
       const Icon = icons[level]
 
@@ -200,7 +200,7 @@ export const PermissionsTabNew = forwardRef<{ handleSave: () => void }, Permissi
           className={cn(
             'flex items-center gap-1 px-3 py-1.5 rounded-md text-sm border transition-colors',
             colors[level],
-            !isActive && 'border-transparent text-gray-400'
+            !isActive && 'border-transparent text-morandi-muted'
           )}
         >
           <Icon size={14} />
