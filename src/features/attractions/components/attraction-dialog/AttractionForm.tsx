@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { AttractionFormData } from '../../types'
 import type { Country, Region, City } from '@/stores/region-store'
 import { ATTRACTION_FORM_LABELS, DATABASE_MANAGEMENT_PAGE_LABELS } from '../../constants/labels'
+import { CoordinateSearch } from './CoordinateSearch'
 
 interface AttractionFormProps {
   formData: AttractionFormData
@@ -271,6 +272,27 @@ export function AttractionForm({
               placeholder={ATTRACTION_FORM_LABELS.完整地址}
             />
           )}
+        </div>
+
+        {/* 座標搜尋 */}
+        <div>
+          <label className="text-sm font-medium mb-2 block">座標</label>
+          <CoordinateSearch
+            attractionName={formData.name}
+            city={city?.name}
+            country={country?.name}
+            currentLat={formData.latitude}
+            currentLng={formData.longitude}
+            onCoordsUpdate={(lat, lng, address) => {
+              setFormData(prev => ({
+                ...prev,
+                latitude: lat,
+                longitude: lng,
+                ...(address && !prev.address ? { address } : {}), // 如果沒有地址，自動填入
+              }))
+            }}
+            readOnly={readOnly}
+          />
         </div>
 
         {/* 備註 */}

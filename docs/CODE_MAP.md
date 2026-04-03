@@ -311,4 +311,61 @@ interface AccommodationSegment {
 
 ---
 
-**更新**：2026-03-31
+## 🤖 AI / 外部 API 功能索引
+
+> 更換 API 或調整 AI 提示詞時，直接查這裡找位置
+
+### 航班查詢 — AeroDataBox (RapidAPI)
+
+| 位置 | 說明 |
+|------|------|
+| `src/features/dashboard/actions/flight-actions.ts` | 核心查詢邏輯（`searchFlightAction`）|
+| `src/features/tours/hooks/useTourForm.ts:33` | 開團時選航班 |
+| `src/features/tours/components/tour-itinerary-tab.tsx:154` | 行程分頁航班查詢 |
+| `.env.local` → `AERODATABOX_API_KEY` | API Key |
+
+### 護照辨識 — OCR.space + Google Vision
+
+| 位置 | 說明 |
+|------|------|
+| `src/app/api/ocr/passport/route.ts` | 主 API 路由 |
+| `src/app/api/ocr/passport/ocr-clients.ts` | OCR.space / Google Vision 呼叫 |
+| `src/app/api/ocr/passport/passport-parser.ts` | 解析護照文字 |
+| `src/features/orders/hooks/usePassportUpload.ts` | **成員** — 護照上傳/辨識 |
+| `src/app/(main)/customers/hooks/usePassportUpload.ts` | **顧客** — 護照上傳/辨識 |
+| `.env.local` → `OCR_SPACE_API_KEY` | OCR.space Key |
+| `.env.local` → `GOOGLE_VISION_API_KEYS` | Google Vision Key（可多組輪換）|
+
+### 行程 AI 文案生成 — Gemini
+
+| 位置 | 說明 |
+|------|------|
+| `src/app/api/ai/generate-itinerary-copy/route.ts` | 行程管理 AI 深層文字 |
+| `src/app/api/ai/suggest-attraction/route.ts` | 景點建議 |
+| `src/app/api/ai/edit-image/route.ts` | AI 圖片編輯 |
+| `src/app/api/gemini/generate-image/route.ts` | AI 圖片生成 |
+| `.env.local` → `GEMINI_API_KEY` | API Key（可設 KEY_2~5 輪換）|
+
+### LINE 機器人 — LINE Messaging API + Gemini
+
+| 位置 | 說明 |
+|------|------|
+| `src/app/api/line/webhook/route.ts` | LINE Webhook 入口 |
+| `src/app/api/line/push/route.ts` | 主動推播 |
+| `src/app/api/line/test-ai/route.ts` | AI 測試 |
+| `src/app/(main)/settings/bot-line/page.tsx` | LINE Bot 後台設定 |
+| `src/app/(main)/settings/ai/page.tsx` | AI 提示詞設定 |
+| `.env.local` → `LINE_CHANNEL_ACCESS_TOKEN` | LINE Bot Token |
+| `.env.local` → `LINE_CHANNEL_SECRET` | LINE Channel Secret |
+| `.env.local` → `NEXT_PUBLIC_LINE_BOT_ID` | LINE Bot ID |
+
+### 旅客聊天 — Gemini
+
+| 位置 | 說明 |
+|------|------|
+| `src/app/api/traveler-chat/route.ts` | 聊天 API |
+| `src/components/workspace/channel-chat/` | 旅客聊天 UI |
+
+---
+
+**更新**：2026-04-03

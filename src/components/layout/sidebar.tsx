@@ -270,6 +270,12 @@ const menuItems: MenuItem[] = [
         icon: MapPin,
         requiredPermission: 'database',
       },
+      {
+        href: '/data-management/custom-destinations',
+        label: '客製化景點',
+        icon: Target,
+        requiredPermission: 'database',
+      },
       // 運價表 - 暫時移除，之後整合
       // {
       //   href: '/database/transportation-rates',
