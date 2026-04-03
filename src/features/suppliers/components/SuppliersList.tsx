@@ -236,7 +236,7 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
               </p>
 
               {availableGroups.length === 0 ? (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-md p-3 text-sm text-yellow-700">
+                <div className="bg-status-warning-bg border border-status-warning/30 rounded-md p-3 text-sm text-status-warning">
                   目前沒有可綁定的群組。請先將 VENTURO 數位助理加入 LINE 群組。
                 </div>
               ) : (

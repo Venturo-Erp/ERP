@@ -47,7 +47,7 @@ const STATUS_LABELS: Record<LeaveRequestStatus, string> = {
 }
 
 const STATUS_COLORS: Record<LeaveRequestStatus, string> = {
-  pending: 'bg-yellow-100 text-yellow-700',
+  pending: 'bg-status-warning-bg text-status-warning',
   approved: 'bg-morandi-green/10 text-morandi-green',
   rejected: 'bg-morandi-red/10 text-morandi-red',
   cancelled: 'bg-morandi-container text-morandi-secondary',
@@ -140,7 +140,7 @@ export function LeaveManagementPage() {
         <span
           className={`px-2 py-0.5 rounded text-xs ${
             row.requires_proof === true
-              ? 'bg-yellow-100 text-yellow-700'
+              ? 'bg-status-warning-bg text-status-warning'
               : 'bg-morandi-container text-morandi-secondary'
           }`}
         >

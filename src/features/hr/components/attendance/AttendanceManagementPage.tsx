@@ -345,7 +345,7 @@ export function AttendanceManagementPage() {
             </div>
             <div className="text-center">
               <div className="text-sm text-morandi-secondary">{L.summary_late}</div>
-              <div className="text-xl font-bold text-yellow-600">{summary.late_days}</div>
+              <div className="text-xl font-bold text-status-warning">{summary.late_days}</div>
             </div>
             <div className="text-center">
               <div className="text-sm text-morandi-secondary">{L.summary_absent}</div>

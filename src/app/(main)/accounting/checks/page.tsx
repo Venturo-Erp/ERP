@@ -213,9 +213,9 @@ export default function ChecksPage() {
       <div className="h-full flex flex-col">
         {/* 統計卡片 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border-b">
-          <div className="bg-yellow-50 p-4 rounded-lg">
-            <div className="text-sm text-yellow-700 mb-1">未兌現支票</div>
-            <div className="text-2xl font-bold text-yellow-900">{stats.pending} 張</div>
+          <div className="bg-status-warning-bg p-4 rounded-lg">
+            <div className="text-sm text-status-warning mb-1">未兌現支票</div>
+            <div className="text-2xl font-bold text-status-warning">{stats.pending} 張</div>
           </div>
           <div className="bg-status-info/10 p-4 rounded-lg">
             <div className="text-sm text-status-info mb-1">未兌現金額</div>

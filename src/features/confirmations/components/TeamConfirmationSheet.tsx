@@ -95,7 +95,7 @@ export function TeamConfirmationSheet({
     replied: { label: '已回覆', bgClass: 'bg-status-warning/10', textClass: 'text-status-warning' },
     confirmed: { label: '✓ 已確認', bgClass: 'bg-morandi-green/10', textClass: 'text-morandi-green' },
     cancelled: { label: '已取消', bgClass: 'bg-morandi-red/10', textClass: 'text-morandi-red' },
-    outdated: { label: '需更新', bgClass: 'bg-yellow-100', textClass: 'text-yellow-700' },
+    outdated: { label: '需更新', bgClass: 'bg-status-warning-bg', textClass: 'text-status-warning' },
   }
 
   // 統計各狀態數量

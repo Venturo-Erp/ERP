@@ -172,7 +172,7 @@ export default function AccountsPage() {
           <Star
             size={18}
             className={
-              row.is_favorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground'
+              row.is_favorite ? 'fill-status-warning text-status-warning' : 'text-muted-foreground'
             }
           />
         </button>

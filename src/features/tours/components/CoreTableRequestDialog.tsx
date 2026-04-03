@@ -467,9 +467,9 @@ export function CoreTableRequestDialog({
                 </div>
               </div>
 
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm">
-                <p className="font-medium text-yellow-800 mb-1">📝 提示</p>
-                <ul className="list-disc list-inside text-yellow-700 space-y-1">
+              <div className="bg-status-warning-bg border border-status-warning/30 rounded-lg p-3 text-sm">
+                <p className="font-medium text-status-warning mb-1">📝 提示</p>
+                <ul className="list-disc list-inside text-status-warning space-y-1">
                   <li>總人數自動帶入（{totalPax || 0} 人）</li>
                   <li>桌數/房間數需助理手動填寫</li>
                   <li>預算來自報價單填寫的金額</li>

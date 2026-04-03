@@ -679,7 +679,7 @@ function PaymentStatusCell({ requestId }: { requestId: string | null }) {
         </div>
       )}
       {amounts.pendingAmount > 0 && (
-        <div className="text-yellow-600 font-medium">
+        <div className="text-status-warning font-medium">
           ⏳ 待付款 ${amounts.pendingAmount.toLocaleString()}
         </div>
       )}

@@ -298,8 +298,8 @@ function CancellationTable({ items }: { items: Array<Record<string, unknown>> })
           ))}
         </tbody>
       </table>
-      <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-        <p className="text-sm text-yellow-800">
+      <div className="mt-4 p-3 bg-status-warning-bg border border-status-warning/30 rounded-lg">
+        <p className="text-sm text-status-warning">
           🙏 造成不便，敬請見諒。如有任何問題，請隨時與我們聯繫。
         </p>
       </div>
