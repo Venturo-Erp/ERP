@@ -154,7 +154,7 @@ export function ChannelChat() {
     <div
       className={cn(
         'h-full flex overflow-hidden',
-        travelerMode.mode === 'traveler' ? 'bg-[#1e1b2e]' : 'bg-card'
+        travelerMode.mode === 'traveler' ? 'bg-dark-bg' : 'bg-card'
       )}
       data-chat-mode={travelerMode.mode}
     >

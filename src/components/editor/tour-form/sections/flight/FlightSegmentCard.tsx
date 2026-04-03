@@ -42,7 +42,7 @@ export function FlightSegmentCard({
   onClearSegments,
 }: FlightSegmentCardProps) {
   return (
-    <div className="bg-[#F9F8F6] p-4 rounded-lg space-y-3 border border-[#E8E4E0]">
+    <div className="bg-background p-4 rounded-lg space-y-3 border border-border">
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-sm text-[var(--morandi-primary)]">{title}</h3>
         <div className="flex items-center gap-3">

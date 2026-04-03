@@ -163,14 +163,14 @@ export function MapExplorerDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent level={1} className="max-w-[95vw] w-[1200px] h-[80vh] p-0 gap-0">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b bg-[#f5f0e8]">
+        <div className="flex items-center justify-between px-6 py-4 border-b bg-background">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#c9a96e] flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-morandi-gold flex items-center justify-center">
               <Navigation className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-[#5a5a5a]">探索周邊景點</h2>
-              <p className="text-sm text-[#8a8a8a]">
+              <h2 className="text-lg font-semibold text-morandi-secondary">探索周邊景點</h2>
+              <p className="text-sm text-dark-text-muted">
                 以「{centerAttraction.name}」為中心，5km 範圍
               </p>
             </div>
@@ -184,33 +184,33 @@ export function MapExplorerDialog({
         <div className="flex flex-1 overflow-hidden">
           {/* 左側：景點列表 */}
           <div className="w-72 border-r bg-white overflow-y-auto">
-            <div className="p-4 border-b bg-[#faf8f5]">
-              <div className="text-sm font-medium text-[#5a5a5a]">
+            <div className="p-4 border-b bg-background">
+              <div className="text-sm font-medium text-morandi-secondary">
                 周邊景點（{nearbyAttractions.length}）
               </div>
             </div>
 
             {loading ? (
-              <div className="p-8 text-center text-sm text-[#8a8a8a]">載入中...</div>
+              <div className="p-8 text-center text-sm text-dark-text-muted">載入中...</div>
             ) : nearbyAttractions.length === 0 ? (
-              <div className="p-8 text-center text-sm text-[#8a8a8a]">5km 內沒有其他景點</div>
+              <div className="p-8 text-center text-sm text-dark-text-muted">5km 內沒有其他景點</div>
             ) : (
               <div className="divide-y">
                 {nearbyAttractions.map(attraction => (
                   <button
                     key={attraction.id}
-                    className={`w-full p-3 text-left hover:bg-[#faf8f5] transition-colors ${
-                      selectedAttraction?.id === attraction.id ? 'bg-[#f5f0e8]' : ''
+                    className={`w-full p-3 text-left hover:bg-background transition-colors ${
+                      selectedAttraction?.id === attraction.id ? 'bg-background' : ''
                     }`}
                     onClick={() => setSelectedAttraction(attraction)}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-sm text-[#5a5a5a] truncate">
+                        <div className="font-medium text-sm text-morandi-secondary truncate">
                           {attraction.name}
                         </div>
                         {attraction.category && (
-                          <div className="text-xs text-[#8a8a8a] mt-0.5">{attraction.category}</div>
+                          <div className="text-xs text-dark-text-muted mt-0.5">{attraction.category}</div>
                         )}
                       </div>
                       <Badge

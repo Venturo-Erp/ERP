@@ -50,7 +50,7 @@ export function UploadableImage({
 
   return (
     <div
-      className={`${emptySize} bg-muted border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-morandi-container hover:border-[#2C5F4D] transition-colors ${className}`}
+      className={`${emptySize} bg-muted border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-morandi-container hover:border-editor-theme-green transition-colors ${className}`}
       onClick={() => triggerUpload(targetKey)}
     >
       {isUploading ? (

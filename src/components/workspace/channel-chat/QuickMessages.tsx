@@ -185,7 +185,7 @@ export function QuickMessages({ onSend, disabled }: QuickMessagesProps) {
             {COMP_WORKSPACE_LABELS.LABEL_7765}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-48 p-1 bg-[#2d2640] border-violet-500/30" align="end">
+        <PopoverContent className="w-48 p-1 bg-dark-bg-elevated border-violet-500/30" align="end">
           <div className="text-xs font-medium text-violet-300 px-2 py-1.5 border-b border-violet-500/30 mb-1">
             {COMP_WORKSPACE_LABELS.SELECT_1304}
           </div>
@@ -204,7 +204,7 @@ export function QuickMessages({ onSend, disabled }: QuickMessagesProps) {
 
       {/* 編輯對話框 */}
       <Dialog open={!!selectedMessage} onOpenChange={open => !open && handleCloseDialog()}>
-        <DialogContent level={1} className="sm:max-w-md bg-[#1e1b2e] border-violet-500/30">
+        <DialogContent level={1} className="sm:max-w-md bg-dark-bg border-violet-500/30">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-violet-200">
               {selectedMessage?.icon}
@@ -226,7 +226,7 @@ export function QuickMessages({ onSend, disabled }: QuickMessagesProps) {
                       value={variableValues[variable.key] || ''}
                       onChange={e => handleVariableChange(variable.key, e.target.value)}
                       placeholder={variable.placeholder}
-                      className="mt-1 border-violet-500/30 focus:border-violet-400 focus:ring-violet-400 bg-[#2d2640] text-violet-100 placeholder:text-violet-400/60"
+                      className="mt-1 border-violet-500/30 focus:border-violet-400 focus:ring-violet-400 bg-dark-bg-elevated text-violet-100 placeholder:text-violet-400/60"
                     />
                   </div>
                 ))}
@@ -241,7 +241,7 @@ export function QuickMessages({ onSend, disabled }: QuickMessagesProps) {
               <Textarea
                 value={previewContent}
                 onChange={e => setPreviewContent(e.target.value)}
-                className="mt-1 min-h-[120px] border-violet-500/30 focus:border-violet-400 focus:ring-violet-400 bg-[#2d2640] text-violet-100 placeholder:text-violet-400/60"
+                className="mt-1 min-h-[120px] border-violet-500/30 focus:border-violet-400 focus:ring-violet-400 bg-dark-bg-elevated text-violet-100 placeholder:text-violet-400/60"
                 placeholder={COMP_WORKSPACE_LABELS.編輯訊息內容}
               />
             </div>

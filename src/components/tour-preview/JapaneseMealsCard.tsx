@@ -35,7 +35,7 @@ export function JapaneseMealsCard({ meals, className }: JapaneseMealsCardProps) 
       {mealItems.map((meal, index) => (
         <div
           key={index}
-          className="relative bg-card rounded-xl border-2 border-[#E0D5C1] p-2 sm:p-3 md:p-4 flex flex-col items-center justify-center min-h-[80px] sm:min-h-[90px] md:min-h-[100px] text-center shadow-sm hover:border-[#5D4037]/40 transition-colors duration-300"
+          className="relative bg-card rounded-xl border-2 border-border p-2 sm:p-3 md:p-4 flex flex-col items-center justify-center min-h-[80px] sm:min-h-[90px] md:min-h-[100px] text-center shadow-sm hover:border-morandi-primary/40 transition-colors duration-300"
         >
           {/* 內層邊框（障子門效果）*/}
           <div

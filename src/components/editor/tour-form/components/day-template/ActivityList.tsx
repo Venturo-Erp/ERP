@@ -32,13 +32,13 @@ export function ActivityList({
     return (
       <div className="relative pl-8">
         {/* 時間軸線 */}
-        <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-[#4a6fa5]/20" />
+        <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-editor-theme-blue/20" />
 
         {/* 景點 */}
         {activities.map((act, i) => (
           <div key={i} className="relative mb-6 last:mb-0">
             {/* 時間點 */}
-            <div className="absolute -left-5 w-4 h-4 rounded-full bg-[#4a6fa5] border-4 border-white shadow" />
+            <div className="absolute -left-5 w-4 h-4 rounded-full bg-editor-theme-blue border-4 border-white shadow" />
 
             <div className="flex gap-4 bg-muted rounded-xl p-4">
               <UploadableImage
@@ -81,7 +81,7 @@ export function ActivityList({
           <button
             type="button"
             onClick={addActivity}
-            className="w-full py-3 border-2 border-dashed border-border rounded-xl text-morandi-muted hover:border-[#4a6fa5] hover:text-[#4a6fa5] transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 border-2 border-dashed border-border rounded-xl text-morandi-muted hover:border-editor-theme-blue hover:text-editor-theme-blue transition-colors flex items-center justify-center gap-2"
           >
             <Plus size={18} />
             <span>{COMP_EDITOR_LABELS.ADD_8581}</span>
@@ -101,7 +101,7 @@ export function ActivityList({
           <button
             type="button"
             onClick={addActivity}
-            className="text-xs text-[#c76d54] hover:underline flex items-center gap-1"
+            className="text-xs text-editor-theme-accent hover:underline flex items-center gap-1"
           >
             <Plus size={12} /> {COMP_EDITOR_LABELS.新增}
           </button>
@@ -174,7 +174,7 @@ export function ActivityList({
       <button
         type="button"
         onClick={addActivity}
-        className="h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center text-morandi-muted hover:border-[#B8A99A] hover:text-[#B8A99A] transition-colors"
+        className="h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center text-morandi-muted hover:border-morandi-container hover:text-morandi-container transition-colors"
       >
         <Plus size={28} />
         <span className="text-sm mt-1">{COMP_EDITOR_LABELS.ADD_14}</span>

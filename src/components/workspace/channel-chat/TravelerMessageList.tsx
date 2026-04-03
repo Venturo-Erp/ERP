@@ -96,8 +96,8 @@ export function TravelerMessageList({
   // 對話未開啟狀態
   if (!isConversationOpen) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-[#1e1b2e]">
-        <div className="w-16 h-16 rounded-full bg-[#2d2640] flex items-center justify-center mb-4">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-dark-bg">
+        <div className="w-16 h-16 rounded-full bg-dark-bg-elevated flex items-center justify-center mb-4">
           {conversationType === 'tour_announcement' ? (
             <Megaphone size={32} className="text-violet-400" />
           ) : (
@@ -128,7 +128,7 @@ export function TravelerMessageList({
   // 載入中
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#1e1b2e]">
+      <div className="flex-1 flex items-center justify-center bg-dark-bg">
         <Loader2 className="animate-spin text-violet-400" size={32} />
       </div>
     )
@@ -137,7 +137,7 @@ export function TravelerMessageList({
   // 無訊息
   if (messages.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-[#1e1b2e]">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 bg-dark-bg">
         <AlertCircle size={32} className="text-violet-400 mb-2" />
         <p className="text-sm text-violet-300">{COMP_WORKSPACE_LABELS.EMPTY_2029}</p>
         <p className="text-xs text-violet-400/70 mt-1">{COMP_WORKSPACE_LABELS.SENDING_1794}</p>
@@ -146,7 +146,7 @@ export function TravelerMessageList({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 bg-[#1e1b2e]">
+    <div className="flex-1 overflow-y-auto p-4 bg-dark-bg">
       <div className="space-y-3">
         {messages.map((message, index) => {
           const senderInfo = getSenderInfo(message.sender_id)
@@ -163,7 +163,7 @@ export function TravelerMessageList({
               {/* 日期分隔符 */}
               {showDateSeparator && (
                 <div className="flex items-center justify-center my-4">
-                  <div className="bg-[#2d2640] text-violet-300 text-xs px-3 py-1 rounded-full border border-violet-500/30">
+                  <div className="bg-dark-bg-elevated text-violet-300 text-xs px-3 py-1 rounded-full border border-violet-500/30">
                     {format(
                       new Date(message.created_at),
                       COMP_WORKSPACE_LABELS.yyyy年MM月dd日_EEEE,
@@ -181,7 +181,7 @@ export function TravelerMessageList({
                     'w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0',
                     senderInfo.isEmployee
                       ? 'bg-violet-500 text-white'
-                      : 'bg-[#3d3655] text-violet-200'
+                      : 'bg-dark-bg-elevated text-violet-200'
                   )}
                 >
                   {senderInfo.avatar ? (
@@ -214,7 +214,7 @@ export function TravelerMessageList({
                       'px-3 py-2 rounded-lg whitespace-pre-wrap break-words',
                       isOwnMessage
                         ? 'bg-violet-500 text-white rounded-br-none'
-                        : 'bg-[#2d2640] text-violet-100 border border-violet-500/20 rounded-bl-none'
+                        : 'bg-dark-bg-elevated text-violet-100 border border-violet-500/20 rounded-bl-none'
                     )}
                   >
                     {message.content}

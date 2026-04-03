@@ -42,7 +42,7 @@ export function TravelerMessageInput({
   }
 
   return (
-    <div className="p-3 border-t border-violet-500/30 bg-[#252038]">
+    <div className="p-3 border-t border-violet-500/30 bg-dark-bg-elevated">
       <div className="flex items-end gap-2">
         {/* 快速訊息按鈕 */}
         <QuickMessages onSend={onSend} disabled={disabled} />
@@ -58,7 +58,7 @@ export function TravelerMessageInput({
             className={cn(
               'min-h-[40px] max-h-[120px] resize-none pr-12',
               'border-violet-500/30 focus:border-violet-400 focus:ring-violet-400',
-              'bg-[#1e1b2e] text-violet-100 placeholder:text-violet-400/60'
+              'bg-dark-bg text-violet-100 placeholder:text-violet-400/60'
             )}
             rows={1}
           />

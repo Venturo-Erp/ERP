@@ -39,7 +39,7 @@ export function EditableText({
           onKeyDown={e => {
             if (e.key === 'Escape') setEditingField(null)
           }}
-          className={`w-full px-2 py-1 border-2 border-[#2C5F4D] rounded resize-none outline-none ${inputClassName} ${className}`}
+          className={`w-full px-2 py-1 border-2 border-editor-theme-green rounded resize-none outline-none ${inputClassName} ${className}`}
           rows={3}
           placeholder={placeholder}
         />
@@ -55,7 +55,7 @@ export function EditableText({
         onKeyDown={e => {
           if (e.key === 'Enter' || e.key === 'Escape') setEditingField(null)
         }}
-        className={`w-full px-2 py-1 border-2 border-[#2C5F4D] rounded outline-none ${inputClassName} ${className}`}
+        className={`w-full px-2 py-1 border-2 border-editor-theme-green rounded outline-none ${inputClassName} ${className}`}
         placeholder={placeholder}
       />
     )
@@ -64,7 +64,7 @@ export function EditableText({
   return (
     <div
       onClick={() => setEditingField(fieldKey)}
-      className={`cursor-pointer hover:bg-[#2C5F4D]/10 rounded px-1 py-0.5 transition-all border border-transparent hover:border-[#2C5F4D]/30 ${className}`}
+      className={`cursor-pointer hover:bg-editor-theme-green/10 rounded px-1 py-0.5 transition-all border border-transparent hover:border-editor-theme-green/30 ${className}`}
       title={COMP_EDITOR_LABELS.點擊編輯}
     >
       {value || <span className="text-morandi-muted italic">{placeholder}</span>}

@@ -29,7 +29,7 @@ export function JapaneseAccommodationCard({
   return (
     <div
       className={cn(
-        'w-full rounded-xl border border-[#DCD5C9] p-1 shadow-sm relative overflow-hidden group',
+        'w-full rounded-xl border border-border p-1 shadow-sm relative overflow-hidden group',
         className
       )}
       style={{

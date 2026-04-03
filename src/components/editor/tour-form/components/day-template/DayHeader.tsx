@@ -59,7 +59,7 @@ export function DayHeader({
   return (
     <>
       {/* 標題列 */}
-      <div className="flex items-center justify-between px-6 py-4 border-b bg-[#2C5F4D]/5">
+      <div className="flex items-center justify-between px-6 py-4 border-b bg-editor-theme-green/5">
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
@@ -75,7 +75,7 @@ export function DayHeader({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={onSave} className="gap-2 bg-[#2C5F4D] hover:bg-[#234a3d]">
+          <Button onClick={onSave} className="gap-2 bg-editor-theme-green hover:bg-editor-theme-green/80">
             <Save size={16} />
             {COMP_EDITOR_LABELS.SAVE}
           </Button>

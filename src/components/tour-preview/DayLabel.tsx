@@ -88,14 +88,14 @@ export function DayLabel({
     return (
       <div className={`relative flex items-center gap-6 ${className}`}>
         {/* 大型浮水印數字 */}
-        <h2 className="text-6xl font-black text-[#30abe8]/10 absolute -ml-4 -mt-4 select-none">
+        <h2 className="text-6xl font-black text-status-info/10 absolute -ml-4 -mt-4 select-none">
           {paddedNum}
         </h2>
         <div className="relative z-10">
-          <span className="block text-[#30abe8] text-xs font-bold tracking-[0.2em] mb-1">
+          <span className="block text-status-info text-xs font-bold tracking-[0.2em] mb-1">
             DAY {ordinalText}
           </span>
-          {title && <h3 className="text-2xl font-bold text-[#2c3e50] tracking-widest">{title}</h3>}
+          {title && <h3 className="text-2xl font-bold text-morandi-primary tracking-widest">{title}</h3>}
         </div>
       </div>
     )

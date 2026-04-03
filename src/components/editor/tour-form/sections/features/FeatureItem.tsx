@@ -4,7 +4,7 @@ import { Loader2, X, Plus, GripVertical } from 'lucide-react'
 import { COMP_EDITOR_LABELS } from '../../../constants/labels'
 
 const TAG_COLOR_OPTIONS = [
-  { value: '#2C5F4D', label: COMP_EDITOR_LABELS.深綠, preview: 'bg-[#2C5F4D]' },
+  { value: '#2C5F4D', label: COMP_EDITOR_LABELS.深綠, preview: 'bg-editor-theme-green' },
   { value: '#C69C6D', label: COMP_EDITOR_LABELS.金色, preview: 'bg-[#C69C6D]' },
   { value: '#8F4F4F', label: COMP_EDITOR_LABELS.酒紅, preview: 'bg-[#8F4F4F]' },
   { value: '#636E72', label: COMP_EDITOR_LABELS.灰色, preview: 'bg-[#636E72]' },

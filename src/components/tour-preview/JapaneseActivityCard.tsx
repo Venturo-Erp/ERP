@@ -35,7 +35,7 @@ export function JapaneseActivityCard({
       className={cn(
         'group bg-card rounded-[1rem] shadow-[0_4px_20px_-2px_rgba(132,158,103,0.15)]',
         'hover:shadow-lg transition-all duration-500',
-        'border border-[#EBE5DC] overflow-hidden',
+        'border border-border overflow-hidden',
         onClick && 'cursor-pointer',
         className
       )}

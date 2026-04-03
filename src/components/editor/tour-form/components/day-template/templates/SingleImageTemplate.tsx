@@ -88,7 +88,7 @@ export function SingleImageTemplate({
             <button
               type="button"
               onClick={addActivity}
-              className="text-xs text-[#c76d54] hover:underline flex items-center gap-1"
+              className="text-xs text-editor-theme-accent hover:underline flex items-center gap-1"
             >
               <Plus size={12} /> {COMP_EDITOR_LABELS.新增}
             </button>

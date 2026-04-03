@@ -37,6 +37,19 @@
   --brand-telegram: #0088cc; /* Telegram 藍 */
   --brand-facebook: #1877F2; /* Facebook 藍 */
 
+  /* 暗色模式 (旅客聊天等) */
+  --dark-bg: #1e1b2e;
+  --dark-bg-elevated: #2d2640;
+  --dark-text: #e0e0e0;
+  --dark-text-muted: #8a8a8a;
+  --dark-border: #3d3654;
+
+  /* 行程編輯器主題色 */
+  --editor-theme-blue: #4a6fa5;
+  --editor-theme-blue-light: #8da399;
+  --editor-theme-green: #2C5F4D;
+  --editor-theme-accent: #c76d54;
+
   /* 語義顏色系統 (替代硬編碼的 blue/red/green/amber) */
   --status-info: #8ba4b4; /* 資訊 - 柔和藍灰 */
   --status-info-bg: #f0f4f6; /* 資訊背景 */
@@ -144,6 +157,19 @@
   --color-brand-line-hover: var(--brand-line-hover);
   --color-brand-telegram: var(--brand-telegram);
   --color-brand-facebook: var(--brand-facebook);
+
+  /* 暗色模式 */
+  --color-dark-bg: var(--dark-bg);
+  --color-dark-bg-elevated: var(--dark-bg-elevated);
+  --color-dark-text: var(--dark-text);
+  --color-dark-text-muted: var(--dark-text-muted);
+  --color-dark-border: var(--dark-border);
+
+  /* 行程編輯器主題色 */
+  --color-editor-theme-blue: var(--editor-theme-blue);
+  --color-editor-theme-blue-light: var(--editor-theme-blue-light);
+  --color-editor-theme-green: var(--editor-theme-green);
+  --color-editor-theme-accent: var(--editor-theme-accent);
 
   --font-sans: var(--font-noto-sans-tc), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

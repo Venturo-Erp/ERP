@@ -80,7 +80,7 @@ export function MultiImageTemplate({
           <button
             type="button"
             onClick={addActivity}
-            className="flex-shrink-0 w-40 h-28 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center text-morandi-muted hover:border-[#8da399] hover:text-[#8da399] transition-colors"
+            className="flex-shrink-0 w-40 h-28 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center text-morandi-muted hover:border-editor-theme-blue-light hover:text-editor-theme-blue-light transition-colors"
           >
             <Plus size={24} />
             <span className="text-xs mt-1">{COMP_EDITOR_LABELS.ADD_4351}</span>
@@ -103,7 +103,7 @@ export function MultiImageTemplate({
 
         <div className="flex gap-6 text-sm">
           <div className="flex items-center gap-2">
-            <Utensils size={14} className="text-[#8da399]" />
+            <Utensils size={14} className="text-editor-theme-blue-light" />
             <EditableText
               value={editingDay.meals?.lunch || ''}
               fieldKey="meals-lunch"
@@ -115,7 +115,7 @@ export function MultiImageTemplate({
             />
           </div>
           <div className="flex items-center gap-2">
-            <Building2 size={14} className="text-[#8da399]" />
+            <Building2 size={14} className="text-editor-theme-blue-light" />
             <EditableText
               value={editingDay.accommodation || ''}
               fieldKey="accommodation"

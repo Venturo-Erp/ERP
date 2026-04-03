@@ -35,7 +35,7 @@ export function TimelineTemplate({
   return (
     <div className="bg-card rounded-xl shadow-lg overflow-hidden">
       {/* 標題區 */}
-      <div className="p-6 bg-[#4a6fa5] text-white">
+      <div className="p-6 bg-editor-theme-blue text-white">
         <div className="flex items-center gap-4">
           <div className="text-5xl font-light opacity-30">
             {String(dayIndex + 1).padStart(2, '0')}
@@ -60,13 +60,13 @@ export function TimelineTemplate({
       <div className="p-6">
         <div className="relative pl-8">
           {/* 時間軸線 */}
-          <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-[#4a6fa5]/20" />
+          <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-editor-theme-blue/20" />
 
           {/* 景點 */}
           {(editingDay.activities || []).map((act, i) => (
             <div key={i} className="relative mb-6 last:mb-0">
               {/* 時間點 */}
-              <div className="absolute -left-5 w-4 h-4 rounded-full bg-[#4a6fa5] border-4 border-white shadow" />
+              <div className="absolute -left-5 w-4 h-4 rounded-full bg-editor-theme-blue border-4 border-white shadow" />
 
               <div className="flex gap-4 bg-muted rounded-xl p-4">
                 <UploadableImage
@@ -109,7 +109,7 @@ export function TimelineTemplate({
             <button
               type="button"
               onClick={addActivity}
-              className="w-full py-3 border-2 border-dashed border-border rounded-xl text-morandi-muted hover:border-[#4a6fa5] hover:text-[#4a6fa5] transition-colors flex items-center justify-center gap-2"
+              className="w-full py-3 border-2 border-dashed border-border rounded-xl text-morandi-muted hover:border-editor-theme-blue hover:text-editor-theme-blue transition-colors flex items-center justify-center gap-2"
             >
               <Plus size={18} />
               <span>{COMP_EDITOR_LABELS.ADD_8581}</span>
@@ -120,7 +120,7 @@ export function TimelineTemplate({
         {/* 餐食 + 住宿 */}
         <div className="mt-6 pt-4 border-t border-border/50 grid grid-cols-3 gap-4">
           <div>
-            <div className="text-xs text-[#4a6fa5] font-medium mb-1 flex items-center gap-1">
+            <div className="text-xs text-editor-theme-blue font-medium mb-1 flex items-center gap-1">
               <Utensils size={12} /> {COMP_EDITOR_LABELS.午餐}
             </div>
             <EditableText
@@ -134,7 +134,7 @@ export function TimelineTemplate({
             />
           </div>
           <div>
-            <div className="text-xs text-[#4a6fa5] font-medium mb-1 flex items-center gap-1">
+            <div className="text-xs text-editor-theme-blue font-medium mb-1 flex items-center gap-1">
               <Utensils size={12} /> {COMP_EDITOR_LABELS.晚餐}
             </div>
             <EditableText
@@ -148,7 +148,7 @@ export function TimelineTemplate({
             />
           </div>
           <div>
-            <div className="text-xs text-[#4a6fa5] font-medium mb-1 flex items-center gap-1">
+            <div className="text-xs text-editor-theme-blue font-medium mb-1 flex items-center gap-1">
               <Building2 size={12} /> {COMP_EDITOR_LABELS.住宿}
             </div>
             <EditableText

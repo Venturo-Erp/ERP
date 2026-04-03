@@ -151,19 +151,19 @@ export function CountriesSection({
 
   return (
     <div className="space-y-4">
-      <div className="border-b-2 border-[#B8A99A] pb-2">
+      <div className="border-b-2 border-morandi-container pb-2">
         <h2 className="text-lg font-bold text-morandi-primary">🌍 旅遊國家/地區</h2>
         <p className="text-xs text-morandi-primary mt-1">{COMP_EDITOR_LABELS.SELECT_1146}</p>
       </div>
 
       {/* 主要國家 */}
       {primaryCountry && (
-        <div className="p-4 bg-[#F9F8F6] border-2 border-[#C6B9AC] rounded-lg">
+        <div className="p-4 bg-background border-2 border-border rounded-lg">
           <div className="flex items-center justify-between mb-3">
             <label className="text-sm font-semibold text-[var(--morandi-primary)]">
               {COMP_EDITOR_LABELS.LABEL_2736}
             </label>
-            <span className="text-xs bg-[#B8A99A] text-white px-2 py-0.5 rounded">
+            <span className="text-xs bg-morandi-container text-white px-2 py-0.5 rounded">
               {COMP_EDITOR_LABELS.LABEL_4022}
             </span>
           </div>
@@ -226,7 +226,7 @@ export function CountriesSection({
                 </label>
                 <button
                   onClick={() => removeCountry(actualIndex)}
-                  className="text-[#8C8C8C] hover:text-[#8C8C8C] text-sm flex items-center gap-1"
+                  className="text-morandi-secondary hover:text-morandi-secondary text-sm flex items-center gap-1"
                 >
                   <X size={14} />
                   {COMP_EDITOR_LABELS.DELETE}
@@ -270,7 +270,7 @@ export function CountriesSection({
       {/* 新增按鈕 */}
       <button
         onClick={addCountry}
-        className="w-full px-4 py-2.5 border-2 border-dashed border-[#E8E4E0] rounded-lg text-sm text-morandi-secondary hover:border-[#B8A99A] hover:text-[var(--morandi-primary)] hover:bg-[#F9F8F6] transition-colors"
+        className="w-full px-4 py-2.5 border-2 border-dashed border-border rounded-lg text-sm text-morandi-secondary hover:border-morandi-container hover:text-[var(--morandi-primary)] hover:bg-background transition-colors"
       >
         + 新增其他國家
       </button>

@@ -37,7 +37,7 @@ export function CardGridTemplate({
       {/* 標題 */}
       <div className="p-6 border-b border-border/50">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-xl bg-[#B8A99A] flex flex-col items-center justify-center text-white">
+          <div className="w-16 h-16 rounded-xl bg-morandi-container flex flex-col items-center justify-center text-white">
             <span className="text-2xl font-bold">{dayIndex + 1}</span>
             <span className="text-[10px] opacity-80">{dateDisplay}</span>
           </div>
@@ -104,7 +104,7 @@ export function CardGridTemplate({
           <button
             type="button"
             onClick={addActivity}
-            className="h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center text-morandi-muted hover:border-[#B8A99A] hover:text-[#B8A99A] transition-colors"
+            className="h-32 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center text-morandi-muted hover:border-morandi-container hover:text-morandi-container transition-colors"
           >
             <Plus size={28} />
             <span className="text-sm mt-1">{COMP_EDITOR_LABELS.ADD_14}</span>
@@ -113,9 +113,9 @@ export function CardGridTemplate({
       </div>
 
       {/* 底部：餐食 + 住宿 */}
-      <div className="px-6 py-4 bg-[#B8A99A]/5 border-t border-[#B8A99A]/20 flex gap-6">
+      <div className="px-6 py-4 bg-morandi-container/5 border-t border-morandi-container/20 flex gap-6">
         <div className="flex-1">
-          <div className="text-xs text-[#B8A99A] font-medium mb-1">
+          <div className="text-xs text-morandi-container font-medium mb-1">
             {COMP_EDITOR_LABELS.LABEL_9126}
           </div>
           <div className="flex gap-4 text-sm">
@@ -158,7 +158,7 @@ export function CardGridTemplate({
           </div>
         </div>
         <div>
-          <div className="text-xs text-[#B8A99A] font-medium mb-1">{COMP_EDITOR_LABELS.住宿}</div>
+          <div className="text-xs text-morandi-container font-medium mb-1">{COMP_EDITOR_LABELS.住宿}</div>
           <EditableText
             value={editingDay.accommodation || ''}
             fieldKey="accommodation"

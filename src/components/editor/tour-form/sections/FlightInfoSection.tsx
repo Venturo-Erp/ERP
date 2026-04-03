@@ -166,7 +166,7 @@ export function FlightInfoSection({
     <div className="space-y-3">
       {/* 摘要按鈕卡片 - 點擊開啟設定 Modal */}
       <button type="button" onClick={() => setShowFlightSettings(true)} className="w-full group">
-        <div className="flex items-center gap-3 p-3 rounded-lg border-2 border-[#B8A99A]/30 bg-[#B8A99A]/5 hover:border-[#B8A99A] hover:shadow-md transition-all">
+        <div className="flex items-center gap-3 p-3 rounded-lg border-2 border-morandi-container/30 bg-morandi-container/5 hover:border-morandi-container hover:shadow-md transition-all">
           <div
             className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{ backgroundColor: '#B8A99A' }}
