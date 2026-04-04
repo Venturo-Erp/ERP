@@ -10,14 +10,6 @@ const withBundleAnalyzer = bundleAnalyzer({
 })
 
 const nextConfig: NextConfig = {
-  async redirects() {
-    return [
-      { source: '/wishlist-templates', destination: '/customized-tours', permanent: true },
-      { source: '/wishlist-templates/:id', destination: '/customized-tours/:id', permanent: true },
-      { source: '/p/wishlist/:slug', destination: '/p/customized/:slug', permanent: true },
-      { source: '/p/wishlist/:slug/track/:code', destination: '/p/customized/track/:code', permanent: true },
-    ]
-  },
   // ✅ 啟用圖片優化（Next.js 15 內建優化）
   images: {
     formats: ['image/avif', 'image/webp'],
