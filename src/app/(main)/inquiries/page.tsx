@@ -105,7 +105,7 @@ export default function InquiriesPage() {
         status: string
         internal_notes: string | null
         created_at: string | null
-        wishlist_templates: { name: string } | null
+        customized_tours: { name: string } | null
       }
 
       const processed: CustomerInquiry[] = (data || []).map((row: ApiRow) => ({
@@ -121,7 +121,7 @@ export default function InquiriesPage() {
         status: row.status as CustomerInquiry['status'],
         internal_notes: row.internal_notes,
         created_at: row.created_at || new Date().toISOString(),
-        template_name: row.wishlist_templates?.name,
+        template_name: row.customized_tours?.name,
       }))
 
       setInquiries(processed)

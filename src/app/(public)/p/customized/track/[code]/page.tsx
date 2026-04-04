@@ -2,7 +2,7 @@
 
 /**
  * 詢價單追蹤頁面 - 客人查看進度
- * 路由: /p/wishlist/track/[code]
+ * 路由: /p/customized/track/[code]
  * 
  * 功能：
  * 1. 客人用追蹤碼查看詢價單狀態
@@ -176,7 +176,7 @@ export default function TrackInquiryPage({
         <MapPin className="w-16 h-16 text-white/20 mb-4" />
         <p className="text-xl font-medium mb-2 text-white">找不到此詢價單</p>
         <p className="text-white/60 mb-6">追蹤碼可能有誤，請確認後重試</p>
-        <Link href="/p/wishlist">
+        <Link href="/p/customized">
           <Button>返回首頁</Button>
         </Link>
       </div>
@@ -192,7 +192,7 @@ export default function TrackInquiryPage({
       <header className="bg-slate-900/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/p/wishlist" className="text-white/60 hover:text-white">
+            <Link href="/p/customized" className="text-white/60 hover:text-white">
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <h1 className="text-xl font-bold text-white">{companyInfo.name}</h1>

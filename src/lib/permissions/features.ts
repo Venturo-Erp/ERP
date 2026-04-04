@@ -114,11 +114,11 @@ export const FEATURES: FeatureDefinition[] = [
   },
   // ===== 進階功能（付費） =====
   {
-    code: 'wishlist',
+    code: 'customized',
     name: '客製化管理',
     description: '客製化行程選單、客戶詢價管理',
     category: 'premium',
-    routes: ['/wishlist-templates', '/inquiries'],
+    routes: ['/customized-tours', '/inquiries'],
   },
   {
     code: 'workspace',

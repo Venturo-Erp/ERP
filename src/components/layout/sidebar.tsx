@@ -332,13 +332,13 @@ const menuItems: MenuItem[] = [
     ],
   },
   {
-    href: '/wishlist-templates',
+    href: '/customized-tours',
     label: '客製化管理',
     icon: Sparkles,
-    requiredPermission: 'wishlist',
+    requiredPermission: 'customized',
     children: [
-      { href: '/wishlist-templates', label: '客製化模板', icon: LayoutTemplate, requiredPermission: 'wishlist' },
-      { href: '/inquiries', label: '詢價單管理', icon: Inbox, requiredPermission: 'wishlist' },
+      { href: '/customized-tours', label: '客製化行程', icon: LayoutTemplate, requiredPermission: 'customized' },
+      { href: '/inquiries', label: '詢價單管理', icon: Inbox, requiredPermission: 'customized' },
     ],
   },
   {

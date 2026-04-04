@@ -17,7 +17,7 @@ interface TemplateItem {
   category: string | null
 }
 
-interface WishlistSelectorProps {
+interface CustomizedSelectorProps {
   template: {
     id: string
     name: string
@@ -27,7 +27,7 @@ interface WishlistSelectorProps {
   groupedItems: Record<string, TemplateItem[]>
 }
 
-export function WishlistSelector({ template, groupedItems }: WishlistSelectorProps) {
+export function CustomizedSelector({ template, groupedItems }: CustomizedSelectorProps) {
   const [selectedItems, setSelectedItems] = useState<TemplateItem[]>([])
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)

@@ -1,8 +1,8 @@
 'use client'
 
 /**
- * 客製化模板管理頁面
- * 路由: /wishlist-templates
+ * 客製化行程管理頁面
+ * 路由: /customized-tours
  */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -33,7 +33,7 @@ import { supabase } from '@/lib/supabase/client' // 用於 CRUD 操作
 import { format } from 'date-fns'
 import { logger } from '@/lib/utils/logger'
 
-interface WishlistTemplate {
+interface CustomizedTour {
   id: string
   name: string
   slug: string
@@ -51,12 +51,12 @@ const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secon
   archived: { label: '已封存', variant: 'outline' },
 }
 
-export default function WishlistTemplatesPage() {
+export default function CustomizedToursPage() {
   const { user } = useAuthStore()
-  const [templates, setTemplates] = useState<WishlistTemplate[]>([])
+  const [templates, setTemplates] = useState<CustomizedTour[]>([])
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingTemplate, setEditingTemplate] = useState<WishlistTemplate | null>(null)
+  const [editingTemplate, setEditingTemplate] = useState<CustomizedTour | null>(null)
   
   // 表單
   const [formData, setFormData] = useState({
@@ -69,7 +69,7 @@ export default function WishlistTemplatesPage() {
     if (!user?.workspace_id) return
 
     try {
-      const res = await fetch('/api/wishlist-templates')
+      const res = await fetch('/api/customized-tours')
       if (!res.ok) throw new Error('載入失敗')
       
       const data = await res.json()
@@ -86,7 +86,7 @@ export default function WishlistTemplatesPage() {
         customer_inquiries: { count: number }[]
       }
       
-      const processed: WishlistTemplate[] = (data || []).map((t: ApiRow) => ({
+      const processed: CustomizedTour[] = (data || []).map((t: ApiRow) => ({
         id: t.id,
         name: t.name,
         slug: t.slug,
@@ -125,7 +125,7 @@ export default function WishlistTemplatesPage() {
     setDialogOpen(true)
   }
 
-  const handleEdit = (template: WishlistTemplate) => {
+  const handleEdit = (template: CustomizedTour) => {
     setEditingTemplate(template)
     setFormData({
       name: template.name,
@@ -185,7 +185,7 @@ export default function WishlistTemplatesPage() {
     fetchTemplates()
   }
 
-  const handleDelete = async (template: WishlistTemplate) => {
+  const handleDelete = async (template: CustomizedTour) => {
     if (!confirm(`確定要刪除「${template.name}」？`)) return
 
     const { error } = await supabase
@@ -202,7 +202,7 @@ export default function WishlistTemplatesPage() {
     fetchTemplates()
   }
 
-  const handlePublish = async (template: WishlistTemplate) => {
+  const handlePublish = async (template: CustomizedTour) => {
     const newStatus = template.status === 'published' ? 'draft' : 'published'
     
     const { error } = await supabase
@@ -220,13 +220,13 @@ export default function WishlistTemplatesPage() {
   }
 
   const copyLink = (slug: string) => {
-    const url = `${window.location.origin}/p/wishlist/${slug}`
+    const url = `${window.location.origin}/p/customized/${slug}`
     navigator.clipboard.writeText(url)
     toast.success('已複製連結')
   }
 
   // 表格欄位
-  const columns: TableColumn<WishlistTemplate>[] = [
+  const columns: TableColumn<CustomizedTour>[] = [
     {
       key: 'name',
       label: '名稱',
@@ -270,7 +270,7 @@ export default function WishlistTemplatesPage() {
   ]
 
   // 操作欄
-  const renderActions = (row: WishlistTemplate) => (
+  const renderActions = (row: CustomizedTour) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="iconSm">
@@ -278,7 +278,7 @@ export default function WishlistTemplatesPage() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => window.location.href = `/wishlist-templates/${row.id}`}>
+        <DropdownMenuItem onClick={() => window.location.href = `/customized-tours/${row.id}`}>
           <Edit className="w-4 h-4 mr-2" />
           編輯景點
         </DropdownMenuItem>
@@ -288,7 +288,7 @@ export default function WishlistTemplatesPage() {
         </DropdownMenuItem>
         {row.status === 'published' && (
           <>
-            <DropdownMenuItem onClick={() => window.open(`/p/wishlist/${row.slug}`, '_blank')}>
+            <DropdownMenuItem onClick={() => window.open(`/p/customized/${row.slug}`, '_blank')}>
               <Eye className="w-4 h-4 mr-2" />
               預覽
             </DropdownMenuItem>
@@ -316,20 +316,20 @@ export default function WishlistTemplatesPage() {
   return (
     <>
       <ListPageLayout
-        title="客製化模板管理"
+        title="客製化行程管理"
         icon={Sparkles}
         data={templates}
         columns={columns}
         loading={loading}
         renderActions={renderActions}
-        onRowClick={(row) => window.location.href = `/wishlist-templates/${row.id}`}
+        onRowClick={(row) => window.location.href = `/customized-tours/${row.id}`}
         bordered
         searchable
         searchPlaceholder="搜尋名稱..."
         searchFields={['name', 'slug']}
         onAdd={handleCreate}
-        addLabel="新增客製化模板"
-        emptyMessage="還沒有客製化模板，點擊「新增客製化模板」開始建立"
+        addLabel="新增客製化行程"
+        emptyMessage="還沒有客製化行程，點擊「新增客製化行程」開始建立"
       />
 
       {/* 新增/編輯 Dialog */}
@@ -337,7 +337,7 @@ export default function WishlistTemplatesPage() {
         <DialogContent level={1} className="max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingTemplate ? '編輯客製化模板' : '新增客製化模板'}
+              {editingTemplate ? '編輯客製化行程' : '新增客製化行程'}
             </DialogTitle>
           </DialogHeader>
 
@@ -360,7 +360,7 @@ export default function WishlistTemplatesPage() {
             <div className="space-y-2">
               <Label>連結代碼</Label>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">/p/wishlist/</span>
+                <span className="text-sm text-muted-foreground whitespace-nowrap">/p/customized/</span>
                 <Input
                   value={formData.slug}
                   onChange={e => setFormData(p => ({ ...p, slug: e.target.value }))}

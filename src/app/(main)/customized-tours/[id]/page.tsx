@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * 客製化模板編輯頁面 - 使用 ContentPageLayout 規範
+ * 客製化行程編輯頁面 - 使用 ContentPageLayout 規範
  * 左側：已選景點列表 + 基本資訊
  * 右側：景點庫（含國家篩選）
  */
@@ -45,7 +45,7 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase/client'
 
-interface WishlistTemplate {
+interface CustomizedTour {
   id: string
   name: string
   slug: string
@@ -89,7 +89,7 @@ const TEMPLATE_TABS = [
   { value: 'settings', label: '基本設定' },
 ] as const
 
-export default function WishlistTemplateEditPage({ 
+export default function CustomizedTourEditPage({ 
   params 
 }: { 
   params: Promise<{ id: string }> 
@@ -98,7 +98,7 @@ export default function WishlistTemplateEditPage({
   const router = useRouter()
   const { user } = useAuthStore()
   
-  const [template, setTemplate] = useState<WishlistTemplate | null>(null)
+  const [template, setTemplate] = useState<CustomizedTour | null>(null)
   const [items, setItems] = useState<TemplateItem[]>([])
   const [attractions, setAttractions] = useState<Attraction[]>([])
   const [countries, setCountries] = useState<Country[]>([])
@@ -133,8 +133,8 @@ export default function WishlistTemplateEditPage({
       .single()
 
     if (templateError || !templateData) {
-      toast.error('找不到客製化模板')
-      router.push('/wishlist-templates')
+      toast.error('找不到客製化行程')
+      router.push('/customized-tours')
       return
     }
 
@@ -295,7 +295,7 @@ export default function WishlistTemplateEditPage({
 
   // 複製連結
   const copyLink = () => {
-    const url = `${window.location.origin}/p/wishlist/${template?.slug}`
+    const url = `${window.location.origin}/p/customized/${template?.slug}`
     navigator.clipboard.writeText(url)
     toast.success('已複製連結')
   }
@@ -324,7 +324,7 @@ export default function WishlistTemplateEditPage({
         title="載入中..."
         icon={Sparkles}
         breadcrumb={[
-          { label: '客製化模板管理', href: '/wishlist-templates' },
+          { label: '客製化行程管理', href: '/customized-tours' },
           { label: '...', href: '#' },
         ]}
       >
@@ -337,10 +337,10 @@ export default function WishlistTemplateEditPage({
 
   return (
     <ContentPageLayout
-      title={template?.name || '客製化模板'}
+      title={template?.name || '客製化行程'}
       icon={Sparkles}
       breadcrumb={[
-        { label: '客製化模板管理', href: '/wishlist-templates' },
+        { label: '客製化行程管理', href: '/customized-tours' },
         { label: template?.name || '', href: '#' },
       ]}
       badge={
@@ -359,7 +359,7 @@ export default function WishlistTemplateEditPage({
           </Button>
           {template?.status === 'published' && (
             <>
-              <Button variant="outline" size="sm" onClick={() => window.open(`/p/wishlist/${template?.slug}`, '_blank')}>
+              <Button variant="outline" size="sm" onClick={() => window.open(`/p/customized/${template?.slug}`, '_blank')}>
                 <Eye className="w-4 h-4 mr-1" />
                 預覽
               </Button>
@@ -569,7 +569,7 @@ export default function WishlistTemplateEditPage({
         <div className="max-w-2xl mx-auto p-6">
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label className="text-base">客製化模板名稱 *</Label>
+              <Label className="text-base">客製化行程名稱 *</Label>
               <Input
                 value={editForm.name}
                 onChange={(e) => setEditForm(p => ({ ...p, name: e.target.value }))}
@@ -582,7 +582,7 @@ export default function WishlistTemplateEditPage({
               <Label className="text-base">連結代碼</Label>
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground whitespace-nowrap px-3 py-2 bg-muted rounded-l-md border border-r-0">
-                  /p/wishlist/
+                  /p/customized/
                 </span>
                 <Input
                   value={editForm.slug}
@@ -592,7 +592,7 @@ export default function WishlistTemplateEditPage({
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                發佈後的連結：{window.location.origin}/p/wishlist/{editForm.slug || 'your-slug'}
+                發佈後的連結：{window.location.origin}/p/customized/{editForm.slug || 'your-slug'}
               </p>
             </div>
 
@@ -601,7 +601,7 @@ export default function WishlistTemplateEditPage({
               <Textarea
                 value={editForm.description}
                 onChange={(e) => setEditForm(p => ({ ...p, description: e.target.value }))}
-                placeholder="這個客製化模板包含哪些景點？給客戶看的簡介..."
+                placeholder="這個客製化行程包含哪些景點？給客戶看的簡介..."
                 rows={4}
               />
             </div>
@@ -635,7 +635,7 @@ export default function WishlistTemplateEditPage({
             <div className="space-y-2">
               <Label>連結代碼</Label>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">/p/wishlist/</span>
+                <span className="text-sm text-muted-foreground whitespace-nowrap">/p/customized/</span>
                 <Input
                   value={editForm.slug}
                   onChange={(e) => setEditForm(p => ({ ...p, slug: e.target.value }))}

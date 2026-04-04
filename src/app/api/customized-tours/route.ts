@@ -1,6 +1,6 @@
 /**
- * 客製化模板 API
- * GET /api/wishlist-templates - 取得列表
+ * 客製化行程 API
+ * GET /api/customized-tours - 取得列表
  */
 
 import { NextRequest, NextResponse } from 'next/server'

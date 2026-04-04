@@ -1,6 +1,6 @@
 /**
  * 客製化入口頁 - 3D 地球 + DIY 選景點
- * 路由: /p/wishlist
+ * 路由: /p/customized
  * 
  * 🎯 核心概念：
  * 1. 客人進來看到 3D 地球（或世界地圖）
@@ -20,7 +20,7 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
-interface WishlistTemplate {
+interface CustomizedTour {
   id: string
   name: string
   slug: string
@@ -35,7 +35,7 @@ interface CompanyInfo {
   phone: string
 }
 
-async function getPublishedTemplates(): Promise<{ templates: WishlistTemplate[], companyInfo: CompanyInfo }> {
+async function getPublishedTemplates(): Promise<{ templates: CustomizedTour[], companyInfo: CompanyInfo }> {
   const { data, error } = await supabaseAdmin
     .from('wishlist_templates')
     .select(`
@@ -126,7 +126,7 @@ export default async function WishlistIndexPage() {
             {templates.map(template => (
               <Link
                 key={template.id}
-                href={`/p/wishlist/${template.slug}`}
+                href={`/p/customized/${template.slug}`}
                 className="group block bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1"
               >
                 {/* 封面圖 */}

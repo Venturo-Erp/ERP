@@ -2,13 +2,13 @@
 
 /**
  * 客製化詳情頁 - 客戶 DIY 選景點
- * 路由: /p/wishlist/[slug]
+ * 路由: /p/customized/[slug]
  * 
  * 🎯 流程：
  * 1. 客人選景點（左側卡片）
  * 2. 已選清單顯示在右側
  * 3. 送出 → 3D 特效動畫（衛星發送到座標）
- * 4. 生成專屬追蹤連結 /p/wishlist/track/[code]
+ * 4. 生成專屬追蹤連結 /p/customized/track/[code]
  * 5. 客人可用此連結查看進度、我們的回覆
  */
 
@@ -42,7 +42,7 @@ import {
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 
-interface WishlistTemplate {
+interface CustomizedTour {
   id: string
   name: string
   slug: string
@@ -78,7 +78,7 @@ export default function WishlistDetailPage({
   const { slug } = use(params)
   const router = useRouter()
   
-  const [template, setTemplate] = useState<WishlistTemplate | null>(null)
+  const [template, setTemplate] = useState<CustomizedTour | null>(null)
   const [items, setItems] = useState<TemplateItem[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -298,7 +298,7 @@ export default function WishlistDetailPage({
     }
 
     // 成功！顯示追蹤連結
-    const url = `${window.location.origin}/p/wishlist/track/${code}`
+    const url = `${window.location.origin}/p/customized/track/${code}`
     setTrackingCode(code)
     setTrackingUrl(url)
     setShowInquiryForm(false)
@@ -335,7 +335,7 @@ export default function WishlistDetailPage({
         <MapPin className="w-16 h-16 text-white/20 mb-4" />
         <p className="text-xl font-medium mb-2 text-white">找不到此頁面</p>
         <p className="text-white/60 mb-6">此頁面可能已下架或連結錯誤</p>
-        <Link href="/p/wishlist">
+        <Link href="/p/customized">
           <Button>返回首頁</Button>
         </Link>
       </div>
@@ -348,7 +348,7 @@ export default function WishlistDetailPage({
       <header className="bg-slate-900/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/p/wishlist" className="text-white/60 hover:text-white">
+            <Link href="/p/customized" className="text-white/60 hover:text-white">
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <h1 className="text-xl font-bold text-white">{companyInfo.name}</h1>
@@ -486,7 +486,7 @@ export default function WishlistDetailPage({
                       variant="outline"
                       className="w-full border-brand-line text-brand-line hover:bg-brand-line hover:text-white"
                       onClick={() => {
-                        window.location.href = `/api/auth/line?redirect=/p/wishlist/${slug}`
+                        window.location.href = `/api/auth/line?redirect=/p/customized/${slug}`
                       }}
                     >
                       <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
@@ -505,7 +505,7 @@ export default function WishlistDetailPage({
                 onClick={() => {
                   if (!lineUser) {
                     // 強制 LINE 登入
-                    window.location.href = `/api/auth/line?redirect=/p/wishlist/${slug}`
+                    window.location.href = `/api/auth/line?redirect=/p/customized/${slug}`
                     return
                   }
                   // 已登入，檢查是否已綁定客戶
@@ -543,7 +543,7 @@ export default function WishlistDetailPage({
                   size="sm"
                   className="border-brand-line text-brand-line hover:bg-brand-line hover:text-white"
                   onClick={() => {
-                    window.location.href = `/api/auth/line?redirect=/p/wishlist/${slug}`
+                    window.location.href = `/api/auth/line?redirect=/p/customized/${slug}`
                   }}
                 >
                   <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="currentColor">
@@ -860,7 +860,7 @@ export default function WishlistDetailPage({
               }}>
                 繼續選景點
               </Button>
-              <Button className="flex-1" onClick={() => router.push(`/p/wishlist/track/${trackingCode}`)}>
+              <Button className="flex-1" onClick={() => router.push(`/p/customized/track/${trackingCode}`)}>
                 查看進度
               </Button>
             </div>
