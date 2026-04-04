@@ -124,6 +124,7 @@ export function CoverInfoForm({
               value={data.subtitle || ''}
               onChange={value => updateField('subtitle', value)}
               placeholder={data.coverStyle === 'art' ? 'Odyssey' : COMP_EDITOR_LABELS.半自由行}
+              singleLine={false}
             />
             {data.coverStyle === 'art' && !data.subtitle && (
               <p className="text-xs text-morandi-secondary mt-1">{COMP_EDITOR_LABELS.LABEL_463}</p>

@@ -6,6 +6,7 @@ import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import Underline from '@tiptap/extension-underline'
 import Highlight from '@tiptap/extension-highlight'
+import FontFamily from '@tiptap/extension-font-family'
 import { useEffect, useCallback, useState, useRef, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import {
@@ -15,6 +16,7 @@ import {
   Strikethrough,
   Palette,
   Highlighter,
+  Type,
 } from 'lucide-react'
 import { UI_LABELS } from './constants/labels'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
@@ -52,6 +54,27 @@ const HIGHLIGHTS = [
   { label: '橙色', value: '#FFE0B2' },
 ]
 
+// 字體選項（使用已載入的 Google Fonts）
+const FONTS = [
+  { label: '預設', value: '' },
+  // 中文
+  { label: 'Noto Serif TC（宋體）', value: '"Noto Serif TC", serif' },
+  { label: 'LXGW WenKai TC（手寫楷）', value: '"LXGW WenKai TC", cursive' },
+  { label: 'Zen Old Mincho（日系宋）', value: '"Zen Old Mincho", serif' },
+  // 英文無襯線
+  { label: 'Inter', value: 'Inter, sans-serif' },
+  { label: 'Montserrat', value: 'Montserrat, sans-serif' },
+  { label: 'Poppins', value: 'Poppins, sans-serif' },
+  { label: 'Quicksand', value: 'Quicksand, sans-serif' },
+  // 英文有襯線
+  { label: 'Playfair Display', value: '"Playfair Display", serif' },
+  { label: 'Cormorant Garamond', value: '"Cormorant Garamond", serif' },
+  // 英文手寫
+  { label: 'Dancing Script', value: '"Dancing Script", cursive' },
+  { label: 'Great Vibes', value: '"Great Vibes", cursive' },
+  { label: 'Caveat', value: 'Caveat, cursive' },
+]
+
 export function RichTextInput({
   value,
   onChange,
@@ -63,23 +86,25 @@ export function RichTextInput({
   const [toolbarPos, setToolbarPos] = useState({ top: 0, left: 0 })
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showHighlightPicker, setShowHighlightPicker] = useState(false)
+  const [showFontPicker, setShowFontPicker] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Memoize extensions to prevent recreating on each render
   const extensions = useMemo(
     () => [
       StarterKit.configure({
-        // 保留 paragraph（必須），但禁用其他區塊類型
         heading: false,
         bulletList: false,
         orderedList: false,
         blockquote: false,
         codeBlock: false,
         horizontalRule: false,
+        // 允許 hardBreak（Shift+Enter）
         hardBreak: singleLine ? false : undefined,
       }),
       TextStyle,
       Color,
+      FontFamily,
       Underline.configure({
         HTMLAttributes: {
           class: 'underline',
@@ -91,7 +116,7 @@ export function RichTextInput({
   )
 
   const editor = useEditor({
-    immediatelyRender: false, // 避免 SSR hydration 問題
+    immediatelyRender: false,
     extensions,
     content: value || '',
     editorProps: {
@@ -101,15 +126,23 @@ export function RichTextInput({
           singleLine && 'whitespace-nowrap overflow-x-auto'
         ),
       },
-      handleKeyDown: singleLine
-        ? (view, event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault()
-              return true
-            }
-            return false
+      handleKeyDown: (view, event) => {
+        if (singleLine) {
+          // Enter 禁止，Shift+Enter 也禁止（單行模式）
+          if (event.key === 'Enter') {
+            event.preventDefault()
+            return true
           }
-        : undefined,
+        } else {
+          // 多行模式：Shift+Enter 插入 hardBreak
+          if (event.key === 'Enter' && event.shiftKey) {
+            editor?.chain().focus().setHardBreak().run()
+            event.preventDefault()
+            return true
+          }
+        }
+        return false
+      },
     },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML()
@@ -122,7 +155,6 @@ export function RichTextInput({
     onSelectionUpdate: ({ editor }) => {
       const { from, to } = editor.state.selection
       if (from !== to) {
-        // 有選取文字，顯示工具列
         const selection = window.getSelection()
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0)
@@ -131,7 +163,7 @@ export function RichTextInput({
           if (containerRect) {
             setToolbarPos({
               top: rect.top - containerRect.top - 45,
-              left: rect.left - containerRect.left + rect.width / 2 - 120,
+              left: rect.left - containerRect.left + rect.width / 2 - 150,
             })
           }
         }
@@ -140,6 +172,7 @@ export function RichTextInput({
         setShowToolbar(false)
         setShowColorPicker(false)
         setShowHighlightPicker(false)
+        setShowFontPicker(false)
       }
     },
   })
@@ -171,6 +204,18 @@ export function RichTextInput({
     editor?.chain().focus().unsetHighlight().run()
     setShowHighlightPicker(false)
   }, [editor])
+
+  const setFont = useCallback(
+    (fontFamily: string) => {
+      if (fontFamily === '') {
+        editor?.chain().focus().unsetFontFamily().run()
+      } else {
+        editor?.chain().focus().setFontFamily(fontFamily).run()
+      }
+      setShowFontPicker(false)
+    },
+    [editor]
+  )
 
   if (!editor) return null
 
@@ -243,6 +288,37 @@ export function RichTextInput({
 
           <div className="w-px h-5 bg-muted mx-1" />
 
+          {/* 字體選擇 */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setShowFontPicker(!showFontPicker)
+                setShowColorPicker(false)
+                setShowHighlightPicker(false)
+              }}
+              className="p-1.5 rounded hover:bg-muted transition-colors"
+              title="字體"
+            >
+              <Type size={16} />
+            </button>
+            {showFontPicker && (
+              <div className="absolute left-0 top-full mt-1 bg-card rounded-lg shadow-lg border border-border z-50 min-w-[200px] max-h-[280px] overflow-y-auto">
+                {FONTS.map(font => (
+                  <button
+                    key={font.value}
+                    type="button"
+                    onClick={() => setFont(font.value)}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors flex items-center gap-2"
+                    style={{ fontFamily: font.value || 'inherit' }}
+                  >
+                    {font.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* 文字顏色 */}
           <div className="relative">
             <button
@@ -250,6 +326,7 @@ export function RichTextInput({
               onClick={() => {
                 setShowColorPicker(!showColorPicker)
                 setShowHighlightPicker(false)
+                setShowFontPicker(false)
               }}
               className="p-1.5 rounded hover:bg-muted transition-colors"
               title={UI_LABELS.LABEL_4467}
@@ -279,6 +356,7 @@ export function RichTextInput({
               onClick={() => {
                 setShowHighlightPicker(!showHighlightPicker)
                 setShowColorPicker(false)
+                setShowFontPicker(false)
               }}
               className={cn(
                 'p-1.5 rounded hover:bg-muted transition-colors',
@@ -312,6 +390,13 @@ export function RichTextInput({
               </div>
             )}
           </div>
+
+          {!singleLine && (
+            <>
+              <div className="w-px h-5 bg-muted mx-1" />
+              <span className="text-[10px] text-morandi-muted px-1 select-none">Shift+Enter 換行</span>
+            </>
+          )}
         </div>
       )}
 
