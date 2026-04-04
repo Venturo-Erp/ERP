@@ -13,8 +13,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
 import { ApiError, successResponse } from '@/lib/api/response'
 import { subDays } from 'date-fns'
-
-const CRON_SECRET = process.env.CRON_SECRET
+import { validateCronAuth, unauthorizedResponse } from '@/lib/auth/cron-auth'
 
 // Logan 的 ID
 const LOGAN_ID = '00000000-0000-0000-0000-000000000002'
@@ -27,10 +26,11 @@ interface SyncResult {
 }
 
 export async function GET(_request: NextRequest) {
-  // 驗證 cron secret
-  const authHeader = _request.headers.get('authorization')
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
-    return ApiError.unauthorized('Unauthorized')
+  // 🔒 驗證 Cron 身份
+  const authResult = validateCronAuth(_request)
+  if (!authResult.success) {
+    logger.warn('Cron auth failed:', authResult.error)
+    return unauthorizedResponse(authResult.error)
   }
 
   try {

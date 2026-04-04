@@ -39,6 +39,16 @@ export async function POST(request: NextRequest) {
       return errorResponse('Invalid bucket', 400, ErrorCode.VALIDATION_ERROR)
     }
 
+    // 🔒 租戶隔離：確保檔案路徑包含 workspace_id
+    const workspaceId = auth.data.workspaceId
+    if (!path.startsWith(`${workspaceId}/`)) {
+      return errorResponse(
+        '檔案路徑必須以 workspace_id 開頭',
+        403,
+        ErrorCode.FORBIDDEN
+      )
+    }
+
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
 
@@ -96,6 +106,16 @@ export async function DELETE(request: NextRequest) {
     const allowedBuckets = ['company-assets', 'passport-images', 'member-documents', 'user-avatars']
     if (!allowedBuckets.includes(bucket)) {
       return errorResponse('Invalid bucket', 400, ErrorCode.VALIDATION_ERROR)
+    }
+
+    // 🔒 租戶隔離：確保檔案路徑包含 workspace_id
+    const workspaceId = auth.data.workspaceId
+    if (!path.startsWith(`${workspaceId}/`)) {
+      return errorResponse(
+        '只能刪除自己租戶的檔案',
+        403,
+        ErrorCode.FORBIDDEN
+      )
     }
 
     const supabaseAdmin = getSupabaseAdminClient()

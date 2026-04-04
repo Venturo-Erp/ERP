@@ -56,6 +56,15 @@
   --public-accent: #002366; /* 藍色強調 */
   --public-muted: #C0B090; /* 金棕 */
 
+  /* 漸層色（莫蘭迪金系列） */
+  --gradient-gold-light: #d4c5a9;
+  --gradient-gold-mid: #c9b896;
+  --gradient-gold-dark: #bfad87;
+  --gradient-brown-light: #d4c4a8;
+  --gradient-brown-mid: #b5986a;
+  --gradient-brown-dark: #a08968;
+  --gradient-primary-dark: #4a4540;
+
   /* 行事曆狀態色 */
   --cal-proposal: #9BB5D6;
   --cal-in-progress: #A8C4A2;
@@ -299,10 +308,10 @@ body {
 
 /* 功能色 - 背景 */
 .bg-morandi-gold {
-  background: linear-gradient(to bottom right, #d4c5a9, #c9b896, #bfad87);
+  background: linear-gradient(to bottom right, var(--gradient-gold-light), var(--gradient-gold-mid), var(--gradient-gold-dark));
 }
 .bg-morandi-gold-hover:hover {
-  background: linear-gradient(to bottom right, #c9b896, #bfad87, #b5a378);
+  background: linear-gradient(to bottom right, var(--gradient-gold-mid), var(--gradient-gold-dark), var(--gradient-brown-mid));
 }
 .bg-morandi-red {
   background-color: var(--morandi-red);
@@ -428,14 +437,14 @@ body {
 
 /* 佈局與裝飾分離的組合式樣式 */
 .btn-gradient-primary {
-  background: linear-gradient(to right, #b5986a, #d4c4a8);
+  background: linear-gradient(to right, var(--gradient-brown-mid), var(--gradient-brown-light));
   color: white;
   border: none;
   box-shadow: 0 2px 8px rgba(181, 152, 106, 0.15);
   transition: all 0.2s ease;
 }
 .btn-gradient-primary:hover {
-  background: linear-gradient(to right, #a08968, #c4b89a);
+  background: linear-gradient(to right, var(--gradient-brown-dark), var(--gradient-brown-light));
   box-shadow: 0 4px 12px rgba(181, 152, 106, 0.25);
   transform: scale(1.02);
 }
@@ -446,7 +455,7 @@ body {
 
 /* 主要按鈕 - 柔和漸層（參考記帳頁面） */
 .btn-morandi-primary {
-  background: linear-gradient(to right, #b5986a, #d4c4a8);
+  background: linear-gradient(to right, var(--gradient-brown-mid), var(--gradient-brown-light));
   color: white;
   font-weight: 500;
   padding: 0.5rem 1.25rem;
@@ -458,7 +467,7 @@ body {
 }
 
 .btn-morandi-primary:hover {
-  background: linear-gradient(to right, #a08968, #c4b89a);
+  background: linear-gradient(to right, var(--gradient-brown-dark), var(--gradient-brown-light));
   box-shadow: 0 4px 12px rgba(181, 152, 106, 0.25);
   transform: scale(1.02);
 }
@@ -507,7 +516,7 @@ body {
 }
 
 .btn-icon-morandi:hover {
-  background: linear-gradient(135deg, #d4c5a9, #c9b896, #bfad87);
+  background: linear-gradient(135deg, var(--gradient-gold-light), var(--gradient-gold-mid), var(--gradient-gold-dark));
   color: white;
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(196, 165, 114, 0.25);
@@ -549,7 +558,7 @@ body {
   top: 20%;
   bottom: 20%;
   width: 3px;
-  background: linear-gradient(to bottom, #b5986a, #d4c4a8);
+  background: linear-gradient(to bottom, var(--gradient-brown-mid), var(--gradient-brown-light));
   border-radius: 2px 0 0 2px;
 }
 
@@ -638,7 +647,7 @@ body {
 
 /* 工具提示氣泡 */
 .tooltip-morandi {
-  background: linear-gradient(135deg, #3a3633, #4a4540);
+  background: linear-gradient(135deg, var(--morandi-primary), var(--gradient-primary-dark));
   color: rgba(255, 255, 255, 0.95);
   padding: 0.5rem 0.875rem;
   border-radius: 0.5rem;
@@ -1068,12 +1077,12 @@ input[type='number'] {
   font-size: 12px !important;
   font-weight: 500 !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
-  color: #475569 !important;
+  color: var(--morandi-secondary) !important;
 }
 
 .main-marker-tooltip {
-  background: #fef2f2 !important;
-  color: #dc2626 !important;
+  background: var(--status-danger-bg) !important;
+  color: var(--status-danger) !important;
   font-weight: 600 !important;
 }
 
@@ -1097,7 +1106,7 @@ input[type='number'] {
 }
 
 .attraction-popup .leaflet-popup-close-button {
-  color: #94a3b8 !important;
+  color: var(--morandi-muted) !important;
   font-size: 18px !important;
   padding: 6px 8px !important;
 }

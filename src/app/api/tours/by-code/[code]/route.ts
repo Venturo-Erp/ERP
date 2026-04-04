@@ -1,3 +1,11 @@
+/**
+ * 公開查詢旅遊團（透過 code）
+ * GET /api/tours/by-code/[code]
+ * 
+ * 用途：客戶透過分享連結查看旅遊團資訊
+ * 🔒 安全性：只回傳公開欄位，不洩露內部資訊
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -12,9 +20,10 @@ export async function GET(
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 
+  // 只查詢公開欄位（不包含 workspace_id, leader_id, sales_id）
   const { data, error } = await supabase
     .from('tours')
-    .select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, created_at, updated_at, is_deleted, leader_id, sales_id, metadata, tour_type')
+    .select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, tour_type')
     .eq('code', code)
     .eq('is_deleted', false)
     .single()

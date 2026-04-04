@@ -208,7 +208,6 @@ export function CoverInfoSection({
               <Button
                 onClick={() => setShowCoverSettings(false)}
                 className="w-full"
-                style={{ backgroundColor: currentStyleColor }}
               >
                 {COMP_EDITOR_LABELS.SETTINGS_6595}
               </Button>
