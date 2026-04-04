@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { getPlaceCoordinates, extractCoordsFromUrl, isValidCoordinates } from '@/lib/google-places'
-import type { PlaceCoordinates } from '@/lib/google-places'
+import { MapPin, ExternalLink } from 'lucide-react'
 
 interface CoordinateSearchProps {
   attractionName: string
@@ -16,190 +15,166 @@ interface CoordinateSearchProps {
   readOnly?: boolean
 }
 
+/**
+ * 座標輸入工具
+ * 支援：
+ * 1. 手動輸入 lat/lng
+ * 2. 貼上 Google Maps 連結自動解析
+ */
 export function CoordinateSearch({
   attractionName,
-  city = '清邁',
-  country = 'Thailand',
   currentLat,
   currentLng,
   onCoordsUpdate,
   readOnly = false,
 }: CoordinateSearchProps) {
-  const [searching, setSearching] = useState(false)
-  const [suggestedCoords, setSuggestedCoords] = useState<PlaceCoordinates | null>(null)
   const [googleMapsUrl, setGoogleMapsUrl] = useState('')
   const [urlError, setUrlError] = useState('')
+  const [manualLat, setManualLat] = useState('')
+  const [manualLng, setManualLng] = useState('')
 
-  // 自動搜尋（debounced）
-  useEffect(() => {
-    if (!attractionName || readOnly) {
-      setSuggestedCoords(null)
-      return
-    }
-
-    // 如果已有座標，不自動搜尋
-    if (isValidCoordinates(currentLat, currentLng)) {
-      return
-    }
-
-    const timer = setTimeout(() => {
-      handleSearch()
-    }, 1000) // 1 秒 debounce
-
-    return () => clearTimeout(timer)
-  }, [attractionName, city, country, readOnly, currentLat, currentLng])
-
-  const handleSearch = useCallback(async () => {
-    if (!attractionName || readOnly) return
-
-    setSearching(true)
+  // 從 Google Maps URL 解析座標
+  const parseGoogleMapsUrl = (url: string): { lat: number; lng: number } | null => {
     try {
-      const coords = await getPlaceCoordinates(attractionName, city, country)
-      setSuggestedCoords(coords)
-    } catch (error) {
-      console.error('搜尋座標失敗:', error)
-    } finally {
-      setSearching(false)
-    }
-  }, [attractionName, city, country, readOnly])
-
-  const handleApplyCoords = () => {
-    if (suggestedCoords) {
-      onCoordsUpdate(suggestedCoords.lat, suggestedCoords.lng, suggestedCoords.address)
-      setSuggestedCoords(null)
+      // 格式: @lat,lng,zoom
+      const atMatch = url.match(/@(-?\d+\.?\d*),(-?\d+\.?\d*)/)
+      if (atMatch) {
+        return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]) }
+      }
+      // 格式: /maps/place/...!3dlat!4dlng
+      const d3Match = url.match(/!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/)
+      if (d3Match) {
+        return { lat: parseFloat(d3Match[1]), lng: parseFloat(d3Match[2]) }
+      }
+      // 格式: ll=lat,lng
+      const llMatch = url.match(/ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/)
+      if (llMatch) {
+        return { lat: parseFloat(llMatch[1]), lng: parseFloat(llMatch[2]) }
+      }
+      return null
+    } catch {
+      return null
     }
   }
 
-  const handleUrlPaste = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const url = e.target.value
-    setGoogleMapsUrl(url)
+  const handleUrlPaste = () => {
     setUrlError('')
-
-    if (!url) return
-
-    const coords = extractCoordsFromUrl(url)
+    const coords = parseGoogleMapsUrl(googleMapsUrl)
     if (coords) {
       onCoordsUpdate(coords.lat, coords.lng)
       setGoogleMapsUrl('')
-      setUrlError('')
-    } else if (url.includes('maps.google') || url.includes('goo.gl/maps')) {
-      setUrlError('無法從 URL 解析座標，請確認格式')
+    } else {
+      setUrlError('無法解析座標，請確認連結格式')
     }
   }
 
-  const hasValidCoords = isValidCoordinates(currentLat, currentLng)
+  const handleManualInput = () => {
+    const lat = parseFloat(manualLat)
+    const lng = parseFloat(manualLng)
+    if (isNaN(lat) || isNaN(lng)) {
+      setUrlError('請輸入有效的座標數值')
+      return
+    }
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      setUrlError('座標超出範圍')
+      return
+    }
+    setUrlError('')
+    onCoordsUpdate(lat, lng)
+    setManualLat('')
+    setManualLng('')
+  }
 
   if (readOnly) {
+    if (!currentLat || !currentLng) return null
     return (
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm font-medium">緯度</label>
-          <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
-            {currentLat?.toFixed(6) || '-'}
-          </div>
-        </div>
-        <div>
-          <label className="text-sm font-medium">經度</label>
-          <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
-            {currentLng?.toFixed(6) || '-'}
-          </div>
-        </div>
-      </div>
+      <a
+        href={`https://www.google.com/maps?q=${currentLat},${currentLng}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-1 text-xs text-status-info hover:underline"
+      >
+        <MapPin size={12} />
+        {currentLat.toFixed(6)}, {currentLng.toFixed(6)}
+        <ExternalLink size={10} />
+      </a>
     )
   }
 
   return (
     <div className="space-y-3">
-      {/* 座標輸入區 */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="text-sm font-medium">
-            緯度 {hasValidCoords && <span className="text-green-600">✓</span>}
-          </label>
-          <Input
-            type="number"
-            step="0.000001"
-            value={currentLat ?? ''}
-            onChange={e => onCoordsUpdate(parseFloat(e.target.value) || 0, currentLng ?? 0)}
-            placeholder="18.788015"
-          />
-        </div>
-        <div>
-          <label className="text-sm font-medium">
-            經度 {hasValidCoords && <span className="text-green-600">✓</span>}
-          </label>
-          <Input
-            type="number"
-            step="0.000001"
-            value={currentLng ?? ''}
-            onChange={e => onCoordsUpdate(currentLat ?? 0, parseFloat(e.target.value) || 0)}
-            placeholder="98.985934"
-          />
-        </div>
-      </div>
-
-      {/* 自動搜尋建議 */}
-      {suggestedCoords && !hasValidCoords && (
-        <div className="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-md">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex-1 text-sm">
-              <div className="font-medium text-blue-900 dark:text-blue-100">找到座標：</div>
-              <div className="text-blue-700 dark:text-blue-300 mt-1">
-                {suggestedCoords.name}
-              </div>
-              <div className="text-blue-600 dark:text-blue-400 text-xs mt-1">
-                {suggestedCoords.lat.toFixed(6)}, {suggestedCoords.lng.toFixed(6)}
-              </div>
-              <div className="text-blue-600/80 dark:text-blue-400/80 text-xs mt-0.5">
-                {suggestedCoords.address}
-              </div>
-            </div>
-            <Button 
-              size="sm" 
-              onClick={handleApplyCoords}
-              className="shrink-0"
-            >
-              使用此座標
-            </Button>
-          </div>
+      {/* 目前座標顯示 */}
+      {currentLat && currentLng && (
+        <div className="flex items-center gap-2 text-xs text-morandi-secondary">
+          <MapPin size={12} className="text-morandi-gold" />
+          <span>目前：{currentLat.toFixed(6)}, {currentLng.toFixed(6)}</span>
+          <a
+            href={`https://www.google.com/maps?q=${currentLat},${currentLng}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-status-info hover:underline flex items-center gap-1"
+          >
+            地圖確認 <ExternalLink size={10} />
+          </a>
         </div>
       )}
 
-      {/* 手動搜尋按鈕 */}
-      {!hasValidCoords && !suggestedCoords && attractionName && (
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={handleSearch}
-          disabled={searching}
-          className="w-full"
-        >
-          {searching ? '搜尋中...' : '🔍 搜尋座標'}
-        </Button>
-      )}
-
-      {/* Google Maps URL 貼上 */}
+      {/* 貼上 Google Maps 連結 */}
       <div>
-        <label className="text-sm font-medium text-muted-foreground">
-          或貼上 Google Maps 連結
-        </label>
-        <Input
-          value={googleMapsUrl}
-          onChange={handleUrlPaste}
-          placeholder="https://maps.google.com/?q=18.788015,98.985934"
-          className={urlError ? 'border-red-500' : ''}
-        />
-        {urlError && (
-          <p className="text-xs text-red-500 mt-1">{urlError}</p>
-        )}
+        <p className="text-xs text-morandi-secondary mb-1">貼上 Google Maps 連結自動解析座標</p>
+        <div className="flex gap-2">
+          <Input
+            value={googleMapsUrl}
+            onChange={e => setGoogleMapsUrl(e.target.value)}
+            placeholder="https://maps.google.com/..."
+            className="text-xs"
+          />
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleUrlPaste}
+            disabled={!googleMapsUrl}
+          >
+            解析
+          </Button>
+        </div>
       </div>
 
-      {/* 說明文字 */}
-      {!hasValidCoords && (
-        <p className="text-xs text-muted-foreground">
-          💡 輸入景點名稱後會自動搜尋座標，或直接貼上 Google Maps 連結
-        </p>
-      )}
+      {/* 手動輸入 */}
+      <div>
+        <p className="text-xs text-morandi-secondary mb-1">或手動輸入座標</p>
+        <div className="flex gap-2">
+          <Input
+            value={manualLat}
+            onChange={e => setManualLat(e.target.value)}
+            placeholder="緯度（如 18.7883）"
+            className="text-xs"
+          />
+          <Input
+            value={manualLng}
+            onChange={e => setManualLng(e.target.value)}
+            placeholder="經度（如 98.9853）"
+            className="text-xs"
+          />
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleManualInput}
+            disabled={!manualLat || !manualLng}
+          >
+            套用
+          </Button>
+        </div>
+      </div>
+
+      {urlError && <p className="text-xs text-status-danger">{urlError}</p>}
+
+      {/* 提示 */}
+      <p className="text-xs text-morandi-muted">
+        提示：在 Google Maps 找到景點後，點「分享」複製連結，或直接複製網址列的 URL
+      </p>
     </div>
   )
 }

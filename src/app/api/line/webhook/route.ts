@@ -3,16 +3,6 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import { logger } from '@/lib/utils/logger'
 import { handleAICustomerService } from '@/lib/line/ai-customer-service'
 import { checkRateLimit } from '@/lib/rate-limit'
-import {
-  detectChiangMaiIntent,
-  sendCategorySelection,
-  loadDestinations,
-  sendDestinationCarousel,
-  saveDestinationPick,
-  getUserPicks,
-  sendPicksSummary,
-  generateSessionId,
-} from '@/lib/line/destination-selection'
 
 /** LINE Webhook event type (minimal) */
 interface LineEvent {
@@ -386,131 +376,12 @@ async function processInsurancePDF(event: LineEvent) {
   }
 }
 
-/** 處理清邁景點選擇 */
-async function handleDestinationSelection(event: LineEvent) {
-  const userId = event.source?.userId
-  const userMessage = event.message?.text?.trim()
-  
-  if (!userId || !userMessage) return false
-  
-  // 偵測清邁關鍵字
-  if (detectChiangMaiIntent(userMessage)) {
-    await sendCategorySelection(event.replyToken!)
-    logger.info(`[LINE] Destination selection started for: ${userId}`)
-    return true
-  }
-  
-  return false
-}
 
-/** 處理 Postback（景點選擇按鈕） */
-async function handleDestinationPostback(event: LineEvent) {
-  const userId = event.source?.userId
-  const postbackData = event.postback?.data
-  
-  if (!userId || !postbackData) return false
-  
-  const params = new URLSearchParams(postbackData)
-  const action = params.get('action')
-  
-  if (!action || !action.includes('destination')) return false
-  
-  try {
-    if (action === 'view_destinations') {
-      // 顯示特定類別景點
-      const category = params.get('category') as any
-      const destinations = await loadDestinations(category, false)
-      const sessionId = generateSessionId()
-      await sendDestinationCarousel(userId, destinations, sessionId)
-      return true
-    }
-    
-    if (action === 'recommend_top20') {
-      // 推薦 Top 20
-      const destinations = await loadDestinations(undefined, true)
-      const sessionId = generateSessionId()
-      await sendDestinationCarousel(userId, destinations, sessionId)
-      return true
-    }
-    
-    if (action === 'view_all_destinations') {
-      // 顯示全部 50 個
-      const destinations = await loadDestinations(undefined, false)
-      const sessionId = generateSessionId()
-      await sendDestinationCarousel(userId, destinations, sessionId)
-      return true
-    }
-    
-    if (action === 'pick_destination') {
-      // 記錄選擇
-      const destinationId = params.get('destination_id')
-      const sessionId = params.get('session_id')
-      
-      if (destinationId && sessionId) {
-        await saveDestinationPick(userId, destinationId, sessionId)
-        
-        // 取得目前已選景點
-        const picks = await getUserPicks(userId, sessionId)
-        
-        // 回覆確認
-        await fetch('https://api.line.me/v2/bot/message/push', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${LINE_TOKEN}`,
-          },
-          body: JSON.stringify({
-            to: userId,
-            messages: [
-              {
-                type: 'text',
-                text: `✅ 已選：${picks.length} 個景點\n\n繼續選或輸入「完成」查看摘要`
-              }
-            ],
-          }),
-        })
-      }
-      
-      return true
-    }
-  } catch (err) {
-    logger.error('[LINE] Destination postback error:', err)
-  }
-  
-  return false
-}
+
+
 
 /** 處理「完成」指令 */
-async function handleFinishSelection(event: LineEvent) {
-  const userId = event.source?.userId
-  const userMessage = event.message?.text?.trim()
-  
-  if (!userId || !userMessage) return false
-  
-  if (userMessage === '完成' || userMessage.toLowerCase() === 'done') {
-    // TODO: 從最近的 session 取得選擇
-    // 暫時回覆提示
-    await fetch('https://api.line.me/v2/bot/message/reply', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${LINE_TOKEN}`,
-      },
-      body: JSON.stringify({
-        replyToken: event.replyToken,
-        messages: [
-          {
-            type: 'text',
-            text: `✅ 景點選擇完成！\n\n請稍後，我們會整理你的需求單 📋`
-          }
-        ],
-      }),
-    })
-    return true
-  }
-  
-  return false
-}
+
 
 /** 處理 AI 客服訊息 */
 async function handleAIMessage(event: LineEvent) {
@@ -521,8 +392,6 @@ async function handleAIMessage(event: LineEvent) {
     if (!userId || !userMessage) return
     
     // 1. 先檢查景點選擇
-    if (await handleDestinationSelection(event)) return
-    if (await handleFinishSelection(event)) return
     
     // 2. 取得用戶資訊
     const profile = await getUserProfile(userId)
@@ -581,7 +450,6 @@ export async function POST(req: NextRequest) {
 
       // Postback 事件 → 景點選擇按鈕
       if (event.type === 'postback') {
-        await handleDestinationPostback(event)
       }
 
       // 私人訊息 → 檢查綁定指令（客戶或員工）或 AI 客服
