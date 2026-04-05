@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 建立確認連結
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.cornertravel.com.tw'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://erp.venturo.tw'
     const confirmUrl = `${baseUrl}/transport/${item_id}/confirm`
 
     // Flex Message

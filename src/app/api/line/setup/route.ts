@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: '請先完成 Step 2' }, { status: 400 })
       }
 
-      const webhookUrl = `https://app.cornertravel.com.tw/api/line/webhook`
+      const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/line/webhook`
 
       // 設定 webhook
       const setRes = await fetch('https://api.line.me/v2/bot/channel/webhook/endpoint', {

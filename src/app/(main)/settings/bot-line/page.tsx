@@ -343,7 +343,7 @@ export default function LineConnectionsPage() {
                   <div>
                     <label className="text-sm font-medium text-muted-foreground">Callback URL</label>
                     <div className="mt-1 font-mono text-sm bg-muted px-3 py-2 rounded text-xs">
-                      https://app.cornertravel.com.tw/api/auth/line/callback
+                      https://erp.venturo.tw/api/auth/line/callback
                     </div>
                   </div>
                 </div>

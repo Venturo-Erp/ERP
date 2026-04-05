@@ -12,8 +12,8 @@
  *
  * IP 白名單：
  * - 藍新 API 需要 IP 白名單，Vercel 無固定 IP
- * - 使用 Quotaguard Static proxy 取得固定 IP
- * - 環境變數：QUOTAGUARD_STATIC_URL
+ * - 透過 GCP Cloud Run proxy (venturo-invoice-proxy) 取得固定 IP
+ * - 環境變數：INVOICE_PROXY_URL, INVOICE_PROXY_SECRET
  */
 
 import {
@@ -23,7 +23,6 @@ import {
   convertTaxType,
   formatInvoiceDate,
 } from './crypto'
-import { ProxyAgent, fetch as undiciFetch } from 'undici'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
 
@@ -196,19 +195,22 @@ async function sendRequest(
     'Content-Type': 'application/x-www-form-urlencoded',
   }
 
-  // 檢查是否有 Quotaguard proxy 設定（用於 Vercel 等無固定 IP 的環境）
-  const proxyUrl = process.env.QUOTAGUARD_STATIC_URL
+  // 透過 Cloud Run proxy 發送（固定 IP），或本地直連
+  const invoiceProxyUrl = process.env.INVOICE_PROXY_URL
+  const invoiceProxySecret = process.env.INVOICE_PROXY_SECRET
 
   let response: Response
-  if (proxyUrl) {
-    logger.log('[NewebPay] 使用 Quotaguard proxy 發送請求')
-    const proxyAgent = new ProxyAgent(proxyUrl)
-    response = (await undiciFetch(requestUrl, {
+  if (invoiceProxyUrl) {
+    logger.log('[NewebPay] 使用 Cloud Run proxy 發送請求')
+    response = await fetch(`${invoiceProxyUrl}/proxy`, {
       method: 'POST',
-      headers: requestHeaders,
-      body: requestBody,
-      dispatcher: proxyAgent,
-    })) as unknown as Response
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: requestUrl,
+        body: requestBody,
+        secret: invoiceProxySecret,
+      }),
+    })
   } else {
     // 本地開發或有固定 IP 的環境直接發送
     response = await fetch(requestUrl, {

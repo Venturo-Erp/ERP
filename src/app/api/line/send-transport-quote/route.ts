@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     } = body
 
     // 遊覽車報價連結（帶 requestId，單一性）
-    const viewUrl = `https://app.cornertravel.com.tw/public/transport-quote/${tourId}/${requestId}`
+    const viewUrl = `${process.env.NEXT_PUBLIC_APP_URL}/public/transport-quote/${tourId}/${requestId}`
 
     // Flex Message：遊覽車需求單
     const flexMessage = {

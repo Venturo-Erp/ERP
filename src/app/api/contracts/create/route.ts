@@ -200,7 +200,7 @@ export async function POST(request: NextRequest) {
       .in('id', memberIds)
 
     // 產生簽約連結
-    const signUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cornertravel.com.tw'}/public/contract/sign/${contractCode}`
+    const signUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://erp.venturo.tw'}/public/contract/sign/${contractCode}`
 
     return NextResponse.json({
       success: true,

@@ -139,7 +139,7 @@ export async function POST(request: Request) {
     })
 
     // 5. 公開名單頁面（網頁版，手機可直接看）
-    const memberPageUrl = `https://app.cornertravel.com.tw/public/insurance/${tourCode}`
+    const memberPageUrl = `${process.env.NEXT_PUBLIC_APP_URL}/public/insurance/${tourCode}`
 
     // 6. 發 LINE — 純文字 + 短網址
     const textMsg = `📋 ${tourCode} ${tourName}

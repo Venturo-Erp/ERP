@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       params.set('pax', totalPax.toString())
     }
 
-    const viewUrl = `https://app.cornertravel.com.tw/public/itinerary/${tourId}?${params.toString()}`
+    const viewUrl = `${process.env.NEXT_PUBLIC_APP_URL}/public/itinerary/${tourId}?${params.toString()}`
 
     // 簡化版 Flex Message：團資訊 + 人數 + 查看按鈕（不顯示供應商、不列內容）
     const flexMessage = {

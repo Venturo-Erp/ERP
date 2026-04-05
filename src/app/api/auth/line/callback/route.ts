@@ -13,7 +13,7 @@ const LINE_LOGIN_CHANNEL_ID = process.env.LINE_LOGIN_CHANNEL_ID!
 const LINE_LOGIN_CHANNEL_SECRET = process.env.LINE_LOGIN_CHANNEL_SECRET!
 const CALLBACK_URL = process.env.NEXT_PUBLIC_APP_URL 
   ? `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/line/callback`
-  : 'https://app.cornertravel.com.tw/api/auth/line/callback'
+  : 'https://erp.venturo.tw/api/auth/line/callback'
 
 interface LineProfile {
   userId: string

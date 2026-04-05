@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     const requestId = request.id
 
     // 建立公開連結
-    const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.cornertravel.com.tw'}/public/accommodation-quote/${tourId}/${requestId}`
+    const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://erp.venturo.tw'}/public/accommodation-quote/${tourId}/${requestId}`
 
     // 組成 LINE Flex Message
     const flexMessage = {

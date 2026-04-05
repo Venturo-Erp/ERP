@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from 'next/server'
 const LINE_LOGIN_CHANNEL_ID = process.env.LINE_LOGIN_CHANNEL_ID!
 const CALLBACK_URL = process.env.NEXT_PUBLIC_APP_URL 
   ? `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/line/callback`
-  : 'https://app.cornertravel.com.tw/api/auth/line/callback'
+  : 'https://erp.venturo.tw/api/auth/line/callback'
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams

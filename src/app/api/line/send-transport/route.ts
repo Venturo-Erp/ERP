@@ -39,7 +39,7 @@ ${vehicleDesc ? `🚍 車型：${vehicleDesc}\n` : ''}
 ${daysList}
 ${note ? `\n📝 備註：${note}` : ''}
 
-${requestId ? `📎 線上報價：https://app.cornertravel.com.tw/public/request/${requestId}\n` : ''}請協助報價，謝謝！`
+${requestId ? `📎 線上報價：${process.env.NEXT_PUBLIC_APP_URL}/public/request/${requestId}\n` : ''}請協助報價，謝謝！`
 
     const lineRes = await fetch(LINE_API_URL, {
       method: 'POST',
