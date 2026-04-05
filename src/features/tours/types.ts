@@ -24,7 +24,8 @@ export interface NewTourData {
   max_participants: number
   description?: string
   enable_checkin?: boolean // 是否開啟報到功能
-  controller_id?: string // 團控人員 ID
+  controller_id?: string // 團控人員 ID（舊欄位，保留向後相容）
+  role_assignments?: Record<string, string> // 動態選人欄位 { fieldId: employeeId }
   outbound_flight_number?: string // 去程航班號碼 (如: BR190)
   outbound_flight_text?: string // 去程航班文字 (如: BR 190 07:25-11:45)
   return_flight_number?: string // 回程航班號碼 (如: BR191)

@@ -18,10 +18,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { 
-  Shield, 
-  Plus, 
-  Trash2, 
+import {
+  Shield,
+  Plus,
+  Trash2,
   Save,
   Loader2,
   Users,
@@ -35,6 +35,7 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
+import { TeamSettingsTab } from '@/features/hr/components/TeamSettingsTab'
 
 interface Role {
   id: string
@@ -50,6 +51,7 @@ export default function RolesPage() {
   const { user } = useAuthStore()
   const { toast } = useToast()
   
+  const [activeTab, setActiveTab] = useState('permissions')
   const [roles, setRoles] = useState<Role[]>([])
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
   const [permissions, setPermissions] = useState<TabPermission[]>([])
@@ -385,14 +387,25 @@ export default function RolesPage() {
   }
 
   return (
-    <ContentPageLayout 
-      title="職務管理" 
+    <ContentPageLayout
+      title="職務管理"
       icon={Shield}
       breadcrumb={[
         { label: '人資管理', href: '/hr' },
         { label: '職務管理', href: '/hr/roles' },
       ]}
+      tabs={[
+        { value: 'permissions', label: '職務權限' },
+        { value: 'team', label: '團務設定' },
+      ]}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
     >
+
+      {activeTab === 'team' ? (
+        <TeamSettingsTab />
+      ) : (
+      <>
       <div className="grid grid-cols-12 gap-6 h-full min-h-[500px]">
         {/* 左側：職務列表 */}
         <div className="col-span-3 flex flex-col">
@@ -533,7 +546,7 @@ export default function RolesPage() {
         </div>
       </div>
 
-      {/* 新增職務 Dialog */}
+      {/* 新增職務 Dialog — 仍在 permissions tab 條件區塊內 */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent level={1} className="sm:max-w-md">
           <DialogHeader>
@@ -574,6 +587,8 @@ export default function RolesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </>
+      )}
     </ContentPageLayout>
   )
 }

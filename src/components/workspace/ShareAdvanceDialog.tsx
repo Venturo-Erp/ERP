@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react'
 import { Plus, Trash2, X, Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { useWorkspaceWidgets } from '@/stores/workspace-store'
 import { useEmployeesSlim } from '@/data'
 import { Combobox } from '@/components/ui/combobox'
@@ -215,20 +216,14 @@ export function ShareAdvanceDialog({
             />
           </div>
           <div className="flex gap-2 justify-end w-full">
-            <button
-              className="btn-morandi-secondary !py-2 !px-4 flex items-center gap-2"
-              onClick={onClose}
-            >
+            <Button variant="outline" onClick={onClose}>
               <X size={16} />
               {COMP_WORKSPACE_LABELS.CANCEL}
-            </button>
-            <button
-              className="btn-morandi-primary !py-2 !px-4 flex items-center gap-2"
-              onClick={handleShare}
-            >
+            </Button>
+            <Button onClick={handleShare}>
               <Check size={16} />
               {COMP_WORKSPACE_LABELS.LABEL_903}
-            </button>
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>

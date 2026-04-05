@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react'
 import { Hash, Lock, Check, Globe, Building2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import { useWorkspaceStore } from '@/stores'
 import { useAuthStore } from '@/stores/auth-store'
 import { useEmployeesSlim } from '@/data'
@@ -271,20 +272,21 @@ export function CreateChannelDialog({
         </div>
 
         <div className="flex gap-2 mt-4 justify-end border-t border-morandi-gold/10 pt-4">
-          <button
-            className="btn-morandi-secondary !py-1.5 !px-3 text-sm"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onClose}
             disabled={isCreating}
           >
             {COMP_WORKSPACE_LABELS.CANCEL}
-          </button>
-          <button
-            className="btn-morandi-primary !py-1.5 !px-3 text-sm"
+          </Button>
+          <Button
+            size="sm"
             onClick={onCreate}
             disabled={!channelName.trim() || selectedMembers.length === 0 || isCreating}
           >
             {isCreating ? COMP_WORKSPACE_LABELS.建立中 : COMP_WORKSPACE_LABELS.建立}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

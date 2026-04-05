@@ -39,9 +39,9 @@ export default function MonitoringPage() {
           <div className="grid gap-4 md:grid-cols-2">
             {/* 左側：Star-Office-UI */}
             <Card className="p-0 overflow-hidden">
-              <div className="bg-muted px-4 py-3 border-b">
+              <div className="bg-morandi-container px-4 py-3 border-b">
                 <h3 className="font-semibold">AI Agents 辦公室</h3>
-                <p className="text-sm text-muted-foreground">像素風格即時狀態</p>
+                <p className="text-sm text-morandi-secondary">像素風格即時狀態</p>
               </div>
               <div className="aspect-[4/3]">
                 <iframe
@@ -54,9 +54,9 @@ export default function MonitoringPage() {
 
             {/* 右側：Mission Control */}
             <Card className="p-0 overflow-hidden">
-              <div className="bg-muted px-4 py-3 border-b">
+              <div className="bg-morandi-container px-4 py-3 border-b">
                 <h3 className="font-semibold">任務控制中心</h3>
-                <p className="text-sm text-muted-foreground">Kanban 看板管理</p>
+                <p className="text-sm text-morandi-secondary">Kanban 看板管理</p>
               </div>
               <div className="aspect-[4/3]">
                 <iframe
@@ -72,19 +72,19 @@ export default function MonitoringPage() {
           <div className="grid gap-4 md:grid-cols-4">
             <Card className="p-4">
               <div className="text-2xl font-bold">8</div>
-              <p className="text-xs text-muted-foreground">總 Agents</p>
+              <p className="text-xs text-morandi-secondary">總 Agents</p>
             </Card>
             <Card className="p-4">
               <div className="text-2xl font-bold text-morandi-green">3</div>
-              <p className="text-xs text-muted-foreground">活躍中</p>
+              <p className="text-xs text-morandi-secondary">活躍中</p>
             </Card>
             <Card className="p-4">
               <div className="text-2xl font-bold text-status-info">12</div>
-              <p className="text-xs text-muted-foreground">進行中任務</p>
+              <p className="text-xs text-morandi-secondary">進行中任務</p>
             </Card>
             <Card className="p-4">
               <div className="text-2xl font-bold text-morandi-secondary">45</div>
-              <p className="text-xs text-muted-foreground">今日完成</p>
+              <p className="text-xs text-morandi-secondary">今日完成</p>
             </Card>
           </div>
         </TabsContent>
@@ -92,9 +92,9 @@ export default function MonitoringPage() {
         {/* Agent 狀態：全螢幕 Star-Office-UI */}
         <TabsContent value="agents" className="space-y-4">
           <Card className="p-0 overflow-hidden">
-            <div className="bg-muted px-4 py-3 border-b">
+            <div className="bg-morandi-container px-4 py-3 border-b">
               <h3 className="font-semibold">AI Agents 即時狀態</h3>
-              <p className="text-sm text-muted-foreground">Star Office UI - 像素風格辦公室</p>
+              <p className="text-sm text-morandi-secondary">Star Office UI - 像素風格辦公室</p>
             </div>
             <div className="h-[calc(100vh-300px)]">
               <iframe
@@ -109,9 +109,9 @@ export default function MonitoringPage() {
         {/* 任務看板：全螢幕 Mission Control */}
         <TabsContent value="tasks" className="space-y-4">
           <Card className="p-0 overflow-hidden">
-            <div className="bg-muted px-4 py-3 border-b">
+            <div className="bg-morandi-container px-4 py-3 border-b">
               <h3 className="font-semibold">任務看板</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-morandi-secondary">
                 OpenClaw Mission Control - 即時任務管理
               </p>
             </div>

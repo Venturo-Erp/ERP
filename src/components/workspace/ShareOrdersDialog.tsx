@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { Search, Receipt, X, Check } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { useOrdersSlim } from '@/data'
 import { useWorkspaceWidgets } from '@/stores/workspace-store'
 import { useAuthStore } from '@/stores/auth-store'
@@ -274,21 +275,14 @@ export function ShareOrdersDialog({ channelId, open, onClose, onSuccess }: Share
             </div>
           </div>
           <div className="flex gap-2 justify-end w-full">
-            <button
-              className="btn-morandi-secondary !py-2 !px-4 flex items-center gap-2"
-              onClick={onClose}
-            >
+            <Button variant="outline" onClick={onClose}>
               <X size={16} />
               {COMP_WORKSPACE_LABELS.CANCEL}
-            </button>
-            <button
-              className="btn-morandi-primary !py-2 !px-4 flex items-center gap-2"
-              onClick={handleShare}
-              disabled={selectedOrders.size === 0}
-            >
+            </Button>
+            <Button onClick={handleShare} disabled={selectedOrders.size === 0}>
               <Check size={16} />
               {COMP_WORKSPACE_LABELS.LABEL_903}
-            </button>
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>

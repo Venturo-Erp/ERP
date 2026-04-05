@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react'
 import { EnhancedTable, type TableColumn } from '@/components/ui/enhanced-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, MessageCircle } from 'lucide-react'
+import { Edit2, Trash2, MessageCircle } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Supplier } from '../types'
 import { LABELS } from '../constants/labels'
@@ -197,7 +197,7 @@ export const SuppliersList: React.FC<SuppliersListProps> = ({
                   className="text-morandi-blue hover:bg-morandi-blue/10"
                   title={LABELS.edit}
                 >
-                  <Pencil size={16} />
+                  <Edit2 size={16} />
                 </Button>
               )}
               {onDelete && (

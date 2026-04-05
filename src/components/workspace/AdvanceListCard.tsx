@@ -5,6 +5,7 @@ import { Receipt, Check, Trash2 } from 'lucide-react'
 import { AdvanceList } from '@/stores/workspace-store'
 import { confirm } from '@/lib/ui/alert-dialog'
 import { CurrencyCell } from '@/components/table-cells'
+import { Button } from '@/components/ui/button'
 import { COMP_WORKSPACE_LABELS } from './constants/labels'
 
 interface AdvanceListCardProps {
@@ -157,12 +158,13 @@ export function AdvanceListCard({
                       <span>{COMP_WORKSPACE_LABELS.LABEL_2202}</span>
                     </div>
                   ) : canProcess ? (
-                    <button
+                    <Button
+                      size="xs"
                       onClick={() => onCreatePayment(item.id, item)}
-                      className="btn-morandi-primary !py-1 !px-2 text-xs w-full"
+                      className="w-full text-xs"
                     >
                       {COMP_WORKSPACE_LABELS.LABEL_4772}
-                    </button>
+                    </Button>
                   ) : (
                     <div className="text-xs text-morandi-secondary text-center">
                       {COMP_WORKSPACE_LABELS.待處理}
@@ -179,12 +181,9 @@ export function AdvanceListCard({
               <span className="text-sm text-morandi-secondary">
                 已選擇 {selectedItems.size} 筆項目
               </span>
-              <button
-                onClick={handleBatchPayment}
-                className="btn-morandi-primary !py-1.5 !px-4 text-sm"
-              >
+              <Button size="sm" onClick={handleBatchPayment}>
                 {COMP_WORKSPACE_LABELS.LABEL_6339}
-              </button>
+              </Button>
             </div>
           )}
 

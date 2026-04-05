@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { TableColumn } from '@/components/ui/enhanced-table'
 import { DateCell, CurrencyCell, TextCell, ActionCell } from '@/components/table-cells'
-import { X, FileText } from 'lucide-react'
+import { Trash2, Printer } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   PAYMENT_REQUEST_STATUS_LABELS,
@@ -162,7 +162,7 @@ export function useCurrentOrderColumns({ currentOrder, onRemove }: UseCurrentOrd
             <ActionCell
               actions={[
                 {
-                  icon: X,
+                  icon: Trash2,
                   label: DISBURSEMENT_LABELS.移除,
                   onClick: () => onRemove(typedRow.id),
                   variant: 'danger',
@@ -259,7 +259,7 @@ export function useHistoryColumns({ onPrintPDF, getEmployeeName }: UseHistoryCol
               onClick={() => onPrintPDF(typedRow)}
               className="text-morandi-gold border-morandi-gold hover:bg-morandi-gold/10"
             >
-              <FileText size={14} className="mr-1" />
+              <Printer size={14} className="mr-1" />
               PDF
             </Button>
           )

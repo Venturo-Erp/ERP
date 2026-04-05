@@ -18,50 +18,21 @@ export interface TourDependencyCheck {
  * 檢查旅遊團是否有不可刪除的關聯資料
  */
 export async function checkTourDependencies(tourId: string): Promise<TourDependencyCheck> {
-  // 1. 先取得該團的所有訂單 ID
-  const { data: orderIds } = await supabase
-    .from('orders')
-    .select('id')
-    .eq('tour_id', tourId)
-
-  // 2. 用訂單 ID 查詢真正的團員數
-  let memberCount = 0
-  if (orderIds && orderIds.length > 0) {
-    const ids = orderIds.map(o => o.id)
-    const { count } = await supabase
-      .from('order_members')
-      .select('id', { count: 'exact', head: true })
-      .in('order_id', ids)
-    memberCount = count ?? 0
-  }
-
-  // 3. 檢查其他關聯資料
-  const checks = await Promise.all([
-    // receipt_orders 沒有 tour_id，用 receipts 表（有 tour_id）
+  // 只檢查請款單和收款單，有財務資料時才阻擋刪除
+  const [receipts, payments] = await Promise.all([
     supabase.from('receipts').select('id', { count: 'exact', head: true }).eq('tour_id', tourId),
     supabase
       .from('payment_requests')
       .select('id', { count: 'exact', head: true })
       .eq('tour_id', tourId),
-    supabase.from('pnrs').select('id', { count: 'exact', head: true }).eq('tour_id', tourId),
-    supabase
-      .from('tour_confirmation_sheets')
-      .select('id', { count: 'exact', head: true })
-      .eq('tour_id', tourId),
   ])
 
-  const [receipts, payments, pnrs, confirmationSheets] = checks
   const blockers: string[] = []
 
-  // 4. 只有真正有團員時才加入 blocker
-  if (memberCount > 0) blockers.push(TOUR_DEPENDENCY_LABELS.MEMBERS_COUNT(memberCount))
   if (receipts.count && receipts.count > 0)
     blockers.push(TOUR_DEPENDENCY_LABELS.RECEIPTS_COUNT(receipts.count))
   if (payments.count && payments.count > 0)
     blockers.push(TOUR_DEPENDENCY_LABELS.PAYMENTS_COUNT(payments.count))
-  if (pnrs.count && pnrs.count > 0) blockers.push(TOUR_DEPENDENCY_LABELS.PNRS_COUNT(pnrs.count))
-  if (confirmationSheets.count && confirmationSheets.count > 0)
-    blockers.push(TOUR_DEPENDENCY_LABELS.CONFIRMATION_SHEETS_COUNT(confirmationSheets.count))
 
   return { blockers, hasBlockers: blockers.length > 0 }
 }

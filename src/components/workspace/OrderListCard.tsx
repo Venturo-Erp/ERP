@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Receipt, ChevronDown, ChevronUp, DollarSign, Check } from 'lucide-react'
 import type { Order } from '@/stores/types'
 import { CurrencyCell } from '@/components/table-cells'
+import { Button } from '@/components/ui/button'
 
 // 使用統一的型別定義
 import type { SharedOrderList } from '@/stores/workspace/types'
@@ -182,13 +183,14 @@ export function OrderListCard({
                               <span>{COMP_WORKSPACE_LABELS.PROCESSING_238}</span>
                             </div>
                           ) : canProcess ? (
-                            <button
+                            <Button
+                              size="xs"
                               onClick={() => onCreateReceipt(order.id, order)}
-                              className="btn-morandi-primary !py-1 !px-2 text-xs flex items-center gap-1 mx-auto"
+                              className="text-xs mx-auto"
                             >
                               <DollarSign size={12} />
                               <span>{COMP_WORKSPACE_LABELS.LABEL_1761}</span>
-                            </button>
+                            </Button>
                           ) : (
                             <div className="text-xs text-morandi-secondary">
                               {COMP_WORKSPACE_LABELS.待處理}

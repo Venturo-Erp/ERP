@@ -15,7 +15,6 @@ import { useAuthStore } from '@/stores/auth-store'
 import { TOUR_OPERATIONS_LABELS } from '../constants/labels'
 import {
   checkTourDependencies,
-  checkTourPaidOrders,
   deleteTourEmptyOrders,
   unlinkTourQuotes,
   unlinkTourItineraries,
@@ -231,6 +230,20 @@ export function useTourOperations(params: UseTourOperationsParams) {
 
         const createdTour = await actions.create(tourData)
 
+        // 寫入動態選人欄位指派（field_id → employee_id）
+        if (newTour.role_assignments && !isProposalOrTemplate) {
+          const assignments = Object.entries(newTour.role_assignments)
+            .filter(([, employeeId]) => employeeId)
+            .map(([fieldId, employeeId]) => ({
+              tour_id: createdTour.id,
+              field_id: fieldId,
+              employee_id: employeeId,
+            }))
+          if (assignments.length > 0) {
+            await supabase.from('tour_role_assignments').insert(assignments as never[])
+          }
+        }
+
         // 🔧 核心表架構：直接用 id 更新 usage_count
         if (countryId) {
           incrementCountryUsage(countryId)
@@ -347,41 +360,33 @@ export function useTourOperations(params: UseTourOperationsParams) {
           return { success: false, error: errorMsg }
         }
 
-        // 檢查是否有已付款訂單
-        const { hasPaidOrders, count: paidCount } = await checkTourPaidOrders(tour.id)
-        if (hasPaidOrders) {
-          return {
-            success: false,
-            error: TOUR_OPERATIONS_LABELS.CANNOT_DELETE_PAID_ORDERS(paidCount),
-          }
-        }
+        // 清理關聯資料
+        await supabase.from('tour_itinerary_items').delete().eq('tour_id', tour.id)
+        await Promise.all([
+          supabase.from('calendar_events').delete().eq('related_tour_id', tour.id),
+          supabase.from('channels').delete().eq('tour_id', tour.id),
+          supabase.from('tour_confirmation_sheets').delete().eq('tour_id', tour.id),
+          supabase.from('pnrs').delete().eq('tour_id', tour.id),
+        ])
 
-        // 刪除關聯的行事曆事件
-        const { error: deleteEventsError } = await supabase
-          .from('calendar_events')
-          .delete()
-          .eq('related_tour_id', tour.id)
+        // 斷開報價單和行程表連結
+        await unlinkTourQuotes(tour.id)
+        await unlinkTourItineraries(tour.id)
 
-        if (deleteEventsError) {
-          logger.warn(`刪除旅遊團 ${tour.code} 的行事曆事件失敗:`, deleteEventsError)
-        } else {
-          logger.info(`已刪除旅遊團 ${tour.code} 的行事曆事件`)
-        }
+        // 刪除空訂單
+        await deleteTourEmptyOrders(tour.id)
 
-        // 軟刪除：只標記為已刪除，不真正刪除資料
-        const { error: softDeleteError } = await supabase
+        // 真刪除旅遊團
+        const { error: deleteError } = await supabase
           .from('tours')
-          .update({
-            is_deleted: true,
-            deleted_at: new Date().toISOString(),
-          } as Record<string, unknown>)
+          .delete()
           .eq('id', tour.id)
 
-        if (softDeleteError) {
-          throw softDeleteError
+        if (deleteError) {
+          throw deleteError
         }
 
-        logger.info(`已軟刪除旅遊團 ${tour.code}`)
+        logger.info(`已刪除旅遊團 ${tour.code}`)
         return { success: true }
       } catch (err) {
         const errorMsg =
@@ -410,6 +415,17 @@ export function useTourOperations(params: UseTourOperationsParams) {
           archived: !tour.archived,
           archive_reason: tour.archived ? null : reason,
         } as Partial<Tour>)
+
+        // 同步頻道封存狀態
+        const isArchiving = !tour.archived
+        await supabase
+          .from('channels')
+          .update({
+            is_archived: isArchiving,
+            archived_at: isArchiving ? new Date().toISOString() : null,
+          })
+          .eq('tour_id', tour.id)
+
         logger.info(tour.archived ? '已解除封存旅遊團' : `已封存旅遊團，原因：${reason}`)
       } catch (err) {
         logger.error('封存/解封旅遊團失敗:', err)
@@ -506,6 +522,25 @@ export function useTourOperations(params: UseTourOperationsParams) {
           } catch (orderErr) {
             logger.warn('轉開團建立訂單失敗:', (orderErr as Error).message)
           }
+        }
+
+        // 🔧 自動建立頻道（轉正式團時）
+        const { useAuthStore } = await import('@/stores/auth-store')
+        const user = useAuthStore.getState().user
+        if (user) {
+          const { createTourChannel } = await import('../services/tour-channel.service')
+          const tourForChannel = { id: tourId, code, name: tour.name, workspace_id: workspaceId } as unknown as Tour
+          createTourChannel(tourForChannel, user.id)
+            .then(result => {
+              if (result.success) {
+                logger.log(`[useTourOperations] 轉開團已為 ${code} 建立頻道`)
+              } else {
+                logger.warn(`[useTourOperations] 轉開團建立頻道失敗: ${result.error}`)
+              }
+            })
+            .catch(error => {
+              logger.error('[useTourOperations] 轉開團建立頻道時發生錯誤:', error)
+            })
         }
 
         // 導航到新團號

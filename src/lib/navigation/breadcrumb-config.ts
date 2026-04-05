@@ -79,7 +79,6 @@ export const BREADCRUMB_CONFIG: Record<string, BreadcrumbConfig> = {
   // manifestation removed
   '/hr': { label: '人資管理', parent: '/' },
   '/workspace': { label: '工作區', parent: '/' },
-  '/traveler-chat': { label: '旅客聊天', parent: '/' },
 
   // ========== 設定 ==========
   '/settings': { label: '設定', parent: '/' },

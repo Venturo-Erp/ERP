@@ -37,13 +37,6 @@
   --brand-telegram: #0088cc; /* Telegram 藍 */
   --brand-facebook: #1877F2; /* Facebook 藍 */
 
-  /* 暗色模式 (旅客聊天等) */
-  --dark-bg: #1e1b2e;
-  --dark-bg-elevated: #2d2640;
-  --dark-text: #e0e0e0;
-  --dark-text-muted: #8a8a8a;
-  --dark-border: #3d3654;
-
   /* 行程編輯器主題色 */
   --editor-theme-blue: #4a6fa5;
   --editor-theme-blue-light: #8da399;
@@ -182,13 +175,6 @@
   --color-brand-line-hover: var(--brand-line-hover);
   --color-brand-telegram: var(--brand-telegram);
   --color-brand-facebook: var(--brand-facebook);
-
-  /* 暗色模式 */
-  --color-dark-bg: var(--dark-bg);
-  --color-dark-bg-elevated: var(--dark-bg-elevated);
-  --color-dark-text: var(--dark-text);
-  --color-dark-text-muted: var(--dark-text-muted);
-  --color-dark-border: var(--dark-border);
 
   /* 行程編輯器主題色 */
   --color-editor-theme-blue: var(--editor-theme-blue);

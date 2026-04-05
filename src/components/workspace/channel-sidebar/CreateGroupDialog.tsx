@@ -1,4 +1,5 @@
 import { COMP_WORKSPACE_LABELS } from '../constants/labels'
+import { Button } from '@/components/ui/button'
 /**
  * 新增群組 Dialog
  */
@@ -36,12 +37,12 @@ export function CreateGroupDialog({
           className="input-morandi"
         />
         <div className="flex gap-2 mt-3 justify-end">
-          <button className="btn-morandi-secondary !py-1.5 !px-3 text-sm" onClick={onClose}>
+          <Button variant="outline" size="sm" onClick={onClose}>
             {COMP_WORKSPACE_LABELS.CANCEL}
-          </button>
-          <button className="btn-morandi-primary !py-1.5 !px-3 text-sm" onClick={onCreate}>
+          </Button>
+          <Button size="sm" onClick={onCreate}>
             {COMP_WORKSPACE_LABELS.建立}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

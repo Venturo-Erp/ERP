@@ -214,7 +214,7 @@ function FileItem({ file, isSelected, viewMode, onSelect, onToggleStar }: FileIt
             {LABELS.moveTo}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive">
+          <DropdownMenuItem className="text-morandi-red">
             <Trash2 className="w-4 h-4 mr-2" />
             {LABELS.deleteFolder}
           </DropdownMenuItem>

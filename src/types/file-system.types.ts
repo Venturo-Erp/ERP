@@ -234,6 +234,9 @@ export interface FileSystemState {
 // 分類顯示資訊
 // ============================================================================
 
+// Colors use Morandi palette hex values (morandi-gold, status-info, morandi-green, etc.)
+// Note: hex colors below match the Morandi palette and are used in inline JS styles (backgroundColor)
+// where CSS variables/Tailwind classes are not available.
 export const FILE_CATEGORY_INFO: Record<
   FileCategory,
   { label: string; icon: string; color: string }

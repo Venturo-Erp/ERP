@@ -103,7 +103,7 @@ function FolderNode({ node, level = 0 }: FolderNodeProps) {
               <DropdownMenuItem>{LABELS.newSubfolder}</DropdownMenuItem>
               <DropdownMenuItem>{LABELS.rename}</DropdownMenuItem>
               {!node.is_system && (
-                <DropdownMenuItem className="text-destructive">
+                <DropdownMenuItem className="text-morandi-red">
                   {LABELS.deleteFolder}
                 </DropdownMenuItem>
               )}

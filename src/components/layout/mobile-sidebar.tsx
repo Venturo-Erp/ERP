@@ -65,8 +65,6 @@ const menuItems: MenuItem[] = [
     icon: Building2,
     requiredPermission: 'workspace',
   },
-  // 旅伴通訊已整合到工作頻道中，此路由暫時隱藏
-  // { href: '/traveler-chat', label: '旅伴通訊', icon: MessageCircle, requiredPermission: 'workspace' },
   {
     href: '/todos',
     label: COMP_LAYOUT_LABELS.待辦事項,

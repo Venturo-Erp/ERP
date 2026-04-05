@@ -9,11 +9,6 @@ import { ChatHeader } from './channel-chat/ChatHeader'
 import { ChatMessages } from './channel-chat/ChatMessages'
 import { DialogsContainer } from './channel-chat/DialogsContainer'
 import { ThreadPanel } from './channel-chat/ThreadPanel'
-import { useTravelerMode } from './channel-chat/useTravelerMode'
-import { TravelerMessageList } from './channel-chat/TravelerMessageList'
-import { QuickMessages } from './channel-chat/QuickMessages'
-import { TravelerMessageInput } from './channel-chat/TravelerMessageInput'
-import { cn } from '@/lib/utils'
 import { useEmployeesSlim } from '@/data'
 import { COMP_WORKSPACE_LABELS } from './constants/labels'
 
@@ -104,9 +99,6 @@ export function ChannelChat() {
     handleUpdateChannel,
   } = useChannelChat()
 
-  // 旅伴模式 Hook
-  const travelerMode = useTravelerMode(selectedChannel?.tour_id || null)
-
   // Resolve DM channel display name
   const { items: slimEmployees = [] } = useEmployeesSlim()
   const resolvedChannelName = useMemo(() => {
@@ -151,13 +143,7 @@ export function ChannelChat() {
   }
 
   return (
-    <div
-      className={cn(
-        'h-full flex overflow-hidden',
-        travelerMode.mode === 'traveler' ? 'bg-dark-bg' : 'bg-card'
-      )}
-      data-chat-mode={travelerMode.mode}
-    >
+    <div className="h-full flex overflow-hidden bg-card">
       <ChannelSidebar
         selectedChannelId={selectedChannel?.id || null}
         onSelectChannel={handleChannelSwitch}
@@ -172,47 +158,10 @@ export function ChannelChat() {
                 showMemberSidebar={showMemberSidebar}
                 onToggleMemberSidebar={() => setShowMemberSidebar(!showMemberSidebar)}
                 tourId={selectedChannel.tour_id}
-                // 旅伴模式相關
-                mode={travelerMode.mode}
-                onModeChange={travelerMode.setMode}
-                activeConversationType={travelerMode.activeConversationType}
-                onConversationTypeChange={travelerMode.setActiveConversationType}
-                unreadCount={travelerMode.totalUnreadCount}
-                isConversationOpen={travelerMode.conversation?.is_open}
               />
             }
           >
-            {/* 根據模式顯示不同內容 */}
-            {travelerMode.mode === 'traveler' ? (
-              // 旅伴群組模式
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <TravelerMessageList
-                  messages={travelerMode.messages}
-                  travelers={travelerMode.travelers}
-                  employees={travelerMode.employees}
-                  isLoading={travelerMode.isMessagesLoading}
-                  conversationType={travelerMode.activeConversationType}
-                  isConversationOpen={travelerMode.conversation?.is_open ?? false}
-                  onToggleOpen={async isOpen => {
-                    await travelerMode.toggleConversation(isOpen)
-                  }}
-                  currentUserId={user?.id}
-                />
-                {travelerMode.conversation?.is_open && (
-                  <TravelerMessageInput
-                    onSend={travelerMode.sendMessage}
-                    disabled={!travelerMode.selectedConversationId}
-                    placeholder={
-                      travelerMode.activeConversationType === 'tour_announcement'
-                        ? COMP_WORKSPACE_LABELS.發送公告給所有旅客
-                        : COMP_WORKSPACE_LABELS.回覆客服訊息
-                    }
-                  />
-                )}
-              </div>
-            ) : (
-              // 內部頻道模式
-              <ChatMessages
+            <ChatMessages
                 channel={selectedChannel}
                 isAdmin={isAdmin}
                 messages={currentMessages || []}
@@ -256,7 +205,6 @@ export function ChannelChat() {
                 onCheckTicketStatus={() => setShowCheckTicketStatusDialog(true)}
                 onTourReview={() => setShowTourReviewDialog(true)}
               />
-            )}
           </ChannelTabs>
         ) : (
           <div className="flex-1 flex items-center justify-center">

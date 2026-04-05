@@ -333,23 +333,6 @@ export const generateItineraryRequestSchema = z.object({
 })
 
 // ==========================================
-// 旅客對話
-// ==========================================
-
-export const travelerChatSchema = z.object({
-  action: z.enum(['toggle', 'send_message', 'add_employee', 'mark_read']),
-  tourId: z.string().optional(),
-  isOpen: z.boolean().optional(),
-  sendWelcome: z.boolean().optional(),
-  conversationId: z.string().optional(),
-  content: z.string().optional(),
-  type: z.string().optional(),
-  attachments: z.array(z.unknown()).optional(),
-  employeeId: z.string().optional(),
-  role: z.string().optional(),
-})
-
-// ==========================================
 // AI 景點補充
 // ==========================================
 

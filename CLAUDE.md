@@ -1,5 +1,18 @@
 # CLAUDE.md - Venturo ERP 開發規範
 
+## 🧭 第一步：查地圖，不要盲掃
+
+開始任何任務前，**先讀對應的 map 檔案**，不要用 grep/find 盤查整個專案。
+
+| 要做什麼 | 先讀 |
+|---------|------|
+| 改程式碼 | `docs/CODE_MAP.md` — 檔案位置、架構、模組對照 |
+| 改產品/功能邏輯 | `docs/BUSINESS_MAP.md` — 商業規則、資料流、定價 |
+| 改 UI/文案/品牌 | `docs/BRAND_MAP.md` — 品牌定位、色系、客群 |
+| 找頁面路由 | `docs/SITEMAP.md` 或 `.claude/CLAUDE.md` 的路由表 |
+
+**禁止**：不讀 map 就開始 `grep -rn` 或 `find` 全掃。Map 已經索引好了，比搜尋快 10 倍。
+
 ## 🔧 Build 規則
 
 **Commit 與 Push 前必須通過 type-check**

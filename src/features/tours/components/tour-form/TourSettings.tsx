@@ -1,14 +1,23 @@
 'use client'
 
-import React, { useMemo } from 'react'
+import React, { useMemo, useState, useEffect } from 'react'
 import { Combobox } from '@/components/ui/combobox'
 import { useEmployeesSlim } from '@/data'
 import type { Employee } from '@/stores/types'
 import type { SyncableEntity } from '@/types'
 import type { NewTourData } from '../../types'
-import { TOUR_SETTINGS } from '../../constants'
+import { Loader2 } from 'lucide-react'
+import { logger } from '@/lib/utils/logger'
 
 type EmployeeWithSync = Employee & Partial<SyncableEntity>
+
+interface SelectorField {
+  id: string
+  name: string
+  level: 'tour' | 'order'
+  is_required: boolean
+  roles: { id: string; name: string }[]
+}
 
 interface TourSettingsProps {
   newTour: NewTourData
@@ -17,43 +26,97 @@ interface TourSettingsProps {
 
 export function TourSettings({ newTour, setNewTour }: TourSettingsProps) {
   const { items: employees } = useEmployeesSlim()
+  const [selectorFields, setSelectorFields] = useState<SelectorField[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // 篩選團控人員（目前顯示所有在職員工，未來可加「團控」職務）
-  const controllers = useMemo(() => {
+  // 載入團級選人欄位
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch('/api/job-roles/selector-fields')
+        if (res.ok) {
+          const data: SelectorField[] = await res.json()
+          setSelectorFields(data.filter(f => f.level === 'tour'))
+        }
+      } catch (err) {
+        logger.error('Failed to fetch selector fields:', err)
+      }
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  // 所有在職員工
+  const activeEmployees = useMemo(() => {
     return employees.filter(emp => {
       const empWithSync = emp as EmployeeWithSync
-      const notDeleted = !empWithSync._deleted
-      const isActive = emp.status === 'active'
-      const isNotBot = emp.employee_type !== 'bot'
-      return notDeleted && isActive && isNotBot
+      return !empWithSync._deleted && emp.status === 'active' && emp.employee_type !== 'bot'
     })
   }, [employees])
 
+  // 根據欄位映射的職務過濾員工
+  const getFilteredEmployees = (field: SelectorField) => {
+    if (field.roles.length === 0) return activeEmployees
+
+    const roleIds = new Set(field.roles.map(r => r.id))
+    return activeEmployees.filter(emp => {
+      // 員工的 role_id 在映射的職務裡
+      const empRoleId = (emp as Employee & { job_info?: { role_id?: string } }).job_info?.role_id
+      return empRoleId && roleIds.has(empRoleId)
+    })
+  }
+
+  const handleAssignment = (fieldId: string, employeeId: string) => {
+    setNewTour(prev => ({
+      ...prev,
+      role_assignments: {
+        ...prev.role_assignments,
+        [fieldId]: employeeId || '',
+      },
+    }))
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-4">
+        <Loader2 className="h-4 w-4 animate-spin text-morandi-secondary" />
+      </div>
+    )
+  }
+
+  // 沒有設定任何團級選人欄位
+  if (selectorFields.length === 0) return null
+
   return (
     <div className="space-y-4">
-      {/* 團控人員選擇（選填） */}
-      <div>
-        <label className="block text-sm font-medium text-morandi-primary mb-1">
-          {TOUR_SETTINGS.controller_label}{' '}
-          <span className="text-morandi-secondary font-normal">
-            {TOUR_SETTINGS.controller_optional}
-          </span>
-        </label>
-        <Combobox
-          options={controllers.map(emp => ({
-            value: emp.id,
-            label: `${emp.display_name || emp.english_name} (${emp.employee_number})`,
-          }))}
-          value={newTour.controller_id || ''}
-          onChange={value => setNewTour(prev => ({ ...prev, controller_id: value || undefined }))}
-          placeholder={TOUR_SETTINGS.controller_placeholder}
-          emptyMessage={TOUR_SETTINGS.controller_empty}
-          showSearchIcon={true}
-          showClearButton={true}
-          disablePortal={true}
-        />
-      </div>
-
+      {selectorFields.map(field => {
+        const filtered = getFilteredEmployees(field)
+        return (
+          <div key={field.id}>
+            <label className="block text-sm font-medium text-morandi-primary mb-1">
+              {field.name}{' '}
+              {field.is_required ? (
+                <span className="text-morandi-red">*</span>
+              ) : (
+                <span className="text-morandi-secondary font-normal">(選填)</span>
+              )}
+            </label>
+            <Combobox
+              options={filtered.map(emp => ({
+                value: emp.id,
+                label: `${emp.display_name || emp.english_name} (${emp.employee_number})`,
+              }))}
+              value={newTour.role_assignments?.[field.id] || ''}
+              onChange={value => handleAssignment(field.id, value)}
+              placeholder={`選擇${field.name}...`}
+              emptyMessage={`找不到可選的${field.name}`}
+              showSearchIcon={true}
+              showClearButton={true}
+              disablePortal={true}
+            />
+          </div>
+        )
+      })}
     </div>
   )
 }

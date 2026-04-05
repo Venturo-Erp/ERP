@@ -22,7 +22,7 @@ interface TodoCardProps {
 const PRIORITY_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   urgent: { label: '緊急', color: 'text-morandi-red', bg: 'bg-morandi-red/10' },
   high: { label: '高', color: 'text-status-warning', bg: 'bg-status-warning/10' },
-  medium: { label: '中', color: 'text-yellow-700', bg: 'bg-yellow-100' },
+  medium: { label: '中', color: 'text-morandi-gold', bg: 'bg-morandi-gold/10' },
   low: { label: '低', color: 'text-morandi-secondary', bg: 'bg-morandi-container' },
 }
 

@@ -30,6 +30,7 @@ import { ConfirmDialog } from '@/components/dialog/confirm-dialog'
 import { useConfirmDialog } from '@/hooks/useConfirmDialog'
 import { generateCompanyPaymentRequestCode } from '@/stores/utils/code-generator'
 import { useAuthStore } from '@/stores/auth-store'
+import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 type EmployeeTab = 'active' | 'terminated' | 'bot'
@@ -195,6 +196,25 @@ export default function HRPage() {
     }
 
     try {
+      // 檢查員工是否有關聯資料
+      const [tours, orders, receipts, payments] = await Promise.all([
+        supabase.from('tours').select('id', { count: 'exact', head: true }).or(`created_by.eq.${employee.id},controller_id.eq.${employee.id}`),
+        supabase.from('orders').select('id', { count: 'exact', head: true }).or(`sales_person_id.eq.${employee.id},assistant_id.eq.${employee.id}`),
+        supabase.from('receipts').select('id', { count: 'exact', head: true }).eq('created_by', employee.id),
+        supabase.from('payment_requests').select('id', { count: 'exact', head: true }).eq('created_by', employee.id),
+      ])
+
+      const blockers: string[] = []
+      if (tours.count && tours.count > 0) blockers.push(`${tours.count} 個旅遊團`)
+      if (orders.count && orders.count > 0) blockers.push(`${orders.count} 筆訂單`)
+      if (receipts.count && receipts.count > 0) blockers.push(`${receipts.count} 筆收款單`)
+      if (payments.count && payments.count > 0) blockers.push(`${payments.count} 筆請款單`)
+
+      if (blockers.length > 0) {
+        toast.error(`無法刪除：此員工關聯 ${blockers.join('、')}`)
+        return
+      }
+
       await deleteUser(employee.id)
       if (expandedEmployee === employee.id) {
         setExpandedEmployee(null)

@@ -96,7 +96,7 @@ export function FilePreview({ onBack }: FilePreviewProps) {
           <Button
             variant="outline"
             size="sm"
-            className="w-full justify-start text-destructive hover:text-destructive"
+            className="w-full justify-start text-morandi-red hover:text-morandi-red"
           >
             <Trash2 className="w-4 h-4 mr-2" />
             {LABELS.delete}
@@ -308,7 +308,7 @@ export function FilePreview({ onBack }: FilePreviewProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="w-full text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
           onClick={handleDelete}
         >
           <Trash2 className="w-4 h-4 mr-1" />

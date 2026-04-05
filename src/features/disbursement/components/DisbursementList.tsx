@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react'
 import { EnhancedTable } from '@/components/ui/enhanced-table'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Calendar, FileText, ChevronDown, ChevronRight, Check, ArrowRight } from 'lucide-react'
+import { Calendar, Printer, FileText, ChevronDown, ChevronRight, Check, ArrowRight } from 'lucide-react'
 import { PaymentRequest, DisbursementOrder } from '../types'
 import { PaymentRequestItem } from '@/stores/types'
 import { usePendingColumns, useCurrentOrderColumns, useHistoryColumns } from './DisbursementColumns'
@@ -133,7 +133,7 @@ export function CurrentOrderList({
             onClick={() => onPrintPDF(currentOrder)}
             className="text-morandi-gold border-morandi-gold hover:bg-morandi-gold/10"
           >
-            <FileText size={16} className="mr-2" />
+            <Printer size={16} className="mr-2" />
             {DISBURSEMENT_LABELS.PRINT_1814}
           </Button>
           {currentOrder.status === 'pending' && (

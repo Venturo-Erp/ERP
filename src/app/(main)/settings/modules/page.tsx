@@ -183,7 +183,7 @@ export default function ModulesManagementPage() {
         <div className="p-6">
           <div className="max-w-6xl mx-auto space-y-6">
             {/* 工作空間資訊 */}
-            <Card className="bg-gradient-to-br from-[#F9F8F6] to-[#F9F8F6] border-morandi-container">
+            <Card className="bg-gradient-to-br from-background to-background border-morandi-container">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Package className="h-5 w-5" />
@@ -191,7 +191,7 @@ export default function ModulesManagementPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-lg font-semibold text-[var(--morandi-primary)]">
+                <div className="text-lg font-semibold text-morandi-primary">
                   {currentWorkspace?.name || MODULES_PAGE_LABELS.UNKNOWN_WORKSPACE}
                 </div>
                 <div className="text-sm text-morandi-secondary mt-1">
@@ -272,7 +272,7 @@ export default function ModulesManagementPage() {
                               'font-medium',
                               status.expired
                                 ? 'text-status-danger'
-                                : 'text-[var(--morandi-primary)]'
+                                : 'text-morandi-primary'
                             )}
                           />
                         </div>

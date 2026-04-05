@@ -74,7 +74,7 @@ export function WidgetSettingsDialog({ activeWidgets, onToggleWidget }: WidgetSe
                   onCheckedChange={() => onToggleWidget(widget.id as WidgetType)}
                 />
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#B5986A]/10 to-[#D4C4A8]/10 flex items-center justify-center shadow-sm flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-morandi-gold/10 to-morandi-container/10 flex items-center justify-center shadow-sm flex-shrink-0">
                     <Icon className="h-4 w-4 text-morandi-gold" />
                   </div>
                   <span className="font-medium text-morandi-primary text-sm truncate">

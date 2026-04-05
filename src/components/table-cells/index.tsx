@@ -340,7 +340,7 @@ export function ActionCell({ actions, className }: ActionCellProps) {
             title={action.label}
             disabled={action.disabled}
           >
-            <IconComponent size={14} />
+            <IconComponent size={16} />
           </button>
         )
       })}

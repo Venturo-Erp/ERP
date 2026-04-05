@@ -8,7 +8,7 @@ import { EnhancedTable, type TableColumn } from '@/components/ui/enhanced-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
-  Pencil,
+  Edit2,
   Trash2,
   Eye,
   FileText,
@@ -186,7 +186,7 @@ export const CompanyAssetsList: React.FC<CompanyAssetsListProps> = ({
                 className="text-morandi-blue hover:bg-morandi-blue/10"
                 title={COMPANY_ASSETS_LABELS.編輯}
               >
-                <Pencil size={16} />
+                <Edit2 size={16} />
               </Button>
             )}
             {onDelete && (

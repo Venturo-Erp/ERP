@@ -8,6 +8,7 @@ import { ArrowLeft, Plus } from 'lucide-react'
 import { TodoCard } from '@/components/mobile/cards'
 import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import { logger } from '@/lib/utils/logger'
 import { TODOS_LABELS } from './constants/labels'
 
@@ -166,9 +167,9 @@ export default function MobileTodosPage() {
             </Link>
             <h1 className="text-lg font-bold text-morandi-primary">{TODOS_LABELS.LABEL_9553}</h1>
           </div>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full bg-morandi-gold text-white">
+          <Button size="icon" className="rounded-full">
             <Plus size={20} />
-          </button>
+          </Button>
         </div>
 
         {/* 篩選標籤 */}

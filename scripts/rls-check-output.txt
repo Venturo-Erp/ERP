@@ -1,0 +1,56 @@
+# RLS 安全檢測報告
+檢測時間：2026/4/4 下午10:04:47
+
+## 檢測：workspace_job_roles
+✅ 表存在，記錄數：3
+
+## 檢測：employees
+✅ 表存在，記錄數：9
+
+## 檢測：role_tab_permissions
+✅ 表存在，記錄數：212
+
+## 檢測：workspace_tasks
+✅ 表存在，記錄數：0
+
+## 📊 檢測摘要
+- 檢測表數：4
+- 存在的表：4
+- 發現問題：0 個
+
+## 完整結果（JSON）
+{
+  "tables": [
+    {
+      "name": "workspace_job_roles",
+      "exists": true,
+      "rls": "unknown",
+      "recordCount": 3
+    },
+    {
+      "name": "employees",
+      "exists": true,
+      "rls": "unknown",
+      "recordCount": 9
+    },
+    {
+      "name": "role_tab_permissions",
+      "exists": true,
+      "rls": "likely-enabled",
+      "recordCount": 212
+    },
+    {
+      "name": "workspace_tasks",
+      "exists": true,
+      "rls": "likely-enabled",
+      "recordCount": 0
+    }
+  ],
+  "issues": [],
+  "summary": {
+    "total": 0,
+    "withRLS": 0,
+    "withoutRLS": 0,
+    "missingPolicies": 0
+  }
+}

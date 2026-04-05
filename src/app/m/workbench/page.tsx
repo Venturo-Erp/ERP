@@ -96,7 +96,7 @@ const CATEGORIES = [
         icon: FileText,
         label: WORKBENCH_LABELS.ITEM_CONTRACTS,
         href: '/contracts',
-        color: 'bg-slate-100 text-slate-600',
+        color: 'bg-morandi-container text-morandi-secondary',
       },
       {
         icon: FileCheck,
@@ -121,8 +121,6 @@ const CATEGORIES = [
         href: '/m/visas',
         color: 'bg-morandi-gold/10 text-morandi-gold',
       },
-      // 旅伴通訊已整合到工作頻道中
-      // { icon: MessageCircle, label: '通訊', href: '/traveler-chat', color: 'bg-pink-100 text-pink-600' },
     ],
   },
   {

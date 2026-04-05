@@ -1,0 +1,116 @@
+# RLS 安全檢測報告（最終版）
+**檢測時間：** 2026/4/4 下午10:06:56
+
+**檢測範圍：** 核心資料表
+
+---
+
+
+### workspace_job_roles
+
+✅ 表存在（3 筆記錄）
+✅ 有 `workspace_id` 欄位
+⚠️ **RLS 狀態不明**（查詢成功但無資料，可能已啟用或只是沒資料）
+
+### employees
+
+✅ 表存在（9 筆記錄）
+✅ 有 `workspace_id` 欄位
+⚠️ **RLS 狀態不明**（查詢成功但無資料，可能已啟用或只是沒資料）
+
+### role_tab_permissions
+
+✅ 表存在（212 筆記錄）
+❌ **無 `workspace_id` 欄位**
+
+### workspace_tasks
+
+✅ 表存在（0 筆記錄）
+
+---
+
+## 📊 檢測摘要
+
+- 檢測表數：4
+- 存在的表：4
+- 有 workspace_id：2
+- RLS 已啟用：0
+- RLS 未啟用：0
+- 狀態不明：2
+- 發現問題：1 個（嚴重：0）
+
+**風險等級：** MEDIUM
+
+## ⚠️ 發現的問題
+
+### role_tab_permissions
+
+- **[MEDIUM]** 表沒有 workspace_id 欄位，無法進行租戶隔離
+
+## 🔧 修復建議
+
+### role_tab_permissions
+
+#### 1. add-workspace-id
+**優先級：** MEDIUM
+
+```sql
+ALTER TABLE role_tab_permissions ADD COLUMN workspace_id UUID REFERENCES workspaces(id);
+```
+
+
+---
+
+## 📋 詳細結果（JSON）
+
+```json
+[
+  {
+    "table": "workspace_job_roles",
+    "exists": true,
+    "hasWorkspaceId": true,
+    "rlsEnabled": "unknown",
+    "policies": [],
+    "issues": [],
+    "recommendations": []
+  },
+  {
+    "table": "employees",
+    "exists": true,
+    "hasWorkspaceId": true,
+    "rlsEnabled": "unknown",
+    "policies": [],
+    "issues": [],
+    "recommendations": []
+  },
+  {
+    "table": "role_tab_permissions",
+    "exists": true,
+    "hasWorkspaceId": false,
+    "rlsEnabled": null,
+    "policies": [],
+    "issues": [
+      {
+        "severity": "medium",
+        "message": "表沒有 workspace_id 欄位，無法進行租戶隔離"
+      }
+    ],
+    "recommendations": [
+      {
+        "priority": "medium",
+        "action": "add-workspace-id",
+        "sql": "ALTER TABLE role_tab_permissions ADD COLUMN workspace_id UUID REFERENCES workspaces(id);"
+      }
+    ]
+  },
+  {
+    "table": "workspace_tasks",
+    "exists": true,
+    "hasWorkspaceId": false,
+    "rlsEnabled": null,
+    "policies": [],
+    "issues": [],
+    "recommendations": []
+  }
+]
+```

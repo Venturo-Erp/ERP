@@ -34,7 +34,9 @@ export function usePaymentForm() {
         .select('id, code, name')
         .eq('workspace_id', workspaceId)
         .or('tour_type.is.null,tour_type.eq.official')
-        .eq('archived', false)
+        .or('archived.is.null,archived.eq.false')
+        .or('is_deleted.is.null,is_deleted.eq.false')
+        .is('deleted_at', null)
         .order('departure_date', { ascending: false })
         .limit(50)
       

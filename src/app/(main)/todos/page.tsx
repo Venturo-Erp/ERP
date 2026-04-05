@@ -297,7 +297,7 @@ export default function TodosPage() {
         )
       case 2:
         return cn(
-          'bg-gradient-to-r from-status-info-bg via-sky-50/30 to-status-info-bg',
+          'bg-gradient-to-r from-status-info-bg via-morandi-container/30 to-status-info-bg',
           'hover:from-status-info-bg hover:via-sky-100/40 hover:to-status-info-bg',
           opacity
         )

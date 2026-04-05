@@ -13,8 +13,8 @@ export function CalendarStyles() {
       }
 
       .fc .fc-button {
-        background-color: #b8a99a;
-        border-color: #b8a99a;
+        background-color: var(--morandi-muted);
+        border-color: var(--morandi-muted);
         color: white;
         padding: 0.5rem 1rem;
         font-size: 0.875rem;
@@ -23,44 +23,44 @@ export function CalendarStyles() {
       }
 
       .fc .fc-button:hover {
-        background-color: #9e8c7a;
-        border-color: #9e8c7a;
+        background-color: var(--morandi-gold-hover);
+        border-color: var(--morandi-gold-hover);
       }
 
       .fc .fc-button:disabled {
-        background-color: #e8e4e0;
-        border-color: #e8e4e0;
-        color: #8c8c8c;
+        background-color: var(--morandi-container);
+        border-color: var(--morandi-container);
+        color: var(--morandi-secondary);
         opacity: 0.6;
       }
 
       .fc .fc-button-primary:not(:disabled).fc-button-active {
-        background-color: #9e8c7a;
-        border-color: #9e8c7a;
+        background-color: var(--morandi-gold-hover);
+        border-color: var(--morandi-gold-hover);
       }
 
       /* 星期標題列 */
       .fc .fc-col-header-cell {
-        background-color: rgba(249, 248, 246, 0.4);
+        background-color: color-mix(in srgb, var(--background) 40%, transparent);
         padding: 0.75rem 1rem;
         font-weight: 700;
         font-size: 11px;
         letter-spacing: 0.1em;
         text-transform: uppercase;
-        color: rgba(51, 51, 51, 0.6);
-        border-color: #e8e4e0;
+        color: color-mix(in srgb, var(--morandi-primary) 60%, transparent);
+        border-color: var(--morandi-container);
         border-bottom-width: 1px;
       }
 
       /* 周末標題特殊顏色 */
       .fc .fc-col-header-cell.fc-day-sat,
       .fc .fc-col-header-cell.fc-day-sun {
-        color: #b8a99a;
+        color: var(--morandi-muted);
       }
 
       /* 日曆格子 */
       .fc .fc-daygrid-day {
-        border-color: #e8e4e0;
+        border-color: var(--morandi-container);
         transition: background-color 0.2s;
       }
 
@@ -72,13 +72,13 @@ export function CalendarStyles() {
 
       .fc-theme-standard td,
       .fc-theme-standard th {
-        border-color: #e8e4e0;
+        border-color: var(--morandi-container);
       }
 
       .fc-theme-standard .fc-scrollgrid {
-        border-color: #e8e4e0;
-        border-top: 1px solid #e8e4e0;
-        border-left: 1px solid #e8e4e0;
+        border-color: var(--morandi-container);
+        border-top: 1px solid var(--morandi-container);
+        border-left: 1px solid var(--morandi-container);
       }
 
       /* 日期數字 */
@@ -98,29 +98,29 @@ export function CalendarStyles() {
       }
 
       .fc .fc-daygrid-day-number:hover {
-        background-color: #f9f8f6;
+        background-color: var(--background);
       }
 
       /* 周末日期顏色 */
       .fc .fc-day-sat .fc-daygrid-day-number,
       .fc .fc-day-sun .fc-daygrid-day-number {
-        color: #b8a99a;
+        color: var(--morandi-muted);
         font-weight: 600;
       }
 
       /* 周末格子背景 */
       .fc .fc-day-sat,
       .fc .fc-day-sun {
-        background-color: rgba(249, 248, 246, 0.5);
+        background-color: color-mix(in srgb, var(--background) 50%, transparent);
       }
 
       /* 今天 */
       .fc .fc-day-today {
-        background-color: rgba(184, 169, 154, 0.05) !important;
+        background-color: color-mix(in srgb, var(--morandi-muted) 5%, transparent) !important;
       }
 
       .fc .fc-day-today .fc-daygrid-day-number {
-        background-color: #b8a99a;
+        background-color: var(--morandi-muted);
         color: white;
         width: 28px;
         height: 28px;
@@ -129,12 +129,12 @@ export function CalendarStyles() {
         justify-content: center;
         border-radius: 6px;
         font-weight: 700;
-        box-shadow: 0 2px 4px rgba(184, 169, 154, 0.3);
+        box-shadow: 0 2px 4px color-mix(in srgb, var(--morandi-muted) 30%, transparent);
       }
 
       /* Hover 效果 */
       .fc .fc-daygrid-day:hover {
-        background-color: rgba(249, 248, 246, 0.8);
+        background-color: color-mix(in srgb, var(--background) 80%, transparent);
         cursor: pointer;
       }
 
@@ -152,10 +152,10 @@ export function CalendarStyles() {
         padding: 0 4px !important;
         border-radius: 0 4px 4px 0;
         font-weight: 500;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 1px 3px color-mix(in srgb, var(--morandi-primary) 5%, transparent);
         transition: all 0.2s ease;
         margin: 0 2px !important;
-        background-color: rgba(184, 169, 154, 0.1);
+        background-color: color-mix(in srgb, var(--morandi-muted) 10%, transparent);
         color: var(--morandi-primary);
       }
 
@@ -175,8 +175,8 @@ export function CalendarStyles() {
       }
 
       .fc-event:hover {
-        background-color: rgba(184, 169, 154, 0.2);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background-color: color-mix(in srgb, var(--morandi-muted) 20%, transparent);
+        box-shadow: 0 2px 4px color-mix(in srgb, var(--morandi-primary) 10%, transparent);
       }
 
       .fc-event-title {
@@ -188,7 +188,7 @@ export function CalendarStyles() {
 
       /* 更多連結 */
       .fc-daygrid-more-link {
-        color: #b8a99a !important;
+        color: var(--morandi-muted) !important;
         font-weight: 600 !important;
         text-decoration: none !important;
         padding: 2px 6px !important;
@@ -197,12 +197,12 @@ export function CalendarStyles() {
         display: inline-block !important;
         margin-top: 4px !important;
         font-size: 10px !important;
-        background-color: rgba(184, 169, 154, 0.1) !important;
+        background-color: color-mix(in srgb, var(--morandi-muted) 10%, transparent) !important;
       }
 
       .fc-daygrid-more-link:hover {
-        background-color: rgba(184, 169, 154, 0.2) !important;
-        color: #9e8c7a !important;
+        background-color: color-mix(in srgb, var(--morandi-muted) 20%, transparent) !important;
+        color: var(--morandi-gold-hover) !important;
       }
 
       .fc-popover {
@@ -221,28 +221,28 @@ export function CalendarStyles() {
 
       /* 事件顏色類型 */
       .fc-event[data-event-type='tour'] {
-        border-left-color: #8fa9c2;
-        background-color: rgba(143, 169, 194, 0.2);
+        border-left-color: var(--status-info);
+        background-color: color-mix(in srgb, var(--status-info) 20%, transparent);
       }
 
       .fc-event[data-event-type='meeting'] {
-        border-left-color: #b8a99a;
-        background-color: rgba(184, 169, 154, 0.1);
+        border-left-color: var(--morandi-muted);
+        background-color: color-mix(in srgb, var(--morandi-muted) 10%, transparent);
       }
 
       .fc-event[data-event-type='deadline'] {
-        border-left-color: #c77d7d;
-        background-color: rgba(199, 125, 125, 0.1);
+        border-left-color: var(--morandi-red);
+        background-color: color-mix(in srgb, var(--morandi-red) 10%, transparent);
       }
 
       .fc-event[data-event-type='holiday'] {
-        border-left-color: #8fa38f;
-        background-color: rgba(143, 163, 143, 0.2);
+        border-left-color: var(--morandi-green);
+        background-color: color-mix(in srgb, var(--morandi-green) 20%, transparent);
       }
 
       .fc-event[data-event-type='task'] {
-        border-left-color: #d4b483;
-        background-color: rgba(212, 180, 131, 0.1);
+        border-left-color: var(--morandi-gold);
+        background-color: color-mix(in srgb, var(--morandi-gold) 10%, transparent);
       }
 
       /* 生日事件特殊樣式 - 圓形點點 */
@@ -294,18 +294,18 @@ export function CalendarStyles() {
       /* 時間軸樣式 */
       .fc .fc-timegrid-slot {
         height: 40px;
-        border-color: #e8e4e0;
+        border-color: var(--morandi-container);
       }
 
       .fc .fc-timegrid-slot-label {
         font-size: 11px;
-        color: rgba(51, 51, 51, 0.5);
+        color: color-mix(in srgb, var(--morandi-primary) 50%, transparent);
         font-weight: 500;
         padding: 0 8px;
       }
 
       .fc .fc-timegrid-slot-lane {
-        border-color: #e8e4e0;
+        border-color: var(--morandi-container);
       }
 
       /* 時間軸事件 */
@@ -313,7 +313,7 @@ export function CalendarStyles() {
         border-radius: 4px;
         border: none;
         border-left: 3px solid currentColor;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 3px color-mix(in srgb, var(--morandi-primary) 10%, transparent);
         font-size: 11px;
         padding: 2px 4px;
       }
@@ -336,29 +336,29 @@ export function CalendarStyles() {
       /* 全天事件區塊 */
       .fc .fc-timegrid-divider {
         padding: 0;
-        border-color: #e8e4e0;
+        border-color: var(--morandi-container);
       }
 
       .fc .fc-daygrid-body {
-        border-color: #e8e4e0;
+        border-color: var(--morandi-container);
       }
 
       /* 現在時間指示線 */
       .fc .fc-timegrid-now-indicator-line {
-        border-color: #b8a99a;
+        border-color: var(--morandi-muted);
         border-width: 2px;
       }
 
       .fc .fc-timegrid-now-indicator-arrow {
-        border-color: #b8a99a;
+        border-color: var(--morandi-muted);
         border-top-color: transparent;
         border-bottom-color: transparent;
       }
 
       /* 週視圖日期標題 */
       .fc .fc-timegrid-axis {
-        border-color: #e8e4e0;
-        background-color: rgba(249, 248, 246, 0.4);
+        border-color: var(--morandi-container);
+        background-color: color-mix(in srgb, var(--background) 40%, transparent);
       }
 
       /* 週/日視圖：今天不需要特殊背景，表頭已經很清楚 */
@@ -376,21 +376,21 @@ export function CalendarStyles() {
       /* 週/日視圖：今天的表頭用金色文字標記 */
       .fc-timeGridWeek-view .fc-col-header-cell.fc-day-today a,
       .fc-timeGridDay-view .fc-col-header-cell.fc-day-today a {
-        color: #b8a99a;
+        color: var(--morandi-muted);
         font-weight: 700;
       }
 
       /* 拖曳時的樣式 */
       .fc-event.fc-event-dragging {
         opacity: 0.8;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--morandi-primary) 15%, transparent);
         transform: scale(1.02);
       }
 
       /* 拖曳佔位符 */
       .fc-event.fc-event-mirror {
         opacity: 0.5;
-        background-color: #b8a99a !important;
+        background-color: var(--morandi-muted) !important;
       }
 
       /* 可拖曳事件的游標 */

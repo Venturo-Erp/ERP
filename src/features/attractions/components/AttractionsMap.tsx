@@ -29,24 +29,19 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c
 }
 
-// Morandi 配色
+// Morandi 調色盤 — Leaflet 地圖標記需要實際 hex 值，無法使用 CSS 變數
+const CATEGORY_COLORS: Record<string, string> = {
+  '神社寺廟': '#c08374',   // morandi-red
+  '自然景觀': '#9fa68f',   // morandi-green
+  '歷史古蹟': '#c9aa7c',   // morandi-gold
+  '主題樂園': '#8b8680',   // morandi-secondary
+  '美術館': '#8ba4b4',     // status-info
+  '購物': '#d4a574',       // status-warning
+}
+const CATEGORY_COLOR_DEFAULT = '#b8b2aa' // morandi-muted
+
 function getCategoryColor(category?: string): string {
-  switch (category) {
-    case '神社寺廟':
-      return '#E8C4C4'
-    case '自然景觀':
-      return '#A8BFA6'
-    case '歷史古蹟':
-      return '#D4C4A8'
-    case '主題樂園':
-      return '#C4B8E0'
-    case '美術館':
-      return '#A5BCCD'
-    case '購物':
-      return '#E8D4C4'
-    default:
-      return '#CFB9A5'
-  }
+  return (category && CATEGORY_COLORS[category]) || CATEGORY_COLOR_DEFAULT
 }
 
 export function AttractionsMap({
@@ -139,8 +134,8 @@ export function AttractionsMap({
       // 搜尋範圍圓圈（虛線）- 跟著地圖中心移動
       const searchCircle = L.circle([selectedAttraction.latitude!, selectedAttraction.longitude!], {
         radius: radiusKm * 1000,
-        color: '#94A3B8',
-        fillColor: '#94A3B8',
+        color: '#b8b2aa',
+        fillColor: '#b8b2aa',
         fillOpacity: 0.08,
         weight: 2,
         dashArray: '8, 8',
@@ -174,7 +169,7 @@ export function AttractionsMap({
 
       // 創建自訂標記（圓角方形 + 圖片）
       const createMarkerIcon = (attraction: Attraction, isMain: boolean) => {
-        const color = isMain ? '#dc2626' : getCategoryColor(attraction.category)
+        const color = isMain ? '#c08374' : getCategoryColor(attraction.category) // morandi-red for main marker
         const size = isMain ? 44 : 36
         const imgSize = isMain ? 36 : 28
         const img = attraction.thumbnail || ''
@@ -318,9 +313,9 @@ export function AttractionsMap({
           `
           <div style="min-width: 180px; padding: 4px;">
             ${attraction.thumbnail ? `<img alt="" src="${attraction.thumbnail}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />` : ''}
-            <div style="font-weight: 600; font-size: 14px; color: #334155;">${attraction.name}</div>
-            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">${attraction.category || ''} · ${distance} km</div>
-            ${attraction.description ? `<div style="font-size: 11px; color: #94a3b8; margin-top: 6px; line-height: 1.4;">${attraction.description.slice(0, 80)}${attraction.description.length > 80 ? '...' : ''}</div>` : ''}
+            <div style="font-weight: 600; font-size: 14px; color: #3a3633;">${attraction.name}</div>
+            <div style="font-size: 12px; color: #8b8680; margin-top: 4px;">${attraction.category || ''} · ${distance} km</div>
+            ${attraction.description ? `<div style="font-size: 11px; color: #b8b2aa; margin-top: 6px; line-height: 1.4;">${attraction.description.slice(0, 80)}${attraction.description.length > 80 ? '...' : ''}</div>` : ''}
           </div>
         `,
           { closeButton: true, className: 'attraction-popup' }

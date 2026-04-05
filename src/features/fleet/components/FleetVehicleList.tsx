@@ -7,7 +7,7 @@ import React from 'react'
 import { EnhancedTable, type TableColumn } from '@/components/ui/enhanced-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, AlertTriangle, Calendar } from 'lucide-react'
+import { Edit2, Trash2, AlertTriangle, Calendar } from 'lucide-react'
 import type { FleetVehicle, FleetDriver, VehicleType, VehicleStatus } from '@/types/fleet.types'
 import { getVehicleTypeLabel, getDaysUntilDue, getDueStatusColor } from '@/types/fleet.types'
 import { formatDate } from '@/lib/utils/format-date'
@@ -190,7 +190,7 @@ export const FleetVehicleList: React.FC<FleetVehicleListProps> = ({
                 className="text-morandi-gold hover:bg-morandi-gold/10"
                 title={FLEET_LABELS.EDIT}
               >
-                <Pencil size={16} />
+                <Edit2 size={16} />
               </Button>
             )}
             {onDelete && (

@@ -17,9 +17,32 @@ export interface ModuleDefinition {
   tabs: ModuleTab[]
 }
 
-// 模組與分頁定義
+// 模組與分頁定義（順序與側邊欄一致）
 export const MODULES: ModuleDefinition[] = [
-  // ===== 核心模組（有分頁） =====
+  {
+    code: 'dashboard',
+    name: '首頁',
+    description: '儀表板總覽',
+    tabs: [],
+  },
+  {
+    code: 'calendar',
+    name: '行事曆',
+    description: '出團日曆',
+    tabs: [],
+  },
+  {
+    code: 'workspace',
+    name: '頻道',
+    description: '團隊頻道',
+    tabs: [],
+  },
+  {
+    code: 'todos',
+    name: '待辦事項',
+    description: '任務管理',
+    tabs: [],
+  },
   {
     code: 'tours',
     name: '旅遊團管理',
@@ -49,6 +72,12 @@ export const MODULES: ModuleDefinition[] = [
       { code: 'payments', name: '付款記錄', description: '訂單收款狀態' },
       { code: 'travelers', name: '旅客資料', description: '旅客護照、聯絡資訊' },
     ],
+  },
+  {
+    code: 'itinerary',
+    name: '行程管理',
+    description: '行程編輯與範本',
+    tabs: [],
   },
   {
     code: 'finance',
@@ -81,6 +110,24 @@ export const MODULES: ModuleDefinition[] = [
     ],
   },
   {
+    code: 'visas',
+    name: '簽證管理',
+    description: '簽證申請與追蹤',
+    tabs: [],
+  },
+  {
+    code: 'design',
+    name: '設計工具',
+    description: '手冊、行銷素材',
+    tabs: [],
+  },
+  {
+    code: 'office',
+    name: '文件管理',
+    description: '文件編輯與儲存',
+    tabs: [],
+  },
+  {
     code: 'hr',
     name: '人資管理',
     description: '員工、出勤、薪資',
@@ -104,37 +151,6 @@ export const MODULES: ModuleDefinition[] = [
       { code: 'archive', name: '封存管理', description: '封存資料查閱' },
     ],
   },
-  // 報價單已整合到旅遊團管理中，不再獨立
-  // {
-  //   code: 'quotes',
-  //   name: '報價單',
-  //   description: '報價製作與管理',
-  //   tabs: [...],
-  // },
-  {
-    code: 'itinerary',
-    name: '行程管理',
-    description: '行程編輯與範本',
-    tabs: [], // 無分頁，只有行程列表
-  },
-  {
-    code: 'visas',
-    name: '簽證管理',
-    description: '簽證申請與追蹤',
-    tabs: [], // 無分頁
-  },
-  {
-    code: 'design',
-    name: '設計工具',
-    description: '手冊、行銷素材',
-    tabs: [], // 無分頁
-  },
-  {
-    code: 'office',
-    name: '文件管理',
-    description: '文件編輯與儲存',
-    tabs: [], // 無分頁，只有文件列表
-  },
   {
     code: 'settings',
     name: '系統設定',
@@ -144,32 +160,6 @@ export const MODULES: ModuleDefinition[] = [
       { code: 'company', name: '公司設定', description: '公司名稱、Logo、聯絡方式' },
       { code: 'bot-line', name: 'LINE Bot', description: 'LINE 連線與群組管理' },
     ],
-  },
-
-  // ===== 簡單模組（無分頁） =====
-  {
-    code: 'dashboard',
-    name: '首頁',
-    description: '儀表板總覽',
-    tabs: [],
-  },
-  {
-    code: 'calendar',
-    name: '行事曆',
-    description: '出團日曆',
-    tabs: [],
-  },
-  {
-    code: 'todos',
-    name: '待辦事項',
-    description: '任務管理',
-    tabs: [],
-  },
-  {
-    code: 'workspace',
-    name: '工作空間',
-    description: '團隊頻道',
-    tabs: [],
   },
 ]
 

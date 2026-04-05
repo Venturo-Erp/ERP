@@ -222,7 +222,7 @@ export function ChannelList({
             />
           )}
 
-          {/* 同事區塊（按辦公室分組） */}
+          {/* 同事 */}
           <ColleaguesSection
             isExpanded={expandedSections.colleagues !== false}
             onToggleExpanded={() => onToggleExpanded('colleagues', !expandedSections.colleagues)}

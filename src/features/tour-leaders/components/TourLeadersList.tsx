@@ -7,7 +7,7 @@ import React from 'react'
 import { EnhancedTable, type TableColumn } from '@/components/ui/enhanced-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Pencil, Trash2, Calendar } from 'lucide-react'
+import { Edit2, Trash2, Calendar } from 'lucide-react'
 import type { TourLeader } from '@/types/tour-leader.types'
 import { TOUR_LEADERS_LABELS } from '../constants/labels'
 
@@ -166,7 +166,7 @@ export const TourLeadersList: React.FC<TourLeadersListProps> = ({
                 className="text-morandi-blue hover:bg-morandi-blue/10"
                 title={TOUR_LEADERS_LABELS.EDIT}
               >
-                <Pencil size={16} />
+                <Edit2 size={16} />
               </Button>
             )}
             {onDelete && (

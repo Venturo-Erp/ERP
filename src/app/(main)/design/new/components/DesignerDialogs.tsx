@@ -198,7 +198,7 @@ export function createBlockInsertHandler(canvas: fabric.Canvas | null) {
           top: shapeEl.y + offset,
           width: shapeEl.width,
           height: shapeEl.height,
-          fill: shapeEl.fill || '#ccc',
+          fill: shapeEl.fill || 'var(--morandi-container)',
           stroke: shapeEl.stroke,
           strokeWidth: shapeEl.strokeWidth || 0,
         })
@@ -211,7 +211,7 @@ export function createBlockInsertHandler(canvas: fabric.Canvas | null) {
           top: imgEl.y + offset,
           width: imgEl.width,
           height: imgEl.height,
-          fill: '#e8e4df',
+          fill: 'var(--morandi-container)',
           stroke: 'var(--morandi-gold)',
           strokeWidth: 1,
           rx: 4,

@@ -231,7 +231,10 @@ export function AddRequestDialog({
 
   // 過濾掉已封存和特殊團
   const activeTours = useMemo(() => {
-    return tours.filter(tour => !tour.archived && tour.status !== ADD_REQUEST_DIALOG_LABELS.特殊團)
+    return tours.filter(tour => {
+      const t = tour as unknown as { is_deleted?: boolean; deleted_at?: string | null }
+      return !tour.archived && !t.is_deleted && !t.deleted_at && tour.status !== ADD_REQUEST_DIALOG_LABELS.特殊團
+    })
   }, [tours])
 
   // 批量請款：計算值

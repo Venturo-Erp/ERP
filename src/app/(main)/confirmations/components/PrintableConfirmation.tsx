@@ -422,9 +422,9 @@ const FlightConfirmationContent: React.FC<{ data: FlightData }> = ({ data }) => 
           <thead>
             <tr
               style={{
-                borderTop: '2px dashed #B8A99A',
-                borderBottom: '2px dashed #B8A99A',
-                backgroundColor: '#FFFBF0',
+                borderTop: '2px dashed var(--morandi-muted)',
+                borderBottom: '2px dashed var(--morandi-muted)',
+                backgroundColor: 'var(--background)',
               }}
             >
               <th
@@ -491,7 +491,7 @@ const FlightConfirmationContent: React.FC<{ data: FlightData }> = ({ data }) => 
                 <tr
                   style={{
                     borderBottom:
-                      idx === (data.segments?.length || 0) - 1 ? 'none' : '1px dashed #B8A99A',
+                      idx === (data.segments?.length || 0) - 1 ? 'none' : '1px dashed var(--morandi-muted)',
                   }}
                 >
                   <td className="py-1.5 pb-3"></td>

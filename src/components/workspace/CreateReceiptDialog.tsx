@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
 import { createReceipt } from '@/data'
 import { useAuthStore } from '@/stores'
 import type { Receipt } from '@/types/receipt.types'
@@ -208,21 +209,14 @@ export function CreateReceiptDialog({ order, open, onClose, onSuccess }: CreateR
 
         {/* 底部操作按鈕 */}
         <DialogFooter className="pt-3 border-t border-morandi-gold/20">
-          <button
-            className="btn-morandi-secondary !py-2 !px-4 flex items-center gap-2"
-            onClick={onClose}
-          >
+          <Button variant="outline" onClick={onClose}>
             <X size={16} />
             {COMP_WORKSPACE_LABELS.CANCEL}
-          </button>
-          <button
-            className="btn-morandi-primary !py-2 !px-4 flex items-center gap-2"
-            onClick={handleCreate}
-            disabled={!amount || parseFloat(amount) <= 0}
-          >
+          </Button>
+          <Button onClick={handleCreate} disabled={!amount || parseFloat(amount) <= 0}>
             <Save size={16} />
             {COMP_WORKSPACE_LABELS.LABEL_1761}
-          </button>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

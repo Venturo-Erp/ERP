@@ -100,7 +100,7 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
                 className="grid grid-cols-12 gap-2 py-1 pb-3"
                 style={{
                   borderBottom:
-                    idx < (data.segments?.length || 0) - 1 ? '1px dashed #d4af37' : 'none',
+                    idx < (data.segments?.length || 0) - 1 ? '1px dashed var(--morandi-gold)' : 'none',
                 }}
               >
                 <div className="col-span-2"></div>

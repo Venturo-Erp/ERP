@@ -298,7 +298,7 @@ function FinderItemCard({
           )}
           {onDelete && (
             <DropdownMenuItem
-              className="text-destructive"
+              className="text-morandi-red"
               onClick={e => {
                 e.stopPropagation()
                 onDelete()
@@ -619,7 +619,7 @@ export function FinderView({
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-destructive"
+                className="text-morandi-red"
                 onClick={() => onDelete(Array.from(selectedIds))}
               >
                 <Trash2 size={14} className="mr-1" />

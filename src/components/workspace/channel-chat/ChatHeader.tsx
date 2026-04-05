@@ -4,18 +4,13 @@ import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Badge } from '@/components/ui/badge'
 import {
   Users,
   MapPin,
   CircleDollarSign,
   ExternalLink,
-  MessageCircle,
-  Megaphone,
 } from 'lucide-react'
 import { useQuotes } from '@/data'
-import { cn } from '@/lib/utils'
-import type { ChatMode, TravelerConversationType } from './useTravelerMode'
 import { stripHtml } from '@/lib/utils/string-utils'
 import { COMP_WORKSPACE_LABELS } from '../constants/labels'
 
@@ -23,25 +18,12 @@ interface ChatHeaderProps {
   showMemberSidebar: boolean
   onToggleMemberSidebar: () => void
   tourId?: string | null
-  // 旅伴模式相關
-  mode?: ChatMode
-  onModeChange?: (mode: ChatMode) => void
-  activeConversationType?: TravelerConversationType
-  onConversationTypeChange?: (type: TravelerConversationType) => void
-  unreadCount?: number
-  isConversationOpen?: boolean
 }
 
 export function ChatHeader({
   showMemberSidebar,
   onToggleMemberSidebar,
   tourId,
-  mode = 'internal',
-  onModeChange,
-  activeConversationType = 'tour_announcement',
-  onConversationTypeChange,
-  unreadCount = 0,
-  isConversationOpen = false,
 }: ChatHeaderProps) {
   const router = useRouter()
   const { items: quotes } = useQuotes()
@@ -54,81 +36,6 @@ export function ChatHeader({
 
   return (
     <div className="flex items-center gap-1">
-      {/* 模式切換按鈕 - 只在有 tourId 時顯示 */}
-      {tourId && onModeChange && (
-        <div className="flex items-center gap-1 mr-2 border-r border-border pr-2">
-          <Button
-            variant={mode === 'internal' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => onModeChange('internal')}
-            className={cn(
-              'h-7 px-2 text-xs',
-              mode === 'internal'
-                ? 'bg-morandi-gold hover:bg-morandi-gold-hover text-white'
-                : 'text-morandi-secondary hover:text-morandi-primary'
-            )}
-          >
-            {COMP_WORKSPACE_LABELS.LABEL_3084}
-          </Button>
-          <Button
-            variant={mode === 'traveler' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => onModeChange('traveler')}
-            className={cn(
-              'h-7 px-2 text-xs relative',
-              mode === 'traveler'
-                ? 'bg-violet-500 hover:bg-violet-600 text-white'
-                : 'text-morandi-secondary hover:text-violet-500 hover:bg-violet-50'
-            )}
-          >
-            <Users size={12} className="mr-1" />
-            {COMP_WORKSPACE_LABELS.LABEL_6006}
-            {unreadCount > 0 && mode !== 'traveler' && (
-              <Badge
-                variant="destructive"
-                className="absolute -top-1.5 -right-1.5 h-4 min-w-4 px-1 text-[10px]"
-              >
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </Badge>
-            )}
-          </Button>
-        </div>
-      )}
-
-      {/* 旅伴模式下的對話類型切換 */}
-      {mode === 'traveler' && tourId && onConversationTypeChange && (
-        <div className="flex items-center gap-1 mr-2 border-r border-violet-500/30 pr-2">
-          <Button
-            variant={activeConversationType === 'tour_announcement' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => onConversationTypeChange('tour_announcement')}
-            className={cn(
-              'h-7 px-2 text-xs',
-              activeConversationType === 'tour_announcement'
-                ? 'bg-violet-500/20 text-violet-200 hover:bg-violet-500/30'
-                : 'text-violet-400 hover:text-violet-200'
-            )}
-          >
-            <Megaphone size={12} className="mr-1" />
-            {COMP_WORKSPACE_LABELS.LABEL_1719}
-          </Button>
-          <Button
-            variant={activeConversationType === 'tour_support' ? 'default' : 'ghost'}
-            size="sm"
-            onClick={() => onConversationTypeChange('tour_support')}
-            className={cn(
-              'h-7 px-2 text-xs',
-              activeConversationType === 'tour_support'
-                ? 'bg-violet-500/20 text-violet-200 hover:bg-violet-500/30'
-                : 'text-violet-400 hover:text-violet-200'
-            )}
-          >
-            <MessageCircle size={12} className="mr-1" />
-            {COMP_WORKSPACE_LABELS.LABEL_9903}
-          </Button>
-        </div>
-      )}
-
       {/* 跳轉到旅遊團詳情 */}
       {tourId && (
         <Button

@@ -18,6 +18,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { alertSuccess, alertError } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase/client'
 import { useWorkspaceFeatures } from '@/lib/permissions'
 import { 
   ModulePermissionTable, 
@@ -69,6 +70,10 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
   const [roleTabPermissions, setRoleTabPermissions] = useState<TabPermission[]>([])
   const [personalOverrides, setPersonalOverrides] = useState<PermissionOverride[]>([])
 
+  // 團務職務（workspace_job_roles）
+  const [jobRoles, setJobRoles] = useState<{ id: string; name: string }[]>([])
+  const [selectedJobRoles, setSelectedJobRoles] = useState<Set<string>>(new Set())
+
   const [formData, setFormData] = useState({
     chinese_name: employee?.chinese_name || '',
     english_name: employee?.english_name || '',
@@ -78,6 +83,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     address: employee?.personal_info?.address || '',
     birth_date: employee?.personal_info?.birth_date || '',
     id_number: employee?.personal_info?.national_id || '',
+    job_title: (employee as unknown as Record<string, unknown>)?.job_title as string || '',
     position: employee?.job_info?.position || '',
     hire_date: employee?.job_info?.hire_date || new Date().toISOString().split('T')[0],
     emergency_contact_name: employee?.personal_info?.emergency_contact?.name || '',
@@ -87,6 +93,28 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
     role_id: employee?.job_info?.role_id || '',
     base_salary: employee?.salary_info?.base_salary || 0,
   })
+
+  // 載入團務職務定義 + 員工已選職務
+  useEffect(() => {
+    if (!user?.workspace_id) return
+    const load = async () => {
+      const { data } = await supabase
+        .from('workspace_roles')
+        .select('id, name')
+        .eq('workspace_id', user.workspace_id!)
+        .order('sort_order') as { data: { id: string; name: string }[] | null }
+      setJobRoles(data || [])
+
+      if (employeeId) {
+        const { data: assigned } = await supabase
+          .from('employee_job_roles' as never)
+          .select('role_id')
+          .eq('employee_id', employeeId) as { data: { role_id: string }[] | null }
+        setSelectedJobRoles(new Set((assigned || []).map(a => a.role_id)))
+      }
+    }
+    load()
+  }, [user?.workspace_id, employeeId])
 
   // 載入職務列表
   useEffect(() => {
@@ -160,6 +188,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         address: employee.personal_info?.address || '',
         birth_date: employee.personal_info?.birth_date || '',
         id_number: employee.personal_info?.national_id || '',
+        job_title: (employee as unknown as Record<string, unknown>).job_title as string || '',
         position: employee.job_info?.position || '',
         hire_date: employee.job_info?.hire_date || new Date().toISOString().split('T')[0],
         emergency_contact_name: employee.personal_info?.emergency_contact?.name || '',
@@ -214,6 +243,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
         chinese_name: formData.chinese_name,
         english_name: formData.english_name,
         display_name: formData.display_name || formData.chinese_name,
+        job_title: formData.job_title || null,
         personal_info: {
           email: formData.email,
           phone: formData.phone,
@@ -269,6 +299,23 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
           'success',
           '新員工建立成功'
         )
+      }
+
+      // 儲存團務職務
+      const empId = employeeId || ((await supabase.from('employees').select('id').eq('chinese_name', formData.chinese_name).single()).data as { id: string } | null)?.id
+      if (empId) {
+        const ejrTable = supabase.from('employee_job_roles' as never) as unknown as {
+          delete: () => { eq: (col: string, val: string) => Promise<unknown> }
+          insert: (data: unknown[]) => Promise<unknown>
+        }
+        await ejrTable.delete().eq('employee_id', empId)
+        if (selectedJobRoles.size > 0) {
+          const inserts = Array.from(selectedJobRoles).map(role_id => ({
+            employee_id: empId,
+            role_id,
+          }))
+          await ejrTable.insert(inserts)
+        }
       }
 
       // 儲存員工的個人覆寫
@@ -427,6 +474,57 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                       </select>
                     </div>
                   </div>
+
+                  {/* 職稱（名片用） */}
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold text-morandi-secondary uppercase">
+                      職稱（名片用）
+                    </Label>
+                    <Input
+                      value={formData.job_title}
+                      onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
+                      className="border-morandi-gold/30 focus:border-morandi-gold"
+                      placeholder="例：資深業務經理、副總經理"
+                    />
+                  </div>
+
+                  {/* 團務職務（複選） */}
+                  {jobRoles.length > 0 && (
+                    <div className="space-y-2">
+                      <Label className="text-xs font-semibold text-morandi-secondary uppercase">
+                        團務職務（可複選）
+                      </Label>
+                      <div className="flex flex-wrap gap-2">
+                        {jobRoles.map(jr => (
+                          <label
+                            key={jr.id}
+                            className={cn(
+                              'flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer transition-colors',
+                              selectedJobRoles.has(jr.id)
+                                ? 'border-morandi-gold bg-morandi-gold/10 text-morandi-primary'
+                                : 'border-morandi-gold/30 text-morandi-secondary hover:bg-morandi-container/30'
+                            )}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedJobRoles.has(jr.id)}
+                              onChange={(e) => {
+                                const next = new Set(selectedJobRoles)
+                                if (e.target.checked) {
+                                  next.add(jr.id)
+                                } else {
+                                  next.delete(jr.id)
+                                }
+                                setSelectedJobRoles(next)
+                              }}
+                              className="accent-[var(--morandi-gold)]"
+                            />
+                            <span className="text-sm">{jr.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* 聯絡資訊 */}
                   <div className="grid grid-cols-2 gap-4">

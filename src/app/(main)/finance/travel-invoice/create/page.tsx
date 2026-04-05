@@ -189,7 +189,7 @@ export default function CreateInvoicePage() {
                         value="unreported"
                         checked={reportStatus === 'unreported'}
                         onChange={() => setReportStatus('unreported')}
-                        className="w-4 h-4 accent-primary"
+                        className="w-4 h-4 accent-morandi-gold"
                       />
                       <span className="text-sm">{FinanceLabels.unreported}</span>
                     </label>
@@ -200,7 +200,7 @@ export default function CreateInvoicePage() {
                         value="reported"
                         checked={reportStatus === 'reported'}
                         onChange={() => setReportStatus('reported')}
-                        className="w-4 h-4 accent-primary"
+                        className="w-4 h-4 accent-morandi-gold"
                       />
                       <span className="text-sm">{FinanceLabels.reported}</span>
                     </label>
@@ -266,7 +266,7 @@ export default function CreateInvoicePage() {
             </CardHeader>
             <CardContent className="p-0">
               {/* 表格標題 */}
-              <div className="grid grid-cols-12 gap-2 px-4 py-2 bg-muted/50 border-y text-sm font-medium text-muted-foreground">
+              <div className="grid grid-cols-12 gap-2 px-4 py-2 bg-morandi-container/50 border-y text-sm font-medium text-morandi-secondary">
                 <div className="col-span-4">{FinanceLabels.summary}</div>
                 <div className="col-span-1 text-center">{FinanceLabels.quantity}</div>
                 <div className="col-span-2 text-right">{FinanceLabels.unitPrice}</div>
@@ -345,7 +345,7 @@ export default function CreateInvoicePage() {
                   variant="outline"
                   size="sm"
                   onClick={addItem}
-                  className="text-primary"
+                  className="text-morandi-primary"
                 >
                   <Plus className="mr-1 h-4 w-4" />
                   {FinanceLabels.addRow}
@@ -375,7 +375,7 @@ export default function CreateInvoicePage() {
               <div className="px-4 py-4 border-t bg-muted/30">
                 <div className="flex justify-end items-center gap-4">
                   <span className="text-sm font-medium">{FinanceLabels.total}</span>
-                  <span className="text-xl font-bold text-primary min-w-[120px] text-right">
+                  <span className="text-xl font-bold text-morandi-primary min-w-[120px] text-right">
                     NT$ {total_amount.toLocaleString()}
                   </span>
                 </div>

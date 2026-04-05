@@ -139,7 +139,7 @@ export function DashboardClient() {
       {filteredActiveWidgets.length === 0 ? (
         <Card className="p-12 text-center border-morandi-gold/20 shadow-sm rounded-2xl bg-card">
           <div className="max-w-md mx-auto">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-[#B5986A]/10 to-[#D4C4A8]/10 flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-r from-morandi-gold/10 to-morandi-container/10 flex items-center justify-center mx-auto mb-4 shadow-sm">
               <Settings className="h-8 w-8 text-morandi-gold" />
             </div>
             <h3 className="text-lg font-semibold text-morandi-primary mb-2">

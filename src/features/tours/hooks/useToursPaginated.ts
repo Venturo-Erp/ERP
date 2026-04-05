@@ -10,6 +10,7 @@
  * - Reduces data transfer by 90%+
  */
 
+import { useEffect } from 'react'
 import useSWR, { mutate } from 'swr'
 import { supabase } from '@/lib/supabase/client'
 import { Tour } from '@/stores/types'
@@ -155,6 +156,25 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
     // Also mutate the legacy key for backwards compatibility
     await mutate('tours')
   }
+
+  // Realtime 訂閱：tours 表有任何變更時自動刷新列表
+  useEffect(() => {
+    const channel = supabase
+      .channel('realtime:tours-paginated')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tours' },
+        () => {
+          mutateSelf()
+          mutate('tours')
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   // Create tour
   const createTour = async (

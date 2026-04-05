@@ -33,7 +33,7 @@ const databaseModules = [
     description: DATABASE_LABELS.MODULE_SUPPLIERS_DESC,
     icon: Building2,
     href: '/database/suppliers',
-    color: 'bg-indigo-500',
+    color: 'bg-status-info',
     count: 12,
   },
   {

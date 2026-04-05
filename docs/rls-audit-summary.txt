@@ -1,0 +1,36 @@
+## RLS 檢測總結（2026-04-04 22:07）
+
+### Batch 1 - 核心表（已完成）
+
+#### workspace_job_roles
+- ✅ 有 workspace_id
+- ❌ Policy 太寬鬆：USING (true)
+- 🔴 風險：HIGH（無隔離）
+
+#### employees
+- ✅ 有 workspace_id
+- ⚠️ Policy 未知（需查詢）
+- 🟡 風險：MEDIUM
+
+#### role_tab_permissions
+- ❌ 無 workspace_id
+- ✅ RLS 已攔截（其他方式隔離）
+- 🟡 風險：MEDIUM
+
+#### workspace_tasks
+- ❓ 空表無法驗證
+- ✅ RLS 已攔截
+- 🟢 風險：LOW
+
+### 修復優先級
+1. workspace_job_roles - 改 Policy（15分鐘）
+2. employees - 查 Policy（10分鐘）
+3. role_tab_permissions - 評估加 workspace_id（30分鐘）
+
+### 下一步
+執行 scripts/查詢RLS完整狀態.sql 取得完整 policies
+
+### 檔案位置
+- 完整報告：docs/rls-security-audit-2026-04-04.md
+- 檢測腳本：scripts/check-rls-final.mjs
+- SQL 查詢：scripts/查詢RLS完整狀態.sql
