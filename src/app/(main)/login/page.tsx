@@ -196,7 +196,7 @@ export default function LoginPage() {
               id="rememberMe"
               checked={rememberMe}
               onChange={e => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-border text-morandi-gold focus:ring-morandi-gold cursor-pointer"
+              className="w-4 h-4 rounded border-border cursor-pointer accent-[var(--morandi-gold)]"
             />
             <label
               htmlFor="rememberMe"

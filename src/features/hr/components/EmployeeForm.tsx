@@ -12,7 +12,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Camera, Save, Loader2, User, DollarSign, Shield, Mail, Phone, Calendar, CreditCard, MapPin, Heart } from 'lucide-react'
+import { Camera, Save, Loader2, User, DollarSign, Shield, Mail, Phone, Calendar, CreditCard, MapPin, Heart, Lock } from 'lucide-react'
 import { useUserStore } from '@/stores/user-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { alertSuccess, alertError } from '@/lib/ui/alert-dialog'
@@ -42,11 +42,12 @@ interface EmployeeFormProps {
   onSubmit: () => void
   onCancel: () => void
   mode?: 'hr' | 'self'
+  onPasswordChange?: () => void
 }
 
 type TabType = 'basic' | 'permissions' | 'salary'
 
-export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: EmployeeFormProps) {
+export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr', onPasswordChange }: EmployeeFormProps) {
   const { items: employees, create: createEmployee, update: updateEmployee, fetchAll } = useUserStore()
   const { user } = useAuthStore()
   const { isFeatureEnabled } = useWorkspaceFeatures()
@@ -460,32 +461,32 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                        職務 {!isEditMode && mode === 'hr' && <span className="text-morandi-red">*</span>}
+                        職稱（名片用）
                       </Label>
-                      <select
-                        value={formData.role_id}
-                        onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
-                        className="w-full px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-white text-morandi-primary"
-                      >
-                        <option value="">請選擇職務</option>
-                        {roles.map((role) => (
-                          <option key={role.id} value={role.id}>{role.name}</option>
-                        ))}
-                      </select>
+                      <Input
+                        value={formData.job_title}
+                        onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
+                        className="border-morandi-gold/30 focus:border-morandi-gold"
+                        placeholder="例：資深業務經理、副總經理"
+                      />
                     </div>
                   </div>
 
-                  {/* 職稱（名片用） */}
+                  {/* 職務（權限角色） */}
                   <div className="space-y-1.5">
                     <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                      職稱（名片用）
+                      職務 {!isEditMode && mode === 'hr' && <span className="text-morandi-red">*</span>}
                     </Label>
-                    <Input
-                      value={formData.job_title}
-                      onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
-                      className="border-morandi-gold/30 focus:border-morandi-gold"
-                      placeholder="例：資深業務經理、副總經理"
-                    />
+                    <select
+                      value={formData.role_id}
+                      onChange={(e) => setFormData({ ...formData, role_id: e.target.value })}
+                      className="w-full px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-white text-morandi-primary"
+                    >
+                      <option value="">請選擇職務</option>
+                      {roles.map((role) => (
+                        <option key={role.id} value={role.id}>{role.name}</option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* 團務職務（複選） */}
@@ -769,9 +770,24 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr' }: Em
           
           {/* 底部按鈕 */}
           <div className="px-6 py-4 flex justify-end gap-3 flex-shrink-0">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              取消
-            </Button>
+            {mode !== 'self' && (
+              <Button type="button" variant="outline" onClick={onCancel}>
+                取消
+              </Button>
+            )}
+            {mode === 'self' && (
+              <Button
+                type="button"
+                variant="outline"
+                className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold hover:text-white"
+                onClick={() => {
+                  if (onPasswordChange) onPasswordChange()
+                }}
+              >
+                <Lock className="w-4 h-4 mr-2" />
+                修改密碼
+              </Button>
+            )}
             <Button
               type="submit"
               disabled={submitting || !formData.chinese_name || !formData.email || (!isEditMode && !formData.role_id && mode === 'hr')}
