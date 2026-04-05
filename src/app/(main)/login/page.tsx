@@ -5,9 +5,7 @@ import { LABELS } from './constants/labels'
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/stores/auth-store'
-import { User, Lock, AlertCircle, Eye, EyeOff, Building2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 
 // localStorage keys
@@ -26,7 +24,6 @@ export default function LoginPage() {
   const searchParams = useSearchParams()
   const { validateLogin } = useAuthStore()
 
-  // 從 localStorage 讀取上次輸入的代號和帳號
   useEffect(() => {
     const lastCode = localStorage.getItem(LAST_CODE_KEY)
     const lastUsername = localStorage.getItem(LAST_USERNAME_KEY)
@@ -34,23 +31,17 @@ export default function LoginPage() {
     if (lastUsername) setUsername(lastUsername)
   }, [])
 
-  // 顯示 session 過期提示
   useEffect(() => {
     if (searchParams.get('reason') === 'session_expired') {
       setError(LABELS.SESSION_EXPIRED)
     }
   }, [searchParams])
 
-  // 取得登入後要跳轉的頁面
   const getRedirectPath = (): string => {
     const redirectParam = searchParams.get('redirect')
-    if (redirectParam && redirectParam !== '/login') {
-      return redirectParam
-    }
+    if (redirectParam && redirectParam !== '/login') return redirectParam
     const lastPath = localStorage.getItem('last-visited-path')
-    if (lastPath && lastPath !== '/login') {
-      return lastPath
-    }
+    if (lastPath && lastPath !== '/login') return lastPath
     return '/dashboard'
   }
 
@@ -59,29 +50,17 @@ export default function LoginPage() {
     setError('')
 
     const trimmedCode = code.trim().toUpperCase()
-    if (!trimmedCode) {
-      setError(LABELS.ERROR_ENTER_CODE)
-      return
-    }
-
-    if (!username.trim()) {
-      setError(LABELS.ERROR_ENTER_USERNAME)
-      return
-    }
+    if (!trimmedCode) { setError(LABELS.ERROR_ENTER_CODE); return }
+    if (!username.trim()) { setError(LABELS.ERROR_ENTER_USERNAME); return }
 
     setIsLoading(true)
-
     try {
-      // 記住輸入的代號和帳號
       localStorage.setItem(LAST_CODE_KEY, trimmedCode)
       localStorage.setItem(LAST_USERNAME_KEY, username.trim())
 
       const result = await validateLogin(username.trim(), password, trimmedCode, rememberMe)
-
       if (result.success) {
-        const redirectPath = getRedirectPath()
-        // 使用 window.location.href 確保完整頁面導航（避免 router.push 有時不生效）
-        window.location.href = redirectPath
+        window.location.href = getRedirectPath()
       } else {
         setError(result.message || '帳號或密碼錯誤')
       }
@@ -94,129 +73,169 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-morandi-light via-white to-morandi-container/20">
-      <div className="bg-card p-8 rounded-xl shadow-lg max-w-md w-full">
-        {/* Logo 區域 */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-morandi-gold rounded-full mb-4">
-            <User size={32} className="text-white" />
-          </div>
-          <h2 className="text-2xl font-bold text-morandi-primary">{LABELS.TITLE}</h2>
-          <p className="text-sm text-morandi-secondary mt-2">{LABELS.LOGIN_HINT}</p>
-        </div>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#f0ebe3] via-[#f8f5f0] to-[#e8e0d6]">
+      <div
+        className="w-full max-w-[380px] mx-4"
+        style={{
+          background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
+          borderRadius: '40px',
+          padding: '32px 40px',
+          border: '5px solid rgb(255, 255, 255)',
+          boxShadow: 'rgba(180, 160, 120, 0.45) 0px 30px 30px -20px',
+        }}
+      >
+        {/* 標題 */}
+        <h1
+          className="text-center font-black text-[28px] tracking-tight"
+          style={{ color: 'var(--morandi-gold)' }}
+        >
+          Venturo
+        </h1>
+        <p className="text-center text-xs text-[#aaa] mt-1">旅遊資源管理系統</p>
 
         {/* 錯誤訊息 */}
         {error && (
-          <div className="mb-4 p-3 bg-status-danger-bg border border-status-danger/30 rounded-lg flex items-start gap-2">
-            <AlertCircle size={18} className="text-status-danger mt-0.5" />
-            <span className="text-sm text-status-danger">{error}</span>
+          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-2">
+            <AlertCircle size={16} className="text-red-400 mt-0.5 shrink-0" />
+            <span className="text-xs text-red-500">{error}</span>
           </div>
         )}
 
-        {/* 登入表單 */}
-        <form onSubmit={handleLogin} className="space-y-4">
-          {/* 代號輸入 */}
-          <div>
-            <label className="block text-sm font-medium text-morandi-primary mb-2">
-              {LABELS.LABEL_7816}
-            </label>
-            <div className="relative">
-              <Building2
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-morandi-secondary"
-              />
-              <Input
-                type="text"
-                value={code}
-                onChange={e => setCode(e.target.value.toUpperCase())}
-                className="pl-10 uppercase"
-                placeholder={LABELS.LABEL_6892}
-                required
-                autoComplete="organization"
-                autoFocus
-              />
-            </div>
-          </div>
-
-          {/* 帳號 */}
-          <div>
-            <label className="block text-sm font-medium text-morandi-primary mb-2">
-              {LABELS.LABEL_9987}
-            </label>
-            <div className="relative">
-              <User
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-morandi-secondary"
-              />
-              <Input
-                type="text"
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                className="pl-10"
-                placeholder={LABELS.LABEL_6929}
-                required
-                autoComplete="username"
-              />
-            </div>
-          </div>
-
-          {/* 密碼 */}
-          <div>
-            <label className="block text-sm font-medium text-morandi-primary mb-2">
-              {LABELS.PASSWORD}
-            </label>
-            <div className="relative">
-              <Lock
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-morandi-secondary"
-              />
-              <Input
-                type={showPassword ? 'text' : 'password'}
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="pl-10 pr-10"
-                placeholder={LABELS.LABEL_772}
-                required
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-morandi-secondary hover:text-morandi-primary"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
+        {/* 表單 */}
+        <form onSubmit={handleLogin} className="mt-5">
+          <input
+            type="text"
+            value={code}
+            onChange={e => setCode(e.target.value.toUpperCase())}
+            placeholder="公司代號"
+            required
+            autoComplete="organization"
+            autoFocus
+            className="login-input uppercase"
+          />
+          <input
+            type="text"
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            placeholder="帳號（例：E001）"
+            required
+            autoComplete="username"
+            className="login-input"
+          />
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="密碼"
+              required
+              autoComplete="current-password"
+              className="login-input pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-[#666] mt-[7px]"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
           </div>
 
           {/* 記住我 */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-3 ml-2">
             <input
               type="checkbox"
               id="rememberMe"
               checked={rememberMe}
               onChange={e => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-border cursor-pointer accent-[var(--morandi-gold)]"
+              className="w-3.5 h-3.5 rounded accent-[var(--morandi-gold)] cursor-pointer"
             />
-            <label
-              htmlFor="rememberMe"
-              className="text-sm text-morandi-primary cursor-pointer select-none"
-            >
-              {LABELS.LABEL_3877}
+            <label htmlFor="rememberMe" className="text-[11px] text-[#aaa] cursor-pointer select-none">
+              記住我（30 天內免重新登入）
             </label>
           </div>
 
-          <Button
+          {/* 登入按鈕 */}
+          <button
             type="submit"
-            className="w-full bg-morandi-gold hover:bg-morandi-gold-hover"
             disabled={isLoading || !code.trim()}
+            className="login-button"
           >
             {isLoading ? '登入中...' : '登入'}
-          </Button>
+          </button>
         </form>
 
-        {/* Demo 體驗按鈕 */}
       </div>
+
+      <style>{`
+        .login-input {
+          width: 100%;
+          background: white;
+          border: none;
+          padding: 14px 20px;
+          border-radius: 20px;
+          margin-top: 14px;
+          box-shadow: rgba(180, 160, 120, 0.2) 0px 10px 10px -5px;
+          border: 2px solid transparent;
+          font-size: 14px;
+          color: #333;
+          outline: none;
+          transition: border-color 0.2s;
+        }
+        .login-input::placeholder {
+          color: #aaa;
+        }
+        .login-input:focus {
+          border-color: var(--morandi-gold);
+        }
+        .login-button {
+          display: block;
+          width: 100%;
+          font-weight: bold;
+          background: linear-gradient(45deg, var(--morandi-gold) 0%, hsl(38, 35%, 65%) 100%);
+          color: white;
+          padding: 14px;
+          margin-top: 20px;
+          border-radius: 20px;
+          box-shadow: rgba(180, 160, 120, 0.5) 0px 20px 10px -15px;
+          border: none;
+          font-size: 15px;
+          cursor: pointer;
+          transition: all 0.2s ease-in-out;
+        }
+        .login-button:hover {
+          transform: scale(1.03);
+          box-shadow: rgba(180, 160, 120, 0.5) 0px 23px 10px -20px;
+        }
+        .login-button:active {
+          transform: scale(0.95);
+          box-shadow: rgba(180, 160, 120, 0.5) 0px 15px 10px -10px;
+        }
+        .login-button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+          transform: none;
+        }
+        .login-social-btn {
+          background: linear-gradient(45deg, rgb(60, 60, 60) 0%, rgb(120, 120, 120) 100%);
+          border: 4px solid white;
+          padding: 8px;
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: grid;
+          place-content: center;
+          box-shadow: rgba(180, 160, 120, 0.3) 0px 12px 10px -8px;
+          transition: all 0.2s ease-in-out;
+          cursor: pointer;
+        }
+        .login-social-btn:hover {
+          transform: scale(1.15);
+        }
+        .login-social-btn:active {
+          transform: scale(0.9);
+        }
+      `}</style>
     </div>
   )
 }

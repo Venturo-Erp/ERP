@@ -331,7 +331,29 @@ export default function CompanySettingsPage() {
       title={COMPANY_LABELS.TITLE}
       headerActions={<SettingsTabs />}
     >
-      <div className="max-w-4xl mx-auto space-y-8 p-6">
+      <div className="settings-glass relative max-w-4xl mx-auto space-y-8 p-6">
+        {/* 背景光暈 */}
+        <div className="absolute inset-0 -z-10 rounded-xl overflow-hidden pointer-events-none">
+          <div className="absolute -top-20 -right-20 w-80 h-80 bg-morandi-gold/40 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute -bottom-10 -left-20 w-80 h-80 bg-rose-300/25 rounded-full blur-3xl" />
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-morandi-gold/20 rounded-full blur-3xl" />
+        </div>
+        <style>{`
+          .settings-glass > .rounded-xl {
+            background: rgba(255,255,255,0.25) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            border: 1px solid rgba(255,255,255,0.4) !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.2) inset !important;
+          }
+          .settings-glass select,
+          .settings-glass input:not([type="checkbox"]):not([type="file"]),
+          .settings-glass textarea {
+            background-color: #ffffff !important;
+            border-color: rgba(0,0,0,0.1) !important;
+          }
+        `}</style>
         {/* 基本資訊 */}
         <Card className="rounded-xl shadow-lg border border-border p-8">
           <div className="flex items-center gap-3 mb-6">

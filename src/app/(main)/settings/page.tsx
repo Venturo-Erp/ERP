@@ -132,18 +132,46 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* 個人資料 - 用同一個 EmployeeForm，mode='self' */}
-        <EmployeeForm
-          employeeId={user?.id}
-          mode="self"
-          onSubmit={() => {
-            window.location.reload()
-          }}
-          onCancel={() => {
-            router.back()
-          }}
-          onPasswordChange={() => setShowPasswordSection(true)}
-        />
+        {/* 個人資料 - 毛玻璃卡片 */}
+        <div className="settings-glass relative rounded-xl">
+          {/* 背景光暈 */}
+          <div className="absolute inset-0 -z-10 rounded-xl overflow-hidden">
+            <div className="absolute -top-20 -right-20 w-80 h-80 bg-morandi-gold/40 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute -bottom-10 -left-20 w-80 h-80 bg-rose-300/25 rounded-full blur-3xl" />
+            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl" />
+            <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-morandi-gold/20 rounded-full blur-3xl" />
+          </div>
+          <EmployeeForm
+            employeeId={user?.id}
+            mode="self"
+            onSubmit={() => {
+              window.location.reload()
+            }}
+            onCancel={() => {
+              router.back()
+            }}
+            onPasswordChange={() => setShowPasswordSection(true)}
+          />
+        </div>
+        <style>{`
+          .settings-glass .bg-white {
+            background: rgba(255,255,255,0.25) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+            border: 1px solid rgba(255,255,255,0.4) !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 0 0 1px rgba(255,255,255,0.2) inset !important;
+          }
+          .settings-glass .bg-gradient-to-b {
+            background: rgba(255,255,255,0.12) !important;
+            backdrop-filter: blur(24px) !important;
+            -webkit-backdrop-filter: blur(24px) !important;
+          }
+          .settings-glass select,
+          .settings-glass input:not([type="checkbox"]):not([type="file"]) {
+            background-color: #ffffff !important;
+            border-color: rgba(0,0,0,0.1) !important;
+          }
+        `}</style>
 
         {/* 修改密碼 Dialog */}
         <Dialog open={showPasswordSection} onOpenChange={setShowPasswordSection}>

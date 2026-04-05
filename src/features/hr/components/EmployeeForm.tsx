@@ -360,7 +360,7 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr', onPa
       {/* Character Card 風格 */}
       <div className="bg-white rounded-xl overflow-hidden border-l-4 border-morandi-gold h-full flex">
         {/* 左側：照片（固定寬度，高度填滿） */}
-        <div className="w-72 bg-gradient-to-b from-morandi-container to-morandi-container/50 p-8 flex flex-col items-center flex-shrink-0">
+        <div className="w-72 bg-gradient-to-b from-morandi-container to-morandi-container/50 p-8 flex flex-col items-center justify-center flex-shrink-0">
               <div className="relative group mb-4">
                 <div
                   onClick={() => fileInputRef.current?.click()}
@@ -489,8 +489,8 @@ export function EmployeeForm({ employeeId, onSubmit, onCancel, mode = 'hr', onPa
                     </select>
                   </div>
 
-                  {/* 團務職務（複選） */}
-                  {jobRoles.length > 0 && (
+                  {/* 團務職務（複選）— 已移除，改由職務權限 + 團務設定映射決定 */}
+                  {false && jobRoles.length > 0 && (
                     <div className="space-y-2">
                       <Label className="text-xs font-semibold text-morandi-secondary uppercase">
                         團務職務（可複選）
