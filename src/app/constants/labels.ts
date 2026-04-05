@@ -16,6 +16,6 @@ export const ERROR_PAGE_LABELS = {
 } as const
 
 export const LAYOUT_LABELS = {
-  TITLE: '旅遊團管理系統',
-  DESCRIPTION: '專業的旅遊團管理系統',
+  TITLE: 'Venturo ERP',
+  DESCRIPTION: 'Venturo ERP — 旅遊業管理系統',
 } as const
