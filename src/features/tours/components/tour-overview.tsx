@@ -3,8 +3,10 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { useMemo } from 'react'
 import { Tour } from '@/stores/types'
-import { useOrdersSlim } from '@/data'
+import { useOrdersSlim, useReceipts } from '@/data'
+import { formatCurrency } from '@/lib/utils/format-currency'
 import { useWorkspaceChannels } from '@/stores/workspace-store'
 import {
   Calendar,
@@ -46,7 +48,20 @@ export const TourOverview = React.memo(function TourOverview({
 }: TourOverviewProps) {
   const router = useRouter()
   const { items: orders } = useOrdersSlim()
+  const { items: allReceipts } = useReceipts()
   const { channels } = useWorkspaceChannels()
+
+  // 收款金額計算
+  const orderIds = useMemo(() => new Set((orders ?? []).filter(o => o.tour_id === tour.id).map(o => o.id)), [orders, tour.id])
+  const tourReceipts = useMemo(
+    () => (allReceipts ?? []).filter(r => !r.deleted_at && (r.tour_id === tour.id || (r.order_id && orderIds.has(r.order_id)))),
+    [allReceipts, tour.id, orderIds]
+  )
+  const confirmedIncome = useMemo(() => tourReceipts.filter(r => r.status === '1').reduce((sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0), 0), [tourReceipts])
+  const estimatedIncome = useMemo(() => tourReceipts.reduce((sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0), 0), [tourReceipts])
+  const totalExpense = tour.total_cost ?? 0
+  const confirmedProfit = confirmedIncome - totalExpense
+  const estimatedProfit = estimatedIncome - totalExpense
 
   // 健康度資料
   const healthData = useTourHealth(tour.id)
@@ -127,34 +142,22 @@ export const TourOverview = React.memo(function TourOverview({
       ]
     : [
         {
-          title: COMP_TOURS_LABELS.報價單價格,
-          amount: tour.price ?? 0,
-          icon: DollarSign,
-          color: 'text-morandi-gold',
-        },
-        {
-          title: COMP_TOURS_LABELS.合約狀態,
-          value: tour.contract_status || COMP_TOURS_LABELS.未簽約,
-          icon: tour.contract_status === 'signed' ? CheckCircle : AlertCircle,
-          color: tour.contract_status === 'signed' ? 'text-morandi-green' : 'text-morandi-red',
-        },
-        {
-          title: COMP_TOURS_LABELS.總收入,
-          amount: tour.total_revenue ?? 0,
+          title: '總收入（預估／實收）',
+          value: `${formatCurrency(estimatedIncome)} / ${formatCurrency(confirmedIncome)}`,
           icon: TrendingUp,
           color: 'text-morandi-green',
         },
         {
           title: COMP_TOURS_LABELS.總支出,
-          amount: tour.total_cost ?? 0,
+          amount: totalExpense,
           icon: TrendingUp,
           color: 'text-morandi-red',
         },
         {
-          title: COMP_TOURS_LABELS.淨利潤,
-          amount: tour.profit ?? 0,
+          title: '總利潤（預估／實收）',
+          value: `${formatCurrency(estimatedProfit)} / ${formatCurrency(confirmedProfit)}`,
           icon: TrendingUp,
-          color: (tour.profit ?? 0) >= 0 ? 'text-morandi-green' : 'text-morandi-red',
+          color: confirmedProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red',
         },
         {
           title: COMP_TOURS_LABELS.總訂單數,
