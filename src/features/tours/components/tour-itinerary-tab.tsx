@@ -225,7 +225,9 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
 
         if (itinerary) {
           setCurrentItineraryId(itinerary.id)
-          setTitle(itinerary.title || tour.name || '')
+          // Strip HTML tags（防止 rich text editor 帶入 HTML）
+          const rawTitle = itinerary.title || tour.name || ''
+          setTitle(rawTitle.replace(/<[^>]*>/g, ''))
 
           // 載入航班資料（兼容舊格式：單一物件 / 新格式：陣列）
           const emptyFlight: FlightInfo = {
@@ -845,7 +847,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
 
       const itineraryData = {
         tour_id: tour.id,
-        title,
+        title: title.replace(/<[^>]*>/g, ''),
         tagline: '',
         subtitle: '',
         description: '',
