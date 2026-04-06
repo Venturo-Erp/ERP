@@ -22,6 +22,8 @@ interface AttractionFormProps {
   onFormDataChange: (formData: AttractionFormData) => void
   /** 唯讀模式（無編輯權限時） */
   readOnly?: boolean
+  /** 放在左欄底部的額外內容（如圖片上傳） */
+  children?: React.ReactNode
 }
 
 export function AttractionForm({
@@ -31,6 +33,7 @@ export function AttractionForm({
   availableCities,
   onFormDataChange,
   readOnly = false,
+  children,
 }: AttractionFormProps) {
   const setFormData = (updater: (prev: AttractionFormData) => AttractionFormData) => {
     onFormDataChange(updater(formData))
@@ -253,6 +256,9 @@ export function AttractionForm({
             )}
           </div>
         </div>
+
+        {/* 圖片上傳（從 children 傳入） */}
+        {children}
       </div>
 
       {/* ====== 右欄 ====== */}

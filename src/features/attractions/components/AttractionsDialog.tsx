@@ -425,24 +425,24 @@ export function AttractionsDialog({
         availableCities={availableCities}
         onFormDataChange={setFormData}
         readOnly={readOnly}
-      />
-
-      <AttractionImageUpload
-        fileInputRef={fileInputRef}
-        dropZoneRef={dropZoneRef}
-        isUploading={isUploading}
-        uploadedImages={uploadedImages}
-        imagePositions={imagePositions}
-        isDragOver={isDragOver}
-        onImageUpload={handleImageUpload}
-        onRemoveImage={handleRemoveImage}
-        onPositionChange={handlePositionChange}
-        onAddUrlImage={handleAddUrlImage}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onReplaceImage={handleReplaceImage}
-      />
+      >
+        <AttractionImageUpload
+          fileInputRef={fileInputRef}
+          dropZoneRef={dropZoneRef}
+          isUploading={isUploading}
+          uploadedImages={uploadedImages}
+          imagePositions={imagePositions}
+          isDragOver={isDragOver}
+          onImageUpload={handleImageUpload}
+          onRemoveImage={handleRemoveImage}
+          onPositionChange={handlePositionChange}
+          onAddUrlImage={handleAddUrlImage}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onReplaceImage={handleReplaceImage}
+        />
+      </AttractionForm>
     </FormDialog>
   )
 }
