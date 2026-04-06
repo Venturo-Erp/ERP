@@ -7,6 +7,10 @@ const VERIFY_TOKEN = process.env.META_WEBHOOK_VERIFY_TOKEN || 'venturo_meta_webh
 const PAGE_ACCESS_TOKEN = process.env.META_PAGE_ACCESS_TOKEN || ''
 const APP_SECRET = process.env.META_APP_SECRET || ''
 
+// Message ID 去重（防止 Meta 重送 webhook 導致重複回覆）
+const processedMessages = new Set<string>()
+const MAX_PROCESSED = 1000
+
 /**
  * 驗證 Meta Webhook 簽章 (X-Hub-Signature-256)
  */
@@ -133,8 +137,20 @@ async function sendReply(senderId: string, text: string) {
 async function handleIncomingMessage(platform: string, event: MetaMessageEvent) {
   const senderId = event.sender.id
   const messageText = event.message.text
+  const messageId = event.message.mid
 
   if (!messageText) return // 暫不處理附件
+
+  // Message ID 去重
+  if (processedMessages.has(messageId)) {
+    logger.info(`[Meta] Duplicate message skipped: ${messageId}`)
+    return
+  }
+  processedMessages.add(messageId)
+  if (processedMessages.size > MAX_PROCESSED) {
+    const first = processedMessages.values().next().value
+    if (first) processedMessages.delete(first)
+  }
 
   logger.info(`[Meta ${platform}] Message from ${senderId}: ${messageText}`)
 

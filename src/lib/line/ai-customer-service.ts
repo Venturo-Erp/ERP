@@ -201,6 +201,8 @@ async function queryAttractions(
  * 系統提示詞、字數限制、資料來源皆從 DB 讀取（管理員可在後台修改）
  */
 async function generateAIResponse(
+  platform: 'line' | 'messenger',
+  userId: string,
   userMessage: string,
   intent: string,
   tours: TourQueryResult[],
@@ -272,10 +274,20 @@ async function generateAIResponse(
     context = '目前沒有找到符合的行程或景點資料。'
   }
 
+  // 載入對話紀錄
+  const history = await loadRecentConversations(platform, userId, 5)
+  let conversationContext = ''
+  if (history.length > 0) {
+    conversationContext =
+      '之前的對話紀錄（請根據上下文延續對話，不要重複問已經問過的問題）：\n' +
+      history.map(h => (h.role === 'user' ? `客戶：${h.content}` : `你：${h.content}`)).join('\n') +
+      '\n\n'
+  }
+
   const prompt = `${systemPrompt}
 
-客戶意圖：${intent}
-客戶問：${userMessage}
+${conversationContext}客戶意圖：${intent}
+客戶最新訊息：${userMessage}
 
 ${context}
 
@@ -291,6 +303,33 @@ ${context}
 回覆：`
 
   return await callGemini(prompt)
+}
+
+/**
+ * 載入最近的對話紀錄（用於上下文記憶）
+ */
+async function loadRecentConversations(
+  platform: 'line' | 'messenger',
+  userId: string,
+  limit: number = 5
+): Promise<{ role: 'user' | 'assistant'; content: string }[]> {
+  const { data, error } = await supabase
+    .from('customer_service_conversations')
+    .select('user_message, ai_response')
+    .eq('platform', platform)
+    .eq('platform_user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error || !data) return []
+
+  // 反轉為時間正序
+  const history: { role: 'user' | 'assistant'; content: string }[] = []
+  for (const row of data.reverse()) {
+    history.push({ role: 'user', content: row.user_message })
+    history.push({ role: 'assistant', content: row.ai_response })
+  }
+  return history
 }
 
 /**
@@ -373,7 +412,15 @@ export async function handleAICustomerService(
     }
 
     // 5. 生成 AI 回覆（系統提示詞、字數、風格皆從 DB 讀取）
-    const aiResponse = await generateAIResponse(userMessage, intent, tours, attractions, wsId)
+    const aiResponse = await generateAIResponse(
+      platform,
+      userId,
+      userMessage,
+      intent,
+      tours,
+      attractions,
+      wsId
+    )
 
     // 6. 儲存對話記錄
     const mentionedTours = tours.map(t => t.code)
