@@ -21,7 +21,7 @@ const HOTEL_SELECT_FIELDS = [
   'region_id',
   'city_id',
   'address',
-  'phone',
+  'booking_phone',
   'website',
   'latitude',
   'longitude',
