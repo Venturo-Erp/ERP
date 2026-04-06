@@ -113,6 +113,32 @@ async function queryTours(destination?: string, tourCode?: string): Promise<Tour
 }
 
 /**
+ * 用中文名稱查找 city_id（從 cities 表）
+ */
+async function resolveCityId(name: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('cities')
+    .select('id')
+    .ilike('name', `%${name}%`)
+    .limit(1)
+
+  return data?.[0]?.id || null
+}
+
+/**
+ * 用中文名稱查找 country_id（從 countries 表）
+ */
+async function resolveCountryId(name: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('countries')
+    .select('id')
+    .ilike('name', `%${name}%`)
+    .limit(1)
+
+  return data?.[0]?.id || null
+}
+
+/**
  * 查詢景點資料庫
  */
 async function queryAttractions(
@@ -138,7 +164,14 @@ async function queryAttractions(
     .order('display_order', { ascending: true })
     .limit(limit)
 
-  if (city) {
+  // 先用中文名稱解析出英文 city_id / country_id
+  const resolvedCityId = city ? await resolveCityId(city) : null
+  const resolvedDestCityId = destination ? await resolveCityId(destination) : null
+  const resolvedCountryId = destination ? await resolveCountryId(destination) : null
+
+  if (resolvedCityId) {
+    query = query.eq('city_id', resolvedCityId)
+  } else if (city) {
     query = query.eq('city_id', city)
   }
 
@@ -146,11 +179,13 @@ async function queryAttractions(
     query = query.eq('category', category)
   }
 
-  // 用目的地模糊搜尋（城市或國家或名稱）
-  if (destination && !city) {
-    query = query.or(
-      `city_id.ilike.%${destination}%,country_id.ilike.%${destination}%,name.ilike.%${destination}%`
-    )
+  // 用解析後的 ID 或原始文字搜尋
+  if (destination && !city && !resolvedCityId) {
+    const conditions: string[] = []
+    if (resolvedDestCityId) conditions.push(`city_id.eq.${resolvedDestCityId}`)
+    if (resolvedCountryId) conditions.push(`country_id.eq.${resolvedCountryId}`)
+    conditions.push(`name.ilike.%${destination}%`)
+    query = query.or(conditions.join(','))
   }
 
   const { data, error } = await query
