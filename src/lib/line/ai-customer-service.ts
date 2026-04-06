@@ -198,7 +198,7 @@ async function queryAttractions(
 
 /**
  * 生成 AI 回覆
- * 系統提示詞從 DB 讀取（管理員可修改語氣、公司介紹等）
+ * 系統提示詞、字數限制、資料來源皆從 DB 讀取（管理員可在後台修改）
  */
 async function generateAIResponse(
   userMessage: string,
@@ -215,25 +215,61 @@ async function generateAIResponse(
   }[] = [],
   wsId: string = FALLBACK_WORKSPACE_ID
 ): Promise<string> {
-  const systemPrompt = await getAISetting(
+  // Read settings from DB
+  const rawSystemPrompt = await getAISetting(
     wsId,
     'ai_prompt',
     'system_prompt',
-    '你是角落旅行社的 AI 客服助理。專營高端客製化旅遊。繁體中文，親切專業，200字以內。'
+    `你是角落旅行社的首席旅遊顧問「威廉」的AI代理人，代表威廉與客戶溝通。語氣優雅從容，展現質感品味。
+
+對話流程：
+1. 優雅問候：「感謝您的詢問，我是威廉的旅遊顧問助理」
+2. 細膩了解需求：詢問旅伴組成（如提到「幾大幾小」請確認小朋友年齡，這會影響行程安排與報價）
+3. 了解預算期待：不直接問數字，而是「方便讓我了解您對這趟旅行的投資期待嗎？」
+4. 探索旅行風格：「您理想中的旅行節奏是什麼樣的？我們擅長安排深度慢旅，讓每個體驗都有餘裕。」
+5. 說明服務特色：「角落旅行社專注私人包團客製化行程，從住宿、餐廳到體驗都為您精心挑選。雖然費用較一般團體高，但每一分都花在真正的體驗上。若您希望輕鬆出遊，我們也能為您推薦優質的團體行程，目前正有合作優惠。」
+6. 根據資料庫提供精選推薦，強調深度體驗而非數量
+
+品牌定位：不追求米其林星級，而是真正的在地深度體驗。慢慢玩，好好度假，讓旅行成為生活的養分。
+回覆字數上限：{max_length}字。繁體中文。`
   )
+
+  const maxLengthRaw = await getAISetting(wsId, 'ai_prompt', 'max_length', '200')
+  const maxLength = ['100', '150', '200', '300'].includes(maxLengthRaw) ? maxLengthRaw : '200'
+
+  // Replace {max_length} placeholder in the system prompt
+  const systemPrompt = rawSystemPrompt.replace(/{max_length}/g, maxLength)
+
+  // Read data_sources setting to decide what context to include
+  const dataSourcesRaw = await getAISetting(
+    wsId,
+    'ai_prompt',
+    'data_sources',
+    '{"attractions":true,"tours":true}'
+  )
+  let dataSourcesEnabled = { attractions: true, tours: true }
+  try {
+    const parsed = JSON.parse(dataSourcesRaw) as { attractions?: boolean; tours?: boolean }
+    dataSourcesEnabled = {
+      attractions: parsed.attractions !== false,
+      tours: parsed.tours !== false,
+    }
+  } catch {
+    // keep defaults
+  }
 
   let context = ''
 
-  if (tours.length > 0) {
+  if (dataSourcesEnabled.tours && tours.length > 0) {
     context += `我們的行程資料：\n${JSON.stringify(tours, null, 2)}\n\n`
   }
 
-  if (attractions.length > 0) {
+  if (dataSourcesEnabled.attractions && attractions.length > 0) {
     context += `推薦景點清單：\n${attractions.map(a => `- ${a.name}（${a.city_id || a.country_id || ''}${a.category ? ` / ${a.category}` : ''}）${a.description ? `：${a.description}` : ''}${a.tags && a.tags.length > 0 ? ` #${a.tags.join(' #')}` : ''}`).join('\n')}\n\n`
   }
 
   if (!context) {
-    context = '目前沒有找到符合的行程或景點。'
+    context = '目前沒有找到符合的行程或景點資料。'
   }
 
   const prompt = `${systemPrompt}
@@ -244,12 +280,12 @@ async function generateAIResponse(
 ${context}
 
 規則：
-1. 只根據我們的行程資料和景點清單回答
-2. 不要提到其他旅行社
+1. 依照上方對話流程引導客戶，逐步收集旅伴人數（有小孩請確認年齡）、預算、旅行風格
+2. 只根據我們的行程資料和景點清單回答，不提其他旅行社
 3. 如果有價格資訊，明確列出
 4. 如果推薦景點，說明推薦理由（適合誰、有什麼特色）
-5. 如果客戶表達報名意願，引導他們提供聯絡資訊或詢問「需要規劃行程嗎？」
-6. 保持簡潔親切（最多 200 字）
+5. 我們是私人包團客製化，費用比一般團高，但如果客戶預算有限，也可協助報名網路旅行團（目前有優惠）
+6. 回覆字數不超過 ${maxLength} 字
 
 回覆：`
 
@@ -299,10 +335,28 @@ export async function handleAICustomerService(
     // 1. 分析意圖（提示詞從 DB 讀取）
     const { intent, destination, tourCode, city, category } = await analyzeIntent(userMessage, wsId)
 
-    // 2. 查詢相關行程
-    const tours = await queryTours(destination, tourCode)
+    // 2. 讀取資料來源設定
+    const dataSourcesRaw = await getAISetting(
+      wsId,
+      'ai_prompt',
+      'data_sources',
+      '{"attractions":true,"tours":true}'
+    )
+    let dataSourcesEnabled = { attractions: true, tours: true }
+    try {
+      const parsed = JSON.parse(dataSourcesRaw) as { attractions?: boolean; tours?: boolean }
+      dataSourcesEnabled = {
+        attractions: parsed.attractions !== false,
+        tours: parsed.tours !== false,
+      }
+    } catch {
+      // keep defaults
+    }
 
-    // 3. 查詢景點資料庫
+    // 3. 查詢相關行程（依資料來源設定）
+    const tours = dataSourcesEnabled.tours ? await queryTours(destination, tourCode) : []
+
+    // 4. 查詢景點資料庫（依資料來源設定）
     let attractions: {
       id: string
       name: string
@@ -313,14 +367,14 @@ export async function handleAICustomerService(
       tags: string[] | null
     }[] = []
 
-    if (intent === '景點推薦' || city || destination) {
+    if (dataSourcesEnabled.attractions && (intent === '景點推薦' || city || destination)) {
       attractions = await queryAttractions(city, category, destination, 5)
     }
 
-    // 4. 生成 AI 回覆（系統提示詞從 DB 讀取）
+    // 5. 生成 AI 回覆（系統提示詞、字數、風格皆從 DB 讀取）
     const aiResponse = await generateAIResponse(userMessage, intent, tours, attractions, wsId)
 
-    // 5. 儲存對話記錄
+    // 6. 儲存對話記錄
     const mentionedTours = tours.map(t => t.code)
     await saveConversation(
       platform,
