@@ -189,6 +189,7 @@ export default function AttractionsTab({
           getCitiesByRegion={getCitiesByRegion}
           initialFormData={initialFormData}
           fixedCategory={fixedCategory}
+          onDelete={deleteAttraction}
         />
       )}
 

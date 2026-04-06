@@ -18,7 +18,7 @@ import { suggestAttractionSchema } from '@/lib/validations/api-schemas'
 // Gemini API 設定
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent'
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
 interface SuggestAttractionRequest {
   name: string // 景點名稱

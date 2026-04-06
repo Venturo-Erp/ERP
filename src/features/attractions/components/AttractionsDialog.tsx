@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { FormDialog } from '@/components/dialog'
 import { Attraction, AttractionFormData } from '../types'
 import type { Country, Region, City } from '@/stores/region-store'
-import { supabase } from '@/lib/supabase/client'
 import { prompt, alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { useAttractionForm } from '../hooks/useAttractionForm'
@@ -14,7 +13,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { isFeatureAvailable } from '@/lib/feature-restrictions'
 import { useRolePermissions } from '@/lib/permissions/hooks'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Loader2, CheckCircle2 } from 'lucide-react'
+import { Sparkles, Loader2, CheckCircle2, Trash2 } from 'lucide-react'
 import { ATTRACTIONS_DIALOG_LABELS } from '../constants/labels'
 import { updateAttraction } from '@/data'
 import { toast } from 'sonner'
@@ -33,6 +32,8 @@ interface AttractionsDialogProps {
   initialFormData: AttractionFormData
   /** 固定分類（用於飯店/餐廳 tab，影響標題顯示） */
   fixedCategory?: string
+  /** 刪除景點（僅編輯時可用） */
+  onDelete?: (id: string) => Promise<{ success: boolean; cancelled?: boolean }>
 }
 
 export function AttractionsDialog({
@@ -48,6 +49,7 @@ export function AttractionsDialog({
   getCitiesByRegion,
   initialFormData,
   fixedCategory,
+  onDelete,
 }: AttractionsDialogProps) {
   const { canWrite } = useRolePermissions()
   const readOnly = !!attraction && !canWrite('/database')
@@ -91,6 +93,26 @@ export function AttractionsDialog({
       toast.error('標記失敗，請稍後再試')
     } finally {
       setIsVerifying(false)
+    }
+  }
+
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // 刪除景點（onDelete 內部已包含確認對話框）
+  const handleDelete = async () => {
+    if (!attraction?.id || !onDelete) return
+
+    setIsDeleting(true)
+    try {
+      const result = await onDelete(attraction.id)
+      if (result.success) {
+        onClose()
+      }
+    } catch (err) {
+      logger.error('刪除景點失敗:', err)
+      toast.error('刪除失敗，請稍後再試')
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -367,6 +389,19 @@ export function AttractionsDialog({
         >
           {isAiLoading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
           {ATTRACTIONS_DIALOG_LABELS.AI_補充}
+        </Button>
+      )}
+      {attraction && onDelete && canWrite('/database') && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="h-7 text-xs gap-1.5 text-status-danger border-status-danger/50 hover:bg-status-danger/10"
+        >
+          {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+          刪除
         </Button>
       )}
     </div>

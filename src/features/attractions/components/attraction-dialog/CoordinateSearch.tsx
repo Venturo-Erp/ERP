@@ -32,6 +32,7 @@ export function CoordinateSearch({
   const [urlError, setUrlError] = useState('')
   const [manualLat, setManualLat] = useState('')
   const [manualLng, setManualLng] = useState('')
+  const [coordsPaste, setCoordsPaste] = useState('')
 
   // 從 Google Maps URL 解析座標
   const parseGoogleMapsUrl = (url: string): { lat: number; lng: number } | null => {
@@ -66,6 +67,24 @@ export function CoordinateSearch({
     } else {
       setUrlError('無法解析座標，請確認連結格式')
     }
+  }
+
+  // 解析貼上的「緯度, 經度」格式
+  const handleCoordsPaste = () => {
+    setUrlError('')
+    const match = coordsPaste.trim().match(/^(-?\d+\.?\d*)\s*[,，]\s*(-?\d+\.?\d*)$/)
+    if (!match) {
+      setUrlError('格式錯誤，請輸入「緯度, 經度」（例如：12.9483, 100.8898）')
+      return
+    }
+    const lat = parseFloat(match[1])
+    const lng = parseFloat(match[2])
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+      setUrlError('座標超出範圍')
+      return
+    }
+    onCoordsUpdate(lat, lng)
+    setCoordsPaste('')
   }
 
   const handleManualInput = () => {
@@ -120,6 +139,29 @@ export function CoordinateSearch({
           </a>
         </div>
       )}
+
+      {/* 貼上「緯度, 經度」座標 */}
+      <div>
+        <p className="text-xs text-morandi-secondary mb-1">貼上座標（格式：緯度, 經度）</p>
+        <div className="flex gap-2">
+          <Input
+            value={coordsPaste}
+            onChange={e => setCoordsPaste(e.target.value)}
+            placeholder="例如：12.948332, 100.889793"
+            className="text-xs"
+            onKeyDown={e => e.key === 'Enter' && coordsPaste && handleCoordsPaste()}
+          />
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={handleCoordsPaste}
+            disabled={!coordsPaste}
+          >
+            套用
+          </Button>
+        </div>
+      </div>
 
       {/* 貼上 Google Maps 連結 */}
       <div>
