@@ -10,10 +10,14 @@ export interface FlightInfo {
   airline?: string | null
   /** 航班號 */
   flightNumber?: string | null
-  /** 出發機場 */
+  /** 出發機場 IATA */
   departureAirport?: string | null
-  /** 抵達機場 */
+  /** 出發機場中文名 */
+  departureAirportName?: string | null
+  /** 抵達機場 IATA */
   arrivalAirport?: string | null
+  /** 抵達機場中文名 */
+  arrivalAirportName?: string | null
   /** 出發時間 (HH:mm) */
   departureTime?: string | null
   /** 抵達時間 (HH:mm) */
@@ -48,7 +52,9 @@ export interface FlightSegmentInfo {
   flightNumber: string
   airline: string
   departureAirport: string
+  departureAirportName?: string
   arrivalAirport: string
+  arrivalAirportName?: string
   departureTime: string
   arrivalTime: string
   departureDate?: string

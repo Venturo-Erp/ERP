@@ -350,6 +350,30 @@ export {
   invalidateAttractions,
 } from './attractions'
 
+// Hotels
+export {
+  hotelEntity,
+  useHotels,
+  useHotel,
+  useHotelsPaginated,
+  createHotel,
+  updateHotel,
+  deleteHotel,
+  invalidateHotels,
+} from './hotels'
+
+// Restaurants
+export {
+  restaurantEntity,
+  useRestaurants,
+  useRestaurant,
+  useRestaurantsPaginated,
+  createRestaurant,
+  updateRestaurant,
+  deleteRestaurant,
+  invalidateRestaurants,
+} from './restaurants'
+
 // ============================================
 // 公司客戶
 // ============================================

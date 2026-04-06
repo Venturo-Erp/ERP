@@ -261,7 +261,7 @@ export default function DatabaseManagementPage() {
                 <AttractionsTab
                   searchTerm={searchTerm}
                   setSearchTerm={setSearchTerm}
-                  selectedCategory="住宿"
+                  selectedCategory="all"
                   setSelectedCategory={() => {}}
                   selectedCountry={selectedCountry}
                   openAdd={openAdd}
@@ -269,6 +269,7 @@ export default function DatabaseManagementPage() {
                   closeAdd={closeAdd}
                   initialFormData={getInitialFormData()}
                   fixedCategory="住宿"
+                  tableName="hotels"
                 />
               </Suspense>
             )}
@@ -286,7 +287,7 @@ export default function DatabaseManagementPage() {
                 <AttractionsTab
                   searchTerm={searchTerm}
                   setSearchTerm={setSearchTerm}
-                  selectedCategory="美食餐廳"
+                  selectedCategory="all"
                   setSelectedCategory={() => {}}
                   selectedCountry={selectedCountry}
                   openAdd={openAdd}
@@ -294,6 +295,7 @@ export default function DatabaseManagementPage() {
                   closeAdd={closeAdd}
                   initialFormData={getInitialFormData()}
                   fixedCategory="美食餐廳"
+                  tableName="restaurants"
                 />
               </Suspense>
             )}

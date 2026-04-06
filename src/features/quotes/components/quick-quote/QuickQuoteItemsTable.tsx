@@ -438,7 +438,7 @@ export const QuickQuoteItemsTable: React.FC<QuickQuoteItemsTableProps> = ({
           </Button>
         )}
       </div>
-      <div className="bg-card rounded-lg border border-morandi-gold/20 overflow-hidden">
+      <div className="bg-card rounded-xl border border-border overflow-hidden">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <table className="w-full text-sm">
             <thead>

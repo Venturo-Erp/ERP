@@ -187,7 +187,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
         workspace_id: user?.workspace_id || '',
         created_by: user?.id,
         created_by_name: user?.display_name || user?.chinese_name || '',
-        quick_quote_items: [],
+        quick_quote_items: [{ id: crypto.randomUUID(), description: '', quantity: 1, cost: 0, unit_price: 0, amount: 0, notes: '' }],
       } as Parameters<typeof createQuote>[0])
 
       if (newQuote?.id) {
@@ -217,7 +217,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
   return (
     <div className="flex h-full gap-4">
       {/* 左邊版本選單 - 卡片樣式 */}
-      <div className="w-40 shrink-0 flex flex-col bg-card border border-border rounded-xl overflow-hidden ml-1">
+      <div className="w-40 shrink-0 flex flex-col bg-card border border-border rounded-xl overflow-hidden">
         {/* 主報價單 */}
         <button
           onClick={() => setSelectedVersion('main')}

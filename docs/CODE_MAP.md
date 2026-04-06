@@ -266,14 +266,7 @@ interface AccommodationSegment {
 
 ### ⚠️ 已知問題與待修項目
 
-#### 1. 需求單住宿未用 Segment 合併
-
-**問題**：需求單的住宿資料傳入 `AccommodationQuoteDialog` 時，每晚獨立一筆，
-但廠商需求單應該是一整段（入住日~退房日）。
-
-**修法**：需求單也應該用 `useAccommodationSegments` 或同樣邏輯合併後再傳入。
-
-#### 2. 報價單的計價邏輯（重要）
+#### 1. 報價單的計價邏輯（重要）
 
 **檔案**：`src/features/quotes/hooks/useCategoryItems.ts` 第 60-130 行
 

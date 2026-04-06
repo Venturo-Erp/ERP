@@ -21,7 +21,9 @@ function flightDataToSegment(data: FlightData): FlightSegmentInfo {
     flightNumber: data.flightNumber,
     airline: data.airline,
     departureAirport: data.departure.iata,
+    departureAirportName: data.departure.airport,
     arrivalAirport: data.arrival.iata,
+    arrivalAirportName: data.arrival.airport,
     departureTime: data.departure.time,
     arrivalTime: data.arrival.time,
   }

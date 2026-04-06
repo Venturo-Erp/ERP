@@ -1278,42 +1278,13 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   return (
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex flex-col h-full overflow-hidden">
-        {/* -- Header -- */}
-        <div className="px-4 py-2 flex items-center justify-between">
-          <h3 className="flex items-center gap-2 text-sm font-bold text-morandi-primary">
-            <FileText className="w-4 h-4 text-morandi-gold" />
-            {currentItineraryId ? COMP_TOURS_LABELS.編輯行程表 : COMP_TOURS_LABELS.建立行程表}
-            <span className="font-normal text-xs text-muted-foreground ml-1">
-              — {tour.name || COMP_TOURS_LABELS.未設定}
-            </span>
-          </h3>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setViewMode('preview')}
-              className="h-7 px-2 text-xs gap-1"
-            >
-              <Eye size={12} />
-              {TOUR_ITINERARY_TAB_LABELS.預覽}
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={saving || !title.trim()}
-              className="h-7 px-3 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1"
-            >
-              {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-              {currentItineraryId ? COMP_TOURS_LABELS.更新行程 : COMP_TOURS_LABELS.建立行程}
-            </Button>
-          </div>
-        </div>
-
         {/* -- 左右分割主內容區 -- */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex gap-2 overflow-hidden">
           {/* -- 左側：行程編輯（60%）-- */}
-          <div className="w-[60%] overflow-y-auto px-4 pb-4">
-            {/* Info row: title + days + accommodation */}
+          <div className="w-[60%] flex flex-col overflow-hidden">
+            <div className="border border-border rounded-lg bg-card flex flex-col overflow-hidden">
+            {/* Info row: title + days + buttons (sticky) */}
+            <div className="p-4 pb-2">
             <div className="flex items-end gap-3 mb-3">
               <div className="flex-1 space-y-1">
                 <Label className="text-xs text-muted-foreground">
@@ -1359,7 +1330,31 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                   className="h-8 text-sm"
                 />
               </div>
+              <div className="flex items-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setViewMode('preview')}
+                  className="h-8 px-2 text-xs gap-1"
+                >
+                  <Eye size={12} />
+                  {TOUR_ITINERARY_TAB_LABELS.預覽}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleSave}
+                  disabled={saving || !title.trim()}
+                  className="h-8 px-3 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1"
+                >
+                  {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                  {currentItineraryId ? COMP_TOURS_LABELS.更新行程 : COMP_TOURS_LABELS.建立行程}
+                </Button>
+              </div>
             </div>
+            </div>
+
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto p-4 pt-2">
 
             {/* Flights row (hidden for domestic) */}
             {!isDomestic && (
@@ -1373,7 +1368,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                     </span>
                   </div>
                   <div className="border border-border/50 rounded overflow-hidden">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/30 px-2 py-1.5 border-b border-border/30">
+                    <div className="flex items-center gap-1.5 text-xs text-white bg-morandi-gold px-2 py-1.5 border-b border-border/30">
                       <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.LABEL_5176}</span>
                       <span className="w-20">{TOUR_ITINERARY_TAB_LABELS.LABEL_3349}</span>
                       <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.LABEL_7681}</span>
@@ -1390,7 +1385,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                       >
                         <Input
                           value={flight.airline || ''}
-                          placeholder="—"
+                          placeholder="長榮"
                           onChange={e =>
                             setOutboundFlights(prev =>
                               prev.map((f, i) =>
@@ -1402,7 +1397,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                         />
                         <Input
                           value={flight.flightNumber || ''}
-                          placeholder="—"
+                          placeholder="BR123"
                           onChange={e =>
                             setOutboundFlights(prev =>
                               prev.map((f, i) =>
@@ -1416,7 +1411,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                         />
                         <Input
                           value={flight.departureAirport || ''}
-                          placeholder="—"
+                          placeholder="TPE"
                           onChange={e =>
                             setOutboundFlights(prev =>
                               prev.map((f, i) =>
@@ -1430,7 +1425,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                         />
                         <Input
                           value={flight.departureTime || ''}
-                          placeholder="—"
+                          placeholder="08:00"
                           onChange={e =>
                             setOutboundFlights(prev =>
                               prev.map((f, i) =>
@@ -1443,7 +1438,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                         <span className="text-muted-foreground w-4 text-center text-xs">→</span>
                         <Input
                           value={flight.arrivalAirport || ''}
-                          placeholder="—"
+                          placeholder="NRT"
                           onChange={e =>
                             setOutboundFlights(prev =>
                               prev.map((f, i) =>
@@ -1457,7 +1452,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                         />
                         <Input
                           value={flight.arrivalTime || ''}
-                          placeholder="—"
+                          placeholder="12:00"
                           onChange={e =>
                             setOutboundFlights(prev =>
                               prev.map((f, i) =>
@@ -1472,8 +1467,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                             <Input
                               value={outboundFlightNumber}
                               onChange={e => setOutboundFlightNumber(e.target.value.toUpperCase())}
-                              placeholder={TOUR_ITINERARY_TAB_LABELS.SEARCH_8458}
-                              className="h-7 text-xs w-36 px-1"
+                              placeholder="航班號搜尋"
+                              className="h-7 text-xs w-28 px-1"
                               onKeyDown={e => {
                                 if (e.key === 'Enter' && outboundFlightNumber) {
                                   handleSearchOutboundFlight()
@@ -1486,20 +1481,6 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                               placeholder={TOUR_ITINERARY_TAB_LABELS.日期_表頭}
                               className="h-7 text-xs w-24"
                             />
-                            <Button
-                              type="button"
-                              size="sm"
-                              onClick={handleSearchOutboundFlight}
-                              disabled={searchingOutbound || !outboundFlightNumber}
-                              className="h-7 w-7 p-0 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-                              title={TOUR_ITINERARY_TAB_LABELS.SEARCH_3338}
-                            >
-                              {searchingOutbound ? (
-                                <Loader2 size={12} className="animate-spin" />
-                              ) : (
-                                <Search size={12} />
-                              )}
-                            </Button>
                             <Button
                               type="button"
                               size="sm"
@@ -1577,7 +1558,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                     </span>
                   </div>
                   <div className="border border-border/50 rounded overflow-hidden">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/30 px-2 py-1.5 border-b border-border/30">
+                    <div className="flex items-center gap-1.5 text-xs text-white bg-morandi-gold px-2 py-1.5 border-b border-border/30">
                       <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.LABEL_5176}</span>
                       <span className="w-20">{TOUR_ITINERARY_TAB_LABELS.LABEL_3349}</span>
                       <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.LABEL_7681}</span>
@@ -1594,7 +1575,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                       >
                         <Input
                           value={flight.airline || ''}
-                          placeholder="—"
+                          placeholder="長榮"
                           onChange={e =>
                             setReturnFlights(prev =>
                               prev.map((f, i) =>
@@ -1606,7 +1587,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                         />
                         <Input
                           value={flight.flightNumber || ''}
-                          placeholder="—"
+                          placeholder="BR124"
                           onChange={e =>
                             setReturnFlights(prev =>
                               prev.map((f, i) =>
@@ -1620,7 +1601,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                         />
                         <Input
                           value={flight.departureAirport || ''}
-                          placeholder="—"
+                          placeholder="NRT"
                           onChange={e =>
                             setReturnFlights(prev =>
                               prev.map((f, i) =>
@@ -1634,7 +1615,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                         />
                         <Input
                           value={flight.departureTime || ''}
-                          placeholder="—"
+                          placeholder="14:00"
                           onChange={e =>
                             setReturnFlights(prev =>
                               prev.map((f, i) =>
@@ -1647,7 +1628,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                         <span className="text-muted-foreground w-4 text-center text-xs">→</span>
                         <Input
                           value={flight.arrivalAirport || ''}
-                          placeholder="—"
+                          placeholder="TPE"
                           onChange={e =>
                             setReturnFlights(prev =>
                               prev.map((f, i) =>
@@ -1661,7 +1642,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                         />
                         <Input
                           value={flight.arrivalTime || ''}
-                          placeholder="—"
+                          placeholder="17:00"
                           onChange={e =>
                             setReturnFlights(prev =>
                               prev.map((f, i) =>
@@ -1676,8 +1657,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                             <Input
                               value={returnFlightNumber}
                               onChange={e => setReturnFlightNumber(e.target.value.toUpperCase())}
-                              placeholder={TOUR_ITINERARY_TAB_LABELS.SEARCH_8458}
-                              className="h-7 text-xs w-36 px-1"
+                              placeholder="航班號搜尋"
+                              className="h-7 text-xs w-28 px-1"
                               onKeyDown={e => {
                                 if (e.key === 'Enter' && returnFlightNumber) {
                                   handleSearchReturnFlight()
@@ -1690,20 +1671,6 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                               placeholder={TOUR_ITINERARY_TAB_LABELS.日期_表頭}
                               className="h-7 text-xs w-24"
                             />
-                            <Button
-                              type="button"
-                              size="sm"
-                              onClick={handleSearchReturnFlight}
-                              disabled={searchingReturn || !returnFlightNumber}
-                              className="h-7 w-7 p-0 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-                              title={TOUR_ITINERARY_TAB_LABELS.SEARCH_3338}
-                            >
-                              {searchingReturn ? (
-                                <Loader2 size={12} className="animate-spin" />
-                              ) : (
-                                <Search size={12} />
-                              )}
-                            </Button>
                             <Button
                               type="button"
                               size="sm"
@@ -1824,10 +1791,12 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 />
               ))}
             </table>
+            </div>
+            </div>
           </div>
 
           {/* -- 右側：資源庫 + 地圖（40%）-- */}
-          <div className="w-[40%] flex flex-col border-l border-border overflow-hidden">
+          <div className="w-[40%] flex flex-col border border-border rounded-lg bg-card overflow-hidden">
             <ResourcePanel
               className="flex-1 overflow-hidden"
               countryId={tour.country_id || ''}

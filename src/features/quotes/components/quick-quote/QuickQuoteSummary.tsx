@@ -47,8 +47,8 @@ export const QuickQuoteSummary: React.FC<QuickQuoteSummaryProps> = ({
     <>
       {/* 費用說明 - 只在編輯模式或有內容時顯示 */}
       {(isEditing || expenseDescription) && (
-        <div className="bg-card border border-border rounded-xl p-6">
-          <h2 className="text-lg font-semibold text-morandi-primary mb-4">
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold text-morandi-primary">
             {QUICK_QUOTE_SECTION_LABELS.LABEL_9264}
           </h2>
           {isEditing ? (

@@ -16,6 +16,9 @@ import {
   TrendingDown,
   DollarSign,
   ArrowRight,
+  MapPin,
+  Calendar,
+  Users,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
@@ -280,7 +283,30 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
   return (
     <div className="space-y-6">
       {/* 總覽卡片 — 與總覽頁相同格式 */}
-      <div className="bg-white border border-border rounded-lg px-5 py-3">
+      <div className="border border-border rounded-lg overflow-hidden bg-card">
+        {/* 團號表頭 */}
+        <div className="px-5 py-3 border-b border-border/60">
+          <div className="flex items-center gap-6 text-sm">
+            <span className="text-lg font-semibold text-morandi-primary">{tour.code}</span>
+            <div className="flex items-center gap-1.5 text-morandi-secondary">
+              <MapPin size={14} />
+              <span>{tour.location}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-morandi-secondary">
+              <Calendar size={14} />
+              <span>{tour.departure_date} ~ {tour.return_date}</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-morandi-secondary">
+              <Users size={14} />
+              <span>{tour.current_participants ?? 0} 人</span>
+            </div>
+            <span className={`px-2 py-0.5 rounded text-xs font-medium ${statusInfo.color}`}>
+              {statusInfo.label}
+            </span>
+          </div>
+        </div>
+        {/* 財務概況 */}
+        <div className="px-5 py-3">
         <div className="flex items-stretch">
           <div className="flex-1 flex items-center gap-2.5 px-3">
             <TrendingUp size={16} className="text-morandi-green shrink-0" />
@@ -325,6 +351,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
               </p>
             </div>
           </div>
+        </div>
         </div>
       </div>
 

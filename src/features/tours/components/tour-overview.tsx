@@ -16,15 +16,12 @@ import {
   Users,
   FileText,
   TrendingUp,
+  TrendingDown,
   AlertCircle,
   CheckCircle,
-  Calculator,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { CurrencyCell } from '@/components/table-cells'
-import { COMP_TOURS_LABELS, TOUR_HEALTH_LABELS } from '../constants/labels'
-import { useTourHealth } from '../hooks/useTourHealth'
-import { TOUR_OVERVIEW } from '../constants'
+import { COMP_TOURS_LABELS } from '../constants/labels'
 import { useTourChannelOperations, TourStoreActions } from './TourChannelOperations'
 import { logger } from '@/lib/utils/logger'
 
@@ -96,8 +93,6 @@ export const TourOverview = React.memo(function TourOverview({
   const confirmedProfit = confirmedIncome - totalExpense
   const estimatedProfit = estimatedIncome - totalExpense
 
-  // 健康度資料
-  const healthData = useTourHealth(tour.id)
 
   // 檢查該團是否已有頻道
   const existingChannel = channels.find((ch: { tour_id?: string | null }) => ch.tour_id === tour.id)
@@ -211,11 +206,6 @@ export const TourOverview = React.memo(function TourOverview({
     return badges[status || ''] || 'bg-morandi-container text-morandi-secondary'
   }
 
-  // 健康度項目（移除需求單狀態，團員人數已在標題列顯示）
-  const healthItems: Array<{
-    label: string
-    data: { status: 'good' | 'warning' | 'error'; message: string }
-  }> = []
 
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-card">
@@ -250,89 +240,48 @@ export const TourOverview = React.memo(function TourOverview({
         </div>
       </div>
 
-      {/* 財務概況 — 橫排緊湊 */}
-      <div className="px-5 py-3 border-b border-border/40">
-        <div className="flex items-stretch">
-          {overviewCards.map((card, index) => (
-            <React.Fragment key={index}>
-              <div className="flex-1 flex items-center gap-2.5 px-3">
-                <div className={cn('shrink-0', card.color)}>
-                  <card.icon size={16} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] text-morandi-secondary leading-tight">{card.title}</p>
-                  {card.amount !== undefined ? (
-                    <CurrencyCell
-                      amount={card.amount}
-                      className="text-sm font-semibold text-morandi-primary"
-                    />
-                  ) : (
-                    <p className="text-sm font-semibold text-morandi-primary truncate">
-                      {card.value}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </React.Fragment>
-          ))}
-        </div>
-      </div>
-
-      {/* 團況健康度 — 兩欄緊湊 */}
+      {/* 財務概況 — 與結案統一 */}
       <div className="px-5 py-3">
-        {healthData.isLoading ? (
-          <div className="text-center py-2 text-sm text-morandi-secondary">
-            {TOUR_HEALTH_LABELS.載入中}
+        <div className="flex items-stretch">
+          <div className="flex-1 flex items-center gap-2.5 px-3">
+            <TrendingUp size={16} className="text-morandi-green shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] text-morandi-secondary leading-tight">總收入（預估／實收）</p>
+              <p className="text-sm font-semibold text-morandi-primary">
+                {formatCurrency(estimatedIncome)} / {formatCurrency(confirmedIncome)}
+              </p>
+            </div>
           </div>
-        ) : healthData.error ? (
-          <div className="text-center py-2 text-sm text-morandi-red">{healthData.error}</div>
-        ) : (
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-            {healthItems.map((item, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <span className="text-sm">{getHealthStatusEmoji(item.data.status)}</span>
-                <span className="text-xs text-morandi-secondary">{item.label}</span>
-                <span
-                  className={cn(
-                    'text-xs font-medium ml-auto',
-                    getHealthStatusColor(item.data.status)
-                  )}
-                >
-                  {item.data.message}
-                </span>
-              </div>
-            ))}
+          <div className="flex-1 flex items-center gap-2.5 px-3">
+            <TrendingDown size={16} className="text-morandi-red shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] text-morandi-secondary leading-tight">總支出</p>
+              <p className="text-sm font-semibold text-morandi-primary">
+                {formatCurrency(totalExpense)}
+              </p>
+            </div>
           </div>
-        )}
+          <div className="flex-1 flex items-center gap-2.5 px-3">
+            <DollarSign size={16} className={`shrink-0 ${confirmedProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`} />
+            <div className="min-w-0">
+              <p className="text-[11px] text-morandi-secondary leading-tight">總利潤（預估／實收）</p>
+              <p className="text-sm font-semibold text-morandi-primary">
+                {formatCurrency(estimatedProfit)} / {formatCurrency(confirmedProfit)}
+              </p>
+            </div>
+          </div>
+          <div className="flex-1 flex items-center gap-2.5 px-3">
+            <FileText size={16} className="text-morandi-gold shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[11px] text-morandi-secondary leading-tight">總訂單數</p>
+              <p className="text-sm font-semibold text-morandi-primary">
+                {orders.filter(o => o.tour_id === tour.id).length} 筆
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )
 })
 
-// 健康度狀態顏色
-function getHealthStatusColor(status: 'good' | 'warning' | 'error'): string {
-  switch (status) {
-    case 'good':
-      return 'text-morandi-green'
-    case 'warning':
-      return 'text-morandi-gold'
-    case 'error':
-      return 'text-morandi-red'
-    default:
-      return 'text-morandi-secondary'
-  }
-}
-
-// 健康度狀態 emoji
-function getHealthStatusEmoji(status: 'good' | 'warning' | 'error'): string {
-  switch (status) {
-    case 'good':
-      return '✅'
-    case 'warning':
-      return '⚠️'
-    case 'error':
-      return '🔴'
-    default:
-      return '⚠️'
-  }
-}

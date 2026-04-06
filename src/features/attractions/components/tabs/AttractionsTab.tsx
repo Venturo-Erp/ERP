@@ -11,7 +11,7 @@
 import { logger } from '@/lib/utils/logger'
 import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
-import { useAttractionsData } from '../../hooks/useAttractionsData'
+import { useAttractionsData, AttractionsTableName } from '../../hooks/useAttractionsData'
 import { useAttractionsFilters } from '../../hooks/useAttractionsFilters'
 import { useAttractionsDialog } from '../../hooks/useAttractionsDialog'
 import { useAttractionsReorder } from '../../hooks/useAttractionsReorder'
@@ -45,6 +45,8 @@ export interface AttractionsTabProps {
   initialFormData: import('../../types').AttractionFormData
   /** 固定分類篩選（用於飯店/餐廳獨立 tab） */
   fixedCategory?: string
+  /** 資料表名稱（預設 attractions，飯店傳 hotels，餐廳傳 restaurants） */
+  tableName?: AttractionsTableName
 }
 
 export default function AttractionsTab({
@@ -58,13 +60,14 @@ export default function AttractionsTab({
   closeAdd,
   initialFormData,
   fixedCategory,
+  tableName = 'attractions',
 }: AttractionsTabProps) {
   // 排序模式控制
   const [isReorderMode, setIsReorderMode] = useState(false)
   const [isSorting, setIsSorting] = useState(false)
 
   const { attractions, loading, addAttraction, updateAttraction, deleteAttraction, toggleStatus } =
-    useAttractionsData()
+    useAttractionsData(tableName)
 
   const { isEditOpen, editingAttraction, openEdit, closeEdit } = useAttractionsDialog()
   const { reorderAttractions, moveUp, moveDown } = useAttractionsReorder()

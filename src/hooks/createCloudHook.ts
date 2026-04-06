@@ -415,4 +415,4 @@ export function createCloudHook<T extends BaseEntity>(
   }
 }
 
-export default createCloudHook
+

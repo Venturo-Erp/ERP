@@ -582,27 +582,27 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
         <div className="flex flex-col gap-6 w-full">
           {/* 上方：成本計算表格 - 100% 寬度 */}
           <div className={cn('w-full', isReadOnly && 'opacity-70 pointer-events-none select-none')}>
-            <div className="border border-border bg-card rounded-xl shadow-sm">
+            <div className="border border-border bg-card rounded-xl shadow-sm overflow-hidden">
               <div ref={scrollRef} className="overflow-x-auto">
                 <table className="w-full min-w-[800px] border-collapse">
-                  <thead className="bg-morandi-container/50 border-b border-border">
+                  <thead className="bg-morandi-gold border-b border-border">
                     <tr>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-morandi-charcoal w-12 table-divider">
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-white w-12 table-divider">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_2257}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-charcoal w-70 table-divider">
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-white w-70 table-divider">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_7325}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-charcoal w-20 table-divider">
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-white w-20 table-divider">
                         {QUOTE_DETAIL_EMBED_LABELS.QUANTITY}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-charcoal w-28 table-divider">
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-white w-28 table-divider">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_9413}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-charcoal w-28 table-divider whitespace-nowrap">
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-white w-28 table-divider whitespace-nowrap">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_832}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-charcoal w-24">
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-white w-24">
                         {QUOTE_DETAIL_EMBED_LABELS.ACTIONS}
                       </th>
                     </tr>

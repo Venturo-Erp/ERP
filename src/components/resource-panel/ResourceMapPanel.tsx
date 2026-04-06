@@ -222,7 +222,7 @@ export function ResourceMapPanel({
   }
 
   return (
-    <div className={`border-t bg-card ${className}`}>
+    <div className={`border-t border-border bg-card ${className}`}>
       {/* Header - 可點擊展開/收合 */}
       <button
         onClick={toggleExpanded}

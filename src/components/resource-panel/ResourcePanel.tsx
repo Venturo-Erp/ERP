@@ -424,7 +424,7 @@ export function ResourcePanel({
   return (
     <div className={cn('flex flex-col bg-card border-b border-border', className)}>
       {/* 大標題：景點庫 */}
-      <div className="h-14 bg-morandi-green/90 text-white px-4 flex items-center border-b border-border">
+      <div className="h-14 bg-morandi-gold text-white px-4 flex items-center border-b border-border">
         <h2 className="text-lg font-bold">景點庫</h2>
       </div>
 

@@ -211,6 +211,12 @@ body {
     color 0.3s ease;
 }
 
+/* 全站 checkbox / radio 品牌色 */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--morandi-gold);
+}
+
 /* 金色質感提升 - 左邊框加入細微漸層陰影 */
 .hover\:border-l-3:hover {
   box-shadow: -2px 0 4px rgba(201, 170, 124, 0.15);
