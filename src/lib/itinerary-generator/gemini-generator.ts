@@ -15,7 +15,7 @@ import type {
 
 // Gemini API 設定
 const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent'
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
 // 多 API Key 輪替
 const GEMINI_API_KEYS = [
