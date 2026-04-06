@@ -3,9 +3,10 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { Tour } from '@/stores/types'
 import { useOrdersSlim, useReceipts } from '@/data'
+import { supabase } from '@/lib/supabase/client'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { useWorkspaceChannels } from '@/stores/workspace-store'
 import {
@@ -78,7 +79,20 @@ export const TourOverview = React.memo(function TourOverview({
       ),
     [tourReceipts]
   )
-  const totalExpense = tour.total_cost ?? 0
+  // 總支出 = 請款單項目的 local_cost 加總（不管核准狀態）
+  // 注意：不用 tour.total_cost，那是報價預估值，不是實際支出
+  const [totalExpense, setTotalExpense] = useState(0)
+  useEffect(() => {
+    if (!tour.id) return
+    supabase
+      .from('tour_request_items')
+      .select('local_cost')
+      .eq('tour_id', tour.id)
+      .then(({ data }) => {
+        const sum = (data || []).reduce((acc, item) => acc + (Number(item.local_cost) || 0), 0)
+        setTotalExpense(sum)
+      })
+  }, [tour.id])
   const confirmedProfit = confirmedIncome - totalExpense
   const estimatedProfit = estimatedIncome - totalExpense
 

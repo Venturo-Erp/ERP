@@ -14,8 +14,6 @@ import type { TabItem } from '@/components/layout/list-page-layout'
 // Lazy load tabs - 只有切換到該 tab 才載入組件
 const RegionsTab = lazy(() => import('./tabs/RegionsTab'))
 const AttractionsTab = lazy(() => import('./tabs/AttractionsTab'))
-const MichelinRestaurantsTab = lazy(() => import('./tabs/MichelinRestaurantsTab'))
-const PremiumExperiencesTab = lazy(() => import('./tabs/PremiumExperiencesTab'))
 
 // CORNER workspace ID（米其林、頂級體驗專屬）
 const CORNER_WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
@@ -26,8 +24,6 @@ const ALL_TABS = [
   'attractions',
   'hotels',
   'restaurants',
-  'michelin',
-  'experiences',
 ] as const
 type TabValue = (typeof ALL_TABS)[number]
 
@@ -147,12 +143,6 @@ export default function DatabaseManagementPage() {
     { value: 'attractions', label: DATABASE_MANAGEMENT_PAGE_LABELS.景點活動, icon: MapPin },
     { value: 'hotels', label: '飯店', icon: Hotel },
     { value: 'restaurants', label: '餐廳', icon: UtensilsCrossed },
-    ...(isCorner
-      ? [
-          { value: 'michelin', label: DATABASE_MANAGEMENT_PAGE_LABELS.米其林餐廳, icon: Star },
-          { value: 'experiences', label: DATABASE_MANAGEMENT_PAGE_LABELS.頂級體驗, icon: Sparkles },
-        ]
-      : []),
   ]
 
   return (
@@ -309,37 +299,6 @@ export default function DatabaseManagementPage() {
             )}
           </TabsContent>
 
-          {isCorner && (
-            <TabsContent value="michelin" className="h-full mt-0 data-[state=inactive]:hidden">
-              {loadedTabs.has('michelin') && (
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center h-full">
-                      {DATABASE_MANAGEMENT_PAGE_LABELS.LOADING_6912}
-                    </div>
-                  }
-                >
-                  <MichelinRestaurantsTab selectedCountry={selectedCountry} />
-                </Suspense>
-              )}
-            </TabsContent>
-          )}
-
-          {isCorner && (
-            <TabsContent value="experiences" className="h-full mt-0 data-[state=inactive]:hidden">
-              {loadedTabs.has('experiences') && (
-                <Suspense
-                  fallback={
-                    <div className="flex items-center justify-center h-full">
-                      {DATABASE_MANAGEMENT_PAGE_LABELS.LOADING_6912}
-                    </div>
-                  }
-                >
-                  <PremiumExperiencesTab selectedCountry={selectedCountry} />
-                </Suspense>
-              )}
-            </TabsContent>
-          )}
         </div>
       </Tabs>
     </ContentPageLayout>
