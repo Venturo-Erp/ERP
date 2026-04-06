@@ -98,6 +98,7 @@ export function ImageEditor({
   const [aiProcessing, setAiProcessing] = useState<AiEditAction | null>(null)
   const [transformedSrc, setTransformedSrc] = useState(imageSrc)
   const [previewSrc, setPreviewSrc] = useState(imageSrc)
+  const [aiPreviewUrl, setAiPreviewUrl] = useState<string | null>(null)
 
   // Refs
   const previewRef = useRef<HTMLDivElement>(null)
@@ -281,11 +282,12 @@ export function ImageEditor({
           throw new Error(result.error || '編輯失敗')
         }
 
-        // 上傳 base64 到 Storage
+        // 上傳 base64 到 Storage，但先預覽不直接替換
         const uploadResult = await uploadBase64ToStorage(result.data.image)
         if (uploadResult.success && uploadResult.url) {
-          onAiReplace(uploadResult.url)
-          void alert(`${result.data.actionLabel} 完成`, 'success')
+          // 更新預覽圖，讓用戶確認後按「存檔」才真正套用
+          setAiPreviewUrl(uploadResult.url)
+          void alert(`${result.data.actionLabel} 完成，按「存檔」套用`, 'success')
         } else {
           throw new Error('上傳失敗')
         }
@@ -301,9 +303,13 @@ export function ImageEditor({
 
   // ============ 存檔 ============
   const handleSave = useCallback(() => {
+    // 如果有 AI 美化過的預覽圖，存檔時套用替換
+    if (aiPreviewUrl && onAiReplace) {
+      onAiReplace(aiPreviewUrl)
+    }
     onSave(settings)
     onClose()
-  }, [settings, onSave, onClose])
+  }, [settings, onSave, onClose, aiPreviewUrl, onAiReplace])
 
   // ============ 裁切並存檔 ============
   const handleCropAndSave = useCallback(async () => {
@@ -365,7 +371,7 @@ export function ImageEditor({
               onMouseDown={handleMouseDown}
             >
               <img
-                src={previewSrc}
+                src={aiPreviewUrl || previewSrc}
                 alt={tCommon('preview')}
                 className={cn(
                   'w-full h-full pointer-events-none',
