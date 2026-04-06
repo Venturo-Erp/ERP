@@ -26,7 +26,7 @@ export async function GET() {
     if (!auth.success) return NextResponse.json({ error: '請先登入' }, { status: 401 })
 
     const { data } = await dynamicFrom('workspace_line_config')
-      .select('*')
+      .select('setup_step, is_connected, bot_display_name, bot_basic_id, bot_user_id, webhook_url, connected_at')
       .eq('workspace_id', auth.data.workspaceId)
       .single()
 
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
       const botInfo = await testRes.json()
 
-      await dynamicFrom('workspace_line_config').upsert({
+      const { error: upsertError } = await dynamicFrom('workspace_line_config').upsert({
         workspace_id: auth.data.workspaceId,
         channel_access_token,
         channel_secret,
@@ -79,6 +79,11 @@ export async function POST(req: NextRequest) {
         setup_step: 2,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'workspace_id' })
+
+      if (upsertError) {
+        logger.error('LINE config upsert failed:', upsertError)
+        return NextResponse.json({ error: '儲存設定失敗：' + upsertError.message }, { status: 500 })
+      }
 
       return NextResponse.json({
         ok: true,

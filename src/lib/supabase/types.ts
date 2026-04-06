@@ -3879,6 +3879,8 @@ export type Database = {
         Row: {
           ai_response: string
           created_at: string | null
+          follow_up_note: string | null
+          follow_up_status: string | null
           id: string
           intent: string | null
           is_potential_lead: boolean | null
@@ -3889,10 +3891,13 @@ export type Database = {
           sentiment: string | null
           user_display_name: string | null
           user_message: string
+          workspace_id: string | null
         }
         Insert: {
           ai_response: string
           created_at?: string | null
+          follow_up_note?: string | null
+          follow_up_status?: string | null
           id?: string
           intent?: string | null
           is_potential_lead?: boolean | null
@@ -3903,10 +3908,13 @@ export type Database = {
           sentiment?: string | null
           user_display_name?: string | null
           user_message: string
+          workspace_id?: string | null
         }
         Update: {
           ai_response?: string
           created_at?: string | null
+          follow_up_note?: string | null
+          follow_up_status?: string | null
           id?: string
           intent?: string | null
           is_potential_lead?: boolean | null
@@ -3917,8 +3925,17 @@ export type Database = {
           sentiment?: string | null
           user_display_name?: string | null
           user_message?: string
+          workspace_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customer_service_conversations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       customer_service_leads: {
         Row: {
@@ -19367,42 +19384,131 @@ export type Database = {
           },
         ]
       }
+      wishlist_selections: {
+        Row: {
+          admin_replied_at: string | null
+          admin_replied_by: string | null
+          admin_reply: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          notes: string | null
+          selected_item_ids: string[]
+          status: string
+          template_id: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          admin_replied_at?: string | null
+          admin_replied_by?: string | null
+          admin_reply?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          selected_item_ids?: string[]
+          status?: string
+          template_id: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          admin_replied_at?: string | null
+          admin_replied_by?: string | null
+          admin_reply?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          selected_item_ids?: string[]
+          status?: string
+          template_id?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_selections_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "wishlist_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wishlist_template_items: {
         Row: {
+          address: string | null
           attraction_id: string | null
           category: string | null
           created_at: string | null
           description: string | null
           display_order: number | null
+          duration_minutes: number | null
+          google_maps_url: string | null
           id: string
           image_url: string | null
+          is_recommended: boolean
+          item_type: string
           name: string
+          notes: string | null
+          phone: string | null
+          price_range: string | null
           region: string | null
+          tags: string[] | null
           template_id: string
+          website: string | null
         }
         Insert: {
+          address?: string | null
           attraction_id?: string | null
           category?: string | null
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          duration_minutes?: number | null
+          google_maps_url?: string | null
           id?: string
           image_url?: string | null
+          is_recommended?: boolean
+          item_type?: string
           name: string
+          notes?: string | null
+          phone?: string | null
+          price_range?: string | null
           region?: string | null
+          tags?: string[] | null
           template_id: string
+          website?: string | null
         }
         Update: {
+          address?: string | null
           attraction_id?: string | null
           category?: string | null
           created_at?: string | null
           description?: string | null
           display_order?: number | null
+          duration_minutes?: number | null
+          google_maps_url?: string | null
           id?: string
           image_url?: string | null
+          is_recommended?: boolean
+          item_type?: string
           name?: string
+          notes?: string | null
+          phone?: string | null
+          price_range?: string | null
           region?: string | null
+          tags?: string[] | null
           template_id?: string
+          website?: string | null
         }
         Relationships: [
           {
