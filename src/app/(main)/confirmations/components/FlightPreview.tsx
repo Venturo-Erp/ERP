@@ -73,7 +73,10 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
                 <div className="col-span-6 font-medium" style={{ color: 'var(--morandi-primary)' }}>
                   {segment.airline}({segment.flightNumber})
                 </div>
-                <div className="col-span-4 text-right" style={{ color: 'var(--morandi-secondary)' }}>
+                <div
+                  className="col-span-4 text-right"
+                  style={{ color: 'var(--morandi-secondary)' }}
+                >
                   /{FLIGHT_PREVIEW_LABELS.DIRECT_FLIGHT}
                 </div>
               </div>
@@ -100,7 +103,9 @@ export function FlightPreview({ formData }: FlightPreviewProps) {
                 className="grid grid-cols-12 gap-2 py-1 pb-3"
                 style={{
                   borderBottom:
-                    idx < (data.segments?.length || 0) - 1 ? '1px dashed var(--morandi-gold)' : 'none',
+                    idx < (data.segments?.length || 0) - 1
+                      ? '1px dashed var(--morandi-gold)'
+                      : 'none',
                 }}
               >
                 <div className="col-span-2"></div>

@@ -52,6 +52,7 @@ import {
   MessageCircle,
   Sparkles,
   LayoutTemplate,
+  Bot,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth-store'
@@ -80,7 +81,7 @@ const menuItems: MenuItem[] = [
     href: '/channel',
     label: COMP_LAYOUT_LABELS.頻道,
     icon: Building2,
-    requiredPermission: 'workspace',  // 對應 workspace_features.workspace
+    requiredPermission: 'workspace', // 對應 workspace_features.workspace
   },
   // 郵件系統暫時隱藏（目前使用 Google Workspace）
   // { href: '/mail', label: '郵件', icon: Mail, requiredPermission: 'workspace' },
@@ -316,10 +317,10 @@ const menuItems: MenuItem[] = [
   //   ],
   // },
   { href: '/war-room', label: '作戰會議室', icon: Target, requiredPermission: 'war_room' },
-  { 
-    href: '/hr', 
-    label: COMP_LAYOUT_LABELS.人資管理, 
-    icon: UserCog, 
+  {
+    href: '/hr',
+    label: COMP_LAYOUT_LABELS.人資管理,
+    icon: UserCog,
     requiredPermission: 'hr',
     children: [
       { href: '/hr/roles', label: '職務管理', icon: Shield, requiredPermission: 'hr' },
@@ -335,7 +336,12 @@ const menuItems: MenuItem[] = [
     icon: Sparkles,
     requiredPermission: 'customized',
     children: [
-      { href: '/customized-tours', label: '客製化行程', icon: LayoutTemplate, requiredPermission: 'customized' },
+      {
+        href: '/customized-tours',
+        label: '客製化行程',
+        icon: LayoutTemplate,
+        requiredPermission: 'customized',
+      },
       { href: '/inquiries', label: '詢價單管理', icon: Inbox, requiredPermission: 'customized' },
     ],
   },
@@ -368,11 +374,16 @@ const menuItems: MenuItem[] = [
 const localMenuItems: MenuItem[] = [
   { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: Home },
   { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPin }, // 包含「收到的委託」分頁
-  { href: '/finance', label: COMP_LAYOUT_LABELS.財務系統, icon: CreditCard, children: [
-    { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
-    { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
-    { href: '/finance/settings', label: '財務設定', icon: Settings },
-  ]},
+  {
+    href: '/finance',
+    label: COMP_LAYOUT_LABELS.財務系統,
+    icon: CreditCard,
+    children: [
+      { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
+      { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
+      { href: '/finance/settings', label: '財務設定', icon: Settings },
+    ],
+  },
   { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserCog },
   { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Settings },
 ]
@@ -382,11 +393,16 @@ const transportMenuItems: MenuItem[] = [
   { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: Home },
   { href: '/supplier/trips', label: '車趟管理', icon: Truck }, // 新的車趟管理頁面
   { href: '/database/fleet', label: COMP_LAYOUT_LABELS.車隊管理, icon: Bus },
-  { href: '/finance', label: COMP_LAYOUT_LABELS.財務系統, icon: CreditCard, children: [
-    { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
-    { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
-    { href: '/finance/settings', label: '財務設定', icon: Settings },
-  ]},
+  {
+    href: '/finance',
+    label: COMP_LAYOUT_LABELS.財務系統,
+    icon: CreditCard,
+    children: [
+      { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
+      { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
+      { href: '/finance/settings', label: '財務設定', icon: Settings },
+    ],
+  },
   { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserCog },
   { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Settings },
 ]
@@ -482,7 +498,7 @@ export function Sidebar() {
     // 不受租戶類型限制
     if (isAdmin) {
       // 直接進入完整選單過濾邏輯
-    } 
+    }
     // 車行使用簡化選單（車趟管理為主）
     else if (isTransport) {
       return transportMenuItems
@@ -496,14 +512,14 @@ export function Sidebar() {
       return items
         .map(item => {
           if (isMenuItemHidden(item.href, hiddenMenuItems)) return null
-          
+
           // 🔧 檢查租戶功能權限（workspace_features）
           if (item.requiredPermission) {
             if (!isFeatureEnabled(item.requiredPermission)) {
               return null
             }
           }
-          
+
           // 檢查功能限制（非 TP/TC 不可見）
           if (
             item.restrictedFeature &&
@@ -658,6 +674,14 @@ export function Sidebar() {
         <ul className="space-y-px">
           {visibleMenuItems.map(item => renderMenuItem(item))}
           {visiblePersonalToolItems.map(item => renderMenuItem(item))}
+
+          {/* AI & 機器人管理（需付費功能 ai_bot 開啟） */}
+          {isFeatureEnabled('ai_bot') &&
+            renderMenuItem({
+              href: '/ai-bot',
+              label: 'AI & 機器人',
+              icon: Bot,
+            })}
 
           {/* 設定 */}
           {renderMenuItem({

@@ -4,7 +4,13 @@ import { getTodayString } from '@/lib/utils/format-date'
 
 import React from 'react'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { SimpleDateInput } from '@/components/ui/simple-date-input'
 import { CountryAirportSelector } from '@/components/selectors/CountryAirportSelector'
 import { useWorkspaceFeatures } from '@/lib/permissions'
@@ -64,7 +70,10 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
           <Select
             value={newTour.department_id || '_none_'}
             onValueChange={value =>
-              setNewTour(prev => ({ ...prev, department_id: value === '_none_' ? undefined : value }))
+              setNewTour(prev => ({
+                ...prev,
+                department_id: value === '_none_' ? undefined : value,
+              }))
             }
           >
             <SelectTrigger className="mt-1">
@@ -72,11 +81,13 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="_none_">不指定</SelectItem>
-              {departments.filter(d => d.is_active).map(d => (
-                <SelectItem key={d.id} value={d.id}>
-                  {d.code} - {d.name}
-                </SelectItem>
-              ))}
+              {departments
+                .filter(d => d.is_active)
+                .map(d => (
+                  <SelectItem key={d.id} value={d.id}>
+                    {d.code} - {d.name}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
         </div>

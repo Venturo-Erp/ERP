@@ -51,7 +51,10 @@ async function enrichDailyItinerary(
   if (!attractions) return dailyItinerary
 
   // 建立對照表
-  const attractionMap = new Map<string, { description?: string; thumbnail?: string; images?: string[] }>()
+  const attractionMap = new Map<
+    string,
+    { description?: string; thumbnail?: string; images?: string[] }
+  >()
   for (const attr of attractions) {
     attractionMap.set(attr.id, {
       description: attr.description || undefined,
@@ -76,7 +79,7 @@ async function enrichDailyItinerary(
         }
       }
       return activity
-    })
+    }),
   }))
 }
 
@@ -188,7 +191,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       showPricingDetails: itinerary.show_pricing_details,
       pricingDetails: itinerary.pricing_details,
       // 價格方案（從 quotes 表讀取，透過 tours.quote_id）
-      priceTiers: (itinerary as { tour?: { quote?: { tier_pricings?: unknown } } }).tour?.quote?.tier_pricings || null,
+      priceTiers:
+        (itinerary as { tour?: { quote?: { tier_pricings?: unknown } } }).tour?.quote
+          ?.tier_pricings || null,
       showPriceTiers: itinerary.show_price_tiers,
       // 常見問題
       faqs: itinerary.faqs,
@@ -200,7 +205,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       cancellationPolicy: itinerary.cancellation_policy,
       showCancellationPolicy: itinerary.show_cancellation_policy,
       itinerarySubtitle: itinerary.itinerary_subtitle,
-      dailyItinerary: await enrichDailyItinerary(supabaseAdmin, itinerary.daily_itinerary as DayItinerary[]),
+      dailyItinerary: await enrichDailyItinerary(
+        supabaseAdmin,
+        itinerary.daily_itinerary as DayItinerary[]
+      ),
       versionRecords: itinerary.version_records,
       createdAt: itinerary.created_at,
       updatedAt: itinerary.updated_at,

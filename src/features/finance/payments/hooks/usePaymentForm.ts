@@ -18,17 +18,17 @@ interface TourSlim {
 
 export function usePaymentForm() {
   const { items: orders } = useOrdersSlim()
-  
+
   // 只載入正式團（從 API 層過濾，省流量）
   const [tours, setTours] = useState<TourSlim[]>([])
-  
+
   useEffect(() => {
     const loadOfficialTours = async () => {
       const { useAuthStore } = await import('@/stores')
       const { supabase } = await import('@/lib/supabase/client')
       const workspaceId = useAuthStore.getState().user?.workspace_id
       if (!workspaceId) return
-      
+
       const { data } = await supabase
         .from('tours')
         .select('id, code, name')
@@ -39,7 +39,7 @@ export function usePaymentForm() {
         .is('deleted_at', null)
         .order('departure_date', { ascending: false })
         .limit(50)
-      
+
       setTours(data || [])
     }
     loadOfficialTours()

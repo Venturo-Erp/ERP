@@ -239,22 +239,12 @@ export function PayrollManagementPage() {
   // 期間操作按鈕
   const renderPeriodActions = (row: PayrollPeriod) => (
     <div className="flex items-center gap-2">
-      <Button
-        size="sm"
-        variant="outline"
-        onClick={() => handleViewRecords(row)}
-        className="gap-1"
-      >
+      <Button size="sm" variant="outline" onClick={() => handleViewRecords(row)} className="gap-1">
         <Eye size={14} />
         {L.btn_view}
       </Button>
       {row.status === 'draft' && (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => handleCalculate(row)}
-          className="gap-1"
-        >
+        <Button size="sm" variant="outline" onClick={() => handleCalculate(row)} className="gap-1">
           <Calculator size={14} />
           {L.btn_calculate}
         </Button>
@@ -445,7 +435,11 @@ export function PayrollManagementPage() {
                 <thead className="bg-morandi-container/50 sticky top-0">
                   <tr>
                     {recordColumns.map(col => (
-                      <th key={col.key} className="px-4 py-3 text-left font-medium text-morandi-primary" style={{ width: col.width }}>
+                      <th
+                        key={col.key}
+                        className="px-4 py-3 text-left font-medium text-morandi-primary"
+                        style={{ width: col.width }}
+                      >
                         {col.label}
                       </th>
                     ))}
@@ -460,9 +454,7 @@ export function PayrollManagementPage() {
                           {col.render ? col.render(undefined, record) : '-'}
                         </td>
                       ))}
-                      <td className="px-4 py-3">
-                        {renderRecordActions(record)}
-                      </td>
+                      <td className="px-4 py-3">{renderRecordActions(record)}</td>
                     </tr>
                   ))}
                 </tbody>

@@ -4,7 +4,7 @@ import { createApiClient, getCurrentWorkspaceId } from '@/lib/supabase/api-clien
 /**
  * GET /api/finance/payment-methods
  * 取得收款/付款方式列表
- * 
+ *
  * Query params:
  * - type: 'receipt' | 'payment' （選填）
  */
@@ -102,10 +102,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   // RLS 會確保只能刪除自己租戶的資料
-  const { error } = await supabase
-    .from('payment_methods')
-    .update({ is_active: false })
-    .eq('id', id)
+  const { error } = await supabase.from('payment_methods').update({ is_active: false }).eq('id', id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

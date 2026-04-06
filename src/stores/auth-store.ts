@@ -54,7 +54,6 @@ async function fetchWorkspaceInfo(
  * @param options - 額外選項
  */
 
-
 function buildUserFromEmployee(
   employeeData: EmployeeRow,
   workspaceInfo: { code?: string; name?: string; type?: User['workspace_type'] },
@@ -247,7 +246,10 @@ export const useAuthStore = create<AuthState>()(
             }
           }
 
-          const user = buildUserFromEmployee(employeeData, workspaceInfo, { rolePermissions, isAdmin: jwtIsAdmin })
+          const user = buildUserFromEmployee(employeeData, workspaceInfo, {
+            rolePermissions,
+            isAdmin: jwtIsAdmin,
+          })
 
           // 6. 設定 JWT cookie
           if (jwt) {
@@ -283,7 +285,9 @@ export const useAuthStore = create<AuthState>()(
           // 這可能發生在 supabase_user_id 還沒同步時
           const { data, error } = await supabase
             .from('employees')
-            .select('id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active, created_at, updated_at')
+            .select(
+              'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active, created_at, updated_at'
+            )
             .eq('id', currentUser.id)
             .maybeSingle()
 

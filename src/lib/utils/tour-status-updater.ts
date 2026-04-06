@@ -20,7 +20,7 @@ function calculateTourStatus(
 ): string | null {
   // 如果已經是「已結團」，不自動改
   if (currentStatus === '已結團') return null
-  
+
   // 如果是提案階段，不自動改
   if (currentStatus === '提案') return null
 
@@ -66,18 +66,14 @@ export async function updateAllTourStatuses(): Promise<{ updated: number; errors
   }
 
   for (const tour of tours || []) {
-    const newStatus = calculateTourStatus(
-      tour.status,
-      tour.departure_date,
-      tour.return_date
-    )
+    const newStatus = calculateTourStatus(tour.status, tour.departure_date, tour.return_date)
 
     if (newStatus) {
       const { error: updateError } = await supabase
         .from('tours')
-        .update({ 
+        .update({
           status: newStatus,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', tour.id)
 
@@ -105,18 +101,14 @@ export async function updateTourStatus(tourId: string): Promise<boolean> {
 
   if (error || !tour) return false
 
-  const newStatus = calculateTourStatus(
-    tour.status,
-    tour.departure_date,
-    tour.return_date
-  )
+  const newStatus = calculateTourStatus(tour.status, tour.departure_date, tour.return_date)
 
   if (newStatus) {
     const { error: updateError } = await supabase
       .from('tours')
-      .update({ 
+      .update({
         status: newStatus,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       })
       .eq('id', tourId)
 

@@ -63,7 +63,9 @@ export default function VouchersPage() {
     try {
       let query = supabase
         .from('journal_vouchers')
-        .select('id, voucher_no, voucher_date, memo, status, total_debit, total_credit, created_by, workspace_id, created_at')
+        .select(
+          'id, voucher_no, voucher_date, memo, status, total_debit, total_credit, created_by, workspace_id, created_at'
+        )
         .eq('workspace_id', user.workspace_id)
 
       // 應用日期範圍篩選
@@ -179,10 +181,7 @@ export default function VouchersPage() {
     setIsDetailDialogOpen(true)
   }
 
-  const handleReverse = (voucher: JournalVoucher) => {
-   
-   
-  }
+  const handleReverse = (voucher: JournalVoucher) => {}
 
   const handleCreate = () => {
     setIsCreateDialogOpen(true)
@@ -255,7 +254,16 @@ export default function VouchersPage() {
       <VoucherDetailDialog
         open={isDetailDialogOpen}
         onOpenChange={setIsDetailDialogOpen}
-        voucher={selectedVoucher ? { ...selectedVoucher, status: selectedVoucher.status || 'draft', total_debit: selectedVoucher.total_debit || 0, total_credit: selectedVoucher.total_credit || 0 } : null}
+        voucher={
+          selectedVoucher
+            ? {
+                ...selectedVoucher,
+                status: selectedVoucher.status || 'draft',
+                total_debit: selectedVoucher.total_debit || 0,
+                total_credit: selectedVoucher.total_credit || 0,
+              }
+            : null
+        }
       />
     </>
   )

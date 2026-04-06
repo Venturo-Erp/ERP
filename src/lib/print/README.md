@@ -8,12 +8,12 @@
 
 ## 組件一覽
 
-| 組件 | 用途 |
-|-----|------|
+| 組件               | 用途                         |
+| ------------------ | ---------------------------- |
 | `PrintableWrapper` | 完整預覽對話框（含頁首頁尾） |
-| `printElement()` | 直接列印 DOM 元素 |
-| `printHtml()` | 直接列印 HTML 字串 |
-| `PrintTemplate` | 輕量版模板 |
+| `printElement()`   | 直接列印 DOM 元素            |
+| `printHtml()`      | 直接列印 HTML 字串           |
+| `PrintTemplate`    | 輕量版模板                   |
 
 ---
 
@@ -30,7 +30,7 @@ function MyComponent() {
   return (
     <>
       <Button onClick={() => setShowPrint(true)}>列印預覽</Button>
-      
+
       <PrintableWrapper
         isOpen={showPrint}
         onClose={() => setShowPrint(false)}
@@ -56,16 +56,12 @@ function MyComponent() {
   const handlePrint = () => {
     printElement(contentRef.current, {
       title: '文件標題',
-      margin: 15,      // mm
-      fontSize: 12,    // px
+      margin: 15, // mm
+      fontSize: 12, // px
     })
   }
 
-  return (
-    <div ref={contentRef}>
-      內容...
-    </div>
-  )
+  return <div ref={contentRef}>內容...</div>
 }
 ```
 
@@ -74,21 +70,25 @@ function MyComponent() {
 ## 設計規範
 
 ### 尺寸
+
 - 紙張：A4（210mm × 297mm）
 - 邊距：15mm（預設）
 - 字體：13px（預設）
 
 ### 顏色
+
 使用 `MORANDI_COLORS`：
+
 ```tsx
 import { MORANDI_COLORS } from '@/lib/print'
 
-MORANDI_COLORS.gold      // 金色（標題）
-MORANDI_COLORS.brown     // 棕色（內文）
-MORANDI_COLORS.border    // 邊框
+MORANDI_COLORS.gold // 金色（標題）
+MORANDI_COLORS.brown // 棕色（內文）
+MORANDI_COLORS.border // 邊框
 ```
 
 ### 頁首頁尾
+
 - 頁首：Logo + 公司名（從 workspace 設定取）
 - 頁尾：公司資訊（從 useCompanyInfo 取）
 - 多頁時每頁都顯示

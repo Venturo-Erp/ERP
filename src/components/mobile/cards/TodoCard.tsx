@@ -100,7 +100,9 @@ export function TodoCard({ todo, onToggle, onClick, className }: TodoCardProps) 
               </div>
             )}
             {dueInfo && (
-              <div className={cn('flex items-center gap-1', dueInfo.isOverdue && 'text-morandi-red')}>
+              <div
+                className={cn('flex items-center gap-1', dueInfo.isOverdue && 'text-morandi-red')}
+              >
                 {dueInfo.isOverdue ? <AlertCircle size={12} /> : <Clock size={12} />}
                 <span>{dueInfo.text}</span>
               </div>

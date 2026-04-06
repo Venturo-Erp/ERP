@@ -434,7 +434,8 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                   group.items.map((item, itemIdx) => {
                     const isFirstInGroup = itemIdx === 0
                     const { payee: groupPayee, supplier: groupSupplier } = splitPayFor(group.payFor)
-                    const subtotalRowSpan = ((group as unknown as Record<string, unknown>).subtotalRowSpan as number) || 0
+                    const subtotalRowSpan =
+                      ((group as unknown as Record<string, unknown>).subtotalRowSpan as number) || 0
                     const showSubtotalCell = subtotalRowSpan > 0 && isFirstInGroup
 
                     return (
@@ -667,7 +668,8 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
                   group.items.map((item, itemIdx) => {
                     const isFirstInGroup = itemIdx === 0
                     const { payee: groupPayee, supplier: groupSupplier } = splitPayFor(group.payFor)
-                    const subtotalRowSpan = ((group as unknown as Record<string, unknown>).subtotalRowSpan as number) || 0
+                    const subtotalRowSpan =
+                      ((group as unknown as Record<string, unknown>).subtotalRowSpan as number) || 0
                     const showSubtotalCell = subtotalRowSpan > 0 && isFirstInGroup
                     return (
                       <tr key={`company-${groupIdx}-${itemIdx}`}>

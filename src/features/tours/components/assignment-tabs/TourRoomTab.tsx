@@ -2,7 +2,7 @@
 
 /**
  * TourRoomTab - 分房 Tab
- * 
+ *
  * 功能：
  * - 從行程表讀取住宿區段
  * - 簡單列表輸入：房型名稱 + 數量
@@ -23,7 +23,10 @@ import { cn } from '@/lib/utils'
 import { logger } from '@/lib/utils/logger'
 import type { OrderMember } from '@/features/orders/types/order-member.types'
 import { COMP_TOURS_LABELS } from '../../constants/labels'
-import { useAccommodationSegments, type AccommodationSegment } from '../../hooks/useAccommodationSegments'
+import {
+  useAccommodationSegments,
+  type AccommodationSegment,
+} from '../../hooks/useAccommodationSegments'
 
 type MemberBasic = Pick<OrderMember, 'id' | 'chinese_name' | 'passport_name'>
 
@@ -74,8 +77,8 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
   const [hasChanges, setHasChanges] = useState(false)
 
   // 選中的區段
-  const selectedSegment = useMemo(() =>
-    segments.find(s => s.id === selectedSegmentId) || segments[0] || null,
+  const selectedSegment = useMemo(
+    () => segments.find(s => s.id === selectedSegmentId) || segments[0] || null,
     [segments, selectedSegmentId]
   )
 
@@ -93,11 +96,11 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
   // 當區段或房間變化時，重建輸入列表
   useEffect(() => {
     if (!selectedSegment) return
-    
+
     // 從現有房間統計出房型列表
     const segmentRooms = rooms.filter(r => r.night_number === selectedSegment.start_night)
     const stats: Record<string, RoomTypeRow> = {}
-    
+
     for (const room of segmentRooms) {
       const key = room.room_type
       if (!stats[key]) {
@@ -110,13 +113,13 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
       }
       stats[key].quantity++
     }
-    
+
     const rows = Object.values(stats)
     // 如果沒有任何房型，加一個空行
     if (rows.length === 0) {
       rows.push({ id: 'new-1', room_type: '', quantity: 0, capacity: 2 })
     }
-    
+
     setRoomTypeRows(rows)
     setHasChanges(false)
   }, [rooms, selectedSegment])
@@ -125,7 +128,9 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
     try {
       const { data, error } = await supabase
         .from('tour_rooms_status')
-        .select('id, tour_id, room_number, room_type, hotel_name, night_number, capacity, assigned_count, remaining_beds, is_full, display_order, notes')
+        .select(
+          'id, tour_id, room_number, room_type, hotel_name, night_number, capacity, assigned_count, remaining_beds, is_full, display_order, notes'
+        )
         .eq('tour_id', tourId)
         .order('night_number')
         .order('display_order')
@@ -142,18 +147,20 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
 
   // 更新行
   const updateRow = (id: string, field: keyof RoomTypeRow, value: string | number) => {
-    setRoomTypeRows(prev => prev.map(row => {
-      if (row.id !== id) return row
-      
-      const updated = { ...row, [field]: value }
-      
-      // 如果更新房型名稱，自動猜測容量
-      if (field === 'room_type' && typeof value === 'string') {
-        updated.capacity = guessCapacity(value)
-      }
-      
-      return updated
-    }))
+    setRoomTypeRows(prev =>
+      prev.map(row => {
+        if (row.id !== id) return row
+
+        const updated = { ...row, [field]: value }
+
+        // 如果更新房型名稱，自動猜測容量
+        if (field === 'room_type' && typeof value === 'string') {
+          updated.capacity = guessCapacity(value)
+        }
+
+        return updated
+      })
+    )
     setHasChanges(true)
   }
 
@@ -161,7 +168,7 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
   const addRow = () => {
     setRoomTypeRows(prev => [
       ...prev,
-      { id: `new-${Date.now()}`, room_type: '', quantity: 0, capacity: 2 }
+      { id: `new-${Date.now()}`, room_type: '', quantity: 0, capacity: 2 },
     ])
   }
 
@@ -174,10 +181,10 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
   // 儲存變更
   const handleSave = async () => {
     if (!selectedSegment) return
-    
+
     // 過濾掉空的行
     const validRows = roomTypeRows.filter(row => row.room_type.trim() && row.quantity > 0)
-    
+
     setSaving(true)
     try {
       // 刪除此區段的所有舊房間，重新建立（確保 display_order 正確）
@@ -186,17 +193,17 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
         .select('id')
         .eq('tour_id', tourId)
         .in('night_number', selectedSegment.nights)
-      
+
       // 刪除舊房間
       if (existingRooms && existingRooms.length > 0) {
         for (const room of existingRooms) {
           await deleteTourRoom(room.id)
         }
       }
-      
+
       // 重新建立所有房間，display_order 全域遞增（跨房型）
       let globalDisplayOrder = 0
-      
+
       for (const row of validRows) {
         for (let i = 0; i < row.quantity; i++) {
           // 每一間房，為所有晚數都建立記錄（使用相同的 display_order）
@@ -213,7 +220,7 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
           globalDisplayOrder++
         }
       }
-      
+
       toast.success('房型已儲存')
       setHasChanges(false)
       await loadRooms()
@@ -230,19 +237,21 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
   // 同步房間統計到行程表
   const syncRoomDetailsToItinerary = async () => {
     if (!selectedSegment) return
-    
+
     try {
       const { data: latestRooms } = await supabase
         .from('tour_rooms')
         .select('room_type, capacity, night_number')
         .eq('tour_id', tourId)
         .in('night_number', selectedSegment.nights)
-      
+
       if (!latestRooms) return
-      
-      const firstNightRooms = latestRooms.filter(r => r.night_number === selectedSegment.start_night)
+
+      const firstNightRooms = latestRooms.filter(
+        r => r.night_number === selectedSegment.start_night
+      )
       const roomCounts: Record<string, { type: string; capacity: number; count: number }> = {}
-      
+
       for (const room of firstNightRooms) {
         const key = room.room_type
         if (!roomCounts[key]) {
@@ -250,13 +259,13 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
         }
         roomCounts[key].count++
       }
-      
+
       const roomDetails = Object.values(roomCounts).map(r => ({
         type: r.type,
         capacity: r.capacity,
         quantity: r.count,
       }))
-      
+
       for (const nightNumber of selectedSegment.nights) {
         await supabase
           .from('tour_itinerary_items')
@@ -301,7 +310,7 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
           {segments.map(segment => {
             const isSelected = selectedSegmentId === segment.id
             const roomCount = rooms.filter(r => r.night_number === segment.start_night).length
-            
+
             return (
               <button
                 key={segment.id}
@@ -314,17 +323,16 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
                 )}
               >
                 <span>
-                  {segment.night_count > 1 
+                  {segment.night_count > 1
                     ? `第${segment.start_night}-${segment.end_night}晚`
-                    : `第${segment.start_night}晚`
-                  }
+                    : `第${segment.start_night}晚`}
                 </span>
                 <span className="text-xs opacity-70">({roomCount}房)</span>
               </button>
             )
           })}
         </div>
-        
+
         {/* 飯店名稱（從行程表引用） */}
         {selectedSegment?.hotel_name && (
           <div className="flex items-center gap-2 text-sm text-morandi-primary">
@@ -343,7 +351,7 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
           <span className="text-center">／數量</span>
           <span></span>
         </div>
-        
+
         {/* 輸入行 */}
         {roomTypeRows.map((row, index) => (
           <div key={row.id} className="grid grid-cols-[1fr_80px_80px_40px] gap-2 items-center">
@@ -380,7 +388,7 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
             </Button>
           </div>
         ))}
-        
+
         {/* 新增行按鈕 */}
         <Button
           variant="outline"
@@ -405,12 +413,8 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
             '尚未設定房型'
           )}
         </div>
-        
-        <Button
-          onClick={handleSave}
-          disabled={!hasChanges || saving}
-          className="gap-1"
-        >
+
+        <Button onClick={handleSave} disabled={!hasChanges || saving} className="gap-1">
           <Save className="h-4 w-4" />
           {saving ? '儲存中...' : '儲存'}
         </Button>

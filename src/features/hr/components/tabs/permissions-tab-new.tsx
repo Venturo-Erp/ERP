@@ -22,7 +22,7 @@ const POSITIONS = [
   { id: 'custom', name: '自訂', description: '手動設定權限' },
 ] as const
 
-type PositionId = typeof POSITIONS[number]['id']
+type PositionId = (typeof POSITIONS)[number]['id']
 
 // 功能模組定義
 const FEATURE_MODULES = [
@@ -37,43 +37,80 @@ const FEATURE_MODULES = [
   { code: 'settings', name: '系統設定', description: '公司設定、權限' },
 ] as const
 
-type FeatureCode = typeof FEATURE_MODULES[number]['code']
+type FeatureCode = (typeof FEATURE_MODULES)[number]['code']
 type AccessLevel = 'full' | 'read' | 'none'
 
 // 職位預設權限
 const POSITION_DEFAULTS: Record<PositionId, Record<FeatureCode, AccessLevel>> = {
   admin: {
-    calendar: 'full', tours: 'full', orders: 'full', finance: 'full',
-    hr: 'full', database: 'full', itinerary: 'full', visas: 'full', settings: 'full',
+    calendar: 'full',
+    tours: 'full',
+    orders: 'full',
+    finance: 'full',
+    hr: 'full',
+    database: 'full',
+    itinerary: 'full',
+    visas: 'full',
+    settings: 'full',
   },
   sales: {
-    calendar: 'full', tours: 'full', orders: 'full', finance: 'read',
-    hr: 'none', database: 'full', itinerary: 'full', visas: 'read', settings: 'none',
+    calendar: 'full',
+    tours: 'full',
+    orders: 'full',
+    finance: 'read',
+    hr: 'none',
+    database: 'full',
+    itinerary: 'full',
+    visas: 'read',
+    settings: 'none',
   },
   accountant: {
-    calendar: 'read', tours: 'read', orders: 'read', finance: 'full',
-    hr: 'read', database: 'read', itinerary: 'none', visas: 'none', settings: 'none',
+    calendar: 'read',
+    tours: 'read',
+    orders: 'read',
+    finance: 'full',
+    hr: 'read',
+    database: 'read',
+    itinerary: 'none',
+    visas: 'none',
+    settings: 'none',
   },
   assistant: {
-    calendar: 'read', tours: 'read', orders: 'read', finance: 'none',
-    hr: 'none', database: 'read', itinerary: 'read', visas: 'none', settings: 'none',
+    calendar: 'read',
+    tours: 'read',
+    orders: 'read',
+    finance: 'none',
+    hr: 'none',
+    database: 'read',
+    itinerary: 'read',
+    visas: 'none',
+    settings: 'none',
   },
   custom: {
-    calendar: 'none', tours: 'none', orders: 'none', finance: 'none',
-    hr: 'none', database: 'none', itinerary: 'none', visas: 'none', settings: 'none',
+    calendar: 'none',
+    tours: 'none',
+    orders: 'none',
+    finance: 'none',
+    hr: 'none',
+    database: 'none',
+    itinerary: 'none',
+    visas: 'none',
+    settings: 'none',
   },
 }
 
 // 從 permissions 陣列解析出功能權限
 function parsePermissions(permissions: string[]): Record<FeatureCode, AccessLevel> {
   const result: Record<FeatureCode, AccessLevel> = {} as Record<FeatureCode, AccessLevel>
-  
+
   // 如果有 * 權限，全部設為 full
   if (permissions.includes('*')) {
-    FEATURE_MODULES.forEach(f => { result[f.code] = 'full' })
+    FEATURE_MODULES.forEach(f => {
+      result[f.code] = 'full'
+    })
     return result
   }
-  
+
   FEATURE_MODULES.forEach(f => {
     if (permissions.includes(f.code)) {
       result[f.code] = 'full'
@@ -83,20 +120,20 @@ function parsePermissions(permissions: string[]): Record<FeatureCode, AccessLeve
       result[f.code] = 'none'
     }
   })
-  
+
   return result
 }
 
 // 將功能權限轉換為 permissions 陣列
 function toPermissionsArray(features: Record<FeatureCode, AccessLevel>): string[] {
   const result: string[] = []
-  
+
   // 檢查是否全部都是 full
   const allFull = FEATURE_MODULES.every(f => features[f.code] === 'full')
   if (allFull) {
     return ['*']
   }
-  
+
   Object.entries(features).forEach(([code, level]) => {
     if (level === 'full') {
       result.push(code)
@@ -105,7 +142,7 @@ function toPermissionsArray(features: Record<FeatureCode, AccessLevel>): string[
     }
     // none 不加入
   })
-  
+
   return result
 }
 
@@ -128,7 +165,9 @@ export const PermissionsTabNew = forwardRef<{ handleSave: () => void }, Permissi
     // 從 employee.permissions 解析出功能權限
     const initialFeatures = parsePermissions(employee.permissions || [])
     const [features, setFeatures] = useState<Record<FeatureCode, AccessLevel>>(initialFeatures)
-    const [selectedPosition, setSelectedPosition] = useState<PositionId>(detectPosition(initialFeatures))
+    const [selectedPosition, setSelectedPosition] = useState<PositionId>(
+      detectPosition(initialFeatures)
+    )
     const [isSaving, setIsSaving] = useState(false)
 
     useEffect(() => {
@@ -157,8 +196,12 @@ export const PermissionsTabNew = forwardRef<{ handleSave: () => void }, Permissi
       setIsSaving(true)
       try {
         const permissions = toPermissionsArray(features)
-        const roles = selectedPosition === 'admin' ? ['admin'] : 
-                      selectedPosition === 'custom' ? [] : [selectedPosition]
+        const roles =
+          selectedPosition === 'admin'
+            ? ['admin']
+            : selectedPosition === 'custom'
+              ? []
+              : [selectedPosition]
 
         await updateUser(employee.id, {
           roles: roles as unknown as typeof employee.roles,
@@ -183,14 +226,28 @@ export const PermissionsTabNew = forwardRef<{ handleSave: () => void }, Permissi
       }
     }
 
-    const AccessButton = ({ level, current, onClick }: { level: AccessLevel; current: AccessLevel; onClick: () => void }) => {
+    const AccessButton = ({
+      level,
+      current,
+      onClick,
+    }: {
+      level: AccessLevel
+      current: AccessLevel
+      onClick: () => void
+    }) => {
       const isActive = current === level
       const icons = { full: Check, read: Eye, none: EyeOff }
       const labels = { full: '完整', read: '讀取', none: '關閉' }
       const colors = {
-        full: isActive ? 'bg-morandi-green/10 text-morandi-green border-morandi-green/30' : 'hover:bg-morandi-green/10',
-        read: isActive ? 'bg-status-info/10 text-status-info border-status-info/30' : 'hover:bg-status-info/10',
-        none: isActive ? 'bg-morandi-container/50 text-morandi-secondary border-border' : 'hover:bg-morandi-container/30',
+        full: isActive
+          ? 'bg-morandi-green/10 text-morandi-green border-morandi-green/30'
+          : 'hover:bg-morandi-green/10',
+        read: isActive
+          ? 'bg-status-info/10 text-status-info border-status-info/30'
+          : 'hover:bg-status-info/10',
+        none: isActive
+          ? 'bg-morandi-container/50 text-morandi-secondary border-border'
+          : 'hover:bg-morandi-container/30',
       }
       const Icon = icons[level]
 
@@ -239,7 +296,10 @@ export const PermissionsTabNew = forwardRef<{ handleSave: () => void }, Permissi
         {/* 功能權限矩陣 */}
         <div>
           <h4 className="text-sm font-medium text-morandi-primary mb-3">
-            功能權限 {selectedPosition !== 'custom' && <span className="text-morandi-muted font-normal">（可微調）</span>}
+            功能權限{' '}
+            {selectedPosition !== 'custom' && (
+              <span className="text-morandi-muted font-normal">（可微調）</span>
+            )}
           </h4>
           <div className="border rounded-lg overflow-hidden">
             <table className="w-full">

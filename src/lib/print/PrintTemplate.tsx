@@ -2,13 +2,13 @@
 
 /**
  * 通用列印模板
- * 
+ *
  * 特點：
  * - A4 尺寸（210mm × 297mm）
  * - 固定頁首頁尾
  * - 中間內容區可撐開
  * - 支援多頁
- * 
+ *
  * @example
  * ```tsx
  * <PrintTemplate
@@ -68,85 +68,74 @@ export interface PrintTemplateProps {
   showBorder?: boolean
 }
 
-export const PrintTemplate = forwardRef<HTMLDivElement, PrintTemplateProps>(
-  function PrintTemplate(
-    {
-      header,
-      footer,
-      children,
-      forceFooterBottom = false,
-      orientation = 'portrait',
-      margin,
-      className,
-      showBorder = false,
-    },
-    ref
-  ) {
-    const isLandscape = orientation === 'landscape'
-    const pageWidth = isLandscape ? A4.height : A4.width
-    const pageHeight = isLandscape ? A4.width : A4.height
+export const PrintTemplate = forwardRef<HTMLDivElement, PrintTemplateProps>(function PrintTemplate(
+  {
+    header,
+    footer,
+    children,
+    forceFooterBottom = false,
+    orientation = 'portrait',
+    margin,
+    className,
+    showBorder = false,
+  },
+  ref
+) {
+  const isLandscape = orientation === 'landscape'
+  const pageWidth = isLandscape ? A4.height : A4.width
+  const pageHeight = isLandscape ? A4.width : A4.height
 
-    const m = {
-      top: margin?.top ?? A4.margin.top,
-      right: margin?.right ?? A4.margin.right,
-      bottom: margin?.bottom ?? A4.margin.bottom,
-      left: margin?.left ?? A4.margin.left,
-    }
-
-    return (
-      <div
-        ref={ref}
-        className={cn(
-          'print-template bg-white text-black',
-          showBorder && 'border border-dashed border-gray-300',
-          className
-        )}
-        style={{
-          width: `${pageWidth}mm`,
-          minHeight: `${pageHeight}mm`,
-          padding: `${m.top}mm ${m.right}mm ${m.bottom}mm ${m.left}mm`,
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif',
-          fontSize: '12px',
-          lineHeight: '1.5',
-          boxSizing: 'border-box',
-          // 用 flex 讓頁尾可以撐到底部
-          display: 'flex',
-          flexDirection: 'column',
-        }}
-      >
-        {/* 頁首 */}
-        {header && (
-          <div 
-            className="print-header flex-shrink-0"
-            style={{ marginBottom: '10mm' }}
-          >
-            {header}
-          </div>
-        )}
-
-        {/* 主要內容 */}
-        <div 
-          className={cn(
-            'print-content',
-            forceFooterBottom && 'flex-1'
-          )}
-        >
-          {children}
-        </div>
-
-        {/* 頁尾 */}
-        {footer && (
-          <div 
-            className="print-footer flex-shrink-0"
-            style={{ marginTop: forceFooterBottom ? 'auto' : '10mm' }}
-          >
-            {footer}
-          </div>
-        )}
-      </div>
-    )
+  const m = {
+    top: margin?.top ?? A4.margin.top,
+    right: margin?.right ?? A4.margin.right,
+    bottom: margin?.bottom ?? A4.margin.bottom,
+    left: margin?.left ?? A4.margin.left,
   }
-)
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        'print-template bg-white text-black',
+        showBorder && 'border border-dashed border-gray-300',
+        className
+      )}
+      style={{
+        width: `${pageWidth}mm`,
+        minHeight: `${pageHeight}mm`,
+        padding: `${m.top}mm ${m.right}mm ${m.bottom}mm ${m.left}mm`,
+        fontFamily:
+          '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif',
+        fontSize: '12px',
+        lineHeight: '1.5',
+        boxSizing: 'border-box',
+        // 用 flex 讓頁尾可以撐到底部
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {/* 頁首 */}
+      {header && (
+        <div className="print-header flex-shrink-0" style={{ marginBottom: '10mm' }}>
+          {header}
+        </div>
+      )}
+
+      {/* 主要內容 */}
+      <div className={cn('print-content', forceFooterBottom && 'flex-1')}>{children}</div>
+
+      {/* 頁尾 */}
+      {footer && (
+        <div
+          className="print-footer flex-shrink-0"
+          style={{ marginTop: forceFooterBottom ? 'auto' : '10mm' }}
+        >
+          {footer}
+        </div>
+      )}
+    </div>
+  )
+})
 
 /**
  * 列印時的分頁符號

@@ -4,7 +4,7 @@ import { createApiClient } from '@/lib/supabase/api-client'
 /**
  * 權限檢查 API
  * POST /api/permissions/check
- * 
+ *
  * 檢查使用者是否有權限存取特定模組/分頁
  * 新版：使用 role_tab_permissions + employee_permission_overrides
  */
@@ -14,10 +14,7 @@ export async function POST(request: NextRequest) {
     const { roleId, employeeId, moduleCode, tabCode } = await request.json()
 
     if (!moduleCode) {
-      return NextResponse.json(
-        { error: '缺少 moduleCode 參數' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: '缺少 moduleCode 參數' }, { status: 400 })
     }
 
     // 1. 檢查租戶功能權限（RLS 自動過濾）
@@ -36,8 +33,8 @@ export async function POST(request: NextRequest) {
         .eq('role_id', roleId)
 
       // 找匹配的權限
-      const permission = permissions?.find(p => 
-        p.module_code === moduleCode && p.tab_code === (tabCode || null)
+      const permission = permissions?.find(
+        p => p.module_code === moduleCode && p.tab_code === (tabCode || null)
       )
       if (permission) {
         canRead = permission.can_read
@@ -52,10 +49,12 @@ export async function POST(request: NextRequest) {
         .select('module_code, tab_code, override_type')
         .eq('employee_id', employeeId)
 
-      const override = (overrides as { module_code: string; tab_code: string | null; override_type: string }[] | null)?.find(o =>
-        o.module_code === moduleCode && o.tab_code === (tabCode || null)
-      )
-      
+      const override = (
+        overrides as
+          | { module_code: string; tab_code: string | null; override_type: string }[]
+          | null
+      )?.find(o => o.module_code === moduleCode && o.tab_code === (tabCode || null))
+
       if (override) {
         if (override.override_type === 'grant') {
           canRead = true
@@ -74,9 +73,6 @@ export async function POST(request: NextRequest) {
       features: features?.filter(f => f.enabled).map(f => f.feature_code) || [],
     })
   } catch {
-    return NextResponse.json(
-      { error: '權限檢查失敗' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: '權限檢查失敗' }, { status: 500 })
   }
 }

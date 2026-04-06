@@ -73,16 +73,17 @@ export async function updateAISetting(
   value: string,
   updatedBy?: string
 ): Promise<boolean> {
-  const { error } = await supabase
-    .from('ai_settings')
-    .upsert({
+  const { error } = await supabase.from('ai_settings').upsert(
+    {
       workspace_id: workspaceId,
       setting_category: category,
       setting_key: key,
       setting_value: value,
       updated_at: new Date().toISOString(),
       updated_by: updatedBy || null,
-    }, { onConflict: 'workspace_id,setting_category,setting_key' })
+    },
+    { onConflict: 'workspace_id,setting_category,setting_key' }
+  )
 
   if (!error) {
     // 清快取

@@ -21,7 +21,7 @@ interface AgentStatusState {
   meetingActive: boolean
   meetingTopic?: string
   meetingParticipants: string[]
-  
+
   // Actions
   setAgentStatus: (agentId: string, status: AgentStatus, task?: string) => void
   setAgentMessage: (agentId: string, message: string) => void
@@ -39,7 +39,7 @@ const defaultAgents: Agent[] = [
     emoji: '🐺',
     role: '協調者',
     status: 'idle',
-    position: { x: 42, y: 22 },  // 左邊桌子旁
+    position: { x: 42, y: 22 }, // 左邊桌子旁
   },
   {
     id: 'matthew',
@@ -48,7 +48,7 @@ const defaultAgents: Agent[] = [
     role: 'IT Lead',
     status: 'working',
     currentTask: '開發 AI Office',
-    position: { x: 42, y: 32 },  // 中間桌子旁
+    position: { x: 42, y: 32 }, // 中間桌子旁
   },
   {
     id: 'nova',
@@ -56,7 +56,7 @@ const defaultAgents: Agent[] = [
     emoji: '✨',
     role: '設計與品質',
     status: 'idle',
-    position: { x: 58, y: 22 },  // 右邊桌子旁
+    position: { x: 58, y: 22 }, // 右邊桌子旁
   },
   {
     id: 'caesar',
@@ -64,7 +64,7 @@ const defaultAgents: Agent[] = [
     emoji: '🏛️',
     role: '財務',
     status: 'idle',
-    position: { x: 50, y: 38 },  // 會議桌旁
+    position: { x: 50, y: 38 }, // 會議桌旁
   },
   {
     id: 'donki',
@@ -72,7 +72,7 @@ const defaultAgents: Agent[] = [
     emoji: '🎯',
     role: '特助',
     status: 'idle',
-    position: { x: 60, y: 35 },  // 沙發旁
+    position: { x: 60, y: 35 }, // 沙發旁
   },
   {
     id: 'yuzuki',
@@ -80,19 +80,19 @@ const defaultAgents: Agent[] = [
     emoji: '🌙',
     role: '神秘顧問',
     status: 'idle',
-    position: { x: 65, y: 28 },  // 茶水間旁
+    position: { x: 65, y: 28 }, // 茶水間旁
   },
 ]
 
-export const useAgentStatusStore = create<AgentStatusState>((set) => ({
+export const useAgentStatusStore = create<AgentStatusState>(set => ({
   agents: defaultAgents,
   meetingActive: false,
   meetingTopic: undefined,
   meetingParticipants: [],
 
   setAgentStatus: (agentId, status, task) =>
-    set((state) => ({
-      agents: state.agents.map((agent) =>
+    set(state => ({
+      agents: state.agents.map(agent =>
         agent.id === agentId
           ? { ...agent, status, currentTask: task, lastActiveAt: new Date().toISOString() }
           : agent
@@ -100,8 +100,8 @@ export const useAgentStatusStore = create<AgentStatusState>((set) => ({
     })),
 
   setAgentMessage: (agentId, message) =>
-    set((state) => ({
-      agents: state.agents.map((agent) =>
+    set(state => ({
+      agents: state.agents.map(agent =>
         agent.id === agentId
           ? { ...agent, lastMessage: message, lastActiveAt: new Date().toISOString() }
           : agent
@@ -109,35 +109,31 @@ export const useAgentStatusStore = create<AgentStatusState>((set) => ({
     })),
 
   setAgentPosition: (agentId, position) =>
-    set((state) => ({
-      agents: state.agents.map((agent) =>
-        agent.id === agentId ? { ...agent, position } : agent
-      ),
+    set(state => ({
+      agents: state.agents.map(agent => (agent.id === agentId ? { ...agent, position } : agent)),
     })),
 
   startMeeting: (topic, participants) =>
-    set((state) => ({
+    set(state => ({
       meetingActive: true,
       meetingTopic: topic,
       meetingParticipants: participants,
-      agents: state.agents.map((agent) =>
-        participants.includes(agent.id)
-          ? { ...agent, status: 'meeting' as AgentStatus }
-          : agent
+      agents: state.agents.map(agent =>
+        participants.includes(agent.id) ? { ...agent, status: 'meeting' as AgentStatus } : agent
       ),
     })),
 
   endMeeting: () =>
-    set((state) => ({
+    set(state => ({
       meetingActive: false,
       meetingTopic: undefined,
       meetingParticipants: [],
-      agents: state.agents.map((agent) =>
+      agents: state.agents.map(agent =>
         state.meetingParticipants.includes(agent.id)
           ? { ...agent, status: 'idle' as AgentStatus }
           : agent
       ),
     })),
 
-  updateAgents: (agents) => set({ agents }),
+  updateAgents: agents => set({ agents }),
 }))

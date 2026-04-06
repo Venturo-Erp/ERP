@@ -35,10 +35,7 @@ export async function POST(request: NextRequest) {
     const workspaceId = await getCurrentWorkspaceId()
 
     if (!workspaceId) {
-      return NextResponse.json(
-        { error: '未登入或無法取得租戶' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: '未登入或無法取得租戶' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -65,10 +62,7 @@ export async function POST(request: NextRequest) {
     } = body
 
     if (!tourId || !memberIds?.length) {
-      return NextResponse.json(
-        { error: '缺少必要參數：tourId, memberIds' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: '缺少必要參數：tourId, memberIds' }, { status: 400 })
     }
 
     // 取得團資訊（RLS 會自動過濾）
@@ -79,10 +73,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (tourError || !tour) {
-      return NextResponse.json(
-        { error: '找不到旅遊團' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: '找不到旅遊團' }, { status: 404 })
     }
 
     // 取得第一個團員的資訊（作為簽約人）
@@ -101,35 +92,34 @@ export async function POST(request: NextRequest) {
     // 組合 contract_data（合約變數）
     const today = new Date()
     const departureDate = tour.departure_date ? new Date(tour.departure_date) : today
-    
+
     // 計算旅客名稱（多人時加「等 N 人」）
     const baseTravelerName = signerName || firstMember?.chinese_name || ''
-    const travelerNameWithCount = memberIds.length > 1
-      ? `${baseTravelerName} 等 ${memberIds.length} 人`
-      : baseTravelerName
+    const travelerNameWithCount =
+      memberIds.length > 1 ? `${baseTravelerName} 等 ${memberIds.length} 人` : baseTravelerName
 
     const generatedContractData = {
       // 審閱日期（今天）
       reviewYear: (today.getFullYear() - 1911).toString(),
       reviewMonth: (today.getMonth() + 1).toString(),
       reviewDay: today.getDate().toString(),
-      
+
       // 旅客資訊
       travelerName: travelerNameWithCount,
       travelerIdNumber: signerIdNumber || firstMember?.id_number || '',
       travelerPhone: signerPhone || '',
       travelerAddress: signerAddress || '',
-      
+
       // 緊急聯絡人
       emergencyContactName: emergencyContactName || '',
       emergencyContactRelation: emergencyContactRelation || '',
       emergencyContactPhone: emergencyContactPhone || '',
-      
+
       // 旅遊團資訊
       tourName: tour.name || '',
       tourDestination: tour.location || '',
       tourCode: tour.code || '',
-      
+
       // 集合資訊（出發日期）
       gatherYear: (departureDate.getFullYear() - 1911).toString(),
       gatherMonth: (departureDate.getMonth() + 1).toString(),
@@ -137,21 +127,21 @@ export async function POST(request: NextRequest) {
       gatherHour: '06',
       gatherMinute: '00',
       gatherLocation: '桃園國際機場第一航廈',
-      
+
       // 費用資訊（需從訂單取得）
       totalAmount: '0',
       depositAmount: '0',
       paymentMethod: '匯款',
       finalPaymentMethod: '匯款',
-      
+
       // 保險
       deathInsurance: '500萬',
       medicalInsurance: '20萬',
-      
+
       // 其他
       minParticipants: '16',
       companyExtension: '',
-      
+
       // 合併傳入的 contractData
       ...contractData,
     }
@@ -187,17 +177,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (createError) {
-      return NextResponse.json(
-        { error: '建立合約失敗' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: '建立合約失敗' }, { status: 500 })
     }
 
     // 更新團員的 contract_id
-    await supabase
-      .from('order_members')
-      .update({ contract_id: contract.id })
-      .in('id', memberIds)
+    await supabase.from('order_members').update({ contract_id: contract.id }).in('id', memberIds)
 
     // 產生簽約連結
     const signUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://erp.venturo.tw'}/public/contract/sign/${contractCode}`
@@ -210,9 +194,6 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch {
-    return NextResponse.json(
-      { error: '系統錯誤' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
   }
 }

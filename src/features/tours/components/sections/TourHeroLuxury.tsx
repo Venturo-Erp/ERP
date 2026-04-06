@@ -139,8 +139,8 @@ export function TourHeroLuxury({ data, viewMode }: TourHeroLuxuryProps) {
                   alt={data.title}
                   className="absolute inset-0 w-full h-full object-cover"
                   style={{
-                    objectPosition: data.coverImagePosition 
-                      ? `${data.coverImagePosition.x}% ${data.coverImagePosition.y}%` 
+                    objectPosition: data.coverImagePosition
+                      ? `${data.coverImagePosition.x}% ${data.coverImagePosition.y}%`
                       : 'center',
                   }}
                 />

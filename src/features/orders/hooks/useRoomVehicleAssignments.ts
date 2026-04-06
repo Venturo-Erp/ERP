@@ -587,7 +587,9 @@ export function useRoomVehicleAssignments({
 
           if (isRoomFull) {
             // 房間已滿，顯示警告但仍允許分配
-            toast.warning(`此房間已滿（${currentCount}/${targetRoom.capacity}），確定要加入嗎？`, { duration: 3000 })
+            toast.warning(`此房間已滿（${currentCount}/${targetRoom.capacity}），確定要加入嗎？`, {
+              duration: 3000,
+            })
           }
         }
       }

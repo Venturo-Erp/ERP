@@ -6,8 +6,8 @@ const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ''
 
-// 角落旅行社 workspace ID（之後從 session 取）
-const DEFAULT_WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
+// 從 webhook 傳入 workspace ID，不再寫死
+const FALLBACK_WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || '',
@@ -22,8 +22,8 @@ async function callGemini(prompt: string): Promise<string> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }]
-    })
+      contents: [{ parts: [{ text: prompt }] }],
+    }),
   })
 
   if (!response.ok) {
@@ -51,7 +51,10 @@ interface TourQueryResult {
  * 從訊息中提取意圖和關鍵字
  * 意圖提示詞從 DB 讀取（管理員可修改）
  */
-async function analyzeIntent(message: string): Promise<{
+async function analyzeIntent(
+  message: string,
+  wsId: string
+): Promise<{
   intent: string
   destination?: string
   tourCode?: string
@@ -59,7 +62,7 @@ async function analyzeIntent(message: string): Promise<{
   category?: string
 }> {
   const intentPrompt = await getAISetting(
-    DEFAULT_WORKSPACE_ID,
+    wsId,
     'ai_prompt',
     'intent_prompt',
     '分析用戶訊息的意圖，回傳 JSON：{"intent": "行程查詢|價格詢問|報名流程|付款方式|簽證資訊|集合資訊|客訴處理|轉接真人|我的訂單|景點推薦|其他", "destination": "目的地或null", "tour_code": "團號或null", "city": "詢問的城市或null", "category": "景點類型(文化/美食/自然/購物)或null"}'
@@ -72,7 +75,10 @@ async function analyzeIntent(message: string): Promise<{
 只回傳 JSON，不要其他文字。`
 
   const text = await callGemini(prompt)
-  const jsonText = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+  const jsonText = text
+    .replace(/```json\n?/g, '')
+    .replace(/```\n?/g, '')
+    .trim()
 
   try {
     return JSON.parse(jsonText)
@@ -107,38 +113,49 @@ async function queryTours(destination?: string, tourCode?: string): Promise<Tour
 }
 
 /**
- * 查詢客製化景點
+ * 查詢景點資料庫
  */
-async function queryCustomDestinations(
+async function queryAttractions(
   city?: string,
   category?: string,
+  destination?: string,
   limit: number = 5
-): Promise<{
-  id: string
-  city: string
-  name: string
-  category?: string | null
-  description?: string | null
-  tags?: string[] | null
-}[]> {
+): Promise<
+  {
+    id: string
+    name: string
+    city_id: string | null
+    country_id: string | null
+    category: string | null
+    description: string | null
+    tags: string[] | null
+  }[]
+> {
   let query = supabase
-    .from('custom_destinations')
-    .select('id, city, name, category, description, tags')
-    .eq('workspace_id', DEFAULT_WORKSPACE_ID)
-    .order('created_at', { ascending: false })
+    .from('attractions')
+    .select('id, name, city_id, country_id, category, description, tags')
+    .eq('is_active', true)
+    .order('display_order', { ascending: true })
     .limit(limit)
 
   if (city) {
-    query = query.eq('city', city)
+    query = query.eq('city_id', city)
   }
 
   if (category) {
     query = query.eq('category', category)
   }
 
+  // 用目的地模糊搜尋（城市或國家或名稱）
+  if (destination && !city) {
+    query = query.or(
+      `city_id.ilike.%${destination}%,country_id.ilike.%${destination}%,name.ilike.%${destination}%`
+    )
+  }
+
   const { data, error } = await query
   if (error) {
-    logger.error('[LINE AI] Query custom destinations error:', error)
+    logger.error('[LINE AI] Query attractions error:', error)
     return []
   }
   return data || []
@@ -152,30 +169,32 @@ async function generateAIResponse(
   userMessage: string,
   intent: string,
   tours: TourQueryResult[],
-  destinations: {
+  attractions: {
     id: string
-    city: string
     name: string
-    category?: string | null
-    description?: string | null
-    tags?: string[] | null
-  }[] = []
+    city_id: string | null
+    country_id: string | null
+    category: string | null
+    description: string | null
+    tags: string[] | null
+  }[] = [],
+  wsId: string = FALLBACK_WORKSPACE_ID
 ): Promise<string> {
   const systemPrompt = await getAISetting(
-    DEFAULT_WORKSPACE_ID,
+    wsId,
     'ai_prompt',
     'system_prompt',
     '你是角落旅行社的 AI 客服助理。專營高端客製化旅遊。繁體中文，親切專業，200字以內。'
   )
 
   let context = ''
-  
+
   if (tours.length > 0) {
     context += `我們的行程資料：\n${JSON.stringify(tours, null, 2)}\n\n`
   }
-  
-  if (destinations.length > 0) {
-    context += `推薦景點清單：\n${destinations.map(d => `- ${d.name}${d.category ? `（${d.category}）` : ''}${d.description ? `：${d.description}` : ''}${d.tags && d.tags.length > 0 ? ` #${d.tags.join(' #')}` : ''}`).join('\n')}\n\n`
+
+  if (attractions.length > 0) {
+    context += `推薦景點清單：\n${attractions.map(a => `- ${a.name}（${a.city_id || a.country_id || ''}${a.category ? ` / ${a.category}` : ''}）${a.description ? `：${a.description}` : ''}${a.tags && a.tags.length > 0 ? ` #${a.tags.join(' #')}` : ''}`).join('\n')}\n\n`
   }
 
   if (!context) {
@@ -214,17 +233,15 @@ async function saveConversation(
   intent: string,
   mentionedTours: string[]
 ) {
-  const { error } = await supabase
-    .from('customer_service_conversations')
-    .insert({
-      platform,
-      platform_user_id: userId,
-      user_display_name: displayName,
-      user_message: userMessage,
-      ai_response: aiResponse,
-      intent,
-      mentioned_tours: mentionedTours,
-    })
+  const { error } = await supabase.from('customer_service_conversations').insert({
+    platform,
+    platform_user_id: userId,
+    user_display_name: displayName,
+    user_message: userMessage,
+    ai_response: aiResponse,
+    intent,
+    mentioned_tours: mentionedTours,
+  })
 
   if (error) {
     logger.error('[LINE AI] Save conversation error:', error)
@@ -238,35 +255,47 @@ export async function handleAICustomerService(
   platform: 'line' | 'messenger',
   userId: string,
   displayName: string | null,
-  userMessage: string
+  userMessage: string,
+  workspaceId?: string
 ): Promise<string> {
   try {
+    const wsId = workspaceId || FALLBACK_WORKSPACE_ID
+
     // 1. 分析意圖（提示詞從 DB 讀取）
-    const { intent, destination, tourCode, city, category } = await analyzeIntent(userMessage)
+    const { intent, destination, tourCode, city, category } = await analyzeIntent(userMessage, wsId)
 
     // 2. 查詢相關行程
     const tours = await queryTours(destination, tourCode)
 
-    // 3. 查詢客製化景點（如果意圖是景點推薦）
-    let destinations: {
+    // 3. 查詢景點資料庫
+    let attractions: {
       id: string
-      city: string
       name: string
-      category?: string | null
-      description?: string | null
-      tags?: string[] | null
+      city_id: string | null
+      country_id: string | null
+      category: string | null
+      description: string | null
+      tags: string[] | null
     }[] = []
-    
-    if (intent === '景點推薦' || city) {
-      destinations = await queryCustomDestinations(city, category, 5)
+
+    if (intent === '景點推薦' || city || destination) {
+      attractions = await queryAttractions(city, category, destination, 5)
     }
 
     // 4. 生成 AI 回覆（系統提示詞從 DB 讀取）
-    const aiResponse = await generateAIResponse(userMessage, intent, tours, destinations)
+    const aiResponse = await generateAIResponse(userMessage, intent, tours, attractions, wsId)
 
     // 5. 儲存對話記錄
     const mentionedTours = tours.map(t => t.code)
-    await saveConversation(platform, userId, displayName, userMessage, aiResponse, intent, mentionedTours)
+    await saveConversation(
+      platform,
+      userId,
+      displayName,
+      userMessage,
+      aiResponse,
+      intent,
+      mentionedTours
+    )
 
     return aiResponse
   } catch (error) {

@@ -14,7 +14,9 @@ async function testAPI() {
   // Test 1: 取得所有收款方式
   console.log('📋 Test 1: 取得收款方式 (type=receipt)')
   try {
-    const response = await fetch(`${BASE_URL}/api/finance/payment-methods?workspace_id=${WORKSPACE_ID}&type=receipt`)
+    const response = await fetch(
+      `${BASE_URL}/api/finance/payment-methods?workspace_id=${WORKSPACE_ID}&type=receipt`
+    )
     const data = await response.json()
     console.log(`✅ 成功取得 ${data.length} 筆收款方式`)
     console.log('   範例:', data[0]?.name)
@@ -25,7 +27,9 @@ async function testAPI() {
   // Test 2: 取得所有付款方式
   console.log('\n📋 Test 2: 取得付款方式 (type=payment)')
   try {
-    const response = await fetch(`${BASE_URL}/api/finance/payment-methods?workspace_id=${WORKSPACE_ID}&type=payment`)
+    const response = await fetch(
+      `${BASE_URL}/api/finance/payment-methods?workspace_id=${WORKSPACE_ID}&type=payment`
+    )
     const data = await response.json()
     console.log(`✅ 成功取得 ${data.length} 筆付款方式`)
     console.log('   範例:', data[0]?.name)

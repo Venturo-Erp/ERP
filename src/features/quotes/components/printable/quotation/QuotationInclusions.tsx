@@ -22,10 +22,17 @@ export const QuotationInclusions: React.FC<QuotationInclusionsProps> = ({
     '個人消費及小費',
     '行李超重費用',
     '單人房差價',
-  ]
+  ],
 }) => {
   // 從「不包含」移到「包含」的項目
-  const allToggleItems = ['個人護照費用', '簽證費用', '行程外之自費行程', '個人消費及小費', '行李超重費用', '單人房差價']
+  const allToggleItems = [
+    '個人護照費用',
+    '簽證費用',
+    '行程外之自費行程',
+    '個人消費及小費',
+    '行李超重費用',
+    '單人房差價',
+  ]
   const includedExtra = allToggleItems.filter(i => !excludedItems.includes(i))
 
   return (

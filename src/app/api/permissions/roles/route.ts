@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const supabase = await createApiClient()
   const roleId = request.nextUrl.searchParams.get('id')
-  
+
   if (!roleId) {
     return NextResponse.json({ error: '缺少 id' }, { status: 400 })
   }
@@ -86,10 +86,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: '無法刪除管理員角色' }, { status: 400 })
   }
 
-  const { error } = await supabase
-    .from('workspace_roles')
-    .delete()
-    .eq('id', roleId)
+  const { error } = await supabase.from('workspace_roles').delete().eq('id', roleId)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

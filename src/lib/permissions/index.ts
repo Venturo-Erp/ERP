@@ -89,7 +89,7 @@ const ROUTE_TO_MODULE: Record<string, string> = {
 function getModuleFromRoute(route: string): string | null {
   // 移除開頭的 /
   const cleanRoute = route.startsWith('/') ? route : `/${route}`
-  
+
   // 找最長匹配的路由
   for (const [routePrefix, moduleCode] of Object.entries(ROUTE_TO_MODULE)) {
     if (cleanRoute === routePrefix || cleanRoute.startsWith(`${routePrefix}/`)) {
@@ -101,7 +101,7 @@ function getModuleFromRoute(route: string): string | null {
 
 /**
  * 根據路由檢查是否有權限
- * 
+ *
  * 支援兩種權限格式：
  * 1. 舊格式：permission_id（如 'tours', 'finance'）
  * 2. 新格式：module_code 或 module_code:tab_code（如 'tours:overview', 'finance:payments'）

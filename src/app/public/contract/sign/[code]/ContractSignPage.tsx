@@ -49,7 +49,12 @@ interface Contract {
     seal_image_url: string
   }
   members: ContractMember[]
-  itineraryData: { daily_itinerary: unknown; departure_date: string | null; outbound_flight: unknown; return_flight: unknown } | null
+  itineraryData: {
+    daily_itinerary: unknown
+    departure_date: string | null
+    outbound_flight: unknown
+    return_flight: unknown
+  } | null
   itineraryDepartureDate: string | null
 }
 
@@ -85,7 +90,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
   const [signatureWidth, setSignatureWidth] = useState(350)
   const [readingProgress, setReadingProgress] = useState(isSigned ? 100 : 0)
   const [signaturePreview, setSignaturePreview] = useState<string | null>(null)
-  
+
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // 行程預覽資料（跟報價單用同一個 formatter）
@@ -93,16 +98,26 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     const itin = contract.itineraryData
     if (!itin?.daily_itinerary) return []
     const daily = itin.daily_itinerary as Array<{
-      day: number; route?: string; title?: string
+      day: number
+      route?: string
+      title?: string
       meals?: { breakfast?: string; lunch?: string; dinner?: string }
-      accommodation?: string; sameAsPrevious?: boolean
-      hotelBreakfast?: boolean; lunchSelf?: boolean; dinnerSelf?: boolean
-      note?: string; description?: string
+      accommodation?: string
+      sameAsPrevious?: boolean
+      hotelBreakfast?: boolean
+      lunchSelf?: boolean
+      dinnerSelf?: boolean
+      note?: string
+      description?: string
     }>
     const schedule = daily.map((d, i) => ({
       day: d.day || i + 1,
       route: d.route || d.title || '',
-      meals: { breakfast: d.meals?.breakfast || '', lunch: d.meals?.lunch || '', dinner: d.meals?.dinner || '' },
+      meals: {
+        breakfast: d.meals?.breakfast || '',
+        lunch: d.meals?.lunch || '',
+        dinner: d.meals?.dinner || '',
+      },
       accommodation: d.accommodation || '',
       sameAsPrevious: d.sameAsPrevious || false,
       hotelBreakfast: d.hotelBreakfast || false,
@@ -110,7 +125,10 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
       dinnerSelf: d.dinnerSelf || false,
       note: d.note || d.description || undefined,
     }))
-    return getPreviewDailyData(schedule, contract.itineraryDepartureDate || itin.departure_date || null)
+    return getPreviewDailyData(
+      schedule,
+      contract.itineraryDepartureDate || itin.departure_date || null
+    )
   }, [contract.itineraryData, contract.itineraryDepartureDate])
 
   // 計算響應式簽名板寬度
@@ -119,7 +137,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
       const width = Math.min(350, window.innerWidth - 96) // 左右各留 48px
       setSignatureWidth(width)
     }
-    
+
     updateWidth()
     window.addEventListener('resize', updateWidth)
     return () => window.removeEventListener('resize', updateWidth)
@@ -130,16 +148,16 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     const loadContract = async () => {
       try {
         setLoading(true)
-        
+
         const templateFile = TEMPLATE_FILES[contract.template] || 'international.html'
         const response = await fetch(`/contract-templates/${templateFile}`)
-        
+
         if (!response.ok) {
           throw new Error('無法載入合約範本')
         }
-        
+
         let template = await response.text()
-        
+
         // 替換變數
         const data = contract.contract_data || {}
         Object.entries(data).forEach(([key, value]) => {
@@ -152,14 +170,16 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             .replace(/'/g, '&#039;')
           template = template.replace(regex, safeValue)
         })
-        
+
         // 在「訂約人」區塊的「甲方：」後面插入簽約人名字
-        const signerBaseName = contract.signer_type === 'company'
-          ? (contract.company_name || contract.signer_name)
-          : contract.signer_name
-        const signerDisplay = contract.member_ids?.length > 1
-          ? `${signerBaseName} 等 ${contract.member_ids.length} 人`
-          : signerBaseName
+        const signerBaseName =
+          contract.signer_type === 'company'
+            ? contract.company_name || contract.signer_name
+            : contract.signer_name
+        const signerDisplay =
+          contract.member_ids?.length > 1
+            ? `${signerBaseName} 等 ${contract.member_ids.length} 人`
+            : signerBaseName
         if (signerDisplay) {
           // 在最後一個「甲方：」後面插入名字 + 簽名佔位符
           const lastIndex = template.lastIndexOf('甲方：')
@@ -167,7 +187,8 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             const afterParty = template.indexOf('</span>', lastIndex)
             if (afterParty !== -1) {
               const insertPos = afterParty + '</span>'.length
-              template = template.slice(0, insertPos) +
+              template =
+                template.slice(0, insertPos) +
                 `<span style="font-size:8pt;font-family:'PingFang TC Light',sans-serif;color:black">${signerDisplay}</span>` +
                 `<span id="contract-signature-placeholder"></span>` +
                 template.slice(insertPos)
@@ -241,18 +262,62 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
           </style>
         `
         template = printStyles + template
-        
+
         // 清理 HTML
         const sanitizedHtml = DOMPurify.sanitize(template, {
           ALLOWED_TAGS: [
-            'html', 'head', 'body', 'style', 'title', 'div', 'span', 'p', 'br', 'hr',
-            'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
-            'ul', 'ol', 'li', 'strong', 'em', 'b', 'i', 'u', 'a', 'img', 'header', 'footer',
-            'section', 'article',
+            'html',
+            'head',
+            'body',
+            'style',
+            'title',
+            'div',
+            'span',
+            'p',
+            'br',
+            'hr',
+            'h1',
+            'h2',
+            'h3',
+            'h4',
+            'h5',
+            'h6',
+            'table',
+            'thead',
+            'tbody',
+            'tr',
+            'th',
+            'td',
+            'ul',
+            'ol',
+            'li',
+            'strong',
+            'em',
+            'b',
+            'i',
+            'u',
+            'a',
+            'img',
+            'header',
+            'footer',
+            'section',
+            'article',
           ],
-          ALLOWED_ATTR: ['class', 'id', 'style', 'src', 'alt', 'href', 'target', 'colspan', 'rowspan', 'width', 'height'],
+          ALLOWED_ATTR: [
+            'class',
+            'id',
+            'style',
+            'src',
+            'alt',
+            'href',
+            'target',
+            'colspan',
+            'rowspan',
+            'width',
+            'height',
+          ],
         })
-        
+
         setContractHtml(sanitizedHtml)
       } catch (err) {
         setError((err as Error).message)
@@ -260,7 +325,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
         setLoading(false)
       }
     }
-    
+
     loadContract()
   }, [contract])
 
@@ -268,13 +333,13 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
   const handleScroll = () => {
     const container = scrollContainerRef.current
     if (!container) return
-    
+
     const { scrollTop, scrollHeight, clientHeight } = container
     const progress = Math.min((scrollTop / (scrollHeight - clientHeight)) * 100, 100)
     setReadingProgress(progress)
-    
+
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50
-    
+
     if (isAtBottom && !canSign) {
       setCanSign(true)
     }
@@ -314,14 +379,18 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
               </tr>
             </thead>
             <tbody>
-              ${contract.members.map((m, i) => `
+              ${contract.members
+                .map(
+                  (m, i) => `
                 <tr style="border-bottom: 1px solid #ddd;">
                   <td style="padding: 6px 8px;">${i + 1}</td>
                   <td style="padding: 6px 8px; font-weight: 500;">${m.chinese_name || '-'}</td>
                   <td style="padding: 6px 8px;">${m.id_number || '-'}</td>
                   <td style="padding: 6px 8px;">${m.birth_date ? new Date(m.birth_date).toLocaleDateString('zh-TW') : '-'}</td>
                 </tr>
-              `).join('')}
+              `
+                )
+                .join('')}
             </tbody>
           </table>
         </div>
@@ -331,7 +400,8 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     // 行程表 HTML（跟報價單同款式）
     let itineraryHtml = ''
     if (contract.include_itinerary && dailyData.length > 0) {
-      const attachmentNum = contract.include_member_list && contract.members.length > 1 ? '二' : '一'
+      const attachmentNum =
+        contract.include_member_list && contract.members.length > 1 ? '二' : '一'
       const border = `1px solid ${MORANDI_COLORS.border}`
       itineraryHtml = `
         <div style="page-break-before: always; padding-top: 20px;">
@@ -344,9 +414,10 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
               </tr>
             </thead>
             <tbody>
-              ${dailyData.map((day, idx) => {
-                const bg = idx % 2 === 0 ? '#fff' : '#FAFAF8'
-                return `
+              ${dailyData
+                .map((day, idx) => {
+                  const bg = idx % 2 === 0 ? '#fff' : '#FAFAF8'
+                  return `
                   <tr style="background: ${bg};">
                     <td rowspan="${1 + (day.note ? 1 : 0) + 1 + (day.accommodation ? 1 : 0)}" style="padding: 6px 8px; text-align: center; vertical-align: middle; font-weight: 600; color: ${MORANDI_COLORS.gold}; border-top: ${border}; border-right: ${border};">${day.date || day.dayLabel}</td>
                     <td style="padding: 6px 8px; font-weight: 500; border-top: ${border};">${day.title}</td>
@@ -363,7 +434,8 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   </tr>
                   ${day.accommodation ? `<tr style="background: ${bg};"><td style="padding: 4px 8px; font-size: 11px; border-top: ${border};"><b style="color: ${MORANDI_COLORS.lightGray}">住宿 </b>${day.accommodation}</td></tr>` : ''}
                 `
-              }).join('')}
+                })
+                .join('')}
             </tbody>
           </table>
         </div>
@@ -373,9 +445,18 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     // 列印時帶入簽約人資訊 + 簽名
     const infoStyle = 'font-size:8pt;font-family:"PingFang TC Light",sans-serif;color:black'
     let printContractHtml = contractHtml
-      .replace('<!--SIGNER_ADDRESS-->', signerAddress ? `<span style="${infoStyle}">${signerAddress}</span>` : '')
-      .replace('<!--SIGNER_ID-->', signerIdNumber ? `<span style="${infoStyle}">${signerIdNumber}</span>` : '')
-      .replace('<!--SIGNER_PHONE-->', signerPhone ? `<span style="${infoStyle}">${signerPhone}</span>` : '')
+      .replace(
+        '<!--SIGNER_ADDRESS-->',
+        signerAddress ? `<span style="${infoStyle}">${signerAddress}</span>` : ''
+      )
+      .replace(
+        '<!--SIGNER_ID-->',
+        signerIdNumber ? `<span style="${infoStyle}">${signerIdNumber}</span>` : ''
+      )
+      .replace(
+        '<!--SIGNER_PHONE-->',
+        signerPhone ? `<span style="${infoStyle}">${signerPhone}</span>` : ''
+      )
     if (savedSignature) {
       printContractHtml = printContractHtml.replace(
         '<span id="contract-signature-placeholder"></span>',
@@ -449,7 +530,9 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   <div className="font-medium text-gray-900 flex items-center gap-2">
                     {TEMPLATE_LABELS[contract.template] || '旅遊合約'}
                     {savedSignature && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">已簽署</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                        已簽署
+                      </span>
                     )}
                   </div>
                   <div className="text-sm text-gray-500">
@@ -457,12 +540,10 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   </div>
                 </div>
               </div>
-              <div className="text-sm text-gray-500">
-                {contract.workspaces.name}
-              </div>
+              <div className="text-sm text-gray-500">{contract.workspaces.name}</div>
             </div>
           </div>
-          
+
           {/* 閱讀進度條 */}
           <div className="w-full h-1 bg-gray-100">
             <div
@@ -499,10 +580,20 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                     __html: (() => {
                       let html = contractHtml
                       // 填入簽約人資訊
-                      const infoStyle = 'font-size:8pt;font-family:"PingFang TC Light",sans-serif;color:black'
-                      html = html.replace('<!--SIGNER_ADDRESS-->', signerAddress ? `<span style="${infoStyle}">${signerAddress}</span>` : '')
-                      html = html.replace('<!--SIGNER_ID-->', signerIdNumber ? `<span style="${infoStyle}">${signerIdNumber}</span>` : '')
-                      html = html.replace('<!--SIGNER_PHONE-->', signerPhone ? `<span style="${infoStyle}">${signerPhone}</span>` : '')
+                      const infoStyle =
+                        'font-size:8pt;font-family:"PingFang TC Light",sans-serif;color:black'
+                      html = html.replace(
+                        '<!--SIGNER_ADDRESS-->',
+                        signerAddress ? `<span style="${infoStyle}">${signerAddress}</span>` : ''
+                      )
+                      html = html.replace(
+                        '<!--SIGNER_ID-->',
+                        signerIdNumber ? `<span style="${infoStyle}">${signerIdNumber}</span>` : ''
+                      )
+                      html = html.replace(
+                        '<!--SIGNER_PHONE-->',
+                        signerPhone ? `<span style="${infoStyle}">${signerPhone}</span>` : ''
+                      )
                       // 填入簽名
                       if (savedSignature) {
                         html = html.replace(
@@ -511,67 +602,39 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                         )
                       }
                       return html
-                    })()
+                    })(),
                   }}
                 />
 
-                {/* 舊的獨立簽名區塊移除，簽名已嵌入甲方旁邊 */}
-                {false && savedSignature && (
-                  <div className="border-t-2 border-amber-200 p-8">
-                    <div className="flex justify-between items-end">
-                      <div>
-                        <div className="text-sm text-gray-500 mb-1">甲方簽名</div>
-                        <img
-                          src={savedSignature || undefined}
-                          alt="甲方簽名"
-                          className="h-20 object-contain"
-                        />
-                        <div className="text-sm font-medium text-gray-900 mt-2">
-                          {contract.signer_type === 'company'
-                            ? contract.company_name
-                            : contract.signer_name}
-                          {contract.member_ids?.length > 1 &&
-                            ` 等 ${contract.member_ids.length} 人`}
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          簽署時間：{new Date().toLocaleString('zh-TW')}
-                        </div>
-                      </div>
-                      {contract.workspaces.seal_image_url && (
-                        <div>
-                          <div className="text-sm text-gray-500 mb-1">乙方（公司章）</div>
-                          <img
-                            src={contract.workspaces.seal_image_url}
-                            alt="公司章"
-                            className="h-20 object-contain"
-                          />
-                          <div className="text-sm font-medium text-gray-900 mt-2">
-                            {contract.workspaces.name}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
 
                 {/* 附件：團員名單表格 */}
                 {contract.include_member_list && contract.members.length > 1 && (
                   <div className="border-t-2 border-gray-200 p-8">
-                    <h3 className="text-base font-semibold text-gray-900 mb-4">附件一：簽約團員名單（{contract.members.length} 人）</h3>
+                    <h3 className="text-base font-semibold text-gray-900 mb-4">
+                      附件一：簽約團員名單（{contract.members.length} 人）
+                    </h3>
                     <table className="w-full text-sm border-collapse">
                       <thead>
                         <tr className="border-b-2 border-gray-300">
-                          <th className="text-left py-2 px-3 font-medium text-gray-600 w-10">序號</th>
+                          <th className="text-left py-2 px-3 font-medium text-gray-600 w-10">
+                            序號
+                          </th>
                           <th className="text-left py-2 px-3 font-medium text-gray-600">姓名</th>
-                          <th className="text-left py-2 px-3 font-medium text-gray-600">身分證字號 / 護照號碼</th>
-                          <th className="text-left py-2 px-3 font-medium text-gray-600">出生日期</th>
+                          <th className="text-left py-2 px-3 font-medium text-gray-600">
+                            身分證字號 / 護照號碼
+                          </th>
+                          <th className="text-left py-2 px-3 font-medium text-gray-600">
+                            出生日期
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {contract.members.map((member, idx) => (
                           <tr key={member.id} className="border-b border-gray-200">
                             <td className="py-2 px-3 text-gray-500">{idx + 1}</td>
-                            <td className="py-2 px-3 font-medium text-gray-900">{member.chinese_name || '-'}</td>
+                            <td className="py-2 px-3 font-medium text-gray-900">
+                              {member.chinese_name || '-'}
+                            </td>
                             <td className="py-2 px-3 text-gray-700">{member.id_number || '-'}</td>
                             <td className="py-2 px-3 text-gray-700">
                               {member.birth_date
@@ -589,13 +652,47 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                 {contract.include_itinerary && dailyData.length > 0 && (
                   <div className="border-t-2 border-gray-200 p-8">
                     <h3 className="text-base font-semibold text-gray-900 mb-4">
-                      {contract.include_member_list && contract.members.length > 1 ? '附件二' : '附件一'}：簡易行程表
+                      {contract.include_member_list && contract.members.length > 1
+                        ? '附件二'
+                        : '附件一'}
+                      ：簡易行程表
                     </h3>
-                    <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, fontSize: '12px', borderRadius: '8px', overflow: 'hidden', border: `1px solid ${MORANDI_COLORS.border}` }}>
+                    <table
+                      style={{
+                        width: '100%',
+                        borderCollapse: 'separate',
+                        borderSpacing: 0,
+                        fontSize: '12px',
+                        borderRadius: '8px',
+                        overflow: 'hidden',
+                        border: `1px solid ${MORANDI_COLORS.border}`,
+                      }}
+                    >
                       <thead>
                         <tr>
-                          <th style={{ padding: '6px 8px', textAlign: 'center', fontWeight: 600, color: 'white', backgroundColor: MORANDI_COLORS.gold, width: '50px' }}>天數</th>
-                          <th style={{ padding: '6px 8px', textAlign: 'left', fontWeight: 600, color: 'white', backgroundColor: MORANDI_COLORS.gold }}>行程內容</th>
+                          <th
+                            style={{
+                              padding: '6px 8px',
+                              textAlign: 'center',
+                              fontWeight: 600,
+                              color: 'white',
+                              backgroundColor: MORANDI_COLORS.gold,
+                              width: '50px',
+                            }}
+                          >
+                            天數
+                          </th>
+                          <th
+                            style={{
+                              padding: '6px 8px',
+                              textAlign: 'left',
+                              fontWeight: 600,
+                              color: 'white',
+                              backgroundColor: MORANDI_COLORS.gold,
+                            }}
+                          >
+                            行程內容
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
@@ -605,29 +702,91 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                           return (
                             <React.Fragment key={idx}>
                               <tr style={{ backgroundColor: bg }}>
-                                <td rowSpan={1 + (day.note ? 1 : 0) + 1 + (day.accommodation ? 1 : 0)} style={{ padding: '6px 8px', textAlign: 'center', verticalAlign: 'middle', fontWeight: 600, color: MORANDI_COLORS.gold, borderTop: border, borderRight: border }}>
+                                <td
+                                  rowSpan={1 + (day.note ? 1 : 0) + 1 + (day.accommodation ? 1 : 0)}
+                                  style={{
+                                    padding: '6px 8px',
+                                    textAlign: 'center',
+                                    verticalAlign: 'middle',
+                                    fontWeight: 600,
+                                    color: MORANDI_COLORS.gold,
+                                    borderTop: border,
+                                    borderRight: border,
+                                  }}
+                                >
                                   {day.date || day.dayLabel}
                                 </td>
-                                <td style={{ padding: '6px 8px', fontWeight: 500, borderTop: border }}>{day.title}</td>
+                                <td
+                                  style={{ padding: '6px 8px', fontWeight: 500, borderTop: border }}
+                                >
+                                  {day.title}
+                                </td>
                               </tr>
                               {day.note && (
                                 <tr style={{ backgroundColor: bg }}>
-                                  <td style={{ padding: '4px 8px', color: MORANDI_COLORS.gold, fontSize: '11px', borderTop: border }}>※{day.note}</td>
+                                  <td
+                                    style={{
+                                      padding: '4px 8px',
+                                      color: MORANDI_COLORS.gold,
+                                      fontSize: '11px',
+                                      borderTop: border,
+                                    }}
+                                  >
+                                    ※{day.note}
+                                  </td>
                                 </tr>
                               )}
                               <tr style={{ backgroundColor: bg }}>
                                 <td style={{ padding: '4px 0', borderTop: border }}>
-                                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', fontSize: '11px' }}>
-                                    <div style={{ padding: '0 8px' }}><span style={{ fontWeight: 600, color: MORANDI_COLORS.lightGray }}>早餐 </span>{day.meals.breakfast || 'X'}</div>
-                                    <div style={{ padding: '0 8px', borderLeft: border }}><span style={{ fontWeight: 600, color: MORANDI_COLORS.lightGray }}>午餐 </span>{day.meals.lunch || 'X'}</div>
-                                    <div style={{ padding: '0 8px', borderLeft: border }}><span style={{ fontWeight: 600, color: MORANDI_COLORS.lightGray }}>晚餐 </span>{day.meals.dinner || 'X'}</div>
+                                  <div
+                                    style={{
+                                      display: 'grid',
+                                      gridTemplateColumns: '1fr 1fr 1fr',
+                                      fontSize: '11px',
+                                    }}
+                                  >
+                                    <div style={{ padding: '0 8px' }}>
+                                      <span
+                                        style={{ fontWeight: 600, color: MORANDI_COLORS.lightGray }}
+                                      >
+                                        早餐{' '}
+                                      </span>
+                                      {day.meals.breakfast || 'X'}
+                                    </div>
+                                    <div style={{ padding: '0 8px', borderLeft: border }}>
+                                      <span
+                                        style={{ fontWeight: 600, color: MORANDI_COLORS.lightGray }}
+                                      >
+                                        午餐{' '}
+                                      </span>
+                                      {day.meals.lunch || 'X'}
+                                    </div>
+                                    <div style={{ padding: '0 8px', borderLeft: border }}>
+                                      <span
+                                        style={{ fontWeight: 600, color: MORANDI_COLORS.lightGray }}
+                                      >
+                                        晚餐{' '}
+                                      </span>
+                                      {day.meals.dinner || 'X'}
+                                    </div>
                                   </div>
                                 </td>
                               </tr>
                               {day.accommodation && (
                                 <tr style={{ backgroundColor: bg }}>
-                                  <td style={{ padding: '4px 8px', fontSize: '11px', borderTop: border }}>
-                                    <span style={{ fontWeight: 600, color: MORANDI_COLORS.lightGray }}>住宿 </span>{day.accommodation}
+                                  <td
+                                    style={{
+                                      padding: '4px 8px',
+                                      fontSize: '11px',
+                                      borderTop: border,
+                                    }}
+                                  >
+                                    <span
+                                      style={{ fontWeight: 600, color: MORANDI_COLORS.lightGray }}
+                                    >
+                                      住宿{' '}
+                                    </span>
+                                    {day.accommodation}
                                   </td>
                                 </tr>
                               )}
@@ -655,11 +814,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                     ? `已於 ${new Date(contract.signed_at!).toLocaleDateString('zh-TW')} 簽署完成`
                     : '簽署完成，請確認合約內容'}
                 </div>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={handlePrint}
-                >
+                <Button size="lg" variant="outline" onClick={handlePrint}>
                   <Printer className="w-5 h-5 mr-2" />
                   列印合約
                 </Button>
@@ -671,9 +826,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   <span>請閱讀完整合約內容</span>
                   <ChevronDown className="w-4 h-4 animate-bounce" />
                 </div>
-                <p className="text-xs text-gray-400">
-                  滾動至合約底部後即可簽署
-                </p>
+                <p className="text-xs text-gray-400">滾動至合約底部後即可簽署</p>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -685,11 +838,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   <FileSignature className="w-5 h-5 mr-2" />
                   我已閱讀，進行電子簽署
                 </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  onClick={handlePrint}
-                >
+                <Button size="lg" variant="outline" onClick={handlePrint}>
                   <Printer className="w-5 h-5 mr-2" />
                   列印合約
                 </Button>
@@ -720,9 +869,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
             <div className="mb-6 pb-4 border-b border-gray-100">
-              <div className="text-sm text-gray-500 mb-1">
-                {TEMPLATE_LABELS[contract.template]}
-              </div>
+              <div className="text-sm text-gray-500 mb-1">{TEMPLATE_LABELS[contract.template]}</div>
               <div className="font-semibold text-gray-900">{contract.tours.name}</div>
               <div className="text-sm text-gray-600 mt-1">
                 簽約人：{contract.signer_name}
@@ -797,9 +944,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
               </Button>
             </div>
 
-            <p className="text-xs text-gray-400 text-center mt-4">
-              以上資訊將記載於合約中
-            </p>
+            <p className="text-xs text-gray-400 text-center mt-4">以上資訊將記載於合約中</p>
           </div>
         </div>
       </div>
@@ -828,17 +973,12 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
           <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
             {/* 合約摘要 */}
             <div className="mb-6 pb-6 border-b border-gray-100">
-              <div className="text-sm text-gray-500 mb-1">
-                {TEMPLATE_LABELS[contract.template]}
-              </div>
+              <div className="text-sm text-gray-500 mb-1">{TEMPLATE_LABELS[contract.template]}</div>
               <div className="font-semibold text-gray-900">{contract.tours.name}</div>
               <div className="text-sm text-gray-600 mt-1">
                 簽約人：
-                {contract.signer_type === 'company'
-                  ? contract.company_name
-                  : contract.signer_name}
-                {contract.member_ids?.length > 1 &&
-                  ` 等 ${contract.member_ids.length} 人`}
+                {contract.signer_type === 'company' ? contract.company_name : contract.signer_name}
+                {contract.member_ids?.length > 1 && ` 等 ${contract.member_ids.length} 人`}
               </div>
             </div>
 
@@ -851,9 +991,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             ) : signaturePreview ? (
               // 簽名預覽
               <div className="space-y-4">
-                <div className="text-sm text-gray-600 text-center">
-                  請確認您的簽名：
-                </div>
+                <div className="text-sm text-gray-600 text-center">請確認您的簽名：</div>
                 <div className="border-2 border-amber-200 rounded-lg p-4 bg-amber-50">
                   <img
                     src={signaturePreview}
@@ -883,17 +1021,11 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
               </div>
             ) : (
               // 簽名板
-              <SignaturePad
-                onSave={handleSignatureCapture}
-                width={signatureWidth}
-                height={180}
-              />
+              <SignaturePad onSave={handleSignatureCapture} width={signatureWidth} height={180} />
             )}
 
             {error && (
-              <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
-                {error}
-              </div>
+              <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">{error}</div>
             )}
 
             <p className="text-xs text-gray-400 text-center mt-6">
@@ -924,21 +1056,17 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             <br />
             簽署時間：{new Date().toLocaleString('zh-TW')}
           </div>
-          
+
           {/* 導航按鈕 */}
           <div className="flex flex-col gap-3">
             <Button
               size="lg"
-              onClick={() => window.location.href = '/'}
+              onClick={() => (window.location.href = '/')}
               className="bg-amber-500 hover:bg-amber-600"
             >
               回到首頁
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => setStep('preview')}
-            >
+            <Button size="lg" variant="outline" onClick={() => setStep('preview')}>
               查看合約
             </Button>
           </div>

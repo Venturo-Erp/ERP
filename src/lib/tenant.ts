@@ -40,5 +40,3 @@ export function getBrandTagline(season?: string): string {
   const year = getCurrentYear()
   return season ? `${COMPANY_NAME} ${year} ${season}` : `${COMPANY_NAME} ${year}`
 }
-
-

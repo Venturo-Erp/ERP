@@ -1,7 +1,7 @@
 /**
  * LINE 推播訊息
  * POST /api/line/push
- * 
+ *
  * body: { userId: string, message: string }
  */
 
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${LINE_CHANNEL_ACCESS_TOKEN}`,
+        Authorization: `Bearer ${LINE_CHANNEL_ACCESS_TOKEN}`,
       },
       body: JSON.stringify({
         to: userId,

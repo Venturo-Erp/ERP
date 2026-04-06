@@ -63,7 +63,9 @@ export function getUserFromToken(token: string): AuthPayload | null {
 
 // 檢查權限（支援 module:tab 前綴比對）
 export function hasPermission(userPermissions: string[], requiredPermission: string): boolean {
-  return userPermissions.some(p => p === requiredPermission || p.startsWith(`${requiredPermission}:`))
+  return userPermissions.some(
+    p => p === requiredPermission || p.startsWith(`${requiredPermission}:`)
+  )
 }
 
 // 檢查角色

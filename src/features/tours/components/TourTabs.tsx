@@ -153,7 +153,7 @@ export function TourTabContent({
     case 'members':
       return (
         <OrderMembersExpandable
-          key={`members-${tour.id}`}  // 強制重新掛載
+          key={`members-${tour.id}`} // 強制重新掛載
           tourId={tour.id}
           workspaceId={workspaceId || ''}
           mode="tour"
@@ -173,7 +173,7 @@ export function TourTabContent({
     case 'requirements':
       return (
         <TourRequirementsTab
-          key={`requirements-${tour.id}`}  // 強制重新掛載
+          key={`requirements-${tour.id}`} // 強制重新掛載
           tourId={tour.id}
           quoteId={tour.quote_id}
           tour={tour}

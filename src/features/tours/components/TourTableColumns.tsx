@@ -75,10 +75,10 @@ export function useTourTableColumns({ ordersByTourId }: UseTourTableColumnsParam
         render: (value, row) => {
           const tour = row as Tour
           const today = new Date().toISOString().split('T')[0]
-          
+
           // 動態計算實際狀態
           let actualStatus = tour.status || ''
-          
+
           if (tour.departure_date && tour.return_date) {
             if (actualStatus === '待出發' && tour.departure_date <= today) {
               actualStatus = '進行中'
@@ -87,7 +87,7 @@ export function useTourTableColumns({ ordersByTourId }: UseTourTableColumnsParam
               actualStatus = '已完成'
             }
           }
-          
+
           const config = getStatusConfig('tour', actualStatus)
           return (
             <span

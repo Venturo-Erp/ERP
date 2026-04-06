@@ -454,7 +454,7 @@ export function ResourcePanel({
               <span>{selectedCountryName || '地區'}</span>
             </div>
           </button>
-          
+
           {/* 下拉選單 */}
           <div
             id="country-dropdown-menu"
@@ -478,7 +478,8 @@ export function ResourcePanel({
                 }}
                 className={cn(
                   'w-full px-3 py-2 text-left text-xs hover:bg-muted/50',
-                  resolvedCountryId === c.id && 'bg-morandi-gold/10 text-morandi-primary font-medium'
+                  resolvedCountryId === c.id &&
+                    'bg-morandi-gold/10 text-morandi-primary font-medium'
                 )}
               >
                 {c.name}
@@ -529,7 +530,7 @@ export function ResourcePanel({
 
       {/* 資源列表（雙欄佈局）*/}
       <div className="flex-1 overflow-y-auto p-2">
-        {(loading[activeTab] || isSearching) ? (
+        {loading[activeTab] || isSearching ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 size={20} className="animate-spin text-muted-foreground" />
           </div>
@@ -556,7 +557,8 @@ export function ResourcePanel({
                       return
                     }
 
-                    const workspaceId = (await supabase.auth.getUser()).data.user?.user_metadata?.workspace_id
+                    const workspaceId = (await supabase.auth.getUser()).data.user?.user_metadata
+                      ?.workspace_id
                     if (!workspaceId) {
                       alert('未登入或缺少 workspace')
                       return
@@ -660,14 +662,18 @@ export function ResourcePanel({
         tourItineraryItemId={
           editingResource
             ? coreItems.find(
-                item => item.resource_id === editingResource.id && item.resource_type === editingResource.type
+                item =>
+                  item.resource_id === editingResource.id &&
+                  item.resource_type === editingResource.type
               )?.id
             : undefined
         }
         currentOverride={
           editingResource
             ? coreItems.find(
-                item => item.resource_id === editingResource.id && item.resource_type === editingResource.type
+                item =>
+                  item.resource_id === editingResource.id &&
+                  item.resource_type === editingResource.type
               )?.override_description
             : undefined
         }
@@ -684,8 +690,6 @@ export function ResourcePanel({
           }))
         }}
       />
-
-
     </div>
   )
 }

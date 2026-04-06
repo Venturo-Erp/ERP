@@ -14,7 +14,6 @@ import { logger } from '@/lib/utils/logger'
 import { ApiError, successResponse } from '@/lib/api/response'
 import { subDays } from 'date-fns'
 
-
 // Logan 的 ID
 const LOGAN_ID = '00000000-0000-0000-0000-000000000002'
 

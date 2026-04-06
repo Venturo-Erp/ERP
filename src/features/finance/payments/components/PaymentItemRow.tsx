@@ -65,29 +65,36 @@ export function PaymentItemRow({
   const [copied, setCopied] = useState(false)
 
   // 讀取收入類會計科目（僅公司收款需要）
-  const [incomeSubjects, setIncomeSubjects] = useState<Array<{ id: string; code: string; name: string }>>([])
-  
+  const [incomeSubjects, setIncomeSubjects] = useState<
+    Array<{ id: string; code: string; name: string }>
+  >([])
+
   // 從 DB 讀取收款方式（fallback，如果父組件沒有傳入）
-  const [localPaymentMethods, setLocalPaymentMethods] = useState<Array<{ id: string; name: string; placeholder?: string | null }>>([])
-  const paymentMethods = propPaymentMethods && propPaymentMethods.length > 0 ? propPaymentMethods : localPaymentMethods
-  
+  const [localPaymentMethods, setLocalPaymentMethods] = useState<
+    Array<{ id: string; name: string; placeholder?: string | null }>
+  >([])
+  const paymentMethods =
+    propPaymentMethods && propPaymentMethods.length > 0 ? propPaymentMethods : localPaymentMethods
+
   useEffect(() => {
     // 只有在父組件沒有傳入時才自己載入
     if (propPaymentMethods && propPaymentMethods.length > 0) return
-    
+
     const loadPaymentMethods = async () => {
       const { useAuthStore } = await import('@/stores')
       const workspaceId = useAuthStore.getState().user?.workspace_id
       if (!workspaceId) return
-      
-      const response = await fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}&type=receipt`)
+
+      const response = await fetch(
+        `/api/finance/payment-methods?workspace_id=${workspaceId}&type=receipt`
+      )
       if (response.ok) {
         const data = await response.json()
         setLocalPaymentMethods(data || [])
       }
     }
     loadPaymentMethods()
-    
+
     if (mode === 'company') {
       // 讀取收入類科目
       const loadSubjects = async () => {
@@ -105,7 +112,7 @@ export function PaymentItemRow({
 
   // 收款方式選項：使用 DB 的資料（必須等載入完成）
   const isLoading = paymentMethods.length === 0
-  
+
   const receiptTypeOptions = paymentMethods.map(m => ({ value: m.name, label: m.name }))
 
   // 計算 Select value：

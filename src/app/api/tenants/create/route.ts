@@ -47,22 +47,29 @@ export async function POST(request: NextRequest) {
       .eq('id', auth.data.employeeId)
       .single()
 
-    logger.log(`Employee query: id=${auth.data.employeeId}, data=${JSON.stringify(currentEmployee)}, error=${currentEmpError?.message}`)
+    logger.log(
+      `Employee query: id=${auth.data.employeeId}, data=${JSON.stringify(currentEmployee)}, error=${currentEmpError?.message}`
+    )
 
     if (!currentEmployee || !currentEmployee.workspace_id) {
       logger.error('Employee not found or no workspace')
       return errorResponse('找不到員工資料', 403, ErrorCode.FORBIDDEN)
     }
 
-    const employeeName = currentEmployee.display_name || currentEmployee.chinese_name || currentEmployee.english_name || ''
-    
+    const employeeName =
+      currentEmployee.display_name ||
+      currentEmployee.chinese_name ||
+      currentEmployee.english_name ||
+      ''
+
     logger.log(`Employee name resolved: ${employeeName}`)
 
     // 🔒 權限檢查：只有有「租戶管理」權限的人可以建立租戶
     // 新系統：檢查 workspace_roles 的分頁權限
     // role_id 可能在頂層或 job_info 裡
-    const effectiveRoleId = currentEmployee.role_id
-      || (currentEmployee.job_info as Record<string, unknown>)?.role_id as string | undefined
+    const effectiveRoleId =
+      currentEmployee.role_id ||
+      ((currentEmployee.job_info as Record<string, unknown>)?.role_id as string | undefined)
     let canManageTenants = false
 
     if (effectiveRoleId) {
@@ -77,9 +84,7 @@ export async function POST(request: NextRequest) {
       canManageTenants = rolePermission?.can_write ?? false
     }
 
-    logger.log(
-      `Permission check: canManageTenants=${canManageTenants}, name=${employeeName}`
-    )
+    logger.log(`Permission check: canManageTenants=${canManageTenants}, name=${employeeName}`)
 
     if (!canManageTenants) {
       logger.error(`Permission denied: canManageTenants=${canManageTenants}, name=${employeeName}`)
@@ -138,7 +143,11 @@ export async function POST(request: NextRequest) {
 
     if (wsError || !workspace) {
       logger.error('Failed to create workspace:', JSON.stringify(wsError))
-      return errorResponse(`建立 workspace 失敗: ${wsError?.message || 'unknown'}`, 500, ErrorCode.OPERATION_FAILED)
+      return errorResponse(
+        `建立 workspace 失敗: ${wsError?.message || 'unknown'}`,
+        500,
+        ErrorCode.OPERATION_FAILED
+      )
     }
 
     logger.log(`Workspace created: ${workspace.id}`)
@@ -182,7 +191,9 @@ export async function POST(request: NextRequest) {
     logger.log(`Employee created: ${employee.id}`)
 
     // 2.3 建立 Supabase Auth 帳號（登入需要）
-    const authEmail = adminEmail?.toLowerCase() || `${newWorkspaceCode.toLowerCase()}_${adminEmployeeNumber.toLowerCase()}@venturo.com`
+    const authEmail =
+      adminEmail?.toLowerCase() ||
+      `${newWorkspaceCode.toLowerCase()}_${adminEmployeeNumber.toLowerCase()}@venturo.com`
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: authEmail,
       password: adminPassword,
@@ -224,7 +235,7 @@ export async function POST(request: NextRequest) {
       logger.warn('Failed to create default roles:', rolesError)
     } else {
       logger.log(`Default roles created: ${createdRoles?.length}`)
-      
+
       // 找到管理員職務的 ID
       const adminRole = createdRoles?.find(r => r.name === '管理員')
       if (adminRole) {
@@ -237,12 +248,28 @@ export async function POST(request: NextRequest) {
 
         // 管理員權限（全開）
         const adminModules = [
-          'dashboard', 'tours', 'orders', 'quotes', 'finance',
-          'database', 'hr', 'settings', 'calendar', 'todos',
-          'workspace', 'itinerary', 'visas', 'customers', 'channel',
+          'dashboard',
+          'tours',
+          'orders',
+          'quotes',
+          'finance',
+          'database',
+          'hr',
+          'settings',
+          'calendar',
+          'todos',
+          'workspace',
+          'itinerary',
+          'visas',
+          'customers',
+          'channel',
         ]
         const adminPermissions = adminModules.map(mod => ({
-          role_id: adminRole.id, module_code: mod, tab_code: null, can_read: true, can_write: true,
+          role_id: adminRole.id,
+          module_code: mod,
+          tab_code: null,
+          can_read: true,
+          can_write: true,
         }))
 
         // 設定預設權限（其他職務）
@@ -254,36 +281,174 @@ export async function POST(request: NextRequest) {
           // 管理員權限
           ...adminPermissions,
           // 會計權限
-          ...(accountingRole ? [
-            { role_id: accountingRole.id, module_code: 'accounting', tab_code: null, can_read: true, can_write: true },
-            { role_id: accountingRole.id, module_code: 'finance', tab_code: 'payments', can_read: true, can_write: true },
-            { role_id: accountingRole.id, module_code: 'finance', tab_code: 'requests', can_read: true, can_write: true },
-            { role_id: accountingRole.id, module_code: 'finance', tab_code: 'treasury', can_read: true, can_write: true },
-            { role_id: accountingRole.id, module_code: 'dashboard', tab_code: null, can_read: true, can_write: false },
-            { role_id: accountingRole.id, module_code: 'calendar', tab_code: null, can_read: true, can_write: true },
-            { role_id: accountingRole.id, module_code: 'todos', tab_code: null, can_read: true, can_write: true },
-            { role_id: accountingRole.id, module_code: 'settings', tab_code: 'personal', can_read: true, can_write: true },
-          ] : []),
+          ...(accountingRole
+            ? [
+                {
+                  role_id: accountingRole.id,
+                  module_code: 'accounting',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: accountingRole.id,
+                  module_code: 'finance',
+                  tab_code: 'payments',
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: accountingRole.id,
+                  module_code: 'finance',
+                  tab_code: 'requests',
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: accountingRole.id,
+                  module_code: 'finance',
+                  tab_code: 'treasury',
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: accountingRole.id,
+                  module_code: 'dashboard',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: false,
+                },
+                {
+                  role_id: accountingRole.id,
+                  module_code: 'calendar',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: accountingRole.id,
+                  module_code: 'todos',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: accountingRole.id,
+                  module_code: 'settings',
+                  tab_code: 'personal',
+                  can_read: true,
+                  can_write: true,
+                },
+              ]
+            : []),
           // 業務權限
-          ...(salesRole ? [
-            { role_id: salesRole.id, module_code: 'tours', tab_code: null, can_read: true, can_write: true },
-            { role_id: salesRole.id, module_code: 'orders', tab_code: null, can_read: true, can_write: true },
-            { role_id: salesRole.id, module_code: 'database', tab_code: 'customers', can_read: true, can_write: true },
-            { role_id: salesRole.id, module_code: 'dashboard', tab_code: null, can_read: true, can_write: false },
-            { role_id: salesRole.id, module_code: 'calendar', tab_code: null, can_read: true, can_write: true },
-            { role_id: salesRole.id, module_code: 'todos', tab_code: null, can_read: true, can_write: true },
-            { role_id: salesRole.id, module_code: 'settings', tab_code: 'personal', can_read: true, can_write: true },
-          ] : []),
+          ...(salesRole
+            ? [
+                {
+                  role_id: salesRole.id,
+                  module_code: 'tours',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: salesRole.id,
+                  module_code: 'orders',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: salesRole.id,
+                  module_code: 'database',
+                  tab_code: 'customers',
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: salesRole.id,
+                  module_code: 'dashboard',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: false,
+                },
+                {
+                  role_id: salesRole.id,
+                  module_code: 'calendar',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: salesRole.id,
+                  module_code: 'todos',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: salesRole.id,
+                  module_code: 'settings',
+                  tab_code: 'personal',
+                  can_read: true,
+                  can_write: true,
+                },
+              ]
+            : []),
           // 助理權限（同業務）
-          ...(assistantRole ? [
-            { role_id: assistantRole.id, module_code: 'tours', tab_code: null, can_read: true, can_write: true },
-            { role_id: assistantRole.id, module_code: 'orders', tab_code: null, can_read: true, can_write: true },
-            { role_id: assistantRole.id, module_code: 'database', tab_code: 'customers', can_read: true, can_write: true },
-            { role_id: assistantRole.id, module_code: 'dashboard', tab_code: null, can_read: true, can_write: false },
-            { role_id: assistantRole.id, module_code: 'calendar', tab_code: null, can_read: true, can_write: true },
-            { role_id: assistantRole.id, module_code: 'todos', tab_code: null, can_read: true, can_write: true },
-            { role_id: assistantRole.id, module_code: 'settings', tab_code: 'personal', can_read: true, can_write: true },
-          ] : []),
+          ...(assistantRole
+            ? [
+                {
+                  role_id: assistantRole.id,
+                  module_code: 'tours',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: assistantRole.id,
+                  module_code: 'orders',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: assistantRole.id,
+                  module_code: 'database',
+                  tab_code: 'customers',
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: assistantRole.id,
+                  module_code: 'dashboard',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: false,
+                },
+                {
+                  role_id: assistantRole.id,
+                  module_code: 'calendar',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: assistantRole.id,
+                  module_code: 'todos',
+                  tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                {
+                  role_id: assistantRole.id,
+                  module_code: 'settings',
+                  tab_code: 'personal',
+                  can_read: true,
+                  can_write: true,
+                },
+              ]
+            : []),
         ]
 
         if (defaultTabPermissions.length > 0) {
@@ -296,30 +461,48 @@ export async function POST(request: NextRequest) {
     // 2.6 建立預設 workspace_features（開放所有基本功能）
     // 免費功能（預設全開）
     const freeFeatures = [
-      'dashboard', 'calendar', 'workspace', 'todos', 'tours', 'orders',
-      'quotes', 'finance', 'database', 'hr', 'settings', 'customers',
-      'itinerary', 'channel',
+      'dashboard',
+      'calendar',
+      'workspace',
+      'todos',
+      'tours',
+      'orders',
+      'quotes',
+      'finance',
+      'database',
+      'hr',
+      'settings',
+      'customers',
+      'itinerary',
+      'channel',
     ]
     // 付費功能（預設關閉）
     const premiumFeatures = [
-      'accounting', 'design', 'office', 'bot_line', 'bot_telegram',
-      'fleet', 'local', 'supplier_portal', 'esims',
+      'accounting',
+      'design',
+      'office',
+      'bot_line',
+      'bot_telegram',
+      'fleet',
+      'local',
+      'supplier_portal',
+      'esims',
     ]
     const defaultFeatures = [
       ...freeFeatures.map(code => ({ feature_code: code, enabled: true })),
       ...premiumFeatures.map(code => ({ feature_code: code, enabled: false })),
     ]
-    
+
     const featuresToInsert = defaultFeatures.map(f => ({
       workspace_id: workspace.id,
       feature_code: f.feature_code,
       enabled: f.enabled,
     }))
-    
+
     const { error: featuresError } = await supabaseAdmin
       .from('workspace_features')
       .insert(featuresToInsert)
-    
+
     if (featuresError) {
       logger.warn('Failed to create workspace features:', featuresError)
     } else {
@@ -347,7 +530,9 @@ export async function POST(request: NextRequest) {
       // 複製國家
       const { data: cornerCountries } = await supabaseAdmin
         .from('countries')
-        .select('id, code, name, name_en, region, workspace_id, usage_count, emoji, has_regions, is_active, display_order')
+        .select(
+          'id, code, name, name_en, region, workspace_id, usage_count, emoji, has_regions, is_active, display_order'
+        )
         .eq('workspace_id', CORNER_WS)
       if (cornerCountries && cornerCountries.length > 0) {
         const newCountries = cornerCountries.map(c => ({
@@ -362,7 +547,9 @@ export async function POST(request: NextRequest) {
       // 複製城市/機場
       const { data: cornerAirports } = await supabaseAdmin
         .from('ref_airports')
-        .select('iata_code, icao_code, english_name, name_zh, city_code, city_name_en, city_name_zh, country_code, timezone, workspace_id, is_favorite, usage_count, latitude, longitude')
+        .select(
+          'iata_code, icao_code, english_name, name_zh, city_code, city_name_en, city_name_zh, country_code, timezone, workspace_id, is_favorite, usage_count, latitude, longitude'
+        )
         .eq('workspace_id', CORNER_WS)
       if (cornerAirports && cornerAirports.length > 0) {
         const newAirports = cornerAirports.map(a => ({
@@ -411,7 +598,10 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error)
-    logger.error('Failed to create tenant:', { error: errorMessage, stack: error instanceof Error ? error.stack : undefined })
+    logger.error('Failed to create tenant:', {
+      error: errorMessage,
+      stack: error instanceof Error ? error.stack : undefined,
+    })
     return errorResponse(`建立租戶失敗: ${errorMessage}`, 500, ErrorCode.INTERNAL_ERROR)
   }
 }

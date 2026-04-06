@@ -20,14 +20,17 @@ ALTER TABLE tour_requests ADD COLUMN IF NOT EXISTS package_status TEXT;
 console.log('🔄 Step 1: 擴充 tour_requests 表...\n')
 
 try {
-  const response = await fetch(`https://api.supabase.com/v1/projects/${projectRef}/database/query`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query: sql }),
-  })
+  const response = await fetch(
+    `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: sql }),
+    }
+  )
 
   const result = await response.json()
 

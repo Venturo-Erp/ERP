@@ -61,7 +61,9 @@ export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRest
     try {
       const { data, error } = await supabase
         .from('michelin_restaurants')
-        .select('id, name, english_name, description, country_id, city_id, michelin_stars, cuisine_type, address, images, is_active, created_at')
+        .select(
+          'id, name, english_name, description, country_id, city_id, michelin_stars, cuisine_type, address, images, is_active, created_at'
+        )
         .order('michelin_stars', { ascending: false })
         .order('name')
         .limit(1000)

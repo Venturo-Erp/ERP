@@ -60,7 +60,7 @@ export default function HRPage() {
   useEffect(() => {
     fetchAll()
     fetchWorkspaces()
-    
+
     // 載入職務列表
     const loadRoles = async () => {
       try {
@@ -198,10 +198,22 @@ export default function HRPage() {
     try {
       // 檢查員工是否有關聯資料
       const [tours, orders, receipts, payments] = await Promise.all([
-        supabase.from('tours').select('id', { count: 'exact', head: true }).or(`created_by.eq.${employee.id},controller_id.eq.${employee.id}`),
-        supabase.from('orders').select('id', { count: 'exact', head: true }).or(`sales_person_id.eq.${employee.id},assistant_id.eq.${employee.id}`),
-        supabase.from('receipts').select('id', { count: 'exact', head: true }).eq('created_by', employee.id),
-        supabase.from('payment_requests').select('id', { count: 'exact', head: true }).eq('created_by', employee.id),
+        supabase
+          .from('tours')
+          .select('id', { count: 'exact', head: true })
+          .or(`created_by.eq.${employee.id},controller_id.eq.${employee.id}`),
+        supabase
+          .from('orders')
+          .select('id', { count: 'exact', head: true })
+          .or(`sales_person_id.eq.${employee.id},assistant_id.eq.${employee.id}`),
+        supabase
+          .from('receipts')
+          .select('id', { count: 'exact', head: true })
+          .eq('created_by', employee.id),
+        supabase
+          .from('payment_requests')
+          .select('id', { count: 'exact', head: true })
+          .eq('created_by', employee.id),
       ])
 
       const blockers: string[] = []
@@ -446,7 +458,7 @@ export default function HRPage() {
         bordered={true}
         statusTabs={tabOptions}
         activeStatusTab={activeTab}
-        onStatusTabChange={(tab) => setActiveTab(tab as EmployeeTab)}
+        onStatusTabChange={tab => setActiveTab(tab as EmployeeTab)}
         defaultSort={{ key: 'employee_number', direction: 'asc' }}
         headerActions={
           <div className="flex gap-3">
@@ -480,7 +492,10 @@ export default function HRPage() {
 
       {expandedEmployee && (
         <Dialog open={true} onOpenChange={() => setExpandedEmployee(null)}>
-          <DialogContent level={1} className="max-w-6xl h-[90vh] p-0 bg-transparent shadow-none border-none">
+          <DialogContent
+            level={1}
+            className="max-w-6xl h-[90vh] p-0 bg-transparent shadow-none border-none"
+          >
             <DialogTitle className="sr-only">編輯員工</DialogTitle>
             <EmployeeForm
               employeeId={expandedEmployee}
@@ -495,7 +510,10 @@ export default function HRPage() {
       )}
 
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent level={1} className="max-w-6xl h-[90vh] p-0 bg-transparent shadow-none border-none">
+        <DialogContent
+          level={1}
+          className="max-w-6xl h-[90vh] p-0 bg-transparent shadow-none border-none"
+        >
           <DialogTitle className="sr-only">新增員工</DialogTitle>
           <EmployeeForm
             onSubmit={() => {

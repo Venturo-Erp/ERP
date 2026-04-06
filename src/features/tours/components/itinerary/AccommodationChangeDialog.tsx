@@ -102,7 +102,10 @@ export function AccommodationChangeDialog({
             <X className="h-4 w-4 mr-1" />
             取消
           </Button>
-          <Button onClick={onConfirm} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
+          <Button
+            onClick={onConfirm}
+            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+          >
             <Check className="h-4 w-4 mr-1" />
             確認變更
           </Button>

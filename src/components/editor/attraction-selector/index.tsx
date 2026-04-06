@@ -91,7 +91,7 @@ export function AttractionSelector({
 
   // 景點詳情狀態
   const [detailAttraction, setDetailAttraction] = useState<AttractionWithCity | null>(null)
-  
+
   // 編輯景點：直接跳轉到資料庫頁面
   const handleEditAttraction = (attraction: AttractionWithCity) => {
     // 在新分頁打開景點編輯頁面
@@ -103,7 +103,7 @@ export function AttractionSelector({
     null
   )
   const [showMap, setShowMap] = useState(false)
-  
+
   // 拖拽模式
   const [dragMode, setDragMode] = useState(false)
 
@@ -151,11 +151,10 @@ export function AttractionSelector({
     onClose()
   }
 
-
-
   return (
     <Dialog open={isOpen} onOpenChange={handleCancel}>
-      <DialogContent level={1}
+      <DialogContent
+        level={1}
         className="w-[1200px] h-[700px] max-w-[95vw] max-h-[90vh] flex flex-col p-0 gap-0"
       >
         <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-morandi-gold/10 to-transparent">
@@ -167,11 +166,11 @@ export function AttractionSelector({
             {showMap && (
               <Button
                 size="sm"
-                variant={dragMode ? "default" : "outline"}
+                variant={dragMode ? 'default' : 'outline'}
                 onClick={() => setDragMode(!dragMode)}
-                className={dragMode ? "bg-morandi-gold hover:bg-morandi-gold-hover" : ""}
+                className={dragMode ? 'bg-morandi-gold hover:bg-morandi-gold-hover' : ''}
               >
-                {dragMode ? "✓ 拖拽模式" : "啟用拖拽"}
+                {dragMode ? '✓ 拖拽模式' : '啟用拖拽'}
               </Button>
             )}
           </div>

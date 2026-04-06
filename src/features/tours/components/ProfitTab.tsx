@@ -134,7 +134,7 @@ export function ProfitTab({ tour }: ProfitTabProps) {
       allocation_mode: 'single' as const,
       payment_items: [],
       total_amount: Number(r.receipt_amount) || Number(r.amount) || 0,
-      status: r.status === '1' ? 'received' as const : 'pending' as const,
+      status: r.status === '1' ? ('received' as const) : ('pending' as const),
       created_by: r.created_by ?? '',
       updated_at: r.updated_at ?? '',
       created_at: r.created_at ?? '',

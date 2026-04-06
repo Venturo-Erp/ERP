@@ -54,158 +54,161 @@ function BlockEditorPageContent() {
   const initialLoadDone = useRef(false)
 
   // 用 attraction_id 從景點庫補上描述和圖片
-  const enrichDailyItinerary = useCallback(async (dailyItinerary: TourFormData['dailyItinerary']) => {
-    if (!dailyItinerary || dailyItinerary.length === 0) return dailyItinerary
+  const enrichDailyItinerary = useCallback(
+    async (dailyItinerary: TourFormData['dailyItinerary']) => {
+      if (!dailyItinerary || dailyItinerary.length === 0) return dailyItinerary
 
-    const attractionIds = new Set<string>()
-    for (const day of dailyItinerary) {
-      for (const activity of day.activities || []) {
-        if (activity.attraction_id && !activity.description) {
-          attractionIds.add(activity.attraction_id)
+      const attractionIds = new Set<string>()
+      for (const day of dailyItinerary) {
+        for (const activity of day.activities || []) {
+          if (activity.attraction_id && !activity.description) {
+            attractionIds.add(activity.attraction_id)
+          }
         }
       }
-    }
-    if (attractionIds.size === 0) return dailyItinerary
+      if (attractionIds.size === 0) return dailyItinerary
 
-    const supabase = createSupabaseBrowserClient()
-    const { data: attractions } = await supabase
-      .from('attractions')
-      .select('id, description, thumbnail, images')
-      .in('id', Array.from(attractionIds))
+      const supabase = createSupabaseBrowserClient()
+      const { data: attractions } = await supabase
+        .from('attractions')
+        .select('id, description, thumbnail, images')
+        .in('id', Array.from(attractionIds))
 
-    if (!attractions) return dailyItinerary
+      if (!attractions) return dailyItinerary
 
-    const attrMap = new Map(attractions.map(a => [a.id, a]))
-    return dailyItinerary.map(day => ({
-      ...day,
-      activities: day.activities?.map(activity => {
-        if (!activity.attraction_id) return activity
-        const attr = attrMap.get(activity.attraction_id)
-        if (!attr) return activity
-        return {
-          ...activity,
-          description: activity.description || attr.description || '',
-          image: activity.image || attr.thumbnail || (attr.images as string[])?.[0] || undefined,
-        }
-      }),
-    }))
-  }, [])
+      const attrMap = new Map(attractions.map(a => [a.id, a]))
+      return dailyItinerary.map(day => ({
+        ...day,
+        activities: day.activities?.map(activity => {
+          if (!activity.attraction_id) return activity
+          const attr = attrMap.get(activity.attraction_id)
+          if (!attr) return activity
+          return {
+            ...activity,
+            description: activity.description || attr.description || '',
+            image: activity.image || attr.thumbnail || (attr.images as string[])?.[0] || undefined,
+          }
+        }),
+      }))
+    },
+    []
+  )
 
   // 載入現有行程或創建新行程
   useEffect(() => {
     if (initialLoadDone.current) return
     const loadItinerary = async () => {
-    if (itineraryId && itineraries.length > 0) {
-      const itinerary = itineraries.find(i => i.id === itineraryId)
-      if (itinerary) {
-        // 用 attraction_id 補上景點描述和圖片
-        const enrichedDailyItinerary = await enrichDailyItinerary(itinerary.daily_itinerary || [])
+      if (itineraryId && itineraries.length > 0) {
+        const itinerary = itineraries.find(i => i.id === itineraryId)
+        if (itinerary) {
+          // 用 attraction_id 補上景點描述和圖片
+          const enrichedDailyItinerary = await enrichDailyItinerary(itinerary.daily_itinerary || [])
 
-        // 將現有資料轉換為 TourFormData 格式
-        const tourData: TourFormData = {
-          tagline: itinerary.tagline || '',
-          title: itinerary.title || '',
-          subtitle: itinerary.subtitle || '',
-          description: itinerary.description || '',
-          departureDate: itinerary.departure_date || '',
-          tourCode: itinerary.tour_code || '',
-          coverImage: itinerary.cover_image || '',
-          coverStyle: itinerary.cover_style as TourFormData['coverStyle'],
-          country: itinerary.country || '',
-          city: itinerary.city || '',
-          price: itinerary.price,
-          priceNote: itinerary.price_note,
-          outboundFlight: (Array.isArray(itinerary.outbound_flight)
-            ? itinerary.outbound_flight[0]
-            : itinerary.outbound_flight) || {
-            airline: '',
-            flightNumber: '',
-            departureAirport: '',
-            departureTime: '',
-            arrivalAirport: '',
-            arrivalTime: '',
-          },
-          returnFlight: (Array.isArray(itinerary.return_flight)
-            ? itinerary.return_flight[0]
-            : itinerary.return_flight) || {
-            airline: '',
-            flightNumber: '',
-            departureAirport: '',
-            departureTime: '',
-            arrivalAirport: '',
-            arrivalTime: '',
-          },
-          flightStyle: itinerary.flight_style as TourFormData['flightStyle'],
-          features: itinerary.features || [],
-          featuresStyle: 'original',
-          focusCards: itinerary.focus_cards || [],
-          leader: itinerary.leader || { name: '', domesticPhone: '', overseasPhone: '' },
-          meetingPoints: itinerary.meeting_info
-            ? [itinerary.meeting_info]
-            : [{ time: '', location: '' }],
-          hotels: itinerary.hotels || [],
-          showFeatures: itinerary.show_features !== false,
-          showLeaderMeeting: itinerary.show_leader_meeting !== false,
-          showHotels: itinerary.show_hotels || false,
-          itinerarySubtitle: itinerary.itinerary_subtitle || '',
-          dailyItinerary: enrichedDailyItinerary || [],
-          itineraryStyle: itinerary.itinerary_style as TourFormData['itineraryStyle'],
-          pricingDetails: itinerary.pricing_details,
-          showPricingDetails: itinerary.show_pricing_details || false,
-          // priceTiers 改從 tours.tier_pricings 讀取（price_tiers 已從 DB 移除）
-          priceTiers: undefined,
-          showPriceTiers: itinerary.show_price_tiers || false,
-          faqs: itinerary.faqs || undefined,
-          showFaqs: itinerary.show_faqs || false,
-          notices: itinerary.notices || undefined,
-          showNotices: itinerary.show_notices || false,
-          cancellationPolicy: itinerary.cancellation_policy || undefined,
-          showCancellationPolicy: itinerary.show_cancellation_policy || false,
+          // 將現有資料轉換為 TourFormData 格式
+          const tourData: TourFormData = {
+            tagline: itinerary.tagline || '',
+            title: itinerary.title || '',
+            subtitle: itinerary.subtitle || '',
+            description: itinerary.description || '',
+            departureDate: itinerary.departure_date || '',
+            tourCode: itinerary.tour_code || '',
+            coverImage: itinerary.cover_image || '',
+            coverStyle: itinerary.cover_style as TourFormData['coverStyle'],
+            country: itinerary.country || '',
+            city: itinerary.city || '',
+            price: itinerary.price,
+            priceNote: itinerary.price_note,
+            outboundFlight: (Array.isArray(itinerary.outbound_flight)
+              ? itinerary.outbound_flight[0]
+              : itinerary.outbound_flight) || {
+              airline: '',
+              flightNumber: '',
+              departureAirport: '',
+              departureTime: '',
+              arrivalAirport: '',
+              arrivalTime: '',
+            },
+            returnFlight: (Array.isArray(itinerary.return_flight)
+              ? itinerary.return_flight[0]
+              : itinerary.return_flight) || {
+              airline: '',
+              flightNumber: '',
+              departureAirport: '',
+              departureTime: '',
+              arrivalAirport: '',
+              arrivalTime: '',
+            },
+            flightStyle: itinerary.flight_style as TourFormData['flightStyle'],
+            features: itinerary.features || [],
+            featuresStyle: 'original',
+            focusCards: itinerary.focus_cards || [],
+            leader: itinerary.leader || { name: '', domesticPhone: '', overseasPhone: '' },
+            meetingPoints: itinerary.meeting_info
+              ? [itinerary.meeting_info]
+              : [{ time: '', location: '' }],
+            hotels: itinerary.hotels || [],
+            showFeatures: itinerary.show_features !== false,
+            showLeaderMeeting: itinerary.show_leader_meeting !== false,
+            showHotels: itinerary.show_hotels || false,
+            itinerarySubtitle: itinerary.itinerary_subtitle || '',
+            dailyItinerary: enrichedDailyItinerary || [],
+            itineraryStyle: itinerary.itinerary_style as TourFormData['itineraryStyle'],
+            pricingDetails: itinerary.pricing_details,
+            showPricingDetails: itinerary.show_pricing_details || false,
+            // priceTiers 改從 tours.tier_pricings 讀取（price_tiers 已從 DB 移除）
+            priceTiers: undefined,
+            showPriceTiers: itinerary.show_price_tiers || false,
+            faqs: itinerary.faqs || undefined,
+            showFaqs: itinerary.show_faqs || false,
+            notices: itinerary.notices || undefined,
+            showNotices: itinerary.show_notices || false,
+            cancellationPolicy: itinerary.cancellation_policy || undefined,
+            showCancellationPolicy: itinerary.show_cancellation_policy || false,
+          }
+
+          // 轉換為區塊
+          const newBlocks = tourDataToBlocks(tourData)
+          setBlocks(newBlocks)
         }
-
-        // 轉換為區塊
-        const newBlocks = tourDataToBlocks(tourData)
-        setBlocks(newBlocks)
+      } else if (!itineraryId) {
+        // 創建預設區塊
+        const defaultData: TourFormData = {
+          tagline: `${COMPANY_NAME} ${new Date().getFullYear()}`,
+          title: '',
+          subtitle: '',
+          description: '',
+          departureDate: '',
+          tourCode: '',
+          country: '',
+          city: '',
+          outboundFlight: {
+            airline: '',
+            flightNumber: '',
+            departureAirport: '',
+            departureTime: '',
+            arrivalAirport: '',
+            arrivalTime: '',
+          },
+          returnFlight: {
+            airline: '',
+            flightNumber: '',
+            departureAirport: '',
+            departureTime: '',
+            arrivalAirport: '',
+            arrivalTime: '',
+          },
+          features: [],
+          focusCards: [],
+          leader: { name: '', domesticPhone: '', overseasPhone: '' },
+          meetingPoints: [{ time: '', location: '' }],
+          hotels: [],
+          itinerarySubtitle: '',
+          dailyItinerary: [],
+        }
+        setBlocks(tourDataToBlocks(defaultData))
       }
-    } else if (!itineraryId) {
-      // 創建預設區塊
-      const defaultData: TourFormData = {
-        tagline: `${COMPANY_NAME} ${new Date().getFullYear()}`,
-        title: '',
-        subtitle: '',
-        description: '',
-        departureDate: '',
-        tourCode: '',
-        country: '',
-        city: '',
-        outboundFlight: {
-          airline: '',
-          flightNumber: '',
-          departureAirport: '',
-          departureTime: '',
-          arrivalAirport: '',
-          arrivalTime: '',
-        },
-        returnFlight: {
-          airline: '',
-          flightNumber: '',
-          departureAirport: '',
-          departureTime: '',
-          arrivalAirport: '',
-          arrivalTime: '',
-        },
-        features: [],
-        focusCards: [],
-        leader: { name: '', domesticPhone: '', overseasPhone: '' },
-        meetingPoints: [{ time: '', location: '' }],
-        hotels: [],
-        itinerarySubtitle: '',
-        dailyItinerary: [],
-      }
-      setBlocks(tourDataToBlocks(defaultData))
-    }
-    initialLoadDone.current = true
-    setLoading(false)
+      initialLoadDone.current = true
+      setLoading(false)
     }
     loadItinerary()
   }, [itineraryId, itineraries, enrichDailyItinerary])

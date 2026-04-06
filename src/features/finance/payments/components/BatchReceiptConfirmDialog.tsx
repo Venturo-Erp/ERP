@@ -1,7 +1,7 @@
 'use client'
 /**
  * BatchReceiptConfirmDialog - 收款批次確認對話框
- * 
+ *
  * 支援同一批次（batch_id）的多筆收款逐筆確認
  * 狀態：0=待確認, 1=已確認, 2=異常
  */
@@ -60,7 +60,9 @@ export function BatchReceiptConfirmDialog({
       if (receipt.batch_id) {
         const { data, error } = await supabase
           .from('receipts')
-          .select('id, receipt_number, order_id, tour_id, amount, actual_amount, receipt_date, payment_method, status, notes, workspace_id, created_at, updated_at')
+          .select(
+            'id, receipt_number, order_id, tour_id, amount, actual_amount, receipt_date, payment_method, status, notes, workspace_id, created_at, updated_at'
+          )
           .eq('batch_id', receipt.batch_id)
           .order('receipt_number', { ascending: true })
 
@@ -170,9 +172,7 @@ export function BatchReceiptConfirmDialog({
 
   // 更新異常備註
   const handleNoteChange = (index: number, value: string) => {
-    setItems(prev =>
-      prev.map((item, i) => (i === index ? { ...item, abnormalNote: value } : item))
-    )
+    setItems(prev => prev.map((item, i) => (i === index ? { ...item, abnormalNote: value } : item)))
   }
 
   // 儲存所有變更
@@ -181,8 +181,16 @@ export function BatchReceiptConfirmDialog({
     try {
       for (const item of items) {
         // 只更新有變更的
-        const originalStatus = item.receipt.status === '1' ? 'confirmed' : item.receipt.status === '2' ? 'abnormal' : 'pending'
-        if (item.status === originalStatus && item.actualAmount === (item.receipt.actual_amount || item.receipt.receipt_amount)) {
+        const originalStatus =
+          item.receipt.status === '1'
+            ? 'confirmed'
+            : item.receipt.status === '2'
+              ? 'abnormal'
+              : 'pending'
+        if (
+          item.status === originalStatus &&
+          item.actualAmount === (item.receipt.actual_amount || item.receipt.receipt_amount)
+        ) {
           continue
         }
 
@@ -231,10 +239,13 @@ export function BatchReceiptConfirmDialog({
   // 計算批次狀態
   const getBatchStatus = () => {
     const statuses = items.map(i => i.status)
-    if (statuses.every(s => s === 'confirmed')) return { label: '已確認', color: 'text-morandi-green' }
+    if (statuses.every(s => s === 'confirmed'))
+      return { label: '已確認', color: 'text-morandi-green' }
     if (statuses.every(s => s === 'abnormal')) return { label: '異常', color: 'text-morandi-red' }
-    if (statuses.some(s => s === 'abnormal')) return { label: '部分異常', color: 'text-status-warning' }
-    if (statuses.some(s => s === 'confirmed')) return { label: '部分確認', color: 'text-status-info' }
+    if (statuses.some(s => s === 'abnormal'))
+      return { label: '部分異常', color: 'text-status-warning' }
+    if (statuses.some(s => s === 'confirmed'))
+      return { label: '部分確認', color: 'text-status-info' }
     return { label: '待確認', color: 'text-morandi-secondary' }
   }
 
@@ -320,7 +331,10 @@ export function BatchReceiptConfirmDialog({
                       </td>
                       <td className="py-3 px-3 text-sm">{item.receipt.receipt_date || '-'}</td>
                       <td className="py-3 px-3 text-sm">{item.receipt.receipt_account || '-'}</td>
-                      <td className="py-3 px-3 text-sm text-muted-foreground max-w-[150px] truncate" title={item.receipt.notes || ''}>
+                      <td
+                        className="py-3 px-3 text-sm text-muted-foreground max-w-[150px] truncate"
+                        title={item.receipt.notes || ''}
+                      >
                         {item.receipt.notes || '-'}
                       </td>
                       <td className="py-3 px-3 text-sm text-right font-medium">
@@ -399,7 +413,8 @@ export function BatchReceiptConfirmDialog({
                           <span
                             className={cn(
                               'text-xs font-medium px-2 py-1 rounded',
-                              item.status === 'confirmed' && 'bg-morandi-green/10 text-morandi-green',
+                              item.status === 'confirmed' &&
+                                'bg-morandi-green/10 text-morandi-green',
                               item.status === 'abnormal' && 'bg-morandi-red/10 text-morandi-red'
                             )}
                           >

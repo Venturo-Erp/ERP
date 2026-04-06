@@ -13,14 +13,16 @@ export async function GET(request: NextRequest) {
 
   // 支援多種 type: expense, company_expense, company_income
   const typeFilter = searchParams.get('type')
-  
+
   let query = supabase
     .from('expense_categories')
-    .select(`
+    .select(
+      `
       *,
       debit_account:chart_of_accounts!debit_account_id(id, code, name),
       credit_account:chart_of_accounts!credit_account_id(id, code, name)
-    `)
+    `
+    )
     .or(`user_id.is.null,user_id.eq.${workspaceId}`) // 系統預設或該工作區的
     .order('sort_order', { ascending: true })
 
@@ -44,7 +46,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient()
   const body = await request.json()
-  const { name, icon, color, workspace_id, sort_order, debit_account_id, credit_account_id, type } = body
+  const { name, icon, color, workspace_id, sort_order, debit_account_id, credit_account_id, type } =
+    body
 
   if (!name || !workspace_id) {
     return NextResponse.json({ error: '缺少必要欄位' }, { status: 400 })
@@ -57,7 +60,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: '無效的類型' }, { status: 400 })
   }
 
-  const { data, error} = await supabase
+  const { data, error } = await supabase
     .from('expense_categories')
     .insert({
       name,
@@ -71,11 +74,13 @@ export async function POST(request: NextRequest) {
       debit_account_id: debit_account_id || null,
       credit_account_id: credit_account_id || null,
     })
-    .select(`
+    .select(
+      `
       *,
       debit_account:chart_of_accounts!debit_account_id(id, code, name),
       credit_account:chart_of_accounts!credit_account_id(id, code, name)
-    `)
+    `
+    )
     .single()
 
   if (error) {
@@ -107,11 +112,13 @@ export async function PUT(request: NextRequest) {
       credit_account_id: credit_account_id || null,
     })
     .eq('id', id)
-    .select(`
+    .select(
+      `
       *,
       debit_account:chart_of_accounts!debit_account_id(id, code, name),
       credit_account:chart_of_accounts!credit_account_id(id, code, name)
-    `)
+    `
+    )
     .single()
 
   if (error) {

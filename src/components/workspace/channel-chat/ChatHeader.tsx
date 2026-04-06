@@ -4,12 +4,7 @@ import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import {
-  Users,
-  MapPin,
-  CircleDollarSign,
-  ExternalLink,
-} from 'lucide-react'
+import { Users, MapPin, CircleDollarSign, ExternalLink } from 'lucide-react'
 import { useQuotes } from '@/data'
 import { stripHtml } from '@/lib/utils/string-utils'
 import { COMP_WORKSPACE_LABELS } from '../constants/labels'
@@ -20,11 +15,7 @@ interface ChatHeaderProps {
   tourId?: string | null
 }
 
-export function ChatHeader({
-  showMemberSidebar,
-  onToggleMemberSidebar,
-  tourId,
-}: ChatHeaderProps) {
+export function ChatHeader({ showMemberSidebar, onToggleMemberSidebar, tourId }: ChatHeaderProps) {
   const router = useRouter()
   const { items: quotes } = useQuotes()
 

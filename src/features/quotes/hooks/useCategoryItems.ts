@@ -77,7 +77,11 @@ export const useCategoryItems = ({
                     updatedItem.total = updatedItem.child_price || 0
                   } else if (updatedItem.name === '嬰兒') {
                     updatedItem.total = updatedItem.infant_price || 0
-                  } else if (category_id === 'accommodation' || category_id === 'meals' || category_id === 'activities') {
+                  } else if (
+                    category_id === 'accommodation' ||
+                    category_id === 'meals' ||
+                    category_id === 'activities'
+                  ) {
                     // 住宿 & 餐飲 & 活動：小計 = 單價 ÷ 單位人數
                     // 住宿：quantity = 幾人房（2人房 → 房價 ÷ 2 = 每人價）
                     // 餐飲：quantity = 幾人一桌（10人桌 → 桌價 ÷ 10 = 每人價）
@@ -100,7 +104,9 @@ export const useCategoryItems = ({
                       updatedItem.total = Math.ceil(total_cost / groupSizeForGuide)
                     } else {
                       // 人數為 1 時不分攤
-                      updatedItem.total = Math.ceil(effectiveQuantity * (updatedItem.unit_price || 0))
+                      updatedItem.total = Math.ceil(
+                        effectiveQuantity * (updatedItem.unit_price || 0)
+                      )
                     }
                   } else if (
                     category_id === 'transport' &&

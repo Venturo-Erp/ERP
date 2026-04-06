@@ -144,12 +144,14 @@ export function useQuoteLoader(
       logger.info(COMP_TOURS_LABELS.報價單載入成功, quote?.id, quote?.name)
 
       // 註：quote_items 表已廢棄，此查詢為向後兼容保留
-      const { data: quoteItems, error: itemsError } = await supabase
+      const { data: quoteItems, error: itemsError } = (await supabase
         .from('quote_items' as never)
-        .select('id, quote_id, category, item_name, unit_price, quantity, subtotal, notes, sort_order, created_at')
+        .select(
+          'id, quote_id, category, item_name, unit_price, quantity, subtotal, notes, sort_order, created_at'
+        )
         .eq('quote_id', quoteId)
         .order('display_order', { ascending: true })
-        .limit(500) as { data: QuoteItemRow[] | null; error: Error | null }
+        .limit(500)) as { data: QuoteItemRow[] | null; error: Error | null }
 
       if (itemsError) {
         logger.error(COMP_TOURS_LABELS.載入報價項目失敗, itemsError)

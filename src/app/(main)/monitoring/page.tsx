@@ -33,7 +33,6 @@ export default function MonitoringPage() {
       onTabChange={setActiveTab}
     >
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-
         {/* 總覽：兩個系統並排 */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">

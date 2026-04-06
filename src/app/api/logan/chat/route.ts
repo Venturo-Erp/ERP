@@ -11,7 +11,6 @@ import { ApiError, successResponse } from '@/lib/api/response'
 import { validateBody } from '@/lib/api/validation'
 import { loganChatSchema } from '@/lib/validations/api-schemas'
 
-
 export async function POST(request: NextRequest) {
   // 全局 AI 開關
   if (process.env.NEXT_PUBLIC_DISABLE_AI === 'true') {

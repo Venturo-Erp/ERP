@@ -1,40 +1,40 @@
-import { createClient } from '@supabase/supabase-js';
-import 'dotenv/config';
+import { createClient } from '@supabase/supabase-js'
+import 'dotenv/config'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+)
 
 const { data, error } = await supabase
   .from('attractions')
   .select('id, name_zh, name_en, city, category')
   .eq('country', 'Thailand')
   .order('city', { ascending: true })
-  .order('name_zh', { ascending: true });
+  .order('name_zh', { ascending: true })
 
 if (error) {
-  console.error('錯誤:', error);
-  process.exit(1);
+  console.error('錯誤:', error)
+  process.exit(1)
 }
 
-console.log(`泰國總景點數：${data.length}\n`);
+console.log(`泰國總景點數：${data.length}\n`)
 
 // 按城市分組
 const byCity = data.reduce((acc, item) => {
-  if (!acc[item.city]) acc[item.city] = [];
-  acc[item.city].push(item);
-  return acc;
-}, {});
+  if (!acc[item.city]) acc[item.city] = []
+  acc[item.city].push(item)
+  return acc
+}, {})
 
 Object.entries(byCity).forEach(([city, attractions]) => {
-  console.log(`\n【${city}】(${attractions.length} 個)`);
+  console.log(`\n【${city}】(${attractions.length} 個)`)
   attractions.forEach((attr, i) => {
-    console.log(`${i + 1}. ${attr.name_zh} (${attr.name_en || 'N/A'}) - ${attr.category || 'N/A'}`);
-  });
-});
+    console.log(`${i + 1}. ${attr.name_zh} (${attr.name_en || 'N/A'}) - ${attr.category || 'N/A'}`)
+  })
+})
 
-console.log('\n\n=== 芭達雅景點對比 ===\n');
+console.log('\n\n=== 芭達雅景點對比 ===\n')
 
 // 芭達雅景點清單（從表單）
 const pattayaList = [
@@ -83,21 +83,19 @@ const pattayaList = [
   '日本街',
   '3D立體美術館',
   '將軍山觀景台',
-  'Pattaya Park Tower'
-];
+  'Pattaya Park Tower',
+]
 
 // 檢查哪些不在資料庫
 const pattayaInDB = data
   .filter(a => a.city === '芭達雅' || a.city === 'Pattaya')
-  .map(a => a.name_zh);
+  .map(a => a.name_zh)
 
 const missing = pattayaList.filter(name => {
-  return !pattayaInDB.some(dbName => 
-    dbName.includes(name) || name.includes(dbName)
-  );
-});
+  return !pattayaInDB.some(dbName => dbName.includes(name) || name.includes(dbName))
+})
 
-console.log(`\n缺少的芭達雅景點 (${missing.length} 個):`);
+console.log(`\n缺少的芭達雅景點 (${missing.length} 個):`)
 missing.forEach((name, i) => {
-  console.log(`${i + 1}. ${name}`);
-});
+  console.log(`${i + 1}. ${name}`)
+})

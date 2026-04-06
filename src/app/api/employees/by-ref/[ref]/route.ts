@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ ref: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ ref: string }> }) {
   const { ref } = await params
 
   const supabase = createClient(
@@ -15,13 +12,21 @@ export async function GET(
   // 先用 employee_number 查
   let { data, error } = await supabase
     .from('employees')
-    .select('id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active')
+    .select(
+      'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active'
+    )
     .eq('employee_number', ref)
     .single()
 
   // 如果查不到，用 display_name 查
   if (!data) {
-    const result = await supabase.from('employees').select('id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active').eq('display_name', ref).single()
+    const result = await supabase
+      .from('employees')
+      .select(
+        'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active'
+      )
+      .eq('display_name', ref)
+      .single()
     data = result.data
     error = result.error
   }

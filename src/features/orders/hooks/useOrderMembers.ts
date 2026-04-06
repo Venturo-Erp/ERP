@@ -179,7 +179,9 @@ export function useOrderMembers({
 
           const { data: allMembersData, error: membersError } = await supabase
             .from('order_members')
-            .select('id, order_id, chinese_name, passport_name, passport_name_print, gender, age, birth_date, identity, member_type, id_number, passport_number, passport_expiry, passport_image_url, pnr, ticket_number, ticketing_deadline, hotel_1_name, hotel_1_checkin, hotel_1_checkout, hotel_2_name, hotel_2_checkin, hotel_2_checkout, selling_price, cost_price, flight_cost, transport_cost, misc_cost, profit, deposit_amount, balance_amount, deposit_receipt_no, balance_receipt_no, total_payable, special_meal, remarks, customer_id, checked_in, checked_in_at, sort_order, flight_self_arranged, custom_costs, contract_created_at, workspace_id, created_at, created_by, updated_at, updated_by')
+            .select(
+              'id, order_id, chinese_name, passport_name, passport_name_print, gender, age, birth_date, identity, member_type, id_number, passport_number, passport_expiry, passport_image_url, pnr, ticket_number, ticketing_deadline, hotel_1_name, hotel_1_checkin, hotel_1_checkout, hotel_2_name, hotel_2_checkin, hotel_2_checkout, selling_price, cost_price, flight_cost, transport_cost, misc_cost, profit, deposit_amount, balance_amount, deposit_receipt_no, balance_receipt_no, total_payable, special_meal, remarks, customer_id, checked_in, checked_in_at, sort_order, flight_self_arranged, custom_costs, contract_created_at, workspace_id, created_at, created_by, updated_at, updated_by'
+            )
             .in('order_id', orderIds)
             .order('created_at', { ascending: true })
             .limit(500)
@@ -198,7 +200,9 @@ export function useOrderMembers({
         }
         const { data, error: membersError } = await supabase
           .from('order_members')
-          .select('id, order_id, chinese_name, passport_name, passport_name_print, gender, age, birth_date, identity, member_type, id_number, passport_number, passport_expiry, passport_image_url, pnr, ticket_number, ticketing_deadline, hotel_1_name, hotel_1_checkin, hotel_1_checkout, hotel_2_name, hotel_2_checkin, hotel_2_checkout, selling_price, cost_price, flight_cost, transport_cost, misc_cost, profit, deposit_amount, balance_amount, deposit_receipt_no, balance_receipt_no, total_payable, special_meal, remarks, customer_id, checked_in, checked_in_at, sort_order, flight_self_arranged, custom_costs, contract_created_at, workspace_id, created_at, created_by, updated_at, updated_by')
+          .select(
+            'id, order_id, chinese_name, passport_name, passport_name_print, gender, age, birth_date, identity, member_type, id_number, passport_number, passport_expiry, passport_image_url, pnr, ticket_number, ticketing_deadline, hotel_1_name, hotel_1_checkin, hotel_1_checkout, hotel_2_name, hotel_2_checkin, hotel_2_checkout, selling_price, cost_price, flight_cost, transport_cost, misc_cost, profit, deposit_amount, balance_amount, deposit_receipt_no, balance_receipt_no, total_payable, special_meal, remarks, customer_id, checked_in, checked_in_at, sort_order, flight_self_arranged, custom_costs, contract_created_at, workspace_id, created_at, created_by, updated_at, updated_by'
+          )
           .eq('order_id', orderId)
           .order('created_at', { ascending: true })
           .limit(500)

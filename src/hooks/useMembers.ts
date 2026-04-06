@@ -74,11 +74,8 @@ interface UseMembersReturn {
  */
 export function useMembers({ orderId, tourId }: UseMembersOptions = {}): UseMembersReturn {
   // 使用 @/data 的 SWR hook
-  const {
-    items: allMembers,
-    loading: isLoading,
-  } = useMembersData()
-  
+  const { items: allMembers, loading: isLoading } = useMembersData()
+
   // 相容舊 API
   const isValidating = false
   const error: Error | undefined = undefined

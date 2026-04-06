@@ -75,7 +75,10 @@ export function DayHeader({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button onClick={onSave} className="gap-2 bg-editor-theme-green hover:bg-editor-theme-green/80">
+          <Button
+            onClick={onSave}
+            className="gap-2 bg-editor-theme-green hover:bg-editor-theme-green/80"
+          >
             <Save size={16} />
             {COMP_EDITOR_LABELS.SAVE}
           </Button>

@@ -206,7 +206,7 @@ export function PreferredFeaturesSettings() {
 
     // 新系統：管理員給全部功能，其他人給基本功能
     const { isAdmin } = useAuthStore.getState()
-    const defaultFeatures = isAdmin 
+    const defaultFeatures = isAdmin
       ? AVAILABLE_FEATURES.map(f => f.id)
       : ['tours', 'orders', 'calendar', 'todos', 'workspace']
 

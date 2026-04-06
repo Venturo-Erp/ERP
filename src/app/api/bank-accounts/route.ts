@@ -10,7 +10,9 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('bank_accounts')
-    .select('id, code, name, bank_name, account_number, is_default, is_active, workspace_id, created_at, updated_at')
+    .select(
+      'id, code, name, bank_name, account_number, is_default, is_active, workspace_id, created_at, updated_at'
+    )
     .eq('is_active', true)
     .order('is_default', { ascending: false })
     .order('name')
@@ -43,9 +45,7 @@ export async function POST(request: NextRequest) {
 
   // 如果設為預設，先把其他的取消預設
   if (is_default) {
-    await supabase
-      .from('bank_accounts')
-      .update({ is_default: false })
+    await supabase.from('bank_accounts').update({ is_default: false })
   }
 
   const { data, error } = await supabase
@@ -84,10 +84,7 @@ export async function PUT(request: NextRequest) {
 
   // 如果設為預設，先把其他的取消預設
   if (is_default) {
-    await supabase
-      .from('bank_accounts')
-      .update({ is_default: false })
-      .neq('id', id)
+    await supabase.from('bank_accounts').update({ is_default: false }).neq('id', id)
   }
 
   const { data, error } = await supabase
@@ -124,10 +121,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: '缺少 id' }, { status: 400 })
   }
 
-  const { error } = await supabase
-    .from('bank_accounts')
-    .delete()
-    .eq('id', id)
+  const { error } = await supabase.from('bank_accounts').delete().eq('id', id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

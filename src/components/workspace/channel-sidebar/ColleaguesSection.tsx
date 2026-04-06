@@ -73,11 +73,7 @@ export function ColleaguesSection({
               )}
             >
               {emp.avatar ? (
-                <img
-                  src={emp.avatar}
-                  alt=""
-                  className="w-5 h-5 rounded-full object-cover"
-                />
+                <img src={emp.avatar} alt="" className="w-5 h-5 rounded-full object-cover" />
               ) : (
                 <div className="w-5 h-5 rounded-full bg-morandi-container flex items-center justify-center text-xs text-morandi-secondary">
                   {(emp.chinese_name || emp.display_name || '?')[0]}

@@ -1,7 +1,7 @@
 'use client'
 /**
  * 顧客詳情/編輯對話框（統一組件）
- * 
+ *
  * mode:
  * - 'view': 檢視模式（唯讀）
  * - 'edit': 編輯模式（可修改）
@@ -194,11 +194,13 @@ export function CustomerDialog({
                   className="w-full h-full object-cover absolute inset-0"
                 />
                 {/* 驗證狀態 - 左上角 */}
-                <div className={`absolute top-3 left-3 px-2 py-1 rounded text-xs font-medium flex items-center gap-1 ${
-                  isVerified 
-                    ? 'bg-morandi-green/90 text-white' 
-                    : 'bg-status-warning/90 text-white'
-                }`}>
+                <div
+                  className={`absolute top-3 left-3 px-2 py-1 rounded text-xs font-medium flex items-center gap-1 ${
+                    isVerified
+                      ? 'bg-morandi-green/90 text-white'
+                      : 'bg-status-warning/90 text-white'
+                  }`}
+                >
                   {isVerified ? <Check size={12} /> : '⚠'}
                   {isVerified ? L.status_verified : L.status_unverified}
                 </div>
@@ -238,7 +240,10 @@ export function CustomerDialog({
                 />
               </FormField>
 
-              <FormField label={L.label_passport_name} labelClassName="text-xs text-morandi-secondary">
+              <FormField
+                label={L.label_passport_name}
+                labelClassName="text-xs text-morandi-secondary"
+              >
                 <Input
                   value={formData.passport_name}
                   onChange={e => updateField('passport_name', e.target.value.toUpperCase())}
@@ -247,7 +252,10 @@ export function CustomerDialog({
                 />
               </FormField>
 
-              <FormField label={L.label_passport_number} labelClassName="text-xs text-morandi-secondary">
+              <FormField
+                label={L.label_passport_number}
+                labelClassName="text-xs text-morandi-secondary"
+              >
                 <Input
                   value={formData.passport_number}
                   onChange={e => updateField('passport_number', e.target.value)}
@@ -256,7 +264,10 @@ export function CustomerDialog({
                 />
               </FormField>
 
-              <FormField label={L.label_passport_expiry} labelClassName="text-xs text-morandi-secondary">
+              <FormField
+                label={L.label_passport_expiry}
+                labelClassName="text-xs text-morandi-secondary"
+              >
                 {isEdit ? (
                   <DatePicker
                     value={formData.passport_expiry}
@@ -288,7 +299,10 @@ export function CustomerDialog({
                 )}
               </FormField>
 
-              <FormField label={L.label_national_id} labelClassName="text-xs text-morandi-secondary">
+              <FormField
+                label={L.label_national_id}
+                labelClassName="text-xs text-morandi-secondary"
+              >
                 <Input
                   value={formData.national_id}
                   onChange={e => updateField('national_id', e.target.value)}
@@ -358,11 +372,7 @@ export function CustomerDialog({
             </>
           ) : (
             <>
-              <Button
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="gap-1.5"
-              >
+              <Button variant="outline" onClick={() => onOpenChange(false)} className="gap-1.5">
                 <X size={14} />
                 {L.btn_close}
               </Button>

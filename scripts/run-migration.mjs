@@ -9,7 +9,7 @@ const client = new Client({
   user: 'postgres.pfqvdacxowpgfamuvnsn',
   password: 'OpenAIisAGoodCompany.',
   database: 'postgres',
-  ssl: { rejectUnauthorized: false }
+  ssl: { rejectUnauthorized: false },
 })
 
 const migrationFile = process.argv[2]
@@ -21,12 +21,12 @@ if (!migrationFile) {
 try {
   await client.connect()
   console.log('✅ 連線成功')
-  
+
   const sql = readFileSync(migrationFile, 'utf-8')
   console.log(`執行 migration: ${migrationFile}`)
-  
+
   await client.query(sql)
-  
+
   console.log('✅ Migration 執行成功')
 } catch (err) {
   console.error('❌ Migration 失敗:', err.message)

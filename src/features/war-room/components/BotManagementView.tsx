@@ -58,7 +58,9 @@ export const BotManagementView: React.FC<BotManagementViewProps> = ({ bots, load
       render: (_value: unknown, row: Bot) => (
         <span
           className={`px-2 py-1 rounded text-xs font-medium ${
-            row.status === 'active' ? 'bg-morandi-green/10 text-morandi-green' : 'bg-morandi-red/10 text-morandi-red'
+            row.status === 'active'
+              ? 'bg-morandi-green/10 text-morandi-green'
+              : 'bg-morandi-red/10 text-morandi-red'
           }`}
         >
           {row.status === 'active' ? '運行中' : '離線'}

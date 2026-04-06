@@ -4,13 +4,13 @@ import { createServerClient } from '@supabase/ssr'
 
 /**
  * API Route 專用的 Supabase Client
- * 
+ *
  * 使用方式：
  * const supabase = await createApiClient()
  * const { data } = await supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by')
  * // 不需要加 .eq('workspace_id', ...) ！
  * // RLS 會自動過濾
- * 
+ *
  * 如果需要繞過 RLS（例如 super admin 操作）：
  * const supabase = createServiceClient()
  */
@@ -22,7 +22,7 @@ import { createServerClient } from '@supabase/ssr'
  */
 export async function createApiClient() {
   const cookieStore = await cookies()
-  
+
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -51,10 +51,7 @@ export async function createApiClient() {
  * - 必須手動處理 workspace_id
  */
 export function createServiceClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 }
 
 /**
@@ -63,8 +60,10 @@ export function createServiceClient() {
  */
 export async function getCurrentWorkspaceId(): Promise<string | null> {
   const supabase = await createApiClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) return null
 
   // 從 employees 表取得 workspace_id

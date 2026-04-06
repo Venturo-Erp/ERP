@@ -78,7 +78,9 @@ export function PnrPreview({
                   <div className="flex items-start gap-2">
                     <Baby size={14} className="text-status-warning mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-morandi-primary text-xs">{v.passengerName}</div>
+                      <div className="font-semibold text-morandi-primary text-xs">
+                        {v.passengerName}
+                      </div>
                       <div className="text-status-warning text-xs mt-0.5">{v.warning}</div>
                       {v.suggestion && (
                         <div className="text-status-warning text-xs mt-1 flex items-start gap-1">
@@ -112,7 +114,10 @@ export function PnrPreview({
             {parsedData.connections
               ?.filter(c => !c.isSufficient)
               .map((c, idx) => (
-                <div key={`conn-${idx}`} className="bg-morandi-red/10 border border-morandi-red/30 p-2 rounded-lg">
+                <div
+                  key={`conn-${idx}`}
+                  className="bg-morandi-red/10 border border-morandi-red/30 p-2 rounded-lg"
+                >
                   <div className="flex items-start gap-2">
                     <AlertTriangle size={14} className="text-morandi-red mt-0.5 flex-shrink-0" />
                     <div className="flex-1 min-w-0">

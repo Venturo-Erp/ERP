@@ -14,8 +14,8 @@ steps:
     name: 活動目標確認
     description: 確認活動目標、受眾、預算
     assignees:
-      - ben      # 業務經理
-      - caesar   # 產品經理
+      - ben # 業務經理
+      - caesar # 產品經理
     duration_days: 0.5
     outputs:
       - 活動 Brief 文件
@@ -27,8 +27,8 @@ steps:
     name: 創意發想
     description: 團隊腦力激盪，提出活動創意
     assignees:
-      - ben      # 業務經理
-      - caesar   # 產品經理
+      - ben # 業務經理
+      - caesar # 產品經理
       - designer # 設計師
     duration_days: 1
     outputs:
@@ -42,7 +42,7 @@ steps:
     name: 活動企劃書
     description: 撰寫完整的活動企劃書
     assignees:
-      - ben      # 業務經理
+      - ben # 業務經理
     duration_days: 1
     outputs:
       - 活動企劃書（PPT/Word）
@@ -57,7 +57,7 @@ steps:
     name: 企劃審批
     description: William 審批企劃書
     assignees:
-      - william  # 決策者
+      - william # 決策者
     duration_days: 0.5
     outputs:
       - 審批意見
@@ -70,9 +70,9 @@ steps:
     name: 活動準備
     description: 執行活動所需的準備工作
     assignees:
-      - ben      # 業務經理
+      - ben # 業務經理
       - designer # 設計師
-      - matthew  # 技術支援（如需線上系統）
+      - matthew # 技術支援（如需線上系統）
     duration_days: 2
     outputs:
       - 宣傳素材（海報、文案、影片）
@@ -87,8 +87,8 @@ steps:
     name: 活動執行
     description: 實際執行活動
     assignees:
-      - ben      # 主責
-      - team     # 全員支援
+      - ben # 主責
+      - team # 全員支援
     duration_days: 1
     outputs:
       - 活動順利完成
@@ -102,7 +102,7 @@ steps:
     name: 活動檢討
     description: 檢討活動成效，撰寫報告
     assignees:
-      - ben      # 業務經理
+      - ben # 業務經理
     duration_days: 1
     outputs:
       - 活動成效報告

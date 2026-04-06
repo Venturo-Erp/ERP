@@ -50,7 +50,10 @@ export function AttractionSearchBar({
 
         {/* 搜尋框 */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-morandi-muted" size={16} />
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-morandi-muted"
+            size={16}
+          />
           <Input
             value={searchQuery}
             onChange={e => onSearchChange(e.target.value)}
@@ -59,8 +62,6 @@ export function AttractionSearchBar({
           />
         </div>
       </div>
-
-
     </div>
   )
 }

@@ -11,7 +11,18 @@
  */
 
 import { useState, useMemo, useCallback } from 'react'
-import { Search, X, Plus, AlertTriangle, Edit, Trash2, Users, FileSpreadsheet, MessageCircle, Copy } from 'lucide-react'
+import {
+  Search,
+  X,
+  Plus,
+  AlertTriangle,
+  Edit,
+  Trash2,
+  Users,
+  FileSpreadsheet,
+  MessageCircle,
+  Copy,
+} from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -412,7 +423,11 @@ export default function CustomersPage() {
                       ? 'text-brand-line hover:bg-brand-line/10'
                       : 'text-morandi-secondary hover:text-brand-line hover:bg-brand-line/10'
                   }`}
-                  title={(customer as unknown as Record<string, unknown>).line_user_id ? '已綁定 LINE' : '綁定 LINE'}
+                  title={
+                    (customer as unknown as Record<string, unknown>).line_user_id
+                      ? '已綁定 LINE'
+                      : '綁定 LINE'
+                  }
                   onClick={e => {
                     e.stopPropagation()
                     setLineBindingCustomer(customer)
@@ -475,7 +490,7 @@ export default function CustomersPage() {
         customer={selectedCustomer}
         mode={customerDialogMode}
         onModeChange={setCustomerDialogMode}
-        onSave={async (data) => {
+        onSave={async data => {
           if (selectedCustomer) {
             await updateCustomer(selectedCustomer.id, data as Partial<Customer>)
           }
@@ -508,13 +523,15 @@ export default function CustomersPage() {
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-line/10 flex items-center justify-center">
                     <MessageCircle className="w-8 h-8 text-brand-line" />
                   </div>
-                  <p className="font-medium text-morandi-primary">
-                    {lineBindingCustomer.name}
-                  </p>
+                  <p className="font-medium text-morandi-primary">{lineBindingCustomer.name}</p>
                   <p className="text-sm text-brand-line mt-1">✓ 已綁定 LINE</p>
                   <p className="text-xs text-morandi-secondary mt-2">
-                    綁定時間：{(lineBindingCustomer as unknown as Record<string, unknown>).line_linked_at
-                      ? new Date((lineBindingCustomer as unknown as Record<string, unknown>).line_linked_at as string).toLocaleDateString('zh-TW')
+                    綁定時間：
+                    {(lineBindingCustomer as unknown as Record<string, unknown>).line_linked_at
+                      ? new Date(
+                          (lineBindingCustomer as unknown as Record<string, unknown>)
+                            .line_linked_at as string
+                        ).toLocaleDateString('zh-TW')
                       : '未知'}
                   </p>
                 </div>
@@ -529,15 +546,11 @@ export default function CustomersPage() {
                     />
                   </div>
                   <div className="text-center">
-                    <p className="font-medium text-morandi-primary">
-                      {lineBindingCustomer.name}
-                    </p>
+                    <p className="font-medium text-morandi-primary">{lineBindingCustomer.name}</p>
                     <p className="text-sm text-morandi-secondary mt-1">
                       客戶編號：{lineBindingCustomer.code}
                     </p>
-                    <p className="text-xs text-morandi-muted mt-2">
-                      請客戶掃描 QR Code 完成綁定
-                    </p>
+                    <p className="text-xs text-morandi-muted mt-2">請客戶掃描 QR Code 完成綁定</p>
                   </div>
                   <div className="flex gap-2 w-full">
                     <Button

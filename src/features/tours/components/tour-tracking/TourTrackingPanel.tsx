@@ -58,7 +58,8 @@ function getQuoteStatusDisplay(status: string): StatusDisplay {
     default:
       return {
         label: TOUR_TRACKING_LABELS.QUOTE_NONE,
-        color: 'text-muted-foreground bg-morandi-container',        icon: '⬜',
+        color: 'text-muted-foreground bg-morandi-container',
+        icon: '⬜',
       }
   }
 }
@@ -92,7 +93,8 @@ function getRequestStatusDisplay(status: string): StatusDisplay {
     default:
       return {
         label: TOUR_TRACKING_LABELS.REQUEST_NONE,
-        color: 'text-muted-foreground bg-morandi-container',        icon: '⬜',
+        color: 'text-muted-foreground bg-morandi-container',
+        icon: '⬜',
       }
   }
 }
@@ -114,7 +116,8 @@ function getConfirmationStatusDisplay(status: string): StatusDisplay {
     default:
       return {
         label: TOUR_TRACKING_LABELS.CONFIRM_NONE,
-        color: 'text-muted-foreground bg-morandi-container',        icon: '⬜',
+        color: 'text-muted-foreground bg-morandi-container',
+        icon: '⬜',
       }
   }
 }
@@ -136,7 +139,8 @@ function getLeaderStatusDisplay(status: string): StatusDisplay {
     default:
       return {
         label: TOUR_TRACKING_LABELS.LEADER_NONE,
-        color: 'text-muted-foreground bg-morandi-container',        icon: '⬜',
+        color: 'text-muted-foreground bg-morandi-container',
+        icon: '⬜',
       }
   }
 }
@@ -259,7 +263,10 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
               const selectedPrice = response?.tierPrices?.[selectedTier]
 
               return (
-                <div key={quote.id} className="border rounded-lg p-4 bg-morandi-green/10 border-morandi-green/30">
+                <div
+                  key={quote.id}
+                  className="border rounded-lg p-4 bg-morandi-green/10 border-morandi-green/30"
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="font-semibold">{quote.supplier_name || 'Local 供應商'}</p>
@@ -336,7 +343,11 @@ export function TourTrackingPanel({ tour }: TourTrackingPanelProps) {
                   {/* 第一列：原本的空白列，現在放按鈕 */}
                   <tr className="border-b">
                     <th colSpan={8} className="px-3 py-2">
-                      <Button size="sm" variant="default" className="bg-morandi-green hover:bg-morandi-green">
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="bg-morandi-green hover:bg-morandi-green"
+                      >
                         給 Local 報價
                       </Button>
                     </th>

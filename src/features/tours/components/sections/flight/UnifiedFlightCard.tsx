@@ -248,11 +248,7 @@ function OriginalFlightCard({
 
         <div className="flex-1 flex items-center justify-center">
           <div className="flex-1 h-px" style={{ backgroundColor: theme.colors.border }} />
-          <Plane
-            className="mx-2"
-            size={20}
-            style={{ color: theme.colors.primary }}
-          />
+          <Plane className="mx-2" size={20} style={{ color: theme.colors.primary }} />
           <div className="flex-1 h-px" style={{ backgroundColor: theme.colors.border }} />
         </div>
 

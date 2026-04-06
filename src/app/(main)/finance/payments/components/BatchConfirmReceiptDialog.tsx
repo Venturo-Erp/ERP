@@ -7,7 +7,7 @@
  * 2. 允許會計輸入每筆的實收金額
  * 3. 批量確認收款狀態
  * 4. 每筆獨立處理，失敗不影響其他
- * 
+ *
  * ADR-001: 不再使用 receipt_items，直接用 receipts
  */
 
@@ -22,11 +22,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import {
-  useReceipts,
-  updateReceipt,
-  invalidateReceipts,
-} from '@/data'
+import { useReceipts, updateReceipt, invalidateReceipts } from '@/data'
 import { CheckCircle, AlertCircle, DollarSign, Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { alert } from '@/lib/ui/alert-dialog'
@@ -176,7 +172,8 @@ export function BatchConfirmReceiptDialog({
     }
   }
 
-  const allSelected = confirmItems.size > 0 && Array.from(confirmItems.values()).every(item => item.selected)
+  const allSelected =
+    confirmItems.size > 0 && Array.from(confirmItems.values()).every(item => item.selected)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -198,10 +195,7 @@ export function BatchConfirmReceiptDialog({
             <div className="space-y-2">
               {/* 表頭 */}
               <div className="flex items-center gap-4 px-4 py-2 bg-muted/50 rounded-lg text-sm font-medium text-muted-foreground">
-                <Checkbox
-                  checked={allSelected}
-                  onCheckedChange={toggleSelectAll}
-                />
+                <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} />
                 <div className="w-32">{BATCH_CONFIRM_LABELS.LABEL_6427}</div>
                 <div className="w-24">{BATCH_CONFIRM_LABELS.LABEL_5187}</div>
                 <div className="flex-1">{BATCH_CONFIRM_LABELS.LABEL_7017}</div>
@@ -220,20 +214,21 @@ export function BatchConfirmReceiptDialog({
                     key={receipt.id}
                     className={cn(
                       'flex items-center gap-4 px-4 py-3 rounded-lg border transition-colors',
-                      selected ? 'bg-morandi-gold/5 border-morandi-gold/30' : 'bg-card border-border'
+                      selected
+                        ? 'bg-morandi-gold/5 border-morandi-gold/30'
+                        : 'bg-card border-border'
                     )}
                   >
-                    <Checkbox
-                      checked={selected}
-                      onCheckedChange={() => toggleSelect(receipt.id)}
-                    />
+                    <Checkbox checked={selected} onCheckedChange={() => toggleSelect(receipt.id)} />
                     <div className="w-32 font-mono text-sm">{receipt.receipt_number}</div>
                     <div className="w-24 text-sm">
                       {RECEIPT_TYPE_LABELS[receipt.receipt_type as ReceiptType] || '-'}
                     </div>
                     <div className="flex-1">
                       <div className="text-sm font-medium">{receipt.order_number || '-'}</div>
-                      <div className="text-xs text-muted-foreground">{receipt.tour_name || '-'}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {receipt.tour_name || '-'}
+                      </div>
                     </div>
                     <div className="w-28 text-right">
                       <CurrencyCell amount={expectedAmount} />
@@ -242,7 +237,9 @@ export function BatchConfirmReceiptDialog({
                       <Input
                         type="number"
                         value={actualAmount}
-                        onChange={e => updateActualAmount(receipt.id, parseFloat(e.target.value) || 0)}
+                        onChange={e =>
+                          updateActualAmount(receipt.id, parseFloat(e.target.value) || 0)
+                        }
                         className={cn(
                           'h-8 text-right',
                           isAbnormal && 'border-status-warning bg-status-warning/10'
@@ -269,7 +266,8 @@ export function BatchConfirmReceiptDialog({
               {BATCH_CONFIRM_LABELS.SELECTED_STATS(selectedItems.length, pendingReceipts.length)}
             </span>
             <span className="text-sm font-medium">
-              {BATCH_CONFIRM_LABELS.TOTAL_PREFIX}<CurrencyCell amount={totalAmount} />
+              {BATCH_CONFIRM_LABELS.TOTAL_PREFIX}
+              <CurrencyCell amount={totalAmount} />
             </span>
           </div>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -280,7 +278,9 @@ export function BatchConfirmReceiptDialog({
             disabled={isSubmitting || selectedItems.length === 0}
             className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
           >
-            {isSubmitting ? BATCH_CONFIRM_LABELS.CONFIRMING : BATCH_CONFIRM_LABELS.CONFIRM_N_RECEIPTS(selectedItems.length)}
+            {isSubmitting
+              ? BATCH_CONFIRM_LABELS.CONFIRMING
+              : BATCH_CONFIRM_LABELS.CONFIRM_N_RECEIPTS(selectedItems.length)}
           </Button>
         </DialogFooter>
       </DialogContent>

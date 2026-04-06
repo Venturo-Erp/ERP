@@ -162,49 +162,49 @@ export function ChannelChat() {
             }
           >
             <ChatMessages
-                channel={selectedChannel}
-                isAdmin={isAdmin}
-                messages={currentMessages || []}
-                advanceLists={advanceLists}
-                sharedOrderLists={sharedOrderLists}
-                channelName={resolvedChannelName}
-                currentUserId={user?.id}
-                isLoading={isMessagesLoading}
-                showMemberSidebar={showMemberSidebar}
-                messageText={messageText}
-                attachedFiles={attachedFiles}
-                uploadingFiles={uploadingFiles}
-                uploadProgress={uploadProgress}
-                messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
-                onReaction={handleReactionClick}
-                onDeleteMessage={handleDeleteMessageClick}
-                onReply={openThread}
-                getReplyCount={getReplyCount}
-                onCreatePayment={(itemId, item) => {
-                  setSelectedAdvanceItem(item as Parameters<typeof setSelectedAdvanceItem>[0])
-                  setSelectedAdvanceListId(
-                    advanceLists.find(al => al.items?.some(i => i.id === itemId))?.id || ''
-                  )
-                  setShowCreatePaymentDialog(true)
-                }}
-                onDeleteAdvanceList={deleteAdvanceList}
-                onCreateReceipt={(_orderId, order) => {
-                  setSelectedOrder(order as Parameters<typeof setSelectedOrder>[0])
-                  setShowCreateReceiptDialog(true)
-                }}
-                onMessageChange={setMessageText}
-                onSubmit={handleSubmitMessage}
-                onFilesChange={setAttachedFiles}
-                onShowShareOrders={() => setShowShareOrdersDialog(true)}
-                onShowShareQuote={() => setShowShareQuoteDialog(true)}
-                onShowNewPayment={() => setShowNewPaymentDialog(true)}
-                onShowNewReceipt={() => setShowNewReceiptDialog(true)}
-                onShowShareAdvance={() => setShowShareAdvanceDialog(true)}
-                onShowNewTask={() => setShowNewTaskDialog(true)}
-                // 機器人專用 handlers
-                onCheckTicketStatus={() => setShowCheckTicketStatusDialog(true)}
-                onTourReview={() => setShowTourReviewDialog(true)}
-              />
+              channel={selectedChannel}
+              isAdmin={isAdmin}
+              messages={currentMessages || []}
+              advanceLists={advanceLists}
+              sharedOrderLists={sharedOrderLists}
+              channelName={resolvedChannelName}
+              currentUserId={user?.id}
+              isLoading={isMessagesLoading}
+              showMemberSidebar={showMemberSidebar}
+              messageText={messageText}
+              attachedFiles={attachedFiles}
+              uploadingFiles={uploadingFiles}
+              uploadProgress={uploadProgress}
+              messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
+              onReaction={handleReactionClick}
+              onDeleteMessage={handleDeleteMessageClick}
+              onReply={openThread}
+              getReplyCount={getReplyCount}
+              onCreatePayment={(itemId, item) => {
+                setSelectedAdvanceItem(item as Parameters<typeof setSelectedAdvanceItem>[0])
+                setSelectedAdvanceListId(
+                  advanceLists.find(al => al.items?.some(i => i.id === itemId))?.id || ''
+                )
+                setShowCreatePaymentDialog(true)
+              }}
+              onDeleteAdvanceList={deleteAdvanceList}
+              onCreateReceipt={(_orderId, order) => {
+                setSelectedOrder(order as Parameters<typeof setSelectedOrder>[0])
+                setShowCreateReceiptDialog(true)
+              }}
+              onMessageChange={setMessageText}
+              onSubmit={handleSubmitMessage}
+              onFilesChange={setAttachedFiles}
+              onShowShareOrders={() => setShowShareOrdersDialog(true)}
+              onShowShareQuote={() => setShowShareQuoteDialog(true)}
+              onShowNewPayment={() => setShowNewPaymentDialog(true)}
+              onShowNewReceipt={() => setShowNewReceiptDialog(true)}
+              onShowShareAdvance={() => setShowShareAdvanceDialog(true)}
+              onShowNewTask={() => setShowNewTaskDialog(true)}
+              // 機器人專用 handlers
+              onCheckTicketStatus={() => setShowCheckTicketStatusDialog(true)}
+              onTourReview={() => setShowTourReviewDialog(true)}
+            />
           </ChannelTabs>
         ) : (
           <div className="flex-1 flex items-center justify-center">

@@ -50,11 +50,14 @@ async function getUserProfile(userId: string): Promise<{
 }
 
 /** 儲存用戶到 DB（follow 事件） */
-async function saveUserToDb(userId: string, profile: {
-  displayName: string | null
-  pictureUrl: string | null
-  statusMessage: string | null
-} | null) {
+async function saveUserToDb(
+  userId: string,
+  profile: {
+    displayName: string | null
+    pictureUrl: string | null
+    statusMessage: string | null
+  } | null
+) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -74,7 +77,7 @@ async function saveUserToDb(userId: string, profile: {
       picture_url: profile?.pictureUrl,
       status_message: profile?.statusMessage,
       followed_at: new Date().toISOString(),
-      unfollowed_at: null,  // 重新追蹤時清除
+      unfollowed_at: null, // 重新追蹤時清除
       updated_at: new Date().toISOString(),
     }),
   })
@@ -236,7 +239,7 @@ async function processCustomerBinding(event: LineEvent) {
         apikey: supabaseKey,
         Authorization: `Bearer ${supabaseKey}`,
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         line_user_id: userId,
         line_linked_at: new Date().toISOString(),
       }),
@@ -277,7 +280,7 @@ async function processEmployeeBinding(event: LineEvent) {
   // 檢查是否為綁定指令：「綁定 E001」或「綁定:E001」（但不是 C 開頭的客戶）
   const bindMatch = text.match(/^綁定[:\s]*([A-Za-z0-9]+)$/i)
   if (!bindMatch || !userId) return false
-  
+
   // C 開頭是客戶，交給 processCustomerBinding 處理
   if (bindMatch[1].toUpperCase().startsWith('C')) return false
 
@@ -330,7 +333,8 @@ async function processEmployeeBinding(event: LineEvent) {
       body: JSON.stringify({ line_user_id: userId }),
     })
 
-    const empName = employee.chinese_name || employee.display_name || employee.english_name || employeeCode
+    const empName =
+      employee.chinese_name || employee.display_name || employee.english_name || employeeCode
 
     // 回覆成功
     await fetch('https://api.line.me/v2/bot/message/reply', {
@@ -376,26 +380,21 @@ async function processInsurancePDF(event: LineEvent) {
   }
 }
 
-
-
-
-
 /** 處理「完成」指令 */
-
 
 /** 處理 AI 客服訊息 */
 async function handleAIMessage(event: LineEvent) {
   try {
     const userId = event.source?.userId
     const userMessage = event.message?.text?.trim()
-    
+
     if (!userId || !userMessage) return
-    
+
     // 1. 先檢查景點選擇
-    
+
     // 2. 取得用戶資訊
     const profile = await getUserProfile(userId)
-    
+
     // 3. 呼叫 AI 客服
     const aiResponse = await handleAICustomerService(
       'line',
@@ -403,7 +402,7 @@ async function handleAIMessage(event: LineEvent) {
       profile?.displayName || null,
       userMessage
     )
-    
+
     // 4. 回覆用戶
     await fetch('https://api.line.me/v2/bot/message/reply', {
       method: 'POST',
@@ -416,8 +415,10 @@ async function handleAIMessage(event: LineEvent) {
         messages: [{ type: 'text', text: aiResponse }],
       }),
     })
-    
-    logger.info(`[LINE AI] User: ${userId} | Message: ${userMessage} | Response: ${aiResponse.substring(0, 50)}...`)
+
+    logger.info(
+      `[LINE AI] User: ${userId} | Message: ${userMessage} | Response: ${aiResponse.substring(0, 50)}...`
+    )
   } catch (err) {
     logger.error('[LINE AI] Handle message error:', err)
   }
@@ -454,6 +455,13 @@ export async function POST(req: NextRequest) {
 
       // 私人訊息 → 檢查綁定指令（客戶或員工）或 AI 客服
       if (source.type === 'user' && event.type === 'message' && event.message?.type === 'text') {
+        // 確保用戶記錄存在（補漏：follow 事件可能遺漏）
+        const msgUserId = source.userId
+        if (msgUserId) {
+          const profile = await getUserProfile(msgUserId)
+          await saveUserToDb(msgUserId, profile)
+        }
+
         // 先嘗試客戶綁定（C 開頭）
         const isCustomerBinding = await processCustomerBinding(event)
         if (!isCustomerBinding) {

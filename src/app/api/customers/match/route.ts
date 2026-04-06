@@ -1,9 +1,9 @@
 /**
  * 比對客戶（用姓名+生日）
  * POST /api/customers/match
- * 
+ *
  * body: { name: string, birthDate?: string, phone?: string, workspaceId: string }
- * 
+ *
  * 回傳：
  * - 找到 → { matches: [{id, name, phone, ...}] }
  * - 沒找到 → { matches: [] }
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     // 優先用姓名 + 生日比對
     if (birthDate) {
       query = query.eq('name', name).eq('birth_date', birthDate)
-    } 
+    }
     // 或用姓名 + 電話
     else if (phone) {
       query = query.eq('name', name).eq('phone', phone)

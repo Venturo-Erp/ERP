@@ -103,10 +103,10 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
 
     const salesRoleId = getRoleIdByName('業務')
     const adminRoleId = getRoleIdByName('管理員')
-    
+
     // 業務 + 管理員都可以當業務
-    const qualified = activeEmployees.filter(emp => 
-      emp.job_info?.role_id === salesRoleId || emp.job_info?.role_id === adminRoleId
+    const qualified = activeEmployees.filter(
+      emp => emp.job_info?.role_id === salesRoleId || emp.job_info?.role_id === adminRoleId
     )
 
     // 如果有符合的就顯示，沒有就顯示所有人
@@ -128,10 +128,10 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
 
     const assistantRoleId = getRoleIdByName('助理')
     const adminRoleId = getRoleIdByName('管理員')
-    
+
     // 助理 + 管理員都可以當助理
-    const qualified = activeEmployees.filter(emp => 
-      emp.job_info?.role_id === assistantRoleId || emp.job_info?.role_id === adminRoleId
+    const qualified = activeEmployees.filter(
+      emp => emp.job_info?.role_id === assistantRoleId || emp.job_info?.role_id === adminRoleId
     )
 
     // 如果有符合的就顯示，沒有就顯示所有人

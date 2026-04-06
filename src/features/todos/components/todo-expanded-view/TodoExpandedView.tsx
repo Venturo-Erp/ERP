@@ -155,28 +155,26 @@ export function TodoExpandedView({ todo, onUpdate, onClose }: TodoExpandedViewPr
                   </div>
                 </div>
               )
-            ) : (
-              /* 沒有 task_type：顯示快速操作分頁 */
-              canEdit ? (
-                <>
-                  <QuickActionsSection activeTab={activeTab} onTabChange={setActiveTab} />
-                  <div className="flex-1 bg-card border border-border rounded-xl p-4 overflow-y-auto shadow-sm">
-                    <QuickActionContent
-                      activeTab={activeTab}
-                      todo={todo}
-                      onUpdate={onUpdate}
-                      onClose={onClose}
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center text-morandi-secondary">
-                    <Eye size={32} className="mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">{COMMON_LABELS.readOnlyMode}</p>
-                  </div>
+            ) : /* 沒有 task_type：顯示快速操作分頁 */
+            canEdit ? (
+              <>
+                <QuickActionsSection activeTab={activeTab} onTabChange={setActiveTab} />
+                <div className="flex-1 bg-card border border-border rounded-xl p-4 overflow-y-auto shadow-sm">
+                  <QuickActionContent
+                    activeTab={activeTab}
+                    todo={todo}
+                    onUpdate={onUpdate}
+                    onClose={onClose}
+                  />
                 </div>
-              )
+              </>
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center text-morandi-secondary">
+                  <Eye size={32} className="mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">{COMMON_LABELS.readOnlyMode}</p>
+                </div>
+              </div>
             )}
           </div>
         </div>

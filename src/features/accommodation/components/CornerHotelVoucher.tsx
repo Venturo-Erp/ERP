@@ -122,7 +122,9 @@ export const CornerHotelVoucher: React.FC<CornerHotelVoucherProps> = ({
       <div className="bg-background p-3 px-4 rounded-lg mb-5 border-l-4 border-morandi-gold">
         <div className="mb-1.5">
           <span className="text-[var(--morandi-primary)] font-semibold">{t.confirmation}</span>
-          <span className="text-morandi-gold font-bold text-[12pt]">{data.confirmation_number}</span>
+          <span className="text-morandi-gold font-bold text-[12pt]">
+            {data.confirmation_number}
+          </span>
         </div>
         <div className="mb-1.5">
           <span className="text-[var(--morandi-primary)] font-semibold">{t.pin}</span>
@@ -198,7 +200,9 @@ export const CornerHotelVoucher: React.FC<CornerHotelVoucherProps> = ({
 
           {/* 旅客姓名 */}
           <div className="mb-3">
-            <div className="text-[9pt] text-morandi-secondary mb-1 font-semibold">{t.guestName}</div>
+            <div className="text-[9pt] text-morandi-secondary mb-1 font-semibold">
+              {t.guestName}
+            </div>
             <div className="text-[11pt] font-semibold text-[var(--morandi-primary)]">
               {data.guest_names.join(', ')}
             </div>
@@ -206,7 +210,9 @@ export const CornerHotelVoucher: React.FC<CornerHotelVoucherProps> = ({
 
           {/* 可入住人數 */}
           <div className="mb-3">
-            <div className="text-[9pt] text-morandi-secondary mb-1 font-semibold">{t.maxOccupancy}</div>
+            <div className="text-[9pt] text-morandi-secondary mb-1 font-semibold">
+              {t.maxOccupancy}
+            </div>
             <div className="text-[10pt] text-morandi-primary">{data.max_occupancy}</div>
           </div>
 
@@ -224,7 +230,9 @@ export const CornerHotelVoucher: React.FC<CornerHotelVoucherProps> = ({
 
           {/* 房間設施 */}
           <div>
-            <div className="text-[9pt] text-morandi-secondary mb-1 font-semibold">{t.facilities}</div>
+            <div className="text-[9pt] text-morandi-secondary mb-1 font-semibold">
+              {t.facilities}
+            </div>
             <div className="text-[9pt] text-morandi-primary leading-loose">
               {data.room_facilities.join('・')}
             </div>

@@ -111,7 +111,9 @@ export async function getCustomerById(id: string, workspaceId?: string): Promise
 
   const { data, error } = await supabase
     .from('customers')
-    .select('id, code, name, english_name, phone, email, national_id, birth_date, gender, address, passport_number, passport_expiry, passport_name, passport_name_print, passport_image_url, vip_level, is_vip, member_type, emergency_contact, notes, nickname, source, company, workspace_id, created_at, updated_at')
+    .select(
+      'id, code, name, english_name, phone, email, national_id, birth_date, gender, address, passport_number, passport_expiry, passport_name, passport_name_print, passport_image_url, vip_level, is_vip, member_type, emergency_contact, notes, nickname, source, company, workspace_id, created_at, updated_at'
+    )
     .eq('id', id)
     .eq('workspace_id', wsId) // 🔒 Workspace 過濾
     .single()
@@ -147,7 +149,9 @@ export async function checkCustomerByPassport(
 
   const { data, error } = await supabase
     .from('customers')
-    .select('id, code, name, english_name, phone, email, national_id, birth_date, gender, address, passport_number, passport_expiry, passport_name, passport_name_print, passport_image_url, vip_level, is_vip, member_type, emergency_contact, notes, nickname, source, company, workspace_id, created_at, updated_at')
+    .select(
+      'id, code, name, english_name, phone, email, national_id, birth_date, gender, address, passport_number, passport_expiry, passport_name, passport_name_print, passport_image_url, vip_level, is_vip, member_type, emergency_contact, notes, nickname, source, company, workspace_id, created_at, updated_at'
+    )
     .eq('passport_number', passportNumber)
     .eq('workspace_id', wsId) // 🔒 Workspace 過濾
     .maybeSingle()

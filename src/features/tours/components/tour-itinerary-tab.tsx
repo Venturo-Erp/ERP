@@ -68,8 +68,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   const { items: coreItems, refresh: refreshCoreItems } = useTourItineraryItemsByTour(tour.id)
 
   // 權限：是否可以編輯資料庫
-  const canEditDatabase = isAdmin ||
-    currentUser?.permissions?.includes('database') || false
+  const canEditDatabase = isAdmin || currentUser?.permissions?.includes('database') || false
 
   // State
   const [loading, setLoading] = useState(true)
@@ -521,7 +520,9 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           const sb = createSupabaseBrowserClient()
           const { data: originalRequest } = await sb
             .from('tour_requests')
-            .select('id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, supplier_contact, supplier_response, items, note, sent_at, sent_to, sent_via, replied_at, replied_by, accepted_at, accepted_by, confirmed_at, confirmed_by, rejected_at, rejected_by, rejection_reason, closed_at, closed_by, close_note, package_status, selected_tier, covered_item_ids, recipient_workspace_id, target_workspace_id, source_type, source_id, request_scope, assigned_employee_id, assigned_employee_name, line_group_id, line_group_name, hidden, created_at, created_by, updated_at, updated_by')
+            .select(
+              'id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, supplier_contact, supplier_response, items, note, sent_at, sent_to, sent_via, replied_at, replied_by, accepted_at, accepted_by, confirmed_at, confirmed_by, rejected_at, rejected_by, rejection_reason, closed_at, closed_by, close_note, package_status, selected_tier, covered_item_ids, recipient_workspace_id, target_workspace_id, source_type, source_id, request_scope, assigned_employee_id, assigned_employee_name, line_group_id, line_group_name, hidden, created_at, created_by, updated_at, updated_by'
+            )
             .eq('id', relatedCoreItem.request_id)
             .single()
 
@@ -773,13 +774,13 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
       // 建立完整資料（給 syncToCore 用）
       const fullDailyItinerary = dailySchedule.map((day, idx) => {
         let dateLabel = ''
-        let dateISO = ''  // ISO 格式日期 (YYYY-MM-DD)
+        let dateISO = '' // ISO 格式日期 (YYYY-MM-DD)
         if (tour.departure_date) {
           const date = new Date(tour.departure_date)
           date.setDate(date.getDate() + idx)
           const weekdays = TOUR_ITINERARY_TAB_LABELS.WEEKDAYS
           dateLabel = `${date.getMonth() + 1}/${date.getDate()} (${weekdays[date.getDay()]})`
-          dateISO = date.toISOString().split('T')[0]  // "2026-03-30"
+          dateISO = date.toISOString().split('T')[0] // "2026-03-30"
         }
 
         const isFirst = idx === 0
@@ -802,7 +803,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         return {
           day: day.day, // 天數
           dayLabel: `Day ${day.day}`,
-          date: dateISO || dateLabel,  // 優先用 ISO 格式
+          date: dateISO || dateLabel, // 優先用 ISO 格式
           title: dayTitle,
           route: day.route || '', // 路線描述
           highlight: '',
@@ -935,7 +936,12 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               ) {
                 const cancelList = result.cancellations
                   .map((c: Record<string, unknown>) =>
-                    (c.items as Record<string, unknown>[]).map((i: Record<string, unknown>) => `${(i.service_date as string) || ''} ${i.title as string}`).join('、')
+                    (c.items as Record<string, unknown>[])
+                      .map(
+                        (i: Record<string, unknown>) =>
+                          `${(i.service_date as string) || ''} ${i.title as string}`
+                      )
+                      .join('、')
                   )
                   .join('\n')
 

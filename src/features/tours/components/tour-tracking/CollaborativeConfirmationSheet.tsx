@@ -30,7 +30,9 @@ interface RequestItem {
 async function fetchRequestItems(requestId: string): Promise<RequestItem[]> {
   const { data, error } = await supabase
     .from('tour_request_items')
-    .select('id, request_id, tour_id, workspace_id, item_name, item_category, service_date, day_number, sort_order, source, source_item_id, handled_by, local_status, created_at, updated_at')
+    .select(
+      'id, request_id, tour_id, workspace_id, item_name, item_category, service_date, day_number, sort_order, source, source_item_id, handled_by, local_status, created_at, updated_at'
+    )
     .eq('request_id', requestId)
     .order('day_number', { ascending: true })
     .order('sort_order', { ascending: true })
@@ -95,7 +97,7 @@ export function CollaborativeConfirmationSheet({
     } catch (error) {
       toast({
         title: '更新失敗',
-        description: (error instanceof Error ? error.message : String(error)),
+        description: error instanceof Error ? error.message : String(error),
         variant: 'destructive',
       })
     }
@@ -109,7 +111,9 @@ export function CollaborativeConfirmationSheet({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = request.supplier_response as Record<string, unknown> | null
     const selectedPrice =
-      request.selected_tier != null ? (response?.tierPrices as Record<number, number> | undefined)?.[request.selected_tier] : undefined
+      request.selected_tier != null
+        ? (response?.tierPrices as Record<number, number> | undefined)?.[request.selected_tier]
+        : undefined
 
     const html = `
       <!DOCTYPE html>
@@ -216,7 +220,11 @@ export function CollaborativeConfirmationSheet({
                 {' '}
                 • {request.selected_tier} 人團{' '}
                 {Number(
-                  ((request.supplier_response as Record<string, unknown>)?.tierPrices as Record<number, number> | undefined)?.[request.selected_tier!]
+                  (
+                    (request.supplier_response as Record<string, unknown>)?.tierPrices as
+                      | Record<number, number>
+                      | undefined
+                  )?.[request.selected_tier!]
                 ).toLocaleString()}{' '}
                 元/人
               </>

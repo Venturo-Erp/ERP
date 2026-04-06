@@ -1,11 +1,11 @@
 /**
  * 用 LINE userId 查詢客戶
  * GET /api/customers/by-line?lineUserId=xxx&workspaceId=xxx
- * 
+ *
  * 回傳：
  * - 有綁定 → { customer: {...} }
  * - 沒綁定 → { customer: null }
- * 
+ *
  * 🔒 安全性：需要提供 workspaceId，防止跨租戶查詢
  */
 

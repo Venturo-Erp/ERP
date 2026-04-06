@@ -22,7 +22,9 @@ export default async function TransportQuoteWithRequestPage({
   // 查詢需求單
   const { data: request } = await supabase
     .from('tour_requests')
-    .select('id, tour_id, supplier_name, supplier_response, replied_at, note, metadata, items, status, request_type')
+    .select(
+      'id, tour_id, supplier_name, supplier_response, replied_at, note, metadata, items, status, request_type'
+    )
     .eq('id', requestId)
     .eq('tour_id', tourId)
     .single()
@@ -77,7 +79,24 @@ export default async function TransportQuoteWithRequestPage({
 
   // 判斷是否已提交
   const isSubmitted = request.supplier_response && request.replied_at
-  const quoteData = request.supplier_response as { submitted_at?: string; totalFare?: number; contact?: string; phone?: string; driverName?: string; driverPhone?: string; vehiclePlate?: string; vehicleType?: string; includesParking?: boolean; includesToll?: boolean; includesAccommodation?: boolean; includesTip?: boolean; accommodationFee?: number; tipAmount?: number; supplierNote?: string; [key: string]: unknown } | null
+  const quoteData = request.supplier_response as {
+    submitted_at?: string
+    totalFare?: number
+    contact?: string
+    phone?: string
+    driverName?: string
+    driverPhone?: string
+    vehiclePlate?: string
+    vehicleType?: string
+    includesParking?: boolean
+    includesToll?: boolean
+    includesAccommodation?: boolean
+    includesTip?: boolean
+    accommodationFee?: number
+    tipAmount?: number
+    supplierNote?: string
+    [key: string]: unknown
+  } | null
 
   // 計算天數
   const totalDays =
@@ -89,7 +108,10 @@ export default async function TransportQuoteWithRequestPage({
       : null
 
   // 按天分組
-  const grouped = new Map<number, { date: string; weekday: string; items: typeof coreItems; hotel: (typeof coreItems)[0] | null }>()
+  const grouped = new Map<
+    number,
+    { date: string; weekday: string; items: typeof coreItems; hotel: (typeof coreItems)[0] | null }
+  >()
   const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 
   for (const item of coreItems) {
@@ -160,22 +182,22 @@ export default async function TransportQuoteWithRequestPage({
                 {daySchedule.map((day, idx) => {
                   const meals: Record<string, string> = { breakfast: '', lunch: '', dinner: '' }
                   day.items
-                    .filter((i) => i.category === 'meals')
-                    .forEach((m) => {
+                    .filter(i => i.category === 'meals')
+                    .forEach(m => {
                       if (m.sub_category && meals[m.sub_category] !== undefined) {
                         meals[m.sub_category] = m.title || '-'
                       }
                     })
 
                   const activities = day.items
-                    .filter((i) => i.category === 'activities')
-                    .map((a) => a.title)
+                    .filter(i => i.category === 'activities')
+                    .map(a => a.title)
                     .filter(Boolean)
                     .join(' → ')
                   const content =
                     activities ||
                     day.items
-                      .map((i) => i.title)
+                      .map(i => i.title)
                       .filter(Boolean)
                       .join('、')
 
@@ -226,8 +248,22 @@ export default async function TransportQuoteWithRequestPage({
                   <span className="text-xs text-morandi-secondary ml-2">（點擊展開）</span>
                 </summary>
                 <div className="p-4 space-y-3 border-t border-border">
-                  {(history as Array<{ id: string; replied_at: string; supplier_response: Record<string, unknown> | null }>).map((h) => {
-                    const quoteData = h.supplier_response as { totalFare?: number; contact?: string; includesParking?: boolean; includesToll?: boolean; includesAccommodation?: boolean; includesTip?: boolean; supplierNote?: string } | null
+                  {(
+                    history as Array<{
+                      id: string
+                      replied_at: string
+                      supplier_response: Record<string, unknown> | null
+                    }>
+                  ).map(h => {
+                    const quoteData = h.supplier_response as {
+                      totalFare?: number
+                      contact?: string
+                      includesParking?: boolean
+                      includesToll?: boolean
+                      includesAccommodation?: boolean
+                      includesTip?: boolean
+                      supplierNote?: string
+                    } | null
                     return (
                       <div
                         key={h.id}
@@ -285,7 +321,10 @@ export default async function TransportQuoteWithRequestPage({
                   <div className="text-4xl mb-2">✅</div>
                   <h3 className="text-xl font-semibold text-green-900">報價已提交</h3>
                   <p className="text-sm text-green-700 mt-1">
-                    提交時間：{quoteData?.submitted_at ? new Date(quoteData.submitted_at).toLocaleString('zh-TW') : '—'}
+                    提交時間：
+                    {quoteData?.submitted_at
+                      ? new Date(quoteData.submitted_at).toLocaleString('zh-TW')
+                      : '—'}
                   </p>
                 </div>
 
@@ -311,11 +350,12 @@ export default async function TransportQuoteWithRequestPage({
                       {quoteData.includesToll && <div>✓ 過路費</div>}
                       {quoteData.includesAccommodation && <div>✓ 司機住宿</div>}
                       {quoteData.includesTip && <div>✓ 小費</div>}
-                      {!quoteData.includesAccommodation && (quoteData.accommodationFee ?? 0) > 0 && (
-                        <div className="text-amber-700">
-                          司機住宿費：${quoteData.accommodationFee} 元
-                        </div>
-                      )}
+                      {!quoteData.includesAccommodation &&
+                        (quoteData.accommodationFee ?? 0) > 0 && (
+                          <div className="text-amber-700">
+                            司機住宿費：${quoteData.accommodationFee} 元
+                          </div>
+                        )}
                       {!quoteData.includesTip && (quoteData.tipAmount ?? 0) > 0 && (
                         <div className="text-amber-700">小費：${quoteData.tipAmount} 元</div>
                       )}

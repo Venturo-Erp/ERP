@@ -394,7 +394,9 @@ export function RichTextInput({
           {!singleLine && (
             <>
               <div className="w-px h-5 bg-muted mx-1" />
-              <span className="text-[10px] text-morandi-muted px-1 select-none">Shift+Enter 換行</span>
+              <span className="text-[10px] text-morandi-muted px-1 select-none">
+                Shift+Enter 換行
+              </span>
             </>
           )}
         </div>

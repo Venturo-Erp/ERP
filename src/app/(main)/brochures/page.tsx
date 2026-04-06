@@ -6,10 +6,6 @@ import { COMP_LAYOUT_LABELS } from '@/components/layout/constants/labels'
 
 export default function BrochuresPage() {
   return (
-    <DesignPage
-      title={COMP_LAYOUT_LABELS.手冊}
-      icon={BookOpen}
-      categoryFilter={['brochure']}
-    />
+    <DesignPage title={COMP_LAYOUT_LABELS.手冊} icon={BookOpen} categoryFilter={['brochure']} />
   )
 }

@@ -158,7 +158,7 @@ export default function AttractionsTab({
   return (
     <div className="h-full flex flex-col">
       <div className="flex-1 overflow-auto">
-        {(
+        {
           <AttractionsList
             loading={loading}
             sortedAttractions={sortedAttractions}
@@ -171,7 +171,7 @@ export default function AttractionsTab({
             onMoveUp={attraction => moveUp(attraction, sortedAttractions)}
             onMoveDown={attraction => moveDown(attraction, sortedAttractions)}
           />
-        )}
+        }
       </div>
 
       {/* 編輯對話框 */}

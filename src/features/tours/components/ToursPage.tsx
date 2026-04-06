@@ -43,7 +43,7 @@ export const ToursPage: React.FC = () => {
 
   // 判斷是否為 Local/DMC
   const isLocal = user?.workspace_type === 'dmc' || user?.workspace_type === 'guide_supplier'
-  
+
   // 收到的委託數量（Local 專用）
   const [receivedCount, setReceivedCount] = useState(0)
 
@@ -198,25 +198,28 @@ export const ToursPage: React.FC = () => {
   }, [operations, deleteConfirm.tour, closeDeleteDialog])
 
   // 處理報名（建立訂單）
-  const handleAddOrder = useCallback(async (orderData: OrderFormData) => {
-    try {
-      await createOrder({
-        tour_id: orderData.tour_id,
-        contact_person: orderData.contact_person,
-        sales_person: orderData.sales_person,
-        assistant: orderData.assistant,
-        member_count: orderData.member_count || 0,
-        total_amount: orderData.total_amount || 0,
-        paid_amount: 0,
-        remaining_amount: orderData.total_amount || 0,
-        workspace_id: user?.workspace_id,
-      })
-      toast.success('訂單建立成功')
-      setAddOrderDialogTour(null)
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : '建立訂單失敗')
-    }
-  }, [user?.workspace_id])
+  const handleAddOrder = useCallback(
+    async (orderData: OrderFormData) => {
+      try {
+        await createOrder({
+          tour_id: orderData.tour_id,
+          contact_person: orderData.contact_person,
+          sales_person: orderData.sales_person,
+          assistant: orderData.assistant,
+          member_count: orderData.member_count || 0,
+          total_amount: orderData.total_amount || 0,
+          paid_amount: 0,
+          remaining_amount: orderData.total_amount || 0,
+          workspace_id: user?.workspace_id,
+        })
+        toast.success('訂單建立成功')
+        setAddOrderDialogTour(null)
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : '建立訂單失敗')
+      }
+    },
+    [user?.workspace_id]
+  )
 
   const { handleCreateChannel } = useTourChannelOperations({
     actions: actions as unknown as TourStoreActions,
@@ -451,7 +454,10 @@ export const ToursPage: React.FC = () => {
       )}
 
       {/* 報名對話框（新增訂單） */}
-      <Dialog open={!!addOrderDialogTour} onOpenChange={open => !open && setAddOrderDialogTour(null)}>
+      <Dialog
+        open={!!addOrderDialogTour}
+        onOpenChange={open => !open && setAddOrderDialogTour(null)}
+      >
         <DialogContent level={1} className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>報名旅遊團 - {addOrderDialogTour?.name}</DialogTitle>

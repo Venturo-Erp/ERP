@@ -107,7 +107,9 @@ export function CoordinateSearch({
       {currentLat && currentLng && (
         <div className="flex items-center gap-2 text-xs text-morandi-secondary">
           <MapPin size={12} className="text-morandi-gold" />
-          <span>目前：{currentLat.toFixed(6)}, {currentLng.toFixed(6)}</span>
+          <span>
+            目前：{currentLat.toFixed(6)}, {currentLng.toFixed(6)}
+          </span>
           <a
             href={`https://www.google.com/maps?q=${currentLat},${currentLng}`}
             target="_blank"

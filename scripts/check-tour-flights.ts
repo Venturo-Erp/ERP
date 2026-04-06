@@ -10,7 +10,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 async function main() {
   const tourCode = 'HAN260925A'
-  
+
   // 查詢團的航班資料
   const { data: tour, error } = await supabase
     .from('tours')

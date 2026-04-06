@@ -38,18 +38,20 @@ export function useTourItineraryItemsByTour(tour_id: string | null) {
       if (!tour_id) return []
       const { data, error } = await supabase
         .from('tour_itinerary_items')
-        .select('id, tour_id, day_number, sort_order, category, sub_category, title, description, resource_type, resource_name, resource_id, supplier_id, supplier_name, service_date, service_date_end, estimated_cost, confirmed_cost, actual_expense, booking_status, booking_reference, booking_confirmed_at, confirmation_status, confirmation_item_id, handled_by, request_status, request_id, quote_status, quoted_cost, show_on_brochure, show_on_quote, show_on_web, workspace_id, created_at, updated_at')
+        .select(
+          'id, tour_id, day_number, sort_order, category, sub_category, title, description, resource_type, resource_name, resource_id, supplier_id, supplier_name, service_date, service_date_end, estimated_cost, confirmed_cost, actual_expense, booking_status, booking_reference, booking_confirmed_at, confirmation_status, confirmation_item_id, handled_by, request_status, request_id, quote_status, quoted_cost, show_on_brochure, show_on_quote, show_on_web, workspace_id, created_at, updated_at'
+        )
         .eq('tour_id', tour_id)
         .order('day_number', { ascending: true })
         .order('sort_order', { ascending: true })
         .limit(500)
       if (error) throw error
-      
+
       // 收集需要查詢的 attraction ids
       const attractionIds = (data || [])
         .filter(item => item.resource_type === 'attraction' && item.resource_id)
         .map(item => item.resource_id as string)
-      
+
       // 批次查詢景點資料（含描述和圖片）
       let attractionMap = new Map<string, { description?: string; thumbnail?: string }>()
       if (attractionIds.length > 0) {
@@ -57,7 +59,7 @@ export function useTourItineraryItemsByTour(tour_id: string | null) {
           .from('attractions')
           .select('id, description, thumbnail, images')
           .in('id', attractionIds)
-        
+
         if (attractions) {
           for (const attr of attractions) {
             attractionMap.set(attr.id, {
@@ -67,7 +69,7 @@ export function useTourItineraryItemsByTour(tour_id: string | null) {
           }
         }
       }
-      
+
       // 把景點資料 merge 進來
       return (data || []).map(item => {
         const attr = item.resource_id ? attractionMap.get(item.resource_id) : null
@@ -95,18 +97,20 @@ export function useTourItineraryItemsByItinerary(itinerary_id: string | null) {
       if (!itinerary_id) return []
       const { data, error } = await supabase
         .from('tour_itinerary_items')
-        .select('id, tour_id, day_number, sort_order, category, sub_category, title, description, resource_type, resource_name, resource_id, supplier_id, supplier_name, service_date, service_date_end, estimated_cost, confirmed_cost, actual_expense, booking_status, booking_reference, booking_confirmed_at, confirmation_status, confirmation_item_id, handled_by, request_status, request_id, quote_status, quoted_cost, show_on_brochure, show_on_quote, show_on_web, workspace_id, created_at, updated_at')
+        .select(
+          'id, tour_id, day_number, sort_order, category, sub_category, title, description, resource_type, resource_name, resource_id, supplier_id, supplier_name, service_date, service_date_end, estimated_cost, confirmed_cost, actual_expense, booking_status, booking_reference, booking_confirmed_at, confirmation_status, confirmation_item_id, handled_by, request_status, request_id, quote_status, quoted_cost, show_on_brochure, show_on_quote, show_on_web, workspace_id, created_at, updated_at'
+        )
         .eq('itinerary_id', itinerary_id)
         .order('day_number', { ascending: true })
         .order('sort_order', { ascending: true })
         .limit(500)
       if (error) throw error
-      
+
       // 收集需要查詢的 attraction ids
       const attractionIds = (data || [])
         .filter(item => item.resource_type === 'attraction' && item.resource_id)
         .map(item => item.resource_id as string)
-      
+
       // 批次查詢景點資料（含描述和圖片）
       let attractionMap = new Map<string, { description?: string; thumbnail?: string }>()
       if (attractionIds.length > 0) {
@@ -114,7 +118,7 @@ export function useTourItineraryItemsByItinerary(itinerary_id: string | null) {
           .from('attractions')
           .select('id, description, thumbnail, images')
           .in('id', attractionIds)
-        
+
         if (attractions) {
           for (const attr of attractions) {
             attractionMap.set(attr.id, {
@@ -124,7 +128,7 @@ export function useTourItineraryItemsByItinerary(itinerary_id: string | null) {
           }
         }
       }
-      
+
       // 把景點資料 merge 進來
       return (data || []).map(item => {
         const attr = item.resource_id ? attractionMap.get(item.resource_id) : null
@@ -217,6 +221,7 @@ function accommodationToItem(
     sort_order,
     category: ITINERARY_ITEM_CATEGORIES.ACCOMMODATION,
     title: accommodation,
+    resource_name: accommodation,
     service_date: service_date || null,
     resource_type: resource_id ? 'hotel' : null,
     resource_id: resource_id || null,
@@ -252,7 +257,9 @@ export function useSyncItineraryToCore() {
         // 1. 取得所有舊項目（檢查需求單狀態 + 報價欄位）
         const { data: old_items, error: fetch_error } = await supabase
           .from('tour_itinerary_items')
-          .select('id,title,category,request_id,supplier_name,service_date,resource_id,unit_price,quantity,total_cost,quote_status,quote_note,pricing_type,adult_price,child_price,infant_price,estimated_cost,quoted_cost,sub_category,show_on_quote,day_number')
+          .select(
+            'id,title,category,request_id,supplier_name,service_date,resource_id,unit_price,quantity,total_cost,quote_status,quote_note,pricing_type,adult_price,child_price,infant_price,estimated_cost,quoted_cost,sub_category,show_on_quote,day_number'
+          )
           .eq('itinerary_id', itinerary_id)
 
         if (fetch_error) throw fetch_error
@@ -309,7 +316,10 @@ export function useSyncItineraryToCore() {
             }
             // 餐食：用 category:day_number:sub_category 做 key
             if (oldItem.category === 'meals' && oldItem.day_number && oldItem.sub_category) {
-              oldPricingByDayCategory.set(`meals:${oldItem.day_number}:${oldItem.sub_category}`, oldItem)
+              oldPricingByDayCategory.set(
+                `meals:${oldItem.day_number}:${oldItem.sub_category}`,
+                oldItem
+              )
             }
 
             // 刪除判斷仍用指紋

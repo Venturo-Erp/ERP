@@ -80,7 +80,7 @@ export function AttractionsDialog({
   // 標記已驗證
   const handleMarkVerified = async () => {
     if (!attraction?.id) return
-    
+
     setIsVerifying(true)
     try {
       await updateAttraction(attraction.id, { data_verified: true })
@@ -322,12 +322,15 @@ export function AttractionsDialog({
   // 自訂標題（包含 AI 補充按鈕 + 標記已驗證按鈕）
   const dialogTitle = (
     <div className="flex items-center gap-3">
-      <span>{attraction
-        ? `編輯${fixedCategory === '住宿' ? '飯店' : fixedCategory === '美食餐廳' ? '餐廳' : '景點'}`
-        : fixedCategory === '住宿' ? '新增飯店'
-        : fixedCategory === '美食餐廳' ? '新增餐廳'
-        : ATTRACTIONS_DIALOG_LABELS.新增景點
-      }</span>
+      <span>
+        {attraction
+          ? `編輯${fixedCategory === '住宿' ? '飯店' : fixedCategory === '美食餐廳' ? '餐廳' : '景點'}`
+          : fixedCategory === '住宿'
+            ? '新增飯店'
+            : fixedCategory === '美食餐廳'
+              ? '新增餐廳'
+              : ATTRACTIONS_DIALOG_LABELS.新增景點}
+      </span>
       {/* 待驗證警示 + 標記按鈕 */}
       {attraction && !isVerified && (
         <Button
@@ -338,7 +341,11 @@ export function AttractionsDialog({
           disabled={isVerifying}
           className="h-7 text-xs gap-1.5 text-morandi-gold border-morandi-gold bg-morandi-gold/10 hover:bg-morandi-gold/10"
         >
-          {isVerifying ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+          {isVerifying ? (
+            <Loader2 size={14} className="animate-spin" />
+          ) : (
+            <CheckCircle2 size={14} />
+          )}
           標記已驗證
         </Button>
       )}

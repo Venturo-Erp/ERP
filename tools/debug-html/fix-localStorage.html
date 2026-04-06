@@ -1,116 +1,126 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <title>修復 localStorage</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      max-width: 700px;
-      margin: 50px auto;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-    .container {
-      background: white;
-      padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    h1 { color: #333; margin-bottom: 20px; }
-    button {
-      background: #d4a574;
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 16px;
-      width: 100%;
-      margin: 10px 0;
-    }
-    button:hover { background: #c49563; }
-    #result {
-      margin-top: 20px;
-      padding: 15px;
-      border-radius: 6px;
-      white-space: pre-wrap;
-      font-family: monospace;
-      font-size: 13px;
-    }
-    .success { background: #d4edda; color: #155724; }
-    .error { background: #f8d7da; color: #721c24; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>🔧 修復 localStorage</h1>
-    <p>此工具會：</p>
-    <ul>
-      <li>移除「夥伴」群組</li>
-      <li>移除所有 type='direct' 的頻道</li>
-      <li>清除衝突的選中狀態</li>
-    </ul>
-
-    <button onclick="fixData()">🔧 執行修復</button>
-
-    <div id="result"></div>
-  </div>
-
-  <script>
-    function showResult(message, type = 'success') {
-      const div = document.getElementById('result');
-      div.className = type;
-      div.textContent = message;
-    }
-
-    function fixData() {
-      try {
-        const stored = localStorage.getItem('channels-storage');
-        if (!stored) {
-          showResult('❌ 找不到 channels-storage', 'error');
-          return;
-        }
-
-        const data = JSON.parse(stored);
-        let report = '🔧 修復報告\n\n';
-
-        // 1. 移除「夥伴」群組
-        const originalGroupCount = (data.state?.channelGroups || []).length;
-        data.state.channelGroups = (data.state?.channelGroups || [])
-          .filter(g => g.name !== '夥伴');
-        const removedGroups = originalGroupCount - data.state.channelGroups.length;
-        report += `✅ 移除 ${removedGroups} 個「夥伴」群組\n`;
-
-        // 2. 移除 direct 類型頻道
-        const originalChannelCount = (data.state?.channels || []).length;
-        data.state.channels = (data.state?.channels || [])
-          .filter(ch => ch.type !== 'direct');
-        const removedChannels = originalChannelCount - data.state.channels.length;
-        report += `✅ 移除 ${removedChannels} 個 direct 類型頻道\n`;
-
-        // 3. 修正選中狀態衝突
-        if (data.state.selectedChannel && data.state.selectedDirectMessage) {
-          report += `⚠️ 發現選中狀態衝突\n`;
-          // 保留 DM，清除 channel
-          data.state.selectedChannel = null;
-          data.state.currentChannel = null;
-          report += `✅ 已清除 channel 選中狀態，保留 DM\n`;
-        }
-
-        // 4. 儲存
-        localStorage.setItem('channels-storage', JSON.stringify(data));
-
-        report += `\n🎉 修復完成！\n`;
-        report += `\n請重新整理頁面 (F5) 查看結果`;
-
-        showResult(report, 'success');
-
-      } catch (error) {
-        showResult(`❌ 錯誤: ${error.message}\n\n${error.stack}`, 'error');
-        console.error('修復失敗:', error);
+  <head>
+    <meta charset="UTF-8" />
+    <title>修復 localStorage</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        max-width: 700px;
+        margin: 50px auto;
+        padding: 20px;
+        background: #f5f5f5;
       }
-    }
-  </script>
-</body>
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+      button {
+        background: #d4a574;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+        margin: 10px 0;
+      }
+      button:hover {
+        background: #c49563;
+      }
+      #result {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 6px;
+        white-space: pre-wrap;
+        font-family: monospace;
+        font-size: 13px;
+      }
+      .success {
+        background: #d4edda;
+        color: #155724;
+      }
+      .error {
+        background: #f8d7da;
+        color: #721c24;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔧 修復 localStorage</h1>
+      <p>此工具會：</p>
+      <ul>
+        <li>移除「夥伴」群組</li>
+        <li>移除所有 type='direct' 的頻道</li>
+        <li>清除衝突的選中狀態</li>
+      </ul>
+
+      <button onclick="fixData()">🔧 執行修復</button>
+
+      <div id="result"></div>
+    </div>
+
+    <script>
+      function showResult(message, type = 'success') {
+        const div = document.getElementById('result')
+        div.className = type
+        div.textContent = message
+      }
+
+      function fixData() {
+        try {
+          const stored = localStorage.getItem('channels-storage')
+          if (!stored) {
+            showResult('❌ 找不到 channels-storage', 'error')
+            return
+          }
+
+          const data = JSON.parse(stored)
+          let report = '🔧 修復報告\n\n'
+
+          // 1. 移除「夥伴」群組
+          const originalGroupCount = (data.state?.channelGroups || []).length
+          data.state.channelGroups = (data.state?.channelGroups || []).filter(
+            g => g.name !== '夥伴'
+          )
+          const removedGroups = originalGroupCount - data.state.channelGroups.length
+          report += `✅ 移除 ${removedGroups} 個「夥伴」群組\n`
+
+          // 2. 移除 direct 類型頻道
+          const originalChannelCount = (data.state?.channels || []).length
+          data.state.channels = (data.state?.channels || []).filter(ch => ch.type !== 'direct')
+          const removedChannels = originalChannelCount - data.state.channels.length
+          report += `✅ 移除 ${removedChannels} 個 direct 類型頻道\n`
+
+          // 3. 修正選中狀態衝突
+          if (data.state.selectedChannel && data.state.selectedDirectMessage) {
+            report += `⚠️ 發現選中狀態衝突\n`
+            // 保留 DM，清除 channel
+            data.state.selectedChannel = null
+            data.state.currentChannel = null
+            report += `✅ 已清除 channel 選中狀態，保留 DM\n`
+          }
+
+          // 4. 儲存
+          localStorage.setItem('channels-storage', JSON.stringify(data))
+
+          report += `\n🎉 修復完成！\n`
+          report += `\n請重新整理頁面 (F5) 查看結果`
+
+          showResult(report, 'success')
+        } catch (error) {
+          showResult(`❌ 錯誤: ${error.message}\n\n${error.stack}`, 'error')
+          console.error('修復失敗:', error)
+        }
+      }
+    </script>
+  </body>
 </html>

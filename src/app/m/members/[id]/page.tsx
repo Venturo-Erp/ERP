@@ -62,7 +62,9 @@ export default function MemberDetailPage() {
       // 1. 取得成員資料
       const { data: memberData, error: memberError } = await supabase
         .from('order_members')
-        .select('id, order_id, chinese_name, passport_name, gender, age, birth_date, identity, member_type, id_number, passport_number, passport_expiry, pnr, hotel_1_name, hotel_1_checkin, hotel_1_checkout, hotel_2_name, hotel_2_checkin, hotel_2_checkout, selling_price, cost_price, profit, deposit_amount, balance_amount, deposit_receipt_no, balance_receipt_no, special_meal, remarks, workspace_id')
+        .select(
+          'id, order_id, chinese_name, passport_name, gender, age, birth_date, identity, member_type, id_number, passport_number, passport_expiry, pnr, hotel_1_name, hotel_1_checkin, hotel_1_checkout, hotel_2_name, hotel_2_checkin, hotel_2_checkout, selling_price, cost_price, profit, deposit_amount, balance_amount, deposit_receipt_no, balance_receipt_no, special_meal, remarks, workspace_id'
+        )
         .eq('id', memberId)
         .single()
 

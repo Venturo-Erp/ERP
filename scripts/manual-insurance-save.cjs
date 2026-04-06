@@ -10,7 +10,8 @@ const path = require('path')
 const { createClient } = require('@supabase/supabase-js')
 
 const LINE_TOKEN = process.env.LINE_CHANNEL_ACCESS_TOKEN || 'YOUR_LINE_TOKEN'
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pfqvdacxowpgfamuvnsn.supabase.co'
+const SUPABASE_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pfqvdacxowpgfamuvnsn.supabase.co'
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'YOUR_SERVICE_KEY'
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)

@@ -1,8 +1,8 @@
-import js from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import reactHooks from 'eslint-plugin-react-hooks';
-import prettierConfig from 'eslint-config-prettier';
-import venturoDesignSystem from './eslint-rules/venturo-design-system.js';
+import js from '@eslint/js'
+import tseslint from 'typescript-eslint'
+import reactHooks from 'eslint-plugin-react-hooks'
+import prettierConfig from 'eslint-config-prettier'
+import venturoDesignSystem from './eslint-rules/venturo-design-system.js'
 
 export default tseslint.config(
   // 全域忽略
@@ -50,7 +50,7 @@ export default tseslint.config(
   {
     plugins: {
       'react-hooks': reactHooks,
-      'venturo': venturoDesignSystem,
+      venturo: venturoDesignSystem,
     },
     rules: {
       // =====================================================
@@ -87,7 +87,7 @@ export default tseslint.config(
       'no-console': 'off', // 開發階段暫時允許
 
       // 關閉與 Prettier 衝突或不需要的規則
-      'quotes': 'off',
+      quotes: 'off',
       'no-useless-escape': 'off',
       'no-case-declarations': 'off',
       'no-useless-catch': 'off',
@@ -99,6 +99,5 @@ export default tseslint.config(
   },
 
   // Prettier 整合 (必須放在最後)
-  prettierConfig,
-);
-
+  prettierConfig
+)

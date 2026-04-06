@@ -154,26 +154,41 @@ function ReceiptOverviewTable({ tour }: { tour: Tour }) {
 
   const [paymentMethodMap, setPaymentMethodMap] = useState<Record<string, string>>({})
   useEffect(() => {
-    supabase.from('payment_methods').select('id,name').then(({ data }) => {
-      if (data) {
-        const map: Record<string, string> = {}
-        for (const pm of data) map[pm.id] = pm.name
-        setPaymentMethodMap(map)
-      }
-    })
+    supabase
+      .from('payment_methods')
+      .select('id,name')
+      .then(({ data }) => {
+        if (data) {
+          const map: Record<string, string> = {}
+          for (const pm of data) map[pm.id] = pm.name
+          setPaymentMethodMap(map)
+        }
+      })
   }, [])
 
-  const orderIds = useMemo(() => new Set((allOrders ?? []).filter(o => o.tour_id === tour.id).map(o => o.id)), [allOrders, tour.id])
+  const orderIds = useMemo(
+    () => new Set((allOrders ?? []).filter(o => o.tour_id === tour.id).map(o => o.id)),
+    [allOrders, tour.id]
+  )
 
   const receipts = useMemo(
-    () => (allReceipts ?? [])
-      .filter(r => !r.deleted_at && (r.tour_id === tour.id || (r.order_id && orderIds.has(r.order_id))))
-      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()),
+    () =>
+      (allReceipts ?? [])
+        .filter(
+          r => !r.deleted_at && (r.tour_id === tour.id || (r.order_id && orderIds.has(r.order_id)))
+        )
+        .sort(
+          (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+        ),
     [allReceipts, tour.id, orderIds]
   )
 
   const PAYMENT_METHOD_LABELS: Record<string, string> = {
-    transfer: '匯款', cash: '現金', card: '刷卡', check: '支票', linkpay: 'LinkPay',
+    transfer: '匯款',
+    cash: '現金',
+    card: '刷卡',
+    check: '支票',
+    linkpay: 'LinkPay',
   }
 
   const formatDate = (dateStr: string | null | undefined) => {
@@ -207,44 +222,71 @@ function ReceiptOverviewTable({ tour }: { tour: Tour }) {
             <th className="px-4 py-2 text-left font-medium">收款日期</th>
             <th className="px-4 py-2 text-left font-medium">收款方式</th>
             <th className="px-4 py-2 text-left font-medium">收款明細</th>
-            <th className="px-4 py-2 text-left font-medium" colSpan={3}>備註</th>
+            <th className="px-4 py-2 text-left font-medium" colSpan={3}>
+              備註
+            </th>
             <th className="px-4 py-2 text-right font-medium">待核金額</th>
             <th className="px-4 py-2 text-center font-medium">狀態</th>
             <th className="px-4 py-2 text-right font-medium">金額</th>
           </tr>
         </thead>
         <tbody>
-          {receipts.length > 0 ? receipts.map(r => {
-            const receiptStatus = r.status === '1'
-              ? { label: '已確認', style: 'bg-morandi-green/20 text-morandi-green' }
-              : { label: '待確認', style: 'bg-morandi-secondary/20 text-morandi-secondary' }
-            return (
-              <tr key={r.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
-                <td className="px-4 py-2 font-medium text-morandi-primary">
-                  <button className="text-morandi-gold hover:underline cursor-pointer" onClick={() => { setSelectedReceipt(r as unknown as Receipt); setReceiptDialogOpen(true) }}>
-                    {r.receipt_number || '-'}
-                  </button>
-                </td>
-                <td className="px-4 py-2 text-morandi-secondary">{formatDate(r.receipt_date)}</td>
-                <td className="px-4 py-2 text-morandi-secondary">
-                  {(r.payment_method_id && paymentMethodMap[r.payment_method_id]) || PAYMENT_METHOD_LABELS[r.payment_method || ''] || r.payment_method || '-'}
-                </td>
-                <td className="px-4 py-2 text-morandi-secondary">{r.receipt_account || r.payment_name || '-'}</td>
-                <td className="px-4 py-2 text-morandi-secondary" colSpan={3}>{r.notes || '-'}</td>
-                <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">
-                  {r.status !== '1' ? formatCurrency(Number(r.actual_amount) || Number(r.receipt_amount) || 0) : formatCurrency(0)}
-                </td>
-                <td className="px-4 py-2 text-center">
-                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${receiptStatus.style}`}>
-                    {receiptStatus.label}
-                  </span>
-                </td>
-                <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-green font-medium">
-                  {r.status === '1' ? `+${formatCurrency(Number(r.actual_amount) || Number(r.receipt_amount) || 0)}` : ''}
-                </td>
-              </tr>
-            )
-          }) : (
+          {receipts.length > 0 ? (
+            receipts.map(r => {
+              const receiptStatus =
+                r.status === '1'
+                  ? { label: '已確認', style: 'bg-morandi-green/20 text-morandi-green' }
+                  : { label: '待確認', style: 'bg-morandi-secondary/20 text-morandi-secondary' }
+              return (
+                <tr
+                  key={r.id}
+                  className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50"
+                >
+                  <td className="px-4 py-2 font-medium text-morandi-primary">
+                    <button
+                      className="text-morandi-gold hover:underline cursor-pointer"
+                      onClick={() => {
+                        setSelectedReceipt(r as unknown as Receipt)
+                        setReceiptDialogOpen(true)
+                      }}
+                    >
+                      {r.receipt_number || '-'}
+                    </button>
+                  </td>
+                  <td className="px-4 py-2 text-morandi-secondary">{formatDate(r.receipt_date)}</td>
+                  <td className="px-4 py-2 text-morandi-secondary">
+                    {(r.payment_method_id && paymentMethodMap[r.payment_method_id]) ||
+                      PAYMENT_METHOD_LABELS[r.payment_method || ''] ||
+                      r.payment_method ||
+                      '-'}
+                  </td>
+                  <td className="px-4 py-2 text-morandi-secondary">
+                    {r.receipt_account || r.payment_name || '-'}
+                  </td>
+                  <td className="px-4 py-2 text-morandi-secondary" colSpan={3}>
+                    {r.notes || '-'}
+                  </td>
+                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">
+                    {r.status !== '1'
+                      ? formatCurrency(Number(r.actual_amount) || Number(r.receipt_amount) || 0)
+                      : formatCurrency(0)}
+                  </td>
+                  <td className="px-4 py-2 text-center">
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${receiptStatus.style}`}
+                    >
+                      {receiptStatus.label}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-green font-medium">
+                    {r.status === '1'
+                      ? `+${formatCurrency(Number(r.actual_amount) || Number(r.receipt_amount) || 0)}`
+                      : ''}
+                  </td>
+                </tr>
+              )
+            })
+          ) : (
             <tr>
               <td colSpan={10} className="py-12 text-center text-morandi-secondary">
                 <DollarSign size={24} className="mx-auto mb-4 opacity-50" />

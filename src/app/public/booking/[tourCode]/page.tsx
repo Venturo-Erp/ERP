@@ -11,7 +11,16 @@ interface Itinerary {
   title: string
   subtitle?: string
   tour_code?: string
-  daily_itinerary?: Array<{ date?: string; dayLabel?: string; title?: string; description?: string; breakfast?: string; lunch?: string; dinner?: string; accommodation?: string }>
+  daily_itinerary?: Array<{
+    date?: string
+    dayLabel?: string
+    title?: string
+    description?: string
+    breakfast?: string
+    lunch?: string
+    dinner?: string
+    accommodation?: string
+  }>
 }
 
 interface Employee {
@@ -22,11 +31,7 @@ interface Employee {
   employee_number?: string
 }
 
-export default function PublicItineraryPage({
-  params,
-}: {
-  params: Promise<{ tourCode: string }>
-}) {
+export default function PublicItineraryPage({ params }: { params: Promise<{ tourCode: string }> }) {
   const { tourCode } = use(params)
   const searchParams = useSearchParams()
   const salesPersonRef = searchParams.get('ref')
@@ -137,10 +142,7 @@ export default function PublicItineraryPage({
 
           <div className="space-y-12">
             {dailyItinerary.map((day, index) => (
-              <article
-                key={index}
-                className="bg-white rounded-3xl shadow-lg overflow-hidden group"
-              >
+              <article key={index} className="bg-white rounded-3xl shadow-lg overflow-hidden group">
                 <div className="grid lg:grid-cols-12">
                   {/* Day Number */}
                   <div className="lg:col-span-2 bg-morandi-primary p-8 text-white flex flex-col justify-between items-start relative overflow-hidden">

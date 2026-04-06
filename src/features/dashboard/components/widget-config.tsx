@@ -1,4 +1,13 @@
-import { Calculator, DollarSign, Clock, Clipboard, Cloud, Plane, CloudSun, ClipboardList } from 'lucide-react'
+import {
+  Calculator,
+  DollarSign,
+  Clock,
+  Clipboard,
+  Cloud,
+  Plane,
+  CloudSun,
+  ClipboardList,
+} from 'lucide-react'
 import type { WidgetConfig } from '../types'
 import { CalculatorWidget } from './calculator-widget'
 import { CurrencyWidget } from './currency-widget'

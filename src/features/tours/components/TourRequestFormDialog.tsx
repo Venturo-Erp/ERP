@@ -232,7 +232,9 @@ export function TourRequestFormDialog({
       if (!currentWorkspaceId) return
       const { data, error } = await supabase
         .from('workspaces')
-        .select('id, name, code, description, legal_name, phone, email, address, tax_id, logo_url, is_active, type, contract_seal_image_url, invoice_seal_image_url, website, fax, bank_name, bank_branch, bank_account, bank_account_name, subtitle, icon, default_password, employee_number_prefix, payment_config, _deleted, _needs_sync, _synced_at, created_at, created_by, updated_at, updated_by')
+        .select(
+          'id, name, code, description, legal_name, phone, email, address, tax_id, logo_url, is_active, type, contract_seal_image_url, invoice_seal_image_url, website, fax, bank_name, bank_branch, bank_account, bank_account_name, subtitle, icon, default_password, employee_number_prefix, payment_config, _deleted, _needs_sync, _synced_at, created_at, created_by, updated_at, updated_by'
+        )
         .neq('id', currentWorkspaceId)
         .eq('is_active', true)
         .order('name')
@@ -609,8 +611,8 @@ export function TourRequestFormDialog({
             tourId: tour.id,
             workspaceId: user.workspace_id,
             requestType: categoryName,
-            supplierName: targetWs?.name || supplierInfo.name
-          })
+            supplierName: targetWs?.name || supplierInfo.name,
+          }),
         }).catch(() => {}) // 忽略錯誤，不影響主流程
       }
 

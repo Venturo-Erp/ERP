@@ -100,11 +100,11 @@ export const useQuoteSave = ({
         ...quickQuoteData,
       }
 
-      logger.log('[handleSave] 儲存報價單:', { 
-        quoteId: quote.id, 
-        groupSize, 
+      logger.log('[handleSave] 儲存報價單:', {
+        quoteId: quote.id,
+        groupSize,
         tierPricingsCount: tierPricingsData.length,
-        tierPricings: tierPricingsData
+        tierPricings: tierPricingsData,
       })
 
       // ✅ 等待存檔完成，捕獲錯誤
@@ -132,7 +132,9 @@ export const useQuoteSave = ({
             // 寫入完成後，重新讀取核心表並更新 categories（確保 ID 正確）
             const { data: freshItems } = await supabase
               .from('tour_itinerary_items')
-              .select('id, tour_id, day_number, sort_order, category, sub_category, title, description, resource_type, resource_name, resource_id, supplier_id, supplier_name, service_date, service_date_end, estimated_cost, confirmed_cost, actual_expense, booking_status, booking_reference, booking_confirmed_at, confirmation_status, confirmation_item_id, handled_by, request_status, request_id, quote_status, quoted_cost, show_on_brochure, show_on_quote, show_on_web, workspace_id, created_at, updated_at')
+              .select(
+                'id, tour_id, day_number, sort_order, category, sub_category, title, description, resource_type, resource_name, resource_id, supplier_id, supplier_name, service_date, service_date_end, estimated_cost, confirmed_cost, actual_expense, booking_status, booking_reference, booking_confirmed_at, confirmation_status, confirmation_item_id, handled_by, request_status, request_id, quote_status, quoted_cost, show_on_brochure, show_on_quote, show_on_web, workspace_id, created_at, updated_at'
+              )
               .eq('tour_id', quote.tour_id!)
               .order('day_number', { ascending: true })
               .order('sort_order', { ascending: true })

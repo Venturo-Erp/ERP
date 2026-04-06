@@ -293,7 +293,9 @@ export async function getStatusHistory(
   try {
     let query = supabase
       .from('pnr_flight_status_history')
-      .select('id, pnr_id, segment_id, flight_number, airline_code, flight_date, operational_status, booking_status, delay_minutes, gate_info, new_departure_time, new_arrival_time, external_data, source, remarks, recorded_at, workspace_id')
+      .select(
+        'id, pnr_id, segment_id, flight_number, airline_code, flight_date, operational_status, booking_status, delay_minutes, gate_info, new_departure_time, new_arrival_time, external_data, source, remarks, recorded_at, workspace_id'
+      )
       .eq('pnr_id', pnrId)
       .order('recorded_at', { ascending: false })
       .limit(500)
@@ -335,7 +337,9 @@ export async function getLatestFlightStatus(
   try {
     const { data, error } = await supabase
       .from('pnr_flight_status_history')
-      .select('id, pnr_id, segment_id, flight_number, airline_code, flight_date, operational_status, booking_status, delay_minutes, gate_info, new_departure_time, new_arrival_time, external_data, source, remarks, recorded_at, workspace_id')
+      .select(
+        'id, pnr_id, segment_id, flight_number, airline_code, flight_date, operational_status, booking_status, delay_minutes, gate_info, new_departure_time, new_arrival_time, external_data, source, remarks, recorded_at, workspace_id'
+      )
       .eq('pnr_id', pnrId)
       .eq('airline_code', airlineCode)
       .eq('flight_number', flightNumber)
@@ -433,7 +437,9 @@ export async function getPnrSubscriptions(pnrId: string): Promise<FlightStatusSu
   try {
     const { data, error } = await supabase
       .from('flight_status_subscriptions')
-      .select('id, pnr_id, flight_number, flight_date, airline_code, segment_id, is_active, last_checked_at, external_provider, external_subscription_id, notify_on, notify_employee_ids, notify_channel_id, workspace_id, created_at, updated_at')
+      .select(
+        'id, pnr_id, flight_number, flight_date, airline_code, segment_id, is_active, last_checked_at, external_provider, external_subscription_id, notify_on, notify_employee_ids, notify_channel_id, workspace_id, created_at, updated_at'
+      )
       .eq('pnr_id', pnrId)
       .eq('is_active', true)
       .limit(500)

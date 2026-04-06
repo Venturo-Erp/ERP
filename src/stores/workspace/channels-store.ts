@@ -81,7 +81,7 @@ const useChannelsUIStore = create<
  * Channels Store Facade
  * 整合 Channel, ChannelGroup, Workspace 三個 createStore
  * 保持與舊版相同的 API
- * 
+ *
  * 🔧 優化：使用 selector 避免不必要的 re-render
  */
 export const useChannelsStore = () => {
@@ -278,9 +278,12 @@ export const useChannelsStore = () => {
     reorderChannels: (channels: Channel[]) => {
       // 批量更新順序 (createStore 會自動處理)
       channels.forEach((channel, index) => {
-        useChannelStore.getState().update(channel.id, { order: index }).catch(error => {
-          logger.warn('[ChannelsStore] 更新頻道順序失敗:', error)
-        })
+        useChannelStore
+          .getState()
+          .update(channel.id, { order: index })
+          .catch(error => {
+            logger.warn('[ChannelsStore] 更新頻道順序失敗:', error)
+          })
       })
     },
 
@@ -306,7 +309,9 @@ export const useChannelsStore = () => {
 
       // 批量更新頻道
       await Promise.all(
-        channelsInGroup.map(channel => useChannelStore.getState().update(channel.id, { group_id: null }))
+        channelsInGroup.map(channel =>
+          useChannelStore.getState().update(channel.id, { group_id: null })
+        )
       )
 
       // 刪除群組

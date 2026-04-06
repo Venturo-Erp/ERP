@@ -27,13 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Plus,
-  Trash2,
-  Pencil,
-  Loader2,
-  ListChecks,
-} from 'lucide-react'
+import { Plus, Trash2, Pencil, Loader2, ListChecks } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 
 interface Role {
@@ -209,16 +203,27 @@ export function TeamSettingsTab() {
             <table className="w-full">
               <thead>
                 <tr className="bg-morandi-bg/50 border-b border-border">
-                  <th className="text-left p-3 text-sm font-semibold text-morandi-primary">欄位名稱</th>
+                  <th className="text-left p-3 text-sm font-semibold text-morandi-primary">
+                    欄位名稱
+                  </th>
                   <th className="text-left p-3 text-sm font-semibold text-morandi-primary">層級</th>
-                  <th className="text-left p-3 text-sm font-semibold text-morandi-primary">可選職務</th>
-                  <th className="text-center p-3 text-sm font-semibold text-morandi-primary">必填</th>
-                  <th className="text-right p-3 text-sm font-semibold text-morandi-primary">操作</th>
+                  <th className="text-left p-3 text-sm font-semibold text-morandi-primary">
+                    可選職務
+                  </th>
+                  <th className="text-center p-3 text-sm font-semibold text-morandi-primary">
+                    必填
+                  </th>
+                  <th className="text-right p-3 text-sm font-semibold text-morandi-primary">
+                    操作
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {selectorFields.map(field => (
-                  <tr key={field.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/20">
+                  <tr
+                    key={field.id}
+                    className="border-b border-border last:border-b-0 hover:bg-morandi-bg/20"
+                  >
                     <td className="p-3 text-sm text-morandi-primary font-medium">{field.name}</td>
                     <td className="p-3">
                       <Badge
@@ -236,7 +241,11 @@ export function TeamSettingsTab() {
                       <div className="flex flex-wrap gap-1">
                         {field.roles.length > 0 ? (
                           field.roles.map(role => (
-                            <Badge key={role.id} variant="secondary" className="text-xs bg-morandi-container text-morandi-primary">
+                            <Badge
+                              key={role.id}
+                              variant="secondary"
+                              className="text-xs bg-morandi-container text-morandi-primary"
+                            >
                               {role.name}
                             </Badge>
                           ))
@@ -357,7 +366,9 @@ export function TeamSettingsTab() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setFieldDialogOpen(false)}>取消</Button>
+            <Button variant="outline" onClick={() => setFieldDialogOpen(false)}>
+              取消
+            </Button>
             <Button
               onClick={handleSaveField}
               disabled={savingField || !fieldForm.name.trim()}

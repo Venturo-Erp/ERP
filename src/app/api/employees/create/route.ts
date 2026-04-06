@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // 3. 建立 Supabase Auth 帳號
     const authEmail = `${workspaceCode}_${employeeData.employee_number.toLowerCase()}@venturo.com`
-    
+
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email: authEmail,
       password: password || '12345678',
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     }
 
     logger.log(`Employee created: ${employee.employee_number}`)
-    
+
     return NextResponse.json({
       success: true,
       employee: {

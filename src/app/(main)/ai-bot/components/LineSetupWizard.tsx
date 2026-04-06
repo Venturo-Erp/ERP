@@ -1,4 +1,4 @@
-{'use client'}
+'use client'
 
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -41,12 +41,21 @@ export function LineSetupWizard({ onComplete }: LineSetupWizardProps) {
       const res = await fetch('/api/line/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'save_messaging', channel_access_token: token, channel_secret: secret }),
+        body: JSON.stringify({
+          action: 'save_messaging',
+          channel_access_token: token,
+          channel_secret: secret,
+        }),
       })
       const data = await res.json()
       if (data.ok) {
         toast.success(`驗證成功！Bot: ${data.bot.displayName}`)
-        setConfig(prev => ({ ...prev, setup_step: 2, bot_display_name: data.bot.displayName, bot_basic_id: data.bot.basicId }))
+        setConfig(prev => ({
+          ...prev,
+          setup_step: 2,
+          bot_display_name: data.bot.displayName,
+          bot_basic_id: data.bot.basicId,
+        }))
         setToken('')
         setSecret('')
       } else {
@@ -70,7 +79,12 @@ export function LineSetupWizard({ onComplete }: LineSetupWizardProps) {
       const data = await res.json()
       if (data.ok) {
         toast.success('Webhook 設定成功！')
-        setConfig(prev => ({ ...prev, setup_step: 3, is_connected: true, webhook_url: data.webhook_url }))
+        setConfig(prev => ({
+          ...prev,
+          setup_step: 3,
+          is_connected: true,
+          webhook_url: data.webhook_url,
+        }))
       } else {
         toast.error(data.error || 'Webhook 設定失敗')
       }
@@ -124,7 +138,11 @@ export function LineSetupWizard({ onComplete }: LineSetupWizardProps) {
               <Badge className="bg-morandi-green/20 text-morandi-green">運作中</Badge>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => setConfig(prev => ({ ...prev, setup_step: 0 }))}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setConfig(prev => ({ ...prev, setup_step: 0 }))}
+          >
             重新設定
           </Button>
         </CardContent>
@@ -137,20 +155,47 @@ export function LineSetupWizard({ onComplete }: LineSetupWizardProps) {
       <Card className={step >= 1 ? 'border-morandi-green/30' : ''}>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step >= 1 ? 'bg-morandi-green text-white' : 'bg-morandi-container text-morandi-secondary'}`}>1</span>
+            <span
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step >= 1 ? 'bg-morandi-green text-white' : 'bg-morandi-container text-morandi-secondary'}`}
+            >
+              1
+            </span>
             建立 LINE Messaging API Channel
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <ol className="list-decimal list-inside space-y-2 text-sm text-morandi-secondary">
-            <li>前往 <a href="https://developers.line.biz/console/" target="_blank" rel="noopener noreferrer" className="text-morandi-gold underline">LINE Developers Console</a></li>
-            <li>點擊 <strong>Create</strong> 建立 Provider（輸入公司名稱）</li>
-            <li>在 Provider 內點擊 <strong>Create a Messaging API channel</strong></li>
-            <li>進入 Channel → 點 <strong>Messaging API</strong> 分頁 → 找到 Channel access token → 點 <strong>Issue</strong> 產生</li>
-            <li>點 <strong>Basic settings</strong> 分頁 → 複製 <strong>Channel secret</strong></li>
+            <li>
+              前往{' '}
+              <a
+                href="https://developers.line.biz/console/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-morandi-gold underline"
+              >
+                LINE Developers Console
+              </a>
+            </li>
+            <li>
+              點擊 <strong>Create</strong> 建立 Provider（輸入公司名稱）
+            </li>
+            <li>
+              在 Provider 內點擊 <strong>Create a Messaging API channel</strong>
+            </li>
+            <li>
+              進入 Channel → 點 <strong>Messaging API</strong> 分頁 → 找到 Channel access token → 點{' '}
+              <strong>Issue</strong> 產生
+            </li>
+            <li>
+              點 <strong>Basic settings</strong> 分頁 → 複製 <strong>Channel secret</strong>
+            </li>
           </ol>
           {step < 1 && (
-            <Button variant="outline" size="sm" onClick={() => setConfig(prev => ({ ...prev, setup_step: 1 }))}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setConfig(prev => ({ ...prev, setup_step: 1 }))}
+            >
               我已建立，下一步
             </Button>
           )}
@@ -160,10 +205,16 @@ export function LineSetupWizard({ onComplete }: LineSetupWizardProps) {
       <Card className={step >= 2 ? 'border-morandi-green/30' : step >= 1 ? '' : 'opacity-50'}>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step >= 2 ? 'bg-morandi-green text-white' : 'bg-morandi-container text-morandi-secondary'}`}>2</span>
+            <span
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step >= 2 ? 'bg-morandi-green text-white' : 'bg-morandi-container text-morandi-secondary'}`}
+            >
+              2
+            </span>
             輸入 API 金鑰
             {step >= 2 && config.bot_display_name && (
-              <Badge className="bg-morandi-green/20 text-morandi-green ml-2">{config.bot_display_name}</Badge>
+              <Badge className="bg-morandi-green/20 text-morandi-green ml-2">
+                {config.bot_display_name}
+              </Badge>
             )}
           </CardTitle>
         </CardHeader>
@@ -201,9 +252,15 @@ export function LineSetupWizard({ onComplete }: LineSetupWizardProps) {
       <Card className={step >= 3 ? 'border-morandi-green/30' : step >= 2 ? '' : 'opacity-50'}>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step >= 3 ? 'bg-morandi-green text-white' : 'bg-morandi-container text-morandi-secondary'}`}>3</span>
+            <span
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step >= 3 ? 'bg-morandi-green text-white' : 'bg-morandi-container text-morandi-secondary'}`}
+            >
+              3
+            </span>
             設定 Webhook（自動）
-            {step >= 3 && <Badge className="bg-morandi-green/20 text-morandi-green ml-2">已連接</Badge>}
+            {step >= 3 && (
+              <Badge className="bg-morandi-green/20 text-morandi-green ml-2">已連接</Badge>
+            )}
           </CardTitle>
         </CardHeader>
         {step >= 2 && step < 3 && (
@@ -221,7 +278,11 @@ export function LineSetupWizard({ onComplete }: LineSetupWizardProps) {
       <Card className={step >= 3 ? '' : 'opacity-50'}>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step >= 4 ? 'bg-morandi-green text-white' : 'bg-morandi-container text-morandi-secondary'}`}>4</span>
+            <span
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step >= 4 ? 'bg-morandi-green text-white' : 'bg-morandi-container text-morandi-secondary'}`}
+            >
+              4
+            </span>
             完成！
           </CardTitle>
         </CardHeader>

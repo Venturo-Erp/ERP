@@ -1,8 +1,8 @@
-import pg from 'pg';
-const { Client } = pg;
+import pg from 'pg'
+const { Client } = pg
 
-const DB_PASSWORD = 'kH6j4/UXg-+hGu@';
-const PROJECT_REF = 'pfqvdacxowpgfamuvnsn';
+const DB_PASSWORD = 'kH6j4/UXg-+hGu@'
+const PROJECT_REF = 'pfqvdacxowpgfamuvnsn'
 
 // 嘗試不同的連接配置
 const configs = [
@@ -14,8 +14,8 @@ const configs = [
       database: 'postgres',
       user: 'postgres',
       password: DB_PASSWORD,
-      ssl: { rejectUnauthorized: false }
-    }
+      ssl: { rejectUnauthorized: false },
+    },
   },
   {
     name: 'Pooler (aws pooler)',
@@ -25,8 +25,8 @@ const configs = [
       database: 'postgres',
       user: `postgres.${PROJECT_REF}`,
       password: DB_PASSWORD,
-      ssl: { rejectUnauthorized: false }
-    }
+      ssl: { rejectUnauthorized: false },
+    },
   },
   {
     name: 'Pooler (direct project)',
@@ -36,35 +36,37 @@ const configs = [
       database: 'postgres',
       user: 'postgres',
       password: DB_PASSWORD,
-      ssl: { rejectUnauthorized: false }
-    }
-  }
-];
+      ssl: { rejectUnauthorized: false },
+    },
+  },
+]
 
 for (const { name, config } of configs) {
-  console.log(`\n測試 ${name}...`);
-  const client = new Client(config);
+  console.log(`\n測試 ${name}...`)
+  const client = new Client(config)
 
   try {
-    await client.connect();
-    console.log(`✅ ${name} 連接成功！`);
+    await client.connect()
+    console.log(`✅ ${name} 連接成功！`)
 
-    const result = await client.query('SELECT version()');
-    console.log(`PostgreSQL 版本: ${result.rows[0].version.substring(0, 50)}...`);
+    const result = await client.query('SELECT version()')
+    console.log(`PostgreSQL 版本: ${result.rows[0].version.substring(0, 50)}...`)
 
-    await client.end();
+    await client.end()
 
-    console.log(`\n🎉 找到可用的連接配置！`);
-    console.log('Host:', config.host);
-    console.log('Port:', config.port);
-    console.log('User:', config.user);
+    console.log(`\n🎉 找到可用的連接配置！`)
+    console.log('Host:', config.host)
+    console.log('Port:', config.port)
+    console.log('User:', config.user)
 
-    process.exit(0);
+    process.exit(0)
   } catch (error) {
-    console.log(`❌ 失敗: ${error.message}`);
-    try { await client.end(); } catch {}
+    console.log(`❌ 失敗: ${error.message}`)
+    try {
+      await client.end()
+    } catch {}
   }
 }
 
-console.log('\n❌ 所有連接方式都失敗');
-process.exit(1);
+console.log('\n❌ 所有連接方式都失敗')
+process.exit(1)

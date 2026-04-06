@@ -191,7 +191,10 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
             <thead>
               <tr>
                 <td>
-                  <div className="relative pb-4 mb-6" style={{ borderBottom: '1px solid var(--morandi-container)' }}>
+                  <div
+                    className="relative pb-4 mb-6"
+                    style={{ borderBottom: '1px solid var(--morandi-container)' }}
+                  >
                     {/* Logo - 左上角 */}
                     {logoUrl ? (
                       <div
@@ -210,7 +213,10 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
                         />
                       </div>
                     ) : (
-                      <div className="absolute left-0 top-0 text-xs" style={{ color: 'var(--morandi-muted)' }}>
+                      <div
+                        className="absolute left-0 top-0 text-xs"
+                        style={{ color: 'var(--morandi-muted)' }}
+                      >
                         {workspaceName}
                       </div>
                     )}
@@ -256,7 +262,10 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
                     }}
                   >
                     <div className="text-center" style={{ marginBottom: '12px' }}>
-                      <p className="text-sm italic" style={{ color: 'var(--morandi-secondary)', margin: 0 }}>
+                      <p
+                        className="text-sm italic"
+                        style={{ color: 'var(--morandi-secondary)', margin: 0 }}
+                      >
                         {companySubtitle}
                       </p>
                     </div>
@@ -300,7 +309,10 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
 
           {/* 非列印模式的內容 */}
           <div className="print:hidden">
-            <div className="relative pb-4 mb-6" style={{ borderBottom: '1px solid var(--morandi-container)' }}>
+            <div
+              className="relative pb-4 mb-6"
+              style={{ borderBottom: '1px solid var(--morandi-container)' }}
+            >
               {/* Logo - 左上角 */}
               {logoUrl ? (
                 <div className="absolute left-0 top-0" style={{ width: '120px', height: '40px' }}>
@@ -316,7 +328,10 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
                   />
                 </div>
               ) : (
-                <div className="absolute left-0 top-0 text-xs" style={{ color: 'var(--morandi-muted)' }}>
+                <div
+                  className="absolute left-0 top-0 text-xs"
+                  style={{ color: 'var(--morandi-muted)' }}
+                >
                   {workspaceName}
                 </div>
               )}
@@ -371,7 +386,10 @@ export const PrintableConfirmation: React.FC<PrintableConfirmationProps> = ({
               }}
             >
               <div className="text-center" style={{ marginBottom: '12px' }}>
-                <p className="text-sm italic" style={{ color: 'var(--morandi-secondary)', margin: 0 }}>
+                <p
+                  className="text-sm italic"
+                  style={{ color: 'var(--morandi-secondary)', margin: 0 }}
+                >
                   {companySubtitle}
                 </p>
               </div>
@@ -460,7 +478,10 @@ const FlightConfirmationContent: React.FC<{ data: FlightData }> = ({ data }) => 
                   <td className="py-1.5" style={{ color: 'var(--morandi-secondary)' }}>
                     {'duration' in segment ? (segment.duration as string) : ''}
                   </td>
-                  <td className="py-1.5" style={{ width: '110px', color: 'var(--morandi-secondary)' }}>
+                  <td
+                    className="py-1.5"
+                    style={{ width: '110px', color: 'var(--morandi-secondary)' }}
+                  >
                     {'stops' in segment && typeof segment.stops === 'number'
                       ? segment.stops === 0
                         ? `/${LABELS.DIRECT_FLIGHT}`
@@ -472,26 +493,38 @@ const FlightConfirmationContent: React.FC<{ data: FlightData }> = ({ data }) => 
                 <tr>
                   <td
                     className="py-1.5"
-                    style={{ whiteSpace: 'nowrap', color: 'var(--morandi-primary)', fontWeight: 500 }}
+                    style={{
+                      whiteSpace: 'nowrap',
+                      color: 'var(--morandi-primary)',
+                      fontWeight: 500,
+                    }}
                   >
                     {segment.departureDate}
                   </td>
                   <td className="py-1.5" style={{ color: 'var(--morandi-primary)' }}>
                     {segment.departureTime} {LABELS.DEPARTURE}: {segment.departureAirport}
                   </td>
-                  <td className="py-1.5" style={{ width: '180px', color: 'var(--morandi-secondary)' }}>
+                  <td
+                    className="py-1.5"
+                    style={{ width: '180px', color: 'var(--morandi-secondary)' }}
+                  >
                     {segment.departureTerminal
                       ? `${LABELS.TERMINAL}${segment.departureTerminal} `
                       : ''}
                     /{'cabin' in segment ? (segment.cabin as string) : LABELS.ECONOMY_CLASS} /OK
                   </td>
-                  <td className="py-1.5" style={{ width: '110px', color: 'var(--morandi-secondary)' }}></td>
+                  <td
+                    className="py-1.5"
+                    style={{ width: '110px', color: 'var(--morandi-secondary)' }}
+                  ></td>
                 </tr>
                 {/* 抵達行 */}
                 <tr
                   style={{
                     borderBottom:
-                      idx === (data.segments?.length || 0) - 1 ? 'none' : '1px dashed var(--morandi-muted)',
+                      idx === (data.segments?.length || 0) - 1
+                        ? 'none'
+                        : '1px dashed var(--morandi-muted)',
                   }}
                 >
                   <td className="py-1.5 pb-3"></td>

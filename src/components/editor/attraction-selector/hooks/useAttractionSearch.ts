@@ -273,8 +273,6 @@ export function useAttractionSearch({
   // 解析行程標題，找出可能的景點關鍵字
   const titleKeywords = useMemo(() => parseDayTitleForAttractions(dayTitle), [dayTitle])
 
-
-
   // 根據標題關鍵字匹配建議景點（完全匹配優先）
   const suggestedAttractions = useMemo(() => {
     if (titleKeywords.length === 0 || attractions.length === 0) return []
@@ -286,12 +284,12 @@ export function useAttractionSearch({
     // 按關鍵字順序處理
     for (const keyword of titleKeywords) {
       const keywordLower = keyword.toLowerCase()
-      
+
       for (const a of attractions) {
         if (addedIds.has(a.id)) continue
-        
+
         const nameLower = a.name.toLowerCase()
-        
+
         // 完全匹配
         if (nameLower === keywordLower) {
           exactMatches.push(a)

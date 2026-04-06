@@ -66,7 +66,9 @@ async function getTourMembers(code: string) {
       : Promise.resolve({ data: null }),
   ])
 
-  const members = (membersResult.data || []).map(m => m.customer).filter((c): c is Member => c !== null)
+  const members = (membersResult.data || [])
+    .map(m => m.customer)
+    .filter((c): c is Member => c !== null)
   const excelUrl = signedUrlResult.data?.signedUrl || null
 
   return { tour, members, excelUrl, companyName }
@@ -170,7 +172,10 @@ export default async function InsuranceMemberPage({
             <tbody>
               {members.length === 0 ? (
                 <tr>
-                  <td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--morandi-muted)' }}>
+                  <td
+                    colSpan={4}
+                    style={{ padding: '24px', textAlign: 'center', color: 'var(--morandi-muted)' }}
+                  >
                     尚無團員資料
                   </td>
                 </tr>
@@ -183,7 +188,13 @@ export default async function InsuranceMemberPage({
                       backgroundColor: i % 2 === 0 ? '#fff' : '#faf8f5',
                     }}
                   >
-                    <td style={{ padding: '10px 8px', textAlign: 'center', color: 'var(--morandi-muted)' }}>
+                    <td
+                      style={{
+                        padding: '10px 8px',
+                        textAlign: 'center',
+                        color: 'var(--morandi-muted)',
+                      }}
+                    >
                       {i + 1}
                     </td>
                     <td style={{ padding: '10px 8px', fontWeight: 500 }}>{m.name}</td>

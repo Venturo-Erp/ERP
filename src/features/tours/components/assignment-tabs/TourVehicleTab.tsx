@@ -60,7 +60,9 @@ export function TourVehicleTab({ tourId, members }: TourVehicleTabProps) {
     try {
       const { data, error } = await supabase
         .from('tour_vehicles_status')
-        .select('id, tour_id, vehicle_name, vehicle_type, license_plate, driver_name, driver_phone, capacity, assigned_count, remaining_seats, is_full, display_order, notes')
+        .select(
+          'id, tour_id, vehicle_name, vehicle_type, license_plate, driver_name, driver_phone, capacity, assigned_count, remaining_seats, is_full, display_order, notes'
+        )
         .eq('tour_id', tourId)
         .order('display_order')
         .limit(500)

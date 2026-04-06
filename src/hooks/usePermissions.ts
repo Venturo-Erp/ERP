@@ -31,23 +31,21 @@ export const usePermissions = () => {
     const isAdmin = storeIsAdmin
 
     return {
-      canViewReceipts:
-        isAdmin || hasModulePermission(userPermissions, 'finance'),
-      canCreateReceipts:
-        isAdmin || hasModulePermission(userPermissions, 'finance'),
-      canEditReceipts:
-        isAdmin || hasModulePermission(userPermissions, 'finance'),
-      canConfirmReceipts:
-        isAdmin || hasModulePermission(userPermissions, 'finance'),
+      canViewReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'),
+      canCreateReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'),
+      canEditReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'),
+      canConfirmReceipts: isAdmin || hasModulePermission(userPermissions, 'finance'),
       canViewFinance:
-        isAdmin || hasModulePermission(userPermissions, 'finance') || hasModulePermission(userPermissions, 'accounting'),
-      canManageFinance:
-        isAdmin || hasModulePermission(userPermissions, 'finance'),
-      canEditDatabase:
-        isAdmin || hasModulePermission(userPermissions, 'database'),
+        isAdmin ||
+        hasModulePermission(userPermissions, 'finance') ||
+        hasModulePermission(userPermissions, 'accounting'),
+      canManageFinance: isAdmin || hasModulePermission(userPermissions, 'finance'),
+      canEditDatabase: isAdmin || hasModulePermission(userPermissions, 'database'),
       isAdmin,
       isAccountant:
-        isAdmin || hasModulePermission(userPermissions, 'accounting') || hasModulePermission(userPermissions, 'finance'),
+        isAdmin ||
+        hasModulePermission(userPermissions, 'accounting') ||
+        hasModulePermission(userPermissions, 'finance'),
     }
   }, [user, storeIsAdmin])
 

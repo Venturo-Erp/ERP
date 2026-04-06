@@ -88,7 +88,9 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
     try {
       const { data, error } = await supabase
         .from('quotes')
-        .select('id, tour_id, version, status, quick_quote_items, cost_structure, total_cost, profit_margin, notes, workspace_id, created_at, created_by, updated_at')  // 載入完整資料給 QuickQuoteDetail 使用
+        .select(
+          'id, tour_id, version, status, quick_quote_items, cost_structure, total_cost, profit_margin, notes, workspace_id, created_at, created_by, updated_at'
+        ) // 載入完整資料給 QuickQuoteDetail 使用
         .eq('tour_id', tour.id)
         .eq('quote_type', 'quick')
         .order('created_at', { ascending: false })
@@ -110,7 +112,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
   const handleCreateMainQuote = async () => {
     try {
       setCreatingMain(true)
-      
+
       // 查詢現有報價單最大編號，生成遞增編號
       let quoteCode: string | undefined = undefined
       if (tour.code) {
@@ -121,7 +123,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
           .like('code', `${tour.code}-Q%`)
           .order('code', { ascending: false })
           .limit(1)
-        
+
         let nextNum = 1
         if (existingQuotes && existingQuotes.length > 0 && existingQuotes[0].code) {
           // 從 KIX261223A-Q05 提取 05
@@ -298,10 +300,10 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
             }
             return (
               <QuickQuoteDetail
-                key={selectedQuote.id}  // 強制重新渲染
+                key={selectedQuote.id} // 強制重新渲染
                 quote={selectedQuote}
-                embedded={true}  // 嵌入模式：隱藏 header，按鈕移到底部
-                onUpdate={async (data) => {
+                embedded={true} // 嵌入模式：隱藏 header，按鈕移到底部
+                onUpdate={async data => {
                   // 更新快速報價單
                   const { error } = await supabase
                     .from('quotes')

@@ -20,7 +20,7 @@ import { voidInvoiceSchema } from '@/lib/validations/api-schemas'
  */
 async function checkVoidPermission(employeeId: string): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
-  
+
   // 取得員工的職務 ID
   const { data: employee, error } = await adminClient
     .from('employees')

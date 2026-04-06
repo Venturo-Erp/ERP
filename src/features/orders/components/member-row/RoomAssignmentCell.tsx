@@ -145,7 +145,9 @@ export function RoomAssignmentCell({
                   )}
                 >
                   {member.name}
-                  {member.isChild && <span className="ml-1 text-xs text-status-warning">(不佔床)</span>}
+                  {member.isChild && (
+                    <span className="ml-1 text-xs text-status-warning">(不佔床)</span>
+                  )}
                 </span>
                 <button
                   type="button"

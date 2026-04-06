@@ -211,7 +211,9 @@ export function ItinerarySyncDialog({ open, syncInfo, onSync, onClose }: Itinera
           <Button
             onClick={handleConfirm}
             disabled={!isSelectionValid}
-            className={syncInfo.action === 'decrease' ? 'bg-status-warning hover:bg-status-warning/80' : ''}
+            className={
+              syncInfo.action === 'decrease' ? 'bg-status-warning hover:bg-status-warning/80' : ''
+            }
           >
             {syncInfo.action === 'decrease'
               ? COMP_TOURS_LABELS.確認移除

@@ -50,11 +50,7 @@ import { stripHtml } from '@/lib/utils/string-utils'
 import { LABELS } from './constants/labels'
 import { logger } from '@/lib/utils/logger'
 
-const statusFilters = [
-  LABELS.ALL,
-  LABELS.STATUS_TEMPLATE,
-  LABELS.STATUS_PROPOSAL,
-]
+const statusFilters = [LABELS.ALL, LABELS.STATUS_TEMPLATE, LABELS.STATUS_PROPOSAL]
 
 export default function ItineraryPage() {
   const router = useRouter()
@@ -214,7 +210,6 @@ export default function ItineraryPage() {
               </SelectContent>
             </Select>
           </div>
-
         </div>
       }
     >
@@ -343,7 +338,9 @@ function CreateItineraryDialog({
 
       const { data: itineraryItems } = await supabase
         .from('tour_itinerary_items')
-        .select('id, tour_id, day_number, sort_order, category, sub_category, title, resource_type, resource_name')
+        .select(
+          'id, tour_id, day_number, sort_order, category, sub_category, title, resource_type, resource_name'
+        )
         .eq('tour_id', selectedTourId)
         .order('day_number', { ascending: true })
 
@@ -359,26 +356,32 @@ function CreateItineraryDialog({
         }> = []
 
         for (let day = 1; day <= days; day++) {
-          const dayItems = itineraryItems.filter((item: Record<string, unknown>) => item.day_number === day)
+          const dayItems = itineraryItems.filter(
+            (item: Record<string, unknown>) => item.day_number === day
+          )
 
           dailyData.push({
             title:
-              dayItems.find((item: Record<string, unknown>) => item.resource_type === 'attraction')?.resource_name ||
-              '',
+              dayItems.find((item: Record<string, unknown>) => item.resource_type === 'attraction')
+                ?.resource_name || '',
             breakfast:
               dayItems.find(
-                (item: Record<string, unknown>) => item.resource_type === 'meal' && item.meal_type === 'breakfast'
+                (item: Record<string, unknown>) =>
+                  item.resource_type === 'meal' && item.meal_type === 'breakfast'
               )?.resource_name || '',
             lunch:
               dayItems.find(
-                (item: Record<string, unknown>) => item.resource_type === 'meal' && item.meal_type === 'lunch'
+                (item: Record<string, unknown>) =>
+                  item.resource_type === 'meal' && item.meal_type === 'lunch'
               )?.resource_name || '',
             dinner:
               dayItems.find(
-                (item: Record<string, unknown>) => item.resource_type === 'meal' && item.meal_type === 'dinner'
+                (item: Record<string, unknown>) =>
+                  item.resource_type === 'meal' && item.meal_type === 'dinner'
               )?.resource_name || '',
             accommodation:
-              dayItems.find((item: Record<string, unknown>) => item.resource_type === 'hotel')?.resource_name || '',
+              dayItems.find((item: Record<string, unknown>) => item.resource_type === 'hotel')
+                ?.resource_name || '',
             isSameAccommodation: false,
           })
         }
@@ -536,7 +539,6 @@ function CreateItineraryDialog({
             </Button>
             <Button
               onClick={() => {
-               
                 formState.setNewItineraryTitle(templateName)
                 formState.setNewItineraryDays(templateDays)
                 setStep('createItinerary')

@@ -433,13 +433,16 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
   }, [allSuppliers])
 
   const prList = useMemo(
-    () => (allPaymentRequests ?? [])
-      .filter(pr => pr.tour_id === tour.id)
-      .filter(pr => {
-        const rt = (pr.request_type || '').toLowerCase()
-        return !rt.includes('bonus') && !rt.includes('獎金')
-      })
-      .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()),
+    () =>
+      (allPaymentRequests ?? [])
+        .filter(pr => pr.tour_id === tour.id)
+        .filter(pr => {
+          const rt = (pr.request_type || '').toLowerCase()
+          return !rt.includes('bonus') && !rt.includes('獎金')
+        })
+        .sort(
+          (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+        ),
     [allPaymentRequests, tour.id]
   )
 
@@ -491,68 +494,155 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
           </tr>
         </thead>
         <tbody>
-          {prList.length > 0 ? prList.map(pr => {
-            const CATEGORY_ORDER = ['住宿','交通','餐食','活動','導遊','保險','出團款','回團款','ESIM','同業','其他']
-            const rawItems = (pr as unknown as { items?: Array<{ id?: string; category?: string; supplier_id?: string; supplier_name?: string; description?: string; unitprice?: number; quantity?: number; subtotal?: number }> }).items ?? []
-            const items = [...rawItems].sort((a, b) => {
-              const ai = CATEGORY_ORDER.indexOf(a.category || '')
-              const bi = CATEGORY_ORDER.indexOf(b.category || '')
-              return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
-            })
-            const statusInfo = statusMap[pr.status || ''] ?? { label: pr.status || '待處理', style: 'bg-morandi-secondary/20 text-morandi-secondary' }
+          {prList.length > 0 ? (
+            prList.map(pr => {
+              const CATEGORY_ORDER = [
+                '住宿',
+                '交通',
+                '餐食',
+                '活動',
+                '導遊',
+                '保險',
+                '出團款',
+                '回團款',
+                'ESIM',
+                '同業',
+                '其他',
+              ]
+              const rawItems =
+                (
+                  pr as unknown as {
+                    items?: Array<{
+                      id?: string
+                      category?: string
+                      supplier_id?: string
+                      supplier_name?: string
+                      description?: string
+                      unitprice?: number
+                      quantity?: number
+                      subtotal?: number
+                    }>
+                  }
+                ).items ?? []
+              const items = [...rawItems].sort((a, b) => {
+                const ai = CATEGORY_ORDER.indexOf(a.category || '')
+                const bi = CATEGORY_ORDER.indexOf(b.category || '')
+                return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
+              })
+              const statusInfo = statusMap[pr.status || ''] ?? {
+                label: pr.status || '待處理',
+                style: 'bg-morandi-secondary/20 text-morandi-secondary',
+              }
 
-            if (items.length === 0) {
-              return (
-                <tr key={pr.id} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
-                  <td className="px-4 py-2 font-medium text-morandi-primary">
-                    <button className="text-morandi-gold hover:underline cursor-pointer" onClick={() => { setSelectedRequest(pr as unknown as PaymentRequest); setRequestDialogOpen(true) }}>
-                      {pr.code || '-'}
-                    </button>
-                  </td>
-                  <td className="px-4 py-2 text-morandi-secondary">{formatDate(pr.request_date)}</td>
-                  <td className="px-4 py-2 text-morandi-secondary">{pr.request_type || '-'}</td>
-                  <td className="px-4 py-2 text-morandi-secondary">{pr.supplier_name || '-'}</td>
-                  <td className="px-4 py-2 text-morandi-secondary">{pr.notes || '-'}</td>
-                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
-                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
-                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">-</td>
-                  <td className="px-4 py-2 text-center">
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}>{statusInfo.label}</span>
-                  </td>
-                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">-{formatCurrency(Number(pr.amount) || 0)}</td>
-                </tr>
-              )
-            }
-
-            return items.map((item, idx) => (
-              <tr key={`${pr.id}-${item.id || idx}`} className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50">
-                {idx === 0 ? (
-                  <>
-                    <td className="px-4 py-2 font-medium text-morandi-primary" rowSpan={items.length}>
-                      <button className="text-morandi-gold hover:underline cursor-pointer" onClick={() => { setSelectedRequest(pr as unknown as PaymentRequest); setRequestDialogOpen(true) }}>
+              if (items.length === 0) {
+                return (
+                  <tr
+                    key={pr.id}
+                    className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50"
+                  >
+                    <td className="px-4 py-2 font-medium text-morandi-primary">
+                      <button
+                        className="text-morandi-gold hover:underline cursor-pointer"
+                        onClick={() => {
+                          setSelectedRequest(pr as unknown as PaymentRequest)
+                          setRequestDialogOpen(true)
+                        }}
+                      >
                         {pr.code || '-'}
                       </button>
                     </td>
-                    <td className="px-4 py-2 text-morandi-secondary" rowSpan={items.length}>{formatDate(pr.request_date)}</td>
-                  </>
-                ) : null}
-                <td className="px-4 py-2 text-morandi-secondary">{item.category || '-'}</td>
-                <td className="px-4 py-2 text-morandi-secondary">{(item.supplier_id && supplierMap[item.supplier_id]) || item.supplier_name || '-'}</td>
-                <td className="px-4 py-2 text-morandi-secondary">{item.description || '-'}</td>
-                <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{formatCurrency(item.unitprice ?? 0)}</td>
-                <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{item.quantity ?? '-'}</td>
-                <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">{formatCurrency(item.subtotal ?? 0)}</td>
-                {idx === 0 ? (
-                  <>
-                    <td className="px-4 py-2 text-center" rowSpan={items.length}>
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}>{statusInfo.label}</span>
+                    <td className="px-4 py-2 text-morandi-secondary">
+                      {formatDate(pr.request_date)}
                     </td>
-                    <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium" rowSpan={items.length}>-{formatCurrency(Number(pr.amount) || 0)}</td>
-                  </>
-                ) : null}
-              </tr>
-            ))
-          }) : (
+                    <td className="px-4 py-2 text-morandi-secondary">{pr.request_type || '-'}</td>
+                    <td className="px-4 py-2 text-morandi-secondary">{pr.supplier_name || '-'}</td>
+                    <td className="px-4 py-2 text-morandi-secondary">{pr.notes || '-'}</td>
+                    <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">
+                      -
+                    </td>
+                    <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">
+                      -
+                    </td>
+                    <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">
+                      -
+                    </td>
+                    <td className="px-4 py-2 text-center">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}
+                      >
+                        {statusInfo.label}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium">
+                      -{formatCurrency(Number(pr.amount) || 0)}
+                    </td>
+                  </tr>
+                )
+              }
+
+              return items.map((item, idx) => (
+                <tr
+                  key={`${pr.id}-${item.id || idx}`}
+                  className="border-b border-border last:border-b-0 hover:bg-morandi-bg/50"
+                >
+                  {idx === 0 ? (
+                    <>
+                      <td
+                        className="px-4 py-2 font-medium text-morandi-primary"
+                        rowSpan={items.length}
+                      >
+                        <button
+                          className="text-morandi-gold hover:underline cursor-pointer"
+                          onClick={() => {
+                            setSelectedRequest(pr as unknown as PaymentRequest)
+                            setRequestDialogOpen(true)
+                          }}
+                        >
+                          {pr.code || '-'}
+                        </button>
+                      </td>
+                      <td className="px-4 py-2 text-morandi-secondary" rowSpan={items.length}>
+                        {formatDate(pr.request_date)}
+                      </td>
+                    </>
+                  ) : null}
+                  <td className="px-4 py-2 text-morandi-secondary">{item.category || '-'}</td>
+                  <td className="px-4 py-2 text-morandi-secondary">
+                    {(item.supplier_id && supplierMap[item.supplier_id]) ||
+                      item.supplier_name ||
+                      '-'}
+                  </td>
+                  <td className="px-4 py-2 text-morandi-secondary">{item.description || '-'}</td>
+                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">
+                    {formatCurrency(item.unitprice ?? 0)}
+                  </td>
+                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">
+                    {item.quantity ?? '-'}
+                  </td>
+                  <td className="px-4 py-2 text-right font-mono tabular-nums text-morandi-secondary">
+                    {formatCurrency(item.subtotal ?? 0)}
+                  </td>
+                  {idx === 0 ? (
+                    <>
+                      <td className="px-4 py-2 text-center" rowSpan={items.length}>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${statusInfo.style}`}
+                        >
+                          {statusInfo.label}
+                        </span>
+                      </td>
+                      <td
+                        className="px-4 py-2 text-right font-mono tabular-nums text-morandi-red font-medium"
+                        rowSpan={items.length}
+                      >
+                        -{formatCurrency(Number(pr.amount) || 0)}
+                      </td>
+                    </>
+                  ) : null}
+                </tr>
+              ))
+            })
+          ) : (
             <tr>
               <td colSpan={10} className="py-12 text-center text-morandi-secondary">
                 <Receipt size={24} className="mx-auto mb-4 opacity-50" />

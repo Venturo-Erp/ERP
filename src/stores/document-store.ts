@@ -209,7 +209,9 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
         const versionTable = type === 'brochure' ? 'brochure_versions' : 'itinerary_versions'
         const { data: version, error: versionError } = await supabase
           .from(versionTable)
-          .select('id, document_id, version_number, data, thumbnail_url, restored_from, created_at, created_by')
+          .select(
+            'id, document_id, version_number, data, thumbnail_url, restored_from, created_at, created_by'
+          )
           .eq('id', doc.current_version_id)
           .single()
 
@@ -418,7 +420,9 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
     try {
       const { data: version, error } = await supabase
         .from(versionTable)
-        .select('id, document_id, version_number, data, thumbnail_url, restored_from, created_at, created_by')
+        .select(
+          'id, document_id, version_number, data, thumbnail_url, restored_from, created_at, created_by'
+        )
         .eq('id', versionId)
         .single()
 
@@ -458,7 +462,9 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
       // 1. Fetch old version
       const { data: oldVersion, error: fetchError } = await supabase
         .from(versionTable)
-        .select('id, document_id, version_number, data, thumbnail_url, restored_from, created_at, created_by')
+        .select(
+          'id, document_id, version_number, data, thumbnail_url, restored_from, created_at, created_by'
+        )
         .eq('id', versionId)
         .single()
 
@@ -520,7 +526,9 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
     try {
       const { data: versions, error } = await supabase
         .from(versionTable)
-        .select('id, document_id, version_number, data, thumbnail_url, restored_from, created_at, created_by')
+        .select(
+          'id, document_id, version_number, data, thumbnail_url, restored_from, created_at, created_by'
+        )
         .eq('document_id', document.id)
         .order('version_number', { ascending: false })
         .limit(100)
@@ -547,7 +555,9 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
     try {
       const { data: template, error } = await supabase
         .from('design_templates')
-        .select('id, name, category, type, data, thumbnail_url, description, tags, is_public, is_featured, use_count, workspace_id, created_at, created_by, updated_at, updated_by')
+        .select(
+          'id, name, category, type, data, thumbnail_url, description, tags, is_public, is_featured, use_count, workspace_id, created_at, created_by, updated_at, updated_by'
+        )
         .eq('id', templateId)
         .single()
 
@@ -622,7 +632,9 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
       const workspaceId = getWorkspaceId()
       let query = supabase
         .from('design_templates')
-        .select('id, name, category, type, data, thumbnail_url, description, tags, is_public, is_featured, use_count, workspace_id, created_at, created_by, updated_at, updated_by')
+        .select(
+          'id, name, category, type, data, thumbnail_url, description, tags, is_public, is_featured, use_count, workspace_id, created_at, created_by, updated_at, updated_by'
+        )
         .eq('type', type)
         .order('use_count', { ascending: false })
         .limit(500)

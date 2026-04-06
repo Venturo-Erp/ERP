@@ -5,17 +5,25 @@ import { useSearchParams } from 'next/navigation'
 import { BookingDialog } from './components/BookingDialog'
 import { logger } from '@/lib/utils/logger'
 
-export default function PublicItineraryPage({
-  params,
-}: {
-  params: Promise<{ tourCode: string }>
-}) {
+export default function PublicItineraryPage({ params }: { params: Promise<{ tourCode: string }> }) {
   const { tourCode } = use(params)
   const searchParams = useSearchParams()
   const salesPersonRef = searchParams.get('ref')
 
-  const [itinerary, setItinerary] = useState<{ tour_code?: string; title?: string; subtitle?: string; tour_id?: string; flights?: Array<Record<string, string>>; daily_itinerary?: Array<Record<string, string>> } | null>(null)
-  const [salesPerson, setSalesPerson] = useState<{ id?: string; display_name?: string; name?: string; email?: string } | null>(null)
+  const [itinerary, setItinerary] = useState<{
+    tour_code?: string
+    title?: string
+    subtitle?: string
+    tour_id?: string
+    flights?: Array<Record<string, string>>
+    daily_itinerary?: Array<Record<string, string>>
+  } | null>(null)
+  const [salesPerson, setSalesPerson] = useState<{
+    id?: string
+    display_name?: string
+    name?: string
+    email?: string
+  } | null>(null)
   const [loading, setLoading] = useState(true)
   const [isBookingOpen, setIsBookingOpen] = useState(false)
 

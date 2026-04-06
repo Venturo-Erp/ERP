@@ -22,7 +22,9 @@ const tourFilesDb = () => dynamicFrom('tour_files')
  */
 export async function getTourRequests(tourId: string): Promise<TourRequest[]> {
   const { data, error } = await tourRequestsDb()
-    .select('id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, items, note, replied_at, accepted_at, created_at, updated_at')
+    .select(
+      'id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, items, note, replied_at, accepted_at, created_at, updated_at'
+    )
     .eq('tour_id', tourId)
     .order('created_at', { ascending: false })
 
@@ -36,7 +38,9 @@ export async function getTourRequests(tourId: string): Promise<TourRequest[]> {
 export async function getTourRequestDetail(requestId: string): Promise<TourRequestDetail | null> {
   // 主需求單
   const { data: request, error: requestError } = await tourRequestsDb()
-    .select('id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, items, note, replied_at, accepted_at, created_at, updated_at')
+    .select(
+      'id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, items, note, replied_at, accepted_at, created_at, updated_at'
+    )
     .eq('id', requestId)
     .single()
 
@@ -45,13 +49,17 @@ export async function getTourRequestDetail(requestId: string): Promise<TourReque
 
   // 文件版本
   const { data: documents } = await requestDocumentsDb()
-    .select('id, request_id, file_url, file_name, file_type, version, status, workspace_id, created_at, updated_at')
+    .select(
+      'id, request_id, file_url, file_name, file_type, version, status, workspace_id, created_at, updated_at'
+    )
     .eq('request_id', requestId)
     .order('created_at', { ascending: true })
 
   // 相關檔案
   const { data: related_files } = await tourFilesDb()
-    .select('id, tour_id, file_url, file_name, file_type, category, description, workspace_id, created_at, updated_at')
+    .select(
+      'id, tour_id, file_url, file_name, file_type, category, description, workspace_id, created_at, updated_at'
+    )
     .eq('related_request_id', requestId)
     .order('created_at', { ascending: false })
 

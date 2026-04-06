@@ -18,16 +18,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import {
-  Shield,
-  Plus,
-  Trash2,
-  Save,
-  Loader2,
-  Users,
-  Star,
-  Check,
-} from 'lucide-react'
+import { Shield, Plus, Trash2, Save, Loader2, Users, Star, Check } from 'lucide-react'
 import { useAuthStore } from '@/stores'
 import { type TabPermission } from '@/features/hr/components/ModulePermissionTable'
 import { MODULES, type ModuleDefinition } from '@/lib/permissions'
@@ -45,12 +36,10 @@ interface Role {
   sort_order: number
 }
 
-
-
 export default function RolesPage() {
   const { user } = useAuthStore()
   const { toast } = useToast()
-  
+
   const [activeTab, setActiveTab] = useState('permissions')
   const [roles, setRoles] = useState<Role[]>([])
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
@@ -108,10 +97,8 @@ export default function RolesPage() {
 
   // 展開/收合模組
   const toggleExpand = (moduleCode: string) => {
-    setExpandedModules(prev => 
-      prev.includes(moduleCode) 
-        ? prev.filter(m => m !== moduleCode)
-        : [...prev, moduleCode]
+    setExpandedModules(prev =>
+      prev.includes(moduleCode) ? prev.filter(m => m !== moduleCode) : [...prev, moduleCode]
     )
   }
 
@@ -121,7 +108,10 @@ export default function RolesPage() {
   }
 
   // 檢查模組是否全開
-  const isModuleFullyEnabled = (module: ModuleDefinition, field: 'can_read' | 'can_write'): boolean => {
+  const isModuleFullyEnabled = (
+    module: ModuleDefinition,
+    field: 'can_read' | 'can_write'
+  ): boolean => {
     if (module.tabs.length === 0) {
       const perm = getPermission(module.code, null)
       return perm?.[field] ?? false
@@ -133,7 +123,10 @@ export default function RolesPage() {
   }
 
   // 檢查模組是否部分開啟
-  const isModulePartiallyEnabled = (module: ModuleDefinition, field: 'can_read' | 'can_write'): boolean => {
+  const isModulePartiallyEnabled = (
+    module: ModuleDefinition,
+    field: 'can_read' | 'can_write'
+  ): boolean => {
     if (module.tabs.length === 0) return false
     const enabledCount = module.tabs.filter(tab => {
       const perm = getPermission(module.code, tab.code)
@@ -154,10 +147,8 @@ export default function RolesPage() {
         // 沒有分頁的模組
         const existing = updated.find(p => p.module_code === module.code && p.tab_code === null)
         if (existing) {
-          updated = updated.map(p => 
-            p.module_code === module.code && p.tab_code === null 
-              ? { ...p, [field]: newValue }
-              : p
+          updated = updated.map(p =>
+            p.module_code === module.code && p.tab_code === null ? { ...p, [field]: newValue } : p
           )
         } else {
           updated.push({
@@ -170,9 +161,11 @@ export default function RolesPage() {
       } else {
         // 有分頁的模組：更新所有分頁
         module.tabs.forEach(tab => {
-          const existing = updated.find(p => p.module_code === module.code && p.tab_code === tab.code)
+          const existing = updated.find(
+            p => p.module_code === module.code && p.tab_code === tab.code
+          )
           if (existing) {
-            updated = updated.map(p => 
+            updated = updated.map(p =>
               p.module_code === module.code && p.tab_code === tab.code
                 ? { ...p, [field]: newValue }
                 : p
@@ -193,22 +186,27 @@ export default function RolesPage() {
   }
 
   // 切換單一分頁
-  const toggleTabPermission = (moduleCode: string, tabCode: string, field: 'can_read' | 'can_write') => {
+  const toggleTabPermission = (
+    moduleCode: string,
+    tabCode: string,
+    field: 'can_read' | 'can_write'
+  ) => {
     setPermissions(prev => {
       const existing = prev.find(p => p.module_code === moduleCode && p.tab_code === tabCode)
       if (existing) {
-        return prev.map(p => 
-          p.module_code === moduleCode && p.tab_code === tabCode
-            ? { ...p, [field]: !p[field] }
-            : p
+        return prev.map(p =>
+          p.module_code === moduleCode && p.tab_code === tabCode ? { ...p, [field]: !p[field] } : p
         )
       }
-      return [...prev, {
-        module_code: moduleCode,
-        tab_code: tabCode,
-        can_read: field === 'can_read',
-        can_write: field === 'can_write',
-      }]
+      return [
+        ...prev,
+        {
+          module_code: moduleCode,
+          tab_code: tabCode,
+          can_read: field === 'can_read',
+          can_write: field === 'can_write',
+        },
+      ]
     })
   }
 
@@ -303,7 +301,9 @@ export default function RolesPage() {
     return (
       <div key={module.code}>
         {/* 模組行 */}
-        <div className={`flex items-center border-t border-border ${hasTabs ? 'bg-morandi-bg/30' : 'bg-white'}`}>
+        <div
+          className={`flex items-center border-t border-border ${hasTabs ? 'bg-morandi-bg/30' : 'bg-white'}`}
+        >
           <div className="flex-1 p-4 flex items-center gap-2">
             {hasTabs ? (
               <button
@@ -355,33 +355,35 @@ export default function RolesPage() {
         </div>
 
         {/* 分頁行 */}
-        {hasTabs && isExpanded && module.tabs.map(tab => {
-          const perm = getPermission(module.code, tab.code)
-          return (
-            <div key={tab.code} className="flex items-center border-t border-border bg-white">
-              <div className="flex-1 p-4 pl-12 flex items-center gap-2">
-                <div className="w-1 h-4 bg-border rounded-full" />
-                <span className="text-sm text-morandi-primary">{tab.name}</span>
+        {hasTabs &&
+          isExpanded &&
+          module.tabs.map(tab => {
+            const perm = getPermission(module.code, tab.code)
+            return (
+              <div key={tab.code} className="flex items-center border-t border-border bg-white">
+                <div className="flex-1 p-4 pl-12 flex items-center gap-2">
+                  <div className="w-1 h-4 bg-border rounded-full" />
+                  <span className="text-sm text-morandi-primary">{tab.name}</span>
+                </div>
+                <div className="w-32 p-4 flex justify-center">
+                  <Switch
+                    checked={isAdmin || (perm?.can_read ?? false)}
+                    onCheckedChange={() => toggleTabPermission(module.code, tab.code, 'can_read')}
+                    disabled={isAdmin}
+                    className="data-[state=checked]:bg-morandi-green"
+                  />
+                </div>
+                <div className="w-32 p-4 flex justify-center">
+                  <Switch
+                    checked={isAdmin || (perm?.can_write ?? false)}
+                    onCheckedChange={() => toggleTabPermission(module.code, tab.code, 'can_write')}
+                    disabled={isAdmin}
+                    className="data-[state=checked]:bg-morandi-gold"
+                  />
+                </div>
               </div>
-              <div className="w-32 p-4 flex justify-center">
-                <Switch
-                  checked={isAdmin || (perm?.can_read ?? false)}
-                  onCheckedChange={() => toggleTabPermission(module.code, tab.code, 'can_read')}
-                  disabled={isAdmin}
-                  className="data-[state=checked]:bg-morandi-green"
-                />
-              </div>
-              <div className="w-32 p-4 flex justify-center">
-                <Switch
-                  checked={isAdmin || (perm?.can_write ?? false)}
-                  onCheckedChange={() => toggleTabPermission(module.code, tab.code, 'can_write')}
-                  disabled={isAdmin}
-                  className="data-[state=checked]:bg-morandi-gold"
-                />
-              </div>
-            </div>
-          )
-        })}
+            )
+          })}
       </div>
     )
   }
@@ -401,193 +403,210 @@ export default function RolesPage() {
       activeTab={activeTab}
       onTabChange={setActiveTab}
     >
-
       {activeTab === 'team' ? (
         <TeamSettingsTab />
       ) : (
-      <>
-      <div className="grid grid-cols-12 gap-6 h-full min-h-[500px]">
-        {/* 左側：職務列表 */}
-        <div className="col-span-3 flex flex-col">
-          <div className="bg-white border border-border rounded-lg flex flex-col h-full">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <h3 className="font-semibold text-morandi-primary">職務列表</h3>
-              <Button 
-                size="sm" 
-                onClick={() => setIsDialogOpen(true)}
-                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                新增
-              </Button>
+        <>
+          <div className="grid grid-cols-12 gap-6 h-full min-h-[500px]">
+            {/* 左側：職務列表 */}
+            <div className="col-span-3 flex flex-col">
+              <div className="bg-white border border-border rounded-lg flex flex-col h-full">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                  <h3 className="font-semibold text-morandi-primary">職務列表</h3>
+                  <Button
+                    size="sm"
+                    onClick={() => setIsDialogOpen(true)}
+                    className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    新增
+                  </Button>
+                </div>
+
+                <div className="flex-1 overflow-y-auto p-4">
+                  {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-morandi-secondary" />
+                    </div>
+                  ) : roles.length === 0 ? (
+                    <div className="text-center py-8 text-morandi-secondary">
+                      <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <p>尚未建立角色</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {roles.map(role => (
+                        <div
+                          key={role.id}
+                          className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                            selectedRole?.id === role.id
+                              ? 'border-morandi-gold bg-morandi-gold/5 shadow-sm'
+                              : 'border-border hover:border-morandi-gold/50 hover:bg-morandi-bg/50'
+                          }`}
+                          onClick={() => setSelectedRole(role)}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {selectedRole?.id === role.id && (
+                                <Check className="h-4 w-4 text-morandi-gold" />
+                              )}
+                              <span className="font-medium text-morandi-primary text-sm">
+                                {role.name}
+                              </span>
+                              {role.is_admin && (
+                                <Badge className="bg-morandi-gold/20 text-morandi-gold border-morandi-gold/30 text-xs">
+                                  <Star className="h-3 w-3" />
+                                </Badge>
+                              )}
+                            </div>
+                            {!role.is_admin && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-6 w-6 p-0 hover:bg-morandi-red/10"
+                                onClick={e => {
+                                  e.stopPropagation()
+                                  handleDeleteRole(role)
+                                }}
+                              >
+                                <Trash2 className="h-3 w-3 text-morandi-red" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
-              {loading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-morandi-secondary" />
-                </div>
-              ) : roles.length === 0 ? (
-                <div className="text-center py-8 text-morandi-secondary">
-                  <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>尚未建立角色</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {roles.map(role => (
-                    <div
-                      key={role.id}
-                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                        selectedRole?.id === role.id
-                          ? 'border-morandi-gold bg-morandi-gold/5 shadow-sm'
-                          : 'border-border hover:border-morandi-gold/50 hover:bg-morandi-bg/50'
-                      }`}
-                      onClick={() => setSelectedRole(role)}
+            {/* 右側：權限設定 */}
+            <div className="col-span-9 flex flex-col">
+              <div className="bg-white border border-border rounded-lg flex flex-col h-full">
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                  <div className="flex items-center gap-3">
+                    <h3 className="font-semibold text-morandi-primary">
+                      {selectedRole ? `${selectedRole.name} 的權限` : '請選擇職務'}
+                    </h3>
+                    {selectedRole && (
+                      <div className="flex items-center gap-4 text-xs text-morandi-secondary">
+                        <span className="flex items-center gap-1">
+                          <div className="w-3 h-3 rounded bg-morandi-green" /> 可讀取
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <div className="w-3 h-3 rounded bg-morandi-gold" /> 可寫入
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-morandi-gold" /> 部分開啟
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {selectedRole && (
+                    <Button
+                      onClick={handleSavePermissions}
+                      disabled={saving}
+                      className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          {selectedRole?.id === role.id && (
-                            <Check className="h-4 w-4 text-morandi-gold" />
-                          )}
-                          <span className="font-medium text-morandi-primary text-sm">{role.name}</span>
-                          {role.is_admin && (
-                            <Badge className="bg-morandi-gold/20 text-morandi-gold border-morandi-gold/30 text-xs">
-                              <Star className="h-3 w-3" />
-                            </Badge>
-                          )}
+                      {saving ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Save className="h-4 w-4 mr-2" />
+                      )}
+                      儲存
+                    </Button>
+                  )}
+                </div>
+
+                <div className="flex-1 overflow-y-auto">
+                  {selectedRole ? (
+                    <div>
+                      {/* 表頭 */}
+                      <div className="flex items-center bg-morandi-bg/50 sticky top-0 border-b border-border">
+                        <div className="flex-1 p-4 font-semibold text-morandi-primary">
+                          功能模組
                         </div>
-                        {!role.is_admin && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 hover:bg-morandi-red/10"
-                            onClick={e => {
-                              e.stopPropagation()
-                              handleDeleteRole(role)
-                            }}
-                          >
-                            <Trash2 className="h-3 w-3 text-morandi-red" />
-                          </Button>
-                        )}
+                        <div className="w-32 p-4 text-center font-semibold text-morandi-primary">
+                          可讀取
+                        </div>
+                        <div className="w-32 p-4 text-center font-semibold text-morandi-primary">
+                          可寫入
+                        </div>
+                      </div>
+
+                      {/* 模組列表 */}
+                      {MODULES.map(module => renderModuleRow(module))}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center h-full text-morandi-secondary">
+                      <div className="text-center">
+                        <Shield className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                        <p>請從左側選擇一個角色</p>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        </div>
 
-        {/* 右側：權限設定 */}
-        <div className="col-span-9 flex flex-col">
-          <div className="bg-white border border-border rounded-lg flex flex-col h-full">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <div className="flex items-center gap-3">
-                <h3 className="font-semibold text-morandi-primary">
-                  {selectedRole ? `${selectedRole.name} 的權限` : '請選擇職務'}
-                </h3>
-                {selectedRole && (
-                  <div className="flex items-center gap-4 text-xs text-morandi-secondary">
-                    <span className="flex items-center gap-1">
-                      <div className="w-3 h-3 rounded bg-morandi-green" /> 可讀取
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <div className="w-3 h-3 rounded bg-morandi-gold" /> 可寫入
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <div className="w-2 h-2 rounded-full bg-morandi-gold" /> 部分開啟
-                    </span>
+                {selectedRole?.is_admin && (
+                  <div className="p-4 border-t border-border bg-morandi-bg/30">
+                    <p className="text-sm text-morandi-secondary text-center">
+                      管理員角色擁有所有權限，無法修改
+                    </p>
                   </div>
                 )}
               </div>
-              {selectedRole && (
-                <Button 
-                  onClick={handleSavePermissions} 
-                  disabled={saving}
+            </div>
+          </div>
+
+          {/* 新增職務 Dialog — 仍在 permissions tab 條件區塊內 */}
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent level={1} className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-morandi-primary">新增職務</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="name" className="text-morandi-primary">
+                    角色名稱
+                  </Label>
+                  <Input
+                    id="name"
+                    value={editingRole.name}
+                    onChange={e => setEditingRole({ ...editingRole, name: e.target.value })}
+                    placeholder="例如：業務、會計、助理"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description" className="text-morandi-primary">
+                    說明（選填）
+                  </Label>
+                  <Input
+                    id="description"
+                    value={editingRole.description}
+                    onChange={e => setEditingRole({ ...editingRole, description: e.target.value })}
+                    placeholder="這個角色的職責說明"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  取消
+                </Button>
+                <Button
+                  onClick={handleCreateRole}
+                  disabled={saving || !editingRole.name}
                   className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
                 >
-                  {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-                  儲存
+                  {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  建立
                 </Button>
-              )}
-            </div>
-
-            <div className="flex-1 overflow-y-auto">
-              {selectedRole ? (
-                <div>
-                  {/* 表頭 */}
-                  <div className="flex items-center bg-morandi-bg/50 sticky top-0 border-b border-border">
-                    <div className="flex-1 p-4 font-semibold text-morandi-primary">功能模組</div>
-                    <div className="w-32 p-4 text-center font-semibold text-morandi-primary">可讀取</div>
-                    <div className="w-32 p-4 text-center font-semibold text-morandi-primary">可寫入</div>
-                  </div>
-
-                  {/* 模組列表 */}
-                  {MODULES.map(module => renderModuleRow(module))}
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-full text-morandi-secondary">
-                  <div className="text-center">
-                    <Shield className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p>請從左側選擇一個角色</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {selectedRole?.is_admin && (
-              <div className="p-4 border-t border-border bg-morandi-bg/30">
-                <p className="text-sm text-morandi-secondary text-center">
-                  管理員角色擁有所有權限，無法修改
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 新增職務 Dialog — 仍在 permissions tab 條件區塊內 */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent level={1} className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-morandi-primary">新增職務</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div>
-              <Label htmlFor="name" className="text-morandi-primary">角色名稱</Label>
-              <Input
-                id="name"
-                value={editingRole.name}
-                onChange={e => setEditingRole({ ...editingRole, name: e.target.value })}
-                placeholder="例如：業務、會計、助理"
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="description" className="text-morandi-primary">說明（選填）</Label>
-              <Input
-                id="description"
-                value={editingRole.description}
-                onChange={e => setEditingRole({ ...editingRole, description: e.target.value })}
-                placeholder="這個角色的職責說明"
-                className="mt-1"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>取消</Button>
-            <Button 
-              onClick={handleCreateRole} 
-              disabled={saving || !editingRole.name}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-            >
-              {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              建立
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      </>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
       )}
     </ContentPageLayout>
   )

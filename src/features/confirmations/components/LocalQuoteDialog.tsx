@@ -132,7 +132,7 @@ export function LocalQuoteDialog({
   const daySchedules: DaySchedule[] = useMemo(() => {
     // 優先使用 transportDays 的 route（來自行程表）
     const dayMap = new Map<number, DaySchedule>()
-    
+
     // 初始化每天的基礎資料（使用 transportDays 的 route）
     for (const td of transportDays) {
       dayMap.set(td.dayNumber, {
@@ -325,134 +325,157 @@ export function LocalQuoteDialog({
               <Skeleton className="h-40 w-full" />
               <Skeleton className="h-20 w-full" />
             </div>
-          ) : (<>
-          {/* 團資訊條 */}
-          <div className="flex items-center gap-6 px-4 py-3 bg-background rounded-lg border border-border">
-            <div className="text-sm">
-              <span className="text-muted-foreground mr-1">團號</span>
-              <span className="font-semibold">{tour?.code || '-'}</span>
-            </div>
-            <div className="text-sm">
-              <span className="text-muted-foreground mr-1">團名</span>
-              <span className="font-semibold">{tour?.name || '-'}</span>
-            </div>
-            <div className="text-sm">
-              <span className="text-muted-foreground mr-1">出發日</span>
-              <span className="font-semibold">{tour?.departure_date || '-'}</span>
-            </div>
-            <div className="text-sm flex items-center gap-2">
-              <span className="text-muted-foreground">人數</span>
-              <Input
-                type="number"
-                value={paxInput}
-                onChange={e => setPaxInput(e.target.value)}
-                placeholder={totalPax?.toString() || ''}
-                className="h-7 w-20 text-sm"
-              />
-            </div>
-          </div>
-
-          {/* 行程表格（跟公開頁面一樣） */}
-          {daySchedules.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <Sun size={40} className="mx-auto mb-3 opacity-30" />
-              <p>尚無行程資料，請先到「行程」頁籤填寫</p>
-            </div>
           ) : (
-            <table className="w-full border-collapse text-sm mb-3">
-              <thead>
-                <tr className="bg-[var(--morandi-gold)] text-white">
-                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-20">日期</th>
-                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left">行程內容</th>
-                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">早餐</th>
-                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">午餐</th>
-                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">晚餐</th>
-                  <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-32">住宿</th>
-                </tr>
-              </thead>
-              <tbody>
-                {daySchedules.map((day, idx) => (
-                  <tr key={day.dayNumber} className={idx % 2 === 0 ? 'bg-white' : 'bg-background'}>
-                    <td className="border border-morandi-container px-3 py-2">
-                      <div className="font-semibold text-[var(--morandi-gold)]">Day {day.dayNumber}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {day.date}
-                        {day.weekday ? ` (${day.weekday})` : ''}
-                      </div>
-                    </td>
-                    <td className="border border-morandi-container px-3 py-2 font-medium">
-                      {day.route || '—'}
-                    </td>
-                    <td className="border border-morandi-container px-3 py-2 text-center text-xs">
-                      {day.breakfast || '-'}
-                    </td>
-                    <td className="border border-morandi-container px-3 py-2 text-center text-xs">
-                      {day.lunch || '-'}
-                    </td>
-                    <td className="border border-morandi-container px-3 py-2 text-center text-xs">
-                      {day.dinner || '-'}
-                    </td>
-                    <td className="border border-morandi-container px-3 py-2 text-xs">
-                      {day.hotel || '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          {/* 人數梯次設定 */}
-          <div className="pt-2">
-            <label className="text-sm font-medium mb-1.5 block">
-              報價梯次（供應商會看到這些人數選項）
-            </label>
-            <div className="flex flex-wrap items-center gap-2">
-              {paxTiers.map(num => (
-                <div
-                  key={num}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-background border border-[var(--morandi-gold)] rounded-full text-sm"
-                >
-                  <span className="font-semibold">{num} 人團</span>
-                  <button
-                    onClick={() => handleRemoveTier(num)}
-                    className="text-muted-foreground hover:text-destructive transition"
-                  >
-                    <X size={14} />
-                  </button>
+            <>
+              {/* 團資訊條 */}
+              <div className="flex items-center gap-6 px-4 py-3 bg-background rounded-lg border border-border">
+                <div className="text-sm">
+                  <span className="text-muted-foreground mr-1">團號</span>
+                  <span className="font-semibold">{tour?.code || '-'}</span>
                 </div>
-              ))}
-              <div className="inline-flex items-center gap-1">
-                <Input
-                  type="number"
-                  value={newTierInput}
-                  onChange={e => setNewTierInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleAddTier()}
-                  placeholder="新增人數"
-                  className="h-8 w-24 text-sm"
-                />
-                <Button size="sm" variant="outline" onClick={handleAddTier} className="h-8 px-2">
-                  <Plus size={14} />
-                </Button>
+                <div className="text-sm">
+                  <span className="text-muted-foreground mr-1">團名</span>
+                  <span className="font-semibold">{tour?.name || '-'}</span>
+                </div>
+                <div className="text-sm">
+                  <span className="text-muted-foreground mr-1">出發日</span>
+                  <span className="font-semibold">{tour?.departure_date || '-'}</span>
+                </div>
+                <div className="text-sm flex items-center gap-2">
+                  <span className="text-muted-foreground">人數</span>
+                  <Input
+                    type="number"
+                    value={paxInput}
+                    onChange={e => setPaxInput(e.target.value)}
+                    placeholder={totalPax?.toString() || ''}
+                    className="h-7 w-20 text-sm"
+                  />
+                </div>
               </div>
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              供應商會看到這些梯次選項並填寫每人報價
-            </p>
-          </div>
 
-          {/* 備註 */}
-          <div className="pt-2">
-            <label className="text-sm font-medium mb-1.5 block">備註</label>
-            <Textarea
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              placeholder="給 Local 的特殊需求、偏好、注意事項..."
-              rows={2}
-              className="resize-none"
-            />
-          </div>
+              {/* 行程表格（跟公開頁面一樣） */}
+              {daySchedules.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Sun size={40} className="mx-auto mb-3 opacity-30" />
+                  <p>尚無行程資料，請先到「行程」頁籤填寫</p>
+                </div>
+              ) : (
+                <table className="w-full border-collapse text-sm mb-3">
+                  <thead>
+                    <tr className="bg-[var(--morandi-gold)] text-white">
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-20">
+                        日期
+                      </th>
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left">
+                        行程內容
+                      </th>
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">
+                        早餐
+                      </th>
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">
+                        午餐
+                      </th>
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">
+                        晚餐
+                      </th>
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-32">
+                        住宿
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {daySchedules.map((day, idx) => (
+                      <tr
+                        key={day.dayNumber}
+                        className={idx % 2 === 0 ? 'bg-white' : 'bg-background'}
+                      >
+                        <td className="border border-morandi-container px-3 py-2">
+                          <div className="font-semibold text-[var(--morandi-gold)]">
+                            Day {day.dayNumber}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {day.date}
+                            {day.weekday ? ` (${day.weekday})` : ''}
+                          </div>
+                        </td>
+                        <td className="border border-morandi-container px-3 py-2 font-medium">
+                          {day.route || '—'}
+                        </td>
+                        <td className="border border-morandi-container px-3 py-2 text-center text-xs">
+                          {day.breakfast || '-'}
+                        </td>
+                        <td className="border border-morandi-container px-3 py-2 text-center text-xs">
+                          {day.lunch || '-'}
+                        </td>
+                        <td className="border border-morandi-container px-3 py-2 text-center text-xs">
+                          {day.dinner || '-'}
+                        </td>
+                        <td className="border border-morandi-container px-3 py-2 text-xs">
+                          {day.hotel || '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
 
-          </>)}
+              {/* 人數梯次設定 */}
+              <div className="pt-2">
+                <label className="text-sm font-medium mb-1.5 block">
+                  報價梯次（供應商會看到這些人數選項）
+                </label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {paxTiers.map(num => (
+                    <div
+                      key={num}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-background border border-[var(--morandi-gold)] rounded-full text-sm"
+                    >
+                      <span className="font-semibold">{num} 人團</span>
+                      <button
+                        onClick={() => handleRemoveTier(num)}
+                        className="text-muted-foreground hover:text-destructive transition"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                  <div className="inline-flex items-center gap-1">
+                    <Input
+                      type="number"
+                      value={newTierInput}
+                      onChange={e => setNewTierInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleAddTier()}
+                      placeholder="新增人數"
+                      className="h-8 w-24 text-sm"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleAddTier}
+                      className="h-8 px-2"
+                    >
+                      <Plus size={14} />
+                    </Button>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  供應商會看到這些梯次選項並填寫每人報價
+                </p>
+              </div>
+
+              {/* 備註 */}
+              <div className="pt-2">
+                <label className="text-sm font-medium mb-1.5 block">備註</label>
+                <Textarea
+                  value={note}
+                  onChange={e => setNote(e.target.value)}
+                  placeholder="給 Local 的特殊需求、偏好、注意事項..."
+                  rows={2}
+                  className="resize-none"
+                />
+              </div>
+            </>
+          )}
           {/* 選擇發送方式 */}
           <div className="border-t border-[var(--morandi-gold)] pt-4 mt-2">
             <label className="text-sm font-medium mb-3 block">選擇發送方式</label>

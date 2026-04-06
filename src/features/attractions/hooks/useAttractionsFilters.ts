@@ -84,7 +84,7 @@ export function useAttractionsFilters({
         const aVerified = a.data_verified ?? true
         const bVerified = b.data_verified ?? true
         if (aVerified !== bVerified) {
-          return aVerified ? 1 : -1  // false 排前面
+          return aVerified ? 1 : -1 // false 排前面
         }
         // 同樣驗證狀態，按名稱
         return a.name.localeCompare(b.name, 'zh-TW')

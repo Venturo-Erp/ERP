@@ -30,21 +30,21 @@ export function useItineraryFilters({
     if (viewMode === 'templates') {
       // 模板：只顯示模板
       filtered = filtered.filter(
-        item => !item.archived_at &&
-        (item.template_id || item.tour_code?.startsWith('TMPL-'))
+        item => !item.archived_at && (item.template_id || item.tour_code?.startsWith('TMPL-'))
       )
     } else if (viewMode === 'proposals') {
       // 提案：只顯示提案（PROP- 開頭的團號）
       filtered = filtered.filter(
-        item => !item.template_id && !item.archived_at &&
-        item.tour_code?.startsWith('PROP-')
+        item => !item.template_id && !item.archived_at && item.tour_code?.startsWith('PROP-')
       )
     } else {
       // 團體：顯示正式團（不含模板和提案）
       filtered = filtered.filter(
-        item => !item.template_id && !item.archived_at &&
-        !item.tour_code?.startsWith('PROP-') &&
-        !item.tour_code?.startsWith('TMPL-')
+        item =>
+          !item.template_id &&
+          !item.archived_at &&
+          !item.tour_code?.startsWith('PROP-') &&
+          !item.tour_code?.startsWith('TMPL-')
       )
     }
 
@@ -76,15 +76,7 @@ export function useItineraryFilters({
     })
 
     return filtered
-  }, [
-    itineraries,
-    statusFilter,
-    searchTerm,
-    isItineraryClosed,
-    authorFilter,
-    viewMode,
-    userId,
-  ])
+  }, [itineraries, statusFilter, searchTerm, isItineraryClosed, authorFilter, viewMode, userId])
 
   return { filteredItineraries }
 }

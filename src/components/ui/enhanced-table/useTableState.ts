@@ -16,7 +16,9 @@ export function useTableState<T>({
   defaultSort,
 }: UseTableStateProps<T>) {
   const [sortColumn, setSortColumn] = useState<string | null>(defaultSort?.key ?? null)
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(defaultSort?.direction ?? 'asc')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(
+    defaultSort?.direction ?? 'asc'
+  )
   const [filters, setFilters] = useState<Record<string, string>>({})
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)

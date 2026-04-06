@@ -34,10 +34,10 @@ export function TourHeroSection({ data, viewMode }: TourHeroSectionProps) {
             src={data.coverImage}
             alt="Cover"
             className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-            style={{ 
+            style={{
               filter: 'brightness(0.7)',
-              objectPosition: data.coverImagePosition 
-                ? `${data.coverImagePosition.x}% ${data.coverImagePosition.y}%` 
+              objectPosition: data.coverImagePosition
+                ? `${data.coverImagePosition.x}% ${data.coverImagePosition.y}%`
                 : 'center',
             }}
           />

@@ -7,7 +7,9 @@ import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 
 export function AISettingsTab() {
-  const [settings, setSettings] = useState<Record<string, { value: string; description: string; id: string }>>({})
+  const [settings, setSettings] = useState<
+    Record<string, { value: string; description: string; id: string }>
+  >({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
   const [editValues, setEditValues] = useState<Record<string, string>>({})
@@ -25,7 +27,11 @@ export function AISettingsTab() {
         const map: typeof settings = {}
         for (const row of data) {
           const key = `${row.setting_category}:${row.setting_key}`
-          map[key] = { value: row.setting_value || '', description: row.description || '', id: row.id }
+          map[key] = {
+            value: row.setting_value || '',
+            description: row.description || '',
+            id: row.id,
+          }
         }
         setSettings(map)
         const vals: Record<string, string> = {}
@@ -97,13 +103,11 @@ export function AISettingsTab() {
                 return (
                   <div key={key} className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium text-morandi-primary">{setting.description || shortKey}</label>
+                      <label className="text-sm font-medium text-morandi-primary">
+                        {setting.description || shortKey}
+                      </label>
                       {isChanged(key) && (
-                        <Button
-                          size="sm"
-                          onClick={() => handleSave(key)}
-                          disabled={saving === key}
-                        >
+                        <Button size="sm" onClick={() => handleSave(key)} disabled={saving === key}>
                           {saving === key ? '儲存中...' : '儲存'}
                         </Button>
                       )}
@@ -117,7 +121,8 @@ export function AISettingsTab() {
                     />
                     {key.startsWith('notification:') && (
                       <p className="text-xs text-morandi-muted">
-                        可用變數：{'{customer_name}'} {'{tour_name}'} {'{departure_date}'} {'{remaining_amount}'} {'{meeting_time}'} {'{meeting_location}'} {'{days}'}
+                        可用變數：{'{customer_name}'} {'{tour_name}'} {'{departure_date}'}{' '}
+                        {'{remaining_amount}'} {'{meeting_time}'} {'{meeting_location}'} {'{days}'}
                       </p>
                     )}
                   </div>

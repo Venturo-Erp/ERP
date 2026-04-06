@@ -120,7 +120,9 @@ export async function getLatestFareHistory(pnrId: string): Promise<PnrFareHistor
   try {
     const { data, error } = await supabase
       .from('pnr_fare_history')
-      .select('id, pnr_id, base_fare, taxes, total_fare, currency, fare_basis, source, raw_fare_data, recorded_at, recorded_by, workspace_id, created_at')
+      .select(
+        'id, pnr_id, base_fare, taxes, total_fare, currency, fare_basis, source, raw_fare_data, recorded_at, recorded_by, workspace_id, created_at'
+      )
       .eq('pnr_id', pnrId)
       .order('recorded_at', { ascending: false })
       .limit(1)
@@ -149,7 +151,9 @@ export async function getFareHistory(pnrId: string, limit: number = 10): Promise
   try {
     const { data, error } = await supabase
       .from('pnr_fare_history')
-      .select('id, pnr_id, base_fare, taxes, total_fare, currency, fare_basis, source, raw_fare_data, recorded_at, recorded_by, workspace_id, created_at')
+      .select(
+        'id, pnr_id, base_fare, taxes, total_fare, currency, fare_basis, source, raw_fare_data, recorded_at, recorded_by, workspace_id, created_at'
+      )
       .eq('pnr_id', pnrId)
       .order('recorded_at', { ascending: false })
       .limit(limit)
@@ -219,7 +223,9 @@ export async function checkFareAlerts(
     // 取得該 PNR 的有效警報設定
     const { data: alerts, error } = await supabase
       .from('pnr_fare_alerts')
-      .select('id, pnr_id, alert_type, threshold_amount, threshold_percent, last_fare, is_active, last_checked_at, workspace_id, created_at, updated_at')
+      .select(
+        'id, pnr_id, alert_type, threshold_amount, threshold_percent, last_fare, is_active, last_checked_at, workspace_id, created_at, updated_at'
+      )
       .eq('pnr_id', pnrId)
       .eq('is_active', true)
       .limit(500)

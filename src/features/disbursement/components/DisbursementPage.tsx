@@ -177,48 +177,51 @@ export function DisbursementPage() {
   }, [])
 
   // 確認出帳（直接從列表操作）
-  const handleConfirmPaid = useCallback(async (order: DisbursementOrder) => {
-    const confirmed = await confirm(DISBURSEMENT_LABELS.確定要將此出納單標記為_已出帳_嗎, {
-      title: DISBURSEMENT_LABELS.確認出帳,
-      type: 'warning',
-    })
-    if (!confirmed) return
-
-    try {
-      // 更新出納單狀態
-      await updateDisbursementOrderApi(order.id, {
-        status: 'paid',
-        confirmed_by: user?.id || null,
-        confirmed_at: new Date().toISOString(),
+  const handleConfirmPaid = useCallback(
+    async (order: DisbursementOrder) => {
+      const confirmed = await confirm(DISBURSEMENT_LABELS.確定要將此出納單標記為_已出帳_嗎, {
+        title: DISBURSEMENT_LABELS.確認出帳,
+        type: 'warning',
       })
+      if (!confirmed) return
 
-      // 更新所有請款單狀態為 billed
-      const requestIds = order.payment_request_ids || []
-      const tour_ids_to_recalculate = new Set<string>()
-      for (const requestId of requestIds) {
-        await updatePaymentRequestApi(requestId, {
-          status: 'billed',
+      try {
+        // 更新出納單狀態
+        await updateDisbursementOrderApi(order.id, {
+          status: 'paid',
+          confirmed_by: user?.id || null,
+          confirmed_at: new Date().toISOString(),
         })
-        const req = payment_requests.find(r => r.id === requestId)
-        if (req?.tour_id) {
-          tour_ids_to_recalculate.add(req.tour_id)
+
+        // 更新所有請款單狀態為 billed
+        const requestIds = order.payment_request_ids || []
+        const tour_ids_to_recalculate = new Set<string>()
+        for (const requestId of requestIds) {
+          await updatePaymentRequestApi(requestId, {
+            status: 'billed',
+          })
+          const req = payment_requests.find(r => r.id === requestId)
+          if (req?.tour_id) {
+            tour_ids_to_recalculate.add(req.tour_id)
+          }
         }
+
+        // 重算相關團的成本
+        for (const tour_id of tour_ids_to_recalculate) {
+          await recalculateExpenseStats(tour_id)
+        }
+
+        // SWR 快取失效
+        await Promise.all([invalidateDisbursementOrders(), invalidatePaymentRequests()])
+
+        await alert(DISBURSEMENT_LABELS.出納單已標記為已出帳, 'success')
+      } catch (error) {
+        logger.error(DISBURSEMENT_LABELS.更新出納單失敗_2, error)
+        await alert(DISBURSEMENT_LABELS.更新出納單失敗, 'error')
       }
-
-      // 重算相關團的成本
-      for (const tour_id of tour_ids_to_recalculate) {
-        await recalculateExpenseStats(tour_id)
-      }
-
-      // SWR 快取失效
-      await Promise.all([invalidateDisbursementOrders(), invalidatePaymentRequests()])
-
-      await alert(DISBURSEMENT_LABELS.出納單已標記為已出帳, 'success')
-    } catch (error) {
-      logger.error(DISBURSEMENT_LABELS.更新出納單失敗_2, error)
-      await alert(DISBURSEMENT_LABELS.更新出納單失敗, 'error')
-    }
-  }, [user, payment_requests])
+    },
+    [user, payment_requests]
+  )
 
   // 刪除出納單
   const handleDelete = useCallback(async (order: DisbursementOrder) => {

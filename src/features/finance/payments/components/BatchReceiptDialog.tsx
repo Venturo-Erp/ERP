@@ -67,10 +67,14 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
   const [paymentMethods, setPaymentMethods] = useState<{ value: string; label: string }[]>([])
   // 會計科目（選填）
   const [accountingSubjectId, setAccountingSubjectId] = useState<string>('')
-  const [accountingSubjects, setAccountingSubjects] = useState<{ value: string; label: string }[]>([])
+  const [accountingSubjects, setAccountingSubjects] = useState<{ value: string; label: string }[]>(
+    []
+  )
 
   // 原始收款方式資料（含 id）
-  const [paymentMethodsRaw, setPaymentMethodsRaw] = useState<{ id: string; code: string; name: string }[]>([])
+  const [paymentMethodsRaw, setPaymentMethodsRaw] = useState<
+    { id: string; code: string; name: string }[]
+  >([])
 
   // 載入收款方式
   useEffect(() => {
@@ -83,10 +87,12 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
           if (methods && methods.length > 0) {
             // 保留完整資料（含 id）
             setPaymentMethodsRaw(methods)
-            setPaymentMethods(methods.map((m: { id: string; code: string | null; name: string }) => ({
-              value: m.id, // 改用 id 作為 value（更穩定）
-              label: m.name,
-            })))
+            setPaymentMethods(
+              methods.map((m: { id: string; code: string | null; name: string }) => ({
+                value: m.id, // 改用 id 作為 value（更穩定）
+                label: m.name,
+              }))
+            )
             // 設定預設值為第一個方式
             if (methods.length > 0 && !paymentMethod) {
               setPaymentMethod(methods[0].id as PaymentMethod)
@@ -96,16 +102,18 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
         .catch(() => {
           // 失敗時使用預設值
         })
-      
+
       // 載入會計科目（收入類）
       fetch(`/api/finance/accounting-subjects?workspace_id=${user.workspace_id}&type=revenue`)
         .then(res => res.json())
         .then(data => {
           const subjects = Array.isArray(data) ? data : []
-          setAccountingSubjects(subjects.map((s: { id: string; code: string; name: string }) => ({
-            value: s.id,
-            label: `${s.code} ${s.name}`,
-          })))
+          setAccountingSubjects(
+            subjects.map((s: { id: string; code: string; name: string }) => ({
+              value: s.id,
+              label: `${s.code} ${s.name}`,
+            }))
+          )
         })
         .catch(() => {})
     }
@@ -297,22 +305,20 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
 
     try {
       // 取得選中的收款方式
-      const selectedPaymentMethod = paymentMethodsRaw.find(
-        m => m.id === paymentMethod
-      )
+      const selectedPaymentMethod = paymentMethodsRaw.find(m => m.id === paymentMethod)
       const paymentMethodId = selectedPaymentMethod?.id || null
-      
+
       // 收款方式名稱（新格式直接用 name）
       const paymentMethodName = selectedPaymentMethod?.name || '現金'
-      
+
       // 映射到 receipt_type 數字（用於舊欄位向下相容）
       const nameToReceiptType: Record<string, number> = {
-        '現金': 1,
-        '匯款': 0,
-        '刷卡': 2,
-        '信用卡': 2,
-        '支票': 3,
-        'LinkPay': 4,
+        現金: 1,
+        匯款: 0,
+        刷卡: 2,
+        信用卡: 2,
+        支票: 3,
+        LinkPay: 4,
         'LINE Pay': 4,
       }
       const receiptTypeNum = nameToReceiptType[paymentMethodName] ?? 0
@@ -431,16 +437,13 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
               />
             </div>
           </div>
-          
+
           {/* 會計科目（選填）*/}
           {accountingSubjects.length > 0 && (
             <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label>會計科目（選填）</Label>
-                <Select
-                  value={accountingSubjectId}
-                  onValueChange={setAccountingSubjectId}
-                >
+                <Select value={accountingSubjectId} onValueChange={setAccountingSubjectId}>
                   <SelectTrigger>
                     <SelectValue placeholder="請選擇會計科目" />
                   </SelectTrigger>

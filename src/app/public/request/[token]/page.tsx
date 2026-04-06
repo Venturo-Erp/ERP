@@ -330,7 +330,12 @@ export default function PublicRequestPage() {
           return (
             <div key={`acc-${idx}`} style={{ marginBottom: 24 }}>
               <div
-                style={{ border: '1px solid var(--border)', borderRadius: 5, padding: 15, marginBottom: 10 }}
+                style={{
+                  border: '1px solid var(--border)',
+                  borderRadius: 5,
+                  padding: 15,
+                  marginBottom: 10,
+                }}
               >
                 <h3
                   style={{
@@ -515,7 +520,14 @@ export default function PublicRequestPage() {
         )}
 
         {/* 統包價格 */}
-        <div style={{ border: '1px solid var(--border)', borderRadius: 5, padding: 15, marginBottom: 20 }}>
+        <div
+          style={{
+            border: '1px solid var(--border)',
+            borderRadius: 5,
+            padding: 15,
+            marginBottom: 20,
+          }}
+        >
           <h3
             style={{
               margin: '0 0 10px 0',
@@ -556,7 +568,14 @@ export default function PublicRequestPage() {
         </div>
 
         {/* 整體備註 */}
-        <div style={{ border: '1px solid var(--border)', borderRadius: 5, padding: 15, marginBottom: 20 }}>
+        <div
+          style={{
+            border: '1px solid var(--border)',
+            borderRadius: 5,
+            padding: 15,
+            marginBottom: 20,
+          }}
+        >
           <h3
             style={{
               margin: '0 0 8px 0',
@@ -619,7 +638,14 @@ export default function PublicRequestPage() {
           </p>
         )}
 
-        <p style={{ textAlign: 'center', marginTop: 30, fontSize: 11, color: 'var(--morandi-muted)' }}>
+        <p
+          style={{
+            textAlign: 'center',
+            marginTop: 30,
+            fontSize: 11,
+            color: 'var(--morandi-muted)',
+          }}
+        >
           此頁面由 Venturo ERP 產生 · {COMPANY_NAME}
         </p>
       </div>

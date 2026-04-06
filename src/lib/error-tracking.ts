@@ -34,8 +34,6 @@ export function captureException(error: unknown, context?: ErrorContext): void {
     module: context?.module,
     ...context?.extra,
   })
-
- 
 }
 
 /**
@@ -49,8 +47,6 @@ export function captureMessage(message: string, level: ErrorLevel = 'info'): voi
         ? console.warn
         : console.log
   logFn(`[error-tracking][${level}]`, message, { userId: _currentUserId })
-
- 
 }
 
 /**
@@ -58,7 +54,6 @@ export function captureMessage(message: string, level: ErrorLevel = 'info'): voi
  */
 export function setUser(userId: string | null): void {
   _currentUserId = userId
- 
 }
 
 /**

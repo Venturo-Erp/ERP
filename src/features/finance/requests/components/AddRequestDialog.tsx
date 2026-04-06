@@ -137,8 +137,7 @@ export function AddRequestDialog({
   const isAdmin = useAuthStore(state => state.isAdmin)
   const canCreateCompanyPayment = useMemo(() => {
     if (!currentUser?.permissions) return false
-    return isAdmin ||
-           currentUser.permissions.includes('accounting')
+    return isAdmin || currentUser.permissions.includes('accounting')
   }, [currentUser?.permissions, isAdmin])
 
   // === 團體請款狀態 ===
@@ -233,7 +232,12 @@ export function AddRequestDialog({
   const activeTours = useMemo(() => {
     return tours.filter(tour => {
       const t = tour as unknown as { is_deleted?: boolean; deleted_at?: string | null }
-      return !tour.archived && !t.is_deleted && !t.deleted_at && tour.status !== ADD_REQUEST_DIALOG_LABELS.特殊團
+      return (
+        !tour.archived &&
+        !t.is_deleted &&
+        !t.deleted_at &&
+        tour.status !== ADD_REQUEST_DIALOG_LABELS.特殊團
+      )
     })
   }, [tours])
 
@@ -706,12 +710,12 @@ export function AddRequestDialog({
                   }
                 />
                 <div>
-                  <label className="text-sm font-medium text-morandi-primary">
-                    付款方式
-                  </label>
+                  <label className="text-sm font-medium text-morandi-primary">付款方式</label>
                   <Select
                     value={formData.payment_method_id || ''}
-                    onValueChange={value => setFormData(prev => ({ ...prev, payment_method_id: value || undefined }))}
+                    onValueChange={value =>
+                      setFormData(prev => ({ ...prev, payment_method_id: value || undefined }))
+                    }
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="選擇付款方式（選填）" />
@@ -1003,12 +1007,12 @@ export function AddRequestDialog({
                     }
                   />
                   <div>
-                    <label className="text-sm font-medium text-morandi-primary">
-                      付款方式
-                    </label>
+                    <label className="text-sm font-medium text-morandi-primary">付款方式</label>
                     <Select
                       value={formData.payment_method_id || ''}
-                      onValueChange={value => setFormData(prev => ({ ...prev, payment_method_id: value || undefined }))}
+                      onValueChange={value =>
+                        setFormData(prev => ({ ...prev, payment_method_id: value || undefined }))
+                      }
                     >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="選擇付款方式（選填）" />

@@ -95,14 +95,16 @@ async function createVoucherFromReceipt(workspaceId: string, receiptId: string) 
   // 1. 查詢收款單（含收款方式的科目設定）
   const { data: receipt, error: recError } = await db
     .from('receipts')
-    .select(`
+    .select(
+      `
       *,
       payment_method_ref:payment_methods!payment_method_id(
         id, name,
         debit_account:chart_of_accounts!debit_account_id(id, code, name),
         credit_account:chart_of_accounts!credit_account_id(id, code, name)
       )
-    `)
+    `
+    )
     .eq('id', receiptId)
     .single()
 
@@ -199,18 +201,23 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
   // 2. 查詢所有請款類別（用於對應 category）
   const { data: categories } = await db
     .from('expense_categories')
-    .select(`
+    .select(
+      `
       id, name,
       debit_account:chart_of_accounts!debit_account_id(id, code, name),
       credit_account:chart_of_accounts!credit_account_id(id, code, name)
-    `)
+    `
+    )
     .eq('workspace_id', workspaceId)
     .eq('is_active', true)
 
-  const categoryMap = new Map<string, {
-    debit_account: { id: string; code: string; name: string } | null
-    credit_account: { id: string; code: string; name: string } | null
-  }>()
+  const categoryMap = new Map<
+    string,
+    {
+      debit_account: { id: string; code: string; name: string } | null
+      credit_account: { id: string; code: string; name: string } | null
+    }
+  >()
 
   if (categories) {
     for (const cat of categories) {
@@ -219,7 +226,7 @@ async function createVoucherFromPaymentRequest(workspaceId: string, paymentReque
       const creditRaw = cat.credit_account as unknown
       const debit = Array.isArray(debitRaw) ? debitRaw[0] : debitRaw
       const credit = Array.isArray(creditRaw) ? creditRaw[0] : creditRaw
-      
+
       categoryMap.set(cat.name, {
         debit_account: debit as { id: string; code: string; name: string } | null,
         credit_account: credit as { id: string; code: string; name: string } | null,

@@ -42,11 +42,7 @@ export async function POST(request: NextRequest) {
     // 🔒 租戶隔離：確保檔案路徑包含 workspace_id
     const workspaceId = auth.data.workspaceId
     if (!path.startsWith(`${workspaceId}/`)) {
-      return errorResponse(
-        '檔案路徑必須以 workspace_id 開頭',
-        403,
-        ErrorCode.FORBIDDEN
-      )
+      return errorResponse('檔案路徑必須以 workspace_id 開頭', 403, ErrorCode.FORBIDDEN)
     }
 
     const arrayBuffer = await file.arrayBuffer()
@@ -111,11 +107,7 @@ export async function DELETE(request: NextRequest) {
     // 🔒 租戶隔離：確保檔案路徑包含 workspace_id
     const workspaceId = auth.data.workspaceId
     if (!path.startsWith(`${workspaceId}/`)) {
-      return errorResponse(
-        '只能刪除自己租戶的檔案',
-        403,
-        ErrorCode.FORBIDDEN
-      )
+      return errorResponse('只能刪除自己租戶的檔案', 403, ErrorCode.FORBIDDEN)
     }
 
     const supabaseAdmin = getSupabaseAdminClient()

@@ -28,7 +28,7 @@ export function usePaymentData() {
   const { items: orders, loading: ordersLoading } = useOrdersSlim()
   const { items: receipts, loading: receiptsLoading } = useReceipts()
   const { items: linkpayLogs } = useLinkPayLogs()
-  
+
   // 合併 loading 狀態
   const loading = ordersLoading || receiptsLoading
   const { get: getTour } = useTourDictionary()

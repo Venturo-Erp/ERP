@@ -141,7 +141,7 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
               data = quotes || []
               for (const q of data) {
                 fileItems.push({
-                  id: q.id || "",
+                  id: q.id || '',
                   name: q.name || q.code || COMP_TOURS_LABELS.未命名報價單,
                   createdAt: q.created_at || '',
                   dbType: 'quote',
@@ -160,7 +160,7 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
               data = quickQuotes || []
               for (const q of data) {
                 fileItems.push({
-                  id: q.id || "",
+                  id: q.id || '',
                   name: q.name || q.code || COMP_TOURS_LABELS.未命名快速報價,
                   createdAt: q.created_at || '',
                   dbType: 'quick_quote',
@@ -178,7 +178,7 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
               data = itineraries || []
               for (const i of data) {
                 fileItems.push({
-                  id: i.id || "",
+                  id: i.id || '',
                   name: i.title || i.code || COMP_TOURS_LABELS.未命名行程表,
                   createdAt: i.created_at || '',
                   dbType: 'itinerary',
@@ -196,7 +196,7 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
               data = requests || []
               for (const r of data) {
                 fileItems.push({
-                  id: r.id || "",
+                  id: r.id || '',
                   name: `${r.request_type || COMP_TOURS_LABELS.需求} - ${r.supplier_name || r.code}`,
                   createdAt: r.created_at || '',
                   dbType: 'request',

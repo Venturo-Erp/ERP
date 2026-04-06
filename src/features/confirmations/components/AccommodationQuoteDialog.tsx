@@ -154,7 +154,9 @@ export function AccommodationQuoteDialog({
     const styles = Array.from(document.styleSheets)
       .map(sheet => {
         try {
-          return Array.from(sheet.cssRules).map(rule => rule.cssText).join('\n')
+          return Array.from(sheet.cssRules)
+            .map(rule => rule.cssText)
+            .join('\n')
         } catch {
           return ''
         }
@@ -410,7 +412,10 @@ export function AccommodationQuoteDialog({
         {/* A4 預覽區 */}
         <div className="flex-1 overflow-y-auto p-6 bg-morandi-container/50">
           {loadingData ? (
-            <div className="bg-white mx-auto shadow-lg p-8 space-y-6" style={{ width: '210mm', minHeight: '297mm' }}>
+            <div
+              className="bg-white mx-auto shadow-lg p-8 space-y-6"
+              style={{ width: '210mm', minHeight: '297mm' }}
+            >
               <Skeleton className="h-8 w-[200px] mx-auto" />
               <div className="grid grid-cols-2 gap-4">
                 <Skeleton className="h-24 w-full" />
@@ -421,33 +426,33 @@ export function AccommodationQuoteDialog({
               <Skeleton className="h-20 w-full" />
             </div>
           ) : (
-          <div
-            ref={printContentRef}
-            className="bg-white mx-auto shadow-lg"
-            style={{
-              width: '210mm',
-              minHeight: '297mm',
-              padding: '1.5cm',
-            }}
-          >
-            <UnifiedTraditionalView
-              requestType="accommodation"
-              tour={tour}
-              totalPax={totalPax}
-              supplierName={supplierName}
-              contact={contact}
-              phone={phone}
-              fax={fax}
-              items={accommodations}
-              note={note}
-              setNote={setNote}
-              onInfoChange={(field, value) => {
-                if (field === 'contact') setContact(value)
-                else if (field === 'phone') setPhone(value)
-                else if (field === 'fax') setFax(value)
+            <div
+              ref={printContentRef}
+              className="bg-white mx-auto shadow-lg"
+              style={{
+                width: '210mm',
+                minHeight: '297mm',
+                padding: '1.5cm',
               }}
-            />
-          </div>
+            >
+              <UnifiedTraditionalView
+                requestType="accommodation"
+                tour={tour}
+                totalPax={totalPax}
+                supplierName={supplierName}
+                contact={contact}
+                phone={phone}
+                fax={fax}
+                items={accommodations}
+                note={note}
+                setNote={setNote}
+                onInfoChange={(field, value) => {
+                  if (field === 'contact') setContact(value)
+                  else if (field === 'phone') setPhone(value)
+                  else if (field === 'fax') setFax(value)
+                }}
+              />
+            </div>
           )}
         </div>
 

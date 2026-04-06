@@ -82,11 +82,11 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
   }
 
   const removeTraveler = (id: string) => {
-    setTravelers(travelers.filter((t) => t.id !== id))
+    setTravelers(travelers.filter(t => t.id !== id))
   }
 
   const updateTraveler = (id: string, field: keyof Traveler, value: string) => {
-    setTravelers(travelers.map((t) => (t.id === id ? { ...t, [field]: value } : t)))
+    setTravelers(travelers.map(t => (t.id === id ? { ...t, [field]: value } : t)))
   }
 
   return (
@@ -118,7 +118,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                 </label>
                 <Input
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
                   placeholder="姓名"
                   required
                   className="bg-white"
@@ -131,7 +131,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                 <Input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={e => setFormData({ ...formData, email: e.target.value })}
                   placeholder="email@example.com"
                   required
                   className="bg-white"
@@ -144,7 +144,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                 <Input
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="+886 912 345 678"
                   required
                   className="bg-white"
@@ -158,7 +158,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                   type="number"
                   min="1"
                   value={formData.memberCount}
-                  onChange={(e) =>
+                  onChange={e =>
                     setFormData({ ...formData, memberCount: parseInt(e.target.value) })
                   }
                   className="bg-white"
@@ -189,9 +189,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                     </label>
                     <Input
                       value={traveler.chineseName}
-                      onChange={(e) =>
-                        updateTraveler(traveler.id, 'chineseName', e.target.value)
-                      }
+                      onChange={e => updateTraveler(traveler.id, 'chineseName', e.target.value)}
                       placeholder="王小明"
                       className="bg-white"
                     />
@@ -202,9 +200,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                     </label>
                     <Input
                       value={traveler.pinyinName}
-                      onChange={(e) =>
-                        updateTraveler(traveler.id, 'pinyinName', e.target.value)
-                      }
+                      onChange={e => updateTraveler(traveler.id, 'pinyinName', e.target.value)}
                       placeholder="WANG XIAO MING"
                       className="bg-white"
                     />
@@ -216,9 +212,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                     <Input
                       type="date"
                       value={traveler.dateOfBirth}
-                      onChange={(e) =>
-                        updateTraveler(traveler.id, 'dateOfBirth', e.target.value)
-                      }
+                      onChange={e => updateTraveler(traveler.id, 'dateOfBirth', e.target.value)}
                       className="bg-white"
                     />
                   </div>

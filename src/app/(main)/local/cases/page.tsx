@@ -26,7 +26,9 @@ export default function LocalCasesPage() {
       if (!workspaceId) return []
       const { data, error } = await supabase
         .from('tour_requests')
-        .select('id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, supplier_contact, items, note, replied_at, accepted_at, confirmed_at, closed_at, package_status, recipient_workspace_id, target_workspace_id, assigned_employee_id, assigned_employee_name, created_at, updated_at')
+        .select(
+          'id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, supplier_contact, items, note, replied_at, accepted_at, confirmed_at, closed_at, package_status, recipient_workspace_id, target_workspace_id, assigned_employee_id, assigned_employee_name, created_at, updated_at'
+        )
         .or(`recipient_workspace_id.eq.${workspaceId},target_workspace_id.eq.${workspaceId}`)
         .in('status', ['accepted', 'completed'])
         .order('service_date', { ascending: true })
@@ -127,7 +129,9 @@ export default function LocalCasesPage() {
                   <div className="text-right shrink-0">
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full ${
-                        isCompleted ? 'bg-morandi-green/10 text-morandi-green' : 'bg-morandi-gold/10 text-morandi-gold'
+                        isCompleted
+                          ? 'bg-morandi-green/10 text-morandi-green'
+                          : 'bg-morandi-gold/10 text-morandi-gold'
                       }`}
                     >
                       {isCompleted ? '已完成' : '進行中'}

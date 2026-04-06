@@ -450,7 +450,10 @@ export function MemberRow({
       {/* 團體模式：自訂費用欄位 */}
       {mode === 'tour' &&
         customCostFields.map(field => (
-          <td key={field.id} className="border border-morandi-gold/20 px-2 py-1 bg-morandi-green/10/50">
+          <td
+            key={field.id}
+            className="border border-morandi-gold/20 px-2 py-1 bg-morandi-green/10/50"
+          >
             <input
               type="text"
               value={field.values[member.id] || ''}

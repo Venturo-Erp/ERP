@@ -34,7 +34,10 @@ function getNextThursday(): Date {
 }
 
 // 生成出納單號：DOYYMMDD-NNN（根據出帳日期，流水號從 001 開始）
-async function generateDisbursementNumber(existingOrders: DisbursementOrder[], disbursementDate?: string): Promise<string> {
+async function generateDisbursementNumber(
+  existingOrders: DisbursementOrder[],
+  disbursementDate?: string
+): Promise<string> {
   const date = disbursementDate ? new Date(disbursementDate) : new Date()
   const yy = String(date.getFullYear()).slice(-2)
   const mm = String(date.getMonth() + 1).padStart(2, '0')
@@ -248,7 +251,10 @@ export function useCreateDisbursement({
         disbursement_date: disbursementDate,
       }
       if (dateChanged) {
-        const newOrderNumber = await generateDisbursementNumber(disbursement_orders, disbursementDate)
+        const newOrderNumber = await generateDisbursementNumber(
+          disbursement_orders,
+          disbursementDate
+        )
         updatedFields = { ...updatedFields, order_number: newOrderNumber, code: newOrderNumber }
       }
 

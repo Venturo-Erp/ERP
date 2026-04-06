@@ -12,10 +12,6 @@ export const metadata: Metadata = {
   title: '合約簽署',
 }
 
-export default function ContractSignLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function ContractSignLayout({ children }: { children: React.ReactNode }) {
   return children
 }

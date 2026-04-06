@@ -170,8 +170,7 @@ export function DailyItinerarySection({
             )
           })()}
         </div>
-        <div className="flex items-center gap-3">
-        </div>
+        <div className="flex items-center gap-3"></div>
       </div>
 
       {/* 每日卡片列表 */}
@@ -335,7 +334,6 @@ export function DailyItinerarySection({
             />
           )
         })()}
-
     </div>
   )
 }

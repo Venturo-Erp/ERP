@@ -807,7 +807,9 @@ export function TourItinerarySection({
         onOpenChange={open => !open && setSelectedActivity(null)}
       >
         <DialogContent level={1} className="max-w-[85vw] max-h-[70vh] w-auto p-0 overflow-hidden">
-          <VisuallyHidden><DialogTitle>景點詳情</DialogTitle></VisuallyHidden>
+          <VisuallyHidden>
+            <DialogTitle>景點詳情</DialogTitle>
+          </VisuallyHidden>
           <AnimatePresence mode="wait">
             {selectedActivity && (
               <motion.div

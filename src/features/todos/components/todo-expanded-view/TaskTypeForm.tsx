@@ -13,7 +13,18 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
-import { Hotel, Utensils, Bus, Ticket, PartyPopper, FileText, Plane, Users, Copy, Check } from 'lucide-react'
+import {
+  Hotel,
+  Utensils,
+  Bus,
+  Ticket,
+  PartyPopper,
+  FileText,
+  Plane,
+  Users,
+  Copy,
+  Check,
+} from 'lucide-react'
 import { useToursSlim, useOrdersSlim, useEmployeesSlim } from '@/data'
 import { toast } from 'sonner'
 import { supabase } from '@/lib/supabase/client'
@@ -360,12 +371,14 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
     departureDate: string
     returnDate: string
   } | null>(null)
-  const [members, setMembers] = useState<{
-    id: string
-    chinese_name: string
-    english_name: string
-    pnr?: string
-  }[]>([])
+  const [members, setMembers] = useState<
+    {
+      id: string
+      chinese_name: string
+      english_name: string
+      pnr?: string
+    }[]
+  >([])
   const [loading, setLoading] = useState(true)
   const [pnrInput, setPnrInput] = useState('')
   const [copied, setCopied] = useState(false)
@@ -402,20 +415,30 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
         // 讀取團員名單（透過 orders）
         const { data: orderMembers } = await supabase
           .from('order_members')
-          .select(`
+          .select(
+            `
             id,
             chinese_name,
             passport_name,
             orders!inner(tour_id)
-          `)
+          `
+          )
           .eq('orders.tour_id', todo.tour_id)
 
         if (orderMembers) {
-          setMembers((orderMembers as unknown as Array<{ id: string; chinese_name: string | null; passport_name: string | null }>).map(m => ({
-            id: m.id,
-            chinese_name: m.chinese_name || '',
-            english_name: m.passport_name || '',
-          })))
+          setMembers(
+            (
+              orderMembers as unknown as Array<{
+                id: string
+                chinese_name: string | null
+                passport_name: string | null
+              }>
+            ).map(m => ({
+              id: m.id,
+              chinese_name: m.chinese_name || '',
+              english_name: m.passport_name || '',
+            }))
+          )
         }
       } catch (error) {
         logger.error('讀取訂票資料失敗:', error)
@@ -428,7 +451,9 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
   }, [todo.tour_id])
 
   // 解析航班資訊
-  const parseFlight = (flight: Record<string, unknown> | null): {
+  const parseFlight = (
+    flight: Record<string, unknown> | null
+  ): {
     display: string
     flightNumber: string
     airline: string
@@ -440,15 +465,15 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
     if (!flight) return null
     const f = Array.isArray(flight) ? flight[0] : flight
     if (!f) return null
-    
+
     // 嘗試從 flightNumber 解析（格式如：中華航空 CI 154 07:30-11:20）
     const flightStr = f.flightNumber || ''
     const match = flightStr.match(/([A-Z]{2})\s*(\d+)/)
-    
+
     return {
       display: flightStr || '未設定',
       flightNumber: match ? `${match[1]}${match[2]}` : '',
-      airline: match ? match[1] : (f.airline || ''),
+      airline: match ? match[1] : f.airline || '',
       departureAirport: f.departureAirport || '',
       arrivalAirport: f.arrivalAirport || '',
       departureDate: f.departureDate || '',
@@ -459,51 +484,61 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
   // 產生 Amadeus 查位指令
   const generateAvailabilityCommand = (flight: ReturnType<typeof parseFlight>, date?: string) => {
     if (!flight || !flight.airline) return null
-    
+
     // AN日期出發抵達/A航空 例：AN15JANTPENRT/ACI
     let cmd = 'AN'
-    
+
     // 日期格式：15JAN
     if (date || flight.departureDate) {
       const d = new Date(date || flight.departureDate)
       if (!isNaN(d.getTime())) {
         const day = d.getDate().toString().padStart(2, '0')
-        const month = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'][d.getMonth()]
+        const month = [
+          'JAN',
+          'FEB',
+          'MAR',
+          'APR',
+          'MAY',
+          'JUN',
+          'JUL',
+          'AUG',
+          'SEP',
+          'OCT',
+          'NOV',
+          'DEC',
+        ][d.getMonth()]
         cmd += `${day}${month}`
       }
     }
-    
+
     // 機場
     if (flight.departureAirport && flight.arrivalAirport) {
       cmd += `${flight.departureAirport}${flight.arrivalAirport}`
     }
-    
+
     // 航空公司
     cmd += `/A${flight.airline}`
-    
+
     return cmd
   }
 
   // 複製航班指令
   const handleCopyFlight = (type: 'outbound' | 'return') => {
     if (!flightInfo) return
-    
-    const flight = type === 'outbound' 
-      ? parseFlight(flightInfo.outbound)
-      : parseFlight(flightInfo.return)
-    
+
+    const flight =
+      type === 'outbound' ? parseFlight(flightInfo.outbound) : parseFlight(flightInfo.return)
+
     if (!flight) {
       toast.error('航班資訊不完整')
       return
     }
 
     // 取得日期
-    const tourDate = type === 'outbound' 
-      ? flightInfo.departureDate 
-      : flightInfo.returnDate
+    const tourDate = type === 'outbound' ? flightInfo.departureDate : flightInfo.returnDate
 
     const cmd = generateAvailabilityCommand(flight, tourDate)
-    
+
     if (cmd && cmd.length > 5) {
       navigator.clipboard.writeText(cmd)
       toast.success(`已複製：${cmd}`)
@@ -517,9 +552,8 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
   // 複製團員名單（Amadeus 訂位格式）
   const handleCopyMembers = () => {
     // 取得選取的團員，如果沒選就用全部
-    const targetMembers = selectedMembers.size > 0
-      ? members.filter(m => selectedMembers.has(m.id))
-      : members
+    const targetMembers =
+      selectedMembers.size > 0 ? members.filter(m => selectedMembers.has(m.id)) : members
 
     // 產生 Amadeus 格式：NM1姓/名 然後 1姓/名
     const lines = targetMembers
@@ -591,26 +625,38 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
         </div>
         {flightInfo && (
           <div className="text-xs space-y-1.5">
-            <p className="font-medium text-morandi-primary">{flightInfo.tourCode} {flightInfo.tourName}</p>
-            
+            <p className="font-medium text-morandi-primary">
+              {flightInfo.tourCode} {flightInfo.tourName}
+            </p>
+
             {/* 去程 - 可點選 */}
             <div
               onClick={() => handleCopyFlight('outbound')}
               className="flex items-center gap-2 p-2 rounded bg-white/50 cursor-pointer hover:bg-white/80 transition-colors group"
             >
               <span className="text-morandi-muted w-10">去程</span>
-              <span className="flex-1 font-mono">{parseFlight(flightInfo.outbound)?.display || '未設定'}</span>
-              <Copy size={12} className="text-morandi-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="flex-1 font-mono">
+                {parseFlight(flightInfo.outbound)?.display || '未設定'}
+              </span>
+              <Copy
+                size={12}
+                className="text-morandi-muted opacity-0 group-hover:opacity-100 transition-opacity"
+              />
             </div>
-            
+
             {/* 回程 - 可點選 */}
             <div
               onClick={() => handleCopyFlight('return')}
               className="flex items-center gap-2 p-2 rounded bg-white/50 cursor-pointer hover:bg-white/80 transition-colors group"
             >
               <span className="text-morandi-muted w-10">回程</span>
-              <span className="flex-1 font-mono">{parseFlight(flightInfo.return)?.display || '未設定'}</span>
-              <Copy size={12} className="text-morandi-muted opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span className="flex-1 font-mono">
+                {parseFlight(flightInfo.return)?.display || '未設定'}
+              </span>
+              <Copy
+                size={12}
+                className="text-morandi-muted opacity-0 group-hover:opacity-100 transition-opacity"
+              />
             </div>
           </div>
         )}
@@ -622,7 +668,8 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
           <div className="flex items-center gap-2 text-morandi-primary">
             <Users size={16} />
             <span className="text-sm font-medium">
-              團員名單 ({selectedMembers.size > 0 ? `${selectedMembers.size}/` : ''}{members.length}人)
+              團員名單 ({selectedMembers.size > 0 ? `${selectedMembers.size}/` : ''}
+              {members.length}人)
             </span>
           </div>
           <Button
@@ -633,14 +680,18 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
             className="h-7 text-xs"
           >
             {copied ? <Check size={12} className="mr-1" /> : <Copy size={12} className="mr-1" />}
-            {copied ? '已複製' : selectedMembers.size > 0 ? `複製 ${selectedMembers.size} 人` : '複製全部'}
+            {copied
+              ? '已複製'
+              : selectedMembers.size > 0
+                ? `複製 ${selectedMembers.size} 人`
+                : '複製全部'}
           </Button>
         </div>
 
         <p className="text-xs text-morandi-muted">
           勾選要複製的旅客，產生 Amadeus 訂位格式（NM1姓/名）
         </p>
-        
+
         <div className="max-h-48 overflow-y-auto border border-border rounded-lg">
           <table className="w-full text-xs">
             <thead className="bg-morandi-background/50 sticky top-0">
@@ -658,9 +709,9 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => (
-                <tr 
-                  key={member.id} 
+              {members.map(member => (
+                <tr
+                  key={member.id}
                   className={`border-t border-border/50 cursor-pointer hover:bg-morandi-background/30 ${
                     selectedMembers.has(member.id) ? 'bg-morandi-gold/10' : ''
                   }`}
@@ -671,7 +722,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
                       type="checkbox"
                       checked={selectedMembers.has(member.id)}
                       onChange={() => toggleMember(member.id)}
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={e => e.stopPropagation()}
                       className="rounded border-morandi-muted"
                     />
                   </td>
@@ -699,13 +750,11 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
         <Textarea
           placeholder="貼上 Amadeus 電報內容..."
           value={pnrInput}
-          onChange={(e) => setPnrInput(e.target.value)}
+          onChange={e => setPnrInput(e.target.value)}
           rows={4}
           className="font-mono text-xs"
         />
-        <p className="text-xs text-morandi-muted">
-          貼上電報後，系統會自動解析旅客和航班資訊
-        </p>
+        <p className="text-xs text-morandi-muted">貼上電報後，系統會自動解析旅客和航班資訊</p>
       </div>
 
       {/* 操作按鈕 */}

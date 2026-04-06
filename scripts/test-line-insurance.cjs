@@ -22,7 +22,8 @@ function renderTableImage(title, subtitle, headers, rows) {
   const subtitleHeight = 30
   const tableWidth = colWidths.reduce((a, b) => a + b, 0)
   const width = tableWidth + padding * 2
-  const height = titleHeight + subtitleHeight + headerHeight + rowHeight * rows.length + padding * 2 + 10
+  const height =
+    titleHeight + subtitleHeight + headerHeight + rowHeight * rows.length + padding * 2 + 10
 
   const canvas = createCanvas(width, height)
   const ctx = canvas.getContext('2d')
@@ -125,22 +126,32 @@ async function main() {
   // 1. 取團資料
   const { data: tour } = await supabase
     .from('tours')
-    .select('id, code, name, departure_date, return_date, days_count, airport_code, outbound_flight, return_flight, tour_leader_id, country_id')
+    .select(
+      'id, code, name, departure_date, return_date, days_count, airport_code, outbound_flight, return_flight, tour_leader_id, country_id'
+    )
     .eq('code', TOUR_CODE)
     .single()
-  if (!tour) { console.error('Tour not found'); return }
+  if (!tour) {
+    console.error('Tour not found')
+    return
+  }
 
   // 國家
   let countryName = '台灣'
   if (tour.country_id) {
-    const { data: c } = await supabase.from('countries').select('name').eq('id', tour.country_id).single()
+    const { data: c } = await supabase
+      .from('countries')
+      .select('name')
+      .eq('id', tour.country_id)
+      .single()
     if (c) countryName = c.name
   }
 
   // 天數
   let daysCount = tour.days_count
   if (!daysCount && tour.departure_date && tour.return_date) {
-    daysCount = Math.round((new Date(tour.return_date) - new Date(tour.departure_date)) / 86400000) + 1
+    daysCount =
+      Math.round((new Date(tour.return_date) - new Date(tour.departure_date)) / 86400000) + 1
   }
 
   const isLocal = countryName === '台灣' || countryName === 'Taiwan'
@@ -152,21 +163,31 @@ async function main() {
   // 領隊
   let leaderName = ''
   if (tour.tour_leader_id) {
-    const { data: l } = await supabase.from('employees').select('chinese_name').eq('id', tour.tour_leader_id).single()
+    const { data: l } = await supabase
+      .from('employees')
+      .select('chinese_name')
+      .eq('id', tour.tour_leader_id)
+      .single()
     if (l) leaderName = l.chinese_name
   }
 
   // 2. 取團員
   const { data: orders } = await supabase.from('orders').select('id').eq('tour_id', tour.id)
   const orderIds = orders?.map(o => o.id) || []
-  if (!orderIds.length) { console.error('No orders'); return }
+  if (!orderIds.length) {
+    console.error('No orders')
+    return
+  }
 
   const { data: members } = await supabase
     .from('order_members')
     .select('*, customer:customer_id(name, national_id, birth_date)')
     .in('order_id', orderIds)
     .order('created_at', { ascending: true })
-  if (!members?.length) { console.error('No members'); return }
+  if (!members?.length) {
+    console.error('No members')
+    return
+  }
 
   const representative = leaderName || members[0]?.customer?.name || '-'
 
@@ -189,7 +210,8 @@ async function main() {
   // 4. 上傳圖片到 Supabase Storage
   const imgStoragePath = `tour-documents/${tour.code}/insurance_${Date.now()}.png`
   await supabase.storage.from('documents').upload(imgStoragePath, imgBuffer, {
-    contentType: 'image/png', upsert: true,
+    contentType: 'image/png',
+    upsert: true,
   })
   const { data: imgUrl } = supabase.storage.from('documents').getPublicUrl(imgStoragePath)
   console.log(`🔗 Image URL: ${imgUrl.publicUrl}`)
@@ -204,15 +226,34 @@ async function main() {
   ws.addRow([])
   const hr = ws.addRow(headers)
   hr.font = { bold: true }
-  hr.eachCell(c => { c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8DCC8' } }; c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} } })
-  rows.forEach(r => { const row = ws.addRow(r); row.eachCell(c => { c.border = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} } }) })
+  hr.eachCell(c => {
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8DCC8' } }
+    c.border = {
+      top: { style: 'thin' },
+      bottom: { style: 'thin' },
+      left: { style: 'thin' },
+      right: { style: 'thin' },
+    }
+  })
+  rows.forEach(r => {
+    const row = ws.addRow(r)
+    row.eachCell(c => {
+      c.border = {
+        top: { style: 'thin' },
+        bottom: { style: 'thin' },
+        left: { style: 'thin' },
+        right: { style: 'thin' },
+      }
+    })
+  })
   ws.columns = [{ width: 5 }, { width: 12 }, { width: 14 }, { width: 14 }]
 
   const xlsxBuf = await wb.xlsx.writeBuffer()
   const xlsxName = `${tour.code}_members_${Date.now()}.xlsx`
   const xlsxPath = `tour-documents/${tour.code}/${xlsxName}`
   await supabase.storage.from('documents').upload(xlsxPath, xlsxBuf, {
-    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', upsert: true,
+    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    upsert: true,
   })
   const { data: xlsxUrl } = supabase.storage.from('documents').getPublicUrl(xlsxPath)
 
@@ -245,7 +286,7 @@ async function main() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${LINE_TOKEN}`,
+      Authorization: `Bearer ${LINE_TOKEN}`,
     },
     body: JSON.stringify({
       to: LINE_GROUP_ID,

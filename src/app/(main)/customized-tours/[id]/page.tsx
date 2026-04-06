@@ -8,9 +8,9 @@
 
 import { useState, useEffect, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { 
-  Plus, 
-  Trash2, 
+import {
+  Plus,
+  Trash2,
   MapPin,
   Search,
   X,
@@ -79,9 +79,7 @@ interface Country {
 }
 
 // 預設地區選項
-const REGIONS = [
-  '曼谷', '清邁', '清萊', '芭達雅', '普吉島', '蘇美島', '華欣', '大城', '其他',
-]
+const REGIONS = ['曼谷', '清邁', '清萊', '芭達雅', '普吉島', '蘇美島', '華欣', '大城', '其他']
 
 // 頁籤定義
 const TEMPLATE_TABS = [
@@ -89,31 +87,27 @@ const TEMPLATE_TABS = [
   { value: 'settings', label: '基本設定' },
 ] as const
 
-export default function CustomizedTourEditPage({ 
-  params 
-}: { 
-  params: Promise<{ id: string }> 
-}) {
+export default function CustomizedTourEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
   const { user } = useAuthStore()
-  
+
   const [template, setTemplate] = useState<CustomizedTour | null>(null)
   const [items, setItems] = useState<TemplateItem[]>([])
   const [attractions, setAttractions] = useState<Attraction[]>([])
   const [countries, setCountries] = useState<Country[]>([])
   const [loading, setLoading] = useState(true)
-  
+
   // 篩選
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCountry, setSelectedCountry] = useState<string>('all')
-  
+
   // 頁籤
   const [activeTab, setActiveTab] = useState<string>('items')
-  
+
   // 設定 Dialog
   const [settingsOpen, setSettingsOpen] = useState(false)
-  
+
   // 編輯表單
   const [editForm, setEditForm] = useState({
     name: '',
@@ -148,7 +142,9 @@ export default function CustomizedTourEditPage({
     // 載入模板內的景點
     const { data: itemsData } = await supabase
       .from('wishlist_template_items')
-      .select('id, template_id, attraction_id, display_order, name, image_url, description, region, category')
+      .select(
+        'id, template_id, attraction_id, display_order, name, image_url, description, region, category'
+      )
       .eq('template_id', id)
       .order('display_order')
 
@@ -193,18 +189,16 @@ export default function CustomizedTourEditPage({
       return
     }
 
-    const { error } = await supabase
-      .from('wishlist_template_items')
-      .insert({
-        template_id: id,
-        attraction_id: attraction.id,
-        name: attraction.name,
-        image_url: attraction.images?.[0] || null,
-        description: attraction.description,
-        region: null,
-        category: attraction.category,
-        display_order: items.length,
-      })
+    const { error } = await supabase.from('wishlist_template_items').insert({
+      template_id: id,
+      attraction_id: attraction.id,
+      name: attraction.name,
+      image_url: attraction.images?.[0] || null,
+      description: attraction.description,
+      region: null,
+      category: attraction.category,
+      display_order: items.length,
+    })
 
     if (error) {
       toast.error('新增失敗')
@@ -217,10 +211,7 @@ export default function CustomizedTourEditPage({
 
   // 刪除景點
   const handleDeleteItem = async (item: TemplateItem) => {
-    const { error } = await supabase
-      .from('wishlist_template_items')
-      .delete()
-      .eq('id', item.id)
+    const { error } = await supabase.from('wishlist_template_items').delete().eq('id', item.id)
 
     if (error) {
       toast.error('刪除失敗')
@@ -278,7 +269,7 @@ export default function CustomizedTourEditPage({
   // 發佈/取消發佈
   const handleTogglePublish = async () => {
     const newStatus = template?.status === 'published' ? 'draft' : 'published'
-    
+
     const { error } = await supabase
       .from('wishlist_templates')
       .update({ status: newStatus })
@@ -359,7 +350,11 @@ export default function CustomizedTourEditPage({
           </Button>
           {template?.status === 'published' && (
             <>
-              <Button variant="outline" size="sm" onClick={() => window.open(`/p/customized/${template?.slug}`, '_blank')}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(`/p/customized/${template?.slug}`, '_blank')}
+              >
                 <Eye className="w-4 h-4 mr-1" />
                 預覽
               </Button>
@@ -369,8 +364,8 @@ export default function CustomizedTourEditPage({
               </Button>
             </>
           )}
-          <Button 
-            size="sm" 
+          <Button
+            size="sm"
             variant={template?.status === 'published' ? 'outline' : 'default'}
             onClick={handleTogglePublish}
           >
@@ -409,11 +404,15 @@ export default function CustomizedTourEditPage({
                     <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
                       {index + 1}
                     </div>
-                    
+
                     {/* 圖片 */}
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                       {item.image_url ? (
-                        <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+                        <img
+                          src={item.image_url}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <ImageIcon className="w-6 h-6 text-muted-foreground/30" />
@@ -427,19 +426,23 @@ export default function CustomizedTourEditPage({
                       <div className="flex items-center gap-2 mt-1">
                         <Select
                           value={item.region || ''}
-                          onValueChange={(v) => handleUpdateRegion(item, v)}
+                          onValueChange={v => handleUpdateRegion(item, v)}
                         >
                           <SelectTrigger className="w-28 h-7 text-xs">
                             <SelectValue placeholder="選地區" />
                           </SelectTrigger>
                           <SelectContent>
                             {REGIONS.map(r => (
-                              <SelectItem key={r} value={r}>{r}</SelectItem>
+                              <SelectItem key={r} value={r}>
+                                {r}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                         {item.category && (
-                          <Badge variant="outline" className="text-xs">{item.category}</Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {item.category}
+                          </Badge>
                         )}
                       </div>
                     </div>
@@ -463,7 +466,7 @@ export default function CustomizedTourEditPage({
           <div className="w-1/2 overflow-y-auto p-6 bg-muted/30">
             <div className="mb-4 space-y-3">
               <h2 className="text-lg font-semibold">景點庫</h2>
-              
+
               {/* 國家篩選 */}
               <div className="flex gap-2">
                 <Select value={selectedCountry} onValueChange={setSelectedCountry}>
@@ -473,7 +476,9 @@ export default function CustomizedTourEditPage({
                   <SelectContent>
                     <SelectItem value="all">全部國家</SelectItem>
                     {countries.map(c => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -482,7 +487,7 @@ export default function CustomizedTourEditPage({
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={e => setSearchTerm(e.target.value)}
                     placeholder="搜尋景點..."
                     className="pl-10 bg-white"
                   />
@@ -503,15 +508,16 @@ export default function CustomizedTourEditPage({
             <div className="grid grid-cols-2 gap-3">
               {filteredAttractions.map(attraction => {
                 const isAdded = addedIds.has(attraction.id)
-                
+
                 return (
                   <div
                     key={attraction.id}
                     className={`
                       relative flex gap-3 p-3 bg-white border rounded-lg cursor-pointer transition-all
-                      ${isAdded 
-                        ? 'opacity-50 cursor-not-allowed border-morandi-green/30 bg-morandi-green/10'
-                        : 'hover:border-primary hover:shadow-md'
+                      ${
+                        isAdded
+                          ? 'opacity-50 cursor-not-allowed border-morandi-green/30 bg-morandi-green/10'
+                          : 'hover:border-primary hover:shadow-md'
                       }
                     `}
                     onClick={() => !isAdded && handleAddAttraction(attraction)}
@@ -528,7 +534,7 @@ export default function CustomizedTourEditPage({
                         <MapPin className="w-5 h-5 text-muted-foreground/30" />
                       </div>
                     )}
-                    
+
                     {/* 資訊 */}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{attraction.name}</p>
@@ -539,7 +545,10 @@ export default function CustomizedTourEditPage({
 
                     {/* 加入按鈕或已加入標記 */}
                     {isAdded ? (
-                      <Badge variant="outline" className="absolute top-2 right-2 text-xs bg-morandi-green/10 text-morandi-green border-morandi-green/30">
+                      <Badge
+                        variant="outline"
+                        className="absolute top-2 right-2 text-xs bg-morandi-green/10 text-morandi-green border-morandi-green/30"
+                      >
                         已加入
                       </Badge>
                     ) : (
@@ -572,7 +581,7 @@ export default function CustomizedTourEditPage({
               <Label className="text-base">客製化行程名稱 *</Label>
               <Input
                 value={editForm.name}
-                onChange={(e) => setEditForm(p => ({ ...p, name: e.target.value }))}
+                onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))}
                 placeholder="例：清邁精選景點"
                 className="text-lg"
               />
@@ -586,7 +595,7 @@ export default function CustomizedTourEditPage({
                 </span>
                 <Input
                   value={editForm.slug}
-                  onChange={(e) => setEditForm(p => ({ ...p, slug: e.target.value }))}
+                  onChange={e => setEditForm(p => ({ ...p, slug: e.target.value }))}
                   placeholder="chiang-mai"
                   className="rounded-l-none flex-1"
                 />
@@ -600,7 +609,7 @@ export default function CustomizedTourEditPage({
               <Label className="text-base">說明文字</Label>
               <Textarea
                 value={editForm.description}
-                onChange={(e) => setEditForm(p => ({ ...p, description: e.target.value }))}
+                onChange={e => setEditForm(p => ({ ...p, description: e.target.value }))}
                 placeholder="這個客製化行程包含哪些景點？給客戶看的簡介..."
                 rows={4}
               />
@@ -627,7 +636,7 @@ export default function CustomizedTourEditPage({
               <Label>名稱 *</Label>
               <Input
                 value={editForm.name}
-                onChange={(e) => setEditForm(p => ({ ...p, name: e.target.value }))}
+                onChange={e => setEditForm(p => ({ ...p, name: e.target.value }))}
                 placeholder="例：清邁精選景點"
               />
             </div>
@@ -635,10 +644,12 @@ export default function CustomizedTourEditPage({
             <div className="space-y-2">
               <Label>連結代碼</Label>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">/p/customized/</span>
+                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                  /p/customized/
+                </span>
                 <Input
                   value={editForm.slug}
-                  onChange={(e) => setEditForm(p => ({ ...p, slug: e.target.value }))}
+                  onChange={e => setEditForm(p => ({ ...p, slug: e.target.value }))}
                   placeholder="chiang-mai"
                   className="flex-1"
                 />
@@ -649,7 +660,7 @@ export default function CustomizedTourEditPage({
               <Label>說明</Label>
               <Textarea
                 value={editForm.description}
-                onChange={(e) => setEditForm(p => ({ ...p, description: e.target.value }))}
+                onChange={e => setEditForm(p => ({ ...p, description: e.target.value }))}
                 placeholder="精選清邁必去景點..."
                 rows={3}
               />
@@ -660,9 +671,7 @@ export default function CustomizedTourEditPage({
             <Button variant="outline" onClick={() => setSettingsOpen(false)}>
               取消
             </Button>
-            <Button onClick={handleSaveSettings}>
-              儲存
-            </Button>
+            <Button onClick={handleSaveSettings}>儲存</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -12,10 +12,15 @@ const AGENT_INFO: Record<string, { name: string; emoji: string; role: string }> 
 }
 
 // 模擬 AI 執行結果
-function generateResult(type: string, title: string, assignee: string, collaborators: string[]): string {
+function generateResult(
+  type: string,
+  title: string,
+  assignee: string,
+  collaborators: string[]
+): string {
   const agent = AGENT_INFO[assignee]
   const collabList = collaborators.map(id => AGENT_INFO[id]).filter(Boolean)
-  
+
   if (type === 'meeting') {
     const participants = [agent, ...collabList].map(a => `${a.emoji} ${a.name}`).join('、')
     return `📋 **會議結論**
@@ -30,7 +35,7 @@ function generateResult(type: string, title: string, assignee: string, collabora
 
 **下一步**：各自回到崗位執行分配的任務`
   }
-  
+
   if (type === 'research') {
     return `🔍 **研究報告**
 
@@ -44,7 +49,7 @@ function generateResult(type: string, title: string, assignee: string, collabora
 
 **建議**：可以開始實作`
   }
-  
+
   // development
   return `💻 **開發完成**
 
@@ -78,9 +83,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     logger.error('AI Workflow Execute Error:', error)
-    return NextResponse.json(
-      { ok: false, error: 'Failed to execute task' },
-      { status: 500 }
-    )
+    return NextResponse.json({ ok: false, error: 'Failed to execute task' }, { status: 500 })
   }
 }

@@ -134,8 +134,10 @@ export function SupplierDispatchPage() {
             notes: (r.notes as string | null) || null,
             dispatch_status:
               (replyContent?.dispatch_status as 'pending' | 'assigned' | 'completed') || 'pending',
-            assigned_driver_id: replyContent?.driver_id || (r.assigned_vehicle_id as string | null) || null,
-            assigned_driver_name: replyContent?.driver_name || (r.assignee_name as string | null) || null,
+            assigned_driver_id:
+              replyContent?.driver_id || (r.assigned_vehicle_id as string | null) || null,
+            assigned_driver_name:
+              replyContent?.driver_name || (r.assignee_name as string | null) || null,
           }
         })
 
@@ -184,7 +186,8 @@ export function SupplierDispatchPage() {
         .eq('id', selectedRequest.id)
         .single()
 
-      const existingContent = ((currentData as unknown as Record<string, unknown>)?.reply_content || {}) as Record<string, unknown>
+      const existingContent = ((currentData as unknown as Record<string, unknown>)?.reply_content ||
+        {}) as Record<string, unknown>
 
       // 更新 reply_content 和 assignee_name（保留現有資料）
       const { error } = await supabase

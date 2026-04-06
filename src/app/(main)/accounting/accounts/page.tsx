@@ -27,9 +27,9 @@ interface Account {
 
 // 根據科目代碼計算層級（用於縮排）
 function getAccountLevel(code: string): number {
-  if (code.length === 1) return 0  // 大類：1, 2, 3...
-  if (code.length === 2) return 1  // 中類：11, 12, 21...
-  if (code.length === 4) return 2  // 明細：1100, 1110...
+  if (code.length === 1) return 0 // 大類：1, 2, 3...
+  if (code.length === 2) return 1 // 中類：11, 12, 21...
+  if (code.length === 4) return 2 // 明細：1100, 1110...
   if (code.includes('-')) return 3 // 子明細：1100-1, 1100-2...
   return 2
 }
@@ -92,12 +92,14 @@ export default function AccountsPage() {
     // 找出所有以 parentCode- 開頭的子科目
     const children = accounts.filter(a => a.code.startsWith(parentCode + '-'))
     if (children.length === 0) return `${parentCode}-1`
-    
+
     // 找出最大的編號
-    const maxNum = Math.max(...children.map(c => {
-      const match = c.code.match(new RegExp(`^${parentCode}-(\\d+)$`))
-      return match ? parseInt(match[1]) : 0
-    }))
+    const maxNum = Math.max(
+      ...children.map(c => {
+        const match = c.code.match(new RegExp(`^${parentCode}-(\\d+)$`))
+        return match ? parseInt(match[1]) : 0
+      })
+    )
     return `${parentCode}-${maxNum + 1}`
   }
 
@@ -119,13 +121,20 @@ export default function AccountsPage() {
     try {
       const { data, error } = await supabase
         .from('chart_of_accounts')
-        .select('id, code, name, account_type, description, is_system_locked, is_active, workspace_id, parent_id, created_at, updated_at')
+        .select(
+          'id, code, name, account_type, description, is_system_locked, is_active, workspace_id, parent_id, created_at, updated_at'
+        )
         .eq('workspace_id', user.workspace_id)
         .order('code', { ascending: true })
 
       if (error) throw error
       // 補上 is_favorite 預設值（DB 可能沒有這個欄位）
-      setAccounts((data || []).map(d => ({ ...d, is_favorite: (d as Record<string, unknown>).is_favorite as boolean ?? false })))
+      setAccounts(
+        (data || []).map(d => ({
+          ...d,
+          is_favorite: ((d as Record<string, unknown>).is_favorite as boolean) ?? false,
+        }))
+      )
     } catch (error) {
       logger.error('載入科目失敗:', error)
     } finally {
@@ -194,15 +203,12 @@ export default function AccountsPage() {
         const indent = level * 20 // 每層縮排 20px
         const hasChild = hasChildren(row.id)
         const isExpanded = expandedIds.has(row.id)
-        
+
         return (
-          <div 
-            className="flex items-center"
-            style={{ paddingLeft: `${indent}px` }}
-          >
+          <div className="flex items-center" style={{ paddingLeft: `${indent}px` }}>
             {hasChild ? (
               <button
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation()
                   toggleExpand(row.id)
                 }}
@@ -217,7 +223,7 @@ export default function AccountsPage() {
             ) : (
               <span className="w-5" /> // 占位符，保持對齊
             )}
-            <span 
+            <span
               className={`font-medium ${level === 0 ? 'text-base font-bold' : level === 1 ? 'font-semibold' : ''}`}
             >
               {row.name}
@@ -270,10 +276,10 @@ export default function AccountsPage() {
       width: '120px',
       render: (_: unknown, row: Account) => (
         <div className="flex gap-1">
-          <Button 
-            size="sm" 
-            variant="ghost" 
-            onClick={() => handleAddChild(row)} 
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => handleAddChild(row)}
             className="gap-1 px-2"
             title="新增子科目"
           >
@@ -302,8 +308,8 @@ export default function AccountsPage() {
         searchable={false}
         headerActions={
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={() => {
                 // 展開所有
@@ -313,11 +319,7 @@ export default function AccountsPage() {
             >
               全部展開
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setExpandedIds(new Set())}
-            >
+            <Button variant="outline" size="sm" onClick={() => setExpandedIds(new Set())}>
               全部折疊
             </Button>
             <Button onClick={handleCreate} className="gap-2">

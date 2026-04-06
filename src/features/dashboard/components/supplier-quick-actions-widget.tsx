@@ -2,7 +2,7 @@
 
 /**
  * SupplierQuickActionsWidget - 供應商快捷入口
- * 
+ *
  * 顯示給供應商（transportation/dmc）的快捷操作
  */
 
@@ -11,14 +11,7 @@ import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  ClipboardList, 
-  TrendingUp, 
-  Truck, 
-  Users,
-  ArrowRight,
-  Inbox
-} from 'lucide-react'
+import { ClipboardList, TrendingUp, Truck, Users, ArrowRight, Inbox } from 'lucide-react'
 import { useAuthStore } from '@/stores'
 import { supabase } from '@/lib/supabase/client'
 
@@ -58,8 +51,8 @@ export function SupplierQuickActionsWidget() {
   }, [user?.workspace_id])
 
   // 判斷是否為供應商
-  const isSupplier = 
-    user?.workspace_type === 'transportation' || 
+  const isSupplier =
+    user?.workspace_type === 'transportation' ||
     user?.workspace_type === 'dmc' ||
     user?.workspace_type === 'vehicle_supplier' ||
     user?.workspace_type === 'guide_supplier'
@@ -77,22 +70,22 @@ export function SupplierQuickActionsWidget() {
       href: '/tours',
       icon: <Inbox className="h-5 w-5" />,
       badge: pendingRequests > 0 ? pendingRequests : undefined,
-      badgeColor: 'destructive'
+      badgeColor: 'destructive',
     },
     {
       id: 'finance',
       label: '收款管理',
       description: '查看應收帳款',
       href: '/finance/payments',
-      icon: <TrendingUp className="h-5 w-5" />
+      icon: <TrendingUp className="h-5 w-5" />,
     },
     {
       id: 'hr',
       label: '人員管理',
       description: '管理員工資料',
       href: '/hr',
-      icon: <Users className="h-5 w-5" />
-    }
+      icon: <Users className="h-5 w-5" />,
+    },
   ]
 
   // 車行專屬：派單管理
@@ -102,7 +95,7 @@ export function SupplierQuickActionsWidget() {
       label: '派單管理',
       description: '分配司機與車輛',
       href: '/supplier/dispatch',
-      icon: <Truck className="h-5 w-5" />
+      icon: <Truck className="h-5 w-5" />,
     })
   }
 
@@ -111,9 +104,7 @@ export function SupplierQuickActionsWidget() {
       <div className="bg-morandi-container px-4 py-3 border-b border-morandi-gold/20 flex-shrink-0">
         <div className="flex items-center gap-2">
           <ClipboardList className="h-4 w-4 text-morandi-gold" />
-          <h3 className="font-semibold text-sm text-morandi-primary">
-            供應商專區
-          </h3>
+          <h3 className="font-semibold text-sm text-morandi-primary">供應商專區</h3>
           {pendingRequests > 0 && (
             <Badge variant="destructive" className="text-xs">
               {pendingRequests} 待處理
@@ -136,19 +127,14 @@ export function SupplierQuickActionsWidget() {
                   {action.icon}
                 </div>
                 {action.badge && (
-                  <Badge 
-                    variant={action.badgeColor || 'default'} 
-                    className="text-xs"
-                  >
+                  <Badge variant={action.badgeColor || 'default'} className="text-xs">
                     {action.badge}
                   </Badge>
                 )}
               </div>
               <div className="text-left mt-1">
                 <div className="font-medium text-sm">{action.label}</div>
-                <div className="text-xs text-muted-foreground">
-                  {action.description}
-                </div>
+                <div className="text-xs text-muted-foreground">{action.description}</div>
               </div>
             </Button>
           ))}
@@ -156,9 +142,7 @@ export function SupplierQuickActionsWidget() {
 
         {/* 快速連結提示 */}
         <div className="mt-4 pt-3 border-t border-border">
-          <p className="text-xs text-muted-foreground text-center">
-            💡 所有功能都在側邊選單中
-          </p>
+          <p className="text-xs text-muted-foreground text-center">💡 所有功能都在側邊選單中</p>
         </div>
       </div>
     </Card>

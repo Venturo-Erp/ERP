@@ -228,10 +228,11 @@ export function usePassportUpload({
           const custId = member.customer_id as string
           const pData: PassportDataForConflict = {
             passport_number: item.customer.passport_number || null,
-            passport_name:
-              item.customer.passport_name || item.customer.english_name || null,
+            passport_name: item.customer.passport_name || item.customer.english_name || null,
             passport_expiry: item.customer.passport_expiry || null,
-            passport_image_url: (member as Record<string, unknown>).passport_image_url as string | null,
+            passport_image_url: (member as Record<string, unknown>).passport_image_url as
+              | string
+              | null,
             birth_date: item.customer.birth_date || null,
             gender:
               item.customer.sex === COMP_ORDERS_LABELS.男

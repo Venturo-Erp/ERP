@@ -2,7 +2,7 @@
 
 /**
  * useAccommodationSegments - 讀取行程表住宿並合併成區段
- * 
+ *
  * 邏輯：連續住同一家飯店的晚數合併成一個區段
  * 例如：第 1 晚 A 飯店、第 2-4 晚 B 飯店 → 2 個區段
  */
@@ -54,19 +54,19 @@ function mergeIntoSegments(accommodations: AccommodationItem[]): AccommodationSe
 
   // 按 day_number 排序
   const sorted = [...accommodations].sort((a, b) => a.day_number - b.day_number)
-  
+
   const segments: AccommodationSegment[] = []
   let currentSegment: AccommodationSegment | null = null
   let lastHotelName = ''
 
   for (const item of sorted) {
     let hotelName = normalizeHotelName(item.title)
-    
+
     // 「同上」沿用前一天的飯店名稱
     if (hotelName === '同上' && lastHotelName) {
       hotelName = lastHotelName
     }
-    
+
     const nightNumber = item.day_number // day_number 就是晚數
 
     if (

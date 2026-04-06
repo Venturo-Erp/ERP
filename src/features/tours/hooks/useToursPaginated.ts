@@ -161,14 +161,10 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
   useEffect(() => {
     const channel = supabase
       .channel('realtime:tours-paginated')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'tours' },
-        () => {
-          mutateSelf()
-          mutate('tours')
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tours' }, () => {
+        mutateSelf()
+        mutate('tours')
+      })
       .subscribe()
 
     return () => {
@@ -352,7 +348,9 @@ export function useTourDetailsPaginated(tourId: string | null) {
 
       const { data, error: queryError } = await supabase
         .from('tours')
-        .select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by')
+        .select(
+          'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
+        )
         .eq('id', tourId)
         .single()
 

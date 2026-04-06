@@ -18,7 +18,16 @@ interface TeamConfirmationSheetProps {
     id: string
     request_type: string
     supplier_name: string
-    items: Array<{ room_type?: string; quantity?: number; check_in_date?: string; meal_time?: string; meal_content?: string; name?: string; activity_name?: string; activity_time?: string; }>
+    items: Array<{
+      room_type?: string
+      quantity?: number
+      check_in_date?: string
+      meal_time?: string
+      meal_content?: string
+      name?: string
+      activity_name?: string
+      activity_time?: string
+    }>
     note?: string
     sent_to?: string
     supplier_response?: Record<string, unknown>
@@ -56,7 +65,6 @@ export function TeamConfirmationSheet({
       // 從 items 的日期推斷
       const firstItem = req.items[0]
       if (firstItem.check_in_date || firstItem.meal_time || firstItem.activity_time) {
-       
         day = 1 // 暫時預設 Day 1
       }
     }
@@ -93,9 +101,17 @@ export function TeamConfirmationSheet({
     draft: { label: '草稿', bgClass: 'bg-morandi-container', textClass: 'text-morandi-primary' },
     sent: { label: '已發送', bgClass: 'bg-status-info/10', textClass: 'text-status-info' },
     replied: { label: '已回覆', bgClass: 'bg-status-warning/10', textClass: 'text-status-warning' },
-    confirmed: { label: '✓ 已確認', bgClass: 'bg-morandi-green/10', textClass: 'text-morandi-green' },
+    confirmed: {
+      label: '✓ 已確認',
+      bgClass: 'bg-morandi-green/10',
+      textClass: 'text-morandi-green',
+    },
     cancelled: { label: '已取消', bgClass: 'bg-morandi-red/10', textClass: 'text-morandi-red' },
-    outdated: { label: '需更新', bgClass: 'bg-status-warning-bg', textClass: 'text-status-warning' },
+    outdated: {
+      label: '需更新',
+      bgClass: 'bg-status-warning-bg',
+      textClass: 'text-status-warning',
+    },
   }
 
   // 統計各狀態數量
@@ -110,7 +126,10 @@ export function TeamConfirmationSheet({
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent level={1} className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col print:max-w-none print:h-auto">
+      <DialogContent
+        level={1}
+        className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col print:max-w-none print:h-auto"
+      >
         <DialogHeader className="print:hidden">
           <DialogTitle>需求追蹤表（領隊核對用）</DialogTitle>
         </DialogHeader>
@@ -120,7 +139,9 @@ export function TeamConfirmationSheet({
           <div className="print:p-8">
             {/* 標頭 */}
             <div className="mb-6 pb-4 border-b-2 border-[var(--morandi-gold)]">
-              <h1 className="text-2xl font-bold text-[var(--morandi-gold)] mb-2">需求追蹤表（領隊核對用）</h1>
+              <h1 className="text-2xl font-bold text-[var(--morandi-gold)] mb-2">
+                需求追蹤表（領隊核對用）
+              </h1>
               <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
                 <div>
                   <span className="font-medium">團號：</span>
@@ -183,7 +204,10 @@ export function TeamConfirmationSheet({
                       const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.draft
 
                       return (
-                        <div key={req.id} className="border-l-4 border-[var(--morandi-gold)]/30 pl-4">
+                        <div
+                          key={req.id}
+                          className="border-l-4 border-[var(--morandi-gold)]/30 pl-4"
+                        >
                           <div className="flex items-start justify-between mb-2">
                             <div>
                               <span className="font-semibold text-[var(--morandi-gold)]">
@@ -204,7 +228,9 @@ export function TeamConfirmationSheet({
                               {req.items.map((item, idx) => (
                                 <div key={idx} className="text-morandi-primary">
                                   • {String(item.room_type)} × {Number(item.quantity)} 間
-                                  {item.check_in_date ? ` (入住 ${String(item.check_in_date)})` : null}
+                                  {item.check_in_date
+                                    ? ` (入住 ${String(item.check_in_date)})`
+                                    : null}
                                 </div>
                               ))}
                             </div>
@@ -214,7 +240,8 @@ export function TeamConfirmationSheet({
                             <div className="text-sm space-y-1">
                               {req.items.map((item, idx) => (
                                 <div key={idx} className="text-morandi-primary">
-                                  • {String(item.meal_time || '')} {String(item.meal_content || item.name || '')}
+                                  • {String(item.meal_time || '')}{' '}
+                                  {String(item.meal_content || item.name || '')}
                                   {item.quantity ? ` (${Number(item.quantity)} 人)` : null}
                                 </div>
                               ))}
@@ -243,10 +270,20 @@ export function TeamConfirmationSheet({
                           {req.supplier_response && (
                             <div className="mt-2 text-sm text-morandi-secondary">
                               {(req.supplier_response as Record<string, unknown>)?.contact ? (
-                                <div>聯絡人：{String((req.supplier_response as Record<string, unknown>)?.contact)}</div>
+                                <div>
+                                  聯絡人：
+                                  {String(
+                                    (req.supplier_response as Record<string, unknown>)?.contact
+                                  )}
+                                </div>
                               ) : null}
                               {(req.supplier_response as Record<string, unknown>)?.phone ? (
-                                <div>電話：{String((req.supplier_response as Record<string, unknown>)?.phone)}</div>
+                                <div>
+                                  電話：
+                                  {String(
+                                    (req.supplier_response as Record<string, unknown>)?.phone
+                                  )}
+                                </div>
                               ) : null}
                             </div>
                           )}

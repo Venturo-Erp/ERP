@@ -39,16 +39,16 @@ export const CompanyAssetsPage: React.FC = () => {
 
   // 判斷是否為管理者或會計
   // 管理員或有 accounting 權限的可以存取
-  const isAdminOrAccountant =
-    isAdmin ||
-    user?.permissions?.includes('accounting')
+  const isAdminOrAccountant = isAdmin || user?.permissions?.includes('accounting')
 
   // 載入資料
   const fetchAssets = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('company_assets')
-        .select('id, name, description, category, folder_id, file_url, file_type, file_size, tags, workspace_id, created_at, created_by, updated_at')
+        .select(
+          'id, name, description, category, folder_id, file_url, file_type, file_size, tags, workspace_id, created_at, created_by, updated_at'
+        )
         .order('created_at', { ascending: false })
         .limit(500)
 

@@ -1,20 +1,20 @@
 /**
  * 🎯 行程管理資料載入器（進階功能）
- * 
+ *
  * **功能說明**：
  * 行程管理是「開團/報價/模板」的進階功能，用於製作精美的行程表。
- * 
+ *
  * **使用流程**：
  * 1. 在旅遊團模組建立團（填日期、國家、天數）
  * 2. 點「行程」按鈕 → 自動開啟行程管理
  * 3. 自動帶入：日期、天數、國家、城市、航班資訊
  * 4. 手動編輯：每日行程、住宿、餐飲、景點
- * 
+ *
  * **三種載入模式**：
  * - 編輯現有行程：優先從 itinerary_id 載入（含完整 daily_itinerary JSON）
  * - 從旅遊團建立：從 tour_id 載入基本資料 → 產生空白 daily_itinerary
  * - 從報價單匯入：從 from_quote=true 載入參數（餐飲、住宿、活動）
- * 
+ *
  * **自動帶入的欄位**：
  * - 標題：tour.name
  * - 日期：tour.departure_date / return_date
@@ -22,7 +22,7 @@
  * - 國家/城市：tour.country_id / airport_code
  * - 航班：tour.outbound_flight / return_flight
  * - 團號：tour.code（例如 TYO260421A）
- * 
+ *
  * **台灣團特殊處理**：
  * - 預設 flightStyle = 'none'（無航班）
  * - 集合地點：空白（不是機場）
@@ -97,41 +97,44 @@ export function useItineraryDataLoader({
   const isFetchingRef = useRef(false)
 
   // 用 attraction_id 從景點庫補上描述和圖片
-  const enrichActivities = useCallback(async (dailyItinerary: DailyItinerary[]): Promise<DailyItinerary[]> => {
-    if (!dailyItinerary || dailyItinerary.length === 0) return dailyItinerary
+  const enrichActivities = useCallback(
+    async (dailyItinerary: DailyItinerary[]): Promise<DailyItinerary[]> => {
+      if (!dailyItinerary || dailyItinerary.length === 0) return dailyItinerary
 
-    const attractionIds = new Set<string>()
-    for (const day of dailyItinerary) {
-      for (const activity of day.activities || []) {
-        if (activity.attraction_id && !activity.description) {
-          attractionIds.add(activity.attraction_id)
+      const attractionIds = new Set<string>()
+      for (const day of dailyItinerary) {
+        for (const activity of day.activities || []) {
+          if (activity.attraction_id && !activity.description) {
+            attractionIds.add(activity.attraction_id)
+          }
         }
       }
-    }
-    if (attractionIds.size === 0) return dailyItinerary
+      if (attractionIds.size === 0) return dailyItinerary
 
-    const { data: attractions } = await supabase
-      .from('attractions')
-      .select('id, description, thumbnail, images')
-      .in('id', Array.from(attractionIds))
+      const { data: attractions } = await supabase
+        .from('attractions')
+        .select('id, description, thumbnail, images')
+        .in('id', Array.from(attractionIds))
 
-    if (!attractions) return dailyItinerary
+      if (!attractions) return dailyItinerary
 
-    const attrMap = new Map(attractions.map(a => [a.id, a]))
-    return dailyItinerary.map(day => ({
-      ...day,
-      activities: day.activities?.map(activity => {
-        if (!activity.attraction_id) return activity
-        const attr = attrMap.get(activity.attraction_id)
-        if (!attr) return activity
-        return {
-          ...activity,
-          description: activity.description || attr.description || '',
-          image: activity.image || attr.thumbnail || (attr.images as string[])?.[0] || '',
-        }
-      }),
-    }))
-  }, [])
+      const attrMap = new Map(attractions.map(a => [a.id, a]))
+      return dailyItinerary.map(day => ({
+        ...day,
+        activities: day.activities?.map(activity => {
+          if (!activity.attraction_id) return activity
+          const attr = attrMap.get(activity.attraction_id)
+          if (!attr) return activity
+          return {
+            ...activity,
+            description: activity.description || attr.description || '',
+            image: activity.image || attr.thumbnail || (attr.images as string[])?.[0] || '',
+          }
+        }),
+      }))
+    },
+    []
+  )
 
   // 載入行程表資料的輔助函數
   const loadItineraryData = useCallback(
@@ -165,7 +168,7 @@ export function useItineraryDataLoader({
         priceNote: itinerary.price_note || '',
         // 🎯 SSOT：country 和 city（機場代碼）從 tours 表繼承
         country: itinerary.country || '',
-        city: itinerary.city || '',  // 機場代碼，如 CNX、FUK
+        city: itinerary.city || '', // 機場代碼，如 CNX、FUK
         status: itinerary.status || ITINERARY_DATA_LOADER_LABELS.STATUS_PROPOSAL,
         outboundFlight: (Array.isArray(itinerary.outbound_flight)
           ? itinerary.outbound_flight[0]
@@ -217,16 +220,18 @@ export function useItineraryDataLoader({
         hotels: (itinerary.hotels as HotelInfo[]) || [],
         showHotels: itinerary.show_hotels || false,
         itinerarySubtitle: itinerary.itinerary_subtitle || '',
-        dailyItinerary: await enrichActivities((itinerary.daily_itinerary || []).map(day => {
-          const d = day as DailyItinerary
-          return {
-            ...d,
-            activities: Array.isArray(d.activities) ? d.activities : [],
-            recommendations: Array.isArray(d.recommendations) ? d.recommendations : [],
-            images: Array.isArray(d.images) ? d.images : [],
-            meals: d.meals || { breakfast: '', lunch: '', dinner: '' },
-          }
-        })),
+        dailyItinerary: await enrichActivities(
+          (itinerary.daily_itinerary || []).map(day => {
+            const d = day as DailyItinerary
+            return {
+              ...d,
+              activities: Array.isArray(d.activities) ? d.activities : [],
+              recommendations: Array.isArray(d.recommendations) ? d.recommendations : [],
+              images: Array.isArray(d.images) ? d.images : [],
+              meals: d.meals || { breakfast: '', lunch: '', dinner: '' },
+            }
+          })
+        ),
         showPricingDetails: itinerary.pricing_details?.show_pricing_details || false,
         pricingDetails: itinerary.pricing_details || {
           show_pricing_details: false,
@@ -284,7 +289,14 @@ export function useItineraryDataLoader({
       hasInitializedRef.current = true
       lastIdRef.current = itinerary.id
     },
-    [setTourData, setCurrentVersionIndex, setQuoteTierPricings, setLoading, quotes, enrichActivities]
+    [
+      setTourData,
+      setCurrentVersionIndex,
+      setQuoteTierPricings,
+      setLoading,
+      quotes,
+      enrichActivities,
+    ]
   )
 
   useEffect(() => {
@@ -308,7 +320,7 @@ export function useItineraryDataLoader({
           logger.log('[ItineraryDataLoader] 等待 countries 載入...')
           return
         }
-        
+
         logger.log('[ItineraryDataLoader] 嘗試載入行程, itineraryId:', itineraryId)
 
         // 總是從資料庫載入最新資料（避免 SWR 快取過期問題）
@@ -320,7 +332,8 @@ export function useItineraryDataLoader({
             // JOIN tours 表，從核心表讀取 SSOT 資料
             const { data, error } = await supabase
               .from('itineraries')
-              .select(`
+              .select(
+                `
                 *,
                 tour:tours (
                   airport_code,
@@ -328,7 +341,8 @@ export function useItineraryDataLoader({
                   outbound_flight,
                   return_flight
                 )
-              `)
+              `
+              )
               .eq('id', itineraryId)
               .single()
 
@@ -341,9 +355,9 @@ export function useItineraryDataLoader({
                 '[ItineraryDataLoader] daily_itinerary 長度:',
                 (data.daily_itinerary as unknown[])?.length || 0
               )
-              
+
               // 🎯 SSOT：從 tour 繼承 airport_code、country_id、航班資訊
-              const tourData = data.tour as { 
+              const tourData = data.tour as {
                 airport_code?: string
                 country_id?: string
                 outbound_flight?: unknown
@@ -351,34 +365,39 @@ export function useItineraryDataLoader({
               } | null
               const airportCode = tourData?.airport_code || ''
               const countryId = tourData?.country_id || ''
-              
+
               // 航班資料（可能是陣列，取第一筆）
-              const tourOutboundFlight = Array.isArray(tourData?.outbound_flight) 
-                ? tourData.outbound_flight[0] 
+              const tourOutboundFlight = Array.isArray(tourData?.outbound_flight)
+                ? tourData.outbound_flight[0]
                 : tourData?.outbound_flight
-              const tourReturnFlight = Array.isArray(tourData?.return_flight) 
-                ? tourData.return_flight[0] 
+              const tourReturnFlight = Array.isArray(tourData?.return_flight)
+                ? tourData.return_flight[0]
                 : tourData?.return_flight
-              
+
               // 查詢國家名稱（countries 已確保載入完成）
               let countryName = ''
               if (countryId) {
                 const country = countries.find(c => c.id === countryId || c.code === countryId)
                 countryName = country?.name || ''
               }
-              
-              logger.log('[ItineraryDataLoader] SSOT - airport_code:', airportCode, 'country:', countryName)
-              
+
+              logger.log(
+                '[ItineraryDataLoader] SSOT - airport_code:',
+                airportCode,
+                'country:',
+                countryName
+              )
+
               // 合併資料：用 tour 的值覆蓋 itinerary 的舊欄位
               const itinerary = {
                 ...data,
-                city: airportCode,  // city 欄位現在存機場代碼
+                city: airportCode, // city 欄位現在存機場代碼
                 country: countryName,
                 // 🎯 SSOT：航班從 tours 表繼承
                 outbound_flight: tourOutboundFlight || data.outbound_flight,
                 return_flight: tourReturnFlight || data.return_flight,
               } as unknown as Itinerary
-              
+
               await loadItineraryData(itinerary)
 
               // 檢查交接狀態（如果有關聯的 tour）
@@ -556,11 +575,7 @@ export function useItineraryDataLoader({
         itinerarySubtitle: `${days}天${days - 1}夜精彩旅程規劃`,
         // 🎯 產生空白的每日行程（Day 1, Day 2, ...）
         // 如果旅遊團已有 daily_itinerary，會優先使用（編輯模式）
-        dailyItinerary: createDailyItineraryFromTour(
-          tour,
-          days,
-          departureDate
-        ),
+        dailyItinerary: createDailyItineraryFromTour(tour, days, departureDate),
       })
 
       setLoading(false)
@@ -595,19 +610,23 @@ function createDailyItineraryFromTour(
   departureDate: Date
 ): DailyItinerary[] {
   const dailyItinerary: DailyItinerary[] = []
-  
+
   // 如果旅遊團已有 daily_itinerary，直接使用
   const tourWithDailyItinerary = tour as Tour & { daily_itinerary?: DailyItinerary[] }
-  if (tourWithDailyItinerary.daily_itinerary && Array.isArray(tourWithDailyItinerary.daily_itinerary) && tourWithDailyItinerary.daily_itinerary.length > 0) {
+  if (
+    tourWithDailyItinerary.daily_itinerary &&
+    Array.isArray(tourWithDailyItinerary.daily_itinerary) &&
+    tourWithDailyItinerary.daily_itinerary.length > 0
+  ) {
     return tourWithDailyItinerary.daily_itinerary
   }
-  
+
   // 否則生成空白行程（只帶標題）
   for (let i = 0; i < days; i++) {
     const dayNum = i + 1
     const currentDate = new Date(departureDate)
     currentDate.setDate(currentDate.getDate() + i)
-    
+
     dailyItinerary.push({
       dayLabel: `Day ${dayNum}`,
       date: formatDateCompactPadded(currentDate),
@@ -625,7 +644,7 @@ function createDailyItineraryFromTour(
       accommodation: '',
     })
   }
-  
+
   return dailyItinerary
 }
 

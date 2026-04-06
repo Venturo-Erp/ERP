@@ -4,13 +4,10 @@ import { createApiClient } from '@/lib/supabase/api-client'
 /**
  * 合約 PDF 下載 API
  * GET /api/contracts/[id]/pdf
- * 
+ *
  * 回傳合約的 PDF 版本（含簽名）
  */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
 
   try {
@@ -19,27 +16,23 @@ export async function GET(
     // 1. 取得合約資料（RLS 自動過濾）
     const { data: contract, error } = await supabase
       .from('contracts')
-      .select(`
+      .select(
+        `
         *,
         tour:tours(code, name, departure_date, return_date),
         order:orders(code, customer_name)
-      `)
+      `
+      )
       .eq('id', id)
       .single()
 
     if (error || !contract) {
-      return NextResponse.json(
-        { error: '找不到合約' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: '找不到合約' }, { status: 404 })
     }
 
     // 2. 檢查是否已簽署
     if (contract.status !== 'signed' && contract.status !== 'completed') {
-      return NextResponse.json(
-        { error: '合約尚未簽署' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: '合約尚未簽署' }, { status: 400 })
     }
 
     // 3. 產生 HTML 內容
@@ -53,10 +46,7 @@ export async function GET(
       },
     })
   } catch {
-    return NextResponse.json(
-      { error: '產生 PDF 失敗' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: '產生 PDF 失敗' }, { status: 500 })
   }
 }
 
@@ -194,11 +184,15 @@ ${contract.content || '（無內容）'}
     </div>
   </div>
 
-  ${signatures && signatures.length > 0 ? `
+  ${
+    signatures && signatures.length > 0
+      ? `
   <div class="section">
     <div class="section-title">簽署</div>
     <div class="signatures">
-      ${signatures.map(sig => `
+      ${signatures
+        .map(
+          sig => `
         <div class="signature-box">
           <img src="${sig.signature_data}" alt="簽名" />
           <div class="signature-name">${sig.name}</div>
@@ -206,10 +200,14 @@ ${contract.content || '（無內容）'}
             ${formatDateTime(sig.signed_at)}
           </div>
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
   </div>
-  ` : ''}
+  `
+      : ''
+  }
 
   <div class="footer">
     <p>本合約由 Venturo ERP 系統產生</p>

@@ -8,7 +8,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: { persistSession: false }
+  auth: { persistSession: false },
 })
 
 const DEFAULT_ROLES = [
@@ -129,7 +129,17 @@ async function createDefaultRoles() {
       // 業務權限
       else if (roleTemplate.name === '業務') {
         const salesPermissions = PERMISSION_ROUTES.filter(route =>
-          ['/tours', '/orders', '/quotes', '/customers', '/calendar', '/channel', '/todos', '/itinerary', '/finance/payments'].includes(route)
+          [
+            '/tours',
+            '/orders',
+            '/quotes',
+            '/customers',
+            '/calendar',
+            '/channel',
+            '/todos',
+            '/itinerary',
+            '/finance/payments',
+          ].includes(route)
         ).map(route => ({
           workspace_id: workspace.id,
           role_id: role.id,
@@ -144,7 +154,19 @@ async function createDefaultRoles() {
       // 會計權限
       else if (roleTemplate.name === '會計') {
         const accountantPermissions = PERMISSION_ROUTES.filter(route =>
-          ['/finance/payments', '/finance/requests', '/finance/treasury', '/accounting', '/tours', '/orders', '/customers', '/database', '/calendar', '/channel', '/todos'].includes(route)
+          [
+            '/finance/payments',
+            '/finance/requests',
+            '/finance/treasury',
+            '/accounting',
+            '/tours',
+            '/orders',
+            '/customers',
+            '/database',
+            '/calendar',
+            '/channel',
+            '/todos',
+          ].includes(route)
         ).map(route => ({
           workspace_id: workspace.id,
           role_id: role.id,

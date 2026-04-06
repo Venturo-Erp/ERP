@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createApiClient, getCurrentWorkspaceId, createServiceClient } from '@/lib/supabase/api-client'
+import {
+  createApiClient,
+  getCurrentWorkspaceId,
+  createServiceClient,
+} from '@/lib/supabase/api-client'
 
 /**
  * GET /api/permissions/features
  * 取得當前租戶的功能權限
- * 
+ *
  * 特殊：可傳 workspace_id 查詢其他租戶（需 super admin）
  */
 export async function GET(request: NextRequest) {
   const queryWorkspaceId = request.nextUrl.searchParams.get('workspace_id')
-  
+
   // 如果指定了 workspace_id，用 service client（super admin 操作）
   if (queryWorkspaceId) {
     const serviceSupabase = createServiceClient()
@@ -26,9 +30,7 @@ export async function GET(request: NextRequest) {
 
   // 否則取得當前租戶的功能（RLS 自動過濾）
   const supabase = await createApiClient()
-  const { data, error } = await supabase
-    .from('workspace_features')
-    .select('feature_code, enabled')
+  const { data, error } = await supabase.from('workspace_features').select('feature_code, enabled')
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
@@ -40,7 +42,7 @@ export async function GET(request: NextRequest) {
 /**
  * PUT /api/permissions/features
  * 更新租戶的功能權限（覆蓋式）
- * 
+ *
  * 這是 super admin 操作，需要用 service client
  */
 export async function PUT(request: NextRequest) {
@@ -66,7 +68,7 @@ export async function PUT(request: NextRequest) {
       .from('workspaces')
       .update({ premium_enabled })
       .eq('id', targetWorkspaceId)
-    
+
     if (wsError) {
       return NextResponse.json({ error: wsError.message }, { status: 500 })
     }

@@ -21,7 +21,9 @@ export default async function AccommodationQuotePage({
   // 查詢需求單
   const { data: request } = await supabase
     .from('tour_requests')
-    .select('id, tour_id, supplier_name, supplier_response, replied_at, note, items, status, request_type')
+    .select(
+      'id, tour_id, supplier_name, supplier_response, replied_at, note, items, status, request_type'
+    )
     .eq('id', requestId)
     .eq('tour_id', tourId)
     .single()
@@ -70,7 +72,14 @@ export default async function AccommodationQuotePage({
 
   // 判斷是否已提交
   const isSubmitted = request.supplier_response && request.replied_at
-  const quoteData = request.supplier_response as { submitted_at?: string; contact?: string; phone?: string; totalCost?: number; rooms?: Array<{ roomType?: string; quantity?: number; unitPrice?: number }>; notes?: string } | null
+  const quoteData = request.supplier_response as {
+    submitted_at?: string
+    contact?: string
+    phone?: string
+    totalCost?: number
+    rooms?: Array<{ roomType?: string; quantity?: number; unitPrice?: number }>
+    notes?: string
+  } | null
 
   // 計算天數
   const totalDays =
@@ -149,7 +158,14 @@ export default async function AccommodationQuotePage({
                 </summary>
                 <div className="p-4 space-y-3 border-t border-border">
                   {history.map((h: (typeof history)[number]) => {
-                    const hQuote = h.supplier_response as { submitted_at?: string; contact?: string; phone?: string; totalCost?: number; rooms?: Array<{ roomType?: string; quantity?: number; unitPrice?: number }>; notes?: string } | null
+                    const hQuote = h.supplier_response as {
+                      submitted_at?: string
+                      contact?: string
+                      phone?: string
+                      totalCost?: number
+                      rooms?: Array<{ roomType?: string; quantity?: number; unitPrice?: number }>
+                      notes?: string
+                    } | null
                     return (
                       <div
                         key={h.id}
@@ -167,16 +183,25 @@ export default async function AccommodationQuotePage({
                           <div>聯絡人：{hQuote?.contact || '—'}</div>
                           {quoteData!.rooms && quoteData!.rooms.length > 0 && (
                             <div className="mt-2">
-                              {quoteData!.rooms.map((room: { roomType?: string; quantity?: number; unitPrice?: number }, idx: number) => (
-                                <div key={idx} className="flex justify-between py-1">
-                                  <span>
-                                    {room.roomType} × {room.quantity}
-                                  </span>
-                                  <span className="font-medium">
-                                    ${room.unitPrice?.toLocaleString()}
-                                  </span>
-                                </div>
-                              ))}
+                              {quoteData!.rooms.map(
+                                (
+                                  room: {
+                                    roomType?: string
+                                    quantity?: number
+                                    unitPrice?: number
+                                  },
+                                  idx: number
+                                ) => (
+                                  <div key={idx} className="flex justify-between py-1">
+                                    <span>
+                                      {room.roomType} × {room.quantity}
+                                    </span>
+                                    <span className="font-medium">
+                                      ${room.unitPrice?.toLocaleString()}
+                                    </span>
+                                  </div>
+                                )
+                              )}
                             </div>
                           )}
                           {hQuote?.notes && (
@@ -221,14 +246,19 @@ export default async function AccommodationQuotePage({
                   {quoteData!.rooms && quoteData!.rooms.length > 0 && (
                     <div>
                       <div className="text-morandi-secondary mb-2">房型報價：</div>
-                      {quoteData!.rooms.map((room: { roomType?: string; quantity?: number; unitPrice?: number }, idx: number) => (
-                        <div key={idx} className="flex justify-between py-1 pl-4">
-                          <span>
-                            {room.roomType} × {room.quantity}
-                          </span>
-                          <span className="font-medium">${room.unitPrice?.toLocaleString()}</span>
-                        </div>
-                      ))}
+                      {quoteData!.rooms.map(
+                        (
+                          room: { roomType?: string; quantity?: number; unitPrice?: number },
+                          idx: number
+                        ) => (
+                          <div key={idx} className="flex justify-between py-1 pl-4">
+                            <span>
+                              {room.roomType} × {room.quantity}
+                            </span>
+                            <span className="font-medium">${room.unitPrice?.toLocaleString()}</span>
+                          </div>
+                        )
+                      )}
                     </div>
                   )}
                   {quoteData!.notes && (

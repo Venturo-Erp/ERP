@@ -44,7 +44,9 @@ export function useTourConfirmationSheet({ tourId }: UseTourConfirmationSheetPro
       // 先找現有的確認表
       const { data: existingSheet, error: sheetError } = await supabase
         .from('tour_confirmation_sheets')
-        .select('id, tour_id, tour_code, tour_name, status, pax, departure_date, return_date, tour_leader_name, sales_person, notes, workspace_id, created_at, created_by, updated_at')
+        .select(
+          'id, tour_id, tour_code, tour_name, status, pax, departure_date, return_date, tour_leader_name, sales_person, notes, workspace_id, created_at, created_by, updated_at'
+        )
         .eq('tour_id', tourId)
         .maybeSingle()
 
@@ -56,7 +58,9 @@ export function useTourConfirmationSheet({ tourId }: UseTourConfirmationSheetPro
         // 載入明細
         const { data: itemsData, error: itemsError } = await supabase
           .from('tour_confirmation_items')
-          .select('id, sheet_id, title, category, supplier_name, service_date, day_label, expected_cost, actual_cost, booking_status, notes, sort_order, workspace_id, created_at, updated_at')
+          .select(
+            'id, sheet_id, title, category, supplier_name, service_date, day_label, expected_cost, actual_cost, booking_status, notes, sort_order, workspace_id, created_at, updated_at'
+          )
           .eq('sheet_id', existingSheet.id)
           .order('category')
           .order('service_date')

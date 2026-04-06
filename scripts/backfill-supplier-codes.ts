@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * 補充現有供應商編號（S00001, S00002, ...）
- * 
+ *
  * 執行方式：
  * cd ~/Projects/venturo-erp
  * npx tsx scripts/backfill-supplier-codes.ts
@@ -74,7 +74,7 @@ async function main() {
   // 批次更新
   for (const supplier of needsUpdate) {
     const newCode = `S${String(nextNum).padStart(5, '0')}`
-    
+
     const { error: updateError } = await supabase
       .from('suppliers')
       .update({ code: newCode })

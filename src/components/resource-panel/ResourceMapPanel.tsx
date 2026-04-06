@@ -26,11 +26,11 @@ const AttractionsMap = dynamic(
 )
 
 // 可拖曳的景點按鈕
-function DraggableAttractionButton({ 
-  attraction, 
+function DraggableAttractionButton({
+  attraction,
   isSelected,
-  onClick 
-}: { 
+  onClick,
+}: {
   attraction: Attraction
   isSelected: boolean
   onClick: () => void
@@ -127,7 +127,9 @@ export function ResourceMapPanel({
       try {
         const { data, error } = await supabase
           .from('attractions')
-          .select('id, name, english_name, description, category, images, thumbnail, address, latitude, longitude, phone, website, opening_hours, data_verified, region_id, city_id, country_id, is_active, workspace_id, created_at, updated_at')
+          .select(
+            'id, name, english_name, description, category, images, thumbnail, address, latitude, longitude, phone, website, opening_hours, data_verified, region_id, city_id, country_id, is_active, workspace_id, created_at, updated_at'
+          )
           .eq('country_id', countryId)
           .not('latitude', 'is', null)
           .not('longitude', 'is', null)

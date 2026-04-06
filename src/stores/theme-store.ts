@@ -8,7 +8,7 @@ interface ThemeState {
   setTheme: (theme: ThemeType) => void
 }
 
-export const useThemeStore = create<ThemeState>((set) => ({
+export const useThemeStore = create<ThemeState>(set => ({
   currentTheme: 'morandi',
 
   initTheme: () => {
@@ -18,7 +18,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
     }
   },
 
-  setTheme: (theme) => {
+  setTheme: theme => {
     set({ currentTheme: theme })
     document.documentElement.setAttribute('data-theme', theme)
     if (typeof window !== 'undefined') {

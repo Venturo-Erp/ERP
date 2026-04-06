@@ -46,9 +46,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
   const [currentAvatarUrl, setCurrentAvatarUrl] = useState<string | null>(user?.avatar_url || null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const currentEmployee = employees.find((e) => e.id === user?.id)
-
-
+  const currentEmployee = employees.find(e => e.id === user?.id)
 
   const [formData, setFormData] = useState({
     display_name: '',
@@ -79,15 +77,17 @@ export function AccountSettings({ user }: AccountSettingsProps) {
         chinese_name: currentEmployee.chinese_name || '',
         english_name: currentEmployee.english_name || '',
         email: currentEmployee.personal_info?.email || currentEmployee.email || '',
-        phone: (Array.isArray(currentEmployee.personal_info?.phone) 
-          ? currentEmployee.personal_info.phone[0] 
-          : currentEmployee.personal_info?.phone) || '',
+        phone:
+          (Array.isArray(currentEmployee.personal_info?.phone)
+            ? currentEmployee.personal_info.phone[0]
+            : currentEmployee.personal_info?.phone) || '',
         address: currentEmployee.personal_info?.address || '',
         birth_date: currentEmployee.personal_info?.birth_date || '',
         id_number: currentEmployee.personal_info?.national_id || '',
         bank_account: '',
         emergency_contact_name: currentEmployee.personal_info?.emergency_contact?.name || '',
-        emergency_contact_relation: currentEmployee.personal_info?.emergency_contact?.relationship || '',
+        emergency_contact_relation:
+          currentEmployee.personal_info?.emergency_contact?.relationship || '',
         emergency_contact_phone: currentEmployee.personal_info?.emergency_contact?.phone || '',
         emergency_contact_address: currentEmployee.personal_info?.emergency_contact?.address || '',
       })
@@ -147,10 +147,10 @@ export function AccountSettings({ user }: AccountSettingsProps) {
       if (updateError) {
         logger.error('更新頭像 URL 失敗:', updateError)
       }
-      
+
       // 重新載入員工資料
       await fetchAll()
-      
+
       await alertSuccess(LABELS.AVATAR_UPLOAD_SUCCESS)
     } catch (error) {
       logger.error('頭像上傳失敗:', error)
@@ -209,17 +209,11 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 className="w-48 h-48 rounded-3xl bg-morandi-gold/10 border-4 border-dashed border-morandi-gold/30 flex items-center justify-center overflow-hidden cursor-pointer group-hover:border-morandi-gold transition-all"
               >
                 {currentAvatarUrl ? (
-                  <img
-                    src={currentAvatarUrl}
-                    alt="頭像"
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={currentAvatarUrl} alt="頭像" className="w-full h-full object-cover" />
                 ) : (
                   <div className="flex flex-col items-center text-morandi-secondary">
                     <Camera className="w-12 h-12 mb-2" />
-                    <span className="text-xs font-semibold uppercase tracking-wider">
-                      上傳照片
-                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-wider">上傳照片</span>
                     <p className="text-[10px] mt-1 opacity-60">JPG, PNG, GIF</p>
                   </div>
                 )}
@@ -263,9 +257,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 </Label>
                 <Input
                   value={formData.chinese_name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, chinese_name: e.target.value })
-                  }
+                  onChange={e => setFormData({ ...formData, chinese_name: e.target.value })}
                   className="border-morandi-gold/30 focus:border-morandi-gold"
                 />
               </div>
@@ -276,9 +268,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 </Label>
                 <Input
                   value={formData.display_name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, display_name: e.target.value })
-                  }
+                  onChange={e => setFormData({ ...formData, display_name: e.target.value })}
                   className="border-morandi-gold/30 focus:border-morandi-gold"
                   placeholder="例：William"
                 />
@@ -290,9 +280,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 </Label>
                 <Input
                   value={formData.english_name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, english_name: e.target.value })
-                  }
+                  onChange={e => setFormData({ ...formData, english_name: e.target.value })}
                   className="border-morandi-gold/30 focus:border-morandi-gold"
                 />
               </div>
@@ -317,7 +305,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 <Input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={e => setFormData({ ...formData, email: e.target.value })}
                   className="border-morandi-gold/30 focus:border-morandi-gold"
                 />
               </div>
@@ -331,7 +319,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 <Input
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
                   className="border-morandi-gold/30 focus:border-morandi-gold"
                 />
               </div>
@@ -345,9 +333,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 <Input
                   type="date"
                   value={formData.birth_date}
-                  onChange={(e) =>
-                    setFormData({ ...formData, birth_date: e.target.value })
-                  }
+                  onChange={e => setFormData({ ...formData, birth_date: e.target.value })}
                   className="border-morandi-gold/30 focus:border-morandi-gold"
                   placeholder="YYYY-MM-DD"
                 />
@@ -361,9 +347,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 </Label>
                 <Input
                   value={formData.id_number}
-                  onChange={(e) =>
-                    setFormData({ ...formData, id_number: e.target.value })
-                  }
+                  onChange={e => setFormData({ ...formData, id_number: e.target.value })}
                   className="border-morandi-gold/30 focus:border-morandi-gold"
                 />
               </div>
@@ -376,7 +360,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 </Label>
                 <Input
                   value={formData.address}
-                  onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                  onChange={e => setFormData({ ...formData, address: e.target.value })}
                   className="border-morandi-gold/30 focus:border-morandi-gold"
                 />
               </div>
@@ -389,9 +373,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
                 </Label>
                 <Input
                   value={formData.bank_account}
-                  onChange={(e) =>
-                    setFormData({ ...formData, bank_account: e.target.value })
-                  }
+                  onChange={e => setFormData({ ...formData, bank_account: e.target.value })}
                   className="border-morandi-gold/30 focus:border-morandi-gold"
                 />
               </div>
@@ -403,30 +385,22 @@ export function AccountSettings({ user }: AccountSettingsProps) {
         <div className="p-6 bg-morandi-container/10">
           <div className="flex items-center gap-2 mb-4">
             <Heart className="w-4 h-4 text-morandi-red" />
-            <h3 className="text-sm font-bold text-morandi-primary uppercase">
-              緊急聯絡人
-            </h3>
+            <h3 className="text-sm font-bold text-morandi-primary uppercase">緊急聯絡人</h3>
           </div>
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                姓名
-              </Label>
+              <Label className="text-xs font-semibold text-morandi-secondary uppercase">姓名</Label>
               <Input
                 value={formData.emergency_contact_name}
-                onChange={(e) =>
-                  setFormData({ ...formData, emergency_contact_name: e.target.value })
-                }
+                onChange={e => setFormData({ ...formData, emergency_contact_name: e.target.value })}
                 className="border-morandi-gold/30 focus:border-morandi-gold"
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                關係
-              </Label>
+              <Label className="text-xs font-semibold text-morandi-secondary uppercase">關係</Label>
               <Input
                 value={formData.emergency_contact_relation}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     emergency_contact_relation: e.target.value,
@@ -436,13 +410,11 @@ export function AccountSettings({ user }: AccountSettingsProps) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                電話
-              </Label>
+              <Label className="text-xs font-semibold text-morandi-secondary uppercase">電話</Label>
               <Input
                 type="tel"
                 value={formData.emergency_contact_phone}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({
                     ...formData,
                     emergency_contact_phone: e.target.value,
@@ -452,12 +424,10 @@ export function AccountSettings({ user }: AccountSettingsProps) {
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold text-morandi-secondary uppercase">
-                地址
-              </Label>
+              <Label className="text-xs font-semibold text-morandi-secondary uppercase">地址</Label>
               <Input
                 value={formData.emergency_contact_address || ''}
-                onChange={(e) =>
+                onChange={e =>
                   setFormData({ ...formData, emergency_contact_address: e.target.value })
                 }
                 className="border-morandi-gold/30 focus:border-morandi-gold"

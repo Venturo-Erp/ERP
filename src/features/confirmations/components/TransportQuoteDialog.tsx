@@ -461,8 +461,12 @@ export function TransportQuoteDialog({
                 <table className="w-full border-collapse text-sm mb-3">
                   <thead>
                     <tr className="bg-[var(--morandi-gold)] text-white">
-                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-20">日期</th>
-                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left">行程內容</th>
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-20">
+                        日期
+                      </th>
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left">
+                        行程內容
+                      </th>
                       <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">
                         早餐
                       </th>
@@ -472,7 +476,9 @@ export function TransportQuoteDialog({
                       <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-center w-16">
                         晚餐
                       </th>
-                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-32">住宿</th>
+                      <th className="border border-[var(--morandi-gold)]/50 px-3 py-2 text-left w-32">
+                        住宿
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -482,7 +488,9 @@ export function TransportQuoteDialog({
                         className={idx % 2 === 0 ? 'bg-white' : 'bg-background'}
                       >
                         <td className="border border-morandi-container px-3 py-2">
-                          <div className="font-semibold text-[var(--morandi-gold)]">Day {day.dayNumber}</div>
+                          <div className="font-semibold text-[var(--morandi-gold)]">
+                            Day {day.dayNumber}
+                          </div>
                           <div className="text-xs text-muted-foreground">
                             {day.date}
                             {day.weekday ? ` (${day.weekday})` : ''}

@@ -2,7 +2,16 @@
   "mcpServers": {
     "cc-workflow-studio": {
       "type": "http",
-      "url": "http://127.0.0.1:49774/mcp"
+      "url": "http://127.0.0.1:53881/mcp"
+    },
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase",
+        "--access-token",
+        "sbp_94746ae5e9ecc9d270d27006ba5ed1d0da0bbaf0"
+      ]
     }
   }
 }

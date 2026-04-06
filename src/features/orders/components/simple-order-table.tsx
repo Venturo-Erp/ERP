@@ -152,9 +152,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
             onClose={() => handleToggleExpand(order.id)}
             embedded
             tour={
-              tours.find(t => t.id === order.tour_id) as
-                | import('@/stores/types').Tour
-                | undefined
+              tours.find(t => t.id === order.tour_id) as import('@/stores/types').Tour | undefined
             }
           />
         ),

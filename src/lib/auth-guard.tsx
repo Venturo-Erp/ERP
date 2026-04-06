@@ -226,7 +226,9 @@ export function usePermissionCheck(requiredRoute?: string) {
 
   const checkRoute = requiredRoute || pathname
   const storeIsAdmin = useAuthStore(state => state.isAdmin)
-  const hasPermission = user ? hasPermissionForRoute(user.permissions || [], checkRoute, storeIsAdmin) : false
+  const hasPermission = user
+    ? hasPermissionForRoute(user.permissions || [], checkRoute, storeIsAdmin)
+    : false
 
   return {
     hasPermission,

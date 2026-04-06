@@ -52,7 +52,9 @@ export function AttractionForm({
           <div>
             <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.ZH_NAME}</label>
             {readOnly ? (
-              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">{formData.name || '-'}</div>
+              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
+                {formData.name || '-'}
+              </div>
             ) : (
               <Input
                 value={formData.name}
@@ -65,7 +67,9 @@ export function AttractionForm({
           <div>
             <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.EN_NAME}</label>
             {readOnly ? (
-              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">{formData.english_name || '-'}</div>
+              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
+                {formData.english_name || '-'}
+              </div>
             ) : (
               <Input
                 value={formData.english_name}
@@ -80,7 +84,9 @@ export function AttractionForm({
         <div>
           <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.DESCRIPTION_LABEL}</label>
           {readOnly ? (
-            <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50 min-h-[68px] whitespace-pre-wrap">{formData.description || '-'}</div>
+            <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50 min-h-[68px] whitespace-pre-wrap">
+              {formData.description || '-'}
+            </div>
           ) : (
             <textarea
               value={formData.description}
@@ -92,11 +98,15 @@ export function AttractionForm({
         </div>
 
         {/* 地點 */}
-        <div className={`grid gap-3 ${availableRegions.length > 0 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        <div
+          className={`grid gap-3 ${availableRegions.length > 0 ? 'grid-cols-3' : 'grid-cols-2'}`}
+        >
           <div>
             <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.COUNTRY}</label>
             {readOnly ? (
-              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">{country?.name || '-'}</div>
+              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
+                {country?.name || '-'}
+              </div>
             ) : (
               <Select
                 value={formData.country_id}
@@ -109,7 +119,9 @@ export function AttractionForm({
                 </SelectTrigger>
                 <SelectContent>
                   {countries.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -120,7 +132,9 @@ export function AttractionForm({
             <div>
               <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.REGION}</label>
               {readOnly ? (
-                <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">{region?.name || '-'}</div>
+                <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
+                  {region?.name || '-'}
+                </div>
               ) : (
                 <Select
                   value={formData.region_id}
@@ -133,7 +147,9 @@ export function AttractionForm({
                   </SelectTrigger>
                   <SelectContent>
                     {availableRegions.map(r => (
-                      <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
+                      <SelectItem key={r.id} value={r.id}>
+                        {r.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -144,7 +160,9 @@ export function AttractionForm({
           <div>
             <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.CITY_SELECT}</label>
             {readOnly ? (
-              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">{city?.name || '不指定'}</div>
+              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
+                {city?.name || '不指定'}
+              </div>
             ) : (
               <Select
                 value={formData.city_id || '_none_'}
@@ -158,7 +176,9 @@ export function AttractionForm({
                 <SelectContent>
                   <SelectItem value="_none_">{ATTRACTION_FORM_LABELS.NOT_SPECIFIED}</SelectItem>
                   {availableCities.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -171,7 +191,9 @@ export function AttractionForm({
           <div>
             <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.CATEGORY}</label>
             {readOnly ? (
-              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">{formData.category || '-'}</div>
+              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
+                {formData.category || '-'}
+              </div>
             ) : (
               <Select
                 value={formData.category}
@@ -194,9 +216,16 @@ export function AttractionForm({
             <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.TAGS}</label>
             {readOnly ? (
               <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
-                {formData.tags ? formData.tags.split(',').map((t, i) => (
-                  <span key={i} className="inline-block px-1.5 py-0.5 mr-1 bg-morandi-gold/10 text-morandi-gold rounded text-xs">{t.trim()}</span>
-                )) : '-'}
+                {formData.tags
+                  ? formData.tags.split(',').map((t, i) => (
+                      <span
+                        key={i}
+                        className="inline-block px-1.5 py-0.5 mr-1 bg-morandi-gold/10 text-morandi-gold rounded text-xs"
+                      >
+                        {t.trim()}
+                      </span>
+                    ))
+                  : '-'}
               </div>
             ) : (
               <Input
@@ -209,7 +238,9 @@ export function AttractionForm({
           <div>
             <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.DURATION}</label>
             {readOnly ? (
-              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">{formData.duration_minutes} 分鐘</div>
+              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
+                {formData.duration_minutes} 分鐘
+              </div>
             ) : (
               <Input
                 type="number"
@@ -231,7 +262,9 @@ export function AttractionForm({
           <div>
             <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.PHONE}</label>
             {readOnly ? (
-              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">{formData.phone || '-'}</div>
+              <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
+                {formData.phone || '-'}
+              </div>
             ) : (
               <Input
                 value={formData.phone}
@@ -245,10 +278,17 @@ export function AttractionForm({
             {readOnly ? (
               <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
                 {formData.website ? (
-                  <a href={formData.website} target="_blank" rel="noopener noreferrer" className="text-morandi-gold hover:underline truncate block">
+                  <a
+                    href={formData.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-morandi-gold hover:underline truncate block"
+                  >
                     {formData.website}
                   </a>
-                ) : '-'}
+                ) : (
+                  '-'
+                )}
               </div>
             ) : (
               <Input
@@ -264,7 +304,9 @@ export function AttractionForm({
         <div>
           <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.ADDRESS}</label>
           {readOnly ? (
-            <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">{formData.address || '-'}</div>
+            <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50">
+              {formData.address || '-'}
+            </div>
           ) : (
             <Input
               value={formData.address}
@@ -299,7 +341,9 @@ export function AttractionForm({
         <div>
           <label className="text-sm font-medium">{ATTRACTION_FORM_LABELS.INTERNAL_NOTES}</label>
           {readOnly ? (
-            <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50 min-h-[68px] whitespace-pre-wrap">{formData.notes || '-'}</div>
+            <div className="px-3 py-2 text-sm border border-border rounded-md bg-muted/50 min-h-[68px] whitespace-pre-wrap">
+              {formData.notes || '-'}
+            </div>
           ) : (
             <textarea
               value={formData.notes}

@@ -13,7 +13,9 @@ const requestDocumentsDb = () => dynamicFrom('request_documents')
  */
 export async function getRequestDocuments(requestId: string): Promise<RequestDocument[]> {
   const { data, error } = await requestDocumentsDb()
-    .select('id, request_id, file_url, file_name, file_type, version, status, workspace_id, created_at, updated_at')
+    .select(
+      'id, request_id, file_url, file_name, file_type, version, status, workspace_id, created_at, updated_at'
+    )
     .eq('request_id', requestId)
     .order('created_at', { ascending: true })
 

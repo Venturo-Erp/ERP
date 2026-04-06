@@ -72,7 +72,9 @@ export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperi
     try {
       const { data, error } = await supabase
         .from('premium_experiences')
-        .select('id, name, english_name, description, category, country_id, city_id, exclusivity_level, images, is_active, is_featured, created_at')
+        .select(
+          'id, name, english_name, description, category, country_id, city_id, exclusivity_level, images, is_active, is_featured, created_at'
+        )
         .order('exclusivity_level', { ascending: false })
         .order('name')
         .limit(1000)

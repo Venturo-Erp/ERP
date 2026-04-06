@@ -3,7 +3,7 @@
 /**
  * 詢價單追蹤頁面 - 客人查看進度
  * 路由: /p/customized/track/[code]
- * 
+ *
  * 功能：
  * 1. 客人用追蹤碼查看詢價單狀態
  * 2. 看到我們的回覆/報價
@@ -12,8 +12,8 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
-import { 
-  MapPin, 
+import {
+  MapPin,
   ChevronLeft,
   Phone,
   Loader2,
@@ -54,23 +54,27 @@ interface CompanyInfo {
 const STATUS_MAP = {
   pending: { label: '等待處理', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
   contacted: { label: '已聯繫', color: 'bg-status-info/10 text-status-info', icon: Phone },
-  quoted: { label: '已報價', color: 'bg-morandi-secondary/10 text-morandi-secondary', icon: MessageCircle },
-  converted: { label: '已成團', color: 'bg-morandi-green/10 text-morandi-green', icon: CheckCircle },
+  quoted: {
+    label: '已報價',
+    color: 'bg-morandi-secondary/10 text-morandi-secondary',
+    icon: MessageCircle,
+  },
+  converted: {
+    label: '已成團',
+    color: 'bg-morandi-green/10 text-morandi-green',
+    icon: CheckCircle,
+  },
   cancelled: { label: '已取消', color: 'bg-gray-100 text-gray-800', icon: Clock },
 }
 
-export default function TrackInquiryPage({ 
-  params 
-}: { 
-  params: Promise<{ code: string }> 
-}) {
+export default function TrackInquiryPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params)
-  
+
   const [inquiry, setInquiry] = useState<Inquiry | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: '旅行社', phone: '' })
-  
+
   // 追加留言
   const [additionalNotes, setAdditionalNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -80,10 +84,12 @@ export default function TrackInquiryPage({
     const fetchInquiry = async () => {
       const { data, error } = await supabase
         .from('customer_inquiries')
-        .select(`
+        .select(
+          `
           *,
           wishlist_templates(name, workspace_id)
-        `)
+        `
+        )
         .eq('code', code)
         .single()
 
@@ -94,7 +100,7 @@ export default function TrackInquiryPage({
       }
 
       const templateInfo = data.wishlist_templates as { name: string; workspace_id: string } | null
-      
+
       setInquiry({
         id: data.id,
         code: data.code,
@@ -110,7 +116,7 @@ export default function TrackInquiryPage({
         template_name: templateInfo?.name,
         workspace_id: templateInfo?.workspace_id || data.workspace_id,
       })
-      
+
       // 載入公司資訊
       const workspaceId = templateInfo?.workspace_id || data.workspace_id
       if (workspaceId) {
@@ -119,7 +125,7 @@ export default function TrackInquiryPage({
           .select('legal_name, phone')
           .eq('id', workspaceId)
           .single()
-        
+
         if (workspace) {
           setCompanyInfo({
             name: workspace.legal_name || '旅行社',
@@ -127,7 +133,7 @@ export default function TrackInquiryPage({
           })
         }
       }
-      
+
       setLoading(false)
     }
 
@@ -140,7 +146,7 @@ export default function TrackInquiryPage({
 
     setSubmitting(true)
 
-    const newNotes = inquiry?.notes 
+    const newNotes = inquiry?.notes
       ? `${inquiry.notes}\n\n---\n[${new Date().toLocaleString('zh-TW')}] 客戶追加：\n${additionalNotes}`
       : `[${new Date().toLocaleString('zh-TW')}] 客戶追加：\n${additionalNotes}`
 
@@ -159,7 +165,7 @@ export default function TrackInquiryPage({
     toast.success('留言已送出')
     setAdditionalNotes('')
     // 重新載入
-    setInquiry(prev => prev ? { ...prev, notes: newNotes } : null)
+    setInquiry(prev => (prev ? { ...prev, notes: newNotes } : null))
   }
 
   if (loading) {
@@ -198,7 +204,10 @@ export default function TrackInquiryPage({
             <h1 className="text-xl font-bold text-white">{companyInfo.name}</h1>
           </div>
           {companyInfo.phone && (
-            <a href={`tel:${companyInfo.phone}`} className="flex items-center gap-1 text-sm text-white/60 hover:text-white">
+            <a
+              href={`tel:${companyInfo.phone}`}
+              className="flex items-center gap-1 text-sm text-white/60 hover:text-white"
+            >
               <Phone className="w-4 h-4" />
               {companyInfo.phone}
             </a>
@@ -221,7 +230,7 @@ export default function TrackInquiryPage({
           {/* 詢價資訊 */}
           <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
             <h3 className="font-bold text-white mb-4">詢價資訊</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <p className="text-white/50 text-sm">姓名</p>
@@ -267,7 +276,7 @@ export default function TrackInquiryPage({
             <h3 className="font-bold text-white mb-4">
               已選景點（{inquiry?.selected_items?.length || 0}）
             </h3>
-            
+
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {inquiry?.selected_items?.map((item, index) => (
                 <div
@@ -304,9 +313,7 @@ export default function TrackInquiryPage({
               <MessageCircle className="w-5 h-5" />
               {companyInfo.name}回覆
             </h3>
-            <div className="text-white/90 whitespace-pre-wrap">
-              {inquiry.internal_notes}
-            </div>
+            <div className="text-white/90 whitespace-pre-wrap">{inquiry.internal_notes}</div>
           </div>
         )}
 
@@ -315,13 +322,13 @@ export default function TrackInquiryPage({
           <h3 className="font-bold text-white mb-4">追加留言</h3>
           <Textarea
             value={additionalNotes}
-            onChange={(e) => setAdditionalNotes(e.target.value)}
+            onChange={e => setAdditionalNotes(e.target.value)}
             placeholder="有任何問題或想補充的嗎？"
             rows={3}
             className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/30"
           />
-          <Button 
-            className="mt-3" 
+          <Button
+            className="mt-3"
             onClick={handleAddNote}
             disabled={!additionalNotes.trim() || submitting}
           >

@@ -150,7 +150,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     setLoading(true)
 
     const { data } = await dynamicFrom('transportation_rates')
-      .select('id, country_id, country_name, vehicle_type, category, supplier, route, trip_type, cost_vnd, price_twd, kkday_selling_price, kkday_cost, kkday_profit, is_backup, price, currency, unit, notes, is_active, display_order, workspace_id, created_at, updated_at')
+      .select(
+        'id, country_id, country_name, vehicle_type, category, supplier, route, trip_type, cost_vnd, price_twd, kkday_selling_price, kkday_cost, kkday_profit, is_backup, price, currency, unit, notes, is_active, display_order, workspace_id, created_at, updated_at'
+      )
       .eq('country_name', countryName)
       .eq('is_active', true)
       .order('display_order')
@@ -169,7 +171,9 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     if (!selectedCountry) return
 
     const { data } = await dynamicFrom('transportation_rates')
-      .select('id, country_id, country_name, vehicle_type, category, supplier, route, trip_type, cost_vnd, price_twd, kkday_selling_price, kkday_cost, kkday_profit, is_backup, price, currency, unit, notes, is_active, display_order, workspace_id, created_at, updated_at')
+      .select(
+        'id, country_id, country_name, vehicle_type, category, supplier, route, trip_type, cost_vnd, price_twd, kkday_selling_price, kkday_cost, kkday_profit, is_backup, price, currency, unit, notes, is_active, display_order, workspace_id, created_at, updated_at'
+      )
       .eq('country_name', selectedCountry)
       .eq('is_active', true)
       .order('display_order')
@@ -240,7 +244,10 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                       onClick={() => handleToggleVisibility?.(category.id, h.id)}
                       className="block w-full text-left px-2 py-1 text-xs text-status-info hover:bg-status-info/10 rounded"
                     >
-                      {h.day ? `D${h.day}${h.sub_category === 'breakfast' ? '早' : h.sub_category === 'lunch' ? '午' : h.sub_category === 'dinner' ? '晚' : ''} ` : ''}{h.name} — 恢復
+                      {h.day
+                        ? `D${h.day}${h.sub_category === 'breakfast' ? '早' : h.sub_category === 'lunch' ? '午' : h.sub_category === 'dinner' ? '晚' : ''} `
+                        : ''}
+                      {h.name} — 恢復
                     </button>
                   ))}
                 </div>
@@ -338,9 +345,15 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
             <div className="flex gap-1 justify-end">
               {/* 成人/小孩/嬰兒 各只能新增一次 */}
               {(() => {
-                const hasAdult = category.items.some(item => item.name === CATEGORY_SECTION_LABELS.成人)
-                const hasChild = category.items.some(item => item.name === CATEGORY_SECTION_LABELS.LABEL_475)
-                const hasInfant = category.items.some(item => item.name === CATEGORY_SECTION_LABELS.LABEL_2772)
+                const hasAdult = category.items.some(
+                  item => item.name === CATEGORY_SECTION_LABELS.成人
+                )
+                const hasChild = category.items.some(
+                  item => item.name === CATEGORY_SECTION_LABELS.LABEL_475
+                )
+                const hasInfant = category.items.some(
+                  item => item.name === CATEGORY_SECTION_LABELS.LABEL_2772
+                )
                 return (
                   <>
                     <Button

@@ -1,9 +1,9 @@
 /**
  * 綁定 LINE 到客戶
  * POST /api/customers/link-line
- * 
+ *
  * body: { customerId: string, lineUserId: string }
- * 
+ *
  * 或建立新客戶並綁定：
  * body: { lineUserId: string, name: string, phone?: string, workspaceId: string }
  */

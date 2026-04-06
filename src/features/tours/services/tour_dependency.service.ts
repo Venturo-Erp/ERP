@@ -139,7 +139,13 @@ export async function unlinkTourItineraries(tourId: string): Promise<number> {
  * 取得旅遊團的 PNR 資料
  */
 export async function fetchTourPnrs(tourId: string): Promise<unknown[]> {
-  const { data, error } = await supabase.from('pnrs').select('id, tour_id, record_locator, airline_code, status, pax_count, segments, passengers, workspace_id, created_at, updated_at').eq('tour_id', tourId).limit(500)
+  const { data, error } = await supabase
+    .from('pnrs')
+    .select(
+      'id, tour_id, record_locator, airline_code, status, pax_count, segments, passengers, workspace_id, created_at, updated_at'
+    )
+    .eq('tour_id', tourId)
+    .limit(500)
   if (error) {
     logger.error('查詢團 PNR 失敗:', error)
     throw error
@@ -154,7 +160,9 @@ export async function fetchPnrsByLocators(locators: string[]): Promise<unknown[]
   if (locators.length === 0) return []
   const { data, error } = await supabase
     .from('pnrs')
-    .select('id, tour_id, record_locator, airline_code, status, pax_count, segments, passengers, workspace_id, created_at, updated_at')
+    .select(
+      'id, tour_id, record_locator, airline_code, status, pax_count, segments, passengers, workspace_id, created_at, updated_at'
+    )
     .in('record_locator', locators)
     .limit(500)
   if (error) {

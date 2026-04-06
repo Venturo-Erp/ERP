@@ -41,7 +41,9 @@ export function useTourDepartureData(tourId: string, open: boolean) {
 
         // 載入餐食
         const { data: mealsData } = await dynamicFrom('tour_departure_meals')
-          .select('id, departure_data_id, meal_type, restaurant_name, menu, cost, workspace_id, created_at')
+          .select(
+            'id, departure_data_id, meal_type, restaurant_name, menu, cost, workspace_id, created_at'
+          )
           .eq('departure_data_id', mainData.id)
           .order('date', { ascending: true })
           .order('display_order', { ascending: true })
@@ -50,7 +52,9 @@ export function useTourDepartureData(tourId: string, open: boolean) {
 
         // 載入住宿
         const { data: accomData } = await dynamicFrom('tour_departure_accommodations')
-          .select('id, departure_data_id, hotel_name, room_type, room_count, cost, workspace_id, created_at')
+          .select(
+            'id, departure_data_id, hotel_name, room_type, room_count, cost, workspace_id, created_at'
+          )
           .eq('departure_data_id', mainData.id)
           .order('date', { ascending: true })
           .order('display_order', { ascending: true })
@@ -59,7 +63,9 @@ export function useTourDepartureData(tourId: string, open: boolean) {
 
         // 載入活動
         const { data: activData } = await dynamicFrom('tour_departure_activities')
-          .select('id, departure_data_id, activity_name, description, cost, workspace_id, created_at')
+          .select(
+            'id, departure_data_id, activity_name, description, cost, workspace_id, created_at'
+          )
           .eq('departure_data_id', mainData.id)
           .order('date', { ascending: true })
           .order('display_order', { ascending: true })

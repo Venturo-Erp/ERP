@@ -131,7 +131,9 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
   const [columns, setColumns] = useState<ExportColumnsConfig>(DEFAULT_COLUMNS)
   // 只預選有資料的成員（有名字或護照資料的）
   const [selectedMembers, setSelectedMembers] = useState<Set<string>>(
-    new Set(members.filter(m => m.chinese_name || m.passport_name || m.passport_number).map(m => m.id))
+    new Set(
+      members.filter(m => m.chinese_name || m.passport_name || m.passport_number).map(m => m.id)
+    )
   )
   const [pnrData, setPnrData] = useState<PNR[]>([])
   const [loadingPnr, setLoadingPnr] = useState(false)

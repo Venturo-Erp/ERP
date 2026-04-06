@@ -33,7 +33,13 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { COMPANY_LABELS } from '../constants/labels'
 import { useWorkspaceFeatures } from '@/lib/permissions'
-import { useDepartments, createDepartment, updateDepartment, deleteDepartment, invalidateDepartments } from '@/data'
+import {
+  useDepartments,
+  createDepartment,
+  updateDepartment,
+  deleteDepartment,
+  invalidateDepartments,
+} from '@/data'
 import type { Department } from '@/data'
 
 export const dynamic = 'force-dynamic'
@@ -327,10 +333,7 @@ export default function CompanySettingsPage() {
   }
 
   return (
-    <ContentPageLayout 
-      title={COMPANY_LABELS.TITLE}
-      headerActions={<SettingsTabs />}
-    >
+    <ContentPageLayout title={COMPANY_LABELS.TITLE} headerActions={<SettingsTabs />}>
       <div className="settings-glass relative max-w-4xl mx-auto space-y-8 p-6">
         {/* 背景光暈 */}
         <div className="absolute inset-0 -z-10 rounded-xl overflow-hidden pointer-events-none">
@@ -647,7 +650,9 @@ function DepartmentsSection({ workspaceId }: { workspaceId: string }) {
     if (!name.trim() || !code.trim()) return
     setSaving(true)
     try {
-      await createDepartment({ name: name.trim(), code: code.trim().toUpperCase() } as Parameters<typeof createDepartment>[0])
+      await createDepartment({ name: name.trim(), code: code.trim().toUpperCase() } as Parameters<
+        typeof createDepartment
+      >[0])
       await invalidateDepartments()
       setName('')
       setCode('')
@@ -717,7 +722,11 @@ function DepartmentsSection({ workspaceId }: { workspaceId: string }) {
           <h2 className="text-xl font-semibold">部門管理</h2>
         </div>
         {!isAdding && !editingDept && (
-          <Button onClick={startAdd} size="sm" className="bg-morandi-gold hover:bg-morandi-gold/90 text-white">
+          <Button
+            onClick={startAdd}
+            size="sm"
+            className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+          >
             <Plus className="h-4 w-4 mr-1" />
             新增部門
           </Button>
@@ -734,7 +743,10 @@ function DepartmentsSection({ workspaceId }: { workspaceId: string }) {
       ) : (
         <div className="space-y-2">
           {departments.map(dept => (
-            <div key={dept.id} className="flex items-center justify-between px-4 py-3 bg-morandi-bg rounded-lg">
+            <div
+              key={dept.id}
+              className="flex items-center justify-between px-4 py-3 bg-morandi-bg rounded-lg"
+            >
               <div className="flex items-center gap-3">
                 <span className="font-mono text-sm font-semibold bg-morandi-gold/10 text-morandi-gold px-2 py-1 rounded">
                   {dept.code}
@@ -745,7 +757,12 @@ function DepartmentsSection({ workspaceId }: { workspaceId: string }) {
                 <Button variant="ghost" size="sm" onClick={() => startEdit(dept)}>
                   <Pencil className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => handleDelete(dept)} className="text-morandi-red hover:text-morandi-red">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDelete(dept)}
+                  className="text-morandi-red hover:text-morandi-red"
+                >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -761,7 +778,12 @@ function DepartmentsSection({ workspaceId }: { workspaceId: string }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-sm">部門名稱</Label>
-              <Input value={name} onChange={e => setName(e.target.value)} placeholder="例如：勁揚旅行社" className="mt-1" />
+              <Input
+                value={name}
+                onChange={e => setName(e.target.value)}
+                placeholder="例如：勁揚旅行社"
+                className="mt-1"
+              />
             </div>
             <div>
               <Label className="text-sm">部門代號（團號前綴）</Label>
@@ -775,7 +797,9 @@ function DepartmentsSection({ workspaceId }: { workspaceId: string }) {
             </div>
           </div>
           <div className="flex gap-2 mt-3">
-            <Button variant="outline" size="sm" onClick={cancel}>取消</Button>
+            <Button variant="outline" size="sm" onClick={cancel}>
+              取消
+            </Button>
             <Button
               size="sm"
               onClick={editingDept ? handleUpdate : handleAdd}

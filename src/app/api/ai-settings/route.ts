@@ -51,16 +51,17 @@ export async function PATCH(req: NextRequest) {
     }
 
     const supabase = getSupabaseAdminClient()
-    const { error } = await supabase
-      .from('ai_settings')
-      .upsert({
+    const { error } = await supabase.from('ai_settings').upsert(
+      {
         workspace_id: auth.data.workspaceId,
         setting_category: category,
         setting_key: key,
         setting_value: value,
         updated_at: new Date().toISOString(),
         updated_by: auth.data.employeeId,
-      }, { onConflict: 'workspace_id,setting_category,setting_key' })
+      },
+      { onConflict: 'workspace_id,setting_category,setting_key' }
+    )
 
     if (error) {
       logger.error('更新 AI 設定失敗:', error)

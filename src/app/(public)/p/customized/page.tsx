@@ -1,7 +1,7 @@
 /**
  * 客製化入口頁 - 3D 地球 + DIY 選景點
  * 路由: /p/customized
- * 
+ *
  * 🎯 核心概念：
  * 1. 客人進來看到 3D 地球（或世界地圖）
  * 2. 點選國家 → 進入該國景點選擇
@@ -35,10 +35,14 @@ interface CompanyInfo {
   phone: string
 }
 
-async function getPublishedTemplates(): Promise<{ templates: CustomizedTour[], companyInfo: CompanyInfo }> {
+async function getPublishedTemplates(): Promise<{
+  templates: CustomizedTour[]
+  companyInfo: CompanyInfo
+}> {
   const { data, error } = await supabaseAdmin
     .from('wishlist_templates')
-    .select(`
+    .select(
+      `
       id,
       name,
       slug,
@@ -46,7 +50,8 @@ async function getPublishedTemplates(): Promise<{ templates: CustomizedTour[], c
       cover_image,
       workspace_id,
       wishlist_template_items(count)
-    `)
+    `
+    )
     .eq('status', 'published')
     .order('name')
 
@@ -73,7 +78,7 @@ async function getPublishedTemplates(): Promise<{ templates: CustomizedTour[], c
       .select('legal_name, phone')
       .eq('id', templates[0].workspace_id)
       .single()
-    
+
     if (workspace) {
       companyInfo = {
         name: workspace.legal_name || COMPANY.legalName,
@@ -102,7 +107,6 @@ export default async function WishlistIndexPage() {
 
       {/* Hero - 未來放 3D 地球 */}
       <section className="py-20 px-4 text-center relative">
-        
         <div className="w-48 h-48 mx-auto mb-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-2xl shadow-blue-500/30">
           <Globe className="w-24 h-24 text-white animate-pulse" />
         </div>
@@ -115,7 +119,7 @@ export default async function WishlistIndexPage() {
       {/* 目的地列表 */}
       <section className="max-w-6xl mx-auto px-4 pb-20">
         <h3 className="text-xl font-bold text-white mb-6">選擇目的地</h3>
-        
+
         {templates.length === 0 ? (
           <div className="text-center py-20">
             <MapPin className="w-16 h-16 mx-auto mb-4 text-white/20" />
@@ -168,7 +172,9 @@ export default async function WishlistIndexPage() {
       {/* Footer */}
       <footer className="border-t border-white/10 py-8">
         <div className="max-w-6xl mx-auto px-4 text-center text-sm text-white/40">
-          <p>© {new Date().getFullYear()} {companyInfo.name}. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} {companyInfo.name}. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>

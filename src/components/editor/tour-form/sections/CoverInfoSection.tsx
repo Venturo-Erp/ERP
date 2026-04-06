@@ -94,7 +94,7 @@ export function CoverInfoSection({
   // 生成預覽用資料
   const getHeroData = () => ({
     coverImage: data.coverImage,
-    coverImagePosition: data.coverImagePosition,  // 圖片位置調整
+    coverImagePosition: data.coverImagePosition, // 圖片位置調整
     tagline: data.tagline || getWorkspaceCompanyName(),
     title: data.title || COMP_EDITOR_LABELS.行程標題,
     subtitle: data.subtitle || COMP_EDITOR_LABELS.副標題,
@@ -205,10 +205,7 @@ export function CoverInfoSection({
               />
 
               {/* 完成按鈕 */}
-              <Button
-                onClick={() => setShowCoverSettings(false)}
-                className="w-full"
-              >
+              <Button onClick={() => setShowCoverSettings(false)} className="w-full">
                 {COMP_EDITOR_LABELS.SETTINGS_6595}
               </Button>
             </div>

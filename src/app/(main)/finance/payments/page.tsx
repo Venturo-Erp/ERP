@@ -100,8 +100,6 @@ export default function PaymentsPage() {
     setIsDialogOpen(true)
   }, [])
 
-
-
   // 處理列點擊 - 開啟編輯對話框
   const handleRowClick = useCallback(
     (receipt: Receipt) => {

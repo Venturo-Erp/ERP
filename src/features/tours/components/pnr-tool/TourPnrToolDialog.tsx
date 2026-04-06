@@ -778,7 +778,9 @@ export function TourPnrToolDialog({
                         <span
                           className={cn(
                             'ml-auto px-1.5 py-0.5 rounded text-[10px]',
-                            isOk ? 'bg-status-success-bg text-status-success' : 'bg-status-danger-bg text-status-danger'
+                            isOk
+                              ? 'bg-status-success-bg text-status-success'
+                              : 'bg-status-danger-bg text-status-danger'
                           )}
                         >
                           {statusLabel}

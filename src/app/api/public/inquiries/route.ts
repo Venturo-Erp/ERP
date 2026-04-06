@@ -30,17 +30,11 @@ export async function POST(request: NextRequest) {
 
     // 驗證必填欄位
     if (!customerName || !phone) {
-      return NextResponse.json(
-        { error: '請填寫姓名和電話' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: '請填寫姓名和電話' }, { status: 400 })
     }
 
     if (!selectedItems || selectedItems.length === 0) {
-      return NextResponse.json(
-        { error: '請至少選擇一個景點' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: '請至少選擇一個景點' }, { status: 400 })
     }
 
     // 建立詢價單
@@ -63,13 +57,8 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       logger.error('建立詢價單失敗:', error)
-      return NextResponse.json(
-        { error: '送出失敗，請稍後再試' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: '送出失敗，請稍後再試' }, { status: 500 })
     }
-
-   
 
     return NextResponse.json({
       success: true,
@@ -77,9 +66,6 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     logger.error('API 錯誤:', error)
-    return NextResponse.json(
-      { error: '系統錯誤' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
   }
 }

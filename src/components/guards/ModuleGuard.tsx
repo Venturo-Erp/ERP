@@ -16,17 +16,10 @@ interface ModuleGuardProps {
 }
 
 // 不需要檢查權限的路由
-const PUBLIC_ROUTES = [
-  '/login',
-  '/unauthorized',
-  '/public',
-]
+const PUBLIC_ROUTES = ['/login', '/unauthorized', '/public']
 
 // 總是允許的路由（基本功能）
-const ALWAYS_ALLOWED = [
-  '/dashboard',
-  '/settings',
-]
+const ALWAYS_ALLOWED = ['/dashboard', '/settings']
 
 export function ModuleGuard({ children }: ModuleGuardProps) {
   const pathname = usePathname()

@@ -7,7 +7,27 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Building2, UtensilsCrossed, Save, X, ExternalLink, FileEdit, Database, Phone, Globe, Clock, Timer, Ticket, StickyNote, Trash2, Upload, Loader2, Star, CheckCircle2 } from 'lucide-react'
+import {
+  MapPin,
+  Building2,
+  UtensilsCrossed,
+  Save,
+  X,
+  ExternalLink,
+  FileEdit,
+  Database,
+  Phone,
+  Globe,
+  Clock,
+  Timer,
+  Ticket,
+  StickyNote,
+  Trash2,
+  Upload,
+  Loader2,
+  Star,
+  CheckCircle2,
+} from 'lucide-react'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { ResourceOverrideDialog } from './ResourceOverrideDialog'
@@ -32,10 +52,10 @@ interface ResourceDetailDialogProps {
   onSave?: (updated: { id: string; name: string; description?: string; address?: string }) => void
   onDelete?: (id: string) => void
   // 權限控制
-  canEditDatabase?: boolean  // 是否可以編輯資料庫
+  canEditDatabase?: boolean // 是否可以編輯資料庫
   // 本團覆蓋相關
-  tourItineraryItemId?: string  // 行程項目 ID（有傳才顯示「編輯本團」按鈕）
-  currentOverride?: string | null  // 目前的覆蓋內容
+  tourItineraryItemId?: string // 行程項目 ID（有傳才顯示「編輯本團」按鈕）
+  currentOverride?: string | null // 目前的覆蓋內容
   onOverrideSave?: (description: string) => void
   readOnly?: boolean // 完全唯讀（不顯示任何編輯按鈕）
 }
@@ -88,7 +108,9 @@ export function ResourceDetailDialog({
 
         const { data, error } = await supabase
           .from(table)
-          .select('id, name, english_name, description, category, images, thumbnail, address, latitude, longitude, city_id, country_id, is_active, created_at, updated_at')
+          .select(
+            'id, name, english_name, description, category, images, thumbnail, address, latitude, longitude, city_id, country_id, is_active, created_at, updated_at'
+          )
           .eq('id', resource.id)
           .single()
 
@@ -183,7 +205,11 @@ export function ResourceDetailDialog({
   }
 
   const getTableName = () =>
-    resource.type === 'attraction' ? 'attractions' : resource.type === 'hotel' ? 'hotels' : 'restaurants'
+    resource.type === 'attraction'
+      ? 'attractions'
+      : resource.type === 'hotel'
+        ? 'hotels'
+        : 'restaurants'
 
   const handleDelete = async () => {
     if (!confirm(`確定要刪除「${resource.name}」嗎？此操作無法還原。`)) return
@@ -269,10 +295,7 @@ export function ResourceDetailDialog({
     }
 
     try {
-      const { error } = await supabase
-        .from(getTableName())
-        .update(updates)
-        .eq('id', resource.id)
+      const { error } = await supabase.from(getTableName()).update(updates).eq('id', resource.id)
 
       if (error) throw error
 
@@ -318,11 +341,11 @@ export function ResourceDetailDialog({
 
   // fullData 載入後以它為準（thumbnail 可能被刪成 null），未載入時才用 resource prop
   const thumbnail = fullData ? (fullData.thumbnail as string | null) : resource.thumbnail
-  const images = fullData ? ((fullData.images as string[]) || []) : []
+  const images = fullData ? (fullData.images as string[]) || [] : []
   // 合併所有圖片：thumbnail + images（去重，避免 thumbnail 也出現在 images 陣列裡）
   const allImages = [...new Set([thumbnail, ...images].filter(Boolean))] as string[]
   const hasImages = allImages.length > 0
-  
+
   const hasCoordinates = resource.latitude && resource.longitude
   const googleMapsUrl = hasCoordinates
     ? `https://www.google.com/maps?q=${resource.latitude},${resource.longitude}`
@@ -330,7 +353,7 @@ export function ResourceDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent level={1} className={(hasImages || isEditing) ? 'max-w-4xl' : 'max-w-md'}>
+      <DialogContent level={1} className={hasImages || isEditing ? 'max-w-4xl' : 'max-w-md'}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {iconMap[resource.type]}
@@ -344,7 +367,7 @@ export function ResourceDetailDialog({
         {loading ? (
           <div className="py-8 text-center text-muted-foreground">載入中...</div>
         ) : (
-          <div className={(hasImages || isEditing) ? 'flex gap-6' : 'space-y-4'}>
+          <div className={hasImages || isEditing ? 'flex gap-6' : 'space-y-4'}>
             {/* 左側：圖片 */}
             {(hasImages || isEditing) && (
               <div className="w-[320px] flex-shrink-0 space-y-2">
@@ -408,7 +431,10 @@ export function ResourceDetailDialog({
                       >
                         <img src={img} alt="" className="w-full h-full object-cover" />
                         {idx === 0 && (
-                          <Star size={8} className="absolute top-0.5 left-0.5 text-white fill-current drop-shadow" />
+                          <Star
+                            size={8}
+                            className="absolute top-0.5 left-0.5 text-white fill-current drop-shadow"
+                          />
                         )}
                       </button>
                     ))}
@@ -417,7 +443,11 @@ export function ResourceDetailDialog({
                 {/* 上傳照片按鈕（編輯模式） */}
                 {isEditing && (
                   <label className="flex items-center justify-center gap-1.5 px-3 py-2 border border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors text-sm text-muted-foreground">
-                    {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                    {uploading ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Upload size={14} />
+                    )}
                     {uploading ? '上傳中...' : '上傳照片'}
                     <input
                       type="file"
@@ -433,7 +463,13 @@ export function ResourceDetailDialog({
             )}
 
             {/* 右側：資訊 */}
-            <div className={(hasImages || isEditing) ? 'flex-1 space-y-3 max-h-[500px] overflow-y-auto pr-2' : 'space-y-4'}>
+            <div
+              className={
+                hasImages || isEditing
+                  ? 'flex-1 space-y-3 max-h-[500px] overflow-y-auto pr-2'
+                  : 'space-y-4'
+              }
+            >
               {/* 名稱 */}
               {isEditing ? (
                 <div className="space-y-1.5">
@@ -446,7 +482,9 @@ export function ResourceDetailDialog({
                 </div>
               ) : (
                 <div>
-                  <h3 className="text-lg font-semibold">{String(fullData?.name || resource.name)}</h3>
+                  <h3 className="text-lg font-semibold">
+                    {String(fullData?.name || resource.name)}
+                  </h3>
                   {resource.category && (
                     <Badge variant="secondary" className="mt-1">
                       {resource.category}
@@ -554,7 +592,8 @@ export function ResourceDetailDialog({
               {hasCoordinates && !isEditing && (
                 <div className="flex items-center gap-2 pt-2 border-t">
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <MapPin size={12} /> {resource.latitude?.toFixed(4)}, {resource.longitude?.toFixed(4)}
+                    <MapPin size={12} /> {resource.latitude?.toFixed(4)},{' '}
+                    {resource.longitude?.toFixed(4)}
                   </span>
                   {googleMapsUrl && (
                     <a
@@ -584,13 +623,21 @@ export function ResourceDetailDialog({
                           try {
                             const { error } = await supabase
                               .from(getTableName())
-                              .update({ data_verified: newVerified, updated_at: new Date().toISOString() })
+                              .update({
+                                data_verified: newVerified,
+                                updated_at: new Date().toISOString(),
+                              })
                               .eq('id', resource.id)
                             if (error) throw error
-                            setFullData(prev => prev ? { ...prev, data_verified: newVerified } : null)
+                            setFullData(prev =>
+                              prev ? { ...prev, data_verified: newVerified } : null
+                            )
                             toast.success(newVerified ? '已驗證' : '已取消驗證')
                             // 通知父組件刷新列表
-                            onSave?.({ id: resource.id, name: String(fullData?.name || resource.name) })
+                            onSave?.({
+                              id: resource.id,
+                              name: String(fullData?.name || resource.name),
+                            })
                           } catch {
                             toast.error('操作失敗')
                           }
@@ -672,7 +719,7 @@ export function ResourceDetailDialog({
           currentOverride={currentOverride}
           originalDescription={fullData?.description as string | null}
           images={allImages}
-          onSave={(desc) => {
+          onSave={desc => {
             onOverrideSave?.(desc)
             setShowOverrideDialog(false)
           }}

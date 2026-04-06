@@ -125,10 +125,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: '系統科目不能刪除' }, { status: 400 })
   }
 
-  const { error } = await supabase
-    .from('chart_of_accounts')
-    .delete()
-    .eq('id', id)
+  const { error } = await supabase.from('chart_of_accounts').delete().eq('id', id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

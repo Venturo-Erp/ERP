@@ -1,7 +1,7 @@
 import { logger } from '@/lib/utils/logger'
 /**
  * 通用列印服務
- * 
+ *
  * 使用 iframe 列印，確保：
  * 1. 只列印內容，不列印頁面 UI
  * 2. 正確的 A4 尺寸
@@ -30,11 +30,11 @@ const DEFAULT_OPTIONS: PrintOptions = {
 
 /**
  * 使用 iframe 列印 HTML 內容
- * 
+ *
  * @example
  * ```tsx
  * import { printHtml } from '@/lib/print/print-service'
- * 
+ *
  * const handlePrint = () => {
  *   printHtml(contentRef.current.innerHTML, {
  *     title: '合約',
@@ -45,7 +45,7 @@ const DEFAULT_OPTIONS: PrintOptions = {
  */
 export function printHtml(html: string, options: PrintOptions = {}): void {
   const opts = { ...DEFAULT_OPTIONS, ...options }
-  
+
   // 建立隱藏的 iframe
   const iframe = document.createElement('iframe')
   iframe.style.position = 'absolute'
@@ -139,10 +139,7 @@ export function printHtml(html: string, options: PrintOptions = {}): void {
 /**
  * 從 ref 元素列印
  */
-export function printElement(
-  element: HTMLElement | null,
-  options: PrintOptions = {}
-): void {
+export function printElement(element: HTMLElement | null, options: PrintOptions = {}): void {
   if (!element) {
     logger.warn('[printElement] Element is null')
     return

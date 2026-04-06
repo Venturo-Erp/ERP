@@ -95,7 +95,15 @@ export default async function TransportQuotePage({
       : null
 
   // 按天分組（自動計算日期）
-  const grouped = new Map<number, { date: string; weekday: string; items: typeof coreItems; hotel: (typeof coreItems)[number] | null }>()
+  const grouped = new Map<
+    number,
+    {
+      date: string
+      weekday: string
+      items: typeof coreItems
+      hotel: (typeof coreItems)[number] | null
+    }
+  >()
   const weekdays = ['日', '一', '二', '三', '四', '五', '六']
 
   for (const item of coreItems) {
@@ -164,22 +172,22 @@ export default async function TransportQuotePage({
                 {daySchedule.map((day, idx) => {
                   const meals: Record<string, string> = { breakfast: '', lunch: '', dinner: '' }
                   day.items
-                    .filter((i) => i.category === 'meals')
-                    .forEach((m) => {
+                    .filter(i => i.category === 'meals')
+                    .forEach(m => {
                       if (m.sub_category && meals[m.sub_category] !== undefined) {
                         meals[m.sub_category] = m.title || '-'
                       }
                     })
 
                   const activities = day.items
-                    .filter((i) => i.category === 'activities')
-                    .map((a) => a.title)
+                    .filter(i => i.category === 'activities')
+                    .map(a => a.title)
                     .filter(Boolean)
                     .join(' → ')
                   const content =
                     activities ||
                     day.items
-                      .map((i) => i.title)
+                      .map(i => i.title)
                       .filter(Boolean)
                       .join('、')
 

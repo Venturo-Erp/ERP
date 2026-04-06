@@ -46,15 +46,20 @@ interface RequestDetailDialogProps {
   readOnly?: boolean
 }
 
-export function RequestDetailDialog({ request, open, onOpenChange, readOnly = false }: RequestDetailDialogProps) {
+export function RequestDetailDialog({
+  request,
+  open,
+  onOpenChange,
+  readOnly = false,
+}: RequestDetailDialogProps) {
   const { items: requestItems, refresh: refreshRequestItems } = usePaymentRequestItems()
   const { items: tours } = useToursSlim()
   const { items: suppliers } = useSuppliersSlim()
   const { items: employees } = useEmployeesSlim()
-  
+
   // 付款方式
   const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string }>>([])
-  
+
   useEffect(() => {
     if (open && request?.workspace_id) {
       supabase
@@ -137,7 +142,9 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
       if (request.batch_id) {
         const { data, error } = await supabase
           .from('payment_requests')
-          .select('id, code, request_number, request_type, amount, total_amount, status, tour_id, tour_code, supplier_name, expense_type, notes, workspace_id, created_at')
+          .select(
+            'id, code, request_number, request_type, amount, total_amount, status, tour_id, tour_code, supplier_name, expense_type, notes, workspace_id, created_at'
+          )
           .eq('batch_id', request.batch_id)
           .order('code', { ascending: true })
           .limit(500)
@@ -319,7 +326,7 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
       const newTotal = localItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0)
       const { error: amountError } = await supabase
         .from('payment_requests')
-        .update({ 
+        .update({
           amount: newTotal,
           payment_method_id: localPaymentMethodId || null,
         })
@@ -506,7 +513,10 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
               <p className="text-xs text-morandi-muted mb-1">
                 {REQUEST_DETAIL_FORM_LABELS.請款日期}
               </p>
-              <DateCell date={currentRequest.request_date || currentRequest.created_at} showIcon={false} />
+              <DateCell
+                date={currentRequest.request_date || currentRequest.created_at}
+                showIcon={false}
+              />
             </div>
             <div>
               <p className="text-xs text-morandi-muted mb-1">{REQUEST_DETAIL_FORM_LABELS.總金額}</p>
@@ -538,7 +548,9 @@ export function RequestDetailDialog({ request, open, onOpenChange, readOnly = fa
                 </Select>
               ) : (
                 <p className="text-sm font-medium text-morandi-primary">
-                  {paymentMethods.find((m: { id: string; name: string }) => m.id === currentRequest.payment_method_id)?.name || '-'}
+                  {paymentMethods.find(
+                    (m: { id: string; name: string }) => m.id === currentRequest.payment_method_id
+                  )?.name || '-'}
                 </p>
               )}
             </div>

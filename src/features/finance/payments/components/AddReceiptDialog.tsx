@@ -88,7 +88,7 @@ export function AddReceiptDialog({
   // 權限判斷（新系統）
   const { user, isAdmin } = useAuthStore()
   const isAccountant = isAdmin || user?.permissions?.includes('accounting')
-  
+
   // 是否可編輯（未確認 or 會計角色）
   const canEdit = !isConfirmed || isAccountant
   // 是否可確認（會計角色 + 編輯模式 + 未確認）
@@ -101,9 +101,11 @@ export function AddReceiptDialog({
   // LinkPay 結果
   const [linkPayResults, setLinkPayResults] = useState<LinkPayResult[]>([])
   const [copiedLink, setCopiedLink] = useState<string | null>(null)
-  
+
   // 收款方式（統一在 Dialog 層級載入，避免競爭）
-  const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string; placeholder?: string | null }>>([])
+  const [paymentMethods, setPaymentMethods] = useState<
+    Array<{ id: string; name: string; placeholder?: string | null }>
+  >([])
   const [dialogLoading, setDialogLoading] = useState(false)
 
   // 當對話框開啟時：載入資料、重置表單、設定預設值
@@ -147,38 +149,38 @@ export function AddReceiptDialog({
         })
 
         // 從 receipt 主表載入（receipt_items 表尚未建立）
-          // 需要用 payment_method_id 去查詢對應的收款方式名稱（使用上方已載入的資料）
-          const extReceipt = editingReceipt as { payment_method_id?: string; payment_method?: string }
-          let receiptTypeValue: string | number = editingReceipt.receipt_type ?? 0
+        // 需要用 payment_method_id 去查詢對應的收款方式名稱（使用上方已載入的資料）
+        const extReceipt = editingReceipt as { payment_method_id?: string; payment_method?: string }
+        let receiptTypeValue: string | number = editingReceipt.receipt_type ?? 0
 
-          // 如果有 payment_method_id，從已載入的收款方式中查找
-          if (extReceipt.payment_method_id && loadedMethods.length > 0) {
-            const matched = loadedMethods.find((m) => m.id === extReceipt.payment_method_id)
-            if (matched) {
-              receiptTypeValue = matched.name
-            }
+        // 如果有 payment_method_id，從已載入的收款方式中查找
+        if (extReceipt.payment_method_id && loadedMethods.length > 0) {
+          const matched = loadedMethods.find(m => m.id === extReceipt.payment_method_id)
+          if (matched) {
+            receiptTypeValue = matched.name
           }
-          
-          setPaymentItems([
-            {
-              id: editingReceipt.id,
-              receipt_type: receiptTypeValue as number,
-              transaction_date: editingReceipt.receipt_date || getTodayString(),
-              receipt_account: editingReceipt.receipt_account || '',
-              notes: editingReceipt.notes || '',
-              amount: editingReceipt.receipt_amount || 0,
-              email: editingReceipt.email || '',
-              payment_name: editingReceipt.payment_name || '',
-              pay_dateline: editingReceipt.pay_dateline || '',
-              handler_name: editingReceipt.handler_name || '',
-              account_info: editingReceipt.account_info || '',
-              fees: editingReceipt.fees || 0,
-              card_last_four: editingReceipt.card_last_four || '',
-              auth_code: editingReceipt.auth_code || '',
-              check_number: editingReceipt.check_number || '',
-              check_bank: editingReceipt.check_bank || '',
-            },
-          ])
+        }
+
+        setPaymentItems([
+          {
+            id: editingReceipt.id,
+            receipt_type: receiptTypeValue as number,
+            transaction_date: editingReceipt.receipt_date || getTodayString(),
+            receipt_account: editingReceipt.receipt_account || '',
+            notes: editingReceipt.notes || '',
+            amount: editingReceipt.receipt_amount || 0,
+            email: editingReceipt.email || '',
+            payment_name: editingReceipt.payment_name || '',
+            pay_dateline: editingReceipt.pay_dateline || '',
+            handler_name: editingReceipt.handler_name || '',
+            account_info: editingReceipt.account_info || '',
+            fees: editingReceipt.fees || 0,
+            card_last_four: editingReceipt.card_last_four || '',
+            auth_code: editingReceipt.auth_code || '',
+            check_number: editingReceipt.check_number || '',
+            check_bank: editingReceipt.check_bank || '',
+          },
+        ])
         return
       }
 
@@ -328,7 +330,14 @@ export function AddReceiptDialog({
         onSuccess?.()
       }
     } catch (error) {
-      logger.error('[AddReceiptDialog] Create Receipt Error:', error, JSON.stringify(error, Object.getOwnPropertyNames(error instanceof Error ? error : Object(error))))
+      logger.error(
+        '[AddReceiptDialog] Create Receipt Error:',
+        error,
+        JSON.stringify(
+          error,
+          Object.getOwnPropertyNames(error instanceof Error ? error : Object(error))
+        )
+      )
 
       // 解析錯誤訊息
       let errorMessage = ADD_RECEIPT_DIALOG_LABELS.發生未知錯誤_請檢查必填欄位是否完整
@@ -503,152 +512,154 @@ export function AddReceiptDialog({
                 <Skeleton className="h-10 w-full" />
                 <Skeleton className="h-10 w-[60%]" />
               </div>
-            ) : (<>
-            {/* 收款項目 - 文青風表格 */}
-            <div className="flex-1 flex flex-col overflow-hidden pt-4 border-t border-morandi-container/30">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-morandi-primary">
-                  {ADD_RECEIPT_DIALOG_LABELS.LABEL_4595}
-                </h3>
-                {/* 未確認的收款單都可以新增/刪除項目 */}
-                {!isConfirmed && (
-                  <Button
-                    onClick={addPaymentItem}
-                    size="sm"
-                    variant="outline"
-                    className="text-morandi-gold border-morandi-gold/50 hover:bg-morandi-gold/10 hover:border-morandi-gold"
-                  >
-                    <Plus size={14} className="mr-2" />
-                    {ADD_RECEIPT_DIALOG_LABELS.ADD_2089}
-                  </Button>
-                )}
-              </div>
-
-              <div className="flex-1 overflow-auto">
-                {/* 項目表格 */}
-                <div className="border border-border rounded-lg overflow-hidden bg-card">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="text-xs text-morandi-primary font-medium bg-morandi-container/50">
-                        <th
-                          className="text-left py-2.5 px-3 border-b border-r border-border"
-                          style={{ width: '110px' }}
-                        >
-                          {ADD_RECEIPT_DIALOG_LABELS.LABEL_5187}
-                        </th>
-                        <th
-                          className="text-left py-2.5 px-3 border-b border-r border-border"
-                          style={{ width: '150px' }}
-                        >
-                          {ADD_RECEIPT_DIALOG_LABELS.LABEL_1182}
-                        </th>
-                        <th
-                          className="text-left py-2.5 px-3 border-b border-r border-border"
-                          style={{ width: '180px' }}
-                        >
-                          {ADD_RECEIPT_DIALOG_LABELS.LABEL_6465}
-                        </th>
-                        <th className="text-left py-2.5 px-3 border-b border-r border-border">
-                          {ADD_RECEIPT_DIALOG_LABELS.REMARKS}
-                        </th>
-                        <th
-                          className="text-right py-2.5 px-3 border-b border-border"
-                          style={{ width: '140px' }}
-                        >
-                          {ADD_RECEIPT_DIALOG_LABELS.AMOUNT}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paymentItems.map((item, index) => (
-                        <PaymentItemRow
-                          key={item.id}
-                          item={item}
-                          index={index}
-                          onUpdate={updatePaymentItem}
-                          onRemove={removePaymentItem}
-                          canRemove={paymentItems.length > 1}
-                          isNewRow={!isEditMode && index === paymentItems.length - 1}
-                          readonly={isConfirmed}
-                          paymentMethods={paymentMethods}
-                          orderInfo={
-                            selectedOrder
-                              ? {
-                                  order_number: selectedOrder.order_number || undefined,
-                                  tour_name: selectedOrder.tour_name || undefined,
-                                  contact_person: selectedOrder.contact_person || undefined,
-                                  contact_email:
-                                    (selectedOrder as { contact_email?: string }).contact_email ||
-                                    undefined,
-                                }
-                              : undefined
-                          }
-                        />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            {/* LinkPay 結果區域 */}
-            {linkPayResults.length > 0 && (
-              <div className="space-y-3 pt-4 border-t border-morandi-gold/30 bg-morandi-gold/5 -mx-6 px-6 py-4">
-                <h3 className="text-sm font-medium text-morandi-gold flex items-center gap-2">
-                  <ExternalLink size={16} />
-                  {ADD_RECEIPT_DIALOG_LABELS.LINKPAY_LINKS_GENERATED}
-                </h3>
-                <div className="space-y-2">
-                  {linkPayResults.map(result => (
-                    <div
-                      key={result.receiptNumber}
-                      className="flex items-center gap-3 bg-card rounded-lg px-4 py-3 border border-morandi-gold/20"
-                    >
-                      <span className="text-sm font-medium text-morandi-primary min-w-[120px]">
-                        {result.receiptNumber}
-                      </span>
-                      <Input
-                        value={result.link}
-                        readOnly
-                        className="flex-1 text-xs bg-morandi-container/30 border-0"
-                      />
+            ) : (
+              <>
+                {/* 收款項目 - 文青風表格 */}
+                <div className="flex-1 flex flex-col overflow-hidden pt-4 border-t border-morandi-container/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-medium text-morandi-primary">
+                      {ADD_RECEIPT_DIALOG_LABELS.LABEL_4595}
+                    </h3>
+                    {/* 未確認的收款單都可以新增/刪除項目 */}
+                    {!isConfirmed && (
                       <Button
-                        variant="ghost"
+                        onClick={addPaymentItem}
                         size="sm"
-                        onClick={() => {
-                          navigator.clipboard.writeText(result.link)
-                          setCopiedLink(result.receiptNumber)
-                          setTimeout(() => setCopiedLink(null), 2000)
-                        }}
-                        className="gap-1 text-morandi-gold hover:bg-morandi-gold/10"
+                        variant="outline"
+                        className="text-morandi-gold border-morandi-gold/50 hover:bg-morandi-gold/10 hover:border-morandi-gold"
                       >
-                        {copiedLink === result.receiptNumber ? (
-                          <>
-                            <Check size={14} />
-                            {ADD_RECEIPT_DIALOG_LABELS.COPYING_1937}
-                          </>
-                        ) : (
-                          <>
-                            <Copy size={14} />
-                            {ADD_RECEIPT_DIALOG_LABELS.COPY}
-                          </>
-                        )}
+                        <Plus size={14} className="mr-2" />
+                        {ADD_RECEIPT_DIALOG_LABELS.ADD_2089}
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => window.open(result.link, '_blank')}
-                        className="gap-1 text-morandi-secondary hover:bg-morandi-container/50"
-                      >
-                        <ExternalLink size={14} />
-                        {ADD_RECEIPT_DIALOG_LABELS.LABEL_1670}
-                      </Button>
+                    )}
+                  </div>
+
+                  <div className="flex-1 overflow-auto">
+                    {/* 項目表格 */}
+                    <div className="border border-border rounded-lg overflow-hidden bg-card">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="text-xs text-morandi-primary font-medium bg-morandi-container/50">
+                            <th
+                              className="text-left py-2.5 px-3 border-b border-r border-border"
+                              style={{ width: '110px' }}
+                            >
+                              {ADD_RECEIPT_DIALOG_LABELS.LABEL_5187}
+                            </th>
+                            <th
+                              className="text-left py-2.5 px-3 border-b border-r border-border"
+                              style={{ width: '150px' }}
+                            >
+                              {ADD_RECEIPT_DIALOG_LABELS.LABEL_1182}
+                            </th>
+                            <th
+                              className="text-left py-2.5 px-3 border-b border-r border-border"
+                              style={{ width: '180px' }}
+                            >
+                              {ADD_RECEIPT_DIALOG_LABELS.LABEL_6465}
+                            </th>
+                            <th className="text-left py-2.5 px-3 border-b border-r border-border">
+                              {ADD_RECEIPT_DIALOG_LABELS.REMARKS}
+                            </th>
+                            <th
+                              className="text-right py-2.5 px-3 border-b border-border"
+                              style={{ width: '140px' }}
+                            >
+                              {ADD_RECEIPT_DIALOG_LABELS.AMOUNT}
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {paymentItems.map((item, index) => (
+                            <PaymentItemRow
+                              key={item.id}
+                              item={item}
+                              index={index}
+                              onUpdate={updatePaymentItem}
+                              onRemove={removePaymentItem}
+                              canRemove={paymentItems.length > 1}
+                              isNewRow={!isEditMode && index === paymentItems.length - 1}
+                              readonly={isConfirmed}
+                              paymentMethods={paymentMethods}
+                              orderInfo={
+                                selectedOrder
+                                  ? {
+                                      order_number: selectedOrder.order_number || undefined,
+                                      tour_name: selectedOrder.tour_name || undefined,
+                                      contact_person: selectedOrder.contact_person || undefined,
+                                      contact_email:
+                                        (selectedOrder as { contact_email?: string })
+                                          .contact_email || undefined,
+                                    }
+                                  : undefined
+                              }
+                            />
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
+
+                {/* LinkPay 結果區域 */}
+                {linkPayResults.length > 0 && (
+                  <div className="space-y-3 pt-4 border-t border-morandi-gold/30 bg-morandi-gold/5 -mx-6 px-6 py-4">
+                    <h3 className="text-sm font-medium text-morandi-gold flex items-center gap-2">
+                      <ExternalLink size={16} />
+                      {ADD_RECEIPT_DIALOG_LABELS.LINKPAY_LINKS_GENERATED}
+                    </h3>
+                    <div className="space-y-2">
+                      {linkPayResults.map(result => (
+                        <div
+                          key={result.receiptNumber}
+                          className="flex items-center gap-3 bg-card rounded-lg px-4 py-3 border border-morandi-gold/20"
+                        >
+                          <span className="text-sm font-medium text-morandi-primary min-w-[120px]">
+                            {result.receiptNumber}
+                          </span>
+                          <Input
+                            value={result.link}
+                            readOnly
+                            className="flex-1 text-xs bg-morandi-container/30 border-0"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              navigator.clipboard.writeText(result.link)
+                              setCopiedLink(result.receiptNumber)
+                              setTimeout(() => setCopiedLink(null), 2000)
+                            }}
+                            className="gap-1 text-morandi-gold hover:bg-morandi-gold/10"
+                          >
+                            {copiedLink === result.receiptNumber ? (
+                              <>
+                                <Check size={14} />
+                                {ADD_RECEIPT_DIALOG_LABELS.COPYING_1937}
+                              </>
+                            ) : (
+                              <>
+                                <Copy size={14} />
+                                {ADD_RECEIPT_DIALOG_LABELS.COPY}
+                              </>
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(result.link, '_blank')}
+                            className="gap-1 text-morandi-secondary hover:bg-morandi-container/50"
+                          >
+                            <ExternalLink size={14} />
+                            {ADD_RECEIPT_DIALOG_LABELS.LABEL_1670}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
-          </>)}
           </TabsContent>
 
           {/* 公司收款 */}
@@ -656,9 +667,7 @@ export function AddReceiptDialog({
             {/* 收款項目 */}
             <div className="flex-1 flex flex-col overflow-hidden">
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-morandi-primary">
-                  收款項目
-                </h3>
+                <h3 className="text-sm font-medium text-morandi-primary">收款項目</h3>
                 {!isConfirmed && (
                   <Button
                     onClick={addPaymentItem}
@@ -677,19 +686,31 @@ export function AddReceiptDialog({
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="text-xs text-morandi-primary font-medium bg-morandi-container/50">
-                        <th className="text-left py-2.5 px-3 border-b border-r border-border" style={{ width: '110px' }}>
+                        <th
+                          className="text-left py-2.5 px-3 border-b border-r border-border"
+                          style={{ width: '110px' }}
+                        >
                           收款方式
                         </th>
-                        <th className="text-left py-2.5 px-3 border-b border-r border-border" style={{ width: '150px' }}>
+                        <th
+                          className="text-left py-2.5 px-3 border-b border-r border-border"
+                          style={{ width: '150px' }}
+                        >
                           收款日期
                         </th>
-                        <th className="text-left py-2.5 px-3 border-b border-r border-border" style={{ width: '180px' }}>
+                        <th
+                          className="text-left py-2.5 px-3 border-b border-r border-border"
+                          style={{ width: '180px' }}
+                        >
                           收款項目
                         </th>
                         <th className="text-left py-2.5 px-3 border-b border-r border-border">
                           備註
                         </th>
-                        <th className="text-right py-2.5 px-3 border-b border-border" style={{ width: '140px' }}>
+                        <th
+                          className="text-right py-2.5 px-3 border-b border-border"
+                          style={{ width: '140px' }}
+                        >
                           金額
                         </th>
                       </tr>
@@ -774,12 +795,15 @@ export function AddReceiptDialog({
                     setIsSubmitting(true)
                     try {
                       await handleSubmit()
-                      await onUpdate?.(editingReceipt.id, { 
+                      await onUpdate?.(editingReceipt.id, {
                         status: '2',
                         updated_by: user?.id,
                       })
                       // 重算團財務數據
-                      await recalculateReceiptStats(editingReceipt.order_id, editingReceipt.tour_id || null)
+                      await recalculateReceiptStats(
+                        editingReceipt.order_id,
+                        editingReceipt.tour_id || null
+                      )
                       toast({ title: '已標記為異常' })
                       onSuccess?.()
                       onOpenChange(false)
@@ -801,12 +825,15 @@ export function AddReceiptDialog({
                     setIsSubmitting(true)
                     try {
                       await handleSubmit()
-                      await onUpdate?.(editingReceipt.id, { 
+                      await onUpdate?.(editingReceipt.id, {
                         status: '1',
                         actual_amount: totalAmount,
                       } as Partial<Receipt>)
                       // 重算團財務數據
-                      await recalculateReceiptStats(editingReceipt.order_id, editingReceipt.tour_id || null)
+                      await recalculateReceiptStats(
+                        editingReceipt.order_id,
+                        editingReceipt.tour_id || null
+                      )
                       toast({ title: '已確認收款' })
                       onSuccess?.()
                       onOpenChange(false)

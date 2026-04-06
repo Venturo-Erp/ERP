@@ -82,7 +82,7 @@ export default function WorkspacesPage() {
   // 上傳大小章
   const handleSealUpload = async (workspaceId: string, file: File) => {
     if (!file) return
-    
+
     setUploadingSeal(workspaceId)
     try {
       // 上傳到 Supabase Storage
@@ -90,17 +90,17 @@ export default function WorkspacesPage() {
       const { error: uploadError } = await supabase.storage
         .from('workspace-assets')
         .upload(fileName, file, { upsert: true })
-      
+
       if (uploadError) throw uploadError
-      
+
       // 取得公開 URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('workspace-assets')
-        .getPublicUrl(fileName)
-      
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from('workspace-assets').getPublicUrl(fileName)
+
       // 更新 workspace
       await updateWorkspace(workspaceId, { seal_image_url: publicUrl })
-      
+
       toast.success('大小章上傳成功')
       loadWorkspaces()
     } catch (error) {
@@ -430,9 +430,9 @@ export default function WorkspacesPage() {
                 )}
               </span>
               {workspace.seal_image_url && (
-                <img 
-                  src={workspace.seal_image_url} 
-                  alt="大小章" 
+                <img
+                  src={workspace.seal_image_url}
+                  alt="大小章"
                   className="w-8 h-8 object-contain ml-2"
                 />
               )}
@@ -456,7 +456,7 @@ export default function WorkspacesPage() {
                   const input = document.createElement('input')
                   input.type = 'file'
                   input.accept = 'image/*'
-                  input.onchange = (e) => {
+                  input.onchange = e => {
                     const file = (e.target as HTMLInputElement).files?.[0]
                     if (file) handleSealUpload(workspace.id, file)
                   }

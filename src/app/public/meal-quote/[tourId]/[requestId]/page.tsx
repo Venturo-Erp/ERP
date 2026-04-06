@@ -21,7 +21,9 @@ export default async function MealQuotePage({
   // 查詢需求單
   const { data: request } = await supabase
     .from('tour_requests')
-    .select('id, tour_id, supplier_name, supplier_response, replied_at, note, items, status, request_type')
+    .select(
+      'id, tour_id, supplier_name, supplier_response, replied_at, note, items, status, request_type'
+    )
     .eq('id', requestId)
     .eq('tour_id', tourId)
     .single()
@@ -70,7 +72,15 @@ export default async function MealQuotePage({
 
   // 判斷是否已提交
   const isSubmitted = request.supplier_response && request.replied_at
-  const quoteData = request.supplier_response as { submitted_at?: string; contact?: string; phone?: string; pax?: number; unitPrice?: number; totalCost?: number; notes?: string } | null
+  const quoteData = request.supplier_response as {
+    submitted_at?: string
+    contact?: string
+    phone?: string
+    pax?: number
+    unitPrice?: number
+    totalCost?: number
+    notes?: string
+  } | null
 
   // 計算天數
   const totalDays =
@@ -116,7 +126,9 @@ export default async function MealQuotePage({
                       {requestItems.map((item: Record<string, unknown>, idx: number) => (
                         <tr key={idx} className="border-b border-border">
                           <td className="py-2">{(item.meal_time as string) || '—'}</td>
-                          <td className="py-2">{(item.meal_content as string) || (item.name as string) || '—'}</td>
+                          <td className="py-2">
+                            {(item.meal_content as string) || (item.name as string) || '—'}
+                          </td>
                           <td className="text-center py-2">
                             {(item.quantity as number) || tour.current_participants || '—'}
                           </td>
@@ -149,7 +161,15 @@ export default async function MealQuotePage({
                 </summary>
                 <div className="p-4 space-y-3 border-t border-border">
                   {history.map((h: (typeof history)[number]) => {
-                    const hQuote = h.supplier_response as { submitted_at?: string; contact?: string; phone?: string; pax?: number; unitPrice?: number; totalCost?: number; notes?: string } | null
+                    const hQuote = h.supplier_response as {
+                      submitted_at?: string
+                      contact?: string
+                      phone?: string
+                      pax?: number
+                      unitPrice?: number
+                      totalCost?: number
+                      notes?: string
+                    } | null
                     return (
                       <div
                         key={h.id}

@@ -1,12 +1,11 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { Settings, Building2, MessageCircle } from 'lucide-react'
+import { Settings, Building2 } from 'lucide-react'
 
 const tabs = [
   { value: 'personal', label: '個人設定', href: '/settings' },
   { value: 'company', label: '公司設定', href: '/settings/company' },
-  { value: 'line', label: 'LINE Bot', href: '/settings/bot-line' },
 ]
 
 export function SettingsTabs() {
@@ -15,7 +14,6 @@ export function SettingsTabs() {
 
   const getActiveTab = () => {
     if (pathname === '/settings/company') return 'company'
-    if (pathname === '/settings/bot-line') return 'line'
     return 'personal'
   }
 

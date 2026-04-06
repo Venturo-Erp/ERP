@@ -11,11 +11,7 @@ const supabase = createClient(
 )
 
 async function fixAdminPerms() {
-  const { data: ws } = await supabase
-    .from('workspaces')
-    .select('id')
-    .eq('code', 'CORNER')
-    .single()
+  const { data: ws } = await supabase.from('workspaces').select('id').eq('code', 'CORNER').single()
 
   const { data: role } = await supabase
     .from('workspace_roles')

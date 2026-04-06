@@ -126,7 +126,9 @@ export function useTourEdit(params: UseTourEditParams) {
       // Fetch linked itinerary
       const { data: itinerary, error } = await supabase
         .from('itineraries')
-        .select('id, tour_id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary, version_records, workspace_id, created_at, updated_at')
+        .select(
+          'id, tour_id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary, version_records, workspace_id, created_at, updated_at'
+        )
         .eq('tour_id', tourId)
         .single()
 
@@ -194,18 +196,12 @@ export function useTourEdit(params: UseTourEditParams) {
       // 同步更新相關訂單和收款的 tour_name
       if (tour.name !== formData.name.trim()) {
         const newName = formData.name.trim()
-        
+
         // 更新訂單
-        await supabase
-          .from('orders')
-          .update({ tour_name: newName })
-          .eq('tour_id', tour.id)
-        
+        await supabase.from('orders').update({ tour_name: newName }).eq('tour_id', tour.id)
+
         // 更新收款
-        await supabase
-          .from('receipts')
-          .update({ tour_name: newName })
-          .eq('tour_id', tour.id)
+        await supabase.from('receipts').update({ tour_name: newName }).eq('tour_id', tour.id)
       }
 
       // Reload data

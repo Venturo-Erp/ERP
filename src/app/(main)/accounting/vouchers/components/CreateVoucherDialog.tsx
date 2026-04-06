@@ -93,7 +93,7 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
 
   const loadSourceDocuments = async () => {
     if (!user?.workspace_id || !sourceType) return
-    
+
     setIsLoadingDocuments(true)
     try {
       if (sourceType === 'receipt') {
@@ -104,14 +104,16 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
           .eq('workspace_id', user.workspace_id)
           .order('receipt_date', { ascending: false })
           .limit(50)
-        
-        setSourceDocuments((data || []).map(r => ({
-          id: r.id,
-          code: r.receipt_number || r.id.slice(0, 8),
-          description: r.notes || '收款單',
-          amount: r.amount || 0,
-          date: r.receipt_date || '',
-        })))
+
+        setSourceDocuments(
+          (data || []).map(r => ({
+            id: r.id,
+            code: r.receipt_number || r.id.slice(0, 8),
+            description: r.notes || '收款單',
+            amount: r.amount || 0,
+            date: r.receipt_date || '',
+          }))
+        )
       } else if (sourceType === 'payment_request') {
         // 載入請款單
         const { data } = await supabase
@@ -120,14 +122,16 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
           .eq('workspace_id', user.workspace_id)
           .order('request_date', { ascending: false })
           .limit(50)
-        
-        setSourceDocuments((data || []).map(r => ({
-          id: r.id,
-          code: r.code || r.id.slice(0, 8),
-          description: r.notes || '請款單',
-          amount: r.total_amount || 0,
-          date: r.request_date || '',
-        })))
+
+        setSourceDocuments(
+          (data || []).map(r => ({
+            id: r.id,
+            code: r.code || r.id.slice(0, 8),
+            description: r.notes || '請款單',
+            amount: r.total_amount || 0,
+            date: r.request_date || '',
+          }))
+        )
       }
     } catch (error) {
       logger.error('載入單據失敗:', error)
@@ -283,9 +287,9 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
           <div className="grid grid-cols-2 gap-4 p-3 bg-muted/50 rounded-lg">
             <div>
               <Label>關聯單據類型（選填）</Label>
-              <Select 
-                value={sourceType || 'none'} 
-                onValueChange={(v) => setSourceType(v === 'none' ? '' : v as SourceType)}
+              <Select
+                value={sourceType || 'none'}
+                onValueChange={v => setSourceType(v === 'none' ? '' : (v as SourceType))}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="不關聯單據" />
@@ -299,8 +303,8 @@ export function CreateVoucherDialog({ open, onOpenChange, onSuccess }: CreateVou
             </div>
             <div>
               <Label>選擇單據</Label>
-              <Select 
-                value={sourceId} 
+              <Select
+                value={sourceId}
                 onValueChange={setSourceId}
                 disabled={!sourceType || isLoadingDocuments}
               >

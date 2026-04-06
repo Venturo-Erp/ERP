@@ -74,7 +74,7 @@ export function AcceptQuoteDialog({
     } catch (error) {
       toast({
         title: '成交失敗',
-        description: (error instanceof Error ? error.message : String(error)),
+        description: error instanceof Error ? error.message : String(error),
         variant: 'destructive',
       })
     } finally {

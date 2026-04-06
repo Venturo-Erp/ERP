@@ -79,7 +79,9 @@ export function useTourRequestItems(tourId: string | null): UseTourRequestItemsR
     try {
       const { data, error: fetchError } = await supabase
         .from('tour_requests')
-        .select('id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, supplier_contact, supplier_response, items, note, sent_at, sent_to, sent_via, replied_at, replied_by, accepted_at, accepted_by, confirmed_at, confirmed_by, rejected_at, rejected_by, rejection_reason, closed_at, closed_by, close_note, package_status, selected_tier, covered_item_ids, recipient_workspace_id, target_workspace_id, source_type, source_id, request_scope, assigned_employee_id, assigned_employee_name, line_group_id, line_group_name, hidden, created_at, created_by, updated_at, updated_by')
+        .select(
+          'id, code, tour_id, workspace_id, request_type, status, supplier_name, supplier_id, supplier_contact, supplier_response, items, note, sent_at, sent_to, sent_via, replied_at, replied_by, accepted_at, accepted_by, confirmed_at, confirmed_by, rejected_at, rejected_by, rejection_reason, closed_at, closed_by, close_note, package_status, selected_tier, covered_item_ids, recipient_workspace_id, target_workspace_id, source_type, source_id, request_scope, assigned_employee_id, assigned_employee_name, line_group_id, line_group_name, hidden, created_at, created_by, updated_at, updated_by'
+        )
         .eq('tour_id', tourId)
         .not('supplier_id', 'is', null) // 有供應商才顯示
         .order('category')

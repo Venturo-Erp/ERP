@@ -175,7 +175,9 @@ export async function getQuoteById(id: string, workspaceId?: string): Promise<Qu
 
   const { data, error } = await supabase
     .from('quotes')
-    .select('id, tour_id, version, status, quick_quote_items, cost_structure, total_cost, profit_margin, notes, confirmation_status, confirmed_at, confirmed_by, customer_confirmed_at, display_price, is_locked, locked_at, locked_by, overall_margin_percent, workspace_id, created_at, created_by, updated_at, updated_by')
+    .select(
+      'id, tour_id, version, status, quick_quote_items, cost_structure, total_cost, profit_margin, notes, confirmation_status, confirmed_at, confirmed_by, customer_confirmed_at, display_price, is_locked, locked_at, locked_by, overall_margin_percent, workspace_id, created_at, created_by, updated_at, updated_by'
+    )
     .eq('id', id)
     .eq('workspace_id', wsId) // 🔒 Workspace 過濾
     .single()

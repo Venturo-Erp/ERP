@@ -280,12 +280,14 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
               >
                 {tab.label}
                 {tab.count !== undefined && (
-                  <span className={cn(
-                    'px-1.5 py-0.5 rounded text-xs',
-                    props.activeTab === tab.value
-                      ? 'bg-morandi-gold/20 text-morandi-gold'
-                      : 'bg-morandi-container text-morandi-secondary'
-                  )}>
+                  <span
+                    className={cn(
+                      'px-1.5 py-0.5 rounded text-xs',
+                      props.activeTab === tab.value
+                        ? 'bg-morandi-gold/20 text-morandi-gold'
+                        : 'bg-morandi-container text-morandi-secondary'
+                    )}
+                  >
                     {tab.count}
                   </span>
                 )}

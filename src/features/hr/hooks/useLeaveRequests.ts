@@ -216,7 +216,9 @@ export function useLeaveRequests() {
         // 取得請假申請資訊
         const { data: request, error: fetchError } = await supabase
           .from('leave_requests')
-          .select('id, employee_id, leave_type_id, start_date, end_date, days, reason, status, approved_by, approved_at, workspace_id, created_at, updated_at')
+          .select(
+            'id, employee_id, leave_type_id, start_date, end_date, days, reason, status, approved_by, approved_at, workspace_id, created_at, updated_at'
+          )
           .eq('id', id)
           .limit(500)
 
@@ -242,7 +244,9 @@ export function useLeaveRequests() {
         const year = new Date(request.start_date).getFullYear()
         const { data: balance, error: balanceError } = await supabase
           .from('leave_balances')
-          .select('id, employee_id, leave_type_id, year, entitled_days, used_days, remaining_days, carry_over_days, notes, workspace_id, created_at, updated_at')
+          .select(
+            'id, employee_id, leave_type_id, year, entitled_days, used_days, remaining_days, carry_over_days, notes, workspace_id, created_at, updated_at'
+          )
           .eq('employee_id', request.employee_id)
           .eq('leave_type_id', request.leave_type_id)
           .eq('year', year)

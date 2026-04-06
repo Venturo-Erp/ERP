@@ -1,10 +1,10 @@
 #!/usr/bin/env tsx
 /**
  * 修正顧客重複和護照驗證狀態問題
- * 
+ *
  * 1. 合併重複的顧客（相同護照號碼）
  * 2. 同步護照驗證狀態（從 order_members 推斷）
- * 
+ *
  * 執行方式：
  * cd ~/Projects/venturo-erp
  * npx tsx scripts/fix-customer-duplicates-and-verification.ts
@@ -53,7 +53,7 @@ async function main() {
       passport_number: group[0].passport_number,
       ids: group.map(c => c.id),
       names: group.map(c => c.name),
-      created_ats: group.map(c => c.created_at)
+      created_ats: group.map(c => c.created_at),
     }))
 
   const dupError = error
@@ -67,10 +67,12 @@ async function main() {
     console.log('✅ 沒有重複的顧客！\n')
   } else {
     console.log(`📋 找到 ${duplicates.length} 組重複的顧客：`)
-    
+
     for (const dup of duplicates) {
       console.log(`\n🔹 ${dup.names[0]} (護照: ${dup.passport_number})`)
-      console.log(`   重複 ${dup.ids.length} 筆，ID: ${dup.ids.slice(0, 3).join(', ')}${dup.ids.length > 3 ? '...' : ''}`)
+      console.log(
+        `   重複 ${dup.ids.length} 筆，ID: ${dup.ids.slice(0, 3).join(', ')}${dup.ids.length > 3 ? '...' : ''}`
+      )
 
       // 保留最早建立的，刪除其他的
       const keepId = dup.ids[0]
@@ -92,10 +94,7 @@ async function main() {
       }
 
       // 2. 刪除重複的顧客
-      const { error: deleteError } = await supabase
-        .from('customers')
-        .delete()
-        .in('id', deleteIds)
+      const { error: deleteError } = await supabase.from('customers').delete().in('id', deleteIds)
 
       if (deleteError) {
         console.error(`   ❌ 刪除顧客失敗:`, deleteError.message)
@@ -110,7 +109,8 @@ async function main() {
   // 查詢所有有關聯訂單成員的顧客
   const { data: customersWithMembers, error: cwmError } = await supabase
     .from('customers')
-    .select(`
+    .select(
+      `
       id,
       name,
       passport_number,
@@ -122,7 +122,8 @@ async function main() {
         passport_expiry,
         id_number
       )
-    `)
+    `
+    )
     .eq('workspace_id', WORKSPACE_ID)
 
   if (cwmError) {
@@ -137,11 +138,9 @@ async function main() {
   for (const customer of customersWithMembers || []) {
     // 檢查 order_members 的護照資料是否完整
     const members = customer.order_members as any[]
-    const hasVerifiedMember = members.some(m => 
-      m.passport_number && 
-      m.passport_name && 
-      m.passport_expiry &&
-      m.passport_number.length >= 8
+    const hasVerifiedMember = members.some(
+      m =>
+        m.passport_number && m.passport_name && m.passport_expiry && m.passport_number.length >= 8
     )
 
     // 如果有完整的護照資料，但顧客的 verification_status 不是 verified，則更新

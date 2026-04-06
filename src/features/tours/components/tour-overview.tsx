@@ -52,13 +52,32 @@ export const TourOverview = React.memo(function TourOverview({
   const { channels } = useWorkspaceChannels()
 
   // 收款金額計算
-  const orderIds = useMemo(() => new Set((orders ?? []).filter(o => o.tour_id === tour.id).map(o => o.id)), [orders, tour.id])
+  const orderIds = useMemo(
+    () => new Set((orders ?? []).filter(o => o.tour_id === tour.id).map(o => o.id)),
+    [orders, tour.id]
+  )
   const tourReceipts = useMemo(
-    () => (allReceipts ?? []).filter(r => !r.deleted_at && (r.tour_id === tour.id || (r.order_id && orderIds.has(r.order_id)))),
+    () =>
+      (allReceipts ?? []).filter(
+        r => !r.deleted_at && (r.tour_id === tour.id || (r.order_id && orderIds.has(r.order_id)))
+      ),
     [allReceipts, tour.id, orderIds]
   )
-  const confirmedIncome = useMemo(() => tourReceipts.filter(r => r.status === '1').reduce((sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0), 0), [tourReceipts])
-  const estimatedIncome = useMemo(() => tourReceipts.reduce((sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0), 0), [tourReceipts])
+  const confirmedIncome = useMemo(
+    () =>
+      tourReceipts
+        .filter(r => r.status === '1')
+        .reduce((sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0), 0),
+    [tourReceipts]
+  )
+  const estimatedIncome = useMemo(
+    () =>
+      tourReceipts.reduce(
+        (sum, r) => sum + (Number(r.actual_amount) || Number(r.receipt_amount) || 0),
+        0
+      ),
+    [tourReceipts]
+  )
   const totalExpense = tour.total_cost ?? 0
   const confirmedProfit = confirmedIncome - totalExpense
   const estimatedProfit = estimatedIncome - totalExpense
@@ -179,7 +198,10 @@ export const TourOverview = React.memo(function TourOverview({
   }
 
   // 健康度項目（移除需求單狀態，團員人數已在標題列顯示）
-  const healthItems: Array<{ label: string; data: { status: 'good' | 'warning' | 'error'; message: string } }> = []
+  const healthItems: Array<{
+    label: string
+    data: { status: 'good' | 'warning' | 'error'; message: string }
+  }> = []
 
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-card">

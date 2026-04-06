@@ -120,7 +120,8 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           .limit(1)
           .maybeSingle()
 
-        const leaderName = ((leaderMember as unknown as Record<string, unknown>))?.chinese_name as string || null
+        const leaderName =
+          ((leaderMember as unknown as Record<string, unknown>)?.chinese_name as string) || null
 
         setHeaderInfo({
           code: tour.code,
@@ -420,7 +421,13 @@ function CategoryTable({
           <colgroup>
             <col style={{ width: '10%' }} />
             <col style={{ width: showUnitPriceColumns ? '22%' : '35%' }} />
-            {showUnitPriceColumns && <><col style={{ width: '12%' }} /><col style={{ width: '8%' }} /><col style={{ width: '12%' }} /></>}
+            {showUnitPriceColumns && (
+              <>
+                <col style={{ width: '12%' }} />
+                <col style={{ width: '8%' }} />
+                <col style={{ width: '12%' }} />
+              </>
+            )}
             <col style={{ width: '12%' }} />
             <col style={{ width: '12%' }} />
             <col style={{ width: showUnitPriceColumns ? '12%' : '19%' }} />
@@ -499,7 +506,7 @@ function TableRow({
     item.confirmed_cost ??
     item.reply_cost ??
     (item.unit_price != null && item.quantity != null ? item.unit_price * item.quantity : null)
-  
+
   // 如果系統沒有預計支出，可以手動填 estimated_cost
   const [manualEstimatedCost, setManualEstimatedCost] = useState<string>(
     item.estimated_cost != null ? String(item.estimated_cost) : ''
@@ -609,7 +616,7 @@ function TableRow({
 
       {/* 預計支出：Local 負責顯示標籤，有系統值顯示，沒有則可編輯 */}
       <td className="px-3 py-2">
-        {((item as unknown as Record<string, unknown>).handled_by) === 'local' ? (
+        {(item as unknown as Record<string, unknown>).handled_by === 'local' ? (
           // Local 負責 → 顯示標籤（不需填預算）
           <div className="text-right">
             <span className="px-2 py-0.5 text-xs bg-status-info/10 text-status-info rounded print:bg-transparent print:text-status-info">
@@ -748,7 +755,10 @@ function DailyItineraryTable({
 
       {/* 表格 */}
       <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
-        <colgroup><col style={{ width: '12%' }} /><col style={{ width: '88%' }} /></colgroup>
+        <colgroup>
+          <col style={{ width: '12%' }} />
+          <col style={{ width: '88%' }} />
+        </colgroup>
         <thead>
           <tr className="bg-morandi-container border-b">
             <th className="px-3 py-2 text-left font-medium">日期</th>

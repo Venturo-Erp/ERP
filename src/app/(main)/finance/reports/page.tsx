@@ -4,14 +4,7 @@ import Link from 'next/link'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
 import { ActionCell } from '@/components/table-cells'
-import { 
-  FileDown, 
-  TrendingUp, 
-  AlertCircle, 
-  Wallet, 
-  BarChart3,
-  ExternalLink 
-} from 'lucide-react'
+import { FileDown, TrendingUp, AlertCircle, Wallet, BarChart3, ExternalLink } from 'lucide-react'
 
 interface ReportItem {
   id: string
@@ -85,9 +78,7 @@ export default function ReportsPage() {
     {
       key: 'description',
       label: '說明',
-      render: value => (
-        <span className="text-sm text-morandi-secondary">{String(value)}</span>
-      ),
+      render: value => <span className="text-sm text-morandi-secondary">{String(value)}</span>,
     },
   ]
 
@@ -106,16 +97,13 @@ export default function ReportsPage() {
   )
 
   return (
-    <ContentPageLayout
-      title="財務報表"
-      icon={BarChart3}
-    >
+    <ContentPageLayout title="財務報表" icon={BarChart3}>
       <div className="p-4">
         <EnhancedTable
           columns={columns}
           data={reports}
           actions={renderActions}
-          onRowClick={(report) => {
+          onRowClick={report => {
             window.location.href = report.href
           }}
           bordered

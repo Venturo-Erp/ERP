@@ -8,10 +8,7 @@ export async function GET(request: NextRequest) {
     const tourId = searchParams.get('tourId')
 
     if (!tourId) {
-      return NextResponse.json(
-        { error: '缺少 tourId' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: '缺少 tourId' }, { status: 400 })
     }
 
     // RLS 會自動過濾，只回傳當前租戶的合約
@@ -22,17 +19,11 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false })
 
     if (error) {
-      return NextResponse.json(
-        { error: '查詢失敗' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: '查詢失敗' }, { status: 500 })
     }
 
     return NextResponse.json({ contracts: data })
   } catch {
-    return NextResponse.json(
-      { error: '系統錯誤' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
   }
 }

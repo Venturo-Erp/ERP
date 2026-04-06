@@ -56,7 +56,9 @@ export default function PeriodClosingPage() {
     try {
       const { data, error } = await supabase
         .from('accounting_period_closings')
-        .select('id, period_start, period_end, period_type, closed_by, closed_at, net_income, workspace_id, created_at')
+        .select(
+          'id, period_start, period_end, period_type, closed_by, closed_at, net_income, workspace_id, created_at'
+        )
         .eq('workspace_id', user.workspace_id)
         .order('period_end', { ascending: false })
         .limit(20)

@@ -55,7 +55,9 @@ export function ActivityQuoteDialog({
   }, [activities])
 
   const handleItemChange = (idx: number, field: string, value: unknown) => {
-    setEditableItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item))
+    setEditableItems(prev =>
+      prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item))
+    )
   }
 
   const handleInfoChange = (field: 'contact' | 'phone' | 'fax', value: string) => {
@@ -81,11 +83,14 @@ export function ActivityQuoteDialog({
 
     const loadAttractionInfo = async () => {
       if (resourceId) {
-        const { data } = await supabase
+        const { data } = (await supabase
           .from('attractions')
           .select('contact_name, phone, fax')
           .eq('id', resourceId)
-          .maybeSingle() as { data: { contact_name?: string; phone?: string; fax?: string } | null; error: unknown }
+          .maybeSingle()) as {
+          data: { contact_name?: string; phone?: string; fax?: string } | null
+          error: unknown
+        }
         if (data) {
           const info = {
             contact: data.contact_name || undefined,
@@ -198,7 +203,10 @@ export function ActivityQuoteDialog({
 
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
-      <DialogContent level={1} className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col print:max-w-none print:max-h-none print:overflow-visible">
+      <DialogContent
+        level={1}
+        className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col print:max-w-none print:max-h-none print:overflow-visible"
+      >
         <DialogHeader>
           <DialogTitle>活動需求單</DialogTitle>
         </DialogHeader>

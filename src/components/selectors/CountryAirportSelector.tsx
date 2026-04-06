@@ -78,7 +78,11 @@ export function CountryAirportSelector({
     if (externalCountries) {
       return externalCountries
         .filter(c => c.is_active)
-        .sort((a, b) => ((b as { usage_count?: number }).usage_count || 0) - ((a as { usage_count?: number }).usage_count || 0))
+        .sort(
+          (a, b) =>
+            ((b as { usage_count?: number }).usage_count || 0) -
+            ((a as { usage_count?: number }).usage_count || 0)
+        )
         .map(c => ({ value: c.name, label: c.name }))
     }
     // 優先用 countriesData（有 id），fallback 到 hookCountries
@@ -293,16 +297,20 @@ export function CountryAirportSelector({
         maxWidth="sm"
       >
         <div>
-          <label className="text-sm font-medium text-morandi-primary mb-2 block">
-            國家名稱
-          </label>
-          <Input value={newCountryName} onChange={e => setNewCountryName(e.target.value)} placeholder="例如：日本" />
+          <label className="text-sm font-medium text-morandi-primary mb-2 block">國家名稱</label>
+          <Input
+            value={newCountryName}
+            onChange={e => setNewCountryName(e.target.value)}
+            placeholder="例如：日本"
+          />
         </div>
         <div>
-          <label className="text-sm font-medium text-morandi-primary mb-2 block">
-            英文名稱
-          </label>
-          <Input value={newCountryNameEn} onChange={e => setNewCountryNameEn(e.target.value)} placeholder="例如：Japan" />
+          <label className="text-sm font-medium text-morandi-primary mb-2 block">英文名稱</label>
+          <Input
+            value={newCountryNameEn}
+            onChange={e => setNewCountryNameEn(e.target.value)}
+            placeholder="例如：Japan"
+          />
         </div>
         <div>
           <label className="text-sm font-medium text-morandi-primary mb-2 block">
@@ -310,7 +318,14 @@ export function CountryAirportSelector({
           </label>
           <Input
             value={newCountryCode}
-            onChange={e => setNewCountryCode(e.target.value.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2))}
+            onChange={e =>
+              setNewCountryCode(
+                e.target.value
+                  .toUpperCase()
+                  .replace(/[^A-Z]/g, '')
+                  .slice(0, 2)
+              )
+            }
             placeholder="例如：JP"
             maxLength={2}
           />

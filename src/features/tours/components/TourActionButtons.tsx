@@ -39,7 +39,14 @@ interface UseTourActionButtonsParams {
 }
 
 export function useTourActionButtons(params: UseTourActionButtonsParams) {
-  const { operations, onEditTour, setDeleteConfirm, onOpenArchiveDialog, onAddOrder, itineraries = [] } = params
+  const {
+    operations,
+    onEditTour,
+    setDeleteConfirm,
+    onOpenArchiveDialog,
+    onAddOrder,
+    itineraries = [],
+  } = params
   const router = useRouter()
 
   const renderActions = useCallback(

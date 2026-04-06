@@ -65,7 +65,9 @@ export async function createInsuranceRequirement(
       hidden: false,
       created_by: userId,
     } as never)
-    .select('id, code, tour_id, workspace_id, request_type, status, supplier_name, items, note, created_at')
+    .select(
+      'id, code, tour_id, workspace_id, request_type, status, supplier_name, items, note, created_at'
+    )
     .single()
 
   if (error) {

@@ -49,10 +49,7 @@ export async function PUT(
   }
 
   // 刪除舊的權限
-  await supabase
-    .from('role_tab_permissions')
-    .delete()
-    .eq('role_id', roleId)
+  await supabase.from('role_tab_permissions').delete().eq('role_id', roleId)
 
   // 只插入有開啟的權限
   const permissionsToInsert = permissions
@@ -66,9 +63,7 @@ export async function PUT(
     }))
 
   if (permissionsToInsert.length > 0) {
-    const { error } = await supabase
-      .from('role_tab_permissions')
-      .insert(permissionsToInsert)
+    const { error } = await supabase.from('role_tab_permissions').insert(permissionsToInsert)
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })

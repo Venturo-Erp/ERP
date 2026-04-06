@@ -21,7 +21,7 @@ export default function ReceiptTestPage() {
   // 可調整的偏移量（微調用）
   const [offsetLeft, setOffsetLeft] = useState(0) // mm
   const [offsetTop, setOffsetTop] = useState(0) // mm
-  
+
   // 基本資料
   const [buyer, setBuyer] = useState('永弘旅行社')
   const [taxId, setTaxId] = useState('12345678')
@@ -29,7 +29,7 @@ export default function ReceiptTestPage() {
   const [month, setMonth] = useState('03')
   const [day, setDay] = useState('26')
   const [handler, setHandler] = useState('王小明')
-  
+
   // 明細（固定 7 行）
   const [items, setItems] = useState<ReceiptItem[]>([
     { id: '1', desc: '', qty: 0, price: 0, note: '' },
@@ -42,19 +42,22 @@ export default function ReceiptTestPage() {
   ])
 
   // 顯示用：0 顯示為空
-  const displayValue = (val: number) => val === 0 ? '' : val
+  const displayValue = (val: number) => (val === 0 ? '' : val)
 
   // 計算金額和總計
-  const itemsWithAmount = useMemo(() => 
-    items.map(item => ({
-      ...item,
-      amount: item.qty * item.price
-    }))
-  , [items])
+  const itemsWithAmount = useMemo(
+    () =>
+      items.map(item => ({
+        ...item,
+        amount: item.qty * item.price,
+      })),
+    [items]
+  )
 
-  const total = useMemo(() => 
-    itemsWithAmount.reduce((sum, item) => sum + item.amount, 0)
-  , [itemsWithAmount])
+  const total = useMemo(
+    () => itemsWithAmount.reduce((sum, item) => sum + item.amount, 0),
+    [itemsWithAmount]
+  )
 
   // 數字轉大寫
   const numToChinese = (num: number): Record<string, string> => {
@@ -76,23 +79,23 @@ export default function ReceiptTestPage() {
 
   // 更新明細
   const updateItem = (id: string, field: keyof ReceiptItem, value: string | number) => {
-    setItems(items.map(item => 
-      item.id === id ? { ...item, [field]: value } : item
-    ))
+    setItems(items.map(item => (item.id === id ? { ...item, [field]: value } : item)))
   }
 
   // 生成列印 HTML（共用於預覽和列印）
   const generatePrintHtml = () => {
-    const itemsHtml = itemsWithAmount.map((item, idx) => {
-      const topPos = 48 + idx * 8
-      return `
+    const itemsHtml = itemsWithAmount
+      .map((item, idx) => {
+        const topPos = 48 + idx * 8
+        return `
         <div style="position: absolute; top: ${topPos}mm; left: 15mm; width: 38mm; overflow: hidden;">${item.desc}</div>
         <div style="position: absolute; top: ${topPos}mm; left: 53mm; width: 12mm; text-align: left;">${item.qty || ''}</div>
         <div style="position: absolute; top: ${topPos}mm; left: 65mm; width: 25mm; text-align: left;">${item.price || ''}</div>
         <div style="position: absolute; top: ${topPos}mm; left: 90mm; width: 20mm; text-align: left;">${item.amount || ''}</div>
         <div style="position: absolute; top: ${topPos}mm; left: 110mm; width: 85mm;">${item.note}</div>
       `
-    }).join('')
+      })
+      .join('')
 
     const totalTopPos = 104
 
@@ -186,7 +189,7 @@ export default function ReceiptTestPage() {
       {/* 左邊：輸入區 */}
       <div>
         <h1 className="text-2xl font-bold mb-6">收據列印測試</h1>
-        
+
         {/* 基本資料 */}
         <div className="bg-card p-4 rounded-lg mb-4">
           <h2 className="font-semibold mb-4">基本資料</h2>
@@ -202,9 +205,24 @@ export default function ReceiptTestPage() {
             <div>
               <label className="text-sm text-muted-foreground">日期（民國）</label>
               <div className="flex gap-1">
-                <Input value={year} onChange={e => setYear(e.target.value)} className="w-16" placeholder="年" />
-                <Input value={month} onChange={e => setMonth(e.target.value)} className="w-12" placeholder="月" />
-                <Input value={day} onChange={e => setDay(e.target.value)} className="w-12" placeholder="日" />
+                <Input
+                  value={year}
+                  onChange={e => setYear(e.target.value)}
+                  className="w-16"
+                  placeholder="年"
+                />
+                <Input
+                  value={month}
+                  onChange={e => setMonth(e.target.value)}
+                  className="w-12"
+                  placeholder="月"
+                />
+                <Input
+                  value={day}
+                  onChange={e => setDay(e.target.value)}
+                  className="w-12"
+                  placeholder="日"
+                />
               </div>
             </div>
             <div>
@@ -231,25 +249,25 @@ export default function ReceiptTestPage() {
               {items.map(item => (
                 <tr key={item.id} className="border-b">
                   <td className="py-2">
-                    <Input 
-                      value={item.desc} 
+                    <Input
+                      value={item.desc}
                       onChange={e => updateItem(item.id, 'desc', e.target.value)}
                       className="h-8"
                     />
                   </td>
                   <td className="py-2">
-                    <Input 
+                    <Input
                       type="number"
-                      value={displayValue(item.qty)} 
+                      value={displayValue(item.qty)}
                       onChange={e => updateItem(item.id, 'qty', parseInt(e.target.value) || 0)}
                       className="h-8 text-center"
                       placeholder=""
                     />
                   </td>
                   <td className="py-2">
-                    <Input 
+                    <Input
                       type="number"
-                      value={displayValue(item.price)} 
+                      value={displayValue(item.price)}
                       onChange={e => updateItem(item.id, 'price', parseInt(e.target.value) || 0)}
                       className="h-8 text-right"
                       placeholder=""
@@ -259,8 +277,8 @@ export default function ReceiptTestPage() {
                     {item.qty * item.price > 0 ? (item.qty * item.price).toLocaleString() : ''}
                   </td>
                   <td className="py-2">
-                    <Input 
-                      value={item.note} 
+                    <Input
+                      value={item.note}
                       onChange={e => updateItem(item.id, 'note', e.target.value)}
                       className="h-8"
                     />
@@ -270,14 +288,16 @@ export default function ReceiptTestPage() {
             </tbody>
             <tfoot>
               <tr className="font-bold">
-                <td colSpan={3} className="py-2 text-right">總計：</td>
+                <td colSpan={3} className="py-2 text-right">
+                  總計：
+                </td>
                 <td className="py-2 text-right">{total > 0 ? total.toLocaleString() : ''}</td>
                 <td></td>
               </tr>
             </tfoot>
           </table>
         </div>
-        
+
         {/* 調整面板 */}
         <div className="bg-card p-4 rounded-lg mb-6">
           <h2 className="font-semibold mb-4">位置微調（mm）</h2>
@@ -326,7 +346,7 @@ export default function ReceiptTestPage() {
       {/* 右邊：預覽區 */}
       <div>
         <h2 className="font-semibold mb-4">列印預覽</h2>
-        <div 
+        <div
           className="bg-white border-2 border-dashed border-gray-300 overflow-hidden"
           style={{
             width: '214mm',
@@ -342,13 +362,33 @@ export default function ReceiptTestPage() {
             marginTop: '98mm',
           }}
         >
-          <div 
+          <div
             style={{ position: 'absolute', left: `${10 + offsetLeft}mm`, top: `${offsetTop}mm` }}
           >
             {/* 買受人 */}
-            <div style={{ position: 'absolute', top: '17mm', left: '15mm', whiteSpace: 'nowrap', letterSpacing: '2px' }}>{buyer}</div>
+            <div
+              style={{
+                position: 'absolute',
+                top: '17mm',
+                left: '15mm',
+                whiteSpace: 'nowrap',
+                letterSpacing: '2px',
+              }}
+            >
+              {buyer}
+            </div>
             {/* 統編 */}
-            <div style={{ position: 'absolute', top: '22mm', left: '15mm', whiteSpace: 'nowrap', letterSpacing: '3px' }}>{taxId}</div>
+            <div
+              style={{
+                position: 'absolute',
+                top: '22mm',
+                left: '15mm',
+                whiteSpace: 'nowrap',
+                letterSpacing: '3px',
+              }}
+            >
+              {taxId}
+            </div>
             {/* 年月日 */}
             <div style={{ position: 'absolute', top: '17mm', left: '100mm' }}>{year}</div>
             <div style={{ position: 'absolute', top: '17mm', left: '115mm' }}>{month}</div>
@@ -358,27 +398,108 @@ export default function ReceiptTestPage() {
               const topPos = 48 + idx * 8
               return (
                 <div key={item.id}>
-                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '15mm', width: '38mm', overflow: 'hidden', whiteSpace: 'nowrap' }}>{item.desc}</div>
-                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '53mm', width: '12mm', textAlign: 'left' }}>{item.qty || ''}</div>
-                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '65mm', width: '25mm', textAlign: 'left' }}>{item.price || ''}</div>
-                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '90mm', width: '20mm', textAlign: 'left' }}>{item.amount || ''}</div>
-                  <div style={{ position: 'absolute', top: `${topPos}mm`, left: '110mm', width: '85mm', whiteSpace: 'nowrap' }}>{item.note}</div>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: `${topPos}mm`,
+                      left: '15mm',
+                      width: '38mm',
+                      overflow: 'hidden',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {item.desc}
+                  </div>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: `${topPos}mm`,
+                      left: '53mm',
+                      width: '12mm',
+                      textAlign: 'left',
+                    }}
+                  >
+                    {item.qty || ''}
+                  </div>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: `${topPos}mm`,
+                      left: '65mm',
+                      width: '25mm',
+                      textAlign: 'left',
+                    }}
+                  >
+                    {item.price || ''}
+                  </div>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: `${topPos}mm`,
+                      left: '90mm',
+                      width: '20mm',
+                      textAlign: 'left',
+                    }}
+                  >
+                    {item.amount || ''}
+                  </div>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: `${topPos}mm`,
+                      left: '110mm',
+                      width: '85mm',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {item.note}
+                  </div>
                 </div>
               )
             })}
             {/* 總計 */}
-            <div style={{ position: 'absolute', top: '104mm', left: '90mm', width: '20mm', textAlign: 'left' }}>{total || ''}</div>
+            <div
+              style={{
+                position: 'absolute',
+                top: '104mm',
+                left: '90mm',
+                width: '20mm',
+                textAlign: 'left',
+              }}
+            >
+              {total || ''}
+            </div>
             {/* 大寫金額 */}
-            <div style={{ position: 'absolute', top: '116mm', left: '23.5mm' }}>{chineseAmount.千萬}</div>
-            <div style={{ position: 'absolute', top: '116mm', left: '40mm' }}>{chineseAmount.百萬}</div>
-            <div style={{ position: 'absolute', top: '116mm', left: '55mm' }}>{chineseAmount.十萬}</div>
-            <div style={{ position: 'absolute', top: '116mm', left: '68mm' }}>{chineseAmount.萬}</div>
-            <div style={{ position: 'absolute', top: '116mm', left: '83mm' }}>{chineseAmount.千}</div>
-            <div style={{ position: 'absolute', top: '116mm', left: '98mm' }}>{chineseAmount.百}</div>
-            <div style={{ position: 'absolute', top: '116mm', left: '112mm' }}>{chineseAmount.十}</div>
-            <div style={{ position: 'absolute', top: '116mm', left: '125mm' }}>{chineseAmount.元}</div>
+            <div style={{ position: 'absolute', top: '116mm', left: '23.5mm' }}>
+              {chineseAmount.千萬}
+            </div>
+            <div style={{ position: 'absolute', top: '116mm', left: '40mm' }}>
+              {chineseAmount.百萬}
+            </div>
+            <div style={{ position: 'absolute', top: '116mm', left: '55mm' }}>
+              {chineseAmount.十萬}
+            </div>
+            <div style={{ position: 'absolute', top: '116mm', left: '68mm' }}>
+              {chineseAmount.萬}
+            </div>
+            <div style={{ position: 'absolute', top: '116mm', left: '83mm' }}>
+              {chineseAmount.千}
+            </div>
+            <div style={{ position: 'absolute', top: '116mm', left: '98mm' }}>
+              {chineseAmount.百}
+            </div>
+            <div style={{ position: 'absolute', top: '116mm', left: '112mm' }}>
+              {chineseAmount.十}
+            </div>
+            <div style={{ position: 'absolute', top: '116mm', left: '125mm' }}>
+              {chineseAmount.元}
+            </div>
             {/* 經手人 */}
-            <div style={{ position: 'absolute', top: '128mm', left: '170mm', whiteSpace: 'nowrap' }}>{handler}</div>
+            <div
+              style={{ position: 'absolute', top: '128mm', left: '170mm', whiteSpace: 'nowrap' }}
+            >
+              {handler}
+            </div>
           </div>
         </div>
         <p className="text-xs text-muted-foreground mt-2">* 預覽為 70% 縮放</p>

@@ -112,7 +112,10 @@ export default function MonthlyIncomeReportPage() {
 
   // 計算統計數據
   const stats = useMemo(() => {
-    const totalAmount = filteredReceipts.reduce((sum, r) => sum + (r.receipt_amount || r.amount || 0), 0)
+    const totalAmount = filteredReceipts.reduce(
+      (sum, r) => sum + (r.receipt_amount || r.amount || 0),
+      0
+    )
     // 按付款方式分組統計
     const byPaymentMethod = filteredReceipts.reduce(
       (acc, r) => {
@@ -163,7 +166,9 @@ export default function MonthlyIncomeReportPage() {
       key: 'receipt_amount',
       label: MONTHLY_INCOME_LABELS.COL_AMOUNT,
       width: '120',
-      render: (value, row) => <CurrencyCell amount={Number(value) || Number(row.amount) || 0} variant="income" />,
+      render: (value, row) => (
+        <CurrencyCell amount={Number(value) || Number(row.amount) || 0} variant="income" />
+      ),
     },
     {
       key: 'handler_name',

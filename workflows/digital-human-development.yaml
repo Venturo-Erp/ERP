@@ -14,8 +14,8 @@ steps:
     name: 技術討論
     description: 與技術團隊討論數字人技術方案
     assignees:
-      - matthew  # IT Lead
-      - nova     # AI 工程師
+      - matthew # IT Lead
+      - nova # AI 工程師
     duration_days: 1
     outputs:
       - 技術方案文件
@@ -27,7 +27,7 @@ steps:
     name: 角色設計
     description: 定義數字人的性格、外觀、聲音
     assignees:
-      - caesar   # 產品經理
+      - caesar # 產品經理
       - designer # 設計師
     duration_days: 2
     outputs:
@@ -42,8 +42,8 @@ steps:
     name: 原型開發
     description: 開發數字人原型（基礎功能）
     assignees:
-      - nova      # AI 工程師
-      - matthew   # IT Lead
+      - nova # AI 工程師
+      - matthew # IT Lead
     duration_days: 3
     outputs:
       - 可運行的原型
@@ -57,8 +57,8 @@ steps:
     name: 內部測試
     description: 內部團隊測試數字人功能
     assignees:
-      - caesar   # 產品經理
-      - tester   # 測試人員
+      - caesar # 產品經理
+      - tester # 測試人員
     duration_days: 1
     outputs:
       - 測試報告
@@ -72,8 +72,8 @@ steps:
     name: 優化調整
     description: 根據測試結果優化數字人
     assignees:
-      - nova     # AI 工程師
-      - matthew  # IT Lead
+      - nova # AI 工程師
+      - matthew # IT Lead
     duration_days: 1
     outputs:
       - 優化後的數字人
@@ -87,7 +87,7 @@ steps:
     name: 部署上線
     description: 將數字人部署到生產環境
     assignees:
-      - matthew  # IT Lead
+      - matthew # IT Lead
     duration_days: 0.5
     outputs:
       - 部署完成

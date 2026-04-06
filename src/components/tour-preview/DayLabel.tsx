@@ -95,7 +95,9 @@ export function DayLabel({
           <span className="block text-status-info text-xs font-bold tracking-[0.2em] mb-1">
             DAY {ordinalText}
           </span>
-          {title && <h3 className="text-2xl font-bold text-morandi-primary tracking-widest">{title}</h3>}
+          {title && (
+            <h3 className="text-2xl font-bold text-morandi-primary tracking-widest">{title}</h3>
+          )}
         </div>
       </div>
     )

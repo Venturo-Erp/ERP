@@ -142,7 +142,10 @@ export function usePassportValidation(): UsePassportValidationReturn {
         const idNumber = customerData.national_id || ''
         const birthDate = customerData.birth_date || null
         const rawName = customerData.name || ''
-        const cleanName = rawName.replace(/\([^)]+\)$/, '').replace(/⚠️/g, '').trim()
+        const cleanName = rawName
+          .replace(/\([^)]+\)$/, '')
+          .replace(/⚠️/g, '')
+          .trim()
         // 只有包含中文字元才當作中文名，否則留空
         const hasChinese = /[\u4e00-\u9fff]/.test(cleanName)
         const chineseName = hasChinese ? cleanName : ''
@@ -322,7 +325,10 @@ export function usePassportValidation(): UsePassportValidationReturn {
         const idNumber = customerData.national_id || ''
         const birthDate = customerData.birth_date || null
         const rawName = customerData.name || ''
-        const cleanName = rawName.replace(/\([^)]+\)$/, '').replace(/⚠️/g, '').trim()
+        const cleanName = rawName
+          .replace(/\([^)]+\)$/, '')
+          .replace(/⚠️/g, '')
+          .trim()
         const hasChinese = /[\u4e00-\u9fff]/.test(cleanName)
         const chineseName = hasChinese ? cleanName : ''
 

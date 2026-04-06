@@ -14,8 +14,8 @@ steps:
     name: 需求分析
     description: 收集需求、分析可行性
     assignees:
-      - caesar   # 產品經理
-      - matthew  # IT Lead
+      - caesar # 產品經理
+      - matthew # IT Lead
     duration_days: 1
     outputs:
       - 需求文件（PRD）
@@ -27,9 +27,9 @@ steps:
     name: 功能設計
     description: UI/UX 設計 + 技術架構設計
     assignees:
-      - caesar   # 產品經理（功能設計）
+      - caesar # 產品經理（功能設計）
       - designer # 設計師（UI/UX）
-      - matthew  # IT Lead（技術架構）
+      - matthew # IT Lead（技術架構）
     duration_days: 2
     outputs:
       - UI 設計稿（Figma）
@@ -44,7 +44,7 @@ steps:
     name: 設計審批
     description: William 審批設計方案
     assignees:
-      - william  # 決策者
+      - william # 決策者
     duration_days: 0.5
     outputs:
       - 審批意見
@@ -57,9 +57,9 @@ steps:
     name: 功能開發
     description: 前端 + 後端開發
     assignees:
-      - frontend_dev  # 前端工程師
-      - backend_dev   # 後端工程師
-      - matthew       # IT Lead（技術指導）
+      - frontend_dev # 前端工程師
+      - backend_dev # 後端工程師
+      - matthew # IT Lead（技術指導）
     duration_days: 3-7
     outputs:
       - 前端代碼
@@ -74,7 +74,7 @@ steps:
     name: 代碼審查
     description: 技術 Lead 審查代碼品質
     assignees:
-      - matthew  # IT Lead
+      - matthew # IT Lead
     duration_days: 0.5
     outputs:
       - Code Review 意見
@@ -87,8 +87,8 @@ steps:
     name: 測試
     description: 功能測試、整合測試
     assignees:
-      - tester   # 測試工程師
-      - caesar   # 產品經理（驗收測試）
+      - tester # 測試工程師
+      - caesar # 產品經理（驗收測試）
     duration_days: 1
     outputs:
       - 測試報告
@@ -116,7 +116,7 @@ steps:
     name: 部署上線
     description: 部署到生產環境
     assignees:
-      - matthew  # IT Lead
+      - matthew # IT Lead
     duration_days: 0.5
     outputs:
       - 生產環境部署完成
@@ -130,8 +130,8 @@ steps:
     name: 文檔撰寫
     description: 撰寫使用文檔、技術文檔
     assignees:
-      - caesar   # 產品經理（使用文檔）
-      - matthew  # IT Lead（技術文檔）
+      - caesar # 產品經理（使用文檔）
+      - matthew # IT Lead（技術文檔）
     duration_days: 0.5
     outputs:
       - 使用手冊

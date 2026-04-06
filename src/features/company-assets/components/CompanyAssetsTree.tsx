@@ -73,7 +73,9 @@ export function CompanyAssetsTree({ onSelectFile, onAddFile }: CompanyAssetsTree
       // 載入資料夾
       let folderQuery = supabase
         .from('company_asset_folders')
-        .select('id, name, parent_id, icon, color, sort_order, workspace_id, created_at, updated_at')
+        .select(
+          'id, name, parent_id, icon, color, sort_order, workspace_id, created_at, updated_at'
+        )
         .order('sort_order', { ascending: true })
         .order('name', { ascending: true })
         .limit(500)

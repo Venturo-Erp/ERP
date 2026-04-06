@@ -45,14 +45,17 @@ CREATE INDEX IF NOT EXISTS tour_request_items_local_status_idx ON tour_request_i
 console.log('🔄 Step 2: 建立 tour_request_items 表（無外鍵約束）...\n')
 
 try {
-  const response = await fetch(`https://api.supabase.com/v1/projects/${projectRef}/database/query`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query: sql }),
-  })
+  const response = await fetch(
+    `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: sql }),
+    }
+  )
 
   const result = await response.json()
 

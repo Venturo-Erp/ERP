@@ -6,7 +6,17 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, Edit, Trash2, Eye, Link as LinkIcon, MoreHorizontal, Sparkles, Globe, FileEdit } from 'lucide-react'
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Link as LinkIcon,
+  MoreHorizontal,
+  Sparkles,
+  Globe,
+  FileEdit,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { TableColumn } from '@/components/ui/enhanced-table'
@@ -45,7 +55,10 @@ interface CustomizedTour {
   inquiries_count: number
 }
 
-const STATUS_CONFIG: Record<string, { label: string; variant: 'default' | 'secondary' | 'outline' }> = {
+const STATUS_CONFIG: Record<
+  string,
+  { label: string; variant: 'default' | 'secondary' | 'outline' }
+> = {
   draft: { label: '草稿', variant: 'secondary' },
   published: { label: '已發佈', variant: 'default' },
   archived: { label: '已封存', variant: 'outline' },
@@ -57,7 +70,7 @@ export default function CustomizedToursPage() {
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<CustomizedTour | null>(null)
-  
+
   // 表單
   const [formData, setFormData] = useState({
     name: '',
@@ -71,7 +84,7 @@ export default function CustomizedToursPage() {
     try {
       const res = await fetch('/api/customized-tours')
       if (!res.ok) throw new Error('載入失敗')
-      
+
       const data = await res.json()
 
       interface ApiRow {
@@ -85,7 +98,7 @@ export default function CustomizedToursPage() {
         wishlist_template_items: { count: number }[]
         customer_inquiries: { count: number }[]
       }
-      
+
       const processed: CustomizedTour[] = (data || []).map((t: ApiRow) => ({
         id: t.id,
         name: t.name,
@@ -112,11 +125,12 @@ export default function CustomizedToursPage() {
   }, [fetchTemplates])
 
   const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
-      .replace(/^-|-$/g, '')
-      || `template-${Date.now()}`
+    return (
+      name
+        .toLowerCase()
+        .replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-')
+        .replace(/^-|-$/g, '') || `template-${Date.now()}`
+    )
   }
 
   const handleCreate = () => {
@@ -159,16 +173,14 @@ export default function CustomizedToursPage() {
       }
       toast.success('已更新')
     } else {
-      const { error } = await supabase
-        .from('wishlist_templates')
-        .insert({
-          workspace_id: user?.workspace_id as string,
-          name: formData.name,
-          slug,
-          description: formData.description || null,
-          status: 'draft' as const,
-          created_by: user?.id,
-        })
+      const { error } = await supabase.from('wishlist_templates').insert({
+        workspace_id: user?.workspace_id as string,
+        name: formData.name,
+        slug,
+        description: formData.description || null,
+        status: 'draft' as const,
+        created_by: user?.id,
+      })
 
       if (error) {
         if (error.message.includes('duplicate')) {
@@ -188,10 +200,7 @@ export default function CustomizedToursPage() {
   const handleDelete = async (template: CustomizedTour) => {
     if (!confirm(`確定要刪除「${template.name}」？`)) return
 
-    const { error } = await supabase
-      .from('wishlist_templates')
-      .delete()
-      .eq('id', template.id)
+    const { error } = await supabase.from('wishlist_templates').delete().eq('id', template.id)
 
     if (error) {
       toast.error('刪除失敗')
@@ -204,7 +213,7 @@ export default function CustomizedToursPage() {
 
   const handlePublish = async (template: CustomizedTour) => {
     const newStatus = template.status === 'published' ? 'draft' : 'published'
-    
+
     const { error } = await supabase
       .from('wishlist_templates')
       .update({ status: newStatus })
@@ -278,7 +287,7 @@ export default function CustomizedToursPage() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => window.location.href = `/customized-tours/${row.id}`}>
+        <DropdownMenuItem onClick={() => (window.location.href = `/customized-tours/${row.id}`)}>
           <Edit className="w-4 h-4 mr-2" />
           編輯景點
         </DropdownMenuItem>
@@ -302,10 +311,7 @@ export default function CustomizedToursPage() {
           <Globe className="w-4 h-4 mr-2" />
           {row.status === 'published' ? '取消發佈' : '發佈'}
         </DropdownMenuItem>
-        <DropdownMenuItem 
-          onClick={() => handleDelete(row)}
-          className="text-destructive"
-        >
+        <DropdownMenuItem onClick={() => handleDelete(row)} className="text-destructive">
           <Trash2 className="w-4 h-4 mr-2" />
           刪除
         </DropdownMenuItem>
@@ -322,7 +328,7 @@ export default function CustomizedToursPage() {
         columns={columns}
         loading={loading}
         renderActions={renderActions}
-        onRowClick={(row) => window.location.href = `/customized-tours/${row.id}`}
+        onRowClick={row => (window.location.href = `/customized-tours/${row.id}`)}
         bordered
         searchable
         searchPlaceholder="搜尋名稱..."
@@ -336,9 +342,7 @@ export default function CustomizedToursPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent level={1} className="max-w-md">
           <DialogHeader>
-            <DialogTitle>
-              {editingTemplate ? '編輯客製化行程' : '新增客製化行程'}
-            </DialogTitle>
+            <DialogTitle>{editingTemplate ? '編輯客製化行程' : '新增客製化行程'}</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -347,8 +351,8 @@ export default function CustomizedToursPage() {
               <Input
                 value={formData.name}
                 onChange={e => {
-                  setFormData(p => ({ 
-                    ...p, 
+                  setFormData(p => ({
+                    ...p,
                     name: e.target.value,
                     slug: p.slug || generateSlug(e.target.value),
                   }))
@@ -360,7 +364,9 @@ export default function CustomizedToursPage() {
             <div className="space-y-2">
               <Label>連結代碼</Label>
               <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">/p/customized/</span>
+                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                  /p/customized/
+                </span>
                 <Input
                   value={formData.slug}
                   onChange={e => setFormData(p => ({ ...p, slug: e.target.value }))}
@@ -368,9 +374,7 @@ export default function CustomizedToursPage() {
                   className="flex-1"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                客人會看到的網址
-              </p>
+              <p className="text-xs text-muted-foreground">客人會看到的網址</p>
             </div>
 
             <div className="space-y-2">
@@ -388,9 +392,7 @@ export default function CustomizedToursPage() {
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
               取消
             </Button>
-            <Button onClick={handleSave}>
-              {editingTemplate ? '更新' : '建立'}
-            </Button>
+            <Button onClick={handleSave}>{editingTemplate ? '更新' : '建立'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

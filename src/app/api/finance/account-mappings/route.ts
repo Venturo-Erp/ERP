@@ -25,7 +25,8 @@ export async function GET(request: NextRequest) {
 
   let query = getSupabase()
     .from('account_mappings')
-    .select(`
+    .select(
+      `
       id,
       category,
       mapping_type,
@@ -33,7 +34,8 @@ export async function GET(request: NextRequest) {
       credit_account_id,
       debit:chart_of_accounts!debit_account_id(id, code, name),
       credit:chart_of_accounts!credit_account_id(id, code, name)
-    `)
+    `
+    )
     .eq('workspace_id', workspaceId)
     .eq('is_active', true)
     .order('mapping_type')
@@ -107,12 +109,14 @@ export async function POST(request: NextRequest) {
   // 取得目標租戶的會計科目（按代碼對應）
   const { data: sourceAccounts } = await getSupabase()
     .from('account_mappings')
-    .select(`
+    .select(
+      `
       category,
       mapping_type,
       debit:chart_of_accounts!debit_account_id(code),
       credit:chart_of_accounts!credit_account_id(code)
-    `)
+    `
+    )
     .eq('workspace_id', sourceId)
 
   const { data: targetAccounts } = await getSupabase()
@@ -127,27 +131,33 @@ export async function POST(request: NextRequest) {
   const targetAccountMap = new Map(targetAccounts.map(a => [a.code, a.id]))
 
   // 建立新對應
-  const newMappings = sourceAccounts?.map(m => {
-    const debitRaw = m.debit as unknown
-    const creditRaw = m.credit as unknown
-    const debit = Array.isArray(debitRaw) ? debitRaw[0] : debitRaw
-    const credit = Array.isArray(creditRaw) ? creditRaw[0] : creditRaw
-    return {
-      workspace_id,
-      category: m.category,
-      mapping_type: m.mapping_type,
-      debit_account_id: debit && typeof debit === 'object' ? targetAccountMap.get((debit as { code: string }).code) : undefined,
-      credit_account_id: credit && typeof credit === 'object' ? targetAccountMap.get((credit as { code: string }).code) : undefined,
-    }
-  }).filter(m => m.debit_account_id && m.credit_account_id)
+  const newMappings = sourceAccounts
+    ?.map(m => {
+      const debitRaw = m.debit as unknown
+      const creditRaw = m.credit as unknown
+      const debit = Array.isArray(debitRaw) ? debitRaw[0] : debitRaw
+      const credit = Array.isArray(creditRaw) ? creditRaw[0] : creditRaw
+      return {
+        workspace_id,
+        category: m.category,
+        mapping_type: m.mapping_type,
+        debit_account_id:
+          debit && typeof debit === 'object'
+            ? targetAccountMap.get((debit as { code: string }).code)
+            : undefined,
+        credit_account_id:
+          credit && typeof credit === 'object'
+            ? targetAccountMap.get((credit as { code: string }).code)
+            : undefined,
+      }
+    })
+    .filter(m => m.debit_account_id && m.credit_account_id)
 
   if (!newMappings || newMappings.length === 0) {
     return NextResponse.json({ error: '無法建立對應（會計科目代碼不符）' }, { status: 400 })
   }
 
-  const { error: insertError } = await getSupabase()
-    .from('account_mappings')
-    .insert(newMappings)
+  const { error: insertError } = await getSupabase().from('account_mappings').insert(newMappings)
 
   if (insertError) {
     return NextResponse.json({ error: insertError.message }, { status: 500 })

@@ -81,7 +81,9 @@ async function getThreads(workspaceId: string, searchParams: URLSearchParams) {
 
   let query = admin()
     .from('customer_service_conversations')
-    .select('id, platform, platform_user_id, user_display_name, user_message, ai_response, intent, mentioned_tours, is_potential_lead, lead_score, created_at, follow_up_status, follow_up_note, sentiment')
+    .select(
+      'id, platform, platform_user_id, user_display_name, user_message, ai_response, intent, mentioned_tours, is_potential_lead, lead_score, created_at, follow_up_status, follow_up_note, sentiment'
+    )
     .eq('workspace_id', workspaceId)
     .order('created_at', { ascending: false })
     .limit(1000)
@@ -99,21 +101,24 @@ async function getThreads(workspaceId: string, searchParams: URLSearchParams) {
   const rows = (data || []) as unknown as RawRow[]
 
   // 按 platform_user_id 聚合
-  const threadMap = new Map<string, {
-    platform_user_id: string
-    platform: string
-    user_display_name: string | null
-    last_message: string
-    last_ai_response: string
-    last_intent: string
-    last_time: string
-    message_count: number
-    needs_followup_count: number
-    is_potential_lead: boolean
-    max_lead_score: number
-    intents: string[]
-    mentioned_tours: string[]
-  }>()
+  const threadMap = new Map<
+    string,
+    {
+      platform_user_id: string
+      platform: string
+      user_display_name: string | null
+      last_message: string
+      last_ai_response: string
+      last_intent: string
+      last_time: string
+      message_count: number
+      needs_followup_count: number
+      is_potential_lead: boolean
+      max_lead_score: number
+      intents: string[]
+      mentioned_tours: string[]
+    }
+  >()
 
   for (const row of rows) {
     const key = `${row.platform}:${row.platform_user_id}`
@@ -141,7 +146,8 @@ async function getThreads(workspaceId: string, searchParams: URLSearchParams) {
       existing.message_count++
       if (needsFollow) existing.needs_followup_count++
       if (row.is_potential_lead) existing.is_potential_lead = true
-      if ((row.lead_score || 0) > existing.max_lead_score) existing.max_lead_score = row.lead_score || 0
+      if ((row.lead_score || 0) > existing.max_lead_score)
+        existing.max_lead_score = row.lead_score || 0
       if (!existing.intents.includes(intent)) existing.intents.push(intent)
       if (row.mentioned_tours) {
         for (const t of row.mentioned_tours) {

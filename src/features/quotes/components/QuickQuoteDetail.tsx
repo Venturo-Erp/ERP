@@ -128,11 +128,7 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
       {viewModeToggle}
 
       {/* 列印按鈕（任何模式都顯示） */}
-      <Button
-        onClick={() => setShowPrintPreview(true)}
-        variant="outline"
-        className="gap-2"
-      >
+      <Button onClick={() => setShowPrintPreview(true)} variant="outline" className="gap-2">
         <Printer className="h-4 w-4" />
         {QUICK_QUOTE_DETAIL_LABELS.PRINT}
       </Button>
@@ -200,9 +196,9 @@ export const QuickQuoteDetail: React.FC<QuickQuoteDetailProps> = ({
 
       <div className="w-full p-3 space-y-4 overflow-x-auto">
         {/* 客戶資訊（嵌入模式時按鈕整合在這裡） */}
-        <QuickQuoteHeader 
-          formData={formData} 
-          isEditing={isEditing} 
+        <QuickQuoteHeader
+          formData={formData}
+          isEditing={isEditing}
           onFieldChange={setFormField}
           actions={embedded ? <ActionButtons /> : undefined}
         />

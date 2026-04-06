@@ -2,7 +2,7 @@
  * RequirementsDrawer - 需求追蹤列表
  *
  * 欄位：項目 | 備註 | 報價 | 狀態/供應商 | 操作
- * 
+ *
  * 狀態流程：
  * - 待作業：還沒發給任何供應商
  * - 作業中：已發出去，等待回覆
@@ -29,14 +29,14 @@ import { Button } from '@/components/ui/button'
 
 interface RequestItem {
   id: string
-  title: string  // 項目名稱
-  category: string  // 類型（accommodation, transport, etc）
-  note?: string | null  // 備註
-  quoted_price?: number | null  // 報價金額（業務報給客戶的）
+  title: string // 項目名稱
+  category: string // 類型（accommodation, transport, etc）
+  note?: string | null // 備註
+  quoted_price?: number | null // 報價金額（業務報給客戶的）
   status: 'pending' | 'in_progress' | 'awaiting_confirmation' | 'confirmed' | 'completed'
-  supplier_name?: string | null  // 選定的供應商（確認後才有）
-  supplier_count?: number  // 已發送給幾個供應商
-  replied_count?: number  // 幾個供應商已回覆
+  supplier_name?: string | null // 選定的供應商（確認後才有）
+  supplier_count?: number // 已發送給幾個供應商
+  replied_count?: number // 幾個供應商已回覆
 }
 
 interface RequirementsDrawerProps {
@@ -80,11 +80,11 @@ const STATUS_CONFIG = {
   },
 } as const
 
-export function RequirementsDrawer({ 
-  items, 
-  onSendRequest, 
+export function RequirementsDrawer({
+  items,
+  onSendRequest,
   onViewReplies,
-  onConfirm 
+  onConfirm,
 }: RequirementsDrawerProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -105,7 +105,9 @@ export function RequirementsDrawer({
             <th className="px-4 py-3 text-left font-medium text-morandi-primary">項目</th>
             <th className="px-4 py-3 text-left font-medium text-morandi-primary w-48">備註</th>
             <th className="px-4 py-3 text-right font-medium text-morandi-primary w-28">報價</th>
-            <th className="px-4 py-3 text-center font-medium text-morandi-primary w-36">狀態/供應商</th>
+            <th className="px-4 py-3 text-center font-medium text-morandi-primary w-36">
+              狀態/供應商
+            </th>
             <th className="px-4 py-3 text-center font-medium text-morandi-primary w-32">操作</th>
           </tr>
         </thead>
@@ -121,9 +123,7 @@ export function RequirementsDrawer({
               >
                 {/* 項目 */}
                 <td className="px-4 py-3">
-                  <span className="font-medium text-morandi-primary">
-                    {item.title}
-                  </span>
+                  <span className="font-medium text-morandi-primary">{item.title}</span>
                 </td>
 
                 {/* 備註 */}
@@ -157,12 +157,10 @@ export function RequirementsDrawer({
                       <StatusIcon size={12} />
                       {statusConfig.label}
                     </span>
-                    
+
                     {/* 供應商資訊 */}
                     {item.status === 'confirmed' || item.status === 'completed' ? (
-                      <span className="text-xs text-morandi-secondary">
-                        {item.supplier_name}
-                      </span>
+                      <span className="text-xs text-morandi-secondary">{item.supplier_name}</span>
                     ) : item.status === 'in_progress' ? (
                       <span className="text-xs text-morandi-muted">
                         已發 {item.supplier_count || 0} 家
@@ -178,43 +176,28 @@ export function RequirementsDrawer({
                 {/* 操作 */}
                 <td className="px-4 py-3 text-center">
                   {item.status === 'pending' && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onSendRequest?.(item.id)}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => onSendRequest?.(item.id)}>
                       <Send size={14} className="mr-1" />
                       發送
                     </Button>
                   )}
-                  
+
                   {item.status === 'in_progress' && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => onViewReplies?.(item.id)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => onViewReplies?.(item.id)}>
                       <Clock size={14} className="mr-1" />
                       等待中
                     </Button>
                   )}
-                  
+
                   {item.status === 'awaiting_confirmation' && (
-                    <Button
-                      size="sm"
-                      onClick={() => onViewReplies?.(item.id)}
-                    >
+                    <Button size="sm" onClick={() => onViewReplies?.(item.id)}>
                       <AlertCircle size={14} className="mr-1" />
                       查看報價
                     </Button>
                   )}
-                  
+
                   {(item.status === 'confirmed' || item.status === 'completed') && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => onViewReplies?.(item.id)}
-                    >
+                    <Button size="sm" variant="ghost" onClick={() => onViewReplies?.(item.id)}>
                       <MoreHorizontal size={14} />
                     </Button>
                   )}

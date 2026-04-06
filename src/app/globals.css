@@ -32,22 +32,22 @@
   --morandi-muted: #b8b2aa;
 
   /* 品牌色 */
-  --brand-line: #06C755; /* LINE 綠 */
+  --brand-line: #06c755; /* LINE 綠 */
   --brand-line-hover: #05b34c;
   --brand-telegram: #0088cc; /* Telegram 藍 */
-  --brand-facebook: #1877F2; /* Facebook 藍 */
+  --brand-facebook: #1877f2; /* Facebook 藍 */
 
   /* 行程編輯器主題色 */
   --editor-theme-blue: #4a6fa5;
   --editor-theme-blue-light: #8da399;
-  --editor-theme-green: #2C5F4D;
+  --editor-theme-green: #2c5f4d;
   --editor-theme-accent: #c76d54;
 
   /* 公開頁面主題色 */
   --public-primary: #00113a; /* 深藍 */
   --public-secondary: #006970; /* 青綠 */
   --public-accent: #002366; /* 藍色強調 */
-  --public-muted: #C0B090; /* 金棕 */
+  --public-muted: #c0b090; /* 金棕 */
 
   /* 漸層色（莫蘭迪金系列） */
   --gradient-gold-light: #d4c5a9;
@@ -59,14 +59,14 @@
   --gradient-primary-dark: #4a4540;
 
   /* 行事曆狀態色 */
-  --cal-proposal: #9BB5D6;
-  --cal-in-progress: #A8C4A2;
-  --cal-pending-close: #D4B896;
-  --cal-closed: #B8B3AE;
-  --cal-special: #D4A5A5;
-  --cal-personal: #B8A9D1;
-  --cal-birthday: #E6B8C8;
-  --cal-company: #E0C3A0;
+  --cal-proposal: #9bb5d6;
+  --cal-in-progress: #a8c4a2;
+  --cal-pending-close: #d4b896;
+  --cal-closed: #b8b3ae;
+  --cal-special: #d4a5a5;
+  --cal-personal: #b8a9d1;
+  --cal-birthday: #e6b8c8;
+  --cal-company: #e0c3a0;
 
   /* 語義顏色系統 (替代硬編碼的 blue/red/green/amber) */
   --status-info: #8ba4b4; /* 資訊 - 柔和藍灰 */
@@ -294,10 +294,20 @@ body {
 
 /* 功能色 - 背景 */
 .bg-morandi-gold {
-  background: linear-gradient(to bottom right, var(--gradient-gold-light), var(--gradient-gold-mid), var(--gradient-gold-dark));
+  background: linear-gradient(
+    to bottom right,
+    var(--gradient-gold-light),
+    var(--gradient-gold-mid),
+    var(--gradient-gold-dark)
+  );
 }
 .bg-morandi-gold-hover:hover {
-  background: linear-gradient(to bottom right, var(--gradient-gold-mid), var(--gradient-gold-dark), var(--gradient-brown-mid));
+  background: linear-gradient(
+    to bottom right,
+    var(--gradient-gold-mid),
+    var(--gradient-gold-dark),
+    var(--gradient-brown-mid)
+  );
 }
 .bg-morandi-red {
   background-color: var(--morandi-red);
@@ -502,7 +512,12 @@ body {
 }
 
 .btn-icon-morandi:hover {
-  background: linear-gradient(135deg, var(--gradient-gold-light), var(--gradient-gold-mid), var(--gradient-gold-dark));
+  background: linear-gradient(
+    135deg,
+    var(--gradient-gold-light),
+    var(--gradient-gold-mid),
+    var(--gradient-gold-dark)
+  );
   color: white;
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(196, 165, 114, 0.25);

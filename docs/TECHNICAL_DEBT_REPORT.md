@@ -6,11 +6,11 @@
 
 ## 📊 概覽
 
-| 類別 | 數量 | 優先級 |
-|------|------|--------|
-| TODO/FIXME 註解 | 94 | 🟡 中 |
-| @deprecated 標記 | 12 | 🔴 高 |
-| 舊版欄位殘留 | 3 | 🔴 高 |
+| 類別             | 數量 | 優先級 |
+| ---------------- | ---- | ------ |
+| TODO/FIXME 註解  | 94   | 🟡 中  |
+| @deprecated 標記 | 12   | 🔴 高  |
+| 舊版欄位殘留     | 3    | 🔴 高  |
 
 ---
 
@@ -21,6 +21,7 @@
 **狀態**：標記 deprecated，但仍被引用
 
 **引用位置**：
+
 ```
 src/features/tours/components/TourRequestFormDialog.tsx:27
   → import { usePrintLogo } from '@/features/quotes/components/printable/shared/usePrintLogo'
@@ -30,6 +31,7 @@ src/features/quotes/components/PrintableQuickQuote.tsx:15
 ```
 
 **建議**：
+
 1. 將引用改為 `@/lib/print` 的版本
 2. 刪除整個 `printable/shared/` 目錄
 
@@ -40,6 +42,7 @@ src/features/quotes/components/PrintableQuickQuote.tsx:15
 **狀態**：`price_tiers` 已標記 deprecated，應改用 `tier_pricings`
 
 **仍在使用 `price_tiers` 的位置**：
+
 ```
 src/features/tours/components/tour-webpage-tab.tsx:260, 316
 src/components/editor/publish/hooks/usePublish.ts:93
@@ -61,20 +64,20 @@ src/components/editor/publish/hooks/usePublish.ts:93
 
 ### 需要處理的 TODO（有時效性）
 
-| 位置 | 內容 | 優先級 |
-|------|------|--------|
-| `middleware.ts:42` | 2026-04 移除 base64 fallback | 🔴 本月 |
-| `api/public/inquiries/route.ts:71` | 發送通知給業務 | 🟡 中 |
-| `api/orders/create-from-booking/route.ts:82` | 發送通知 | 🟡 中 |
-| `accounting/checks/page.tsx` | 多個 TODO 等 migration | 🟡 中 |
+| 位置                                         | 內容                         | 優先級  |
+| -------------------------------------------- | ---------------------------- | ------- |
+| `middleware.ts:42`                           | 2026-04 移除 base64 fallback | 🔴 本月 |
+| `api/public/inquiries/route.ts:71`           | 發送通知給業務               | 🟡 中   |
+| `api/orders/create-from-booking/route.ts:82` | 發送通知                     | 🟡 中   |
+| `accounting/checks/page.tsx`                 | 多個 TODO 等 migration       | 🟡 中   |
 
 ### 功能性 TODO（可稍後處理）
 
-| 位置 | 內容 |
-|------|------|
+| 位置                      | 內容               |
+| ------------------------- | ------------------ |
 | `p/wishlist/page.tsx:104` | 3D Globe component |
-| `itinerary/page.tsx:538` | 建立模板功能 |
-| `AccountSettings.tsx:88` | bank_account 來源 |
+| `itinerary/page.tsx:538`  | 建立模板功能       |
+| `AccountSettings.tsx:88`  | bank_account 來源  |
 
 ---
 
@@ -82,12 +85,12 @@ src/components/editor/publish/hooks/usePublish.ts:93
 
 這些是為了向後相容保留的，可以在確認無舊資料後移除：
 
-| 位置 | 說明 |
-|------|------|
-| `tour.types.ts:186` | `image` 欄位（舊版單張圖片） |
-| `lib/permissions/hooks.ts:160` | `isAdmin` 重複匯出 |
-| `lib/tenant.ts:45,52` | deprecated 函數 |
-| `designer/templates/definitions/types.ts:159` | `showSeatNumber` |
+| 位置                                          | 說明                         |
+| --------------------------------------------- | ---------------------------- |
+| `tour.types.ts:186`                           | `image` 欄位（舊版單張圖片） |
+| `lib/permissions/hooks.ts:160`                | `isAdmin` 重複匯出           |
+| `lib/tenant.ts:45,52`                         | deprecated 函數              |
+| `designer/templates/definitions/types.ts:159` | `showSeatNumber`             |
 
 ---
 

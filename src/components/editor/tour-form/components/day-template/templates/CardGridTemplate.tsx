@@ -158,7 +158,9 @@ export function CardGridTemplate({
           </div>
         </div>
         <div>
-          <div className="text-xs text-morandi-container font-medium mb-1">{COMP_EDITOR_LABELS.住宿}</div>
+          <div className="text-xs text-morandi-container font-medium mb-1">
+            {COMP_EDITOR_LABELS.住宿}
+          </div>
           <EditableText
             value={editingDay.accommodation || ''}
             fieldKey="accommodation"

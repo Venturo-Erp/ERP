@@ -175,7 +175,13 @@ export function useReceiptMutations() {
           if (byName) return byName.id
         }
         // 再用 code 對照
-        const codeMap: Record<number, string> = { 0: 'TRANSFER', 1: 'CASH', 2: 'CREDIT_CARD', 3: 'CHECK', 4: 'LINKPAY' }
+        const codeMap: Record<number, string> = {
+          0: 'TRANSFER',
+          1: 'CASH',
+          2: 'CREDIT_CARD',
+          3: 'CHECK',
+          4: 'LINKPAY',
+        }
         const byCode = paymentMethodsData.find(m => m.code === codeMap[receiptTypeNum])
         return byCode?.id || paymentMethodsData[0]?.id || ''
       }
@@ -187,7 +193,8 @@ export function useReceiptMutations() {
         .like('receipt_number', `${tourCode}-R%`)
 
       // 取得現有收款單（用於計算下一個流水號）
-      const filteredReceipts = existingReceipts?.filter(r => r.receipt_number?.startsWith(`${tourCode}-R`)) || []
+      const filteredReceipts =
+        existingReceipts?.filter(r => r.receipt_number?.startsWith(`${tourCode}-R`)) || []
 
       // 找出目前最大的 R 編號
       const prefix = `${tourCode}-R`
@@ -219,12 +226,12 @@ export function useReceiptMutations() {
         const nextNum = (maxNumber + 1 + i).toString().padStart(2, '0')
         const itemReceiptNumber = `${prefix}${nextNum}`
 
-        logger.info('[createReceiptWithItems] Creating receipt...', { 
-          index: i, 
-          receiptNumber: itemReceiptNumber, 
-          receiptType: receiptTypeNum, 
+        logger.info('[createReceiptWithItems] Creating receipt...', {
+          index: i,
+          receiptNumber: itemReceiptNumber,
+          receiptType: receiptTypeNum,
           amount: item.amount,
-          paymentItemsCount: paymentItems.length
+          paymentItemsCount: paymentItems.length,
         })
 
         const createdReceipt = await createReceipt({

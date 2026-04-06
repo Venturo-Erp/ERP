@@ -42,7 +42,11 @@ export async function POST(request: NextRequest) {
     // 組合每日行程摘要
     const dailySummary = days
       .map((day, i) => {
-        const activities = day.activities?.map(a => a.name).filter(Boolean).join('、') || ''
+        const activities =
+          day.activities
+            ?.map(a => a.name)
+            .filter(Boolean)
+            .join('、') || ''
         return `Day ${i + 1}: ${day.title}${activities ? `（${activities}）` : ''}`
       })
       .join('\n')
@@ -91,7 +95,10 @@ ${dailySummary}
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
 
     // 解析回應（處理 markdown code block 和純 JSON）
-    const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim()
+    const cleaned = text
+      .replace(/```json\s*/g, '')
+      .replace(/```\s*/g, '')
+      .trim()
     let result: { subtitle?: string; description?: string }
     try {
       const jsonMatch = cleaned.match(/\{[\s\S]*\}/)

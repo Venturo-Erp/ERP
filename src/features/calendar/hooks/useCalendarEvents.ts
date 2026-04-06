@@ -73,11 +73,13 @@ export function useCalendarEvents() {
     async ([, wsId]: [string, string]) => {
       const { data, error } = await supabase
         .from('leave_requests')
-        .select(`
+        .select(
+          `
           id, employee_id, leave_type_id, start_date, end_date, days, status,
           employee:employees!leave_requests_employee_id_fkey(chinese_name, english_name, display_name),
           leave_type:leave_types!leave_requests_leave_type_id_fkey(name, code)
-        `)
+        `
+        )
         .eq('workspace_id', wsId)
         .eq('status', 'approved')
       if (error) throw error
@@ -330,9 +332,13 @@ export function useCalendarEvents() {
 
     return leaveRequests.map(leave => {
       // 取得員工姓名
-      const emp = leave.employee as { chinese_name?: string; english_name?: string; display_name?: string } | null
+      const emp = leave.employee as {
+        chinese_name?: string
+        english_name?: string
+        display_name?: string
+      } | null
       const employeeName = emp?.display_name || emp?.chinese_name || emp?.english_name || '未知員工'
-      
+
       // 取得假別名稱
       const leaveType = leave.leave_type as { name?: string; code?: string } | null
       const leaveTypeName = leaveType?.name || '請假'

@@ -148,14 +148,7 @@ export function useItineraryList() {
     })
 
     return filtered
-  }, [
-    itineraries,
-    statusFilter,
-    searchTerm,
-    isItineraryClosed,
-    authorFilter,
-    user?.id,
-  ])
+  }, [itineraries, statusFilter, searchTerm, isItineraryClosed, authorFilter, user?.id])
 
   return {
     // 資料

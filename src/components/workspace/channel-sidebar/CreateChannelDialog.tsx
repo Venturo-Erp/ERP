@@ -87,7 +87,6 @@ export function CreateChannelDialog({
   if (!isOpen) return null
 
   return (
-   
     // eslint-disable-next-line venturo/no-custom-modal
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9100]">
       <div className="card-morandi-elevated w-96 max-h-[80vh] flex flex-col">
@@ -272,12 +271,7 @@ export function CreateChannelDialog({
         </div>
 
         <div className="flex gap-2 mt-4 justify-end border-t border-morandi-gold/10 pt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onClose}
-            disabled={isCreating}
-          >
+          <Button variant="outline" size="sm" onClick={onClose} disabled={isCreating}>
             {COMP_WORKSPACE_LABELS.CANCEL}
           </Button>
           <Button

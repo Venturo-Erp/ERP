@@ -45,7 +45,13 @@ const accountTypes = [
   { value: 'cost', label: '成本' },
 ]
 
-export function CreateAccountDialog({ open, onOpenChange, onSuccess, parentAccount, suggestedCode }: CreateAccountDialogProps) {
+export function CreateAccountDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+  parentAccount,
+  suggestedCode,
+}: CreateAccountDialogProps) {
   const { user } = useAuthStore()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [parentAccounts, setParentAccounts] = useState<ParentAccount[]>([])
@@ -88,13 +94,13 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess, parentAccou
 
   const loadParentAccounts = async () => {
     if (!user?.workspace_id) return
-    
+
     const { data } = await supabase
       .from('chart_of_accounts')
       .select('id, code, name, account_type')
       .eq('workspace_id', user.workspace_id)
       .order('code')
-    
+
     // 過濾出可作為父科目的（大類、中類、明細）
     const filtered = (data || []).filter(d => d.code.length <= 4)
     setParentAccounts(filtered)
@@ -160,10 +166,9 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess, parentAccou
       <DialogContent level={1} className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {parentAccount 
+            {parentAccount
               ? `新增子科目（${parentAccount.code} ${parentAccount.name}）`
-              : '新增會計科目'
-            }
+              : '新增會計科目'}
           </DialogTitle>
         </DialogHeader>
 
@@ -213,7 +218,9 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess, parentAccou
             <Label htmlFor="parent_id">父科目（選填）</Label>
             <Select
               value={formData.parent_id || 'none'}
-              onValueChange={value => setFormData({ ...formData, parent_id: value === 'none' ? '' : value })}
+              onValueChange={value =>
+                setFormData({ ...formData, parent_id: value === 'none' ? '' : value })
+              }
             >
               <SelectTrigger id="parent_id">
                 <SelectValue placeholder="選擇父科目（可不選）" />
@@ -229,9 +236,7 @@ export function CreateAccountDialog({ open, onOpenChange, onSuccess, parentAccou
                   ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">
-              選擇父科目後，新科目會顯示在該科目下方
-            </p>
+            <p className="text-xs text-muted-foreground">選擇父科目後，新科目會顯示在該科目下方</p>
           </div>
 
           <div className="space-y-2">

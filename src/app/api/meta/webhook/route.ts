@@ -103,14 +103,17 @@ async function sendReply(senderId: string, text: string) {
     return
   }
 
-  const res = await fetch(`https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      recipient: { id: senderId },
-      message: { text },
-    }),
-  })
+  const res = await fetch(
+    `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        recipient: { id: senderId },
+        message: { text },
+      }),
+    }
+  )
 
   if (!res.ok) {
     const err = await res.text()

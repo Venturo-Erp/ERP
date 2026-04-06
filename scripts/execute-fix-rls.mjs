@@ -85,28 +85,27 @@ USING (
 try {
   // 執行 SQL
   const { data, error } = await supabase.rpc('exec_sql', { sql_string: sql })
-  
+
   if (error) {
     console.error('❌ 執行失敗：', error)
     process.exit(1)
   }
-  
+
   console.log('✅ RLS Policy 修復成功！\n')
-  
+
   // 驗證
   console.log('🔍 驗證新的 policies...\n')
   const { data: policies, error: verifyError } = await supabase
     .from('pg_policies')
     .select('tablename, policyname, cmd, qual')
     .eq('tablename', 'workspace_job_roles')
-  
+
   if (verifyError) {
     console.error('⚠️ 驗證失敗：', verifyError)
   } else {
     console.log('📋 當前 policies：')
     console.table(policies)
   }
-  
 } catch (err) {
   console.error('❌ 錯誤：', err)
   process.exit(1)

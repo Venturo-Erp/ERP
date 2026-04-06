@@ -27,10 +27,12 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabaseAdmin
       .from('customer_inquiries')
-      .select(`
+      .select(
+        `
         *,
         wishlist_templates(name)
-      `)
+      `
+      )
       .eq('workspace_id', workspaceId)
       .order('created_at', { ascending: false })
 

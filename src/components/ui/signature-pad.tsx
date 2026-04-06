@@ -49,29 +49,26 @@ export function SignaturePad({
   }, [width, height])
 
   // 取得座標（支援觸控和滑鼠）
-  const getCoordinates = useCallback(
-    (e: React.TouchEvent | React.MouseEvent) => {
-      const canvas = canvasRef.current
-      if (!canvas) return { x: 0, y: 0 }
+  const getCoordinates = useCallback((e: React.TouchEvent | React.MouseEvent) => {
+    const canvas = canvasRef.current
+    if (!canvas) return { x: 0, y: 0 }
 
-      const rect = canvas.getBoundingClientRect()
+    const rect = canvas.getBoundingClientRect()
 
-      if ('touches' in e) {
-        // 觸控事件
-        return {
-          x: e.touches[0].clientX - rect.left,
-          y: e.touches[0].clientY - rect.top,
-        }
-      } else {
-        // 滑鼠事件
-        return {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        }
+    if ('touches' in e) {
+      // 觸控事件
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top,
       }
-    },
-    []
-  )
+    } else {
+      // 滑鼠事件
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      }
+    }
+  }, [])
 
   // 開始繪製
   const startDrawing = useCallback(
@@ -135,9 +132,9 @@ export function SignaturePad({
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
       <div className="text-sm text-morandi-secondary mb-1">請在下方簽名：</div>
-      
+
       {/* 簽名區域 - touch-none 防止觸控時縮放/滾動 */}
-      <div 
+      <div
         className="border-2 border-dashed border-morandi-gold/50 rounded-lg overflow-hidden bg-white touch-none"
         style={{ touchAction: 'none' }}
       >
@@ -179,9 +176,7 @@ export function SignaturePad({
         </Button>
       </div>
 
-      <p className="text-xs text-morandi-secondary text-center">
-        📱 手機觸控或 🖱️ 滑鼠繪製皆可
-      </p>
+      <p className="text-xs text-morandi-secondary text-center">📱 手機觸控或 🖱️ 滑鼠繪製皆可</p>
     </div>
   )
 }

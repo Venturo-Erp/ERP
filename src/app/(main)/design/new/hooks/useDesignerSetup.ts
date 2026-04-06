@@ -86,7 +86,9 @@ export function useDesignerSetup({
         if (selectedItineraryId) {
           const { data: itineraryData } = await supabase
             .from('itineraries')
-            .select('id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary')
+            .select(
+              'id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary'
+            )
             .eq('id', selectedItineraryId)
             .single()
 

@@ -1,6 +1,6 @@
 /**
  * 模組分頁權限定義
- * 
+ *
  * 每個模組可以有多個分頁，每個分頁可以獨立設定讀/寫權限
  */
 
@@ -158,7 +158,6 @@ export const MODULES: ModuleDefinition[] = [
     tabs: [
       { code: 'personal', name: '個人設定', description: '密碼、頭像、個人資料' },
       { code: 'company', name: '公司設定', description: '公司名稱、Logo、聯絡方式' },
-      { code: 'bot-line', name: 'LINE Bot', description: 'LINE 連線與群組管理' },
     ],
   },
 ]

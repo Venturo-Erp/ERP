@@ -122,7 +122,10 @@ export function ResourceOverrideDialog({
                     >
                       <img src={img} alt="" className="w-full h-full object-cover" />
                       {idx === 0 && (
-                        <Star size={8} className="absolute top-0.5 left-0.5 text-white fill-current drop-shadow" />
+                        <Star
+                          size={8}
+                          className="absolute top-0.5 left-0.5 text-white fill-current drop-shadow"
+                        />
                       )}
                     </button>
                   ))}
@@ -148,13 +151,11 @@ export function ResourceOverrideDialog({
               <Label>本團專用介紹</Label>
               <Textarea
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={e => setDescription(e.target.value)}
                 placeholder="留空則使用資料庫原始內容"
                 rows={5}
               />
-              <p className="text-xs text-muted-foreground">
-                此修改只影響這一團
-              </p>
+              <p className="text-xs text-muted-foreground">此修改只影響這一團</p>
             </div>
 
             {/* 按鈕 */}

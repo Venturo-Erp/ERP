@@ -43,10 +43,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (channelError) {
-      return NextResponse.json(
-        { success: false, error: channelError.message },
-        { status: 500 }
-      )
+      return NextResponse.json({ success: false, error: channelError.message }, { status: 500 })
     }
 
     // 3. 將相關人員加入頻道
@@ -118,9 +115,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, channelId: newChannel.id })
   } catch (error) {
-    return NextResponse.json(
-      { success: false, error: String(error) },
-      { status: 500 }
-    )
+    return NextResponse.json({ success: false, error: String(error) }, { status: 500 })
   }
 }

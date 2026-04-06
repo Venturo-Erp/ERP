@@ -17,7 +17,9 @@ export default async function Page({ params }: PageProps) {
   // 查詢合約
   const { data: contract, error } = await supabase
     .from('contracts')
-    .select('id, code, template, signer_type, signer_name, company_name, member_ids, contract_data, status, signer_phone, signer_address, signer_id_number, signature_image, signed_at, include_member_list, include_itinerary, tour_id, workspace_id')
+    .select(
+      'id, code, template, signer_type, signer_name, company_name, member_ids, contract_data, status, signer_phone, signer_address, signer_id_number, signature_image, signed_at, include_member_list, include_itinerary, tour_id, workspace_id'
+    )
     .eq('code', code)
     .single()
 
@@ -40,8 +42,10 @@ export default async function Page({ params }: PageProps) {
   ])
 
   // fallback: 舊合約的 include_itinerary 可能存在 contract_data 裡
-  const shouldIncludeItinerary = contract.include_itinerary || contract.contract_data?.includeItinerary
-  const shouldIncludeMemberList = contract.include_member_list || contract.contract_data?.includeMemberList
+  const shouldIncludeItinerary =
+    contract.include_itinerary || contract.contract_data?.includeItinerary
+  const shouldIncludeMemberList =
+    contract.include_member_list || contract.contract_data?.includeMemberList
 
   // 查詢團員 + 行程資料（並行）
   const [membersResult, itineraryResult] = await Promise.all([
@@ -62,7 +66,12 @@ export default async function Page({ params }: PageProps) {
   ])
 
   const members = membersResult.data || []
-  let itineraryData: { daily_itinerary: unknown; departure_date: string | null; outbound_flight: unknown; return_flight: unknown } | null = null
+  let itineraryData: {
+    daily_itinerary: unknown
+    departure_date: string | null
+    outbound_flight: unknown
+    return_flight: unknown
+  } | null = null
   let itineraryDepartureDate: string | null = null
   if (itineraryResult.data) {
     itineraryData = itineraryResult.data
@@ -74,7 +83,14 @@ export default async function Page({ params }: PageProps) {
     ...contract,
     include_itinerary: !!shouldIncludeItinerary,
     include_member_list: !!shouldIncludeMemberList,
-    tours: tour || { id: '', code: '', name: '未知', location: '', departure_date: '', return_date: '' },
+    tours: tour || {
+      id: '',
+      code: '',
+      name: '未知',
+      location: '',
+      departure_date: '',
+      return_date: '',
+    },
     workspaces: workspace || { id: '', name: '未知', seal_image_url: '' },
     members,
     itineraryData,

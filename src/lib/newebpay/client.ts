@@ -100,33 +100,44 @@ interface QueryParams {
 
 /**
  * 從 Supabase 獲取藍新金流設定
+ * merchantId (統一編號) 從 workspace 的 tax_id 讀取
+ * hashKey / hashIV 從 system_settings 讀取
  */
 async function getNewebPayConfig(workspaceId: string): Promise<NewebPayConfig> {
   const supabase = getSupabaseAdminClient()
 
-  // 從 system_settings 表獲取設定（依 workspace_id 隔離）
-  const { data, error } = await supabase
-    .from('system_settings')
-    .select('id, category, description, settings, is_active, workspace_id, created_at, updated_at')
-    .eq('category', 'newebpay')
-    .eq('workspace_id', workspaceId)
-    .single()
+  // 同時取 workspace (統編) 和 newebpay 設定 (金鑰)
+  const [workspaceResult, settingsResult] = await Promise.all([
+    supabase.from('workspaces').select('tax_id').eq('id', workspaceId).single(),
+    supabase
+      .from('system_settings')
+      .select(
+        'id, category, description, settings, is_active, workspace_id, created_at, updated_at'
+      )
+      .eq('category', 'newebpay')
+      .eq('workspace_id', workspaceId)
+      .single(),
+  ])
 
-  if (error || !data) {
+  if (workspaceResult.error || !workspaceResult.data?.tax_id) {
+    throw new Error('無法獲取公司統一編號，請在公司設定中填寫')
+  }
+
+  if (settingsResult.error || !settingsResult.data) {
     throw new Error('無法獲取藍新金流設定，請先在系統設定中配置')
   }
 
-  const settings = data.settings as Record<string, string | boolean>
+  const settings = settingsResult.data.settings as Record<string, string | boolean>
 
-  if (!settings.merchantId || !settings.hashKey || !settings.hashIV) {
-    throw new Error('藍新金流設定不完整，請確認 MerchantID、HashKey、HashIV')
+  if (!settings.hashKey || !settings.hashIV) {
+    throw new Error('藍新金流設定不完整，請確認 HashKey、HashIV')
   }
 
   return {
-    merchantId: settings.merchantId as string,
+    merchantId: workspaceResult.data.tax_id,
     hashKey: settings.hashKey as string,
     hashIV: settings.hashIV as string,
-    isProduction: settings.isProduction === true, // 依照設定決定環境
+    isProduction: settings.isProduction === true,
   }
 }
 

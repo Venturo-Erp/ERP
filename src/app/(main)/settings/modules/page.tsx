@@ -264,15 +264,15 @@ export default function ModulesManagementPage() {
                       {/* 到期日 */}
                       {status.enabled && status.expiresAt && (
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-morandi-secondary">{MODULES_PAGE_LABELS.EXPIRY_DATE}</span>
+                          <span className="text-morandi-secondary">
+                            {MODULES_PAGE_LABELS.EXPIRY_DATE}
+                          </span>
                           <DateCell
                             date={status.expiresAt}
                             showIcon={true}
                             className={cn(
                               'font-medium',
-                              status.expired
-                                ? 'text-status-danger'
-                                : 'text-morandi-primary'
+                              status.expired ? 'text-status-danger' : 'text-morandi-primary'
                             )}
                           />
                         </div>
@@ -380,7 +380,10 @@ export default function ModulesManagementPage() {
                 </div>
                 <ul className="space-y-1.5">
                   {MODULE_INFO[selectedModule].features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2 text-sm text-morandi-secondary">
+                    <li
+                      key={index}
+                      className="flex items-start gap-2 text-sm text-morandi-secondary"
+                    >
                       <CheckCircle2 className="h-4 w-4 text-status-success mt-0.5 flex-shrink-0" />
                       <span>{feature}</span>
                     </li>

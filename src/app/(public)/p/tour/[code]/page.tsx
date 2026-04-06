@@ -3,7 +3,7 @@
 /**
  * 公開行程頁面 - Tokyo Sakura 風格
  * 路由: /p/tour/[code]?ref=E001
- * 
+ *
  * 特色：
  * - Sticky 日期導航（滾動自動高亮）
  * - 時間軸佈局
@@ -14,10 +14,10 @@
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { 
-  MapPin, 
-  Calendar, 
-  Users, 
+import {
+  MapPin,
+  Calendar,
+  Users,
   Clock,
   Phone,
   Mail,
@@ -95,15 +95,11 @@ interface CompanyInfo {
   phone: string
 }
 
-export default function PublicTourPage({ 
-  params 
-}: { 
-  params: Promise<{ code: string }> 
-}) {
+export default function PublicTourPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = use(params)
   const searchParams = useSearchParams()
   const ref = searchParams.get('ref')
-  
+
   const [tour, setTour] = useState<TourData | null>(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
@@ -117,7 +113,8 @@ export default function PublicTourPage({
       // 用 code 查 tour
       const { data: tourData, error } = await supabase
         .from('tours')
-        .select(`
+        .select(
+          `
           id,
           code,
           departure_date,
@@ -134,7 +131,8 @@ export default function PublicTourPage({
             daily_itinerary,
             hotels
           )
-        `)
+        `
+        )
         .eq('code', code)
         .eq('is_deleted', false)
         .single()
@@ -145,13 +143,13 @@ export default function PublicTourPage({
         return
       }
 
-      const itineraryData = Array.isArray(tourData.itinerary) 
-        ? tourData.itinerary[0] 
+      const itineraryData = Array.isArray(tourData.itinerary)
+        ? tourData.itinerary[0]
         : tourData.itinerary
 
       setTour({
         ...tourData,
-        itinerary: itineraryData || null
+        itinerary: itineraryData || null,
       } as TourData)
 
       // 載入公司資訊
@@ -161,7 +159,7 @@ export default function PublicTourPage({
           .select('legal_name, phone')
           .eq('id', tourData.workspace_id)
           .single()
-        
+
         if (workspace) {
           setCompanyInfo({
             name: workspace.legal_name || '旅行社',
@@ -178,7 +176,7 @@ export default function PublicTourPage({
           .eq('airport_code', tourData.airport_code)
           .eq('is_default', true)
           .single()
-        
+
         if (imageData?.image_url) {
           setHeroImage(imageData.image_url)
         }
@@ -191,7 +189,7 @@ export default function PublicTourPage({
           .select('display_name, email, avatar_url, employee_number')
           .or(`employee_number.eq.${ref},id.eq.${ref}`)
           .single()
-        
+
         if (empData) {
           setEmployee(empData)
         }
@@ -208,7 +206,7 @@ export default function PublicTourPage({
     const handleScroll = () => {
       const dailyItinerary = tour?.itinerary?.daily_itinerary || []
       let current = 0
-      
+
       dailyItinerary.forEach((_, index) => {
         const element = document.getElementById(`day${index + 1}`)
         if (element) {
@@ -218,7 +216,7 @@ export default function PublicTourPage({
           }
         }
       })
-      
+
       setActiveDay(current)
     }
 
@@ -261,13 +259,26 @@ export default function PublicTourPage({
   // 取得活動圖標
   const getActivityIcon = (icon?: string) => {
     switch (icon) {
-      case '🍽️': case '🍴': return <Utensils className="w-5 h-5" />
-      case '🏨': case '🛏️': return <Hotel className="w-5 h-5" />
-      case '📷': case '📸': return <Camera className="w-5 h-5" />
-      case '🚢': case '⛵': return <Ship className="w-5 h-5" />
-      case '🌳': case '🌲': return <TreePine className="w-5 h-5" />
-      case '🏛️': case '🏢': return <Building className="w-5 h-5" />
-      default: return <MapPin className="w-5 h-5" />
+      case '🍽️':
+      case '🍴':
+        return <Utensils className="w-5 h-5" />
+      case '🏨':
+      case '🛏️':
+        return <Hotel className="w-5 h-5" />
+      case '📷':
+      case '📸':
+        return <Camera className="w-5 h-5" />
+      case '🚢':
+      case '⛵':
+        return <Ship className="w-5 h-5" />
+      case '🌳':
+      case '🌲':
+        return <TreePine className="w-5 h-5" />
+      case '🏛️':
+      case '🏢':
+        return <Building className="w-5 h-5" />
+      default:
+        return <MapPin className="w-5 h-5" />
     }
   }
 
@@ -309,7 +320,10 @@ export default function PublicTourPage({
       {/* Sticky Day Navigation */}
       {dailyItinerary.length > 0 && (
         <nav className="sticky top-[72px] z-40 bg-white/60 backdrop-blur-md border-b border-slate-200/20 py-2">
-          <div className="max-w-7xl mx-auto px-6 flex justify-center md:justify-start gap-2 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          <div
+            className="max-w-7xl mx-auto px-6 flex justify-center md:justify-start gap-2 overflow-x-auto"
+            style={{ scrollbarWidth: 'none' }}
+          >
             {dailyItinerary.map((day, index) => (
               <a
                 key={index}
@@ -330,8 +344,8 @@ export default function PublicTourPage({
       {/* Hero Section */}
       <section className="relative h-[500px] md:h-[614px] w-full overflow-hidden flex items-end pb-24 px-8 md:px-24">
         {heroImage ? (
-          <img 
-            src={heroImage} 
+          <img
+            src={heroImage}
             alt={itinerary?.title || '行程封面'}
             className="absolute inset-0 w-full h-full object-cover"
           />
@@ -349,9 +363,7 @@ export default function PublicTourPage({
             {itinerary?.title || tour.code}
           </h1>
           {itinerary?.subtitle && (
-            <p className="text-white/80 text-lg mt-4 max-w-2xl">
-              {itinerary.subtitle}
-            </p>
+            <p className="text-white/80 text-lg mt-4 max-w-2xl">{itinerary.subtitle}</p>
           )}
         </div>
       </section>
@@ -361,15 +373,13 @@ export default function PublicTourPage({
         <div className="flex-1 space-y-24 md:space-y-32">
           {dailyItinerary.length > 0 ? (
             dailyItinerary.map((day, index) => (
-              <section 
-                key={index} 
-                id={`day${index + 1}`}
-                className="relative pl-12 scroll-mt-48"
-              >
+              <section key={index} id={`day${index + 1}`} className="relative pl-12 scroll-mt-48">
                 {/* Timeline */}
                 <div className="absolute left-0 top-0 bottom-0 w-px bg-slate-200 ml-4"></div>
                 <div className="absolute left-0 top-2 w-8 h-8 rounded-full bg-public-accent flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">{String(index + 1).padStart(2, '0')}</span>
+                  <span className="text-white text-xs font-bold">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
                 </div>
 
                 {/* Day Title */}
@@ -379,27 +389,34 @@ export default function PublicTourPage({
 
                 <div className="space-y-12">
                   {/* Activities */}
-                  {day.activities && day.activities.map((activity, actIdx) => (
-                    <div key={actIdx} className="group">
-                      <div className="flex items-center gap-4 mb-4">
-                        <span className="text-public-secondary">{getActivityIcon(activity.icon)}</span>
-                        <span className="text-sm font-bold tracking-widest text-public-secondary uppercase">
-                          {activity.icon || '景點'}
-                        </span>
+                  {day.activities &&
+                    day.activities.map((activity, actIdx) => (
+                      <div key={actIdx} className="group">
+                        <div className="flex items-center gap-4 mb-4">
+                          <span className="text-public-secondary">
+                            {getActivityIcon(activity.icon)}
+                          </span>
+                          <span className="text-sm font-bold tracking-widest text-public-secondary uppercase">
+                            {activity.icon || '景點'}
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-bold mb-4">{activity.title}</h3>
+                        {activity.description && (
+                          <p className="text-morandi-primary leading-relaxed">
+                            {activity.description}
+                          </p>
+                        )}
                       </div>
-                      <h3 className="text-xl font-bold mb-4">{activity.title}</h3>
-                      {activity.description && (
-                        <p className="text-morandi-primary leading-relaxed">{activity.description}</p>
-                      )}
-                    </div>
-                  ))}
+                    ))}
 
                   {/* Meals */}
                   {day.meals && (day.meals.breakfast || day.meals.lunch || day.meals.dinner) && (
                     <div className="p-6 bg-morandi-gold/10 rounded-xl border border-morandi-gold/20">
                       <div className="flex items-center gap-3 mb-3">
                         <Utensils className="w-5 h-5 text-morandi-gold" />
-                        <span className="text-sm font-bold text-morandi-primary uppercase tracking-widest">餐食安排</span>
+                        <span className="text-sm font-bold text-morandi-primary uppercase tracking-widest">
+                          餐食安排
+                        </span>
                       </div>
                       <div className="text-sm text-morandi-primary space-y-1">
                         {day.meals.breakfast && <p>早餐：{day.meals.breakfast}</p>}
@@ -414,7 +431,9 @@ export default function PublicTourPage({
                     <div className="p-6 bg-slate-50 rounded-xl">
                       <div className="flex items-center gap-4">
                         <Hotel className="w-5 h-5 text-slate-400" />
-                        <span className="text-morandi-primary font-medium">住宿：{day.accommodation}</span>
+                        <span className="text-morandi-primary font-medium">
+                          住宿：{day.accommodation}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -435,7 +454,9 @@ export default function PublicTourPage({
           <div className="sticky top-40 space-y-6">
             {/* Price Card */}
             <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-              <div className="text-slate-500 text-xs font-bold tracking-widest uppercase mb-2">行程價格</div>
+              <div className="text-slate-500 text-xs font-bold tracking-widest uppercase mb-2">
+                行程價格
+              </div>
               <div className="flex items-baseline gap-2 mb-8">
                 {tour.selling_price_per_person ? (
                   <>
@@ -448,16 +469,22 @@ export default function PublicTourPage({
                   <span className="text-2xl font-bold text-slate-500">洽詢報價</span>
                 )}
               </div>
-              
+
               <div className="space-y-3">
-                <Link href={`/p/tour/${code}/register${ref ? `?ref=${ref}` : ''}`} className="block">
+                <Link
+                  href={`/p/tour/${code}/register${ref ? `?ref=${ref}` : ''}`}
+                  className="block"
+                >
                   <Button className="w-full bg-gradient-to-r from-[#00113a] to-[#002366] text-white py-4 rounded-xl font-bold hover:shadow-lg transition-all">
                     立即預約
                   </Button>
                 </Link>
                 {companyInfo.phone && (
                   <a href={`tel:${companyInfo.phone}`} className="block">
-                    <Button variant="outline" className="w-full border-public-primary text-public-primary py-4 rounded-xl font-bold hover:bg-slate-50 transition-all">
+                    <Button
+                      variant="outline"
+                      className="w-full border-public-primary text-public-primary py-4 rounded-xl font-bold hover:bg-slate-50 transition-all"
+                    >
                       諮詢專屬顧問
                     </Button>
                   </a>
@@ -469,7 +496,9 @@ export default function PublicTourPage({
                 {tour.departure_date && (
                   <div className="flex items-center gap-3 text-sm text-morandi-primary">
                     <Calendar className="w-4 h-4 text-morandi-green" />
-                    <span>出發日期：{new Date(tour.departure_date).toLocaleDateString('zh-TW')}</span>
+                    <span>
+                      出發日期：{new Date(tour.departure_date).toLocaleDateString('zh-TW')}
+                    </span>
                   </div>
                 )}
                 {tour.max_participants && (
@@ -481,7 +510,9 @@ export default function PublicTourPage({
                 {daysCount > 0 && (
                   <div className="flex items-center gap-3 text-sm text-morandi-primary">
                     <Clock className="w-4 h-4 text-morandi-green" />
-                    <span>行程天數：{daysCount} 天 {nightsCount} 夜</span>
+                    <span>
+                      行程天數：{daysCount} 天 {nightsCount} 夜
+                    </span>
                   </div>
                 )}
               </div>
@@ -489,7 +520,9 @@ export default function PublicTourPage({
               {/* Itinerary Summary */}
               {dailyItinerary.length > 0 && (
                 <div className="mt-8 pt-8 border-t border-slate-100">
-                  <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">行程摘要</div>
+                  <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">
+                    行程摘要
+                  </div>
                   <ul className="space-y-3">
                     {dailyItinerary.map((day, idx) => (
                       <li key={idx} className="flex gap-3 text-sm">
@@ -526,13 +559,15 @@ export default function PublicTourPage({
           {employee && (
             <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 mb-8 max-w-xl mx-auto">
               <div className="text-center mb-6">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">您的專屬顧問</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                  您的專屬顧問
+                </span>
               </div>
               <div className="flex items-center gap-6">
                 {employee.avatar_url ? (
-                  <img 
-                    src={employee.avatar_url} 
-                    alt={employee.display_name || ''} 
+                  <img
+                    src={employee.avatar_url}
+                    alt={employee.display_name || ''}
                     className="w-20 h-20 rounded-full object-cover"
                   />
                 ) : (
@@ -545,10 +580,15 @@ export default function PublicTourPage({
                     {employee.display_name || '專屬顧問'}
                   </h3>
                   {employee.employee_number && (
-                    <p className="text-sm text-slate-500 mb-2">員工編號：{employee.employee_number}</p>
+                    <p className="text-sm text-slate-500 mb-2">
+                      員工編號：{employee.employee_number}
+                    </p>
                   )}
                   {employee.email && (
-                    <a href={`mailto:${employee.email}`} className="flex items-center gap-2 text-sm text-public-secondary hover:underline mt-3">
+                    <a
+                      href={`mailto:${employee.email}`}
+                      className="flex items-center gap-2 text-sm text-public-secondary hover:underline mt-3"
+                    >
                       <Mail className="w-4 h-4" />
                       {employee.email}
                     </a>
@@ -562,7 +602,10 @@ export default function PublicTourPage({
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="text-lg font-bold text-public-primary">{companyInfo.name}</div>
             {companyInfo.phone && (
-              <a href={`tel:${companyInfo.phone}`} className="flex items-center gap-2 text-slate-600 hover:text-public-primary">
+              <a
+                href={`tel:${companyInfo.phone}`}
+                className="flex items-center gap-2 text-slate-600 hover:text-public-primary"
+              >
                 <Phone className="w-4 h-4" />
                 {companyInfo.phone}
               </a>

@@ -10,7 +10,9 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('chart_of_accounts')
-    .select('id, code, name, account_type, description, is_system_locked, is_active, workspace_id, created_at, updated_at')
+    .select(
+      'id, code, name, account_type, description, is_system_locked, is_active, workspace_id, created_at, updated_at'
+    )
     .order('code')
 
   if (error) {
@@ -117,10 +119,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: '系統科目無法刪除' }, { status: 400 })
   }
 
-  const { error } = await supabase
-    .from('chart_of_accounts')
-    .delete()
-    .eq('id', id)
+  const { error } = await supabase.from('chart_of_accounts').delete().eq('id', id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

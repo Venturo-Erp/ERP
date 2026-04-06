@@ -143,7 +143,7 @@ export function CreateDisbursementDialog({
       <RequestDetailDialog
         request={viewingRequest}
         open={!!viewingRequest}
-        onOpenChange={(open) => !open && setViewingRequest(null)}
+        onOpenChange={open => !open && setViewingRequest(null)}
         readOnly
       />
     </Dialog>

@@ -38,3 +38,5 @@ public/
 !tailwind.config.js
 *.js
 scripts/
+.claude/
+.claude/**

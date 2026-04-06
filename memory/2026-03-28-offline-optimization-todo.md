@@ -8,12 +8,12 @@
 
 ## 核心決策
 
-| 項目 | 決定 |
-|------|------|
-| 離線模式 | **只讀**（不支援離線寫入）|
-| 離線時編輯 | **禁用按鈕**（不是存檔時報錯）|
-| 快取儲存 | **IndexedDB**（持久化）|
-| 同步策略 | **SWR**（Stale-While-Revalidate）|
+| 項目       | 決定                              |
+| ---------- | --------------------------------- |
+| 離線模式   | **只讀**（不支援離線寫入）        |
+| 離線時編輯 | **禁用按鈕**（不是存檔時報錯）    |
+| 快取儲存   | **IndexedDB**（持久化）           |
+| 同步策略   | **SWR**（Stale-While-Revalidate） |
 
 ---
 
@@ -46,8 +46,8 @@
   ```tsx
   // 概念
   const { data } = useSWR(key, fetcher, {
-    fallbackData: await idbGet(key),  // 先讀本地
-    onSuccess: (data) => idbSet(key, data),  // 成功後存本地
+    fallbackData: await idbGet(key), // 先讀本地
+    onSuccess: data => idbSet(key, data), // 成功後存本地
   })
   ```
 - [ ] 改造 Entity Hook 使用 `usePersistedSWR`
@@ -81,14 +81,14 @@
 
 ## 預估總工時
 
-| Phase | 工時 | 依賴 |
-|-------|------|------|
-| Phase 1 | 2-3h | 無 |
-| Phase 2 | 1-2h | 無 |
-| Phase 3 | 4-6h | 無 |
-| Phase 4 | 2-3h | Phase 3 |
-| Phase 5 | 1-2h | Phase 3 |
-| **總計** | **10-16h** | |
+| Phase    | 工時       | 依賴    |
+| -------- | ---------- | ------- |
+| Phase 1  | 2-3h       | 無      |
+| Phase 2  | 1-2h       | 無      |
+| Phase 3  | 4-6h       | 無      |
+| Phase 4  | 2-3h       | Phase 3 |
+| Phase 5  | 1-2h       | Phase 3 |
+| **總計** | **10-16h** |         |
 
 ---
 

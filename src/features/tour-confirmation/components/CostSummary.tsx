@@ -118,7 +118,9 @@ export function CostSummaryCard({ summary }: CostSummaryCardProps) {
       {difference !== 0 && (
         <div
           className={`px-4 py-2 text-xs border-t border-border ${
-            difference > 0 ? 'bg-morandi-red/10 text-morandi-red' : 'bg-morandi-green/10 text-morandi-green'
+            difference > 0
+              ? 'bg-morandi-red/10 text-morandi-red'
+              : 'bg-morandi-green/10 text-morandi-green'
           }`}
         >
           {difference > 0

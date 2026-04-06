@@ -50,7 +50,9 @@ export function MealQuoteDialog({
   }, [meals])
 
   const handleItemChange = (idx: number, field: string, value: unknown) => {
-    setEditableItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: value } : item))
+    setEditableItems(prev =>
+      prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item))
+    )
   }
   const [selectedGroupId, setSelectedGroupId] = useState<string>('')
   const [sending, setSending] = useState(false)
@@ -187,18 +189,18 @@ export function MealQuoteDialog({
               {loadingGroups ? (
                 <Skeleton className="h-10 w-64" />
               ) : (
-              <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder="請選擇群組" />
-                </SelectTrigger>
-                <SelectContent>
-                  {lineGroups.map(g => (
-                    <SelectItem key={g.group_id} value={g.group_id}>
-                      {g.group_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+                  <SelectTrigger className="w-64">
+                    <SelectValue placeholder="請選擇群組" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {lineGroups.map(g => (
+                      <SelectItem key={g.group_id} value={g.group_id}>
+                        {g.group_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
               <Button
                 onClick={handleSendLine}

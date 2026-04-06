@@ -263,7 +263,9 @@ function NewItineraryPageContent() {
         <div className="bg-morandi-gold/10 border-b border-morandi-gold/30 px-4 py-3 flex items-center gap-3">
           <span className="material-symbols-outlined text-morandi-gold">lock</span>
           <div>
-            <p className="text-sm font-medium text-morandi-primary">{EDITOR_LABELS.HANDOVER_NOTICE}</p>
+            <p className="text-sm font-medium text-morandi-primary">
+              {EDITOR_LABELS.HANDOVER_NOTICE}
+            </p>
             <p className="text-xs text-morandi-gold">{EDITOR_LABELS.HANDOVER_DESC}</p>
           </div>
         </div>

@@ -90,7 +90,14 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
   localTiers,
   insuranceText: externalInsuranceText = '',
   onInsuranceChange,
-  excludedItems: externalExcludedItems = ['個人護照費用', '簽證費用', '行程外之自費行程', '個人消費及小費', '行李超重費用', '單人房差價'],
+  excludedItems: externalExcludedItems = [
+    '個人護照費用',
+    '簽證費用',
+    '行程外之自費行程',
+    '個人消費及小費',
+    '行李超重費用',
+    '單人房差價',
+  ],
   onExcludedItemsChange,
 }) => {
   // 檢查是否有 Local 報價（人數欄位鎖定）
@@ -101,7 +108,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
   // 展開/收合狀態
   const [baseExpanded, setBaseExpanded] = useState(true)
   const [tierExpanded, setTierExpanded] = useState<Record<string, boolean>>({})
-  
+
   // 保險文字和不包含項目
   const [insuranceText, setInsuranceText] = useState(externalInsuranceText)
   const [excludedItems, setExcludedItems] = useState(externalExcludedItems)
@@ -271,17 +278,19 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
         <div className="bg-card border border-morandi-gold/40 rounded-xl overflow-hidden shadow-sm">
           <div
             className={cn(
-              "bg-morandi-gold/15 px-4 py-2 flex items-center justify-between cursor-pointer select-none",
-              baseExpanded && "border-b border-morandi-gold/30"
+              'bg-morandi-gold/15 px-4 py-2 flex items-center justify-between cursor-pointer select-none',
+              baseExpanded && 'border-b border-morandi-gold/30'
             )}
             onClick={() => setBaseExpanded(prev => !prev)}
           >
             <div className="flex items-center gap-1">
-              {baseExpanded ? <ChevronDown size={14} className="text-morandi-gold" /> : <ChevronRight size={14} className="text-morandi-gold" />}
+              {baseExpanded ? (
+                <ChevronDown size={14} className="text-morandi-gold" />
+              ) : (
+                <ChevronRight size={14} className="text-morandi-gold" />
+              )}
               {tierPricings.length > 0 && (
-                <span className="text-xs font-semibold text-morandi-gold mr-1">
-                  砍次 1
-                </span>
+                <span className="text-xs font-semibold text-morandi-gold mr-1">砍次 1</span>
               )}
               <input
                 onClick={e => e.stopPropagation()}
@@ -311,121 +320,125 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
             </div>
           </div>
           {baseExpanded && (
-          <table className="w-full text-sm">
-            <thead className="border-b border-morandi-container/60">
-              <tr>
-                <th className="text-left py-2 px-4 text-xs font-medium text-morandi-secondary">
-                  {SELLING_PRICE_SECTION_LABELS.LABEL_8725}
-                </th>
-                <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
-                  {SELLING_PRICE_SECTION_LABELS.LABEL_7178}
-                </th>
-                <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
-                  {SELLING_PRICE_SECTION_LABELS.LABEL_561}
-                </th>
-                <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
-                  {SELLING_PRICE_SECTION_LABELS.LABEL_7705}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <PriceInputRow
-                label={PRICE_SUMMARY_CARD_LABELS.單人房}
-                cost={identityCosts.single_room}
-                sellingPrice={sellingPrices.single_room}
-                profit={identityProfits.single_room}
-                onPriceChange={value => handlePriceChange('single_room', value)}
-                isReadOnly={isReadOnly}
-              />
-              <PriceInputRow
-                label={CATEGORY_SECTION_LABELS.成人}
-                cost={identityCosts.adult}
-                sellingPrice={sellingPrices.adult}
-                profit={identityProfits.adult}
-                onPriceChange={value => handlePriceChange('adult', value)}
-                isReadOnly={isReadOnly}
-              />
-              <PriceInputRow
-                label={PRICE_SUMMARY_CARD_LABELS.小孩}
-                cost={identityCosts.child_with_bed}
-                sellingPrice={sellingPrices.child_with_bed}
-                profit={identityProfits.child_with_bed}
-                onPriceChange={value => handlePriceChange('child_with_bed', value)}
-                isReadOnly={isReadOnly}
-              />
-              <PriceInputRow
-                label={PRICE_SUMMARY_CARD_LABELS.不佔床}
-                cost={identityCosts.child_no_bed}
-                sellingPrice={sellingPrices.child_no_bed}
-                profit={identityProfits.child_no_bed}
-                onPriceChange={value => handlePriceChange('child_no_bed', value)}
-                isReadOnly={isReadOnly}
-              />
-              <PriceInputRow
-                label={COST_ITEM_ROW_LABELS.嬰兒}
-                cost={identityCosts.infant}
-                sellingPrice={sellingPrices.infant}
-                profit={identityProfits.infant}
-                onPriceChange={value => handlePriceChange('infant', value)}
-                isReadOnly={isReadOnly}
-              />
+            <table className="w-full text-sm">
+              <thead className="border-b border-morandi-container/60">
+                <tr>
+                  <th className="text-left py-2 px-4 text-xs font-medium text-morandi-secondary">
+                    {SELLING_PRICE_SECTION_LABELS.LABEL_8725}
+                  </th>
+                  <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
+                    {SELLING_PRICE_SECTION_LABELS.LABEL_7178}
+                  </th>
+                  <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
+                    {SELLING_PRICE_SECTION_LABELS.LABEL_561}
+                  </th>
+                  <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
+                    {SELLING_PRICE_SECTION_LABELS.LABEL_7705}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <PriceInputRow
+                  label={PRICE_SUMMARY_CARD_LABELS.單人房}
+                  cost={identityCosts.single_room}
+                  sellingPrice={sellingPrices.single_room}
+                  profit={identityProfits.single_room}
+                  onPriceChange={value => handlePriceChange('single_room', value)}
+                  isReadOnly={isReadOnly}
+                />
+                <PriceInputRow
+                  label={CATEGORY_SECTION_LABELS.成人}
+                  cost={identityCosts.adult}
+                  sellingPrice={sellingPrices.adult}
+                  profit={identityProfits.adult}
+                  onPriceChange={value => handlePriceChange('adult', value)}
+                  isReadOnly={isReadOnly}
+                />
+                <PriceInputRow
+                  label={PRICE_SUMMARY_CARD_LABELS.小孩}
+                  cost={identityCosts.child_with_bed}
+                  sellingPrice={sellingPrices.child_with_bed}
+                  profit={identityProfits.child_with_bed}
+                  onPriceChange={value => handlePriceChange('child_with_bed', value)}
+                  isReadOnly={isReadOnly}
+                />
+                <PriceInputRow
+                  label={PRICE_SUMMARY_CARD_LABELS.不佔床}
+                  cost={identityCosts.child_no_bed}
+                  sellingPrice={sellingPrices.child_no_bed}
+                  profit={identityProfits.child_no_bed}
+                  onPriceChange={value => handlePriceChange('child_no_bed', value)}
+                  isReadOnly={isReadOnly}
+                />
+                <PriceInputRow
+                  label={COST_ITEM_ROW_LABELS.嬰兒}
+                  cost={identityCosts.infant}
+                  sellingPrice={sellingPrices.infant}
+                  profit={identityProfits.infant}
+                  onPriceChange={value => handlePriceChange('infant', value)}
+                  isReadOnly={isReadOnly}
+                />
 
-              {/* 動態房型 */}
-              {accommodationSummary.length > 1 &&
-                accommodationSummary.slice(1).map(room => (
-                  <React.Fragment key={room.name}>
-                    <tr className="border-b border-morandi-container/60">
-                      <td
-                        colSpan={4}
-                        className="py-2 px-3 text-xs font-medium text-morandi-secondary"
-                      >
-                        {room.name}
-                      </td>
-                    </tr>
-                    <PriceInputRow
-                      label={CATEGORY_SECTION_LABELS.成人}
-                      cost={getRoomTypeCost(
-                        room.name,
-                        'adult',
-                        accommodationSummary,
-                        identityCosts
-                      )}
-                      sellingPrice={sellingPrices.room_types?.[room.name]?.adult || 0}
-                      profit={getRoomTypeProfit(
-                        room.name,
-                        'adult',
-                        sellingPrices,
-                        accommodationSummary,
-                        identityCosts
-                      )}
-                      onPriceChange={value => handleRoomTypePriceChange(room.name, 'adult', value)}
-                      isReadOnly={isReadOnly}
-                      indented
-                    />
-                    <PriceInputRow
-                      label={PRICE_SUMMARY_CARD_LABELS.小孩}
-                      cost={getRoomTypeCost(
-                        room.name,
-                        'child',
-                        accommodationSummary,
-                        identityCosts
-                      )}
-                      sellingPrice={sellingPrices.room_types?.[room.name]?.child || 0}
-                      profit={getRoomTypeProfit(
-                        room.name,
-                        'child',
-                        sellingPrices,
-                        accommodationSummary,
-                        identityCosts
-                      )}
-                      onPriceChange={value => handleRoomTypePriceChange(room.name, 'child', value)}
-                      isReadOnly={isReadOnly}
-                      indented
-                    />
-                  </React.Fragment>
-                ))}
-            </tbody>
-          </table>
+                {/* 動態房型 */}
+                {accommodationSummary.length > 1 &&
+                  accommodationSummary.slice(1).map(room => (
+                    <React.Fragment key={room.name}>
+                      <tr className="border-b border-morandi-container/60">
+                        <td
+                          colSpan={4}
+                          className="py-2 px-3 text-xs font-medium text-morandi-secondary"
+                        >
+                          {room.name}
+                        </td>
+                      </tr>
+                      <PriceInputRow
+                        label={CATEGORY_SECTION_LABELS.成人}
+                        cost={getRoomTypeCost(
+                          room.name,
+                          'adult',
+                          accommodationSummary,
+                          identityCosts
+                        )}
+                        sellingPrice={sellingPrices.room_types?.[room.name]?.adult || 0}
+                        profit={getRoomTypeProfit(
+                          room.name,
+                          'adult',
+                          sellingPrices,
+                          accommodationSummary,
+                          identityCosts
+                        )}
+                        onPriceChange={value =>
+                          handleRoomTypePriceChange(room.name, 'adult', value)
+                        }
+                        isReadOnly={isReadOnly}
+                        indented
+                      />
+                      <PriceInputRow
+                        label={PRICE_SUMMARY_CARD_LABELS.小孩}
+                        cost={getRoomTypeCost(
+                          room.name,
+                          'child',
+                          accommodationSummary,
+                          identityCosts
+                        )}
+                        sellingPrice={sellingPrices.room_types?.[room.name]?.child || 0}
+                        profit={getRoomTypeProfit(
+                          room.name,
+                          'child',
+                          sellingPrices,
+                          accommodationSummary,
+                          identityCosts
+                        )}
+                        onPriceChange={value =>
+                          handleRoomTypePriceChange(room.name, 'child', value)
+                        }
+                        isReadOnly={isReadOnly}
+                        indented
+                      />
+                    </React.Fragment>
+                  ))}
+              </tbody>
+            </table>
           )}
         </div>
 
@@ -437,13 +450,19 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
           >
             <div
               className={cn(
-                "bg-morandi-container/30 px-4 py-2 flex items-center justify-between cursor-pointer select-none",
-                (tierExpanded[tier.id] ?? true) && "border-b border-border"
+                'bg-morandi-container/30 px-4 py-2 flex items-center justify-between cursor-pointer select-none',
+                (tierExpanded[tier.id] ?? true) && 'border-b border-border'
               )}
-              onClick={() => setTierExpanded(prev => ({ ...prev, [tier.id]: !(prev[tier.id] ?? true) }))}
+              onClick={() =>
+                setTierExpanded(prev => ({ ...prev, [tier.id]: !(prev[tier.id] ?? true) }))
+              }
             >
               <div className="flex items-center gap-1">
-                {(tierExpanded[tier.id] ?? true) ? <ChevronDown size={14} className="text-morandi-secondary" /> : <ChevronRight size={14} className="text-morandi-secondary" />}
+                {(tierExpanded[tier.id] ?? true) ? (
+                  <ChevronDown size={14} className="text-morandi-secondary" />
+                ) : (
+                  <ChevronRight size={14} className="text-morandi-secondary" />
+                )}
                 <span className="text-xs font-semibold text-morandi-secondary mr-1">
                   砍次 {tierIndex + 2}
                 </span>
@@ -490,73 +509,80 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
               </div>
             </div>
             {(tierExpanded[tier.id] ?? true) && (
-            <table className="w-full text-sm">
-              <thead className="border-b border-border/60">
-                <tr>
-                  <th className="text-left py-2 px-4 text-xs font-medium text-morandi-secondary">
-                    {SELLING_PRICE_SECTION_LABELS.LABEL_8725}
-                  </th>
-                  <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
-                    {SELLING_PRICE_SECTION_LABELS.LABEL_7178}
-                  </th>
-                  <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
-                    {SELLING_PRICE_SECTION_LABELS.LABEL_561}
-                  </th>
-                  <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
-                    {SELLING_PRICE_SECTION_LABELS.LABEL_7705}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <PriceInputRow
-                  label={PRICE_SUMMARY_CARD_LABELS.單人房}
-                  cost={tier.identity_costs.single_room}
-                  sellingPrice={tier.selling_prices.single_room}
-                  profit={tier.identity_profits.single_room}
-                  onPriceChange={value => handleTierPriceChange(tier.id, 'single_room', value)}
-                  isReadOnly={isReadOnly}
-                />
-                <PriceInputRow
-                  label={CATEGORY_SECTION_LABELS.成人}
-                  cost={tier.identity_costs.adult}
-                  sellingPrice={tier.selling_prices.adult}
-                  profit={tier.identity_profits.adult}
-                  onPriceChange={value => handleTierPriceChange(tier.id, 'adult', value)}
-                  isReadOnly={isReadOnly}
-                />
-                <PriceInputRow
-                  label={PRICE_SUMMARY_CARD_LABELS.小孩}
-                  cost={tier.identity_costs.child_with_bed}
-                  sellingPrice={tier.selling_prices.child_with_bed}
-                  profit={tier.identity_profits.child_with_bed}
-                  onPriceChange={value => handleTierPriceChange(tier.id, 'child_with_bed', value)}
-                  isReadOnly={isReadOnly}
-                />
-                <PriceInputRow
-                  label={PRICE_SUMMARY_CARD_LABELS.不佔床}
-                  cost={tier.identity_costs.child_no_bed}
-                  sellingPrice={tier.selling_prices.child_no_bed}
-                  profit={tier.identity_profits.child_no_bed}
-                  onPriceChange={value => handleTierPriceChange(tier.id, 'child_no_bed', value)}
-                  isReadOnly={isReadOnly}
-                />
-                <PriceInputRow
-                  label={COST_ITEM_ROW_LABELS.嬰兒}
-                  cost={tier.identity_costs.infant}
-                  sellingPrice={tier.selling_prices.infant}
-                  profit={tier.identity_profits.infant}
-                  onPriceChange={value => handleTierPriceChange(tier.id, 'infant', value)}
-                  isReadOnly={isReadOnly}
-                />
-              </tbody>
-            </table>
+              <table className="w-full text-sm">
+                <thead className="border-b border-border/60">
+                  <tr>
+                    <th className="text-left py-2 px-4 text-xs font-medium text-morandi-secondary">
+                      {SELLING_PRICE_SECTION_LABELS.LABEL_8725}
+                    </th>
+                    <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
+                      {SELLING_PRICE_SECTION_LABELS.LABEL_7178}
+                    </th>
+                    <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
+                      {SELLING_PRICE_SECTION_LABELS.LABEL_561}
+                    </th>
+                    <th className="text-center py-2 px-4 text-xs font-medium text-morandi-secondary">
+                      {SELLING_PRICE_SECTION_LABELS.LABEL_7705}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <PriceInputRow
+                    label={PRICE_SUMMARY_CARD_LABELS.單人房}
+                    cost={tier.identity_costs.single_room}
+                    sellingPrice={tier.selling_prices.single_room}
+                    profit={tier.identity_profits.single_room}
+                    onPriceChange={value => handleTierPriceChange(tier.id, 'single_room', value)}
+                    isReadOnly={isReadOnly}
+                  />
+                  <PriceInputRow
+                    label={CATEGORY_SECTION_LABELS.成人}
+                    cost={tier.identity_costs.adult}
+                    sellingPrice={tier.selling_prices.adult}
+                    profit={tier.identity_profits.adult}
+                    onPriceChange={value => handleTierPriceChange(tier.id, 'adult', value)}
+                    isReadOnly={isReadOnly}
+                  />
+                  <PriceInputRow
+                    label={PRICE_SUMMARY_CARD_LABELS.小孩}
+                    cost={tier.identity_costs.child_with_bed}
+                    sellingPrice={tier.selling_prices.child_with_bed}
+                    profit={tier.identity_profits.child_with_bed}
+                    onPriceChange={value => handleTierPriceChange(tier.id, 'child_with_bed', value)}
+                    isReadOnly={isReadOnly}
+                  />
+                  <PriceInputRow
+                    label={PRICE_SUMMARY_CARD_LABELS.不佔床}
+                    cost={tier.identity_costs.child_no_bed}
+                    sellingPrice={tier.selling_prices.child_no_bed}
+                    profit={tier.identity_profits.child_no_bed}
+                    onPriceChange={value => handleTierPriceChange(tier.id, 'child_no_bed', value)}
+                    isReadOnly={isReadOnly}
+                  />
+                  <PriceInputRow
+                    label={COST_ITEM_ROW_LABELS.嬰兒}
+                    cost={tier.identity_costs.infant}
+                    sellingPrice={tier.selling_prices.infant}
+                    profit={tier.identity_profits.infant}
+                    onPriceChange={value => handleTierPriceChange(tier.id, 'infant', value)}
+                    isReadOnly={isReadOnly}
+                  />
+                </tbody>
+              </table>
             )}
           </div>
         ))}
 
         {/* 費用包含 / 不含 — 勾選控制，取消勾選自動移到「包含」 */}
         {(() => {
-          const allToggleItems = ['個人護照費用', '簽證費用', '行程外之自費行程', '個人消費及小費', '行李超重費用', '單人房差價']
+          const allToggleItems = [
+            '個人護照費用',
+            '簽證費用',
+            '行程外之自費行程',
+            '個人消費及小費',
+            '行李超重費用',
+            '單人房差價',
+          ]
           const includedToggleItems = allToggleItems.filter(i => !excludedItems.includes(i))
           const excludedToggleItems = allToggleItems.filter(i => excludedItems.includes(i))
 
@@ -583,12 +609,12 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                     <input
                       type="text"
                       value={insuranceText}
-                      onChange={(e) => {
+                      onChange={e => {
                         setInsuranceText(e.target.value)
                         onInsuranceChange?.(e.target.value)
                       }}
                       placeholder="輸入數字 (例如: 200/20)"
-                      onBlur={(e) => {
+                      onBlur={e => {
                         const val = e.target.value.trim()
                         const match = val.match(/^(\d+)\/(\d+)$/)
                         if (match) {
@@ -601,7 +627,10 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                     />
                   </div>
                   {includedToggleItems.map(item => (
-                    <label key={item} className="flex items-center gap-2 cursor-pointer text-morandi-green">
+                    <label
+                      key={item}
+                      className="flex items-center gap-2 cursor-pointer text-morandi-green"
+                    >
                       <span>•</span>
                       <span>{item}</span>
                       <button

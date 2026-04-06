@@ -307,17 +307,19 @@ export function OrderMembersExpandable({
       const membersToSync = membersData.members.filter(
         m => !m.customer_id && (m.chinese_name || m.passport_name || m.id_number)
       )
-      
+
       if (membersToSync.length > 0) {
         const { createCustomer } = await import('@/data')
-        
+
         for (const member of membersToSync) {
           try {
             // 先查是否已有顧客
             const { data: existing } = await supabase
               .from('customers')
               .select('id')
-              .or(`passport_number.eq.${member.passport_number || ''},national_id.eq.${member.id_number || ''}`)
+              .or(
+                `passport_number.eq.${member.passport_number || ''},national_id.eq.${member.id_number || ''}`
+              )
               .not('passport_number', 'is', null)
               .limit(1)
               .maybeSingle()
@@ -355,7 +357,7 @@ export function OrderMembersExpandable({
             logger.warn('自動存為顧客失敗:', member.chinese_name, err)
           }
         }
-        
+
         if (membersToSync.length > 0) {
           toast.success(`已自動建立/關聯 ${membersToSync.length} 位顧客`)
         }
@@ -511,7 +513,9 @@ export function OrderMembersExpandable({
 
       const { data: customers, error } = await supabase
         .from('customers')
-        .select('id, code, name, english_name, phone, email, national_id, birth_date, gender, address, passport_number, passport_expiry, passport_name, passport_name_print, passport_image_url, vip_level, is_vip, member_type, emergency_contact, notes, nickname, source, company, workspace_id, created_at, updated_at')
+        .select(
+          'id, code, name, english_name, phone, email, national_id, birth_date, gender, address, passport_number, passport_expiry, passport_name, passport_name_print, passport_image_url, vip_level, is_vip, member_type, emergency_contact, notes, nickname, source, company, workspace_id, created_at, updated_at'
+        )
         .in('id', customerIds)
         .limit(500)
 
@@ -896,11 +900,11 @@ export function OrderMembersExpandable({
         const bKey = roomVehicle.roomSortKeys[b.id]
         const aHasRoom = aKey !== undefined
         const bHasRoom = bKey !== undefined
-        
+
         // 已分配的排前面，未分配的排後面
         if (aHasRoom && !bHasRoom) return -1
         if (!aHasRoom && bHasRoom) return 1
-        
+
         // 都已分配：先按房間順序，同房內按原本的 sort_order
         if (aHasRoom && bHasRoom) {
           const roomDiff = Math.floor(aKey / 10) - Math.floor(bKey / 10)
@@ -908,7 +912,7 @@ export function OrderMembersExpandable({
           // 同房內按 sort_order 排序
           return (a.sort_order ?? 999) - (b.sort_order ?? 999)
         }
-        
+
         // 都未分配：按原本的 sort_order
         return (a.sort_order ?? 999) - (b.sort_order ?? 999)
       })
@@ -944,43 +948,43 @@ export function OrderMembersExpandable({
   const handlePaste = useCallback(
     async (e: React.ClipboardEvent, memberIndex: number, fieldName: string) => {
       const pastedText = e.clipboardData.getData('text')
-      
+
       // 檢查是否有多行（換行符分隔）
       const lines = pastedText.split(/[\r\n]+/).filter(line => line.trim())
-      
+
       if (lines.length <= 1) {
         // 單行貼上，讓瀏覽器預設處理
         return
       }
-      
+
       // 多行貼上，阻止預設行為
       e.preventDefault()
-      
+
       // 使用 sortedMembers（畫面顯示的順序）而不是 membersData.members
       const updates: Array<{ id: string; [key: string]: string }> = []
-      
+
       // 從當前成員開始，依序填入
       for (let i = 0; i < lines.length && memberIndex + i < sortedMembers.length; i++) {
         const member = sortedMembers[memberIndex + i]
         updates.push({
           id: member.id,
-          [fieldName]: lines[i].trim()
+          [fieldName]: lines[i].trim(),
         })
       }
-      
+
       // 批量更新（使用 Supabase 批量更新）
       try {
-        const promises = updates.map(update => 
+        const promises = updates.map(update =>
           supabase
             .from('order_members')
             .update({ [fieldName]: update[fieldName] })
             .eq('id', update.id)
         )
         await Promise.all(promises)
-        
+
         // 重新載入資料
         await membersData.loadMembers()
-        
+
         toast.success(`已貼上 ${updates.length} 筆資料`)
       } catch (error) {
         logger.error('批量貼上失敗', error)
@@ -1245,115 +1249,119 @@ export function OrderMembersExpandable({
             <Skeleton className="h-10 w-[80%]" />
           </div>
         ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <table className="border-collapse text-sm member-table-inline table-fixed w-full">
-            <MemberTableHeader
-              mode={mode}
-              orderCount={membersData.orderCount}
-              showIdentityColumn={showIdentityColumn}
-              showPnrColumn={columnVisibility.pnr}
-              showRoomColumn={roomVehicle.showRoomColumn && columnVisibility.room}
-              showVehicleColumn={roomVehicle.showVehicleColumn && columnVisibility.vehicle}
-              showSurchargeColumn={columnVisibility.surcharges}
-              hotelColumns={roomVehicle.hotelColumns}
-              customCostFields={customCostFields}
-              columnVisibility={columnVisibility}
-              isEditMode={isAllEditMode}
-              columnWidths={columnWidths}
-              onColumnResize={setColumnWidth}
-            />
-            <SortableContext
-              items={sortedMembers.map(m => m.id)}
-              strategy={verticalListSortingStrategy}
-            >
-              <tbody>
-                {sortedMembers.map((member, index) => (
-                  <MemberRow
-                    key={member.id}
-                    member={member}
-                    index={index}
-                    isEditMode={isAllEditMode}
-                    showIdentityColumn={showIdentityColumn}
-                    showPnrColumn={columnVisibility.pnr}
-                    showRoomColumn={roomVehicle.showRoomColumn && columnVisibility.room}
-                    showVehicleColumn={roomVehicle.showVehicleColumn && columnVisibility.vehicle}
-                    showOrderCode={mode === 'tour' && membersData.orderCount > 1}
-                    departureDate={membersData.departureDate}
-                    roomAssignment={roomVehicle.roomAssignments[member.id]}
-                    vehicleAssignment={roomVehicle.vehicleAssignments[member.id]}
-                    roomRowSpan={rowSpans.roomSpans[member.id]}
-                    vehicleRowSpan={rowSpans.vehicleSpans[member.id]}
-                    hotelColumns={roomVehicle.hotelColumns}
-                    roomAssignmentsByHotel={roomVehicle.roomAssignmentsByHotel}
-                    roomIdByHotelMember={roomVehicle.roomIdByHotelMember}
-                    roomMembersByHotelRoom={roomVehicle.roomMembersByHotelRoom}
-                    roomOptionsByHotel={roomVehicle.roomOptionsByHotel}
-                    roomRowSpansByHotel={rowSpans.roomSpansByHotel}
-                    pnrValue={pnrValues[member.id]}
-                    onRoomAssign={roomVehicle.assignMemberToRoom}
-                    onRemoveMemberFromRoom={roomVehicle.removeMemberFromRoom}
-                    customCostFields={customCostFields}
-                    mode={mode}
-                    columnVisibility={columnVisibility}
-                    onUpdateField={handleUpdateField}
-                    onDelete={membersData.handleDeleteMember}
-                    onEdit={memberEdit.openEditDialog}
-                    onPreview={member => setPreviewMember(member)}
-                    onPnrChange={(id, val) => setPnrValues({ ...pnrValues, [id]: val })}
-                    onCustomCostChange={async (fId, mId, val) => {
-                      // 更新前端 state
-                      setCustomCostFields(
-                        customCostFields.map(f =>
-                          f.id === fId ? { ...f, values: { ...f.values, [mId]: val } } : f
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <table className="border-collapse text-sm member-table-inline table-fixed w-full">
+              <MemberTableHeader
+                mode={mode}
+                orderCount={membersData.orderCount}
+                showIdentityColumn={showIdentityColumn}
+                showPnrColumn={columnVisibility.pnr}
+                showRoomColumn={roomVehicle.showRoomColumn && columnVisibility.room}
+                showVehicleColumn={roomVehicle.showVehicleColumn && columnVisibility.vehicle}
+                showSurchargeColumn={columnVisibility.surcharges}
+                hotelColumns={roomVehicle.hotelColumns}
+                customCostFields={customCostFields}
+                columnVisibility={columnVisibility}
+                isEditMode={isAllEditMode}
+                columnWidths={columnWidths}
+                onColumnResize={setColumnWidth}
+              />
+              <SortableContext
+                items={sortedMembers.map(m => m.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <tbody>
+                  {sortedMembers.map((member, index) => (
+                    <MemberRow
+                      key={member.id}
+                      member={member}
+                      index={index}
+                      isEditMode={isAllEditMode}
+                      showIdentityColumn={showIdentityColumn}
+                      showPnrColumn={columnVisibility.pnr}
+                      showRoomColumn={roomVehicle.showRoomColumn && columnVisibility.room}
+                      showVehicleColumn={roomVehicle.showVehicleColumn && columnVisibility.vehicle}
+                      showOrderCode={mode === 'tour' && membersData.orderCount > 1}
+                      departureDate={membersData.departureDate}
+                      roomAssignment={roomVehicle.roomAssignments[member.id]}
+                      vehicleAssignment={roomVehicle.vehicleAssignments[member.id]}
+                      roomRowSpan={rowSpans.roomSpans[member.id]}
+                      vehicleRowSpan={rowSpans.vehicleSpans[member.id]}
+                      hotelColumns={roomVehicle.hotelColumns}
+                      roomAssignmentsByHotel={roomVehicle.roomAssignmentsByHotel}
+                      roomIdByHotelMember={roomVehicle.roomIdByHotelMember}
+                      roomMembersByHotelRoom={roomVehicle.roomMembersByHotelRoom}
+                      roomOptionsByHotel={roomVehicle.roomOptionsByHotel}
+                      roomRowSpansByHotel={rowSpans.roomSpansByHotel}
+                      pnrValue={pnrValues[member.id]}
+                      onRoomAssign={roomVehicle.assignMemberToRoom}
+                      onRemoveMemberFromRoom={roomVehicle.removeMemberFromRoom}
+                      customCostFields={customCostFields}
+                      mode={mode}
+                      columnVisibility={columnVisibility}
+                      onUpdateField={handleUpdateField}
+                      onDelete={membersData.handleDeleteMember}
+                      onEdit={memberEdit.openEditDialog}
+                      onPreview={member => setPreviewMember(member)}
+                      onPnrChange={(id, val) => setPnrValues({ ...pnrValues, [id]: val })}
+                      onCustomCostChange={async (fId, mId, val) => {
+                        // 更新前端 state
+                        setCustomCostFields(
+                          customCostFields.map(f =>
+                            f.id === fId ? { ...f, values: { ...f.values, [mId]: val } } : f
+                          )
                         )
-                      )
-                      // 存到 DB: 讀取該團員現有的 custom_costs，合併後寫回
-                      try {
-                        const { data: existing } = await supabase
-                          .from('order_members')
-                          .select('custom_costs')
-                          .eq('id', mId)
-                          .single()
-                        const existingRaw = existing as Record<string, unknown> | null
-                        const currentCosts =
-                          (existingRaw?.custom_costs as Record<string, string>) || {}
-                        const updatedCosts = { ...currentCosts, [fId]: val }
-                        await supabase
-                          .from('order_members')
-                          .update({ custom_costs: updatedCosts } as Record<string, unknown>)
-                          .eq('id', mId)
-                      } catch (err) {
-                        logger.error('儲存自訂費用失敗', err)
-                      }
-                    }}
-                    onSurchargeChange={handleSurchargeChange}
-                    onKeyDown={handleKeyDown}
-                    onPaste={handlePaste}
-                    onNameSearch={(memberId, value) => {
-                      const memberIndex = membersData.members.findIndex(m => m.id === memberId)
-                      if (memberIndex >= 0) {
-                        customerMatch.checkCustomerMatchByName(
+                        // 存到 DB: 讀取該團員現有的 custom_costs，合併後寫回
+                        try {
+                          const { data: existing } = await supabase
+                            .from('order_members')
+                            .select('custom_costs')
+                            .eq('id', mId)
+                            .single()
+                          const existingRaw = existing as Record<string, unknown> | null
+                          const currentCosts =
+                            (existingRaw?.custom_costs as Record<string, string>) || {}
+                          const updatedCosts = { ...currentCosts, [fId]: val }
+                          await supabase
+                            .from('order_members')
+                            .update({ custom_costs: updatedCosts } as Record<string, unknown>)
+                            .eq('id', mId)
+                        } catch (err) {
+                          logger.error('儲存自訂費用失敗', err)
+                        }
+                      }}
+                      onSurchargeChange={handleSurchargeChange}
+                      onKeyDown={handleKeyDown}
+                      onPaste={handlePaste}
+                      onNameSearch={(memberId, value) => {
+                        const memberIndex = membersData.members.findIndex(m => m.id === memberId)
+                        if (memberIndex >= 0) {
+                          customerMatch.checkCustomerMatchByName(
+                            value,
+                            memberIndex,
+                            membersData.members[memberIndex]
+                          )
+                        }
+                      }}
+                      onIdNumberSearch={(memberId, value, memberIndex) => {
+                        customerMatch.checkCustomerMatchByIdNumber(
                           value,
                           memberIndex,
                           membersData.members[memberIndex]
                         )
-                      }
-                    }}
-                    onIdNumberSearch={(memberId, value, memberIndex) => {
-                      customerMatch.checkCustomerMatchByIdNumber(
-                        value,
-                        memberIndex,
-                        membersData.members[memberIndex]
-                      )
-                    }}
-                    onSetAsLeader={handleSetAsLeader}
-                    onAddFamily={handleAddFamily}
-                  />
-                ))}
-              </tbody>
-            </SortableContext>
-          </table>
-        </DndContext>
+                      }}
+                      onSetAsLeader={handleSetAsLeader}
+                      onAddFamily={handleAddFamily}
+                    />
+                  ))}
+                </tbody>
+              </SortableContext>
+            </table>
+          </DndContext>
         )}
       </div>
 

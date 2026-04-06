@@ -154,7 +154,11 @@ export function useTourOperations(params: UseTourOperationsParams) {
             return
           }
           const departure_date = new Date(newTour.departure_date)
-          let generatedCode = await tourService.generateTourCode(cityCode, departure_date, newTour.isSpecial)
+          let generatedCode = await tourService.generateTourCode(
+            cityCode,
+            departure_date,
+            newTour.isSpecial
+          )
 
           // 部門代號前綴（如 JY-CNX250501A）
           if (newTour.department_id) {
@@ -377,10 +381,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
         await deleteTourEmptyOrders(tour.id)
 
         // 真刪除旅遊團
-        const { error: deleteError } = await supabase
-          .from('tours')
-          .delete()
-          .eq('id', tour.id)
+        const { error: deleteError } = await supabase.from('tours').delete().eq('id', tour.id)
 
         if (deleteError) {
           throw deleteError
@@ -474,8 +475,8 @@ export function useTourOperations(params: UseTourOperationsParams) {
           const newTourData = {
             name: tour.name,
             location: tour.location || '',
-            country_id: tour.country_id || null,  // ✅ 保留國家
-            airport_code: tour.airport_code || null,  // ✅ 保留機場代碼
+            country_id: tour.country_id || null, // ✅ 保留國家
+            airport_code: tour.airport_code || null, // ✅ 保留機場代碼
             tour_type: 'official' as const,
             departure_date,
             return_date,
@@ -529,7 +530,12 @@ export function useTourOperations(params: UseTourOperationsParams) {
         const user = useAuthStore.getState().user
         if (user) {
           const { createTourChannel } = await import('../services/tour-channel.service')
-          const tourForChannel = { id: tourId, code, name: tour.name, workspace_id: workspaceId } as unknown as Tour
+          const tourForChannel = {
+            id: tourId,
+            code,
+            name: tour.name,
+            workspace_id: workspaceId,
+          } as unknown as Tour
           createTourChannel(tourForChannel, user.id)
             .then(result => {
               if (result.success) {

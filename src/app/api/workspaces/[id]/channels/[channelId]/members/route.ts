@@ -4,7 +4,6 @@ import { getServerAuth } from '@/lib/auth/server-auth'
 import { ApiError, successResponse } from '@/lib/api/response'
 import { addChannelMembersSchema, removeChannelMemberSchema } from '@/lib/validations/api-schemas'
 
-
 type RouteParams = {
   params: Promise<{
     id: string

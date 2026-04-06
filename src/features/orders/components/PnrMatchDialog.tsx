@@ -783,7 +783,9 @@ export function PnrMatchDialog({
                         className={cn(
                           'border-t',
                           result.selectedCustomerId && 'bg-morandi-container',
-                          !result.selectedCustomerId && result.confidence === 'none' && 'bg-morandi-red/10',
+                          !result.selectedCustomerId &&
+                            result.confidence === 'none' &&
+                            'bg-morandi-red/10',
                           !result.selectedCustomerId &&
                             result.confidence === 'partial' &&
                             'bg-morandi-gold/10'
@@ -848,7 +850,8 @@ export function PnrMatchDialog({
                               }
                               className={cn(
                                 'text-xs border rounded px-2 py-1 w-full max-w-[180px]',
-                                result.selectedCustomerId && 'border-morandi-secondary bg-morandi-container'
+                                result.selectedCustomerId &&
+                                  'border-morandi-secondary bg-morandi-container'
                               )}
                               disabled={!!result.matchedMember && !result.selectedCustomerId}
                             >

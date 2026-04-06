@@ -42,7 +42,8 @@ export async function createRequestFromQuote(input: {
   > = {}
 
   for (const category of categories) {
-    const supplierName = (category.supplier_name as string) || (category.name as string) || '未指定供應商'
+    const supplierName =
+      (category.supplier_name as string) || (category.name as string) || '未指定供應商'
     const requestType = getCategoryRequestType(category.name as string)
 
     if (!groupedBySupplier[supplierName]) {

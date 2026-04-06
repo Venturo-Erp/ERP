@@ -21,7 +21,9 @@ export function useDesigns() {
       // 先取得所有設計文件
       const { data: docs, error: docsError } = await supabase
         .from('brochure_documents')
-        .select('id, name, tour_id, tour_name, tour_code, type, design_type, status, workspace_id, created_at, updated_at')
+        .select(
+          'id, name, tour_id, tour_name, tour_code, type, design_type, status, workspace_id, created_at, updated_at'
+        )
         .eq('workspace_id', workspaceId!)
         .order('created_at', { ascending: false })
         .limit(200)

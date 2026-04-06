@@ -342,7 +342,6 @@ export const FleetPage: React.FC = () => {
       contentClassName="flex-1 overflow-hidden flex flex-col"
     >
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-
         <TabsContent value="vehicles" className="flex-1 overflow-auto mt-0 p-0">
           <FleetVehicleList
             items={filteredVehicles}

@@ -150,9 +150,7 @@ export function CoverInfoForm({
         {/* 🎯 SSOT：國家和機場代碼從 tours 表繼承，唯讀顯示 */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-morandi-primary mb-1">
-              國家
-            </label>
+            <label className="block text-sm font-medium text-morandi-primary mb-1">國家</label>
             <Input
               type="text"
               value={selectedCountry || data.country || ''}
@@ -163,9 +161,7 @@ export function CoverInfoForm({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-morandi-primary mb-1">
-              機場代碼
-            </label>
+            <label className="block text-sm font-medium text-morandi-primary mb-1">機場代碼</label>
             <Input
               type="text"
               value={data.city || ''}
@@ -276,7 +272,15 @@ export function CoverInfoForm({
 }
 
 // AI 文案生成按鈕
-function AiCopyButton({ data, updateField, onChange }: { data: TourFormData; updateField: (field: string, value: unknown) => void; onChange: (data: TourFormData) => void }) {
+function AiCopyButton({
+  data,
+  updateField,
+  onChange,
+}: {
+  data: TourFormData
+  updateField: (field: string, value: unknown) => void
+  onChange: (data: TourFormData) => void
+}) {
   const [loading, setLoading] = useState(false)
 
   const handleGenerate = async () => {

@@ -177,7 +177,7 @@ export function ListPageLayout<T extends Record<string, any>>({
   // ========== 內部狀態管理 ==========
   const [searchQuery, setSearchQuery] = useState('')
   const [internalActiveTab, setInternalActiveTab] = useState(defaultStatusTab)
-  
+
   // 支援外部控制或內部控制
   const activeStatusTab = externalActiveTab ?? internalActiveTab
 

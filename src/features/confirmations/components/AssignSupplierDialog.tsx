@@ -183,7 +183,18 @@ export function AssignSupplierDialog({
       setSaving(false)
     }
     return true
-  }, [canPrint, tourId, user, items, selectedSupplier, supplierName, sendMethod, supabase, toast, onSave])
+  }, [
+    canPrint,
+    tourId,
+    user,
+    items,
+    selectedSupplier,
+    supplierName,
+    sendMethod,
+    supabase,
+    toast,
+    onSave,
+  ])
 
   const handlePrintAndSave = useCallback(async () => {
     if (!canPrint) return
@@ -720,7 +731,9 @@ export function AssignSupplierDialog({
                   variant={sendMethod === 'line' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('line')}
                   className={
-                    sendMethod === 'line' ? 'bg-morandi-green hover:bg-morandi-green text-white' : ''
+                    sendMethod === 'line'
+                      ? 'bg-morandi-green hover:bg-morandi-green text-white'
+                      : ''
                   }
                 >
                   <MessageCircle size={14} className="mr-1.5" />
@@ -742,7 +755,9 @@ export function AssignSupplierDialog({
                   variant={sendMethod === 'fax' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('fax')}
                   className={
-                    sendMethod === 'fax' ? 'bg-morandi-primary hover:bg-morandi-primary/90 text-white' : ''
+                    sendMethod === 'fax'
+                      ? 'bg-morandi-primary hover:bg-morandi-primary/90 text-white'
+                      : ''
                   }
                 >
                   <Phone size={14} className="mr-1.5" />
@@ -753,7 +768,9 @@ export function AssignSupplierDialog({
                   variant={sendMethod === 'tenant' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('tenant')}
                   className={
-                    sendMethod === 'tenant' ? 'bg-morandi-secondary hover:bg-morandi-secondary text-white' : ''
+                    sendMethod === 'tenant'
+                      ? 'bg-morandi-secondary hover:bg-morandi-secondary text-white'
+                      : ''
                   }
                 >
                   <Globe size={14} className="mr-1.5" />
@@ -764,7 +781,9 @@ export function AssignSupplierDialog({
                   variant={sendMethod === 'assign' ? 'default' : 'outline'}
                   onClick={() => setSendMethod('assign')}
                   className={
-                    sendMethod === 'assign' ? 'bg-status-warning hover:bg-status-warning text-white' : ''
+                    sendMethod === 'assign'
+                      ? 'bg-status-warning hover:bg-status-warning text-white'
+                      : ''
                   }
                 >
                   <Users size={14} className="mr-1.5" />
@@ -1062,7 +1081,9 @@ export function AssignSupplierDialog({
                       // 2. 查員工的 LINE User ID
                       const { data: empData } = await supabase
                         .from('employees')
-                        .select('id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active, created_at, updated_at')
+                        .select(
+                          'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active, created_at, updated_at'
+                        )
                         .eq('id', selectedEmployeeId)
                         .single()
 

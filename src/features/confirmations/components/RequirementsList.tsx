@@ -124,7 +124,9 @@ export function RequirementsList({
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [coreItems, setCoreItems] = useState<TourItineraryItem[]>([])
   // 🆕 從分房系統讀取的房型資料（按飯店分組）
-  const [tourRoomsByHotel, setTourRoomsByHotel] = useState<Record<string, { room_type: string; capacity: number; quantity: number }[]>>({})
+  const [tourRoomsByHotel, setTourRoomsByHotel] = useState<
+    Record<string, { room_type: string; capacity: number; quantity: number }[]>
+  >({})
 
   // Local 報價 Dialog
   const [showLocalQuoteDialog, setShowLocalQuoteDialog] = useState(false)
@@ -157,7 +159,9 @@ export function RequirementsList({
         if (tourId) {
           const { data: tourData } = await supabase
             .from('tours')
-            .select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by')
+            .select(
+              'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
+            )
             .eq('id', tourId)
             .single()
           if (!tourData) return
@@ -207,7 +211,9 @@ export function RequirementsList({
           // 直接讀核心表（不依賴 quote_id）
           const { data: items } = await supabase
             .from('tour_itinerary_items')
-            .select('id, tour_id, day_number, sort_order, category, sub_category, title, description, resource_type, resource_name, resource_id, supplier_id, supplier_name, service_date, service_date_end, estimated_cost, confirmed_cost, actual_expense, booking_status, booking_reference, booking_confirmed_at, confirmation_status, confirmation_item_id, handled_by, request_status, request_id, quote_status, quoted_cost, show_on_brochure, show_on_quote, show_on_web, workspace_id, created_at, updated_at')
+            .select(
+              'id, tour_id, day_number, sort_order, category, sub_category, title, description, resource_type, resource_name, resource_id, supplier_id, supplier_name, service_date, service_date_end, estimated_cost, confirmed_cost, actual_expense, booking_status, booking_reference, booking_confirmed_at, confirmation_status, confirmation_item_id, handled_by, request_status, request_id, quote_status, quoted_cost, show_on_brochure, show_on_quote, show_on_web, workspace_id, created_at, updated_at'
+            )
             .eq('tour_id', tourId)
             .order('day_number', { ascending: true })
             .order('sort_order', { ascending: true })
@@ -221,16 +227,23 @@ export function RequirementsList({
             .eq('tour_id', tourId)
             .order('night_number', { ascending: true })
             .order('display_order', { ascending: true })
-          
+
           if (tourRooms && tourRooms.length > 0) {
             // 按飯店分組，統計每種房型的數量
-            const roomsByHotel: Record<string, Record<string, { room_type: string; capacity: number; count: number }>> = {}
+            const roomsByHotel: Record<
+              string,
+              Record<string, { room_type: string; capacity: number; count: number }>
+            > = {}
             for (const room of tourRooms) {
               const hotelName = room.hotel_name || '未指定'
               if (!roomsByHotel[hotelName]) roomsByHotel[hotelName] = {}
               const key = `${room.room_type}-${room.capacity}`
               if (!roomsByHotel[hotelName][key]) {
-                roomsByHotel[hotelName][key] = { room_type: room.room_type || '', capacity: room.capacity || 0, count: 0 }
+                roomsByHotel[hotelName][key] = {
+                  room_type: room.room_type || '',
+                  capacity: room.capacity || 0,
+                  count: 0,
+                }
               }
               // 只算第一晚的數量（避免重複計算）
               const firstNight = tourRooms.filter(r => r.hotel_name === hotelName)[0]?.night_number
@@ -239,9 +252,16 @@ export function RequirementsList({
               }
             }
             // 轉換成陣列格式
-            const result: Record<string, { room_type: string; capacity: number; quantity: number }[]> = {}
+            const result: Record<
+              string,
+              { room_type: string; capacity: number; quantity: number }[]
+            > = {}
             for (const [hotel, rooms] of Object.entries(roomsByHotel)) {
-              result[hotel] = Object.values(rooms).map(r => ({ room_type: r.room_type, capacity: r.capacity, quantity: r.count }))
+              result[hotel] = Object.values(rooms).map(r => ({
+                room_type: r.room_type,
+                capacity: r.capacity,
+                quantity: r.count,
+              }))
             }
             setTourRoomsByHotel(result)
           } else {
@@ -568,7 +588,9 @@ export function RequirementsList({
           const { data: newReq, error } = await supabase
             .from('tour_requests')
             .insert(insertData as never)
-            .select('id, code, tour_id, workspace_id, request_type, status, supplier_name, items, note, created_at')
+            .select(
+              'id, code, tour_id, workspace_id, request_type, status, supplier_name, items, note, created_at'
+            )
             .single()
           if (error) throw error
           if (newReq) setExistingRequests(prev => [...prev, newReq as unknown as TourRequest])
@@ -843,7 +865,7 @@ export function RequirementsList({
         // 3. 自動關閉同一項目的其他需求單
         const confirmedResourceIds = new Set<string>()
         const confirmedItineraryItemIds = new Set<string>()
-        
+
         for (const item of items) {
           if (item.resource_id) confirmedResourceIds.add(item.resource_id)
           if (item.itinerary_item_id) confirmedItineraryItemIds.add(item.itinerary_item_id)
@@ -861,11 +883,14 @@ export function RequirementsList({
           if (otherRequests && otherRequests.length > 0) {
             const toReject: string[] = []
             for (const req of otherRequests) {
-              const reqItems = (Array.isArray(req.items) ? req.items : []) as Array<Record<string, unknown>>
+              const reqItems = (Array.isArray(req.items) ? req.items : []) as Array<
+                Record<string, unknown>
+              >
               const hasOverlap = reqItems.some(
-                (ri) =>
+                ri =>
                   (ri.resource_id && confirmedResourceIds.has(ri.resource_id as string)) ||
-                  (ri.itinerary_item_id && confirmedItineraryItemIds.has(ri.itinerary_item_id as string))
+                  (ri.itinerary_item_id &&
+                    confirmedItineraryItemIds.has(ri.itinerary_item_id as string))
               )
               if (hasOverlap) {
                 toReject.push(req.id)
@@ -908,7 +933,7 @@ export function RequirementsList({
 
               // 標記需要處理的取消通知（不用 Toast，改用持久化提示）
               logger.info(`已關閉 ${toReject.length} 個重複需求單，請確認取消通知`)
-              
+
               // 刷新頁面（顯示持久化提示區域）
               await loadData(false)
             }
@@ -1007,7 +1032,6 @@ export function RequirementsList({
         // 重新載入
         await loadData(false)
 
-       
         // 可以導航到需求單詳細頁面或直接下載 PDF
       } catch (error) {
         logger.error('產生需求單失敗', error)
@@ -1039,7 +1063,9 @@ export function RequirementsList({
 
   // 找出需要處理的取消通知
   const pendingCancellations = existingRequests.filter(
-    req => req.status === 'rejected' && (req as unknown as Record<string, unknown>).needs_cancellation_notice === true
+    req =>
+      req.status === 'rejected' &&
+      (req as unknown as Record<string, unknown>).needs_cancellation_notice === true
   )
 
   return (
@@ -1071,7 +1097,6 @@ export function RequirementsList({
                       {req.sent_via === 'line' ? (
                         <button
                           onClick={async () => {
-                           
                             logger.info('發送 Line 取消通知:', req.id)
                             // 暫時直接標記為已處理
                             await supabase
@@ -1087,26 +1112,29 @@ export function RequirementsList({
                         </button>
                       ) : req.sent_via === 'print' || req.sent_via === 'fax' ? (
                         (() => {
-                          const downloaded = (req as unknown as Record<string, unknown>).cancellation_pdf_downloaded === true
+                          const downloaded =
+                            (req as unknown as Record<string, unknown>)
+                              .cancellation_pdf_downloaded === true
                           const confirmLabel = req.sent_via === 'fax' ? '✓ 已傳真' : '✓ 已完成'
-                          
+
                           return !downloaded ? (
                             <button
                               onClick={async () => {
-                               
                                 logger.info('產生取消通知 PDF:', req.id)
-                                
+
                                 // 暫時模擬下載
                                 toast({ title: 'PDF 下載中...', description: '功能開發中' })
-                                
+
                                 // 標記為已下載
                                 await supabase
                                   .from('tour_requests')
                                   .update({ cancellation_pdf_downloaded: true } as never)
                                   .eq('id', req.id)
-                                
+
                                 await loadData(false)
-                                toast({ title: `PDF 已下載，請${req.sent_via === 'fax' ? '傳真' : '列印'}後點擊確認` })
+                                toast({
+                                  title: `PDF 已下載，請${req.sent_via === 'fax' ? '傳真' : '列印'}後點擊確認`,
+                                })
                               }}
                               className="px-3 py-1.5 text-xs font-medium text-white bg-status-info hover:bg-status-info rounded"
                             >
@@ -1117,9 +1145,9 @@ export function RequirementsList({
                               onClick={async () => {
                                 await supabase
                                   .from('tour_requests')
-                                  .update({ 
+                                  .update({
                                     needs_cancellation_notice: false,
-                                    cancellation_pdf_downloaded: false
+                                    cancellation_pdf_downloaded: false,
                                   } as never)
                                   .eq('id', req.id)
                                 await loadData(false)
@@ -1131,7 +1159,6 @@ export function RequirementsList({
                             </button>
                           )
                         })()
-                      
                       ) : (
                         <button
                           onClick={async () => {
@@ -1202,8 +1229,8 @@ export function RequirementsList({
                   <tr className="bg-morandi-container/50 border-b border-border">
                     <th colSpan={7} className="px-3 py-2">
                       <div className="flex justify-end">
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           onClick={() => setShowLocalQuoteDialog(true)}
                           className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
                         >
@@ -1307,12 +1334,19 @@ export function RequirementsList({
                                   setExpandedMainItems(newExpanded)
                                 }}
                               >
-                                {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                {isExpanded ? (
+                                  <ChevronDown size={14} />
+                                ) : (
+                                  <ChevronRight size={14} />
+                                )}
                                 {item.supplierName || item.title || '-'}
                               </button>
                             </td>
                             {/* 欄位2: 日期 */}
-                            <td className="px-2 py-2.5 text-sm text-morandi-secondary" style={{ width: '70px' }}>
+                            <td
+                              className="px-2 py-2.5 text-sm text-morandi-secondary"
+                              style={{ width: '70px' }}
+                            >
                               {formatDate(item.serviceDate)}
                             </td>
                             {/* 欄位3: 說明（房型/車型/時間/數量等） */}
@@ -1322,7 +1356,7 @@ export function RequirementsList({
                                 if (cat.key === 'accommodation') {
                                   const hotelName = item.supplierName || item.title || ''
                                   const roomsFromAssignment = tourRoomsByHotel[hotelName]
-                                  
+
                                   if (roomsFromAssignment && roomsFromAssignment.length > 0) {
                                     return (
                                       <div className="flex flex-col gap-0.5">
@@ -1334,18 +1368,26 @@ export function RequirementsList({
                                       </div>
                                     )
                                   }
-                                  return <span className="text-morandi-muted">{item.quantity || 1}晚</span>
+                                  return (
+                                    <span className="text-morandi-muted">
+                                      {item.quantity || 1}晚
+                                    </span>
+                                  )
                                 }
                                 // 交通：顯示車型
                                 if (cat.key === 'transport') {
                                   const req = findMatchingRequest(item)
-                                  const vehicleDesc = ((req?.items?.[0] as Record<string, unknown> | undefined))?.vehicle_desc as string | undefined
+                                  const vehicleDesc = (
+                                    req?.items?.[0] as Record<string, unknown> | undefined
+                                  )?.vehicle_desc as string | undefined
                                   return vehicleDesc || item.title || '-'
                                 }
                                 // 餐食：顯示時間
                                 if (cat.key === 'meal') {
                                   const req = findMatchingRequest(item)
-                                  const mealTime = ((req?.items?.[0] as Record<string, unknown> | undefined))?.meal_time as string | undefined
+                                  const mealTime = (
+                                    req?.items?.[0] as Record<string, unknown> | undefined
+                                  )?.meal_time as string | undefined
                                   return mealTime ? `${item.title} ${mealTime}` : item.title || '-'
                                 }
                                 // 其他
@@ -1363,7 +1405,12 @@ export function RequirementsList({
                                   transport: 'transport_note',
                                 }
                                 const noteField = noteFieldMap[cat.key] || 'note'
-                                const noteValue = (((req?.items?.[0] as Record<string, unknown> | undefined))?.[noteField] as string) || req?.note || ''
+                                const noteValue =
+                                  ((req?.items?.[0] as Record<string, unknown> | undefined)?.[
+                                    noteField
+                                  ] as string) ||
+                                  req?.note ||
+                                  ''
                                 return (
                                   <span className="text-sm text-morandi-secondary truncate block">
                                     {noteValue || '-'}
@@ -1379,9 +1426,10 @@ export function RequirementsList({
                                 const actualPrice = request?.items?.[0]?.quoted_cost
 
                                 if (!estimatedPrice && !actualPrice) return '-'
-                                
+
                                 const displayPrice = actualPrice || estimatedPrice
-                                const hasPriceChange = estimatedPrice && actualPrice && estimatedPrice !== actualPrice
+                                const hasPriceChange =
+                                  estimatedPrice && actualPrice && estimatedPrice !== actualPrice
                                 const isExpensive = hasPriceChange && actualPrice! > estimatedPrice
                                 const isCheaper = hasPriceChange && actualPrice! < estimatedPrice
 
@@ -1431,7 +1479,7 @@ export function RequirementsList({
                                 if (cat.key === 'accommodation') {
                                   const hotelName = supplierName || ''
                                   const roomsFromAssignment = tourRoomsByHotel[hotelName]
-                                  
+
                                   // 有房型了（從分房系統）→ 顯示「發送需求」
                                   if (roomsFromAssignment && roomsFromAssignment.length > 0) {
                                     return (
@@ -1454,7 +1502,7 @@ export function RequirementsList({
                                       </Button>
                                     )
                                   }
-                                  
+
                                   // 沒房型 → 顯示「同上」或「新增需求」
                                   const sameHotelDraft = existingRequests.find(
                                     r =>
@@ -1520,10 +1568,10 @@ export function RequirementsList({
                                 // 交通：區分機票和遊覽車
                                 if (cat.key === 'transport') {
                                   // 機票（成人/小孩/嬰兒）
-                                  const isTicket = ['成人', '小孩', '嬰兒', '兒童'].some(t => 
-                                    item.title?.includes(t) || supplierName?.includes(t)
+                                  const isTicket = ['成人', '小孩', '嬰兒', '兒童'].some(
+                                    t => item.title?.includes(t) || supplierName?.includes(t)
                                   )
-                                  
+
                                   if (isTicket) {
                                     return (
                                       <Button
@@ -1536,7 +1584,7 @@ export function RequirementsList({
                                       </Button>
                                     )
                                   }
-                                  
+
                                   // 遊覽車等其他交通
                                   return (
                                     <Button
@@ -1684,7 +1732,11 @@ export function RequirementsList({
                                                   _isComparisonGroup: true,
                                                   _comparisonRequests: requests,
                                                   _sourceId: requests[0].source_id,
-                                                } as TourRequest & { _isComparisonGroup: boolean; _comparisonRequests: TourRequest[]; _sourceId: string | null | undefined },
+                                                } as TourRequest & {
+                                                  _isComparisonGroup: boolean
+                                                  _comparisonRequests: TourRequest[]
+                                                  _sourceId: string | null | undefined
+                                                },
                                               ]
                                             }
                                             return requests
@@ -1699,7 +1751,11 @@ export function RequirementsList({
                                             最新報價
                                           </h4>
                                           <RequirementsDrawer
-                                            items={latestRequestDisplay as unknown as Parameters<typeof RequirementsDrawer>[0]['items']}
+                                            items={
+                                              latestRequestDisplay as unknown as Parameters<
+                                                typeof RequirementsDrawer
+                                              >[0]['items']
+                                            }
                                           />
                                         </div>
 
@@ -1734,8 +1790,12 @@ export function RequirementsList({
                                                     'tour_request',
                                                     req.status || 'draft'
                                                   )
-                                                  const quotedCost = (req.supplier_response as Record<string, unknown> | null)
-                                                    ?.quotedCost as number | undefined
+                                                  const quotedCost = (
+                                                    req.supplier_response as Record<
+                                                      string,
+                                                      unknown
+                                                    > | null
+                                                  )?.quotedCost as number | undefined
                                                   const time =
                                                     req.replied_at || req.sent_at || req.created_at
 
@@ -1799,19 +1859,55 @@ export function RequirementsList({
                                   onClick={() => toggleHiddenCategory(cat.key)}
                                   className="flex items-center gap-1 text-xs text-morandi-muted hover:text-morandi-secondary transition-colors font-normal"
                                 >
-                                  {isHiddenExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                                  {isHiddenExpanded ? (
+                                    <ChevronDown size={14} />
+                                  ) : (
+                                    <ChevronRight size={14} />
+                                  )}
                                   <EyeOff size={12} />
-                                  <span>{COMP_REQUIREMENTS_LABELS.已隱藏}({hiddenItems.length})</span>
+                                  <span>
+                                    {COMP_REQUIREMENTS_LABELS.已隱藏}({hiddenItems.length})
+                                  </span>
                                 </button>
                               )}
                             </div>
                           </th>
-                          <th className="px-2 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '70px' }}>日期</th>
-                          <th className="px-2 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '10%' }}>說明</th>
-                          <th className="px-2 py-2 text-left text-xs font-medium text-morandi-secondary" style={{ width: '10%' }}>備註</th>
-                          <th className="px-2 py-2 text-right text-xs font-medium text-morandi-secondary" style={{ width: '70px' }}>報價</th>
-                          <th className="px-2 py-2 text-center text-xs font-medium text-morandi-secondary" style={{ width: '60px' }}>狀態</th>
-                          <th className="px-2 py-2 text-center text-xs font-medium text-morandi-secondary" style={{ width: '80px' }}>操作</th>
+                          <th
+                            className="px-2 py-2 text-left text-xs font-medium text-morandi-secondary"
+                            style={{ width: '70px' }}
+                          >
+                            日期
+                          </th>
+                          <th
+                            className="px-2 py-2 text-left text-xs font-medium text-morandi-secondary"
+                            style={{ width: '10%' }}
+                          >
+                            說明
+                          </th>
+                          <th
+                            className="px-2 py-2 text-left text-xs font-medium text-morandi-secondary"
+                            style={{ width: '10%' }}
+                          >
+                            備註
+                          </th>
+                          <th
+                            className="px-2 py-2 text-right text-xs font-medium text-morandi-secondary"
+                            style={{ width: '70px' }}
+                          >
+                            報價
+                          </th>
+                          <th
+                            className="px-2 py-2 text-center text-xs font-medium text-morandi-secondary"
+                            style={{ width: '60px' }}
+                          >
+                            狀態
+                          </th>
+                          <th
+                            className="px-2 py-2 text-center text-xs font-medium text-morandi-secondary"
+                            style={{ width: '80px' }}
+                          >
+                            操作
+                          </th>
                         </tr>
 
                         {visibleItems.map((trackItem, idx) => renderItem(trackItem, idx, false))}
@@ -1926,9 +2022,10 @@ export function RequirementsList({
           accommodations={(() => {
             // 匹配飯店：supplier_name 或 title 都可能存飯店名
             const hotelCoreItems = coreItems
-              .filter(it =>
-                it.category === 'accommodation' &&
-                (it.supplier_name === selectedHotel.name || it.title === selectedHotel.name)
+              .filter(
+                it =>
+                  it.category === 'accommodation' &&
+                  (it.supplier_name === selectedHotel.name || it.title === selectedHotel.name)
               )
               .sort((a, b) => (a.day_number || 0) - (b.day_number || 0))
 
@@ -1937,9 +2034,10 @@ export function RequirementsList({
             // 算入住日（第一晚）和退房日（最後一晚 + 1天）
             const firstItem = hotelCoreItems[0]
             const lastItem = hotelCoreItems[hotelCoreItems.length - 1]
-            const checkInDate = firstItem.service_date
-              || (firstItem.day_number != null ? calculateDate(firstItem.day_number) : '')
-              || ''
+            const checkInDate =
+              firstItem.service_date ||
+              (firstItem.day_number != null ? calculateDate(firstItem.day_number) : '') ||
+              ''
             let checkOutDate = ''
             if (lastItem.service_date) {
               const d = new Date(lastItem.service_date)
@@ -1949,18 +2047,21 @@ export function RequirementsList({
               checkOutDate = calculateDate(lastItem.day_number + 1) || ''
             }
             const nights = hotelCoreItems.length
-            const dateRange = checkInDate && checkOutDate
-              ? `${checkInDate} ~ ${checkOutDate}（${nights}晚）`
-              : checkInDate || ''
+            const dateRange =
+              checkInDate && checkOutDate
+                ? `${checkInDate} ~ ${checkOutDate}（${nights}晚）`
+                : checkInDate || ''
 
             // 一筆合併的住宿，房型和床型留空讓業務手填
-            return [{
-              checkIn: dateRange,
-              roomType: '',
-              bedType: '',
-              quantity: 0,
-              note: '',
-            }]
+            return [
+              {
+                checkIn: dateRange,
+                roomType: '',
+                bedType: '',
+                quantity: 0,
+                note: '',
+              },
+            ]
           })()}
           supplierName={selectedHotel.name}
         />
@@ -1987,7 +2088,10 @@ export function RequirementsList({
               return itemSupplierName === selectedTransport.name && it.category === 'meals'
             })
             .map(it => ({
-              date: it.service_date || (it.day_number != null ? calculateDate(it.day_number) : '') || '',
+              date:
+                it.service_date ||
+                (it.day_number != null ? calculateDate(it.day_number) : '') ||
+                '',
               time: it.sub_category
                 ? { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' }[it.sub_category] ||
                   it.sub_category
@@ -2021,7 +2125,10 @@ export function RequirementsList({
               return itemSupplierName === selectedTransport.name && it.category === 'activities'
             })
             .map(it => ({
-              time: it.service_date || (it.day_number != null ? calculateDate(it.day_number) : '') || '',
+              time:
+                it.service_date ||
+                (it.day_number != null ? calculateDate(it.day_number) : '') ||
+                '',
               venue: it.title || '',
               quantity: it.quantity || 1,
               note: it.quote_note || '',
@@ -2056,7 +2163,11 @@ export function RequirementsList({
             return_date: tour.return_date || '',
             current_participants: totalPax || 0,
           }}
-          confirmedRequests={existingRequests as unknown as Parameters<typeof TeamConfirmationSheet>[0]['confirmedRequests']}
+          confirmedRequests={
+            existingRequests as unknown as Parameters<
+              typeof TeamConfirmationSheet
+            >[0]['confirmedRequests']
+          }
         />
       )}
     </>

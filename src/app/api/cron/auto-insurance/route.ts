@@ -21,7 +21,21 @@ async function sendInsuranceForTour(
       'id, code, name, departure_date, return_date, days_count, airport_code, outbound_flight, return_flight, tour_leader_id, country_id'
     )
     .eq('id', tourId)
-    .single()) as { data: { id: string; code: string; name: string; departure_date: string | null; return_date: string | null; days_count: number | null; airport_code: string | null; outbound_flight: unknown; return_flight: unknown; tour_leader_id: string | null; country_id: string | null } | null }
+    .single()) as {
+    data: {
+      id: string
+      code: string
+      name: string
+      departure_date: string | null
+      return_date: string | null
+      days_count: number | null
+      airport_code: string | null
+      outbound_flight: unknown
+      return_flight: unknown
+      tour_leader_id: string | null
+      country_id: string | null
+    } | null
+  }
   if (!tour) return { success: false, error: 'Tour not found' }
 
   // 國家
@@ -74,7 +88,9 @@ async function sendInsuranceForTour(
   const { data: members } = (await supabase
     .from('order_members')
     .select('customer:customer_id(name, national_id, birth_date)')
-    .in('order_id', orderIds)) as { data: Array<{ customer?: { name?: string; national_id?: string; birth_date?: string } }> | null }
+    .in('order_id', orderIds)) as {
+    data: Array<{ customer?: { name?: string; national_id?: string; birth_date?: string } }> | null
+  }
 
   if (!members?.length) return { success: false, error: 'No members' }
 
@@ -105,22 +121,24 @@ async function sendInsuranceForTour(
     }
   })
 
-  members.forEach((m: { customer?: { name?: string; national_id?: string; birth_date?: string } }, i: number) => {
-    const row = ws.addRow([
-      i + 1,
-      m.customer?.name || '',
-      m.customer?.national_id || '',
-      m.customer?.birth_date || '',
-    ])
-    row.eachCell(c => {
-      c.border = {
-        top: { style: 'thin' },
-        bottom: { style: 'thin' },
-        left: { style: 'thin' },
-        right: { style: 'thin' },
-      }
-    })
-  })
+  members.forEach(
+    (m: { customer?: { name?: string; national_id?: string; birth_date?: string } }, i: number) => {
+      const row = ws.addRow([
+        i + 1,
+        m.customer?.name || '',
+        m.customer?.national_id || '',
+        m.customer?.birth_date || '',
+      ])
+      row.eachCell(c => {
+        c.border = {
+          top: { style: 'thin' },
+          bottom: { style: 'thin' },
+          left: { style: 'thin' },
+          right: { style: 'thin' },
+        }
+      })
+    }
+  )
 
   ws.columns = [{ width: 5 }, { width: 12 }, { width: 14 }, { width: 14 }]
 

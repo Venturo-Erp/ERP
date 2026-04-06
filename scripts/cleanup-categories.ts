@@ -12,10 +12,7 @@ async function main() {
   console.log('🗑️  清除舊的請款類別...')
 
   // 刪除所有 type = 'expense' 的類別
-  const { error } = await supabase
-    .from('expense_categories')
-    .delete()
-    .eq('type', 'expense')
+  const { error } = await supabase.from('expense_categories').delete().eq('type', 'expense')
 
   if (error) {
     console.error('❌ 清除失敗:', error.message)

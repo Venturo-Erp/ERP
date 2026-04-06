@@ -1,39 +1,39 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <title>清理 IndexedDB</title>
-  <meta charset="UTF-8">
-</head>
-<body>
-  <h1>清理 Venturo IndexedDB</h1>
-  <button onclick="clearDB()">清空資料庫</button>
-  <pre id="output"></pre>
-  
-  <script>
-    async function clearDB() {
-      const output = document.getElementById('output');
-      output.textContent = '開始清理...\n';
-      
-      try {
-        // 刪除 IndexedDB
-        const deleteRequest = indexedDB.deleteDatabase('VenturoERP');
-        
-        deleteRequest.onsuccess = () => {
-          output.textContent += '✅ IndexedDB 已清空\n';
-          output.textContent += '✅ 請關閉此頁面並重新整理應用\n';
-          
-          // 清空 localStorage
-          localStorage.clear();
-          output.textContent += '✅ localStorage 已清空\n';
-        };
-        
-        deleteRequest.onerror = (e) => {
-          output.textContent += '❌ 清理失敗: ' + e.target.error + '\n';
-        };
-      } catch (error) {
-        output.textContent += '❌ 錯誤: ' + error + '\n';
+  <head>
+    <title>清理 IndexedDB</title>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <h1>清理 Venturo IndexedDB</h1>
+    <button onclick="clearDB()">清空資料庫</button>
+    <pre id="output"></pre>
+
+    <script>
+      async function clearDB() {
+        const output = document.getElementById('output')
+        output.textContent = '開始清理...\n'
+
+        try {
+          // 刪除 IndexedDB
+          const deleteRequest = indexedDB.deleteDatabase('VenturoERP')
+
+          deleteRequest.onsuccess = () => {
+            output.textContent += '✅ IndexedDB 已清空\n'
+            output.textContent += '✅ 請關閉此頁面並重新整理應用\n'
+
+            // 清空 localStorage
+            localStorage.clear()
+            output.textContent += '✅ localStorage 已清空\n'
+          }
+
+          deleteRequest.onerror = e => {
+            output.textContent += '❌ 清理失敗: ' + e.target.error + '\n'
+          }
+        } catch (error) {
+          output.textContent += '❌ 錯誤: ' + error + '\n'
+        }
       }
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>

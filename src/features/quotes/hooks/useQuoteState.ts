@@ -154,7 +154,8 @@ export const useQuoteState = () => {
       const metadata = (quote as typeof quote & { metadata?: Record<string, unknown> })?.metadata
       if (metadata) {
         if (metadata.insuranceText) setInsuranceText(metadata.insuranceText as string)
-        if (Array.isArray(metadata.excludedItems)) setExcludedItems(metadata.excludedItems as string[])
+        if (Array.isArray(metadata.excludedItems))
+          setExcludedItems(metadata.excludedItems as string[])
       }
     }
   }, [quote?.id, quote?.updated_at, relatedTour?.code])

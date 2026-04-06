@@ -42,7 +42,9 @@ export async function POST(request: NextRequest) {
     // 2. 查詢員工（大小寫不敏感）
     const { data: employee, error: empError } = await supabase
       .from('employees')
-      .select('id, employee_number, display_name, english_name, email, avatar, status, password_hash, supabase_user_id, workspace_id, job_info, permissions, is_active, created_at, updated_at')
+      .select(
+        'id, employee_number, display_name, english_name, email, avatar, status, password_hash, supabase_user_id, workspace_id, job_info, permissions, is_active, created_at, updated_at'
+      )
       .ilike('employee_number', username)
       .eq('workspace_id', workspace.id)
       .maybeSingle()
@@ -114,13 +116,15 @@ export async function POST(request: NextRequest) {
 
       const permSet = new Set<string>()
 
-      tabPerms?.filter(p => p.can_read).forEach(p => {
-        if (p.tab_code) {
-          permSet.add(`${p.module_code}:${p.tab_code}`)
-        } else {
-          permSet.add(p.module_code)
-        }
-      })
+      tabPerms
+        ?.filter(p => p.can_read)
+        .forEach(p => {
+          if (p.tab_code) {
+            permSet.add(`${p.module_code}:${p.tab_code}`)
+          } else {
+            permSet.add(p.module_code)
+          }
+        })
 
       // 取得個人覆寫（表尚未建立時跳過）
       try {
@@ -129,7 +133,11 @@ export async function POST(request: NextRequest) {
           .select('module_code, tab_code, override_type')
           .eq('employee_id', employee.id)
 
-        ;(overrides as { module_code: string; tab_code: string | null; override_type: string }[] | null)?.forEach(o => {
+        ;(
+          overrides as
+            | { module_code: string; tab_code: string | null; override_type: string }[]
+            | null
+        )?.forEach(o => {
           const permKey = o.tab_code ? `${o.module_code}:${o.tab_code}` : o.module_code
           if (o.override_type === 'grant') {
             permSet.add(permKey)

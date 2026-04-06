@@ -15,13 +15,31 @@ const TableHeader = ({ children }: { children: React.ReactNode }) => (
 )
 const TableBody = ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>
 const TableRow = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <tr className={`border-b border-border/50 hover:bg-morandi-container/20 transition-colors ${className || ''}`}>{children}</tr>
+  <tr
+    className={`border-b border-border/50 hover:bg-morandi-container/20 transition-colors ${className || ''}`}
+  >
+    {children}
+  </tr>
 )
 const TableHead = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <th className={`px-4 py-3 text-left text-xs font-medium text-morandi-secondary uppercase tracking-wider ${className || ''}`}>{children}</th>
+  <th
+    className={`px-4 py-3 text-left text-xs font-medium text-morandi-secondary uppercase tracking-wider ${className || ''}`}
+  >
+    {children}
+  </th>
 )
-const TableCell = ({ children, className, colSpan }: { children: React.ReactNode; className?: string; colSpan?: number }) => (
-  <td className={`px-4 py-3 text-sm ${className || ''}`} colSpan={colSpan}>{children}</td>
+const TableCell = ({
+  children,
+  className,
+  colSpan,
+}: {
+  children: React.ReactNode
+  className?: string
+  colSpan?: number
+}) => (
+  <td className={`px-4 py-3 text-sm ${className || ''}`} colSpan={colSpan}>
+    {children}
+  </td>
 )
 import {
   Dialog,
@@ -96,13 +114,15 @@ interface ExpenseCategory {
 }
 
 export default function FinanceSettingsPage() {
-  const [activeSection, setActiveSection] = useState<'receipt' | 'payment' | 'bank' | 'category' | 'company_expense' | 'company_income'>('receipt')
+  const [activeSection, setActiveSection] = useState<
+    'receipt' | 'payment' | 'bank' | 'category' | 'company_expense' | 'company_income'
+  >('receipt')
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
   const [chartOfAccounts, setChartOfAccounts] = useState<ChartOfAccount[]>([])
   const [expenseCategories, setExpenseCategories] = useState<ExpenseCategory[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  
+
   // 編輯對話框
   const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null)
   const [editingBank, setEditingBank] = useState<BankAccount | null>(null)
@@ -110,7 +130,7 @@ export default function FinanceSettingsPage() {
   const [isMethodDialogOpen, setIsMethodDialogOpen] = useState(false)
   const [isBankDialogOpen, setIsBankDialogOpen] = useState(false)
   const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
-  
+
   const workspaceId = useAuthStore(state => state.user?.workspace_id)
 
   // 載入資料
@@ -134,12 +154,16 @@ export default function FinanceSettingsPage() {
       setBankAccounts(banksData || [])
 
       // 載入會計科目（供選擇用）
-      const accountsRes = await fetch(`/api/finance/accounting-subjects?workspace_id=${workspaceId}`)
+      const accountsRes = await fetch(
+        `/api/finance/accounting-subjects?workspace_id=${workspaceId}`
+      )
       const accountsData = await accountsRes.json()
       setChartOfAccounts(accountsData || [])
 
       // 載入請款類別
-      const categoriesRes = await fetch(`/api/finance/expense-categories?workspace_id=${workspaceId}`)
+      const categoriesRes = await fetch(
+        `/api/finance/expense-categories?workspace_id=${workspaceId}`
+      )
       const categoriesData = await categoriesRes.json()
       setExpenseCategories(categoriesData || [])
     } catch (error) {
@@ -184,7 +208,7 @@ export default function FinanceSettingsPage() {
       type: 'warning',
     })
     if (!confirmed) return
-    
+
     try {
       const res = await fetch(`/api/finance/payment-methods?id=${method.id}`, {
         method: 'DELETE',
@@ -226,7 +250,7 @@ export default function FinanceSettingsPage() {
       type: 'warning',
     })
     if (!confirmed) return
-    
+
     try {
       const res = await fetch(`/api/bank-accounts?id=${bank.id}`, {
         method: 'DELETE',
@@ -282,7 +306,7 @@ export default function FinanceSettingsPage() {
       type: 'warning',
     })
     if (!confirmed) return
-    
+
     try {
       const res = await fetch(`/api/finance/expense-categories?id=${category.id}`, {
         method: 'DELETE',
@@ -300,7 +324,9 @@ export default function FinanceSettingsPage() {
   // 公司收入項目
   const companyIncomeCategories = expenseCategories.filter(c => c.type === 'company_income')
   // 團體請款類別（原本的 expense 類型）
-  const tourExpenseCategories = expenseCategories.filter(c => c.type === 'expense' || c.type === 'both')
+  const tourExpenseCategories = expenseCategories.filter(
+    c => c.type === 'expense' || c.type === 'both'
+  )
 
   const sections = [
     { key: 'receipt', label: '收款方式', icon: CreditCard },
@@ -318,17 +344,56 @@ export default function FinanceSettingsPage() {
   // 新增按鈕
   const renderAddButton = () => {
     const buttonConfig: Record<string, { label: string; onClick: () => void }> = {
-      receipt: { label: '新增收款方式', onClick: () => { setEditingMethod(null); setIsMethodDialogOpen(true) } },
-      payment: { label: '新增付款方式', onClick: () => { setEditingMethod(null); setIsMethodDialogOpen(true) } },
-      category: { label: '新增請款類別', onClick: () => { setEditingCategory(null); setIsCategoryDialogOpen(true) } },
-      company_expense: { label: '新增支出項目', onClick: () => { setEditingCategory(null); setIsCategoryDialogOpen(true) } },
-      company_income: { label: '新增收入項目', onClick: () => { setEditingCategory(null); setIsCategoryDialogOpen(true) } },
-      bank: { label: '新增銀行帳戶', onClick: () => { setEditingBank(null); setIsBankDialogOpen(true) } },
+      receipt: {
+        label: '新增收款方式',
+        onClick: () => {
+          setEditingMethod(null)
+          setIsMethodDialogOpen(true)
+        },
+      },
+      payment: {
+        label: '新增付款方式',
+        onClick: () => {
+          setEditingMethod(null)
+          setIsMethodDialogOpen(true)
+        },
+      },
+      category: {
+        label: '新增請款類別',
+        onClick: () => {
+          setEditingCategory(null)
+          setIsCategoryDialogOpen(true)
+        },
+      },
+      company_expense: {
+        label: '新增支出項目',
+        onClick: () => {
+          setEditingCategory(null)
+          setIsCategoryDialogOpen(true)
+        },
+      },
+      company_income: {
+        label: '新增收入項目',
+        onClick: () => {
+          setEditingCategory(null)
+          setIsCategoryDialogOpen(true)
+        },
+      },
+      bank: {
+        label: '新增銀行帳戶',
+        onClick: () => {
+          setEditingBank(null)
+          setIsBankDialogOpen(true)
+        },
+      },
     }
     const config = buttonConfig[activeSection]
     if (!config) return null
     return (
-      <Button onClick={config.onClick} className="bg-morandi-gold hover:bg-morandi-gold/90 text-white">
+      <Button
+        onClick={config.onClick}
+        className="bg-morandi-gold hover:bg-morandi-gold/90 text-white"
+      >
         <Plus className="h-4 w-4 mr-2" />
         {config.label}
       </Button>
@@ -336,7 +401,7 @@ export default function FinanceSettingsPage() {
   }
 
   return (
-    <ContentPageLayout 
+    <ContentPageLayout
       title="財務設定"
       icon={Settings}
       headerActions={
@@ -369,456 +434,463 @@ export default function FinanceSettingsPage() {
     >
       {/* 內容區 */}
       <div>
-          {/* 收款方式 */}
-          {activeSection === 'receipt' && (
-            <div className="space-y-4">
-              <Card className="rounded-lg overflow-hidden">
-                <Table>
-                  <TableHeader>
+        {/* 收款方式 */}
+        {activeSection === 'receipt' && (
+          <div className="space-y-4">
+            <Card className="rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[60px]">排序</TableHead>
+                    <TableHead>名稱</TableHead>
+                    <TableHead>借方科目</TableHead>
+                    <TableHead>貸方科目</TableHead>
+                    <TableHead className="w-[80px]">狀態</TableHead>
+                    <TableHead className="w-[80px] text-right">操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {receiptMethods.length === 0 ? (
                     <TableRow>
-                      <TableHead className="w-[60px]">排序</TableHead>
-                      <TableHead>名稱</TableHead>
-                      <TableHead>借方科目</TableHead>
-                      <TableHead>貸方科目</TableHead>
-                      <TableHead className="w-[80px]">狀態</TableHead>
-                      <TableHead className="w-[80px] text-right">操作</TableHead>
+                      <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                        尚未設定收款方式
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {receiptMethods.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
-                          尚未設定收款方式
+                  ) : (
+                    receiptMethods.map(method => (
+                      <TableRow key={method.id}>
+                        <TableCell className="text-morandi-muted">{method.sort_order}</TableCell>
+                        <TableCell className="font-medium">{method.name}</TableCell>
+                        <TableCell className="text-morandi-muted text-sm">
+                          {method.debit_account
+                            ? `${method.debit_account.code} ${method.debit_account.name}`
+                            : '-'}
+                        </TableCell>
+                        <TableCell className="text-morandi-muted text-sm">
+                          {method.credit_account
+                            ? `${method.credit_account.code} ${method.credit_account.name}`
+                            : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={method.is_active ? 'default' : 'secondary'}>
+                            {method.is_active ? '啟用' : '停用'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setEditingMethod(method)
+                                setIsMethodDialogOpen(true)
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteMethod(method)}
+                              className="text-status-danger hover:text-status-danger/80"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      receiptMethods.map(method => (
-                        <TableRow key={method.id}>
-                          <TableCell className="text-morandi-muted">{method.sort_order}</TableCell>
-                          <TableCell className="font-medium">{method.name}</TableCell>
-                          <TableCell className="text-morandi-muted text-sm">
-                            {method.debit_account ? `${method.debit_account.code} ${method.debit_account.name}` : '-'}
-                          </TableCell>
-                          <TableCell className="text-morandi-muted text-sm">
-                            {method.credit_account ? `${method.credit_account.code} ${method.credit_account.name}` : '-'}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={method.is_active ? 'default' : 'secondary'}>
-                              {method.is_active ? '啟用' : '停用'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+        )}
+
+        {/* 付款方式 */}
+        {activeSection === 'payment' && (
+          <div className="space-y-4">
+            <Card className="rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[60px]">排序</TableHead>
+                    <TableHead>名稱</TableHead>
+                    <TableHead>借方科目</TableHead>
+                    <TableHead>貸方科目</TableHead>
+                    <TableHead className="w-[80px]">狀態</TableHead>
+                    <TableHead className="w-[80px] text-right">操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paymentMethodsList.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                        尚未設定付款方式
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paymentMethodsList.map(method => (
+                      <TableRow key={method.id}>
+                        <TableCell className="text-morandi-muted">{method.sort_order}</TableCell>
+                        <TableCell className="font-medium">{method.name}</TableCell>
+                        <TableCell className="text-morandi-muted text-sm">
+                          {method.debit_account
+                            ? `${method.debit_account.code} ${method.debit_account.name}`
+                            : '-'}
+                        </TableCell>
+                        <TableCell className="text-morandi-muted text-sm">
+                          {method.credit_account
+                            ? `${method.credit_account.code} ${method.credit_account.name}`
+                            : '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={method.is_active ? 'default' : 'secondary'}>
+                            {method.is_active ? '啟用' : '停用'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setEditingMethod(method)
+                                setIsMethodDialogOpen(true)
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteMethod(method)}
+                              className="text-status-danger hover:text-status-danger/80"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+        )}
+
+        {/* 請款類別 */}
+        {activeSection === 'category' && (
+          <div className="space-y-4">
+            <Card className="rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>名稱</TableHead>
+                    <TableHead>借方科目</TableHead>
+                    <TableHead>貸方科目</TableHead>
+                    <TableHead className="w-[80px]">狀態</TableHead>
+                    <TableHead className="w-[100px] text-right">操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tourExpenseCategories.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
+                        尚未設定請款類別
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    tourExpenseCategories.map(category => (
+                      <TableRow key={category.id}>
+                        <TableCell className="font-medium">{category.name}</TableCell>
+                        <TableCell>
+                          {category.debit_account ? (
+                            <span className="text-sm">
+                              {category.debit_account.code} {category.debit_account.name}
+                            </span>
+                          ) : (
+                            <span className="text-morandi-muted text-sm">未設定</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {category.credit_account ? (
+                            <span className="text-sm">
+                              {category.credit_account.code} {category.credit_account.name}
+                            </span>
+                          ) : (
+                            <span className="text-morandi-muted text-sm">未設定</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={category.is_active ? 'default' : 'secondary'}>
+                            {category.is_active ? '啟用' : '停用'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setEditingCategory(category)
+                                setIsCategoryDialogOpen(true)
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            {!category.is_system && (
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => {
-                                  setEditingMethod(method)
-                                  setIsMethodDialogOpen(true)
-                                }}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteMethod(method)}
+                                onClick={() => handleDeleteCategory(category)}
                                 className="text-status-danger hover:text-status-danger/80"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </Card>
-            </div>
-          )}
-
-          {/* 付款方式 */}
-          {activeSection === 'payment' && (
-            <div className="space-y-4">
-              <Card className="rounded-lg overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[60px]">排序</TableHead>
-                      <TableHead>名稱</TableHead>
-                      <TableHead>借方科目</TableHead>
-                      <TableHead>貸方科目</TableHead>
-                      <TableHead className="w-[80px]">狀態</TableHead>
-                      <TableHead className="w-[80px] text-right">操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {paymentMethodsList.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
-                          尚未設定付款方式
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      paymentMethodsList.map(method => (
-                        <TableRow key={method.id}>
-                          <TableCell className="text-morandi-muted">{method.sort_order}</TableCell>
-                          <TableCell className="font-medium">{method.name}</TableCell>
-                          <TableCell className="text-morandi-muted text-sm">
-                            {method.debit_account ? `${method.debit_account.code} ${method.debit_account.name}` : '-'}
-                          </TableCell>
-                          <TableCell className="text-morandi-muted text-sm">
-                            {method.credit_account ? `${method.credit_account.code} ${method.credit_account.name}` : '-'}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={method.is_active ? 'default' : 'secondary'}>
-                              {method.is_active ? '啟用' : '停用'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+        )}
+
+        {/* 公司支出項目 */}
+        {activeSection === 'company_expense' && (
+          <div className="space-y-4">
+            <Card className="rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[60px]">排序</TableHead>
+                    <TableHead>名稱</TableHead>
+                    <TableHead>借方科目</TableHead>
+                    <TableHead>貸方科目</TableHead>
+                    <TableHead className="w-[80px]">狀態</TableHead>
+                    <TableHead className="w-[100px] text-right">操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {companyExpenseCategories.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                        尚未設定公司支出項目
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    companyExpenseCategories.map(category => (
+                      <TableRow key={category.id}>
+                        <TableCell className="text-morandi-muted">{category.sort_order}</TableCell>
+                        <TableCell className="font-medium">{category.name}</TableCell>
+                        <TableCell>
+                          {category.debit_account ? (
+                            <span className="text-sm">
+                              {category.debit_account.code} {category.debit_account.name}
+                            </span>
+                          ) : (
+                            <span className="text-morandi-muted text-sm">未設定</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {category.credit_account ? (
+                            <span className="text-sm">
+                              {category.credit_account.code} {category.credit_account.name}
+                            </span>
+                          ) : (
+                            <span className="text-morandi-muted text-sm">未設定</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={category.is_active ? 'default' : 'secondary'}>
+                            {category.is_active ? '啟用' : '停用'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setEditingCategory(category)
+                                setIsCategoryDialogOpen(true)
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            {!category.is_system && (
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => {
-                                  setEditingMethod(method)
-                                  setIsMethodDialogOpen(true)
-                                }}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteMethod(method)}
+                                onClick={() => handleDeleteCategory(category)}
                                 className="text-status-danger hover:text-status-danger/80"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </Card>
-            </div>
-          )}
-
-          {/* 請款類別 */}
-          {activeSection === 'category' && (
-            <div className="space-y-4">
-              <Card className="rounded-lg overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>名稱</TableHead>
-                      <TableHead>借方科目</TableHead>
-                      <TableHead>貸方科目</TableHead>
-                      <TableHead className="w-[80px]">狀態</TableHead>
-                      <TableHead className="w-[100px] text-right">操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {tourExpenseCategories.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center py-8 text-morandi-muted">
-                          尚未設定請款類別
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      tourExpenseCategories.map(category => (
-                        <TableRow key={category.id}>
-                          <TableCell className="font-medium">{category.name}</TableCell>
-                          <TableCell>
-                            {category.debit_account ? (
-                              <span className="text-sm">
-                                {category.debit_account.code} {category.debit_account.name}
-                              </span>
-                            ) : (
-                              <span className="text-morandi-muted text-sm">未設定</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {category.credit_account ? (
-                              <span className="text-sm">
-                                {category.credit_account.code} {category.credit_account.name}
-                              </span>
-                            ) : (
-                              <span className="text-morandi-muted text-sm">未設定</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={category.is_active ? 'default' : 'secondary'}>
-                              {category.is_active ? '啟用' : '停用'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  setEditingCategory(category)
-                                  setIsCategoryDialogOpen(true)
-                                }}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              {!category.is_system && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDeleteCategory(category)}
-                                  className="text-status-danger hover:text-status-danger/80"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </Card>
-            </div>
-          )}
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+        )}
 
-          {/* 公司支出項目 */}
-          {activeSection === 'company_expense' && (
-            <div className="space-y-4">
-              <Card className="rounded-lg overflow-hidden">
-                <Table>
-                  <TableHeader>
+        {/* 公司收入項目 */}
+        {activeSection === 'company_income' && (
+          <div className="space-y-4">
+            <Card className="rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[60px]">排序</TableHead>
+                    <TableHead>名稱</TableHead>
+                    <TableHead>借方科目</TableHead>
+                    <TableHead>貸方科目</TableHead>
+                    <TableHead className="w-[80px]">狀態</TableHead>
+                    <TableHead className="w-[100px] text-right">操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {companyIncomeCategories.length === 0 ? (
                     <TableRow>
-                      <TableHead className="w-[60px]">排序</TableHead>
-                      <TableHead>名稱</TableHead>
-                      <TableHead>借方科目</TableHead>
-                      <TableHead>貸方科目</TableHead>
-                      <TableHead className="w-[80px]">狀態</TableHead>
-                      <TableHead className="w-[100px] text-right">操作</TableHead>
+                      <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                        尚未設定公司收入項目
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {companyExpenseCategories.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
-                          尚未設定公司支出項目
+                  ) : (
+                    companyIncomeCategories.map(category => (
+                      <TableRow key={category.id}>
+                        <TableCell className="text-morandi-muted">{category.sort_order}</TableCell>
+                        <TableCell className="font-medium">{category.name}</TableCell>
+                        <TableCell>
+                          {category.debit_account ? (
+                            <span className="text-sm">
+                              {category.debit_account.code} {category.debit_account.name}
+                            </span>
+                          ) : (
+                            <span className="text-morandi-muted text-sm">未設定</span>
+                          )}
                         </TableCell>
-                      </TableRow>
-                    ) : (
-                      companyExpenseCategories.map(category => (
-                        <TableRow key={category.id}>
-                          <TableCell className="text-morandi-muted">{category.sort_order}</TableCell>
-                          <TableCell className="font-medium">{category.name}</TableCell>
-                          <TableCell>
-                            {category.debit_account ? (
-                              <span className="text-sm">
-                                {category.debit_account.code} {category.debit_account.name}
-                              </span>
-                            ) : (
-                              <span className="text-morandi-muted text-sm">未設定</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {category.credit_account ? (
-                              <span className="text-sm">
-                                {category.credit_account.code} {category.credit_account.name}
-                              </span>
-                            ) : (
-                              <span className="text-morandi-muted text-sm">未設定</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={category.is_active ? 'default' : 'secondary'}>
-                              {category.is_active ? '啟用' : '停用'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  setEditingCategory(category)
-                                  setIsCategoryDialogOpen(true)
-                                }}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              {!category.is_system && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDeleteCategory(category)}
-                                  className="text-status-danger hover:text-status-danger/80"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </Card>
-            </div>
-          )}
-
-          {/* 公司收入項目 */}
-          {activeSection === 'company_income' && (
-            <div className="space-y-4">
-              <Card className="rounded-lg overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[60px]">排序</TableHead>
-                      <TableHead>名稱</TableHead>
-                      <TableHead>借方科目</TableHead>
-                      <TableHead>貸方科目</TableHead>
-                      <TableHead className="w-[80px]">狀態</TableHead>
-                      <TableHead className="w-[100px] text-right">操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {companyIncomeCategories.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
-                          尚未設定公司收入項目
+                        <TableCell>
+                          {category.credit_account ? (
+                            <span className="text-sm">
+                              {category.credit_account.code} {category.credit_account.name}
+                            </span>
+                          ) : (
+                            <span className="text-morandi-muted text-sm">未設定</span>
+                          )}
                         </TableCell>
-                      </TableRow>
-                    ) : (
-                      companyIncomeCategories.map(category => (
-                        <TableRow key={category.id}>
-                          <TableCell className="text-morandi-muted">{category.sort_order}</TableCell>
-                          <TableCell className="font-medium">{category.name}</TableCell>
-                          <TableCell>
-                            {category.debit_account ? (
-                              <span className="text-sm">
-                                {category.debit_account.code} {category.debit_account.name}
-                              </span>
-                            ) : (
-                              <span className="text-morandi-muted text-sm">未設定</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {category.credit_account ? (
-                              <span className="text-sm">
-                                {category.credit_account.code} {category.credit_account.name}
-                              </span>
-                            ) : (
-                              <span className="text-morandi-muted text-sm">未設定</span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={category.is_active ? 'default' : 'secondary'}>
-                              {category.is_active ? '啟用' : '停用'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  setEditingCategory(category)
-                                  setIsCategoryDialogOpen(true)
-                                }}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              {!category.is_system && (
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDeleteCategory(category)}
-                                  className="text-status-danger hover:text-status-danger/80"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </Card>
-            </div>
-          )}
-
-          {/* 銀行帳戶 */}
-          {activeSection === 'bank' && (
-            <div className="space-y-4">
-              <Card className="rounded-lg overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[100px]">代碼</TableHead>
-                      <TableHead>名稱</TableHead>
-                      <TableHead>銀行</TableHead>
-                      <TableHead>帳號</TableHead>
-                      <TableHead className="w-[80px]">預設</TableHead>
-                      <TableHead className="w-[100px] text-right">操作</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {bankAccounts.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
-                          尚未設定銀行帳戶
+                        <TableCell>
+                          <Badge variant={category.is_active ? 'default' : 'secondary'}>
+                            {category.is_active ? '啟用' : '停用'}
+                          </Badge>
                         </TableCell>
-                      </TableRow>
-                    ) : (
-                      bankAccounts.map(bank => (
-                        <TableRow key={bank.id}>
-                          <TableCell className="font-mono">{bank.code}</TableCell>
-                          <TableCell className="font-medium">{bank.name}</TableCell>
-                          <TableCell>{bank.bank_name || '-'}</TableCell>
-                          <TableCell className="font-mono">{bank.account_number || '-'}</TableCell>
-                          <TableCell>
-                            {bank.is_default && (
-                              <Badge className="bg-morandi-gold/20 text-morandi-gold">預設</Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-1">
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setEditingCategory(category)
+                                setIsCategoryDialogOpen(true)
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            {!category.is_system && (
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => {
-                                  setEditingBank(bank)
-                                  setIsBankDialogOpen(true)
-                                }}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteBank(bank)}
+                                onClick={() => handleDeleteCategory(category)}
                                 className="text-status-danger hover:text-status-danger/80"
                               >
                                 <Trash2 className="h-4 w-4" />
                               </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </Card>
-            </div>
-          )}
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+        )}
 
+        {/* 銀行帳戶 */}
+        {activeSection === 'bank' && (
+          <div className="space-y-4">
+            <Card className="rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[100px]">代碼</TableHead>
+                    <TableHead>名稱</TableHead>
+                    <TableHead>銀行</TableHead>
+                    <TableHead>帳號</TableHead>
+                    <TableHead className="w-[80px]">預設</TableHead>
+                    <TableHead className="w-[100px] text-right">操作</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {bankAccounts.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                        尚未設定銀行帳戶
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    bankAccounts.map(bank => (
+                      <TableRow key={bank.id}>
+                        <TableCell className="font-mono">{bank.code}</TableCell>
+                        <TableCell className="font-medium">{bank.name}</TableCell>
+                        <TableCell>{bank.bank_name || '-'}</TableCell>
+                        <TableCell className="font-mono">{bank.account_number || '-'}</TableCell>
+                        <TableCell>
+                          {bank.is_default && (
+                            <Badge className="bg-morandi-gold/20 text-morandi-gold">預設</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                setEditingBank(bank)
+                                setIsBankDialogOpen(true)
+                              }}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeleteBank(bank)}
+                              className="text-status-danger hover:text-status-danger/80"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </Card>
+          </div>
+        )}
       </div>
 
       {/* 付款方式編輯對話框 */}
@@ -848,11 +920,13 @@ export default function FinanceSettingsPage() {
         onSave={handleSaveCategory}
         chartOfAccounts={chartOfAccounts}
         categoryType={
-          activeSection === 'company_expense' ? 'company_expense' :
-          activeSection === 'company_income' ? 'company_income' : 'expense'
+          activeSection === 'company_expense'
+            ? 'company_expense'
+            : activeSection === 'company_income'
+              ? 'company_income'
+              : 'expense'
         }
       />
-
     </ContentPageLayout>
   )
 }
@@ -907,8 +981,8 @@ function MethodDialog({
     }
     setIsSubmitting(true)
     try {
-      await onSave({ 
-        name, 
+      await onSave({
+        name,
         description,
         placeholder: placeholder || null,
         debit_account_id: debitAccountId || null,
@@ -920,9 +994,14 @@ function MethodDialog({
     }
   }
 
-  const title = type === 'receipt' 
-    ? (method ? '編輯收款方式' : '新增收款方式')
-    : (method ? '編輯付款方式' : '新增付款方式')
+  const title =
+    type === 'receipt'
+      ? method
+        ? '編輯收款方式'
+        : '新增收款方式'
+      : method
+        ? '編輯付款方式'
+        : '新增付款方式'
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1082,11 +1161,7 @@ function BankDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>代碼 *</Label>
-              <Input
-                value={code}
-                onChange={e => setCode(e.target.value)}
-                placeholder="例：ESUN"
-              />
+              <Input value={code} onChange={e => setCode(e.target.value)} placeholder="例：ESUN" />
             </div>
             <div className="space-y-2">
               <Label>名稱 *</Label>
@@ -1141,8 +1216,6 @@ function BankDialog({
   )
 }
 
-
-
 // 請款類別編輯對話框
 function CategoryDialog({
   open,
@@ -1168,13 +1241,15 @@ function CategoryDialog({
   // 根據類型決定科目篩選
   // 費用/公司支出: 借方=費用(5), 貸方=負債(2)
   // 公司收入: 借方=資產(1), 貸方=收入(4)
-  const debitAccounts = categoryType === 'company_income' 
-    ? chartOfAccounts.filter(a => a.code.startsWith('1'))  // 資產類
-    : chartOfAccounts.filter(a => a.code.startsWith('5'))  // 費用類
-  const creditAccounts = categoryType === 'company_income'
-    ? chartOfAccounts.filter(a => a.code.startsWith('4'))  // 收入類
-    : chartOfAccounts.filter(a => a.code.startsWith('2'))  // 負債類
-  
+  const debitAccounts =
+    categoryType === 'company_income'
+      ? chartOfAccounts.filter(a => a.code.startsWith('1')) // 資產類
+      : chartOfAccounts.filter(a => a.code.startsWith('5')) // 費用類
+  const creditAccounts =
+    categoryType === 'company_income'
+      ? chartOfAccounts.filter(a => a.code.startsWith('4')) // 收入類
+      : chartOfAccounts.filter(a => a.code.startsWith('2')) // 負債類
+
   // 舊變數保留向後相容
   const expenseAccounts = debitAccounts
   const liabilityAccounts = creditAccounts
@@ -1212,8 +1287,11 @@ function CategoryDialog({
         <DialogHeader>
           <DialogTitle>
             {category ? '編輯' : '新增'}
-            {categoryType === 'company_expense' ? '公司支出項目' : 
-             categoryType === 'company_income' ? '公司收入項目' : '請款類別'}
+            {categoryType === 'company_expense'
+              ? '公司支出項目'
+              : categoryType === 'company_income'
+                ? '公司收入項目'
+                : '請款類別'}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-4">

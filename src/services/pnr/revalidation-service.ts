@@ -376,7 +376,9 @@ export async function getScheduleChanges(
   try {
     let query = supabase
       .from('pnr_schedule_changes')
-      .select('id, pnr_id, segment_id, change_type, original_flight_number, new_flight_number, original_departure_date, new_departure_date, original_departure_time, new_departure_time, original_arrival_time, new_arrival_time, detected_at, processed_at, processed_by, status, requires_reissue, requires_revalidation, requires_refund, notes, workspace_id, created_at, updated_at')
+      .select(
+        'id, pnr_id, segment_id, change_type, original_flight_number, new_flight_number, original_departure_date, new_departure_date, original_departure_time, new_departure_time, original_arrival_time, new_arrival_time, detected_at, processed_at, processed_by, status, requires_reissue, requires_revalidation, requires_refund, notes, workspace_id, created_at, updated_at'
+      )
       .eq('pnr_id', pnrId)
       .order('detected_at', { ascending: false })
       .limit(500)
@@ -414,7 +416,9 @@ export async function getPendingScheduleChanges(limit: number = 50): Promise<Pnr
   try {
     const { data, error } = await supabase
       .from('pnr_schedule_changes')
-      .select('id, pnr_id, segment_id, change_type, original_flight_number, new_flight_number, original_departure_date, new_departure_date, original_departure_time, new_departure_time, original_arrival_time, new_arrival_time, detected_at, processed_at, processed_by, status, requires_reissue, requires_revalidation, requires_refund, notes, workspace_id, created_at, updated_at')
+      .select(
+        'id, pnr_id, segment_id, change_type, original_flight_number, new_flight_number, original_departure_date, new_departure_date, original_departure_time, new_departure_time, original_arrival_time, new_arrival_time, detected_at, processed_at, processed_by, status, requires_reissue, requires_revalidation, requires_refund, notes, workspace_id, created_at, updated_at'
+      )
       .in('status', ['pending', 'contacted'])
       .order('detected_at', { ascending: true })
       .limit(limit)

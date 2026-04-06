@@ -1,14 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/api-client'
+import { getServerAuth } from '@/lib/auth/server-auth'
 import { getBasicFeatures } from '@/lib/permissions'
 import { MODULES } from '@/lib/permissions/module-tabs'
 
 /**
+ * GET /api/workspaces
+ * 取得所有租戶（需要 tenants 功能權限）
+ */
+export async function GET() {
+  const auth = await getServerAuth()
+  if (!auth.success) {
+    return NextResponse.json({ error: '請先登入' }, { status: 401 })
+  }
+
+  // 檢查用戶是否有 tenants 功能權限
+  const supabase = createServiceClient()
+  const { data: feature } = await supabase
+    .from('workspace_features')
+    .select('enabled')
+    .eq('workspace_id', auth.data.workspaceId)
+    .eq('feature_code', 'tenants')
+    .single()
+
+  if (!feature?.enabled) {
+    return NextResponse.json({ error: '無權限' }, { status: 403 })
+  }
+
+  // 有權限 → 查所有 workspaces
+  const { data, error } = await supabase
+    .from('workspaces')
+    .select('*')
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+
+  return NextResponse.json(data)
+}
+
+/**
  * POST /api/workspaces
  * 建立新租戶 + 初始化權限
- * 
+ *
  * 注意：這是 Super Admin 操作，使用 service client
- * 
+ *
  * 會自動：
  * 1. 建立租戶 (workspaces)
  * 2. 開啟基本功能 (workspace_features)

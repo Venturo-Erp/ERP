@@ -13,16 +13,16 @@ interface TabPermission {
 
 /**
  * 取得當前用戶的分頁權限
- * 
+ *
  * 用法：
  * const { canRead, canWrite, loading } = useTabPermissions()
- * 
+ *
  * // 檢查是否能看收款管理
  * if (canRead('finance', 'payments')) { ... }
- * 
+ *
  * // 檢查是否能操作公司收款
  * if (canWrite('finance', 'payments-company')) { ... }
- * 
+ *
  * // 檢查是否能確認核帳
  * if (canWrite('finance', 'payments-confirm')) { ... }
  */
@@ -49,7 +49,7 @@ export function useTabPermissions() {
           return
         }
         const roleData = await roleRes.json()
-        
+
         // 管理員角色擁有所有權限
         if (roleData.is_admin) {
           setIsAdmin(true)
@@ -74,44 +74,56 @@ export function useTabPermissions() {
   }, [user?.id])
 
   // 檢查是否有讀取權限
-  const canRead = useCallback((moduleCode: string, tabCode?: string): boolean => {
-    // 管理員擁有所有權限
-    if (isAdmin) return true
+  const canRead = useCallback(
+    (moduleCode: string, tabCode?: string): boolean => {
+      // 管理員擁有所有權限
+      if (isAdmin) return true
 
-    // 找對應的權限記錄
-    const perm = permissions.find(p => 
-      p.module_code === moduleCode && 
-      (tabCode ? p.tab_code === tabCode : p.tab_code === null)
-    )
+      // 找對應的權限記錄
+      const perm = permissions.find(
+        p =>
+          p.module_code === moduleCode && (tabCode ? p.tab_code === tabCode : p.tab_code === null)
+      )
 
-    return perm?.can_read ?? false
-  }, [permissions, isAdmin])
+      return perm?.can_read ?? false
+    },
+    [permissions, isAdmin]
+  )
 
   // 檢查是否有寫入權限
-  const canWrite = useCallback((moduleCode: string, tabCode?: string): boolean => {
-    // 管理員擁有所有權限
-    if (isAdmin) return true
+  const canWrite = useCallback(
+    (moduleCode: string, tabCode?: string): boolean => {
+      // 管理員擁有所有權限
+      if (isAdmin) return true
 
-    // 找對應的權限記錄
-    const perm = permissions.find(p => 
-      p.module_code === moduleCode && 
-      (tabCode ? p.tab_code === tabCode : p.tab_code === null)
-    )
+      // 找對應的權限記錄
+      const perm = permissions.find(
+        p =>
+          p.module_code === moduleCode && (tabCode ? p.tab_code === tabCode : p.tab_code === null)
+      )
 
-    return perm?.can_write ?? false
-  }, [permissions, isAdmin])
+      return perm?.can_write ?? false
+    },
+    [permissions, isAdmin]
+  )
 
   // 檢查模組內任一分頁是否有讀取權限
-  const canReadAny = useCallback((moduleCode: string): boolean => {
-    if (isAdmin) return true
-    return permissions.some(p => p.module_code === moduleCode && p.can_read)
-  }, [permissions, isAdmin])
+  const canReadAny = useCallback(
+    (moduleCode: string): boolean => {
+      if (isAdmin) return true
+      return permissions.some(p => p.module_code === moduleCode && p.can_read)
+    },
+    [permissions, isAdmin]
+  )
 
   // 檢查模組內任一分頁是否有寫入權限
-  const canWriteAny = useCallback((moduleCode: string): boolean => {
-    if (isAdmin) return true
-    return permissions.some(p => p.module_code === moduleCode && p.can_write)
-  }, [permissions, isAdmin])
+  const canWriteAny = useCallback(
+    (moduleCode: string): boolean => {
+      if (isAdmin) return true
+      return permissions.some(p => p.module_code === moduleCode && p.can_write)
+    },
+    [permissions, isAdmin]
+  )
 
   return {
     permissions,
@@ -126,7 +138,7 @@ export function useTabPermissions() {
 
 /**
  * 權限守衛組件
- * 
+ *
  * 用法：
  * <PermissionGuard module="finance" tab="payments-confirm" action="write">
  *   <Button>確認核帳</Button>
@@ -149,9 +161,7 @@ export function PermissionGuard({
 
   if (loading) return null
 
-  const hasPermission = action === 'write' 
-    ? canWrite(module, tab)
-    : canRead(module, tab)
+  const hasPermission = action === 'write' ? canWrite(module, tab) : canRead(module, tab)
 
   if (!hasPermission) return <>{fallback}</>
 

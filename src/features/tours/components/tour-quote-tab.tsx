@@ -77,7 +77,7 @@ export function TourQuoteTab({ tour }: TourQuoteTabProps) {
           .like('code', `${tour.code}-Q%`)
           .order('code', { ascending: false })
           .limit(1)
-        
+
         let nextNum = 1
         if (existingQuotes && existingQuotes.length > 0 && existingQuotes[0].code) {
           // 從 KIX261223A-Q05 提取 05

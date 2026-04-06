@@ -3,7 +3,7 @@
 /**
  * 客製化詳情頁 - 客戶 DIY 選景點
  * 路由: /p/customized/[slug]
- * 
+ *
  * 🎯 流程：
  * 1. 客人選景點（左側卡片）
  * 2. 已選清單顯示在右側
@@ -16,10 +16,10 @@ import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { QRCodeSVG } from 'qrcode.react'
-import { 
-  MapPin, 
-  Check, 
-  X, 
+import {
+  MapPin,
+  Check,
+  X,
   Send,
   ChevronLeft,
   Phone,
@@ -33,12 +33,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 
@@ -70,25 +65,21 @@ interface SelectedItem {
   priority: number
 }
 
-export default function WishlistDetailPage({ 
-  params 
-}: { 
-  params: Promise<{ slug: string }> 
-}) {
+export default function WishlistDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const router = useRouter()
-  
+
   const [template, setTemplate] = useState<CustomizedTour | null>(null)
   const [items, setItems] = useState<TemplateItem[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
-  
+
   // 已選景點
   const [selectedItems, setSelectedItems] = useState<SelectedItem[]>([])
-  
+
   // 篩選
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  
+
   // 詢價表單
   const [showInquiryForm, setShowInquiryForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -104,14 +95,18 @@ export default function WishlistDetailPage({
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [trackingCode, setTrackingCode] = useState('')
   const [trackingUrl, setTrackingUrl] = useState('')
-  
+
   // 公司資訊
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({ name: '旅行社', phone: '' })
-  
+
   // LINE 用戶
-  const [lineUser, setLineUser] = useState<{ userId: string; displayName: string; pictureUrl?: string } | null>(null)
+  const [lineUser, setLineUser] = useState<{
+    userId: string
+    displayName: string
+    pictureUrl?: string
+  } | null>(null)
   const [lineLoading, setLineLoading] = useState(true)
-  
+
   // 客戶資料（綁定的）
   const [linkedCustomer, setLinkedCustomer] = useState<{
     id: string
@@ -120,14 +115,16 @@ export default function WishlistDetailPage({
     phone: string | null
     email: string | null
   } | null>(null)
-  
+
   // 客戶比對
-  const [matchingCustomers, setMatchingCustomers] = useState<{
-    id: string
-    code: string
-    name: string
-    phone: string | null
-  }[]>([])
+  const [matchingCustomers, setMatchingCustomers] = useState<
+    {
+      id: string
+      code: string
+      name: string
+      phone: string | null
+    }[]
+  >([])
   const [showMatchDialog, setShowMatchDialog] = useState(false)
   const [matchForm, setMatchForm] = useState({ name: '', birthDate: '' })
 
@@ -149,14 +146,14 @@ export default function WishlistDetailPage({
       }
 
       setTemplate(templateData)
-      
+
       // 載入公司資訊
       const { data: workspace } = await supabase
         .from('workspaces')
         .select('legal_name, phone')
         .eq('id', templateData.workspace_id)
         .single()
-      
+
       if (workspace) {
         setCompanyInfo({
           name: workspace.legal_name || '旅行社',
@@ -186,11 +183,11 @@ export default function WishlistDetailPage({
         const data = await res.json()
         if (data.user) {
           setLineUser(data.user)
-          
+
           // 查詢是否已綁定客戶
           const customerRes = await fetch(`/api/customers/by-line?lineUserId=${data.user.userId}`)
           const customerData = await customerRes.json()
-          
+
           if (customerData.customer) {
             setLinkedCustomer(customerData.customer)
             // 自動帶入客戶資料
@@ -231,11 +228,14 @@ export default function WishlistDetailPage({
       if (exists) {
         return prev.filter(s => s.item_id !== item.id)
       } else {
-        return [...prev, {
-          item_id: item.id,
-          name: item.name,
-          priority: prev.length + 1,
-        }]
+        return [
+          ...prev,
+          {
+            item_id: item.id,
+            name: item.name,
+            priority: prev.length + 1,
+          },
+        ]
       }
     })
   }
@@ -271,23 +271,21 @@ export default function WishlistDetailPage({
     // 產生追蹤碼（短碼，好記）
     const code = `W${Date.now().toString(36).toUpperCase().slice(-6)}`
 
-    const { error } = await supabase
-      .from('customer_inquiries' as never)
-      .insert({
-        workspace_id: template?.workspace_id,
-        template_id: template?.id,
-        code,
-        customer_name: inquiryForm.name,
-        phone: inquiryForm.phone,
-        email: null,
-        travel_date: inquiryForm.travel_date || null,
-        people_count: inquiryForm.people_count,
-        notes: inquiryForm.notes || null,
-        selected_items: selectedItems,
-        status: 'pending',
-        line_user_id: lineUser?.userId || null,
-        customer_id: linkedCustomer?.id || null,
-      } as never)
+    const { error } = await supabase.from('customer_inquiries' as never).insert({
+      workspace_id: template?.workspace_id,
+      template_id: template?.id,
+      code,
+      customer_name: inquiryForm.name,
+      phone: inquiryForm.phone,
+      email: null,
+      travel_date: inquiryForm.travel_date || null,
+      people_count: inquiryForm.people_count,
+      notes: inquiryForm.notes || null,
+      selected_items: selectedItems,
+      status: 'pending',
+      line_user_id: lineUser?.userId || null,
+      customer_id: linkedCustomer?.id || null,
+    } as never)
 
     setSubmitting(false)
 
@@ -303,7 +301,7 @@ export default function WishlistDetailPage({
     setTrackingUrl(url)
     setShowInquiryForm(false)
     setSubmitSuccess(true)
-    
+
     // 如果有 LINE 登入，推播追蹤連結給客人
     if (lineUser?.userId) {
       try {
@@ -354,7 +352,10 @@ export default function WishlistDetailPage({
             <h1 className="text-xl font-bold text-white">{companyInfo.name}</h1>
           </div>
           {companyInfo.phone && (
-            <a href={`tel:${companyInfo.phone}`} className="flex items-center gap-1 text-sm text-white/60 hover:text-white">
+            <a
+              href={`tel:${companyInfo.phone}`}
+              className="flex items-center gap-1 text-sm text-white/60 hover:text-white"
+            >
               <Phone className="w-4 h-4" />
               {companyInfo.phone}
             </a>
@@ -369,25 +370,24 @@ export default function WishlistDetailPage({
             {/* 標題 */}
             <div className="mb-6">
               <h2 className="text-3xl font-bold mb-2 text-white">{template?.name}</h2>
-              {template?.description && (
-                <p className="text-white/60">{template.description}</p>
-              )}
+              {template?.description && <p className="text-white/60">{template.description}</p>}
             </div>
 
             {/* 景點卡片 */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {filteredItems.map(item => {
                 const isSelected = selectedItems.some(s => s.item_id === item.id)
-                
+
                 return (
                   <div
                     key={item.id}
                     onClick={() => toggleItem(item)}
                     className={`
                       relative bg-white/5 backdrop-blur-sm border rounded-xl overflow-hidden cursor-pointer transition-all
-                      ${isSelected 
-                        ? 'ring-2 ring-primary border-primary bg-primary/10' 
-                        : 'border-white/10 hover:border-white/30 hover:bg-white/10'
+                      ${
+                        isSelected
+                          ? 'ring-2 ring-primary border-primary bg-primary/10'
+                          : 'border-white/10 hover:border-white/30 hover:bg-white/10'
                       }
                     `}
                   >
@@ -404,7 +404,7 @@ export default function WishlistDetailPage({
                           <MapPin className="w-10 h-10 text-white/20" />
                         </div>
                       )}
-                      
+
                       {/* 選中標記 */}
                       {isSelected && (
                         <div className="absolute top-2 right-2 w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg">
@@ -423,9 +423,7 @@ export default function WishlistDetailPage({
                     {/* 資訊 */}
                     <div className="p-3">
                       <h3 className="font-medium text-white line-clamp-1">{item.name}</h3>
-                      {item.region && (
-                        <p className="text-xs text-white/50">{item.region}</p>
-                      )}
+                      {item.region && <p className="text-xs text-white/50">{item.region}</p>}
                     </div>
                   </div>
                 )
@@ -455,7 +453,7 @@ export default function WishlistDetailPage({
                       </span>
                       <span className="flex-1 text-sm truncate text-white">{item.name}</span>
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation()
                           removeItem(item.item_id)
                         }}
@@ -477,7 +475,9 @@ export default function WishlistDetailPage({
                         <img src={lineUser.pictureUrl} alt="" className="w-8 h-8 rounded-full" />
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-morandi-green truncate">{lineUser.displayName}</p>
+                        <p className="text-sm text-morandi-green truncate">
+                          {lineUser.displayName}
+                        </p>
                         <p className="text-xs text-morandi-green/60">已連結 LINE</p>
                       </div>
                     </div>
@@ -490,7 +490,7 @@ export default function WishlistDetailPage({
                       }}
                     >
                       <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+                        <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
                       </svg>
                       用 LINE 登入接收通知
                     </Button>
@@ -547,13 +547,13 @@ export default function WishlistDetailPage({
                   }}
                 >
                   <svg className="w-4 h-4 mr-1" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+                    <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.627-.63.349 0 .631.285.631.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
                   </svg>
                   LINE 登入
                 </Button>
               </div>
             )}
-            
+
             {lineUser && (
               <div className="flex items-center gap-2 p-2 bg-morandi-green/10 border border-morandi-green/30 rounded-lg">
                 {lineUser.pictureUrl && (
@@ -570,7 +570,7 @@ export default function WishlistDetailPage({
               <Label>姓名 *</Label>
               <Input
                 value={inquiryForm.name}
-                onChange={(e) => setInquiryForm(p => ({ ...p, name: e.target.value }))}
+                onChange={e => setInquiryForm(p => ({ ...p, name: e.target.value }))}
                 placeholder="您的姓名"
               />
             </div>
@@ -579,7 +579,7 @@ export default function WishlistDetailPage({
               <Label>電話 *</Label>
               <Input
                 value={inquiryForm.phone}
-                onChange={(e) => setInquiryForm(p => ({ ...p, phone: e.target.value }))}
+                onChange={e => setInquiryForm(p => ({ ...p, phone: e.target.value }))}
                 placeholder="0912-345-678"
               />
               <p className="text-xs text-muted-foreground">我們會用此電話與您聯繫</p>
@@ -591,7 +591,7 @@ export default function WishlistDetailPage({
                 <Input
                   type="date"
                   value={inquiryForm.travel_date}
-                  onChange={(e) => setInquiryForm(p => ({ ...p, travel_date: e.target.value }))}
+                  onChange={e => setInquiryForm(p => ({ ...p, travel_date: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">
@@ -600,7 +600,9 @@ export default function WishlistDetailPage({
                   type="number"
                   min={1}
                   value={inquiryForm.people_count}
-                  onChange={(e) => setInquiryForm(p => ({ ...p, people_count: parseInt(e.target.value) || 1 }))}
+                  onChange={e =>
+                    setInquiryForm(p => ({ ...p, people_count: parseInt(e.target.value) || 1 }))
+                  }
                 />
               </div>
             </div>
@@ -609,7 +611,7 @@ export default function WishlistDetailPage({
               <Label>其他需求</Label>
               <Textarea
                 value={inquiryForm.notes}
-                onChange={(e) => setInquiryForm(p => ({ ...p, notes: e.target.value }))}
+                onChange={e => setInquiryForm(p => ({ ...p, notes: e.target.value }))}
                 placeholder="有什麼特別想要的行程安排嗎？"
                 rows={3}
               />
@@ -660,34 +662,36 @@ export default function WishlistDetailPage({
           <DialogHeader>
             <DialogTitle>確認您的身份</DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-2">
             <p className="text-sm text-muted-foreground">
               請填寫您的姓名和生日，我們會確認您是否為老客戶
             </p>
-            
+
             <div className="space-y-2">
               <Label>姓名 *</Label>
               <Input
                 value={matchForm.name}
-                onChange={(e) => setMatchForm(p => ({ ...p, name: e.target.value }))}
+                onChange={e => setMatchForm(p => ({ ...p, name: e.target.value }))}
                 placeholder="請輸入真實姓名"
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label>生日（選填，用於確認身份）</Label>
               <Input
                 type="date"
                 value={matchForm.birthDate}
-                onChange={(e) => setMatchForm(p => ({ ...p, birthDate: e.target.value }))}
+                onChange={e => setMatchForm(p => ({ ...p, birthDate: e.target.value }))}
               />
             </div>
 
             {/* 比對結果 */}
             {matchingCustomers.length > 0 && (
               <div className="bg-status-info/10 border border-status-info/30 rounded-lg p-3">
-                <p className="text-sm font-medium text-morandi-primary mb-2">找到可能是您的帳號：</p>
+                <p className="text-sm font-medium text-morandi-primary mb-2">
+                  找到可能是您的帳號：
+                </p>
                 {matchingCustomers.map(c => (
                   <div
                     key={c.id}
@@ -718,9 +722,13 @@ export default function WishlistDetailPage({
                   >
                     <div>
                       <p className="font-medium">{c.name}</p>
-                      <p className="text-xs text-muted-foreground">{c.phone ? `電話：${c.phone.slice(0, 4)}****` : '客戶編號：' + c.code}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {c.phone ? `電話：${c.phone.slice(0, 4)}****` : '客戶編號：' + c.code}
+                      </p>
                     </div>
-                    <Button size="sm" variant="outline">這是我</Button>
+                    <Button size="sm" variant="outline">
+                      這是我
+                    </Button>
                   </div>
                 ))}
                 <p className="text-xs text-muted-foreground mt-2">
@@ -816,7 +824,7 @@ export default function WishlistDetailPage({
             <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-morandi-green/10 flex items-center justify-center">
               <CheckCircle className="w-10 h-10 text-morandi-green" />
             </div>
-            
+
             <h2 className="text-2xl font-bold mb-2">詢價單已送出！</h2>
             <p className="text-muted-foreground mb-6">
               我們會盡快與您聯繫。您可以保存以下連結，隨時查看進度。
@@ -824,17 +832,10 @@ export default function WishlistDetailPage({
 
             {/* QR Code */}
             <div className="bg-white rounded-xl p-6 mb-6 inline-block mx-auto">
-              <QRCodeSVG 
-                value={trackingUrl} 
-                size={180}
-                level="M"
-                includeMargin={false}
-              />
+              <QRCodeSVG value={trackingUrl} size={180} level="M" includeMargin={false} />
             </div>
-            
-            <p className="text-sm text-muted-foreground mb-4">
-              用手機掃描 QR Code 保存追蹤連結
-            </p>
+
+            <p className="text-sm text-muted-foreground mb-4">用手機掃描 QR Code 保存追蹤連結</p>
 
             {/* 追蹤連結 */}
             <div className="bg-muted rounded-lg p-4 mb-6">
@@ -853,14 +854,27 @@ export default function WishlistDetailPage({
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" onClick={() => {
-                setSubmitSuccess(false)
-                setSelectedItems([])
-                setInquiryForm({ name: '', phone: '', travel_date: '', people_count: 2, notes: '' })
-              }}>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setSubmitSuccess(false)
+                  setSelectedItems([])
+                  setInquiryForm({
+                    name: '',
+                    phone: '',
+                    travel_date: '',
+                    people_count: 2,
+                    notes: '',
+                  })
+                }}
+              >
                 繼續選景點
               </Button>
-              <Button className="flex-1" onClick={() => router.push(`/p/customized/track/${trackingCode}`)}>
+              <Button
+                className="flex-1"
+                onClick={() => router.push(`/p/customized/track/${trackingCode}`)}
+              >
                 查看進度
               </Button>
             </div>

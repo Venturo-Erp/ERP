@@ -1,6 +1,6 @@
 /**
  * 頻道自動通知服務
- * 
+ *
  * 統一管理業務事件的頻道通知
  * 符合商業基石：資訊對齊、秩序建立
  */
@@ -14,14 +14,14 @@ const supabase = createClient(
 )
 
 // 通知類型
-export type NotifyEvent = 
-  | 'request_sent'      // 發出需求單
-  | 'request_replied'   // 供應商回覆
+export type NotifyEvent =
+  | 'request_sent' // 發出需求單
+  | 'request_replied' // 供應商回覆
   | 'request_confirmed' // 確認需求
-  | 'task_assigned'     // 指派任務
-  | 'task_completed'    // 完成任務
-  | 'contract_signed'   // 合約簽署
-  | 'payment_received'  // 收到款項
+  | 'task_assigned' // 指派任務
+  | 'task_completed' // 完成任務
+  | 'contract_signed' // 合約簽署
+  | 'payment_received' // 收到款項
   | 'payment_requested' // 請款
 
 // 通知內容
@@ -31,7 +31,7 @@ interface NotifyPayload {
   workspaceId: string
   title: string
   message: string
-  mentionEmployeeIds?: string[]  // @某人
+  mentionEmployeeIds?: string[] // @某人
   metadata?: Record<string, unknown>
 }
 
@@ -54,22 +54,25 @@ export async function sendChannelNotify(payload: NotifyPayload): Promise<boolean
 
     // 2. 格式化訊息
     const emoji = getEventEmoji(payload.event)
-    const formattedMessage = formatMessage(emoji, payload.title, payload.message, payload.mentionEmployeeIds)
+    const formattedMessage = formatMessage(
+      emoji,
+      payload.title,
+      payload.message,
+      payload.mentionEmployeeIds
+    )
 
     // 3. 寫入頻道訊息（使用 messages 表）
-    const { error } = await supabase
-      .from('messages')
-      .insert({
-        channel_id: tour.channel_id,
-        workspace_id: payload.workspaceId,
-        content: formattedMessage,
-        event: 'system_notify',
-        author: { name: '系統通知', avatar: null, is_system: true },
-        metadata: {
-          event: payload.event,
-          ...payload.metadata
-        }
-      })
+    const { error } = await supabase.from('messages').insert({
+      channel_id: tour.channel_id,
+      workspace_id: payload.workspaceId,
+      content: formattedMessage,
+      event: 'system_notify',
+      author: { name: '系統通知', avatar: null, is_system: true },
+      metadata: {
+        event: payload.event,
+        ...payload.metadata,
+      },
+    })
 
     if (error) {
       logger.error('[ChannelNotify] Insert failed:', error)
@@ -95,7 +98,7 @@ function getEventEmoji(event: NotifyEvent): string {
     task_completed: '🎉',
     contract_signed: '📝',
     payment_received: '💰',
-    payment_requested: '💳'
+    payment_requested: '💳',
   }
   return emojiMap[event] || '📢'
 }
@@ -104,18 +107,17 @@ function getEventEmoji(event: NotifyEvent): string {
  * 格式化訊息
  */
 function formatMessage(
-  emoji: string, 
-  title: string, 
-  message: string, 
+  emoji: string,
+  title: string,
+  message: string,
   mentionIds?: string[]
 ): string {
   let formatted = `${emoji} **${title}**\n${message}`
-  
+
   if (mentionIds && mentionIds.length > 0) {
-   
     formatted += `\n\n📌 相關人員待確認`
   }
-  
+
   return formatted
 }
 
@@ -135,7 +137,7 @@ export async function notifyRequestSent(
     tourId,
     workspaceId,
     title: `需求單已發送`,
-    message: `已發送 ${requestType} 需求給 ${supplierName}`
+    message: `已發送 ${requestType} 需求給 ${supplierName}`,
   })
 }
 
@@ -153,7 +155,7 @@ export async function notifyRequestReplied(
     tourId,
     workspaceId,
     title: `收到報價回覆`,
-    message: `${supplierName} 已回覆 ${requestType} 報價`
+    message: `${supplierName} 已回覆 ${requestType} 報價`,
   })
 }
 
@@ -171,7 +173,7 @@ export async function notifyRequestConfirmed(
     tourId,
     workspaceId,
     title: `需求已確認`,
-    message: `已確認 ${supplierName} 的 ${requestType}`
+    message: `已確認 ${supplierName} 的 ${requestType}`,
   })
 }
 
@@ -191,7 +193,7 @@ export async function notifyTaskAssigned(
     workspaceId,
     title: `任務已指派`,
     message: `${taskName} 已指派給 ${assigneeName}`,
-    mentionEmployeeIds: [assigneeId]
+    mentionEmployeeIds: [assigneeId],
   })
 }
 
@@ -209,7 +211,7 @@ export async function notifyTaskCompleted(
     tourId,
     workspaceId,
     title: `任務已完成`,
-    message: `${completedByName} 完成了 ${taskName}`
+    message: `${completedByName} 完成了 ${taskName}`,
   })
 }
 
@@ -226,7 +228,7 @@ export async function notifyContractSigned(
     tourId,
     workspaceId,
     title: `合約已簽署`,
-    message: `${customerName} 已完成電子簽約`
+    message: `${customerName} 已完成電子簽約`,
   })
 }
 
@@ -244,6 +246,6 @@ export async function notifyPaymentReceived(
     tourId,
     workspaceId,
     title: `收到款項`,
-    message: `${payerName} 已付款 NT$ ${amount.toLocaleString()}`
+    message: `${payerName} 已付款 NT$ ${amount.toLocaleString()}`,
   })
 }

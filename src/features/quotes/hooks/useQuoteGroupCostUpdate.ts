@@ -55,10 +55,7 @@ export const useQuoteGroupCostUpdate = ({
                   // 人數為1時，不分攤
                   total = Math.ceil(effectiveQuantity * (item.unit_price || 0))
                 }
-              } else if (
-                category.id === 'guide' &&
-                !item.is_group_cost
-              ) {
+              } else if (category.id === 'guide' && !item.is_group_cost) {
                 // 領隊導遊個人費用（小費）：不分攤，total = unit_price
                 total = item.unit_price || 0
               } else if (

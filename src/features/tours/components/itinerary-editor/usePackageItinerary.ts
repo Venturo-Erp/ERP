@@ -262,7 +262,9 @@ export function usePackageItinerary({
           logger.log('[ItineraryEditor] 直接從資料庫載入行程表:', ctx.itinerary_id)
           const { data, error } = await supabase
             .from('itineraries')
-            .select('id, tour_id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary, version_records, workspace_id, created_at, updated_at')
+            .select(
+              'id, tour_id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary, version_records, workspace_id, created_at, updated_at'
+            )
             .eq('id', ctx.itinerary_id)
             .single()
 
@@ -738,7 +740,9 @@ export function usePackageItinerary({
 
         const { data: refreshedData } = await supabase
           .from('itineraries')
-          .select('id, tour_id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary, version_records, workspace_id, created_at, updated_at')
+          .select(
+            'id, tour_id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary, version_records, workspace_id, created_at, updated_at'
+          )
           .eq('id', existingItinerary.id)
           .single()
         if (refreshedData) {

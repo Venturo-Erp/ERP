@@ -53,14 +53,17 @@ CREATE INDEX tour_request_items_local_status_idx ON tour_request_items(local_sta
 console.log('🔄 執行完整 migration...\n')
 
 try {
-  const response = await fetch(`https://api.supabase.com/v1/projects/${projectRef}/database/query`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query: sql }),
-  })
+  const response = await fetch(
+    `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: sql }),
+    }
+  )
 
   const result = await response.json()
 
@@ -70,31 +73,34 @@ try {
   }
 
   console.log('✅ Migration 執行成功！\n')
-  
+
   // 驗證
   console.log('🔍 驗證結果...\n')
-  
-  const verifyResponse = await fetch(`https://api.supabase.com/v1/projects/${projectRef}/database/query`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      query: "SELECT column_name FROM information_schema.columns WHERE table_name = 'tour_request_items' ORDER BY ordinal_position;",
-    }),
-  })
+
+  const verifyResponse = await fetch(
+    `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        query:
+          "SELECT column_name FROM information_schema.columns WHERE table_name = 'tour_request_items' ORDER BY ordinal_position;",
+      }),
+    }
+  )
 
   const verifyResult = await verifyResponse.json()
-  
+
   if (verifyResult.length > 0) {
     console.log('✅ tour_request_items 表已重建')
     console.log('欄位列表：')
     verifyResult.forEach(row => console.log('  -', row.column_name))
   }
-  
+
   console.log('\n🎉 所有 migration 執行完成！')
-  
 } catch (error) {
   console.error('❌ 執行失敗:', error.message)
   process.exit(1)

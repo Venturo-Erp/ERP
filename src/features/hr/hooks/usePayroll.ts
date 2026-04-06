@@ -132,7 +132,9 @@ export function usePayroll() {
       try {
         let query = supabase
           .from('payroll_periods')
-          .select('id, month, year, start_date, end_date, status, confirmed_at, confirmed_by, paid_at, notes, workspace_id, created_at, updated_at')
+          .select(
+            'id, month, year, start_date, end_date, status, confirmed_at, confirmed_by, paid_at, notes, workspace_id, created_at, updated_at'
+          )
           .limit(500)
 
           .order('year', { ascending: false })
@@ -315,7 +317,9 @@ export function usePayroll() {
         // 取得期間資訊
         const { data: period, error: periodError } = await supabase
           .from('payroll_periods')
-          .select('id, month, year, start_date, end_date, status, confirmed_at, confirmed_by, paid_at, notes, workspace_id, created_at, updated_at')
+          .select(
+            'id, month, year, start_date, end_date, status, confirmed_at, confirmed_by, paid_at, notes, workspace_id, created_at, updated_at'
+          )
           .eq('id', periodId)
           .single()
 
@@ -349,7 +353,9 @@ export function usePayroll() {
         // 取得出勤紀錄
         const { data: attendanceRecords, error: attError } = await supabase
           .from('attendance_records')
-          .select('id, employee_id, date, clock_in, clock_out, status, overtime_hours, work_hours, notes, workspace_id, created_at, updated_at')
+          .select(
+            'id, employee_id, date, clock_in, clock_out, status, overtime_hours, work_hours, notes, workspace_id, created_at, updated_at'
+          )
           .limit(500)
 
           .gte('date', period.start_date)
@@ -498,7 +504,9 @@ export function usePayroll() {
         // 重新計算總額
         const { data: existing, error: fetchError } = await supabase
           .from('payroll_records')
-          .select('id, payroll_period_id, employee_id, base_salary, overtime_hours, overtime_pay, bonus, allowances, other_additions, total_deductions, other_deductions, unpaid_leave_deduction, unpaid_leave_days, paid_leave_days, late_count, late_deduction, meal_allowance, transportation_allowance, net_salary, gross_salary, actual_work_days, work_days, overtime_details, allowance_details, deduction_details, notes, workspace_id, created_at, updated_at')
+          .select(
+            'id, payroll_period_id, employee_id, base_salary, overtime_hours, overtime_pay, bonus, allowances, other_additions, total_deductions, other_deductions, unpaid_leave_deduction, unpaid_leave_days, paid_leave_days, late_count, late_deduction, meal_allowance, transportation_allowance, net_salary, gross_salary, actual_work_days, work_days, overtime_details, allowance_details, deduction_details, notes, workspace_id, created_at, updated_at'
+          )
           .eq('id', id)
           .single()
 

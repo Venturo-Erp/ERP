@@ -59,15 +59,15 @@ export default function OfficePage() {
   const handleRename = async (doc: OfficeDocument) => {
     const newName = prompt('請輸入新檔名', doc.name)
     if (!newName || newName === doc.name) return
-    
+
     try {
       const { error } = await supabase
         .from('office_documents')
         .update({ name: newName })
         .eq('id', doc.id)
-      
+
       if (error) throw error
-      
+
       toast.success('已更新檔名')
       fetchDocuments()
     } catch (error) {

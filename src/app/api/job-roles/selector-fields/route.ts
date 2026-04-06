@@ -15,13 +15,15 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('workspace_selector_fields')
-    .select(`
+    .select(
+      `
       id, name, level, is_required, sort_order, created_at,
       selector_field_roles (
         role_id,
         workspace_roles:role_id ( id, name )
       )
-    `)
+    `
+    )
     .eq('workspace_id', workspaceId)
     .order('sort_order', { ascending: true })
 
@@ -30,9 +32,10 @@ export async function GET() {
   }
 
   // 整理格式：把 nested 的 roles 攤平
-  const result = data?.map((field) => ({
+  const result = data?.map(field => ({
     ...field,
-    roles: field.selector_field_roles?.map((sfr: Record<string, unknown>) => sfr.workspace_roles) ?? [],
+    roles:
+      field.selector_field_roles?.map((sfr: Record<string, unknown>) => sfr.workspace_roles) ?? [],
     selector_field_roles: undefined,
   }))
 
@@ -99,9 +102,7 @@ export async function POST(request: NextRequest) {
       role_id,
     }))
 
-    const { error: mapError } = await supabase
-      .from('selector_field_roles')
-      .insert(mappings)
+    const { error: mapError } = await supabase.from('selector_field_roles').insert(mappings)
 
     if (mapError) {
       return NextResponse.json({ error: mapError.message }, { status: 500 })

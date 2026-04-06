@@ -47,10 +47,7 @@ export async function DELETE(
     return NextResponse.json({ error: '無法刪除管理員角色' }, { status: 400 })
   }
 
-  const { error } = await supabase
-    .from('workspace_roles')
-    .delete()
-    .eq('id', roleId)
+  const { error } = await supabase.from('workspace_roles').delete().eq('id', roleId)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

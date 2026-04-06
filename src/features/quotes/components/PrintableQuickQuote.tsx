@@ -736,7 +736,11 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                 <tr>
                   <td
                     colSpan={5}
-                    style={{ padding: '32px 12px', textAlign: 'center', color: 'var(--morandi-muted)' }}
+                    style={{
+                      padding: '32px 12px',
+                      textAlign: 'center',
+                      color: 'var(--morandi-muted)',
+                    }}
                   >
                     {PRINTABLE_QUICK_QUOTE_LABELS.尚無收費項目}
                   </td>
@@ -819,7 +823,11 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                 </div>
                 <div
                   className="divider"
-                  style={{ width: '1px', height: '24px', backgroundColor: 'var(--morandi-container)' }}
+                  style={{
+                    width: '1px',
+                    height: '24px',
+                    backgroundColor: 'var(--morandi-container)',
+                  }}
                 />
                 <div
                   className="summary-item"
@@ -844,7 +852,11 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
                 </div>
                 <div
                   className="divider"
-                  style={{ width: '1px', height: '24px', backgroundColor: 'var(--morandi-container)' }}
+                  style={{
+                    width: '1px',
+                    height: '24px',
+                    backgroundColor: 'var(--morandi-container)',
+                  }}
                 />
                 <div
                   className="summary-item"
@@ -906,7 +918,10 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               >
                 {PRINTABLE_QUICK_QUOTE_LABELS.匯款資訊}
               </div>
-              <div className="payment-info" style={{ color: 'var(--morandi-primary)', lineHeight: 1.8 }}>
+              <div
+                className="payment-info"
+                style={{ color: 'var(--morandi-primary)', lineHeight: 1.8 }}
+              >
                 {hasBankInfo ? (
                   <>
                     <div>
@@ -946,7 +961,10 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               >
                 {PRINTABLE_QUICK_QUOTE_LABELS.支票資訊}
               </div>
-              <div className="payment-info" style={{ color: 'var(--morandi-primary)', lineHeight: 1.8 }}>
+              <div
+                className="payment-info"
+                style={{ color: 'var(--morandi-primary)', lineHeight: 1.8 }}
+              >
                 <div>
                   {PRINTABLE_QUICK_QUOTE_LABELS.抬頭前綴}
                   {companyFullName}
@@ -992,7 +1010,12 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               <div className="receipt-row" style={{ display: 'flex' }}>
                 <span
                   className="receipt-label"
-                  style={{ fontWeight: 600, color: 'var(--morandi-primary)', width: '130px', flexShrink: 0 }}
+                  style={{
+                    fontWeight: 600,
+                    color: 'var(--morandi-primary)',
+                    width: '130px',
+                    flexShrink: 0,
+                  }}
                 >
                   {PRINTABLE_QUICK_QUOTE_LABELS.開立代收轉付抬頭}
                 </span>
@@ -1006,7 +1029,12 @@ export const PrintableQuickQuote: React.FC<PrintableQuickQuoteProps> = ({
               <div className="receipt-row" style={{ display: 'flex' }}>
                 <span
                   className="receipt-label"
-                  style={{ fontWeight: 600, color: 'var(--morandi-primary)', width: '130px', flexShrink: 0 }}
+                  style={{
+                    fontWeight: 600,
+                    color: 'var(--morandi-primary)',
+                    width: '130px',
+                    flexShrink: 0,
+                  }}
                 >
                   {PRINTABLE_QUICK_QUOTE_LABELS.開立代收轉付統編}
                 </span>

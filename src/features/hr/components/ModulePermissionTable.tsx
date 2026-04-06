@@ -2,7 +2,7 @@
 
 /**
  * ModulePermissionTable - 共用模組權限表格
- * 
+ *
  * mode:
  * - 'role': 編輯職務權限（/hr/roles 用）
  * - 'employee': 員工覆寫（職務是模板，員工可 +/- 微調）
@@ -53,14 +53,20 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
   const [expandedModules, setExpandedModules] = useState<string[]>([])
 
   // === 職務模式的邏輯 ===
-  const getRolePermission = (moduleCode: string, tabCode: string | null): TabPermission | undefined => {
+  const getRolePermission = (
+    moduleCode: string,
+    tabCode: string | null
+  ): TabPermission | undefined => {
     if (mode === 'role') {
       return props.permissions.find(p => p.module_code === moduleCode && p.tab_code === tabCode)
     }
     return props.rolePermissions.find(p => p.module_code === moduleCode && p.tab_code === tabCode)
   }
 
-  const isModuleFullyEnabled = (module: ModuleDefinition, field: 'can_read' | 'can_write'): boolean => {
+  const isModuleFullyEnabled = (
+    module: ModuleDefinition,
+    field: 'can_read' | 'can_write'
+  ): boolean => {
     if (module.tabs.length === 0) {
       const perm = getRolePermission(module.code, null)
       return perm?.[field] ?? false
@@ -71,7 +77,10 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
     })
   }
 
-  const isModulePartiallyEnabled = (module: ModuleDefinition, field: 'can_read' | 'can_write'): boolean => {
+  const isModulePartiallyEnabled = (
+    module: ModuleDefinition,
+    field: 'can_read' | 'can_write'
+  ): boolean => {
     if (module.tabs.length === 0) return false
     const enabledCount = module.tabs.filter(tab => {
       const perm = getRolePermission(module.code, tab.code)
@@ -81,7 +90,11 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
   }
 
   // 職務模式：切換權限
-  const toggleRolePermission = (module: ModuleDefinition, tabCode: string | null, field: 'can_read' | 'can_write') => {
+  const toggleRolePermission = (
+    module: ModuleDefinition,
+    tabCode: string | null,
+    field: 'can_read' | 'can_write'
+  ) => {
     if (mode !== 'role') return
     const { permissions, onPermissionsChange } = props
 
@@ -111,7 +124,9 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
       onPermissionsChange(updated)
     } else {
       // 切換單一項目
-      const existing = permissions.find(p => p.module_code === module.code && p.tab_code === tabCode)
+      const existing = permissions.find(
+        p => p.module_code === module.code && p.tab_code === tabCode
+      )
       if (existing) {
         onPermissionsChange(
           permissions.map(p =>
@@ -135,13 +150,20 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
   }
 
   // === 員工模式的邏輯 ===
-  const getOverride = (moduleCode: string, tabCode: string | null): PermissionOverride | undefined => {
+  const getOverride = (
+    moduleCode: string,
+    tabCode: string | null
+  ): PermissionOverride | undefined => {
     if (mode !== 'employee') return undefined
     return props.overrides.find(o => o.module_code === moduleCode && o.tab_code === tabCode)
   }
 
   // 計算最終狀態（職務 + 覆寫）
-  const getEffectiveStatus = (moduleCode: string, tabCode: string | null, field: 'can_read' | 'can_write'): boolean => {
+  const getEffectiveStatus = (
+    moduleCode: string,
+    tabCode: string | null,
+    field: 'can_read' | 'can_write'
+  ): boolean => {
     const rolePerm = getRolePermission(moduleCode, tabCode)
     if (mode === 'role') return rolePerm?.[field] ?? false
 
@@ -152,11 +174,17 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
   }
 
   // 員工模式：切換覆寫
-  const toggleOverride = (moduleCode: string, tabCode: string | null, field: 'can_read' | 'can_write') => {
+  const toggleOverride = (
+    moduleCode: string,
+    tabCode: string | null,
+    field: 'can_read' | 'can_write'
+  ) => {
     if (mode !== 'employee') return
     const { overrides, onOverridesChange, rolePermissions } = props
 
-    const rolePerm = rolePermissions.find(p => p.module_code === moduleCode && p.tab_code === tabCode)
+    const rolePerm = rolePermissions.find(
+      p => p.module_code === moduleCode && p.tab_code === tabCode
+    )
     const currentRoleValue = rolePerm?.[field] ?? false
     const existing = overrides.find(o => o.module_code === moduleCode && o.tab_code === tabCode)
 
@@ -208,16 +236,20 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
     return (
       <div key={module.code}>
         {/* 模組行 */}
-        <div className={`flex items-center border-t border-border ${hasTabs ? 'bg-morandi-bg/30' : 'bg-white'}`}>
+        <div
+          className={`flex items-center border-t border-border ${hasTabs ? 'bg-morandi-bg/30' : 'bg-white'}`}
+        >
           <div className="flex-1 p-4 flex items-center gap-2">
             {hasTabs ? (
               <button
                 type="button"
-                onClick={() => setExpandedModules(prev =>
-                  prev.includes(module.code)
-                    ? prev.filter(m => m !== module.code)
-                    : [...prev, module.code]
-                )}
+                onClick={() =>
+                  setExpandedModules(prev =>
+                    prev.includes(module.code)
+                      ? prev.filter(m => m !== module.code)
+                      : [...prev, module.code]
+                  )
+                }
                 className="p-1 hover:bg-morandi-bg rounded"
               >
                 {isExpanded ? (
@@ -236,14 +268,18 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
               </Badge>
             )}
           </div>
-          
+
           {/* 可讀取 */}
           <div className="w-32 p-4 flex justify-center">
             <div className="relative">
               <Switch
-                checked={mode === 'role' ? readFully : getEffectiveStatus(module.code, hasTabs ? null : null, 'can_read')}
-                onCheckedChange={() => 
-                  mode === 'role' 
+                checked={
+                  mode === 'role'
+                    ? readFully
+                    : getEffectiveStatus(module.code, hasTabs ? null : null, 'can_read')
+                }
+                onCheckedChange={() =>
+                  mode === 'role'
                     ? toggleRolePermission(module, hasTabs ? null : null, 'can_read')
                     : !hasTabs && toggleOverride(module.code, null, 'can_read')
                 }
@@ -258,14 +294,18 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
               )}
             </div>
           </div>
-          
+
           {/* 可寫入 */}
           <div className="w-32 p-4 flex justify-center">
             <div className="relative">
               <Switch
-                checked={mode === 'role' ? writeFully : getEffectiveStatus(module.code, hasTabs ? null : null, 'can_write')}
-                onCheckedChange={() => 
-                  mode === 'role' 
+                checked={
+                  mode === 'role'
+                    ? writeFully
+                    : getEffectiveStatus(module.code, hasTabs ? null : null, 'can_write')
+                }
+                onCheckedChange={() =>
+                  mode === 'role'
                     ? toggleRolePermission(module, hasTabs ? null : null, 'can_write')
                     : !hasTabs && toggleOverride(module.code, null, 'can_write')
                 }
@@ -280,62 +320,64 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
         </div>
 
         {/* 分頁行 */}
-        {hasTabs && isExpanded && module.tabs.map(tab => {
-          const tabOverride = mode === 'employee' ? getOverride(module.code, tab.code) : undefined
-          const perm = getRolePermission(module.code, tab.code)
+        {hasTabs &&
+          isExpanded &&
+          module.tabs.map(tab => {
+            const tabOverride = mode === 'employee' ? getOverride(module.code, tab.code) : undefined
+            const perm = getRolePermission(module.code, tab.code)
 
-          return (
-            <div key={tab.code} className="flex items-center border-t border-border bg-white">
-              <div className="flex-1 p-4 pl-12 flex items-center gap-2">
-                <div className="w-1 h-4 bg-border rounded-full" />
-                <span className="text-sm text-morandi-primary">{tab.name}</span>
-                {mode === 'employee' && tabOverride?.override_type && (
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs ${
-                      tabOverride.override_type === 'grant' 
-                        ? 'bg-morandi-green/10 text-morandi-green border-morandi-green/30' 
-                        : 'bg-morandi-red/10 text-morandi-red border-morandi-red/30'
-                    }`}
-                  >
-                    {tabOverride.override_type === 'grant' ? '+額外開啟' : '-已關閉'}
-                  </Badge>
-                )}
-              </div>
-              
-              {/* 可讀取 */}
-              <div className="w-32 p-4 flex justify-center">
-                <div className="relative">
-                  <Switch
-                    checked={getEffectiveStatus(module.code, tab.code, 'can_read')}
-                    onCheckedChange={() => 
-                      mode === 'role'
-                        ? toggleRolePermission(module, tab.code, 'can_read')
-                        : toggleOverride(module.code, tab.code, 'can_read')
-                    }
-                    className="data-[state=checked]:bg-morandi-green"
-                  />
+            return (
+              <div key={tab.code} className="flex items-center border-t border-border bg-white">
+                <div className="flex-1 p-4 pl-12 flex items-center gap-2">
+                  <div className="w-1 h-4 bg-border rounded-full" />
+                  <span className="text-sm text-morandi-primary">{tab.name}</span>
                   {mode === 'employee' && tabOverride?.override_type && (
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-status-info/100 rounded-full" />
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${
+                        tabOverride.override_type === 'grant'
+                          ? 'bg-morandi-green/10 text-morandi-green border-morandi-green/30'
+                          : 'bg-morandi-red/10 text-morandi-red border-morandi-red/30'
+                      }`}
+                    >
+                      {tabOverride.override_type === 'grant' ? '+額外開啟' : '-已關閉'}
+                    </Badge>
                   )}
                 </div>
+
+                {/* 可讀取 */}
+                <div className="w-32 p-4 flex justify-center">
+                  <div className="relative">
+                    <Switch
+                      checked={getEffectiveStatus(module.code, tab.code, 'can_read')}
+                      onCheckedChange={() =>
+                        mode === 'role'
+                          ? toggleRolePermission(module, tab.code, 'can_read')
+                          : toggleOverride(module.code, tab.code, 'can_read')
+                      }
+                      className="data-[state=checked]:bg-morandi-green"
+                    />
+                    {mode === 'employee' && tabOverride?.override_type && (
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-status-info/100 rounded-full" />
+                    )}
+                  </div>
+                </div>
+
+                {/* 可寫入 */}
+                <div className="w-32 p-4 flex justify-center">
+                  <Switch
+                    checked={getEffectiveStatus(module.code, tab.code, 'can_write')}
+                    onCheckedChange={() =>
+                      mode === 'role'
+                        ? toggleRolePermission(module, tab.code, 'can_write')
+                        : toggleOverride(module.code, tab.code, 'can_write')
+                    }
+                    className="data-[state=checked]:bg-morandi-gold"
+                  />
+                </div>
               </div>
-              
-              {/* 可寫入 */}
-              <div className="w-32 p-4 flex justify-center">
-                <Switch
-                  checked={getEffectiveStatus(module.code, tab.code, 'can_write')}
-                  onCheckedChange={() => 
-                    mode === 'role'
-                      ? toggleRolePermission(module, tab.code, 'can_write')
-                      : toggleOverride(module.code, tab.code, 'can_write')
-                  }
-                  className="data-[state=checked]:bg-morandi-gold"
-                />
-              </div>
-            </div>
-          )
-        })}
+            )
+          })}
       </div>
     )
   }

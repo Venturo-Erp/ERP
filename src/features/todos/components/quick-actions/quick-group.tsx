@@ -260,7 +260,6 @@ export function QuickGroup({ onSubmit }: QuickGroupProps) {
             />
           </div>
         </div>
-
       </div>
 
       {/* 訂單資訊（選填） */}

@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { 
-  notifyRequestSent, 
-  notifyRequestReplied, 
+import {
+  notifyRequestSent,
+  notifyRequestReplied,
   notifyRequestConfirmed,
   notifyTaskAssigned,
   notifyTaskCompleted,
   notifyContractSigned,
-  notifyPaymentReceived
+  notifyPaymentReceived,
 } from '@/lib/notifications'
 import { logger } from '@/lib/utils/logger'
 
 /**
  * 頻道通知 API
  * POST /api/notify
- * 
+ *
  * 統一處理業務事件的頻道通知
  */
 export async function POST(request: NextRequest) {
@@ -33,9 +33,9 @@ export async function POST(request: NextRequest) {
     switch (event) {
       case 'request_sent':
         success = await notifyRequestSent(
-          tourId, 
-          workspaceId, 
-          data.requestType || '需求', 
+          tourId,
+          workspaceId,
+          data.requestType || '需求',
           data.supplierName || '供應商'
         )
         break
@@ -78,11 +78,7 @@ export async function POST(request: NextRequest) {
         break
 
       case 'contract_signed':
-        success = await notifyContractSigned(
-          tourId,
-          workspaceId,
-          data.customerName || '客戶'
-        )
+        success = await notifyContractSigned(tourId, workspaceId, data.customerName || '客戶')
         break
 
       case 'payment_received':
@@ -95,18 +91,12 @@ export async function POST(request: NextRequest) {
         break
 
       default:
-        return NextResponse.json(
-          { error: `不支援的事件類型：${event}` },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: `不支援的事件類型：${event}` }, { status: 400 })
     }
 
     return NextResponse.json({ success })
   } catch (err) {
     logger.error('[Notify API] Error:', err)
-    return NextResponse.json(
-      { error: '通知失敗' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: '通知失敗' }, { status: 500 })
   }
 }

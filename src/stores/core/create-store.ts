@@ -66,9 +66,7 @@ function getCurrentUserContext(): { workspaceId: string | null; userRole: UserRo
       const user = parsed?.state?.user
       const isAdmin = parsed?.state?.isAdmin
       // 新系統：使用 permissions 判斷管理員
-      const userRole = isAdmin 
-        ? 'admin' as UserRole
-        : ('staff' as UserRole)
+      const userRole = isAdmin ? ('admin' as UserRole) : ('staff' as UserRole)
       return {
         workspaceId: user?.workspace_id || null,
         userRole,
@@ -192,7 +190,7 @@ export function createStore<T extends BaseEntity>(
           // 🔒 Workspace 隔離：若啟用 workspaceScoped，自動過濾 workspace_id
           if (config.workspaceScoped) {
             const { workspaceId } = getCurrentUserContext()
-            
+
             // 所有用戶都強制過濾到自己的 workspace
             if (workspaceId) {
               // 驗證 workspaceId 格式（防止 SQL injection）
@@ -211,8 +209,6 @@ export function createStore<T extends BaseEntity>(
           const { data, error } = await query
 
           if (error) throw error
-          
-          
 
           const items = castRows<T>(data)
           set({ items, loading: false })
@@ -463,7 +459,9 @@ export function createStore<T extends BaseEntity>(
       try {
         set({ loading: true, error: null })
 
-        const { error, count } = await dynamicFrom(tableName).delete({ count: 'exact' }).eq('id', id)
+        const { error, count } = await dynamicFrom(tableName)
+          .delete({ count: 'exact' })
+          .eq('id', id)
 
         if (error) throw error
         if (count === 0) throw new Error('刪除失敗：資料不存在或沒有權限')

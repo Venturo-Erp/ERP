@@ -3,7 +3,7 @@ import { createServiceClient } from '@/lib/supabase/api-client'
 
 /**
  * GET /api/d/[code]
- * 
+ *
  * 公開 API：短網址下載團員名冊（無需登入）
  * 透過團號取得最新的團員名冊並 redirect 到簽名 URL
  */

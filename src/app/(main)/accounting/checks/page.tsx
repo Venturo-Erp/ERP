@@ -45,7 +45,6 @@ export default function ChecksPage() {
 
     setIsLoading(true)
     try {
-     
       // const supabase = createBrowserClient(
       //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
       //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -85,7 +84,9 @@ export default function ChecksPage() {
       width: '100px',
       render: (_: unknown, row: Check) => {
         const isOverdue = new Date(row.due_date) < new Date() && row.status === 'pending'
-        return <span className={isOverdue ? 'text-morandi-red font-semibold' : ''}>{row.due_date}</span>
+        return (
+          <span className={isOverdue ? 'text-morandi-red font-semibold' : ''}>{row.due_date}</span>
+        )
       },
     },
     {
@@ -148,16 +149,12 @@ export default function ChecksPage() {
     },
   ]
 
-  const handleViewDetail = (check: Check) => {
-   
-   
-  }
+  const handleViewDetail = (check: Check) => {}
 
   const handleClearCheck = async (check: Check) => {
     if (!confirm(`確定標記支票 ${check.check_number} 為已兌現？`)) return
 
     try {
-     
       // const supabase = createBrowserClient(
       //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
       //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -168,7 +165,6 @@ export default function ChecksPage() {
       //   .eq('id', check.id)
       // if (error) throw error
       // loadChecks()
-     
     } catch (error) {
       logger.error('更新票據狀態失敗:', error)
       alert('操作失敗')
@@ -179,7 +175,6 @@ export default function ChecksPage() {
     if (!confirm(`確定作廢支票 ${check.check_number}？`)) return
 
     try {
-     
       // const supabase = createBrowserClient(
       //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
       //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -190,7 +185,6 @@ export default function ChecksPage() {
       //   .eq('id', check.id)
       // if (error) throw error
       // loadChecks()
-     
     } catch (error) {
       logger.error('更新票據狀態失敗:', error)
       alert('操作失敗')

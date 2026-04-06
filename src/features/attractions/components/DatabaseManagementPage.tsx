@@ -21,7 +21,14 @@ const PremiumExperiencesTab = lazy(() => import('./tabs/PremiumExperiencesTab'))
 const CORNER_WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
 
 // 有效的 tab 值
-const ALL_TABS = ['regions', 'attractions', 'hotels', 'restaurants', 'michelin', 'experiences'] as const
+const ALL_TABS = [
+  'regions',
+  'attractions',
+  'hotels',
+  'restaurants',
+  'michelin',
+  'experiences',
+] as const
 type TabValue = (typeof ALL_TABS)[number]
 
 // ============================================
@@ -42,7 +49,8 @@ export default function DatabaseManagementPage() {
 
   // 從 URL 讀取 tab，預設為 'regions'
   const tabFromUrl = searchParams.get('tab') as TabValue | null
-  const initialTab = tabFromUrl && (validTabs as readonly string[]).includes(tabFromUrl) ? tabFromUrl : 'regions'
+  const initialTab =
+    tabFromUrl && (validTabs as readonly string[]).includes(tabFromUrl) ? tabFromUrl : 'regions'
 
   const [activeTab, setActiveTab] = useState<TabValue>(initialTab)
   const [loadedTabs, setLoadedTabs] = useState<Set<string>>(new Set([initialTab]))
@@ -76,7 +84,11 @@ export default function DatabaseManagementPage() {
 
   // 同步 URL 變化到 state（處理瀏覽器前進/後退）
   useEffect(() => {
-    if (tabFromUrl && (validTabs as readonly string[]).includes(tabFromUrl) && tabFromUrl !== activeTab) {
+    if (
+      tabFromUrl &&
+      (validTabs as readonly string[]).includes(tabFromUrl) &&
+      tabFromUrl !== activeTab
+    ) {
       setActiveTab(tabFromUrl)
       setLoadedTabs(prev => new Set(prev).add(tabFromUrl))
     }
@@ -117,10 +129,14 @@ export default function DatabaseManagementPage() {
     }
   }, [activeTab, openAdd])
 
-  const addLabel = activeTab === 'regions' ? '新增國家'
-    : activeTab === 'hotels' ? '新增飯店'
-    : activeTab === 'restaurants' ? '新增餐廳'
-    : ATTRACTIONS_DIALOG_LABELS.新增景點
+  const addLabel =
+    activeTab === 'regions'
+      ? '新增國家'
+      : activeTab === 'hotels'
+        ? '新增飯店'
+        : activeTab === 'restaurants'
+          ? '新增餐廳'
+          : ATTRACTIONS_DIALOG_LABELS.新增景點
 
   // 有新增功能的 tabs
   const tabsWithAdd: TabValue[] = ['regions', 'attractions', 'hotels', 'restaurants']
@@ -131,10 +147,12 @@ export default function DatabaseManagementPage() {
     { value: 'attractions', label: DATABASE_MANAGEMENT_PAGE_LABELS.景點活動, icon: MapPin },
     { value: 'hotels', label: '飯店', icon: Hotel },
     { value: 'restaurants', label: '餐廳', icon: UtensilsCrossed },
-    ...(isCorner ? [
-      { value: 'michelin', label: DATABASE_MANAGEMENT_PAGE_LABELS.米其林餐廳, icon: Star },
-      { value: 'experiences', label: DATABASE_MANAGEMENT_PAGE_LABELS.頂級體驗, icon: Sparkles },
-    ] : []),
+    ...(isCorner
+      ? [
+          { value: 'michelin', label: DATABASE_MANAGEMENT_PAGE_LABELS.米其林餐廳, icon: Star },
+          { value: 'experiences', label: DATABASE_MANAGEMENT_PAGE_LABELS.頂級體驗, icon: Sparkles },
+        ]
+      : []),
   ]
 
   return (
@@ -148,13 +166,17 @@ export default function DatabaseManagementPage() {
       tabs={tabs}
       activeTab={activeTab}
       onTabChange={handleTabChange}
-      showSearch={activeTab === 'attractions' || activeTab === 'hotels' || activeTab === 'restaurants'}
+      showSearch={
+        activeTab === 'attractions' || activeTab === 'hotels' || activeTab === 'restaurants'
+      }
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
       searchPlaceholder={
-        activeTab === 'hotels' ? '搜尋飯店名稱...'
-        : activeTab === 'restaurants' ? '搜尋餐廳名稱...'
-        : DATABASE_MANAGEMENT_PAGE_LABELS.搜尋景點名稱
+        activeTab === 'hotels'
+          ? '搜尋飯店名稱...'
+          : activeTab === 'restaurants'
+            ? '搜尋餐廳名稱...'
+            : DATABASE_MANAGEMENT_PAGE_LABELS.搜尋景點名稱
       }
       filters={
         activeTab !== 'regions' ? (

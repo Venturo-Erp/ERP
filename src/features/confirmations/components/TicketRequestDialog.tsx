@@ -2,17 +2,12 @@
 
 /**
  * TicketRequestDialog - 機票需求對話框
- * 
+ *
  * 簡單流程：選指派人 → 建立 ticket 待辦
  */
 
 import { useState } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -39,12 +34,7 @@ interface TicketRequestDialogProps {
   totalPax: number
 }
 
-export function TicketRequestDialog({
-  open,
-  onClose,
-  tour,
-  totalPax,
-}: TicketRequestDialogProps) {
+export function TicketRequestDialog({ open, onClose, tour, totalPax }: TicketRequestDialogProps) {
   const { user } = useAuthStore()
   const { items: employees } = useEmployeesSlim()
   const [selectedEmployee, setSelectedEmployee] = useState<string>('')
@@ -103,7 +93,7 @@ export function TicketRequestDialog({
 
       toast.success('航班資訊已儲存')
       setShowFlightInput(false)
-      
+
       // 建立待辦
       await createTicketTodo()
     } catch (error) {
@@ -145,11 +135,16 @@ export function TicketRequestDialog({
       // 查員工資訊發通知
       const { data: empData } = await supabase
         .from('employees')
-        .select('id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active, created_at, updated_at')
+        .select(
+          'id, employee_number, display_name, english_name, email, avatar, status, workspace_id, job_info, is_active, created_at, updated_at'
+        )
         .eq('id', selectedEmployee)
         .single()
-      
-      const empName = (empData as Record<string, unknown>)?.display_name || (empData as Record<string, unknown>)?.chinese_name || '同事'
+
+      const empName =
+        (empData as Record<string, unknown>)?.display_name ||
+        (empData as Record<string, unknown>)?.chinese_name ||
+        '同事'
       const lineUserId = (empData as Record<string, unknown>)?.line_user_id
 
       // 發送頻道通知
@@ -197,7 +192,9 @@ export function TicketRequestDialog({
         <div className="space-y-4 py-4">
           {/* 團資訊 */}
           <div className="bg-morandi-background/50 rounded-lg p-3 space-y-2 text-sm">
-            <p className="font-medium">{tour.code} {tour.name}</p>
+            <p className="font-medium">
+              {tour.code} {tour.name}
+            </p>
             <p className="text-morandi-muted">
               {tour.departure_date} ~ {tour.return_date}
             </p>
@@ -213,7 +210,7 @@ export function TicketRequestDialog({
                   <p className="text-xs mt-1">請填寫航班資訊後再建立訂票任務</p>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="text-xs">去程航班</Label>
                 <Input
@@ -223,7 +220,7 @@ export function TicketRequestDialog({
                   className="text-sm"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label className="text-xs">回程航班</Label>
                 <Input
@@ -256,9 +253,12 @@ export function TicketRequestDialog({
               <div className="space-y-2">
                 <Label>指派給</Label>
                 <Combobox
-                  options={employees.map((e) => ({
+                  options={employees.map(e => ({
                     value: e.id,
-                    label: (e as unknown as Record<string, unknown>).display_name as string || (e as unknown as Record<string, unknown>).chinese_name as string || e.id,
+                    label:
+                      ((e as unknown as Record<string, unknown>).display_name as string) ||
+                      ((e as unknown as Record<string, unknown>).chinese_name as string) ||
+                      e.id,
                   }))}
                   value={selectedEmployee}
                   onChange={setSelectedEmployee}
@@ -271,8 +271,8 @@ export function TicketRequestDialog({
 
         {/* 按鈕 */}
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => {
               if (showFlightInput) {
                 setShowFlightInput(false)
@@ -281,7 +281,7 @@ export function TicketRequestDialog({
               } else {
                 onClose()
               }
-            }} 
+            }}
             className="flex-1"
           >
             {showFlightInput ? '返回' : '取消'}
@@ -289,9 +289,9 @@ export function TicketRequestDialog({
           <Button
             onClick={showFlightInput ? handleSaveFlightAndSubmit : handleSubmit}
             disabled={
-              showFlightInput 
-                ? (!outboundInput.trim() || !returnInput.trim() || submitting)
-                : (!selectedEmployee || submitting)
+              showFlightInput
+                ? !outboundInput.trim() || !returnInput.trim() || submitting
+                : !selectedEmployee || submitting
             }
             className="flex-1 bg-morandi-sky hover:bg-morandi-sky/90 text-white"
           >

@@ -114,7 +114,10 @@ export function DayTemplateEditor({
         />
 
         {/* 預覽區域 - 根據選擇的風格切換 */}
-        <div className="overflow-auto p-6 bg-background" style={{ maxHeight: 'calc(90vh - 140px)' }}>
+        <div
+          className="overflow-auto p-6 bg-background"
+          style={{ maxHeight: 'calc(90vh - 140px)' }}
+        >
           {/* 單張大圖風格 */}
           {currentStyle === 'single-image' && (
             <SingleImageTemplate

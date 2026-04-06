@@ -16,7 +16,7 @@ interface AttractionCardProps {
   isSelected: boolean
   isSuggested: boolean
   isExisting: boolean
-  canEditDatabase?: boolean  // 是否有編輯資料庫權限
+  canEditDatabase?: boolean // 是否有編輯資料庫權限
   onToggleSelection: (id: string) => void
   onViewOnMap?: (attraction: AttractionWithCity) => void
   onViewDetail?: (attraction: AttractionWithCity) => void
@@ -71,12 +71,12 @@ export function AttractionCard({
       </label>
 
       {/* 縮圖（點擊查看詳情） */}
-      <div 
+      <div
         className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-morandi-container/30 cursor-pointer hover:ring-2 hover:ring-morandi-gold/50 transition-all"
         onClick={() => onViewDetail?.(attraction)}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === 'Enter' && onViewDetail?.(attraction)}
+        onKeyDown={e => e.key === 'Enter' && onViewDetail?.(attraction)}
       >
         {image ? (
           <img src={image} alt={attraction.name} className="w-full h-full object-cover" />

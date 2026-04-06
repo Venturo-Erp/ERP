@@ -1,19 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createApiClient } from '@/lib/supabase/api-client'
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
+import { getServerAuth } from '@/lib/auth/server-auth'
 import { logger } from '@/lib/utils/logger'
 
 /**
  * GET /api/line/connections
  * 取得所有 LINE 連線（群組 + 用戶）
+ * 使用 admin client 因為 line_users/line_groups 尚無 workspace_id 做 RLS
  */
 export async function GET() {
   try {
-    const supabase = await createApiClient()
+    const auth = await getServerAuth()
+    if (!auth.success) {
+      return NextResponse.json({ error: '請先登入' }, { status: 401 })
+    }
+
+    const supabase = getSupabaseAdminClient()
 
     // 取得群組（暫時移除 suppliers 關聯查詢）
     const { data: groups, error: groupsError } = await supabase
       .from('line_groups')
-      .select(`
+      .select(
+        `
         id,
         group_id,
         group_name,
@@ -23,21 +31,26 @@ export async function GET() {
         note,
         joined_at,
         updated_at
-      `)
+      `
+      )
       .order('updated_at', { ascending: false })
 
     if (groupsError) {
       logger.error('line_groups 查詢錯誤:', groupsError)
-      return NextResponse.json({ 
-        error: `查詢群組失敗: ${groupsError.message}`,
-        details: groupsError
-      }, { status: 500 })
+      return NextResponse.json(
+        {
+          error: `查詢群組失敗: ${groupsError.message}`,
+          details: groupsError,
+        },
+        { status: 500 }
+      )
     }
 
     // 取得用戶（包含已取消追蹤的，暫時移除關聯查詢）
     const { data: users, error: usersError } = await supabase
       .from('line_users')
-      .select(`
+      .select(
+        `
         id,
         user_id,
         display_name,
@@ -49,15 +62,19 @@ export async function GET() {
         followed_at,
         unfollowed_at,
         updated_at
-      `)
+      `
+      )
       .order('updated_at', { ascending: false })
 
     if (usersError) {
       logger.error('line_users 查詢錯誤:', usersError)
-      return NextResponse.json({ 
-        error: `查詢用戶失敗: ${usersError.message}`,
-        details: usersError
-      }, { status: 500 })
+      return NextResponse.json(
+        {
+          error: `查詢用戶失敗: ${usersError.message}`,
+          details: usersError,
+        },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({
@@ -66,10 +83,13 @@ export async function GET() {
     })
   } catch (error) {
     logger.error('API /api/line/connections 錯誤:', error)
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : '未知錯誤',
-      stack: error instanceof Error ? error.stack : undefined
-    }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: error instanceof Error ? error.message : '未知錯誤',
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -78,7 +98,12 @@ export async function GET() {
  * 更新 LINE 連線（綁定供應商/員工）
  */
 export async function PUT(request: NextRequest) {
-  const supabase = await createApiClient()
+  const auth = await getServerAuth()
+  if (!auth.success) {
+    return NextResponse.json({ error: '請先登入' }, { status: 401 })
+  }
+
+  const supabase = getSupabaseAdminClient()
   const body = await request.json()
   const { type, id, supplier_id, employee_id, category, note } = body
 
@@ -94,10 +119,7 @@ export async function PUT(request: NextRequest) {
   if (category !== undefined && type === 'group') updates.category = category || null
   if (note !== undefined) updates.note = note || null
 
-  const { error } = await supabase
-    .from(table)
-    .update(updates)
-    .eq('id', id)
+  const { error } = await supabase.from(table).update(updates).eq('id', id)
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })

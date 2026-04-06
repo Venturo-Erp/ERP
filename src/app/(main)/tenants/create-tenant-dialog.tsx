@@ -41,7 +41,7 @@ interface Step1Data {
 interface Step2Data {
   employeeNumber: string
   name: string
-  email: string  // 保留但選填
+  email: string // 保留但選填
   password: string
 }
 

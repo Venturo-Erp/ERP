@@ -82,7 +82,12 @@ export interface User {
   workspace_id?: string // 所屬工作空間 ID
   workspace_code?: string // 所屬工作空間代碼（TP, TC 等）- 登入時一併取得
   workspace_name?: string // 所屬工作空間名稱
-  workspace_type?: 'travel_agency' | 'vehicle_supplier' | 'guide_supplier' | 'transportation' | 'dmc' // 工作空間類型
+  workspace_type?:
+    | 'travel_agency'
+    | 'vehicle_supplier'
+    | 'guide_supplier'
+    | 'transportation'
+    | 'dmc' // 工作空間類型
   selected_workspace_id?: string // Super Admin 選擇的工作空間 ID
   // role_id 和 role_name 已移除，統一使用 roles（RBAC）
   pinyin?: string | null // 拼音姓名

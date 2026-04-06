@@ -27,17 +27,36 @@ const WORKSPACE_TYPE_MAP: Record<string, string> = {
 
 export default function TenantsPage() {
   const router = useRouter()
-  const { workspaces, loadWorkspaces, updateWorkspace } = useWorkspaceChannels()
+  const { updateWorkspace } = useWorkspaceChannels()
   const { items: employees } = useEmployeesSlim()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [allWorkspaces, setAllWorkspaces] = useState<Workspace[]>([])
+
+  // 用 API 取全部租戶（繞過 RLS，server 端檢查 tenants 權限）
+  const loadAllWorkspaces = useCallback(async () => {
+    try {
+      const res = await fetch('/api/workspaces')
+      if (res.ok) {
+        const data = await res.json()
+        setAllWorkspaces(data)
+      } else {
+        logger.error('載入租戶列表失敗:', await res.text())
+      }
+    } catch (err) {
+      logger.error('載入租戶列表失敗:', err)
+    }
+  }, [])
 
   // 點擊行進入詳情頁
-  const handleRowClick = useCallback((workspace: WorkspaceRow) => {
-    router.push(`/tenants/${workspace.id}`)
-  }, [router])
+  const handleRowClick = useCallback(
+    (workspace: WorkspaceRow) => {
+      router.push(`/tenants/${workspace.id}`)
+    },
+    [router]
+  )
 
   useEffect(() => {
-    loadWorkspaces()
+    loadAllWorkspaces()
   }, [])
 
   const getEmployeeCount = useCallback(
@@ -48,11 +67,11 @@ export default function TenantsPage() {
   )
 
   const data: WorkspaceRow[] = useMemo(() => {
-    return (workspaces || []).map(ws => ({
+    return (allWorkspaces || []).map(ws => ({
       ...ws,
       employee_count: getEmployeeCount(ws.id),
     }))
-  }, [workspaces, getEmployeeCount])
+  }, [allWorkspaces, getEmployeeCount])
 
   const handleToggleActive = useCallback(
     async (workspace: WorkspaceRow, e?: React.MouseEvent) => {
@@ -155,8 +174,8 @@ export default function TenantsPage() {
 
   const handleCreateComplete = useCallback(() => {
     setIsCreateOpen(false)
-    loadWorkspaces()
-  }, [loadWorkspaces])
+    loadAllWorkspaces()
+  }, [loadAllWorkspaces])
 
   return (
     <>
@@ -193,7 +212,7 @@ export default function TenantsPage() {
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
         onComplete={handleCreateComplete}
-        existingCodes={(workspaces || []).map(ws => ws.code || '').filter(Boolean)}
+        existingCodes={(allWorkspaces || []).map(ws => ws.code || '').filter(Boolean)}
       />
     </>
   )

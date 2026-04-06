@@ -187,16 +187,16 @@ export function createEntityHook<T extends BaseEntity>(
     useEffect(() => {
       const channel = supabase
         .channel(`realtime:${tableName}`)
-        .on(
-          'postgres_changes',
-          { event: '*', schema: 'public', table: tableName },
-          () => {
-            // 有人異動了這張表 → 刷新所有相關 SWR 快取
-            globalMutate((key: string) => typeof key === 'string' && key.startsWith(cacheKeyPrefix), undefined, { revalidate: true })
-            // 同步清 IndexedDB 快取
-            invalidate_cache_pattern(cacheKeyPrefix)
-          }
-        )
+        .on('postgres_changes', { event: '*', schema: 'public', table: tableName }, () => {
+          // 有人異動了這張表 → 刷新所有相關 SWR 快取
+          globalMutate(
+            (key: string) => typeof key === 'string' && key.startsWith(cacheKeyPrefix),
+            undefined,
+            { revalidate: true }
+          )
+          // 同步清 IndexedDB 快取
+          invalidate_cache_pattern(cacheKeyPrefix)
+        })
         .subscribe()
 
       return () => {
@@ -215,7 +215,7 @@ export function createEntityHook<T extends BaseEntity>(
 
     // 新系統：使用 isAdmin
     const isAdmin = useAuthStore(state => state.isAdmin)
-    
+
     return {
       isReady: hasHydrated && isAuthenticated && !!user?.id,
       hasHydrated,
@@ -281,7 +281,9 @@ export function createEntityHook<T extends BaseEntity>(
       async () => {
         const selectFields = config.list?.select || '*'
 
-        let query = supabase.from(tableName as never /* dynamic table name requires runtime assertion */).select(selectFields)
+        let query = supabase
+          .from(tableName as never /* dynamic table name requires runtime assertion */)
+          .select(selectFields)
 
         // 套用 workspace 過濾
         const workspaceFilter = getWorkspaceFilter()
@@ -349,7 +351,9 @@ export function createEntityHook<T extends BaseEntity>(
       async () => {
         const selectFields = config.slim?.select || 'id'
 
-        let query = supabase.from(tableName as never /* dynamic table name requires runtime assertion */).select(selectFields)
+        let query = supabase
+          .from(tableName as never /* dynamic table name requires runtime assertion */)
+          .select(selectFields)
 
         // 套用 workspace 過濾
         const workspaceFilter = getWorkspaceFilter()

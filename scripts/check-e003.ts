@@ -26,14 +26,14 @@ async function checkE003() {
 
   if (!data) {
     console.log('❌ 找不到 E003！可能已被刪除')
-    
+
     // 查詢所有 E00X 員工
     const { data: allE00X } = await supabase
       .from('employees')
       .select('employee_number, chinese_name, status')
       .like('employee_number', 'E00%')
       .order('employee_number')
-    
+
     console.log('\n📋 所有 E00X 員工:')
     console.table(allE00X)
     return
@@ -48,7 +48,7 @@ async function checkE003() {
   console.log('部門:', data.department)
   console.log('職位:', data.position)
   console.log('Email:', data.email)
-  
+
   console.log('\n📊 診斷:')
   if (data.status === 'terminated') {
     console.log('⚠️  狀態 = terminated（已離職）')

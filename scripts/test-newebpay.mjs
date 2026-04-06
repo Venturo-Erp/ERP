@@ -6,7 +6,7 @@
 import crypto from 'crypto'
 
 const config = {
-  merchantId: '83212711',  // 使用公司統一編號
+  merchantId: '83212711', // 使用公司統一編號
   hashKey: 'YsZf5WBrzAyKujdQX1qabToN60pkgGxl',
   hashIV: 'P1KqUTm2Oh5SctBC',
 }
@@ -99,7 +99,6 @@ async function testConnection() {
       console.log('  Status:', params.get('Status'))
       console.log('  Message:', params.get('Message'))
     }
-
   } catch (error) {
     if (error.name === 'AbortError') {
       console.error('❌ 請求超時（30秒）')

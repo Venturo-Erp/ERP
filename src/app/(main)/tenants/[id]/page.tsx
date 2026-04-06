@@ -12,15 +12,24 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/components/ui/use-toast'
-import { 
-  Building2, 
+import {
+  Building2,
   Save,
   Loader2,
   Lock,
   Unlock,
   Sparkles,
+  Bot,
+  MessageCircle,
+  ExternalLink,
 } from 'lucide-react'
-import { FEATURES, getBasicFeatures, getPremiumFeatures, getEnterpriseFeatures } from '@/lib/permissions'
+import Link from 'next/link'
+import {
+  FEATURES,
+  getBasicFeatures,
+  getPremiumFeatures,
+  getEnterpriseFeatures,
+} from '@/lib/permissions'
 
 interface Workspace {
   id: string
@@ -41,10 +50,14 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
   const { id } = use(params)
   const router = useRouter()
   const { toast } = useToast()
-  
+
   const [workspace, setWorkspace] = useState<Workspace | null>(null)
   const [features, setFeatures] = useState<WorkspaceFeature[]>([])
   const [premiumEnabled, setPremiumEnabled] = useState(false)
+  const [lineConfig, setLineConfig] = useState<{
+    is_connected: boolean
+    bot_display_name?: string
+  } | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
@@ -67,14 +80,27 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       // 取得功能權限
       const featuresRes = await fetch(`/api/permissions/features?workspace_id=${id}`)
       const featuresData: WorkspaceFeature[] = featuresRes.ok ? await featuresRes.json() : []
-      
+
       // 初始化功能列表
-      const featureMap = new Map<string, boolean>(featuresData.map(f => [f.feature_code, f.enabled]))
+      const featureMap = new Map<string, boolean>(
+        featuresData.map(f => [f.feature_code, f.enabled])
+      )
       const allFeatures: WorkspaceFeature[] = FEATURES.map(f => ({
         feature_code: f.code,
         enabled: featureMap.get(f.code) ?? false,
       }))
       setFeatures(allFeatures)
+
+      // 取得 LINE 連線狀態
+      try {
+        const lineRes = await fetch('/api/line/setup')
+        if (lineRes.ok) {
+          const lineData = await lineRes.json()
+          setLineConfig(lineData)
+        }
+      } catch {
+        // 忽略
+      }
 
       setLoading(false)
     }
@@ -85,9 +111,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
   // 切換功能
   const toggleFeature = (featureCode: string) => {
     setFeatures(prev =>
-      prev.map(f =>
-        f.feature_code === featureCode ? { ...f, enabled: !f.enabled } : f
-      )
+      prev.map(f => (f.feature_code === featureCode ? { ...f, enabled: !f.enabled } : f))
     )
   }
 
@@ -143,8 +167,16 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       showBackButton
       onBack={() => router.push('/tenants')}
       headerActions={
-        <Button onClick={handleSave} disabled={saving} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
-          {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+        <Button
+          onClick={handleSave}
+          disabled={saving}
+          className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+        >
+          {saving ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <Save className="h-4 w-4 mr-2" />
+          )}
           儲存
         </Button>
       }
@@ -163,13 +195,79 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
             </div>
             <div>
               <div className="text-sm text-morandi-secondary mb-1">類型</div>
-              <Badge variant="outline" className="font-medium">{workspace?.type}</Badge>
+              <Badge variant="outline" className="font-medium">
+                {workspace?.type}
+              </Badge>
             </div>
             <div>
               <div className="text-sm text-morandi-secondary mb-1">狀態</div>
-              <Badge className={workspace?.is_active ? 'bg-morandi-green/20 text-morandi-green' : 'bg-morandi-secondary/20 text-morandi-secondary'}>
+              <Badge
+                className={
+                  workspace?.is_active
+                    ? 'bg-morandi-green/20 text-morandi-green'
+                    : 'bg-morandi-secondary/20 text-morandi-secondary'
+                }
+              >
                 {workspace?.is_active ? '啟用中' : '已停用'}
               </Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* 渠道連線狀態 */}
+        <div className="bg-white border border-border rounded-lg overflow-hidden">
+          <div className="px-6 py-4 border-b border-border bg-morandi-bg/30">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Bot className="h-4 w-4 text-morandi-gold" />
+                <h3 className="font-semibold text-morandi-primary">渠道連線</h3>
+              </div>
+              <Link
+                href="/ai-bot"
+                className="text-sm text-morandi-gold hover:underline flex items-center gap-1"
+              >
+                管理 <ExternalLink className="h-3 w-3" />
+              </Link>
+            </div>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-border">
+                <MessageCircle className="h-5 w-5 text-[#06C755]" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium">LINE</div>
+                  <div className="text-xs text-morandi-muted">
+                    {lineConfig?.bot_display_name || '未設定'}
+                  </div>
+                </div>
+                <Badge
+                  className={
+                    lineConfig?.is_connected
+                      ? 'bg-morandi-green/20 text-morandi-green'
+                      : 'bg-morandi-secondary/20 text-morandi-secondary'
+                  }
+                >
+                  {lineConfig?.is_connected ? '已連接' : '未連接'}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-border opacity-50">
+                <svg className="h-5 w-5 text-morandi-muted" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
+                </svg>
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-morandi-muted">Instagram</div>
+                  <div className="text-xs text-morandi-muted">即將推出</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-border opacity-50">
+                <svg className="h-5 w-5 text-morandi-muted" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                </svg>
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-morandi-muted">Facebook</div>
+                  <div className="text-xs text-morandi-muted">即將推出</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -207,12 +305,22 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* 付費功能卡片 */}
-        <div className={`bg-white border rounded-lg overflow-hidden ${premiumEnabled ? 'border-morandi-gold' : 'border-border'}`}>
-          <div className={`px-6 py-4 border-b border-border ${premiumEnabled ? 'bg-morandi-gold/10 border-morandi-gold/30' : 'bg-morandi-container/30 border-border'}`}>
+        <div
+          className={`bg-white border rounded-lg overflow-hidden ${premiumEnabled ? 'border-morandi-gold' : 'border-border'}`}
+        >
+          <div
+            className={`px-6 py-4 border-b border-border ${premiumEnabled ? 'bg-morandi-gold/10 border-morandi-gold/30' : 'bg-morandi-container/30 border-border'}`}
+          >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles className={`h-4 w-4 ${premiumEnabled ? 'text-morandi-gold' : 'text-morandi-muted'}`} />
-                <h3 className={`font-semibold ${premiumEnabled ? 'text-morandi-primary' : 'text-morandi-secondary'}`}>付費功能</h3>
+                <Sparkles
+                  className={`h-4 w-4 ${premiumEnabled ? 'text-morandi-gold' : 'text-morandi-muted'}`}
+                />
+                <h3
+                  className={`font-semibold ${premiumEnabled ? 'text-morandi-primary' : 'text-morandi-secondary'}`}
+                >
+                  付費功能
+                </h3>
                 {premiumEnabled ? (
                   <Badge className="bg-morandi-gold/20 text-morandi-gold border-morandi-gold/30">
                     <Unlock className="h-3 w-3 mr-1" />
@@ -225,10 +333,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                   </Badge>
                 )}
               </div>
-              <Switch
-                checked={premiumEnabled}
-                onCheckedChange={setPremiumEnabled}
-              />
+              <Switch checked={premiumEnabled} onCheckedChange={setPremiumEnabled} />
             </div>
             {premiumEnabled && workspace?.premium_expires_at && (
               <div className="text-sm text-morandi-secondary mt-2">

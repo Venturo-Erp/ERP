@@ -190,7 +190,9 @@ export function TourTableTab({ tourId, tour, members }: TourTableTabProps) {
       // 載入餐食設定
       const { data: settings, error: settingsError } = await supabase
         .from('tour_meal_settings')
-        .select('id, tour_id, day_number, meal_type, restaurant_name, enabled, display_order, workspace_id, created_at, updated_at')
+        .select(
+          'id, tour_id, day_number, meal_type, restaurant_name, enabled, display_order, workspace_id, created_at, updated_at'
+        )
         .eq('tour_id', tourId)
         .order('day_number')
         .order('meal_type')
@@ -201,7 +203,9 @@ export function TourTableTab({ tourId, tour, members }: TourTableTabProps) {
       // 載入桌次
       const { data: tableData, error: tableError } = await supabase
         .from('tour_tables_status')
-        .select('id, tour_id, table_number, capacity, assigned_count, is_full, day_number, meal_type, restaurant_name, meal_setting_id, display_order, workspace_id')
+        .select(
+          'id, tour_id, table_number, capacity, assigned_count, is_full, day_number, meal_type, restaurant_name, meal_setting_id, display_order, workspace_id'
+        )
         .eq('tour_id', tourId)
         .order('table_number')
         .limit(500)

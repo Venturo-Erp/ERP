@@ -49,8 +49,7 @@ export const TableBody = React.memo(function TableBody({
   // 載入狀態：顯示骨架屏
   if (loading) {
     const skeletonRows = 5 // 預設顯示 5 行骨架
-    const totalColumns =
-      columns.length + (selection ? 1 : 0) + (actions ? 1 : 0)
+    const totalColumns = columns.length + (selection ? 1 : 0) + (actions ? 1 : 0)
 
     return (
       <tbody>
@@ -103,9 +102,7 @@ export const TableBody = React.memo(function TableBody({
       <tbody>
         <tr className="h-[60vh]">
           <td
-            colSpan={
-              columns.length + (selection ? 1 : 0) + (actions ? 1 : 0)
-            }
+            colSpan={columns.length + (selection ? 1 : 0) + (actions ? 1 : 0)}
             className="py-12 px-6 text-center text-sm text-morandi-secondary align-middle"
           >
             {emptyState || (
@@ -206,9 +203,7 @@ export const TableBody = React.memo(function TableBody({
             {expandable && isExpanded && (
               <tr>
                 <td
-                  colSpan={
-                    columns.length + (selection ? 1 : 0) + (actions ? 1 : 0)
-                  }
+                  colSpan={columns.length + (selection ? 1 : 0) + (actions ? 1 : 0)}
                   className="py-0 px-0"
                 >
                   <div className="bg-morandi-container/20 p-4 border-t border-border/40">

@@ -142,7 +142,9 @@ const DialogContent = React.forwardRef<
         onDrop={e => e.preventDefault()}
         className={cn(
           'fixed inset-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-          showOverlay ? 'bg-morandi-primary/40 backdrop-blur-sm' : 'bg-morandi-primary/20 backdrop-blur-sm'
+          showOverlay
+            ? 'bg-morandi-primary/40 backdrop-blur-sm'
+            : 'bg-morandi-primary/20 backdrop-blur-sm'
         )}
         style={{ zIndex: zIndex.overlay }}
       />

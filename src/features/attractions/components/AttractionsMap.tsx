@@ -31,12 +31,12 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 
 // Morandi 調色盤 — Leaflet 地圖標記需要實際 hex 值，無法使用 CSS 變數
 const CATEGORY_COLORS: Record<string, string> = {
-  '神社寺廟': '#c08374',   // morandi-red
-  '自然景觀': '#9fa68f',   // morandi-green
-  '歷史古蹟': '#c9aa7c',   // morandi-gold
-  '主題樂園': '#8b8680',   // morandi-secondary
-  '美術館': '#8ba4b4',     // status-info
-  '購物': '#d4a574',       // status-warning
+  神社寺廟: '#c08374', // morandi-red
+  自然景觀: '#9fa68f', // morandi-green
+  歷史古蹟: '#c9aa7c', // morandi-gold
+  主題樂園: '#8b8680', // morandi-secondary
+  美術館: '#8ba4b4', // status-info
+  購物: '#d4a574', // status-warning
 }
 const CATEGORY_COLOR_DEFAULT = '#b8b2aa' // morandi-muted
 
@@ -63,7 +63,7 @@ export function AttractionsMap({
   useEffect(() => {
     const centerLat = mapCenter?.lat ?? selectedAttraction?.latitude
     const centerLng = mapCenter?.lng ?? selectedAttraction?.longitude
-    
+
     if (!centerLat || !centerLng) {
       setNearbyAttractions([])
       return
@@ -76,7 +76,15 @@ export function AttractionsMap({
     })
 
     setNearbyAttractions(nearby)
-  }, [selectedAttraction?.id, selectedAttraction?.latitude, selectedAttraction?.longitude, attractions.length, radiusKm, mapCenter?.lat, mapCenter?.lng])
+  }, [
+    selectedAttraction?.id,
+    selectedAttraction?.latitude,
+    selectedAttraction?.longitude,
+    attractions.length,
+    radiusKm,
+    mapCenter?.lat,
+    mapCenter?.lng,
+  ])
 
   // 初始化地圖
   useEffect(() => {
@@ -144,18 +152,18 @@ export function AttractionsMap({
       // 地圖移動時更新圓圈位置 + 重新計算附近景點
       let moveTimeout: ReturnType<typeof setTimeout> | null = null
       let saveTimeout: ReturnType<typeof setTimeout> | null = null
-      
+
       map.on('moveend', () => {
         const center = map.getCenter()
         const zoom = map.getZoom()
         searchCircle.setLatLng(center)
-        
+
         // 800ms 延遲更新附近景點（讓 popup 有時間顯示）
         if (moveTimeout) clearTimeout(moveTimeout)
         moveTimeout = setTimeout(() => {
           setMapCenter({ lat: center.lat, lng: center.lng })
         }, 800)
-        
+
         // 5 秒 debounce 存 localStorage（減少寫入頻率）
         if (saveTimeout) clearTimeout(saveTimeout)
         saveTimeout = setTimeout(() => {
@@ -253,7 +261,7 @@ export function AttractionsMap({
 
     const updateMarkers = async () => {
       const L = (await import('leaflet')).default
-      
+
       // 清除舊的 markers
       markersLayerRef.current?.clearLayers()
 
@@ -297,7 +305,12 @@ export function AttractionsMap({
       nearbyAttractions.slice(0, 20).forEach(attraction => {
         if (!attraction.latitude || !attraction.longitude) return
 
-        const distance = calculateDistance(centerLat, centerLng, attraction.latitude, attraction.longitude).toFixed(1)
+        const distance = calculateDistance(
+          centerLat,
+          centerLng,
+          attraction.latitude,
+          attraction.longitude
+        ).toFixed(1)
 
         const marker = L.marker([attraction.latitude, attraction.longitude], {
           icon: createMarkerIcon(attraction),
@@ -326,8 +339,14 @@ export function AttractionsMap({
     }
 
     updateMarkers()
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- nearbyAttractions 已經是穩定的陣列
-  }, [JSON.stringify(nearbyAttractions.map(a => a.id)), mapCenter?.lat, mapCenter?.lng, selectedAttraction?.latitude, selectedAttraction?.longitude])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- nearbyAttractions 已經是穩定的陣列
+  }, [
+    JSON.stringify(nearbyAttractions.map(a => a.id)),
+    mapCenter?.lat,
+    mapCenter?.lng,
+    selectedAttraction?.latitude,
+    selectedAttraction?.longitude,
+  ])
 
   // 組件卸載時清理
   useEffect(() => {

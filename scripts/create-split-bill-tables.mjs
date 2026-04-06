@@ -1,11 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseUrl = 'https://pfqvdacxowpgfamuvnsn.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmcXZkYWN4b3dwZ2ZhbXV2bnNuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTEwODMyMCwiZXhwIjoyMDc0Njg0MzIwfQ.kbJbdYHtOWudBGzV3Jv5OWzWQQZT4aBFFgfUczaVdIE'
+const supabaseKey =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmcXZkYWN4b3dwZ2ZhbXV2bnNuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTEwODMyMCwiZXhwIjoyMDc0Njg0MzIwfQ.kbJbdYHtOWudBGzV3Jv5OWzWQQZT4aBFFgfUczaVdIE'
 
 const supabase = createClient(supabaseUrl, supabaseKey, {
   db: { schema: 'public' },
-  auth: { persistSession: false }
+  auth: { persistSession: false },
 })
 
 async function createTables() {
@@ -57,11 +58,11 @@ async function createTables() {
   const response = await fetch(`${supabaseUrl}/rest/v1/rpc/exec_sql`, {
     method: 'POST',
     headers: {
-      'apikey': supabaseKey,
-      'Authorization': `Bearer ${supabaseKey}`,
-      'Content-Type': 'application/json'
+      apikey: supabaseKey,
+      Authorization: `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ sql })
+    body: JSON.stringify({ sql }),
   })
 
   if (!response.ok) {

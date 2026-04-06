@@ -98,9 +98,9 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
 
     const salesRoleId = getRoleIdByName('業務')
     const adminRoleId = getRoleIdByName('管理員')
-    
-    const qualified = activeEmployees.filter(emp => 
-      emp.job_info?.role_id === salesRoleId || emp.job_info?.role_id === adminRoleId
+
+    const qualified = activeEmployees.filter(
+      emp => emp.job_info?.role_id === salesRoleId || emp.job_info?.role_id === adminRoleId
     )
 
     const result = qualified.length > 0 ? qualified : activeEmployees
@@ -121,9 +121,9 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
 
     const assistantRoleId = getRoleIdByName('助理')
     const adminRoleId = getRoleIdByName('管理員')
-    
-    const qualified = activeEmployees.filter(emp => 
-      emp.job_info?.role_id === assistantRoleId || emp.job_info?.role_id === adminRoleId
+
+    const qualified = activeEmployees.filter(
+      emp => emp.job_info?.role_id === assistantRoleId || emp.job_info?.role_id === adminRoleId
     )
 
     const result = qualified.length > 0 ? qualified : activeEmployees

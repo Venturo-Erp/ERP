@@ -50,8 +50,14 @@ export default function LoginPage() {
     setError('')
 
     const trimmedCode = code.trim().toUpperCase()
-    if (!trimmedCode) { setError(LABELS.ERROR_ENTER_CODE); return }
-    if (!username.trim()) { setError(LABELS.ERROR_ENTER_USERNAME); return }
+    if (!trimmedCode) {
+      setError(LABELS.ERROR_ENTER_CODE)
+      return
+    }
+    if (!username.trim()) {
+      setError(LABELS.ERROR_ENTER_USERNAME)
+      return
+    }
 
     setIsLoading(true)
     try {
@@ -150,21 +156,19 @@ export default function LoginPage() {
               onChange={e => setRememberMe(e.target.checked)}
               className="w-3.5 h-3.5 rounded accent-[var(--morandi-gold)] cursor-pointer"
             />
-            <label htmlFor="rememberMe" className="text-[11px] text-[#aaa] cursor-pointer select-none">
+            <label
+              htmlFor="rememberMe"
+              className="text-[11px] text-[#aaa] cursor-pointer select-none"
+            >
               記住我（30 天內免重新登入）
             </label>
           </div>
 
           {/* 登入按鈕 */}
-          <button
-            type="submit"
-            disabled={isLoading || !code.trim()}
-            className="login-button"
-          >
+          <button type="submit" disabled={isLoading || !code.trim()} className="login-button">
             {isLoading ? '登入中...' : '登入'}
           </button>
         </form>
-
       </div>
 
       <style>{`

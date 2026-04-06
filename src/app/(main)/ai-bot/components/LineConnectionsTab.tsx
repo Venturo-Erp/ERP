@@ -71,7 +71,13 @@ interface LineConnectionsTabProps {
   onRefresh: () => void
 }
 
-export function LineConnectionsTab({ groups, users, suppliers, searchTerm, onRefresh }: LineConnectionsTabProps) {
+export function LineConnectionsTab({
+  groups,
+  users,
+  suppliers,
+  searchTerm,
+  onRefresh,
+}: LineConnectionsTabProps) {
   const [editingItem, setEditingItem] = useState<{
     type: 'group' | 'user'
     item: LineGroup | LineUser
@@ -117,16 +123,18 @@ export function LineConnectionsTab({ groups, users, suppliers, searchTerm, onRef
     }
   }
 
-  const filteredGroups = groups.filter(g =>
-    !searchTerm ||
-    g.group_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    g.suppliers?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredGroups = groups.filter(
+    g =>
+      !searchTerm ||
+      g.group_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      g.suppliers?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const filteredUsers = users.filter(u =>
-    !searchTerm ||
-    u.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    u.suppliers?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUsers = users.filter(
+    u =>
+      !searchTerm ||
+      u.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.suppliers?.name?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
@@ -138,9 +146,7 @@ export function LineConnectionsTab({ groups, users, suppliers, searchTerm, onRef
             <Users className="h-4 w-4" />
             LINE 群組 ({filteredGroups.length})
           </CardTitle>
-          <CardDescription>
-            Bot 被加入的群組會自動記錄，你可以綁定供應商或分類
-          </CardDescription>
+          <CardDescription>Bot 被加入的群組會自動記錄，你可以綁定供應商或分類</CardDescription>
         </CardHeader>
         <CardContent>
           {filteredGroups.length === 0 ? (
@@ -160,14 +166,19 @@ export function LineConnectionsTab({ groups, users, suppliers, searchTerm, onRef
                       <div className="font-medium">{group.group_name || '未命名群組'}</div>
                       <div className="text-sm text-muted-foreground flex items-center gap-2">
                         {group.member_count && <span>{group.member_count} 人</span>}
-                        {group.joined_at && <span>加入於 {new Date(group.joined_at).toLocaleDateString('zh-TW')}</span>}
+                        {group.joined_at && (
+                          <span>
+                            加入於 {new Date(group.joined_at).toLocaleDateString('zh-TW')}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     {group.category && (
                       <Badge variant="outline">
-                        {CATEGORY_OPTIONS.find(c => c.value === group.category)?.label || group.category}
+                        {CATEGORY_OPTIONS.find(c => c.value === group.category)?.label ||
+                          group.category}
                       </Badge>
                     )}
                     {group.suppliers ? (
@@ -178,7 +189,11 @@ export function LineConnectionsTab({ groups, users, suppliers, searchTerm, onRef
                     ) : (
                       <Badge variant="secondary">未綁定</Badge>
                     )}
-                    <Button variant="ghost" size="sm" onClick={() => openEditDialog('group', group)}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openEditDialog('group', group)}
+                    >
                       編輯
                     </Button>
                   </div>
@@ -196,9 +211,7 @@ export function LineConnectionsTab({ groups, users, suppliers, searchTerm, onRef
             <User className="h-4 w-4" />
             LINE 好友 ({filteredUsers.length})
           </CardTitle>
-          <CardDescription>
-            加 Bot 好友的人會自動記錄，你可以綁定為供應商或員工
-          </CardDescription>
+          <CardDescription>加 Bot 好友的人會自動記錄，你可以綁定為供應商或員工</CardDescription>
         </CardHeader>
         <CardContent>
           {filteredUsers.length === 0 ? (
@@ -214,7 +227,11 @@ export function LineConnectionsTab({ groups, users, suppliers, searchTerm, onRef
                 >
                   <div className="flex items-center gap-4">
                     {user.picture_url ? (
-                      <img src={user.picture_url} alt={user.display_name || ''} className="h-10 w-10 rounded-full" />
+                      <img
+                        src={user.picture_url}
+                        alt={user.display_name || ''}
+                        className="h-10 w-10 rounded-full"
+                      />
                     ) : (
                       <div className="h-10 w-10 rounded-full bg-morandi-container flex items-center justify-center">
                         <User className="h-5 w-5 text-morandi-secondary" />
@@ -224,12 +241,19 @@ export function LineConnectionsTab({ groups, users, suppliers, searchTerm, onRef
                       <div className="font-medium flex items-center gap-2">
                         {user.display_name || '未知用戶'}
                         {user.unfollowed_at && (
-                          <Badge variant="destructive" className="text-xs">已取消追蹤</Badge>
+                          <Badge variant="destructive" className="text-xs">
+                            已取消追蹤
+                          </Badge>
                         )}
                       </div>
                       <div className="text-sm text-muted-foreground">
                         {user.status_message || (
-                          <span>加入於 {user.followed_at ? new Date(user.followed_at).toLocaleDateString('zh-TW') : '未知'}</span>
+                          <span>
+                            加入於{' '}
+                            {user.followed_at
+                              ? new Date(user.followed_at).toLocaleDateString('zh-TW')
+                              : '未知'}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -263,11 +287,10 @@ export function LineConnectionsTab({ groups, users, suppliers, searchTerm, onRef
       <Dialog open={!!editingItem} onOpenChange={() => setEditingItem(null)}>
         <DialogContent level={1}>
           <DialogHeader>
-            <DialogTitle>
-              {editingItem?.type === 'group' ? '編輯群組' : '編輯好友'}
-            </DialogTitle>
+            <DialogTitle>{editingItem?.type === 'group' ? '編輯群組' : '編輯好友'}</DialogTitle>
             <DialogDescription>
-              綁定供應商後，發送需求單時可以選擇這個{editingItem?.type === 'group' ? '群組' : '好友'}
+              綁定供應商後，發送需求單時可以選擇這個
+              {editingItem?.type === 'group' ? '群組' : '好友'}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
@@ -320,7 +343,9 @@ export function LineConnectionsTab({ groups, users, suppliers, searchTerm, onRef
               />
             </div>
             <div className="flex justify-end gap-2 pt-4">
-              <Button variant="outline" onClick={() => setEditingItem(null)}>取消</Button>
+              <Button variant="outline" onClick={() => setEditingItem(null)}>
+                取消
+              </Button>
               <Button onClick={handleSave}>儲存</Button>
             </div>
           </div>

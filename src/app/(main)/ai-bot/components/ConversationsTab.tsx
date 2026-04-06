@@ -8,9 +8,19 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
 import {
-  Search, RefreshCw, CheckCircle, Clock, AlertCircle,
-  MessageCircle, TrendingUp, Users, Bot, ChevronRight,
-  Star, Send, ArrowLeft,
+  Search,
+  RefreshCw,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  MessageCircle,
+  TrendingUp,
+  Users,
+  Bot,
+  ChevronRight,
+  Star,
+  Send,
+  ArrowLeft,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
@@ -119,7 +129,9 @@ export function ConversationsTab() {
     setShowMobileThread(true)
     setMessagesLoading(true)
     try {
-      const res = await fetch(`/api/line/conversations?user=${encodeURIComponent(thread.platform_user_id)}`)
+      const res = await fetch(
+        `/api/line/conversations?user=${encodeURIComponent(thread.platform_user_id)}`
+      )
       if (res.ok) {
         const data = await res.json()
         setMessages(data.messages || [])
@@ -142,7 +154,11 @@ export function ConversationsTab() {
       })
       if (res.ok) {
         setMessages(prev =>
-          prev.map(m => m.id === id ? { ...m, follow_up_status: status, follow_up_note: note || m.follow_up_note } : m)
+          prev.map(m =>
+            m.id === id
+              ? { ...m, follow_up_status: status, follow_up_note: note || m.follow_up_note }
+              : m
+          )
         )
         toast.success(status === 'done' ? '已標記處理完成' : '已更新')
         loadThreads() // 重新載入串列以更新計數
@@ -160,10 +176,12 @@ export function ConversationsTab() {
       {/* 主區域：左右分欄 */}
       <div className="flex gap-4 h-[calc(100vh-360px)] min-h-[500px]">
         {/* 左側：聯絡人列表 */}
-        <div className={cn(
-          'w-full md:w-[380px] md:min-w-[380px] flex flex-col gap-3',
-          showMobileThread && 'hidden md:flex'
-        )}>
+        <div
+          className={cn(
+            'w-full md:w-[380px] md:min-w-[380px] flex flex-col gap-3',
+            showMobileThread && 'hidden md:flex'
+          )}
+        >
           {/* 篩選列 */}
           <div className="space-y-2">
             <div className="relative">
@@ -199,7 +217,15 @@ export function ConversationsTab() {
                 <Star className="h-3.5 w-3.5 mr-1" />
                 潛在客戶
               </Button>
-              <Button variant="outline" size="icon" className="ml-auto h-8 w-8" onClick={() => { loadThreads(); loadStats() }}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="ml-auto h-8 w-8"
+                onClick={() => {
+                  loadThreads()
+                  loadStats()
+                }}
+              >
                 <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />
               </Button>
             </div>
@@ -227,10 +253,7 @@ export function ConversationsTab() {
         </div>
 
         {/* 右側：對話詳情 */}
-        <div className={cn(
-          'flex-1 flex flex-col',
-          !showMobileThread && 'hidden md:flex'
-        )}>
+        <div className={cn('flex-1 flex flex-col', !showMobileThread && 'hidden md:flex')}>
           {selectedThread ? (
             <ThreadDetail
               thread={selectedThread}
@@ -308,7 +331,13 @@ function StatsBar({ stats }: { stats: Stats }) {
   )
 }
 
-function MiniStat({ icon: Icon, label, value, color, bgColor }: {
+function MiniStat({
+  icon: Icon,
+  label,
+  value,
+  color,
+  bgColor,
+}: {
   icon: typeof MessageCircle
   label: string
   value: number
@@ -334,7 +363,11 @@ function MiniStat({ icon: Icon, label, value, color, bgColor }: {
 // Thread List Item
 // ============================================================
 
-function ThreadItem({ thread, isSelected, onClick }: {
+function ThreadItem({
+  thread,
+  isSelected,
+  onClick,
+}: {
   thread: ConversationThread
   isSelected: boolean
   onClick: () => void
@@ -366,9 +399,7 @@ function ThreadItem({ thread, isSelected, onClick }: {
           </div>
 
           {/* 最後訊息預覽 */}
-          <p className="text-xs text-muted-foreground truncate mt-0.5">
-            {thread.last_message}
-          </p>
+          <p className="text-xs text-muted-foreground truncate mt-0.5">{thread.last_message}</p>
 
           {/* 標籤 */}
           <div className="flex items-center gap-1 mt-1.5 flex-wrap">
@@ -402,7 +433,14 @@ function ThreadItem({ thread, isSelected, onClick }: {
 // Thread Detail (Chat View)
 // ============================================================
 
-function ThreadDetail({ thread, messages, loading, messagesEndRef, onBack, onUpdateFollowUp }: {
+function ThreadDetail({
+  thread,
+  messages,
+  loading,
+  messagesEndRef,
+  onBack,
+  onUpdateFollowUp,
+}: {
   thread: ConversationThread
   messages: ConversationMessage[]
   loading: boolean
@@ -457,8 +495,10 @@ function ThreadDetail({ thread, messages, loading, messagesEndRef, onBack, onUpd
           <div className="space-y-4">
             {messages.map((msg, idx) => {
               // 日期分隔
-              const showDate = idx === 0 ||
-                new Date(msg.created_at).toDateString() !== new Date(messages[idx - 1].created_at).toDateString()
+              const showDate =
+                idx === 0 ||
+                new Date(msg.created_at).toDateString() !==
+                  new Date(messages[idx - 1].created_at).toDateString()
 
               return (
                 <div key={msg.id}>
@@ -466,7 +506,11 @@ function ThreadDetail({ thread, messages, loading, messagesEndRef, onBack, onUpd
                     <div className="flex items-center gap-3 my-4">
                       <div className="flex-1 h-px bg-border" />
                       <span className="text-[11px] text-muted-foreground">
-                        {new Date(msg.created_at).toLocaleDateString('zh-TW', { month: 'long', day: 'numeric', weekday: 'short' })}
+                        {new Date(msg.created_at).toLocaleDateString('zh-TW', {
+                          month: 'long',
+                          day: 'numeric',
+                          weekday: 'short',
+                        })}
                       </span>
                       <div className="flex-1 h-px bg-border" />
                     </div>
@@ -480,10 +524,15 @@ function ThreadDetail({ thread, messages, loading, messagesEndRef, onBack, onUpd
                       </div>
                       <div className="flex items-center justify-end gap-2 mt-1 px-1">
                         <span className="text-[10px] text-muted-foreground">
-                          {new Date(msg.created_at).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(msg.created_at).toLocaleTimeString('zh-TW', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
                         </span>
                         {msg.intent && (
-                          <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">{msg.intent}</Badge>
+                          <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">
+                            {msg.intent}
+                          </Badge>
                         )}
                         {msg.sentiment === 'positive' && <span className="text-[10px]">😊</span>}
                         {msg.sentiment === 'negative' && <span className="text-[10px]">😟</span>}
@@ -510,14 +559,18 @@ function ThreadDetail({ thread, messages, loading, messagesEndRef, onBack, onUpd
                     <div className="ml-9 mb-3 p-3 rounded-lg border border-amber-200 bg-amber-50/50">
                       <div className="flex items-center gap-2 mb-2">
                         <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
-                        <span className="text-xs font-medium text-amber-800">此對話需要人工跟進</span>
+                        <span className="text-xs font-medium text-amber-800">
+                          此對話需要人工跟進
+                        </span>
                       </div>
                       <div className="flex gap-2">
                         <Textarea
                           placeholder="備註（選填）..."
                           className="text-xs min-h-[32px] h-8 resize-none"
                           value={followUpNote[msg.id] || ''}
-                          onChange={e => setFollowUpNote(prev => ({ ...prev, [msg.id]: e.target.value }))}
+                          onChange={e =>
+                            setFollowUpNote(prev => ({ ...prev, [msg.id]: e.target.value }))
+                          }
                         />
                         <Button
                           size="sm"
@@ -535,7 +588,9 @@ function ThreadDetail({ thread, messages, loading, messagesEndRef, onBack, onUpd
                     <div className="ml-9 mb-3 flex items-center gap-1.5 text-xs text-morandi-green">
                       <CheckCircle className="h-3 w-3" />
                       已處理跟進
-                      {msg.follow_up_note && <span className="text-muted-foreground">— {msg.follow_up_note}</span>}
+                      {msg.follow_up_note && (
+                        <span className="text-muted-foreground">— {msg.follow_up_note}</span>
+                      )}
                     </div>
                   )}
                 </div>

@@ -63,7 +63,7 @@ export function MemberBasicInfo({
 
   // 日期輸入的本地狀態（避免每次按鍵都觸發 DB 更新）
   const [localBirthDate, setLocalBirthDate] = useState(member.birth_date || '')
-  
+
   // 同步外部變化
   useEffect(() => {
     setLocalBirthDate(member.birth_date || '')
@@ -72,7 +72,7 @@ export function MemberBasicInfo({
   // 處理日期輸入（自動格式化 YYYY-MM-DD）
   const handleDateInput = (value: string) => {
     const digitsOnly = value.replace(/\D/g, '').slice(0, 8) // 最多 8 位數字
-    
+
     // 格式化顯示
     let formatted = ''
     if (digitsOnly.length <= 4) {
@@ -82,16 +82,16 @@ export function MemberBasicInfo({
     } else {
       formatted = digitsOnly.slice(0, 4) + '-' + digitsOnly.slice(4, 6) + '-' + digitsOnly.slice(6)
     }
-    
+
     // 更新本地狀態（即時顯示）
     setLocalBirthDate(formatted)
-    
+
     // 只有完整日期或空值才更新到 DB
     if (formatted.length === 10 || formatted === '') {
       onUpdateField(member.id, 'birth_date', formatted || null)
     }
   }
-  
+
   // 失焦時儲存（即使不完整也存）
   const handleDateBlur = () => {
     if (localBirthDate !== (member.birth_date || '')) {

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * LINE 保險群組檔案過濾與歸檔
- * 
+ *
  * 規則：
  * 1. 只處理保險公司傳的 PDF
  * 2. 檔名 = 團號（TW260321A 或 TC260321A）
@@ -17,7 +17,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 // 可信任的保險公司發送者（LINE displayName 或 userId）
 const TRUSTED_SENDERS = [
-  '喜多里保代',          // displayName
+  '喜多里保代', // displayName
   '喜多里',
   '保險公司',
   // 'U1234567890abcdef', // 或用 userId（更可靠）

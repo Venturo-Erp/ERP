@@ -1,6 +1,6 @@
 /**
  * 功能模組定義
- * 
+ *
  * 用於租戶功能權限管理
  * 對應側邊欄路由
  */
@@ -10,7 +10,7 @@ export interface FeatureDefinition {
   name: string
   description: string
   category: 'basic' | 'premium' | 'enterprise'
-  routes: string[]  // 這個功能包含哪些路由
+  routes: string[] // 這個功能包含哪些路由
 }
 
 // 所有功能模組（對應側邊欄）
@@ -57,12 +57,7 @@ export const FEATURES: FeatureDefinition[] = [
     name: '會計系統',
     description: '傳票、帳務、損益表',
     category: 'basic',
-    routes: [
-      '/accounting',
-      '/accounting/vouchers',
-      '/accounting/accounts',
-      '/accounting/reports',
-    ],
+    routes: ['/accounting', '/accounting/vouchers', '/accounting/accounts', '/accounting/reports'],
   },
   {
     code: 'database',
@@ -164,20 +159,13 @@ export const FEATURES: FeatureDefinition[] = [
     routes: ['/office', '/office/editor', '/files'],
   },
 
-  // ===== 進階功能（付費）- 機器人管理 =====
+  // ===== 進階功能（付費）- AI & 機器人管理 =====
   {
-    code: 'bot_line',
-    name: 'LINE Bot 管理',
-    description: 'LINE 連線管理、群組綁定、自動通知',
+    code: 'ai_bot',
+    name: 'AI & 機器人管理',
+    description: 'LINE/IG/FB 平台連線、AI 客服、對話記錄',
     category: 'premium',
-    routes: ['/settings/bot-line'],
-  },
-  {
-    code: 'bot_telegram',
-    name: 'Telegram Bot 管理',
-    description: 'Telegram 機器人、頻道管理',
-    category: 'premium',
-    routes: ['/settings/bot-telegram'],
+    routes: ['/ai-bot'],
   },
 
   // ===== 企業功能 =====
@@ -234,12 +222,14 @@ export function getFeatureByCode(code: string): FeatureDefinition | undefined {
 export function getFeatureByRoute(route: string): FeatureDefinition | undefined {
   // 處理動態路由 /tours/[code] -> /tours/xxx
   const normalizedRoute = route.replace(/\/\[.*?\]/g, '/[param]')
-  
-  return FEATURES.find(f => 
+
+  return FEATURES.find(f =>
     f.routes.some(r => {
       const normalizedFeatureRoute = r.replace(/\/\[.*?\]/g, '/[param]')
-      return route.startsWith(normalizedFeatureRoute.replace('/[param]', '')) ||
-             normalizedRoute === normalizedFeatureRoute
+      return (
+        route.startsWith(normalizedFeatureRoute.replace('/[param]', '')) ||
+        normalizedRoute === normalizedFeatureRoute
+      )
     })
   )
 }
@@ -247,12 +237,14 @@ export function getFeatureByRoute(route: string): FeatureDefinition | undefined 
 // 根據路由取得所有相關的功能（複數）
 export function getFeaturesByRoute(route: string): FeatureDefinition[] {
   const normalizedRoute = route.replace(/\/\[.*?\]/g, '/[param]')
-  
-  return FEATURES.filter(f => 
+
+  return FEATURES.filter(f =>
     f.routes.some(r => {
       const normalizedFeatureRoute = r.replace(/\/\[.*?\]/g, '/[param]')
-      return route.startsWith(normalizedFeatureRoute.replace('/[param]', '')) ||
-             normalizedRoute === normalizedFeatureRoute
+      return (
+        route.startsWith(normalizedFeatureRoute.replace('/[param]', '')) ||
+        normalizedRoute === normalizedFeatureRoute
+      )
     })
   )
 }

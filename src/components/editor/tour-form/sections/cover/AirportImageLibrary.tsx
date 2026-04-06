@@ -59,41 +59,44 @@ export function AirportImageLibrary({
   }, [])
 
   // 🎯 直接上傳 → 自動存到 airport_images 表
-  const handleDirectUpload = useCallback(async (url: string) => {
-    logger.log('[AirportImageLibrary] 🎯 直接上傳，自動存到圖片庫')
-    logger.log('[AirportImageLibrary] - url:', url)
-    logger.log('[AirportImageLibrary] - airportCode:', airportCode)
-    
-    if (!url || !airportCode) {
-      // 沒有 airportCode 時，直接設定封面（舊行為）
-      onImageUpload(url)
-      return
-    }
+  const handleDirectUpload = useCallback(
+    async (url: string) => {
+      logger.log('[AirportImageLibrary] 🎯 直接上傳，自動存到圖片庫')
+      logger.log('[AirportImageLibrary] - url:', url)
+      logger.log('[AirportImageLibrary] - airportCode:', airportCode)
 
-    try {
-      const newImage: Partial<AirportImage> = {
-        airport_code: airportCode,
-        image_url: url,
-        label: null,
-        is_default: airportImages.length === 0,
-        display_order: airportImages.length,
-        uploaded_by: user?.id || null,
-        workspace_id: user?.workspace_id || null,
+      if (!url || !airportCode) {
+        // 沒有 airportCode 時，直接設定封面（舊行為）
+        onImageUpload(url)
+        return
       }
 
-      logger.log('[AirportImageLibrary] 📤 自動存到 airport_images:', newImage)
-      await create(newImage as Omit<AirportImage, 'id' | 'created_at' | 'updated_at'>)
-      logger.log('[AirportImageLibrary] ✅ 存檔成功')
+      try {
+        const newImage: Partial<AirportImage> = {
+          airport_code: airportCode,
+          image_url: url,
+          label: null,
+          is_default: airportImages.length === 0,
+          display_order: airportImages.length,
+          uploaded_by: user?.id || null,
+          workspace_id: user?.workspace_id || null,
+        }
 
-      // 同時更新封面
-      onImageUpload(url)
-      logger.log('[AirportImageLibrary] 🎉 直接上傳完成！')
-    } catch (error) {
-      logger.error('[AirportImageLibrary] ❌ 存到圖片庫失敗:', error)
-      // 失敗時仍然設定封面
-      onImageUpload(url)
-    }
-  }, [airportCode, airportImages.length, user, create, onImageUpload])
+        logger.log('[AirportImageLibrary] 📤 自動存到 airport_images:', newImage)
+        await create(newImage as Omit<AirportImage, 'id' | 'created_at' | 'updated_at'>)
+        logger.log('[AirportImageLibrary] ✅ 存檔成功')
+
+        // 同時更新封面
+        onImageUpload(url)
+        logger.log('[AirportImageLibrary] 🎉 直接上傳完成！')
+      } catch (error) {
+        logger.error('[AirportImageLibrary] ❌ 存到圖片庫失敗:', error)
+        // 失敗時仍然設定封面
+        onImageUpload(url)
+      }
+    },
+    [airportCode, airportImages.length, user, create, onImageUpload]
+  )
 
   // 儲存新圖片到圖片庫
   const handleSaveNewImage = useCallback(async () => {
@@ -101,7 +104,7 @@ export function AirportImageLibrary({
     logger.log('[AirportImageLibrary] - newImageUrl:', newImageUrl)
     logger.log('[AirportImageLibrary] - airportCode:', airportCode)
     logger.log('[AirportImageLibrary] - newImageLabel:', newImageLabel)
-    
+
     if (!newImageUrl || !airportCode) {
       logger.warn('[AirportImageLibrary] ❌ 缺少必要參數，取消儲存')
       return
@@ -126,7 +129,7 @@ export function AirportImageLibrary({
       setNewImageUrl('')
       setNewImageLabel('')
       setShowAddDialog(false)
-      
+
       logger.log('[AirportImageLibrary] 📢 呼叫 onImageUpload:', newImageUrl)
       onImageUpload(newImageUrl)
       logger.log('[AirportImageLibrary] 🎉 儲存完成！')
@@ -226,7 +229,7 @@ export function AirportImageLibrary({
               role="button"
               tabIndex={0}
               onClick={() => onImageSelect(image.image_url)}
-              onKeyDown={(e) => e.key === 'Enter' && onImageSelect(image.image_url)}
+              onKeyDown={e => e.key === 'Enter' && onImageSelect(image.image_url)}
               className={cn(
                 'relative group overflow-hidden rounded-lg border-2 transition-all aspect-video cursor-pointer',
                 selectedImage === image.image_url

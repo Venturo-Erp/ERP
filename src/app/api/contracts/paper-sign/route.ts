@@ -3,7 +3,7 @@ import { createApiClient } from '@/lib/supabase/api-client'
 
 /**
  * POST /api/contracts/paper-sign
- * 
+ *
  * 標記合約為紙本簽署（需要登入）
  */
 export async function POST(request: NextRequest) {
@@ -15,9 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '缺少合約 ID' }, { status: 400 })
     }
 
-    const signedAt = signedDate 
-      ? new Date(signedDate).toISOString()
-      : new Date().toISOString()
+    const signedAt = signedDate ? new Date(signedDate).toISOString() : new Date().toISOString()
 
     // 更新合約狀態為已簽署（紙本）（RLS 自動過濾）
     const { error } = await supabase

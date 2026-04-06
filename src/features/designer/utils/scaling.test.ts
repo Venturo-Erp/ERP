@@ -77,7 +77,9 @@ describe('scaleFabricData', () => {
   })
 
   it('handles empty objects array', () => {
-    const result = scaleFabricData({ objects: [] }, 2) as unknown as { objects: Record<string, unknown>[] }
+    const result = scaleFabricData({ objects: [] }, 2) as unknown as {
+      objects: Record<string, unknown>[]
+    }
     expect(result.objects).toEqual([])
   })
 

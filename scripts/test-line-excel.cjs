@@ -16,16 +16,25 @@ async function main() {
   // 1. 取團資料（含國家、領隊）
   const { data: tour, error: tourErr } = await supabase
     .from('tours')
-    .select('id, code, name, departure_date, return_date, days_count, airport_code, outbound_flight, return_flight, tour_leader_id, country_id')
+    .select(
+      'id, code, name, departure_date, return_date, days_count, airport_code, outbound_flight, return_flight, tour_leader_id, country_id'
+    )
     .eq('code', TOUR_CODE)
     .single()
 
-  if (!tour) { console.error('Tour not found', tourErr); return }
+  if (!tour) {
+    console.error('Tour not found', tourErr)
+    return
+  }
 
   // 國家名稱
   let countryName = '台灣'
   if (tour.country_id) {
-    const { data: country } = await supabase.from('countries').select('name').eq('id', tour.country_id).single()
+    const { data: country } = await supabase
+      .from('countries')
+      .select('name')
+      .eq('id', tour.country_id)
+      .single()
     if (country) countryName = country.name
   }
 
@@ -49,14 +58,21 @@ async function main() {
   // 領隊
   let leaderName = ''
   if (tour.tour_leader_id) {
-    const { data: leader } = await supabase.from('employees').select('chinese_name').eq('id', tour.tour_leader_id).single()
+    const { data: leader } = await supabase
+      .from('employees')
+      .select('chinese_name')
+      .eq('id', tour.tour_leader_id)
+      .single()
     if (leader) leaderName = leader.chinese_name
   }
 
   // 2. 取團員（透過 order_members）
   const { data: orders } = await supabase.from('orders').select('id').eq('tour_id', tour.id)
   const orderIds = orders?.map(o => o.id) || []
-  if (!orderIds.length) { console.error('No orders'); return }
+  if (!orderIds.length) {
+    console.error('No orders')
+    return
+  }
 
   const { data: members } = await supabase
     .from('order_members')
@@ -64,7 +80,10 @@ async function main() {
     .in('order_id', orderIds)
     .order('created_at', { ascending: true })
 
-  if (!members?.length) { console.error('No members'); return }
+  if (!members?.length) {
+    console.error('No members')
+    return
+  }
 
   // 旅客代表：有領隊用領隊，沒有就用第一位旅客
   const representative = leaderName || members[0]?.customer?.name || '-'
@@ -88,14 +107,24 @@ async function main() {
   headerRow.font = { bold: true }
   headerRow.eachCell(c => {
     c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8DCC8' } }
-    c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }
+    c.border = {
+      top: { style: 'thin' },
+      bottom: { style: 'thin' },
+      left: { style: 'thin' },
+      right: { style: 'thin' },
+    }
   })
 
   members.forEach((m, i) => {
     const c = m.customer || {}
     const row = ws.addRow([i + 1, c.name || '', c.national_id || '', c.birth_date || ''])
     row.eachCell(cell => {
-      cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }
+      cell.border = {
+        top: { style: 'thin' },
+        bottom: { style: 'thin' },
+        left: { style: 'thin' },
+        right: { style: 'thin' },
+      }
     })
   })
 
@@ -117,7 +146,10 @@ async function main() {
       upsert: true,
     })
 
-  if (uploadError) { console.error('Upload error:', uploadError.message); return }
+  if (uploadError) {
+    console.error('Upload error:', uploadError.message)
+    return
+  }
   console.log('📤 Uploaded')
 
   const { data: urlData } = supabase.storage.from('documents').getPublicUrl(storagePath)
@@ -141,7 +173,7 @@ async function main() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${LINE_TOKEN}`,
+      Authorization: `Bearer ${LINE_TOKEN}`,
     },
     body: JSON.stringify({
       to: LINE_GROUP_ID,

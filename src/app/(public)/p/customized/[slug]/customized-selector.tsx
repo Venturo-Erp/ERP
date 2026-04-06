@@ -31,7 +31,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
   const [selectedItems, setSelectedItems] = useState<TemplateItem[]>([])
   const [showForm, setShowForm] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  
+
   // 表單資料
   const [formData, setFormData] = useState({
     name: '',
@@ -56,7 +56,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (selectedItems.length === 0) {
       toast.error('請至少選擇一個景點')
       return
@@ -118,9 +118,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
       {/* Header */}
       <header className="bg-white/70 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="text-2xl font-bold tracking-tight text-public-secondary">
-            御風旅遊
-          </div>
+          <div className="text-2xl font-bold tracking-tight text-public-secondary">御風旅遊</div>
           <a href="tel:07-9585361" className="text-public-secondary font-medium hidden sm:block">
             07-9585361
           </a>
@@ -135,9 +133,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
               {template.name}
             </h1>
             {template.description && (
-              <p className="text-morandi-primary text-lg max-w-2xl">
-                {template.description}
-              </p>
+              <p className="text-morandi-primary text-lg max-w-2xl">{template.description}</p>
             )}
           </header>
 
@@ -148,11 +144,11 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                 <MapPin size={20} />
                 {region}
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {groupedItems[region].map(item => {
                   const selected = isSelected(item.id)
-                  
+
                   return (
                     <div
                       key={item.id}
@@ -160,9 +156,10 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                       className={`
                         group relative rounded-xl overflow-hidden cursor-pointer
                         transition-all duration-300
-                        ${selected 
-                          ? 'bg-status-info-bg ring-2 ring-public-secondary scale-[1.02]' 
-                          : 'bg-white shadow-sm hover:shadow-md hover:scale-[1.01]'
+                        ${
+                          selected
+                            ? 'bg-status-info-bg ring-2 ring-public-secondary scale-[1.02]'
+                            : 'bg-white shadow-sm hover:shadow-md hover:scale-[1.01]'
                         }
                       `}
                     >
@@ -184,16 +181,18 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                       {/* 內容 */}
                       <div className="p-5">
                         <div className="flex justify-between items-start mb-2">
-                          <h3 className={`text-lg font-bold ${selected ? 'text-public-secondary' : 'text-morandi-primary'}`}>
+                          <h3
+                            className={`text-lg font-bold ${selected ? 'text-public-secondary' : 'text-morandi-primary'}`}
+                          >
                             {item.name}
                           </h3>
-                          {selected && (
-                            <Check size={20} className="text-public-secondary" />
-                          )}
+                          {selected && <Check size={20} className="text-public-secondary" />}
                         </div>
-                        
+
                         {item.description && (
-                          <p className={`text-sm leading-relaxed ${selected ? 'text-public-secondary/80' : 'text-morandi-primary'}`}>
+                          <p
+                            className={`text-sm leading-relaxed ${selected ? 'text-public-secondary/80' : 'text-morandi-primary'}`}
+                          >
                             {item.description}
                           </p>
                         )}
@@ -203,16 +202,19 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                             w-full mt-4 py-2.5 rounded-lg font-bold text-sm
                             flex items-center justify-center gap-2
                             transition-colors
-                            ${selected
-                              ? 'bg-public-secondary text-white'
-                              : 'border-2 border-border text-morandi-primary hover:border-public-secondary hover:text-public-secondary'
+                            ${
+                              selected
+                                ? 'bg-public-secondary text-white'
+                                : 'border-2 border-border text-morandi-primary hover:border-public-secondary hover:text-public-secondary'
                             }
                           `}
                         >
                           {selected ? (
                             <>已加入</>
                           ) : (
-                            <><Plus size={16} /> 加入清單</>
+                            <>
+                              <Plus size={16} /> 加入清單
+                            </>
                           )}
                         </button>
                       </div>
@@ -228,21 +230,14 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
         <aside className="w-80 hidden lg:block">
           <div className="sticky top-24 bg-white rounded-2xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-public-secondary mb-2">已選景點</h2>
-            <p className="text-sm text-morandi-primary mb-6">
-              {selectedItems.length} 個景點
-            </p>
+            <p className="text-sm text-morandi-primary mb-6">{selectedItems.length} 個景點</p>
 
             {selectedItems.length === 0 ? (
-              <p className="text-center text-morandi-secondary py-8">
-                點擊景點卡片加入清單
-              </p>
+              <p className="text-center text-morandi-secondary py-8">點擊景點卡片加入清單</p>
             ) : (
               <div className="space-y-3 max-h-[400px] overflow-y-auto mb-6">
                 {selectedItems.map(item => (
-                  <div
-                    key={item.id}
-                    className="flex gap-3 p-3 bg-status-info-bg/20 rounded-xl"
-                  >
+                  <div key={item.id} className="flex gap-3 p-3 bg-status-info-bg/20 rounded-xl">
                     {item.image_url && (
                       <img
                         src={item.image_url}
@@ -251,12 +246,10 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-morandi-primary truncate">
-                        {item.name}
-                      </p>
+                      <p className="text-sm font-bold text-morandi-primary truncate">{item.name}</p>
                       <p className="text-xs text-morandi-primary">{item.region}</p>
                       <button
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation()
                           toggleItem(item)
                         }}
@@ -277,9 +270,10 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                 w-full py-4 rounded-xl font-bold text-white
                 flex items-center justify-center gap-2
                 transition-all
-                ${selectedItems.length > 0
-                  ? 'bg-gradient-to-r from-[#006872] to-[#00838f] shadow-lg hover:shadow-xl'
-                  : 'bg-morandi-muted cursor-not-allowed'
+                ${
+                  selectedItems.length > 0
+                    ? 'bg-gradient-to-r from-[#006872] to-[#00838f] shadow-lg hover:shadow-xl'
+                    : 'bg-morandi-muted cursor-not-allowed'
                 }
               `}
             >
@@ -298,9 +292,10 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
           className={`
             w-full py-4 rounded-xl font-bold text-white
             flex items-center justify-center gap-2
-            ${selectedItems.length > 0
-              ? 'bg-gradient-to-r from-[#006872] to-[#00838f]'
-              : 'bg-morandi-muted cursor-not-allowed'
+            ${
+              selectedItems.length > 0
+                ? 'bg-gradient-to-r from-[#006872] to-[#00838f]'
+                : 'bg-morandi-muted cursor-not-allowed'
             }
           `}
         >
@@ -315,7 +310,10 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
           <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-border flex justify-between items-center">
               <h2 className="text-xl font-bold text-morandi-primary">填寫聯絡資料</h2>
-              <button onClick={() => setShowForm(false)} className="text-morandi-secondary hover:text-morandi-primary">
+              <button
+                onClick={() => setShowForm(false)}
+                className="text-morandi-secondary hover:text-morandi-primary"
+              >
                 <X size={24} />
               </button>
             </div>
@@ -327,7 +325,10 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                   姓名 *
                 </label>
                 <div className="relative">
-                  <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary" />
+                  <User
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary"
+                  />
                   <input
                     type="text"
                     value={formData.name}
@@ -345,7 +346,10 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                   電話 *
                 </label>
                 <div className="relative">
-                  <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary" />
+                  <Phone
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary"
+                  />
                   <input
                     type="tel"
                     value={formData.phone}
@@ -363,7 +367,10 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                   Email
                 </label>
                 <div className="relative">
-                  <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary" />
+                  <Mail
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary"
+                  />
                   <input
                     type="email"
                     value={formData.email}
@@ -381,7 +388,10 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                     出發日期
                   </label>
                   <div className="relative">
-                    <Calendar size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary" />
+                    <Calendar
+                      size={18}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary"
+                    />
                     <input
                       type="date"
                       value={formData.travelDate}
@@ -396,7 +406,10 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                     人數
                   </label>
                   <div className="relative">
-                    <Users size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary" />
+                    <Users
+                      size={18}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-morandi-secondary"
+                    />
                     <select
                       value={formData.peopleCount}
                       onChange={e => setFormData(p => ({ ...p, peopleCount: e.target.value }))}

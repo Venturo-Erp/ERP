@@ -5,9 +5,16 @@ import { createClient } from '@supabase/supabase-js'
 
 // Config
 const SUPABASE_URL = 'https://pfqvdacxowpgfamuvnsn.supabase.co'
-const envFile = fs.readFileSync(path.join(process.env.HOME, 'Projects/venturo-erp/.env.local'), 'utf8')
-const SUPABASE_KEY = envFile.match(/SUPABASE_SERVICE_ROLE_KEY=(.*)/)?.[1] || envFile.match(/NEXT_PUBLIC_SUPABASE_ANON_KEY=(.*)/)?.[1]
-const LINE_TOKEN = fs.readFileSync(path.join(process.env.HOME, 'Projects/venturo-erp/.env.local'), 'utf8').match(/LINE_CHANNEL_ACCESS_TOKEN=(.*)/)?.[1]
+const envFile = fs.readFileSync(
+  path.join(process.env.HOME, 'Projects/venturo-erp/.env.local'),
+  'utf8'
+)
+const SUPABASE_KEY =
+  envFile.match(/SUPABASE_SERVICE_ROLE_KEY=(.*)/)?.[1] ||
+  envFile.match(/NEXT_PUBLIC_SUPABASE_ANON_KEY=(.*)/)?.[1]
+const LINE_TOKEN = fs
+  .readFileSync(path.join(process.env.HOME, 'Projects/venturo-erp/.env.local'), 'utf8')
+  .match(/LINE_CHANNEL_ACCESS_TOKEN=(.*)/)?.[1]
 const LINE_GROUP_ID = 'Cef588e4998134cdb9313b80667924bdb' // william筆記本
 
 const TOUR_CODE = 'TW260321A'
@@ -22,16 +29,24 @@ async function main() {
     .eq('code', TOUR_CODE)
     .single()
 
-  if (!tour) { console.error('Tour not found'); return }
+  if (!tour) {
+    console.error('Tour not found')
+    return
+  }
   console.log(`📋 團: ${tour.code} ${tour.name} (${tour.departure_date})`)
 
   // 2. 取團員
   const { data: members } = await supabase
     .from('tour_members')
-    .select('*, customer:customers(chinese_name, english_name, passport_number, passport_expiry, birth_date, gender, id_number, dietary_preference)')
+    .select(
+      '*, customer:customers(chinese_name, english_name, passport_number, passport_expiry, birth_date, gender, id_number, dietary_preference)'
+    )
     .eq('tour_id', tour.id)
 
-  if (!members?.length) { console.error('No members'); return }
+  if (!members?.length) {
+    console.error('No members')
+    return
+  }
   console.log(`👥 團員: ${members.length} 人`)
 
   // 3. 產生 Excel
@@ -49,12 +64,28 @@ async function main() {
   ws.getCell('A2').alignment = { horizontal: 'center' }
 
   // 表頭
-  const headers = ['序', '中文姓名', '護照拼音', '出生年月日', '性別', '身分證號', '護照號碼', '護照效期', '飲食禁忌', '備註']
+  const headers = [
+    '序',
+    '中文姓名',
+    '護照拼音',
+    '出生年月日',
+    '性別',
+    '身分證號',
+    '護照號碼',
+    '護照效期',
+    '飲食禁忌',
+    '備註',
+  ]
   const headerRow = ws.addRow(headers)
   headerRow.font = { bold: true }
   headerRow.eachCell(c => {
     c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE8DCC8' } }
-    c.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }
+    c.border = {
+      top: { style: 'thin' },
+      bottom: { style: 'thin' },
+      left: { style: 'thin' },
+      right: { style: 'thin' },
+    }
   })
 
   // 資料
@@ -73,15 +104,27 @@ async function main() {
       m.note || '',
     ])
     row.eachCell(cell => {
-      cell.border = { top: { style: 'thin' }, bottom: { style: 'thin' }, left: { style: 'thin' }, right: { style: 'thin' } }
+      cell.border = {
+        top: { style: 'thin' },
+        bottom: { style: 'thin' },
+        left: { style: 'thin' },
+        right: { style: 'thin' },
+      }
     })
   })
 
   // 欄寬
   ws.columns = [
-    { width: 5 }, { width: 12 }, { width: 20 }, { width: 14 },
-    { width: 6 }, { width: 14 }, { width: 14 }, { width: 14 },
-    { width: 10 }, { width: 15 },
+    { width: 5 },
+    { width: 12 },
+    { width: 20 },
+    { width: 14 },
+    { width: 6 },
+    { width: 14 },
+    { width: 14 },
+    { width: 14 },
+    { width: 10 },
+    { width: 15 },
   ]
 
   const filePath = `/tmp/${tour.code}_團員名單.xlsx`
@@ -118,14 +161,16 @@ async function main() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${LINE_TOKEN}`,
+      Authorization: `Bearer ${LINE_TOKEN}`,
     },
     body: JSON.stringify({
       to: LINE_GROUP_ID,
-      messages: [{
-        type: 'text',
-        text: messageText,
-      }],
+      messages: [
+        {
+          type: 'text',
+          text: messageText,
+        },
+      ],
     }),
   })
 

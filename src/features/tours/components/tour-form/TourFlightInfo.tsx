@@ -105,9 +105,7 @@ export function TourFlightInfo({
             </Button>
             <Input
               value={newTour.return_flight_text || ''}
-              onChange={e =>
-                setNewTour(prev => ({ ...prev, return_flight_text: e.target.value }))
-              }
+              onChange={e => setNewTour(prev => ({ ...prev, return_flight_text: e.target.value }))}
               placeholder={TOUR_FLIGHT_INFO.flight_text_placeholder}
               className="text-sm flex-1"
             />

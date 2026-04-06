@@ -36,7 +36,11 @@ const TABS: { id: TabType; label: string; icon: typeof FileText }[] = [
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   開團: { label: ID_LABELS.STATUS_PROPOSAL, color: 'text-morandi-gold', bg: 'bg-morandi-gold/10' },
-  待出發: { label: ID_LABELS.STATUS_IN_PROGRESS, color: 'text-morandi-green', bg: 'bg-morandi-green/10' },
+  待出發: {
+    label: ID_LABELS.STATUS_IN_PROGRESS,
+    color: 'text-morandi-green',
+    bg: 'bg-morandi-green/10',
+  },
   已結團: {
     label: ID_LABELS.STATUS_CLOSED,
     color: 'text-morandi-secondary',

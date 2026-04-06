@@ -125,7 +125,9 @@ export function LeaveManagementPage() {
       render: (_, row) => (
         <span
           className={`px-2 py-0.5 rounded text-xs ${
-            row.is_paid !== false ? 'bg-morandi-green/10 text-morandi-green' : 'bg-morandi-red/10 text-morandi-red'
+            row.is_paid !== false
+              ? 'bg-morandi-green/10 text-morandi-green'
+              : 'bg-morandi-red/10 text-morandi-red'
           }`}
         >
           {row.is_paid !== false ? L.yes : L.no}
@@ -359,7 +361,7 @@ export function LeaveManagementPage() {
           searchable={false}
           statusTabs={tabs}
           activeStatusTab={activeTab}
-          onStatusTabChange={(tab) => setActiveTab(tab as TabType)}
+          onStatusTabChange={tab => setActiveTab(tab as TabType)}
           emptyMessage={L.empty_requests}
         />
       ) : (
@@ -377,7 +379,7 @@ export function LeaveManagementPage() {
           searchable={false}
           statusTabs={tabs}
           activeStatusTab={activeTab}
-          onStatusTabChange={(tab) => setActiveTab(tab as TabType)}
+          onStatusTabChange={tab => setActiveTab(tab as TabType)}
           headerActions={
             <Button
               onClick={() => {

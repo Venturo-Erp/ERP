@@ -10,12 +10,14 @@
 ## 🎯 Venturo ERP 核心概念
 
 ### 世界樹（唯一真相來源）
+
 - **定義**：`tour_itinerary_items` = 所有業務的核心
 - **五面觀點**：行程/報價/需求/確認/結帳
 - **位置**：Supabase `tour_itinerary_items` 表
 - **文件**：`~/Projects/venturo-erp/docs/CORE_CONCEPT.md`
 
 ### 成本法則
+
 - **原則**：一個數字一路修正，不分估價/實際
 - **邏輯**：報價 → 確認 → 實際成本（同一欄位）
 - **文件**：`memory/2026-03-13-erp-core-concept.md`
@@ -25,11 +27,13 @@
 ## 💰 財務流程
 
 ### 請款流程
+
 - **起點**：需求單確認
 - **流程**：需求單 → 請款單 → 會計審核 → 付款
 - **文件**：`memory/2026-03-16-requirements-flow.md`
 
 ### 收款流程
+
 - **起點**：行程確認
 - **流程**：行程確認 → 收款單 → 客戶付款
 - **規則**：待補充
@@ -39,6 +43,7 @@
 ## 🏛️ 租戶架構
 
 ### 附屬國概念
+
 - **主租戶**：角落旅行社（CORNER）
 - **附屬租戶**：富順、勁揚
 - **規則**：獨立 workspace_id，資料完全隔離
@@ -49,6 +54,7 @@
 ## 🎯 產品定位
 
 ### 角落旅行社（品牌）
+
 - **定位**：高端不是貴，是值得
 - **客群**：追求品質的旅客
 - **差異化**：深度體驗 > 走馬看花
@@ -57,16 +63,19 @@
 ### Venturo ERP（產品）
 
 **核心賣點**（2026-04-03 確認）：
+
 1. **可客製化** → 插件架構（不是大改特改）
 2. **AI 客服整合** → 殺手級功能
 3. **價格有競爭力** → 訂閱制 $299-1,499/月
 
 **目標客群**：
+
 - 小旅行社（沒官網，用社群媒體接單）
 - 痛點：客服訊息散落在 LINE、FB、IG
 - 需求：統一管理客戶對話 + AI 自動回覆
 
 **差異化優勢**：
+
 - 競品多是官網式 CRM（不適合社群接單）
 - 我們整合社群客服（LINE、FB、IG）
 - AI 處理重複性問題（歷史報價查詢、建立需求單）
@@ -76,14 +85,17 @@
 ## 🚀 開發優先級
 
 **已完成**：
+
 - ✅ LINE 客服整合
 
 **高優先**（2026-04-03）：
+
 - 🔥 Facebook Messenger 客服
 - 🔥 Instagram DM 客服
 - 📋 工具整合（歷史報價查詢、建立需求單）
 
 **商業模式**：
+
 - 基本版：$299/月
 - 專業版：$699/月
 - 社群版：$699/月（LINE + FB + IG）
@@ -111,9 +123,11 @@
 ## 🎯 旅遊資料庫平台戰略（2026-04-03 更新）
 
 ### 願景
+
 從「客服自動化」到「旅遊資源平台」，釋放人力做高價值工作。
 
 **核心概念：**
+
 ```
 客戶自己選（景點/餐廳/酒店）
   ↓
@@ -128,16 +142,19 @@
 ```
 
 **階段式建置：**
+
 1. **Phase 1（現在）**：景點資料庫（清邁 50 個）
 2. **Phase 2（1-2 月後）**：餐廳資料庫
 3. **Phase 3（3-6 月後）**：酒店資料庫
 
 **資料來源：**
+
 - 現有行程提取
 - 供應商推薦
 - 市場調研（持續優化）
 
 **競爭優勢：**
+
 - 不是單純 AI 客服，是完整資料庫
 - 資料越累積越有價值（護城河）
 - 深度整合 ERP（供應商/成本/利潤管理）
@@ -147,11 +164,13 @@
 ## 🚀 ERP 差異化策略（2026-04-03 更新）
 
 ### 核心賣點
+
 1. **可客製化（插件架構）** — 不是大改特改，符合邏輯的擴充
 2. **AI 客服整合** — 殺手級功能，LINE + FB + IG 全通路
 3. **價格有競爭力** — 不比競品貴
 
 ### 目標客群：小旅行社
+
 - 沒有官網
 - 主要用社群媒體接單（FB/IG/LINE）
 - 需要 AI 客服省人力
@@ -160,13 +179,14 @@
 
 **重要：AI 客服是「我們的服務」，不是 ERP 功能**
 
-| 方案 | 月費 | 包含 | 適合 |
-|------|------|------|------|
-| 基礎版 | $299/月 | LINE 客服 | 測試用戶 |
-| 社群版 | $699/月 | LINE + FB + IG | 小旅行社（主推） |
-| 進階版 | $1,499/月 | 全通路 + 工具整合 | 中型旅行社 |
+| 方案   | 月費      | 包含              | 適合             |
+| ------ | --------- | ----------------- | ---------------- |
+| 基礎版 | $299/月   | LINE 客服         | 測試用戶         |
+| 社群版 | $699/月   | LINE + FB + IG    | 小旅行社（主推） |
+| 進階版 | $1,499/月 | 全通路 + 工具整合 | 中型旅行社       |
 
 **服務流程：**
+
 1. 租戶申請 + 付費
 2. 租戶授權（LINE 管理員 / FB Business Manager）
 3. **我們後台手動設定**（無前台 UI）
@@ -174,10 +194,12 @@
 5. 每月收款
 
 **技術架構：**
+
 - ❌ 不做：ERP 前台 UI、OAuth 流程、API key 管理
 - ✅ 只做：Webhook API、內部管理 API、核心邏輯
 
 ### 開發優先級（2026 Q2）
+
 1. ✅ LINE 客服（已完成）
 2. 🔥 Facebook Messenger 客服（高優先）
 3. 🔥 Instagram DM 客服（高優先）
@@ -193,6 +215,7 @@
 ### Phase 1（現在 - 12 個月）：建立客戶基礎
 
 **產品**：Venturo ERP 核心功能
+
 - AI 客服（LINE + FB + IG）
 - 行程管理、報價系統、客戶管理
 
@@ -200,6 +223,7 @@
 **目標**：50-100 家旅行社
 
 **同時進行**：
+
 - 角落內部使用景點系統
 - 累積資料（景點/餐廳/酒店）
 - 優化功能、建立標準流程
@@ -211,15 +235,18 @@
 **前提**：已有 50+ 家 ERP 客戶
 
 **服務 1：景點資料庫**
+
 - 定價：$500/城市（一次性建置）
 - 維護：$50/月（更新 + 新增）
 - 內容：景點 + 餐廳 + 酒店 + 供應商
 
 **服務 2：供應商媒合**
+
 - 定價：佣金制（3-5%）或月費 $299
 - 價值：談判更好價格、品質把關
 
 **收入預估（50 家 x 50% 購買率）：**
+
 - 第一年：$27,500（資料庫建置）
 - 之後：$15,000/年（維護訂閱）
 
@@ -239,6 +266,7 @@
 ## 🎯 階段性產品策略（2026-04-03 更新）
 
 ### 核心理念
+
 **不強迫客戶一次跳到最先進，提供進階路徑。**
 
 ---
@@ -246,11 +274,13 @@
 ### 階段 1：紙娃娃系統（基礎版）
 
 **功能：**
+
 - 客人從 50 個景點選擇
 - 業務收到清單，人工排程
 - 剔除不合理、排序、建議替代
 
 **適合：**
+
 - 傳統旅行社
 - 不想 AI 介入
 - 預算有限
@@ -262,6 +292,7 @@
 ### 階段 2：AI 輔助系統（進階版）
 
 **功能：**
+
 - 客人選景點
 - AI 自動分析屬性（親子/浪漫/冒險）
 - AI 推薦路線（避免來回）
@@ -269,6 +300,7 @@
 - 業務審核 + 微調
 
 **適合：**
+
 - 願意嘗試 AI
 - 想提升效率
 - 但還不完全信任 AI
@@ -280,12 +312,14 @@
 ### 階段 3：全自動系統（旗艦版）
 
 **功能：**
+
 - AI 主動引導客人說出偏好
 - 根據關鍵字智能推薦（含標籤匹配）
 - AI 自動規劃完整行程
 - 業務快速確認（幾乎不用調整）
 
 **景點標籤系統：**
+
 ```json
 {
   "atmosphere": ["relaxed", "adventurous", "romantic", "family"],
@@ -296,6 +330,7 @@
 ```
 
 **適合：**
+
 - 完全擁抱 AI
 - 追求極致效率
 - 信任系統
@@ -329,6 +364,7 @@
 ### 核心需求
 
 **場景：跨國業務**
+
 ```
 角落旅行社（台灣）
 → 安排清邁行程
@@ -346,7 +382,7 @@
 ```sql
 CREATE TABLE destinations (
   id UUID PRIMARY KEY,
-  
+
   -- 多語言名稱
   name_zh_tw TEXT,      -- 繁體中文（台灣客戶）
   name_zh_cn TEXT,      -- 簡體中文（中國客戶）
@@ -354,15 +390,15 @@ CREATE TABLE destinations (
   name_th TEXT,         -- 泰文（當地司機）
   name_ja TEXT,         -- 日文（日本客戶）
   name_ko TEXT,         -- 韓文（韓國客戶）
-  
+
   -- Google Maps 整合（最重要）
   google_maps_url TEXT NOT NULL,  -- 官方連結
   google_place_id TEXT,            -- Place ID（永久不變）
-  
+
   -- 座標（從 URL 提取）
   latitude DECIMAL,
   longitude DECIMAL,
-  
+
   -- 其他資訊
   ...
 );
@@ -394,6 +430,7 @@ CREATE TABLE destinations (
 #### 場景 1：發行程給泰國司機
 
 **舊方式（只有中文）：**
+
 ```
 Day 1:
 - 素帖寺
@@ -402,6 +439,7 @@ Day 1:
 ```
 
 **司機困擾：**
+
 - 不認識中文
 - 要手動翻譯
 - 可能找錯地方
@@ -411,19 +449,21 @@ Day 1:
 **新方式（多語言 + Google Maps）：**
 
 **行程表自動轉換語言：**
+
 ```
 Day 1:
 - วัดพระธาตุดอยสุเทพ（素帖寺）
   📍 Google Maps: [點擊導航]
-  
+
 - Elephant Nature Park（大象保育營）
   📍 Google Maps: [點擊導航]
-  
+
 - ถนนนิมมาน（寧曼路）
   📍 Google Maps: [點擊導航]
 ```
 
 **司機操作：**
+
 - 看到泰文名稱（熟悉）
 - 點 Google Maps（自動導航）
 - 完成！
@@ -433,14 +473,17 @@ Day 1:
 #### 場景 2：多國客戶
 
 **台灣客戶：**
+
 - 看行程表 → 顯示繁體中文
 - 「素帖寺」
 
 **日本客戶：**
+
 - 看行程表 → 顯示日文
 - 「ドイステープ寺院」
 
 **韓國客戶：**
+
 - 看行程表 → 顯示韓文
 - 「도이수텝 사원」
 
@@ -454,21 +497,21 @@ Day 1:
 
 ```typescript
 async function getPlaceDetails(placeId: string, language: string) {
-  const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&language=${language}&key=${API_KEY}`;
-  
-  const response = await fetch(url);
-  const data = await response.json();
-  
+  const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&language=${language}&key=${API_KEY}`
+
+  const response = await fetch(url)
+  const data = await response.json()
+
   return {
-    name: data.result.name,  // 根據 language 自動返回對應語言
-    address: data.result.formatted_address
-  };
+    name: data.result.name, // 根據 language 自動返回對應語言
+    address: data.result.formatted_address,
+  }
 }
 
 // 範例
-await getPlaceDetails('ChIJ...', 'th'); // 回傳泰文
-await getPlaceDetails('ChIJ...', 'zh-TW'); // 回傳繁中
-await getPlaceDetails('ChIJ...', 'ja'); // 回傳日文
+await getPlaceDetails('ChIJ...', 'th') // 回傳泰文
+await getPlaceDetails('ChIJ...', 'zh-TW') // 回傳繁中
+await getPlaceDetails('ChIJ...', 'ja') // 回傳日文
 ```
 
 **成本：** $17 / 1,000 次（可接受）
@@ -481,25 +524,26 @@ await getPlaceDetails('ChIJ...', 'ja'); // 回傳日文
 // 根據司機/客戶語言設定顯示
 function renderItinerary(itinerary, userLanguage) {
   return itinerary.items.map(item => {
-    const destination = item.destination;
-    
+    const destination = item.destination
+
     // 根據語言選擇對應名稱
-    const displayName = {
-      'zh-TW': destination.name_zh_tw,
-      'zh-CN': destination.name_zh_cn,
-      'en': destination.name_en,
-      'th': destination.name_th,
-      'ja': destination.name_ja,
-      'ko': destination.name_ko
-    }[userLanguage] || destination.name_en;
-    
+    const displayName =
+      {
+        'zh-TW': destination.name_zh_tw,
+        'zh-CN': destination.name_zh_cn,
+        en: destination.name_en,
+        th: destination.name_th,
+        ja: destination.name_ja,
+        ko: destination.name_ko,
+      }[userLanguage] || destination.name_en
+
     return {
       name: displayName,
       googleMapsUrl: destination.google_maps_url,
       // 司機點擊自動導航
-      navigationLink: destination.google_maps_url
-    };
-  });
+      navigationLink: destination.google_maps_url,
+    }
+  })
 }
 ```
 
@@ -508,6 +552,7 @@ function renderItinerary(itinerary, userLanguage) {
 #### 3. 小車系統整合
 
 **未來功能：**
+
 ```
 客服建立行程
   ↓
@@ -521,6 +566,7 @@ function renderItinerary(itinerary, userLanguage) {
 ```
 
 **資料來源：**
+
 - 景點座標（從 Google Maps URL 提取）
 - 飯店座標（同上）
 - 自動規劃路線（Google Directions API）
@@ -532,11 +578,13 @@ function renderItinerary(itinerary, userLanguage) {
 #### Phase 1：基礎多語言（立即做）
 
 **人工建立：**
+
 - 繁中名稱（台灣客戶）
 - 英文名稱（國際通用）
 - Google Maps URL（必填）
 
 **其他語言：**
+
 - 之後需要時再補
 
 ---
@@ -544,16 +592,17 @@ function renderItinerary(itinerary, userLanguage) {
 #### Phase 2：API 自動取得（未來）
 
 **當需要泰文、日文、韓文時：**
+
 ```typescript
 // 從 Place ID 自動取得多語言
-const thaiName = await getPlaceDetails(placeId, 'th');
-const japaneseName = await getPlaceDetails(placeId, 'ja');
+const thaiName = await getPlaceDetails(placeId, 'th')
+const japaneseName = await getPlaceDetails(placeId, 'ja')
 
 // 更新資料庫
 await updateDestination({
   name_th: thaiName,
-  name_ja: japaneseName
-});
+  name_ja: japaneseName,
+})
 ```
 
 ---
@@ -561,16 +610,19 @@ await updateDestination({
 ### 商業價值
 
 **內部效益：**
+
 - ✅ 泰國司機更容易理解行程
 - ✅ 減少溝通錯誤
 - ✅ 提升作業效率
 
 **對外賣點：**
+
 - ✅ 支援多國客戶（日韓市場）
 - ✅ 自動語言切換（高級感）
 - ✅ 與當地司機無縫整合
 
 **差異化：**
+
 - 競品只有繁中介面
 - 我們支援多語言行程表
 - 直接整合 Google Maps 導航
@@ -580,16 +632,19 @@ await updateDestination({
 ### 優先級
 
 **現在：**
+
 - ✅ 加入 `google_maps_url` 欄位（已做）
 - ✅ 加入 `google_place_id` 欄位（已做）
 - ✅ 加入多語言名稱欄位（待做，低優先）
 
 **未來（有跨國業務時）：**
+
 - 補充泰文、日文、韓文名稱
 - 小車系統 GPS 整合
 - 自動語言切換
 
 **成本：**
+
 - 欄位擴充：免費（只是加欄位）
 - API 取得多語言：$17 / 1,000 次（需要時才用）
 

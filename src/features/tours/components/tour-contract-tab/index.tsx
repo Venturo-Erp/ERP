@@ -104,18 +104,18 @@ export function TourContractTab({ tour }: TourContractTabProps) {
   const [signerPhone, setSignerPhone] = useState('')
   const [signerAddress, setSignerAddress] = useState('')
   const [signerIdNumber, setSignerIdNumber] = useState('')
-  
+
   // 合約資訊欄位
   const [gatherLocation, setGatherLocation] = useState('桃園國際機場第一航廈')
   const [gatherTime, setGatherTime] = useState('06:00')
   const [depositAmount, setDepositAmount] = useState('')
   const [balanceAmount, setBalanceAmount] = useState('')
-  
+
   // 附件勾選
   const [includeItinerary, setIncludeItinerary] = useState(true)
   const [includeQuote, setIncludeQuote] = useState(false)
   const [includeMemberList, setIncludeMemberList] = useState(true)
-  
+
   // 代表人（多人簽約時）
   const [representativeId, setRepresentativeId] = useState<string>('')
 
@@ -246,9 +246,10 @@ export function TourContractTab({ tour }: TourContractTabProps) {
           workspaceId: tour.workspace_id,
           memberIds: selectedMemberIds,
           signerType,
-          signerName: selectedMemberIds.length > 1 && signerType === 'individual'
-            ? allMembers.find(m => m.id === representativeId)?.name || ''
-            : signerName.trim(),
+          signerName:
+            selectedMemberIds.length > 1 && signerType === 'individual'
+              ? allMembers.find(m => m.id === representativeId)?.name || ''
+              : signerName.trim(),
           signerPhone: signerPhone.trim(),
           signerAddress: signerAddress.trim() || undefined,
           signerIdNumber: signerIdNumber.trim() || undefined,
@@ -262,12 +263,14 @@ export function TourContractTab({ tour }: TourContractTabProps) {
             depositAmount: depositAmount || '0',
             balanceAmount: balanceAmount || '0',
             // 多人簽約時，顯示「XXX等N人」
-            travelerDisplayName: selectedMemberIds.length > 1 && signerType === 'individual'
-              ? `${allMembers.find(m => m.id === representativeId)?.name || ''}等${selectedMemberIds.length}人`
-              : undefined,
-            memberNames: selectedMemberIds.length > 1
-              ? allMembers.filter(m => selectedMemberIds.includes(m.id)).map(m => m.name)
-              : undefined,
+            travelerDisplayName:
+              selectedMemberIds.length > 1 && signerType === 'individual'
+                ? `${allMembers.find(m => m.id === representativeId)?.name || ''}等${selectedMemberIds.length}人`
+                : undefined,
+            memberNames:
+              selectedMemberIds.length > 1
+                ? allMembers.filter(m => selectedMemberIds.includes(m.id)).map(m => m.name)
+                : undefined,
           },
         }),
       })
@@ -311,9 +314,9 @@ export function TourContractTab({ tour }: TourContractTabProps) {
     try {
       const { error } = await supabase
         .from('contracts')
-        .update({ 
+        .update({
           status: 'cancelled',
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', contract.id)
 
@@ -328,7 +331,11 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
   // 重新產生合約（取消舊的 → 帶入同樣團員開啟建立對話框）
   const handleRecreateContract = async (contract: Contract) => {
-    if (!confirm(`確定要重新產生合約「${contract.code}」嗎？\n舊合約將被取消，並以相同團員建立新合約。`)) {
+    if (
+      !confirm(
+        `確定要重新產生合約「${contract.code}」嗎？\n舊合約將被取消，並以相同團員建立新合約。`
+      )
+    ) {
       return
     }
 
@@ -338,7 +345,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
         .from('contracts')
         .update({
           status: 'cancelled',
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', contract.id)
 
@@ -387,7 +394,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
       const res = await fetch('/api/contracts/paper-sign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           contractId: paperSignContract.id,
           signedDate: paperSignDate,
         }),
@@ -434,94 +441,103 @@ export function TourContractTab({ tour }: TourContractTabProps) {
           <div className="px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
               <FileSignature className="w-4 h-4 text-morandi-gold" />
-              <span className="font-medium text-morandi-primary">已建立合約 ({contracts.filter(c => c.status !== 'cancelled').length})</span>
+              <span className="font-medium text-morandi-primary">
+                已建立合約 ({contracts.filter(c => c.status !== 'cancelled').length})
+              </span>
             </div>
           </div>
           <div className="divide-y divide-border">
-            {contracts.filter(c => c.status !== 'cancelled').map(contract => (
-              <div key={contract.id} className="px-4 py-3 flex items-center justify-between">
-                <div>
+            {contracts
+              .filter(c => c.status !== 'cancelled')
+              .map(contract => (
+                <div key={contract.id} className="px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-morandi-primary">
+                        {contract.signer_name}
+                      </span>
+                      {contract.member_ids?.length > 1 && (
+                        <span className="text-sm text-morandi-secondary">
+                          等 {contract.member_ids.length} 人
+                        </span>
+                      )}
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded-full ${
+                          contract.status === 'signed'
+                            ? 'bg-morandi-green/10 text-morandi-green'
+                            : contract.status === 'sent'
+                              ? 'bg-status-info/10 text-status-info'
+                              : 'bg-morandi-container/50 text-morandi-secondary'
+                        }`}
+                      >
+                        {contract.status === 'signed'
+                          ? '已簽署'
+                          : contract.status === 'sent'
+                            ? '已發送'
+                            : '草稿'}
+                      </span>
+                    </div>
+                    <div className="text-xs text-morandi-secondary mt-1">
+                      {CONTRACT_TEMPLATE_LABELS[contract.template as ContractTemplate]} ·{' '}
+                      {contract.code}
+                    </div>
+                  </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-morandi-primary">{contract.signer_name}</span>
-                    {contract.member_ids?.length > 1 && (
-                      <span className="text-sm text-morandi-secondary">
-                        等 {contract.member_ids.length} 人
+                    {contract.signed_at && (
+                      <span className="text-xs text-morandi-green">
+                        ✓ 簽於 {new Date(contract.signed_at).toLocaleDateString('zh-TW')}
                       </span>
                     )}
-                    <span
-                      className={`text-xs px-2 py-0.5 rounded-full ${
-                        contract.status === 'signed'
-                          ? 'bg-morandi-green/10 text-morandi-green'
-                          : contract.status === 'sent'
-                            ? 'bg-status-info/10 text-status-info'
-                            : 'bg-morandi-container/50 text-morandi-secondary'
-                      }`}
-                    >
-                      {contract.status === 'signed'
-                        ? '已簽署'
-                        : contract.status === 'sent'
-                          ? '已發送'
-                          : '草稿'}
-                    </span>
-                  </div>
-                  <div className="text-xs text-morandi-secondary mt-1">
-                    {CONTRACT_TEMPLATE_LABELS[contract.template as ContractTemplate]} · {contract.code}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {contract.signed_at && (
-                    <span className="text-xs text-morandi-green">
-                      ✓ 簽於 {new Date(contract.signed_at).toLocaleDateString('zh-TW')}
-                    </span>
-                  )}
-                  {contract.status !== 'signed' && (
+                    {contract.status !== 'signed' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => openPaperSignDialog(contract)}
+                        title="標記為紙本簽署"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => openPaperSignDialog(contract)}
-                      title="標記為紙本簽署"
+                      onClick={() => copyLink(contract)}
+                      title="複製簽約連結"
                     >
-                      <FileText className="w-4 h-4" />
+                      <Copy className="w-4 h-4" />
                     </Button>
-                  )}
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => copyLink(contract)}
-                    title="複製簽約連結"
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => window.open(`/public/contract/sign/${contract.code}`, '_blank')}
-                    title="開啟簽約頁面"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRecreateContract(contract)}
-                    title="重新產生合約"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </Button>
-                  {contract.status !== 'signed' && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleCancelContract(contract)}
-                      title="取消合約"
-                      className="text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
+                      onClick={() =>
+                        window.open(`/public/contract/sign/${contract.code}`, '_blank')
+                      }
+                      title="開啟簽約頁面"
                     >
-                      <X className="w-4 h-4" />
+                      <ExternalLink className="w-4 h-4" />
                     </Button>
-                  )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRecreateContract(contract)}
+                      title="重新產生合約"
+                    >
+                      <RefreshCw className="w-4 h-4" />
+                    </Button>
+                    {contract.status !== 'signed' && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleCancelContract(contract)}
+                        title="取消合約"
+                        className="text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       )}
@@ -568,9 +584,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                 <div className="flex-1">
                   <span className="font-medium text-morandi-primary">{member.name}</span>
                   {member.id_number && (
-                    <span className="text-sm text-morandi-secondary ml-2">
-                      {member.id_number}
-                    </span>
+                    <span className="text-sm text-morandi-secondary ml-2">{member.id_number}</span>
                   )}
                 </div>
               </div>
@@ -586,26 +600,34 @@ export function TourContractTab({ tour }: TourContractTabProps) {
             已取消合約（{contracts.filter(c => c.status === 'cancelled').length}）
           </summary>
           <div className="divide-y divide-border border-t">
-            {contracts.filter(c => c.status === 'cancelled').map(contract => (
-              <div key={contract.id} className="px-4 py-3 flex items-center justify-between opacity-60">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-morandi-primary line-through">{contract.signer_name}</span>
-                    {contract.member_ids?.length > 1 && (
-                      <span className="text-sm text-morandi-secondary">
-                        等 {contract.member_ids.length} 人
+            {contracts
+              .filter(c => c.status === 'cancelled')
+              .map(contract => (
+                <div
+                  key={contract.id}
+                  className="px-4 py-3 flex items-center justify-between opacity-60"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-morandi-primary line-through">
+                        {contract.signer_name}
                       </span>
-                    )}
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-red/10 text-morandi-red">
-                      已取消
-                    </span>
-                  </div>
-                  <div className="text-xs text-morandi-secondary mt-1">
-                    {CONTRACT_TEMPLATE_LABELS[contract.template as ContractTemplate]} · {contract.code}
+                      {contract.member_ids?.length > 1 && (
+                        <span className="text-sm text-morandi-secondary">
+                          等 {contract.member_ids.length} 人
+                        </span>
+                      )}
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-red/10 text-morandi-red">
+                        已取消
+                      </span>
+                    </div>
+                    <div className="text-xs text-morandi-secondary mt-1">
+                      {CONTRACT_TEMPLATE_LABELS[contract.template as ContractTemplate]} ·{' '}
+                      {contract.code}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
         </details>
       )}
@@ -660,10 +682,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
               ) : selectedMemberIds.length > 1 ? (
                 <div>
                   <Label>代表人（顯示「XXX 等 {selectedMemberIds.length} 人」）</Label>
-                  <Select
-                    value={representativeId}
-                    onValueChange={setRepresentativeId}
-                  >
+                  <Select value={representativeId} onValueChange={setRepresentativeId}>
                     <SelectTrigger>
                       <SelectValue placeholder="選擇代表人" />
                     </SelectTrigger>
@@ -792,7 +811,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   <Checkbox
                     id="include-itinerary"
                     checked={includeItinerary}
-                    onCheckedChange={(checked) => setIncludeItinerary(!!checked)}
+                    onCheckedChange={checked => setIncludeItinerary(!!checked)}
                   />
                   <label htmlFor="include-itinerary" className="text-sm cursor-pointer">
                     附上行程表
@@ -802,7 +821,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                   <Checkbox
                     id="include-quote"
                     checked={includeQuote}
-                    onCheckedChange={(checked) => setIncludeQuote(!!checked)}
+                    onCheckedChange={checked => setIncludeQuote(!!checked)}
                   />
                   <label htmlFor="include-quote" className="text-sm cursor-pointer">
                     附上報價單
@@ -813,7 +832,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                     <Checkbox
                       id="include-member-list"
                       checked={includeMemberList}
-                      onCheckedChange={(checked) => setIncludeMemberList(!!checked)}
+                      onCheckedChange={checked => setIncludeMemberList(!!checked)}
                     />
                     <label htmlFor="include-member-list" className="text-sm cursor-pointer">
                       附上團員名單（{selectedMemberIds.length} 人）
@@ -914,7 +933,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
               <Input
                 type="date"
                 value={paperSignDate}
-                onChange={(e) => setPaperSignDate(e.target.value)}
+                onChange={e => setPaperSignDate(e.target.value)}
               />
               <p className="text-xs text-morandi-secondary">紙本合約收到的日期</p>
             </div>

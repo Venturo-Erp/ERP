@@ -7,12 +7,12 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { format } from 'date-fns'
-import { 
-  Inbox, 
-  Phone, 
-  Mail, 
-  Calendar, 
-  Users, 
+import {
+  Inbox,
+  Phone,
+  Mail,
+  Calendar,
+  Users,
   MapPin,
   MoreHorizontal,
   Eye,
@@ -32,12 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/stores/auth-store'
@@ -89,7 +84,7 @@ export default function InquiriesPage() {
     try {
       const res = await fetch('/api/inquiries')
       if (!res.ok) throw new Error('載入失敗')
-      
+
       const data = await res.json()
 
       interface ApiRow {
@@ -205,9 +200,7 @@ export default function InquiriesPage() {
       key: 'code',
       label: '編號',
       width: '120px',
-      render: (_, row) => (
-        <span className="font-mono text-sm">{row.code}</span>
-      ),
+      render: (_, row) => <span className="font-mono text-sm">{row.code}</span>,
     },
     {
       key: 'customer_name',
@@ -236,9 +229,7 @@ export default function InquiriesPage() {
       key: 'travel_date',
       label: '出發日',
       width: '100px',
-      render: (_, row) => row.travel_date 
-        ? format(new Date(row.travel_date), 'MM/dd')
-        : '-',
+      render: (_, row) => (row.travel_date ? format(new Date(row.travel_date), 'MM/dd') : '-'),
     },
     {
       key: 'people_count',
@@ -290,7 +281,7 @@ export default function InquiriesPage() {
           <CheckCircle className="w-4 h-4 mr-2" />
           標記已成交
         </DropdownMenuItem>
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={() => updateStatus(row, 'cancelled')}
           className="text-destructive"
         >
@@ -359,20 +350,17 @@ export default function InquiriesPage() {
                     <div>
                       <span className="text-muted-foreground">出發日期：</span>
                       <span className="font-medium">
-                        {selectedInquiry.travel_date 
+                        {selectedInquiry.travel_date
                           ? format(new Date(selectedInquiry.travel_date), 'yyyy/MM/dd')
-                          : '未指定'
-                        }
+                          : '未指定'}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">來源：</span>
-                      <span className="font-medium">
-                        {selectedInquiry.template_name || '-'}
-                      </span>
+                      <span className="font-medium">{selectedInquiry.template_name || '-'}</span>
                     </div>
                   </div>
-                  
+
                   {selectedInquiry.notes && (
                     <div className="mt-3 p-3 bg-muted rounded-lg">
                       <span className="text-sm text-muted-foreground">客人備註：</span>
@@ -388,10 +376,7 @@ export default function InquiriesPage() {
                   </h4>
                   <div className="grid grid-cols-2 gap-3">
                     {selectedInquiry.selected_items?.map((item, idx) => (
-                      <div 
-                        key={idx}
-                        className="flex gap-3 p-3 bg-muted/50 rounded-lg"
-                      >
+                      <div key={idx} className="flex gap-3 p-3 bg-muted/50 rounded-lg">
                         {item.image_url && (
                           <img
                             src={item.image_url}
@@ -418,7 +403,7 @@ export default function InquiriesPage() {
                     placeholder="記錄跟進狀況..."
                     rows={3}
                     className="mt-2"
-                    onBlur={(e) => {
+                    onBlur={e => {
                       if (e.target.value !== selectedInquiry.internal_notes) {
                         updateNotes(selectedInquiry, e.target.value)
                       }

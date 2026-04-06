@@ -75,7 +75,9 @@ export function MapExplorerDialog({
         // 查詢同地區的景點（有座標的）
         let query = supabase
           .from('attractions')
-          .select('id, name, english_name, description, category, images, thumbnail, address, latitude, longitude, phone, website, opening_hours, data_verified, region_id, city_id, country_id, is_active, workspace_id, created_at, updated_at')
+          .select(
+            'id, name, english_name, description, category, images, thumbnail, address, latitude, longitude, phone, website, opening_hours, data_verified, region_id, city_id, country_id, is_active, workspace_id, created_at, updated_at'
+          )
           .not('latitude', 'is', null)
           .not('longitude', 'is', null)
 
@@ -210,7 +212,9 @@ export function MapExplorerDialog({
                           {attraction.name}
                         </div>
                         {attraction.category && (
-                          <div className="text-xs text-dark-text-muted mt-0.5">{attraction.category}</div>
+                          <div className="text-xs text-dark-text-muted mt-0.5">
+                            {attraction.category}
+                          </div>
                         )}
                       </div>
                       <Badge

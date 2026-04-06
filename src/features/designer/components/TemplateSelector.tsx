@@ -67,7 +67,13 @@ export function TemplateSelector({
   useEffect(() => {
     // 載入行程表資料
     const loadItinerary = async (id: string) => {
-      const { data, error } = await supabase.from('itineraries').select('id, tour_id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary, version_records, workspace_id, created_at, updated_at').eq('id', id).single()
+      const { data, error } = await supabase
+        .from('itineraries')
+        .select(
+          'id, tour_id, title, subtitle, tour_code, cover_image, country, city, departure_date, duration_days, meeting_info, leader, outbound_flight, return_flight, daily_itinerary, version_records, workspace_id, created_at, updated_at'
+        )
+        .eq('id', id)
+        .single()
 
       if (error) throw error
 
@@ -94,7 +100,13 @@ export function TemplateSelector({
 
     // 載入旅遊團資料
     const loadTour = async (id: string) => {
-      const { data, error } = await supabase.from('tours').select('id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by').eq('id', id).single()
+      const { data, error } = await supabase
+        .from('tours')
+        .select(
+          'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
+        )
+        .eq('id', id)
+        .single()
 
       if (error) throw error
 

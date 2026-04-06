@@ -356,14 +356,21 @@ export function ImageEditor({
                 'relative bg-black rounded-lg overflow-hidden select-none',
                 isDragging ? 'cursor-grabbing' : 'cursor-grab'
               )}
-              style={{ aspectRatio: freeMode ? undefined : aspectRatio, width: '100%', maxHeight: '100%' }}
+              style={{
+                aspectRatio: freeMode ? undefined : aspectRatio,
+                width: '100%',
+                maxHeight: '100%',
+              }}
               onWheel={handleWheel}
               onMouseDown={handleMouseDown}
             >
               <img
                 src={previewSrc}
                 alt={tCommon('preview')}
-                className={cn('w-full h-full pointer-events-none', freeMode ? 'object-contain' : 'object-cover')}
+                className={cn(
+                  'w-full h-full pointer-events-none',
+                  freeMode ? 'object-contain' : 'object-cover'
+                )}
                 style={{
                   objectPosition: `${settings.x}% ${settings.y}%`,
                   transform: `scale(${settings.scale})`,

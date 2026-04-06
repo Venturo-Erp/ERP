@@ -1,194 +1,201 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-TW">
-<head>
-  <meta charset="UTF-8">
-  <title>檢查舊資料</title>
-  <style>
-    body {
-      font-family: monospace;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-    .container {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin: 10px 5px;
-    }
-    button:hover { background: #45a049; }
-    pre {
-      background: #f4f4f4;
-      padding: 15px;
-      border-radius: 4px;
-      overflow-x: auto;
-      white-space: pre-wrap;
-    }
-    .error { color: red; }
-    .success { color: green; }
-    .warning { color: orange; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>🔍 檢查舊資料</h1>
-    <button onclick="checkData()">檢查 localStorage</button>
-    <button onclick="checkIndexedDB()">檢查 IndexedDB</button>
-    <div id="output"></div>
-  </div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>檢查舊資料</title>
+    <style>
+      body {
+        font-family: monospace;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+      button {
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 10px 5px;
+      }
+      button:hover {
+        background: #45a049;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 15px;
+        border-radius: 4px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
+      .error {
+        color: red;
+      }
+      .success {
+        color: green;
+      }
+      .warning {
+        color: orange;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🔍 檢查舊資料</h1>
+      <button onclick="checkData()">檢查 localStorage</button>
+      <button onclick="checkIndexedDB()">檢查 IndexedDB</button>
+      <div id="output"></div>
+    </div>
 
-  <script>
-    function log(msg, type = 'info') {
-      const output = document.getElementById('output');
-      const pre = document.createElement('pre');
-      pre.className = type;
-      pre.textContent = msg;
-      output.appendChild(pre);
-    }
-
-    function checkData() {
-      document.getElementById('output').innerHTML = '';
-
-      const stored = localStorage.getItem('channels-storage');
-      if (!stored) {
-        log('❌ 找不到 channels-storage', 'error');
-        return;
+    <script>
+      function log(msg, type = 'info') {
+        const output = document.getElementById('output')
+        const pre = document.createElement('pre')
+        pre.className = type
+        pre.textContent = msg
+        output.appendChild(pre)
       }
 
-      const data = JSON.parse(stored);
+      function checkData() {
+        document.getElementById('output').innerHTML = ''
 
-      log('=== localStorage 資料 ===\n', 'success');
+        const stored = localStorage.getItem('channels-storage')
+        if (!stored) {
+          log('❌ 找不到 channels-storage', 'error')
+          return
+        }
 
-      // 檢查群組
-      const groups = data.state?.channelGroups || [];
-      log(`頻道群組 (${groups.length} 個):`);
-      groups.forEach(g => {
-        log(`  - ${g.name} (ID: ${g.id}, created: ${g.created_at})`);
-      });
+        const data = JSON.parse(stored)
 
-      // 檢查頻道
-      const channels = data.state?.channels || [];
-      log(`\n頻道 (${channels.length} 個):`);
-      channels.forEach(ch => {
-        const groupName = groups.find(g => g.id === ch.group_id)?.name || '未分組';
-        log(`  - ${ch.name} (type: ${ch.type}, group: ${groupName}, ID: ${ch.id})`);
-      });
+        log('=== localStorage 資料 ===\n', 'success')
 
-      // 檢查 DM
-      const dms = data.state?.directMessages || [];
-      log(`\n直接訊息 (${dms.length} 個):`);
-      dms.forEach(dm => {
-        log(`  - participants: ${dm.participant_ids.join(', ')} (ID: ${dm.id})`);
-      });
+        // 檢查群組
+        const groups = data.state?.channelGroups || []
+        log(`頻道群組 (${groups.length} 個):`)
+        groups.forEach(g => {
+          log(`  - ${g.name} (ID: ${g.id}, created: ${g.created_at})`)
+        })
 
-      // 檢查選中狀態
-      log('\n選中狀態:');
-      log(`  selectedChannel: ${data.state?.selectedChannel?.name || 'null'}`);
-      log(`  selectedDirectMessage: ${data.state?.selectedDirectMessage?.id || 'null'}`);
+        // 檢查頻道
+        const channels = data.state?.channels || []
+        log(`\n頻道 (${channels.length} 個):`)
+        channels.forEach(ch => {
+          const groupName = groups.find(g => g.id === ch.group_id)?.name || '未分組'
+          log(`  - ${ch.name} (type: ${ch.type}, group: ${groupName}, ID: ${ch.id})`)
+        })
 
-      // 檢查問題
-      log('\n⚠️ 潛在問題:', 'warning');
-      const partnerGroups = groups.filter(g => g.name === '夥伴');
-      if (partnerGroups.length > 0) {
-        log(`  - 發現 ${partnerGroups.length} 個「夥伴」群組`, 'error');
+        // 檢查 DM
+        const dms = data.state?.directMessages || []
+        log(`\n直接訊息 (${dms.length} 個):`)
+        dms.forEach(dm => {
+          log(`  - participants: ${dm.participant_ids.join(', ')} (ID: ${dm.id})`)
+        })
+
+        // 檢查選中狀態
+        log('\n選中狀態:')
+        log(`  selectedChannel: ${data.state?.selectedChannel?.name || 'null'}`)
+        log(`  selectedDirectMessage: ${data.state?.selectedDirectMessage?.id || 'null'}`)
+
+        // 檢查問題
+        log('\n⚠️ 潛在問題:', 'warning')
+        const partnerGroups = groups.filter(g => g.name === '夥伴')
+        if (partnerGroups.length > 0) {
+          log(`  - 發現 ${partnerGroups.length} 個「夥伴」群組`, 'error')
+        }
+
+        const directChannels = channels.filter(ch => ch.type === 'direct')
+        if (directChannels.length > 0) {
+          log(`  - 發現 ${directChannels.length} 個 type='direct' 的頻道`, 'error')
+        }
+
+        if (partnerGroups.length === 0 && directChannels.length === 0) {
+          log('  ✅ 沒有發現舊版資料', 'success')
+        }
       }
 
-      const directChannels = channels.filter(ch => ch.type === 'direct');
-      if (directChannels.length > 0) {
-        log(`  - 發現 ${directChannels.length} 個 type='direct' 的頻道`, 'error');
-      }
+      async function checkIndexedDB() {
+        document.getElementById('output').innerHTML = ''
 
-      if (partnerGroups.length === 0 && directChannels.length === 0) {
-        log('  ✅ 沒有發現舊版資料', 'success');
-      }
-    }
+        try {
+          const db = await new Promise((resolve, reject) => {
+            const request = indexedDB.open('VenturoOfflineDB')
+            request.onsuccess = () => resolve(request.result)
+            request.onerror = () => reject(request.error)
+          })
 
-    async function checkIndexedDB() {
-      document.getElementById('output').innerHTML = '';
+          log('=== IndexedDB 資料 ===\n', 'success')
+          log(`資料庫版本: ${db.version}`)
+          log(`可用表格: ${Array.from(db.objectStoreNames).join(', ')}\n`)
 
-      try {
-        const db = await new Promise((resolve, reject) => {
-          const request = indexedDB.open('VenturoOfflineDB');
-          request.onsuccess = () => resolve(request.result);
-          request.onerror = () => reject(request.error);
-        });
+          // 檢查 channel_groups
+          if (db.objectStoreNames.contains('channel_groups')) {
+            const groups = await new Promise((resolve, reject) => {
+              const tx = db.transaction('channel_groups', 'readonly')
+              const request = tx.objectStore('channel_groups').getAll()
+              request.onsuccess = () => resolve(request.result || [])
+              request.onerror = () => reject(request.error)
+            })
 
-        log('=== IndexedDB 資料 ===\n', 'success');
-        log(`資料庫版本: ${db.version}`);
-        log(`可用表格: ${Array.from(db.objectStoreNames).join(', ')}\n`);
+            log(`channel_groups (${groups.length} 個):`)
+            groups.forEach(g => {
+              log(`  - ${g.name} (ID: ${g.id})`)
+            })
 
-        // 檢查 channel_groups
-        if (db.objectStoreNames.contains('channel_groups')) {
-          const groups = await new Promise((resolve, reject) => {
-            const tx = db.transaction('channel_groups', 'readonly');
-            const request = tx.objectStore('channel_groups').getAll();
-            request.onsuccess = () => resolve(request.result || []);
-            request.onerror = () => reject(request.error);
-          });
-
-          log(`channel_groups (${groups.length} 個):`);
-          groups.forEach(g => {
-            log(`  - ${g.name} (ID: ${g.id})`);
-          });
-
-          const partnerGroups = groups.filter(g => g.name === '夥伴');
-          if (partnerGroups.length > 0) {
-            log(`  ⚠️ 發現 ${partnerGroups.length} 個「夥伴」群組`, 'error');
+            const partnerGroups = groups.filter(g => g.name === '夥伴')
+            if (partnerGroups.length > 0) {
+              log(`  ⚠️ 發現 ${partnerGroups.length} 個「夥伴」群組`, 'error')
+            }
           }
-        }
 
-        // 檢查 channels
-        if (db.objectStoreNames.contains('channels')) {
-          const channels = await new Promise((resolve, reject) => {
-            const tx = db.transaction('channels', 'readonly');
-            const request = tx.objectStore('channels').getAll();
-            request.onsuccess = () => resolve(request.result || []);
-            request.onerror = () => reject(request.error);
-          });
+          // 檢查 channels
+          if (db.objectStoreNames.contains('channels')) {
+            const channels = await new Promise((resolve, reject) => {
+              const tx = db.transaction('channels', 'readonly')
+              const request = tx.objectStore('channels').getAll()
+              request.onsuccess = () => resolve(request.result || [])
+              request.onerror = () => reject(request.error)
+            })
 
-          log(`\nchannels (${channels.length} 個):`);
-          channels.forEach(ch => {
-            log(`  - ${ch.name} (type: ${ch.type}, ID: ${ch.id})`);
-          });
+            log(`\nchannels (${channels.length} 個):`)
+            channels.forEach(ch => {
+              log(`  - ${ch.name} (type: ${ch.type}, ID: ${ch.id})`)
+            })
 
-          const directChannels = channels.filter(ch => ch.type === 'direct');
-          if (directChannels.length > 0) {
-            log(`  ⚠️ 發現 ${directChannels.length} 個 direct 類型頻道`, 'error');
+            const directChannels = channels.filter(ch => ch.type === 'direct')
+            if (directChannels.length > 0) {
+              log(`  ⚠️ 發現 ${directChannels.length} 個 direct 類型頻道`, 'error')
+            }
           }
+
+          // 檢查 direct_messages
+          if (db.objectStoreNames.contains('direct_messages')) {
+            const dms = await new Promise((resolve, reject) => {
+              const tx = db.transaction('direct_messages', 'readonly')
+              const request = tx.objectStore('direct_messages').getAll()
+              request.onsuccess = () => resolve(request.result || [])
+              request.onerror = () => reject(request.error)
+            })
+
+            log(`\ndirect_messages (${dms.length} 個):`)
+            dms.forEach(dm => {
+              log(`  - participants: ${dm.participant_ids.join(', ')} (ID: ${dm.id})`)
+            })
+          } else {
+            log('\n⚠️ direct_messages 表格不存在（需要升級資料庫）', 'warning')
+          }
+
+          db.close()
+        } catch (error) {
+          log(`❌ 錯誤: ${error.message}`, 'error')
         }
-
-        // 檢查 direct_messages
-        if (db.objectStoreNames.contains('direct_messages')) {
-          const dms = await new Promise((resolve, reject) => {
-            const tx = db.transaction('direct_messages', 'readonly');
-            const request = tx.objectStore('direct_messages').getAll();
-            request.onsuccess = () => resolve(request.result || []);
-            request.onerror = () => reject(request.error);
-          });
-
-          log(`\ndirect_messages (${dms.length} 個):`);
-          dms.forEach(dm => {
-            log(`  - participants: ${dm.participant_ids.join(', ')} (ID: ${dm.id})`);
-          });
-        } else {
-          log('\n⚠️ direct_messages 表格不存在（需要升級資料庫）', 'warning');
-        }
-
-        db.close();
-
-      } catch (error) {
-        log(`❌ 錯誤: ${error.message}`, 'error');
       }
-    }
-  </script>
-</body>
+    </script>
+  </body>
 </html>

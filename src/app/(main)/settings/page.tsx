@@ -9,7 +9,13 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { SettingsTabs } from './components/SettingsTabs'
 import { EmployeeForm } from '@/features/hr/components/EmployeeForm'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { LABELS } from './constants/labels'
 
 export const dynamic = 'force-dynamic'
@@ -46,9 +52,7 @@ export default function SettingsPage() {
   }
 
   const { isAdmin } = useAuthStore()
-  const hasSettingsAccess =
-    isAdmin ||
-    user?.permissions?.includes('settings')
+  const hasSettingsAccess = isAdmin || user?.permissions?.includes('settings')
 
   const handleLogout = async () => {
     await logout()
@@ -61,7 +65,7 @@ export default function SettingsPage() {
       headerActions={
         <div className="flex items-center gap-4">
           {hasSettingsAccess && <SettingsTabs />}
-          
+
           {user && (
             <div className="flex items-center gap-2 px-3 py-2 bg-morandi-container rounded-lg">
               <User className="h-4 w-4 text-morandi-secondary" />
@@ -91,12 +95,8 @@ export default function SettingsPage() {
                 <AlertCircle className="w-6 h-6 text-morandi-gold" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-morandi-primary mb-2">
-                  歡迎使用系統
-                </h3>
-                <p className="text-sm text-morandi-secondary mb-4">
-                  首次登入，建議先完成以下設定
-                </p>
+                <h3 className="text-lg font-semibold text-morandi-primary mb-2">歡迎使用系統</h3>
+                <p className="text-sm text-morandi-secondary mb-4">首次登入，建議先完成以下設定</p>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 p-3 bg-card/60 rounded-lg">
                     <div className="w-8 h-8 bg-morandi-gold/20 rounded-full flex items-center justify-center">
@@ -190,7 +190,9 @@ export default function SettingsPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={passwordData.currentPassword}
-                  onChange={e => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  onChange={e =>
+                    setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-morandi-container/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50"
                   placeholder="輸入目前密碼"
                 />
@@ -202,7 +204,9 @@ export default function SettingsPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={passwordData.newPassword}
-                  onChange={e => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                  onChange={e =>
+                    setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-morandi-container/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50"
                   placeholder="輸入新密碼（至少 6 位）"
                 />
@@ -214,7 +218,9 @@ export default function SettingsPage() {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={passwordData.confirmPassword}
-                  onChange={e => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  onChange={e =>
+                    setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))
+                  }
                   className="w-full px-3 py-2 border border-morandi-container/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50"
                   placeholder="再次輸入新密碼"
                 />

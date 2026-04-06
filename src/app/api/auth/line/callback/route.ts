@@ -1,7 +1,7 @@
 /**
  * LINE Login Callback
  * GET /api/auth/line/callback?code=xxx&state=xxx
- * 
+ *
  * LINE 授權後跳回這裡，取得用戶資料後重導向原頁面
  */
 
@@ -11,7 +11,7 @@ import { logger } from '@/lib/utils/logger'
 
 const LINE_LOGIN_CHANNEL_ID = process.env.LINE_LOGIN_CHANNEL_ID!
 const LINE_LOGIN_CHANNEL_SECRET = process.env.LINE_LOGIN_CHANNEL_SECRET!
-const CALLBACK_URL = process.env.NEXT_PUBLIC_APP_URL 
+const CALLBACK_URL = process.env.NEXT_PUBLIC_APP_URL
   ? `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/line/callback`
   : 'https://erp.venturo.tw/api/auth/line/callback'
 
@@ -87,21 +87,24 @@ export async function GET(request: NextRequest) {
 
     // 3. 存到 cookie（7 天）
     const cookieStore = await cookies()
-    cookieStore.set('line_user', JSON.stringify({
-      userId: profile.userId,
-      displayName: profile.displayName,
-      pictureUrl: profile.pictureUrl,
-    }), {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-      path: '/',
-    })
+    cookieStore.set(
+      'line_user',
+      JSON.stringify({
+        userId: profile.userId,
+        displayName: profile.displayName,
+        pictureUrl: profile.pictureUrl,
+      }),
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        path: '/',
+      }
+    )
 
     // 4. 重導向回原頁面
     return NextResponse.redirect(new URL(redirect, request.url))
-
   } catch (error) {
     logger.error('LINE Login callback error:', error)
     return NextResponse.redirect(new URL(redirect, request.url))

@@ -4,7 +4,8 @@ import { DisbursementOrder, PaymentRequest } from '@/stores/types'
 import { supabase } from '@/lib/supabase/client'
 import { invalidateDisbursementOrders, invalidatePaymentRequests } from '@/data'
 
-const DO_COLS = 'id, order_number, status, payment_request_ids, total_amount, payment_method, bank_account, confirmed_by, confirmed_at, notes, workspace_id, created_at, created_by, updated_at'
+const DO_COLS =
+  'id, order_number, status, payment_request_ids, total_amount, payment_method, bank_account, confirmed_by, confirmed_at, notes, workspace_id, created_at, created_by, updated_at'
 import { ValidationError } from '@/core/errors/app-errors'
 import { logger } from '@/lib/utils/logger'
 import { PAYMENTS_LABELS } from '../constants/labels'

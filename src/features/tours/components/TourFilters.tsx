@@ -63,12 +63,11 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
   // Local/DMC 時加入「收到的委託」分頁
   const tabs = showReceivedTab
     ? [
-        { 
-          value: 'received', 
-          label: receivedCount && receivedCount > 0 
-            ? `收到的委託 (${receivedCount})` 
-            : '收到的委託', 
-          icon: Inbox 
+        {
+          value: 'received',
+          label:
+            receivedCount && receivedCount > 0 ? `收到的委託 (${receivedCount})` : '收到的委託',
+          icon: Inbox,
         },
         ...baseTabs,
       ]

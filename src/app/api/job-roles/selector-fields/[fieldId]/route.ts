@@ -44,10 +44,7 @@ export async function PUT(
 
   // 重建映射（刪除舊的 + 插入新的）
   if (role_ids !== undefined) {
-    await supabase
-      .from('selector_field_roles')
-      .delete()
-      .eq('field_id', fieldId)
+    await supabase.from('selector_field_roles').delete().eq('field_id', fieldId)
 
     if (role_ids.length > 0) {
       const mappings = role_ids.map((role_id: string) => ({
@@ -55,9 +52,7 @@ export async function PUT(
         role_id,
       }))
 
-      const { error: mapError } = await supabase
-        .from('selector_field_roles')
-        .insert(mappings)
+      const { error: mapError } = await supabase.from('selector_field_roles').insert(mappings)
 
       if (mapError) {
         return NextResponse.json({ error: mapError.message }, { status: 500 })
