@@ -606,7 +606,6 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   }}
                 />
 
-
                 {/* 附件：團員名單表格 */}
                 {contract.include_member_list && contract.members.length > 1 && (
                   <div className="border-t-2 border-gray-200 p-8">

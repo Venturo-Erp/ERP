@@ -541,7 +541,6 @@ export function EmployeeForm({
                   </select>
                 </div>
 
-
                 {/* 聯絡資訊 */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
