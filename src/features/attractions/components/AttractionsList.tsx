@@ -66,20 +66,17 @@ export function AttractionsList({
       label: ATTRACTIONS_LIST_LABELS.景點名稱,
       sortable: true,
       render: (_: unknown, attraction: Attraction) => {
-        const missing = hasMissingData(attraction)
+        const verified = attraction.data_verified ?? false
         return (
           <div className="min-w-[180px] flex items-start gap-1.5">
-            {missing.length > 0 && (
+            {!verified && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <AlertTriangle size={14} className="text-status-warning mt-1 flex-shrink-0" />
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>
-                      {ATTRACTIONS_LIST_LABELS.LABEL_7396}
-                      {missing.join('、')}
-                    </p>
+                    <p>待驗證</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
