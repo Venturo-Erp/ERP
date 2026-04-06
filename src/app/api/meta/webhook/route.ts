@@ -76,10 +76,7 @@ export async function POST(request: NextRequest) {
 
         for (const event of messaging) {
           if (event.message) {
-            // 不 await，先回 200 再處理（Meta 要求 20 秒內回覆）
-            handleIncomingMessage(object, event).catch(err => {
-              logger.error('[Meta] handleIncomingMessage error:', err)
-            })
+            await handleIncomingMessage(object, event)
           }
         }
       }
