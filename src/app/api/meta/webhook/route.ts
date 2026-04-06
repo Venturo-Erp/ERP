@@ -29,12 +29,20 @@ export async function GET(request: NextRequest) {
   const token = searchParams.get('hub.verify_token')
   const challenge = searchParams.get('hub.challenge')
 
+  logger.info('Meta webhook GET received', {
+    mode,
+    token,
+    challenge,
+    expectedToken: VERIFY_TOKEN,
+    allParams: Object.fromEntries(searchParams.entries()),
+  })
+
   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
     logger.info('Meta webhook verified successfully')
     return new NextResponse(challenge, { status: 200 })
   }
 
-  logger.warn('Meta webhook verification failed', { mode, token })
+  logger.warn('Meta webhook verification failed', { mode, token, expectedToken: VERIFY_TOKEN })
   return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 }
 
