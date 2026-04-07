@@ -6,6 +6,7 @@
  */
 
 import { useMemo, useState, useCallback, useEffect } from 'react'
+import { TourOverview } from './tour-overview'
 import {
   FileDown,
   FileText,
@@ -282,78 +283,8 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* 總覽卡片 — 與總覽頁相同格式 */}
-      <div className="border border-border rounded-lg overflow-hidden bg-card">
-        {/* 團號表頭 */}
-        <div className="px-5 py-3 border-b border-border/60">
-          <div className="flex items-center gap-6 text-sm">
-            <span className="text-lg font-semibold text-morandi-primary">{tour.code}</span>
-            <div className="flex items-center gap-1.5 text-morandi-secondary">
-              <MapPin size={14} />
-              <span>{tour.location}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-morandi-secondary">
-              <Calendar size={14} />
-              <span>{tour.departure_date} ~ {tour.return_date}</span>
-            </div>
-            <div className="flex items-center gap-1.5 text-morandi-secondary">
-              <Users size={14} />
-              <span>{tour.current_participants ?? 0} 人</span>
-            </div>
-            <span className={`px-2 py-0.5 rounded text-xs font-medium ${statusInfo.color}`}>
-              {statusInfo.label}
-            </span>
-          </div>
-        </div>
-        {/* 財務概況 */}
-        <div className="px-5 py-3">
-        <div className="flex items-stretch">
-          <div className="flex-1 flex items-center gap-2.5 px-3">
-            <TrendingUp size={16} className="text-morandi-green shrink-0" />
-            <div className="min-w-0">
-              <p className="text-[11px] text-morandi-secondary leading-tight">
-                總收入（預估／實收）
-              </p>
-              <p className="text-sm font-semibold text-morandi-primary">
-                {formatCurrency(estimatedIncome)} / {formatCurrency(confirmedIncome)}
-              </p>
-            </div>
-          </div>
-          <div className="flex-1 flex items-center gap-2.5 px-3">
-            <HandCoins size={16} className="text-morandi-red shrink-0" />
-            <div className="min-w-0">
-              <p className="text-[11px] text-morandi-secondary leading-tight">總支出</p>
-              <p className="text-sm font-semibold text-morandi-primary">
-                {formatCurrency(totalExpense)}
-              </p>
-            </div>
-          </div>
-          <div className="flex-1 flex items-center gap-2.5 px-3">
-            <DollarSign
-              size={16}
-              className={`shrink-0 ${confirmedProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}
-            />
-            <div className="min-w-0">
-              <p className="text-[11px] text-morandi-secondary leading-tight">
-                總利潤（預估／實收）
-              </p>
-              <p className="text-sm font-semibold text-morandi-primary">
-                {formatCurrency(estimatedProfit)} / {formatCurrency(confirmedProfit)}
-              </p>
-            </div>
-          </div>
-          <div className="flex-1 flex items-center gap-2.5 px-3">
-            <FileText size={16} className="text-morandi-gold shrink-0" />
-            <div className="min-w-0">
-              <p className="text-[11px] text-morandi-secondary leading-tight">總訂單數</p>
-              <p className="text-sm font-semibold text-morandi-primary">
-                {(allOrders ?? []).filter(o => o.tour_id === tour.id).length} 筆
-              </p>
-            </div>
-          </div>
-        </div>
-        </div>
-      </div>
+      {/* 總覽卡片 — 直接使用 TourOverview */}
+      <TourOverview tour={tour} />
 
       {/* 收款總覽 */}
       {receipts.length > 0 && (
