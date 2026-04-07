@@ -15,7 +15,7 @@ export async function GET(
   const { data, error } = await supabase
     .from('itineraries')
     .select(
-      'id, tour_id, daily_itinerary, departure_date, outbound_flight, return_flight, workspace_id, created_at, updated_at'
+      'id, tour_id, title, subtitle, tour_code, daily_itinerary, departure_date, return_date, outbound_flight, return_flight, workspace_id, created_at, updated_at'
     )
     .eq('tour_id', tourId)
     .single()
