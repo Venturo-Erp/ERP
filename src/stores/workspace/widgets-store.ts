@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Widgets Store Facade
  * 整合 AdvanceList 和 SharedOrderList Stores (createStore)

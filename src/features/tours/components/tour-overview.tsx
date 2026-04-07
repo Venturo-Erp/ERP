@@ -3,10 +3,9 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { Tour } from '@/stores/types'
-import { useOrdersSlim, useReceipts } from '@/data'
-import { supabase } from '@/lib/supabase/client'
+import { useOrdersSlim, useReceipts, usePaymentRequests, useMembers } from '@/data'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { useWorkspaceChannels } from '@/stores/workspace-store'
 import {
@@ -47,12 +46,17 @@ export const TourOverview = React.memo(function TourOverview({
   const router = useRouter()
   const { items: orders } = useOrdersSlim()
   const { items: allReceipts } = useReceipts()
+  const { items: allMembers } = useMembers()
   const { channels } = useWorkspaceChannels()
 
-  // 收款金額計算
+  // 訂單與團員計算
   const orderIds = useMemo(
     () => new Set((orders ?? []).filter(o => o.tour_id === tour.id).map(o => o.id)),
     [orders, tour.id]
+  )
+  const memberCount = useMemo(
+    () => (allMembers ?? []).filter(m => m.order_id && orderIds.has(m.order_id)).length,
+    [allMembers, orderIds]
   )
   const tourReceipts = useMemo(
     () =>
@@ -76,20 +80,18 @@ export const TourOverview = React.memo(function TourOverview({
       ),
     [tourReceipts]
   )
-  // 總支出 = 請款單項目的 local_cost 加總（不管核准狀態）
-  // 注意：不用 tour.total_cost，那是報價預估值，不是實際支出
-  const [totalExpense, setTotalExpense] = useState(0)
-  useEffect(() => {
-    if (!tour.id) return
-    supabase
-      .from('tour_request_items')
-      .select('local_cost')
-      .eq('tour_id', tour.id)
-      .then(({ data }) => {
-        const sum = (data || []).reduce((acc, item) => acc + (Number(item.local_cost) || 0), 0)
-        setTotalExpense(sum)
+  // 總支出 = 請款單金額加總（與下方請款總覽一致）
+  const { items: allPaymentRequests } = usePaymentRequests()
+  const totalExpense = useMemo(
+    () => (allPaymentRequests ?? [])
+      .filter(pr => pr.tour_id === tour.id)
+      .filter(pr => {
+        const rt = (pr.request_type || '').toLowerCase()
+        return !rt.includes('bonus') && !rt.includes('獎金')
       })
-  }, [tour.id])
+      .reduce((sum, pr) => sum + (Number(pr.amount) || 0), 0),
+    [allPaymentRequests, tour.id]
+  )
   const confirmedProfit = confirmedIncome - totalExpense
   const estimatedProfit = estimatedIncome - totalExpense
 
@@ -226,7 +228,7 @@ export const TourOverview = React.memo(function TourOverview({
             </div>
             <div className="flex items-center gap-1.5 text-morandi-secondary">
               <Users size={14} />
-              <span>{tour.current_participants ?? 0} 人</span>
+              <span>{memberCount} 人</span>
             </div>
             <span
               className={cn(

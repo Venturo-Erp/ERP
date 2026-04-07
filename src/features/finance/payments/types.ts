@@ -30,6 +30,7 @@ export interface PaymentItem {
   id: string
   receipt_type: ReceiptType
   amount: number
+  actual_amount?: number // 實收金額（核帳用）
   transaction_date: string
 
   // 通用欄位

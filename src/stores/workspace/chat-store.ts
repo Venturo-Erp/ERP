@@ -1,3 +1,5 @@
+'use client'
+
 /**
  * Chat Store Facade
  * 整合 Message Store (createStore)，提供統一接口

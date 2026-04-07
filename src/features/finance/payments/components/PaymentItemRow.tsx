@@ -45,6 +45,8 @@ interface PaymentItemRowProps {
   readonly?: boolean
   /** 收款方式列表（從父組件傳入，避免重複載入） */
   paymentMethods?: Array<{ id: string; name: string; placeholder?: string | null }>
+  /** 是否有核帳權限（可填寫實收金額） */
+  canConfirmReceipt?: boolean
 }
 
 export function PaymentItemRow({
@@ -58,6 +60,7 @@ export function PaymentItemRow({
   mode = 'tour',
   readonly = false,
   paymentMethods: propPaymentMethods,
+  canConfirmReceipt = false,
 }: PaymentItemRowProps) {
   const { toast } = useToast()
   const [isGenerating, setIsGenerating] = useState(false)
@@ -292,21 +295,37 @@ export function PaymentItemRow({
           />
         </td>
 
-        {/* 金額 + 刪除 */}
+        {/* 收款金額 */}
+        <td className="py-2 px-3 border-b border-r border-border text-right">
+          <input
+            type="text"
+            inputMode="numeric"
+            value={item.amount ? item.amount.toLocaleString() : ''}
+            onChange={e => {
+              const raw = e.target.value.replace(/,/g, '')
+              const num = parseInt(raw, 10)
+              onUpdate(item.id, { amount: isNaN(num) ? 0 : num })
+            }}
+            placeholder="0"
+            disabled={readonly}
+            className="input-no-focus w-full bg-transparent text-sm text-right"
+          />
+        </td>
+
+        {/* 實收金額 + 刪除 */}
         <td className="py-2 px-3 border-b border-border text-right">
           <div className="flex items-center justify-end gap-2">
             <input
               type="text"
               inputMode="numeric"
-              value={item.amount ? item.amount.toLocaleString() : ''}
+              value={item.actual_amount ? item.actual_amount.toLocaleString() : ''}
               onChange={e => {
-                // 移除逗號後轉數字
                 const raw = e.target.value.replace(/,/g, '')
                 const num = parseInt(raw, 10)
-                onUpdate(item.id, { amount: isNaN(num) ? 0 : num })
+                onUpdate(item.id, { actual_amount: isNaN(num) ? 0 : num })
               }}
               placeholder="0"
-              disabled={readonly}
+              disabled={!canConfirmReceipt}
               className="input-no-focus w-full bg-transparent text-sm text-right"
             />
             {canRemove && (

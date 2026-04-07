@@ -78,6 +78,10 @@ export function usePaymentForm() {
     return paymentItems.reduce((sum, item) => sum + (item.amount || 0), 0)
   }, [paymentItems])
 
+  const totalActualAmount = useMemo(() => {
+    return paymentItems.reduce((sum, item) => sum + (item.actual_amount || 0), 0)
+  }, [paymentItems])
+
   // 新增收款項目
   const addPaymentItem = useCallback(() => {
     const newItem: PaymentItem = {
@@ -172,6 +176,7 @@ export function usePaymentForm() {
     filteredOrders,
     selectedOrder,
     totalAmount,
+    totalActualAmount,
 
     // 操作
     setFormData,

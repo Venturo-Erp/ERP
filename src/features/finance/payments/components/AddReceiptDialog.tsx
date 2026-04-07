@@ -68,6 +68,7 @@ export function AddReceiptDialog({
     filteredOrders,
     selectedOrder,
     totalAmount,
+    totalActualAmount,
     addPaymentItem,
     removePaymentItem,
     updatePaymentItem,
@@ -169,6 +170,7 @@ export function AddReceiptDialog({
             receipt_account: editingReceipt.receipt_account || '',
             notes: editingReceipt.notes || '',
             amount: editingReceipt.receipt_amount || 0,
+            actual_amount: editingReceipt.actual_amount || 0,
             email: editingReceipt.email || '',
             payment_name: editingReceipt.payment_name || '',
             pay_dateline: editingReceipt.pay_dateline || '',
@@ -562,10 +564,16 @@ export function AddReceiptDialog({
                               {ADD_RECEIPT_DIALOG_LABELS.REMARKS}
                             </th>
                             <th
-                              className="text-right py-2.5 px-3 border-b border-border"
-                              style={{ width: '140px' }}
+                              className="text-right py-2.5 px-3 border-b border-r border-border"
+                              style={{ width: '120px' }}
                             >
-                              {ADD_RECEIPT_DIALOG_LABELS.AMOUNT}
+                              收款金額
+                            </th>
+                            <th
+                              className="text-right py-2.5 px-3 border-b border-border"
+                              style={{ width: '120px' }}
+                            >
+                              實收金額
                             </th>
                           </tr>
                         </thead>
@@ -580,6 +588,7 @@ export function AddReceiptDialog({
                               canRemove={paymentItems.length > 1}
                               isNewRow={!isEditMode && index === paymentItems.length - 1}
                               readonly={isConfirmed}
+                              canConfirmReceipt={!!isAccountant}
                               paymentMethods={paymentMethods}
                               orderInfo={
                                 selectedOrder
@@ -727,6 +736,7 @@ export function AddReceiptDialog({
                           isNewRow={!isEditMode && index === paymentItems.length - 1}
                           mode="company"
                           readonly={isConfirmed}
+                          canConfirmReceipt={!!isAccountant}
                           paymentMethods={paymentMethods}
                         />
                       ))}
@@ -827,7 +837,7 @@ export function AddReceiptDialog({
                       await handleSubmit()
                       await onUpdate?.(editingReceipt.id, {
                         status: '1',
-                        actual_amount: totalAmount,
+                        actual_amount: totalActualAmount || totalAmount,
                       } as Partial<Receipt>)
                       // 重算團財務數據
                       await recalculateReceiptStats(
