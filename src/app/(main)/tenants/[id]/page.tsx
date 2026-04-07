@@ -187,8 +187,6 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         { label: '租戶管理', href: '/tenants' },
         { label: workspace?.name || '詳情', href: `/tenants/${id}` },
       ]}
-      showBackButton
-      onBack={() => router.push('/tenants')}
       headerActions={
         <Button
           onClick={handleSave}
