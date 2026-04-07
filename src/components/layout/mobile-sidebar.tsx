@@ -1,5 +1,6 @@
 'use client'
 
+import { AddressBookTabs, ChatDots, House } from '@phosphor-icons/react'
 import { COMPANY_NAME } from '@/lib/tenant'
 
 import { useState, useEffect } from 'react'
@@ -52,7 +53,7 @@ interface MenuItem {
 
 // 主選單項目
 const menuItems: MenuItem[] = [
-  { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: Home },
+  { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: House },
   {
     href: '/calendar',
     label: COMP_LAYOUT_LABELS.行事曆,
@@ -62,7 +63,7 @@ const menuItems: MenuItem[] = [
   {
     href: '/channel',
     label: COMP_LAYOUT_LABELS.工作空間,
-    icon: Building2,
+    icon: ChatDots,
     requiredPermission: 'workspace',
   },
   {
@@ -150,7 +151,7 @@ const menuItems: MenuItem[] = [
       {
         href: '/customers',
         label: COMP_LAYOUT_LABELS.顧客管理,
-        icon: Users,
+        icon: AddressBookTabs,
         requiredPermission: 'customers',
       },
       {

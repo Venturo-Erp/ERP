@@ -1,5 +1,6 @@
 'use client'
 
+import { AddressBookTabs, Bank, BookOpenText, CalendarDots, CashRegister, ChatDots, CheckSquare as PhCheckSquare, Confetti, CurrencyCircleDollar, Dresser, FileCloud, House, Island, Lego, MapPinArea, MapTrifold, Palette as PhPalette, ReadCvLogo, Robot, TipJar, UserCircleGear, UserSquare, UsersFour, Wallet as PhWallet, Wrench } from '@phosphor-icons/react'
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -72,17 +73,17 @@ interface MenuItem {
 }
 
 const menuItems: MenuItem[] = [
-  { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: Home },
+  { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: House },
   {
     href: '/calendar',
     label: COMP_LAYOUT_LABELS.行事曆,
-    icon: Calendar,
+    icon: CalendarDots,
     requiredPermission: 'calendar',
   },
   {
     href: '/channel',
     label: COMP_LAYOUT_LABELS.頻道,
-    icon: Building2,
+    icon: ChatDots,
     requiredPermission: 'workspace', // 對應 workspace_features.workspace
   },
   // 郵件系統暫時隱藏（目前使用 Google Workspace）
@@ -90,33 +91,33 @@ const menuItems: MenuItem[] = [
   {
     href: '/todos',
     label: COMP_LAYOUT_LABELS.待辦事項,
-    icon: CheckSquare,
+    icon: PhCheckSquare,
     requiredPermission: 'todos',
   },
-  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPinned, requiredPermission: 'tours' },
+  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPinArea, requiredPermission: 'tours' },
   {
     href: '/orders',
     label: COMP_LAYOUT_LABELS.訂單,
-    icon: ShoppingCart,
+    icon: CashRegister,
     requiredPermission: 'orders',
   },
   // 行程管理 - 付費功能（由 workspace_features 控制）
   {
     href: '/itinerary',
     label: COMP_LAYOUT_LABELS.行程管理,
-    icon: Route,
+    icon: MapTrifold,
     requiredPermission: 'itinerary',
   },
   {
     href: '/finance',
     label: COMP_LAYOUT_LABELS.財務系統,
-    icon: CreditCard,
+    icon: CurrencyCircleDollar,
     requiredPermission: 'finance',
     children: [
       {
         href: '/finance/payments',
         label: COMP_LAYOUT_LABELS.收款管理,
-        icon: CreditCard,
+        icon: PhWallet,
         requiredPermission: 'finance',
       },
       {
@@ -128,7 +129,7 @@ const menuItems: MenuItem[] = [
       {
         href: '/finance/treasury',
         label: COMP_LAYOUT_LABELS.金庫總覽,
-        icon: Landmark,
+        icon: Bank,
         requiredPermission: 'finance',
       },
       {
@@ -162,7 +163,7 @@ const menuItems: MenuItem[] = [
   {
     href: '/accounting',
     label: COMP_LAYOUT_LABELS.會計系統,
-    icon: FileText,
+    icon: TipJar,
     requiredPermission: 'accounting',
     children: [
       {
@@ -206,25 +207,25 @@ const menuItems: MenuItem[] = [
   {
     href: '/visas',
     label: COMP_LAYOUT_LABELS.簽證管理,
-    icon: FileCheck,
+    icon: ReadCvLogo,
     requiredPermission: 'visas',
   },
   {
     href: '/design',
     label: COMP_LAYOUT_LABELS.設計,
-    icon: Palette,
+    icon: PhPalette,
     requiredPermission: 'design',
     children: [
       {
         href: '/brochures',
         label: COMP_LAYOUT_LABELS.手冊,
-        icon: BookOpen,
+        icon: BookOpenText,
         requiredPermission: 'design',
       },
       {
         href: '/marketing',
         label: COMP_LAYOUT_LABELS.行銷素材,
-        icon: Megaphone,
+        icon: Confetti,
         requiredPermission: 'design',
       },
     ],
@@ -232,7 +233,7 @@ const menuItems: MenuItem[] = [
   {
     href: '/office',
     label: COMP_LAYOUT_LABELS.文件,
-    icon: FileSpreadsheet,
+    icon: FileCloud,
     requiredPermission: 'office',
     children: [
       {
@@ -255,20 +256,20 @@ const menuItems: MenuItem[] = [
   {
     href: '/database',
     label: COMP_LAYOUT_LABELS.資料管理,
-    icon: Database,
+    icon: Dresser,
     requiredPermission: 'database',
     children: [
       // 顧客管理 - 付費功能（由 workspace_features 控制）
       {
         href: '/customers',
         label: COMP_LAYOUT_LABELS.顧客管理,
-        icon: Users,
+        icon: AddressBookTabs,
         requiredPermission: 'customers',
       },
       {
         href: '/database/attractions',
         label: COMP_LAYOUT_LABELS.旅遊資料庫,
-        icon: MapPin,
+        icon: Island,
         requiredPermission: 'database',
       },
 
@@ -322,10 +323,10 @@ const menuItems: MenuItem[] = [
   {
     href: '/hr',
     label: COMP_LAYOUT_LABELS.人資管理,
-    icon: UserCog,
+    icon: UserSquare,
     requiredPermission: 'hr',
     children: [
-      { href: '/hr/roles', label: '職務管理', icon: Shield, requiredPermission: 'hr' },
+      { href: '/hr/roles', label: '職務管理', icon: UserCircleGear, requiredPermission: 'hr' },
       { href: '/hr', label: '員工管理', icon: Users, requiredPermission: 'hr' },
       { href: '/hr/attendance', label: '出勤管理', icon: Clock, requiredPermission: 'hr' },
       { href: '/hr/leave', label: '請假管理', icon: Calendar, requiredPermission: 'hr' },
@@ -335,7 +336,7 @@ const menuItems: MenuItem[] = [
   {
     href: '/customized-tours',
     label: '客製化管理',
-    icon: Sparkles,
+    icon: Lego,
     requiredPermission: 'customized',
     children: [
       {
@@ -350,7 +351,7 @@ const menuItems: MenuItem[] = [
   {
     href: '/tenants',
     label: COMP_LAYOUT_LABELS.租戶管理,
-    icon: Building,
+    icon: UsersFour,
     requiredPermission: 'tenants',
   },
   // 資源調度 - 威廉專屬
@@ -374,39 +375,39 @@ const menuItems: MenuItem[] = [
 
 // Local/DMC 選單（地接社）
 const localMenuItems: MenuItem[] = [
-  { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: Home },
-  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPinned }, // 包含「收到的委託」分頁
+  { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: House },
+  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPinArea }, // 包含「收到的委託」分頁
   {
     href: '/finance',
     label: COMP_LAYOUT_LABELS.財務系統,
-    icon: CreditCard,
+    icon: CurrencyCircleDollar,
     children: [
-      { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
+      { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: PhWallet },
       { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: HandCoins },
-      { href: '/finance/settings', label: '財務設定', icon: Settings },
+      { href: '/finance/settings', label: '財務設定', icon: Wrench },
     ],
   },
-  { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserCog },
-  { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Settings },
+  { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserSquare },
+  { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Wrench },
 ]
 
 // 車行選單（遊覽車公司）
 const transportMenuItems: MenuItem[] = [
-  { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: Home },
+  { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: House },
   { href: '/supplier/trips', label: '車趟管理', icon: Truck }, // 新的車趟管理頁面
   { href: '/database/fleet', label: COMP_LAYOUT_LABELS.車隊管理, icon: Bus },
   {
     href: '/finance',
     label: COMP_LAYOUT_LABELS.財務系統,
-    icon: CreditCard,
+    icon: CurrencyCircleDollar,
     children: [
-      { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
+      { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: PhWallet },
       { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: HandCoins },
-      { href: '/finance/settings', label: '財務設定', icon: Settings },
+      { href: '/finance/settings', label: '財務設定', icon: Wrench },
     ],
   },
-  { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserCog },
-  { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Settings },
+  { href: '/hr', label: COMP_LAYOUT_LABELS.人資管理, icon: UserSquare },
+  { href: '/settings', label: COMP_LAYOUT_LABELS.設定, icon: Wrench },
 ]
 
 // 旅行社完整選單（使用上面的 menuItems）
@@ -596,7 +597,7 @@ export function Sidebar() {
             )}
             onClick={() => toggleSubmenu(item.href)}
           >
-            <item.icon size={18} className="absolute left-5 top-1/2 -translate-y-1/2" />
+            <item.icon size={18} weight="duotone" className="absolute left-5 top-1/2 -translate-y-1/2" />
             {showExpanded && (
               <>
                 <span className="ml-12 block text-left leading-9">{item.label}</span>
@@ -637,6 +638,7 @@ export function Sidebar() {
         >
           <item.icon
             size={isChild ? 14 : 18}
+            weight="duotone"
             className={cn('absolute top-1/2 -translate-y-1/2', isChild ? 'left-8' : 'left-5')}
           />
           {showExpanded && (
@@ -682,14 +684,14 @@ export function Sidebar() {
             renderMenuItem({
               href: '/ai-bot',
               label: 'AI & 機器人',
-              icon: Bot,
+              icon: Robot,
             })}
 
           {/* 設定 */}
           {renderMenuItem({
             href: '/settings',
             label: COMP_LAYOUT_LABELS.設定,
-            icon: Settings,
+            icon: Wrench,
           })}
         </ul>
       </nav>
