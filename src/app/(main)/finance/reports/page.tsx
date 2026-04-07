@@ -1,113 +1,109 @@
 'use client'
 
-import Link from 'next/link'
+import { useState, useCallback, useMemo } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
-import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
-import { ActionCell } from '@/components/table-cells'
-import { FileDown, TrendingUp, AlertCircle, Wallet, BarChart3, ExternalLink } from 'lucide-react'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
+import {
+  BarChart3,
+  TrendingUp,
+  FileDown,
+  AlertCircle,
+  Wallet,
+  PieChart,
+} from 'lucide-react'
+import { DateRangeSelector, type DateRange } from '@/features/finance/reports/components/DateRangeSelector'
+import { OverviewTab } from '@/features/finance/reports/components/OverviewTab'
+import { DisbursementTab } from '@/features/finance/reports/components/DisbursementTab'
+import { IncomeTab } from '@/features/finance/reports/components/IncomeTab'
+import { UnclosedToursTab } from '@/features/finance/reports/components/UnclosedToursTab'
+import { UnpaidOrdersTab } from '@/features/finance/reports/components/UnpaidOrdersTab'
+import { TourPnlTab } from '@/features/finance/reports/components/TourPnlTab'
 
-interface ReportItem {
-  id: string
-  name: string
-  description: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  iconColor: string
+type TabValue = 'overview' | 'disbursement' | 'income' | 'unclosed' | 'unpaid' | 'pnl'
+
+// 不需要日期選擇器的 Tab
+const NO_DATE_TABS: TabValue[] = ['unclosed', 'unpaid', 'pnl']
+
+function getDefaultRange(): DateRange {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth() + 1
+  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+  const lastDay = new Date(year, month, 0).getDate()
+  const endDate = `${year}-${String(month).padStart(2, '0')}-${lastDay}`
+  return { startDate, endDate }
 }
 
-const reports: ReportItem[] = [
-  {
-    id: '1',
-    name: '月請款報表',
-    description: '依月份檢視所有請款單及出納單明細',
-    href: '/finance/reports/monthly-disbursement',
-    icon: FileDown,
-    iconColor: 'text-morandi-gold',
-  },
-  {
-    id: '2',
-    name: '月收款報表',
-    description: '依月份檢視收款明細與統計',
-    href: '/finance/reports/monthly-income',
-    icon: TrendingUp,
-    iconColor: 'text-morandi-green',
-  },
-  {
-    id: '3',
-    name: '未結團旅遊團',
-    description: '顯示已出發但尚未結團的旅遊團列表',
-    href: '/finance/reports/unclosed-tours',
-    icon: AlertCircle,
-    iconColor: 'text-morandi-red',
-  },
-  {
-    id: '4',
-    name: '未收款訂單',
-    description: '顯示有尾款尚未收取的訂單',
-    href: '/finance/reports/unpaid-orders',
-    icon: Wallet,
-    iconColor: 'text-morandi-red',
-  },
-  {
-    id: '5',
-    name: '旅遊團損益表',
-    description: '依團別檢視收支與利潤分析',
-    href: '/finance/reports/tour-pnl',
-    icon: BarChart3,
-    iconColor: 'text-morandi-blue',
-  },
-]
-
 export default function ReportsPage() {
-  const columns: TableColumn<ReportItem>[] = [
-    {
-      key: 'name',
-      label: '報表名稱',
-      render: (_, row) => {
-        const Icon = row.icon
-        return (
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg bg-morandi-container`}>
-              <Icon className={`w-4 h-4 ${row.iconColor}`} />
-            </div>
-            <span className="font-medium text-morandi-primary">{row.name}</span>
-          </div>
-        )
-      },
-    },
-    {
-      key: 'description',
-      label: '說明',
-      render: value => <span className="text-sm text-morandi-secondary">{String(value)}</span>,
-    },
-  ]
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const initialTab = (searchParams.get('tab') as TabValue) || 'overview'
 
-  const renderActions = (report: ReportItem) => (
-    <ActionCell
-      actions={[
-        {
-          icon: ExternalLink,
-          label: '開啟報表',
-          onClick: () => {
-            window.location.href = report.href
-          },
-        },
-      ]}
-    />
+  const [activeTab, setActiveTab] = useState<TabValue>(initialTab)
+  const [dateRange, setDateRange] = useState<DateRange>(getDefaultRange)
+
+  const handleTabChange = useCallback(
+    (value: string) => {
+      const tab = value as TabValue
+      setActiveTab(tab)
+      const url = new URL(window.location.href)
+      url.searchParams.set('tab', tab)
+      router.replace(url.pathname + url.search, { scroll: false })
+    },
+    [router]
+  )
+
+  const showDateSelector = !NO_DATE_TABS.includes(activeTab)
+
+  const tabs = useMemo(
+    () => [
+      { value: 'overview', label: '收支總覽', icon: BarChart3 },
+      { value: 'disbursement', label: '請款報表', icon: FileDown },
+      { value: 'income', label: '收款報表', icon: TrendingUp },
+      { value: 'unclosed', label: '未結團', icon: AlertCircle },
+      { value: 'unpaid', label: '未收款', icon: Wallet },
+      { value: 'pnl', label: '損益表', icon: PieChart },
+    ],
+    []
   )
 
   return (
-    <ContentPageLayout title="財務報表" icon={BarChart3}>
+    <ContentPageLayout
+      title="財務報表"
+      icon={BarChart3}
+      tabs={tabs}
+      activeTab={activeTab}
+      onTabChange={handleTabChange}
+    >
+      {/* 日期區間選擇器 */}
+      {showDateSelector && (
+        <div className="px-4 py-3 border-b border-border bg-morandi-background/30">
+          <DateRangeSelector onChange={setDateRange} />
+        </div>
+      )}
+
       <div className="p-4">
-        <EnhancedTable
-          columns={columns}
-          data={reports}
-          actions={renderActions}
-          onRowClick={report => {
-            window.location.href = report.href
-          }}
-          bordered
-        />
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
+          <TabsContent value="overview" className="mt-0">
+            <OverviewTab dateRange={dateRange} />
+          </TabsContent>
+          <TabsContent value="disbursement" className="mt-0">
+            <DisbursementTab dateRange={dateRange} />
+          </TabsContent>
+          <TabsContent value="income" className="mt-0">
+            <IncomeTab dateRange={dateRange} />
+          </TabsContent>
+          <TabsContent value="unclosed" className="mt-0">
+            <UnclosedToursTab />
+          </TabsContent>
+          <TabsContent value="unpaid" className="mt-0">
+            <UnpaidOrdersTab />
+          </TabsContent>
+          <TabsContent value="pnl" className="mt-0">
+            <TourPnlTab />
+          </TabsContent>
+        </Tabs>
       </div>
     </ContentPageLayout>
   )

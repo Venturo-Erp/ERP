@@ -1,0 +1,176 @@
+'use client'
+
+import { useMemo } from 'react'
+import { ContentContainer } from '@/components/layout/content-container'
+import { Card } from '@/components/ui/card'
+import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
+import { CurrencyCell, DateCell, StatusCell } from '@/components/table-cells'
+import { FileDown, Receipt, Wallet } from 'lucide-react'
+import { usePaymentRequests, useDisbursementOrders } from '@/data'
+import { PaymentRequest, DisbursementOrder } from '@/stores/types'
+import { EXPENSE_TYPE_CONFIG, CompanyExpenseType } from '@/stores/types/finance.types'
+import type { DateRange } from './DateRangeSelector'
+
+function StatCard({
+  title,
+  value,
+  icon: Icon,
+  iconColor,
+  isCurrency = false,
+}: {
+  title: string
+  value: number
+  icon: React.ComponentType<{ size?: number; className?: string }>
+  iconColor: string
+  isCurrency?: boolean
+}) {
+  return (
+    <Card className="p-4 border border-border">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-morandi-secondary mb-1">{title}</p>
+          {isCurrency ? (
+            <CurrencyCell amount={value} className="text-2xl font-bold" />
+          ) : (
+            <p className="text-2xl font-bold text-morandi-primary">{value}</p>
+          )}
+        </div>
+        <Icon size={24} className={iconColor} />
+      </div>
+    </Card>
+  )
+}
+
+interface DisbursementTabProps {
+  dateRange: DateRange
+}
+
+export function DisbursementTab({ dateRange }: DisbursementTabProps) {
+  const { items: paymentRequests } = usePaymentRequests()
+  const { items: disbursementOrders } = useDisbursementOrders()
+
+  const filteredPaymentRequests = useMemo(() => {
+    const { startDate, endDate } = dateRange
+    return paymentRequests.filter(pr => {
+      const d = pr.request_date?.split('T')[0] || ''
+      return d >= startDate && d <= endDate
+    })
+  }, [paymentRequests, dateRange])
+
+  const filteredDisbursementOrders = useMemo(() => {
+    const { startDate, endDate } = dateRange
+    return disbursementOrders.filter(d => {
+      const dt = d.disbursement_date?.split('T')[0] || ''
+      return dt >= startDate && dt <= endDate
+    })
+  }, [disbursementOrders, dateRange])
+
+  const stats = useMemo(() => ({
+    paymentRequestCount: filteredPaymentRequests.length,
+    disbursementOrderCount: filteredDisbursementOrders.length,
+    totalPaymentAmount: filteredPaymentRequests.reduce((sum, pr) => sum + (pr.amount || 0), 0),
+    totalDisbursementAmount: filteredDisbursementOrders.reduce((sum, d) => sum + (d.amount || 0), 0),
+  }), [filteredPaymentRequests, filteredDisbursementOrders])
+
+  const paymentColumns: TableColumn<PaymentRequest>[] = [
+    {
+      key: 'code',
+      label: '請款單號',
+      width: '150',
+      render: value => <span className="font-mono text-sm">{String(value || '')}</span>,
+    },
+    {
+      key: 'request_date',
+      label: '請款日期',
+      width: '120',
+      render: value => <DateCell date={value as string} />,
+    },
+    {
+      key: 'request_category',
+      label: '類別',
+      width: '100',
+      render: (value, row) => {
+        if (value === 'company') {
+          const expenseType = row.expense_type as CompanyExpenseType | undefined
+          const typeName = expenseType ? EXPENSE_TYPE_CONFIG[expenseType]?.name || expenseType : '公司'
+          return <span className="px-2 py-1 text-xs rounded-full bg-morandi-gold/10 text-morandi-gold">{typeName}</span>
+        }
+        return <span className="text-sm text-morandi-secondary">{row.tour_code || '-'}</span>
+      },
+    },
+    {
+      key: 'request_type',
+      label: '類型',
+      width: '100',
+      render: value => <span className="text-sm">{String(value || '-')}</span>,
+    },
+    {
+      key: 'amount',
+      label: '金額',
+      width: '120',
+      render: value => <CurrencyCell amount={Number(value) || 0} />,
+    },
+    {
+      key: 'status',
+      label: '狀態',
+      width: '100',
+      render: value => <StatusCell type="payment" status={value as string} />,
+    },
+  ]
+
+  const disbursementColumns: TableColumn<DisbursementOrder>[] = [
+    {
+      key: 'order_number',
+      label: '出納單號',
+      width: '150',
+      render: value => <span className="font-mono text-sm">{String(value || '')}</span>,
+    },
+    {
+      key: 'disbursement_date',
+      label: '出帳日期',
+      width: '120',
+      render: value => <DateCell date={value as string} />,
+    },
+    {
+      key: 'payment_request_ids',
+      label: '請款單數',
+      width: '100',
+      render: value => <span className="text-sm">{Array.isArray(value) ? value.length : 0} 筆</span>,
+    },
+    {
+      key: 'amount',
+      label: '金額',
+      width: '120',
+      render: value => <CurrencyCell amount={Number(value) || 0} />,
+    },
+    {
+      key: 'status',
+      label: '狀態',
+      width: '100',
+      render: value => <StatusCell type="payment" status={value as string} />,
+    },
+  ]
+
+  return (
+    <div className="space-y-6">
+      <ContentContainer>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard title="請款單數" value={stats.paymentRequestCount} icon={Receipt} iconColor="text-morandi-gold" />
+          <StatCard title="請款總金額" value={stats.totalPaymentAmount} icon={FileDown} iconColor="text-morandi-gold" isCurrency />
+          <StatCard title="出納單數" value={stats.disbursementOrderCount} icon={Wallet} iconColor="text-morandi-green" />
+          <StatCard title="出帳總金額" value={stats.totalDisbursementAmount} icon={FileDown} iconColor="text-morandi-green" isCurrency />
+        </div>
+      </ContentContainer>
+
+      <ContentContainer>
+        <h3 className="text-lg font-semibold text-morandi-primary mb-4">請款單明細</h3>
+        <EnhancedTable columns={paymentColumns} data={filteredPaymentRequests} emptyMessage="此區間沒有請款單" />
+      </ContentContainer>
+
+      <ContentContainer>
+        <h3 className="text-lg font-semibold text-morandi-primary mb-4">出納單明細</h3>
+        <EnhancedTable columns={disbursementColumns} data={filteredDisbursementOrders} emptyMessage="此區間沒有出納單" />
+      </ContentContainer>
+    </div>
+  )
+}

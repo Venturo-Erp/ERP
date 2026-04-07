@@ -201,7 +201,7 @@ async function queryAttractions(
  * 系統提示詞、字數限制、資料來源皆從 DB 讀取（管理員可在後台修改）
  */
 async function generateAIResponse(
-  platform: 'line' | 'messenger',
+  platform: 'line' | 'messenger' | 'instagram',
   userId: string,
   userMessage: string,
   intent: string,
@@ -309,7 +309,7 @@ ${context}
  * 載入最近的對話紀錄（用於上下文記憶）
  */
 async function loadRecentConversations(
-  platform: 'line' | 'messenger',
+  platform: 'line' | 'messenger' | 'instagram',
   userId: string,
   limit: number = 5
 ): Promise<{ role: 'user' | 'assistant'; content: string }[]> {
@@ -336,7 +336,7 @@ async function loadRecentConversations(
  * 儲存對話記錄
  */
 async function saveConversation(
-  platform: 'line' | 'messenger',
+  platform: 'line' | 'messenger' | 'instagram',
   userId: string,
   displayName: string | null,
   userMessage: string,
@@ -363,7 +363,7 @@ async function saveConversation(
  * 主要的 AI 客服處理函數
  */
 export async function handleAICustomerService(
-  platform: 'line' | 'messenger',
+  platform: 'line' | 'messenger' | 'instagram',
   userId: string,
   displayName: string | null,
   userMessage: string,

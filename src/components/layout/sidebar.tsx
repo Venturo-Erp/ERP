@@ -1,6 +1,32 @@
 'use client'
 
-import { AddressBookTabs, Bank, BookOpenText, CalendarDots, CashRegister, ChatDots, CheckSquare as PhCheckSquare, Confetti, CurrencyCircleDollar, Dresser, FileCloud, House, Island, Lego, MapPinArea, MapTrifold, Palette as PhPalette, ReadCvLogo, Robot, TipJar, UserCircleGear, UserSquare, UsersFour, Wallet as PhWallet, Wrench } from '@phosphor-icons/react'
+import {
+  AddressBookTabs,
+  Bank,
+  BookOpenText,
+  CalendarDots,
+  CashRegister,
+  ChatDots,
+  CheckSquare as PhCheckSquare,
+  Confetti,
+  CurrencyCircleDollar,
+  Dresser,
+  FileCloud,
+  House,
+  Island,
+  Lego,
+  MapPinArea,
+  MapTrifold,
+  Palette as PhPalette,
+  ReadCvLogo,
+  Robot,
+  TipJar,
+  UserCircleGear,
+  UserSquare,
+  UsersFour,
+  Wallet as PhWallet,
+  Wrench,
+} from '@phosphor-icons/react'
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -94,7 +120,12 @@ const menuItems: MenuItem[] = [
     icon: PhCheckSquare,
     requiredPermission: 'todos',
   },
-  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPinArea, requiredPermission: 'tours' },
+  {
+    href: '/tours',
+    label: COMP_LAYOUT_LABELS.旅遊團,
+    icon: MapPinArea,
+    requiredPermission: 'tours',
+  },
   {
     href: '/orders',
     label: COMP_LAYOUT_LABELS.訂單,
@@ -124,12 +155,6 @@ const menuItems: MenuItem[] = [
         href: '/finance/requests',
         label: COMP_LAYOUT_LABELS.請款管理,
         icon: HandCoins,
-        requiredPermission: 'finance',
-      },
-      {
-        href: '/finance/treasury',
-        label: COMP_LAYOUT_LABELS.金庫總覽,
-        icon: Bank,
         requiredPermission: 'finance',
       },
       {
@@ -591,16 +616,20 @@ export function Sidebar() {
           {/* 父項目 */}
           <div
             className={cn(
-              'w-full relative h-9 text-xs text-morandi-secondary transition-all duration-200 cursor-pointer',
+              'w-full relative h-11 text-sm text-morandi-secondary transition-all duration-200 cursor-pointer',
               'hover:bg-morandi-gold/5 hover:text-morandi-gold',
               active && 'bg-morandi-gold/10 text-morandi-gold border-l-3 border-morandi-gold'
             )}
             onClick={() => toggleSubmenu(item.href)}
           >
-            <item.icon size={18} weight="duotone" className="absolute left-5 top-1/2 -translate-y-1/2" />
+            <item.icon
+              size={22}
+              weight="duotone"
+              className="absolute left-4 top-1/2 -translate-y-1/2"
+            />
             {showExpanded && (
               <>
-                <span className="ml-12 block text-left leading-9">{item.label}</span>
+                <span className="ml-12 block text-left leading-11">{item.label}</span>
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
                   {isSubmenuExpanded ? (
                     <ChevronDown size={14} className="text-morandi-gold" />
@@ -630,19 +659,19 @@ export function Sidebar() {
           prefetch={false}
           onClick={closeSidebar}
           className={cn(
-            'w-full relative block h-9 text-xs text-morandi-secondary transition-all duration-200',
+            'w-full relative block h-11 text-sm text-morandi-secondary transition-all duration-200',
             'hover:bg-morandi-gold/5 hover:text-morandi-gold',
             active && 'bg-morandi-gold/10 text-morandi-gold border-l-3 border-morandi-gold',
             isChild && 'pl-4'
           )}
         >
           <item.icon
-            size={isChild ? 14 : 18}
+            size={isChild ? 16 : 22}
             weight="duotone"
-            className={cn('absolute top-1/2 -translate-y-1/2', isChild ? 'left-8' : 'left-5')}
+            className={cn('absolute top-1/2 -translate-y-1/2', isChild ? 'left-8' : 'left-4')}
           />
           {showExpanded && (
-            <span className={cn('block text-left leading-9', isChild ? 'ml-14' : 'ml-12')}>
+            <span className={cn('block text-left leading-11', isChild ? 'ml-14' : 'ml-12')}>
               {item.label}
             </span>
           )}
@@ -668,7 +697,9 @@ export function Sidebar() {
             <span className="text-white font-semibold text-lg">V</span>
           </div>
           {showExpanded && (
-            <div className="ml-[58px] text-xl font-bold text-morandi-primary">{user?.workspace_code || 'V'}</div>
+            <div className="ml-[58px] text-xl font-bold text-morandi-primary">
+              {user?.workspace_code || 'V'}
+            </div>
           )}
         </div>
       </div>
