@@ -255,8 +255,8 @@ export function TourForm({ data, onChange, quoteTierPricings, hasLinkedQuote }: 
           />
         </div>
 
-          {/* 航班資訊 - 建團時不需要，訂票時再輸入 */}
-          {/* <div id="section-flight">
+        {/* 航班資訊 - 建團時不需要，訂票時再輸入 */}
+        {/* <div id="section-flight">
             <FlightInfoSection
               data={data}
               updateFlightField={handlers.updateFlightField}
@@ -327,85 +327,78 @@ export function TourForm({ data, onChange, quoteTierPricings, hasLinkedQuote }: 
               }}
             />
           </div> */}
-
-
-        </div>
-
-        {/* 每日行程 */}
-        {/* 行程特色展開內容 */}
-        <div className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
-          <FeaturesSection
-            data={data}
-            updateField={handlers.updateField}
-            addFeature={handlers.addFeature}
-            updateFeature={handlers.updateFeature}
-            removeFeature={handlers.removeFeature}
-            reorderFeature={handlers.reorderFeature}
-          />
-        </div>
-
-        {/* 逐日行程 */}
-        <div id="section-itinerary" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
-          <DailyItinerarySection
-            data={data}
-            updateField={handlers.updateField}
-            addDailyItinerary={handlers.addDailyItinerary}
-            updateDailyItinerary={handlers.updateDailyItinerary}
-            removeDailyItinerary={handlers.removeDailyItinerary}
-            swapDailyItinerary={handlers.swapDailyItinerary}
-            addActivity={handlers.addActivity}
-            updateActivity={handlers.updateActivity}
-            removeActivity={handlers.removeActivity}
-            addDayImage={handlers.addDayImage}
-            updateDayImage={handlers.updateDayImage}
-            removeDayImage={handlers.removeDayImage}
-            addRecommendation={handlers.addRecommendation}
-            updateRecommendation={handlers.updateRecommendation}
-            removeRecommendation={handlers.removeRecommendation}
-            isAccommodationLockedByQuote={hasLinkedQuote}
-          />
-        </div>
-
-        {/* 領隊與集合資訊 */}
-        <div id="section-leader" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
-          <LeaderMeetingSection
-            data={data}
-            updateNestedField={handlers.updateNestedField}
-            updateField={handlers.updateField}
-          />
-        </div>
-
-        {/* 飯店資訊 */}
-        <div id="section-hotel" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
-          <HotelSection data={data} updateField={handlers.updateField} />
-        </div>
-
-        {/* 團費說明 */}
-        <div id="section-pricing" className="mt-6 pt-6 px-3 border-t border-morandi-container/30 space-y-8">
-          {/* 價格方案（4人、6人、8人包團） */}
-          <PriceTiersSection
-            data={data}
-            onChange={onChange}
-            quoteTierPricings={quoteTierPricings}
-          />
-
-          {/* 詳細團費（費用包含/不含） */}
-          <PricingDetailsSection
-            data={data}
-            updateField={handlers.updateField}
-            onChange={onChange}
-          />
-        </div>
-
-        {/* 常見問題 */}
-        <div id="section-faq" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
-          <FAQSection data={data} onChange={onChange} />
-        </div>
-
-        {/* 提醒事項與取消政策 */}
-        <div id="section-notices" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
-          <NoticesPolicySection data={data} onChange={onChange} />
-        </div>
       </div>
+
+      {/* 每日行程 */}
+      {/* 行程特色展開內容 */}
+      <div className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
+        <FeaturesSection
+          data={data}
+          updateField={handlers.updateField}
+          addFeature={handlers.addFeature}
+          updateFeature={handlers.updateFeature}
+          removeFeature={handlers.removeFeature}
+          reorderFeature={handlers.reorderFeature}
+        />
+      </div>
+
+      {/* 逐日行程 */}
+      <div id="section-itinerary" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
+        <DailyItinerarySection
+          data={data}
+          updateField={handlers.updateField}
+          addDailyItinerary={handlers.addDailyItinerary}
+          updateDailyItinerary={handlers.updateDailyItinerary}
+          removeDailyItinerary={handlers.removeDailyItinerary}
+          swapDailyItinerary={handlers.swapDailyItinerary}
+          addActivity={handlers.addActivity}
+          updateActivity={handlers.updateActivity}
+          removeActivity={handlers.removeActivity}
+          addDayImage={handlers.addDayImage}
+          updateDayImage={handlers.updateDayImage}
+          removeDayImage={handlers.removeDayImage}
+          addRecommendation={handlers.addRecommendation}
+          updateRecommendation={handlers.updateRecommendation}
+          removeRecommendation={handlers.removeRecommendation}
+          isAccommodationLockedByQuote={hasLinkedQuote}
+        />
+      </div>
+
+      {/* 領隊與集合資訊 */}
+      <div id="section-leader" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
+        <LeaderMeetingSection
+          data={data}
+          updateNestedField={handlers.updateNestedField}
+          updateField={handlers.updateField}
+        />
+      </div>
+
+      {/* 飯店資訊 */}
+      <div id="section-hotel" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
+        <HotelSection data={data} updateField={handlers.updateField} />
+      </div>
+
+      {/* 團費說明 */}
+      <div
+        id="section-pricing"
+        className="mt-6 pt-6 px-3 border-t border-morandi-container/30 space-y-8"
+      >
+        {/* 價格方案（4人、6人、8人包團） */}
+        <PriceTiersSection data={data} onChange={onChange} quoteTierPricings={quoteTierPricings} />
+
+        {/* 詳細團費（費用包含/不含） */}
+        <PricingDetailsSection data={data} updateField={handlers.updateField} onChange={onChange} />
+      </div>
+
+      {/* 常見問題 */}
+      <div id="section-faq" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
+        <FAQSection data={data} onChange={onChange} />
+      </div>
+
+      {/* 提醒事項與取消政策 */}
+      <div id="section-notices" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
+        <NoticesPolicySection data={data} onChange={onChange} />
+      </div>
+    </div>
   )
 }

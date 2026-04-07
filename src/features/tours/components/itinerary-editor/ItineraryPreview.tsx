@@ -124,8 +124,15 @@ export function ItineraryPreview({
                       <span className="font-medium">
                         {outboundFlight.airline} {outboundFlight.flightNumber}
                         <span className="text-morandi-secondary ml-1">
-                          ({outboundFlight.departureAirport}{outboundFlight.departureAirportName ? ` ${outboundFlight.departureAirportName}` : ''} {outboundFlight.departureTime} →{' '}
-                          {outboundFlight.arrivalAirport}{outboundFlight.arrivalAirportName ? ` ${outboundFlight.arrivalAirportName}` : ''} {outboundFlight.arrivalTime})
+                          ({outboundFlight.departureAirport}
+                          {outboundFlight.departureAirportName
+                            ? ` ${outboundFlight.departureAirportName}`
+                            : ''}{' '}
+                          {outboundFlight.departureTime} → {outboundFlight.arrivalAirport}
+                          {outboundFlight.arrivalAirportName
+                            ? ` ${outboundFlight.arrivalAirportName}`
+                            : ''}{' '}
+                          {outboundFlight.arrivalTime})
                         </span>
                       </span>
                     </div>
@@ -138,8 +145,15 @@ export function ItineraryPreview({
                       <span className="font-medium">
                         {returnFlight.airline} {returnFlight.flightNumber}
                         <span className="text-morandi-secondary ml-1">
-                          ({returnFlight.departureAirport}{returnFlight.departureAirportName ? ` ${returnFlight.departureAirportName}` : ''} {returnFlight.departureTime} →{' '}
-                          {returnFlight.arrivalAirport}{returnFlight.arrivalAirportName ? ` ${returnFlight.arrivalAirportName}` : ''} {returnFlight.arrivalTime})
+                          ({returnFlight.departureAirport}
+                          {returnFlight.departureAirportName
+                            ? ` ${returnFlight.departureAirportName}`
+                            : ''}{' '}
+                          {returnFlight.departureTime} → {returnFlight.arrivalAirport}
+                          {returnFlight.arrivalAirportName
+                            ? ` ${returnFlight.arrivalAirportName}`
+                            : ''}{' '}
+                          {returnFlight.arrivalTime})
                         </span>
                       </span>
                     </div>

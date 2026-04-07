@@ -480,7 +480,9 @@ export function usePayroll() {
         await supabase.from('payroll_periods').update({ status: 'draft' }).eq('id', periodId)
 
         globalMutate(
-          (key: string) => typeof key === 'string' && (key.startsWith('entity:payroll_periods') || key.startsWith('entity:payroll_records')),
+          (key: string) =>
+            typeof key === 'string' &&
+            (key.startsWith('entity:payroll_periods') || key.startsWith('entity:payroll_records')),
           undefined,
           { revalidate: true }
         )

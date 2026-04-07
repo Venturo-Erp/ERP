@@ -299,7 +299,8 @@ export function CompanyAssetsTree({ onSelectFile, onAddFile }: CompanyAssetsTree
 
         if (error) throw error
         globalMutate(
-          (key: string) => typeof key === 'string' && key.startsWith('entity:company_asset_folders'),
+          (key: string) =>
+            typeof key === 'string' && key.startsWith('entity:company_asset_folders'),
           undefined,
           { revalidate: true }
         )

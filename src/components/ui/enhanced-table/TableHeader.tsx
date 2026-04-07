@@ -80,9 +80,7 @@ export const TableHeader = React.memo(function TableHeader({
         {columns.map((column, index) => (
           <th
             key={String(column.key)}
-            className={cn(
-              'text-left py-2.5 px-4 text-xs relative align-middle'
-            )}
+            className={cn('text-left py-2.5 px-4 text-xs relative align-middle')}
             style={{ width: column.width }}
           >
             {/* Remove absolute div - use native border instead */}

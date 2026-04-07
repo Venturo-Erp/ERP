@@ -247,7 +247,8 @@ export function useTourConfirmationSheet({ tourId }: UseTourConfirmationSheetPro
 
         setItems(prev => [...prev, new_item])
         globalMutate(
-          (key: string) => typeof key === 'string' && key.startsWith('entity:tour_confirmation_items'),
+          (key: string) =>
+            typeof key === 'string' && key.startsWith('entity:tour_confirmation_items'),
           undefined,
           { revalidate: true }
         )
@@ -340,7 +341,8 @@ export function useTourConfirmationSheet({ tourId }: UseTourConfirmationSheetPro
 
         setItems(prev => prev.map(item => (item.id === itemId ? updated_item : item)))
         globalMutate(
-          (key: string) => typeof key === 'string' && key.startsWith('entity:tour_confirmation_items'),
+          (key: string) =>
+            typeof key === 'string' && key.startsWith('entity:tour_confirmation_items'),
           undefined,
           { revalidate: true }
         )
@@ -374,7 +376,8 @@ export function useTourConfirmationSheet({ tourId }: UseTourConfirmationSheetPro
 
         setItems(prev => prev.filter(item => item.id !== itemId))
         globalMutate(
-          (key: string) => typeof key === 'string' && key.startsWith('entity:tour_confirmation_items'),
+          (key: string) =>
+            typeof key === 'string' && key.startsWith('entity:tour_confirmation_items'),
           undefined,
           { revalidate: true }
         )

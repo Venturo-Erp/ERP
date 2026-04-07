@@ -306,9 +306,7 @@ export function ResourceDetailDialog({
   }
 
   // images 陣列，第一張就是封面
-  const allImages = fullData
-    ? ((fullData.images as string[]) || [])
-    : (resource.images || [])
+  const allImages = fullData ? (fullData.images as string[]) || [] : resource.images || []
   const hasImages = allImages.length > 0
 
   const hasCoordinates = resource.latitude && resource.longitude
@@ -332,7 +330,11 @@ export function ResourceDetailDialog({
         {loading ? (
           <div className="py-8 text-center text-muted-foreground">載入中...</div>
         ) : (
-          <div className={hasImages || isEditing ? 'grid grid-cols-[300px_1fr] gap-6 items-start' : 'space-y-4'}>
+          <div
+            className={
+              hasImages || isEditing ? 'grid grid-cols-[300px_1fr] gap-6 items-start' : 'space-y-4'
+            }
+          >
             {/* 左側：圖片 */}
             {(hasImages || isEditing) && (
               <div className="space-y-2">

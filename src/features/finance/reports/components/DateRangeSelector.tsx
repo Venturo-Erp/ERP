@@ -177,13 +177,19 @@ export function DateRangeSelector({
       {/* 日期導航 */}
       {granularity !== 'custom' ? (
         <div className="flex items-center gap-2">
-          <button onClick={handlePrev} className="p-1.5 text-morandi-secondary hover:text-morandi-primary transition-colors">
+          <button
+            onClick={handlePrev}
+            className="p-1.5 text-morandi-secondary hover:text-morandi-primary transition-colors"
+          >
             <ChevronLeft size={22} />
           </button>
           <span className="min-w-[120px] text-center font-semibold text-morandi-primary text-base">
             {label}
           </span>
-          <button onClick={handleNext} className="p-1.5 text-morandi-secondary hover:text-morandi-primary transition-colors">
+          <button
+            onClick={handleNext}
+            className="p-1.5 text-morandi-secondary hover:text-morandi-primary transition-colors"
+          >
             <ChevronRight size={22} />
           </button>
         </div>

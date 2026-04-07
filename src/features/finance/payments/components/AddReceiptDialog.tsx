@@ -408,19 +408,19 @@ export function AddReceiptDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent level={2} className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col">
         {/* 收款類型 Tab - 包住整個 header 和內容 */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="flex-1 flex flex-col overflow-hidden"
+        >
           {/* Header: Tab + 選擇器 + 標題 同一行 */}
           <DialogHeader className="flex-row items-center justify-between pb-4">
             {/* 左邊：Tab + 選擇器 */}
             <div className="flex items-center gap-4">
               {/* Tab 切換 */}
               <TabsList className="w-fit h-10">
-                <TabsTrigger value="tour">
-                  團體收款
-                </TabsTrigger>
-                <TabsTrigger value="company">
-                  公司收款
-                </TabsTrigger>
+                <TabsTrigger value="tour">團體收款</TabsTrigger>
+                <TabsTrigger value="company">公司收款</TabsTrigger>
               </TabsList>
 
               {/* 團體收款：團號 + 訂單選擇器 */}

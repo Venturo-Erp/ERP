@@ -16,7 +16,10 @@ import {
   Map,
   Truck,
 } from 'lucide-react'
-import { DateRangeSelector, type DateRange } from '@/features/finance/reports/components/DateRangeSelector'
+import {
+  DateRangeSelector,
+  type DateRange,
+} from '@/features/finance/reports/components/DateRangeSelector'
 import { OverviewTab } from '@/features/finance/reports/components/OverviewTab'
 import { DisbursementTab } from '@/features/finance/reports/components/DisbursementTab'
 import { IncomeTab } from '@/features/finance/reports/components/IncomeTab'
@@ -31,7 +34,11 @@ type TabValue = 'overview' | 'disbursement' | 'income' | 'unclosed' | 'unpaid' |
 const NO_DATE_TABS: TabValue[] = ['unclosed', 'unpaid', 'pnl']
 const GRANULARITY_TABS: TabValue[] = ['overview']
 
-const GRANULARITY_OPTIONS: { value: DetailGranularity; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+const GRANULARITY_OPTIONS: {
+  value: DetailGranularity
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+}[] = [
   { value: 'item', label: '按筆', icon: List },
   { value: 'day', label: '按日', icon: CalendarDays },
   { value: 'tour', label: '按團', icon: Map },
@@ -119,7 +126,6 @@ export default function ReportsPage() {
         ) : undefined
       }
     >
-
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsContent value="overview" className="mt-0">

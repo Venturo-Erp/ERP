@@ -23,15 +23,9 @@ export function Loader({ className, size = 'md', variant = 'rect' }: LoaderProps
       style={{ width: s, height: s }}
     >
       <svg viewBox="0 0 80 80">
-        {variant === 'rect' && (
-          <rect x="8" y="8" width="64" height="64" />
-        )}
-        {variant === 'triangle' && (
-          <polygon points="40 8, 72 72, 8 72" />
-        )}
-        {variant === 'circle' && (
-          <circle cx="40" cy="40" r="32" />
-        )}
+        {variant === 'rect' && <rect x="8" y="8" width="64" height="64" />}
+        {variant === 'triangle' && <polygon points="40 8, 72 72, 8 72" />}
+        {variant === 'circle' && <circle cx="40" cy="40" r="32" />}
       </svg>
     </div>
   )

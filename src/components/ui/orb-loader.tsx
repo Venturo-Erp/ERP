@@ -13,10 +13,7 @@ interface OrbLoaderProps {
  */
 export function OrbLoader({ className, size = 1 }: OrbLoaderProps) {
   return (
-    <div
-      className={cn('orb-loader', className)}
-      style={{ '--size': size } as React.CSSProperties}
-    >
+    <div className={cn('orb-loader', className)} style={{ '--size': size } as React.CSSProperties}>
       <svg>
         <defs>
           <mask id="clipping">

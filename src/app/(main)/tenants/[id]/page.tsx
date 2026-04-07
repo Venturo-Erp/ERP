@@ -375,7 +375,8 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                     key={feature.code}
                     className="flex items-center justify-between px-4 py-3 rounded-[16px] transition-all hover:shadow-sm"
                     style={{
-                      background: 'linear-gradient(0deg, rgb(250, 247, 240) 0%, rgb(245, 240, 232) 100%)',
+                      background:
+                        'linear-gradient(0deg, rgb(250, 247, 240) 0%, rgb(245, 240, 232) 100%)',
                       boxShadow: 'rgba(180, 160, 120, 0.3) 0px 8px 20px -4px',
                     }}
                   >
@@ -400,9 +401,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
             boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
           }}
         >
-          <div
-            className={`px-6 py-4 border-b border-morandi-gold/20`}
-          >
+          <div className={`px-6 py-4 border-b border-morandi-gold/20`}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Sparkles
@@ -444,7 +443,8 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                     key={feature.code}
                     className="flex items-center justify-between px-4 py-3 rounded-[16px] transition-all hover:shadow-sm"
                     style={{
-                      background: 'linear-gradient(0deg, rgb(250, 247, 240) 0%, rgb(245, 240, 232) 100%)',
+                      background:
+                        'linear-gradient(0deg, rgb(250, 247, 240) 0%, rgb(245, 240, 232) 100%)',
                       boxShadow: 'rgba(180, 160, 120, 0.3) 0px 8px 20px -4px',
                     }}
                   >

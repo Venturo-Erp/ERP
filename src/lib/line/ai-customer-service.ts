@@ -116,11 +116,7 @@ async function queryTours(destination?: string, tourCode?: string): Promise<Tour
  * 用中文名稱查找 city_id（從 cities 表）
  */
 async function resolveCityId(name: string): Promise<string | null> {
-  const { data } = await supabase
-    .from('cities')
-    .select('id')
-    .ilike('name', `%${name}%`)
-    .limit(1)
+  const { data } = await supabase.from('cities').select('id').ilike('name', `%${name}%`).limit(1)
 
   return data?.[0]?.id || null
 }
@@ -129,11 +125,7 @@ async function resolveCityId(name: string): Promise<string | null> {
  * 用中文名稱查找 country_id（從 countries 表）
  */
 async function resolveCountryId(name: string): Promise<string | null> {
-  const { data } = await supabase
-    .from('countries')
-    .select('id')
-    .ilike('name', `%${name}%`)
-    .limit(1)
+  const { data } = await supabase.from('countries').select('id').ilike('name', `%${name}%`).limit(1)
 
   return data?.[0]?.id || null
 }

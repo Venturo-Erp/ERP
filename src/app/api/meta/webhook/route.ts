@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
 }
 
 interface MetaMessageEvent {
-  sender: { 
+  sender: {
     id?: string
     instagram_user_id?: string
   }
@@ -277,7 +277,7 @@ async function handleIncomingMessage(platform: string, event: MetaMessageEvent) 
   }
 
   // 檢查是否觸發轉接關鍵字
-  if (HANDOVER_KEYWORDS.some((kw) => messageText.includes(kw))) {
+  if (HANDOVER_KEYWORDS.some(kw => messageText.includes(kw))) {
     logger.info(`[Meta] Handover keyword detected from ${senderId}`)
     await sendReply(senderId, HANDOVER_MESSAGE)
     humanHandoverUsers.set(senderId, Date.now())

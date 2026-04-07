@@ -159,8 +159,7 @@ export function AISettingsTab() {
       } else {
         // auto-fill from default style
         setCustomPrompt(
-          STYLE_OPTIONS.find(s => s.key === (style ?? 'luxury'))?.prompt ??
-            STYLE_OPTIONS[2].prompt
+          STYLE_OPTIONS.find(s => s.key === (style ?? 'luxury'))?.prompt ?? STYLE_OPTIONS[2].prompt
         )
       }
     } catch (err) {
@@ -249,9 +248,7 @@ export function AISettingsTab() {
                       isSelected ? 'border-morandi-gold' : 'border-muted-foreground/40',
                     ].join(' ')}
                   >
-                    {isSelected && (
-                      <span className="h-2 w-2 rounded-full bg-morandi-gold block" />
-                    )}
+                    {isSelected && <span className="h-2 w-2 rounded-full bg-morandi-gold block" />}
                   </span>
 
                   <div className="flex-1 min-w-0">
@@ -322,16 +319,11 @@ export function AISettingsTab() {
               { key: 'tours', label: '行程資料庫', detail: 'tours table' },
             ] as const
           ).map(({ key, label, detail }) => (
-            <label
-              key={key}
-              className="flex items-center gap-3 cursor-pointer group"
-            >
+            <label key={key} className="flex items-center gap-3 cursor-pointer group">
               <input
                 type="checkbox"
                 checked={dataSources[key]}
-                onChange={e =>
-                  setDataSources(prev => ({ ...prev, [key]: e.target.checked }))
-                }
+                onChange={e => setDataSources(prev => ({ ...prev, [key]: e.target.checked }))}
                 className="h-4 w-4 rounded border-border accent-morandi-gold cursor-pointer"
               />
               <span className="text-sm font-medium text-morandi-primary">{label}</span>
@@ -347,9 +339,7 @@ export function AISettingsTab() {
           <CardTitle className="text-base">自訂提示詞</CardTitle>
           <CardDescription>
             選擇風格後自動填入，也可手動修改細節
-            {promptDirty && (
-              <span className="ml-2 text-morandi-gold text-xs">（已自訂）</span>
-            )}
+            {promptDirty && <span className="ml-2 text-morandi-gold text-xs">（已自訂）</span>}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -364,7 +354,9 @@ export function AISettingsTab() {
             placeholder="系統提示詞..."
           />
           <p className="text-xs text-morandi-muted mt-2">
-            提示：提示詞中的 <code className="bg-morandi-container px-1 rounded">{'{max_length}'}</code> 會自動替換為上方設定的字數。
+            提示：提示詞中的{' '}
+            <code className="bg-morandi-container px-1 rounded">{'{max_length}'}</code>{' '}
+            會自動替換為上方設定的字數。
           </p>
         </CardContent>
       </Card>

@@ -19,12 +19,7 @@ const AttractionsTab = lazy(() => import('./tabs/AttractionsTab'))
 const CORNER_WORKSPACE_ID = '8ef05a74-1f87-48ab-afd3-9bfeb423935d'
 
 // 有效的 tab 值
-const ALL_TABS = [
-  'regions',
-  'attractions',
-  'hotels',
-  'restaurants',
-] as const
+const ALL_TABS = ['regions', 'attractions', 'hotels', 'restaurants'] as const
 type TabValue = (typeof ALL_TABS)[number]
 
 // ============================================
@@ -300,7 +295,6 @@ export default function DatabaseManagementPage() {
               </Suspense>
             )}
           </TabsContent>
-
         </div>
       </Tabs>
     </ContentPageLayout>

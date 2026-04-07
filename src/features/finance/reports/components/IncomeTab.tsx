@@ -51,7 +51,7 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
   const filteredReceipts = useMemo(() => {
     const { startDate, endDate } = dateRange
     return receipts.filter(r => {
-      const d = (r.receipt_date || r.created_at?.split('T')[0]) || ''
+      const d = r.receipt_date || r.created_at?.split('T')[0] || ''
       return d >= startDate && d <= endDate
     })
   }, [receipts, dateRange])
@@ -64,7 +64,10 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
       0
     )
     const tourAmount = tourReceipts.reduce((sum, r) => sum + (r.receipt_amount || r.amount || 0), 0)
-    const companyAmount = companyReceipts.reduce((sum, r) => sum + (r.receipt_amount || r.amount || 0), 0)
+    const companyAmount = companyReceipts.reduce(
+      (sum, r) => sum + (r.receipt_amount || r.amount || 0),
+      0
+    )
     const byPaymentMethod = filteredReceipts.reduce(
       (acc, r) => {
         const method = r.payment_method || 'other'
@@ -105,14 +108,18 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
       width: '100',
       render: value => {
         const method = String(value || '')
-        return <span className="text-sm">{RECEIPT_PAYMENT_METHOD_LABELS[method] || method || '-'}</span>
+        return (
+          <span className="text-sm">{RECEIPT_PAYMENT_METHOD_LABELS[method] || method || '-'}</span>
+        )
       },
     },
     {
       key: 'receipt_amount',
       label: '金額',
       width: '120',
-      render: (value, row) => <CurrencyCell amount={Number(value) || Number(row.amount) || 0} variant="income" />,
+      render: (value, row) => (
+        <CurrencyCell amount={Number(value) || Number(row.amount) || 0} variant="income" />
+      ),
     },
     {
       key: 'handler_name',
@@ -132,9 +139,27 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
     <div className="space-y-6">
       <ContentContainer>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatCard title={`團體收款（${stats.tourCount} 筆）`} value={stats.tourAmount} icon={ReceiptIcon} iconColor="text-morandi-green" isCurrency />
-          <StatCard title={`公司收款（${stats.companyCount} 筆）`} value={stats.companyAmount} icon={ReceiptIcon} iconColor="text-morandi-green" isCurrency />
-          <StatCard title={`收款合計（${stats.receiptCount} 筆）`} value={stats.totalAmount} icon={TrendingUp} iconColor="text-morandi-green" isCurrency />
+          <StatCard
+            title={`團體收款（${stats.tourCount} 筆）`}
+            value={stats.tourAmount}
+            icon={ReceiptIcon}
+            iconColor="text-morandi-green"
+            isCurrency
+          />
+          <StatCard
+            title={`公司收款（${stats.companyCount} 筆）`}
+            value={stats.companyAmount}
+            icon={ReceiptIcon}
+            iconColor="text-morandi-green"
+            isCurrency
+          />
+          <StatCard
+            title={`收款合計（${stats.receiptCount} 筆）`}
+            value={stats.totalAmount}
+            icon={TrendingUp}
+            iconColor="text-morandi-green"
+            isCurrency
+          />
         </div>
       </ContentContainer>
 
@@ -144,7 +169,9 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {Object.entries(stats.byPaymentMethod).map(([method, data]) => (
               <div key={method} className="p-4 bg-morandi-container/30 rounded-lg">
-                <p className="text-sm text-morandi-secondary">{RECEIPT_PAYMENT_METHOD_LABELS[method] || method}</p>
+                <p className="text-sm text-morandi-secondary">
+                  {RECEIPT_PAYMENT_METHOD_LABELS[method] || method}
+                </p>
                 <p className="text-lg font-semibold text-morandi-primary">{data.count} 筆</p>
                 <CurrencyCell amount={data.amount} variant="income" className="text-sm" />
               </div>
@@ -155,7 +182,12 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
 
       <ContentContainer>
         <h3 className="text-lg font-semibold text-morandi-primary mb-4">收款單明細</h3>
-        <EnhancedTable columns={columns} data={filteredReceipts} loading={loading} emptyMessage="此區間沒有收款單" />
+        <EnhancedTable
+          columns={columns}
+          data={filteredReceipts}
+          loading={loading}
+          emptyMessage="此區間沒有收款單"
+        />
       </ContentContainer>
     </div>
   )

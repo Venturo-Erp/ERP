@@ -199,7 +199,7 @@ export function AddRequestDialog({
   }, [isEditMode, editBatchRequests, selectedRequestId, editingRequest])
 
   const isEditBatch = editBatchRequests.length > 1
-  const canEdit = isEditMode ? (!readOnly && currentRequest?.status === 'pending') : true
+  const canEdit = isEditMode ? !readOnly && currentRequest?.status === 'pending' : true
 
   // === 付款方式 ===
   const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string }>>([])
@@ -950,16 +950,20 @@ export function AddRequestDialog({
         >
           <Tabs
             value={activeTab}
-            onValueChange={isEditMode ? undefined : v => {
-              const mode = v as RequestMode
-              setActiveTab(mode)
-              // 同步更新 formData.request_category
-              if (mode === 'company') {
-                setFormData(prev => ({ ...prev, request_category: 'company' }))
-              } else {
-                setFormData(prev => ({ ...prev, request_category: 'tour' }))
-              }
-            }}
+            onValueChange={
+              isEditMode
+                ? undefined
+                : v => {
+                    const mode = v as RequestMode
+                    setActiveTab(mode)
+                    // 同步更新 formData.request_category
+                    if (mode === 'company') {
+                      setFormData(prev => ({ ...prev, request_category: 'company' }))
+                    } else {
+                      setFormData(prev => ({ ...prev, request_category: 'tour' }))
+                    }
+                  }
+            }
             className="flex-1 flex flex-col overflow-hidden"
           >
             {/* Header: Tab + 選擇器 + 標題 同一行（統一收款單風格） */}
@@ -1022,8 +1026,24 @@ export function AddRequestDialog({
                   {isEditMode ? (
                     <>
                       請款單 {currentRequest?.code}
-                      <Badge className={statusColors[(currentRequest?.status || 'pending') as 'pending' | 'confirmed' | 'billed']}>
-                        {statusLabels[(currentRequest?.status || 'pending') as 'pending' | 'confirmed' | 'billed']}
+                      <Badge
+                        className={
+                          statusColors[
+                            (currentRequest?.status || 'pending') as
+                              | 'pending'
+                              | 'confirmed'
+                              | 'billed'
+                          ]
+                        }
+                      >
+                        {
+                          statusLabels[
+                            (currentRequest?.status || 'pending') as
+                              | 'pending'
+                              | 'confirmed'
+                              | 'billed'
+                          ]
+                        }
                       </Badge>
                     </>
                   ) : (
@@ -1060,7 +1080,10 @@ export function AddRequestDialog({
             )}
 
             {/* 團體請款 */}
-            <TabsContent value="tour" className="flex-1 overflow-y-auto pt-4 border-t border-morandi-container/30 space-y-6">
+            <TabsContent
+              value="tour"
+              className="flex-1 overflow-y-auto pt-4 border-t border-morandi-container/30 space-y-6"
+            >
               <EditableRequestItemList
                 items={isEditMode ? localItems : requestItems}
                 suppliers={suppliers}
@@ -1434,7 +1457,8 @@ export function AddRequestDialog({
                   disabled={
                     isSubmitting ||
                     (activeTab === 'batch'
-                      ? unallocatedAmount !== 0 || tourAllocations.filter(a => a.tour_id).length === 0
+                      ? unallocatedAmount !== 0 ||
+                        tourAllocations.filter(a => a.tour_id).length === 0
                       : activeTab === 'company'
                         ? !formData.expense_type ||
                           !formData.request_date ||

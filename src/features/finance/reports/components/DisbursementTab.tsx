@@ -72,7 +72,10 @@ export function DisbursementTab({ dateRange }: DisbursementTabProps) {
       paymentRequestCount: filteredPaymentRequests.length,
       disbursementOrderCount: filteredDisbursementOrders.length,
       totalPaymentAmount: filteredPaymentRequests.reduce((sum, pr) => sum + (pr.amount || 0), 0),
-      totalDisbursementAmount: filteredDisbursementOrders.reduce((sum, d) => sum + (d.amount || 0), 0),
+      totalDisbursementAmount: filteredDisbursementOrders.reduce(
+        (sum, d) => sum + (d.amount || 0),
+        0
+      ),
       tourAmount: tourRequests.reduce((sum, pr) => sum + (pr.amount || 0), 0),
       tourCount: tourRequests.length,
       companyAmount: companyRequests.reduce((sum, pr) => sum + (pr.amount || 0), 0),
@@ -100,8 +103,14 @@ export function DisbursementTab({ dateRange }: DisbursementTabProps) {
       render: (value, row) => {
         if (value === 'company') {
           const expenseType = row.expense_type as CompanyExpenseType | undefined
-          const typeName = expenseType ? EXPENSE_TYPE_CONFIG[expenseType]?.name || expenseType : '公司'
-          return <span className="px-2 py-1 text-xs rounded-full bg-morandi-gold/10 text-morandi-gold">{typeName}</span>
+          const typeName = expenseType
+            ? EXPENSE_TYPE_CONFIG[expenseType]?.name || expenseType
+            : '公司'
+          return (
+            <span className="px-2 py-1 text-xs rounded-full bg-morandi-gold/10 text-morandi-gold">
+              {typeName}
+            </span>
+          )
         }
         return <span className="text-sm text-morandi-secondary">{row.tour_code || '-'}</span>
       },
@@ -143,7 +152,9 @@ export function DisbursementTab({ dateRange }: DisbursementTabProps) {
       key: 'payment_request_ids',
       label: '請款單數',
       width: '100',
-      render: value => <span className="text-sm">{Array.isArray(value) ? value.length : 0} 筆</span>,
+      render: value => (
+        <span className="text-sm">{Array.isArray(value) ? value.length : 0} 筆</span>
+      ),
     },
     {
       key: 'amount',
@@ -163,24 +174,61 @@ export function DisbursementTab({ dateRange }: DisbursementTabProps) {
     <div className="space-y-6">
       <ContentContainer>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-          <StatCard title={`團體請款（${stats.tourCount} 筆）`} value={stats.tourAmount} icon={Receipt} iconColor="text-morandi-gold" isCurrency />
-          <StatCard title={`公司支出（${stats.companyCount} 筆）`} value={stats.companyAmount} icon={Receipt} iconColor="text-morandi-gold" isCurrency />
-          <StatCard title={`請款合計（${stats.paymentRequestCount} 筆）`} value={stats.totalPaymentAmount} icon={FileDown} iconColor="text-morandi-gold" isCurrency />
+          <StatCard
+            title={`團體請款（${stats.tourCount} 筆）`}
+            value={stats.tourAmount}
+            icon={Receipt}
+            iconColor="text-morandi-gold"
+            isCurrency
+          />
+          <StatCard
+            title={`公司支出（${stats.companyCount} 筆）`}
+            value={stats.companyAmount}
+            icon={Receipt}
+            iconColor="text-morandi-gold"
+            isCurrency
+          />
+          <StatCard
+            title={`請款合計（${stats.paymentRequestCount} 筆）`}
+            value={stats.totalPaymentAmount}
+            icon={FileDown}
+            iconColor="text-morandi-gold"
+            isCurrency
+          />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <StatCard title="出納單數" value={stats.disbursementOrderCount} icon={Wallet} iconColor="text-morandi-green" />
-          <StatCard title="出帳總金額" value={stats.totalDisbursementAmount} icon={FileDown} iconColor="text-morandi-green" isCurrency />
+          <StatCard
+            title="出納單數"
+            value={stats.disbursementOrderCount}
+            icon={Wallet}
+            iconColor="text-morandi-green"
+          />
+          <StatCard
+            title="出帳總金額"
+            value={stats.totalDisbursementAmount}
+            icon={FileDown}
+            iconColor="text-morandi-green"
+            isCurrency
+          />
         </div>
       </ContentContainer>
 
       <ContentContainer>
         <h3 className="text-lg font-semibold text-morandi-primary mb-4">請款單明細</h3>
-        <EnhancedTable columns={paymentColumns} data={filteredPaymentRequests} emptyMessage="此區間沒有請款單" />
+        <EnhancedTable
+          columns={paymentColumns}
+          data={filteredPaymentRequests}
+          emptyMessage="此區間沒有請款單"
+        />
       </ContentContainer>
 
       <ContentContainer>
         <h3 className="text-lg font-semibold text-morandi-primary mb-4">出納單明細</h3>
-        <EnhancedTable columns={disbursementColumns} data={filteredDisbursementOrders} emptyMessage="此區間沒有出納單" />
+        <EnhancedTable
+          columns={disbursementColumns}
+          data={filteredDisbursementOrders}
+          emptyMessage="此區間沒有出納單"
+        />
       </ContentContainer>
     </div>
   )

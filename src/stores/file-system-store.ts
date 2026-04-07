@@ -484,7 +484,11 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
 
           if (error) throw error
 
-          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
+          mutate(
+            (key: string) => typeof key === 'string' && key.startsWith('entity:files'),
+            undefined,
+            { revalidate: true }
+          )
 
           set(state => ({
             files: state.files.filter(f => f.id !== id),
@@ -508,7 +512,11 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
 
           if (error) throw error
 
-          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
+          mutate(
+            (key: string) => typeof key === 'string' && key.startsWith('entity:files'),
+            undefined,
+            { revalidate: true }
+          )
 
           set(state => ({
             files: state.files.filter(f => !ids.includes(f.id)),
@@ -532,7 +540,11 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
 
           if (error) throw error
 
-          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
+          mutate(
+            (key: string) => typeof key === 'string' && key.startsWith('entity:files'),
+            undefined,
+            { revalidate: true }
+          )
 
           // 從當前列表移除
           set(state => ({
@@ -556,7 +568,11 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
 
           if (error) throw error
 
-          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
+          mutate(
+            (key: string) => typeof key === 'string' && key.startsWith('entity:files'),
+            undefined,
+            { revalidate: true }
+          )
 
           set(state => ({
             files: state.files.filter(f => !fileIds.includes(f.id)),
@@ -577,7 +593,11 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
 
           if (error) throw error
 
-          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
+          mutate(
+            (key: string) => typeof key === 'string' && key.startsWith('entity:files'),
+            undefined,
+            { revalidate: true }
+          )
 
           set(state => ({
             files: state.files.map(f => (f.id === id ? { ...f, filename } : f)),
@@ -603,7 +623,11 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
 
           if (error) throw error
 
-          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
+          mutate(
+            (key: string) => typeof key === 'string' && key.startsWith('entity:files'),
+            undefined,
+            { revalidate: true }
+          )
 
           set(state => ({
             files: state.files.map(f => (f.id === id ? { ...f, is_starred: !f.is_starred } : f)),
@@ -620,7 +644,11 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
 
           if (error) throw error
 
-          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
+          mutate(
+            (key: string) => typeof key === 'string' && key.startsWith('entity:files'),
+            undefined,
+            { revalidate: true }
+          )
 
           set(state => ({
             files: state.files.map(f => (f.id === id ? { ...f, category } : f)),

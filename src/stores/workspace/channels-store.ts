@@ -88,7 +88,12 @@ export const useChannelsStore = () => {
   const channelGroupItems = useChannelGroupStore(state => state.items)
   const channelGroupLoading = useChannelGroupStore(state => state.loading)
   const channelGroupError = useChannelGroupStore(state => state.error)
-  const { items: workspaceItems, loading: workspaceLoading, error: workspaceError, refresh: refreshWorkspaces } = workspaceEntity.useList()
+  const {
+    items: workspaceItems,
+    loading: workspaceLoading,
+    error: workspaceError,
+    refresh: refreshWorkspaces,
+  } = workspaceEntity.useList()
 
   // UI 狀態（使用 selectors 避免不必要的 re-render）
   const selectedChannel = useChannelsUIStore(state => state.selectedChannel)

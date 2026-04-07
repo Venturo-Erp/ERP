@@ -67,7 +67,9 @@ function StatCard({
     <Card className="border border-border">
       <CardContent className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-medium text-morandi-secondary uppercase tracking-wide">{label}</span>
+          <span className="text-xs font-medium text-morandi-secondary uppercase tracking-wide">
+            {label}
+          </span>
           <Icon className={`h-4 w-4 ${iconColor}`} />
         </div>
         <div className={`text-xl font-bold ${amountColor}`}>
@@ -104,7 +106,11 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
       .reduce((sum, r) => sum + (r.actual_amount || r.receipt_amount || 0), 0)
 
     const confirmedPayments = rangePayments.filter(
-      pr => pr.status === 'approved' || pr.status === 'paid' || pr.status === 'billed' || pr.status === 'confirmed'
+      pr =>
+        pr.status === 'approved' ||
+        pr.status === 'paid' ||
+        pr.status === 'billed' ||
+        pr.status === 'confirmed'
     )
     const tourExpense = confirmedPayments
       .filter(pr => pr.request_category === 'tour')
@@ -116,7 +122,15 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
     const totalIncome = tourIncome + companyIncome
     const totalExpense = tourExpense + companyExpense
 
-    return { tourIncome, companyIncome, totalIncome, tourExpense, companyExpense, totalExpense, balance: totalIncome - totalExpense }
+    return {
+      tourIncome,
+      companyIncome,
+      totalIncome,
+      tourExpense,
+      companyExpense,
+      totalExpense,
+      balance: totalIncome - totalExpense,
+    }
   }, [receipts, paymentRequests, dateRange])
 
   // 按筆明細
@@ -135,7 +149,7 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
         category: r.tour_id ? 'tour' : 'company',
         amount: r.actual_amount || r.receipt_amount || 0,
         status: r.status === '1' ? '已確認' : '待確認',
-        tourCode: (r as unknown as Record<string, unknown>).tour_code as string || '',
+        tourCode: ((r as unknown as Record<string, unknown>).tour_code as string) || '',
         supplierName: '',
       })
     })
@@ -146,7 +160,8 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
       rows.push({
         id: pr.id,
         date: pr.request_date || pr.created_at || '',
-        description: `${pr.code || pr.request_number || ''} ${pr.supplier_name || pr.tour_name || ''}`.trim(),
+        description:
+          `${pr.code || pr.request_number || ''} ${pr.supplier_name || pr.tour_name || ''}`.trim(),
         type: 'expense',
         category: pr.request_category === 'company' ? 'company' : 'tour',
         amount: pr.amount || 0,
@@ -209,14 +224,25 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
       key: 'date',
       label: '日期',
       width: '80',
-      render: value => <span className="text-sm">{value ? format(new Date(value as string), 'MM/dd', { locale: zhTW }) : '-'}</span>,
+      render: value => (
+        <span className="text-sm">
+          {value ? format(new Date(value as string), 'MM/dd', { locale: zhTW }) : '-'}
+        </span>
+      ),
     },
     {
       key: 'type',
       label: '類型',
       width: '70',
       render: value => (
-        <Badge variant="outline" className={value === 'income' ? 'bg-morandi-green/10 text-morandi-green border-morandi-green/20 text-xs' : 'bg-morandi-red/10 text-morandi-red border-morandi-red/20 text-xs'}>
+        <Badge
+          variant="outline"
+          className={
+            value === 'income'
+              ? 'bg-morandi-green/10 text-morandi-green border-morandi-green/20 text-xs'
+              : 'bg-morandi-red/10 text-morandi-red border-morandi-red/20 text-xs'
+          }
+        >
           {value === 'income' ? '收入' : '支出'}
         </Badge>
       ),
@@ -225,20 +251,27 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
       key: 'category',
       label: '分類',
       width: '60',
-      render: value => <span className="text-xs text-morandi-secondary">{value === 'tour' ? '團體' : '公司'}</span>,
+      render: value => (
+        <span className="text-xs text-morandi-secondary">{value === 'tour' ? '團體' : '公司'}</span>
+      ),
     },
     {
       key: 'description',
       label: '說明',
-      render: value => <span className="text-sm truncate max-w-[280px] block">{String(value)}</span>,
+      render: value => (
+        <span className="text-sm truncate max-w-[280px] block">{String(value)}</span>
+      ),
     },
     {
       key: 'amount',
       label: '金額',
       width: '120',
       render: (value, row) => (
-        <span className={`font-medium text-sm ${row.type === 'income' ? 'text-morandi-green' : 'text-morandi-red'}`}>
-          {row.type === 'income' ? '+' : '-'}{formatCurrency(Number(value))}
+        <span
+          className={`font-medium text-sm ${row.type === 'income' ? 'text-morandi-green' : 'text-morandi-red'}`}
+        >
+          {row.type === 'income' ? '+' : '-'}
+          {formatCurrency(Number(value))}
         </span>
       ),
     },
@@ -246,7 +279,11 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
       key: 'status',
       label: '狀態',
       width: '80',
-      render: value => <Badge variant="outline" className="text-xs">{String(value)}</Badge>,
+      render: value => (
+        <Badge variant="outline" className="text-xs">
+          {String(value)}
+        </Badge>
+      ),
     },
   ]
 
@@ -275,7 +312,13 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
       width: '130',
       render: value => {
         const n = Number(value)
-        return <CurrencyCell amount={n} variant={n >= 0 ? 'income' : 'expense'} className="font-medium" />
+        return (
+          <CurrencyCell
+            amount={n}
+            variant={n >= 0 ? 'income' : 'expense'}
+            className="font-medium"
+          />
+        )
       },
     },
     {
@@ -295,9 +338,30 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
           <h3 className="text-sm font-semibold text-morandi-primary">收入</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard label="團體收入" amount={stats.tourIncome} icon={Plane} iconColor="text-morandi-green/60" amountColor="text-morandi-green" loading={isLoading} />
-          <StatCard label="公司收入" amount={stats.companyIncome} icon={Building2} iconColor="text-morandi-green/60" amountColor="text-morandi-green" loading={isLoading} />
-          <StatCard label="收入合計" amount={stats.totalIncome} icon={TrendingUp} iconColor="text-morandi-green" amountColor="text-morandi-green" loading={isLoading} />
+          <StatCard
+            label="團體收入"
+            amount={stats.tourIncome}
+            icon={Plane}
+            iconColor="text-morandi-green/60"
+            amountColor="text-morandi-green"
+            loading={isLoading}
+          />
+          <StatCard
+            label="公司收入"
+            amount={stats.companyIncome}
+            icon={Building2}
+            iconColor="text-morandi-green/60"
+            amountColor="text-morandi-green"
+            loading={isLoading}
+          />
+          <StatCard
+            label="收入合計"
+            amount={stats.totalIncome}
+            icon={TrendingUp}
+            iconColor="text-morandi-green"
+            amountColor="text-morandi-green"
+            loading={isLoading}
+          />
         </div>
       </div>
 
@@ -308,9 +372,30 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
           <h3 className="text-sm font-semibold text-morandi-primary">支出</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard label="團體支出" amount={stats.tourExpense} icon={Plane} iconColor="text-morandi-red/60" amountColor="text-morandi-red" loading={isLoading} />
-          <StatCard label="公司支出" amount={stats.companyExpense} icon={Building2} iconColor="text-morandi-red/60" amountColor="text-morandi-red" loading={isLoading} />
-          <StatCard label="支出合計" amount={stats.totalExpense} icon={ArrowUpCircle} iconColor="text-morandi-red" amountColor="text-morandi-red" loading={isLoading} />
+          <StatCard
+            label="團體支出"
+            amount={stats.tourExpense}
+            icon={Plane}
+            iconColor="text-morandi-red/60"
+            amountColor="text-morandi-red"
+            loading={isLoading}
+          />
+          <StatCard
+            label="公司支出"
+            amount={stats.companyExpense}
+            icon={Building2}
+            iconColor="text-morandi-red/60"
+            amountColor="text-morandi-red"
+            loading={isLoading}
+          />
+          <StatCard
+            label="支出合計"
+            amount={stats.totalExpense}
+            icon={ArrowUpCircle}
+            iconColor="text-morandi-red"
+            amountColor="text-morandi-red"
+            loading={isLoading}
+          />
         </div>
       </div>
 
@@ -319,9 +404,13 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
         <Card className="border-2 border-morandi-gold/30 w-full md:w-1/3">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-morandi-secondary uppercase tracking-wide">淨額</span>
+              <span className="text-xs font-medium text-morandi-secondary uppercase tracking-wide">
+                淨額
+              </span>
             </div>
-            <div className={`text-2xl font-bold ${stats.balance >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}>
+            <div
+              className={`text-2xl font-bold ${stats.balance >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}
+            >
               {isLoading ? '...' : formatCurrency(stats.balance)}
             </div>
           </CardContent>
@@ -343,12 +432,20 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
             transactions.length === 0 ? (
               <div className="text-center py-8 text-morandi-secondary">此區間無交易記錄</div>
             ) : (
-              <EnhancedTable columns={itemColumns} data={transactions.slice(0, 100)} emptyMessage="此區間無交易記錄" />
+              <EnhancedTable
+                columns={itemColumns}
+                data={transactions.slice(0, 100)}
+                emptyMessage="此區間無交易記錄"
+              />
             )
           ) : groupedRows.length === 0 ? (
             <div className="text-center py-8 text-morandi-secondary">此區間無交易記錄</div>
           ) : (
-            <EnhancedTable columns={groupColumns} data={groupedRows} emptyMessage="此區間無交易記錄" />
+            <EnhancedTable
+              columns={groupColumns}
+              data={groupedRows}
+              emptyMessage="此區間無交易記錄"
+            />
           )}
         </CardContent>
       </Card>

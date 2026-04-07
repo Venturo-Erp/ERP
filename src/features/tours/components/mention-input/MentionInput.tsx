@@ -107,10 +107,7 @@ function setCursorOffset(el: HTMLElement, offset: number) {
 }
 
 // ── hover tooltip (portal) ─────────────────────────────────────
-const detailCache = new Map<
-  string,
-  { description?: string; city_name?: string; image?: string }
->()
+const detailCache = new Map<string, { description?: string; city_name?: string; image?: string }>()
 
 function AttractionTooltip({ id, name, anchor }: { id: string; name: string; anchor: DOMRect }) {
   const [detail, setDetail] = useState(detailCache.get(id) || null)

@@ -10,7 +10,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Check, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
-import { DisbursementOrder, PaymentRequest, EXPENSE_TYPE_CONFIG, CompanyExpenseType } from '@/stores/types'
+import {
+  DisbursementOrder,
+  PaymentRequest,
+  EXPENSE_TYPE_CONFIG,
+  CompanyExpenseType,
+} from '@/stores/types'
 import {
   usePaymentRequests,
   updatePaymentRequest as updatePaymentRequestApi,
@@ -68,10 +73,14 @@ export function DisbursementDetailDialog({
   }, [order, payment_requests])
 
   // 分類：團體請款 vs 公司請款
-  const tourRequests = useMemo(() =>
-    includedRequests.filter(r => r.request_category !== 'company'), [includedRequests])
-  const companyRequests = useMemo(() =>
-    includedRequests.filter(r => r.request_category === 'company'), [includedRequests])
+  const tourRequests = useMemo(
+    () => includedRequests.filter(r => r.request_category !== 'company'),
+    [includedRequests]
+  )
+  const companyRequests = useMemo(
+    () => includedRequests.filter(r => r.request_category === 'company'),
+    [includedRequests]
+  )
 
   // 付款方式統計
   const paymentMethodStats = useMemo(() => {
@@ -257,7 +266,9 @@ export function DisbursementDetailDialog({
                               {request.code}
                             </td>
                             <td className="py-2 px-3 text-morandi-secondary max-w-[150px] truncate">
-                              {request.tour_code ? `${request.tour_code} - ${request.tour_name || ''}` : '-'}
+                              {request.tour_code
+                                ? `${request.tour_code} - ${request.tour_name || ''}`
+                                : '-'}
                             </td>
                             <td className="py-2 px-3 text-morandi-secondary">
                               {request.supplier_name || '-'}
@@ -266,16 +277,24 @@ export function DisbursementDetailDialog({
                               {request.created_by_name || '-'}
                             </td>
                             <td className="py-2 px-3 text-right">
-                              <CurrencyCell amount={request.amount || 0} className="font-medium text-morandi-gold" />
+                              <CurrencyCell
+                                amount={request.amount || 0}
+                                className="font-medium text-morandi-gold"
+                              />
                             </td>
                           </tr>
                         ))}
                       </tbody>
                       <tfoot>
                         <tr className="bg-morandi-background/50">
-                          <td colSpan={4} className="py-2.5 px-3 text-right font-semibold text-sm">小計</td>
+                          <td colSpan={4} className="py-2.5 px-3 text-right font-semibold text-sm">
+                            小計
+                          </td>
                           <td className="py-2.5 px-3 text-right">
-                            <CurrencyCell amount={tourRequests.reduce((s, r) => s + (r.amount || 0), 0)} className="font-bold text-morandi-gold" />
+                            <CurrencyCell
+                              amount={tourRequests.reduce((s, r) => s + (r.amount || 0), 0)}
+                              className="font-bold text-morandi-gold"
+                            />
                           </td>
                         </tr>
                       </tfoot>
@@ -319,7 +338,8 @@ export function DisbursementDetailDialog({
                             </td>
                             <td className="py-2 px-3 text-morandi-secondary">
                               {request.expense_type
-                                ? EXPENSE_TYPE_CONFIG[request.expense_type as CompanyExpenseType]?.name || request.expense_type
+                                ? EXPENSE_TYPE_CONFIG[request.expense_type as CompanyExpenseType]
+                                    ?.name || request.expense_type
                                 : '-'}
                             </td>
                             <td className="py-2 px-3 text-morandi-secondary">
@@ -329,16 +349,24 @@ export function DisbursementDetailDialog({
                               {request.notes || '-'}
                             </td>
                             <td className="py-2 px-3 text-right">
-                              <CurrencyCell amount={request.amount || 0} className="font-medium text-morandi-gold" />
+                              <CurrencyCell
+                                amount={request.amount || 0}
+                                className="font-medium text-morandi-gold"
+                              />
                             </td>
                           </tr>
                         ))}
                       </tbody>
                       <tfoot>
                         <tr className="bg-morandi-background/50">
-                          <td colSpan={4} className="py-2.5 px-3 text-right font-semibold text-sm">小計</td>
+                          <td colSpan={4} className="py-2.5 px-3 text-right font-semibold text-sm">
+                            小計
+                          </td>
                           <td className="py-2.5 px-3 text-right">
-                            <CurrencyCell amount={companyRequests.reduce((s, r) => s + (r.amount || 0), 0)} className="font-bold text-morandi-gold" />
+                            <CurrencyCell
+                              amount={companyRequests.reduce((s, r) => s + (r.amount || 0), 0)}
+                              className="font-bold text-morandi-gold"
+                            />
                           </td>
                         </tr>
                       </tfoot>
@@ -362,13 +390,21 @@ export function DisbursementDetailDialog({
                     {paymentMethodStats.map(stat => (
                       <div key={stat.name} className="flex items-center justify-between">
                         <span className="text-sm text-morandi-secondary">{stat.name}</span>
-                        <CurrencyCell amount={stat.amount} className="font-semibold text-morandi-gold" />
+                        <CurrencyCell
+                          amount={stat.amount}
+                          className="font-semibold text-morandi-gold"
+                        />
                       </div>
                     ))}
                   </div>
                   <div className="flex items-center justify-between mt-3 pt-3 border-t border-morandi-container/30">
-                    <span className="text-sm font-semibold text-morandi-primary">{DISBURSEMENT_LABELS.合計}</span>
-                    <CurrencyCell amount={order.amount || 0} className="font-bold text-lg text-morandi-gold" />
+                    <span className="text-sm font-semibold text-morandi-primary">
+                      {DISBURSEMENT_LABELS.合計}
+                    </span>
+                    <CurrencyCell
+                      amount={order.amount || 0}
+                      className="font-bold text-lg text-morandi-gold"
+                    />
                   </div>
                 </div>
               )}

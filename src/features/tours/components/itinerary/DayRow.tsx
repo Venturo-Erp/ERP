@@ -193,7 +193,10 @@ export function DayRow({
                       <span>{a.name}</span>
                       <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); handleRemoveAttraction(a.id) }}
+                        onClick={e => {
+                          e.stopPropagation()
+                          handleRemoveAttraction(a.id)
+                        }}
                         className="hover:text-destructive ml-0.5"
                       >
                         <X size={8} />
@@ -263,7 +266,9 @@ export function DayRow({
           </div>
         </td>
         {/* Breakfast -- restaurant drop zone */}
-        <td className={`px-0 py-0 ${c} align-middle ${day.hotelBreakfast ? 'bg-morandi-gold/10' : ''}`}>
+        <td
+          className={`px-0 py-0 ${c} align-middle ${day.hotelBreakfast ? 'bg-morandi-gold/10' : ''}`}
+        >
           <DroppableZone id={`meal-breakfast-drop-${idx}`} acceptType="restaurant">
             <div className="relative min-h-8 flex items-center">
               {day.hotelBreakfast ? (
@@ -359,7 +364,9 @@ export function DayRow({
           </DroppableZone>
         </td>
         {/* Dinner -- restaurant drop zone */}
-        <td className={`px-0 py-0 ${cLast} align-middle ${day.dinnerSelf ? 'bg-morandi-gold/10' : ''}`}>
+        <td
+          className={`px-0 py-0 ${cLast} align-middle ${day.dinnerSelf ? 'bg-morandi-gold/10' : ''}`}
+        >
           <DroppableZone id={`meal-dinner-drop-${idx}`} acceptType="restaurant">
             <div className="relative min-h-8 flex items-center">
               {day.dinnerSelf ? (
@@ -409,7 +416,9 @@ export function DayRow({
       {/* Accommodation row -- hotel drop zone (not for last day) */}
       {!isLast && (
         <tr className={idx % 2 === 1 ? 'bg-muted/5' : ''}>
-          <td className={`px-2 py-0 ${CELL} align-middle text-center text-[10px] text-morandi-gold font-medium`}>
+          <td
+            className={`px-2 py-0 ${CELL} align-middle text-center text-[10px] text-morandi-gold font-medium`}
+          >
             <Hotel size={10} className="inline mx-auto" />
           </td>
           <td colSpan={4} className={`px-0 py-0 ${CELL} align-middle`}>
@@ -422,13 +431,20 @@ export function DayRow({
                 <div className="h-7 flex items-center px-2">
                   <div
                     className={`inline-flex items-center gap-1 bg-status-info/10 text-status-info border border-status-info/30 rounded-full px-2 py-0.5 text-xs ${onHotelClick && day.accommodationId ? 'cursor-pointer hover:bg-status-info/20 transition-colors' : ''}`}
-                    onClick={onHotelClick && day.accommodationId ? () => onHotelClick({ id: day.accommodationId!, name: day.accommodation }) : undefined}
+                    onClick={
+                      onHotelClick && day.accommodationId
+                        ? () => onHotelClick({ id: day.accommodationId!, name: day.accommodation })
+                        : undefined
+                    }
                   >
                     <Hotel size={10} />
                     <span>{day.accommodation}</span>
                     <button
                       type="button"
-                      onClick={(e) => { e.stopPropagation(); updateDaySchedule(idx, 'accommodation', '') }}
+                      onClick={e => {
+                        e.stopPropagation()
+                        updateDaySchedule(idx, 'accommodation', '')
+                      }}
                       className="hover:text-destructive"
                     >
                       <X size={10} />
@@ -460,10 +476,15 @@ export function DayRow({
       {/* Note row */}
       {day.note !== undefined && (
         <tr className={idx % 2 === 1 ? 'bg-muted/5' : ''}>
-          <td className={`px-2 py-0 ${noteRowIsTableBottom ? CELL_NO_B : CELL} align-middle text-[10px] text-morandi-gold font-medium`}>
+          <td
+            className={`px-2 py-0 ${noteRowIsTableBottom ? CELL_NO_B : CELL} align-middle text-[10px] text-morandi-gold font-medium`}
+          >
             PS
           </td>
-          <td colSpan={5} className={`px-0 py-0 ${noteRowIsTableBottom ? CELL_LAST_NO_B : CELL_LAST} align-middle`}>
+          <td
+            colSpan={5}
+            className={`px-0 py-0 ${noteRowIsTableBottom ? CELL_LAST_NO_B : CELL_LAST} align-middle`}
+          >
             <Input
               value={day.note || ''}
               onChange={e => updateDaySchedule(idx, 'note', e.target.value)}

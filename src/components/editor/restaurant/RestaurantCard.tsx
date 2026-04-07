@@ -45,9 +45,7 @@ function getMichelinDisplay(restaurant: CombinedRestaurant) {
 }
 
 function getRestaurantImage(restaurant: CombinedRestaurant) {
-  return (
-    restaurant.images && restaurant.images.length > 0 ? restaurant.images[0] : null
-  )
+  return restaurant.images && restaurant.images.length > 0 ? restaurant.images[0] : null
 }
 
 export function RestaurantCard({ restaurant, isSelected, onToggle }: RestaurantCardProps) {

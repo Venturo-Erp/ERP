@@ -5,7 +5,10 @@ import { Card } from '@/components/ui/card'
 import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
 import { CurrencyCell, DateCell } from '@/components/table-cells'
 import { AlertCircle, Calendar, TrendingUp, TrendingDown, Loader2 } from 'lucide-react'
-import { useUnclosedTours, UnclosedTourData } from '@/features/finance/reports/hooks/useUnclosedTours'
+import {
+  useUnclosedTours,
+  UnclosedTourData,
+} from '@/features/finance/reports/hooks/useUnclosedTours'
 
 function StatCard({
   title,
@@ -90,7 +93,9 @@ export function UnclosedToursTab() {
       render: value => {
         const days = Number(value) || 0
         return (
-          <span className={`font-medium ${days > 14 ? 'text-morandi-red' : days > 7 ? 'text-morandi-gold' : 'text-morandi-secondary'}`}>
+          <span
+            className={`font-medium ${days > 14 ? 'text-morandi-red' : days > 7 ? 'text-morandi-gold' : 'text-morandi-secondary'}`}
+          >
             {days} 天
           </span>
         )
@@ -114,7 +119,13 @@ export function UnclosedToursTab() {
       width: '120',
       render: (_, row) => {
         const profit = (row.total_revenue || 0) - (row.total_cost || 0)
-        return <CurrencyCell amount={profit} variant={profit >= 0 ? 'income' : 'expense'} className="font-medium" />
+        return (
+          <CurrencyCell
+            amount={profit}
+            variant={profit >= 0 ? 'income' : 'expense'}
+            className="font-medium"
+          />
+        )
       },
     },
   ]
@@ -132,10 +143,36 @@ export function UnclosedToursTab() {
 
       <ContentContainer>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="未結團數" value={stats.count} icon={Calendar} iconColor="text-morandi-red" />
-          <StatCard title="總收入" value={stats.totalRevenue} icon={TrendingUp} iconColor="text-morandi-green" isCurrency variant="income" />
-          <StatCard title="總成本" value={stats.totalCost} icon={TrendingDown} iconColor="text-morandi-red" isCurrency variant="expense" />
-          <StatCard title="淨利潤" value={stats.netProfit} icon={TrendingUp} iconColor={stats.netProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red'} isCurrency variant={stats.netProfit >= 0 ? 'income' : 'expense'} />
+          <StatCard
+            title="未結團數"
+            value={stats.count}
+            icon={Calendar}
+            iconColor="text-morandi-red"
+          />
+          <StatCard
+            title="總收入"
+            value={stats.totalRevenue}
+            icon={TrendingUp}
+            iconColor="text-morandi-green"
+            isCurrency
+            variant="income"
+          />
+          <StatCard
+            title="總成本"
+            value={stats.totalCost}
+            icon={TrendingDown}
+            iconColor="text-morandi-red"
+            isCurrency
+            variant="expense"
+          />
+          <StatCard
+            title="淨利潤"
+            value={stats.netProfit}
+            icon={TrendingUp}
+            iconColor={stats.netProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red'}
+            isCurrency
+            variant={stats.netProfit >= 0 ? 'income' : 'expense'}
+          />
         </div>
       </ContentContainer>
 

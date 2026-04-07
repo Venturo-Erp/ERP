@@ -51,10 +51,7 @@ async function enrichDailyItinerary(
   if (!attractions) return dailyItinerary
 
   // 建立對照表
-  const attractionMap = new Map<
-    string,
-    { description?: string; images?: string[] }
-  >()
+  const attractionMap = new Map<string, { description?: string; images?: string[] }>()
   for (const attr of attractions) {
     attractionMap.set(attr.id, {
       description: attr.description || undefined,

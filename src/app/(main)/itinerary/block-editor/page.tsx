@@ -2,7 +2,13 @@
 
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
 // TODO: labels 模組尚未建立，暫用空物件
-const LABELS = { 新增行程: '新增行程', 編輯行程: '編輯行程', 儲存中: '儲存中...', 儲存: '儲存', 返回: '返回' } as Record<string, string>
+const LABELS = {
+  新增行程: '新增行程',
+  編輯行程: '編輯行程',
+  儲存中: '儲存中...',
+  儲存: '儲存',
+  返回: '返回',
+} as Record<string, string>
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -73,13 +79,14 @@ export default function ItineraryEditorPage() {
               arrivalTime: '',
             },
             flightStyle: itinerary.flight_style as TourFormData['flightStyle'],
-            features: itinerary.features && itinerary.features.length > 0 
-              ? itinerary.features 
-              : [
-                  { icon: '⭐', title: '', description: '', images: [] },
-                  { icon: '🏨', title: '', description: '', images: [] },
-                  { icon: '🍽️', title: '', description: '', images: [] }
-                ],
+            features:
+              itinerary.features && itinerary.features.length > 0
+                ? itinerary.features
+                : [
+                    { icon: '⭐', title: '', description: '', images: [] },
+                    { icon: '🏨', title: '', description: '', images: [] },
+                    { icon: '🍽️', title: '', description: '', images: [] },
+                  ],
             featuresStyle: 'original',
             focusCards: itinerary.focus_cards || [],
             leader: itinerary.leader || { name: '', domesticPhone: '', overseasPhone: '' },
@@ -143,7 +150,7 @@ export default function ItineraryEditorPage() {
           features: [
             { icon: '⭐', title: '', description: '', images: [] },
             { icon: '🏨', title: '', description: '', images: [] },
-            { icon: '🍽️', title: '', description: '', images: [] }
+            { icon: '🍽️', title: '', description: '', images: [] },
           ],
           featuresStyle: 'original',
           focusCards: [],
@@ -184,7 +191,9 @@ export default function ItineraryEditorPage() {
         await updateItinerary(itineraryId, formData)
         toast.success('行程表已更新')
       } else {
-        const newItinerary = await createItinerary(formData as unknown as Parameters<typeof createItinerary>[0])
+        const newItinerary = await createItinerary(
+          formData as unknown as Parameters<typeof createItinerary>[0]
+        )
         toast.success('行程表已建立')
         // 導向新行程表
         if (newItinerary?.id) {
@@ -253,9 +262,7 @@ export default function ItineraryEditorPage() {
         <div className="w-2/5 sticky top-0 h-full bg-white">
           <div className="p-6 h-full overflow-y-auto">
             {/* TODO: 這裡放即時預覽元件 */}
-            <div className="text-center text-morandi-secondary py-12">
-              即時預覽區
-            </div>
+            <div className="text-center text-morandi-secondary py-12">即時預覽區</div>
           </div>
         </div>
       </div>
