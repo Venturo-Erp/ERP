@@ -297,7 +297,9 @@ export function EditableRequestItemList({
             <div>
               <Select
                 value={item.payment_method_id || ''}
-                onValueChange={value => updateItem(item.id, { payment_method_id: value || undefined })}
+                onValueChange={value =>
+                  updateItem(item.id, { payment_method_id: value || undefined })
+                }
                 disabled={disabled}
               >
                 <SelectTrigger className="input-no-focus h-9 border-0 shadow-none bg-transparent text-xs px-1">
