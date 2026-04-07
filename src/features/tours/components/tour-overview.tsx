@@ -16,7 +16,7 @@ import {
   Users,
   FileText,
   TrendingUp,
-  TrendingDown,
+  HandCoins,
   AlertCircle,
   CheckCircle,
 } from 'lucide-react'
@@ -253,7 +253,7 @@ export const TourOverview = React.memo(function TourOverview({
             </div>
           </div>
           <div className="flex-1 flex items-center gap-2.5 px-3">
-            <TrendingDown size={16} className="text-morandi-red shrink-0" />
+            <HandCoins size={16} className="text-morandi-red shrink-0" />
             <div className="min-w-0">
               <p className="text-[11px] text-morandi-secondary leading-tight">總支出</p>
               <p className="text-sm font-semibold text-morandi-primary">

@@ -17,6 +17,7 @@ import {
   Database,
   Building2,
   Wallet,
+  HandCoins,
   Clock,
   UserCog,
   BarChart3,
@@ -121,7 +122,7 @@ const menuItems: MenuItem[] = [
       {
         href: '/finance/requests',
         label: COMP_LAYOUT_LABELS.請款管理,
-        icon: TrendingDown,
+        icon: HandCoins,
         requiredPermission: 'finance',
       },
       {
@@ -381,7 +382,7 @@ const localMenuItems: MenuItem[] = [
     icon: CreditCard,
     children: [
       { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
-      { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
+      { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: HandCoins },
       { href: '/finance/settings', label: '財務設定', icon: Settings },
     ],
   },
@@ -400,7 +401,7 @@ const transportMenuItems: MenuItem[] = [
     icon: CreditCard,
     children: [
       { href: '/finance/payments', label: COMP_LAYOUT_LABELS.收款管理, icon: Wallet },
-      { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: CreditCard },
+      { href: '/finance/requests', label: COMP_LAYOUT_LABELS.請款管理, icon: HandCoins },
       { href: '/finance/settings', label: '財務設定', icon: Settings },
     ],
   },
