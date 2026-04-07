@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Home,
   MapPin,
+  MapPinned,
   ShoppingCart,
   Users,
   CreditCard,
@@ -91,7 +92,7 @@ const menuItems: MenuItem[] = [
     icon: CheckSquare,
     requiredPermission: 'todos',
   },
-  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPin, requiredPermission: 'tours' },
+  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPinned, requiredPermission: 'tours' },
   {
     href: '/orders',
     label: COMP_LAYOUT_LABELS.訂單,
@@ -373,7 +374,7 @@ const menuItems: MenuItem[] = [
 // Local/DMC 選單（地接社）
 const localMenuItems: MenuItem[] = [
   { href: '/dashboard', label: COMP_LAYOUT_LABELS.首頁, icon: Home },
-  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPin }, // 包含「收到的委託」分頁
+  { href: '/tours', label: COMP_LAYOUT_LABELS.旅遊團, icon: MapPinned }, // 包含「收到的委託」分頁
   {
     href: '/finance',
     label: COMP_LAYOUT_LABELS.財務系統,
