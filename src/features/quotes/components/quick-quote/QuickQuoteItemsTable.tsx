@@ -90,7 +90,7 @@ const SortableRow: React.FC<SortableRowProps> = ({
     item.cost === 0 || item.cost === undefined ? '' : String(item.cost)
   )
   const [unitPriceExpr, setUnitPriceExpr] = useState<string>(
-    item.unit_price === 0 ? '' : String(item.unit_price)
+    !item.unit_price ? '' : String(item.unit_price)
   )
   const [quantityExpr, setQuantityExpr] = useState<string>(
     item.quantity === 0 ? '' : String(item.quantity)

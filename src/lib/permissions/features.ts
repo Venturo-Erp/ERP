@@ -56,7 +56,7 @@ export const FEATURES: FeatureDefinition[] = [
     code: 'accounting',
     name: '會計系統',
     description: '傳票、帳務、損益表',
-    category: 'basic',
+    category: 'premium',
     routes: ['/accounting', '/accounting/vouchers', '/accounting/accounts', '/accounting/reports'],
   },
   {

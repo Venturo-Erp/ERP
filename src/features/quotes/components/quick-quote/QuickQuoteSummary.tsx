@@ -56,7 +56,7 @@ export const QuickQuoteSummary: React.FC<QuickQuoteSummaryProps> = ({
               value={expenseDescription}
               onChange={e => onExpenseDescriptionChange(e.target.value)}
               placeholder={QUICK_QUOTE_SECTION_LABELS.輸入整體報價說明_例如_含機票_住宿_餐食}
-              className="w-full min-h-[100px] p-3 border border-border rounded-md text-sm resize-y focus:outline-none focus:ring-2 focus:ring-morandi-gold/50"
+              className="w-full min-h-[100px] p-3 border border-border rounded-md text-sm resize-y bg-white focus:outline-none focus:ring-2 focus:ring-morandi-gold/50"
             />
           ) : (
             <p className="text-sm text-morandi-secondary whitespace-pre-wrap">

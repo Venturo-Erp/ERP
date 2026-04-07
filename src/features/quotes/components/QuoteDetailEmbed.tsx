@@ -585,7 +585,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
             <div className="border border-border bg-card rounded-xl shadow-sm overflow-hidden">
               <div ref={scrollRef} className="overflow-x-auto">
                 <table className="w-full min-w-[800px] border-collapse">
-                  <thead className="bg-morandi-gold border-b border-border">
+                  <thead className="bg-morandi-gold border-b border-border sticky top-0 z-20">
                     <tr>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-white w-12 table-divider">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_2257}

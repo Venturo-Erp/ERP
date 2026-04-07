@@ -183,7 +183,14 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
     >
       <div className="space-y-6">
         {/* 租戶資訊卡片 */}
-        <div className="bg-white border border-border rounded-lg p-6">
+        <div
+          className="rounded-[24px] p-6"
+          style={{
+            background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
+            border: '3px solid white',
+            boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
+          }}
+        >
           <div className="grid grid-cols-4 gap-6">
             <div>
               <div className="text-sm text-morandi-secondary mb-1">公司名稱</div>
@@ -215,8 +222,15 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* 渠道連線狀態 */}
-        <div className="bg-white border border-border rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-border bg-morandi-bg/30">
+        <div
+          className="rounded-[24px] overflow-hidden"
+          style={{
+            background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
+            border: '3px solid white',
+            boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
+          }}
+        >
+          <div className="px-6 py-4 border-b border-morandi-gold/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Bot className="h-4 w-4 text-morandi-gold" />
@@ -273,8 +287,15 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* 基本功能卡片 */}
-        <div className="bg-white border border-border rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-border bg-morandi-bg/30">
+        <div
+          className="rounded-[24px] overflow-hidden"
+          style={{
+            background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
+            border: '3px solid white',
+            boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
+          }}
+        >
+          <div className="px-6 py-4 border-b border-morandi-gold/20">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-morandi-green"></div>
               <h3 className="font-semibold text-morandi-primary">基本功能</h3>
@@ -290,7 +311,11 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                 return (
                   <div
                     key={feature.code}
-                    className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-morandi-bg/30 transition-colors"
+                    className="flex items-center justify-between px-4 py-3 rounded-[16px] transition-all hover:shadow-sm"
+                    style={{
+                      background: 'linear-gradient(0deg, rgb(250, 247, 240) 0%, rgb(245, 240, 232) 100%)',
+                      boxShadow: 'rgba(180, 160, 120, 0.3) 0px 8px 20px -4px',
+                    }}
                   >
                     <span className="text-sm font-medium text-morandi-primary">{feature.name}</span>
                     <Switch
@@ -306,10 +331,15 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
 
         {/* 付費功能卡片 */}
         <div
-          className={`bg-white border rounded-lg overflow-hidden ${premiumEnabled ? 'border-morandi-gold' : 'border-border'}`}
+          className="rounded-[24px] overflow-hidden"
+          style={{
+            background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
+            border: '3px solid white',
+            boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
+          }}
         >
           <div
-            className={`px-6 py-4 border-b border-border ${premiumEnabled ? 'bg-morandi-gold/10 border-morandi-gold/30' : 'bg-morandi-container/30 border-border'}`}
+            className={`px-6 py-4 border-b border-morandi-gold/20`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -350,7 +380,11 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                 return (
                   <div
                     key={feature.code}
-                    className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-morandi-bg/30 transition-colors"
+                    className="flex items-center justify-between px-4 py-3 rounded-[16px] transition-all hover:shadow-sm"
+                    style={{
+                      background: 'linear-gradient(0deg, rgb(250, 247, 240) 0%, rgb(245, 240, 232) 100%)',
+                      boxShadow: 'rgba(180, 160, 120, 0.3) 0px 8px 20px -4px',
+                    }}
                   >
                     <span className="text-sm font-medium text-morandi-primary">{feature.name}</span>
                     <Switch

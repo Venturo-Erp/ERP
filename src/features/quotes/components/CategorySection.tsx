@@ -212,8 +212,8 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 
   return (
     <React.Fragment>
-      {/* 分類標題行 - 有底色但無左邊框，可折疊 */}
-      <tr className="bg-morandi-container/40 border-b border-morandi-container/60">
+      {/* 分類標題行 - sticky 凍結在表頭下方 */}
+      <tr className="bg-[#e8e5e0] border-b border-morandi-container/60 sticky top-[41px] z-10">
         <td colSpan={2} className="py-3 px-4 text-sm font-semibold text-morandi-charcoal">
           <div className="flex items-center space-x-2">
             {/* 折疊箭頭 */}
