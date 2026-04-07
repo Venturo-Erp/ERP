@@ -213,7 +213,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
   return (
     <React.Fragment>
       {/* 分類標題行 - sticky 凍結在表頭下方 */}
-      <tr className="bg-[#e8e5e0] border-b border-morandi-container/60 sticky top-[41px] z-10">
+      <tr className="bg-[rgba(138,131,122,0.08)] border-b border-morandi-container/60 sticky top-[41px] z-10">
         <td colSpan={2} className="py-3 px-4 text-sm font-semibold text-morandi-charcoal">
           <div className="flex items-center space-x-2">
             {/* 折疊箭頭 */}
@@ -223,12 +223,12 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               title={isCollapsed ? CATEGORY_SECTION_LABELS.展開 : CATEGORY_SECTION_LABELS.收合}
             >
               {isCollapsed ? (
-                <ChevronRight size={14} className="text-morandi-secondary" />
+                <ChevronRight size={14} className="text-morandi-primary" />
               ) : (
-                <ChevronDown size={14} className="text-morandi-secondary" />
+                <ChevronDown size={14} className="text-morandi-primary" />
               )}
             </button>
-            <Icon size={16} className="text-morandi-gold" />
+            <Icon size={16} className="text-morandi-primary" />
             <span>{category.name}</span>
 
             {/* 已隱藏項目數量 + 展開恢復 */}
@@ -261,7 +261,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 title={CATEGORY_SECTION_LABELS.查看參考報價}
                 onClick={fetchCountriesWithRates}
               >
-                <DollarSign size={14} className="text-morandi-gold" />
+                <DollarSign size={14} className="text-morandi-primary" />
               </button>
             )}
           </div>
@@ -277,7 +277,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               onClick={() => handleAddRow(category.id)}
               disabled={isReadOnly}
               className={cn(
-                'text-morandi-gold hover:bg-morandi-gold/10',
+                'text-morandi-primary hover:bg-morandi-gold/10',
                 isReadOnly && 'cursor-not-allowed opacity-60'
               )}
             >
@@ -293,7 +293,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   onClick={onOpenLocalPricingDialog}
                   disabled={isReadOnly}
                   className={cn(
-                    'text-morandi-gold hover:bg-morandi-gold/10',
+                    'text-morandi-primary hover:bg-morandi-gold/10',
                     isReadOnly && 'cursor-not-allowed opacity-60'
                   )}
                 >
@@ -307,7 +307,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddRow(category.id)}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-secondary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
@@ -320,7 +320,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddTransportRow(category.id)}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-secondary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
@@ -333,7 +333,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddGuideRow(category.id)}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-secondary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
@@ -362,7 +362,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                       onClick={() => handleAddAdultTicket(category.id)}
                       disabled={isReadOnly || hasAdult}
                       className={cn(
-                        'text-morandi-gold hover:bg-morandi-gold/10',
+                        'text-morandi-primary hover:bg-morandi-gold/10',
                         (isReadOnly || hasAdult) && 'cursor-not-allowed opacity-60'
                       )}
                     >
@@ -375,7 +375,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                       onClick={() => handleAddChildTicket(category.id)}
                       disabled={isReadOnly || hasChild}
                       className={cn(
-                        'text-morandi-secondary hover:bg-morandi-gold/10',
+                        'text-morandi-primary hover:bg-morandi-gold/10',
                         (isReadOnly || hasChild) && 'cursor-not-allowed opacity-60'
                       )}
                     >
@@ -388,7 +388,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                       onClick={() => handleAddInfantTicket(category.id)}
                       disabled={isReadOnly || hasInfant}
                       className={cn(
-                        'text-morandi-secondary hover:bg-morandi-gold/10',
+                        'text-morandi-primary hover:bg-morandi-gold/10',
                         (isReadOnly || hasInfant) && 'cursor-not-allowed opacity-60'
                       )}
                     >
@@ -404,7 +404,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddRow(category.id)}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-secondary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
@@ -420,7 +420,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddLunchMeal()}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-gold hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
@@ -436,7 +436,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddActivity()}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-gold hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
@@ -452,7 +452,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddRow(category.id, { quantity: null, name: '小費' })}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-gold hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
@@ -465,7 +465,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddRow(category.id, { quantity: 1, name: '出差費' })}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-secondary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
@@ -481,7 +481,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddRow(category.id)}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-gold hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >

@@ -1000,7 +1000,7 @@ export function OrderMembersExpandable({
     >
       {/* 區塊標題行 */}
       <div
-        className={`flex-shrink-0 flex items-center justify-between px-4 py-2 ${embedded ? '' : 'bg-morandi-container/50 border-b border-border/60'}`}
+        className={`flex-shrink-0 flex items-center justify-between px-4 py-2 ${embedded ? '' : 'bg-morandi-gold-header border-b border-border/60'}`}
       >
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-morandi-primary">

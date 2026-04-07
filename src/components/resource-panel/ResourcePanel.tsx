@@ -23,7 +23,7 @@ interface ResourceItem {
   name: string
   type: ResourceType
   category?: string | null
-  thumbnail?: string | null
+  images?: string[]
   city_name?: string | null
   data_verified?: boolean
   latitude?: number | null
@@ -115,9 +115,9 @@ function DraggableResourceCard({ resource, onEdit }: DraggableResourceCardProps)
       )}
     >
       {/* 縮圖 */}
-      {resource.thumbnail ? (
+      {resource.images?.[0] ? (
         <img
-          src={resource.thumbnail}
+          src={resource.images[0]}
           alt={resource.name}
           className="w-8 h-8 rounded object-cover flex-shrink-0"
         />
@@ -278,10 +278,10 @@ export function ResourcePanel({
       type: ResourceType,
       extraSelect = ''
     ) => {
-      const selectStr = `id, name, category, thumbnail, data_verified, latitude, longitude, address, description, region_id${extraSelect}`
+      const selectStr = `id, name, category, images, data_verified, latitude, longitude, address, description, region_id${extraSelect}`
       let query = supabase
         .from(table)
-        .select(selectStr as 'id, name, category, thumbnail')
+        .select(selectStr as 'id, name, category, images')
         .eq('is_active', true)
 
       // 簡化版：只用國家篩選
@@ -304,7 +304,7 @@ export function ResourcePanel({
             type === 'hotel' && item.star_rating
               ? `${item.star_rating}星`
               : (item.category as string | null),
-          thumbnail: item.thumbnail as string | null,
+          images: (item.images as string[]) || [],
           data_verified: item.data_verified as boolean | undefined,
           latitude: item.latitude as number | null,
           longitude: item.longitude as number | null,
@@ -348,11 +348,11 @@ export function ResourcePanel({
         } as const
         const table = tableMap[activeTab] as 'attractions' | 'hotels' | 'restaurants'
         const extraSelect = activeTab === 'hotel' ? ', star_rating' : ''
-        const selectStr = `id, name, category, thumbnail, data_verified, latitude, longitude, address, description, region_id${extraSelect}`
+        const selectStr = `id, name, category, images, data_verified, latitude, longitude, address, description, region_id${extraSelect}`
 
         let query = supabase
           .from(table)
-          .select(selectStr as 'id, name, category, thumbnail')
+          .select(selectStr as 'id, name, category, images')
           .eq('is_active', true)
           .ilike('name', `%${searchQuery}%`)
 
@@ -372,7 +372,7 @@ export function ResourcePanel({
                 activeTab === 'hotel' && item.star_rating
                   ? `${item.star_rating}星`
                   : (item.category as string | null),
-              thumbnail: item.thumbnail as string | null,
+              images: (item.images as string[]) || [],
               data_verified: item.data_verified as boolean | undefined,
               latitude: item.latitude as number | null,
               longitude: item.longitude as number | null,
@@ -424,8 +424,8 @@ export function ResourcePanel({
   return (
     <div className={cn('flex flex-col bg-card border-b border-border', className)}>
       {/* 大標題：景點庫 */}
-      <div className="h-14 bg-morandi-gold text-white px-4 flex items-center border-b border-border">
-        <h2 className="text-lg font-bold">景點庫</h2>
+      <div className="h-9 bg-morandi-gold-header px-3 flex items-center border-b border-border">
+        <h2 className="text-sm font-semibold">景點庫</h2>
       </div>
 
       {/* 地區篩選 + 類型分頁（4欄平均） */}

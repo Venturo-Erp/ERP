@@ -83,18 +83,18 @@ export const TourOverview = React.memo(function TourOverview({
   // 總支出 = 請款單金額加總（與下方請款總覽一致）
   const { items: allPaymentRequests } = usePaymentRequests()
   const totalExpense = useMemo(
-    () => (allPaymentRequests ?? [])
-      .filter(pr => pr.tour_id === tour.id)
-      .filter(pr => {
-        const rt = (pr.request_type || '').toLowerCase()
-        return !rt.includes('bonus') && !rt.includes('獎金')
-      })
-      .reduce((sum, pr) => sum + (Number(pr.amount) || 0), 0),
+    () =>
+      (allPaymentRequests ?? [])
+        .filter(pr => pr.tour_id === tour.id)
+        .filter(pr => {
+          const rt = (pr.request_type || '').toLowerCase()
+          return !rt.includes('bonus') && !rt.includes('獎金')
+        })
+        .reduce((sum, pr) => sum + (Number(pr.amount) || 0), 0),
     [allPaymentRequests, tour.id]
   )
   const confirmedProfit = confirmedIncome - totalExpense
   const estimatedProfit = estimatedIncome - totalExpense
-
 
   // 檢查該團是否已有頻道
   const existingChannel = channels.find((ch: { tour_id?: string | null }) => ch.tour_id === tour.id)
@@ -208,14 +208,13 @@ export const TourOverview = React.memo(function TourOverview({
     return badges[status || ''] || 'bg-morandi-container text-morandi-secondary'
   }
 
-
   return (
     <div className="border border-border rounded-lg overflow-hidden bg-card">
       {/* 標題列：基本資訊 + 狀態 */}
-      <div className="px-5 py-3 border-b border-border/60">
+      <div className="px-5 py-2.5 border-b border-border/60 bg-morandi-gold-header">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6 text-sm">
-            <span className="text-lg font-semibold text-morandi-primary">{tour.code}</span>
+            <span className="text-sm font-semibold text-morandi-primary">{tour.code}</span>
             <div className="flex items-center gap-1.5 text-morandi-secondary">
               <MapPin size={14} />
               <span>{tour.location}</span>
@@ -248,7 +247,9 @@ export const TourOverview = React.memo(function TourOverview({
           <div className="flex-1 flex items-center gap-2.5 px-3">
             <TrendingUp size={16} className="text-morandi-green shrink-0" />
             <div className="min-w-0">
-              <p className="text-[11px] text-morandi-secondary leading-tight">總收入（預估／實收）</p>
+              <p className="text-[11px] text-morandi-secondary leading-tight">
+                總收入（預估／實收）
+              </p>
               <p className="text-sm font-semibold text-morandi-primary">
                 {formatCurrency(estimatedIncome)} / {formatCurrency(confirmedIncome)}
               </p>
@@ -264,9 +265,14 @@ export const TourOverview = React.memo(function TourOverview({
             </div>
           </div>
           <div className="flex-1 flex items-center gap-2.5 px-3">
-            <DollarSign size={16} className={`shrink-0 ${confirmedProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`} />
+            <DollarSign
+              size={16}
+              className={`shrink-0 ${confirmedProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red'}`}
+            />
             <div className="min-w-0">
-              <p className="text-[11px] text-morandi-secondary leading-tight">總利潤（預估／實收）</p>
+              <p className="text-[11px] text-morandi-secondary leading-tight">
+                總利潤（預估／實收）
+              </p>
               <p className="text-sm font-semibold text-morandi-primary">
                 {formatCurrency(estimatedProfit)} / {formatCurrency(confirmedProfit)}
               </p>
@@ -286,4 +292,3 @@ export const TourOverview = React.memo(function TourOverview({
     </div>
   )
 })
-

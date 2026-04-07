@@ -49,7 +49,14 @@ interface DayRowProps {
   getDateLabel: (idx: number) => string
   getPreviousAccommodation: (index: number) => string
   disabledAttractionIds?: string[]
+  onAttractionClick?: (attraction: { id: string; name: string; verified?: boolean }) => void
+  onHotelClick?: (hotel: { id: string; name: string }) => void
 }
+
+const CELL = 'border-b border-r border-border'
+const CELL_LAST = 'border-b border-border'
+const CELL_NO_B = 'border-r border-border'
+const CELL_LAST_NO_B = ''
 
 export function DayRow({
   day,
@@ -66,7 +73,16 @@ export function DayRow({
   getDateLabel,
   getPreviousAccommodation,
   disabledAttractionIds = [],
+  onAttractionClick,
+  onHotelClick,
 }: DayRowProps) {
+  // 最後一天的最後一行不需要底線（外框已有）
+  const hasNote = day.note !== undefined
+  const mainRowIsTableBottom = isLast && !hasNote
+  const noteRowIsTableBottom = isLast && hasNote
+  const c = mainRowIsTableBottom ? CELL_NO_B : CELL
+  const cLast = mainRowIsTableBottom ? CELL_LAST_NO_B : CELL_LAST
+
   const routeInputRef = React.useRef<HTMLInputElement>(null)
 
   // 插入景點：名字插到游標位置 + 加到 attractions 列表
@@ -78,80 +94,48 @@ export function DayRow({
       const newAttractions = [...existing, attraction]
       reorderAttractions(idx, newAttractions)
 
-      // 在游標位置插入景點名字
+      // 插到 route 文字
       const input = routeInputRef.current
       const currentRoute = day.route || ''
-      const cursorPos = input?.selectionStart ?? currentRoute.length
-      const before = currentRoute.slice(0, cursorPos)
-      const after = currentRoute.slice(cursorPos)
-      const newRoute = before + attraction.name + after
-      updateDaySchedule(idx, 'route', newRoute)
+      const insertText = attraction.name
 
-      // 同步 blocks
-      if (updateBlocks) {
-        const newBlocks: ItineraryBlock[] = [
-          { type: 'text', content: newRoute },
-          ...newAttractions.map(a => ({ type: 'attraction' as const, id: a.id, name: a.name })),
-        ]
-        updateBlocks(idx, newBlocks)
+      if (input) {
+        const pos = input.selectionStart || currentRoute.length
+        const before = currentRoute.slice(0, pos)
+        const after = currentRoute.slice(pos)
+        const separator = before && !before.endsWith(' → ') && !before.endsWith(' ') ? ' → ' : ''
+        const newRoute = before + separator + insertText + after
+        updateDaySchedule(idx, 'route', newRoute)
+      } else {
+        const separator = currentRoute ? ' → ' : ''
+        updateDaySchedule(idx, 'route', currentRoute + separator + insertText)
       }
-
-      // Focus 回 input，游標放在插入的景點名後面
-      const newCursorPos = cursorPos + attraction.name.length
-      setTimeout(() => {
-        if (input) {
-          input.focus()
-          input.setSelectionRange(newCursorPos, newCursorPos)
-        }
-      }, 50)
     },
-    [day.route, day.attractions, idx, reorderAttractions, updateDaySchedule, updateBlocks]
+    [day.attractions, day.route, idx, reorderAttractions, updateDaySchedule]
   )
 
-  // route 文字變更
   const handleRouteChange = React.useCallback(
     (value: string) => {
       updateDaySchedule(idx, 'route', value)
-      // 同步 blocks（保留文字 + attractions）
-      if (updateBlocks) {
-        const newBlocks: ItineraryBlock[] = [
-          { type: 'text', content: value },
-          ...(day.attractions || []).map(a => ({
-            type: 'attraction' as const,
-            id: a.id,
-            name: a.name,
-            verified: a.verified,
-          })),
-        ]
-        updateBlocks(idx, newBlocks)
-      }
     },
-    [idx, day.attractions, updateDaySchedule, updateBlocks]
+    [idx, updateDaySchedule]
   )
 
-  // 移除景點：從 attractions 移除 + 從 route 文字中移除名字
   const handleRemoveAttraction = React.useCallback(
     (attractionId: string) => {
       const attraction = (day.attractions || []).find(a => a.id === attractionId)
+      if (!attraction) return
       removeAttraction(idx, attractionId)
 
-      // 從 route 文字中移除景點名
-      if (attraction && day.route) {
-        let newRoute = day.route
-        // 移除 " → 景點名" 或 "景點名 → " 或單獨的 "景點名"
-        newRoute = newRoute.replace(
-          new RegExp(`\\s*→\\s*${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'),
-          ''
-        )
-        newRoute = newRoute.replace(
-          new RegExp(`${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*→\\s*`, 'g'),
-          ''
-        )
-        newRoute = newRoute.replace(
-          new RegExp(`${attraction.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'),
-          ''
-        )
-        newRoute = newRoute.replace(/^\s*→\s*|\s*→\s*$/g, '').trim()
+      // 從 route 中移除景點名稱
+      const name = attraction.name
+      let newRoute = day.route || ''
+      // 嘗試匹配各種分隔符模式
+      newRoute = newRoute.replace(` → ${name}`, '')
+      newRoute = newRoute.replace(`${name} → `, '')
+      newRoute = newRoute.replace(name, '')
+      newRoute = newRoute.trim()
+      if (newRoute !== day.route) {
         updateDaySchedule(idx, 'route', newRoute)
       }
     },
@@ -162,14 +146,14 @@ export function DayRow({
     <tbody>
       <tr className={`${idx % 2 === 1 ? 'bg-muted/5' : ''} group hover:bg-morandi-gold/5`}>
         {/* Day + date */}
-        <td className="px-2 py-1 border border-border/20 align-middle">
+        <td className={`px-2 py-1 ${c} align-middle text-center`}>
           <div className="font-semibold text-morandi-gold text-xs">Day {day.day}</div>
           {getDateLabel(idx) && (
             <div className="text-[10px] text-muted-foreground">{getDateLabel(idx)}</div>
           )}
         </td>
         {/* Route — 文字輸入 + 景點標籤在下排 */}
-        <td className="px-0 py-0 border border-border/20 align-middle">
+        <td className={`px-0 py-0 ${c} align-middle`}>
           <DroppableZone id={`attraction-drop-${idx}`} acceptType="attraction">
             <div className="flex flex-col">
               {/* 文字輸入 */}
@@ -186,7 +170,7 @@ export function DayRow({
                         ? COMP_TOURS_LABELS.返回台灣
                         : COMP_TOURS_LABELS.今日行程標題
                   }
-                  className="h-8 flex-1 text-sm border-0 shadow-none focus-visible:ring-1 focus-visible:ring-morandi-gold/30 rounded px-2 bg-transparent outline-none min-w-0"
+                  className="h-8 flex-1 text-sm border-0 shadow-none focus-visible:ring-1 focus-visible:ring-morandi-gold/30 rounded px-2 bg-transparent outline-none min-w-0 placeholder:text-muted-foreground/70"
                 />
                 {/* @ mention 搜景點 - 已移除，改用右側資源庫拖拉 */}
               </div>
@@ -200,15 +184,16 @@ export function DayRow({
                         a.verified === false
                           ? 'bg-morandi-gold/10 text-morandi-gold border border-morandi-gold/30'
                           : 'bg-morandi-gold/10 text-morandi-gold'
-                      }`}
+                      } ${onAttractionClick ? 'cursor-pointer hover:bg-morandi-gold/20 transition-colors' : ''}`}
                       title={a.verified === false ? '資料待完善' : undefined}
+                      onClick={onAttractionClick ? () => onAttractionClick(a) : undefined}
                     >
                       {a.verified === false && <span className="mr-0.5">⚠</span>}
                       <MapPin size={8} />
                       <span>{a.name}</span>
                       <button
                         type="button"
-                        onClick={() => handleRemoveAttraction(a.id)}
+                        onClick={(e) => { e.stopPropagation(); handleRemoveAttraction(a.id) }}
                         className="hover:text-destructive ml-0.5"
                       >
                         <X size={8} />
@@ -221,7 +206,7 @@ export function DayRow({
           </DroppableZone>
         </td>
         {/* Tools — 簡化，只保留備註 */}
-        <td className="px-1 py-0 border border-border/20 align-middle">
+        <td className={`px-1 py-0 ${c} align-middle`}>
           <div className="flex items-center justify-center gap-1">
             <button
               type="button"
@@ -278,12 +263,16 @@ export function DayRow({
           </div>
         </td>
         {/* Breakfast -- restaurant drop zone */}
-        <td className="px-0 py-0 border border-border/20 align-middle">
+        <td className={`px-0 py-0 ${c} align-middle ${day.hotelBreakfast ? 'bg-morandi-gold/10' : ''}`}>
           <DroppableZone id={`meal-breakfast-drop-${idx}`} acceptType="restaurant">
-            <div className="relative">
-              {!day.hotelBreakfast && day.meals.breakfast ? (
-                <div className="h-8 flex items-center px-2">
-                  <div className="inline-flex items-center gap-1 bg-status-warning/100/10 text-status-warning rounded-full px-2 py-0.5 text-xs">
+            <div className="relative min-h-8 flex items-center">
+              {day.hotelBreakfast ? (
+                <span className="px-2 text-morandi-gold text-sm font-medium pr-6">
+                  {COMP_TOURS_LABELS.飯店早餐}
+                </span>
+              ) : day.meals.breakfast ? (
+                <div className="flex items-center px-2">
+                  <div className="inline-flex items-center gap-1 bg-status-warning/10 text-status-warning border border-status-warning/30 rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.breakfast}</span>
                     <button
                       type="button"
@@ -296,18 +285,21 @@ export function DayRow({
                 </div>
               ) : (
                 <Input
-                  value={day.hotelBreakfast ? COMP_TOURS_LABELS.飯店早餐 : ''}
+                  value=""
                   onChange={e => updateDaySchedule(idx, 'meals.breakfast', e.target.value)}
                   placeholder={COMP_TOURS_LABELS.早餐}
-                  className={`h-8 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent ${!isFirst ? 'pr-6' : ''}`}
-                  disabled={day.hotelBreakfast}
+                  className={`h-8 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent placeholder:text-muted-foreground/70 ${!isFirst ? 'pr-6' : ''}`}
                 />
               )}
               {!isFirst && (
                 <button
                   type="button"
-                  onClick={() => updateDaySchedule(idx, 'hotelBreakfast', !day.hotelBreakfast)}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2"
+                  onClick={() => {
+                    const next = !day.hotelBreakfast
+                    updateDaySchedule(idx, 'hotelBreakfast', next)
+                    if (!next) updateDaySchedule(idx, 'meals.breakfast', '')
+                  }}
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 z-10"
                   title={COMP_TOURS_LABELS.飯店早餐}
                 >
                   <Check
@@ -320,12 +312,16 @@ export function DayRow({
           </DroppableZone>
         </td>
         {/* Lunch -- restaurant drop zone */}
-        <td className="px-0 py-0 border border-border/20 align-middle">
+        <td className={`px-0 py-0 ${c} align-middle ${day.lunchSelf ? 'bg-morandi-gold/10' : ''}`}>
           <DroppableZone id={`meal-lunch-drop-${idx}`} acceptType="restaurant">
-            <div className="relative">
-              {!day.lunchSelf && day.meals.lunch ? (
-                <div className="h-8 flex items-center px-2">
-                  <div className="inline-flex items-center gap-1 bg-status-warning/100/10 text-status-warning rounded-full px-2 py-0.5 text-xs">
+            <div className="relative min-h-8 flex items-center">
+              {day.lunchSelf ? (
+                <span className="px-2 text-morandi-gold text-sm font-medium pr-6">
+                  {COMP_TOURS_LABELS.敬請自理}
+                </span>
+              ) : day.meals.lunch ? (
+                <div className="flex items-center px-2">
+                  <div className="inline-flex items-center gap-1 bg-status-warning/10 text-status-warning border border-status-warning/30 rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.lunch}</span>
                     <button
                       type="button"
@@ -338,16 +334,19 @@ export function DayRow({
                 </div>
               ) : (
                 <Input
-                  value={day.lunchSelf ? COMP_TOURS_LABELS.敬請自理 : ''}
+                  value=""
                   onChange={e => updateDaySchedule(idx, 'meals.lunch', e.target.value)}
                   placeholder={COMP_TOURS_LABELS.午餐}
-                  className="h-8 text-sm pr-6 border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent"
-                  disabled={day.lunchSelf}
+                  className="h-8 text-sm pr-6 border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent placeholder:text-muted-foreground/70"
                 />
               )}
               <button
                 type="button"
-                onClick={() => updateDaySchedule(idx, 'lunchSelf', !day.lunchSelf)}
+                onClick={() => {
+                  const next = !day.lunchSelf
+                  updateDaySchedule(idx, 'lunchSelf', next)
+                  if (!next) updateDaySchedule(idx, 'meals.lunch', '')
+                }}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2"
                 title={COMP_TOURS_LABELS.敬請自理}
               >
@@ -360,12 +359,16 @@ export function DayRow({
           </DroppableZone>
         </td>
         {/* Dinner -- restaurant drop zone */}
-        <td className="px-0 py-0 border border-border/20 align-middle">
+        <td className={`px-0 py-0 ${cLast} align-middle ${day.dinnerSelf ? 'bg-morandi-gold/10' : ''}`}>
           <DroppableZone id={`meal-dinner-drop-${idx}`} acceptType="restaurant">
-            <div className="relative">
-              {!day.dinnerSelf && day.meals.dinner ? (
-                <div className="h-8 flex items-center px-2">
-                  <div className="inline-flex items-center gap-1 bg-status-warning/100/10 text-status-warning rounded-full px-2 py-0.5 text-xs">
+            <div className="relative min-h-8 flex items-center">
+              {day.dinnerSelf ? (
+                <span className="px-2 text-morandi-gold text-sm font-medium pr-6">
+                  {COMP_TOURS_LABELS.敬請自理}
+                </span>
+              ) : day.meals.dinner ? (
+                <div className="flex items-center px-2">
+                  <div className="inline-flex items-center gap-1 bg-status-warning/10 text-status-warning border border-status-warning/30 rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.dinner}</span>
                     <button
                       type="button"
@@ -378,16 +381,19 @@ export function DayRow({
                 </div>
               ) : (
                 <Input
-                  value={day.dinnerSelf ? COMP_TOURS_LABELS.敬請自理 : ''}
+                  value=""
                   onChange={e => updateDaySchedule(idx, 'meals.dinner', e.target.value)}
                   placeholder={COMP_TOURS_LABELS.晚餐}
-                  className="h-8 text-sm pr-6 border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent"
-                  disabled={day.dinnerSelf}
+                  className="h-8 text-sm pr-6 border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent placeholder:text-muted-foreground/70"
                 />
               )}
               <button
                 type="button"
-                onClick={() => updateDaySchedule(idx, 'dinnerSelf', !day.dinnerSelf)}
+                onClick={() => {
+                  const next = !day.dinnerSelf
+                  updateDaySchedule(idx, 'dinnerSelf', next)
+                  if (!next) updateDaySchedule(idx, 'meals.dinner', '')
+                }}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2"
                 title={COMP_TOURS_LABELS.敬請自理}
               >
@@ -403,10 +409,10 @@ export function DayRow({
       {/* Accommodation row -- hotel drop zone (not for last day) */}
       {!isLast && (
         <tr className={idx % 2 === 1 ? 'bg-muted/5' : ''}>
-          <td className="px-2 py-0 border border-border/20 align-middle text-[10px] text-morandi-gold font-medium">
-            <Hotel size={10} className="inline" />
+          <td className={`px-2 py-0 ${CELL} align-middle text-center text-[10px] text-morandi-gold font-medium`}>
+            <Hotel size={10} className="inline mx-auto" />
           </td>
-          <td colSpan={4} className="px-0 py-0 border border-border/20 align-middle">
+          <td colSpan={4} className={`px-0 py-0 ${CELL} align-middle`}>
             <DroppableZone id={`hotel-drop-${idx}`} acceptType="hotel">
               {day.sameAsPrevious ? (
                 <div className="h-7 flex items-center px-2 text-sm text-muted-foreground">
@@ -414,12 +420,15 @@ export function DayRow({
                 </div>
               ) : day.accommodation ? (
                 <div className="h-7 flex items-center px-2">
-                  <div className="inline-flex items-center gap-1 bg-status-info/100/10 text-status-info rounded-full px-2 py-0.5 text-xs">
+                  <div
+                    className={`inline-flex items-center gap-1 bg-status-info/10 text-status-info border border-status-info/30 rounded-full px-2 py-0.5 text-xs ${onHotelClick && day.accommodationId ? 'cursor-pointer hover:bg-status-info/20 transition-colors' : ''}`}
+                    onClick={onHotelClick && day.accommodationId ? () => onHotelClick({ id: day.accommodationId!, name: day.accommodation }) : undefined}
+                  >
                     <Hotel size={10} />
                     <span>{day.accommodation}</span>
                     <button
                       type="button"
-                      onClick={() => updateDaySchedule(idx, 'accommodation', '')}
+                      onClick={(e) => { e.stopPropagation(); updateDaySchedule(idx, 'accommodation', '') }}
                       className="hover:text-destructive"
                     >
                       <X size={10} />
@@ -427,16 +436,13 @@ export function DayRow({
                   </div>
                 </div>
               ) : (
-                <Input
-                  value=""
-                  onChange={e => updateDaySchedule(idx, 'accommodation', e.target.value)}
-                  placeholder="拖拽酒店到此處..."
-                  className="h-7 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent"
-                />
+                <div className="h-7 flex items-center px-2 text-sm text-muted-foreground/70">
+                  拖拽酒店到此處...
+                </div>
               )}
             </DroppableZone>
           </td>
-          <td className="px-1 py-0 border border-border/20 align-middle text-center">
+          <td className={`px-1 py-0 ${CELL_LAST} align-middle text-center`}>
             {idx > 0 && (
               <label className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground cursor-pointer">
                 <input
@@ -454,15 +460,15 @@ export function DayRow({
       {/* Note row */}
       {day.note !== undefined && (
         <tr className={idx % 2 === 1 ? 'bg-muted/5' : ''}>
-          <td className="px-2 py-0 border border-border/20 align-middle text-[10px] text-morandi-gold font-medium">
+          <td className={`px-2 py-0 ${noteRowIsTableBottom ? CELL_NO_B : CELL} align-middle text-[10px] text-morandi-gold font-medium`}>
             PS
           </td>
-          <td colSpan={5} className="px-0 py-0 border border-border/20 align-middle">
+          <td colSpan={5} className={`px-0 py-0 ${noteRowIsTableBottom ? CELL_LAST_NO_B : CELL_LAST} align-middle`}>
             <Input
               value={day.note || ''}
               onChange={e => updateDaySchedule(idx, 'note', e.target.value)}
               placeholder="輸入備註..."
-              className="h-7 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent text-muted-foreground"
+              className="h-7 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent text-muted-foreground placeholder:text-muted-foreground/70"
             />
           </td>
         </tr>

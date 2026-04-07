@@ -237,7 +237,7 @@ function ItineraryPrintContent() {
           {/* 每日行程表格 */}
           <table className="w-full border-collapse text-sm">
             <thead>
-              <tr className="bg-morandi-gold text-white">
+              <tr className="bg-morandi-gold-header">
                 <th className="border border-morandi-gold/50 px-3 py-2 text-left w-24">
                   {PRINT_LABELS.DATE}
                 </th>

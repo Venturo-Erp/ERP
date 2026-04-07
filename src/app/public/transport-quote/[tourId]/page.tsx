@@ -159,7 +159,7 @@ export default async function TransportQuotePage({
             {/* 行程表 */}
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="bg-morandi-gold text-white">
+                <tr className="bg-morandi-gold-header">
                   <th className="border border-morandi-gold/50 px-3 py-2 text-left w-20">日期</th>
                   <th className="border border-morandi-gold/50 px-3 py-2 text-left">行程內容</th>
                   <th className="border border-morandi-gold/50 px-3 py-2 text-center w-16">早餐</th>

@@ -53,6 +53,7 @@ import {
   AccommodationChangeDialog,
   type AccommodationChange,
 } from './itinerary/AccommodationChangeDialog'
+import { ResourceDetailDialog } from '@/components/resource-panel/ResourceDetailDialog'
 
 interface TourItineraryTabProps {
   tour: Tour
@@ -75,6 +76,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   const [saving, setSaving] = useState(false)
   const [accommodationChanges, setAccommodationChanges] = useState<AccommodationChange[]>([])
   const [showChangeDialog, setShowChangeDialog] = useState(false)
+  const [attractionDetailOpen, setAttractionDetailOpen] = useState(false)
+  const [clickedAttraction, setClickedAttraction] = useState<{ id: string; name: string; type: 'attraction' | 'hotel' | 'restaurant' } | null>(null)
   const pendingSaveRef = useRef<(() => Promise<void>) | null>(null)
   const [currentItineraryId, setCurrentItineraryId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
@@ -1198,7 +1201,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
 
           <table className="w-full border-collapse text-[13px]">
             <thead>
-              <tr className="bg-morandi-gold text-white">
+              <tr className="bg-morandi-gold-header">
                 <th className="border border-morandi-gold/50 px-3 py-2 text-left w-16">
                   {TOUR_ITINERARY_TAB_LABELS.日期_表頭}
                 </th>
@@ -1279,10 +1282,10 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex flex-col h-full overflow-hidden">
         {/* -- 左右分割主內容區 -- */}
-        <div className="flex-1 flex gap-2 overflow-hidden">
+        <div className="flex-1 flex gap-2 overflow-hidden items-stretch">
           {/* -- 左側：行程編輯（60%）-- */}
           <div className="w-[60%] flex flex-col overflow-hidden">
-            <div className="border border-border rounded-lg bg-card flex flex-col overflow-hidden">
+            <div className="border border-border rounded-lg bg-card flex flex-col overflow-hidden flex-1">
             {/* Info row: title + days + buttons (sticky) */}
             <div className="p-4 pb-2">
             <div className="flex items-end gap-3 mb-3">
@@ -1344,7 +1347,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                   size="sm"
                   onClick={handleSave}
                   disabled={saving || !title.trim()}
-                  className="h-8 px-3 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1"
+                  className="h-8 px-3 text-xs bg-morandi-gold-header hover:from-morandi-gold hover:to-morandi-gold text-white gap-1"
                 >
                   {saving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
                   {currentItineraryId ? COMP_TOURS_LABELS.更新行程 : COMP_TOURS_LABELS.建立行程}
@@ -1367,8 +1370,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                       {TOUR_ITINERARY_TAB_LABELS.去程}
                     </span>
                   </div>
-                  <div className="border border-border/50 rounded overflow-hidden">
-                    <div className="flex items-center gap-1.5 text-xs text-white bg-morandi-gold px-2 py-1.5 border-b border-border/30">
+                  <div className="border border-border rounded-xl overflow-hidden">
+                    <div className="flex items-center gap-1.5 text-xs bg-morandi-gold-header px-2 py-1.5">
                       <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.LABEL_5176}</span>
                       <span className="w-20">{TOUR_ITINERARY_TAB_LABELS.LABEL_3349}</span>
                       <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.LABEL_7681}</span>
@@ -1381,7 +1384,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                     {outboundFlights.map((flight, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-1.5 text-sm px-2 py-1 border-b border-border/20 hover:bg-muted/10 group"
+                        className={`flex items-center gap-1.5 text-sm px-2 py-1 hover:bg-muted/10 group ${index < outboundFlights.length - 1 ? 'border-b border-border' : ''}`}
                       >
                         <Input
                           value={flight.airline || ''}
@@ -1557,8 +1560,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                       {TOUR_ITINERARY_TAB_LABELS.回程}
                     </span>
                   </div>
-                  <div className="border border-border/50 rounded overflow-hidden">
-                    <div className="flex items-center gap-1.5 text-xs text-white bg-morandi-gold px-2 py-1.5 border-b border-border/30">
+                  <div className="border border-border rounded-xl overflow-hidden">
+                    <div className="flex items-center gap-1.5 text-xs bg-morandi-gold-header px-2 py-1.5">
                       <span className="w-16">{TOUR_ITINERARY_TAB_LABELS.LABEL_5176}</span>
                       <span className="w-20">{TOUR_ITINERARY_TAB_LABELS.LABEL_3349}</span>
                       <span className="w-14">{TOUR_ITINERARY_TAB_LABELS.LABEL_7681}</span>
@@ -1571,7 +1574,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                     {returnFlights.map((flight, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-1.5 text-sm px-2 py-1 border-b border-border/20 hover:bg-muted/10 group"
+                        className={`flex items-center gap-1.5 text-sm px-2 py-1 hover:bg-muted/10 group ${index < returnFlights.length - 1 ? 'border-b border-border' : ''}`}
                       >
                         <Input
                           value={flight.airline || ''}
@@ -1741,26 +1744,33 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               </div>
             )}
 
+            {/* 行程小標題 */}
+            <div className="flex items-center gap-1.5 text-xs mb-1.5 mt-1">
+              <Map size={12} className="text-morandi-gold" />
+              <span className="text-muted-foreground font-medium">行程</span>
+            </div>
+
             {/* -- Daily schedule table -- */}
-            <table className="w-full border-collapse text-sm border border-border/30">
+            <div className="rounded-xl border border-border overflow-hidden">
+            <table className="w-full border-separate border-spacing-0 text-sm">
               <thead className="sticky top-0 z-10">
-                <tr className="bg-morandi-gold text-white text-xs">
-                  <th className="px-2 py-1.5 text-left w-16 font-medium border-r border-white/20">
+                <tr className="bg-morandi-gold-header text-xs">
+                  <th className="px-2 py-2 text-center w-16 font-medium border-r border-morandi-gold/20">
                     {TOUR_ITINERARY_TAB_LABELS.日期_表頭}
                   </th>
-                  <th className="px-2 py-1.5 text-left font-medium border-r border-white/20">
+                  <th className="px-2 py-2 text-left font-medium border-r border-morandi-gold/20">
                     {TOUR_ITINERARY_TAB_LABELS.行程內容}
                   </th>
-                  <th className="px-1 py-1.5 text-center w-24 font-medium border-r border-white/20">
+                  <th className="px-1 py-2 text-center w-24 font-medium border-r border-morandi-gold/20">
                     工具
                   </th>
-                  <th className="px-1 py-1.5 text-center w-[120px] font-medium border-r border-white/20">
+                  <th className="px-1 py-2 text-center w-[120px] font-medium border-r border-morandi-gold/20">
                     {TOUR_ITINERARY_TAB_LABELS.早餐_表頭}
                   </th>
-                  <th className="px-1 py-1.5 text-center w-[120px] font-medium border-r border-white/20">
+                  <th className="px-1 py-2 text-center w-[120px] font-medium border-r border-morandi-gold/20">
                     {TOUR_ITINERARY_TAB_LABELS.午餐_表頭}
                   </th>
-                  <th className="px-1 py-1.5 text-center w-[120px] font-medium">
+                  <th className="px-1 py-2 text-center w-[120px] font-medium">
                     {TOUR_ITINERARY_TAB_LABELS.晚餐_表頭}
                   </th>
                 </tr>
@@ -1788,9 +1798,18 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                   getDateLabel={getDateLabel}
                   getPreviousAccommodation={getPreviousAccommodation}
                   disabledAttractionIds={disabledAttractionIds}
+                  onAttractionClick={(a) => {
+                    setClickedAttraction({ id: a.id, name: a.name, type: 'attraction' })
+                    setAttractionDetailOpen(true)
+                  }}
+                  onHotelClick={(h) => {
+                    setClickedAttraction({ id: h.id, name: h.name, type: 'hotel' as const })
+                    setAttractionDetailOpen(true)
+                  }}
                 />
               ))}
             </table>
+            </div>
             </div>
             </div>
           </div>
@@ -1834,6 +1853,14 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
             setShowChangeDialog(false)
             pendingSaveRef.current = null
           }}
+        />
+
+        {/* 景點詳情 Dialog */}
+        <ResourceDetailDialog
+          open={attractionDetailOpen}
+          onOpenChange={setAttractionDetailOpen}
+          resource={clickedAttraction}
+          canEditDatabase
         />
       </div>
     </DndContext>

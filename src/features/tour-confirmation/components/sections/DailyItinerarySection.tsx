@@ -36,7 +36,7 @@ export function DailyItinerarySection({ itinerary }: DailyItinerarySectionProps)
 
   return (
     <div className="border-t border-border">
-      <div className="flex items-center gap-2 px-4 py-2 bg-morandi-gold text-white">
+      <div className="flex items-center gap-2 px-4 py-2 bg-morandi-gold-header">
         <span className="font-medium">{TOUR_CONFIRMATION_SHEET_PAGE_LABELS.LABEL_2780}</span>
         <span className="text-white/80 text-sm">({itinerary.daily_itinerary.length} 天)</span>
       </div>

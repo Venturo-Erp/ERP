@@ -18,7 +18,7 @@ export function EditorContainer({
   return (
     <div className="w-1/2 bg-card border-r border-border flex flex-col">
       {/* 標題列 */}
-      <div className="h-14 bg-morandi-gold text-white px-6 flex items-center justify-between border-b border-border">
+      <div className="h-14 bg-morandi-gold-header px-6 flex items-center justify-between border-b border-border">
         <h2 className="text-lg font-semibold">{LABELS.EDIT_CONFIRMATION}</h2>
 
         {/* 類型切換 */}

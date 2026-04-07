@@ -108,7 +108,7 @@ export function useToursForCalendar(dateRange: DateRange | null): ListResult<Tou
 
   return {
     items: data || [],
-    loading: !hasHydrated || isLoading,
+    loading: isLoading && !data,
     error: error?.message || null,
     refresh: async () => {
       await mutate()

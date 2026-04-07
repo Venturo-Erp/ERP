@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useWorkspaceFeatures } from '@/lib/permissions'
 import { useAuthStore } from '@/stores'
-import { Loader2 } from 'lucide-react'
+import { PageLoader } from '@/components/ui/loader'
 
 interface ModuleGuardProps {
   children: React.ReactNode
@@ -67,11 +67,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
   }, [pathname, loading, isRouteAvailable, router, isAdmin, features.length])
 
   if (loading || !checked) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-morandi-gold" />
-      </div>
-    )
+    return <PageLoader />
   }
 
   return <>{children}</>

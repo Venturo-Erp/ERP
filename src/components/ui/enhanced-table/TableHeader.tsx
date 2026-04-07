@@ -63,13 +63,12 @@ export const TableHeader = React.memo(function TableHeader({
   }
 
   return (
-    <thead className="sticky top-0 z-10 bg-card border-b-2 border-morandi-gold/20">
+    <thead className="sticky top-0 z-10 bg-morandi-gold-header border-b border-border">
       {/* 主標題行 */}
       <tr className="relative" data-enhanced-table-header-row>
         {/* Selection checkbox column */}
         {selection && (
           <th className="w-12 py-2.5 px-4 text-xs relative">
-            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-5 w-px bg-morandi-gold/30"></div>
             <Checkbox
               checked={allVisibleSelected}
               indeterminate={someVisibleSelected && !allVisibleSelected}
@@ -82,27 +81,24 @@ export const TableHeader = React.memo(function TableHeader({
           <th
             key={String(column.key)}
             className={cn(
-              'text-left py-2.5 px-4 text-xs relative align-middle',
-              index === columns.length - 1 && 'border-r-0'
+              'text-left py-2.5 px-4 text-xs relative align-middle'
             )}
             style={{ width: column.width }}
           >
-            {index < columns.length - 1 && (
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 h-5 w-px bg-morandi-gold/30"></div>
-            )}
+            {/* Remove absolute div - use native border instead */}
             <div className="flex items-center gap-2">
               {column.sortable ? (
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-auto p-0 hover:bg-transparent text-xs font-medium text-morandi-secondary transition-colors [&_svg]:!size-[12px]"
+                  className="h-auto p-0 hover:bg-transparent text-xs font-medium text-morandi-primary transition-colors [&_svg]:!size-[12px]"
                   onClick={() => onSort(String(column.key))}
                 >
                   {column.label}
                   {getSortIcon(String(column.key))}
                 </Button>
               ) : (
-                <span className="text-xs font-medium text-morandi-secondary">{column.label}</span>
+                <span className="text-xs font-medium text-morandi-primary">{column.label}</span>
               )}
               {index === columns.length - 1 && columns.some(col => col.filterable) && (
                 <Button

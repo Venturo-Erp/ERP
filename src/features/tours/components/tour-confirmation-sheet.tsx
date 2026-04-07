@@ -446,7 +446,7 @@ export function TourConfirmationSheet({ tourId }: TourConfirmationSheetProps) {
       {/* 需求單項目（有供應商可請款） */}
       {requestsWithSupplier.length > 0 && (
         <div className="border border-border rounded-lg overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-3 bg-morandi-gold text-white">
+          <div className="flex items-center gap-2 px-4 py-3 bg-morandi-gold-header">
             <DollarSign size={18} />
             <span className="font-medium">{COMP_TOURS_LABELS.LABEL_6198}</span>
             <span className="text-white/80 text-sm">

@@ -585,24 +585,24 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
             <div className="border border-border bg-card rounded-xl shadow-sm overflow-hidden">
               <div ref={scrollRef} className="overflow-x-auto">
                 <table className="w-full min-w-[800px] border-collapse">
-                  <thead className="bg-morandi-gold border-b border-border sticky top-0 z-20">
+                  <thead className="bg-morandi-gold-header border-b border-border sticky top-0 z-20">
                     <tr>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-white w-12 table-divider">
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-morandi-primary w-12 table-divider">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_2257}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-white w-70 table-divider">
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-primary w-70 table-divider">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_7325}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-white w-20 table-divider">
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-primary w-20 table-divider">
                         {QUOTE_DETAIL_EMBED_LABELS.QUANTITY}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-white w-28 table-divider">
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-primary w-28 table-divider">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_9413}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-white w-28 table-divider whitespace-nowrap">
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-primary w-28 table-divider whitespace-nowrap">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_832}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-white w-24">
+                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-primary w-24">
                         {QUOTE_DETAIL_EMBED_LABELS.ACTIONS}
                       </th>
                     </tr>
