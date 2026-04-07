@@ -57,10 +57,14 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
   }, [receipts, dateRange])
 
   const stats = useMemo(() => {
+    const tourReceipts = filteredReceipts.filter(r => r.tour_id)
+    const companyReceipts = filteredReceipts.filter(r => !r.tour_id)
     const totalAmount = filteredReceipts.reduce(
       (sum, r) => sum + (r.receipt_amount || r.amount || 0),
       0
     )
+    const tourAmount = tourReceipts.reduce((sum, r) => sum + (r.receipt_amount || r.amount || 0), 0)
+    const companyAmount = companyReceipts.reduce((sum, r) => sum + (r.receipt_amount || r.amount || 0), 0)
     const byPaymentMethod = filteredReceipts.reduce(
       (acc, r) => {
         const method = r.payment_method || 'other'
@@ -71,7 +75,15 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
       },
       {} as Record<string, { count: number; amount: number }>
     )
-    return { receiptCount: filteredReceipts.length, totalAmount, byPaymentMethod }
+    return {
+      receiptCount: filteredReceipts.length,
+      totalAmount,
+      tourAmount,
+      tourCount: tourReceipts.length,
+      companyAmount,
+      companyCount: companyReceipts.length,
+      byPaymentMethod,
+    }
   }, [filteredReceipts])
 
   const columns: TableColumn<Receipt>[] = [
@@ -120,9 +132,9 @@ export function IncomeTab({ dateRange }: IncomeTabProps) {
     <div className="space-y-6">
       <ContentContainer>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatCard title="收款單數" value={stats.receiptCount} icon={ReceiptIcon} iconColor="text-morandi-green" />
-          <StatCard title="收款總金額" value={stats.totalAmount} icon={TrendingUp} iconColor="text-morandi-green" isCurrency />
-          <StatCard title="付款方式數" value={Object.keys(stats.byPaymentMethod).length} icon={Users} iconColor="text-morandi-gold" />
+          <StatCard title={`團體收款（${stats.tourCount} 筆）`} value={stats.tourAmount} icon={ReceiptIcon} iconColor="text-morandi-green" isCurrency />
+          <StatCard title={`公司收款（${stats.companyCount} 筆）`} value={stats.companyAmount} icon={ReceiptIcon} iconColor="text-morandi-green" isCurrency />
+          <StatCard title={`收款合計（${stats.receiptCount} 筆）`} value={stats.totalAmount} icon={TrendingUp} iconColor="text-morandi-green" isCurrency />
         </div>
       </ContentContainer>
 

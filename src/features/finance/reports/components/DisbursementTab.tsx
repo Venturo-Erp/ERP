@@ -65,12 +65,20 @@ export function DisbursementTab({ dateRange }: DisbursementTabProps) {
     })
   }, [disbursementOrders, dateRange])
 
-  const stats = useMemo(() => ({
-    paymentRequestCount: filteredPaymentRequests.length,
-    disbursementOrderCount: filteredDisbursementOrders.length,
-    totalPaymentAmount: filteredPaymentRequests.reduce((sum, pr) => sum + (pr.amount || 0), 0),
-    totalDisbursementAmount: filteredDisbursementOrders.reduce((sum, d) => sum + (d.amount || 0), 0),
-  }), [filteredPaymentRequests, filteredDisbursementOrders])
+  const stats = useMemo(() => {
+    const tourRequests = filteredPaymentRequests.filter(pr => pr.request_category === 'tour')
+    const companyRequests = filteredPaymentRequests.filter(pr => pr.request_category === 'company')
+    return {
+      paymentRequestCount: filteredPaymentRequests.length,
+      disbursementOrderCount: filteredDisbursementOrders.length,
+      totalPaymentAmount: filteredPaymentRequests.reduce((sum, pr) => sum + (pr.amount || 0), 0),
+      totalDisbursementAmount: filteredDisbursementOrders.reduce((sum, d) => sum + (d.amount || 0), 0),
+      tourAmount: tourRequests.reduce((sum, pr) => sum + (pr.amount || 0), 0),
+      tourCount: tourRequests.length,
+      companyAmount: companyRequests.reduce((sum, pr) => sum + (pr.amount || 0), 0),
+      companyCount: companyRequests.length,
+    }
+  }, [filteredPaymentRequests, filteredDisbursementOrders])
 
   const paymentColumns: TableColumn<PaymentRequest>[] = [
     {
@@ -154,9 +162,12 @@ export function DisbursementTab({ dateRange }: DisbursementTabProps) {
   return (
     <div className="space-y-6">
       <ContentContainer>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard title="請款單數" value={stats.paymentRequestCount} icon={Receipt} iconColor="text-morandi-gold" />
-          <StatCard title="請款總金額" value={stats.totalPaymentAmount} icon={FileDown} iconColor="text-morandi-gold" isCurrency />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+          <StatCard title={`團體請款（${stats.tourCount} 筆）`} value={stats.tourAmount} icon={Receipt} iconColor="text-morandi-gold" isCurrency />
+          <StatCard title={`公司支出（${stats.companyCount} 筆）`} value={stats.companyAmount} icon={Receipt} iconColor="text-morandi-gold" isCurrency />
+          <StatCard title={`請款合計（${stats.paymentRequestCount} 筆）`} value={stats.totalPaymentAmount} icon={FileDown} iconColor="text-morandi-gold" isCurrency />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <StatCard title="出納單數" value={stats.disbursementOrderCount} icon={Wallet} iconColor="text-morandi-green" />
           <StatCard title="出帳總金額" value={stats.totalDisbursementAmount} icon={FileDown} iconColor="text-morandi-green" isCurrency />
         </div>

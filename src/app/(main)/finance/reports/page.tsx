@@ -11,6 +11,10 @@ import {
   AlertCircle,
   Wallet,
   PieChart,
+  List,
+  CalendarDays,
+  Map,
+  Truck,
 } from 'lucide-react'
 import { DateRangeSelector, type DateRange } from '@/features/finance/reports/components/DateRangeSelector'
 import { OverviewTab } from '@/features/finance/reports/components/OverviewTab'
@@ -20,10 +24,19 @@ import { UnclosedToursTab } from '@/features/finance/reports/components/Unclosed
 import { UnpaidOrdersTab } from '@/features/finance/reports/components/UnpaidOrdersTab'
 import { TourPnlTab } from '@/features/finance/reports/components/TourPnlTab'
 
+export type DetailGranularity = 'item' | 'day' | 'tour' | 'supplier'
+
 type TabValue = 'overview' | 'disbursement' | 'income' | 'unclosed' | 'unpaid' | 'pnl'
 
-// 不需要日期選擇器的 Tab
 const NO_DATE_TABS: TabValue[] = ['unclosed', 'unpaid', 'pnl']
+const GRANULARITY_TABS: TabValue[] = ['overview']
+
+const GRANULARITY_OPTIONS: { value: DetailGranularity; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { value: 'item', label: '按筆', icon: List },
+  { value: 'day', label: '按日', icon: CalendarDays },
+  { value: 'tour', label: '按團', icon: Map },
+  { value: 'supplier', label: '按供應商', icon: Truck },
+]
 
 function getDefaultRange(): DateRange {
   const now = new Date()
@@ -42,6 +55,7 @@ export default function ReportsPage() {
 
   const [activeTab, setActiveTab] = useState<TabValue>(initialTab)
   const [dateRange, setDateRange] = useState<DateRange>(getDefaultRange)
+  const [detailGranularity, setDetailGranularity] = useState<DetailGranularity>('item')
 
   const handleTabChange = useCallback(
     (value: string) => {
@@ -55,6 +69,7 @@ export default function ReportsPage() {
   )
 
   const showDateSelector = !NO_DATE_TABS.includes(activeTab)
+  const showGranularity = GRANULARITY_TABS.includes(activeTab)
 
   const tabs = useMemo(
     () => [
@@ -76,17 +91,35 @@ export default function ReportsPage() {
       activeTab={activeTab}
       onTabChange={handleTabChange}
     >
-      {/* 日期區間選擇器 */}
+      {/* 日期區間 + 顆粒度選擇器 */}
       {showDateSelector && (
-        <div className="px-4 py-3 border-b border-border bg-morandi-background/30">
+        <div className="px-4 py-3 border-b border-border bg-morandi-background/30 flex items-center justify-between flex-wrap gap-3">
           <DateRangeSelector onChange={setDateRange} />
+          {showGranularity && (
+            <div className="flex items-center bg-morandi-container rounded-lg p-0.5">
+              {GRANULARITY_OPTIONS.map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setDetailGranularity(opt.value)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    detailGranularity === opt.value
+                      ? 'bg-white text-morandi-primary shadow-sm'
+                      : 'text-morandi-secondary hover:text-morandi-primary'
+                  }`}
+                >
+                  <opt.icon className="h-3 w-3" />
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       <div className="p-4">
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsContent value="overview" className="mt-0">
-            <OverviewTab dateRange={dateRange} />
+            <OverviewTab dateRange={dateRange} granularity={detailGranularity} />
           </TabsContent>
           <TabsContent value="disbursement" className="mt-0">
             <DisbursementTab dateRange={dateRange} />
