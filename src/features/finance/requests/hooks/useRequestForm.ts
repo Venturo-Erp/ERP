@@ -5,6 +5,20 @@ import { RequestFormData, RequestItem } from '../types'
 import type { PaymentItemCategory } from '@/stores/types'
 import { REQUEST_FORM_HOOK_LABELS } from '../../constants/labels'
 
+// 計算下一個週四（如果今天是週四，跳到下週四）
+function getNextThursdayDate(): string {
+  const today = new Date()
+  const dayOfWeek = today.getDay()
+  let daysUntilThursday = 4 - dayOfWeek
+  if (daysUntilThursday <= 0) daysUntilThursday += 7
+  const nextThursday = new Date(today)
+  nextThursday.setDate(today.getDate() + daysUntilThursday)
+  const year = nextThursday.getFullYear()
+  const month = String(nextThursday.getMonth() + 1).padStart(2, '0')
+  const day = String(nextThursday.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export function useRequestForm() {
   // 使用 @/data 的 SWR hooks（和 usePaymentForm 一致）
   const { items: tours } = useToursSlim()
@@ -30,6 +44,8 @@ export function useRequestForm() {
   const [requestItems, setRequestItems] = useState<RequestItem[]>(() => [
     {
       id: Math.random().toString(36).substr(2, 9),
+      request_date: getNextThursdayDate(),
+      payment_method_id: undefined,
       category: '' as PaymentItemCategory, // 不預設類別，由用戶選擇
       supplier_id: '',
       supplierName: '',
@@ -118,6 +134,8 @@ export function useRequestForm() {
   const addNewEmptyItem = useCallback(() => {
     const newItem: RequestItem = {
       id: Math.random().toString(36).substr(2, 9),
+      request_date: getNextThursdayDate(),
+      payment_method_id: undefined,
       category: '' as PaymentItemCategory, // 不預設類別，由用戶選擇
       supplier_id: '',
       supplierName: '',
@@ -140,26 +158,6 @@ export function useRequestForm() {
     setRequestItems(prev => prev.filter(item => item.id !== itemId))
   }, [])
 
-  // 計算下一個週四（如果今天是週四，跳到下週四）
-  const getNextThursdayDate = useCallback((): string => {
-    const today = new Date()
-    const dayOfWeek = today.getDay() // 0=週日, 1=週一, ..., 4=週四
-
-    let daysUntilThursday = 4 - dayOfWeek
-    if (daysUntilThursday <= 0) {
-      // 今天是週四或之後，跳到下週四
-      daysUntilThursday += 7
-    }
-
-    const nextThursday = new Date(today)
-    nextThursday.setDate(today.getDate() + daysUntilThursday)
-
-    const year = nextThursday.getFullYear()
-    const month = String(nextThursday.getMonth() + 1).padStart(2, '0')
-    const day = String(nextThursday.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }, [])
-
   // Reset form
   const resetForm = useCallback(() => {
     setFormData({
@@ -175,6 +173,8 @@ export function useRequestForm() {
     setRequestItems([
       {
         id: Math.random().toString(36).substr(2, 9),
+        request_date: getNextThursdayDate(),
+        payment_method_id: undefined,
         category: '' as PaymentItemCategory, // 不預設類別，由用戶選擇
         supplier_id: '',
         supplierName: '',
@@ -187,7 +187,7 @@ export function useRequestForm() {
     setOrderSearchValue('')
     setShowTourDropdown(false)
     setShowOrderDropdown(false)
-  }, [currentUser?.id, getNextThursdayDate])
+  }, [currentUser?.id])
 
   return {
     formData,

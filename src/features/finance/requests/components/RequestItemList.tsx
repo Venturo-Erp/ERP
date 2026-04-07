@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Trash2, Plus, Link2, UserCheck, X, BookOpen } from 'lucide-react'
 import { RequestItem, categoryOptions } from '../types'
 import {
@@ -40,6 +41,7 @@ interface EditableRequestItemListProps {
   onCreateSupplier?: (name: string) => Promise<string | null>
   tourId?: string | null
   disabled?: boolean
+  paymentMethods?: Array<{ id: string; name: string }>
 }
 
 /**
@@ -211,6 +213,7 @@ export function EditableRequestItemList({
   onCreateSupplier,
   tourId,
   disabled = false,
+  paymentMethods = [],
 }: EditableRequestItemListProps) {
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [linkingItemId, setLinkingItemId] = useState<string | null>(null)
@@ -236,7 +239,9 @@ export function EditableRequestItemList({
 
       {/* 表頭 */}
       <div className="border-b border-morandi-container/60">
-        <div className="grid grid-cols-[80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-2.5">
+        <div className="grid grid-cols-[110px_100px_80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-2.5">
+          <span className="text-xs font-medium text-morandi-secondary">日期</span>
+          <span className="text-xs font-medium text-morandi-secondary">付款方式</span>
           <span className="text-xs font-medium text-morandi-secondary">
             {REQUEST_ITEM_LIST_LABELS.LABEL_2946}
           </span>
@@ -274,8 +279,40 @@ export function EditableRequestItemList({
         {items.map((item, index) => (
           <div
             key={item.id}
-            className="grid grid-cols-[80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-1.5 border-b border-morandi-container/30 items-center bg-white"
+            className="grid grid-cols-[110px_100px_80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-1.5 border-b border-morandi-container/30 items-center bg-white"
           >
+            {/* Date */}
+            <div>
+              <DatePicker
+                value={item.request_date || ''}
+                onChange={date => updateItem(item.id, { request_date: date })}
+                placeholder="選擇日期"
+                disabled={disabled}
+                hideYear
+                buttonClassName="h-9 p-0 px-1 border-0 shadow-none bg-transparent text-xs"
+              />
+            </div>
+
+            {/* Payment Method */}
+            <div>
+              <Select
+                value={item.payment_method_id || ''}
+                onValueChange={value => updateItem(item.id, { payment_method_id: value || undefined })}
+                disabled={disabled}
+              >
+                <SelectTrigger className="input-no-focus h-9 border-0 shadow-none bg-transparent text-xs px-1">
+                  <SelectValue placeholder="付款方式" />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentMethods.map(method => (
+                    <SelectItem key={method.id} value={method.id}>
+                      {method.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Category - 選擇時自動帶入會計科目 */}
             <div>
               <Select
@@ -481,9 +518,11 @@ export function EditableRequestItemList({
           Array.from({ length: VISIBLE_ROWS - items.length }).map((_, i) => (
             <div
               key={`empty-${i}`}
-              className="grid grid-cols-[80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-1.5 border-b border-morandi-container/30 items-center"
+              className="grid grid-cols-[110px_100px_80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-1.5 border-b border-morandi-container/30 items-center"
               style={{ height: `${ROW_HEIGHT}px` }}
             >
+              <div></div>
+              <div></div>
               <div></div>
               <div></div>
               <div></div>

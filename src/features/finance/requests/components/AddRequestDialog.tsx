@@ -574,6 +574,8 @@ export function AddRequestDialog({
             .filter(item => selectedRequestItems[item.id]?.selected)
             .map(item => ({
               id: Math.random().toString(36).substr(2, 9),
+              request_date: getNextThursdayDate(),
+              payment_method_id: undefined,
               category: item.category as PaymentItemCategory,
               supplier_id: item.supplierId,
               supplierName: item.supplierName,
@@ -631,117 +633,69 @@ export function AddRequestDialog({
             }}
             className="flex-1 flex flex-col overflow-hidden"
           >
-            {/* Header: 左邊 Tab，右邊標題 */}
+            {/* Header: Tab + 選擇器 + 標題 同一行（統一收款單風格） */}
             <DialogHeader className="flex-row items-center justify-between pb-4">
-              <TabsList className="w-fit">
-                <TabsTrigger value="tour" className="gap-2">
-                  <Users size={16} />
-                  {ADD_REQUEST_FORM_LABELS.LABEL_7551}
-                </TabsTrigger>
-                <TabsTrigger value="batch" className="gap-2">
-                  <Layers size={16} />
-                  {ADD_REQUEST_FORM_LABELS.LABEL_163}
-                </TabsTrigger>
-                {canCreateCompanyPayment && (
-                  <TabsTrigger value="company" className="gap-2">
-                    <Briefcase size={16} />
-                    {ADD_REQUEST_FORM_LABELS.LABEL_9152}
+              {/* 左邊：Tab + 選擇器 */}
+              <div className="flex items-center gap-4">
+                <TabsList className="w-fit h-10">
+                  <TabsTrigger value="tour" className="gap-2">
+                    <Users size={16} />
+                    {ADD_REQUEST_FORM_LABELS.LABEL_7551}
                   </TabsTrigger>
+                  <TabsTrigger value="batch" className="gap-2">
+                    <Layers size={16} />
+                    {ADD_REQUEST_FORM_LABELS.LABEL_163}
+                  </TabsTrigger>
+                  {canCreateCompanyPayment && (
+                    <TabsTrigger value="company" className="gap-2">
+                      <Briefcase size={16} />
+                      {ADD_REQUEST_FORM_LABELS.LABEL_9152}
+                    </TabsTrigger>
+                  )}
+                </TabsList>
+
+                {/* 團體請款：團號 + 訂單選擇器 */}
+                {activeTab === 'tour' && (
+                  <>
+                    <div className="relative z-[10020]">
+                      <Combobox
+                        options={tourOptions}
+                        value={formData.tour_id}
+                        onChange={value =>
+                          setFormData(prev => ({ ...prev, tour_id: value, order_id: '' }))
+                        }
+                        placeholder={ADD_REQUEST_DIALOG_LABELS.搜尋團號或團名}
+                        className="w-[350px]"
+                        maxHeight="300px"
+                      />
+                    </div>
+                    <div className="relative z-[10019]">
+                      <Combobox
+                        options={orderOptions}
+                        value={formData.order_id}
+                        onChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
+                        placeholder={
+                          !formData.tour_id
+                            ? ADD_REQUEST_DIALOG_LABELS.請先選擇旅遊團
+                            : BATCH_RECEIPT_DIALOG_LABELS.搜尋訂單
+                        }
+                        disabled={!formData.tour_id}
+                        className="w-[300px]"
+                        maxHeight="300px"
+                      />
+                    </div>
+                  </>
                 )}
-              </TabsList>
+              </div>
+
+              {/* 右邊：標題 */}
               <div className="text-right">
                 <DialogTitle>{ADD_REQUEST_FORM_LABELS.新增請款單}</DialogTitle>
-                <p className="text-sm text-morandi-secondary">
-                  {activeTab === 'batch' ? (
-                    previewCode
-                  ) : (
-                    <>
-                      {ADD_REQUEST_FORM_LABELS.請款單號}
-                      <span className="font-medium text-morandi-primary">{previewCode}</span>{' '}
-                      {ADD_REQUEST_FORM_LABELS.自動生成}
-                    </>
-                  )}
-                </p>
               </div>
             </DialogHeader>
 
             {/* 團體請款 */}
             <TabsContent value="tour" className="flex-1 overflow-y-auto mt-4 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-morandi-primary">
-                    {ADD_REQUEST_FORM_LABELS.選擇旅遊團_必填}
-                  </label>
-                  <Combobox
-                    options={tourOptions}
-                    value={formData.tour_id}
-                    onChange={value =>
-                      setFormData(prev => ({ ...prev, tour_id: value, order_id: '' }))
-                    }
-                    placeholder={ADD_REQUEST_DIALOG_LABELS.搜尋團號或團名}
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-morandi-primary">
-                    {ADD_REQUEST_FORM_LABELS.選擇訂單_可選}
-                  </label>
-                  <Combobox
-                    options={orderOptions}
-                    value={formData.order_id}
-                    onChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
-                    placeholder={
-                      !formData.tour_id
-                        ? ADD_REQUEST_DIALOG_LABELS.請先選擇旅遊團
-                        : BATCH_RECEIPT_DIALOG_LABELS.搜尋訂單
-                    }
-                    disabled={!formData.tour_id}
-                    className="mt-1"
-                  />
-                </div>
-                <RequestDateInput
-                  value={formData.request_date}
-                  onChange={(date, isSpecialBilling) =>
-                    setFormData(prev => ({
-                      ...prev,
-                      request_date: date,
-                      is_special_billing: isSpecialBilling,
-                    }))
-                  }
-                />
-                <div>
-                  <label className="text-sm font-medium text-morandi-primary">付款方式</label>
-                  <Select
-                    value={formData.payment_method_id || ''}
-                    onValueChange={value =>
-                      setFormData(prev => ({ ...prev, payment_method_id: value || undefined }))
-                    }
-                  >
-                    <SelectTrigger className="mt-1">
-                      <SelectValue placeholder="選擇付款方式（選填）" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {paymentMethods.map(method => (
-                        <SelectItem key={method.id} value={method.id}>
-                          {method.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-morandi-primary">
-                    {ADD_REQUEST_FORM_LABELS.備註}
-                  </label>
-                  <Input
-                    value={formData.notes}
-                    onChange={e => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                    placeholder={ADD_REQUEST_DIALOG_LABELS.輸入備註_可選}
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-
               <EditableRequestItemList
                 items={requestItems}
                 suppliers={suppliers}
@@ -750,6 +704,7 @@ export function AddRequestDialog({
                 addNewEmptyItem={addNewEmptyItem}
                 onCreateSupplier={handleCreateSupplier}
                 tourId={formData.tour_id || null}
+                paymentMethods={paymentMethods}
               />
             </TabsContent>
 
@@ -1047,6 +1002,7 @@ export function AddRequestDialog({
                   addNewEmptyItem={addNewEmptyItem}
                   onCreateSupplier={handleCreateSupplier}
                   tourId={formData.tour_id || null}
+                  paymentMethods={paymentMethods}
                 />
               </TabsContent>
             )}

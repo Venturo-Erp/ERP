@@ -415,9 +415,9 @@ export function AddReceiptDialog({
         {/* 收款類型 Tab - 包住整個 header 和內容 */}
         <Tabs defaultValue="tour" className="flex-1 flex flex-col overflow-hidden">
           {/* Header: Tab + 選擇器 + 標題 同一行 */}
-          <DialogHeader className="flex-row items-end justify-between pb-4">
+          <DialogHeader className="flex-row items-center justify-between pb-4">
             {/* 左邊：Tab + 選擇器 */}
-            <div className="flex items-end gap-4">
+            <div className="flex items-center gap-4">
               {/* Tab 切換 */}
               <TabsList className="w-fit h-10">
                 <TabsTrigger value="tour" className="gap-2">
@@ -493,15 +493,6 @@ export function AddReceiptDialog({
                   </span>
                 )}
               </DialogTitle>
-              <p className="text-sm text-muted-foreground">
-                {isConfirmed
-                  ? ADD_RECEIPT_TOAST_LABELS.CONFIRMED_READONLY(
-                      editingReceipt?.receipt_number || ''
-                    )
-                  : isEditMode
-                    ? ADD_RECEIPT_TOAST_LABELS.EDIT_TITLE(editingReceipt?.receipt_number || '')
-                    : ADD_RECEIPT_DIALOG_LABELS.收款單號將自動產生}
-              </p>
             </div>
           </DialogHeader>
 

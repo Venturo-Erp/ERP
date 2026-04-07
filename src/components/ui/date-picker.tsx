@@ -22,6 +22,8 @@ export interface DatePickerProps {
   maxDate?: Date
   /** 是否顯示清除按鈕 */
   clearable?: boolean
+  /** 隱藏年份，只顯示 MM / DD */
+  hideYear?: boolean
 }
 
 /**
@@ -39,6 +41,7 @@ export function DatePicker({
   minDate,
   maxDate,
   clearable = false,
+  hideYear = false,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
 
@@ -77,7 +80,7 @@ export function DatePicker({
     const year = date.getFullYear()
     const month = String(date.getMonth() + 1).padStart(2, '0')
     const day = String(date.getDate()).padStart(2, '0')
-    return `${year} / ${month} / ${day}`
+    return hideYear ? `${month} / ${day}` : `${year} / ${month} / ${day}`
   }
 
   const selectedDate = parseValue(value)

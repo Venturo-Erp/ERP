@@ -188,6 +188,8 @@ export function RequestDetailDialog({
       .filter(item => item.request_id === currentRequestId)
       .map(item => ({
         id: item.id,
+        request_date: (item as unknown as Record<string, unknown>).request_date as string || currentRequest?.request_date || '',
+        payment_method_id: (item as unknown as Record<string, unknown>).payment_method_id as string | undefined,
         category: item.category,
         supplier_id: item.supplier_id || '',
         supplierName: item.supplier_name,
@@ -252,6 +254,8 @@ export function RequestDetailDialog({
       ...prev,
       {
         id: newId,
+        request_date: currentRequest?.request_date || '',
+        payment_method_id: undefined,
         category: '' as PaymentItemCategory,
         supplier_id: '',
         supplierName: '',
@@ -566,6 +570,7 @@ export function RequestDetailDialog({
             onCreateSupplier={handleCreateSupplier}
             tourId={currentRequest.tour_id || null}
             disabled={!canEdit}
+            paymentMethods={paymentMethods}
           />
 
           {/* 備註 */}
