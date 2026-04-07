@@ -15,6 +15,7 @@ import type {
   FileCategory,
 } from '@/types/file-system.types'
 import { logger } from '@/lib/utils/logger'
+import { mutate } from 'swr'
 import { getWorkspaceId } from '@/lib/workspace-context'
 
 // ============================================================================
@@ -483,6 +484,8 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
 
           if (error) throw error
 
+          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
+
           set(state => ({
             files: state.files.filter(f => f.id !== id),
             selectedFileIds: new Set([...state.selectedFileIds].filter(fid => fid !== id)),
@@ -504,6 +507,8 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
             .in('id', ids)
 
           if (error) throw error
+
+          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
 
           set(state => ({
             files: state.files.filter(f => !ids.includes(f.id)),
@@ -527,6 +532,8 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
 
           if (error) throw error
 
+          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
+
           // 從當前列表移除
           set(state => ({
             files: state.files.filter(f => f.id !== fileId),
@@ -549,6 +556,8 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
 
           if (error) throw error
 
+          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
+
           set(state => ({
             files: state.files.filter(f => !fileIds.includes(f.id)),
             selectedFileIds: new Set(),
@@ -567,6 +576,8 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
           const { error } = await supabase.from('files').update({ filename }).eq('id', id)
 
           if (error) throw error
+
+          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
 
           set(state => ({
             files: state.files.map(f => (f.id === id ? { ...f, filename } : f)),
@@ -592,6 +603,8 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
 
           if (error) throw error
 
+          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
+
           set(state => ({
             files: state.files.map(f => (f.id === id ? { ...f, is_starred: !f.is_starred } : f)),
           }))
@@ -606,6 +619,8 @@ export const useFileSystemStore = create<FileSystemStoreState>()(
           const { error } = await supabase.from('files').update({ category }).eq('id', id)
 
           if (error) throw error
+
+          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:files'), undefined, { revalidate: true })
 
           set(state => ({
             files: state.files.map(f => (f.id === id ? { ...f, category } : f)),

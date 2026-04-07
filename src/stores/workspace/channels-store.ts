@@ -6,24 +6,20 @@
 
 import { create } from 'zustand'
 import { v4 as uuidv4 } from 'uuid'
-import { supabase } from '@/lib/supabase/client'
 import { createChannelMember } from '@/data/entities/channel-members'
+import {
+  workspaceEntity,
+  createWorkspace as createWorkspaceEntity,
+  updateWorkspace as updateWorkspaceEntity,
+  invalidateWorkspaces,
+} from '@/data/entities/workspaces'
 import { useChannelStore } from './channel-store'
 import { useChannelGroupStore } from './channel-group-store'
-import { createStore } from '../core/create-store'
 import type { Workspace, Channel, ChannelGroup } from './types'
-import type { BaseEntity } from '@/types'
 import { setCurrentWorkspaceFilter } from '@/lib/workspace-filter'
 import { useAuthStore } from '../auth-store'
 import { deleteAllFilesInFolder } from '@/services/storage'
 import { logger } from '@/lib/utils/logger'
-
-type WorkspaceEntity = Workspace & BaseEntity
-
-// Define the workspace store locally instead of importing it
-const useWorkspaceStore = createStore<WorkspaceEntity>({
-  tableName: 'workspaces',
-})
 
 /**
  * 額外狀態 (不需要同步到 Supabase 的 UI 狀態)
@@ -92,9 +88,7 @@ export const useChannelsStore = () => {
   const channelGroupItems = useChannelGroupStore(state => state.items)
   const channelGroupLoading = useChannelGroupStore(state => state.loading)
   const channelGroupError = useChannelGroupStore(state => state.error)
-  const workspaceItems = useWorkspaceStore(state => state.items)
-  const workspaceLoading = useWorkspaceStore(state => state.loading)
-  const workspaceError = useWorkspaceStore(state => state.error)
+  const { items: workspaceItems, loading: workspaceLoading, error: workspaceError, refresh: refreshWorkspaces } = workspaceEntity.useList()
 
   // UI 狀態（使用 selectors 避免不必要的 re-render）
   const selectedChannel = useChannelsUIStore(state => state.selectedChannel)
@@ -133,11 +127,12 @@ export const useChannelsStore = () => {
     // Workspace 操作
     // ============================================
     loadWorkspaces: async () => {
-      const workspaces = await useWorkspaceStore.getState().fetchAll()
+      // SWR 會自動 fetch，這裡只需確保 refresh 並設定預設 workspace
+      await refreshWorkspaces()
 
-      // 🔥 使用 fetchAll 的返回值，而不是 items (避免競爭條件)
+      // 🔥 使用 SWR 快取的 workspaceItems 來設定預設 workspace
+      const workspaces = workspaceItems
       if (workspaces && workspaces.length > 0 && !useChannelsUIStore.getState().currentWorkspace) {
-        // 根據使用者的 workspace_id 選擇對應的工作空間
         const user = useAuthStore.getState().user
         const userWorkspaceId = user?.workspace_id
 
@@ -150,7 +145,7 @@ export const useChannelsStore = () => {
           }
         }
 
-        useChannelsUIStore.getState().setCurrentWorkspace(selectedWorkspace)
+        useChannelsUIStore.getState().setCurrentWorkspace(selectedWorkspace as Workspace)
         // 🔥 設定 workspace filter
         setCurrentWorkspaceFilter(selectedWorkspace.id)
       }
@@ -161,8 +156,8 @@ export const useChannelsStore = () => {
         // 如果傳入 workspace ID，設定 ID
         useChannelsUIStore.getState().setCurrentWorkspaceId(workspace)
         // 嘗試從列表中找到對應的 workspace 物件
-        const ws = useWorkspaceStore.getState().items.find(w => w.id === workspace)
-        useChannelsUIStore.getState().setCurrentWorkspace(ws || null)
+        const ws = workspaceItems.find(w => w.id === workspace)
+        useChannelsUIStore.getState().setCurrentWorkspace((ws as Workspace) || null)
         // 🔥 設定 workspace filter，讓 fetchAll 可以正確過濾
         setCurrentWorkspaceFilter(workspace)
       } else {
@@ -175,8 +170,16 @@ export const useChannelsStore = () => {
       }
     },
 
-    createWorkspace: useWorkspaceStore.getState().create,
-    updateWorkspace: useWorkspaceStore.getState().update,
+    createWorkspace: async (data: Parameters<typeof createWorkspaceEntity>[0]) => {
+      const result = await createWorkspaceEntity(data)
+      await invalidateWorkspaces()
+      return result
+    },
+    updateWorkspace: async (id: string, data: Parameters<typeof updateWorkspaceEntity>[1]) => {
+      const result = await updateWorkspaceEntity(id, data)
+      await invalidateWorkspaces()
+      return result
+    },
 
     // ============================================
     // Channel 操作 (使用 createStore 的方法)

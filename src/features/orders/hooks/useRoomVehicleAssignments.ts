@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { supabase } from '@/lib/supabase/client'
 import { insertRoomAssignments } from '@/features/orders/services/order_member.service'
 import { logger } from '@/lib/utils/logger'
@@ -666,6 +668,12 @@ export function useRoomVehicleAssignments({
       }
 
       // 重新載入分房資料
+      globalMutate(
+        (key: string) => typeof key === 'string' && key.startsWith('entity:tour_room_assignments'),
+        undefined,
+        { revalidate: true }
+      )
+      invalidate_cache_pattern('entity:tour_room_assignments')
       await loadRoomAssignments()
     } catch (error) {
       logger.error(COMP_ORDERS_LABELS.分配房間失敗, error)
@@ -696,6 +704,12 @@ export function useRoomVehicleAssignments({
         .in('room_id', hotelRoomIds)
 
       // 重新載入分房資料
+      globalMutate(
+        (key: string) => typeof key === 'string' && key.startsWith('entity:tour_room_assignments'),
+        undefined,
+        { revalidate: true }
+      )
+      invalidate_cache_pattern('entity:tour_room_assignments')
       await loadRoomAssignments()
     } catch (error) {
       logger.error(COMP_ORDERS_LABELS.移除成員房間分配失敗, error)

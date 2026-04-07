@@ -9,6 +9,8 @@ import { supabase } from '@/lib/supabase/client'
 import { getRequiredWorkspaceId } from '@/lib/workspace-context'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 
 // ============================================
 // 類型定義
@@ -208,6 +210,12 @@ export function useAttendanceRecords() {
 
         if (insertError) throw insertError
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:attendance_records'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:attendance_records')
         await fetchRecords()
         return true
       } catch (err) {
@@ -258,6 +266,12 @@ export function useAttendanceRecords() {
 
         if (updateError) throw updateError
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:attendance_records'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:attendance_records')
         await fetchRecords()
         return true
       } catch (err) {
@@ -290,6 +304,12 @@ export function useAttendanceRecords() {
 
         if (deleteError) throw deleteError
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:attendance_records'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:attendance_records')
         await fetchRecords()
         return true
       } catch (err) {

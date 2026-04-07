@@ -3,6 +3,8 @@
  * 需求單文件存取層（支援多版本）
  */
 
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { dynamicFrom } from '@/lib/supabase/typed-client'
 import type { RequestDocument, CreateRequestDocumentInput } from '@/types/tour-documents.types'
 
@@ -50,6 +52,12 @@ export async function createRequestDocument(
     .single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:request_documents'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:request_documents')
   return data as unknown as RequestDocument
 }
 
@@ -92,6 +100,12 @@ export async function uploadSupplierReply(
     .single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:request_documents'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:request_documents')
   return data as unknown as RequestDocument
 }
 
@@ -140,6 +154,12 @@ export async function markDocumentAsSent(
     .single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:request_documents'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:request_documents')
   return data as unknown as RequestDocument
 }
 
@@ -161,6 +181,12 @@ export async function markDocumentAsReceived(
     .single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:request_documents'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:request_documents')
   return data as unknown as RequestDocument
 }
 
@@ -171,4 +197,10 @@ export async function deleteRequestDocument(documentId: string): Promise<void> {
   const { error } = await requestDocumentsDb().delete().eq('id', documentId)
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:request_documents'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:request_documents')
 }

@@ -22,7 +22,6 @@ export async function POST(request: NextRequest) {
     const { username, password, code } = validation.data
 
     const supabase = getSupabaseAdminClient()
-
     // 1. 查詢 workspace（統一大寫）
     const { data: workspace, error: wsError } = await supabase
       .from('workspaces')

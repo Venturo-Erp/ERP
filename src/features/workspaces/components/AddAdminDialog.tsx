@@ -17,6 +17,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { UserPlus, Save, Loader2, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import bcrypt from 'bcryptjs'
@@ -91,6 +93,12 @@ export function AddAdminDialog({ open, onOpenChange, workspace, onSuccess }: Add
         throw error
       }
 
+      globalMutate(
+        (key: string) => typeof key === 'string' && key.startsWith('entity:employees'),
+        undefined,
+        { revalidate: true }
+      )
+      invalidate_cache_pattern('entity:employees')
       await alert(`管理員「${formData.name}」已新增`, 'success')
       onOpenChange(false)
       onSuccess()

@@ -4,6 +4,8 @@
 
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 
 /** 刪除使用者所有筆記 */
 export async function deleteUserNotes(userId: string): Promise<void> {
@@ -12,6 +14,12 @@ export async function deleteUserNotes(userId: string): Promise<void> {
     logger.warn('[dashboard.service] 刪除筆記失敗:', error.message)
     throw error
   }
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:notes'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:notes')
 }
 
 /** 批量插入筆記 */
@@ -30,6 +38,12 @@ export async function insertNotes(
     logger.warn('[dashboard.service] 插入筆記失敗:', error.message)
     throw error
   }
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:notes'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:notes')
 }
 
 /** 儲存使用者 widget 偏好 */

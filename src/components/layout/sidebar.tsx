@@ -666,7 +666,7 @@ export function Sidebar() {
             <span className="text-white font-semibold text-lg">V</span>
           </div>
           {showExpanded && (
-            <div className="ml-[58px] text-xl font-bold text-morandi-primary">CORNER</div>
+            <div className="ml-[58px] text-xl font-bold text-morandi-primary">{user?.workspace_code || 'V'}</div>
           )}
         </div>
       </div>

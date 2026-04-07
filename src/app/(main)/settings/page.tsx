@@ -78,7 +78,7 @@ export default function SettingsPage() {
           <Button
             variant="outline"
             onClick={handleLogout}
-            className="flex items-center gap-2 text-morandi-red border-morandi-red hover:bg-morandi-red hover:text-white"
+            className="flex items-center gap-2 text-morandi-red border-morandi-red/50 hover:bg-morandi-red/10 hover:text-morandi-red"
           >
             <LogOut className="h-4 w-4" />
             登出

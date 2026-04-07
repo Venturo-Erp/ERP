@@ -5,6 +5,8 @@
  * 將報價單的修改寫回核心表
  */
 
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import type { TourItineraryItem } from '@/features/tours/types/tour-itinerary-item.types'
@@ -205,6 +207,14 @@ export async function writePricingToCore(
       }
     }
   }
+
+  // Invalidate cache after all updates/inserts
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:tour_itinerary_items'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:tour_itinerary_items')
 
   // CLEAR / DELETE: 核心表有但報價單已移除的項目
   for (const coreItem of coreItems) {

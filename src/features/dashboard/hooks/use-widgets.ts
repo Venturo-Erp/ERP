@@ -36,12 +36,9 @@ export function useWidgets() {
           .select('preference_value')
           .eq('user_id', user.id)
           .eq('preference_key', PREFERENCE_KEY)
-          .single()
+          .maybeSingle()
 
         if (error) {
-          if (error.code === 'PGRST116') {
-            // No record found, use default values
-          }
           // Fallback to localStorage
           const saved = localStorage.getItem(STORAGE_KEY)
           if (saved) {

@@ -33,6 +33,8 @@ import { alertSuccess, alertError } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase/client'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { useWorkspaceFeatures } from '@/lib/permissions'
 import {
   ModulePermissionTable,
@@ -356,6 +358,12 @@ export function EmployeeForm({
           }))
           await ejrTable.insert(inserts)
         }
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:employee_job_roles'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:employee_job_roles')
       }
 
       // 儲存員工的個人覆寫

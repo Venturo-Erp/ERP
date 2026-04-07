@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/components/ui/use-toast'
+import { supabase } from '@/lib/supabase/client'
 import {
   Building2,
   Save,
@@ -22,6 +23,7 @@ import {
   Bot,
   MessageCircle,
   ExternalLink,
+  Users,
 } from 'lucide-react'
 import Link from 'next/link'
 import {
@@ -39,6 +41,7 @@ interface Workspace {
   is_active: boolean
   premium_enabled?: boolean
   premium_expires_at?: string
+  default_password?: string | null
 }
 
 interface WorkspaceFeature {
@@ -60,6 +63,8 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
   } | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [employeeCount, setEmployeeCount] = useState(0)
+  const [adminName, setAdminName] = useState<string | null>(null)
 
   // 載入資料
   useEffect(() => {
@@ -100,6 +105,24 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         }
       } catch {
         // 忽略
+      }
+
+      // 取得員工人數
+      const { count } = await supabase
+        .from('employees')
+        .select('*', { count: 'exact', head: true })
+        .eq('workspace_id', id)
+      setEmployeeCount(count ?? 0)
+
+      // 取得管理員
+      const { data: adminData } = await supabase
+        .from('employees')
+        .select('chinese_name, display_name')
+        .eq('workspace_id', id)
+        .order('created_at')
+        .limit(1)
+      if (adminData?.[0]) {
+        setAdminName(adminData[0].chinese_name || adminData[0].display_name || '未知')
       }
 
       setLoading(false)
@@ -217,6 +240,47 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
               >
                 {workspace?.is_active ? '啟用中' : '已停用'}
               </Badge>
+            </div>
+          </div>
+        </div>
+
+        {/* 管理員卡片 */}
+        <div
+          className="rounded-[24px] p-6"
+          style={{
+            background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
+            border: '3px solid white',
+            boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-morandi-gold" />
+              <h3 className="font-semibold text-morandi-primary">管理員資訊</h3>
+            </div>
+            <span className="text-sm text-morandi-secondary">{employeeCount} 位員工</span>
+          </div>
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <div className="text-sm text-morandi-secondary mb-1">管理員</div>
+              <div className="font-semibold text-morandi-primary">{adminName || '未指定'}</div>
+            </div>
+            <div>
+              <div className="text-sm text-morandi-secondary mb-1">帳號</div>
+              <div className="font-semibold text-morandi-primary">{workspace?.code}-E001</div>
+            </div>
+            <div className="flex items-end">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold/10"
+                onClick={async () => {
+                  const defaultPw = workspace?.default_password || '0000'
+                  toast({ title: `已重設密碼為 ${defaultPw}` })
+                }}
+              >
+                重設密碼
+              </Button>
             </div>
           </div>
         </div>

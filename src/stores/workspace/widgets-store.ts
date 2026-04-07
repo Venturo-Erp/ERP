@@ -7,6 +7,7 @@
 import { create } from 'zustand'
 import { v4 as uuidv4 } from 'uuid'
 import { supabase } from '@/lib/supabase/client'
+import { mutate } from 'swr'
 import { useAdvanceListStore } from './advance-list-store'
 import { useSharedOrderListStore } from './shared-order-list-store'
 import { useChannelStore } from './channel-store'
@@ -109,6 +110,9 @@ export const useWidgetsStore = () => {
           )
 
           if (itemsError) throw itemsError
+
+          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:advance_lists'), undefined, { revalidate: true })
+          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:advance_items'), undefined, { revalidate: true })
         }
       } catch (error) {
         // Silently fail

@@ -8,6 +8,7 @@ import { logger } from '@/lib/utils/logger'
 import { create } from 'zustand'
 import { v4 as uuidv4 } from 'uuid'
 import { supabase } from '@/lib/supabase/client'
+import { mutate } from 'swr'
 import { useMessageStore } from './message-store'
 import { useChannelStore } from './channel-store'
 import type { Message } from './types'
@@ -215,6 +216,7 @@ export const useChatStore = () => {
         }
 
         logger.log('✅ 訊息發送成功:', newMessage.id)
+        mutate((key: string) => typeof key === 'string' && key.startsWith('entity:messages'), undefined, { revalidate: true })
       } catch (error) {
         // 回滾樂觀更新
         logger.error('sendMessage 例外:', error)
@@ -261,6 +263,8 @@ export const useChatStore = () => {
         logger.error('addMessage 失敗:', error)
         throw error
       }
+
+      mutate((key: string) => typeof key === 'string' && key.startsWith('entity:messages'), undefined, { revalidate: true })
 
       // 🔥 使用緩存函數（避免重複計算）
       const channelMessages = getChannelMessages(messageStore.items, newMessage.channel_id)
@@ -342,6 +346,7 @@ export const useChatStore = () => {
         }
 
         logger.log('✅ 訊息刪除成功:', messageId)
+        mutate((key: string) => typeof key === 'string' && key.startsWith('entity:messages'), undefined, { revalidate: true })
       } catch (error) {
         // 回滾樂觀更新
         logger.error('deleteMessage 例外:', error)

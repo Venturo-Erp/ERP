@@ -9,6 +9,8 @@ import { supabase } from '@/lib/supabase/client'
 import { getRequiredWorkspaceId } from '@/lib/workspace-context'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 
 // ============================================
 // 類型定義
@@ -209,6 +211,12 @@ export function usePayroll() {
 
         if (insertError) throw insertError
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:payroll_periods'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:payroll_periods')
         await fetchPeriods()
         return {
           ...data,
@@ -471,6 +479,13 @@ export function usePayroll() {
         // 更新狀態為草稿（計算完成）
         await supabase.from('payroll_periods').update({ status: 'draft' }).eq('id', periodId)
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && (key.startsWith('entity:payroll_periods') || key.startsWith('entity:payroll_records')),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:payroll_periods')
+        invalidate_cache_pattern('entity:payroll_records')
         await fetchPeriods()
         await fetchRecords(periodId)
         return true
@@ -538,6 +553,12 @@ export function usePayroll() {
 
         if (updateError) throw updateError
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:payroll_records'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:payroll_records')
         await fetchRecords(existing.payroll_period_id)
         return true
       } catch (err) {
@@ -594,6 +615,12 @@ export function usePayroll() {
 
         if (updateError) throw updateError
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:payroll_periods'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:payroll_periods')
         await fetchPeriods()
         return true
       } catch (err) {
@@ -649,6 +676,12 @@ export function usePayroll() {
 
         if (updateError) throw updateError
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:payroll_periods'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:payroll_periods')
         await fetchPeriods()
         return true
       } catch (err) {

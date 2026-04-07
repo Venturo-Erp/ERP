@@ -3,6 +3,8 @@
  * 需求單資料存取層
  */
 
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { dynamicFrom } from '@/lib/supabase/typed-client'
 import type {
   TourRequest,
@@ -94,6 +96,12 @@ export async function createTourRequest(
     .single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:tour_requests'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:tour_requests')
   return data as unknown as TourRequest
 }
 
@@ -115,6 +123,12 @@ export async function updateTourRequest(
     .single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:tour_requests'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:tour_requests')
   return data as unknown as TourRequest
 }
 
@@ -125,6 +139,12 @@ export async function deleteTourRequest(requestId: string): Promise<void> {
   const { error } = await tourRequestsDb().delete().eq('id', requestId)
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:tour_requests'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:tour_requests')
 }
 
 /**
@@ -167,6 +187,12 @@ export async function markRequestAsReplied(
     .single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:tour_requests'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:tour_requests')
   return data as unknown as TourRequest
 }
 
@@ -191,5 +217,11 @@ export async function closeTourRequest(
     .single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:tour_requests'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:tour_requests')
   return data as unknown as TourRequest
 }

@@ -3,6 +3,8 @@
  * 旅遊團其他檔案存取層（護照/簽證/Logo等）
  */
 
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { dynamicFrom } from '@/lib/supabase/typed-client'
 import type { TourFile, FileCategory } from '@/types/tour-documents.types'
 
@@ -88,6 +90,12 @@ export async function createTourFile(
     .single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:tour_files'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:tour_files')
   return data
 }
 
@@ -105,6 +113,12 @@ export async function updateTourFile(
   const { data, error } = await tourFilesDb().update(input).eq('id', fileId).select().single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:tour_files'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:tour_files')
   return data
 }
 
@@ -115,6 +129,12 @@ export async function deleteTourFile(fileId: string): Promise<void> {
   const { error } = await tourFilesDb().delete().eq('id', fileId)
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:tour_files'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:tour_files')
 }
 
 /**
@@ -128,6 +148,12 @@ export async function linkFileToRequest(fileId: string, requestId: string): Prom
     .single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:tour_files'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:tour_files')
   return data
 }
 
@@ -142,5 +168,11 @@ export async function unlinkFileFromRequest(fileId: string): Promise<TourFile> {
     .single()
 
   if (error) throw error
+  globalMutate(
+    (key: string) => typeof key === 'string' && key.startsWith('entity:tour_files'),
+    undefined,
+    { revalidate: true }
+  )
+  invalidate_cache_pattern('entity:tour_files')
   return data
 }

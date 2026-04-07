@@ -4,6 +4,8 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import { confirm } from '@/lib/ui/alert-dialog'
@@ -259,6 +261,12 @@ export function useOrderMembers({
         if (data) {
           setMembers(prev => [...prev, ...data])
         }
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:order_members'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:order_members')
 
         // 重算團人數
         if (tourId) {
@@ -290,6 +298,12 @@ export function useOrderMembers({
         if (error) throw error
 
         setMembers(prev => prev.filter(m => m.id !== memberId))
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:order_members'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:order_members')
 
         // 重算團人數
         if (tourId) {
@@ -319,6 +333,12 @@ export function useOrderMembers({
         if (error) throw error
 
         setMembers(prev => prev.map(m => (m.id === memberId ? { ...m, [field]: value } : m)))
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:order_members'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:order_members')
 
         // 如果修改了金額欄位，重算訂單金額
         if (field === 'total_payable' || field === 'selling_price') {
@@ -345,6 +365,12 @@ export function useOrderMembers({
         if (error) throw error
 
         setMembers(prev => prev.map(m => (m.id === memberId ? { ...m, ...data } : m)))
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:order_members'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:order_members')
 
         // 如果修改了金額欄位，重算訂單金額
         if ('total_payable' in data || 'selling_price' in data) {

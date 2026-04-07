@@ -11,6 +11,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { TreeView, type TreeItem } from '@/features/files/components'
@@ -296,6 +298,12 @@ export function CompanyAssetsTree({ onSelectFile, onAddFile }: CompanyAssetsTree
         const { error } = await supabase.from('company_asset_folders').delete().eq('id', folderId)
 
         if (error) throw error
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:company_asset_folders'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:company_asset_folders')
         toast.success(COMPANY_ASSETS_LABELS.資料夾已刪除)
         loadData()
       } catch (err) {

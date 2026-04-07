@@ -691,6 +691,9 @@ export * from './tour-bonus-settings'
 // Workspace Bonus Defaults
 export * from './workspace-bonus-defaults'
 
+// Workspaces
+export * from './workspaces'
+
 // ============================================
 // 核心表（行程項目生命週期）
 // ============================================

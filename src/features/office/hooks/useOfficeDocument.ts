@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
 import type { Database } from '@/lib/supabase/types'
@@ -293,6 +295,13 @@ export function useOfficeDocument(): UseOfficeDocumentReturn {
       const { error: deleteError } = await supabase.from('office_documents').delete().eq('id', id)
 
       if (deleteError) throw deleteError
+
+      globalMutate(
+        (key: string) => typeof key === 'string' && key.startsWith('entity:office_documents'),
+        undefined,
+        { revalidate: true }
+      )
+      invalidate_cache_pattern('entity:office_documents')
 
       // 更新本地列表
       setDocuments(prev => prev.filter(doc => doc.id !== id))

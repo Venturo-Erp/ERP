@@ -7,6 +7,8 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { createTourMealSetting } from '@/data/entities/tour-meal-settings'
 import { createTourTable } from '@/data/entities/tour-tables'
 import { useAuthStore } from '@/stores'
@@ -310,6 +312,12 @@ export function TourTableTab({ tourId, tour, members }: TourTableTabProps) {
 
       if (error) throw error
 
+      globalMutate(
+        (key: string) => typeof key === 'string' && key.startsWith('entity:tour_tables'),
+        undefined,
+        { revalidate: true }
+      )
+      invalidate_cache_pattern('entity:tour_tables')
       toast.success(COMP_TOURS_LABELS.已刪除桌次)
       loadData()
     } catch (error) {

@@ -6,6 +6,8 @@ import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
  */
 
 import { useEffect, useState, useMemo, useCallback } from 'react'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -969,6 +971,12 @@ export function RequirementsList({
       try {
         const { error } = await supabase.from('tour_requests').delete().eq('id', delegationId)
         if (error) throw error
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:tour_requests'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:tour_requests')
         toast({ title: '已刪除委託' })
         await loadData(false)
       } catch {

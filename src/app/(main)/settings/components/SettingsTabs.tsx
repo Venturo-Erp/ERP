@@ -1,7 +1,6 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { Settings, Building2 } from 'lucide-react'
 
 const tabs = [
   { value: 'personal', label: '個人設定', href: '/settings' },
@@ -20,20 +19,23 @@ export function SettingsTabs() {
   const activeTab = getActiveTab()
 
   return (
-    <div className="flex gap-1">
+    <div className="flex items-center gap-1">
       {tabs.map(tab => {
         const isActive = activeTab === tab.value
         return (
           <button
             key={tab.value}
             onClick={() => router.push(tab.href)}
-            className={`px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
+            className={`px-4 py-1.5 text-sm font-medium transition-colors relative ${
               isActive
-                ? 'bg-morandi-gold text-white'
-                : 'text-morandi-secondary hover:bg-morandi-container'
+                ? 'text-morandi-primary'
+                : 'text-morandi-secondary hover:text-morandi-primary'
             }`}
           >
             {tab.label}
+            {isActive && (
+              <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2/3 h-0.5 bg-morandi-gold rounded-full" />
+            )}
           </button>
         )
       })}

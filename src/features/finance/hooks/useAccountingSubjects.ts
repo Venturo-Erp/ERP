@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
-import { supabase } from '@/lib/supabase/client'
+import { useMemo } from 'react'
+import { useAccountingSubjects as useAccountingSubjectsEntity } from '@/data'
 
 interface AccountingSubject {
   id: string
@@ -12,31 +12,19 @@ interface AccountingSubject {
 
 /**
  * 取得會計科目清單（用於下拉選擇）
+ * 底層使用 SWR entity hook，享有快取和去重
  */
 export function useAccountingSubjects(
   filterType?: 'expense' | 'cost' | 'asset' | 'liability' | 'revenue'
 ) {
-  const [subjects, setSubjects] = useState<AccountingSubject[]>([])
-  const [loading, setLoading] = useState(true)
+  const { items, loading } = useAccountingSubjectsEntity()
 
-  useEffect(() => {
-    const fetchSubjects = async () => {
-      let query = supabase.from('accounting_subjects').select('id, code, name, type').order('code')
-
-      if (filterType) {
-        query = query.eq('type', filterType)
-      }
-
-      const { data, error } = await query
-
-      if (!error && data) {
-        setSubjects(data)
-      }
-      setLoading(false)
-    }
-
-    fetchSubjects()
-  }, [filterType])
+  // 根據 filterType 過濾
+  const subjects: AccountingSubject[] = useMemo(() => {
+    const all = (items || []) as AccountingSubject[]
+    if (!filterType) return all
+    return all.filter(s => s.type === filterType)
+  }, [items, filterType])
 
   // 轉換為 Combobox 選項格式
   const options = useMemo(

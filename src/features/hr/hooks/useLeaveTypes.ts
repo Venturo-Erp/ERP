@@ -9,6 +9,8 @@ import { supabase } from '@/lib/supabase/client'
 import { getRequiredWorkspaceId } from '@/lib/workspace-context'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 
 // ============================================
 // 類型定義
@@ -114,6 +116,12 @@ export function useLeaveTypes() {
 
         if (insertError) throw insertError
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:leave_types'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:leave_types')
         await fetchLeaveTypes()
         return true
       } catch (err) {
@@ -149,6 +157,12 @@ export function useLeaveTypes() {
 
         if (updateError) throw updateError
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:leave_types'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:leave_types')
         await fetchLeaveTypes()
         return true
       } catch (err) {
@@ -178,6 +192,12 @@ export function useLeaveTypes() {
 
         if (deleteError) throw deleteError
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:leave_types'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:leave_types')
         await fetchLeaveTypes()
         return true
       } catch (err) {
@@ -216,6 +236,12 @@ export function useLeaveTypes() {
 
       if (insertError) throw insertError
 
+      globalMutate(
+        (key: string) => typeof key === 'string' && key.startsWith('entity:leave_types'),
+        undefined,
+        { revalidate: true }
+      )
+      invalidate_cache_pattern('entity:leave_types')
       await fetchLeaveTypes()
       return true
     } catch (err) {

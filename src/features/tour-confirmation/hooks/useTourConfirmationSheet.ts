@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import type { Json, Database } from '@/lib/supabase/types'
@@ -244,6 +246,12 @@ export function useTourConfirmationSheet({ tourId }: UseTourConfirmationSheetPro
         }
 
         setItems(prev => [...prev, new_item])
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:tour_confirmation_items'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:tour_confirmation_items')
         return new_item
       } catch (err) {
         const message = err instanceof Error ? err.message : '新增失敗'
@@ -331,6 +339,12 @@ export function useTourConfirmationSheet({ tourId }: UseTourConfirmationSheetPro
         }
 
         setItems(prev => prev.map(item => (item.id === itemId ? updated_item : item)))
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:tour_confirmation_items'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:tour_confirmation_items')
         return updated_item
       } catch (err) {
         const message = err instanceof Error ? err.message : '更新失敗'
@@ -359,6 +373,12 @@ export function useTourConfirmationSheet({ tourId }: UseTourConfirmationSheetPro
         if (error) throw error
 
         setItems(prev => prev.filter(item => item.id !== itemId))
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:tour_confirmation_items'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:tour_confirmation_items')
       } catch (err) {
         const message = err instanceof Error ? err.message : '刪除失敗'
         logger.error('刪除明細失敗:', err)

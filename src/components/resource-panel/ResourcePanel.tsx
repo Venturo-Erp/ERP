@@ -612,8 +612,8 @@ export function ResourcePanel({
                       category: '',
                       data_verified: false,
                     }
-                    setSearchQuery('')
-                    setSearchResults([])
+                    // 保留搜尋文字，把新建的資源加入搜尋結果和預載列表
+                    setSearchResults(prev => [newItem, ...prev])
                     setResources(prev => ({
                       ...prev,
                       [activeTab]: [newItem, ...(prev[activeTab] || [])],

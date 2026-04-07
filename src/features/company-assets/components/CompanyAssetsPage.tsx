@@ -13,6 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { CompanyAssetsList } from './CompanyAssetsList'
 import { CompanyAssetsDialog } from './CompanyAssetsDialog'
 import { supabase } from '@/lib/supabase/client'
+import { mutate as globalMutate } from 'swr'
+import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { useAuthStore } from '@/stores'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
 import type { CompanyAsset, CompanyAssetType } from '@/types/company-asset.types'
@@ -116,6 +118,12 @@ export const CompanyAssetsPage: React.FC = () => {
         const { error } = await supabase.from('company_assets').delete().eq('id', asset.id)
         if (error) throw error
 
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:company_assets'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:company_assets')
         await alert(COMPANY_ASSETS_LABELS.刪除成功, 'success')
         fetchAssets()
       } catch (error) {
@@ -223,6 +231,12 @@ export const CompanyAssetsPage: React.FC = () => {
           .eq('id', editingAsset.id)
 
         if (error) throw error
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:company_assets'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:company_assets')
         await alert(COMPANY_ASSETS_LABELS.更新成功, 'success')
       } else {
         const file = formData.file!
@@ -249,6 +263,12 @@ export const CompanyAssetsPage: React.FC = () => {
         })
 
         if (dbError) throw dbError
+        globalMutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:company_assets'),
+          undefined,
+          { revalidate: true }
+        )
+        invalidate_cache_pattern('entity:company_assets')
         await alert(COMPANY_ASSETS_LABELS.新增成功, 'success')
       }
 
