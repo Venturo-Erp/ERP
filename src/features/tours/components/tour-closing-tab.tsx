@@ -13,7 +13,7 @@ import {
   Lock,
   Unlock,
   TrendingUp,
-  TrendingDown,
+  HandCoins,
   DollarSign,
   ArrowRight,
   MapPin,
@@ -320,7 +320,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
             </div>
           </div>
           <div className="flex-1 flex items-center gap-2.5 px-3">
-            <TrendingDown size={16} className="text-morandi-red shrink-0" />
+            <HandCoins size={16} className="text-morandi-red shrink-0" />
             <div className="min-w-0">
               <p className="text-[11px] text-morandi-secondary leading-tight">總支出</p>
               <p className="text-sm font-semibold text-morandi-primary">
@@ -460,7 +460,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
         <div className="border border-border rounded-lg overflow-x-auto bg-card">
           <div>
             <div className="px-4 py-2 bg-morandi-red/10 flex items-center gap-2">
-              <TrendingDown className="w-4 h-4 text-morandi-red" />
+              <HandCoins className="w-4 h-4 text-morandi-red" />
               <span className="text-sm font-medium text-morandi-red">
                 請款 ({paymentRequests.length})
               </span>
