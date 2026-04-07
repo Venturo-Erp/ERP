@@ -163,7 +163,7 @@ export function DateRangeSelector({
           <button
             key={g}
             onClick={() => handleGranularityChange(g)}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               granularity === g
                 ? 'bg-white text-morandi-primary shadow-sm'
                 : 'text-morandi-secondary hover:text-morandi-primary'
@@ -177,15 +177,15 @@ export function DateRangeSelector({
       {/* 日期導航 */}
       {granularity !== 'custom' ? (
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={handlePrev}>
-            <ChevronLeft size={16} />
-          </Button>
-          <span className="min-w-[140px] text-center font-medium text-morandi-primary text-sm">
+          <button onClick={handlePrev} className="p-1.5 text-morandi-secondary hover:text-morandi-primary transition-colors">
+            <ChevronLeft size={22} />
+          </button>
+          <span className="min-w-[120px] text-center font-semibold text-morandi-primary text-base">
             {label}
           </span>
-          <Button variant="outline" size="icon" className="h-8 w-8" onClick={handleNext}>
-            <ChevronRight size={16} />
-          </Button>
+          <button onClick={handleNext} className="p-1.5 text-morandi-secondary hover:text-morandi-primary transition-colors">
+            <ChevronRight size={22} />
+          </button>
         </div>
       ) : (
         <div className="flex items-center gap-2">

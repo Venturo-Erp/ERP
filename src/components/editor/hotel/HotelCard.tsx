@@ -34,7 +34,7 @@ const getHotelClassLabel = (hotelClass: string | null) => {
 }
 
 const getHotelImage = (hotel: LuxuryHotel) => {
-  return hotel.thumbnail || (hotel.images && hotel.images.length > 0 ? hotel.images[0] : null)
+  return hotel.images && hotel.images.length > 0 ? hotel.images[0] : null
 }
 
 export function HotelCard({ hotel, isSelected, onToggle }: HotelCardProps) {

@@ -235,11 +235,17 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
         )}
 
         {/* 功能區域 */}
-        {props.children && <div className="flex items-center mr-6">{props.children}</div>}
+        {props.children && <div className="flex items-center mr-4">{props.children}</div>}
+
+        {/* 操作區（日期選擇等功能） */}
+        {props.actions && <div className="flex items-center mr-4">{props.actions}</div>}
+
+        {/* 彈性空間：把 tabs 推到最右 */}
+        <div className="flex-1" />
 
         {/* 標籤頁 - 手機模式隱藏 */}
         {props.tabs && props.tabs.length > 0 && (
-          <div className="hidden md:flex items-center space-x-1 pointer-events-auto mr-4">
+          <div className="hidden md:flex items-center space-x-1 pointer-events-auto">
             {props.tabs.map(tab => (
               <button
                 key={tab.value}
@@ -273,9 +279,8 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
         {/* 自訂操作按鈕 */}
         {props.customActions && <div className="flex items-center mr-4">{props.customActions}</div>}
 
-        {/* 操作按鈕 - actions 和 onAdd 可以同時顯示 */}
+        {/* 新增按鈕 */}
         <div className="flex items-center gap-3">
-          {props.actions}
           {props.onAdd && (
             <button
               onClick={props.onAdd}

@@ -45,7 +45,7 @@ async function enrichDailyItinerary(
   // 批次查詢景點
   const { data: attractions } = await supabase
     .from('attractions')
-    .select('id, description, thumbnail, images')
+    .select('id, description, images')
     .in('id', Array.from(attractionIds))
 
   if (!attractions) return dailyItinerary
@@ -53,12 +53,11 @@ async function enrichDailyItinerary(
   // 建立對照表
   const attractionMap = new Map<
     string,
-    { description?: string; thumbnail?: string; images?: string[] }
+    { description?: string; images?: string[] }
   >()
   for (const attr of attractions) {
     attractionMap.set(attr.id, {
       description: attr.description || undefined,
-      thumbnail: attr.thumbnail || undefined,
       images: attr.images || undefined,
     })
   }
@@ -72,8 +71,8 @@ async function enrichDailyItinerary(
         if (attr) {
           const enriched = { ...activity }
           if (!activity.description && attr.description) enriched.description = attr.description
-          if (!activity.image && (attr.thumbnail || attr.images?.[0])) {
-            enriched.image = attr.thumbnail || attr.images?.[0]
+          if (!activity.image && attr.images?.[0]) {
+            enriched.image = attr.images[0]
           }
           return enriched
         }

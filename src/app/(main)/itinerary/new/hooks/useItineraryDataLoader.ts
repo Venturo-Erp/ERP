@@ -113,7 +113,7 @@ export function useItineraryDataLoader({
 
       const { data: attractions } = await supabase
         .from('attractions')
-        .select('id, description, thumbnail, images')
+        .select('id, description, images')
         .in('id', Array.from(attractionIds))
 
       if (!attractions) return dailyItinerary
@@ -128,7 +128,7 @@ export function useItineraryDataLoader({
           return {
             ...activity,
             description: activity.description || attr.description || '',
-            image: activity.image || attr.thumbnail || (attr.images as string[])?.[0] || '',
+            image: activity.image || (attr.images as string[])?.[0] || '',
           }
         }),
       }))
@@ -217,7 +217,63 @@ export function useItineraryDataLoader({
           time: '',
           location: '',
         },
-        hotels: (itinerary.hotels as HotelInfo[]) || [],
+        hotels: await (async () => {
+          const saved = (itinerary.hotels as HotelInfo[]) || []
+          // 如果已有完整資料（有描述或圖片），直接用
+          const hasContent = saved.some(h => h.description || (h.images && h.images.length > 0))
+          if (saved.length > 0 && hasContent) return saved
+          // 從核心表帶入飯店（含描述和照片）
+          if (itinerary.tour_id) {
+            const { data: hotelItems } = await supabase
+              .from('tour_itinerary_items')
+              .select('resource_id, sort_order')
+              .eq('tour_id', itinerary.tour_id)
+              .eq('resource_type', 'hotel')
+              .not('resource_id', 'is', null)
+              .order('sort_order')
+            if (hotelItems && hotelItems.length > 0) {
+              // 依行程順序去重
+              const seen = new Set<string>()
+              const orderedIds: string[] = []
+              for (const h of hotelItems) {
+                if (!seen.has(h.resource_id!)) {
+                  seen.add(h.resource_id!)
+                  orderedIds.push(h.resource_id!)
+                }
+              }
+              const { data: hotels } = await supabase
+                .from('hotels')
+                .select('id, name, description, images')
+                .in('id', orderedIds)
+              if (hotels && hotels.length > 0) {
+                // 按行程順序排列
+                const hotelMap = new Map(hotels.map(h => [h.id, h]))
+                return orderedIds
+                  .map(id => hotelMap.get(id))
+                  .filter(Boolean)
+                  .map(h => {
+                    return {
+                      name: h!.name || '',
+                      description: h!.description || '',
+                      images: (h!.images as string[]) || [],
+                    }
+                  })
+              }
+            }
+          }
+          // fallback: 從每日行程的住宿名稱帶入
+          const dailyData = (itinerary.daily_itinerary || []) as DailyItinerary[]
+          const seen = new Set<string>()
+          const auto: HotelInfo[] = []
+          for (const day of dailyData) {
+            const name = day.accommodation?.trim()
+            if (name && !seen.has(name)) {
+              seen.add(name)
+              auto.push({ name, description: '', images: [] })
+            }
+          }
+          return auto
+        })(),
         showHotels: itinerary.show_hotels || false,
         itinerarySubtitle: itinerary.itinerary_subtitle || '',
         dailyItinerary: await enrichActivities(

@@ -225,7 +225,6 @@ export async function POST(request: NextRequest) {
         longitude,
         google_maps_url,
         images,
-        thumbnail,
         is_active,
         display_order,
         notes,

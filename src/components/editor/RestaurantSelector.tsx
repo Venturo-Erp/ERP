@@ -35,7 +35,6 @@ export interface Restaurant {
   max_group_size: number | null
   group_menu_available: boolean
   private_room: boolean
-  thumbnail: string | null
   images: string[] | null
   rating: number | null
   is_active: boolean
@@ -71,7 +70,6 @@ export interface MichelinRestaurant {
   max_group_size: number | null
   group_menu_available: boolean | null
   private_room: boolean | null
-  thumbnail: string | null
   images: string[] | null
   is_active: boolean | null
   // GPS 資訊

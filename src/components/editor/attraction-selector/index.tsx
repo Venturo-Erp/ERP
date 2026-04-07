@@ -296,10 +296,10 @@ export function AttractionSelector({
           {detailAttraction && (
             <>
               {/* 圖片 */}
-              {(detailAttraction.thumbnail || detailAttraction.images?.[0]) && (
+              {detailAttraction.images?.[0] && (
                 <div className="relative h-48">
                   <img
-                    src={detailAttraction.thumbnail || detailAttraction.images?.[0]}
+                    src={detailAttraction.images[0]}
                     alt={detailAttraction.name}
                     className="w-full h-full object-cover"
                   />
@@ -320,7 +320,7 @@ export function AttractionSelector({
 
               {/* 內容 */}
               <div className="p-6">
-                {!detailAttraction.thumbnail && !detailAttraction.images?.[0] && (
+                {!detailAttraction.images?.[0] && (
                   <DialogTitle className="text-xl font-bold mb-3">
                     {detailAttraction.name}
                   </DialogTitle>

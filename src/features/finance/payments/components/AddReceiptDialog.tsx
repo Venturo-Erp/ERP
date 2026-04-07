@@ -14,14 +14,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Combobox } from '@/components/ui/combobox'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Users, Building2 } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 import { confirm } from '@/lib/ui/alert-dialog'
 import { usePaymentForm } from '../hooks/usePaymentForm'
@@ -94,6 +86,9 @@ export function AddReceiptDialog({
   const canEdit = !isConfirmed || isAccountant
   // 是否可確認（會計角色 + 編輯模式 + 未確認）
   const canConfirm = isAccountant && isEditMode && !isConfirmed
+
+  // Tab 狀態
+  const [activeTab, setActiveTab] = useState('tour')
 
   // 提交狀態（防止重複點擊）
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -413,71 +408,67 @@ export function AddReceiptDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent level={2} className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col">
         {/* 收款類型 Tab - 包住整個 header 和內容 */}
-        <Tabs defaultValue="tour" className="flex-1 flex flex-col overflow-hidden">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
           {/* Header: Tab + 選擇器 + 標題 同一行 */}
           <DialogHeader className="flex-row items-center justify-between pb-4">
             {/* 左邊：Tab + 選擇器 */}
             <div className="flex items-center gap-4">
               {/* Tab 切換 */}
               <TabsList className="w-fit h-10">
-                <TabsTrigger value="tour" className="gap-2">
-                  <Users size={14} />
+                <TabsTrigger value="tour">
                   團體收款
                 </TabsTrigger>
-                <TabsTrigger value="company" className="gap-2">
-                  <Building2 size={14} />
+                <TabsTrigger value="company">
                   公司收款
                 </TabsTrigger>
               </TabsList>
 
-              {/* 選擇團體 */}
-              <div className="relative z-[10020]">
-                <Combobox
-                  options={tours.map(tour => ({
-                    value: tour.id,
-                    label: `${tour.code || ''} - ${tour.name || ''}`,
-                  }))}
-                  value={formData.tour_id}
-                  onChange={value => {
-                    setFormData(prev => ({
-                      ...prev,
-                      tour_id: value,
-                      order_id: '',
-                    }))
-                  }}
-                  placeholder={ADD_RECEIPT_DIALOG_LABELS.請選擇團體}
-                  emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
-                  className="w-[350px]"
-                  maxHeight="300px"
-                />
-              </div>
+              {/* 團體收款：團號 + 訂單選擇器 */}
+              {activeTab === 'tour' && (
+                <>
+                  <div className="relative z-[10020]">
+                    <Combobox
+                      options={tours.map(tour => ({
+                        value: tour.id,
+                        label: `${tour.code || ''} - ${tour.name || ''}`,
+                      }))}
+                      value={formData.tour_id}
+                      onChange={value => {
+                        setFormData(prev => ({
+                          ...prev,
+                          tour_id: value,
+                          order_id: '',
+                        }))
+                      }}
+                      placeholder={ADD_RECEIPT_DIALOG_LABELS.請選擇團體}
+                      emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
+                      className="w-[350px]"
+                      maxHeight="300px"
+                    />
+                  </div>
 
-              {/* 選擇訂單 */}
-              <Select
-                disabled={!formData.tour_id || filteredOrders.length === 0}
-                value={formData.order_id}
-                onValueChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
-              >
-                <SelectTrigger className="w-[300px] bg-card">
-                  <SelectValue
-                    placeholder={
-                      !formData.tour_id
-                        ? '選擇團體後選擇訂單'
-                        : filteredOrders.length === 0
-                          ? ADD_RECEIPT_DIALOG_LABELS.此團體沒有訂單
-                          : ADD_RECEIPT_DIALOG_LABELS.請選擇訂單
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredOrders.map(order => (
-                    <SelectItem key={order.id} value={order.id}>
-                      {order.order_number} -{' '}
-                      {order.contact_person || ADD_RECEIPT_DIALOG_LABELS.無聯絡人}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  <div className="relative z-[10019]">
+                    <Combobox
+                      options={filteredOrders.map(order => ({
+                        value: order.id,
+                        label: `${order.order_number} - ${order.contact_person || ADD_RECEIPT_DIALOG_LABELS.無聯絡人}`,
+                      }))}
+                      value={formData.order_id}
+                      onChange={value => setFormData(prev => ({ ...prev, order_id: value }))}
+                      placeholder={
+                        !formData.tour_id
+                          ? '選擇團體後選擇訂單'
+                          : filteredOrders.length === 0
+                            ? ADD_RECEIPT_DIALOG_LABELS.此團體沒有訂單
+                            : ADD_RECEIPT_DIALOG_LABELS.請選擇訂單
+                      }
+                      disabled={!formData.tour_id || filteredOrders.length === 0}
+                      className="w-[300px]"
+                      maxHeight="300px"
+                    />
+                  </div>
+                </>
+              )}
             </div>
 
             {/* 右邊：標題 */}
@@ -529,39 +520,39 @@ export function AddReceiptDialog({
 
                   <div className="flex-1 overflow-auto">
                     {/* 項目表格 */}
-                    <div className="border border-border rounded-lg overflow-hidden bg-card">
+                    <div className="border border-border/50 rounded-lg overflow-hidden">
                       <table className="w-full border-collapse">
                         <thead>
-                          <tr className="text-xs text-morandi-primary font-medium bg-morandi-container/50">
+                          <tr className="bg-morandi-gold-header border-b border-border">
                             <th
-                              className="text-left py-2.5 px-3 border-b border-r border-border"
+                              className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
                               style={{ width: '110px' }}
                             >
                               {ADD_RECEIPT_DIALOG_LABELS.LABEL_5187}
                             </th>
                             <th
-                              className="text-left py-2.5 px-3 border-b border-r border-border"
+                              className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
                               style={{ width: '150px' }}
                             >
                               {ADD_RECEIPT_DIALOG_LABELS.LABEL_1182}
                             </th>
                             <th
-                              className="text-left py-2.5 px-3 border-b border-r border-border"
+                              className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
                               style={{ width: '180px' }}
                             >
                               {ADD_RECEIPT_DIALOG_LABELS.LABEL_6465}
                             </th>
-                            <th className="text-left py-2.5 px-3 border-b border-r border-border">
+                            <th className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary">
                               {ADD_RECEIPT_DIALOG_LABELS.REMARKS}
                             </th>
                             <th
-                              className="text-right py-2.5 px-3 border-b border-r border-border"
+                              className="text-right py-2.5 px-3 text-sm font-semibold text-morandi-primary"
                               style={{ width: '120px' }}
                             >
                               收款金額
                             </th>
                             <th
-                              className="text-right py-2.5 px-3 border-b border-border"
+                              className="text-right py-2.5 px-3 text-sm font-semibold text-morandi-primary"
                               style={{ width: '120px' }}
                             >
                               實收金額
@@ -682,33 +673,33 @@ export function AddReceiptDialog({
               </div>
 
               <div className="flex-1 overflow-auto">
-                <div className="border border-border rounded-lg overflow-hidden bg-card">
+                <div className="border border-border/50 rounded-lg overflow-hidden">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="text-xs text-morandi-primary font-medium bg-morandi-container/50">
+                      <tr className="bg-morandi-gold-header border-b border-border">
                         <th
-                          className="text-left py-2.5 px-3 border-b border-r border-border"
+                          className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
                           style={{ width: '110px' }}
                         >
                           收款方式
                         </th>
                         <th
-                          className="text-left py-2.5 px-3 border-b border-r border-border"
+                          className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
                           style={{ width: '150px' }}
                         >
                           收款日期
                         </th>
                         <th
-                          className="text-left py-2.5 px-3 border-b border-r border-border"
+                          className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
                           style={{ width: '180px' }}
                         >
                           收款項目
                         </th>
-                        <th className="text-left py-2.5 px-3 border-b border-r border-border">
+                        <th className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary">
                           備註
                         </th>
                         <th
-                          className="text-right py-2.5 px-3 border-b border-border"
+                          className="text-right py-2.5 px-3 text-sm font-semibold text-morandi-primary"
                           style={{ width: '140px' }}
                         >
                           金額

@@ -222,7 +222,7 @@ export function AirportImageLibrary({
           <Loader2 className="w-6 h-6 animate-spin text-morandi-gold" />
         </div>
       ) : airportImages.length > 0 ? (
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {airportImages.map(image => (
             <div
               key={image.id}
@@ -311,7 +311,7 @@ export function AirportImageLibrary({
             </div>
 
             {/* Unsplash + Pexels 按鈕 */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Button
                 type="button"
                 variant="outline"

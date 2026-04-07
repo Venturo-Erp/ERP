@@ -128,7 +128,7 @@ export function ResourceMapPanel({
         const { data, error } = await supabase
           .from('attractions')
           .select(
-            'id, name, english_name, description, category, images, thumbnail, address, latitude, longitude, phone, website, opening_hours, data_verified, region_id, city_id, country_id, is_active, workspace_id, created_at, updated_at'
+            'id, name, english_name, description, category, images, address, latitude, longitude, phone, website, opening_hours, data_verified, region_id, city_id, country_id, is_active, workspace_id, created_at, updated_at'
           )
           .eq('country_id', countryId)
           .not('latitude', 'is', null)
@@ -148,7 +148,7 @@ export function ResourceMapPanel({
           address: a.address || undefined,
           phone: a.phone || undefined,
           description: a.description || undefined,
-          thumbnail: a.thumbnail || undefined,
+          images: a.images || undefined,
           region_id: a.region_id || undefined,
           city_id: a.city_id,
           website: a.website || undefined,

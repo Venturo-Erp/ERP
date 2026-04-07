@@ -116,9 +116,7 @@ export function useDailyItinerary({
 
       // 智能圖片選擇邏輯
       let imageUrl = ''
-      if (attraction.thumbnail) {
-        imageUrl = attraction.thumbnail
-      } else if (attraction.images && attraction.images.length > 0) {
+      if (attraction.images && attraction.images.length > 0) {
         imageUrl = attraction.images[0]
       } else if (workspaceId) {
         try {

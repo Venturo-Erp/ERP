@@ -5,9 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { usePayments } from '@/features/payments/hooks/usePayments'
-import { Plus, Loader2, Plane, Building2 } from 'lucide-react'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
+import { Plus, Plane, Building2 } from 'lucide-react'
 import { useRequestTable } from '@/features/finance/requests/hooks/useRequestTable'
 import { PaymentRequest } from '@/stores/types'
 import { REQUESTS_PAGE_LABELS } from '../constants/labels'
@@ -18,27 +16,6 @@ const AddRequestDialog = dynamic(
   () =>
     import('@/features/finance/requests/components/AddRequestDialog').then(m => m.AddRequestDialog),
   { loading: () => null }
-)
-const RequestDetailDialog = dynamic(
-  () =>
-    import('@/features/finance/requests/components/RequestDetailDialog').then(
-      m => m.RequestDetailDialog
-    ),
-  {
-    loading: () => (
-      <Dialog open>
-        <DialogContent
-          level={1}
-          className="bg-transparent border-none shadow-none flex items-center justify-center"
-        >
-          <VisuallyHidden>
-            <DialogTitle>{REQUESTS_PAGE_LABELS.LOADING}</DialogTitle>
-          </VisuallyHidden>
-          <Loader2 className="animate-spin text-white" size={32} />
-        </DialogContent>
-      </Dialog>
-    ),
-  }
 )
 
 export default function RequestsPage() {
@@ -150,16 +127,16 @@ export default function RequestsPage() {
       />
 
       <AddRequestDialog
-        open={isAddDialogOpen}
-        onOpenChange={handleAddDialogClose}
+        open={isAddDialogOpen || !!selectedRequest}
+        onOpenChange={open => {
+          if (!open) {
+            setIsAddDialogOpen(false)
+            setSelectedRequest(null)
+          }
+        }}
         defaultTourId={urlTourId || undefined}
         defaultOrderId={urlOrderId || undefined}
-      />
-
-      <RequestDetailDialog
-        request={selectedRequest}
-        open={!!selectedRequest}
-        onOpenChange={open => !open && setSelectedRequest(null)}
+        editingRequest={selectedRequest}
       />
     </>
   )

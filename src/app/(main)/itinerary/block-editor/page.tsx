@@ -1,102 +1,36 @@
 'use client'
+
 import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
-/**
- * 區塊編輯器版行程表（新架構）
- *
- * 使用 BlockEditor 組件進行行程編輯
- * 可與原有 /itinerary/new 頁面並存
- */
+// TODO: labels 模組尚未建立，暫用空物件
+const LABELS = { 新增行程: '新增行程', 編輯行程: '編輯行程', 儲存中: '儲存中...', 儲存: '儲存', 返回: '返回' } as Record<string, string>
 
-import { BLOCK_EDITOR_LABELS } from '../constants/labels'
-
-import { useState, useEffect, useCallback, useRef, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { ContentPageLayout } from '@/components/layout/content-page-layout'
-import { TourPreview } from '@/components/editor/TourPreview'
-import { PublishButton } from '@/components/editor/PublishButton'
-import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores'
 import { useItineraries, createItinerary, updateItinerary } from '@/data'
-import { toast } from 'sonner'
-import { Cloud, CloudOff, Sparkles } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
-import { createSupabaseBrowserClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 
-// 區塊編輯器
-import { BlockEditor, tourDataToBlocks, blocksToTourData } from '@/components/editor/block-editor'
-import type { AnyBlock } from '@/components/editor/block-editor'
-import type { TourFormData } from '@/components/editor/tour-form/types'
+import { TourForm } from '@/components/editor/TourForm'
+import { TourFormData } from '@/components/editor/tour-form/types'
+// enrichDailyItinerary 尚未實作，暫用 identity function
+const enrichDailyItinerary = <T,>(items: T[]) => items
+import { ContentPageLayout } from '@/components/layout/content-page-layout'
 
-function BlockEditorPageContent() {
+export default function ItineraryEditorPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const itineraryId = searchParams.get('itinerary_id')
-
-  const { items: itineraries } = useItineraries()
   const { user } = useAuthStore()
+  const { items: itineraries, loading: itinerariesLoading } = useItineraries()
 
-  // 區塊狀態
-  const [blocks, setBlocks] = useState<AnyBlock[]>([])
-  const [loading, setLoading] = useState(true)
-  const [currentItineraryId, setCurrentItineraryId] = useState<string | null>(itineraryId)
-
-  // 自動存檔狀態
+  const itineraryId = searchParams.get('itinerary_id')
+  const [formData, setFormData] = useState<TourFormData | null>(null)
+  const [saving, setSaving] = useState(false)
   const [isDirty, setIsDirty] = useState(false)
-  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>(
-    'idle'
-  )
 
-  // 預覽模式
-  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop')
-
-  // 版本控制（簡化版，區塊編輯器暫不支援版本切換）
-  const [currentVersionIndex] = useState(-1)
-  const initialLoadDone = useRef(false)
-
-  // 用 attraction_id 從景點庫補上描述和圖片
-  const enrichDailyItinerary = useCallback(
-    async (dailyItinerary: TourFormData['dailyItinerary']) => {
-      if (!dailyItinerary || dailyItinerary.length === 0) return dailyItinerary
-
-      const attractionIds = new Set<string>()
-      for (const day of dailyItinerary) {
-        for (const activity of day.activities || []) {
-          if (activity.attraction_id && !activity.description) {
-            attractionIds.add(activity.attraction_id)
-          }
-        }
-      }
-      if (attractionIds.size === 0) return dailyItinerary
-
-      const supabase = createSupabaseBrowserClient()
-      const { data: attractions } = await supabase
-        .from('attractions')
-        .select('id, description, thumbnail, images')
-        .in('id', Array.from(attractionIds))
-
-      if (!attractions) return dailyItinerary
-
-      const attrMap = new Map(attractions.map(a => [a.id, a]))
-      return dailyItinerary.map(day => ({
-        ...day,
-        activities: day.activities?.map(activity => {
-          if (!activity.attraction_id) return activity
-          const attr = attrMap.get(activity.attraction_id)
-          if (!attr) return activity
-          return {
-            ...activity,
-            description: activity.description || attr.description || '',
-            image: activity.image || attr.thumbnail || (attr.images as string[])?.[0] || undefined,
-          }
-        }),
-      }))
-    },
-    []
-  )
-
-  // 載入現有行程或創建新行程
+  // 載入行程表資料
   useEffect(() => {
-    if (initialLoadDone.current) return
     const loadItinerary = async () => {
       if (itineraryId && itineraries.length > 0) {
         const itinerary = itineraries.find(i => i.id === itineraryId)
@@ -139,7 +73,13 @@ function BlockEditorPageContent() {
               arrivalTime: '',
             },
             flightStyle: itinerary.flight_style as TourFormData['flightStyle'],
-            features: itinerary.features || [],
+            features: itinerary.features && itinerary.features.length > 0 
+              ? itinerary.features 
+              : [
+                  { icon: '⭐', title: '', description: '', images: [] },
+                  { icon: '🏨', title: '', description: '', images: [] },
+                  { icon: '🍽️', title: '', description: '', images: [] }
+                ],
             featuresStyle: 'original',
             focusCards: itinerary.focus_cards || [],
             leader: itinerary.leader || { name: '', domesticPhone: '', overseasPhone: '' },
@@ -166,12 +106,10 @@ function BlockEditorPageContent() {
             showCancellationPolicy: itinerary.show_cancellation_policy || false,
           }
 
-          // 轉換為區塊
-          const newBlocks = tourDataToBlocks(tourData)
-          setBlocks(newBlocks)
+          setFormData(tourData)
         }
       } else if (!itineraryId) {
-        // 創建預設區塊
+        // 創建預設資料
         const defaultData: TourFormData = {
           tagline: `${COMPANY_NAME} ${new Date().getFullYear()}`,
           title: '',
@@ -197,260 +135,130 @@ function BlockEditorPageContent() {
             arrivalAirport: '',
             arrivalTime: '',
           },
-          features: [],
+          flightStyle: 'original',
+          coverStyle: 'original',
+          coverImage: '',
+          price: '',
+          priceNote: '',
+          features: [
+            { icon: '⭐', title: '', description: '', images: [] },
+            { icon: '🏨', title: '', description: '', images: [] },
+            { icon: '🍽️', title: '', description: '', images: [] }
+          ],
+          featuresStyle: 'original',
           focusCards: [],
           leader: { name: '', domesticPhone: '', overseasPhone: '' },
           meetingPoints: [{ time: '', location: '' }],
           hotels: [],
+          showFeatures: true,
+          showLeaderMeeting: true,
+          showHotels: false,
           itinerarySubtitle: '',
           dailyItinerary: [],
+          itineraryStyle: 'original',
+          pricingDetails: {} as TourFormData['pricingDetails'],
+          showPricingDetails: false,
+          priceTiers: undefined,
+          showPriceTiers: false,
+          faqs: undefined,
+          showFaqs: false,
+          notices: undefined,
+          showNotices: false,
+          cancellationPolicy: undefined,
+          showCancellationPolicy: false,
         }
-        setBlocks(tourDataToBlocks(defaultData))
+        setFormData(defaultData)
       }
-      initialLoadDone.current = true
-      setLoading(false)
     }
+
     loadItinerary()
-  }, [itineraryId, itineraries, enrichDailyItinerary])
+  }, [itineraryId, itineraries.length])
 
-  // 轉換區塊為 TourFormData 用於預覽
-  const tourData = blocksToTourData(blocks)
-
-  // 區塊變更處理
-  const handleBlocksChange = useCallback((newBlocks: AnyBlock[]) => {
-    setBlocks(newBlocks)
-    setIsDirty(true)
-  }, [])
-
-  // 自動存檔
-  const performAutoSave = useCallback(async () => {
-    if (!isDirty || blocks.length === 0) return
-
-    setAutoSaveStatus('saving')
+  // 儲存行程表
+  const handleSave = async () => {
+    if (saving || !formData) return
+    setSaving(true)
     try {
-      const data = blocksToTourData(blocks)
-
-      const saveData = {
-        tour_id: undefined,
-        tagline: data.tagline,
-        title: data.title,
-        subtitle: data.subtitle,
-        description: data.description,
-        departure_date: data.departureDate,
-        tour_code: data.tourCode,
-        cover_image: data.coverImage,
-        cover_style: data.coverStyle || 'original',
-        flight_style: data.flightStyle || 'original',
-        itinerary_style: data.itineraryStyle || 'original',
-        price: data.price || null,
-        price_note: data.priceNote || null,
-        country: data.country,
-        city: data.city,
-        status: BLOCK_EDITOR_LABELS.STATUS_PROPOSAL as '開團',
-        outbound_flight: data.outboundFlight,
-        return_flight: data.returnFlight,
-        features: data.features,
-        focus_cards: data.focusCards,
-        leader: data.leader,
-        meeting_info: data.meetingPoints?.[0],
-        show_features: data.showFeatures,
-        show_leader_meeting: data.showLeaderMeeting,
-        hotels: data.hotels || [],
-        show_hotels: data.showHotels,
-        show_pricing_details: data.showPricingDetails,
-        pricing_details: data.pricingDetails,
-        // price_tiers: 欄位已從 DB 移除，改用 tours.tier_pricings
-        show_price_tiers: data.showPriceTiers || false,
-        faqs: data.faqs || null,
-        show_faqs: data.showFaqs || false,
-        notices: data.notices || null,
-        show_notices: data.showNotices || false,
-        cancellation_policy: data.cancellationPolicy || null,
-        show_cancellation_policy: data.showCancellationPolicy || false,
-        itinerary_subtitle: data.itinerarySubtitle,
-        daily_itinerary: data.dailyItinerary,
-      }
-
-      if (currentItineraryId) {
-        await updateItinerary(currentItineraryId, saveData as Parameters<typeof updateItinerary>[1])
+      // 建立或更新行程表
+      if (itineraryId) {
+        await updateItinerary(itineraryId, formData)
+        toast.success('行程表已更新')
       } else {
-        if (!data.title) {
-          setAutoSaveStatus('idle')
-          return
-        }
-        const newItinerary = await createItinerary({
-          ...saveData,
-          created_by: user?.id || undefined,
-        } as Parameters<typeof createItinerary>[0])
-
+        const newItinerary = await createItinerary(formData as unknown as Parameters<typeof createItinerary>[0])
+        toast.success('行程表已建立')
+        // 導向新行程表
         if (newItinerary?.id) {
-          setCurrentItineraryId(newItinerary.id)
-          window.history.replaceState(
-            null,
-            '',
-            `/itinerary/block-editor?itinerary_id=${newItinerary.id}`
-          )
+          router.push(`/itinerary/new?itinerary_id=${newItinerary.id}`)
         }
       }
-
       setIsDirty(false)
-      setAutoSaveStatus('saved')
-      setTimeout(() => setAutoSaveStatus('idle'), 3000)
     } catch (error) {
-      logger.error('自動存檔失敗:', error)
-      setAutoSaveStatus('error')
-      toast.error(BLOCK_EDITOR_LABELS.AUTO_SAVE_FAILED)
+      logger.error('儲存行程表失敗', error)
+      toast.error('儲存失敗')
+    } finally {
+      setSaving(false)
     }
-  }, [isDirty, blocks, currentItineraryId, updateItinerary, createItinerary, user?.id])
+  }
 
-  // 30 秒自動存檔
-  useEffect(() => {
-    if (isDirty) {
-      const timer = setTimeout(performAutoSave, 30000)
-      return () => clearTimeout(timer)
-    }
-  }, [isDirty, performAutoSave])
+  const handleFormChange = (newData: TourFormData) => {
+    setFormData(newData)
+    setIsDirty(true)
+  }
 
-  if (loading) {
+  if (itinerariesLoading || !formData) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-morandi-secondary">{BLOCK_EDITOR_LABELS.LOADING}</div>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="animate-spin text-muted-foreground" size={24} />
       </div>
     )
   }
 
   return (
-    <ContentPageLayout
-      title={BLOCK_EDITOR_LABELS.BLOCK_EDITOR}
-      breadcrumb={[
-        { label: BLOCK_EDITOR_LABELS.HOME, href: '/dashboard' },
-        { label: BLOCK_EDITOR_LABELS.ITINERARY_MGMT, href: '/itinerary' },
-        { label: BLOCK_EDITOR_LABELS.BLOCK_EDITOR, href: '#' },
-      ]}
-      showBackButton
-      onBack={() => router.push('/itinerary')}
-      headerActions={
-        <div className="flex items-center gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={performAutoSave}
-            disabled={!isDirty || autoSaveStatus === 'saving'}
+    <div className="min-h-screen bg-morandi-background">
+      {/* 標題列 */}
+      <div className="sticky top-0 z-10 bg-white border-b border-morandi-container/50 px-6 py-4">
+        <h1 className="text-xl font-bold text-morandi-primary">{LABELS.STANDARD_ITINERARY}</h1>
+        <p className="text-sm text-morandi-secondary mt-1">{LABELS.STANDARD_ITINERARY_SUBTITLE}</p>
+        <div className="flex items-center justify-between mt-4">
+          <div className="text-sm text-morandi-secondary">
+            {itineraryId ? '編輯行程表' : '建立新行程表'}
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={saving || !isDirty}
+            className="px-4 py-2 bg-morandi-gold text-white rounded-lg hover:bg-morandi-gold-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
           >
-            {autoSaveStatus === 'saving'
-              ? BLOCK_EDITOR_LABELS.MANUAL_SAVING
-              : BLOCK_EDITOR_LABELS.MANUAL_SAVE}
-          </Button>
-          <PublishButton
-            data={{ ...tourData, id: currentItineraryId || undefined }}
-            currentVersionIndex={currentVersionIndex}
-            onVersionChange={() => {}}
-          />
+            {saving ? (
+              <span className="flex items-center gap-1">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                儲存中...
+              </span>
+            ) : (
+              '儲存'
+            )}
+          </button>
         </div>
-      }
-      contentClassName="flex-1 overflow-hidden"
-    >
-      <div className="h-full flex">
-        {/* 左側：區塊編輯器 */}
-        <div className="w-1/2 bg-card border-r border-border flex flex-col">
-          <div className="h-12 bg-morandi-gold/90 text-white px-4 flex items-center justify-between border-b">
-            <div className="flex items-center gap-2">
-              <Sparkles size={16} />
-              <h2 className="text-sm font-semibold">{BLOCK_EDITOR_LABELS.BLOCK_EDITOR}</h2>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              {autoSaveStatus === 'saving' && (
-                <span className="flex items-center gap-1 text-white/80">
-                  <Cloud size={12} className="animate-pulse" />
-                  {BLOCK_EDITOR_LABELS.LABEL_2827}
-                </span>
-              )}
-              {autoSaveStatus === 'saved' && (
-                <span className="flex items-center gap-1 text-white/80">
-                  <Cloud size={12} />
-                  {BLOCK_EDITOR_LABELS.SAVING_4294}
-                </span>
-              )}
-              {autoSaveStatus === 'error' && (
-                <span className="flex items-center gap-1 text-morandi-red/80">
-                  <CloudOff size={12} />
-                  {BLOCK_EDITOR_LABELS.LABEL_6397}
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4">
-            <BlockEditor initialBlocks={blocks} onBlocksChange={handleBlocksChange} showToolbox />
+      </div>
+
+      {/* 左右分割主內容 */}
+      <div className="flex flex-row h-[calc(100vh-5rem)]">
+        {/* 左側：編輯區（60%，垂直滾動） */}
+        <div className="w-3/5 overflow-y-auto border-r border-morandi-container/50">
+          <div className="p-6">
+            <TourForm data={formData} onChange={handleFormChange} />
           </div>
         </div>
 
-        {/* 右側：即時預覽 */}
-        <div className="w-1/2 bg-muted flex flex-col">
-          <div className="h-12 bg-card border-b border-border px-4 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-morandi-primary">
-              {BLOCK_EDITOR_LABELS.LIVE_PREVIEW}
-            </h2>
-            <div className="flex gap-1 bg-morandi-container/30 rounded p-0.5">
-              <button
-                onClick={() => setViewMode('desktop')}
-                className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                  viewMode === 'desktop'
-                    ? 'bg-morandi-gold text-white'
-                    : 'text-morandi-secondary hover:text-morandi-primary'
-                }`}
-              >
-                {BLOCK_EDITOR_LABELS.DEVICE_DESKTOP}
-              </button>
-              <button
-                onClick={() => setViewMode('mobile')}
-                className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                  viewMode === 'mobile'
-                    ? 'bg-morandi-gold text-white'
-                    : 'text-morandi-secondary hover:text-morandi-primary'
-                }`}
-              >
-                {BLOCK_EDITOR_LABELS.DEVICE_MOBILE}
-              </button>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-auto p-4">
-            <div
-              className={`mx-auto bg-card shadow-lg rounded-lg overflow-hidden ${
-                viewMode === 'mobile' ? 'max-w-[390px]' : 'max-w-[1200px]'
-              }`}
-              style={{ height: viewMode === 'mobile' ? '844px' : 'auto' }}
-            >
-              <div className="w-full h-full overflow-y-auto">
-                <TourPreview
-                  data={{
-                    ...tourData,
-                    features: tourData.features.map(f => ({
-                      ...f,
-                      iconComponent: Sparkles,
-                    })),
-                  }}
-                  viewMode={viewMode}
-                />
-              </div>
+        {/* 右側：預覽區（40%，固定） */}
+        <div className="w-2/5 sticky top-0 h-full bg-white">
+          <div className="p-6 h-full overflow-y-auto">
+            {/* TODO: 這裡放即時預覽元件 */}
+            <div className="text-center text-morandi-secondary py-12">
+              即時預覽區
             </div>
           </div>
         </div>
       </div>
-    </ContentPageLayout>
-  )
-}
-
-export default function BlockEditorPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="h-full flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-morandi-gold" />
-        </div>
-      }
-    >
-      <BlockEditorPageContent />
-    </Suspense>
+    </div>
   )
 }

@@ -21,7 +21,6 @@ interface HotelQueryResult {
   highlights: string[] | null
   price_range: string | null
   avg_price_per_night: number | null
-  thumbnail: string | null
   images: string[] | null
   is_active: boolean | null
   is_featured: boolean | null
@@ -246,7 +245,7 @@ export function useHotelSelector({
             id, name, name_en, brand, country_id, region_id, city_id,
             star_rating, hotel_class, category, description,
             highlights, price_range, avg_price_per_night,
-            thumbnail, images, is_active, is_featured,
+            images, is_active, is_featured,
             regions(name),
             cities!inner(name)
           `
@@ -292,7 +291,6 @@ export function useHotelSelector({
             highlights: item.highlights,
             price_range: item.price_range,
             avg_price_per_night: item.avg_price_per_night,
-            thumbnail: item.thumbnail,
             images: item.images,
             is_active: item.is_active ?? true,
             is_featured: item.is_featured ?? false,
@@ -363,7 +361,6 @@ export function useHotelSelector({
       highlights: null,
       price_range: null,
       avg_price_per_night: null,
-      thumbnail: null,
       images: null,
       is_active: true,
       is_featured: false,

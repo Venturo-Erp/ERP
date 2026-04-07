@@ -20,7 +20,7 @@ interface ResourceItem {
   name: string
   type: ResourceType
   category?: string | null
-  thumbnail?: string | null
+  images?: string[]
   city_name?: string | null
 }
 
@@ -63,9 +63,9 @@ function DraggableResourceCard({ resource }: DraggableResourceCardProps) {
       )}
     >
       {/* 縮圖 */}
-      {resource.thumbnail ? (
+      {resource.images?.[0] ? (
         <img
-          src={resource.thumbnail}
+          src={resource.images[0]}
           alt={resource.name}
           className="w-8 h-8 rounded object-cover flex-shrink-0"
         />
@@ -207,7 +207,7 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
     const fetchAttractions = async () => {
       let query = supabase
         .from('attractions')
-        .select('id, name, category, thumbnail')
+        .select('id, name, category, images')
         .eq('is_active', true)
       if (resolvedCountryId) query = query.eq('country_id', resolvedCountryId)
       if (selectedCity) query = query.eq('city_id', selectedCity)
@@ -223,7 +223,7 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
             name: item.name,
             type: 'attraction' as const,
             category: item.category,
-            thumbnail: item.thumbnail,
+            images: item.images || [],
           })),
         }))
       }
@@ -234,7 +234,7 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
     const fetchHotels = async () => {
       let query = supabase
         .from('hotels')
-        .select('id, name, category, thumbnail, star_rating')
+        .select('id, name, category, images, star_rating')
         .eq('is_active', true)
       if (resolvedCountryId) query = query.eq('country_id', resolvedCountryId)
       if (selectedCity) query = query.eq('city_id', selectedCity)
@@ -250,7 +250,7 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
             name: item.name,
             type: 'hotel' as const,
             category: item.star_rating ? `${item.star_rating}星` : item.category,
-            thumbnail: item.thumbnail,
+            images: item.images || [],
           })),
         }))
       }
@@ -261,7 +261,7 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
     const fetchRestaurants = async () => {
       let query = supabase
         .from('restaurants')
-        .select('id, name, category, thumbnail')
+        .select('id, name, category, images')
         .eq('is_active', true)
       if (resolvedCountryId) query = query.eq('country_id', resolvedCountryId)
       if (selectedCity) query = query.eq('city_id', selectedCity)
@@ -277,7 +277,7 @@ export function ResourcePanel({ className, countryId, cityId }: ResourcePanelPro
             name: item.name,
             type: 'restaurant' as const,
             category: item.category,
-            thumbnail: item.thumbnail,
+            images: item.images || [],
           })),
         }))
       }

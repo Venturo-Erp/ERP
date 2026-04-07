@@ -218,7 +218,11 @@ export const useChatStore = () => {
         }
 
         logger.log('✅ 訊息發送成功:', newMessage.id)
-        mutate((key: string) => typeof key === 'string' && key.startsWith('entity:messages'), undefined, { revalidate: true })
+        mutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:messages'),
+          undefined,
+          { revalidate: true }
+        )
       } catch (error) {
         // 回滾樂觀更新
         logger.error('sendMessage 例外:', error)
@@ -266,7 +270,11 @@ export const useChatStore = () => {
         throw error
       }
 
-      mutate((key: string) => typeof key === 'string' && key.startsWith('entity:messages'), undefined, { revalidate: true })
+      mutate(
+        (key: string) => typeof key === 'string' && key.startsWith('entity:messages'),
+        undefined,
+        { revalidate: true }
+      )
 
       // 🔥 使用緩存函數（避免重複計算）
       const channelMessages = getChannelMessages(messageStore.items, newMessage.channel_id)
@@ -348,7 +356,11 @@ export const useChatStore = () => {
         }
 
         logger.log('✅ 訊息刪除成功:', messageId)
-        mutate((key: string) => typeof key === 'string' && key.startsWith('entity:messages'), undefined, { revalidate: true })
+        mutate(
+          (key: string) => typeof key === 'string' && key.startsWith('entity:messages'),
+          undefined,
+          { revalidate: true }
+        )
       } catch (error) {
         // 回滾樂觀更新
         logger.error('deleteMessage 例外:', error)

@@ -5,7 +5,7 @@ export interface AttractionWithCity {
   id: string
   name: string
   description?: string
-  thumbnail?: string
+  image?: string
   images?: string[]
   city_name?: string
 }
@@ -19,7 +19,7 @@ export interface HotelData {
   star_rating?: number
   hotel_class?: string
   city_name?: string
-  thumbnail?: string
+  image?: string
 }
 
 // 餐廳資料型別
@@ -33,7 +33,7 @@ export interface RestaurantData {
   city_name?: string
   is_michelin?: boolean
   michelin_stars?: number
-  thumbnail?: string
+  image?: string
 }
 
 // Props 型別

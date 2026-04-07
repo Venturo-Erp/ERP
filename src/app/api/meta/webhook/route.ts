@@ -125,7 +125,10 @@ export async function POST(request: NextRequest) {
 }
 
 interface MetaMessageEvent {
-  sender: { id: string }
+  sender: { 
+    id?: string
+    instagram_user_id?: string
+  }
   recipient: { id: string }
   timestamp: number
   message: {
@@ -179,14 +182,14 @@ function isHandedOver(userId: string): boolean {
 /**
  * 查詢用戶近期 AI 對話輪數
  */
-async function getRecentRoundCount(userId: string): Promise<number> {
+async function getRecentRoundCount(platform: string, userId: string): Promise<number> {
   const supabase = getSupabase()
   const twentyFourHoursAgo = new Date(Date.now() - HANDOVER_DURATION_MS).toISOString()
 
   const { count, error } = await supabase
     .from('customer_service_conversations')
     .select('*', { count: 'exact', head: true })
-    .eq('platform', 'messenger')
+    .eq('platform', platform)
     .eq('platform_user_id', userId)
     .gte('created_at', twentyFourHoursAgo)
 
@@ -241,9 +244,16 @@ async function sendReply(senderId: string, text: string): Promise<string | null>
 }
 
 async function handleIncomingMessage(platform: string, event: MetaMessageEvent) {
-  const senderId = event.sender.id
+  // Facebook: sender.id, Instagram: sender.instagram_user_id
+  const senderId = event.sender.id || event.sender.instagram_user_id || ''
   const messageText = event.message.text
   const messageId = event.message.mid
+
+  // Skip if no sender ID (invalid Instagram message)
+  if (!senderId) {
+    logger.warn('[Meta] No sender ID found, skipping message', { platform })
+    return
+  }
 
   if (!messageText) return // 暫不處理附件
 
@@ -275,7 +285,8 @@ async function handleIncomingMessage(platform: string, event: MetaMessageEvent) 
   }
 
   // 檢查對話輪數
-  const roundCount = await getRecentRoundCount(senderId)
+  const actualPlatform = platform === 'instagram' ? 'instagram' : 'messenger'
+  const roundCount = await getRecentRoundCount(actualPlatform, senderId)
   if (roundCount >= MAX_AI_ROUNDS) {
     logger.info(`[Meta] User ${senderId} reached ${roundCount} rounds, triggering handover`)
     await sendReply(senderId, HANDOVER_MESSAGE)
@@ -285,8 +296,10 @@ async function handleIncomingMessage(platform: string, event: MetaMessageEvent) 
 
   try {
     // 呼叫 AI 客服（跟 LINE 共用同一套邏輯）
+    // platform: 'messenger' for Facebook, 'instagram' for Instagram DM
+    const actualPlatform = platform === 'instagram' ? 'instagram' : 'messenger'
     const aiResponse = await handleAICustomerService(
-      'messenger',
+      actualPlatform,
       senderId,
       null, // Meta 不像 LINE 可以直接拿 displayName
       messageText

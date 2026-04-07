@@ -27,7 +27,7 @@ import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 import { AddReceiptDialog } from '@/features/finance/payments/components/AddReceiptDialog'
-import { RequestDetailDialog } from '@/features/finance/requests/components/RequestDetailDialog'
+import { AddRequestDialog } from '@/features/finance/requests/components/AddRequestDialog'
 import type { Receipt } from '@/types/receipt.types'
 import type { PaymentRequest } from '@/types/finance.types'
 import { formatCurrency } from '@/lib/utils/format-currency'
@@ -347,10 +347,10 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
       />
 
       {/* 請款單 Dialog */}
-      <RequestDetailDialog
+      <AddRequestDialog
         open={requestDialogOpen}
         onOpenChange={setRequestDialogOpen}
-        request={selectedRequest}
+        editingRequest={selectedRequest}
       />
     </div>
   )

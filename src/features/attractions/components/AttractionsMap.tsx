@@ -180,7 +180,7 @@ export function AttractionsMap({
         const color = isMain ? '#c08374' : getCategoryColor(attraction.category) // morandi-red for main marker
         const size = isMain ? 44 : 36
         const imgSize = isMain ? 36 : 28
-        const img = attraction.thumbnail || ''
+        const img = attraction.images?.[0] || ''
 
         return L.divIcon({
           className: 'custom-attraction-marker',
@@ -274,7 +274,7 @@ export function AttractionsMap({
       const createMarkerIcon = (attraction: Attraction) => {
         const color = getCategoryColor(attraction.category)
         const size = 36
-        const img = attraction.thumbnail || ''
+        const img = attraction.images?.[0] || ''
 
         return L.divIcon({
           className: 'custom-attraction-marker',
@@ -325,7 +325,7 @@ export function AttractionsMap({
         marker.bindPopup(
           `
           <div style="min-width: 180px; padding: 4px;">
-            ${attraction.thumbnail ? `<img alt="" src="${attraction.thumbnail}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />` : ''}
+            ${attraction.images?.[0] ? `<img alt="" src="${attraction.images[0]}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; margin-bottom: 8px;" />` : ''}
             <div style="font-weight: 600; font-size: 14px; color: #3a3633;">${attraction.name}</div>
             <div style="font-size: 12px; color: #8b8680; margin-top: 4px;">${attraction.category || ''} · ${distance} km</div>
             ${attraction.description ? `<div style="font-size: 11px; color: #b8b2aa; margin-top: 6px; line-height: 1.4;">${attraction.description.slice(0, 80)}${attraction.description.length > 80 ? '...' : ''}</div>` : ''}

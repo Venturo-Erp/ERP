@@ -13,6 +13,13 @@ interface HotelSectionProps {
 
 export function HotelSection({ data, updateField }: HotelSectionProps) {
   const hotels = data.hotels || []
+
+  // 有飯店資料時自動開啟顯示
+  React.useEffect(() => {
+    if (hotels.length > 0 && !data.showHotels) {
+      updateField('showHotels', true)
+    }
+  }, [hotels.length])
   const [uploadingImage, setUploadingImage] = useState<{
     hotelIndex: number
     imageIndex: number
@@ -238,20 +245,7 @@ export function HotelSection({ data, updateField }: HotelSectionProps) {
         <h2 className="text-lg font-bold text-morandi-primary border-b-2 border-morandi-gold pb-2 flex-1">
           {COMP_EDITOR_LABELS.飯店資訊}
         </h2>
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={data.showHotels !== false}
-            onChange={e => updateField('showHotels', e.target.checked)}
-            className="w-4 h-4 text-morandi-gold rounded focus:ring-morandi-gold/50"
-          />
-          <span className="text-morandi-primary">{COMP_EDITOR_LABELS.LABEL_3010}</span>
-        </label>
-      </div>
-
-      <div className="bg-morandi-container/20 p-4 rounded-lg space-y-3">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-sm text-morandi-secondary">{COMP_EDITOR_LABELS.ADD_4359}</p>
+        {hotels.length > 0 && (
           <button
             type="button"
             onClick={addHotel}
@@ -260,12 +254,14 @@ export function HotelSection({ data, updateField }: HotelSectionProps) {
             <Plus size={16} />
             {COMP_EDITOR_LABELS.ADD_9618}
           </button>
-        </div>
+        )}
+      </div>
 
+      <div className="bg-morandi-container/20 p-4 rounded-lg space-y-3">
         {hotels.length === 0 && (
           <div className="text-center py-8 bg-card rounded-lg border-2 border-dashed border-morandi-container">
             <p className="text-sm text-morandi-secondary mb-2">{COMP_EDITOR_LABELS.ADD_3223}</p>
-            <p className="text-xs text-morandi-muted">{COMP_EDITOR_LABELS.ADD_9347}</p>
+            <p className="text-xs text-morandi-muted">飯店資訊會從旅遊團行程自動帶入</p>
           </div>
         )}
 

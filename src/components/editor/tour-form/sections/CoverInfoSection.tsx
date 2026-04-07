@@ -1,9 +1,6 @@
-import React, { useState, useMemo } from 'react'
-import { TourFormData, CityOption } from '../types'
-import { Settings2 } from 'lucide-react'
+import React, { useMemo } from 'react'
 import { logger } from '@/lib/utils/logger'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { TourFormData, CityOption } from '../types'
 import type { ImagePositionSettings } from '@/components/ui/image-position-editor'
 import { PreviewPanel } from '../components/PreviewPanel'
 // Hero 組件
@@ -51,8 +48,6 @@ export function CoverInfoSection({
   updateCity,
   onChange,
 }: CoverInfoSectionProps) {
-  const [showCoverSettings, setShowCoverSettings] = useState(false)
-
   const {
     coverStyleOptions,
     currentStyleOption,
@@ -131,95 +126,36 @@ export function CoverInfoSection({
   }
 
   return (
-    <div className="space-y-2">
-      {/* 封面設定按鈕 - 點擊打開 Modal */}
-      <button
-        type="button"
-        onClick={() => setShowCoverSettings(true)}
-        className="w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all hover:shadow-md"
-        style={{ borderColor: `${currentStyleColor}50`, backgroundColor: `${currentStyleColor}08` }}
-      >
-        <div
-          className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ backgroundColor: currentStyleColor }}
-        >
-          <Settings2 size={20} className="text-white" />
-        </div>
-        <div className="text-left flex-1">
-          <h2 className="text-base font-bold text-morandi-primary">
-            {COMP_EDITOR_LABELS.SETTINGS_9115}
-          </h2>
-          <p className="text-xs text-morandi-secondary">
-            風格：{currentStyleOption?.label || COMP_EDITOR_LABELS.經典全屏}
-            {airportCode && ` · ${airportCode}`}
-          </p>
-        </div>
-      </button>
+    <div className="space-y-4">
+      {/* 封面設定表單 - 直接攤開，不用彈窗 */}
+      <div className="space-y-4">
+        {/* 表單區塊 - 在 50% 寬度下，改用垂直排列 */}
+        <CoverInfoForm
+          data={data}
+          selectedCountry={selectedCountry}
+          setSelectedCountry={setSelectedCountry}
+          setSelectedCountryCode={setSelectedCountryCode}
+          allDestinations={allDestinations}
+          availableCities={availableCities}
+          countryNameToCode={countryNameToCode}
+          updateField={updateField}
+          updateCity={updateCity}
+          onChange={onChange}
+          coverStyleOptions={coverStyleOptions}
+          onCoverStyleChange={handleCoverStyleChange}
+          templatesLoading={templatesLoading}
+        />
 
-      {/* 封面設定 Modal */}
-      <Dialog open={showCoverSettings} onOpenChange={setShowCoverSettings}>
-        <DialogContent
-          level={1}
-          className="!flex !flex-row max-w-[95vw] h-[90vh] overflow-hidden p-0"
-        >
-          {/* 左側：設定表單 */}
-          <div className="w-1/2 min-w-0 p-6 overflow-y-auto overflow-x-hidden border-r border-morandi-container">
-            <DialogHeader className="mb-4">
-              <DialogTitle className="flex items-center gap-2">
-                <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: currentStyleColor }}
-                >
-                  <Settings2 size={14} className="text-white" />
-                </div>
-                {COMP_EDITOR_LABELS.SETTINGS_9115}
-              </DialogTitle>
-            </DialogHeader>
-
-            <div className="space-y-4">
-              {/* 表單區塊 */}
-              <CoverInfoForm
-                data={data}
-                selectedCountry={selectedCountry}
-                setSelectedCountry={setSelectedCountry}
-                setSelectedCountryCode={setSelectedCountryCode}
-                allDestinations={allDestinations}
-                availableCities={availableCities}
-                countryNameToCode={countryNameToCode}
-                updateField={updateField}
-                updateCity={updateCity}
-                onChange={onChange}
-                coverStyleOptions={coverStyleOptions}
-                onCoverStyleChange={handleCoverStyleChange}
-                templatesLoading={templatesLoading}
-              />
-
-              {/* 封面圖片 - 使用新的機場圖片庫 */}
-              <AirportImageLibrary
-                airportCode={airportCode}
-                selectedImage={data.coverImage}
-                onImageSelect={handleImageSelect}
-                onImageUpload={handleImageUpload}
-                position={data.coverImagePosition as ImagePositionSettings}
-                onPositionChange={pos => updateField('coverImagePosition', pos)}
-              />
-
-              {/* 完成按鈕 */}
-              <Button onClick={() => setShowCoverSettings(false)} className="w-full">
-                {COMP_EDITOR_LABELS.SETTINGS_6595}
-              </Button>
-            </div>
-          </div>
-
-          {/* 右側：實時預覽 */}
-          <PreviewPanel
-            styleLabel={currentStyleOption?.label || COMP_EDITOR_LABELS.經典全屏}
-            styleColor={currentStyleColor}
-          >
-            {renderHeroPreview}
-          </PreviewPanel>
-        </DialogContent>
-      </Dialog>
+        {/* 封面圖片 - 使用新的機場圖片庫 */}
+        <AirportImageLibrary
+          airportCode={airportCode}
+          selectedImage={data.coverImage}
+          onImageSelect={handleImageSelect}
+          onImageUpload={handleImageUpload}
+          position={data.coverImagePosition as ImagePositionSettings}
+          onPositionChange={pos => updateField('coverImagePosition', pos)}
+        />
+      </div>
     </div>
   )
 }

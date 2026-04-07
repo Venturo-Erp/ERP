@@ -77,7 +77,7 @@ function attractionToActivity(attraction: Attraction): DailyActivity {
     icon: getCategoryIcon(attraction.category || '景點'),
     title: attraction.name,
     description: attraction.notes || attraction.description || `探索${attraction.name}`,
-    image: attraction.thumbnail || attraction.images?.[0],
+    image: attraction.images?.[0],
   }
 }
 

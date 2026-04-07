@@ -233,25 +233,27 @@ export function TourForm({ data, onChange, quoteTierPricings, hasLinkedQuote }: 
         </div>
       </div>
 
-      <div className="p-6 space-y-8">
-        {/* 三格快捷設定 */}
-        <div className="grid grid-cols-3 gap-3">
-          {/* 封面設定 */}
-          <div id="section-cover">
-            <CoverInfoSection
-              data={data}
-              user={user}
-              selectedCountry={selectedCountry}
-              setSelectedCountry={setSelectedCountry}
-              setSelectedCountryCode={setSelectedCountryCode}
-              allDestinations={allDestinations}
-              availableCities={availableCities}
-              countryNameToCode={countryNameToCode}
-              updateField={handlers.updateField}
-              updateCity={handlers.updateCity}
-              onChange={onChange}
-            />
+      <div className="space-y-6">
+        {/* 封面設定 */}
+        <div id="section-cover" className="px-3">
+          <div className="mb-3">
+            <h2 className="text-lg font-bold text-morandi-primary">封面設定</h2>
+            <p className="text-sm text-morandi-secondary mt-1">設定行程封面樣式、標題、圖片等</p>
           </div>
+          <CoverInfoSection
+            data={data}
+            user={user}
+            selectedCountry={selectedCountry}
+            setSelectedCountry={setSelectedCountry}
+            setSelectedCountryCode={setSelectedCountryCode}
+            allDestinations={allDestinations}
+            availableCities={availableCities}
+            countryNameToCode={countryNameToCode}
+            updateField={handlers.updateField}
+            updateCity={handlers.updateCity}
+            onChange={onChange}
+          />
+        </div>
 
           {/* 航班資訊 - 建團時不需要，訂票時再輸入 */}
           {/* <div id="section-flight">
@@ -326,41 +328,12 @@ export function TourForm({ data, onChange, quoteTierPricings, hasLinkedQuote }: 
             />
           </div> */}
 
-          {/* 行程特色 */}
-          <div id="section-features">
-            <button
-              type="button"
-              onClick={() => onChange({ ...data, showFeatures: data.showFeatures === false })}
-              className="w-full flex items-center gap-3 p-3 rounded-lg border-2 border-morandi-gold/30 bg-morandi-gold/5 hover:border-morandi-gold hover:shadow-md transition-all"
-            >
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 bg-morandi-gold">
-                <Star size={20} className="text-white" />
-              </div>
-              <div className="text-left flex-1">
-                <h2 className="text-base font-bold text-morandi-primary">
-                  {COMP_EDITOR_LABELS.LABEL_9157}
-                </h2>
-                <p className="text-xs text-morandi-secondary">
-                  {data.showFeatures !== false
-                    ? COMP_EDITOR_LABELS.已啟用
-                    : COMP_EDITOR_LABELS.未啟用}
-                </p>
-              </div>
-              <input
-                type="checkbox"
-                checked={data.showFeatures !== false}
-                onChange={e => {
-                  e.stopPropagation()
-                  onChange({ ...data, showFeatures: e.target.checked })
-                }}
-                className="h-4 w-4 text-morandi-gold focus:ring-morandi-gold border-morandi-container rounded"
-              />
-            </button>
-          </div>
+
         </div>
 
+        {/* 每日行程 */}
         {/* 行程特色展開內容 */}
-        {data.showFeatures !== false && (
+        <div className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
           <FeaturesSection
             data={data}
             updateField={handlers.updateField}
@@ -369,10 +342,10 @@ export function TourForm({ data, onChange, quoteTierPricings, hasLinkedQuote }: 
             removeFeature={handlers.removeFeature}
             reorderFeature={handlers.reorderFeature}
           />
-        )}
+        </div>
 
-        {/* 每日行程 */}
-        <div id="section-itinerary">
+        {/* 逐日行程 */}
+        <div id="section-itinerary" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
           <DailyItinerarySection
             data={data}
             updateField={handlers.updateField}
@@ -394,7 +367,7 @@ export function TourForm({ data, onChange, quoteTierPricings, hasLinkedQuote }: 
         </div>
 
         {/* 領隊與集合資訊 */}
-        <div id="section-leader">
+        <div id="section-leader" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
           <LeaderMeetingSection
             data={data}
             updateNestedField={handlers.updateNestedField}
@@ -403,12 +376,12 @@ export function TourForm({ data, onChange, quoteTierPricings, hasLinkedQuote }: 
         </div>
 
         {/* 飯店資訊 */}
-        <div id="section-hotel">
+        <div id="section-hotel" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
           <HotelSection data={data} updateField={handlers.updateField} />
         </div>
 
         {/* 團費說明 */}
-        <div id="section-pricing" className="space-y-8">
+        <div id="section-pricing" className="mt-6 pt-6 px-3 border-t border-morandi-container/30 space-y-8">
           {/* 價格方案（4人、6人、8人包團） */}
           <PriceTiersSection
             data={data}
@@ -425,15 +398,14 @@ export function TourForm({ data, onChange, quoteTierPricings, hasLinkedQuote }: 
         </div>
 
         {/* 常見問題 */}
-        <div id="section-faq">
+        <div id="section-faq" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
           <FAQSection data={data} onChange={onChange} />
         </div>
 
         {/* 提醒事項與取消政策 */}
-        <div id="section-notices">
+        <div id="section-notices" className="mt-6 pt-6 px-3 border-t border-morandi-container/30">
           <NoticesPolicySection data={data} onChange={onChange} />
         </div>
       </div>
-    </div>
   )
 }

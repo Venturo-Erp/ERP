@@ -137,7 +137,6 @@ export function ActivitiesSection({
       const newAttraction = {
         name: activity.title,
         description: activity.description || null,
-        thumbnail: activity.image || null,
         images: activity.image ? [activity.image] : [],
         is_active: true,
         display_order: 0,

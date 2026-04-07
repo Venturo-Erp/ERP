@@ -43,7 +43,7 @@ interface ResourceDetailDialogProps {
     name: string
     type: ResourceType
     category?: string | null
-    thumbnail?: string | null
+    images?: string[] | null
     latitude?: number | null
     longitude?: number | null
     address?: string | null
@@ -109,24 +109,12 @@ export function ResourceDetailDialog({
         const { data, error } = await supabase
           .from(table)
           .select(
-            'id, name, english_name, description, category, images, thumbnail, address, latitude, longitude, city_id, country_id, is_active, created_at, updated_at'
+            'id, name, english_name, description, category, images, address, latitude, longitude, city_id, country_id, is_active, created_at, updated_at'
           )
           .eq('id', resource.id)
           .single()
 
         if (error) throw error
-
-        // 清理 DB 資料：移除 images 裡與 thumbnail 重複的 URL
-        if (data.thumbnail && Array.isArray(data.images)) {
-          const cleanImages = data.images.filter((img: string) => img !== data.thumbnail)
-          if (cleanImages.length !== data.images.length) {
-            data.images = cleanImages
-            await supabase
-              .from(table)
-              .update({ images: cleanImages, updated_at: new Date().toISOString() })
-              .eq('id', resource.id)
-          }
-        }
 
         setFullData(data)
 
@@ -275,31 +263,18 @@ export function ResourceDetailDialog({
   }
 
   const handleDeleteImage = async (imageUrl: string) => {
-    const currentThumbnail = (fullData?.thumbnail as string) || resource.thumbnail
     const existingImages = (fullData?.images as string[]) || []
-    const isThumbnail = imageUrl === currentThumbnail
-
-    const updates: Record<string, unknown> = {
-      updated_at: new Date().toISOString(),
-    }
-
-    if (isThumbnail) {
-      // 刪除封面：用 images 的第一張替補，或設為 null
-      // 先把 thumbnail URL 從 images 移除（避免資料重複時多刪）
-      const cleanImages = existingImages.filter(img => img !== imageUrl)
-      updates.thumbnail = cleanImages.length > 0 ? cleanImages[0] : null
-      updates.images = cleanImages.length > 0 ? cleanImages.slice(1) : []
-    } else {
-      // 刪除非封面：從 images 移除
-      updates.images = existingImages.filter(img => img !== imageUrl)
-    }
+    const updatedImages = existingImages.filter(img => img !== imageUrl)
 
     try {
-      const { error } = await supabase.from(getTableName()).update(updates).eq('id', resource.id)
+      const { error } = await supabase
+        .from(getTableName())
+        .update({ images: updatedImages, updated_at: new Date().toISOString() })
+        .eq('id', resource.id)
 
       if (error) throw error
 
-      setFullData(prev => (prev ? { ...prev, ...updates } : null))
+      setFullData(prev => (prev ? { ...prev, images: updatedImages } : null))
       setCurrentImageIndex(0)
       toast.success('已刪除照片')
     } catch (err) {
@@ -308,29 +283,20 @@ export function ResourceDetailDialog({
     }
   }
 
-  const handleSetThumbnail = async (imageUrl: string) => {
-    const currentThumbnail = (fullData?.thumbnail as string) || null
+  const handleSetCover = async (imageUrl: string) => {
     const existingImages = (fullData?.images as string[]) || []
-
-    // 重組：新封面從 images 移除，舊封面放回 images
-    const newImages = existingImages.filter(img => img !== imageUrl)
-    if (currentThumbnail) {
-      newImages.unshift(currentThumbnail)
-    }
+    // 把選中的圖片移到第一張
+    const updatedImages = [imageUrl, ...existingImages.filter(img => img !== imageUrl)]
 
     try {
       const { error } = await supabase
         .from(getTableName())
-        .update({
-          thumbnail: imageUrl,
-          images: newImages,
-          updated_at: new Date().toISOString(),
-        })
+        .update({ images: updatedImages, updated_at: new Date().toISOString() })
         .eq('id', resource.id)
 
       if (error) throw error
 
-      setFullData(prev => (prev ? { ...prev, thumbnail: imageUrl, images: newImages } : null))
+      setFullData(prev => (prev ? { ...prev, images: updatedImages } : null))
       setCurrentImageIndex(0)
       toast.success('已設為封面')
     } catch (err) {
@@ -339,11 +305,10 @@ export function ResourceDetailDialog({
     }
   }
 
-  // fullData 載入後以它為準（thumbnail 可能被刪成 null），未載入時才用 resource prop
-  const thumbnail = fullData ? (fullData.thumbnail as string | null) : resource.thumbnail
-  const images = fullData ? (fullData.images as string[]) || [] : []
-  // 合併所有圖片：thumbnail + images（去重，避免 thumbnail 也出現在 images 陣列裡）
-  const allImages = [...new Set([thumbnail, ...images].filter(Boolean))] as string[]
+  // images 陣列，第一張就是封面
+  const allImages = fullData
+    ? ((fullData.images as string[]) || [])
+    : (resource.images || [])
   const hasImages = allImages.length > 0
 
   const hasCoordinates = resource.latitude && resource.longitude
@@ -367,10 +332,10 @@ export function ResourceDetailDialog({
         {loading ? (
           <div className="py-8 text-center text-muted-foreground">載入中...</div>
         ) : (
-          <div className={hasImages || isEditing ? 'flex gap-6' : 'space-y-4'}>
+          <div className={hasImages || isEditing ? 'grid grid-cols-[300px_1fr] gap-6 items-start' : 'space-y-4'}>
             {/* 左側：圖片 */}
             {(hasImages || isEditing) && (
-              <div className="w-[320px] flex-shrink-0 space-y-2">
+              <div className="space-y-2">
                 {/* 主圖 */}
                 {allImages.length > 0 ? (
                   <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted">
@@ -396,7 +361,7 @@ export function ResourceDetailDialog({
                       <div className="absolute top-2 right-2 flex gap-1">
                         {currentImageIndex !== 0 && (
                           <button
-                            onClick={() => handleSetThumbnail(allImages[currentImageIndex])}
+                            onClick={() => handleSetCover(allImages[currentImageIndex])}
                             className="bg-black/60 hover:bg-black/80 text-white p-1.5 rounded transition-colors"
                             title="設為封面"
                           >

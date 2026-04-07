@@ -21,7 +21,6 @@ export interface Attraction {
   longitude?: number
   google_maps_url?: string
   images?: string[]
-  thumbnail?: string
   is_active: boolean
   display_order: number
   notes?: string

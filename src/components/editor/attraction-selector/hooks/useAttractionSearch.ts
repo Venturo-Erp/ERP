@@ -195,7 +195,6 @@ export function useAttractionSearch({
             english_name,
             category,
             description,
-            thumbnail,
             images,
             country_id,
             region_id,
@@ -228,7 +227,6 @@ export function useAttractionSearch({
             english_name: string | null
             category: string | null
             description: string | null
-            thumbnail: string | null
             images: string[] | null
             country_id: string
             region_id: string | null
@@ -243,7 +241,6 @@ export function useAttractionSearch({
             english_name: item.english_name ?? undefined,
             category: item.category ?? undefined,
             description: item.description ?? undefined,
-            thumbnail: item.thumbnail ?? undefined,
             images: item.images ?? undefined,
             country_id: item.country_id,
             region_id: item.region_id ?? undefined,

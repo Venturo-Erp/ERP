@@ -79,13 +79,9 @@ function SortableAttractionItem({
 
         {/* 景點圖片 */}
         <div className="flex-shrink-0">
-          {(attraction.images && attraction.images.length > 0) || attraction.thumbnail ? (
+          {attraction.images && attraction.images.length > 0 ? (
             <img
-              src={
-                attraction.images && attraction.images.length > 0
-                  ? attraction.images[0]
-                  : attraction.thumbnail!
-              }
+              src={attraction.images[0]}
               alt={attraction.name}
               className="w-16 h-12 object-cover rounded border border-border shadow-sm"
             />

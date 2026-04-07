@@ -76,7 +76,7 @@ export function MapExplorerDialog({
         let query = supabase
           .from('attractions')
           .select(
-            'id, name, english_name, description, category, images, thumbnail, address, latitude, longitude, phone, website, opening_hours, data_verified, region_id, city_id, country_id, is_active, workspace_id, created_at, updated_at'
+            'id, name, english_name, description, category, images, address, latitude, longitude, phone, website, opening_hours, data_verified, region_id, city_id, country_id, is_active, workspace_id, created_at, updated_at'
           )
           .not('latitude', 'is', null)
           .not('longitude', 'is', null)
@@ -101,7 +101,7 @@ export function MapExplorerDialog({
           address: a.address || undefined,
           phone: a.phone || undefined,
           description: a.description || undefined,
-          thumbnail: a.thumbnail || undefined,
+          images: a.images || undefined,
           region_id: a.region_id || undefined,
           city_id: a.city_id,
           website: a.website || undefined,

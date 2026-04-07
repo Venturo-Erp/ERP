@@ -90,36 +90,37 @@ export default function ReportsPage() {
       tabs={tabs}
       activeTab={activeTab}
       onTabChange={handleTabChange}
+      headerActions={
+        showDateSelector ? (
+          <div className="flex items-center gap-3">
+            <DateRangeSelector onChange={setDateRange} />
+            {showGranularity && (
+              <>
+                <div className="h-5 w-px bg-border" />
+                <div className="flex items-center bg-morandi-container rounded-lg p-0.5">
+                  {GRANULARITY_OPTIONS.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setDetailGranularity(opt.value)}
+                      className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                        detailGranularity === opt.value
+                          ? 'bg-white text-morandi-primary shadow-sm'
+                          : 'text-morandi-secondary hover:text-morandi-primary'
+                      }`}
+                    >
+                      <opt.icon className="h-4 w-4" />
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        ) : undefined
+      }
     >
-      {/* 日期區間 + 顆粒度選擇器 */}
-      {showDateSelector && (
-        <div className="px-4 py-2.5 border-b border-border bg-morandi-background/30 flex items-center gap-3 flex-wrap">
-          <DateRangeSelector onChange={setDateRange} />
-          {showGranularity && (
-            <>
-              <div className="h-5 w-px bg-border" />
-              <div className="flex items-center bg-morandi-container rounded-lg p-0.5">
-                {GRANULARITY_OPTIONS.map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setDetailGranularity(opt.value)}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                      detailGranularity === opt.value
-                        ? 'bg-white text-morandi-primary shadow-sm'
-                        : 'text-morandi-secondary hover:text-morandi-primary'
-                    }`}
-                  >
-                    <opt.icon className="h-3 w-3" />
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      )}
 
-      <div className="p-4">
+      <div className="p-6">
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsContent value="overview" className="mt-0">
             <OverviewTab dateRange={dateRange} granularity={detailGranularity} />

@@ -105,7 +105,7 @@ export function CoverInfoForm({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-morandi-primary mb-1">
               {COMP_EDITOR_LABELS.LABEL_147}
@@ -114,6 +114,7 @@ export function CoverInfoForm({
               value={data.title || ''}
               onChange={value => updateField('title', value)}
               placeholder={COMP_EDITOR_LABELS.漫遊福岡}
+              singleLine={false}
             />
           </div>
           <div>
@@ -148,7 +149,7 @@ export function CoverInfoForm({
         </div>
 
         {/* 🎯 SSOT：國家和機場代碼從 tours 表繼承，唯讀顯示 */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-morandi-primary mb-1">國家</label>
             <Input
@@ -173,7 +174,7 @@ export function CoverInfoForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-morandi-primary mb-1">
               {COMP_EDITOR_LABELS.LABEL_4513}
@@ -228,7 +229,7 @@ export function CoverInfoForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-sm font-medium text-morandi-primary mb-1">
               {COMP_EDITOR_LABELS.價格}

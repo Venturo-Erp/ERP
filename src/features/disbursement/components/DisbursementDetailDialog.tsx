@@ -4,13 +4,13 @@
  * 出納單詳情對話框 - 用於查看詳情和確認出帳
  */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Check, FileText } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
-import { DisbursementOrder, PaymentRequest } from '@/stores/types'
+import { DisbursementOrder, PaymentRequest, EXPENSE_TYPE_CONFIG, CompanyExpenseType } from '@/stores/types'
 import {
   usePaymentRequests,
   updatePaymentRequest as updatePaymentRequestApi,
@@ -42,6 +42,22 @@ export function DisbursementDetailDialog({
   const { items: payment_requests } = usePaymentRequests()
   const user = useAuthStore(state => state.user)
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false)
+  const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string }>>([])
+
+  // 載入付款方式
+  useEffect(() => {
+    if (!open || !order) return
+    const workspaceId = user?.workspace_id
+    if (!workspaceId) return
+    supabase
+      .from('payment_methods')
+      .select('id, name')
+      .eq('workspace_id', workspaceId)
+      .eq('type', 'payment')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .then(({ data }) => setPaymentMethods(data || []))
+  }, [open, order, user?.workspace_id])
 
   // 取得此出納單包含的請款單
   const includedRequests = useMemo(() => {
@@ -50,6 +66,25 @@ export function DisbursementDetailDialog({
       .map(id => payment_requests.find(r => r.id === id))
       .filter(Boolean) as PaymentRequest[]
   }, [order, payment_requests])
+
+  // 分類：團體請款 vs 公司請款
+  const tourRequests = useMemo(() =>
+    includedRequests.filter(r => r.request_category !== 'company'), [includedRequests])
+  const companyRequests = useMemo(() =>
+    includedRequests.filter(r => r.request_category === 'company'), [includedRequests])
+
+  // 付款方式統計
+  const paymentMethodStats = useMemo(() => {
+    const stats = new Map<string, number>()
+    for (const req of includedRequests) {
+      const methodId = req.payment_method_id || 'unknown'
+      stats.set(methodId, (stats.get(methodId) || 0) + (req.amount || 0))
+    }
+    return Array.from(stats.entries()).map(([id, amount]) => ({
+      name: paymentMethods.find(m => m.id === id)?.name || '未指定',
+      amount,
+    }))
+  }, [includedRequests, paymentMethods])
 
   if (!order) return null
 
@@ -188,82 +223,155 @@ export function DisbursementDetailDialog({
                 </div>
               </div>
 
-              {/* 包含的請款單 */}
-              <div>
-                <h3 className="text-sm font-semibold text-morandi-primary mb-3">
-                  {DISBURSEMENT_LABELS.包含請款單} ({includedRequests.length}{' '}
-                  {DISBURSEMENT_LABELS.筆})
-                </h3>
-
-                <div className="border border-morandi-container/20 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-morandi-background/50 border-b border-morandi-container/20">
-                        <th className="text-left py-2 px-3 text-morandi-muted font-medium">
-                          {DISBURSEMENT_LABELS.請款單號}
-                        </th>
-                        <th className="text-left py-2 px-3 text-morandi-muted font-medium">
-                          {DISBURSEMENT_LABELS.團號}
-                        </th>
-                        <th className="text-left py-2 px-3 text-morandi-muted font-medium">
-                          {DISBURSEMENT_LABELS.團名}
-                        </th>
-                        <th className="text-left py-2 px-3 text-morandi-muted font-medium">
-                          {DISBURSEMENT_LABELS.請款人}
-                        </th>
-                        <th className="text-right py-2 px-3 text-morandi-muted font-medium">
-                          {DISBURSEMENT_LABELS.金額}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {includedRequests.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="text-center py-8 text-morandi-muted">
-                            {DISBURSEMENT_LABELS.無請款單資料}
-                          </td>
+              {/* 團體請款 */}
+              {tourRequests.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-morandi-primary mb-3">
+                    團體請款 ({tourRequests.length} {DISBURSEMENT_LABELS.筆})
+                  </h3>
+                  <div className="border border-morandi-container/20 rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-morandi-gold-header border-b border-border">
+                          <th className="text-left py-2.5 px-3 text-xs font-medium text-morandi-primary">
+                            {DISBURSEMENT_LABELS.請款單號}
+                          </th>
+                          <th className="text-left py-2.5 px-3 text-xs font-medium text-morandi-primary">
+                            {DISBURSEMENT_LABELS.團名}
+                          </th>
+                          <th className="text-left py-2.5 px-3 text-xs font-medium text-morandi-primary">
+                            付款對象
+                          </th>
+                          <th className="text-left py-2.5 px-3 text-xs font-medium text-morandi-primary">
+                            {DISBURSEMENT_LABELS.請款人}
+                          </th>
+                          <th className="text-right py-2.5 px-3 text-xs font-medium text-morandi-primary">
+                            {DISBURSEMENT_LABELS.金額}
+                          </th>
                         </tr>
-                      ) : (
-                        includedRequests.map(request => (
+                      </thead>
+                      <tbody>
+                        {tourRequests.map(request => (
                           <tr key={request.id} className="border-b border-morandi-container/10">
                             <td className="py-2 px-3 font-medium text-morandi-primary">
                               {request.code}
                             </td>
-                            <td className="py-2 px-3 text-morandi-secondary">
-                              {request.tour_code || '-'}
-                            </td>
                             <td className="py-2 px-3 text-morandi-secondary max-w-[150px] truncate">
-                              {request.tour_name || '-'}
+                              {request.tour_code ? `${request.tour_code} - ${request.tour_name || ''}` : '-'}
+                            </td>
+                            <td className="py-2 px-3 text-morandi-secondary">
+                              {request.supplier_name || '-'}
                             </td>
                             <td className="py-2 px-3 text-morandi-secondary">
                               {request.created_by_name || '-'}
                             </td>
                             <td className="py-2 px-3 text-right">
-                              <CurrencyCell
-                                amount={request.amount || 0}
-                                className="font-medium text-morandi-gold"
-                              />
+                              <CurrencyCell amount={request.amount || 0} className="font-medium text-morandi-gold" />
                             </td>
                           </tr>
-                        ))
-                      )}
-                    </tbody>
-                    <tfoot>
-                      <tr className="bg-morandi-background/50">
-                        <td colSpan={4} className="py-3 px-3 text-right font-semibold">
-                          {DISBURSEMENT_LABELS.合計}
-                        </td>
-                        <td className="py-3 px-3 text-right">
-                          <CurrencyCell
-                            amount={order.amount || 0}
-                            className="font-bold text-morandi-gold"
-                          />
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-morandi-background/50">
+                          <td colSpan={4} className="py-2.5 px-3 text-right font-semibold text-sm">小計</td>
+                          <td className="py-2.5 px-3 text-right">
+                            <CurrencyCell amount={tourRequests.reduce((s, r) => s + (r.amount || 0), 0)} className="font-bold text-morandi-gold" />
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* 公司請款 */}
+              {companyRequests.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-morandi-primary mb-3">
+                    公司請款 ({companyRequests.length} {DISBURSEMENT_LABELS.筆})
+                  </h3>
+                  <div className="border border-morandi-container/20 rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-morandi-gold-header border-b border-border">
+                          <th className="text-left py-2.5 px-3 text-xs font-medium text-morandi-primary">
+                            {DISBURSEMENT_LABELS.請款單號}
+                          </th>
+                          <th className="text-left py-2.5 px-3 text-xs font-medium text-morandi-primary">
+                            支出類別
+                          </th>
+                          <th className="text-left py-2.5 px-3 text-xs font-medium text-morandi-primary">
+                            付款對象
+                          </th>
+                          <th className="text-left py-2.5 px-3 text-xs font-medium text-morandi-primary">
+                            項目說明
+                          </th>
+                          <th className="text-right py-2.5 px-3 text-xs font-medium text-morandi-primary">
+                            {DISBURSEMENT_LABELS.金額}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {companyRequests.map(request => (
+                          <tr key={request.id} className="border-b border-morandi-container/10">
+                            <td className="py-2 px-3 font-medium text-morandi-primary">
+                              {request.code}
+                            </td>
+                            <td className="py-2 px-3 text-morandi-secondary">
+                              {request.expense_type
+                                ? EXPENSE_TYPE_CONFIG[request.expense_type as CompanyExpenseType]?.name || request.expense_type
+                                : '-'}
+                            </td>
+                            <td className="py-2 px-3 text-morandi-secondary">
+                              {request.supplier_name || '-'}
+                            </td>
+                            <td className="py-2 px-3 text-morandi-secondary max-w-[200px] truncate">
+                              {request.notes || '-'}
+                            </td>
+                            <td className="py-2 px-3 text-right">
+                              <CurrencyCell amount={request.amount || 0} className="font-medium text-morandi-gold" />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr className="bg-morandi-background/50">
+                          <td colSpan={4} className="py-2.5 px-3 text-right font-semibold text-sm">小計</td>
+                          <td className="py-2.5 px-3 text-right">
+                            <CurrencyCell amount={companyRequests.reduce((s, r) => s + (r.amount || 0), 0)} className="font-bold text-morandi-gold" />
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* 無資料 */}
+              {includedRequests.length === 0 && (
+                <div className="text-center py-8 text-morandi-muted">
+                  {DISBURSEMENT_LABELS.無請款單資料}
+                </div>
+              )}
+
+              {/* 付款方式統計 */}
+              {paymentMethodStats.length > 0 && (
+                <div className="p-4 bg-morandi-background/50 rounded-lg">
+                  <h3 className="text-sm font-semibold text-morandi-primary mb-3">付款方式統計</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {paymentMethodStats.map(stat => (
+                      <div key={stat.name} className="flex items-center justify-between">
+                        <span className="text-sm text-morandi-secondary">{stat.name}</span>
+                        <CurrencyCell amount={stat.amount} className="font-semibold text-morandi-gold" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-morandi-container/30">
+                    <span className="text-sm font-semibold text-morandi-primary">{DISBURSEMENT_LABELS.合計}</span>
+                    <CurrencyCell amount={order.amount || 0} className="font-bold text-lg text-morandi-gold" />
+                  </div>
+                </div>
+              )}
 
               {/* 操作按鈕 */}
               <div className="flex items-center justify-between pt-4 border-t border-morandi-container/20">

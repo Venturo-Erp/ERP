@@ -199,10 +199,6 @@ function CalcInput({
   )
 }
 
-// 每列高度約 48px，固定顯示 4 列
-const ROW_HEIGHT = 48
-const VISIBLE_ROWS = 4
-const TABLE_HEIGHT = ROW_HEIGHT * VISIBLE_ROWS
 
 export function EditableRequestItemList({
   items,
@@ -229,57 +225,53 @@ export function EditableRequestItemList({
   }))
 
   // 無 focus 樣式的 input class（使用 globals.css 的 input-no-focus）
-  const inputClass = 'input-no-focus w-full h-9 px-1 bg-transparent text-sm'
+  const inputClass = 'input-no-focus w-full h-10 px-2 bg-transparent text-sm'
 
   return (
-    <div>
+    <div className="flex-1 flex flex-col min-h-0">
       <h3 className="text-sm font-medium text-morandi-primary mb-3">
         {REQUEST_ITEM_LIST_LABELS.LABEL_475}
       </h3>
 
+      {/* 外框 */}
+      <div className="border border-border/50 rounded-lg overflow-hidden flex-1 flex flex-col min-h-0">
+
       {/* 表頭 */}
-      <div className="border-b border-morandi-container/60">
-        <div className="grid grid-cols-[110px_100px_80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-2.5">
-          <span className="text-xs font-medium text-morandi-secondary">日期</span>
-          <span className="text-xs font-medium text-morandi-secondary">付款方式</span>
-          <span className="text-xs font-medium text-morandi-secondary">
+      <div className="bg-morandi-gold-header border-b border-border">
+        <div className="grid grid-cols-[110px_100px_80px_1fr_1fr_96px_64px_112px_40px_48px] px-3 py-2.5">
+          <span className="text-sm font-semibold text-morandi-primary">日期</span>
+          <span className="text-sm font-semibold text-morandi-primary">付款方式</span>
+          <span className="text-sm font-semibold text-morandi-primary">
             {REQUEST_ITEM_LIST_LABELS.LABEL_2946}
           </span>
-          <span className="text-xs font-medium text-morandi-secondary">
+          <span className="text-sm font-semibold text-morandi-primary">
             {REQUEST_ITEM_LIST_LABELS.LABEL_561}
           </span>
-          <span className="text-xs font-medium text-morandi-secondary">
+          <span className="text-sm font-semibold text-morandi-primary">
             {REQUEST_ITEM_LIST_LABELS.LABEL_6008}
           </span>
-          <span className="text-xs font-medium text-morandi-secondary text-right">
+          <span className="text-sm font-semibold text-morandi-primary text-right">
             {REQUEST_ITEM_LIST_LABELS.LABEL_9413}
           </span>
-          <span className="text-xs font-medium text-morandi-secondary text-center">
+          <span className="text-sm font-semibold text-morandi-primary text-center">
             {REQUEST_ITEM_LIST_LABELS.QUANTITY}
           </span>
-          <span className="text-xs font-medium text-morandi-secondary text-right">
+          <span className="text-sm font-semibold text-morandi-primary text-right">
             {REQUEST_ITEM_LIST_LABELS.LABEL_832}
           </span>
-          <span className="text-xs font-medium text-morandi-secondary text-center">
-            <Link2 size={12} className="inline" />
+          <span className="text-sm font-semibold text-morandi-primary text-center">
+            <Link2 size={14} className="inline" />
           </span>
           <span></span>
         </div>
       </div>
 
-      {/* 項目區域 - 最小 4 列高度，超過則可滾動 */}
-      <div
-        className="overflow-visible"
-        style={{
-          minHeight: `${TABLE_HEIGHT}px`,
-          maxHeight: `${TABLE_HEIGHT * 1.5}px`,
-          overflowY: items.length > VISIBLE_ROWS ? 'auto' : 'visible',
-        }}
-      >
+      {/* 項目區域 - 自動填滿可用空間，超出可滾動 */}
+      <div className="flex-1 overflow-y-auto">
         {items.map((item, index) => (
           <div
             key={item.id}
-            className="grid grid-cols-[110px_100px_80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-1.5 border-b border-morandi-container/30 items-center bg-white"
+            className="grid grid-cols-[110px_100px_80px_1fr_1fr_96px_64px_112px_40px_48px] px-3 py-2 border-b border-border/50 items-center"
           >
             {/* Date */}
             <div>
@@ -289,7 +281,7 @@ export function EditableRequestItemList({
                 placeholder="選擇日期"
                 disabled={disabled}
                 hideYear
-                buttonClassName="h-9 p-0 px-1 border-0 shadow-none bg-transparent text-xs"
+                buttonClassName="h-10 p-0 px-2 border-0 shadow-none bg-transparent text-sm"
               />
             </div>
 
@@ -302,7 +294,7 @@ export function EditableRequestItemList({
                 }
                 disabled={disabled}
               >
-                <SelectTrigger className="input-no-focus h-9 border-0 shadow-none bg-transparent text-xs px-1">
+                <SelectTrigger className="input-no-focus h-10 border-0 shadow-none bg-transparent text-sm px-2">
                   <SelectValue placeholder="付款方式" />
                 </SelectTrigger>
                 <SelectContent>
@@ -332,7 +324,7 @@ export function EditableRequestItemList({
                 }}
                 disabled={disabled}
               >
-                <SelectTrigger className="input-no-focus h-9 border-0 shadow-none bg-transparent text-sm px-1">
+                <SelectTrigger className="input-no-focus h-10 border-0 shadow-none bg-transparent text-sm px-2">
                   <SelectValue placeholder="類別" />
                 </SelectTrigger>
                 <SelectContent>
@@ -516,34 +508,8 @@ export function EditableRequestItemList({
         ))}
 
         {/* 空白佔位列，確保始終顯示 4 列高度 */}
-        {items.length < VISIBLE_ROWS &&
-          Array.from({ length: VISIBLE_ROWS - items.length }).map((_, i) => (
-            <div
-              key={`empty-${i}`}
-              className="grid grid-cols-[110px_100px_80px_1fr_1fr_96px_64px_112px_40px_48px] px-2 py-1.5 border-b border-morandi-container/30 items-center"
-              style={{ height: `${ROW_HEIGHT}px` }}
-            >
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
-          ))}
       </div>
-
-      {/* Total */}
-      <div className="flex justify-end items-center gap-6 pt-4 mt-2">
-        <span className="text-sm text-morandi-secondary">
-          {REQUEST_ITEM_LIST_LABELS.TOTAL_6550}
-        </span>
-        <CurrencyCell amount={total_amount} className="text-lg font-semibold text-morandi-gold" />
-      </div>
+      </div>{/* 外框結束 */}
 
       {/* Link Confirmation Dialog */}
       {tourId && (

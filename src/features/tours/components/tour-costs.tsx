@@ -35,7 +35,7 @@ interface PaymentRequestWithItems {
 }
 import { Receipt, Plus, Truck, Hotel, Utensils, MapPin, X, TrendingDown } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format-currency'
-import { RequestDetailDialog } from '@/features/finance/requests/components/RequestDetailDialog'
+import { AddRequestDialog } from '@/features/finance/requests/components/AddRequestDialog'
 import type { PaymentRequest } from '@/types/finance.types'
 import { DateCell, CurrencyCell } from '@/components/table-cells'
 import { useToast } from '@/components/ui/use-toast'
@@ -652,10 +652,10 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
           )}
         </tbody>
       </table>
-      <RequestDetailDialog
+      <AddRequestDialog
         open={requestDialogOpen}
         onOpenChange={setRequestDialogOpen}
-        request={selectedRequest}
+        editingRequest={selectedRequest}
       />
     </div>
   )

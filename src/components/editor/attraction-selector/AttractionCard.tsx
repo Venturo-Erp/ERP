@@ -37,8 +37,7 @@ export function AttractionCard({
   selectedMapAttractionId,
 }: AttractionCardProps) {
   const image =
-    attraction.thumbnail ||
-    (attraction.images && attraction.images.length > 0 ? attraction.images[0] : null)
+    attraction.images && attraction.images.length > 0 ? attraction.images[0] : null
   const hasCoordinates = attraction.latitude && attraction.longitude
 
   return (

@@ -53,18 +53,18 @@ export function useTourItineraryItemsByTour(tour_id: string | null) {
         .map(item => item.resource_id as string)
 
       // 批次查詢景點資料（含描述和圖片）
-      let attractionMap = new Map<string, { description?: string; thumbnail?: string }>()
+      let attractionMap = new Map<string, { description?: string; image?: string }>()
       if (attractionIds.length > 0) {
         const { data: attractions } = await supabase
           .from('attractions')
-          .select('id, description, thumbnail, images')
+          .select('id, description, images')
           .in('id', attractionIds)
 
         if (attractions) {
           for (const attr of attractions) {
             attractionMap.set(attr.id, {
               description: attr.description || undefined,
-              thumbnail: attr.thumbnail || attr.images?.[0] || undefined,
+              image: attr.images?.[0] || undefined,
             })
           }
         }
@@ -112,18 +112,18 @@ export function useTourItineraryItemsByItinerary(itinerary_id: string | null) {
         .map(item => item.resource_id as string)
 
       // 批次查詢景點資料（含描述和圖片）
-      let attractionMap = new Map<string, { description?: string; thumbnail?: string }>()
+      let attractionMap = new Map<string, { description?: string; image?: string }>()
       if (attractionIds.length > 0) {
         const { data: attractions } = await supabase
           .from('attractions')
-          .select('id, description, thumbnail, images')
+          .select('id, description, images')
           .in('id', attractionIds)
 
         if (attractions) {
           for (const attr of attractions) {
             attractionMap.set(attr.id, {
               description: attr.description || undefined,
-              thumbnail: attr.thumbnail || attr.images?.[0] || undefined,
+              image: attr.images?.[0] || undefined,
             })
           }
         }

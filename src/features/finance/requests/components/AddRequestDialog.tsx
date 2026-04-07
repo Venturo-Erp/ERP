@@ -1,8 +1,9 @@
-import { useEffect, useState, useMemo, useCallback } from 'react'
-import { Plus, X, FileInput, Building2, Briefcase, Users, Layers, AlertCircle } from 'lucide-react'
+import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
+import { Plus, X, FileInput, AlertCircle, Trash2, Save, Layers } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Combobox } from '@/components/ui/combobox'
@@ -24,15 +25,23 @@ import { useRequestForm } from '../hooks/useRequestForm'
 import { useRequestOperations } from '../hooks/useRequestOperations'
 import { useTourRequestItems } from '../hooks/useTourRequestItems'
 import { usePayments } from '@/features/payments/hooks/usePayments'
-import { RequestItem, categoryOptions } from '../types'
-import { PaymentItemCategory, CompanyExpenseType } from '@/stores/types'
+import { RequestItem, categoryOptions, statusLabels, statusColors } from '../types'
+import { PaymentRequest, PaymentItemCategory, CompanyExpenseType } from '@/stores/types'
+import { paymentRequestService } from '@/features/payments/services/payment-request.service'
+import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
-import { alert } from '@/lib/ui/alert-dialog'
+import { alert, confirm } from '@/lib/ui/alert-dialog'
 import { formatDate } from '@/lib/utils/format-date'
 import { useWorkspaceId } from '@/lib/workspace-context'
 import { useAuthStore } from '@/stores/auth-store'
-import { createSupplier, invalidateSuppliers } from '@/data'
+import {
+  createSupplier,
+  invalidateSuppliers,
+  usePaymentRequestItems,
+  invalidatePaymentRequests,
+  deletePaymentRequest as deletePaymentRequestApi,
+} from '@/data'
 import { supabase } from '@/lib/supabase/client'
 import {
   ADD_RECEIPT_DIALOG_LABELS,
@@ -43,6 +52,8 @@ import {
   REQUEST_TYPE_LABELS,
   REQUEST_LABELS,
   ADD_REQUEST_EXTRA_LABELS,
+  REQUEST_DETAIL_DIALOG_LABELS,
+  REQUEST_DETAIL_FORM_LABELS,
 } from '../../constants/labels'
 
 // COMPANY_PAYMENT_ROLES 已移除 — 權限改用 role_tab_permissions
@@ -55,6 +66,10 @@ interface AddRequestDialogProps {
   defaultTourId?: string
   /** 預設訂單 ID（從快速請款按鈕傳入） */
   defaultOrderId?: string
+  /** 編輯模式：傳入既有請款單 */
+  editingRequest?: PaymentRequest | null
+  /** 只讀模式：隱藏編輯/刪除按鈕 */
+  readOnly?: boolean
 }
 
 // 類別對應的圖標和顏色
@@ -108,6 +123,8 @@ export function AddRequestDialog({
   onSuccess,
   defaultTourId,
   defaultOrderId,
+  editingRequest,
+  readOnly = false,
 }: AddRequestDialogProps) {
   // === 共用 Hooks ===
   const {
@@ -162,6 +179,27 @@ export function AddRequestDialog({
   )
   const [tourAllocations, setTourAllocations] = useState<TourAllocation[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // === Edit mode ===
+  const isEditMode = !!editingRequest
+
+  const { items: dbRequestItems, refresh: refreshRequestItems } = usePaymentRequestItems()
+  const [localItems, setLocalItems] = useState<RequestItem[]>([])
+  const [localPaymentMethodId, setLocalPaymentMethodId] = useState<string | null>(null)
+  const [isDirty, setIsDirty] = useState(false)
+  const [deletedItemIds, setDeletedItemIds] = useState<string[]>([])
+  const [newItemIds, setNewItemIds] = useState<string[]>([])
+
+  // Batch request state (edit mode)
+  const [editBatchRequests, setEditBatchRequests] = useState<PaymentRequest[]>([])
+  const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null)
+  const currentRequest = useMemo(() => {
+    if (!isEditMode) return null
+    return editBatchRequests.find(r => r.id === selectedRequestId) || editingRequest
+  }, [isEditMode, editBatchRequests, selectedRequestId, editingRequest])
+
+  const isEditBatch = editBatchRequests.length > 1
+  const canEdit = isEditMode ? (!readOnly && currentRequest?.status === 'pending') : true
 
   // === 付款方式 ===
   const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string }>>([])
@@ -297,6 +335,281 @@ export function AddRequestDialog({
     }
   }
 
+  // === Edit mode: load batch requests ===
+  useEffect(() => {
+    const loadBatchRequests = async () => {
+      if (!open || !editingRequest) {
+        setEditBatchRequests([])
+        setSelectedRequestId(null)
+        return
+      }
+      if (editingRequest.batch_id) {
+        const { data, error } = await supabase
+          .from('payment_requests')
+          .select(
+            'id, code, request_number, request_type, amount, total_amount, status, tour_id, tour_code, supplier_name, expense_type, notes, workspace_id, created_at, request_date, payment_method_id, order_number, tour_name, created_by_name, batch_id, request_category'
+          )
+          .eq('batch_id', editingRequest.batch_id)
+          .order('code', { ascending: true })
+          .limit(500)
+        if (error) {
+          logger.error('載入批次請款單失敗:', error)
+          setEditBatchRequests([editingRequest])
+        } else {
+          setEditBatchRequests(data as PaymentRequest[])
+        }
+      } else {
+        setEditBatchRequests([editingRequest])
+      }
+      setSelectedRequestId(editingRequest.id)
+    }
+    loadBatchRequests().catch(err => logger.error('[loadBatchRequests]', err))
+  }, [open, editingRequest])
+
+  // === Edit mode: refresh items ===
+  useEffect(() => {
+    if (open && editingRequest) {
+      refreshRequestItems()
+    }
+  }, [open, editingRequest, refreshRequestItems])
+
+  // === Edit mode: DB items → local editable format ===
+  const currentRequestId = currentRequest?.id
+  const dbEditableItems: RequestItem[] = useMemo(() => {
+    if (!isEditMode || !currentRequestId) return []
+    return dbRequestItems
+      .filter(item => item.request_id === currentRequestId)
+      .map(item => ({
+        id: item.id,
+        request_date:
+          ((item as unknown as Record<string, unknown>).request_date as string) ||
+          currentRequest?.request_date ||
+          '',
+        payment_method_id: (item as unknown as Record<string, unknown>).payment_method_id as
+          | string
+          | undefined,
+        category: item.category,
+        supplier_id: item.supplier_id || '',
+        supplierName: item.supplier_name,
+        selected_id: item.supplier_id || '',
+        description: item.description,
+        unit_price: item.unit_price ?? (item as unknown as { unitprice?: number }).unitprice ?? 0,
+        quantity: item.quantity,
+        tour_request_id: item.tour_request_id,
+        confirmation_item_id: (item as unknown as Record<string, unknown>).confirmation_item_id as
+          | string
+          | undefined,
+        advanced_by: (item as unknown as Record<string, unknown>).advanced_by as string | undefined,
+        advanced_by_name: (item as unknown as Record<string, unknown>).advanced_by_name as
+          | string
+          | undefined,
+      }))
+  }, [isEditMode, dbRequestItems, currentRequestId, currentRequest?.request_date])
+
+  // Sync DB items to local state (only when not dirty)
+  const dbItemsJson = JSON.stringify(dbEditableItems)
+  const prevDbItemsJsonRef = useRef('')
+  useEffect(() => {
+    if (!isEditMode) return
+    if (dbItemsJson !== prevDbItemsJsonRef.current) {
+      prevDbItemsJsonRef.current = dbItemsJson
+      if (!isDirty) {
+        setLocalItems(JSON.parse(dbItemsJson))
+      }
+    }
+  }, [isEditMode, dbItemsJson, isDirty])
+
+  // Reset dirty state when switching requests
+  useEffect(() => {
+    if (!isEditMode) return
+    setIsDirty(false)
+    setDeletedItemIds([])
+    setNewItemIds([])
+    setLocalPaymentMethodId(currentRequest?.payment_method_id || null)
+  }, [isEditMode, selectedRequestId, currentRequest?.payment_method_id])
+
+  // === Edit mode: local operations ===
+  const handleEditUpdateItem = useCallback((itemId: string, updates: Partial<RequestItem>) => {
+    setLocalItems(prev => prev.map(item => (item.id === itemId ? { ...item, ...updates } : item)))
+    setIsDirty(true)
+  }, [])
+
+  const handleEditRemoveItem = useCallback(
+    (itemId: string) => {
+      setLocalItems(prev => prev.filter(item => item.id !== itemId))
+      if (!newItemIds.includes(itemId)) {
+        setDeletedItemIds(prev => [...prev, itemId])
+      }
+      setNewItemIds(prev => prev.filter(id => id !== itemId))
+      setIsDirty(true)
+    },
+    [newItemIds]
+  )
+
+  const handleEditAddItem = useCallback(() => {
+    const newId = `new_${Math.random().toString(36).substr(2, 9)}`
+    setLocalItems(prev => [
+      ...prev,
+      {
+        id: newId,
+        request_date: currentRequest?.request_date || '',
+        payment_method_id: undefined,
+        category: '' as PaymentItemCategory,
+        supplier_id: '',
+        supplierName: '',
+        description: '',
+        unit_price: 0,
+        quantity: 1,
+      },
+    ])
+    setNewItemIds(prev => [...prev, newId])
+    setIsDirty(true)
+  }, [currentRequest?.request_date])
+
+  // Resolve supplier name (for edit mode save)
+  const resolveSupplierName = (item: RequestItem): string | null => {
+    if (item.supplierName) return item.supplierName
+    const id = item.supplier_id || item.selected_id
+    if (!id) return null
+    return suppliers.find(s => s.id === id)?.name || null
+  }
+
+  // === Edit mode: save ===
+  const handleSave = async () => {
+    if (!currentRequest || isSubmitting) return
+    setIsSubmitting(true)
+
+    try {
+      // 1. Delete removed items
+      for (const id of deletedItemIds) {
+        await paymentRequestService.deleteItem(currentRequest.id, id)
+      }
+
+      // 2. Insert new items
+      const newItems = localItems.filter(i => newItemIds.includes(i.id))
+      if (newItems.length > 0) {
+        const rows = newItems.map((item, idx) => ({
+          request_id: currentRequest.id,
+          category: item.category || null,
+          supplier_id: item.supplier_id || null,
+          supplier_name: resolveSupplierName(item),
+          description: item.description,
+          unitprice: item.unit_price,
+          quantity: item.quantity,
+          subtotal: item.unit_price * item.quantity,
+          sort_order: localItems.indexOf(item) + 1,
+          advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
+          advanced_by_name: item.advanced_by_name || null,
+          item_number: `${currentRequest.code}-${dbEditableItems.length + idx + 1}`,
+        }))
+        await supabase.from('payment_request_items').insert(rows)
+      }
+
+      // 3. Update existing items
+      for (const item of localItems.filter(i => !newItemIds.includes(i.id))) {
+        const dbUpdates: Record<string, unknown> = {
+          category: item.category,
+          supplier_id: item.supplier_id || null,
+          supplier_name: resolveSupplierName(item),
+          description: item.description,
+          unitprice: item.unit_price,
+          quantity: item.quantity,
+          subtotal: item.unit_price * item.quantity,
+          advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
+          advanced_by_name: item.advanced_by_name || null,
+        }
+        await supabase
+          .from('payment_request_items')
+          .update(dbUpdates as never)
+          .eq('id', item.id)
+      }
+
+      // 4. Update request total + payment method
+      const newTotal = localItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0)
+      const { error: amountError } = await supabase
+        .from('payment_requests')
+        .update({
+          amount: newTotal,
+          payment_method_id: localPaymentMethodId || null,
+        })
+        .eq('id', currentRequest.id)
+      if (amountError) {
+        logger.error('更新請款單金額失敗:', amountError)
+      }
+
+      // 5. Refresh caches
+      await refreshRequestItems()
+      await invalidatePaymentRequests()
+      if (currentRequest.tour_id) {
+        await recalculateExpenseStats(currentRequest.tour_id)
+      }
+
+      setIsDirty(false)
+      setDeletedItemIds([])
+      setNewItemIds([])
+      await alert('儲存成功', 'success')
+      onOpenChange(false)
+    } catch (error) {
+      logger.error('儲存失敗:', error)
+      void alert('儲存失敗，請稍後再試', 'error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // === Edit mode: delete ===
+  const handleDelete = async () => {
+    if (!currentRequest || isSubmitting) return
+    const deleteMessage = isEditBatch
+      ? REQUEST_LABELS.確定要刪除此請款單(currentRequest.code)
+      : REQUEST_DETAIL_DIALOG_LABELS.確定要刪除此請款單嗎_此操作無法復原
+
+    const confirmed = await confirm(deleteMessage, {
+      title: REQUEST_DETAIL_DIALOG_LABELS.刪除請款單,
+      type: 'warning',
+    })
+    if (!confirmed) return
+
+    setIsSubmitting(true)
+    try {
+      await deletePaymentRequestApi(currentRequest.id)
+      if (currentRequest.tour_id) {
+        await recalculateExpenseStats(currentRequest.tour_id)
+      }
+      await alert(REQUEST_DETAIL_DIALOG_LABELS.請款單已刪除, 'success')
+
+      if (isEditBatch && editBatchRequests.length > 1) {
+        const remainingRequests = editBatchRequests.filter(r => r.id !== currentRequest.id)
+        setEditBatchRequests(remainingRequests)
+        setSelectedRequestId(remainingRequests[0].id)
+      } else {
+        onOpenChange(false)
+      }
+    } catch (error) {
+      logger.error('刪除請款單失敗:', error)
+      await alert(REQUEST_DETAIL_DIALOG_LABELS.刪除請款單失敗, 'error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // === Edit mode: close with dirty warning ===
+  const handleOpenChange = async (newOpen: boolean) => {
+    if (!newOpen && isEditMode && isDirty) {
+      const confirmed = await confirm('有未儲存的修改，確定要離開嗎？', {
+        title: '未儲存的修改',
+        type: 'warning',
+      })
+      if (!confirmed) return
+    }
+    if (!newOpen && isEditMode) {
+      setIsDirty(false)
+      setDeletedItemIds([])
+      setNewItemIds([])
+    }
+    onOpenChange(newOpen)
+  }
+
   // 批量請款：操作
   const addTourAllocation = () => {
     // 新增空白行，讓用戶自己選擇旅遊團
@@ -356,6 +669,22 @@ export function AddRequestDialog({
   useEffect(() => {
     if (!open) return
 
+    // Edit mode: set tab based on request category, skip create-mode reset
+    if (isEditMode && editingRequest) {
+      if (editingRequest.request_category === 'company') {
+        setActiveTab('company')
+      } else {
+        setActiveTab('tour')
+      }
+      // Set formData for tour/order selectors
+      setFormData(prev => ({
+        ...prev,
+        tour_id: editingRequest.tour_id || '',
+        order_id: (editingRequest as unknown as Record<string, string>).order_id || '',
+      }))
+      return
+    }
+
     setImportFromRequests(false)
     setSelectedRequestItems({})
 
@@ -389,7 +718,7 @@ export function AddRequestDialog({
     }
 
     initialize().catch(err => logger.error('[initialize]', err))
-  }, [open, defaultTourId, defaultOrderId, resetForm, setFormData])
+  }, [open, defaultTourId, defaultOrderId, resetForm, setFormData, isEditMode, editingRequest])
 
   // 自動帶入訂單
   useEffect(() => {
@@ -614,14 +943,14 @@ export function AddRequestDialog({
   // === 渲染 ===
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={isEditMode ? handleOpenChange : onOpenChange}>
         <DialogContent
           level={2}
           className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col overflow-hidden"
         >
           <Tabs
             value={activeTab}
-            onValueChange={v => {
+            onValueChange={isEditMode ? undefined : v => {
               const mode = v as RequestMode
               setActiveTab(mode)
               // 同步更新 formData.request_category
@@ -638,17 +967,14 @@ export function AddRequestDialog({
               {/* 左邊：Tab + 選擇器 */}
               <div className="flex items-center gap-4">
                 <TabsList className="w-fit h-10">
-                  <TabsTrigger value="tour" className="gap-2">
-                    <Users size={16} />
+                  <TabsTrigger value="tour" disabled={isEditMode}>
                     {ADD_REQUEST_FORM_LABELS.LABEL_7551}
                   </TabsTrigger>
-                  <TabsTrigger value="batch" className="gap-2">
-                    <Layers size={16} />
+                  <TabsTrigger value="batch" disabled={isEditMode}>
                     {ADD_REQUEST_FORM_LABELS.LABEL_163}
                   </TabsTrigger>
                   {canCreateCompanyPayment && (
-                    <TabsTrigger value="company" className="gap-2">
-                      <Briefcase size={16} />
+                    <TabsTrigger value="company" disabled={isEditMode}>
                       {ADD_REQUEST_FORM_LABELS.LABEL_9152}
                     </TabsTrigger>
                   )}
@@ -665,8 +991,10 @@ export function AddRequestDialog({
                           setFormData(prev => ({ ...prev, tour_id: value, order_id: '' }))
                         }
                         placeholder={ADD_REQUEST_DIALOG_LABELS.搜尋團號或團名}
+                        emptyMessage={ADD_RECEIPT_DIALOG_LABELS.找不到團體}
                         className="w-[350px]"
                         maxHeight="300px"
+                        disabled={isEditMode}
                       />
                     </div>
                     <div className="relative z-[10019]">
@@ -679,7 +1007,7 @@ export function AddRequestDialog({
                             ? ADD_REQUEST_DIALOG_LABELS.請先選擇旅遊團
                             : BATCH_RECEIPT_DIALOG_LABELS.搜尋訂單
                         }
-                        disabled={!formData.tour_id}
+                        disabled={isEditMode || !formData.tour_id}
                         className="w-[300px]"
                         maxHeight="300px"
                       />
@@ -690,20 +1018,58 @@ export function AddRequestDialog({
 
               {/* 右邊：標題 */}
               <div className="text-right">
-                <DialogTitle>{ADD_REQUEST_FORM_LABELS.新增請款單}</DialogTitle>
+                <DialogTitle className="flex items-center justify-end gap-2">
+                  {isEditMode ? (
+                    <>
+                      請款單 {currentRequest?.code}
+                      <Badge className={statusColors[(currentRequest?.status || 'pending') as 'pending' | 'confirmed' | 'billed']}>
+                        {statusLabels[(currentRequest?.status || 'pending') as 'pending' | 'confirmed' | 'billed']}
+                      </Badge>
+                    </>
+                  ) : (
+                    ADD_REQUEST_FORM_LABELS.新增請款單
+                  )}
+                </DialogTitle>
               </div>
             </DialogHeader>
 
+            {/* Batch request switcher (edit mode) */}
+            {isEditMode && isEditBatch && (
+              <div className="flex items-center gap-2 px-1 pb-3">
+                <Layers size={14} className="text-morandi-muted" />
+                <span className="text-xs text-morandi-muted">同批次請款單</span>
+                <div className="flex flex-wrap gap-1 ml-2">
+                  {editBatchRequests.map(br => (
+                    <Button
+                      key={br.id}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedRequestId(br.id)}
+                      className={cn(
+                        'h-7 text-xs',
+                        selectedRequestId === br.id
+                          ? 'bg-morandi-gold/10 border-morandi-gold text-morandi-gold'
+                          : 'hover:bg-morandi-container/50'
+                      )}
+                    >
+                      {br.tour_code || br.code}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* 團體請款 */}
-            <TabsContent value="tour" className="flex-1 overflow-y-auto mt-4 space-y-6">
+            <TabsContent value="tour" className="flex-1 overflow-y-auto pt-4 border-t border-morandi-container/30 space-y-6">
               <EditableRequestItemList
-                items={requestItems}
+                items={isEditMode ? localItems : requestItems}
                 suppliers={suppliers}
-                updateItem={updateItem}
-                removeItem={removeItem}
-                addNewEmptyItem={addNewEmptyItem}
+                updateItem={isEditMode ? handleEditUpdateItem : updateItem}
+                removeItem={isEditMode ? handleEditRemoveItem : removeItem}
+                addNewEmptyItem={isEditMode ? handleEditAddItem : addNewEmptyItem}
                 onCreateSupplier={handleCreateSupplier}
                 tourId={formData.tour_id || null}
+                disabled={isEditMode && !canEdit}
                 paymentMethods={paymentMethods}
               />
             </TabsContent>
@@ -1009,62 +1375,85 @@ export function AddRequestDialog({
           </Tabs>
 
           {/* Actions */}
-          <div className="flex items-center gap-4 pt-4 border-t border-border">
-            {/* 左側：總金額顯示 */}
-            <div className="flex items-center text-sm">
-              <span className="text-morandi-secondary">
-                {activeTab === 'batch'
-                  ? ADD_REQUEST_FORM_LABELS.共N筆總金額(
-                      tourAllocations.filter(a => a.tour_id).length
-                    )
-                  : REQUEST_LABELS.共N項總金額(
-                      activeTab === 'tour' && importFromRequests
-                        ? selectedRequestCount
-                        : requestItems.length
-                    )}
+          <div className="flex justify-between items-center pt-4 border-t border-border">
+            {/* 左側：總金額 */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-morandi-secondary">
+                {ADD_RECEIPT_DIALOG_LABELS.TOTAL_6550}
               </span>
-              <span className="inline-block min-w-[120px] text-right font-semibold text-morandi-gold">
+              <span className="text-lg font-semibold text-morandi-gold whitespace-nowrap">
                 NT${' '}
-                {(activeTab === 'batch'
-                  ? batchTotalAmount
-                  : activeTab === 'tour' && importFromRequests
-                    ? selectedRequestTotal
-                    : total_amount
+                {(isEditMode
+                  ? localItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0)
+                  : activeTab === 'batch'
+                    ? batchTotalAmount
+                    : activeTab === 'tour' && importFromRequests
+                      ? selectedRequestTotal
+                      : total_amount
                 ).toLocaleString()}
               </span>
             </div>
-            {/* 中間空白 */}
-            <div className="flex-1" />
             {/* 右側：按鈕 */}
             <div className="flex space-x-2">
-              <Button variant="outline" onClick={handleCancel} className="gap-2">
-                <X size={16} />
-                {ADD_REQUEST_FORM_LABELS.CANCEL}
-              </Button>
-              <Button
-                onClick={handleSubmit}
-                disabled={
-                  isSubmitting ||
-                  (activeTab === 'batch'
-                    ? unallocatedAmount !== 0 || tourAllocations.filter(a => a.tour_id).length === 0
-                    : activeTab === 'company'
-                      ? !formData.expense_type ||
-                        !formData.request_date ||
-                        requestItems.length === 0
-                      : !formData.tour_id ||
-                        (importFromRequests
-                          ? selectedRequestCount === 0
-                          : requestItems.length === 0))
-                }
-                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white rounded-md gap-2"
-              >
-                <Plus size={16} />
-                {isSubmitting
-                  ? ADD_REQUEST_FORM_LABELS.處理中
-                  : activeTab === 'batch'
-                    ? ADD_REQUEST_EXTRA_LABELS.BATCH_CREATE_LABEL
-                    : ADD_REQUEST_DIALOG_LABELS.新增請款單}
-              </Button>
+              {isEditMode ? (
+                canEdit ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleDelete}
+                      disabled={isSubmitting}
+                      className="text-morandi-red border-morandi-red hover:bg-morandi-red/10 gap-2"
+                    >
+                      <Trash2 size={16} />
+                      刪除
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSave}
+                      disabled={isSubmitting || !isDirty}
+                      className={cn(
+                        'gap-2 transition-all',
+                        isDirty
+                          ? 'bg-morandi-gold hover:bg-morandi-gold/90 text-white'
+                          : 'bg-morandi-container/50 text-morandi-muted cursor-not-allowed'
+                      )}
+                    >
+                      <Save size={16} />
+                      {isSubmitting ? '儲存中...' : '儲存'}
+                    </Button>
+                  </>
+                ) : (
+                  <p className="text-sm text-morandi-muted">
+                    此請款單已加入出納單，如需修改請先從出納單移除
+                  </p>
+                )
+              ) : (
+                <Button
+                  onClick={handleSubmit}
+                  disabled={
+                    isSubmitting ||
+                    (activeTab === 'batch'
+                      ? unallocatedAmount !== 0 || tourAllocations.filter(a => a.tour_id).length === 0
+                      : activeTab === 'company'
+                        ? !formData.expense_type ||
+                          !formData.request_date ||
+                          requestItems.length === 0
+                        : !formData.tour_id ||
+                          (importFromRequests
+                            ? selectedRequestCount === 0
+                            : requestItems.length === 0))
+                  }
+                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white rounded-md gap-2"
+                >
+                  <Plus size={16} />
+                  {isSubmitting
+                    ? ADD_REQUEST_FORM_LABELS.處理中
+                    : activeTab === 'batch'
+                      ? ADD_REQUEST_EXTRA_LABELS.BATCH_CREATE_LABEL
+                      : ADD_REQUEST_DIALOG_LABELS.新增請款單}
+                </Button>
+              )}
             </div>
           </div>
         </DialogContent>

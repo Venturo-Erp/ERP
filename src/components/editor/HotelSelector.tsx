@@ -31,7 +31,6 @@ export interface LuxuryHotel {
   highlights: string[] | null
   price_range: string | null
   avg_price_per_night: number | null
-  thumbnail: string | null
   images: string[] | null
   is_active: boolean
   is_featured: boolean

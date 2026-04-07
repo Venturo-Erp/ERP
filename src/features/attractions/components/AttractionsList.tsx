@@ -43,13 +43,9 @@ export function AttractionsList({
       sortable: false,
       render: (_: unknown, attraction: Attraction) => (
         <div className="w-20">
-          {(attraction.images && attraction.images.length > 0) || attraction.thumbnail ? (
+          {attraction.images && attraction.images.length > 0 ? (
             <img
-              src={
-                attraction.images && attraction.images.length > 0
-                  ? attraction.images[0]
-                  : attraction.thumbnail!
-              }
+              src={attraction.images[0]}
               alt={attraction.name}
               className="w-20 h-14 object-cover rounded border border-border shadow-sm"
             />

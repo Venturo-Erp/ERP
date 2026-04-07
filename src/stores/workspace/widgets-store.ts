@@ -113,8 +113,16 @@ export const useWidgetsStore = () => {
 
           if (itemsError) throw itemsError
 
-          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:advance_lists'), undefined, { revalidate: true })
-          mutate((key: string) => typeof key === 'string' && key.startsWith('entity:advance_items'), undefined, { revalidate: true })
+          mutate(
+            (key: string) => typeof key === 'string' && key.startsWith('entity:advance_lists'),
+            undefined,
+            { revalidate: true }
+          )
+          mutate(
+            (key: string) => typeof key === 'string' && key.startsWith('entity:advance_items'),
+            undefined,
+            { revalidate: true }
+          )
         }
       } catch (error) {
         // Silently fail

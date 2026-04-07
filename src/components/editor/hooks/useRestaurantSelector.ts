@@ -36,7 +36,6 @@ interface RestaurantQueryResult {
   max_group_size: number | null
   group_menu_available: boolean | null
   private_room: boolean | null
-  thumbnail: string | null
   images: string[] | null
   rating: number | null
   is_active: boolean | null
@@ -68,7 +67,6 @@ interface MichelinQueryResult {
   avg_price_dinner: number | null
   max_group_size: number | null
   group_menu_available: boolean | null
-  thumbnail: string | null
   images: string[] | null
   is_active: boolean | null
   latitude: number | null
@@ -255,7 +253,7 @@ export function useRestaurantSelector({
               cuisine_type, category, meal_type, description,
               specialties, price_range, avg_price_lunch, avg_price_dinner,
               group_friendly, max_group_size, group_menu_available,
-              private_room, thumbnail, images, rating, is_active, is_featured,
+              private_room, images, rating, is_active, is_featured,
               latitude, longitude, address, phone, google_maps_url,
               regions(name),
               cities!inner(name)
@@ -305,7 +303,6 @@ export function useRestaurantSelector({
                 max_group_size: item.max_group_size,
                 group_menu_available: item.group_menu_available ?? false,
                 private_room: item.private_room ?? false,
-                thumbnail: item.thumbnail,
                 images: item.images,
                 rating: item.rating,
                 is_active: item.is_active ?? true,
@@ -335,7 +332,7 @@ export function useRestaurantSelector({
               cuisine_type, description, signature_dishes,
               price_range, avg_price_lunch, avg_price_dinner,
               max_group_size, group_menu_available,
-              thumbnail, images, is_active,
+              images, is_active,
               latitude, longitude, address, phone, google_maps_url,
               cities!inner(name)
             `
@@ -373,7 +370,6 @@ export function useRestaurantSelector({
                 max_group_size: item.max_group_size,
                 group_menu_available: item.group_menu_available ?? false,
                 private_room: false,
-                thumbnail: item.thumbnail,
                 images: item.images,
                 is_active: item.is_active ?? true,
                 // GPS 資訊

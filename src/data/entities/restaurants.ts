@@ -27,7 +27,6 @@ const RESTAURANT_SELECT_FIELDS = [
   'longitude',
   'google_maps_url',
   'images',
-  'thumbnail',
   'is_active',
   'data_verified',
   'notes',

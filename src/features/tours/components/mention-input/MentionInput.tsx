@@ -109,7 +109,7 @@ function setCursorOffset(el: HTMLElement, offset: number) {
 // ── hover tooltip (portal) ─────────────────────────────────────
 const detailCache = new Map<
   string,
-  { description?: string; city_name?: string; thumbnail?: string }
+  { description?: string; city_name?: string; image?: string }
 >()
 
 function AttractionTooltip({ id, name, anchor }: { id: string; name: string; anchor: DOMRect }) {
@@ -123,7 +123,7 @@ function AttractionTooltip({ id, name, anchor }: { id: string; name: string; anc
     let cancelled = false
     supabase
       .from('attractions')
-      .select('description, thumbnail, cities(name)')
+      .select('description, images, cities(name)')
       .eq('id', id)
       .single()
       .then(({ data }) => {
@@ -132,7 +132,7 @@ function AttractionTooltip({ id, name, anchor }: { id: string; name: string; anc
           description: ((data as Record<string, unknown>).description as string) || '',
           city_name:
             ((data as Record<string, unknown>).cities as { name: string } | null)?.name || '',
-          thumbnail: ((data as Record<string, unknown>).thumbnail as string) || '',
+          image: ((data as Record<string, unknown>).images as string[])?.[0] || '',
         }
         detailCache.set(id, d)
         setDetail(d)
@@ -153,9 +153,9 @@ function AttractionTooltip({ id, name, anchor }: { id: string; name: string; anc
     >
       {detail ? (
         <div className="flex gap-2 p-2">
-          {detail.thumbnail && (
+          {detail.image && (
             <img
-              src={detail.thumbnail}
+              src={detail.image}
               alt={name}
               className="w-16 h-16 object-cover rounded shrink-0"
             />

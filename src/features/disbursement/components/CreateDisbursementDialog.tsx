@@ -24,7 +24,7 @@ import { useCreateDisbursement } from '../hooks/useCreateDisbursement'
 import { DisbursementForm } from './create-dialog/DisbursementForm'
 import { DisbursementItemList } from './create-dialog/DisbursementItemList'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
-import { RequestDetailDialog } from '@/features/finance/requests/components/RequestDetailDialog'
+import { AddRequestDialog } from '@/features/finance/requests/components/AddRequestDialog'
 
 interface CreateDisbursementDialogProps {
   open: boolean
@@ -140,8 +140,8 @@ export function CreateDisbursementDialog({
       </DialogContent>
 
       {/* 請款單詳情視窗（只讀模式） */}
-      <RequestDetailDialog
-        request={viewingRequest}
+      <AddRequestDialog
+        editingRequest={viewingRequest}
         open={!!viewingRequest}
         onOpenChange={open => !open && setViewingRequest(null)}
         readOnly

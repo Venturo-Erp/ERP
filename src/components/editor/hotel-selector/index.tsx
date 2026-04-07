@@ -126,7 +126,6 @@ export function HotelSelector({
       highlights: null,
       price_range: null,
       avg_price_per_night: null,
-      thumbnail: null,
       images: null,
       is_active: true,
       is_featured: false,

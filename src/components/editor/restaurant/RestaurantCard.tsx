@@ -46,8 +46,7 @@ function getMichelinDisplay(restaurant: CombinedRestaurant) {
 
 function getRestaurantImage(restaurant: CombinedRestaurant) {
   return (
-    restaurant.thumbnail ||
-    (restaurant.images && restaurant.images.length > 0 ? restaurant.images[0] : null)
+    restaurant.images && restaurant.images.length > 0 ? restaurant.images[0] : null
   )
 }
 
