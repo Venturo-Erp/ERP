@@ -133,28 +133,11 @@ export default function PaymentsPage() {
       render: value => <DateCell date={String(value)} showIcon={false} />,
     },
     {
-      key: 'order_number',
+      key: 'receipt_account',
       label: FinanceLabels.orderNumber,
-      width: '100',
-      render: (_, row) => {
-        const r = row as Receipt & Record<string, unknown>
-        const method = String(r.payment_method || '')
-        let info = '-'
-        if (method === 'card') {
-          const parts = []
-          if (r.card_last_four) parts.push(`末四碼 ${r.card_last_four}`)
-          if (r.auth_code) parts.push(`授權 ${r.auth_code}`)
-          info = parts.join(' / ') || '-'
-        } else if (method === 'transfer') {
-          const acct = String(r.account_info || r.receipt_account || '')
-          info = acct.length > 5 ? `...${acct.slice(-5)}` : acct || '-'
-        } else if (method === 'cash') {
-          info = r.handler_name ? `經手 ${r.handler_name}` : '-'
-        } else if (method === 'check') {
-          info = r.check_number ? `支票 ${r.check_number}` : r.check_bank ? `${r.check_bank}` : '支票'
-        } else if (method === 'linkpay') {
-          info = r.payment_name ? String(r.payment_name) : 'LinkPay'
-        }
+      width: '120',
+      render: (value) => {
+        const info = String(value || '-')
         return <span className="text-sm text-morandi-secondary">{info}</span>
       },
     },
