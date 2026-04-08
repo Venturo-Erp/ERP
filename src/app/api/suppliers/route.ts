@@ -66,7 +66,6 @@ export async function POST(req: NextRequest) {
         workspace_id: auth.data.workspaceId,
         name,
         code: code || null,
-        category: category || null,
         contact_person: contact_person || null,
         phone: phone || null,
         email: email || null,

@@ -23,7 +23,7 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { logger } from '@/lib/utils/logger'
 import { LineSetupWizard } from './components/LineSetupWizard'
 import { LineConnectionsTab } from './components/LineConnectionsTab'
-import { SimpleConversations } from './components/SimpleConversations'
+import { RealConversations } from './components/RealConversations'
 import { AISettingsTab } from './components/AISettingsTab'
 
 interface LineGroup {
@@ -357,7 +357,7 @@ export default function AIBotManagementPage() {
 
           {/* 對話記錄 */}
           <TabsContent value="conversations" className="mt-4">
-            <SimpleConversations />
+            <RealConversations />
           </TabsContent>
 
           {/* AI 設定 */}

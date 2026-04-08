@@ -432,6 +432,74 @@ async function processInsurancePDF(event: LineEvent) {
 
 /** 處理「完成」指令 */
 
+/** 儲存對話到資料庫 */
+async function saveConversationToDb(
+  platform: string,
+  platformUserId: string,
+  userMessage: string,
+  aiResponse: string,
+  userDisplayName: string | null
+) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !supabaseKey) return
+
+  // 先查詢 LINE Bot 屬於哪個 workspace
+  let workspaceId = '8ef05a74-1f87-48ab-afd3-9bfeb423935d' // 預設值
+
+  try {
+    const configRes = await fetch(
+      `${supabaseUrl}/rest/v1/workspace_line_config?select=workspace_id&limit=1`,
+      {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+        },
+      }
+    )
+
+    if (configRes.ok) {
+      const configs = await configRes.json()
+      if (configs && configs.length > 0) {
+        workspaceId = configs[0].workspace_id
+      }
+    }
+  } catch (error) {
+    // 忽略錯誤，使用預設值
+  }
+
+  try {
+    // 只儲存現有的欄位
+    const conversationData: any = {
+      platform: platform,
+      platform_user_id: platformUserId,
+      user_display_name: userDisplayName,
+      user_message: userMessage,
+      ai_response: aiResponse,
+      created_at: new Date().toISOString()
+    }
+    
+    // 可以添加一些 AI 分析的欄位（如果有的話）
+    // 例如：intent, sentiment 等
+    
+    await fetch(`${supabaseUrl}/rest/v1/customer_service_conversations`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify(conversationData),
+    })
+    
+    logger.info(`[LINE] Conversation saved: ${platformUserId} - ${userMessage.substring(0, 30)}...`)
+  } catch (error) {
+    logger.error('[LINE] Save conversation error:', error)
+  }
+}
+
 /** 處理 AI 客服訊息 */
 async function handleAIMessage(event: LineEvent) {
   try {
@@ -453,7 +521,16 @@ async function handleAIMessage(event: LineEvent) {
       userMessage
     )
 
-    // 4. 回覆用戶
+    // 4. 儲存對話到資料庫
+    await saveConversationToDb(
+      'line',
+      userId,
+      userMessage,
+      aiResponse,
+      profile?.displayName || null
+    )
+
+    // 5. 回覆用戶
     await fetch('https://api.line.me/v2/bot/message/reply', {
       method: 'POST',
       headers: {
