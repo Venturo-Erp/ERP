@@ -458,8 +458,10 @@ export interface Tour extends BaseEntity {
   closing_date?: string | null // 結團日期
   closed_by?: string | null // 結團操作人員 ID
 
-  // 團控人員
+  // 團服務類型與團控
+  tour_service_type?: TourServiceType | null // 團服務類型
   controller_id?: string | null // 團控人員 ID（負責開團的人）
+  department_id?: string | null // 部門 ID
 
   // 報到功能欄位
   enable_checkin?: boolean | null // 是否開啟報到功能
@@ -548,6 +550,17 @@ export type ContractTemplate =
  * - template: 模板（沒有日期，開團時複製一份新團）
  */
 export type TourType = 'official' | 'proposal' | 'template'
+
+/**
+ * TourServiceType - 團服務類型
+ */
+export type TourServiceType =
+  | 'flight'
+  | 'flight_hotel'
+  | 'hotel'
+  | 'car_service'
+  | 'tour_group'
+  | 'visa'
 
 export type TourCategory =
   | 'domestic' // 國內
