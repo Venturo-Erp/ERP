@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { randomUUID } from 'crypto'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
@@ -63,13 +64,14 @@ export async function POST(req: NextRequest) {
     const { data, error } = await supabase
       .from('suppliers')
       .insert({
+        id: randomUUID(),
         workspace_id: auth.data.workspaceId,
         name,
         code: code || null,
         contact_person: contact_person || null,
         phone: phone || null,
         email: email || null,
-        note: note || null,
+        notes: note || null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
