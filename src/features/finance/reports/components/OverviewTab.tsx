@@ -207,7 +207,14 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
       }
     })
 
-    rows.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    // 排序：先日期（新→舊），同日期收入在前、支出在後
+    rows.sort((a, b) => {
+      const dateCompare = new Date(b.date).getTime() - new Date(a.date).getTime()
+      if (dateCompare !== 0) return dateCompare
+      if (a.type === 'income' && b.type === 'expense') return -1
+      if (a.type === 'expense' && b.type === 'income') return 1
+      return 0
+    })
     return rows
   }, [receipts, paymentRequests, dateRange])
 
@@ -310,16 +317,6 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
           {row.type === 'income' ? '+' : '-'}
           {formatCurrency(Number(value))}
         </span>
-      ),
-    },
-    {
-      key: 'status',
-      label: '狀態',
-      width: '80',
-      render: value => (
-        <Badge variant="outline" className="text-xs">
-          {String(value)}
-        </Badge>
       ),
     },
   ]
