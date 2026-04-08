@@ -142,6 +142,7 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
     const rows: TransactionRow[] = []
 
     receipts.forEach(r => {
+      if (r.status !== '1') return // 只顯示已確認的收款
       const d = (r.receipt_date || r.created_at)?.split('T')[0] || ''
       if (d < startDate || d > endDate) return
       rows.push({
@@ -158,6 +159,7 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
     })
 
     paymentRequests.forEach(pr => {
+      if (pr.status !== 'billed' && pr.status !== 'paid') return // 只顯示已出帳/已付款
       const d = (pr.request_date || pr.created_at || '')?.split('T')[0] || ''
       if (d < startDate || d > endDate) return
 
