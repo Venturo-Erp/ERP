@@ -129,7 +129,7 @@ export function AddReceiptDialog({
           : Promise.resolve(null),
       ])
 
-      let loadedMethods: { id: string; name: string }[] = []
+      let loadedMethods: { id: string; name: string; placeholder?: string | null }[] = []
       if (methodsRes && methodsRes.ok) {
         const data = await methodsRes.json()
         loadedMethods = data || []
