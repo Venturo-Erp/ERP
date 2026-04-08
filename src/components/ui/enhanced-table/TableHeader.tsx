@@ -81,7 +81,7 @@ export const TableHeader = React.memo(function TableHeader({
           <th
             key={String(column.key)}
             className={cn('text-left py-2.5 px-4 text-xs relative align-middle')}
-            style={{ width: column.width }}
+            style={{ width: column.width ? `${column.width}px` : undefined }}
           >
             {/* Remove absolute div - use native border instead */}
             <div className="flex items-center gap-2">
