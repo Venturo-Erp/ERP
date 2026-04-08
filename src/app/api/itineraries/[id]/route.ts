@@ -79,6 +79,49 @@ async function enrichDailyItinerary(
   }))
 }
 
+/**
+ * 用飯店名稱從 hotels 表補上介紹和圖片（SSOT）
+ */
+async function enrichHotels(
+  supabase: SupabaseClient,
+  hotels: Array<{
+    name?: string
+    description?: string
+    images?: string[]
+    [key: string]: unknown
+  }> | null
+): Promise<typeof hotels> {
+  if (!hotels || !Array.isArray(hotels) || hotels.length === 0) return hotels
+
+  const hotelNames = hotels.map(h => h.name).filter(Boolean) as string[]
+  if (hotelNames.length === 0) return hotels
+
+  const { data: dbHotels } = await supabase
+    .from('hotels')
+    .select('name, description, images')
+    .in('name', hotelNames)
+
+  if (!dbHotels || dbHotels.length === 0) return hotels
+
+  const hotelMap = new Map<string, { description?: string; images?: string[] }>()
+  for (const h of dbHotels) {
+    hotelMap.set(h.name.toLowerCase(), {
+      description: h.description || undefined,
+      images: h.images || undefined,
+    })
+  }
+
+  return hotels.map(hotel => {
+    const match = hotel.name ? hotelMap.get(hotel.name.toLowerCase()) : null
+    if (!match) return hotel
+    return {
+      ...hotel,
+      description: match.description || hotel.description,
+      images: match.images && match.images.length > 0 ? match.images : hotel.images,
+    }
+  })
+}
+
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
@@ -179,7 +222,10 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       focusCards: itinerary.focus_cards,
       leader: itinerary.leader,
       meetingInfo: itinerary.meeting_info,
-      hotels: itinerary.hotels,
+      hotels: await enrichHotels(
+        supabaseAdmin,
+        itinerary.hotels as Array<{ name?: string; description?: string; images?: string[] }>
+      ),
       showFeatures: itinerary.show_features,
       showLeaderMeeting: itinerary.show_leader_meeting,
       showHotels: itinerary.show_hotels,
