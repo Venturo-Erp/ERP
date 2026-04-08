@@ -124,16 +124,18 @@ export default function PaymentsPage() {
 
   // 表格欄位
   const columns: TableColumn<Receipt>[] = [
-    { key: 'receipt_number', label: FinanceLabels.receiptNumber, sortable: true },
+    { key: 'receipt_number', label: FinanceLabels.receiptNumber, sortable: true, width: '140' },
     {
       key: 'receipt_date',
       label: FinanceLabels.receiptDate,
       sortable: true,
+      width: '90',
       render: value => <DateCell date={String(value)} />,
     },
     {
       key: 'order_number',
       label: FinanceLabels.orderNumber,
+      width: '130',
       render: (_, row) => {
         const r = row as Receipt & Record<string, unknown>
         const method = String(r.payment_method || '')
@@ -172,6 +174,7 @@ export default function PaymentsPage() {
     {
       key: 'payment_method',
       label: FinanceLabels.paymentMethod,
+      width: '80',
       render: value => (
         <span className="text-sm">{PAYMENT_METHOD_MAP[String(value)] || String(value || '-')}</span>
       ),
@@ -179,6 +182,7 @@ export default function PaymentsPage() {
     {
       key: 'status',
       label: FinanceLabels.status,
+      width: '70',
       render: value => <StatusCell type="receipt" status={String(value)} />,
     },
     {
