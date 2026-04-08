@@ -20,7 +20,14 @@ export function useRequestForm() {
     tour_id: '',
     order_id: '',
     expense_type: '', // 公司請款時使用
-    request_date: '',
+    request_date: (() => {
+      const today = new Date()
+      let d = 4 - today.getDay()
+      if (d <= 0) d += 7
+      const t = new Date(today)
+      t.setDate(today.getDate() + d)
+      return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`
+    })(),
     notes: '',
     is_special_billing: false,
     created_by: currentUser?.id || '',
