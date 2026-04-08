@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useMemo } from 'react'
 import { logger } from '@/lib/utils/logger'
 import { TourFormData, HotelInfo } from '../types'
 import { Plus, X, Upload, Image as ImageIcon, GripVertical, Loader2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { alert } from '@/lib/ui/alert-dialog'
 import { COMP_EDITOR_LABELS } from '../../constants/labels'
+import { useHotels } from '@/data/entities/hotels'
 
 interface HotelSectionProps {
   data: TourFormData
@@ -13,6 +14,21 @@ interface HotelSectionProps {
 
 export function HotelSection({ data, updateField }: HotelSectionProps) {
   const hotels = data.hotels || []
+
+  // 從 hotels 表取得 SSOT 資料（描述、圖片）
+  const { items: hotelEntities } = useHotels()
+  const hotelLookup = useMemo(() => {
+    const map = new Map<string, { description: string; images: string[] }>()
+    for (const h of hotelEntities) {
+      if (h.name) {
+        map.set(h.name.trim().toLowerCase(), {
+          description: h.description || '',
+          images: (h.images as string[]) || [],
+        })
+      }
+    }
+    return map
+  }, [hotelEntities])
 
   // 有飯店資料時自動開啟顯示
   React.useEffect(() => {
@@ -266,8 +282,15 @@ export function HotelSection({ data, updateField }: HotelSectionProps) {
         )}
 
         {hotels.map((hotel, hotelIndex) => {
-          const images = getHotelImages(hotel)
-          const canAddMore = images.length < 4
+          // 從 hotels 表查找匹配的飯店（SSOT）
+          const matchedHotel = hotel.name?.trim()
+            ? hotelLookup.get(hotel.name.trim().toLowerCase())
+            : undefined
+          // 若有匹配，使用 SSOT 的描述和圖片；否則使用本地資料
+          const displayDescription = matchedHotel?.description || hotel.description
+          const images = matchedHotel?.images?.length ? matchedHotel.images : getHotelImages(hotel)
+          const isFromSSOT = !!matchedHotel
+          const canAddMore = !isFromSSOT && images.length < 4
 
           return (
             <div
@@ -305,37 +328,69 @@ export function HotelSection({ data, updateField }: HotelSectionProps) {
                   <div>
                     <label className="block text-sm font-medium text-morandi-primary mb-1">
                       {COMP_EDITOR_LABELS.LABEL_6867}
+                      {isFromSSOT && (
+                        <span className="ml-2 text-xs text-morandi-muted font-normal">
+                          （來自飯店資料庫，唯讀）
+                        </span>
+                      )}
                     </label>
-                    <textarea
-                      value={hotel.description}
-                      onChange={e => updateHotel(hotelIndex, 'description', e.target.value)}
-                      className="w-full px-3 py-2 border border-morandi-container rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50 focus:border-morandi-gold min-h-[80px]"
-                      placeholder={COMP_EDITOR_LABELS.介紹飯店特色_位置_設施等}
-                    />
+                    {isFromSSOT ? (
+                      <div className="w-full px-3 py-2 border border-morandi-container/50 rounded-lg bg-morandi-container/10 min-h-[80px] text-morandi-secondary text-sm whitespace-pre-wrap">
+                        {displayDescription || (
+                          <span className="text-morandi-muted italic">尚無描述</span>
+                        )}
+                      </div>
+                    ) : (
+                      <textarea
+                        value={hotel.description}
+                        onChange={e => updateHotel(hotelIndex, 'description', e.target.value)}
+                        className="w-full px-3 py-2 border border-morandi-container rounded-lg focus:outline-none focus:ring-2 focus:ring-morandi-gold/50 focus:border-morandi-gold min-h-[80px]"
+                        placeholder={COMP_EDITOR_LABELS.介紹飯店特色_位置_設施等}
+                      />
+                    )}
                   </div>
 
                   {/* 圖片區域 */}
                   <div>
                     <label className="block text-sm font-medium text-morandi-primary mb-2">
-                      飯店圖片 ({images.length}/4)
+                      飯店圖片 ({images.length}
+                      {isFromSSOT ? '' : '/4'})
+                      {isFromSSOT && (
+                        <span className="ml-2 text-xs text-morandi-muted font-normal">
+                          （來自飯店資料庫，唯讀）
+                        </span>
+                      )}
                     </label>
 
                     {/* 圖片網格 */}
                     <div className="grid grid-cols-4 gap-2">
-                      {/* 已上傳的圖片 */}
+                      {/* 圖片列表 */}
                       {images.map((imageUrl, imageIndex) => (
                         <div
                           key={imageIndex}
-                          draggable
-                          onDragStart={() => handleImageDragStart(hotelIndex, imageIndex)}
-                          onDragOver={e => handleImageDragOver(e, hotelIndex, imageIndex)}
-                          onDrop={() => handleImageDrop(hotelIndex, imageIndex)}
-                          onDragEnd={handleImageDragEnd}
-                          className={`relative aspect-square rounded-lg overflow-hidden border-2 cursor-move group ${
-                            dragOverImage?.hotelIndex === hotelIndex &&
-                            dragOverImage?.imageIndex === imageIndex
-                              ? 'border-morandi-gold'
-                              : 'border-morandi-container'
+                          draggable={!isFromSSOT}
+                          onDragStart={
+                            !isFromSSOT
+                              ? () => handleImageDragStart(hotelIndex, imageIndex)
+                              : undefined
+                          }
+                          onDragOver={
+                            !isFromSSOT
+                              ? (e: React.DragEvent) =>
+                                  handleImageDragOver(e, hotelIndex, imageIndex)
+                              : undefined
+                          }
+                          onDrop={
+                            !isFromSSOT ? () => handleImageDrop(hotelIndex, imageIndex) : undefined
+                          }
+                          onDragEnd={!isFromSSOT ? handleImageDragEnd : undefined}
+                          className={`relative aspect-square rounded-lg overflow-hidden border-2 group ${
+                            isFromSSOT
+                              ? 'border-morandi-container/50 cursor-default'
+                              : dragOverImage?.hotelIndex === hotelIndex &&
+                                  dragOverImage?.imageIndex === imageIndex
+                                ? 'border-morandi-gold cursor-move'
+                                : 'border-morandi-container cursor-move'
                           }`}
                         >
                           <img
@@ -343,18 +398,22 @@ export function HotelSection({ data, updateField }: HotelSectionProps) {
                             alt={`${hotel.name || COMP_EDITOR_LABELS.飯店} 圖片 ${imageIndex + 1}`}
                             className="w-full h-full object-cover"
                           />
-                          {/* 拖曳把手 */}
-                          <div className="absolute top-1 left-1 p-1 bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                            <GripVertical size={12} className="text-white" />
-                          </div>
-                          {/* 刪除按鈕 */}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveImage(hotelIndex, imageIndex)}
-                            className="absolute top-1 right-1 p-1 bg-status-danger rounded text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-status-danger"
-                          >
-                            <X size={12} />
-                          </button>
+                          {!isFromSSOT && (
+                            <>
+                              {/* 拖曳把手 */}
+                              <div className="absolute top-1 left-1 p-1 bg-black/50 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                <GripVertical size={12} className="text-white" />
+                              </div>
+                              {/* 刪除按鈕 */}
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveImage(hotelIndex, imageIndex)}
+                                className="absolute top-1 right-1 p-1 bg-status-danger rounded text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-status-danger"
+                              >
+                                <X size={12} />
+                              </button>
+                            </>
+                          )}
                           {/* 序號 */}
                           <div className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-black/50 rounded text-white text-xs">
                             {imageIndex + 1}
@@ -362,7 +421,7 @@ export function HotelSection({ data, updateField }: HotelSectionProps) {
                         </div>
                       ))}
 
-                      {/* 新增圖片按鈕 */}
+                      {/* 新增圖片按鈕（僅非 SSOT 時顯示） */}
                       {canAddMore && (
                         <div
                           onClick={() => handleAddImageSlot(hotelIndex)}
@@ -393,25 +452,29 @@ export function HotelSection({ data, updateField }: HotelSectionProps) {
                       )}
                     </div>
 
-                    {/* 隱藏的 file input */}
-                    <input
-                      ref={el => {
-                        fileInputRefs.current[`hotel-${hotelIndex}-new`] = el
-                      }}
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={e => {
-                        if (e.target.files && e.target.files.length > 0) {
-                          void handleMultipleImageUpload(hotelIndex, e.target.files)
-                          e.target.value = ''
-                        }
-                      }}
-                      className="hidden"
-                    />
+                    {/* 隱藏的 file input（僅非 SSOT 時需要） */}
+                    {!isFromSSOT && (
+                      <input
+                        ref={el => {
+                          fileInputRefs.current[`hotel-${hotelIndex}-new`] = el
+                        }}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={e => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            void handleMultipleImageUpload(hotelIndex, e.target.files)
+                            e.target.value = ''
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    )}
 
                     <p className="mt-2 text-xs text-morandi-secondary">
-                      可拖曳排序 · 支援拖放上傳 · 建議使用 16:9 高解析度圖片 · 單張不超過 5MB
+                      {isFromSSOT
+                        ? '圖片由飯店資料庫統一管理'
+                        : '可拖曳排序 · 支援拖放上傳 · 建議使用 16:9 高解析度圖片 · 單張不超過 5MB'}
                     </p>
                   </div>
                 </div>

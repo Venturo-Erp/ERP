@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
+  AlertTriangle,
   Bot,
   MessageCircle,
   Users,
@@ -87,37 +88,43 @@ export default function AIBotManagementPage() {
   }, [])
 
   const loadData = useCallback(async () => {
-    // 未連線就不載入資料
-    if (!isConnected) {
-      setGroups([])
-      setUsers([])
-      setLoading(false)
-      return
-    }
+    // 總是載入資料，即使未連線也顯示（資料可能已存在）
     setLoading(true)
     try {
       const res = await fetch('/api/line/connections')
       const data = await res.json()
       if (data.error) {
-        toast.error(`載入失敗: ${data.error}`)
+        // 不顯示錯誤，因為可能只是未連線
+        if (!data.error.includes('請先登入')) {
+          toast.error(`載入失敗: ${data.error}`)
+        }
       }
       setGroups(data.groups || [])
       setUsers(data.users || [])
     } catch (error) {
-      logger.error('載入 LINE 連線失敗:', error)
-      toast.error('載入失敗')
+      // 忽略錯誤，保持現有資料
     } finally {
       setLoading(false)
     }
-  }, [isConnected])
+  }, [])
 
   const loadSuppliers = useCallback(async () => {
     try {
       const res = await fetch('/api/suppliers')
       const data = await res.json()
-      setSuppliers(data || [])
+      // 確保 suppliers 總是陣列
+      if (Array.isArray(data)) {
+        setSuppliers(data)
+      } else if (data && data.error) {
+        // API 返回錯誤，設定為空陣列
+        setSuppliers([])
+      } else {
+        // 其他情況，設定為空陣列
+        setSuppliers([])
+      }
     } catch {
-      // 忽略
+      // 忽略錯誤，保持現有資料或空陣列
+      setSuppliers([])
     }
   }, [])
 
@@ -312,30 +319,37 @@ export default function AIBotManagementPage() {
 
           {/* 群組 & 好友 */}
           <TabsContent value="connections" className="mt-4 space-y-6">
-            {isConnected ? (
-              <>
-                <div className="relative max-w-md">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="搜尋群組名稱或供應商..."
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <LineConnectionsTab
-                  groups={groups}
-                  users={users}
-                  suppliers={suppliers}
-                  searchTerm={searchTerm}
-                  onRefresh={loadData}
-                />
-              </>
-            ) : (
-              <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
-                  <Bot className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                  <p>請先在「平台連線」完成 LINE Bot 設定</p>
+            {/* 總是顯示資料，即使未連線（資料可能已存在） */}
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="搜尋群組名稱或供應商..."
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <LineConnectionsTab
+              groups={groups}
+              users={users}
+              suppliers={suppliers}
+              searchTerm={searchTerm}
+              onRefresh={loadData}
+            />
+            
+            {/* 如果未連線但有資料，表示設定已成功，只是狀態顯示問題 */}
+            {!isConnected && groups.length === 0 && users.length === 0 && (
+              <Card className="border-status-warning/30">
+                <CardContent className="py-4">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="h-5 w-5 text-status-warning" />
+                    <div>
+                      <p className="text-sm font-medium">LINE Bot 設定未完成</p>
+                      <p className="text-xs text-muted-foreground">
+                        請至「平台連線」完成設定，以啟用 AI 自動回覆功能
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -349,7 +363,7 @@ export default function AIBotManagementPage() {
               <Card>
                 <CardContent className="py-12 text-center text-muted-foreground">
                   <Bot className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                  <p>請先在「平台連線」完成 LINE Bot 設定</p>
+                  <p>請先在「平台連線」完成 LINE Bot 設定，以查看對話記錄</p>
                 </CardContent>
               </Card>
             )}

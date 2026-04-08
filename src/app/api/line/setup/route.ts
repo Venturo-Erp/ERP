@@ -25,14 +25,28 @@ export async function GET() {
     const auth = await getServerAuth()
     if (!auth.success) return NextResponse.json({ error: '請先登入' }, { status: 401 })
 
-    const { data } = await dynamicFrom('workspace_line_config')
+    // 先嘗試讀取當前工作區的設定
+    const { data: workspaceData } = await dynamicFrom('workspace_line_config')
       .select(
         'setup_step, is_connected, bot_display_name, bot_basic_id, bot_user_id, webhook_url, connected_at'
       )
       .eq('workspace_id', auth.data.workspaceId)
       .single()
 
-    return NextResponse.json(data || { setup_step: 0, is_connected: false })
+    // 如果當前工作區沒有設定，讀取第一個可用的設定
+    if (workspaceData) {
+      return NextResponse.json(workspaceData)
+    }
+
+    const { data: firstConfig } = await dynamicFrom('workspace_line_config')
+      .select(
+        'setup_step, is_connected, bot_display_name, bot_basic_id, bot_user_id, webhook_url, connected_at'
+      )
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .single()
+
+    return NextResponse.json(firstConfig || { setup_step: 0, is_connected: false })
   } catch (error) {
     logger.error('LINE setup GET error:', error)
     return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
@@ -71,9 +85,19 @@ export async function POST(req: NextRequest) {
 
       const botInfo = await testRes.json()
 
+      // 找出第一個工作區 ID 或用當前工作區 ID
+      // 這裡使用一個策略：如果有現有的設定，更新它；否則用當前工作區
+      const { data: existingConfig } = await dynamicFrom('workspace_line_config')
+        .select('workspace_id')
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single()
+
+      const targetWorkspaceId = existingConfig?.workspace_id || auth.data.workspaceId
+
       const { error: upsertError } = await dynamicFrom('workspace_line_config').upsert(
         {
-          workspace_id: auth.data.workspaceId,
+          workspace_id: targetWorkspaceId,
           channel_access_token,
           channel_secret,
           bot_basic_id: botInfo.basicId || '',
@@ -98,15 +122,19 @@ export async function POST(req: NextRequest) {
 
     // Step 3: 設定 Webhook URL
     if (action === 'set_webhook') {
+      // 找出第一個可用的設定
       const { data: config } = await dynamicFrom('workspace_line_config')
-        .select('channel_access_token')
-        .eq('workspace_id', auth.data.workspaceId)
+        .select('channel_access_token, workspace_id')
+        .order('created_at', { ascending: true })
+        .limit(1)
         .single()
 
       const lineConfig = config as unknown as LineConfig | null
       if (!lineConfig?.channel_access_token) {
         return NextResponse.json({ error: '請先完成 Step 2' }, { status: 400 })
       }
+
+      const targetWorkspaceId = lineConfig.workspace_id
 
       const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/line/webhook`
 
@@ -144,7 +172,7 @@ export async function POST(req: NextRequest) {
           setup_step: testResult.success ? 3 : 2,
           updated_at: new Date().toISOString(),
         })
-        .eq('workspace_id', auth.data.workspaceId)
+        .eq('workspace_id', targetWorkspaceId)
 
       return NextResponse.json({
         ok: testResult.success,
@@ -155,13 +183,24 @@ export async function POST(req: NextRequest) {
 
     // Step 4: 完成設定
     if (action === 'complete') {
+      // 找出第一個可用的設定來更新
+      const { data: existingConfig } = await dynamicFrom('workspace_line_config')
+        .select('workspace_id')
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single()
+
+      if (!existingConfig) {
+        return NextResponse.json({ error: '找不到 LINE 設定' }, { status: 400 })
+      }
+
       await dynamicFrom('workspace_line_config')
         .update({
           setup_step: 4,
           is_connected: true,
           updated_at: new Date().toISOString(),
         })
-        .eq('workspace_id', auth.data.workspaceId)
+        .eq('workspace_id', existingConfig.workspace_id)
 
       return NextResponse.json({ ok: true })
     }

@@ -326,7 +326,7 @@ export function LineConnectionsTab({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">不綁定</SelectItem>
-                  {suppliers.map(s => (
+                  {Array.isArray(suppliers) && suppliers.map(s => (
                     <SelectItem key={s.id} value={s.id}>
                       {s.name}
                     </SelectItem>

@@ -17,7 +17,7 @@ export async function GET() {
 
     const supabase = getSupabaseAdminClient()
 
-    // 取得群組（暫時移除 suppliers 關聯查詢）
+    // 取得當前租戶的群組
     const { data: groups, error: groupsError } = await supabase
       .from('line_groups')
       .select(
@@ -33,6 +33,7 @@ export async function GET() {
         updated_at
       `
       )
+      .eq('workspace_id', auth.data.workspaceId)
       .order('updated_at', { ascending: false })
 
     if (groupsError) {
@@ -46,7 +47,7 @@ export async function GET() {
       )
     }
 
-    // 取得用戶（包含已取消追蹤的，暫時移除關聯查詢）
+    // 取得當前租戶的用戶
     const { data: users, error: usersError } = await supabase
       .from('line_users')
       .select(
@@ -64,6 +65,7 @@ export async function GET() {
         updated_at
       `
       )
+      .eq('workspace_id', auth.data.workspaceId)
       .order('updated_at', { ascending: false })
 
     if (usersError) {

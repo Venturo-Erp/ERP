@@ -63,6 +63,27 @@ async function saveUserToDb(
 
   if (!supabaseUrl || !supabaseKey) return
 
+  // 先查詢 LINE Bot 屬於哪個 workspace
+  let workspaceId = '8ef05a74-1f87-48ab-afd3-9bfeb423935d' // 預設值
+  
+  try {
+    const configRes = await fetch(`${supabaseUrl}/rest/v1/workspace_line_config?select=workspace_id&limit=1`, {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+      },
+    })
+    
+    if (configRes.ok) {
+      const configs = await configRes.json()
+      if (configs && configs.length > 0) {
+        workspaceId = configs[0].workspace_id
+      }
+    }
+  } catch (error) {
+    // 忽略錯誤，使用預設值
+  }
+  
   await fetch(`${supabaseUrl}/rest/v1/line_users`, {
     method: 'POST',
     headers: {
@@ -72,6 +93,7 @@ async function saveUserToDb(
       Prefer: 'resolution=merge-duplicates',
     },
     body: JSON.stringify({
+      workspace_id: workspaceId,
       user_id: userId,
       display_name: profile?.displayName,
       picture_url: profile?.pictureUrl,
@@ -156,6 +178,27 @@ async function saveGroupToDb(
 
   if (!supabaseUrl || !supabaseKey) return
 
+  // 先查詢 LINE Bot 屬於哪個 workspace
+  let workspaceId = '8ef05a74-1f87-48ab-afd3-9bfeb423935d' // 預設值
+  
+  try {
+    const configRes = await fetch(`${supabaseUrl}/rest/v1/workspace_line_config?select=workspace_id&limit=1`, {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+      },
+    })
+    
+    if (configRes.ok) {
+      const configs = await configRes.json()
+      if (configs && configs.length > 0) {
+        workspaceId = configs[0].workspace_id
+      }
+    }
+  } catch (error) {
+    // 忽略錯誤，使用預設值
+  }
+  
   await fetch(`${supabaseUrl}/rest/v1/line_groups`, {
     method: 'POST',
     headers: {
@@ -165,6 +208,7 @@ async function saveGroupToDb(
       Prefer: 'resolution=merge-duplicates',
     },
     body: JSON.stringify({
+      workspace_id: workspaceId,
       group_id: groupId,
       group_name: groupName,
       member_count: memberCount,
