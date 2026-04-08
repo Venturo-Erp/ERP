@@ -316,7 +316,7 @@ export function ResourceDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent level={1} className={hasImages || isEditing ? 'max-w-4xl' : 'max-w-md'}>
+      <DialogContent level={1} className={`${hasImages || isEditing ? 'max-w-4xl' : 'max-w-md'} max-h-[85vh] overflow-y-auto`}>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {iconMap[resource.type]}
