@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
@@ -12,6 +12,8 @@ import {
   Plane,
   TrendingUp,
   FileText,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { useReceipts } from '@/data/entities/receipts'
@@ -32,6 +34,7 @@ interface TransactionRow {
   status: string
   tourCode?: string
   supplierName?: string
+  requestCode?: string
 }
 
 interface GroupedRow {
@@ -41,6 +44,7 @@ interface GroupedRow {
   expense: number
   net: number
   count: number
+  details?: TransactionRow[]
 }
 
 interface OverviewTabProps {
@@ -89,7 +93,9 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
   const stats = useMemo(() => {
     const { startDate, endDate } = dateRange
 
+    // 只算已確認的收款單（status='1'）才算收入
     const rangeReceipts = receipts.filter(r => {
+      if (r.status !== '1') return false
       const d = (r.receipt_date || r.created_at)?.split('T')[0] || ''
       return d >= startDate && d <= endDate
     })
@@ -105,12 +111,9 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
       .filter(r => !r.tour_id)
       .reduce((sum, r) => sum + (r.actual_amount || r.receipt_amount || 0), 0)
 
+    // 只算已出帳（billed）或已付款（paid）的請款單才算支出
     const confirmedPayments = rangePayments.filter(
-      pr =>
-        pr.status === 'approved' ||
-        pr.status === 'paid' ||
-        pr.status === 'billed' ||
-        pr.status === 'confirmed'
+      pr => pr.status === 'billed' || pr.status === 'paid'
     )
     const tourExpense = confirmedPayments
       .filter(pr => pr.request_category === 'tour')
@@ -157,18 +160,49 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
     paymentRequests.forEach(pr => {
       const d = (pr.request_date || pr.created_at || '')?.split('T')[0] || ''
       if (d < startDate || d > endDate) return
-      rows.push({
-        id: pr.id,
-        date: pr.request_date || pr.created_at || '',
-        description:
-          `${pr.code || pr.request_number || ''} ${pr.supplier_name || pr.tour_name || ''}`.trim(),
-        type: 'expense',
-        category: pr.request_category === 'company' ? 'company' : 'tour',
-        amount: pr.amount || 0,
-        status: pr.status === 'paid' ? '已付款' : pr.status === 'billed' ? '已出帳' : '待處理',
-        tourCode: pr.tour_code || '',
-        supplierName: pr.supplier_name || '',
-      })
+
+      // 展開每個項目的供應商（items 從 join 帶出）
+      const items = (
+        pr as unknown as {
+          items?: Array<{
+            supplier_name?: string
+            description?: string
+            subtotal?: number
+            category?: string
+          }>
+        }
+      ).items
+      if (items && items.length > 0) {
+        items.forEach(item => {
+          rows.push({
+            id: `${pr.id}_${item.description || ''}`,
+            date: pr.request_date || pr.created_at || '',
+            description: `${pr.code || pr.request_number || ''} ${item.description || ''}`.trim(),
+            type: 'expense',
+            category: pr.request_category === 'company' ? 'company' : 'tour',
+            amount: item.subtotal || 0,
+            status: pr.status === 'paid' ? '已付款' : pr.status === 'billed' ? '已出帳' : '待處理',
+            tourCode: pr.tour_code || '',
+            supplierName: item.supplier_name || pr.supplier_name || '',
+            requestCode: pr.code || pr.request_number || '',
+          })
+        })
+      } else {
+        // 沒有 items 的舊資料，用主表
+        rows.push({
+          id: pr.id,
+          date: pr.request_date || pr.created_at || '',
+          description:
+            `${pr.code || pr.request_number || ''} ${pr.supplier_name || pr.tour_name || ''}`.trim(),
+          type: 'expense',
+          category: pr.request_category === 'company' ? 'company' : 'tour',
+          amount: pr.amount || 0,
+          status: pr.status === 'paid' ? '已付款' : pr.status === 'billed' ? '已出帳' : '待處理',
+          tourCode: pr.tour_code || '',
+          supplierName: pr.supplier_name || '',
+          requestCode: pr.code || pr.request_number || '',
+        })
+      }
     })
 
     rows.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -198,13 +232,14 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
       }
 
       if (!groups.has(key)) {
-        groups.set(key, { id: key, label, income: 0, expense: 0, net: 0, count: 0 })
+        groups.set(key, { id: key, label, income: 0, expense: 0, net: 0, count: 0, details: [] })
       }
       const g = groups.get(key)!
       if (tx.type === 'income') g.income += tx.amount
       else g.expense += tx.amount
       g.net = g.income - g.expense
       g.count += 1
+      g.details!.push(tx)
     }
 
     const result = Array.from(groups.values())
@@ -440,6 +475,8 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
             )
           ) : groupedRows.length === 0 ? (
             <div className="text-center py-8 text-morandi-secondary">此區間無交易記錄</div>
+          ) : granularity === 'supplier' ? (
+            <SupplierTable rows={groupedRows} />
           ) : (
             <EnhancedTable
               columns={groupColumns}
@@ -449,6 +486,113 @@ export function OverviewTab({ dateRange, granularity }: OverviewTabProps) {
           )}
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+/** 供應商彙總表 — 可展開看明細 */
+function SupplierTable({ rows }: { rows: GroupedRow[] }) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set())
+
+  const toggle = (id: string) => {
+    setExpanded(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  return (
+    <div className="border border-border/50 rounded-lg overflow-hidden">
+      <table className="w-full text-sm border-separate border-spacing-0">
+        <thead className="bg-morandi-gold-header">
+          <tr>
+            <th className="text-left py-2.5 px-4 font-medium text-morandi-primary w-8"></th>
+            <th className="text-left py-2.5 px-4 font-medium text-morandi-primary">供應商</th>
+            <th className="text-right py-2.5 px-4 font-medium text-morandi-primary w-[130px]">
+              金額
+            </th>
+            <th className="text-right py-2.5 px-4 font-medium text-morandi-primary w-[70px]">
+              筆數
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows
+            .filter(r => r.expense > 0 || r.income > 0)
+            .map(row => {
+              const isOpen = expanded.has(row.id)
+              const amount = row.expense > 0 ? row.expense : row.income
+              const isIncome = row.income > 0 && row.expense === 0
+              return (
+                <React.Fragment key={row.id}>
+                  <tr
+                    className="hover:bg-morandi-gold/5 cursor-pointer transition-colors"
+                    onClick={() => toggle(row.id)}
+                  >
+                    <td className="py-2.5 px-4 border-b border-border/30">
+                      {isOpen ? (
+                        <ChevronDown size={14} className="text-morandi-secondary" />
+                      ) : (
+                        <ChevronRight size={14} className="text-morandi-secondary" />
+                      )}
+                    </td>
+                    <td className="py-2.5 px-4 border-b border-border/30 font-medium text-morandi-primary">
+                      {row.label}
+                    </td>
+                    <td
+                      className={`py-2.5 px-4 border-b border-border/30 text-right font-semibold ${isIncome ? 'text-morandi-green' : 'text-morandi-red'}`}
+                    >
+                      {isIncome ? '+' : '-'}
+                      {formatCurrency(amount)}
+                    </td>
+                    <td className="py-2.5 px-4 border-b border-border/30 text-right text-morandi-secondary">
+                      {row.count}
+                    </td>
+                  </tr>
+                  {isOpen &&
+                    row.details &&
+                    row.details.map(detail => (
+                      <tr key={detail.id} className="bg-morandi-container/20">
+                        <td className="border-b border-border/20"></td>
+                        <td className="py-2 px-4 pl-10 border-b border-border/20 text-morandi-secondary text-xs">
+                          <span className="text-morandi-primary/60 mr-2">{detail.requestCode}</span>
+                          {detail.description}
+                          <span className="ml-2 text-morandi-secondary/60">
+                            {detail.date
+                              ? format(new Date(detail.date), 'MM/dd', { locale: zhTW })
+                              : ''}
+                          </span>
+                        </td>
+                        <td
+                          className={`py-2 px-4 border-b border-border/20 text-right text-xs ${detail.type === 'income' ? 'text-morandi-green' : 'text-morandi-red'}`}
+                        >
+                          {formatCurrency(detail.amount)}
+                        </td>
+                        <td className="py-2 px-4 border-b border-border/20 text-right">
+                          <Badge variant="outline" className="text-[10px]">
+                            {detail.status}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                </React.Fragment>
+              )
+            })}
+          {/* 合計行 */}
+          <tr className="bg-morandi-gold-header font-semibold">
+            <td className="py-2.5 px-4"></td>
+            <td className="py-2.5 px-4 text-morandi-primary">合計</td>
+            <td className="py-2.5 px-4 text-right text-morandi-red">
+              -{formatCurrency(rows.reduce((sum, r) => sum + r.expense, 0))}
+            </td>
+            <td className="py-2.5 px-4 text-right text-morandi-secondary">
+              {rows.reduce((sum, r) => sum + r.count, 0)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   )
 }
