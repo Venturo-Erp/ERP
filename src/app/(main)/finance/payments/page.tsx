@@ -151,7 +151,7 @@ export default function PaymentsPage() {
         } else if (method === 'cash') {
           info = r.handler_name ? `經手 ${r.handler_name}` : '-'
         } else if (method === 'check') {
-          info = r.check_number ? `支票 ${r.check_number}` : '-'
+          info = r.check_number ? `支票 ${r.check_number}` : r.check_bank ? `${r.check_bank}` : '支票'
         } else if (method === 'linkpay') {
           info = r.payment_name ? String(r.payment_name) : 'LinkPay'
         }
