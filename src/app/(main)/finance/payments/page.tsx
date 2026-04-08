@@ -136,7 +136,7 @@ export default function PaymentsPage() {
       key: 'receipt_account',
       label: FinanceLabels.orderNumber,
       width: '120',
-      render: (value) => {
+      render: value => {
         const info = String(value || '-')
         return <span className="text-sm text-morandi-secondary">{info}</span>
       },

@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     // 暫時：先返回空陣列，確保 API 不報錯
     // TODO: 修復資料庫查詢後再啟用
     return NextResponse.json([])
-    
+
     /*
     const supabase = getSupabaseAdminClient()
 

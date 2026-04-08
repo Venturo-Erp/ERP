@@ -23,7 +23,7 @@ import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { logger } from '@/lib/utils/logger'
 import { LineSetupWizard } from './components/LineSetupWizard'
 import { LineConnectionsTab } from './components/LineConnectionsTab'
-import { ConversationsTab } from './components/ConversationsTab'
+import { SimpleConversations } from './components/SimpleConversations'
 import { AISettingsTab } from './components/AISettingsTab'
 
 interface LineGroup {
@@ -336,7 +336,7 @@ export default function AIBotManagementPage() {
               searchTerm={searchTerm}
               onRefresh={loadData}
             />
-            
+
             {/* 如果未連線但有資料，表示設定已成功，只是狀態顯示問題 */}
             {!isConnected && groups.length === 0 && users.length === 0 && (
               <Card className="border-status-warning/30">
@@ -357,16 +357,7 @@ export default function AIBotManagementPage() {
 
           {/* 對話記錄 */}
           <TabsContent value="conversations" className="mt-4">
-            {isConnected ? (
-              <ConversationsTab />
-            ) : (
-              <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
-                  <Bot className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                  <p>請先在「平台連線」完成 LINE Bot 設定，以查看對話記錄</p>
-                </CardContent>
-              </Card>
-            )}
+            <SimpleConversations />
           </TabsContent>
 
           {/* AI 設定 */}

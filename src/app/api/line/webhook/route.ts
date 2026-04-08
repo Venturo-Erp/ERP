@@ -65,15 +65,18 @@ async function saveUserToDb(
 
   // 先查詢 LINE Bot 屬於哪個 workspace
   let workspaceId = '8ef05a74-1f87-48ab-afd3-9bfeb423935d' // 預設值
-  
+
   try {
-    const configRes = await fetch(`${supabaseUrl}/rest/v1/workspace_line_config?select=workspace_id&limit=1`, {
-      headers: {
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`,
-      },
-    })
-    
+    const configRes = await fetch(
+      `${supabaseUrl}/rest/v1/workspace_line_config?select=workspace_id&limit=1`,
+      {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+        },
+      }
+    )
+
     if (configRes.ok) {
       const configs = await configRes.json()
       if (configs && configs.length > 0) {
@@ -83,7 +86,7 @@ async function saveUserToDb(
   } catch (error) {
     // 忽略錯誤，使用預設值
   }
-  
+
   await fetch(`${supabaseUrl}/rest/v1/line_users`, {
     method: 'POST',
     headers: {
@@ -180,15 +183,18 @@ async function saveGroupToDb(
 
   // 先查詢 LINE Bot 屬於哪個 workspace
   let workspaceId = '8ef05a74-1f87-48ab-afd3-9bfeb423935d' // 預設值
-  
+
   try {
-    const configRes = await fetch(`${supabaseUrl}/rest/v1/workspace_line_config?select=workspace_id&limit=1`, {
-      headers: {
-        'apikey': supabaseKey,
-        'Authorization': `Bearer ${supabaseKey}`,
-      },
-    })
-    
+    const configRes = await fetch(
+      `${supabaseUrl}/rest/v1/workspace_line_config?select=workspace_id&limit=1`,
+      {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+        },
+      }
+    )
+
     if (configRes.ok) {
       const configs = await configRes.json()
       if (configs && configs.length > 0) {
@@ -198,7 +204,7 @@ async function saveGroupToDb(
   } catch (error) {
     // 忽略錯誤，使用預設值
   }
-  
+
   await fetch(`${supabaseUrl}/rest/v1/line_groups`, {
     method: 'POST',
     headers: {
