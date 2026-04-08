@@ -4,7 +4,9 @@ import { getServerAuth } from '@/lib/auth/server-auth'
 
 /**
  * GET /api/line/conversations
- * 簡化版本：返回基本的對話資料
+ * 兩種模式：
+ * 1. ?view=threads - 返回聚合的對話串列表（按用戶聚合）
+ * 2. 預設模式 - 返回所有對話訊息
  */
 export async function GET(request: NextRequest) {
   try {
@@ -14,12 +16,100 @@ export async function GET(request: NextRequest) {
     }
 
     const workspaceId = auth.data.workspaceId
+    const searchParams = request.nextUrl.searchParams
+    const view = searchParams.get('view')
+    const threadUserId = searchParams.get('thread')
     
-    // 先嘗試查詢資料庫，如果失敗就返回空陣列
     const supabase = getSupabaseAdminClient()
     
-    // 注意：customer_service_conversations 表可能沒有 workspace_id 欄位
-    // 所以我們先查詢所有資料，稍後過濾
+    // 模式 1：查看特定用戶的對話串
+    if (threadUserId) {
+      const { data, error } = await supabase
+        .from('customer_service_conversations')
+        .select('*')
+        .eq('platform_user_id', threadUserId)
+        .order('created_at', { ascending: false })
+        .limit(100)
+      
+      if (error) {
+        console.warn('查詢特定用戶對話失敗:', error.message)
+        return NextResponse.json([])
+      }
+      
+      // 確保返回的是陣列，並轉換為前端需要的格式
+      const conversations = Array.isArray(data) ? data.map(item => ({
+        id: item.id,
+        platform: item.platform || 'line',
+        platform_user_id: item.platform_user_id || '',
+        user_display_name: item.user_display_name || '未知用戶',
+        user_message: item.user_message || '',
+        ai_response: item.ai_response || '',
+        created_at: item.created_at || new Date().toISOString(),
+        follow_up_status: item.follow_up_status || null,
+        // is_read 欄位不存在，用 false 代替
+        is_read: false
+      })) : []
+      
+      return NextResponse.json(conversations)
+    }
+    
+    // 模式 2：聚合的對話串列表
+    if (view === 'threads') {
+      // 先取得所有對話
+      const { data: allData, error: allError } = await supabase
+        .from('customer_service_conversations')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(200)
+      
+      if (allError) {
+        console.warn('對話查詢失敗:', allError.message)
+        return NextResponse.json([])
+      }
+      
+      if (!Array.isArray(allData) || allData.length === 0) {
+        return NextResponse.json([])
+      }
+      
+      // 前端聚合邏輯（暫時方案，之後可以改用 SQL GROUP BY）
+      const threadMap = new Map()
+      
+      for (const item of allData) {
+        const userId = item.platform_user_id || 'unknown'
+        
+        if (!threadMap.has(userId)) {
+          threadMap.set(userId, {
+            platform_user_id: userId,
+            user_display_name: item.user_display_name || '未知用戶',
+            platform: item.platform || 'line',
+            last_message: item.user_message || '',
+            last_ai_response: item.ai_response || '',
+            last_time: item.created_at || new Date().toISOString(),
+            message_count: 1,
+            unread_count: 0, // 原始表沒有 is_read 欄位，先設為 0
+            needs_followup: item.follow_up_status !== null && item.follow_up_status !== 'resolved',
+            // 原始資料引用（用於點擊後顯示詳細對話）
+            raw_messages: [item]
+          })
+        } else {
+          const thread = threadMap.get(userId)
+          thread.message_count++
+          // 原始表沒有 is_read 欄位，暫時不計數
+          if (item.follow_up_status !== null && item.follow_up_status !== 'resolved') {
+            thread.needs_followup = true
+          }
+          thread.raw_messages.push(item)
+        }
+      }
+      
+      // 轉換為陣列並排序（最新對話在前）
+      const threads = Array.from(threadMap.values())
+        .sort((a, b) => new Date(b.last_time).getTime() - new Date(a.last_time).getTime())
+      
+      return NextResponse.json(threads)
+    }
+    
+    // 模式 3：預設模式 - 返回所有對話訊息（現有邏輯）
     const { data, error } = await supabase
       .from('customer_service_conversations')
       .select('*')

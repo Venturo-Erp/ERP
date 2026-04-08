@@ -3,6 +3,7 @@ import { Tour } from '@/stores/types'
 export interface NewTourData {
   name: string
   tour_type?: 'official' | 'proposal' | 'template' // 團類型
+  tour_service_type?: 'flight' | 'flight_hotel' | 'hotel' | 'car_service' | 'tour_group' | 'visa' // 團服務類型
   days_count?: number | null // 天數（提案/模板用）
 
   // 🔧 核心表架構：統一欄位命名
