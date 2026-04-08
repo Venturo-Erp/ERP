@@ -124,12 +124,12 @@ export default function PaymentsPage() {
 
   // 表格欄位
   const columns: TableColumn<Receipt>[] = [
-    { key: 'receipt_number', label: FinanceLabels.receiptNumber, sortable: true, width: '180' },
+    { key: 'receipt_number', label: FinanceLabels.receiptNumber, sortable: true, width: '155' },
     {
       key: 'receipt_date',
       label: FinanceLabels.receiptDate,
       sortable: true,
-      width: '90',
+      width: '80',
       render: value => <DateCell date={String(value)} />,
     },
     {
