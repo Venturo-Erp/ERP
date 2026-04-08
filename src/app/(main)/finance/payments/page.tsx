@@ -129,13 +129,13 @@ export default function PaymentsPage() {
       key: 'receipt_date',
       label: FinanceLabels.receiptDate,
       sortable: true,
-      width: '80',
-      render: value => <DateCell date={String(value)} />,
+      width: '85',
+      render: value => <DateCell date={String(value)} showIcon={false} />,
     },
     {
       key: 'order_number',
       label: FinanceLabels.orderNumber,
-      width: '130',
+      width: '100',
       render: (_, row) => {
         const r = row as Receipt & Record<string, unknown>
         const method = String(r.payment_method || '')
