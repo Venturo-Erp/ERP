@@ -198,6 +198,20 @@ export const FEATURES: FeatureDefinition[] = [
     routes: [],
   },
   {
+    code: 'tour_controller',
+    name: '團控功能',
+    description: '指派團控人員，團控為必填欄位',
+    category: 'premium',
+    routes: ['/tours'],
+  },
+  {
+    code: 'tour_attributes',
+    name: '旅行屬性功能',
+    description: '選擇團類型：機票、機加酒、訂房、派車、旅遊團、簽證',
+    category: 'premium',
+    routes: ['/tours'],
+  },
+  {
     code: 'tenants',
     name: '租戶管理',
     description: '建立與管理其他公司租戶',
@@ -209,7 +223,7 @@ export const FEATURES: FeatureDefinition[] = [
     name: 'eSIM 管理',
     description: '網卡管理、派發',
     category: 'enterprise',
-    routes: ['/esims'],
+    routes: ['/tenants'],
   },
 ]
 

@@ -27,8 +27,23 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
   const isProposalOrTemplate = newTour.tour_type === 'proposal' || newTour.tour_type === 'template'
   const { isFeatureEnabled } = useWorkspaceFeatures()
   const hasDepartments = isFeatureEnabled('departments')
+  const hasTourController = isFeatureEnabled('tour_controller')
+  const hasTourAttributes = isFeatureEnabled('tour_attributes')
   const { items: departments = [] } = useDepartments()
   const { items: employees = [] } = useEmployeesSlim()
+
+  // 暫時硬編碼可用的團類型（等後端 API 完成後改為從設定獲取）
+  const availableTourCategories = [
+    { id: 'flight', label: '✈️ 機票', enabled: true },
+    { id: 'flight_hotel', label: '🏨 機加酒', enabled: true },
+    { id: 'hotel', label: '🛏️ 訂房', enabled: true },
+    { id: 'car_service', label: '🚗 派車', enabled: true },
+    { id: 'tour_group', label: '🧳 旅遊團', enabled: true },
+    { id: 'visa', label: '🛂 簽證', enabled: true },
+  ]
+
+  // 實際可用的團類型（根據租戶設定）
+  const enabledTourCategories = availableTourCategories.filter(cat => cat.enabled)
 
   // 🔧 核心表架構：接收完整國家資料
   const handleCountryChange = (data: { id: string; name: string; code: string }) => {
@@ -64,62 +79,65 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
         />
       </div>
 
-      {/* 團類型選擇（必填） */}
-      <div>
-        <label className="text-sm font-medium text-morandi-primary">
-          團類型 <span className="text-red-500">*</span>
-        </label>
-        <Select
-          value={newTour.tour_service_type || 'tour_group'}
-          onValueChange={(value: 'flight' | 'flight_hotel' | 'hotel' | 'car_service' | 'tour_group' | 'visa') =>
-            setNewTour(prev => ({
-              ...prev,
-              tour_service_type: value,
-            }))
-          }
-        >
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="選擇團類型..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="flight">✈️ 機票</SelectItem>
-            <SelectItem value="flight_hotel">🏨 機加酒</SelectItem>
-            <SelectItem value="hotel">🛏️ 訂房</SelectItem>
-            <SelectItem value="car_service">🚗 派車</SelectItem>
-            <SelectItem value="tour_group">🧳 旅遊團</SelectItem>
-            <SelectItem value="visa">🛂 簽證</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* 團控人員選擇（必填） */}
-      <div>
-        <label className="text-sm font-medium text-morandi-primary">
-          團控 <span className="text-red-500">*</span>
-        </label>
-        <Select
-          value={newTour.controller_id || ''}
-          onValueChange={value =>
-            setNewTour(prev => ({
-              ...prev,
-              controller_id: value,
-            }))
-          }
-        >
-          <SelectTrigger className="mt-1">
-            <SelectValue placeholder="選擇團控人員..." />
-          </SelectTrigger>
-          <SelectContent>
-            {employees
-              .filter(emp => emp.status !== 'terminated' && emp.status !== 'probation')
-              .map(emp => (
-                <SelectItem key={emp.id} value={emp.id}>
-                  {emp.name} {emp.employee_number ? `(${emp.employee_number})` : ''}
+      {/* 團類型選擇（必填） - 僅當租戶開啟 tour_attributes 功能時顯示 */}
+      {hasTourAttributes && (
+        <div>
+          <label className="text-sm font-medium text-morandi-primary">
+            團類型 <span className="text-red-500">*</span>
+          </label>
+          <Select
+            value={newTour.tour_service_type || 'tour_group'}
+            onValueChange={(value: 'flight' | 'flight_hotel' | 'hotel' | 'car_service' | 'tour_group' | 'visa') =>
+              setNewTour(prev => ({
+                ...prev,
+                tour_service_type: value,
+              }))
+            }
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="選擇團類型..." />
+            </SelectTrigger>
+            <SelectContent>
+              {enabledTourCategories.map(category => (
+                <SelectItem key={category.id} value={category.id}>
+                  {category.label}
                 </SelectItem>
               ))}
-          </SelectContent>
-        </Select>
-      </div>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* 團控人員選擇（必填） - 僅當租戶開啟 tour_controller 功能時顯示 */}
+      {hasTourController && (
+        <div>
+          <label className="text-sm font-medium text-morandi-primary">
+            團控 <span className="text-red-500">*</span>
+          </label>
+          <Select
+            value={newTour.controller_id || ''}
+            onValueChange={value =>
+              setNewTour(prev => ({
+                ...prev,
+                controller_id: value,
+              }))
+            }
+          >
+            <SelectTrigger className="mt-1">
+              <SelectValue placeholder="選擇團控人員..." />
+            </SelectTrigger>
+            <SelectContent>
+              {employees
+                .filter(emp => emp.status !== 'terminated' && emp.status !== 'probation')
+                .map(emp => (
+                  <SelectItem key={emp.id} value={emp.id}>
+                    {emp.name} {emp.employee_number ? `(${emp.employee_number})` : ''}
+                  </SelectItem>
+                ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {/* 部門選擇（僅有 departments 功能的租戶顯示） */}
       {hasDepartments && departments.length > 0 && (

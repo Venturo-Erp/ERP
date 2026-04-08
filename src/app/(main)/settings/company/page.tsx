@@ -41,6 +41,7 @@ import {
   invalidateDepartments,
 } from '@/data'
 import type { Department } from '@/data'
+import { TourControllerSection, TourAttributesSection } from './tour-features-section'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
@@ -626,6 +627,12 @@ export default function CompanySettingsPage() {
 
         {/* 部門管理（僅有 departments 功能的租戶顯示） */}
         <DepartmentsSection workspaceId={workspaceId} />
+
+        {/* 團控功能設定（僅有 tour_controller 功能的租戶顯示） */}
+        <TourControllerSection workspaceId={workspaceId} />
+
+        {/* 旅行屬性功能設定（僅有 tour_attributes 功能的租戶顯示） */}
+        <TourAttributesSection workspaceId={workspaceId} />
       </div>
     </ContentPageLayout>
   )
