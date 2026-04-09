@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import useSWR from 'swr'
 import { useAuthStore } from '@/stores'
 
@@ -34,10 +35,12 @@ export function usePaymentMethodsCached(type?: PaymentMethodType) {
     { revalidateOnFocus: false }
   )
 
-  // 去重：多租戶 RLS 可能返回重複，用 id 去重
-  const uniqueMethods = (data ?? []).filter(
-    (method, index, arr) => arr.findIndex(m => m.id === method.id) === index
-  )
+  // 去重 + useMemo 穩定引用（避免 useEffect 無限循環）
+  const uniqueMethods = useMemo(() => {
+    return (data ?? []).filter(
+      (method, index, arr) => arr.findIndex(m => m.id === method.id) === index
+    )
+  }, [data])
 
   return {
     methods: uniqueMethods,

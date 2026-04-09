@@ -205,7 +205,6 @@ export function AddReceiptDialog({
     setFormData,
     editingReceipt,
     setPaymentItems,
-    paymentMethods,
   ])
 
   // 如果只有一個訂單，自動帶入（編輯模式除外）
@@ -244,7 +243,13 @@ export function AddReceiptDialog({
       }
 
       // 編輯模式：更新收款單
-      if (isEditMode && editingReceipt && onUpdate) {
+      if (isEditMode && editingReceipt) {
+        // 如果沒有傳入 onUpdate，使用預設的 supabase update
+        const defaultUpdate = async (receiptId: string, data: Partial<Receipt>) => {
+          const { supabase } = await import('@/lib/supabase/client')
+          const { error } = await supabase.from('receipts').update(data).eq('id', receiptId)
+          if (error) throw error
+        }
         const result = await updateReceiptWithItems({
           receipt: editingReceipt,
           formData,
@@ -256,7 +261,7 @@ export function AddReceiptDialog({
             : null,
           userId: user.id,
           workspaceId: user.workspace_id,
-          onUpdate,
+          onUpdate: onUpdate || defaultUpdate,
         })
 
         toast({
@@ -369,7 +374,14 @@ export function AddReceiptDialog({
   }
 
   const handleDelete = async () => {
-    if (!editingReceipt || !onDelete) return
+    if (!editingReceipt) return
+
+    // 如果沒有傳入 onDelete，使用預設的 supabase delete
+    const deleteFunc = onDelete || (async (receiptId: string) => {
+      const { supabase } = await import('@/lib/supabase/client')
+      const { error } = await supabase.from('receipts').delete().eq('id', receiptId)
+      if (error) throw error
+    })
 
     const confirmed = await confirm(
       ADD_RECEIPT_TOAST_LABELS.DELETE_CONFIRM(editingReceipt.receipt_number),
@@ -380,7 +392,7 @@ export function AddReceiptDialog({
 
     setIsDeleting(true)
     try {
-      await onDelete(editingReceipt.id)
+      await deleteFunc(editingReceipt.id)
       toast({
         title: ADD_RECEIPT_DIALOG_LABELS.刪除成功,
         description: ADD_RECEIPT_TOAST_LABELS.DELETED(editingReceipt.receipt_number),
@@ -728,18 +740,88 @@ export function AddReceiptDialog({
 
         {/* 操作按鈕 */}
         <div className="flex justify-between items-center pt-4 border-t border-border">
-          {/* 左側：總金額 + 刪除按鈕 */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-morandi-secondary">
-                {ADD_RECEIPT_DIALOG_LABELS.TOTAL_6550}
-              </span>
-              <span className="text-lg font-semibold text-morandi-gold whitespace-nowrap">
-                NT$ {totalAmount.toLocaleString()}
-              </span>
-            </div>
-            {/* 刪除按鈕：只在編輯模式且未確認時顯示 */}
-            {isEditMode && !isConfirmed && onDelete && (
+          {/* 左側：總金額 */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-morandi-secondary">
+              {ADD_RECEIPT_DIALOG_LABELS.TOTAL_6550}
+            </span>
+            <span className="text-lg font-semibold text-morandi-gold whitespace-nowrap">
+              NT$ {totalAmount.toLocaleString()}
+            </span>
+          </div>
+
+          {/* 右側：異常 + 刪除 + 存檔 */}
+          <div className="flex items-center gap-2">
+            {/* 會計專用：標記異常 */}
+            {canConfirm && (
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  if (!editingReceipt) return
+                  setIsSubmitting(true)
+                  try {
+                    await handleSubmit()
+                    const updateFunc = onUpdate || (async (id: string, data: Partial<Receipt>) => {
+                      const { supabase } = await import('@/lib/supabase/client')
+                      await supabase.from('receipts').update(data).eq('id', id)
+                    })
+                    await updateFunc(editingReceipt.id, {
+                      status: '2',
+                      updated_by: user?.id,
+                    })
+                    await recalculateReceiptStats(
+                      editingReceipt.order_id,
+                      editingReceipt.tour_id || null
+                    )
+
+                    // 通知建立人：收款單被標記異常
+                    try {
+                      const { supabase } = await import('@/lib/supabase/client')
+                      const tourId = editingReceipt.tour_id
+                      if (tourId) {
+                        const { data: tour } = await supabase
+                          .from('tours')
+                          .select('channel_id')
+                          .eq('id', tourId)
+                          .single()
+                        if (tour?.channel_id) {
+                          await supabase.from('messages').insert({
+                            channel_id: tour.channel_id,
+                            workspace_id: user?.workspace_id,
+                            content: `⚠️ **收款單異常**\n收款單 ${editingReceipt.receipt_number} 已被標記為付款異常，請確認。`,
+                            event: 'system_notify',
+                            author: { name: 'Venturo', avatar: null, is_system: true },
+                            metadata: {
+                              event: 'receipt_abnormal',
+                              receipt_id: editingReceipt.id,
+                              receipt_number: editingReceipt.receipt_number,
+                            },
+                          })
+                        }
+                      }
+                    } catch (notifyErr) {
+                      logger.error('[Receipt] Failed to send abnormal notification:', notifyErr)
+                    }
+
+                    toast({ title: '已標記為異常' })
+                    onSuccess?.()
+                    onOpenChange(false)
+                  } catch (error) {
+                    toast({ title: '操作失敗', variant: 'destructive' })
+                  } finally {
+                    setIsSubmitting(false)
+                  }
+                }}
+                disabled={isSubmitting}
+                className="gap-2 text-morandi-red border-morandi-red/30 hover:bg-morandi-red/10"
+              >
+                <AlertCircle size={16} />
+                異常
+              </Button>
+            )}
+
+            {/* 刪除按鈕：編輯模式且未確認 */}
+            {isEditMode && !isConfirmed && (
               <Button
                 variant="outline"
                 onClick={handleDelete}
@@ -750,11 +832,8 @@ export function AddReceiptDialog({
                 {isDeleting ? ADD_RECEIPT_DIALOG_LABELS.刪除中 : ADD_RECEIPT_DIALOG_LABELS.刪除}
               </Button>
             )}
-          </div>
 
-          {/* 右側：按鈕 */}
-          <div className="flex space-x-2">
-            {/* 儲存按鈕（所有人都有） */}
+            {/* 存檔按鈕 */}
             {linkPayResults.length === 0 && canEdit && (
               <Button
                 onClick={handleSubmit}
@@ -768,76 +847,46 @@ export function AddReceiptDialog({
               >
                 <Save size={16} />
                 {isSubmitting
-                  ? ADD_RECEIPT_DIALOG_LABELS.更新中
-                  : ADD_RECEIPT_DIALOG_LABELS.更新收款單}
+                  ? (isEditMode ? ADD_RECEIPT_DIALOG_LABELS.更新中 : ADD_RECEIPT_DIALOG_LABELS.建立中)
+                  : (isEditMode ? ADD_RECEIPT_DIALOG_LABELS.更新收款單 : ADD_RECEIPT_DIALOG_LABELS.新增收款單)}
               </Button>
             )}
 
-            {/* 會計專用：標記異常 / 確認 */}
+            {/* 會計專用：確認收款 */}
             {canConfirm && (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={async () => {
-                    if (!editingReceipt) return
-                    setIsSubmitting(true)
-                    try {
-                      await handleSubmit()
-                      await onUpdate?.(editingReceipt.id, {
-                        status: '2',
-                        updated_by: user?.id,
-                      })
-                      // 重算團財務數據
-                      await recalculateReceiptStats(
-                        editingReceipt.order_id,
-                        editingReceipt.tour_id || null
-                      )
-                      toast({ title: '已標記為異常' })
-                      onSuccess?.()
-                      onOpenChange(false)
-                    } catch (error) {
-                      toast({ title: '操作失敗', variant: 'destructive' })
-                    } finally {
-                      setIsSubmitting(false)
-                    }
-                  }}
-                  disabled={isSubmitting}
-                  className="gap-2 text-morandi-red border-morandi-red/30 hover:bg-morandi-red/10"
-                >
-                  <AlertCircle size={16} />
-                  異常
-                </Button>
-                <Button
-                  onClick={async () => {
-                    if (!editingReceipt) return
-                    setIsSubmitting(true)
-                    try {
-                      await handleSubmit()
-                      await onUpdate?.(editingReceipt.id, {
-                        status: '1',
-                        actual_amount: totalActualAmount || totalAmount,
-                      } as Partial<Receipt>)
-                      // 重算團財務數據
-                      await recalculateReceiptStats(
-                        editingReceipt.order_id,
-                        editingReceipt.tour_id || null
-                      )
-                      toast({ title: '已確認收款' })
-                      onSuccess?.()
-                      onOpenChange(false)
-                    } catch (error) {
-                      toast({ title: '確認失敗', variant: 'destructive' })
-                    } finally {
-                      setIsSubmitting(false)
-                    }
-                  }}
-                  disabled={isSubmitting}
-                  className="gap-2 bg-morandi-green hover:bg-morandi-green/90 text-white"
-                >
-                  <Check size={16} />
-                  確認
-                </Button>
-              </>
+              <Button
+                onClick={async () => {
+                  if (!editingReceipt) return
+                  setIsSubmitting(true)
+                  try {
+                    await handleSubmit()
+                    const updateFunc = onUpdate || (async (id: string, data: Partial<Receipt>) => {
+                      const { supabase } = await import('@/lib/supabase/client')
+                      await supabase.from('receipts').update(data).eq('id', id)
+                    })
+                    await updateFunc(editingReceipt.id, {
+                      status: '1',
+                      actual_amount: totalActualAmount || totalAmount,
+                    } as Partial<Receipt>)
+                    await recalculateReceiptStats(
+                      editingReceipt.order_id,
+                      editingReceipt.tour_id || null
+                    )
+                    toast({ title: '已確認收款' })
+                    onSuccess?.()
+                    onOpenChange(false)
+                  } catch (error) {
+                    toast({ title: '確認失敗', variant: 'destructive' })
+                  } finally {
+                    setIsSubmitting(false)
+                  }
+                }}
+                disabled={isSubmitting}
+                className="gap-2 bg-morandi-green hover:bg-morandi-green/90 text-white"
+              >
+                <Check size={16} />
+                確認
+              </Button>
             )}
           </div>
         </div>
