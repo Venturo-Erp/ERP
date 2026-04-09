@@ -87,7 +87,9 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
           </label>
           <Select
             value={newTour.tour_service_type || 'tour_group'}
-            onValueChange={(value: 'flight' | 'flight_hotel' | 'hotel' | 'car_service' | 'tour_group' | 'visa') =>
+            onValueChange={(
+              value: 'flight' | 'flight_hotel' | 'hotel' | 'car_service' | 'tour_group' | 'visa'
+            ) =>
               setNewTour(prev => ({
                 ...prev,
                 tour_service_type: value,
@@ -108,36 +110,7 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
         </div>
       )}
 
-      {/* 團控人員選擇（必填） - 僅當租戶開啟 tour_controller 功能時顯示 */}
-      {hasTourController && (
-        <div>
-          <label className="text-sm font-medium text-morandi-primary">
-            團控 <span className="text-red-500">*</span>
-          </label>
-          <Select
-            value={newTour.controller_id || ''}
-            onValueChange={value =>
-              setNewTour(prev => ({
-                ...prev,
-                controller_id: value,
-              }))
-            }
-          >
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder="選擇團控人員..." />
-            </SelectTrigger>
-            <SelectContent>
-              {employees
-                .filter(emp => emp.status !== 'terminated' && emp.status !== 'probation')
-                .map(emp => (
-                  <SelectItem key={emp.id} value={emp.id}>
-                    {emp.name} {emp.employee_number ? `(${emp.employee_number})` : ''}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
+      {/* 團控已移到 TourSettings（動態選人欄位），不再寫死 */}
 
       {/* 部門選擇（僅有 departments 功能的租戶顯示） */}
       {hasDepartments && departments.length > 0 && (
