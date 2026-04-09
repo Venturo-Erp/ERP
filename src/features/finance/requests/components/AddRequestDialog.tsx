@@ -1432,11 +1432,7 @@ export function AddRequestDialog({
                       {isSubmitting ? '儲存中...' : '儲存'}
                     </Button>
                   </>
-                ) : (
-                  <p className="text-sm text-morandi-muted">
-                    此請款單已加入出納單，如需修改請先從出納單移除
-                  </p>
-                )
+                ) : null
               ) : (
                 <Button
                   onClick={handleSubmit}
