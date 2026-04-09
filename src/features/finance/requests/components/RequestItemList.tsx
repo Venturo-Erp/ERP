@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Trash2, Plus, Link2, UserCheck, X, BookOpen } from 'lucide-react'
+import { Trash2, Plus, Link2, UserCheck, X, BookOpen, ArrowRightLeft } from 'lucide-react'
 import { RequestItem, categoryOptions } from '../types'
 import {
   useAccountingSubjects,
@@ -42,6 +42,7 @@ interface EditableRequestItemListProps {
   tourId?: string | null
   disabled?: boolean
   paymentMethods?: Array<{ id: string; name: string }>
+  onTransfer?: () => void
 }
 
 /**
@@ -209,6 +210,7 @@ export function EditableRequestItemList({
   tourId,
   disabled = false,
   paymentMethods = [],
+  onTransfer,
 }: EditableRequestItemListProps) {
   const [linkDialogOpen, setLinkDialogOpen] = useState(false)
   const [linkingItemId, setLinkingItemId] = useState<string | null>(null)
@@ -472,21 +474,30 @@ export function EditableRequestItemList({
               {/* Actions */}
               <div className="text-center">
                 {index === 0 ? (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Button"
-                    onClick={addNewEmptyItem}
-                    disabled={disabled}
-                    className="h-8 w-8 text-morandi-gold hover:bg-morandi-gold/10 disabled:opacity-50 disabled:cursor-not-allowed"
-                    title={
-                      disabled
-                        ? '此請款單已加入出納單，無法新增項目'
-                        : REQUEST_ITEM_LIST_LABELS.新增項目
-                    }
-                  >
-                    <Plus size={16} />
-                  </Button>
+                  disabled && onTransfer ? (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Transfer"
+                      onClick={onTransfer}
+                      className="h-8 w-8 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10"
+                      title="成本轉移"
+                    >
+                      <ArrowRightLeft size={16} />
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      aria-label="Button"
+                      onClick={addNewEmptyItem}
+                      disabled={disabled}
+                      className="h-8 w-8 text-morandi-gold hover:bg-morandi-gold/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title={REQUEST_ITEM_LIST_LABELS.新增項目}
+                    >
+                      <Plus size={16} />
+                    </Button>
+                  )
                 ) : (
                   <Button
                     variant="ghost"
