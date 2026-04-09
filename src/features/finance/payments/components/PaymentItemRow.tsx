@@ -200,7 +200,7 @@ export function PaymentItemRow({
       {/* 主要資料行 */}
       <tr className={cn(index > 0 && 'border-t border-border/50')}>
         {/* 收款方式 */}
-        <td className="py-2 px-3 border-b border-border/50/50">
+        <td className="py-2 px-3 border-b border-border/50">
           <Select
             value={selectValue}
             onValueChange={handleReceiptTypeChange}
@@ -220,7 +220,7 @@ export function PaymentItemRow({
         </td>
 
         {/* 交易日期 */}
-        <td className="py-2 px-3 border-b border-border/50/50">
+        <td className="py-2 px-3 border-b border-border/50">
           <DatePicker
             value={item.transaction_date}
             onChange={date => onUpdate(item.id, { transaction_date: date })}
@@ -230,7 +230,7 @@ export function PaymentItemRow({
         </td>
 
         {/* 收款項目（公司收款 = 會計科目下拉，團體收款 = 手打） */}
-        <td className="py-2 px-3 border-b border-border/50/50">
+        <td className="py-2 px-3 border-b border-border/50">
           {mode === 'company' ? (
             <Select
               value={item.accounting_subject_id || ''}
@@ -266,7 +266,7 @@ export function PaymentItemRow({
         </td>
 
         {/* 備註 */}
-        <td className="py-2 px-3 border-b border-border/50/50">
+        <td className="py-2 px-3 border-b border-border/50">
           <input
             type="text"
             value={item.notes || ''}
@@ -277,7 +277,7 @@ export function PaymentItemRow({
         </td>
 
         {/* 收款金額 */}
-        <td className="py-2 px-3 border-b border-border/50/50 text-right">
+        <td className="py-2 px-3 border-b border-border/50 text-right">
           <input
             type="text"
             inputMode="numeric"
@@ -325,11 +325,11 @@ export function PaymentItemRow({
       {/* LinkPay 額外欄位 - 表頭 */}
       {item.receipt_type === RECEIPT_TYPES.LINK_PAY && (
         <tr className="text-xs text-morandi-primary font-medium bg-card">
-          <th className="text-left py-2.5 px-3 border-b border-border/50/50">Email *</th>
-          <th className="text-left py-2.5 px-3 border-b border-border/50/50">
+          <th className="text-left py-2.5 px-3 border-b border-border/50">Email *</th>
+          <th className="text-left py-2.5 px-3 border-b border-border/50">
             {PAYMENT_ITEM_ROW_LABELS.LABEL_6186}
           </th>
-          <th className="text-left py-2.5 px-3 border-b border-border/50/50" colSpan={2}>
+          <th className="text-left py-2.5 px-3 border-b border-border/50" colSpan={2}>
             {PAYMENT_ITEM_ROW_LABELS.LABEL_4673}
           </th>
           <th className="border-b border-border/50" colSpan={2}></th>
@@ -339,7 +339,7 @@ export function PaymentItemRow({
       {/* LinkPay 額外欄位 - 輸入 */}
       {item.receipt_type === RECEIPT_TYPES.LINK_PAY && (
         <tr className="bg-card">
-          <td className="py-2 px-3 border-b border-border/50/50">
+          <td className="py-2 px-3 border-b border-border/50">
             <input
               type="email"
               value={item.email || ''}
@@ -348,7 +348,7 @@ export function PaymentItemRow({
               className="input-no-focus w-full bg-transparent text-sm"
             />
           </td>
-          <td className="py-2 px-3 border-b border-border/50/50">
+          <td className="py-2 px-3 border-b border-border/50">
             <DatePicker
               value={item.pay_dateline || ''}
               onChange={date => onUpdate(item.id, { pay_dateline: date })}
@@ -356,7 +356,7 @@ export function PaymentItemRow({
               buttonClassName="h-auto p-0 border-0 shadow-none bg-transparent"
             />
           </td>
-          <td className="py-2 px-3 border-b border-border/50/50" colSpan={2}>
+          <td className="py-2 px-3 border-b border-border/50" colSpan={2}>
             <input
               type="text"
               value={item.payment_name || ''}
@@ -392,10 +392,10 @@ export function PaymentItemRow({
       {/* LinkPay 產生的連結 */}
       {item.receipt_type === RECEIPT_TYPES.LINK_PAY && generatedLink && (
         <tr className="bg-morandi-gold/10">
-          <td className="py-2 px-3 border-b border-border/50/50 text-xs text-morandi-secondary">
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-secondary">
             {PAYMENT_ITEM_ROW_LABELS.LABEL_1487}
           </td>
-          <td className="py-2 px-3 border-b border-border/50/50" colSpan={3}>
+          <td className="py-2 px-3 border-b border-border/50" colSpan={3}>
             <input
               type="text"
               value={generatedLink}

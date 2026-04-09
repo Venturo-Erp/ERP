@@ -247,7 +247,7 @@ export function AddReceiptDialog({
         // 如果沒有傳入 onUpdate，使用預設的 supabase update
         const defaultUpdate = async (receiptId: string, data: Partial<Receipt>) => {
           const { supabase } = await import('@/lib/supabase/client')
-          const { error } = await supabase.from('receipts').update(data).eq('id', receiptId)
+          const { error } = await supabase.from('receipts').update(data as Record<string, unknown>).eq('id', receiptId)
           if (error) throw error
         }
         const result = await updateReceiptWithItems({
@@ -763,7 +763,7 @@ export function AddReceiptDialog({
                     await handleSubmit()
                     const updateFunc = onUpdate || (async (id: string, data: Partial<Receipt>) => {
                       const { supabase } = await import('@/lib/supabase/client')
-                      await supabase.from('receipts').update(data).eq('id', id)
+                      await supabase.from('receipts').update(data as Record<string, unknown>).eq('id', id)
                     })
                     await updateFunc(editingReceipt.id, {
                       status: '2',
@@ -781,12 +781,13 @@ export function AddReceiptDialog({
                       if (tourId) {
                         const { data: tour } = await supabase
                           .from('tours')
-                          .select('channel_id')
+                          .select('id, channel_id')
                           .eq('id', tourId)
                           .single()
-                        if (tour?.channel_id) {
+                        const channelId = (tour as unknown as { channel_id?: string })?.channel_id
+                        if (channelId) {
                           await supabase.from('messages').insert({
-                            channel_id: tour.channel_id,
+                            channel_id: channelId,
                             workspace_id: user?.workspace_id,
                             content: `⚠️ **收款單異常**\n收款單 ${editingReceipt.receipt_number} 已被標記為付款異常，請確認。`,
                             event: 'system_notify',
@@ -862,7 +863,7 @@ export function AddReceiptDialog({
                     await handleSubmit()
                     const updateFunc = onUpdate || (async (id: string, data: Partial<Receipt>) => {
                       const { supabase } = await import('@/lib/supabase/client')
-                      await supabase.from('receipts').update(data).eq('id', id)
+                      await supabase.from('receipts').update(data as Record<string, unknown>).eq('id', id)
                     })
                     await updateFunc(editingReceipt.id, {
                       status: '1',
