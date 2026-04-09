@@ -36,6 +36,7 @@ import { supabase } from '@/lib/supabase/client'
 import { mutate as globalMutate } from 'swr'
 import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import { useWorkspaceFeatures } from '@/lib/permissions'
+import { useWorkspaceRoles } from '@/data/hooks'
 import {
   ModulePermissionTable,
   type TabPermission,
@@ -76,6 +77,7 @@ export function EmployeeForm({
   } = useUserStore()
   const { user } = useAuthStore()
   const { isFeatureEnabled } = useWorkspaceFeatures()
+  const { roles: cachedRoles } = useWorkspaceRoles()
 
   // 確保員工資料已載入
   useEffect(() => {
@@ -145,23 +147,12 @@ export function EmployeeForm({
     load()
   }, [user?.workspace_id, employeeId])
 
-  // 載入職務列表
+  // 職務列表改用 SWR 快取
   useEffect(() => {
-    if (!user?.workspace_id) return
-
-    const fetchRoles = async () => {
-      try {
-        const res = await fetch(`/api/permissions/roles?workspace_id=${user.workspace_id}`)
-        if (res.ok) {
-          const data = await res.json()
-          setRoles(data)
-        }
-      } catch (err) {
-        logger.error('載入職務失敗:', err)
-      }
+    if (cachedRoles.length > 0) {
+      setRoles(cachedRoles as Role[])
     }
-    fetchRoles()
-  }, [user?.workspace_id])
+  }, [cachedRoles])
 
   // 當選擇職務時，載入該職務的分頁權限
   useEffect(() => {
