@@ -366,7 +366,7 @@ export function EditableRequestItemList({
                 <DeferredInput
                   value={item.description}
                   onChange={val => updateItem(item.id, { description: val })}
-                  className={`${inputClass} flex-1 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`${inputClass} flex-1 disabled:cursor-default disabled:text-morandi-primary`}
                   disabled={disabled}
                 />
                 {!item.advanced_by ? (
@@ -374,7 +374,7 @@ export function EditableRequestItemList({
                     type="button"
                     onClick={() => updateItem(item.id, { advanced_by: '_pending' })}
                     disabled={disabled}
-                    className="shrink-0 p-1 rounded hover:bg-morandi-container/20 text-morandi-muted hover:text-morandi-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="shrink-0 p-1 rounded hover:bg-morandi-container/20 text-morandi-muted hover:text-morandi-primary transition-colors disabled:cursor-default disabled:text-morandi-primary"
                     title={disabled ? '此請款單已加入出納單，無法修改' : '員工代墊'}
                   >
                     <UserCheck size={14} />
@@ -404,7 +404,7 @@ export function EditableRequestItemList({
                         updateItem(item.id, { advanced_by: undefined, advanced_by_name: undefined })
                       }
                       disabled={disabled}
-                      className="shrink-0 p-0.5 rounded hover:bg-morandi-red/10 text-morandi-muted hover:text-morandi-red disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="shrink-0 p-0.5 rounded hover:bg-morandi-red/10 text-morandi-muted hover:text-morandi-red disabled:cursor-default disabled:text-morandi-primary"
                       title={disabled ? '此請款單已加入出納單，無法修改' : '取消代墊'}
                     >
                       <X size={12} />
@@ -455,7 +455,7 @@ export function EditableRequestItemList({
                       setLinkDialogOpen(true)
                     }}
                     disabled={disabled}
-                    className={`h-7 w-7 ${item.confirmation_item_id ? 'text-morandi-green' : 'text-morandi-muted hover:text-morandi-secondary'} disabled:opacity-50 disabled:cursor-not-allowed`}
+                    className={`h-7 w-7 ${item.confirmation_item_id ? 'text-morandi-green' : 'text-morandi-muted hover:text-morandi-secondary'} disabled:cursor-default disabled:text-morandi-primary`}
                     title={
                       disabled
                         ? '此請款單已加入出納單，無法連結確認單'
@@ -492,7 +492,7 @@ export function EditableRequestItemList({
                       aria-label="Button"
                       onClick={addNewEmptyItem}
                       disabled={disabled}
-                      className="h-8 w-8 text-morandi-gold hover:bg-morandi-gold/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="h-8 w-8 text-morandi-gold hover:bg-morandi-gold/10 disabled:cursor-default disabled:text-morandi-primary"
                       title={REQUEST_ITEM_LIST_LABELS.新增項目}
                     >
                       <Plus size={16} />
@@ -505,7 +505,7 @@ export function EditableRequestItemList({
                     aria-label="Delete"
                     onClick={() => removeItem(item.id)}
                     disabled={disabled}
-                    className="h-8 w-8 text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="h-8 w-8 text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 disabled:cursor-default disabled:text-morandi-primary"
                     title={
                       disabled
                         ? '此請款單已加入出納單，無法刪除項目'
