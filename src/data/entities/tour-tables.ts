@@ -22,7 +22,7 @@ export interface TourTable {
 export const tourTableEntity = createEntityHook<TourTable>('tour_tables', {
   list: {
     select:
-      '*',
+      'id,tour_id,meal_setting_id,table_number,capacity,display_order,workspace_id,created_at,updated_at',
     orderBy: { column: 'table_number', ascending: true },
   },
   slim: {

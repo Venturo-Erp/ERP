@@ -20,7 +20,7 @@ export const tourRoomAssignmentEntity = createEntityHook<TourRoomAssignment>(
   'tour_room_assignments',
   {
     list: {
-      select: '*',
+      select: 'id,room_id,order_member_id,bed_number,created_at,updated_at',
       orderBy: { column: 'created_at', ascending: true },
     },
     slim: {

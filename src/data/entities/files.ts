@@ -40,7 +40,7 @@ export interface FileRecord {
 export const fileEntity = createEntityHook<FileRecord>('files', {
   list: {
     select:
-      '*',
+      'id,workspace_id,folder_id,filename,original_filename,content_type,size_bytes,extension,storage_path,storage_bucket,thumbnail_path,category,tags,tour_id,order_id,customer_id,supplier_id,email_id,source,source_email_attachment_id,version,previous_version_id,is_starred,is_archived,is_deleted,deleted_at,download_count,last_accessed_at,description,notes,created_at,updated_at,created_by,updated_by',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

@@ -22,7 +22,7 @@ export interface PnrAiQuery {
 export const pnrAiQueryEntity = createEntityHook<PnrAiQuery>('pnr_ai_queries', {
   list: {
     select:
-      '*',
+      'id,workspace_id,pnr_id,query_text,query_context,response_text,response_metadata,queried_by,created_at',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

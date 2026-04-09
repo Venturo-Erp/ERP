@@ -79,7 +79,7 @@ export const tourRequestEntity = createEntityHook<TourRequest>('tour_requests', 
   workspaceScoped: true,
   list: {
     select:
-      '*',
+      'id,code,tour_id,tour_code,tour_name,order_id,handler_type,assignee_id,assignee_name,supplier_id,supplier_name,supplier_type,category,service_date,service_date_end,title,description,quantity,specifications,member_ids,member_data,status,priority,reply_content,reply_note,replied_at,replied_by,estimated_cost,quoted_cost,final_cost,currency,confirmed_at,confirmed_by,confirmed_by_name,sync_to_app,synced_at,workspace_id,target_workspace_id,created_by,created_by_name,updated_by,updated_by_name,created_at,updated_at,hidden,is_from_core,response_status,supplier_response_at,recipient_workspace_id,sent_at,request_type,items,note',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

@@ -22,7 +22,8 @@ export interface Department {
 
 export const departmentEntity = createEntityHook<Department>('departments', {
   list: {
-    select: '*',
+    select:
+      'id,workspace_id,name,code,description,is_active,display_order,created_at,updated_at,created_by,updated_by',
     orderBy: { column: 'display_order', ascending: true },
   },
   detail: { select: '*' },

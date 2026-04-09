@@ -6,8 +6,7 @@ import type { QuoteItem } from '@/types/quote.types'
 
 export const quoteItemEntity = createEntityHook<QuoteItem>('quote_items', {
   list: {
-    select:
-      '*',
+    select: '*',
     orderBy: { column: 'order', ascending: true },
   },
   slim: {

@@ -11,7 +11,7 @@ import type { TourLeader } from '@/types/tour-leader.types'
 export const tourLeaderEntity = createEntityHook<TourLeader>('tour_leaders', {
   list: {
     select:
-      '*',
+      'id,code,name,english_name,phone,email,address,national_id,passport_number,passport_expiry,languages,specialties,license_number,notes,status,display_order,created_at,updated_at,photo,domestic_phone,overseas_phone',
     orderBy: { column: 'name', ascending: true },
   },
   slim: {

@@ -11,7 +11,7 @@ import type { Region } from '@/stores/region-store'
 export const regionEntity = createEntityHook<Region>('regions', {
   list: {
     select:
-      '*',
+      'id,country_id,name,name_en,description,display_order,is_active,created_at,updated_at,workspace_id',
     orderBy: { column: 'display_order', ascending: true },
   },
   slim: {

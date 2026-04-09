@@ -7,7 +7,7 @@ import type { Esim } from '@/types/esim.types'
 export const esimEntity = createEntityHook<Esim>('esims', {
   list: {
     select:
-      '*',
+      'id,workspace_id,esim_number,group_code,order_number,supplier_order_number,status,product_id,quantity,price,email,note,created_at,created_by,updated_at,updated_by',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

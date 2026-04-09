@@ -26,7 +26,7 @@ export interface TourRoom {
 export const tourRoomEntity = createEntityHook<TourRoom>('tour_rooms', {
   list: {
     select:
-      '*',
+      'id,tour_id,hotel_name,room_type,room_number,capacity,night_number,notes,display_order,created_at,updated_at,booking_code,amount,created_by,updated_by',
     orderBy: { column: 'display_order', ascending: true },
   },
   slim: {

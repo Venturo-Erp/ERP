@@ -27,8 +27,7 @@ export const pnrFlightStatusHistoryEntity = createEntityHook<PnrFlightStatusHist
   'pnr_flight_status_history',
   {
     list: {
-      select:
-        '*',
+      select: '*',
       orderBy: { column: 'recorded_at', ascending: false },
     },
     slim: {

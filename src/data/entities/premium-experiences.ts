@@ -30,7 +30,7 @@ export interface PremiumExperience {
 export const premiumExperienceEntity = createEntityHook<PremiumExperience>('premium_experiences', {
   list: {
     select:
-      '*',
+      'id,name,english_name,name_local,tagline,country_id,region_id,city_id,specific_location,latitude,longitude,category,sub_category,exclusivity_level,description,description_en,highlights,what_makes_it_special,expert_name,expert_title,expert_credentials,expert_profile,duration_hours,group_size_min,group_size_max,language_support,difficulty_level,physical_requirement,available_seasons,best_time_of_day,advance_booking_days,price_per_person_min,price_per_person_max,currency,price_includes,price_excludes,commission_rate,net_price_per_person,booking_contact,booking_email,booking_phone,cancellation_policy,minimum_participants,dress_code,what_to_bring,restrictions,meeting_point,meeting_point_coords,transportation_included,pickup_service,inclusions,images,thumbnail,video_url,certifications,awards,media_features,recommended_for,best_for_age_group,suitable_for_children,related_attractions,combine_with,sustainability_practices,supports_local_community,eco_friendly,ratings,review_count,is_active,is_featured,display_order,internal_notes,created_at,updated_at,created_by,updated_by',
     orderBy: { column: 'display_order', ascending: true },
   },
   slim: {

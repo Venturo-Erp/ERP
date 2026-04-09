@@ -25,7 +25,7 @@ export interface PnrFareHistory {
 export const pnrFareHistoryEntity = createEntityHook<PnrFareHistory>('pnr_fare_history', {
   list: {
     select:
-      '*',
+      'id,workspace_id,pnr_id,fare_basis,currency,base_fare,taxes,total_fare,source,raw_fare_data,recorded_at,recorded_by,created_at',
     orderBy: { column: 'recorded_at', ascending: false },
   },
   slim: {

@@ -7,7 +7,7 @@ import type { PNR } from '@/types/pnr.types'
 export const pnrEntity = createEntityHook<PNR>('pnrs', {
   list: {
     select:
-      '*',
+      'id,record_locator,workspace_id,employee_id,raw_pnr,passenger_names,ticketing_deadline,cancellation_deadline,segments,special_requests,other_info,status,notes,created_at,updated_at,created_by,updated_by,tour_id',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

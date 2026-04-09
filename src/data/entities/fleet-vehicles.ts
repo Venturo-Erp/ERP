@@ -11,7 +11,7 @@ import type { FleetVehicle } from '@/types/fleet.types'
 export const fleetVehicleEntity = createEntityHook<FleetVehicle>('fleet_vehicles', {
   list: {
     select:
-      '*',
+      'id,workspace_id,license_plate,vehicle_name,vehicle_type,capacity,driver_name,driver_phone,status,notes,display_order,created_at,updated_at,brand,model,year,vin,default_driver_id,registration_date,inspection_due_date,insurance_due_date,last_maintenance_date,next_maintenance_date,next_maintenance_km,current_mileage,documents,created_by,updated_by',
     orderBy: { column: 'license_plate', ascending: true },
   },
   slim: {

@@ -29,8 +29,7 @@ export const michelinRestaurantEntity = createEntityHook<MichelinRestaurant>(
   'michelin_restaurants',
   {
     list: {
-      select:
-        '*',
+      select: '*',
       orderBy: { column: 'display_order', ascending: true },
     },
     slim: {

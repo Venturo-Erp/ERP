@@ -8,7 +8,7 @@ export const workspaceBonusDefaultEntity = createEntityHook<WorkspaceBonusDefaul
   'workspace_bonus_defaults',
   {
     list: {
-      select: '*',
+      select: 'id,workspace_id,type,bonus,bonus_type,employee_id,created_at,updated_at',
       orderBy: { column: 'type', ascending: true },
     },
     slim: {
