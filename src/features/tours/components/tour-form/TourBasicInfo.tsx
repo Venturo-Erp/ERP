@@ -25,9 +25,8 @@ interface TourBasicInfoProps {
 
 export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
   const isProposalOrTemplate = newTour.tour_type === 'proposal' || newTour.tour_type === 'template'
-  const { isFeatureEnabled } = useWorkspaceFeatures()
+  const { isFeatureEnabled, loading: featuresLoading } = useWorkspaceFeatures()
   const hasDepartments = isFeatureEnabled('departments')
-  const hasTourController = isFeatureEnabled('tour_controller')
   const hasTourAttributes = isFeatureEnabled('tour_attributes')
   const { items: departments = [] } = useDepartments()
   const { items: employees = [] } = useEmployeesSlim()
@@ -64,6 +63,19 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
       cityCode: airportCode,
       cityName: cityName,
     }))
+  }
+
+  if (featuresLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="space-y-2">
+            <div className="h-4 w-20 bg-morandi-container/50 rounded animate-pulse" />
+            <div className="h-10 w-full bg-morandi-container/30 rounded animate-pulse" />
+          </div>
+        ))}
+      </div>
+    )
   }
 
   return (
