@@ -151,10 +151,7 @@ export async function POST(request: NextRequest) {
       rolePermissions = Array.from(permSet)
     }
 
-    // 管理員：保留具體權限，但加上 '*' 讓所有權限檢查通過
-    if (isAdmin) {
-      rolePermissions.unshift('*')
-    }
+    // 管理員權限由 role_tab_permissions 控制，不再加 '*'
 
     // 8. 產生 JWT（server-side 簽名）
     const jwt = await new SignJWT({
