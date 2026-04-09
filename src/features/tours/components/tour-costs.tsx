@@ -33,7 +33,7 @@ interface PaymentRequestWithItems {
   items?: PaymentRequestItem[]
   [key: string]: unknown
 }
-import { Receipt, Plus, Truck, Hotel, Utensils, MapPin, X, TrendingDown } from 'lucide-react'
+import { Receipt, Plus, Truck, Hotel, Utensils, MapPin, X, HandCoins } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { AddRequestDialog } from '@/features/finance/requests/components/AddRequestDialog'
 import type { PaymentRequest } from '@/types/finance.types'
@@ -463,7 +463,7 @@ function PaymentRequestOverviewTable({ tour }: { tour: Tour }) {
   return (
     <div className="border border-border rounded-lg overflow-x-auto bg-card">
       <div className="px-4 py-2 bg-morandi-red/10 flex items-center gap-2">
-        <TrendingDown className="w-4 h-4 text-morandi-red" />
+        <HandCoins className="w-4 h-4 text-morandi-red" />
         <span className="text-sm font-medium text-morandi-red">請款總覽 ({prList.length})</span>
       </div>
       <table className="w-full text-sm table-fixed" style={{ minWidth: 900 }}>

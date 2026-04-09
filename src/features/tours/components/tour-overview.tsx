@@ -14,7 +14,7 @@ import {
   DollarSign,
   Users,
   FileText,
-  TrendingUp,
+  Wallet,
   HandCoins,
   AlertCircle,
   CheckCircle,
@@ -148,13 +148,13 @@ export const TourOverview = React.memo(function TourOverview({
         {
           title: COMP_TOURS_LABELS.已付金額,
           amount: order.paid_amount ?? 0,
-          icon: TrendingUp,
+          icon: Wallet,
           color: 'text-morandi-green',
         },
         {
           title: COMP_TOURS_LABELS.未付金額,
           amount: order.remaining_amount ?? 0,
-          icon: TrendingUp,
+          icon: Wallet,
           color: 'text-morandi-red',
         },
         {
@@ -174,19 +174,19 @@ export const TourOverview = React.memo(function TourOverview({
         {
           title: '總收入（預估／實收）',
           value: `${formatCurrency(estimatedIncome)} / ${formatCurrency(confirmedIncome)}`,
-          icon: TrendingUp,
+          icon: Wallet,
           color: 'text-morandi-green',
         },
         {
           title: COMP_TOURS_LABELS.總支出,
           amount: totalExpense,
-          icon: TrendingUp,
+          icon: HandCoins,
           color: 'text-morandi-red',
         },
         {
           title: '總利潤（預估／實收）',
           value: `${formatCurrency(estimatedProfit)} / ${formatCurrency(confirmedProfit)}`,
-          icon: TrendingUp,
+          icon: DollarSign,
           color: confirmedProfit >= 0 ? 'text-morandi-green' : 'text-morandi-red',
         },
         {
@@ -245,7 +245,7 @@ export const TourOverview = React.memo(function TourOverview({
       <div className="px-5 py-3">
         <div className="flex items-stretch">
           <div className="flex-1 flex items-center gap-2.5 px-3">
-            <TrendingUp size={16} className="text-morandi-green shrink-0" />
+            <Wallet size={16} className="text-morandi-green shrink-0" />
             <div className="min-w-0">
               <p className="text-[11px] text-morandi-secondary leading-tight">
                 總收入（預估／實收）

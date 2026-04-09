@@ -87,6 +87,9 @@ export const useCategoryOperations = ({
         unit_price: null,
         total: 0,
         note: '',
+        ...(category_id === 'guide' && {
+          is_group_cost: !!(options?.quantity && options.quantity > 0),
+        }),
       }
 
       setCategories(prev =>

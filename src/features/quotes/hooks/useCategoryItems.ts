@@ -93,17 +93,14 @@ export const useCategoryItems = ({
                         : 0
                   } else if (category_id === 'guide') {
                     // 領隊導遊分類：
-                    // - 數量為 0 或 null → 個人分攤（小費），total = unit_price
-                    // - 數量 > 0 → 團體分攤（出差費），total = (數量 × 單價) ÷ 人數
-                    if (!effectiveQuantity || effectiveQuantity === 0) {
-                      // 個人分攤（小費）
-                      updatedItem.total = updatedItem.unit_price || 0
-                    } else if (groupSizeForGuide > 1) {
-                      // 團體分攤（出差費）
+                    // - is_group_cost = true（出差費）→ total = (數量 × 單價) ÷ 人數
+                    // - is_group_cost = false（小費）→ total = 數量 × 單價（每人費用，不除人數）
+                    if (updatedItem.is_group_cost && groupSizeForGuide > 1) {
+                      // 團體分攤（出差費）：整筆費用除以人數
                       const total_cost = effectiveQuantity * (updatedItem.unit_price || 0)
                       updatedItem.total = Math.ceil(total_cost / groupSizeForGuide)
                     } else {
-                      // 人數為 1 時不分攤
+                      // 個人費用（小費）：數量 × 單價，不除人數
                       updatedItem.total = Math.ceil(
                         effectiveQuantity * (updatedItem.unit_price || 0)
                       )

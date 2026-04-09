@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react'
 import { Tour } from '@/stores/types'
-import { DollarSign, Plus, TrendingUp } from 'lucide-react'
+import { DollarSign, Plus, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useTourPayments } from '../hooks/useTourPayments'
 import { PaymentSummary } from './PaymentSummary'
@@ -200,7 +200,7 @@ function ReceiptOverviewTable({ tour }: { tour: Tour }) {
   return (
     <div className="border border-border rounded-lg overflow-x-auto bg-card">
       <div className="px-4 py-2 bg-morandi-green/10 flex items-center gap-2">
-        <TrendingUp className="w-4 h-4 text-morandi-green" />
+        <Wallet className="w-4 h-4 text-morandi-green" />
         <span className="text-sm font-medium text-morandi-green">收款總覽 ({receipts.length})</span>
       </div>
       <table className="w-full text-sm table-fixed" style={{ minWidth: 900 }}>

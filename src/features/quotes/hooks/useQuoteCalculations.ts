@@ -208,21 +208,14 @@ export const useQuoteCalculations = ({
             costs.child_no_bed += itemCost
             costs.single_room += itemCost
           } else if (category.id === 'guide') {
-            if (item.is_group_cost) {
-              // 出差費（團體分攤）：item.total 已經是均攤後的每人金額
-              const itemCost = item.total || 0
-              costs.adult += itemCost
-              costs.child_with_bed += itemCost
-              costs.child_no_bed += itemCost
-              costs.single_room += itemCost
-            } else {
-              // 小費（個人費用）：每人都要付，用 unit_price
-              const itemCost = item.unit_price || 0
-              costs.adult += itemCost
-              costs.child_with_bed += itemCost
-              costs.child_no_bed += itemCost
-              costs.single_room += itemCost
-            }
+            // 出差費和小費都用 total（已在 useCategoryItems 計算好）
+            // 出差費：total = (數量 × 單價) ÷ 人數
+            // 小費：total = 數量 × 單價（不除人數）
+            const itemCost = item.total || 0
+            costs.adult += itemCost
+            costs.child_with_bed += itemCost
+            costs.child_no_bed += itemCost
+            costs.single_room += itemCost
             // 嬰兒不含導遊費用
           }
         })
