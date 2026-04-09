@@ -4,8 +4,6 @@
 -- 目的: 合併 Online 資料庫到 ERP，新增旅客專用表格
 -- ============================================================================
 
-BEGIN;
-
 -- ============================================================================
 -- 1. traveler_profiles - 旅客個人資料
 -- ============================================================================
@@ -66,6 +64,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_traveler_profiles_updated_at ON traveler_profiles;
 CREATE TRIGGER trigger_traveler_profiles_updated_at
   BEFORE UPDATE ON traveler_profiles
   FOR EACH ROW EXECUTE FUNCTION update_traveler_profiles_updated_at();
@@ -92,6 +91,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_check_member_upgrade ON traveler_profiles;
 CREATE TRIGGER trigger_check_member_upgrade
   BEFORE UPDATE ON traveler_profiles
   FOR EACH ROW EXECUTE FUNCTION check_member_upgrade();
@@ -400,13 +400,18 @@ CREATE INDEX IF NOT EXISTS idx_traveler_split_groups_created_by ON traveler_spli
 CREATE INDEX IF NOT EXISTS idx_traveler_split_groups_trip ON traveler_split_groups(trip_id) WHERE trip_id IS NOT NULL;
 
 -- 加入 FK 到 expenses 和 settlements
-ALTER TABLE traveler_expenses
-  ADD CONSTRAINT fk_traveler_expenses_split_group
-  FOREIGN KEY (split_group_id) REFERENCES traveler_split_groups(id) ON DELETE CASCADE;
-
-ALTER TABLE traveler_settlements
-  ADD CONSTRAINT fk_traveler_settlements_split_group
-  FOREIGN KEY (split_group_id) REFERENCES traveler_split_groups(id) ON DELETE CASCADE;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_traveler_expenses_split_group') THEN
+    ALTER TABLE traveler_expenses
+      ADD CONSTRAINT fk_traveler_expenses_split_group
+      FOREIGN KEY (split_group_id) REFERENCES traveler_split_groups(id) ON DELETE CASCADE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_traveler_settlements_split_group') THEN
+    ALTER TABLE traveler_settlements
+      ADD CONSTRAINT fk_traveler_settlements_split_group
+      FOREIGN KEY (split_group_id) REFERENCES traveler_split_groups(id) ON DELETE CASCADE;
+  END IF;
+END $$;
 
 -- ============================================================================
 -- 12. traveler_split_group_members - 分帳群組成員
@@ -646,4 +651,4 @@ COMMENT ON TABLE social_groups IS '揪團活動';
 COMMENT ON TABLE traveler_friends IS '好友關係';
 COMMENT ON TABLE traveler_badges IS '旅客徽章';
 
-COMMIT;
+-- Done

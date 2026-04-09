@@ -1,7 +1,2 @@
--- 加入 currency 欄位到 split_bill_expenses
-BEGIN;
-
-ALTER TABLE split_bill_expenses
-ADD COLUMN IF NOT EXISTS currency TEXT DEFAULT 'TWD';
-
-COMMIT;
+-- split_bill 功能已移除，跳過
+SELECT 1;

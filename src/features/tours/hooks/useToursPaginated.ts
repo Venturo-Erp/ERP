@@ -80,7 +80,7 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
       let query = supabase
         .from('tours')
         .select(
-          'id, code, name, location, status, departure_date, return_date, price, selling_price_per_person, max_participants, current_participants, total_revenue, total_cost, profit, archived, is_active, quote_id, itinerary_id, controller_id, closing_status, workspace_id, created_at, tour_type, days_count',
+          'id, code, name, location, country_id, airport_code, status, departure_date, return_date, price, selling_price_per_person, max_participants, current_participants, total_revenue, total_cost, profit, archived, is_active, quote_id, itinerary_id, controller_id, closing_status, workspace_id, created_at, tour_type, days_count',
           { count: 'exact' }
         )
         .eq('is_deleted', false) // 過濾已刪除的團

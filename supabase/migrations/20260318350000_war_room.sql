@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS magic_library (
 -- RLS 策略（只有 William + Eddie 能看）
 ALTER TABLE magic_library ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "magic_library_select" ON magic_library;
 CREATE POLICY magic_library_select ON magic_library
   FOR SELECT
   USING (
@@ -48,13 +49,14 @@ CREATE POLICY magic_library_select ON magic_library
     OR is_super_admin()
   );
 
+DROP POLICY IF EXISTS "magic_library_all" ON magic_library;
 CREATE POLICY magic_library_all ON magic_library
   FOR ALL
   USING (is_super_admin());
 
 -- 索引
-CREATE INDEX idx_magic_library_category ON magic_library(category);
-CREATE INDEX idx_magic_library_update_status ON magic_library(update_status);
+CREATE INDEX IF NOT EXISTS idx_magic_library_category ON magic_library(category);
+CREATE INDEX IF NOT EXISTS idx_magic_library_update_status ON magic_library(update_status);
 
 COMMENT ON TABLE magic_library IS '魔法塔图书馆 - 追踪所有开源项目和依赖';
 
@@ -117,6 +119,7 @@ CREATE TABLE IF NOT EXISTS bot_groups (
 ALTER TABLE bot_registry ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bot_groups ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "bot_registry_select" ON bot_registry;
 CREATE POLICY bot_registry_select ON bot_registry
   FOR SELECT
   USING (
@@ -124,10 +127,12 @@ CREATE POLICY bot_registry_select ON bot_registry
     OR is_super_admin()
   );
 
+DROP POLICY IF EXISTS "bot_registry_all" ON bot_registry;
 CREATE POLICY bot_registry_all ON bot_registry
   FOR ALL
   USING (is_super_admin());
 
+DROP POLICY IF EXISTS "bot_groups_select" ON bot_groups;
 CREATE POLICY bot_groups_select ON bot_groups
   FOR SELECT
   USING (
@@ -138,14 +143,15 @@ CREATE POLICY bot_groups_select ON bot_groups
     )
   );
 
+DROP POLICY IF EXISTS "bot_groups_all" ON bot_groups;
 CREATE POLICY bot_groups_all ON bot_groups
   FOR ALL
   USING (is_super_admin());
 
 -- 索引
-CREATE INDEX idx_bot_registry_platform ON bot_registry(platform);
-CREATE INDEX idx_bot_groups_bot_id ON bot_groups(bot_id);
-CREATE INDEX idx_bot_groups_is_new ON bot_groups(is_new);
+CREATE INDEX IF NOT EXISTS idx_bot_registry_platform ON bot_registry(platform);
+CREATE INDEX IF NOT EXISTS idx_bot_groups_bot_id ON bot_groups(bot_id);
+CREATE INDEX IF NOT EXISTS idx_bot_groups_is_new ON bot_groups(is_new);
 
 COMMENT ON TABLE bot_registry IS '机器人注册表';
 COMMENT ON TABLE bot_groups IS '机器人加入的群组';

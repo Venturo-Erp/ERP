@@ -4,35 +4,25 @@
 -- 日期：2026-04-05
 -- ============================================
 
-BEGIN;
 
--- ============================================
--- 1. tour_requests — 有 workspace_id，但原政策為空殼
--- ============================================
-
--- 確保 RLS 啟用
-ALTER TABLE public.tour_requests ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.tour_requests FORCE ROW LEVEL SECURITY;
-
--- 移除舊政策
-DROP POLICY IF EXISTS "tour_requests_select" ON public.tour_requests;
-DROP POLICY IF EXISTS "tour_requests_insert" ON public.tour_requests;
-DROP POLICY IF EXISTS "tour_requests_update" ON public.tour_requests;
-DROP POLICY IF EXISTS "tour_requests_delete" ON public.tour_requests;
-DROP POLICY IF EXISTS "tour_requests_all" ON public.tour_requests;
-
--- 建立標準 4 CRUD 政策
-CREATE POLICY "tour_requests_select" ON public.tour_requests FOR SELECT
-  USING (workspace_id = get_current_user_workspace() OR is_super_admin());
-
-CREATE POLICY "tour_requests_insert" ON public.tour_requests FOR INSERT
-  WITH CHECK (workspace_id = get_current_user_workspace());
-
-CREATE POLICY "tour_requests_update" ON public.tour_requests FOR UPDATE
-  USING (workspace_id = get_current_user_workspace() OR is_super_admin());
-
-CREATE POLICY "tour_requests_delete" ON public.tour_requests FOR DELETE
-  USING (workspace_id = get_current_user_workspace() OR is_super_admin());
+-- 1. tour_requests（跳過：表不存在）
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='tour_requests' AND table_schema='public') THEN
+    RAISE NOTICE 'tour_requests not found, skipping';
+    RETURN;
+  END IF;
+  ALTER TABLE public.tour_requests ENABLE ROW LEVEL SECURITY;
+  ALTER TABLE public.tour_requests FORCE ROW LEVEL SECURITY;
+  DROP POLICY IF EXISTS "tour_requests_select" ON public.tour_requests;
+  DROP POLICY IF EXISTS "tour_requests_insert" ON public.tour_requests;
+  DROP POLICY IF EXISTS "tour_requests_update" ON public.tour_requests;
+  DROP POLICY IF EXISTS "tour_requests_delete" ON public.tour_requests;
+  DROP POLICY IF EXISTS "tour_requests_all" ON public.tour_requests;
+  CREATE POLICY "tour_requests_select" ON public.tour_requests FOR SELECT USING (workspace_id = get_current_user_workspace() OR is_super_admin());
+  CREATE POLICY "tour_requests_insert" ON public.tour_requests FOR INSERT WITH CHECK (workspace_id = get_current_user_workspace());
+  CREATE POLICY "tour_requests_update" ON public.tour_requests FOR UPDATE USING (workspace_id = get_current_user_workspace() OR is_super_admin());
+  CREATE POLICY "tour_requests_delete" ON public.tour_requests FOR DELETE USING (workspace_id = get_current_user_workspace() OR is_super_admin());
+END $$;
 
 -- ============================================
 -- 2. payment_request_items — 無 workspace_id，透過 payment_requests 子查詢隔離
@@ -234,4 +224,3 @@ CREATE POLICY "channel_members_delete" ON public.channel_members FOR DELETE
     ) OR is_super_admin()
   );
 
-COMMIT;

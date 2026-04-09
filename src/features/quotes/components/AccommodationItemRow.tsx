@@ -47,8 +47,7 @@ export const AccommodationItemRow: React.FC<AccommodationItemRowProps> = ({
   return (
     <tr
       className={cn(
-        'border-b border-morandi-container/60 hover:bg-morandi-container/5 transition-colors',
-        dayIndex % 2 === 1 && 'bg-muted/40'
+        'border-b border-morandi-container/60 hover:bg-morandi-container/20 transition-colors'
       )}
     >
       {/* 分類欄：第一個房型顯示天數，合併儲存格 */}

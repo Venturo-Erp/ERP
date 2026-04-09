@@ -27,7 +27,8 @@ CREATE INDEX IF NOT EXISTS idx_company_assets_folder ON company_assets(folder_id
 -- RLS
 ALTER TABLE company_asset_folders ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "company_asset_folders_workspace_access" ON company_asset_folders;
 CREATE POLICY "company_asset_folders_workspace_access" ON company_asset_folders
-  FOR ALL USING (workspace_id IN (
-    SELECT workspace_id FROM workspace_members WHERE user_id = auth.uid()
-  ));
+  FOR ALL USING (
+    workspace_id = get_current_user_workspace() OR is_super_admin()
+  );

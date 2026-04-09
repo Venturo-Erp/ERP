@@ -1,7 +1,6 @@
 -- 在 payments 和 payment_requests 加入 accounting_voucher_id 欄位
 -- 用於追蹤每筆收款/請款對應的會計傳票
 
-BEGIN;
 
 -- 1. payments 表加入 accounting_voucher_id
 ALTER TABLE public.payments
@@ -21,4 +20,3 @@ CREATE INDEX IF NOT EXISTS idx_payment_requests_accounting_voucher
 
 COMMENT ON COLUMN public.payment_requests.accounting_voucher_id IS '對應的會計傳票 ID';
 
-COMMIT;

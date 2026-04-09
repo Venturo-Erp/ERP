@@ -3,8 +3,6 @@
 -- 新增 7 張資料表 + 擴充現有表格
 -- =====================================================
 
-BEGIN;
-
 -- =====================================================
 -- P0: 票價歷史
 -- =====================================================
@@ -555,6 +553,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_pnr_queue_count ON public.pnr_queue_items;
 CREATE TRIGGER trigger_update_pnr_queue_count
 AFTER INSERT OR UPDATE OR DELETE ON public.pnr_queue_items
 FOR EACH ROW
@@ -572,24 +571,26 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 為所有新表格添加 updated_at 觸發器
+DROP TRIGGER IF EXISTS trigger_pnr_fare_alerts_updated_at ON public.pnr_fare_alerts;
 CREATE TRIGGER trigger_pnr_fare_alerts_updated_at
 BEFORE UPDATE ON public.pnr_fare_alerts
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS trigger_flight_status_subscriptions_updated_at ON public.flight_status_subscriptions;
 CREATE TRIGGER trigger_flight_status_subscriptions_updated_at
 BEFORE UPDATE ON public.flight_status_subscriptions
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS trigger_pnr_queue_items_updated_at ON public.pnr_queue_items;
 CREATE TRIGGER trigger_pnr_queue_items_updated_at
 BEFORE UPDATE ON public.pnr_queue_items
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS trigger_pnr_schedule_changes_updated_at ON public.pnr_schedule_changes;
 CREATE TRIGGER trigger_pnr_schedule_changes_updated_at
 BEFORE UPDATE ON public.pnr_schedule_changes
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
-
-COMMIT;

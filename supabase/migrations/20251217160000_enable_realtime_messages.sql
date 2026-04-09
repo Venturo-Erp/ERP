@@ -1,10 +1,9 @@
--- 開啟 messages 表格的 Realtime 功能
--- 讓前端可以即時接收訊息更新
-
-BEGIN;
-
--- 確保 messages 表格存在後，將它加入 Realtime publication
--- Supabase 預設的 publication 名稱是 supabase_realtime
-ALTER PUBLICATION supabase_realtime ADD TABLE messages;
-
-COMMIT;
+-- 開啟 messages 表格的 Realtime 功能（冪等）
+DO $$ BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND tablename = 'messages'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE messages;
+  END IF;
+END $$;

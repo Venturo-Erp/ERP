@@ -7,20 +7,21 @@ ALTER TABLE tours
 ADD COLUMN IF NOT EXISTS tour_service_type VARCHAR(50) NOT NULL DEFAULT 'tour_group';
 
 -- 2. 新增檢查約束，確保 tour_service_type 只能是特定值
-ALTER TABLE tours 
-ADD CONSTRAINT chk_tour_service_type 
-CHECK (tour_service_type IN (
-  'flight',          -- 機票
-  'flight_hotel',    -- 機加酒
-  'hotel',           -- 訂房
-  'car_service',     -- 派車
-  'tour_group',      -- 旅遊團
-  'visa'             -- 簽證
-));
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'chk_tour_service_type') THEN
+    ALTER TABLE tours ADD CONSTRAINT chk_tour_service_type
+    CHECK (tour_service_type IN ('flight','flight_hotel','hotel','car_service','tour_group','visa'));
+  END IF;
+END $$;
 
 -- 3. 新增 department_id 欄位（選填）
-ALTER TABLE tours 
-ADD COLUMN IF NOT EXISTS department_id UUID REFERENCES departments(id);
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='departments') THEN
+    ALTER TABLE tours ADD COLUMN IF NOT EXISTS department_id UUID REFERENCES departments(id);
+  ELSE
+    ALTER TABLE tours ADD COLUMN IF NOT EXISTS department_id UUID;
+  END IF;
+END $$;
 
 -- 4. 將 controller_id 改為必填（NOT NULL）
 -- 注意：需要先處理現有資料中 controller_id 為 NULL 的情況

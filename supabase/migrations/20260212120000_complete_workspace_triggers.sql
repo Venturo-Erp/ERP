@@ -29,13 +29,15 @@ DECLARE
   ];
 BEGIN
   FOREACH tbl IN ARRAY tables LOOP
-    EXECUTE format('DROP TRIGGER IF EXISTS trigger_auto_set_workspace_id ON public.%I', tbl);
-    EXECUTE format(
-      'CREATE TRIGGER trigger_auto_set_workspace_id
-        BEFORE INSERT ON public.%I
-        FOR EACH ROW
-        EXECUTE FUNCTION public.auto_set_workspace_id()',
-      tbl
-    );
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = tbl AND table_schema = 'public') THEN
+      EXECUTE format('DROP TRIGGER IF EXISTS trigger_auto_set_workspace_id ON public.%I', tbl);
+      EXECUTE format(
+        'CREATE TRIGGER trigger_auto_set_workspace_id
+          BEFORE INSERT ON public.%I
+          FOR EACH ROW
+          EXECUTE FUNCTION public.auto_set_workspace_id()',
+        tbl
+      );
+    END IF;
   END LOOP;
 END $$;

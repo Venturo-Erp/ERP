@@ -121,10 +121,8 @@ function setSecureCookie(token: string, _rememberMe: boolean = false): void {
   const secure =
     typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'Secure; ' : ''
 
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    document.cookie = `auth-token=${token}; path=/; max-age=${maxAge}; SameSite=Lax`
-  } else if (typeof window !== 'undefined') {
-    document.cookie = `auth-token=${token}; path=/; max-age=${maxAge}; SameSite=Strict; ${secure}`
+  if (typeof window !== 'undefined') {
+    document.cookie = `auth-token=${token}; path=/; max-age=${maxAge}; SameSite=Lax; ${secure}`
   }
 }
 
@@ -157,11 +155,8 @@ export const useAuthStore = create<AuthState>()(
         resetAuthSyncState()
 
         if (typeof window !== 'undefined') {
-          if (window.location.hostname === 'localhost') {
-            document.cookie = 'auth-token=; path=/; max-age=0; SameSite=Lax'
-          } else {
-            document.cookie = 'auth-token=; path=/; max-age=0; SameSite=Strict; Secure'
-          }
+          const secure = window.location.protocol === 'https:' ? 'Secure; ' : ''
+          document.cookie = `auth-token=; path=/; max-age=0; SameSite=Lax; ${secure}`
         }
 
         set({

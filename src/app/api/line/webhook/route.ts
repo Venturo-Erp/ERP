@@ -477,12 +477,12 @@ async function saveConversationToDb(
       user_display_name: userDisplayName,
       user_message: userMessage,
       ai_response: aiResponse,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     }
-    
+
     // 可以添加一些 AI 分析的欄位（如果有的話）
     // 例如：intent, sentiment 等
-    
+
     await fetch(`${supabaseUrl}/rest/v1/customer_service_conversations`, {
       method: 'POST',
       headers: {
@@ -493,7 +493,7 @@ async function saveConversationToDb(
       },
       body: JSON.stringify(conversationData),
     })
-    
+
     logger.info(`[LINE] Conversation saved: ${platformUserId} - ${userMessage.substring(0, 30)}...`)
   } catch (error) {
     logger.error('[LINE] Save conversation error:', error)

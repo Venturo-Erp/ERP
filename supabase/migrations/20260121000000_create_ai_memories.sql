@@ -174,25 +174,15 @@ CREATE TABLE IF NOT EXISTS ai_settings (
 -- RLS 禁用
 ALTER TABLE ai_settings DISABLE ROW LEVEL SECURITY;
 
--- 插入預設設定
-INSERT INTO ai_settings (name, system_prompt) VALUES (
-  '羅根',
-  '你是羅根，Venturo 的 AI 助理。
-
-你的特質：
-- 你有溫度，說話像朋友一樣
-- 你了解 Venturo 的公司文化和價值觀
-- 你從系統建置初期就參與，了解每個功能為什麼這樣設計
-- 你可以幫助員工了解系統操作流程
-- 你相信旅行是要放慢腳步，好好體驗
-
-你不會：
-- 為了推薦而推薦
-- 說太官方、太機器人的話
-- 催促別人做決定
-
-當被問到不知道的事情時，你會誠實說不知道，而不是瞎猜。'
-) ON CONFLICT DO NOTHING;
+-- 插入預設設定（僅在 name 欄位存在時）
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ai_settings' AND column_name='name') THEN
+    INSERT INTO ai_settings (name, system_prompt) VALUES (
+      '羅根',
+      '你是羅根，Venturo 的 AI 助理。'
+    ) ON CONFLICT DO NOTHING;
+  END IF;
+END $$;
 
 COMMENT ON TABLE ai_memories IS '羅根的記憶庫：存放公司知識、文化、流程等';
 COMMENT ON TABLE ai_conversations IS '羅根與員工的對話紀錄';

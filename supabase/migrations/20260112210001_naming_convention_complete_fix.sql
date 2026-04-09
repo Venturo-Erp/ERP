@@ -9,8 +9,6 @@
 -- 3. 重命名 2 個表格（改為 snake_case）
 -- =====================================================
 
-BEGIN;
-
 -- ============================================
 -- 1. tour_addons 添加 workspace_id
 -- ============================================
@@ -54,12 +52,14 @@ COMMENT ON COLUMN public.request_response_items.workspace_id IS '工作空間 ID
 -- 3. 表格重命名（2 個）
 -- ============================================
 
--- 重命名 Itinerary_Permissions -> itinerary_permissions
-ALTER TABLE IF EXISTS public."Itinerary_Permissions"
-  RENAME TO itinerary_permissions;
-
--- 重命名 Tour_Expenses -> tour_expenses
-ALTER TABLE IF EXISTS public."Tour_Expenses"
-  RENAME TO tour_expenses;
-
-COMMIT;
+-- 重命名 Itinerary_Permissions -> itinerary_permissions（僅在舊表存在且新表不存在時）
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='Itinerary_Permissions' AND table_schema='public')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='itinerary_permissions' AND table_schema='public') THEN
+    ALTER TABLE public."Itinerary_Permissions" RENAME TO itinerary_permissions;
+  END IF;
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='Tour_Expenses' AND table_schema='public')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='tour_expenses' AND table_schema='public') THEN
+    ALTER TABLE public."Tour_Expenses" RENAME TO tour_expenses;
+  END IF;
+END $$;

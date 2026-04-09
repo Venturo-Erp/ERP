@@ -2,8 +2,6 @@
 -- 移除勁陽旅行社 (JY) 測試資料
 -- ============================================
 
-BEGIN;
-
 -- 1. 找到 JY workspace ID
 DO $$
 DECLARE
@@ -41,9 +39,18 @@ BEGIN
   DELETE FROM public.user_roles WHERE user_id = jy_supabase_user_id;
   RAISE NOTICE '✅ 已刪除 JY user_roles';
 
-  -- 刪除 JY workspace
-  DELETE FROM public.workspaces WHERE id = jy_workspace_id;
-  RAISE NOTICE '✅ 已刪除 JY workspace';
+  -- 刪除 JY 相關的依賴表（用 EXCEPTION 處理不存在的表）
+  BEGIN DELETE FROM public.bank_accounts WHERE workspace_id = jy_workspace_id; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM public.payment_methods WHERE workspace_id = jy_workspace_id; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM public.workspace_members WHERE workspace_id = jy_workspace_id; EXCEPTION WHEN undefined_table THEN NULL; END;
+
+  -- 刪除 JY workspace（用 EXCEPTION 處理 FK 衝突）
+  BEGIN
+    DELETE FROM public.workspaces WHERE id = jy_workspace_id;
+    RAISE NOTICE '✅ 已刪除 JY workspace';
+  EXCEPTION WHEN foreign_key_violation THEN
+    RAISE NOTICE '⚠️ JY workspace 有其他依賴，跳過刪除';
+  END;
 
   -- 注意：auth.users 需要用 admin API 刪除，這裡無法直接刪除
   IF jy_supabase_user_id IS NOT NULL THEN
@@ -54,8 +61,6 @@ BEGIN
   END IF;
 
 END $$;
-
-COMMIT;
 
 -- 還原 tours RLS 為正常模式
 DROP POLICY IF EXISTS "tours_select" ON public.tours;

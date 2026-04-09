@@ -2,7 +2,6 @@
 -- 執行日期：2026-03-19
 -- 用途：建立所有會計相關表格
 
-BEGIN;
 
 -- ============================================
 -- 1. 會計科目表 (Chart of Accounts)
@@ -353,4 +352,3 @@ ADD COLUMN IF NOT EXISTS accounting_voucher_id uuid REFERENCES public.journal_vo
 
 CREATE INDEX IF NOT EXISTS idx_payment_requests_accounting_voucher ON public.payment_requests(accounting_voucher_id);
 
-COMMIT;

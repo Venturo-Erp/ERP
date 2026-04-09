@@ -1,77 +1,28 @@
 -- 補齊所有表格的審計欄位 (created_by, updated_by)
-BEGIN;
+-- 使用 DO 塊安全檢查表是否存在，避免因表已刪除而報錯
 
--- tours
-ALTER TABLE public.tours
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
+DO $$
+DECLARE
+  tbl TEXT;
+  tables_with_both TEXT[] := ARRAY[
+    'tours', 'itineraries', 'orders', 'order_members', 'customers',
+    'quotes', 'quote_items', 'payment_requests', 'receipt_orders',
+    'suppliers', 'calendar_events', 'channels', 'todos'
+  ];
+  tables_with_updated_only TEXT[] := ARRAY['disbursement_orders', 'visas'];
+BEGIN
+  -- 表格需要 created_by + updated_by
+  FOREACH tbl IN ARRAY tables_with_both LOOP
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = tbl) THEN
+      EXECUTE format('ALTER TABLE public.%I ADD COLUMN IF NOT EXISTS created_by UUID', tbl);
+      EXECUTE format('ALTER TABLE public.%I ADD COLUMN IF NOT EXISTS updated_by UUID', tbl);
+    END IF;
+  END LOOP;
 
--- itineraries
-ALTER TABLE public.itineraries
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- orders
-ALTER TABLE public.orders
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- order_members
-ALTER TABLE public.order_members
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- customers
-ALTER TABLE public.customers
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- quotes
-ALTER TABLE public.quotes
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- quote_items
-ALTER TABLE public.quote_items
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- payment_requests
-ALTER TABLE public.payment_requests
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- disbursement_orders
-ALTER TABLE public.disbursement_orders
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- receipt_orders
-ALTER TABLE public.receipt_orders
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- suppliers
-ALTER TABLE public.suppliers
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- visas
-ALTER TABLE public.visas
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- calendar_events
-ALTER TABLE public.calendar_events
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- channels
-ALTER TABLE public.channels
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
--- todos
-ALTER TABLE public.todos
-ADD COLUMN IF NOT EXISTS created_by UUID,
-ADD COLUMN IF NOT EXISTS updated_by UUID;
-
-COMMIT;
+  -- 表格只需要 updated_by
+  FOREACH tbl IN ARRAY tables_with_updated_only LOOP
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = tbl) THEN
+      EXECUTE format('ALTER TABLE public.%I ADD COLUMN IF NOT EXISTS updated_by UUID', tbl);
+    END IF;
+  END LOOP;
+END $$;

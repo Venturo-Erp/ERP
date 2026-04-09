@@ -4,8 +4,6 @@
 -- 支援無限數量圖片、季節/主題分類
 -- =============================================
 
-BEGIN;
-
 -- 建立機場圖片表
 CREATE TABLE IF NOT EXISTS public.airport_images (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -62,9 +60,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_airport_images_updated_at ON public.airport_images;
 CREATE TRIGGER trigger_airport_images_updated_at
   BEFORE UPDATE ON public.airport_images
   FOR EACH ROW
   EXECUTE FUNCTION update_airport_images_updated_at();
 
-COMMIT;
+-- Done

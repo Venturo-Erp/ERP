@@ -144,7 +144,7 @@ export function DayRow({
 
   return (
     <tbody>
-      <tr className={`${idx % 2 === 1 ? 'bg-muted/5' : ''} group hover:bg-morandi-gold/5`}>
+      <tr className={`${idx % 2 === 1 ? 'bg-muted/5' : ''} group`}>
         {/* Day + date */}
         <td className={`px-2 py-1 ${c} align-middle text-center`}>
           <div className="font-semibold text-morandi-gold text-xs">Day {day.day}</div>
@@ -266,22 +266,25 @@ export function DayRow({
           </div>
         </td>
         {/* Breakfast -- restaurant drop zone */}
-        <td
-          className={`px-0 py-0 ${c} align-middle ${day.hotelBreakfast ? 'bg-morandi-gold/10' : ''}`}
-        >
+        <td className={`px-0 py-0 ${c} align-middle hover:bg-morandi-gold/10 transition-colors`}>
           <DroppableZone id={`meal-breakfast-drop-${idx}`} acceptType="restaurant">
             <div className="relative min-h-8 flex items-center">
               {day.hotelBreakfast ? (
-                <span className="px-2 text-morandi-gold text-sm font-medium pr-6">
-                  {COMP_TOURS_LABELS.飯店早餐}
-                </span>
+                <div className="flex items-center px-2">
+                  <div className="inline-flex items-center gap-1 bg-morandi-gold/10 text-morandi-gold border border-morandi-gold/30 rounded-full px-2 py-0.5 text-xs">
+                    <span>{COMP_TOURS_LABELS.飯店早餐}</span>
+                  </div>
+                </div>
               ) : day.meals.breakfast ? (
                 <div className="flex items-center px-2">
                   <div className="inline-flex items-center gap-1 bg-status-warning/10 text-status-warning border border-status-warning/30 rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.breakfast}</span>
                     <button
                       type="button"
-                      onClick={() => updateDaySchedule(idx, 'meals.breakfast', '')}
+                      onClick={() => {
+                        updateDaySchedule(idx, 'meals.breakfast', '')
+                        updateDaySchedule(idx, 'hotelBreakfast', false)
+                      }}
                       className="hover:text-destructive"
                     >
                       <X size={10} />
@@ -302,7 +305,8 @@ export function DayRow({
                   onClick={() => {
                     const next = !day.hotelBreakfast
                     updateDaySchedule(idx, 'hotelBreakfast', next)
-                    if (!next) updateDaySchedule(idx, 'meals.breakfast', '')
+                    // 互斥：勾飯店早餐時清餐廳，取消時也清
+                    updateDaySchedule(idx, 'meals.breakfast', '')
                   }}
                   className="absolute right-1.5 top-1/2 -translate-y-1/2 z-10"
                   title={COMP_TOURS_LABELS.飯店早餐}
@@ -317,13 +321,15 @@ export function DayRow({
           </DroppableZone>
         </td>
         {/* Lunch -- restaurant drop zone */}
-        <td className={`px-0 py-0 ${c} align-middle ${day.lunchSelf ? 'bg-morandi-gold/10' : ''}`}>
+        <td className={`px-0 py-0 ${c} align-middle hover:bg-morandi-gold/10 transition-colors`}>
           <DroppableZone id={`meal-lunch-drop-${idx}`} acceptType="restaurant">
             <div className="relative min-h-8 flex items-center">
               {day.lunchSelf ? (
-                <span className="px-2 text-morandi-gold text-sm font-medium pr-6">
-                  {COMP_TOURS_LABELS.敬請自理}
-                </span>
+                <div className="flex items-center px-2">
+                  <div className="inline-flex items-center gap-1 bg-morandi-gold/10 text-morandi-gold border border-morandi-gold/30 rounded-full px-2 py-0.5 text-xs">
+                    <span>{COMP_TOURS_LABELS.敬請自理}</span>
+                  </div>
+                </div>
               ) : day.meals.lunch ? (
                 <div className="flex items-center px-2">
                   <div className="inline-flex items-center gap-1 bg-status-warning/10 text-status-warning border border-status-warning/30 rounded-full px-2 py-0.5 text-xs">
@@ -350,7 +356,7 @@ export function DayRow({
                 onClick={() => {
                   const next = !day.lunchSelf
                   updateDaySchedule(idx, 'lunchSelf', next)
-                  if (!next) updateDaySchedule(idx, 'meals.lunch', '')
+                  updateDaySchedule(idx, 'meals.lunch', '')
                 }}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2"
                 title={COMP_TOURS_LABELS.敬請自理}
@@ -365,14 +371,16 @@ export function DayRow({
         </td>
         {/* Dinner -- restaurant drop zone */}
         <td
-          className={`px-0 py-0 ${cLast} align-middle ${day.dinnerSelf ? 'bg-morandi-gold/10' : ''}`}
+          className={`px-0 py-0 ${cLast} align-middle hover:bg-morandi-gold/10 transition-colors`}
         >
           <DroppableZone id={`meal-dinner-drop-${idx}`} acceptType="restaurant">
             <div className="relative min-h-8 flex items-center">
               {day.dinnerSelf ? (
-                <span className="px-2 text-morandi-gold text-sm font-medium pr-6">
-                  {COMP_TOURS_LABELS.敬請自理}
-                </span>
+                <div className="flex items-center px-2">
+                  <div className="inline-flex items-center gap-1 bg-morandi-gold/10 text-morandi-gold border border-morandi-gold/30 rounded-full px-2 py-0.5 text-xs">
+                    <span>{COMP_TOURS_LABELS.敬請自理}</span>
+                  </div>
+                </div>
               ) : day.meals.dinner ? (
                 <div className="flex items-center px-2">
                   <div className="inline-flex items-center gap-1 bg-status-warning/10 text-status-warning border border-status-warning/30 rounded-full px-2 py-0.5 text-xs">
@@ -399,7 +407,7 @@ export function DayRow({
                 onClick={() => {
                   const next = !day.dinnerSelf
                   updateDaySchedule(idx, 'dinnerSelf', next)
-                  if (!next) updateDaySchedule(idx, 'meals.dinner', '')
+                  updateDaySchedule(idx, 'meals.dinner', '')
                 }}
                 className="absolute right-1.5 top-1/2 -translate-y-1/2"
                 title={COMP_TOURS_LABELS.敬請自理}

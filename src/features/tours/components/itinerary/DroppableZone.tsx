@@ -25,9 +25,12 @@ export function DroppableZone({ id, acceptType, children, className }: Droppable
   const showReject = isOver && draggedType !== undefined && !isCompatible
 
   const highlightStyles: Record<DropZoneAcceptType, string> = {
-    attraction: 'ring-2 ring-morandi-gold/50 bg-morandi-gold/5',
-    hotel: 'ring-2 ring-morandi-gold/40 bg-morandi-gold/5',
-    restaurant: 'ring-2 ring-morandi-gold/40 bg-morandi-gold/5',
+    attraction:
+      'ring-2 ring-morandi-gold bg-morandi-gold/15 shadow-[0_0_8px_rgba(var(--morandi-gold-rgb,180,160,120),0.3)]',
+    hotel:
+      'ring-2 ring-morandi-gold bg-morandi-gold/15 shadow-[0_0_8px_rgba(var(--morandi-gold-rgb,180,160,120),0.3)]',
+    restaurant:
+      'ring-2 ring-morandi-gold bg-morandi-gold/15 shadow-[0_0_8px_rgba(var(--morandi-gold-rgb,180,160,120),0.3)]',
   }
 
   return (

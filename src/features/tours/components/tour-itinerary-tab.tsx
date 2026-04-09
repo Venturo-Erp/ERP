@@ -9,7 +9,14 @@
  */
 
 import { useState, useEffect, useCallback, useMemo, useRef, Fragment } from 'react'
-import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
+import {
+  DndContext,
+  DragOverlay,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  pointerWithin,
+} from '@dnd-kit/core'
 import {
   Loader2,
   FileText,
@@ -1283,7 +1290,12 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   // Edit mode — 左右分割佈局（左 60% 行程編輯，右 40% 資源庫+地圖）
   // ============================================================
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={pointerWithin}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
       <div className="flex flex-col h-full overflow-hidden">
         {/* -- 左右分割主內容區 -- */}
         <div className="flex-1 flex gap-2 overflow-hidden items-stretch">
@@ -1351,7 +1363,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                       size="sm"
                       onClick={handleSave}
                       disabled={saving || !title.trim()}
-                      className="h-8 px-3 text-xs bg-morandi-gold-header hover:from-morandi-gold hover:to-morandi-gold text-white gap-1"
+                      className="h-8 px-3 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1"
                     >
                       {saving ? (
                         <Loader2 className="w-3 h-3 animate-spin" />

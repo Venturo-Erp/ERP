@@ -1,12 +1,18 @@
 -- 刪除 hosanna workspace 及其相關資料
-BEGIN;
+DO $$
+DECLARE
+  ws_id uuid;
+BEGIN
+  SELECT id INTO ws_id FROM public.workspaces WHERE code = 'hosanna';
+  IF ws_id IS NULL THEN RETURN; END IF;
 
--- 先刪除員工
-DELETE FROM public.employees WHERE workspace_id = (
-  SELECT id FROM public.workspaces WHERE code = 'hosanna'
-);
+  DELETE FROM public.employees WHERE workspace_id = ws_id;
+  BEGIN DELETE FROM public.bank_accounts WHERE workspace_id = ws_id; EXCEPTION WHEN undefined_table THEN NULL; END;
+  BEGIN DELETE FROM public.payment_methods WHERE workspace_id = ws_id; EXCEPTION WHEN undefined_table THEN NULL; END;
 
--- 再刪除 workspace
-DELETE FROM public.workspaces WHERE code = 'hosanna';
-
-COMMIT;
+  BEGIN
+    DELETE FROM public.workspaces WHERE id = ws_id;
+  EXCEPTION WHEN foreign_key_violation THEN
+    RAISE NOTICE '⚠️ hosanna workspace 有其他依賴，跳過刪除';
+  END;
+END $$;

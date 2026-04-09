@@ -20,7 +20,6 @@
 --  13. workspaces — 啟用 RLS，用戶只能看自己的 workspace
 -- ============================================================================
 
-BEGIN;
 
 -- ============================================================================
 -- 1. accounting_accounts — 透過 user_id 對應 employees.supabase_user_id 取 workspace
@@ -626,7 +625,6 @@ CREATE POLICY "workspaces_delete" ON public.workspaces
     is_super_admin()
   );
 
-COMMIT;
 
 -- ============================================================================
 -- 驗證結果

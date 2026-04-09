@@ -5,8 +5,6 @@
 -- 用途: 儲存和管理 Amadeus PNR 記錄
 -- 功能: 追蹤開票期限、航班資訊、旅客資料
 
-BEGIN;
-
 -- ============================================
 -- Part 1: 參考資料表
 -- ============================================
@@ -258,6 +256,9 @@ USING (true) WITH CHECK (true);
 -- Part 5: 初始資料 - 航空公司
 -- ============================================
 
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ref_airlines' AND column_name='name_en') THEN
+
 INSERT INTO public.ref_airlines (iata_code, icao_code, name_en, name_zh, country, alliance) VALUES
 -- 台灣
 ('CI', 'CAL', 'China Airlines', '中華航空', 'Taiwan', 'SkyTeam'),
@@ -329,9 +330,15 @@ INSERT INTO public.ref_airlines (iata_code, icao_code, name_en, name_zh, country
 ('NZ', 'ANZ', 'Air New Zealand', '紐西蘭航空', 'New Zealand', 'Star Alliance')
 ON CONFLICT (iata_code) DO NOTHING;
 
+END IF;
+END $$;
+
 -- ============================================
 -- Part 6: 初始資料 - 機場
 -- ============================================
+
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='ref_airports' AND column_name='name_en') THEN
 
 INSERT INTO public.ref_airports (iata_code, icao_code, name_en, name_zh, city_code, city_name_zh, country_code, timezone) VALUES
 -- 台灣
@@ -413,6 +420,9 @@ INSERT INTO public.ref_airports (iata_code, icao_code, name_en, name_zh, city_co
 ('HGH', 'ZSHC', 'Hangzhou Xiaoshan International Airport', '杭州蕭山機場', 'HGH', '杭州', 'CN', 'Asia/Shanghai'),
 ('NKG', 'ZSNJ', 'Nanjing Lukou International Airport', '南京祿口機場', 'NKG', '南京', 'CN', 'Asia/Shanghai')
 ON CONFLICT (iata_code) DO NOTHING;
+
+END IF;
+END $$;
 
 -- ============================================
 -- Part 7: 初始資料 - 艙等/SSR/狀態碼
@@ -552,8 +562,6 @@ INSERT INTO public.ref_status_codes (code, category, description_en, description
 ('WL', 'Waitlist', 'Waitlist', '候補名單'),
 ('WK', 'Work', 'Working', '處理中')
 ON CONFLICT (code) DO NOTHING;
-
-COMMIT;
 
 -- ============================================
 -- 驗證

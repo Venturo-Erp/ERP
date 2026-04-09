@@ -237,25 +237,21 @@ BEGIN
   RAISE NOTICE '';
 END $$;
 
--- Add Foreign Keys
-ALTER TABLE tour_members
-ADD CONSTRAINT tour_members_tour_id_fkey
-FOREIGN KEY (tour_id) REFERENCES tours(id)
-ON DELETE CASCADE;
-
-ALTER TABLE order_members
-ADD CONSTRAINT order_members_order_id_fkey
-FOREIGN KEY (order_id) REFERENCES orders(id)
-ON DELETE CASCADE;
-
--- Add CHECK constraints (UUID format validation)
-ALTER TABLE tour_members
-ADD CONSTRAINT tour_members_tour_id_uuid_format
-CHECK (tour_id IS NULL OR tour_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
-
-ALTER TABLE order_members
-ADD CONSTRAINT order_members_order_id_uuid_format
-CHECK (order_id IS NULL OR order_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
+-- Add Foreign Keys (idempotent)
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'tour_members_tour_id_fkey') THEN
+    ALTER TABLE tour_members ADD CONSTRAINT tour_members_tour_id_fkey FOREIGN KEY (tour_id) REFERENCES tours(id) ON DELETE CASCADE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'order_members_order_id_fkey') THEN
+    ALTER TABLE order_members ADD CONSTRAINT order_members_order_id_fkey FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'tour_members_tour_id_uuid_format') THEN
+    ALTER TABLE tour_members ADD CONSTRAINT tour_members_tour_id_uuid_format CHECK (tour_id IS NULL OR tour_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'order_members_order_id_uuid_format') THEN
+    ALTER TABLE order_members ADD CONSTRAINT order_members_order_id_uuid_format CHECK (order_id IS NULL OR order_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$');
+  END IF;
+END $$;
 
 DO $$
 BEGIN

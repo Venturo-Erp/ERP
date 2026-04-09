@@ -37,15 +37,13 @@ CREATE TABLE IF NOT EXISTS line_messages (
   is_read boolean DEFAULT false,
   is_ai_reply boolean DEFAULT false, -- 是否為 AI 回覆
   ai_model text, -- AI 模型名稱
-  created_at timestamptz DEFAULT now(),
-  
-  -- 索引
-  INDEX idx_line_messages_conversation ON line_messages(conversation_id, created_at),
-  INDEX idx_line_messages_workspace ON line_messages(workspace_id),
-  INDEX idx_line_messages_created ON line_messages(created_at DESC)
+  created_at timestamptz DEFAULT now()
 );
 
 -- 建立索引
+CREATE INDEX IF NOT EXISTS idx_line_messages_conversation ON line_messages(conversation_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_line_messages_workspace ON line_messages(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_line_messages_created ON line_messages(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_line_conversations_workspace ON line_conversations(workspace_id);
 CREATE INDEX IF NOT EXISTS idx_line_conversations_updated ON line_conversations(updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_line_conversations_target ON line_conversations(target_id);
@@ -97,6 +95,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_update_conversation_timestamp ON line_messages;
 CREATE TRIGGER trigger_update_conversation_timestamp
 AFTER INSERT ON line_messages
 FOR EACH ROW

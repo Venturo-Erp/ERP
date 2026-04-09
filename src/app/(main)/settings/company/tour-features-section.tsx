@@ -26,7 +26,7 @@ export function TourControllerSection({ workspaceId }: { workspaceId: string }) 
     try {
       // TODO: 儲存到 workspace_feature_settings 表
       // await saveTourControllerSettings(workspaceId, enabled, required)
-      
+
       if (enabled) {
         toast.success('團控功能已啟用')
       } else {
@@ -46,9 +46,7 @@ export function TourControllerSection({ workspaceId }: { workspaceId: string }) 
     <Card className="p-6 space-y-4">
       <div className="space-y-2">
         <h3 className="text-lg font-semibold text-morandi-primary">團控功能設定</h3>
-        <p className="text-sm text-morandi-secondary">
-          啟用後，開團時必須指派團控人員
-        </p>
+        <p className="text-sm text-morandi-secondary">啟用後，開團時必須指派團控人員</p>
       </div>
 
       <div className="space-y-4">
@@ -56,15 +54,9 @@ export function TourControllerSection({ workspaceId }: { workspaceId: string }) 
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label htmlFor="tour-controller-enabled">啟用團控功能</Label>
-            <p className="text-sm text-morandi-secondary">
-              開啟後，開團時會顯示團控選擇欄位
-            </p>
+            <p className="text-sm text-morandi-secondary">開啟後，開團時會顯示團控選擇欄位</p>
           </div>
-          <Switch
-            id="tour-controller-enabled"
-            checked={enabled}
-            onCheckedChange={setEnabled}
-          />
+          <Switch id="tour-controller-enabled" checked={enabled} onCheckedChange={setEnabled} />
         </div>
 
         {/* 必填設定 */}
@@ -72,9 +64,7 @@ export function TourControllerSection({ workspaceId }: { workspaceId: string }) 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="tour-controller-required">團控為必填欄位</Label>
-              <p className="text-sm text-morandi-secondary">
-                開啟後，開團時必須選擇團控人員
-              </p>
+              <p className="text-sm text-morandi-secondary">開啟後，開團時必須選擇團控人員</p>
             </div>
             <Switch
               id="tour-controller-required"
@@ -88,9 +78,7 @@ export function TourControllerSection({ workspaceId }: { workspaceId: string }) 
         {enabled && required && (
           <div className="flex items-start gap-2 p-3 bg-morandi-gold/10 border border-morandi-gold/20 rounded-md">
             <AlertCircle className="h-4 w-4 text-morandi-gold mt-0.5" />
-            <p className="text-sm text-morandi-secondary">
-              團控為必填欄位，開團時必須選擇團控人員
-            </p>
+            <p className="text-sm text-morandi-secondary">團控為必填欄位，開團時必須選擇團控人員</p>
           </div>
         )}
       </div>
@@ -125,7 +113,12 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
   const hasTourAttributes = isFeatureEnabled('tour_attributes')
   const [enabled, setEnabled] = useState(hasTourAttributes)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
-    'flight', 'flight_hotel', 'hotel', 'car_service', 'tour_group', 'visa'
+    'flight',
+    'flight_hotel',
+    'hotel',
+    'car_service',
+    'tour_group',
+    'visa',
   ])
   const [saving, setSaving] = useState(false)
 
@@ -142,9 +135,7 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
   // 切換單一類別
   const toggleCategory = (categoryId: string) => {
     setSelectedCategories(prev =>
-      prev.includes(categoryId)
-        ? prev.filter(id => id !== categoryId)
-        : [...prev, categoryId]
+      prev.includes(categoryId) ? prev.filter(id => id !== categoryId) : [...prev, categoryId]
     )
   }
 
@@ -164,7 +155,7 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
     try {
       // TODO: 儲存到 workspace_feature_settings 表
       // await saveTourAttributesSettings(workspaceId, enabled, selectedCategories)
-      
+
       if (enabled) {
         toast.success(`已啟用 ${selectedCategories.length} 種團類型`)
       } else {
@@ -194,15 +185,9 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
             <Label htmlFor="tour-attributes-enabled">啟用旅行屬性功能</Label>
-            <p className="text-sm text-morandi-secondary">
-              開啟後，開團時會顯示團類型選擇欄位
-            </p>
+            <p className="text-sm text-morandi-secondary">開啟後，開團時會顯示團類型選擇欄位</p>
           </div>
-          <Switch
-            id="tour-attributes-enabled"
-            checked={enabled}
-            onCheckedChange={setEnabled}
-          />
+          <Switch id="tour-attributes-enabled" checked={enabled} onCheckedChange={setEnabled} />
         </div>
 
         {/* 團類型選擇（僅啟用時顯示） */}
@@ -254,9 +239,7 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
                     >
                       {category.label}
                     </Label>
-                    <p className="text-xs text-morandi-secondary">
-                      {category.description}
-                    </p>
+                    <p className="text-xs text-morandi-secondary">{category.description}</p>
                   </div>
                 </div>
               ))}

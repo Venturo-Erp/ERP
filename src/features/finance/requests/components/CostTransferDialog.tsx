@@ -97,6 +97,9 @@ export function CostTransferDialog({
         .from('payment_request_items')
         .update({
           tour_id: targetTourId,
+          transferred_from_tour_id: sourceRequest.tourId,
+          transferred_at: new Date().toISOString(),
+          transferred_by: user?.id,
           updated_by: user?.id,
           updated_at: new Date().toISOString(),
         })

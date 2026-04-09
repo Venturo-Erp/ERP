@@ -2,7 +2,6 @@
 -- 原本：('asset', 'liability', 'revenue', 'expense', 'cost')
 -- 修正後：('asset', 'liability', 'equity', 'revenue', 'expense', 'cost')
 
-BEGIN;
 
 -- 刪除舊的 CHECK 約束
 ALTER TABLE public.chart_of_accounts
@@ -13,4 +12,3 @@ ALTER TABLE public.chart_of_accounts
 ADD CONSTRAINT chart_of_accounts_account_type_check
 CHECK (account_type IN ('asset', 'liability', 'equity', 'revenue', 'expense', 'cost'));
 
-COMMIT;

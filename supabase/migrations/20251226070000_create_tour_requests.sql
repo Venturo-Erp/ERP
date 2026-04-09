@@ -80,15 +80,19 @@ CREATE TABLE IF NOT EXISTS public.tour_requests (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 索引
-CREATE INDEX IF NOT EXISTS idx_tour_requests_tour ON public.tour_requests(tour_id);
-CREATE INDEX IF NOT EXISTS idx_tour_requests_supplier ON public.tour_requests(supplier_id);
-CREATE INDEX IF NOT EXISTS idx_tour_requests_assignee ON public.tour_requests(assignee_id);
-CREATE INDEX IF NOT EXISTS idx_tour_requests_status ON public.tour_requests(status);
-CREATE INDEX IF NOT EXISTS idx_tour_requests_category ON public.tour_requests(category);
-CREATE INDEX IF NOT EXISTS idx_tour_requests_service_date ON public.tour_requests(service_date);
-CREATE INDEX IF NOT EXISTS idx_tour_requests_workspace ON public.tour_requests(workspace_id);
-CREATE INDEX IF NOT EXISTS idx_tour_requests_handler_type ON public.tour_requests(handler_type);
+-- 索引（用 DO block 檢查欄位是否存在）
+DO $$
+DECLARE
+  _col text;
+  _cols text[] := ARRAY['tour_id','supplier_id','assignee_id','status','category','service_date','workspace_id','handler_type'];
+  _idx text[] := ARRAY['idx_tour_requests_tour','idx_tour_requests_supplier','idx_tour_requests_assignee','idx_tour_requests_status','idx_tour_requests_category','idx_tour_requests_service_date','idx_tour_requests_workspace','idx_tour_requests_handler_type'];
+BEGIN
+  FOR i IN 1..array_length(_cols, 1) LOOP
+    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tour_requests' AND column_name=_cols[i]) THEN
+      EXECUTE format('CREATE INDEX IF NOT EXISTS %I ON public.tour_requests(%I)', _idx[i], _cols[i]);
+    END IF;
+  END LOOP;
+END $$;
 
 -- 2. 需求項目表：tour_request_items（需求細項）
 CREATE TABLE IF NOT EXISTS public.tour_request_items (
@@ -170,25 +174,29 @@ CREATE TABLE IF NOT EXISTS public.tour_request_member_vouchers (
 CREATE INDEX IF NOT EXISTS idx_tour_request_member_vouchers_request ON public.tour_request_member_vouchers(request_id);
 CREATE INDEX IF NOT EXISTS idx_tour_request_member_vouchers_member ON public.tour_request_member_vouchers(member_id);
 
--- 5. 視圖：團體需求單進度統計
-CREATE OR REPLACE VIEW public.tour_requests_progress AS
-SELECT
-  tour_id,
-  tour_code,
-  tour_name,
-  workspace_id,
-  COUNT(*) as total_requests,
-  COUNT(*) FILTER (WHERE status = 'completed' OR status = 'confirmed') as completed_requests,
-  COUNT(*) FILTER (WHERE status = 'draft') as draft_requests,
-  COUNT(*) FILTER (WHERE status IN ('pending', 'in_progress', 'replied')) as in_progress_requests,
-  COUNT(*) FILTER (WHERE status = 'cancelled') as cancelled_requests,
-  ROUND(
-    (COUNT(*) FILTER (WHERE status = 'completed' OR status = 'confirmed')::DECIMAL /
-     NULLIF(COUNT(*) FILTER (WHERE status != 'cancelled'), 0)) * 100,
-    0
-  ) as completion_percentage
-FROM public.tour_requests
-GROUP BY tour_id, tour_code, tour_name, workspace_id;
+-- 5. 視圖：團體需求單進度統計（只在必要欄位存在時建立）
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='tour_requests' AND column_name='tour_code') THEN
+    CREATE OR REPLACE VIEW public.tour_requests_progress AS
+    SELECT
+      tour_id,
+      tour_code,
+      tour_name,
+      workspace_id,
+      COUNT(*) as total_requests,
+      COUNT(*) FILTER (WHERE status = 'completed' OR status = 'confirmed') as completed_requests,
+      COUNT(*) FILTER (WHERE status = 'draft') as draft_requests,
+      COUNT(*) FILTER (WHERE status IN ('pending', 'in_progress', 'replied')) as in_progress_requests,
+      COUNT(*) FILTER (WHERE status = 'cancelled') as cancelled_requests,
+      ROUND(
+        (COUNT(*) FILTER (WHERE status = 'completed' OR status = 'confirmed')::DECIMAL /
+         NULLIF(COUNT(*) FILTER (WHERE status != 'cancelled'), 0)) * 100,
+        0
+      ) as completion_percentage
+    FROM public.tour_requests
+    GROUP BY tour_id, tour_code, tour_name, workspace_id;
+  END IF;
+END $$;
 
 -- 6. 禁用 RLS（符合現有系統模式）
 ALTER TABLE public.tour_requests DISABLE ROW LEVEL SECURITY;
@@ -205,16 +213,19 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS trigger_tour_requests_updated_at ON public.tour_requests;
 CREATE TRIGGER trigger_tour_requests_updated_at
   BEFORE UPDATE ON public.tour_requests
   FOR EACH ROW
   EXECUTE FUNCTION update_tour_requests_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_tour_request_items_updated_at ON public.tour_request_items;
 CREATE TRIGGER trigger_tour_request_items_updated_at
   BEFORE UPDATE ON public.tour_request_items
   FOR EACH ROW
   EXECUTE FUNCTION update_tour_requests_updated_at();
 
+DROP TRIGGER IF EXISTS trigger_tour_request_member_vouchers_updated_at ON public.tour_request_member_vouchers;
 CREATE TRIGGER trigger_tour_request_member_vouchers_updated_at
   BEFORE UPDATE ON public.tour_request_member_vouchers
   FOR EACH ROW
@@ -225,4 +236,8 @@ COMMENT ON TABLE public.tour_requests IS '團體需求單主表 - 統一管理�
 COMMENT ON TABLE public.tour_request_items IS '團體需求單項目表 - 需求的細項（如多天行程）';
 COMMENT ON TABLE public.tour_request_messages IS '團體需求單留言表 - 需求的溝通記錄';
 COMMENT ON TABLE public.tour_request_member_vouchers IS '團員票券表 - 個人票券綁定（機票PNR、門票等）';
-COMMENT ON VIEW public.tour_requests_progress IS '團體需求單進度統計視圖';
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.views WHERE table_name='tour_requests_progress') THEN
+    COMMENT ON VIEW public.tour_requests_progress IS '團體需求單進度統計視圖';
+  END IF;
+END $$;

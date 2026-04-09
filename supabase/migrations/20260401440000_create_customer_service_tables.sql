@@ -102,6 +102,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS auto_create_lead_trigger ON customer_service_conversations;
 CREATE TRIGGER auto_create_lead_trigger
 BEFORE INSERT ON customer_service_conversations
 FOR EACH ROW

@@ -10,30 +10,16 @@
 -- ============================================================================
 
 -- 系統預設資料夾類型（用於自動建立和分類）
-CREATE TYPE folder_type AS ENUM (
-  'root',           -- 根目錄
-  'tour',           -- 團資料夾
-  'customer',       -- 客戶資料夾
-  'supplier',       -- 供應商資料夾
-  'template',       -- 模板資料夾
-  'custom'          -- 自訂資料夾
-);
+DO $$ BEGIN
+  CREATE TYPE folder_type AS ENUM ('root','tour','customer','supplier','template','custom');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- 檔案分類（用於自動分類）
-CREATE TYPE file_category AS ENUM (
-  'contract',       -- 合約
-  'quote',          -- 報價單
-  'itinerary',      -- 行程表
-  'passport',       -- 護照
-  'visa',           -- 簽證
-  'ticket',         -- 機票/車票
-  'voucher',        -- 訂房確認/憑證
-  'invoice',        -- 發票/收據
-  'insurance',      -- 保險
-  'photo',          -- 照片
-  'email_attachment', -- 郵件附件
-  'other'           -- 其他
-);
+DO $$ BEGIN
+  CREATE TYPE file_category AS ENUM ('contract','quote','itinerary','passport','visa','ticket','voucher','invoice','insurance','photo','email_attachment','other');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- ============================================================================
 -- 2. 資料夾表：folders

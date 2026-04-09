@@ -223,7 +223,17 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
       [paymentRequests, paymentRequestItems]
     )
 
-    // 分離公司請款和團體請款
+    // 偵測成本轉移項目
+    const transferredItemIds = useMemo(() => {
+      const ids = new Set<string>()
+      for (const item of paymentRequestItems) {
+        const transferred = (item as unknown as Record<string, unknown>).transferred_from_tour_id
+        if (transferred) ids.add(item.id)
+      }
+      return ids
+    }, [paymentRequestItems])
+
+    // 分離：團體請款、公司請款、成本轉移
     const companyItems = useMemo(
       () => processedItems.filter(item => item.isCompany),
       [processedItems]
@@ -232,6 +242,25 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
       () => processedItems.filter(item => !item.isCompany),
       [processedItems]
     )
+
+    // 成本轉移項目（從 paymentRequestItems 中找有 transferred_from_tour_id 的）
+    const transferItems = useMemo(() => {
+      return paymentRequestItems
+        .filter(item => (item as unknown as Record<string, unknown>).transferred_from_tour_id)
+        .map(item => {
+          const request = paymentRequests.find(r => r.id === item.request_id)
+          return {
+            id: item.id,
+            fromTourName: request?.tour_name || '-',
+            fromTourCode: request?.tour_code || '-',
+            description: item.description || '-',
+            supplier: item.supplier_name || '-',
+            amount: item.subtotal || 0,
+          }
+        })
+    }, [paymentRequestItems, paymentRequests])
+
+    const transferTotal = transferItems.reduce((sum, item) => sum + item.amount, 0)
 
     // 分別分組
     const companyGroups = useMemo(
@@ -796,6 +825,108 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
         {tourGroups.length === 0 && companyGroups.length === 0 && (
           <div style={{ textAlign: 'center', padding: '40px', color: COLORS.lightGray }}>
             {PRINT_LABELS.LABEL_9162}
+          </div>
+        )}
+
+        {/* 成本轉移區塊 */}
+        {transferItems.length > 0 && (
+          <div style={{ marginBottom: '12px' }}>
+            <div
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                color: COLORS.brown,
+                letterSpacing: '2px',
+                marginBottom: '6px',
+                paddingTop: '8px',
+              }}
+            >
+              成本轉移 COST TRANSFER
+            </div>
+            <table
+              style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                fontSize: '11px',
+              }}
+            >
+              <thead>
+                <tr
+                  style={{
+                    backgroundColor: COLORS.lightBrown,
+                    borderBottom: `1px solid ${COLORS.gold}`,
+                  }}
+                >
+                  <th
+                    style={{
+                      textAlign: 'left',
+                      padding: '6px 8px',
+                      color: COLORS.gray,
+                      fontWeight: 500,
+                    }}
+                  >
+                    原團
+                  </th>
+                  <th
+                    style={{
+                      textAlign: 'left',
+                      padding: '6px 8px',
+                      color: COLORS.gray,
+                      fontWeight: 500,
+                    }}
+                  >
+                    供應商
+                  </th>
+                  <th
+                    style={{
+                      textAlign: 'left',
+                      padding: '6px 8px',
+                      color: COLORS.gray,
+                      fontWeight: 500,
+                    }}
+                  >
+                    項目說明
+                  </th>
+                  <th
+                    style={{
+                      textAlign: 'right',
+                      padding: '6px 8px',
+                      color: COLORS.gray,
+                      fontWeight: 500,
+                    }}
+                  >
+                    金額
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {transferItems.map((item, i) => (
+                  <tr key={item.id} style={{ borderBottom: `1px solid #e5e5e5` }}>
+                    <td style={{ padding: '5px 8px', color: COLORS.gray }}>{item.fromTourCode}</td>
+                    <td style={{ padding: '5px 8px', color: COLORS.gray }}>{item.supplier}</td>
+                    <td style={{ padding: '5px 8px', color: COLORS.gray }}>{item.description}</td>
+                    <td style={{ padding: '5px 8px', textAlign: 'right', color: COLORS.gray }}>
+                      {item.amount.toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                padding: '8px 8px',
+                borderTop: `1px solid ${COLORS.gold}`,
+                fontSize: '12px',
+              }}
+            >
+              <span style={{ color: COLORS.lightGray, marginRight: '16px' }}>轉移小計</span>
+              <span style={{ fontWeight: 600, color: COLORS.gray }}>
+                NT$ {transferTotal.toLocaleString()}
+              </span>
+            </div>
           </div>
         )}
 

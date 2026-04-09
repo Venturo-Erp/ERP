@@ -56,10 +56,12 @@ ALTER TABLE magic_combo_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE agent_registry ENABLE ROW LEVEL SECURITY;
 
 -- SELECT 政策
+DROP POLICY IF EXISTS "magic_combos_select" ON magic_combos;
 CREATE POLICY magic_combos_select ON magic_combos
   FOR SELECT
   USING (is_super_admin() OR (workspace_id)::text = (get_current_user_workspace())::text);
 
+DROP POLICY IF EXISTS "magic_combo_items_select" ON magic_combo_items;
 CREATE POLICY magic_combo_items_select ON magic_combo_items
   FOR SELECT
   USING (
@@ -70,15 +72,18 @@ CREATE POLICY magic_combo_items_select ON magic_combo_items
     )
   );
 
+DROP POLICY IF EXISTS "agent_registry_select" ON agent_registry;
 CREATE POLICY agent_registry_select ON agent_registry
   FOR SELECT
   USING (is_super_admin() OR (workspace_id)::text = (get_current_user_workspace())::text);
 
 -- INSERT 政策
+DROP POLICY IF EXISTS "magic_combos_insert" ON magic_combos;
 CREATE POLICY magic_combos_insert ON magic_combos
   FOR INSERT
   WITH CHECK (is_super_admin() OR (workspace_id)::text = (get_current_user_workspace())::text);
 
+DROP POLICY IF EXISTS "magic_combo_items_insert" ON magic_combo_items;
 CREATE POLICY magic_combo_items_insert ON magic_combo_items
   FOR INSERT
   WITH CHECK (
@@ -89,15 +94,18 @@ CREATE POLICY magic_combo_items_insert ON magic_combo_items
     )
   );
 
+DROP POLICY IF EXISTS "agent_registry_insert" ON agent_registry;
 CREATE POLICY agent_registry_insert ON agent_registry
   FOR INSERT
   WITH CHECK (is_super_admin() OR (workspace_id)::text = (get_current_user_workspace())::text);
 
 -- UPDATE 政策
+DROP POLICY IF EXISTS "magic_combos_update" ON magic_combos;
 CREATE POLICY magic_combos_update ON magic_combos
   FOR UPDATE
   USING (is_super_admin() OR (workspace_id)::text = (get_current_user_workspace())::text);
 
+DROP POLICY IF EXISTS "magic_combo_items_update" ON magic_combo_items;
 CREATE POLICY magic_combo_items_update ON magic_combo_items
   FOR UPDATE
   USING (
@@ -108,15 +116,18 @@ CREATE POLICY magic_combo_items_update ON magic_combo_items
     )
   );
 
+DROP POLICY IF EXISTS "agent_registry_update" ON agent_registry;
 CREATE POLICY agent_registry_update ON agent_registry
   FOR UPDATE
   USING (is_super_admin() OR (workspace_id)::text = (get_current_user_workspace())::text);
 
 -- DELETE 政策
+DROP POLICY IF EXISTS "magic_combos_delete" ON magic_combos;
 CREATE POLICY magic_combos_delete ON magic_combos
   FOR DELETE
   USING (is_super_admin() OR (workspace_id)::text = (get_current_user_workspace())::text);
 
+DROP POLICY IF EXISTS "magic_combo_items_delete" ON magic_combo_items;
 CREATE POLICY magic_combo_items_delete ON magic_combo_items
   FOR DELETE
   USING (
@@ -127,6 +138,7 @@ CREATE POLICY magic_combo_items_delete ON magic_combo_items
     )
   );
 
+DROP POLICY IF EXISTS "agent_registry_delete" ON agent_registry;
 CREATE POLICY agent_registry_delete ON agent_registry
   FOR DELETE
   USING (is_super_admin() OR (workspace_id)::text = (get_current_user_workspace())::text);

@@ -42,7 +42,7 @@ export const CostItemRow: React.FC<CostItemRowProps> = ({
 
   return (
     <tr
-      className={`group border-b border-morandi-container/60 hover:bg-morandi-container/5 transition-colors ${isChildOrInfantTicket ? 'opacity-60' : ''}`}
+      className={`group border-b border-morandi-container/60 hover:bg-morandi-container/20 transition-colors ${isChildOrInfantTicket ? 'opacity-60' : ''}`}
     >
       <td colSpan={2} className="py-3 px-4 text-sm text-morandi-primary text-center table-divider">
         <div className="flex items-center gap-1">

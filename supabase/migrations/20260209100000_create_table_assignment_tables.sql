@@ -143,6 +143,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS tour_meal_settings_updated_at ON tour_meal_settings;
 CREATE TRIGGER tour_meal_settings_updated_at
   BEFORE UPDATE ON tour_meal_settings
   FOR EACH ROW
@@ -156,6 +157,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS tour_tables_updated_at ON tour_tables;
 CREATE TRIGGER tour_tables_updated_at
   BEFORE UPDATE ON tour_tables
   FOR EACH ROW

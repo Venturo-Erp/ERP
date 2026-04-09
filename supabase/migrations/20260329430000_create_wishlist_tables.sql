@@ -71,15 +71,15 @@ CREATE TABLE IF NOT EXISTS customer_inquiries (
 );
 
 -- 索引
-CREATE INDEX idx_wishlist_templates_workspace ON wishlist_templates(workspace_id);
-CREATE INDEX idx_wishlist_templates_status ON wishlist_templates(status);
-CREATE INDEX idx_wishlist_templates_slug ON wishlist_templates(slug);
+CREATE INDEX IF NOT EXISTS idx_wishlist_templates_workspace ON wishlist_templates(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_wishlist_templates_status ON wishlist_templates(status);
+CREATE INDEX IF NOT EXISTS idx_wishlist_templates_slug ON wishlist_templates(slug);
 
-CREATE INDEX idx_wishlist_template_items_template ON wishlist_template_items(template_id);
+CREATE INDEX IF NOT EXISTS idx_wishlist_template_items_template ON wishlist_template_items(template_id);
 
-CREATE INDEX idx_customer_inquiries_workspace ON customer_inquiries(workspace_id);
-CREATE INDEX idx_customer_inquiries_template ON customer_inquiries(template_id);
-CREATE INDEX idx_customer_inquiries_status ON customer_inquiries(status);
+CREATE INDEX IF NOT EXISTS idx_customer_inquiries_workspace ON customer_inquiries(workspace_id);
+CREATE INDEX IF NOT EXISTS idx_customer_inquiries_template ON customer_inquiries(template_id);
+CREATE INDEX IF NOT EXISTS idx_customer_inquiries_status ON customer_inquiries(status);
 
 -- 自動編號函數
 CREATE OR REPLACE FUNCTION generate_inquiry_code()
@@ -102,6 +102,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS tr_customer_inquiry_code ON customer_inquiries;
 CREATE TRIGGER tr_customer_inquiry_code
   BEFORE INSERT ON customer_inquiries
   FOR EACH ROW
