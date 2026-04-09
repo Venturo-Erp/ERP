@@ -332,7 +332,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
         const errorMessage =
           err instanceof Error ? err.message : TOUR_OPERATIONS_LABELS.CREATE_TOUR_FAILED
         setFormError(errorMessage)
-        logger.error('Failed to create tour:', err)
+        logger.error('Failed to create tour:', err, JSON.stringify(err, Object.getOwnPropertyNames(err instanceof Error ? err : Object(err))))
       } finally {
         setSubmitting(false)
       }
