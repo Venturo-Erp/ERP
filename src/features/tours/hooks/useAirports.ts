@@ -59,7 +59,16 @@ async function fetchAirports(): Promise<Airport[]> {
     throw error
   }
 
-  return (data || []) as Airport[]
+  // 去重：多租戶可能有重複的 iata_code，只保留第一筆（usage_count 最高的）
+  const seen = new Set<string>()
+  const unique: Airport[] = []
+  for (const airport of (data || []) as Airport[]) {
+    if (!seen.has(airport.iata_code)) {
+      seen.add(airport.iata_code)
+      unique.push(airport)
+    }
+  }
+  return unique
 }
 
 // 從 countries 表讀取國家（含 code 用於對照）
