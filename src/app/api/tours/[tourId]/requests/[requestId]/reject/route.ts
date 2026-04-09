@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createApiClient } from '@/lib/supabase/api-client'
+import { logger } from '@/lib/utils/logger'
 
 /**
  * POST /api/tours/[tourId]/requests/[requestId]/reject
@@ -31,7 +32,8 @@ export async function POST(
     }
 
     return NextResponse.json({ success: true })
-  } catch {
+  } catch (error) {
+    logger.error('拒絕處理失敗:', error)
     return NextResponse.json({ error: '拒絕處理失敗' }, { status: 500 })
   }
 }

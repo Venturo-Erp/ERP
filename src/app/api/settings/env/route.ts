@@ -52,6 +52,28 @@ async function getGeminiUsage(): Promise<string | undefined> {
   return getApiUsage('gemini', 1500) // 每分鐘 60 次，保守估算每日 50 次 × 30 天
 }
 
+async function checkAdminPermission(employeeId: string): Promise<boolean> {
+  const adminClient = getSupabaseAdminClient()
+  const { data: employee } = await adminClient
+    .from('employees')
+    .select('job_info')
+    .eq('id', employeeId)
+    .single()
+
+  if (!employee) return false
+
+  const jobInfo = employee.job_info as { role_id?: string } | null
+  if (!jobInfo?.role_id) return false
+
+  const { data: role } = await adminClient
+    .from('workspace_roles')
+    .select('is_admin')
+    .eq('id', jobInfo.role_id)
+    .single()
+
+  return role?.is_admin === true
+}
+
 export async function GET() {
   // 🔒 安全檢查：需要登入
   const auth = await getServerAuth()
@@ -59,10 +81,11 @@ export async function GET() {
     return ApiError.unauthorized('請先登入')
   }
 
-  // [Planned] 管理員權限檢查 - 待 RBAC 模組完成後啟用
-  // if (!isAdmin(auth.data.employeeId)) {
-  //   return errorResponse('需要管理員權限', 403)
-  // }
+  // 🔒 管理員權限檢查：查詢員工的職務是否為 admin
+  const isAdmin = await checkAdminPermission(auth.data.employeeId)
+  if (!isAdmin) {
+    return ApiError.forbidden('需要管理員權限')
+  }
 
   const googleVisionUsage = await getGoogleVisionUsage()
   const geminiUsage = await getGeminiUsage()

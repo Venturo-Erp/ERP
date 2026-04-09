@@ -6,6 +6,12 @@ import { createServiceClient } from '@/lib/supabase/api-client'
  *
  * 公開 API：短網址下載團員名冊（無需登入）
  * 透過團號取得最新的團員名冊並 redirect 到簽名 URL
+ *
+ * ⚠️ Security: Uses service_role client (bypasses RLS) because this is a public endpoint.
+ * Tour codes are semi-predictable (e.g. CNX250128A). Risk is mitigated by:
+ * - Only exposing the latest member roster file (not arbitrary data)
+ * - Short-lived signed URLs (15 min expiry)
+ * TODO: Add rate limiting (e.g. IP-based, 10 req/min) to prevent enumeration attacks.
  */
 export async function GET(request: Request, { params }: { params: Promise<{ code: string }> }) {
   const supabase = createServiceClient()
@@ -35,7 +41,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ code
   // 生成 24hr signed URL
   const { data: signedData } = await supabase.storage
     .from('documents')
-    .createSignedUrl(data.file_path, 86400) // 24hr
+    .createSignedUrl(data.file_path, 900) // 15 min (short expiry to limit exposure)
 
   if (!signedData?.signedUrl) {
     return NextResponse.json({ error: 'Failed to generate download URL' }, { status: 500 })

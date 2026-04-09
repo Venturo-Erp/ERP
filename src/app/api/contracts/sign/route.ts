@@ -7,6 +7,12 @@ import { headers } from 'next/headers'
  *
  * 公開 API：客戶簽署合約（無需登入）
  * 注意：使用 service client 因為客戶不會登入
+ *
+ * ⚠️ Security: Contract signing relies on UUID secrecy as the sole auth factor.
+ * This is an intentional trade-off for frictionless public signing links.
+ * UUIDs (v4) have 122 bits of entropy — brute-force enumeration is infeasible.
+ * Additional mitigations: signed contracts are immutable (status check on line 67),
+ * and signing metadata (IP, user-agent) is recorded for audit.
  */
 export async function POST(request: NextRequest) {
   try {
