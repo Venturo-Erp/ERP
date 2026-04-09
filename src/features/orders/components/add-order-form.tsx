@@ -75,7 +75,9 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
       const isActive = emp.status === 'active'
       // 排除機器人
       const notBot =
-        emp.employee_number !== 'BOT001' && emp.id !== '00000000-0000-0000-0000-000000000001'
+        emp.employee_type !== 'bot' &&
+        emp.employee_number !== 'BOT001' &&
+        emp.id !== '00000000-0000-0000-0000-000000000001'
       return notDeleted && isActive && notBot
     })
 
@@ -100,7 +102,9 @@ export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: Ad
       const isActive = emp.status === 'active'
       // 排除機器人
       const notBot =
-        emp.employee_number !== 'BOT001' && emp.id !== '00000000-0000-0000-0000-000000000001'
+        emp.employee_type !== 'bot' &&
+        emp.employee_number !== 'BOT001' &&
+        emp.id !== '00000000-0000-0000-0000-000000000001'
       return notDeleted && isActive && notBot
     })
 
