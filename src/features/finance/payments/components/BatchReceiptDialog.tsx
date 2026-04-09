@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select'
 import { useOrdersSlim, useToursSlim, createReceipt, invalidateReceipts } from '@/data'
 import { useAuthStore } from '@/stores'
+import { usePaymentMethodsCached } from '@/data/hooks'
 import { generateReceiptNumber } from '@/lib/utils/receipt-number-generator'
 import { logger } from '@/lib/utils/logger'
 import { PaymentMethod } from '@/stores/types'
@@ -72,39 +73,26 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
   )
 
   // 原始收款方式資料（含 id）
+  // 收款方式（SWR 快取）
+  const { methods: cachedMethods } = usePaymentMethodsCached('receipt')
   const [paymentMethodsRaw, setPaymentMethodsRaw] = useState<
     { id: string; code: string; name: string }[]
   >([])
 
-  // 載入收款方式
+  // 同步 SWR 快取到本地 state
   useEffect(() => {
-    if (user?.workspace_id) {
-      fetch(`/api/finance/payment-methods?workspace_id=${user.workspace_id}&type=receipt`)
-        .then(res => res.json())
-        .then(data => {
-          // API 直接回傳陣列
-          const methods = Array.isArray(data) ? data : data.data
-          if (methods && methods.length > 0) {
-            // 保留完整資料（含 id）
-            setPaymentMethodsRaw(methods)
-            setPaymentMethods(
-              methods.map((m: { id: string; code: string | null; name: string }) => ({
-                value: m.id, // 改用 id 作為 value（更穩定）
-                label: m.name,
-              }))
-            )
-            // 設定預設值為第一個方式
-            if (methods.length > 0 && !paymentMethod) {
-              setPaymentMethod(methods[0].id as PaymentMethod)
-            }
-          }
-        })
-        .catch(() => {
-          // 失敗時使用預設值
-        })
+    if (cachedMethods.length > 0) {
+      const methods = cachedMethods as { id: string; code: string; name: string }[]
+      setPaymentMethodsRaw(methods)
+      setPaymentMethods(methods.map(m => ({ value: m.id, label: m.name })))
+      if (!paymentMethod && methods.length > 0) {
+        setPaymentMethod(methods[0].id as PaymentMethod)
+      }
 
       // 載入會計科目（收入類）
-      fetch(`/api/finance/accounting-subjects?workspace_id=${user.workspace_id}&type=revenue`)
+      fetch(
+        `/api/finance/accounting-subjects?workspace_id=${user?.workspace_id || ''}&type=revenue`
+      )
         .then(res => res.json())
         .then(data => {
           const subjects = Array.isArray(data) ? data : []
