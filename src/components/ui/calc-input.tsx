@@ -48,9 +48,25 @@ export const CalcInput: React.FC<CalcInputProps> = ({
     }
   }, [value, isFocused])
 
+  // 全形轉半形（數字 + 運算符 + 小數點）
+  const toHalfWidth = (str: string) =>
+    str
+      .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0))
+      .replace(/＋/g, '+')
+      .replace(/－/g, '-')
+      .replace(/＊/g, '*')
+      .replace(/×/g, '*')
+      .replace(/／/g, '/')
+      .replace(/÷/g, '/')
+      .replace(/．/g, '.')
+      .replace(/。/g, '.')
+      .replace(/，/g, ',')
+      .replace(/（/g, '(')
+      .replace(/）/g, ')')
+
   // 計算並更新值
   const calculate = useCallback(() => {
-    const trimmed = displayValue.trim()
+    const trimmed = toHalfWidth(displayValue.trim())
 
     // 空值
     if (!trimmed) {
@@ -90,14 +106,8 @@ export const CalcInput: React.FC<CalcInputProps> = ({
 
   // 處理輸入變更
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // 全形數字 + 全形符號 → 半形
-    let newValue = e.target.value
-      .replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0) - 0xfee0)) // 全形數字
-      .replace(/[＋－＊／]/g, c => {
-        // 全形符號
-        const map: Record<string, string> = { '＋': '+', '－': '-', '＊': '*', '／': '/' }
-        return map[c] || c
-      })
+    // 全形 → 半形（數字、運算符、小數點、括號）
+    let newValue = toHalfWidth(e.target.value)
     setDisplayValue(newValue)
 
     const hasOperator = /[+\-*/]/.test(newValue.slice(1))
