@@ -34,8 +34,13 @@ export function usePaymentMethodsCached(type?: PaymentMethodType) {
     { revalidateOnFocus: false }
   )
 
+  // 去重：多租戶 RLS 可能返回重複，用 id 去重
+  const uniqueMethods = (data ?? []).filter(
+    (method, index, arr) => arr.findIndex(m => m.id === method.id) === index
+  )
+
   return {
-    methods: data ?? [],
+    methods: uniqueMethods,
     loading: isLoading,
   }
 }
