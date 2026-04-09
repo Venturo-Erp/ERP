@@ -80,14 +80,18 @@ export function PaymentItemRow({
 
   useEffect(() => {
     if (mode === 'company') {
-      // 讀取收入類科目
+      // 讀取收入類科目（帶 workspace_id 過濾）
       const loadSubjects = async () => {
         const { supabase } = await import('@/lib/supabase/client')
-        const { data } = await supabase
+        const { useAuthStore } = await import('@/stores')
+        const wsId = useAuthStore.getState().user?.workspace_id
+        let query = supabase
           .from('accounting_subjects')
           .select('id, code, name')
           .eq('type', 'revenue')
           .order('code')
+        if (wsId) query = query.eq('workspace_id', wsId)
+        const { data } = await query
         setIncomeSubjects(data || [])
       }
       loadSubjects()

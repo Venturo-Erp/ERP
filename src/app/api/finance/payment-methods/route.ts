@@ -13,7 +13,8 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams
   const type = searchParams.get('type') // 'receipt' | 'payment'
 
-  // RLS 會自動過濾當前租戶的資料
+  // 明確用 workspace_id 過濾（super admin 的 RLS 會放行全部，所以不能只靠 RLS）
+  const workspaceId = await getCurrentWorkspaceId()
   let query = supabase
     .from('payment_methods')
     .select(
@@ -21,6 +22,10 @@ export async function GET(request: NextRequest) {
     )
     .eq('is_active', true)
     .order('sort_order')
+
+  if (workspaceId) {
+    query = query.eq('workspace_id', workspaceId)
+  }
 
   if (type) {
     query = query.eq('type', type)
