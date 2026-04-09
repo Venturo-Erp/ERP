@@ -49,7 +49,14 @@ export function CostTransferDialog({
   // 排除來源團的選項
   const tourOptions = useMemo(() => {
     return tours
-      .filter(t => t.id !== sourceRequest?.tourId && !t.archived)
+      .filter(t => {
+        if (t.id === sourceRequest?.tourId) return false
+        if (t.archived) return false
+        // 排除已結案團
+        const status = (t as unknown as { status?: string }).status
+        if (status === '已結案' || status === 'closed') return false
+        return true
+      })
       .map(t => ({
         value: t.id,
         label: `${t.code || ''} - ${t.name || ''}`,
@@ -131,7 +138,7 @@ export function CostTransferDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent level={2} className="max-w-lg">
+      <DialogContent level={3} className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ArrowRightLeft size={18} />
@@ -191,12 +198,12 @@ export function CostTransferDialog({
                   }}
                   className="rounded border-morandi-secondary w-4 h-4"
                 />
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm truncate">
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className="text-xs truncate">
                     {item.supplier_name && (
                       <span className="text-morandi-secondary mr-1">{item.supplier_name}</span>
                     )}
-                    {item.description}
+                    <span className="text-morandi-primary">{item.description}</span>
                   </div>
                 </div>
                 <span className="text-sm font-medium text-morandi-primary shrink-0">
