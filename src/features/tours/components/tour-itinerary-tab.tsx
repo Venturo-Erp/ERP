@@ -915,6 +915,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         if (newItinerary?.id) {
           savedItineraryId = newItinerary.id
           setCurrentItineraryId(newItinerary.id)
+          // 回寫 tours.itinerary_id（讓需求分頁等功能能找到行程）
+          await updateTour(tour.id, { itinerary_id: newItinerary.id })
           toast.success(TOUR_ITINERARY_TAB_LABELS.行程表已建立)
         }
       }
