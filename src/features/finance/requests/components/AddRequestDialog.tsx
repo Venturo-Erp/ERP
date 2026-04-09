@@ -21,6 +21,7 @@ import { ExpenseTypeSelector } from './ExpenseTypeSelector'
 import { CurrencyCell } from '@/components/table-cells'
 import { EditableRequestItemList } from './RequestItemList'
 import { CreateSupplierDialog } from './CreateSupplierDialog'
+import { CostTransferDialog } from './CostTransferDialog'
 import { useRequestForm } from '../hooks/useRequestForm'
 import { useRequestOperations } from '../hooks/useRequestOperations'
 import { useTourRequestItems } from '../hooks/useTourRequestItems'
@@ -201,6 +202,9 @@ export function AddRequestDialog({
 
   const isEditBatch = editBatchRequests.length > 1
   const canEdit = isEditMode ? !readOnly && currentRequest?.status === 'pending' : true
+
+  // === 成本轉移 Dialog ===
+  const [costTransferOpen, setCostTransferOpen] = useState(false)
 
   // === 付款方式（SWR 快取） ===
   const { methods: paymentMethods } = usePaymentMethodsCached('payment')
@@ -1080,6 +1084,11 @@ export function AddRequestDialog({
                 tourId={formData.tour_id || null}
                 disabled={isEditMode && !canEdit}
                 paymentMethods={paymentMethods}
+                onTransfer={
+                  isEditMode && !canEdit && currentRequest
+                    ? () => setCostTransferOpen(true)
+                    : undefined
+                }
               />
             </TabsContent>
 
@@ -1472,6 +1481,32 @@ export function AddRequestDialog({
         defaultName={pendingSupplierName}
         onSuccess={handleSupplierCreated}
       />
+
+      {/* 成本轉移 Dialog */}
+      {currentRequest && (
+        <CostTransferDialog
+          open={costTransferOpen}
+          onOpenChange={setCostTransferOpen}
+          sourceRequest={{
+            id: currentRequest.id,
+            code: currentRequest.code || currentRequest.request_number || '',
+            tourId: currentRequest.tour_id || '',
+            tourCode: currentRequest.tour_code || '',
+            tourName: currentRequest.tour_name || '',
+            amount: currentRequest.amount || 0,
+            items: (localItems || []).map(item => ({
+              id: item.id,
+              description: item.description,
+              subtotal: item.unit_price * item.quantity,
+              supplier_name: item.supplierName || undefined,
+            })),
+          }}
+          onSuccess={() => {
+            onSuccess?.()
+            onOpenChange(false)
+          }}
+        />
+      )}
     </>
   )
 }
