@@ -68,6 +68,19 @@ export function coreItemsToCostCategories(items: TourItineraryItem[]): CostCateg
       adult_price: item.adult_price ?? undefined,
       child_price: item.child_price ?? undefined,
       infant_price: item.infant_price ?? undefined,
+      unit_price_formula: (item as Record<string, unknown>).unit_price_formula as
+        | string
+        | undefined,
+      quantity_formula: (item as Record<string, unknown>).quantity_formula as string | undefined,
+      adult_price_formula: (item as Record<string, unknown>).adult_price_formula as
+        | string
+        | undefined,
+      child_price_formula: (item as Record<string, unknown>).child_price_formula as
+        | string
+        | undefined,
+      infant_price_formula: (item as Record<string, unknown>).infant_price_formula as
+        | string
+        | undefined,
       estimated_cost: item.estimated_cost ?? null,
       quoted_cost: item.quoted_cost ?? null,
       resource_type: item.resource_type as CostItem['resource_type'],
@@ -147,6 +160,11 @@ export async function writePricingToCore(
             adult_price: item.adult_price ?? null,
             child_price: item.child_price ?? null,
             infant_price: item.infant_price ?? null,
+            unit_price_formula: item.unit_price_formula ?? null,
+            quantity_formula: item.quantity_formula ?? null,
+            adult_price_formula: item.adult_price_formula ?? null,
+            child_price_formula: item.child_price_formula ?? null,
+            infant_price_formula: item.infant_price_formula ?? null,
             quote_note: item.note ?? null,
             quote_status: 'drafted',
           })
@@ -188,6 +206,11 @@ export async function writePricingToCore(
               adult_price: item.adult_price ?? null,
               child_price: item.child_price ?? null,
               infant_price: item.infant_price ?? null,
+              unit_price_formula: item.unit_price_formula ?? null,
+              quantity_formula: item.quantity_formula ?? null,
+              adult_price_formula: item.adult_price_formula ?? null,
+              child_price_formula: item.child_price_formula ?? null,
+              infant_price_formula: item.infant_price_formula ?? null,
               quote_note: item.note ?? null,
               quote_status: 'drafted',
             })
@@ -212,6 +235,11 @@ export async function writePricingToCore(
             adult_price: item.adult_price ?? null,
             child_price: item.child_price ?? null,
             infant_price: item.infant_price ?? null,
+            unit_price_formula: item.unit_price_formula ?? null,
+            quantity_formula: item.quantity_formula ?? null,
+            adult_price_formula: item.adult_price_formula ?? null,
+            child_price_formula: item.child_price_formula ?? null,
+            infant_price_formula: item.infant_price_formula ?? null,
             quote_note: item.note ?? null,
             quote_status: 'drafted',
             sort_order: 0,
