@@ -34,23 +34,8 @@ export default function TourDetailPage() {
     fetchTourIdByCode(code)
   )
 
-  // 分頁記憶：優先順序 URL > localStorage > 預設值
-  const getInitialTab = (): string => {
-    // 1. 優先使用 URL query
-    const urlTab = searchParams.get('tab')
-    if (urlTab) return urlTab
-
-    // 2. 其次使用 localStorage
-    if (typeof window !== 'undefined') {
-      const lastTab = localStorage.getItem(`tour-${code}-lastTab`)
-      if (lastTab) return lastTab
-    }
-
-    // 3. 最後使用預設值：總覽（overview）
-    return 'overview'
-  }
-
-  const [activeTab, setActiveTab] = useState(getInitialTab())
+  // 分頁：URL 有指定就用，否則預設總覽
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview')
   const [forceShowPnr, setForceShowPnr] = useState(false)
 
   // 監聽分頁變更，更新 URL 和 localStorage
@@ -59,9 +44,6 @@ export default function TourDetailPage() {
     const params = new URLSearchParams(window.location.search)
     params.set('tab', activeTab)
     router.replace(`/tours/${code}?${params.toString()}`, { scroll: false })
-
-    // 更新 localStorage
-    localStorage.setItem(`tour-${code}-lastTab`, activeTab)
   }, [activeTab, code, router])
 
   // 需求單 Dialog 狀態
