@@ -10,7 +10,8 @@ import type { CompanyContact } from '@/stores/types'
 
 export const companyContactEntity = createEntityHook<CompanyContact>('company_contacts', {
   list: {
-    select: '*',
+    select:
+      'id,company_id,name,title,department,phone,mobile,email,is_primary,notes,created_at,updated_at',
     orderBy: { column: 'name', ascending: true },
   },
   slim: {

@@ -30,7 +30,8 @@ export interface PnrQueueItem {
 
 export const pnrQueueItemEntity = createEntityHook<PnrQueueItem>('pnr_queue_items', {
   list: {
-    select: '*',
+    select:
+      'id,workspace_id,pnr_id,queue_type,priority,due_date,reminder_at,status,assigned_to,title,description,metadata,completed_at,completed_by,resolution_notes,created_at,updated_at,created_by',
     orderBy: { column: 'due_date', ascending: true },
   },
   slim: {

@@ -10,7 +10,8 @@ import type { LeaderSchedule } from '@/types/fleet.types'
 
 export const leaderScheduleEntity = createEntityHook<LeaderSchedule>('leader_schedules', {
   list: {
-    select: '*',
+    select:
+      'id,workspace_id,leader_id,start_date,end_date,tour_id,tour_name,tour_code,destination,status,notes,created_at,updated_at,created_by',
     orderBy: { column: 'start_date', ascending: false },
   },
   slim: {

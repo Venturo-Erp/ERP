@@ -10,7 +10,8 @@ import type { Attraction } from '@/features/attractions/types'
 
 export const attractionEntity = createEntityHook<Attraction>('attractions', {
   list: {
-    select: '*',
+    select:
+      'id,name,english_name,description,country_id,region_id,city_id,category,tags,duration_minutes,opening_hours,address,phone,website,latitude,longitude,google_maps_url,images,is_active,display_order,notes,ticket_price,data_verified,created_at,updated_at',
     orderBy: { column: 'name', ascending: true },
   },
   slim: {

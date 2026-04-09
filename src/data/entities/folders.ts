@@ -30,7 +30,8 @@ export interface Folder {
 
 export const folderEntity = createEntityHook<Folder>('folders', {
   list: {
-    select: '*',
+    select:
+      'id,name,parent_id,tour_id,customer_id,supplier_id,folder_type,default_category,path,depth,is_system,icon,color,sort_order,created_by,workspace_id,created_at,updated_at',
     orderBy: { column: 'sort_order', ascending: true },
   },
   slim: {

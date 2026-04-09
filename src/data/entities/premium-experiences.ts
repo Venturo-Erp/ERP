@@ -29,7 +29,8 @@ export interface PremiumExperience {
 
 export const premiumExperienceEntity = createEntityHook<PremiumExperience>('premium_experiences', {
   list: {
-    select: '*',
+    select:
+      'id,name,name_en,description,description_en,category,city_id,country_id,region_id,price_range,currency,rating,display_order,is_active,created_at,updated_at,created_by',
     orderBy: { column: 'display_order', ascending: true },
   },
   slim: {

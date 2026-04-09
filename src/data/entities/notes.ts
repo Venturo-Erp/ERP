@@ -21,7 +21,7 @@ export interface Note {
 
 export const noteEntity = createEntityHook<Note>('notes', {
   list: {
-    select: '*',
+    select: 'id,content,tab_id,tab_name,tab_order,user_id,workspace_id,created_at,updated_at',
     orderBy: { column: 'tab_order', ascending: true },
   },
   slim: {

@@ -21,7 +21,8 @@ export interface PnrAiQuery {
 
 export const pnrAiQueryEntity = createEntityHook<PnrAiQuery>('pnr_ai_queries', {
   list: {
-    select: '*',
+    select:
+      'id,pnr_id,query_text,response_text,queried_by,query_context,response_metadata,workspace_id,created_at',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

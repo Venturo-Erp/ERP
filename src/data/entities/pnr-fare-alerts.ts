@@ -25,7 +25,8 @@ export interface PnrFareAlert {
 
 export const pnrFareAlertEntity = createEntityHook<PnrFareAlert>('pnr_fare_alerts', {
   list: {
-    select: '*',
+    select:
+      'id,pnr_id,alert_type,threshold_amount,current_amount,is_triggered,triggered_at,is_dismissed,dismissed_at,dismissed_by,workspace_id,created_at,updated_at',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

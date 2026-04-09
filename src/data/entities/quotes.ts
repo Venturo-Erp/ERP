@@ -10,7 +10,8 @@ import type { Quote } from '@/stores/types'
 
 export const quoteEntity = createEntityHook<Quote>('quotes', {
   list: {
-    select: '*',
+    select:
+      'id,workspace_id,code,quote_number,quote_type,name,destination,days,status,tour_id,itinerary_id,converted_to_tour,is_pinned,is_active,customer_name,contact_person,contact_phone,contact_email,handler_name,created_by,created_by_name,issue_date,group_size,accommodation_days,budget_range,valid_until,payment_terms,total_cost,total_amount,version,current_version_index,confirmation_status,created_at,updated_at',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

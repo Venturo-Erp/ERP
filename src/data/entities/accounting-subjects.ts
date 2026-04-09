@@ -6,7 +6,8 @@ import type { AccountingSubject } from '@/types/accounting-pro.types'
 
 export const accountingSubjectEntity = createEntityHook<AccountingSubject>('accounting_subjects', {
   list: {
-    select: '*',
+    select:
+      'id,workspace_id,code,name,type,parent_id,level,is_system,is_active,description,created_at,updated_at',
     orderBy: { column: 'code', ascending: true },
   },
   slim: {

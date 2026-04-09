@@ -26,7 +26,8 @@ export interface CompanyAsset {
 
 export const companyAssetEntity = createEntityHook<CompanyAsset>('company_assets', {
   list: {
-    select: '*',
+    select:
+      'id,name,file_path,asset_type,description,file_size,folder_id,mime_type,restricted,uploaded_by,uploaded_by_name,workspace_id,created_at,updated_at',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

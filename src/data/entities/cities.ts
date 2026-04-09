@@ -10,7 +10,8 @@ import type { City } from '@/stores/region-store'
 
 export const cityEntity = createEntityHook<City>('cities', {
   list: {
-    select: '*',
+    select:
+      'id,country_id,region_id,name,name_en,airport_code,description,timezone,background_image_url,background_image_url_2,primary_image,display_order,is_active,is_major,usage_count,workspace_id,created_at,updated_at',
     orderBy: { column: 'display_order', ascending: true },
   },
   slim: {

@@ -10,7 +10,8 @@ import type { DisbursementOrder } from '@/stores/types'
 
 export const disbursementOrderEntity = createEntityHook<DisbursementOrder>('disbursement_orders', {
   list: {
-    select: '*',
+    select:
+      'id,order_number,code,disbursement_date,payment_request_ids,amount,status,notes,created_by,confirmed_by,confirmed_at,handled_by,handled_at,payment_method,paid_at,pdf_url,workspace_id,created_at,updated_at',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

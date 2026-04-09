@@ -10,7 +10,8 @@ import type { Company } from '@/stores/types'
 
 export const companyEntity = createEntityHook<Company>('companies', {
   list: {
-    select: '*',
+    select:
+      'id,workspace_id,company_name,tax_id,phone,email,website,invoice_title,invoice_address,invoice_email,payment_terms,payment_method,credit_limit,bank_name,bank_account,bank_branch,registered_address,mailing_address,vip_level,notes,created_at,updated_at,created_by',
     orderBy: { column: 'company_name', ascending: true },
   },
   slim: {

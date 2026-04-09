@@ -10,7 +10,8 @@ import type { Todo } from '@/stores/types'
 
 export const todoEntity = createEntityHook<Todo>('todos', {
   list: {
-    select: '*',
+    select:
+      'id,title,priority,deadline,status,completed,task_type,tour_request_id,tour_id,creator,assignee,visibility,is_public,calendar_event_id,related_items,sub_tasks,notes,enabled_quick_actions,needs_creator_notification,created_at,updated_at',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

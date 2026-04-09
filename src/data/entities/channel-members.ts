@@ -21,7 +21,7 @@ export interface ChannelMember {
 export const channelMemberEntity = createEntityHook<ChannelMember>('channel_members', {
   workspaceScoped: true,
   list: {
-    select: '*',
+    select: 'id,channel_id,employee_id,role,status,workspace_id,created_at,updated_at',
     orderBy: { column: 'created_at', ascending: true },
   },
   slim: {

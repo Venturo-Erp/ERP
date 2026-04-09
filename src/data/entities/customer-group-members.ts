@@ -12,7 +12,7 @@ export const customerGroupMemberEntity = createEntityHook<CustomerGroupMember>(
   'customer_group_members',
   {
     list: {
-      select: '*',
+      select: 'id,group_id,customer_id,role,created_at,updated_at',
       orderBy: { column: 'created_at', ascending: false },
     },
     slim: {
