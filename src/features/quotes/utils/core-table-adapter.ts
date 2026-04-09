@@ -165,6 +165,37 @@ export async function writePricingToCore(
           continue
         }
 
+        // 防重複：先查核心表有沒有同分類 + 同標題 + 同價格的項目
+        const { data: existing } = await supabase
+          .from('tour_itinerary_items')
+          .select('id')
+          .eq('tour_id', tour_id)
+          .eq('category', category.id)
+          .eq('title', item.name || '')
+          .is('itinerary_id', null)
+          .limit(1)
+
+        if (existing && existing.length > 0) {
+          // 已存在 → UPDATE 而不是 INSERT
+          currentCoreItemIds.add(existing[0].id)
+          await supabase
+            .from('tour_itinerary_items')
+            .update({
+              unit_price: item.unit_price ?? null,
+              quantity: item.quantity ?? null,
+              total_cost: item.total ?? null,
+              pricing_type: item.pricing_type ?? null,
+              adult_price: item.adult_price ?? null,
+              child_price: item.child_price ?? null,
+              infant_price: item.infant_price ?? null,
+              quote_note: item.note ?? null,
+              quote_status: 'drafted',
+            })
+            .eq('id', existing[0].id)
+          result.synced++
+          continue
+        }
+
         const { data, error } = await supabase
           .from('tour_itinerary_items')
           .insert({
