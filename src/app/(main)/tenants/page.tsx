@@ -2,7 +2,8 @@
 
 import { LABELS } from './constants/labels'
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
+import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Building2 } from 'lucide-react'
@@ -30,22 +31,16 @@ export default function TenantsPage() {
   const { updateWorkspace } = useWorkspaceChannels()
   const { items: employees } = useEmployeesSlim()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [allWorkspaces, setAllWorkspaces] = useState<Workspace[]>([])
-
-  // 用 API 取全部租戶（繞過 RLS，server 端檢查 tenants 權限）
-  const loadAllWorkspaces = useCallback(async () => {
-    try {
+  // 用 SWR 快取租戶列表（繞過 RLS，server 端檢查 tenants 權限）
+  const { data: allWorkspaces = [], mutate: refreshWorkspaces } = useSWR<Workspace[]>(
+    'all-workspaces',
+    async () => {
       const res = await fetch('/api/workspaces')
-      if (res.ok) {
-        const data = await res.json()
-        setAllWorkspaces(data)
-      } else {
-        logger.error('載入租戶列表失敗:', await res.text())
-      }
-    } catch (err) {
-      logger.error('載入租戶列表失敗:', err)
-    }
-  }, [])
+      if (!res.ok) return []
+      return res.json()
+    },
+    { revalidateOnFocus: false }
+  )
 
   // 點擊行進入詳情頁
   const handleRowClick = useCallback(
@@ -54,10 +49,6 @@ export default function TenantsPage() {
     },
     [router]
   )
-
-  useEffect(() => {
-    loadAllWorkspaces()
-  }, [])
 
   const getEmployeeCount = useCallback(
     (workspaceId: string) => {
@@ -174,8 +165,8 @@ export default function TenantsPage() {
 
   const handleCreateComplete = useCallback(() => {
     setIsCreateOpen(false)
-    loadAllWorkspaces()
-  }, [loadAllWorkspaces])
+    refreshWorkspaces()
+  }, [refreshWorkspaces])
 
   return (
     <>
