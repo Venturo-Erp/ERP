@@ -230,6 +230,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
             : parseFlightText(newTour.return_flight_text),
           workspace_id: workspaceId,
           department_id: newTour.department_id || undefined,
+          tour_service_type: newTour.tour_service_type || 'tour_group',
         }
 
         const createdTour = await actions.create(tourData)
