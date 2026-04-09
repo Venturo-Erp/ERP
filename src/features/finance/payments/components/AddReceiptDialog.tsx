@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input'
 import type { Receipt } from '@/stores'
 import { useAuthStore } from '@/stores'
 import { ADD_RECEIPT_DIALOG_LABELS, ADD_RECEIPT_TOAST_LABELS } from '../../constants/labels'
+import { usePaymentMethodsCached } from '@/data/hooks'
 
 interface AddReceiptDialogProps {
   open: boolean
@@ -98,10 +99,8 @@ export function AddReceiptDialog({
   const [linkPayResults, setLinkPayResults] = useState<LinkPayResult[]>([])
   const [copiedLink, setCopiedLink] = useState<string | null>(null)
 
-  // 收款方式（統一在 Dialog 層級載入，避免競爭）
-  const [paymentMethods, setPaymentMethods] = useState<
-    Array<{ id: string; name: string; placeholder?: string | null }>
-  >([])
+  // 收款方式（SWR 快取，統一在 Dialog 層級載入）
+  const { methods: paymentMethods, loading: methodsLoading } = usePaymentMethodsCached('receipt')
   const [dialogLoading, setDialogLoading] = useState(false)
 
   // 當對話框開啟時：載入資料、重置表單、設定預設值
@@ -117,24 +116,12 @@ export function AddReceiptDialog({
     const initialize = async () => {
       const { invalidateTours, invalidateOrders } = await import('@/data')
       const { supabase } = await import('@/lib/supabase/client')
-      const { useAuthStore } = await import('@/stores')
-      const workspaceId = useAuthStore.getState().user?.workspace_id
 
-      // 並行載入：SWR 快取 + 收款方式
-      const [, , methodsRes] = await Promise.all([
-        invalidateTours(),
-        invalidateOrders(),
-        workspaceId
-          ? fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}&type=receipt`)
-          : Promise.resolve(null),
-      ])
+      // 並行載入 SWR 快取（收款方式由 usePaymentMethodsCached hook 自動管理）
+      await Promise.all([invalidateTours(), invalidateOrders()])
 
-      let loadedMethods: { id: string; name: string; placeholder?: string | null }[] = []
-      if (methodsRes && methodsRes.ok) {
-        const data = await methodsRes.json()
-        loadedMethods = data || []
-        setPaymentMethods(loadedMethods)
-      }
+      // 使用 hook 提供的 paymentMethods（SWR 快取）
+      const loadedMethods = paymentMethods
 
       // 編輯模式：載入收款單資料和項目
       if (editingReceipt) {
@@ -210,7 +197,16 @@ export function AddReceiptDialog({
     initialize()
       .catch(err => logger.error('[initialize]', err))
       .finally(() => setDialogLoading(false))
-  }, [open, defaultTourId, defaultOrderId, resetForm, setFormData, editingReceipt, setPaymentItems])
+  }, [
+    open,
+    defaultTourId,
+    defaultOrderId,
+    resetForm,
+    setFormData,
+    editingReceipt,
+    setPaymentItems,
+    paymentMethods,
+  ])
 
   // 如果只有一個訂單，自動帶入（編輯模式除外）
   useEffect(() => {

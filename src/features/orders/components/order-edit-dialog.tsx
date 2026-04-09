@@ -18,15 +18,10 @@ import type { SyncableEntity } from '@/types'
 import { X } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 import { COMP_ORDERS_LABELS } from '../constants/labels'
+import { useWorkspaceRoles } from '@/data/hooks'
 
 // 型別守衛：檢查 Employee 是否包含同步欄位
 type EmployeeWithSync = Employee & Partial<SyncableEntity>
-
-// 職務類型
-interface WorkspaceRole {
-  id: string
-  name: string
-}
 
 interface OrderEditDialogProps {
   open: boolean
@@ -38,28 +33,12 @@ interface OrderEditDialogProps {
 export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderEditDialogProps) {
   const { items: employees } = useEmployeesSlim()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [workspaceRoles, setWorkspaceRoles] = useState<WorkspaceRole[]>([])
+  const { roles: workspaceRoles } = useWorkspaceRoles()
   const [formData, setFormData] = useState({
     contact_person: '',
     sales_person: '',
     assistant: '',
   })
-
-  // 載入職務列表
-  useEffect(() => {
-    const loadRoles = async () => {
-      try {
-        const res = await fetch('/api/permissions/roles')
-        if (res.ok) {
-          const data = await res.json()
-          setWorkspaceRoles(data)
-        }
-      } catch (err) {
-        logger.error('載入職務失敗:', err)
-      }
-    }
-    loadRoles()
-  }, [])
 
   // 取得特定職務名稱的 role_id
   const getRoleIdByName = (name: string) => {

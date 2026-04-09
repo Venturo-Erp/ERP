@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Combobox } from '@/components/ui/combobox'
@@ -9,13 +9,7 @@ import { useEmployeesSlim } from '@/data'
 import type { Employee } from '@/stores/types'
 import type { SyncableEntity } from '@/types'
 import { COMP_ORDERS_LABELS } from '../constants/labels'
-import { logger } from '@/lib/utils/logger'
-
-// 職務類型
-interface WorkspaceRole {
-  id: string
-  name: string
-}
+import { useWorkspaceRoles } from '@/data/hooks'
 
 // 型別守衛：檢查 Employee 是否包含同步欄位
 type EmployeeWithSync = Employee & Partial<SyncableEntity>
@@ -44,23 +38,7 @@ interface AddOrderFormProps {
 export function AddOrderForm({ tourId, onSubmit, onCancel, value, onChange }: AddOrderFormProps) {
   const { items: tours } = useToursListSlim()
   const { items: employees } = useEmployeesSlim()
-  const [workspaceRoles, setWorkspaceRoles] = useState<WorkspaceRole[]>([])
-
-  // 載入職務列表
-  useEffect(() => {
-    const loadRoles = async () => {
-      try {
-        const res = await fetch('/api/permissions/roles')
-        if (res.ok) {
-          const data = await res.json()
-          setWorkspaceRoles(data)
-        }
-      } catch (err) {
-        logger.error('載入職務失敗:', err)
-      }
-    }
-    loadRoles()
-  }, [])
+  const { roles: workspaceRoles } = useWorkspaceRoles()
 
   // 取得特定職務名稱的 role_id
   const getRoleIdByName = (name: string) => {

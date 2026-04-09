@@ -5,6 +5,7 @@
 
 import { formatDate } from '@/lib/utils/format-date'
 import { useState, useEffect } from 'react'
+import { usePaymentMethodsCached } from '@/data/hooks'
 import { Link2, Loader2, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
@@ -72,32 +73,12 @@ export function PaymentItemRow({
     Array<{ id: string; code: string; name: string }>
   >([])
 
-  // 從 DB 讀取收款方式（fallback，如果父組件沒有傳入）
-  const [localPaymentMethods, setLocalPaymentMethods] = useState<
-    Array<{ id: string; name: string; placeholder?: string | null }>
-  >([])
+  // 從 SWR 快取讀取收款方式（fallback，如果父組件沒有傳入）
+  const { methods: cachedMethods } = usePaymentMethodsCached('receipt')
   const paymentMethods =
-    propPaymentMethods && propPaymentMethods.length > 0 ? propPaymentMethods : localPaymentMethods
+    propPaymentMethods && propPaymentMethods.length > 0 ? propPaymentMethods : cachedMethods
 
   useEffect(() => {
-    // 只有在父組件沒有傳入時才自己載入
-    if (propPaymentMethods && propPaymentMethods.length > 0) return
-
-    const loadPaymentMethods = async () => {
-      const { useAuthStore } = await import('@/stores')
-      const workspaceId = useAuthStore.getState().user?.workspace_id
-      if (!workspaceId) return
-
-      const response = await fetch(
-        `/api/finance/payment-methods?workspace_id=${workspaceId}&type=receipt`
-      )
-      if (response.ok) {
-        const data = await response.json()
-        setLocalPaymentMethods(data || [])
-      }
-    }
-    loadPaymentMethods()
-
     if (mode === 'company') {
       // 讀取收入類科目
       const loadSubjects = async () => {

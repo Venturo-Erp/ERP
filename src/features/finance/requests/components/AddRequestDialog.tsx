@@ -28,6 +28,7 @@ import { usePayments } from '@/features/payments/hooks/usePayments'
 import { RequestItem, categoryOptions, statusLabels, statusColors } from '../types'
 import { PaymentRequest, PaymentItemCategory, CompanyExpenseType } from '@/stores/types'
 import { paymentRequestService } from '@/features/payments/services/payment-request.service'
+import { usePaymentMethodsCached } from '@/data/hooks'
 import { recalculateExpenseStats } from '@/features/finance/payments/services/expense-core.service'
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
@@ -201,23 +202,8 @@ export function AddRequestDialog({
   const isEditBatch = editBatchRequests.length > 1
   const canEdit = isEditMode ? !readOnly && currentRequest?.status === 'pending' : true
 
-  // === 付款方式 ===
-  const [paymentMethods, setPaymentMethods] = useState<Array<{ id: string; name: string }>>([])
-
-  useEffect(() => {
-    if (open && workspaceId) {
-      supabase
-        .from('payment_methods')
-        .select('id, name')
-        .eq('workspace_id', workspaceId)
-        .eq('type', 'payment')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true })
-        .then(({ data }) => {
-          setPaymentMethods(data || [])
-        })
-    }
-  }, [open, workspaceId])
+  // === 付款方式（SWR 快取） ===
+  const { methods: paymentMethods } = usePaymentMethodsCached('payment')
 
   // === 新增供應商對話框狀態 ===
   const [createSupplierDialogOpen, setCreateSupplierDialogOpen] = useState(false)
