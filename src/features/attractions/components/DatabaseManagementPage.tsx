@@ -3,6 +3,7 @@
 import { useState, lazy, Suspense, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { MapPin, Star, Sparkles, Globe, Hotel, UtensilsCrossed } from 'lucide-react'
+import { Combobox } from '@/components/ui/combobox'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { useAttractionsDialog } from '../hooks/useAttractionsDialog'
@@ -166,34 +167,32 @@ export default function DatabaseManagementPage() {
       filters={
         activeTab !== 'regions' ? (
           <>
-            {/* 國家篩選 - 景點相關 tab 共用 */}
-            <select
+            {/* 國家篩選 - Combobox 可搜尋 */}
+            <Combobox
+              options={[
+                { value: '', label: DATABASE_MANAGEMENT_PAGE_LABELS.LABEL_937 },
+                ...countries.map(c => ({ value: c.id, label: c.name })),
+              ]}
               value={selectedCountry}
-              onChange={e => setSelectedCountry(e.target.value)}
-              className="px-3 py-1 text-sm border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-morandi-primary bg-card text-morandi-primary min-w-[120px]"
-            >
-              <option value="">{DATABASE_MANAGEMENT_PAGE_LABELS.LABEL_937}</option>
-              {countries.map(country => (
-                <option key={country.id} value={country.id}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
+              onChange={setSelectedCountry}
+              placeholder={DATABASE_MANAGEMENT_PAGE_LABELS.LABEL_937}
+              className="min-w-[140px]"
+              showClearButton
+            />
             {/* 分類篩選 - 只在景點活動顯示 */}
             {activeTab === 'attractions' && (
-              <select
+              <Combobox
+                options={[
+                  { value: 'all', label: DATABASE_MANAGEMENT_PAGE_LABELS.LABEL_3573 },
+                  { value: 'unverified', label: '⚠ 待驗證' },
+                  ...categoryOptions,
+                ]}
                 value={selectedCategory}
-                onChange={e => setSelectedCategory(e.target.value)}
-                className="px-3 py-1 text-sm border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-morandi-primary bg-card text-morandi-primary min-w-[120px]"
-              >
-                <option value="all">{DATABASE_MANAGEMENT_PAGE_LABELS.LABEL_3573}</option>
-                <option value="unverified">⚠ 待驗證</option>
-                {categoryOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+                onChange={setSelectedCategory}
+                placeholder={DATABASE_MANAGEMENT_PAGE_LABELS.LABEL_3573}
+                className="min-w-[120px]"
+                showClearButton
+              />
             )}
           </>
         ) : undefined
