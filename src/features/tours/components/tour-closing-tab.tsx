@@ -49,6 +49,7 @@ import {
 import { calculateFullProfit } from '../services/profit-calculation.service'
 import { useAuthStore } from '@/stores'
 import { supabase } from '@/lib/supabase/client'
+import { usePaymentMethodsCached } from '@/data/hooks'
 
 // === 結案狀態 ===
 const CLOSING_STATUS_MAP: Record<string, { label: string; color: string }> = {
@@ -260,20 +261,13 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
     })
   }
 
-  // 收款方式對照（從 payment_methods 表載入，以 id 為 key）
-  const [paymentMethodMap, setPaymentMethodMap] = useState<Record<string, string>>({})
-  useEffect(() => {
-    supabase
-      .from('payment_methods')
-      .select('id,name')
-      .then(({ data }) => {
-        if (data) {
-          const map: Record<string, string> = {}
-          for (const pm of data) map[pm.id] = pm.name
-          setPaymentMethodMap(map)
-        }
-      })
-  }, [])
+  // 收款方式對照（SWR 快取）
+  const { methods: allPaymentMethods } = usePaymentMethodsCached()
+  const paymentMethodMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    for (const pm of allPaymentMethods) map[pm.id] = pm.name
+    return map
+  }, [allPaymentMethods])
 
   const PAYMENT_METHOD_LABELS: Record<string, string> = {
     transfer: '匯款',

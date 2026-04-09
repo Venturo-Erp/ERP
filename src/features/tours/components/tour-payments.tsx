@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { Tour } from '@/stores/types'
 import { DollarSign, Plus, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -12,7 +12,7 @@ import { InvoiceDialog } from './InvoiceDialog'
 import { COMP_TOURS_LABELS } from '../constants/labels'
 import { useReceipts, useOrdersSlim } from '@/data'
 import { formatCurrency } from '@/lib/utils/format-currency'
-import { supabase } from '@/lib/supabase/client'
+import { usePaymentMethodsCached } from '@/data/hooks'
 import { AddReceiptDialog } from '@/features/finance/payments/components/AddReceiptDialog'
 import type { Receipt } from '@/types/receipt.types'
 
@@ -152,19 +152,12 @@ function ReceiptOverviewTable({ tour }: { tour: Tour }) {
   const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null)
   const [receiptDialogOpen, setReceiptDialogOpen] = useState(false)
 
-  const [paymentMethodMap, setPaymentMethodMap] = useState<Record<string, string>>({})
-  useEffect(() => {
-    supabase
-      .from('payment_methods')
-      .select('id,name')
-      .then(({ data }) => {
-        if (data) {
-          const map: Record<string, string> = {}
-          for (const pm of data) map[pm.id] = pm.name
-          setPaymentMethodMap(map)
-        }
-      })
-  }, [])
+  const { methods: allMethods } = usePaymentMethodsCached()
+  const paymentMethodMap = useMemo(() => {
+    const map: Record<string, string> = {}
+    for (const pm of allMethods) map[pm.id] = pm.name
+    return map
+  }, [allMethods])
 
   const orderIds = useMemo(
     () => new Set((allOrders ?? []).filter(o => o.tour_id === tour.id).map(o => o.id)),
