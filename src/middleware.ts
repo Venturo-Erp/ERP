@@ -53,33 +53,46 @@ export async function middleware(request: NextRequest) {
 
   // 公開路由：不需要登入即可訪問（prefix 匹配）
   const publicPaths = [
+    // === 頁面 ===
     '/landing',
     '/login',
     '/confirm', // 報價確認頁面（客戶公開連結）
-    '/api/auth',
-    '/api/health',
-    '/api/finance', // 財務 API（使用 service role key）
-    '/api/linkpay', // Webhook 回調
-    '/api/gemini', // AI 圖片生成 API
-    '/api/itineraries', // 公開行程 API（給 /view 頁面使用）
-    '/api/quotes/confirmation/customer', // 客戶報價確認 API（使用 token 驗證）
-    '/api/my', // App API（使用 Bearer token 驗證）
     '/public', // 供應商公開回覆頁面（用 token 驗證）
-    '/api/contracts/sign', // 公開合約簽署 API
-    '/api/line', // LINE Webhook + API
-    '/api/meta', // Meta (IG + Messenger) Webhook
-    '/api/d', // 短網址下載（公開，24hr signed URL）
-    '/api/trips', // App API（使用 Bearer token 驗證）
-    '/api/eyeline', // 旅人眼線 API（使用 Bearer token 驗證）
-    '/api/join-trip', // 加入行程 API（使用 Bearer token 驗證）
-    '/api/storage', // Storage API（使用 service role key 驗證）
-    '/api/bot', // 機器人 API（內部使用）
-    '/api/cron', // Cron Job API（Vercel 排程使用）
-    '/api/workspaces', // 租戶 API（使用 service role key）
-    '/test-supplier', // 供應商 UI 測試頁面（暫時）
     '/view', // 公開行程檢視頁面
-    '/game', // 遊戲辦公室（隱藏彩蛋）
     '/p/', // 公開頁面（客製化、行程、報名等）
+    '/game', // 遊戲辦公室
+
+    // === 認證 API ===
+    '/api/auth', // 登入/註冊/token
+    '/api/health', // 健康檢查
+
+    // === Webhook（第三方伺服器呼叫，有各自驗證機制）===
+    '/api/line/webhook', // LINE webhook（有 signature 驗證）
+    '/api/meta/webhook', // Meta webhook（有 verify token）
+    '/api/linkpay/callback', // LinkPay 回調
+    '/api/linkpay/webhook', // LinkPay webhook
+
+    // === Cron Job（Vercel 排程，需在 handler 裡驗證 CRON_SECRET）===
+    '/api/cron', // Vercel Cron（handler 內要檢查 Authorization header）
+
+    // === 公開 API（有各自的 token/secret 驗證）===
+    '/api/itineraries', // 公開行程 API（給 /view 頁面使用）
+    '/api/contracts/sign', // 公開合約簽署（用 contractId 驗證）
+    '/api/quotes/confirmation/customer', // 客戶報價確認（用 token 驗證）
+    '/api/d', // 短網址下載（signed URL）
+
+    // === App API（Bearer token 驗證）===
+    '/api/my', // App API
+    '/api/trips', // App 行程 API
+    '/api/eyeline', // 旅人眼線 API
+    '/api/join-trip', // 加入行程 API
+
+    // === 客戶端 API（LINE 用戶操作）===
+    '/api/customers/by-line', // LINE 用戶查詢
+    '/api/customers/link-line', // LINE 綁定
+    '/api/customers/match', // 客戶比對
+
+    // === 靜態資源 ===
     '/_next',
     '/favicon.ico',
     '/manifest.json',
