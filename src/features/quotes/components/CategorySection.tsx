@@ -112,8 +112,19 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
 }) => {
   const Icon = categoryIcons[category.id]
 
-  // 折疊狀態
-  const [isCollapsed, setIsCollapsed] = useState(false)
+  // 折疊狀態（localStorage 記憶）
+  const storageKey = `quote-category-collapsed-${category.id}`
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return localStorage.getItem(storageKey) === '1'
+  })
+  const toggleCollapsed = () => {
+    setIsCollapsed(prev => {
+      const next = !prev
+      localStorage.setItem(storageKey, next ? '1' : '0')
+      return next
+    })
+  }
 
   // 對話框狀態
   const [isCountryDialogOpen, setIsCountryDialogOpen] = useState(false)
@@ -218,7 +229,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
           <div className="flex items-center space-x-2">
             {/* 折疊箭頭 */}
             <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
+              onClick={toggleCollapsed}
               className="p-0.5 hover:bg-morandi-gold/10 rounded transition-colors"
               title={isCollapsed ? CATEGORY_SECTION_LABELS.展開 : CATEGORY_SECTION_LABELS.收合}
             >
