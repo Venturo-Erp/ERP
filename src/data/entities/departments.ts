@@ -22,7 +22,7 @@ export interface Department {
 
 export const departmentEntity = createEntityHook<Department>('departments', {
   list: {
-    select: 'id,workspace_id,name,code,description,is_active,display_order,created_at,updated_at',
+    select: '*',
     orderBy: { column: 'display_order', ascending: true },
   },
   detail: { select: '*' },

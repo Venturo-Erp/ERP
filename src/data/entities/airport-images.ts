@@ -11,7 +11,7 @@ import type { AirportImage } from '@/stores/types'
 export const airportImageEntity = createEntityHook<AirportImage>('airport_images', {
   list: {
     select:
-      'id,airport_code,image_url,label,season,is_default,display_order,uploaded_by,workspace_id,created_at,updated_at',
+      '*',
     orderBy: { column: 'display_order', ascending: true },
   },
   slim: {

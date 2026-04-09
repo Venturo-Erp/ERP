@@ -11,7 +11,7 @@ import type { Visa } from '@/stores/types'
 export const visaEntity = createEntityHook<Visa>('visas', {
   list: {
     select:
-      'id,applicant_name,contact_person,contact_phone,visa_type,country,is_urgent,status,received_date,expected_issue_date,actual_submission_date,documents_returned_date,pickup_date,submission_date,order_id,order_number,tour_id,code,fee,cost,vendor,notes,created_by,created_at,updated_at',
+      '*',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

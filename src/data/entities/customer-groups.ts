@@ -10,7 +10,7 @@ import type { CustomerGroup } from '@/stores/types'
 
 export const customerGroupEntity = createEntityHook<CustomerGroup>('customer_groups', {
   list: {
-    select: 'id,workspace_id,name,type,notes,created_by,created_at,updated_at',
+    select: '*',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

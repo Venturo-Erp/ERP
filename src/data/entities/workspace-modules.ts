@@ -6,7 +6,7 @@ import type { WorkspaceModule } from '@/types/accounting-pro.types'
 
 export const workspaceModuleEntity = createEntityHook<WorkspaceModule>('workspace_modules', {
   list: {
-    select: 'id,workspace_id,module_name,is_enabled,enabled_at,expires_at,created_at,updated_at',
+    select: '*',
     orderBy: { column: 'module_name', ascending: true },
   },
   slim: {

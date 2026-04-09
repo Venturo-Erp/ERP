@@ -11,7 +11,7 @@ import type { CalendarEvent } from '@/types/calendar.types'
 export const calendarEventEntity = createEntityHook<CalendarEvent>('calendar_events', {
   list: {
     select:
-      'id,workspace_id,title,description,start,end,all_day,type,color,visibility,related_tour_id,related_order_id,attendees,reminder_minutes,recurring,recurring_until,owner_id,created_at,updated_at,created_by,updated_by',
+      '*',
     orderBy: { column: 'start', ascending: true },
   },
   slim: {

@@ -28,7 +28,7 @@ export interface TourVehicle {
 export const tourVehicleEntity = createEntityHook<TourVehicle>('tour_vehicles', {
   list: {
     select:
-      'id,tour_id,vehicle_name,vehicle_type,capacity,display_order,driver_name,driver_phone,license_plate,notes,created_at,updated_at',
+      '*',
     orderBy: { column: 'display_order', ascending: true },
   },
   slim: {

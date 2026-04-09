@@ -10,7 +10,7 @@ import type { VendorCost } from '@/stores/types'
 
 export const vendorCostEntity = createEntityHook<VendorCost>('vendor_costs', {
   list: {
-    select: 'id,vendor_name,visa_type,cost,created_at,updated_at',
+    select: '*',
     orderBy: { column: 'vendor_name', ascending: true },
   },
   slim: {

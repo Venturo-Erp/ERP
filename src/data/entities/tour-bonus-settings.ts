@@ -6,7 +6,7 @@ import type { TourBonusSetting } from '@/types/bonus.types'
 
 export const tourBonusSettingEntity = createEntityHook<TourBonusSetting>('tour_bonus_settings', {
   list: {
-    select: 'id,workspace_id,tour_id,type,bonus,bonus_type,employee_id,created_at,updated_at',
+    select: '*',
     orderBy: { column: 'type', ascending: true },
   },
   slim: {

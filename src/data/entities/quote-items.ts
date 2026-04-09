@@ -7,7 +7,7 @@ import type { QuoteItem } from '@/types/quote.types'
 export const quoteItemEntity = createEntityHook<QuoteItem>('quote_items', {
   list: {
     select:
-      'id,workspace_id,quote_id,category_id,category_name,type,name,description,quantity,unit_price,total_price,order,notes,is_optional,is_active,created_at,updated_at',
+      '*',
     orderBy: { column: 'order', ascending: true },
   },
   slim: {

@@ -27,7 +27,7 @@ export interface PnrScheduleChange {
 export const pnrScheduleChangeEntity = createEntityHook<PnrScheduleChange>('pnr_schedule_changes', {
   list: {
     select:
-      'id,pnr_id,change_type,flight_number,original_departure,new_departure,original_arrival,new_arrival,reason,notified,notified_at,workspace_id,created_at,updated_at',
+      '*',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

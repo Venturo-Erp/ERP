@@ -7,7 +7,7 @@ import type { Confirmation } from '@/types/confirmation.types'
 export const confirmationEntity = createEntityHook<Confirmation>('confirmations', {
   list: {
     select:
-      'id,workspace_id,type,booking_number,confirmation_number,data,status,notes,created_at,updated_at,created_by,updated_by',
+      '*',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

@@ -26,7 +26,7 @@ export interface TourDocument {
 export const tourDocumentEntity = createEntityHook<TourDocument>('tour_documents', {
   list: {
     select:
-      'id,tour_id,document_type,title,file_url,file_name,file_size,mime_type,description,uploaded_by,workspace_id,created_at,updated_at',
+      '*',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

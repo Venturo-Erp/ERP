@@ -6,7 +6,7 @@ import type { SupplierCategory } from '@/types/supplier-category.types'
 
 export const supplierCategoryEntity = createEntityHook<SupplierCategory>('supplier_categories', {
   list: {
-    select: 'id,workspace_id,name,icon,color,display_order,is_active,created_at,updated_at',
+    select: '*',
     orderBy: { column: 'display_order', ascending: true },
   },
   slim: {

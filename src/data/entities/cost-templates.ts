@@ -7,7 +7,7 @@ import type { CostTemplate } from '@/types/supplier.types'
 export const costTemplateEntity = createEntityHook<CostTemplate>('cost_templates', {
   list: {
     select:
-      'id,workspace_id,supplier_id,city_id,attraction_id,category,item_name,item_name_en,description,cost_price,selling_price,currency,unit,min_quantity,max_quantity,valid_from,valid_until,season,created_at,updated_at',
+      '*',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

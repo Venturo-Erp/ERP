@@ -23,7 +23,7 @@ export interface WorkspaceEntity extends BaseEntity {
 export const workspaceEntity = createEntityHook<WorkspaceEntity>('workspaces', {
   list: {
     select:
-      'id,name,code,type,description,icon,is_active,seal_image_url,contract_seal_image_url,created_by,created_at,updated_at',
+      '*',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

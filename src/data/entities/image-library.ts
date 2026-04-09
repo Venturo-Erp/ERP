@@ -32,7 +32,7 @@ export const imageLibraryEntity = createEntityHook<ImageLibraryItem>('image_libr
   workspaceScoped: true,
   list: {
     select:
-      'id,name,file_path,public_url,description,category,tags,mime_type,file_size,width,height,country_id,city_id,attraction_id,workspace_id,created_at,created_by,updated_at',
+      '*',
     orderBy: { column: 'created_at', ascending: false },
   },
   slim: {

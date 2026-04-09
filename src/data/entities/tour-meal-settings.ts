@@ -23,7 +23,7 @@ export interface TourMealSetting {
 export const tourMealSettingEntity = createEntityHook<TourMealSetting>('tour_meal_settings', {
   list: {
     select:
-      'id,tour_id,meal_type,day_number,restaurant_name,enabled,display_order,workspace_id,created_at,updated_at',
+      '*',
     orderBy: { column: 'day_number', ascending: true },
   },
   slim: {
