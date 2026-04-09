@@ -36,11 +36,27 @@ const PREMIUM_FEATURE_CODES = [
   'tenants',
 ]
 
+// 模組級快取：登入後第一次 fetch，整個 session 共用
+const featureCache = {
+  workspaceId: null as string | null,
+  features: [] as WorkspaceFeature[],
+  premiumEnabled: false,
+  loaded: false,
+  loading: false,
+  promise: null as Promise<void> | null,
+}
+
 export function useWorkspaceFeatures() {
   const { user } = useAuthStore()
-  const [features, setFeatures] = useState<WorkspaceFeature[]>([])
-  const [premiumEnabled, setPremiumEnabled] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [features, setFeatures] = useState<WorkspaceFeature[]>(
+    featureCache.workspaceId === user?.workspace_id ? featureCache.features : []
+  )
+  const [premiumEnabled, setPremiumEnabled] = useState(
+    featureCache.workspaceId === user?.workspace_id ? featureCache.premiumEnabled : false
+  )
+  const [loading, setLoading] = useState(
+    !(featureCache.workspaceId === user?.workspace_id && featureCache.loaded)
+  )
 
   useEffect(() => {
     if (!user?.workspace_id) {
@@ -50,29 +66,63 @@ export function useWorkspaceFeatures() {
       return
     }
 
+    // 快取命中：同一個 workspace 已載入過，直接用
+    if (featureCache.workspaceId === user.workspace_id && featureCache.loaded) {
+      setFeatures(featureCache.features)
+      setPremiumEnabled(featureCache.premiumEnabled)
+      setLoading(false)
+      return
+    }
+
+    // workspace 換了，清除快取
+    if (featureCache.workspaceId !== user.workspace_id) {
+      featureCache.workspaceId = user.workspace_id
+      featureCache.loaded = false
+      featureCache.loading = false
+      featureCache.promise = null
+    }
+
+    // 如果已經在載入中（其他 component 觸發的），等它完成
+    if (featureCache.loading && featureCache.promise) {
+      featureCache.promise.then(() => {
+        setFeatures(featureCache.features)
+        setPremiumEnabled(featureCache.premiumEnabled)
+        setLoading(false)
+      })
+      return
+    }
+
+    // 第一次載入
+    featureCache.loading = true
+    setLoading(true)
+
     const fetchFeatures = async () => {
-      setLoading(true)
       try {
-        // 取得功能開關
-        const res = await fetch(`/api/permissions/features?workspace_id=${user.workspace_id}`)
+        const [res, wsRes] = await Promise.all([
+          fetch(`/api/permissions/features?workspace_id=${user.workspace_id}`),
+          fetch(`/api/workspaces/${user.workspace_id}`),
+        ])
+
         if (res.ok) {
           const data = await res.json()
+          featureCache.features = data
           setFeatures(data)
         }
 
-        // 取得付費大開關
-        const wsRes = await fetch(`/api/workspaces/${user.workspace_id}`)
         if (wsRes.ok) {
           const ws = await wsRes.json()
-          setPremiumEnabled(ws.premium_enabled ?? false)
+          featureCache.premiumEnabled = ws.premium_enabled ?? false
+          setPremiumEnabled(featureCache.premiumEnabled)
         }
       } catch (err) {
         logger.error('Failed to fetch workspace features:', err)
       }
+      featureCache.loaded = true
+      featureCache.loading = false
       setLoading(false)
     }
 
-    fetchFeatures()
+    featureCache.promise = fetchFeatures()
   }, [user?.workspace_id])
 
   // 檢查功能是否啟用（付費功能需要付費大開關 + 功能小開關都開啟）
