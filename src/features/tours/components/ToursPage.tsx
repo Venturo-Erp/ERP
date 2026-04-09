@@ -192,10 +192,12 @@ export const ToursPage: React.FC = () => {
   const handleDeleteTour = useCallback(async () => {
     const result = await operations.handleDeleteTour(deleteConfirm.tour)
     closeDeleteDialog()
-    if (!result.success && result.error) {
+    if (result.success) {
+      actions.refresh()
+    } else if (result.error) {
       await alert(result.error, 'error')
     }
-  }, [operations, deleteConfirm.tour, closeDeleteDialog])
+  }, [operations, deleteConfirm.tour, closeDeleteDialog, actions])
 
   // 處理報名（建立訂單）
   const handleAddOrder = useCallback(
