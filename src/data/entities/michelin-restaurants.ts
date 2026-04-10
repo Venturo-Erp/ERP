@@ -29,7 +29,8 @@ export const michelinRestaurantEntity = createEntityHook<MichelinRestaurant>(
   'michelin_restaurants',
   {
     list: {
-      select: '*',
+      select:
+        'id,name,english_name,name_local,michelin_stars,michelin_guide_year,bib_gourmand,michelin_plate,green_star,country_id,region_id,city_id,address,latitude,longitude,google_maps_url,cuisine_type,dining_style,price_range,phone,website,reservation_required,description,chef_name,signature_dishes,images,is_active,display_order,notes,created_at,updated_at',
       orderBy: { column: 'display_order', ascending: true },
     },
     slim: {
