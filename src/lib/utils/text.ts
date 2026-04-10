@@ -5,7 +5,7 @@
 
 /**
  * 將全形字符轉換為半形
- * 只轉換數字、英文字母和部分符號，保留全形標點符號（，。？！「」『』等）
+ * 只轉換數字、英文字母和部分符號，保留全形標點符號（，。？！「」『』：【】等）
  * @param str 輸入字串
  * @returns 轉換後的半形字串
  */
@@ -20,8 +20,6 @@ export function toHalfWidth(str: string): string {
       .replace(/[Ａ-Ｚ]/g, char => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
       // 只轉換全形小寫英文 ａ-ｚ (0xFF41-0xFF5A) → a-z
       .replace(/[ａ-ｚ]/g, char => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
-      // 全形冒號轉半形冒號
-      .replace(/：/g, ':')
       // 全形空格轉半形空格
       .replace(/　/g, ' ')
       // 全形運算符號轉半形（用於數學計算）

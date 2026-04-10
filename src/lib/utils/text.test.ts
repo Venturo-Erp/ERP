@@ -26,6 +26,11 @@ describe('toHalfWidth', () => {
     expect(toHalfWidth('你好，世界。')).toBe('你好，世界。')
   })
 
+  it('preserves full-width colon and brackets', () => {
+    expect(toHalfWidth('備註：內容')).toBe('備註：內容')
+    expect(toHalfWidth('『重要』【標籤】')).toBe('『重要』【標籤】')
+  })
+
   it('handles empty/falsy input', () => {
     expect(toHalfWidth('')).toBe('')
     expect(toHalfWidth(null as never)).toBe(null)

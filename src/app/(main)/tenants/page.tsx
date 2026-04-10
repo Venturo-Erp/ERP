@@ -6,7 +6,7 @@ import React, { useState, useMemo, useCallback } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
-import { Building2 } from 'lucide-react'
+import { Building2, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useWorkspaceChannels } from '@/stores/workspace'
 import { useEmployeesSlim } from '@/data'
@@ -16,6 +16,7 @@ import { DateCell, ActionCell } from '@/components/table-cells'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 import { CreateTenantDialog } from './create-tenant-dialog'
+import { EditTenantDialog } from './edit-tenant-dialog'
 
 type WorkspaceRow = Workspace & { employee_count: number }
 
@@ -31,6 +32,7 @@ export default function TenantsPage() {
   const { updateWorkspace } = useWorkspaceChannels()
   const { items: employees } = useEmployeesSlim()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [editingWorkspace, setEditingWorkspace] = useState<WorkspaceRow | null>(null)
   // 用 SWR 快取租戶列表（繞過 RLS，server 端檢查 tenants 權限）
   const { data: allWorkspaces = [], mutate: refreshWorkspaces } = useSWR<Workspace[]>(
     'all-workspaces',
@@ -152,6 +154,11 @@ export default function TenantsPage() {
       <ActionCell
         actions={[
           {
+            icon: Pencil,
+            label: LABELS.EDIT_TENANT,
+            onClick: () => setEditingWorkspace(workspace),
+          },
+          {
             icon: Building2,
             label: workspace.is_active ? LABELS.STATUS_INACTIVE : LABELS.STATUS_ACTIVE,
             onClick: () => handleToggleActive(workspace),
@@ -204,6 +211,16 @@ export default function TenantsPage() {
         onOpenChange={setIsCreateOpen}
         onComplete={handleCreateComplete}
         existingCodes={(allWorkspaces || []).map(ws => ws.code || '').filter(Boolean)}
+      />
+
+      <EditTenantDialog
+        open={!!editingWorkspace}
+        onOpenChange={open => { if (!open) setEditingWorkspace(null) }}
+        workspace={editingWorkspace}
+        onComplete={() => {
+          setEditingWorkspace(null)
+          refreshWorkspaces()
+        }}
       />
     </>
   )

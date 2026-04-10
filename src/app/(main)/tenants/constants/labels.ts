@@ -81,6 +81,13 @@ export const LABELS = {
   BTN_CLOSE: '關閉',
   BTN_CANCEL: '取消',
 
+  // Edit dialog
+  EDIT_TENANT: '編輯租戶',
+  BTN_SAVE: '儲存',
+  BTN_SAVING: '儲存中...',
+  TOAST_EDIT_SUCCESS: '租戶資料已更新',
+  TOAST_EDIT_FAILED: '更新租戶失敗',
+
   // Toast messages
   TOAST_WORKSPACE_CREATED: '工作空間已建立',
   TOAST_ADMIN_CREATED: '管理員帳號已建立',
