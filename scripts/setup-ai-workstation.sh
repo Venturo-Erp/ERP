@@ -191,8 +191,22 @@ sudo pmset -a sleep 0 2>/dev/null && log "已設定永不睡眠" || warn "設定
 sudo pmset -a disksleep 0 2>/dev/null || true
 sudo pmset -a displaysleep 0 2>/dev/null || true
 
+# 啟用 SSH（遠端登入，讓大腦機器能控制這台）
+sudo systemsetup -setremotelogin on 2>/dev/null && log "SSH 遠端登入已開啟" || warn "SSH 設定失敗（請手動到 系統設定 → 共享 → 遠端登入）"
+
 # 啟用防火牆
 sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on 2>/dev/null && log "防火牆已啟用" || warn "防火牆設定失敗"
+
+# 允許 SSH 通過防火牆
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add /usr/libexec/sshd-keygen-wrapper 2>/dev/null || true
+
+# 取得本機 IP（方便設定）
+LOCAL_IP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo "未知")
+log "本機 IP: $LOCAL_IP（大腦機器需要這個 IP 來 SSH 連線）"
+
+# 設定電腦名稱提示
+HOSTNAME=$(hostname)
+log "電腦名稱: $HOSTNAME"
 
 log "系統設定完成"
 
