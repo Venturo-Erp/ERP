@@ -656,19 +656,7 @@ export {
 // 報價單項目
 // ============================================
 
-// Quote Items
-export {
-  quoteItemEntity,
-  useQuoteItems,
-  useQuoteItemsSlim,
-  useQuoteItem,
-  useQuoteItemsPaginated,
-  useQuoteItemDictionary,
-  createQuoteItem,
-  updateQuoteItem,
-  deleteQuoteItem,
-  invalidateQuoteItems,
-} from './quote-items'
+// Quote Items — 已移除（quote_items 表不存在）
 
 // Company Assets
 export * from './company-assets'

@@ -44,7 +44,8 @@ export const transportationRateEntity = createEntityHook<TransportationRate>(
   'transportation_rates',
   {
     list: {
-      select: '*',
+      select:
+        'id,workspace_id,country_id,country_name,vehicle_type,category,supplier,route,trip_type,cost_vnd,price_twd,price,currency,unit,kkday_selling_price,kkday_cost,kkday_profit,is_backup,is_active,display_order,notes,created_at,updated_at,created_by,updated_by',
       orderBy: { column: 'display_order', ascending: true },
     },
     slim: {
