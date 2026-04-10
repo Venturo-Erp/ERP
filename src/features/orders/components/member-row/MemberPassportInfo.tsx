@@ -125,7 +125,7 @@ export function MemberPassportInfo({
                   if (!departureDate) return ''
                   const d = new Date(departureDate)
                   d.setMonth(d.getMonth() + 6)
-                  return `${d.getMonth() + 1}/${d.getDate()}`
+                  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`
                 }
                 // 詳細說明
                 const detailLabel =

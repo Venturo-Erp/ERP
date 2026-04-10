@@ -60,6 +60,7 @@ import {
   Building2,
   Tag,
   TrendingUp,
+  Award,
 } from 'lucide-react'
 import { useAuthStore } from '@/stores/auth-store'
 import { alert, confirm } from '@/lib/ui/alert-dialog'
@@ -115,7 +116,7 @@ interface ExpenseCategory {
 
 export default function FinanceSettingsPage() {
   const [activeSection, setActiveSection] = useState<
-    'receipt' | 'payment' | 'bank' | 'category' | 'company_expense' | 'company_income'
+    'receipt' | 'payment' | 'bank' | 'category' | 'company_expense' | 'company_income' | 'bonus'
   >('receipt')
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
@@ -328,18 +329,17 @@ export default function FinanceSettingsPage() {
     c => c.type === 'expense' || c.type === 'both'
   )
 
-  const sections = [
-    { key: 'receipt', label: '收款方式', icon: CreditCard },
-    { key: 'payment', label: '付款方式', icon: Banknote },
-    { key: 'category', label: '團體請款類別', icon: Tag },
-    { key: 'company_expense', label: '公司支出項目', icon: Building2 },
-    { key: 'company_income', label: '公司收入項目', icon: TrendingUp },
-    { key: 'bank', label: '銀行帳戶', icon: Building2 },
-  ] as const
+  const tabs = [
+    { value: 'receipt', label: '收款方式', icon: CreditCard },
+    { value: 'payment', label: '付款方式', icon: Banknote },
+    { value: 'category', label: '團體請款類別', icon: Tag },
+    { value: 'company_expense', label: '公司支出項目', icon: Building2 },
+    { value: 'company_income', label: '公司收入項目', icon: TrendingUp },
+    { value: 'bank', label: '銀行帳戶', icon: Building2 },
+    { value: 'bonus', label: '獎金設定', icon: Award },
+  ]
 
-  // 取得當前 section 的標題
-  const currentSection = sections.find(s => s.key === activeSection)
-  const sectionTitle = currentSection?.label || ''
+  const sectionTitle = tabs.find(t => t.value === activeSection)?.label || ''
 
   // 新增按鈕
   const renderAddButton = () => {
@@ -404,33 +404,10 @@ export default function FinanceSettingsPage() {
     <ContentPageLayout
       title="財務設定"
       icon={Settings}
-      headerActions={
-        <div className="flex items-center gap-4">
-          {/* 分頁切換 - 標題右邊 */}
-          <div className="flex gap-1">
-            {sections.map(section => {
-              const Icon = section.icon
-              const isActive = activeSection === section.key
-              return (
-                <button
-                  key={section.key}
-                  onClick={() => setActiveSection(section.key)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-morandi-gold text-white'
-                      : 'text-morandi-secondary hover:bg-morandi-container'
-                  }`}
-                >
-                  <Icon className="w-3.5 h-3.5" />
-                  {section.label}
-                </button>
-              )
-            })}
-          </div>
-          {/* 新增按鈕 */}
-          {renderAddButton()}
-        </div>
-      }
+      tabs={tabs}
+      activeTab={activeSection}
+      onTabChange={(value) => setActiveSection(value as typeof activeSection)}
+      headerActions={renderAddButton()}
     >
       {/* 內容區 */}
       <div>
@@ -888,6 +865,19 @@ export default function FinanceSettingsPage() {
                   )}
                 </TableBody>
               </Table>
+            </Card>
+          </div>
+        )}
+
+        {/* 獎金設定 */}
+        {activeSection === 'bonus' && (
+          <div className="space-y-4">
+            <Card className="rounded-lg overflow-hidden p-8">
+              <div className="text-center text-morandi-muted py-8">
+                <Award className="h-12 w-12 mx-auto mb-3 opacity-40" />
+                <p className="text-lg font-medium">獎金設定</p>
+                <p className="text-sm mt-1">即將推出</p>
+              </div>
             </Card>
           </div>
         )}

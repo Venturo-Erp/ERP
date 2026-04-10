@@ -119,12 +119,17 @@ interface DialogContentProps extends React.ComponentPropsWithoutRef<
    * 保留向後兼容：nested={true} 等同於 level={2}
    */
   nested?: boolean
+  /**
+   * 自訂 overlay 的 className（覆蓋預設遮罩樣式）
+   * 用於 lightbox 等需要不同遮罩效果的場景
+   */
+  overlayClassName?: string
 }
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, size = 'lg', level, nested = false, ...props }, ref) => {
+>(({ className, children, size = 'lg', level, nested = false, overlayClassName, ...props }, ref) => {
   // 向後兼容：nested={true} 等同於 level={2}
   const effectiveLevel: DialogLevel = level ?? (nested ? 2 : 1)
   const zIndex = DIALOG_Z_INDEX[effectiveLevel]
@@ -142,9 +147,9 @@ const DialogContent = React.forwardRef<
         onDrop={e => e.preventDefault()}
         className={cn(
           'fixed inset-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-          showOverlay
+          overlayClassName || (showOverlay
             ? 'bg-morandi-primary/40 backdrop-blur-sm'
-            : 'bg-morandi-primary/20 backdrop-blur-sm'
+            : 'bg-morandi-primary/20 backdrop-blur-sm')
         )}
         style={{ zIndex: zIndex.overlay }}
       />

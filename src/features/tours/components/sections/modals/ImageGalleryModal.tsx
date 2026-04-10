@@ -46,8 +46,9 @@ export function ImageGalleryModal(props: ImageGalleryModalProps) {
   return (
     <Dialog open={true} onOpenChange={open => !open && onClose()}>
       <DialogContent
-        level={2}
-        className={`max-w-5xl w-full border-none p-0 gap-0 ${!isArt ? 'bg-black/90' : ''}`}
+        level={1}
+        overlayClassName="backdrop-blur-none bg-black/85"
+        className={`max-w-5xl w-full border-none p-0 gap-0 ${!isArt ? 'bg-transparent' : ''}`}
         style={isArt ? { backgroundColor: ART.ink } : undefined}
         aria-describedby={undefined}
       >

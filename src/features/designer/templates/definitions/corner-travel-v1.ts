@@ -134,7 +134,7 @@ export const cornerTravelV1BackCover: PageTemplate = {
       opacity: 1,
       locked: false,
       visible: true,
-      content: `${data.companyName || '{COMPANY_NAME}股份有限公司'} CORNER TRAVEL AGENCY CO.\n10350 台北市大同區重慶北路一段67號8樓之2\nTEL +886 2 7751 6051・FAX +886 2 2552 1332`,
+      content: `${data.companyName || ''}`,
       style: {
         fontFamily: 'Noto Sans TC',
         fontSize: 8,

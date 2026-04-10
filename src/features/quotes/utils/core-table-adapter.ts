@@ -68,17 +68,19 @@ export function coreItemsToCostCategories(items: TourItineraryItem[]): CostCateg
       adult_price: item.adult_price ?? undefined,
       child_price: item.child_price ?? undefined,
       infant_price: item.infant_price ?? undefined,
-      unit_price_formula: (item as Record<string, unknown>).unit_price_formula as
+      unit_price_formula: (item as unknown as Record<string, unknown>).unit_price_formula as
         | string
         | undefined,
-      quantity_formula: (item as Record<string, unknown>).quantity_formula as string | undefined,
-      adult_price_formula: (item as Record<string, unknown>).adult_price_formula as
+      quantity_formula: (item as unknown as Record<string, unknown>).quantity_formula as
         | string
         | undefined,
-      child_price_formula: (item as Record<string, unknown>).child_price_formula as
+      adult_price_formula: (item as unknown as Record<string, unknown>).adult_price_formula as
         | string
         | undefined,
-      infant_price_formula: (item as Record<string, unknown>).infant_price_formula as
+      child_price_formula: (item as unknown as Record<string, unknown>).child_price_formula as
+        | string
+        | undefined,
+      infant_price_formula: (item as unknown as Record<string, unknown>).infant_price_formula as
         | string
         | undefined,
       estimated_cost: item.estimated_cost ?? null,

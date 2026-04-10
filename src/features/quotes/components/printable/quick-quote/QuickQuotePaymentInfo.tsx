@@ -12,8 +12,8 @@ import { useWorkspaceSettings } from '@/hooks/useWorkspaceSettings'
 
 export const QuickQuotePaymentInfo: React.FC = () => {
   const workspaceName = useAuthStore(state => state.user?.workspace_name) || ''
-  const fullName = workspaceName ? `${workspaceName}股份有限公司` : ''
   const ws = useWorkspaceSettings()
+  const fullName = ws.legal_name || workspaceName || ''
   const hasBankInfo = !!(ws.bank_name || ws.bank_branch || ws.bank_account)
 
   return (

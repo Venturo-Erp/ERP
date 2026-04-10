@@ -350,17 +350,51 @@ export function ResourcePanel({
         const extraSelect = activeTab === 'hotel' ? ', star_rating' : ''
         const selectStr = `id, name, category, images, data_verified, latitude, longitude, address, description, region_id${extraSelect}`
 
-        let query = supabase
+        // 搜尋策略：先精確匹配，沒結果再用 bigram 模糊搜尋
+        const trimmed = searchQuery.trim()
+
+        // Step 1: 精確子字串搜尋
+        let baseQuery = supabase
           .from(table)
           .select(selectStr as 'id, name, category, images')
           .eq('is_active', true)
-          .ilike('name', `%${searchQuery}%`)
-
         if (resolvedCountryId) {
-          query = query.eq('country_id', resolvedCountryId)
+          baseQuery = baseQuery.eq('country_id', resolvedCountryId)
         }
 
-        const { data, error } = await query.order('name').limit(20)
+        let query = baseQuery.ilike('name', `%${trimmed}%`)
+        let { data, error } = await query.order('name').limit(20)
+
+        // Step 2: 精確搜沒結果 → 用 bigram 模糊搜尋
+        if (!error && (!data || data.length === 0) && trimmed.length > 2) {
+          // 過濾掉太常見的詞（飯店、餐廳、景點等）
+          const commonWords = ['飯店', '餐廳', '酒店', '旅館', '景點', '公園', '神社', '寺廟', '美術', '博物']
+          const bigrams: string[] = []
+          for (let i = 0; i <= trimmed.length - 2; i++) {
+            const bg = trimmed.substring(i, i + 2)
+            if (!commonWords.includes(bg)) {
+              bigrams.push(bg)
+            }
+          }
+          // 如果過濾後沒有有效 bigram，用前 3 個字搜
+          if (bigrams.length === 0) {
+            bigrams.push(trimmed.substring(0, Math.min(3, trimmed.length)))
+          }
+          const uniqueBigrams = [...new Set(bigrams)]
+          const orFilter = uniqueBigrams.map(bg => `name.ilike.%${bg}%`).join(',')
+
+          let bigramQuery = supabase
+            .from(table)
+            .select(selectStr as 'id, name, category, images')
+            .eq('is_active', true)
+            .or(orFilter)
+          if (resolvedCountryId) {
+            bigramQuery = bigramQuery.eq('country_id', resolvedCountryId)
+          }
+          const result = await bigramQuery.order('name').limit(20)
+          data = result.data
+          error = result.error
+        }
 
         if (!error && data) {
           setSearchResults(
@@ -534,113 +568,128 @@ export function ResourcePanel({
           <div className="flex items-center justify-center py-8">
             <Loader2 size={20} className="animate-spin text-muted-foreground" />
           </div>
-        ) : filteredResources.length === 0 ? (
+        ) : filteredResources.length === 0 && !searchQuery ? (
           <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground mb-3">
-              {searchQuery ? `找不到「${searchQuery}」` : '尚無資料'}
-            </p>
-            {searchQuery && (
-              <button
-                disabled={isCreating}
-                onClick={async () => {
-                  if (isCreating) return // 防止重複點擊
-                  setIsCreating(true)
-
-                  try {
-                    // 直接建立資源
-                    const trimmed = searchQuery.trim()
-                    if (!trimmed) return
-
-                    const countryIdToUse = resolvedCountryId || countryId
-                    if (!countryIdToUse) {
-                      alert('缺少國家資訊')
-                      return
-                    }
-
-                    const workspaceId = (await supabase.auth.getUser()).data.user?.user_metadata
-                      ?.workspace_id
-                    if (!workspaceId) {
-                      alert('未登入或缺少 workspace')
-                      return
-                    }
-
-                    const TABLE_MAP = {
-                      attraction: 'attractions',
-                      hotel: 'hotels',
-                      restaurant: 'restaurants',
-                    }
-                    const table = TABLE_MAP[activeTab]
-
-                    const insertData: Record<string, unknown> = {
-                      name: trimmed,
-                      country_id: countryIdToUse,
-                      data_verified: false,
-                      ...(activeTab === 'attraction' ? { workspace_id: workspaceId } : {}),
-                    }
-
-                    // 酒店/餐廳需要 city_id
-                    if (activeTab !== 'attraction') {
-                      const { data: cities } = await supabase
-                        .from('cities')
-                        .select('id')
-                        .eq('country_id', countryIdToUse)
-                        .limit(1)
-
-                      if (!cities || cities.length === 0) {
-                        alert('該國家尚無城市資料，請先建立城市')
-                        return
-                      }
-                      insertData.city_id = cities[0].id
-                    }
-
-                    const { data, error: dbError } = await supabase
-                      .from(table as 'attractions')
-                      .insert(insertData as never)
-                      .select('id, name')
-                      .single()
-
-                    if (dbError) {
-                      alert(`建立失敗：${dbError.message}`)
-                      return
-                    }
-
-                    // 加入列表
-                    const newItem: ResourceItem = {
-                      id: (data as unknown as Record<string, unknown>).id as string,
-                      name: (data as unknown as Record<string, unknown>).name as string,
-                      type: activeTab,
-                      category: '',
-                      data_verified: false,
-                    }
-                    // 保留搜尋文字，把新建的資源加入搜尋結果和預載列表
-                    setSearchResults(prev => [newItem, ...prev])
-                    setResources(prev => ({
-                      ...prev,
-                      [activeTab]: [newItem, ...(prev[activeTab] || [])],
-                    }))
-                  } finally {
-                    setIsCreating(false)
-                  }
-                }}
-                className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-white bg-morandi-gold hover:bg-morandi-gold/90 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isCreating ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-                {isCreating ? '建立中...' : `新增「${searchQuery}」`}
-              </button>
-            )}
+            <p className="text-sm text-muted-foreground">尚無資料</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-1.5">
-            {filteredResources.map(resource => (
-              <DraggableResourceCard
-                key={`${resource.type}-${resource.id}`}
-                resource={resource}
-                onEdit={r => {
-                  setEditingResource(r)
-                  setEditDialogOpen(true)
-                }}
-              />
-            ))}
+          <div>
+            {filteredResources.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-sm text-muted-foreground">找不到「{searchQuery}」</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-1.5">
+                {filteredResources.map(resource => (
+                  <DraggableResourceCard
+                    key={`${resource.type}-${resource.id}`}
+                    resource={resource}
+                    onEdit={r => {
+                      setEditingResource(r)
+                      setEditDialogOpen(true)
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* 搜尋時永遠顯示新增按鈕 */}
+            {searchQuery.trim() && (
+              <div className="mt-2 pt-2 border-t border-border/50">
+                <button
+                  disabled={isCreating}
+                  onClick={async () => {
+                    if (isCreating) return
+                    setIsCreating(true)
+
+                    try {
+                      const trimmed = searchQuery.trim()
+                      if (!trimmed) return
+
+                      const countryIdToUse = resolvedCountryId || countryId
+                      if (!countryIdToUse) {
+                        alert('缺少國家資訊')
+                        return
+                      }
+
+                      const workspaceId = (await supabase.auth.getUser()).data.user?.user_metadata
+                        ?.workspace_id
+                      if (!workspaceId) {
+                        alert('未登入或缺少 workspace')
+                        return
+                      }
+
+                      const TABLE_MAP = {
+                        attraction: 'attractions',
+                        hotel: 'hotels',
+                        restaurant: 'restaurants',
+                      }
+                      const table = TABLE_MAP[activeTab]
+
+                      // 預設分類
+                      const DEFAULT_CATEGORY: Record<string, string> = {
+                        attraction: '景點 / Attraction',
+                        hotel: '飯店 / Hotel',
+                        restaurant: '餐廳 / Restaurant',
+                      }
+
+                      const insertData: Record<string, unknown> = {
+                        name: trimmed,
+                        country_id: countryIdToUse,
+                        category: DEFAULT_CATEGORY[activeTab] || null,
+                        data_verified: false,
+                        is_active: true,
+                        ...(activeTab === 'attraction' ? { workspace_id: workspaceId } : {}),
+                      }
+
+                      if (activeTab !== 'attraction') {
+                        const { data: cities } = await supabase
+                          .from('cities')
+                          .select('id')
+                          .eq('country_id', countryIdToUse)
+                          .limit(1)
+
+                        if (!cities || cities.length === 0) {
+                          alert('該國家尚無城市資料，請先建立城市')
+                          return
+                        }
+                        insertData.city_id = cities[0].id
+                      }
+
+                      const { data, error: dbError } = await supabase
+                        .from(table as 'attractions')
+                        .insert(insertData as never)
+                        .select('id, name')
+                        .single()
+
+                      if (dbError) {
+                        alert(`建立失敗：${dbError.message}`)
+                        return
+                      }
+
+                      const newItem: ResourceItem = {
+                        id: (data as unknown as Record<string, unknown>).id as string,
+                        name: (data as unknown as Record<string, unknown>).name as string,
+                        type: activeTab,
+                        category: '',
+                        data_verified: false,
+                      }
+                      setSearchResults(prev => [newItem, ...prev])
+                      setResources(prev => ({
+                        ...prev,
+                        [activeTab]: [newItem, ...(prev[activeTab] || [])],
+                      }))
+                    } finally {
+                      setIsCreating(false)
+                    }
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-1 px-3 py-2 text-xs font-medium text-morandi-gold hover:bg-morandi-gold/10 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isCreating ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                  {isCreating ? '建立中...' : `新增「${searchQuery}」`}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

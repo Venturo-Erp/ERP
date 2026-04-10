@@ -85,10 +85,18 @@ export function QuickAddResource({
     try {
       const table = TABLE_MAP[type] as 'attractions' | 'hotels' | 'restaurants'
 
+      const DEFAULT_CATEGORY: Record<ResourceType, string> = {
+        attraction: '景點 / Attraction',
+        hotel: '飯店 / Hotel',
+        restaurant: '餐廳 / Restaurant',
+      }
+
       const insertData: Record<string, unknown> = {
         name: trimmed,
         country_id: countryId,
+        category: DEFAULT_CATEGORY[type] || null,
         data_verified: false,
+        is_active: true,
         ...(type === 'attraction' ? { workspace_id: workspaceId } : {}),
       }
 

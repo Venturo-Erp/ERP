@@ -140,7 +140,7 @@ export const useQuoteSave = ({
               .order('sort_order', { ascending: true })
               .limit(500)
             if (freshItems && freshItems.length > 0) {
-              setCategories(coreItemsToCostCategories(freshItems as TourItineraryItem[]))
+              setCategories(coreItemsToCostCategories(freshItems as unknown as TourItineraryItem[]))
             }
             // 也更新 SWR 快取
             refreshCoreItems?.()

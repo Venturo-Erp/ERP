@@ -599,35 +599,48 @@ export function OrderMembersExpandable({
       const currentMember = membersData.members.find(m => m.id === memberId)
       if (!currentMember) return
 
+      const isAlreadyLeader = currentMember.identity === COMP_ORDERS_LABELS.領隊_2
+
       try {
-        // 1. 先將所有團員的身份設為成人（取消之前的領隊）
-        const resetPromises = membersData.members
-          .filter(m => m.identity === COMP_ORDERS_LABELS.領隊_2)
-          .map(m =>
-            updateMember(m.id, {
-              identity: COMP_ORDERS_LABELS.大人,
-              sort_order: m.sort_order || 999,
-            } as Parameters<typeof updateMember>[1])
+        if (isAlreadyLeader) {
+          // 取消領隊：改回成人
+          await updateMember(memberId, {
+            identity: COMP_ORDERS_LABELS.大人,
+          } as Parameters<typeof updateMember>[1])
+
+          membersData.setMembers(
+            membersData.members.map(m =>
+              m.id === memberId ? { ...m, identity: COMP_ORDERS_LABELS.大人 } : m
+            )
           )
+        } else {
+          // 1. 先將所有團員的身份設為成人（取消之前的領隊）
+          const resetPromises = membersData.members
+            .filter(m => m.identity === COMP_ORDERS_LABELS.領隊_2)
+            .map(m =>
+              updateMember(m.id, {
+                identity: COMP_ORDERS_LABELS.大人,
+              } as Parameters<typeof updateMember>[1])
+            )
 
-        await Promise.all(resetPromises)
+          await Promise.all(resetPromises)
 
-        // 2. 設定新領隊並排到第一位
-        await updateMember(memberId, {
-          identity: COMP_ORDERS_LABELS.領隊_2,
-          sort_order: 0,
-        } as Parameters<typeof updateMember>[1])
+          // 2. 設定新領隊（不動排序）
+          await updateMember(memberId, {
+            identity: COMP_ORDERS_LABELS.領隊_2,
+          } as Parameters<typeof updateMember>[1])
 
-        // 3. 更新本地狀態
-        membersData.setMembers(
-          membersData.members.map(m =>
-            m.id === memberId
-              ? { ...m, identity: COMP_ORDERS_LABELS.領隊_2, sort_order: 0 }
-              : m.identity === COMP_ORDERS_LABELS.領隊_2
-                ? { ...m, identity: COMP_ORDERS_LABELS.大人, sort_order: m.sort_order || 999 }
-                : m
+          // 3. 更新本地狀態
+          membersData.setMembers(
+            membersData.members.map(m =>
+              m.id === memberId
+                ? { ...m, identity: COMP_ORDERS_LABELS.領隊_2 }
+                : m.identity === COMP_ORDERS_LABELS.領隊_2
+                  ? { ...m, identity: COMP_ORDERS_LABELS.大人 }
+                  : m
+            )
           )
-        )
+        }
 
         toast.success(
           `已將 ${currentMember.chinese_name || currentMember.passport_name || '成員'} 設為領隊`

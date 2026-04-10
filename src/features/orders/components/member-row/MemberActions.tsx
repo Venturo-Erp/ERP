@@ -62,15 +62,19 @@ export function MemberActions({
             )}
           </button>
         )}
-        {/* 設為領隊按鈕 */}
-        {onSetAsLeader && !isLeader && (
+        {/* 設為/取消領隊按鈕 */}
+        {onSetAsLeader && (
           <button
             onClick={e => {
               e.stopPropagation()
               onSetAsLeader(member.id)
             }}
-            className="text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 transition-colors p-1 rounded"
-            title={COMP_ORDERS_LABELS.勾選設為領隊}
+            className={`transition-colors p-1 rounded ${
+              isLeader
+                ? 'text-morandi-gold bg-morandi-gold/10 hover:bg-morandi-gold/20'
+                : 'text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10'
+            }`}
+            title={isLeader ? '取消領隊' : COMP_ORDERS_LABELS.勾選設為領隊}
           >
             <Crown size={14} />
           </button>

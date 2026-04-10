@@ -29,7 +29,10 @@ export function getCompanyInfo(): CompanyInfo {
 
   return {
     name: workspaceName,
-    fullName: workspaceName ? `${workspaceName}股份有限公司` : '',
+    fullName:
+      ((user as unknown as Record<string, unknown>)?.workspace_legal_name as string) ||
+      workspaceName ||
+      '',
     address: '',
     tel: '',
     fax: '',
