@@ -56,7 +56,9 @@ export function PackageItineraryDialog({
               returnFlight={hook.formData.returnFlight}
               dailyData={hook.getPreviewDailyData()}
               companyName={
-                hook.currentUser?.workspace_code || PACKAGE_ITINERARY_DIALOG_LABELS.旅行社
+                hook.currentUser?.workspace_name ||
+                hook.currentUser?.workspace_code ||
+                PACKAGE_ITINERARY_DIALOG_LABELS.旅行社
               }
               isDomestic={hook.isDomestic}
               onEdit={() => hook.setViewMode('edit')}

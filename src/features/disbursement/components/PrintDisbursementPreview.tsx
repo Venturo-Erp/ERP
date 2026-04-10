@@ -215,7 +215,7 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
   function PrintDisbursementPreview({ order, paymentRequests, paymentRequestItems }, ref) {
     const ws = useWorkspaceSettings()
     const workspaceName = ws.name || useAuthStore.getState().user?.workspace_name || ''
-    const companyFullName = ws.legal_name || (workspaceName ? `${workspaceName}股份有限公司` : '')
+    const companyFullName = ws.legal_name || workspaceName || ''
     const logoUrl = ws.logo_url || '/corner-logo.png' // fallback
 
     const processedItems = useMemo(
