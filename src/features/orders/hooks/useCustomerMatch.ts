@@ -113,6 +113,19 @@ export function useCustomerMatch(
     const member = members[pendingMemberIndex]
     if (!member) return
 
+    // 列表模式不載入 passport_image_url，需要額外查詢
+    let passportImageUrl = customer.passport_image_url || member.passport_image_url
+    if (!passportImageUrl) {
+      const { data: detail } = await supabase
+        .from('customers')
+        .select('passport_image_url')
+        .eq('id', customer.id)
+        .single()
+      if (detail?.passport_image_url) {
+        passportImageUrl = detail.passport_image_url
+      }
+    }
+
     // 更新本地狀態
     const updatedMember = {
       ...member,
@@ -123,7 +136,7 @@ export function useCustomerMatch(
       id_number: customer.national_id || member.id_number,
       passport_number: customer.passport_number || member.passport_number,
       passport_expiry: customer.passport_expiry || member.passport_expiry,
-      passport_image_url: customer.passport_image_url || member.passport_image_url,
+      passport_image_url: passportImageUrl,
       customer_id: customer.id,
       customer_verification_status: customer.verification_status,
     }
