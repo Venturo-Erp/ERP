@@ -207,7 +207,7 @@ export default function HRSettingsPage() {
         </Button>
       }
     >
-      <div className="p-4 space-y-4">
+      <div className="space-y-4">
         {/* 打卡時間 */}
         <SettingSection title="打卡時間" description="設定上下班時間與標準工時，系統依此判斷遲到與加班。">
           <div className="grid grid-cols-2 gap-4">
