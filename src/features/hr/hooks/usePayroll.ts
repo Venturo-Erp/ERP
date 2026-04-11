@@ -352,9 +352,9 @@ export function usePayroll() {
         // 取得所有在職員工
         const { data: employees, error: empError } = await supabase
           .from('employees')
-          .select('id, chinese_name, display_name, salary_info')
+          .select('id, chinese_name, display_name, salary_info, monthly_salary')
 
-          .eq('is_active', true)
+          .in('status', ['active', 'probation'])
 
         if (empError) throw empError
 
@@ -396,7 +396,7 @@ export function usePayroll() {
           .from('payroll_deduction_types' as never)
           .select('*')
           .eq('workspace_id', wsId)
-          .eq('is_active', true)
+          .in('status', ['active', 'probation'])
           .order('sort_order')
 
         // 讀取租戶津貼設定
@@ -404,7 +404,7 @@ export function usePayroll() {
           .from('payroll_allowance_types' as never)
           .select('*')
           .eq('workspace_id', wsId)
-          .eq('is_active', true)
+          .in('status', ['active', 'probation'])
           .order('sort_order')
 
         // 讀取員工薪資設定
@@ -427,7 +427,8 @@ export function usePayroll() {
             bonus?: number
             allowances?: number
           } | null
-          const baseSalary = salaryInfo?.base_salary || 0
+          // 優先用 monthly_salary（主欄位），fallback 到 salary_info.base_salary（舊欄位）
+          const baseSalary = (emp as Record<string, unknown>).monthly_salary as number || salaryInfo?.base_salary || 0
           const empConfig = empConfigMap.get(emp.id) as {
             insured_salary?: number
             health_dependents?: number

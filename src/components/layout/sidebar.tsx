@@ -343,7 +343,12 @@ const menuItems: MenuItem[] = [
     icon: UserSquare,
     requiredPermission: 'hr',
     children: [
-      // 員工可見
+      // 員工自助
+      { href: '/hr/my-attendance', label: '我的出勤', icon: Calendar },
+      { href: '/hr/my-leave', label: '我的請假', icon: Calendar },
+      { href: '/hr/my-payslip', label: '我的薪資條', icon: Wallet },
+      { href: '/hr/overtime', label: '加班申請', icon: Clock },
+      { href: '/hr/missed-clock', label: '補打卡', icon: Clock },
       { href: '/hr/announcements', label: '公司公告', icon: Megaphone },
       { href: '/hr/training', label: '數位培訓', icon: BookOpen },
       // 管理員功能
