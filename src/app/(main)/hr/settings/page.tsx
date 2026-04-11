@@ -347,18 +347,18 @@ export default function HRSettingsPage() {
         </CardContent>
       </Card>
 
-      <Button onClick={handleSave} disabled={saving} className="w-full bg-morandi-primary hover:bg-morandi-primary/90 text-white">
+      <Button onClick={handleSave} disabled={saving} className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white">
         {saving ? '儲存中...' : '儲存打卡設定'}
       </Button>
 
       {/* LINE Bot 設定 */}
-      <Card className="border-2 border-[#06C755]/30">
+      <Card className="border-2 border-morandi-green/30">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <MessageCircle size={18} className="text-[#06C755]" />
+            <MessageCircle size={18} className="text-morandi-green" />
             LINE@ 機器人設定
             {lineConfig?.is_connected && (
-              <span className="flex items-center gap-1 text-xs font-normal text-[#06C755]">
+              <span className="flex items-center gap-1 text-xs font-normal text-morandi-green">
                 <CheckCircle2 size={14} /> 已連線
               </span>
             )}
@@ -368,7 +368,7 @@ export default function HRSettingsPage() {
           {lineConfig?.is_connected ? (
             // 已設定
             <div className="space-y-3">
-              <div className="bg-[#06C755]/5 rounded-lg p-4 space-y-2">
+              <div className="bg-morandi-green/5 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-morandi-muted">Bot 名稱</span>
                   <span className="font-medium">{lineConfig.bot_display_name}</span>
@@ -394,9 +394,9 @@ export default function HRSettingsPage() {
           ) : (
             // 未設定 — 教學步驟
             <div className="space-y-4">
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-start gap-2">
-                <AlertCircle size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-amber-800">
+              <div className="bg-status-warning-bg border border-status-warning/20 rounded-lg p-3 flex items-start gap-2">
+                <AlertCircle size={16} className="text-status-warning mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-morandi-primary">
                   要啟用 LINE 打卡，需要先設定公司的 LINE@ 機器人
                 </p>
               </div>
@@ -412,7 +412,7 @@ export default function HRSettingsPage() {
                       <p className="text-sm font-medium">建立 LINE Official Account</p>
                       <p className="text-xs text-morandi-muted">前往 LINE Official Account Manager 建立帳號（免費方案即可）</p>
                       <a href="https://manager.line.biz/" target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-morandi-primary hover:underline inline-flex items-center gap-1 mt-1">
+                        className="text-xs text-morandi-gold hover:underline inline-flex items-center gap-1 mt-1">
                         開啟 LINE OA Manager <ExternalLink size={10} />
                       </a>
                     </div>
@@ -424,7 +424,7 @@ export default function HRSettingsPage() {
                       <p className="text-sm font-medium">啟用 Messaging API</p>
                       <p className="text-xs text-morandi-muted">在 LINE OA 的「設定」→「Messaging API」點擊啟用，會引導到 LINE Developers</p>
                       <a href="https://developers.line.biz/console/" target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-morandi-primary hover:underline inline-flex items-center gap-1 mt-1">
+                        className="text-xs text-morandi-gold hover:underline inline-flex items-center gap-1 mt-1">
                         開啟 LINE Developers <ExternalLink size={10} />
                       </a>
                     </div>
@@ -473,7 +473,7 @@ export default function HRSettingsPage() {
                 <Button
                   onClick={handleLineSetup}
                   disabled={lineSaving || !lineToken || !lineSecret}
-                  className="w-full bg-[#06C755] hover:bg-[#06C755]/90 text-white"
+                  className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white"
                 >
                   {lineSaving ? '設定中...' : '完成設定'}
                 </Button>

@@ -171,7 +171,7 @@ export default function ClockInPage() {
                 ? 'bg-morandi-gold/20 text-morandi-gold border-2 border-morandi-gold/30'
                 : hasClockedIn
                   ? 'bg-morandi-gold hover:bg-morandi-gold/90 text-white shadow-lg hover:shadow-xl'
-                  : 'bg-muted text-muted-foreground'
+                  : 'bg-morandi-container text-morandi-muted'
             )}
           >
             <div className="flex flex-col items-center gap-1">
