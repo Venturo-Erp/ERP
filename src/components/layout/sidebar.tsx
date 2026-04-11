@@ -16,7 +16,6 @@ import {
   Island,
   Lego,
   MapPinArea,
-  MapTrifold,
   Palette as PhPalette,
   ReadCvLogo,
   Robot,
@@ -131,13 +130,6 @@ const menuItems: MenuItem[] = [
     label: COMP_LAYOUT_LABELS.訂單,
     icon: CashRegister,
     requiredPermission: 'orders',
-  },
-  // 行程管理 - 付費功能（由 workspace_features 控制）
-  {
-    href: '/itinerary',
-    label: COMP_LAYOUT_LABELS.行程管理,
-    icon: MapTrifold,
-    requiredPermission: 'itinerary',
   },
   {
     href: '/finance',
@@ -351,6 +343,7 @@ const menuItems: MenuItem[] = [
     icon: UserSquare,
     requiredPermission: 'hr',
     children: [
+      { href: '/hr/clock-in', label: '打卡', icon: Clock },
       { href: '/hr/roles', label: '職務管理', icon: UserCircleGear, requiredPermission: 'hr' },
       { href: '/hr', label: '員工管理', icon: Users, requiredPermission: 'hr' },
       { href: '/hr/attendance', label: '出勤管理', icon: Clock, requiredPermission: 'hr' },

@@ -500,6 +500,83 @@ async function saveConversationToDb(
   }
 }
 
+/** 處理 LINE 打卡 */
+async function processClockIn(event: LineEvent): Promise<boolean> {
+  const text = event.message?.text?.trim() || ''
+  const userId = event.source?.userId
+  if (!userId) return false
+
+  // 支援的打卡指令
+  const clockInKeywords = ['上班', '打卡', '上班打卡']
+  const clockOutKeywords = ['下班', '下班打卡']
+
+  let action: 'clock_in' | 'clock_out' | null = null
+  if (clockInKeywords.includes(text)) action = 'clock_in'
+  else if (clockOutKeywords.includes(text)) action = 'clock_out'
+  if (!action) return false
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!supabaseUrl || !supabaseKey) return false
+
+  try {
+    // 查找已綁定的員工
+    const lineUserRes = await fetch(
+      `${supabaseUrl}/rest/v1/line_users?select=employee_id,workspace_id&user_id=eq.${userId}&employee_id=not.is.null`,
+      { headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` } }
+    )
+    const lineUsers = await lineUserRes.json()
+    if (!lineUsers?.length || !lineUsers[0].employee_id) {
+      await replyText(event.replyToken!, '❌ 你尚未綁定員工帳號，請先傳送員工編號進行綁定（例如：E001）')
+      return true
+    }
+
+    const { employee_id, workspace_id } = lineUsers[0]
+
+    // 呼叫打卡 API
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const clockRes = await fetch(`${baseUrl}/api/hr/clock-in`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        employee_id,
+        workspace_id,
+        action,
+        source: 'line',
+      }),
+    })
+
+    const result = await clockRes.json()
+
+    if (clockRes.ok) {
+      const emoji = action === 'clock_in' ? '✅' : '🏠'
+      await replyText(event.replyToken!, `${emoji} ${result.message}`)
+    } else {
+      await replyText(event.replyToken!, `⚠️ ${result.error}`)
+    }
+    return true
+  } catch (error) {
+    logger.error('[LINE] 打卡處理錯誤:', error)
+    await replyText(event.replyToken!, '❌ 打卡失敗，請稍後再試')
+    return true
+  }
+}
+
+/** LINE 回覆文字訊息 */
+async function replyText(replyToken: string, text: string) {
+  await fetch('https://api.line.me/v2/bot/message/reply', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${LINE_TOKEN}`,
+    },
+    body: JSON.stringify({
+      replyToken,
+      messages: [{ type: 'text', text }],
+    }),
+  })
+}
+
 /** 處理 AI 客服訊息 */
 async function handleAIMessage(event: LineEvent) {
   try {
@@ -589,14 +666,18 @@ export async function POST(req: NextRequest) {
           await saveUserToDb(msgUserId, profile)
         }
 
-        // 先嘗試客戶綁定（C 開頭）
-        const isCustomerBinding = await processCustomerBinding(event)
-        if (!isCustomerBinding) {
-          // 再嘗試員工綁定（非 C 開頭）
-          const isEmployeeBinding = await processEmployeeBinding(event)
-          if (!isEmployeeBinding) {
-            // 都不是綁定 → AI 客服回覆（內含景點選擇邏輯）
-            await handleAIMessage(event)
+        // 先嘗試打卡指令（上班/下班）
+        const isClockIn = await processClockIn(event)
+        if (!isClockIn) {
+          // 再嘗試客戶綁定（C 開頭）
+          const isCustomerBinding = await processCustomerBinding(event)
+          if (!isCustomerBinding) {
+            // 再嘗試員工綁定（非 C 開頭）
+            const isEmployeeBinding = await processEmployeeBinding(event)
+            if (!isEmployeeBinding) {
+              // 都不是綁定 → AI 客服回覆（內含景點選擇邏輯）
+              await handleAIMessage(event)
+            }
           }
         }
       }
