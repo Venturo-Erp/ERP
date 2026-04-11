@@ -207,9 +207,9 @@ export default function HRSettingsPage() {
         </Button>
       }
     >
-      <div className="p-6 space-y-6">
+      <div className="p-4 space-y-4">
         {/* 打卡時間 */}
-        <SettingSection title="打卡時間" description="設定公司的上下班時間與標準工時，系統會依此判斷遲到與加班。">
+        <SettingSection title="打卡時間" description="設定上下班時間與標準工時，系統依此判斷遲到與加班。">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-sm font-medium text-morandi-primary">上班時間</Label>
@@ -240,50 +240,60 @@ export default function HRSettingsPage() {
           </div>
         </SettingSection>
 
-        {/* GPS 定位 */}
-        <SettingSection title="GPS 定位打卡" description="開啟後員工打卡時需在指定地點範圍內，防止遠端打卡。">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-morandi-primary">要求 GPS 定位</p>
-              <p className="text-xs text-morandi-muted">打卡時必須在指定範圍內</p>
+        {/* GPS + 打卡管道 並排 */}
+        <div className="grid md:grid-cols-2 gap-4">
+          {/* GPS 定位 */}
+          <Card className="rounded-xl shadow-sm border border-border p-5">
+            <h3 className="text-sm font-semibold text-morandi-primary mb-1">GPS 定位打卡</h3>
+            <p className="text-xs text-morandi-muted mb-4">開啟後員工需在指定地點範圍內才能打卡</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-morandi-primary">要求 GPS 定位</p>
+                <Switch checked={settings.require_gps} onCheckedChange={v => setSettings(s => ({ ...s, require_gps: v }))} />
+              </div>
+              {settings.require_gps && (
+                <div className="space-y-3 pt-3 border-t border-border/50">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs text-morandi-muted">緯度</Label>
+                      <Input type="number" step="0.0001" value={settings.gps_latitude || ''} onChange={e => setSettings(s => ({ ...s, gps_latitude: Number(e.target.value) || null }))} placeholder="25.0330" className="mt-1" />
+                    </div>
+                    <div>
+                      <Label className="text-xs text-morandi-muted">經度</Label>
+                      <Input type="number" step="0.0001" value={settings.gps_longitude || ''} onChange={e => setSettings(s => ({ ...s, gps_longitude: Number(e.target.value) || null }))} placeholder="121.5654" className="mt-1" />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs text-morandi-muted">允許半徑（公尺）</Label>
+                    <Input type="number" value={settings.gps_radius_meters} onChange={e => setSettings(s => ({ ...s, gps_radius_meters: Number(e.target.value) }))} className="mt-1" />
+                  </div>
+                </div>
+              )}
             </div>
-            <Switch checked={settings.require_gps} onCheckedChange={v => setSettings(s => ({ ...s, require_gps: v }))} />
-          </div>
-          {settings.require_gps && (
-            <div className="grid grid-cols-3 gap-4 pt-3 border-t border-border/50">
-              <div>
-                <Label className="text-sm font-medium text-morandi-primary">公司緯度</Label>
-                <Input type="number" step="0.0001" value={settings.gps_latitude || ''} onChange={e => setSettings(s => ({ ...s, gps_latitude: Number(e.target.value) || null }))} placeholder="25.0330" className="mt-1.5" />
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-morandi-primary">公司經度</Label>
-                <Input type="number" step="0.0001" value={settings.gps_longitude || ''} onChange={e => setSettings(s => ({ ...s, gps_longitude: Number(e.target.value) || null }))} placeholder="121.5654" className="mt-1.5" />
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-morandi-primary">允許半徑（公尺）</Label>
-                <Input type="number" value={settings.gps_radius_meters} onChange={e => setSettings(s => ({ ...s, gps_radius_meters: Number(e.target.value) }))} className="mt-1.5" />
-              </div>
-            </div>
-          )}
-        </SettingSection>
+          </Card>
 
-        {/* 打卡管道 */}
-        <SettingSection title="打卡管道" description="選擇允許員工使用哪些方式打卡。">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-morandi-primary">網頁打卡</p>
-              <p className="text-xs text-morandi-muted">員工從 ERP 系統內打卡</p>
+          {/* 打卡管道 */}
+          <Card className="rounded-xl shadow-sm border border-border p-5">
+            <h3 className="text-sm font-semibold text-morandi-primary mb-1">打卡管道</h3>
+            <p className="text-xs text-morandi-muted mb-4">選擇允許員工使用哪些方式打卡</p>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-morandi-primary">網頁打卡</p>
+                  <p className="text-xs text-morandi-muted">從 ERP 系統內打卡</p>
+                </div>
+                <Switch checked={settings.enable_web_clock} onCheckedChange={v => setSettings(s => ({ ...s, enable_web_clock: v }))} />
+              </div>
+              <div className="flex items-center justify-between pt-3 border-t border-border/50">
+                <div>
+                  <p className="text-sm text-morandi-primary">LINE 打卡</p>
+                  <p className="text-xs text-morandi-muted">傳「上班」「下班」打卡</p>
+                </div>
+                <Switch checked={settings.enable_line_clock} onCheckedChange={v => setSettings(s => ({ ...s, enable_line_clock: v }))} />
+              </div>
             </div>
-            <Switch checked={settings.enable_web_clock} onCheckedChange={v => setSettings(s => ({ ...s, enable_web_clock: v }))} />
-          </div>
-          <div className="flex items-center justify-between pt-3 border-t border-border/50">
-            <div>
-              <p className="text-sm font-medium text-morandi-primary">LINE 打卡</p>
-              <p className="text-xs text-morandi-muted">員工透過 LINE 傳「上班」「下班」打卡</p>
-            </div>
-            <Switch checked={settings.enable_line_clock} onCheckedChange={v => setSettings(s => ({ ...s, enable_line_clock: v }))} />
-          </div>
-        </SettingSection>
+          </Card>
+        </div>
 
         {/* LINE@ 設定 */}
         <Card className="rounded-xl shadow-sm border border-border p-6">
