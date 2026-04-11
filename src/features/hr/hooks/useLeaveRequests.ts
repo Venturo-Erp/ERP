@@ -205,6 +205,9 @@ export function useLeaveRequests() {
   /**
    * 審核請假申請
    */
+  /**
+   * 審核請假申請（統一走 /api/hr/approval）
+   */
   const approveRequest = useCallback(
     async (id: string): Promise<boolean> => {
       if (!user?.id) return false
@@ -213,74 +216,16 @@ export function useLeaveRequests() {
       setError(null)
 
       try {
-        // 取得請假申請資訊
-        const { data: request, error: fetchError } = await supabase
-          .from('leave_requests')
-          .select(
-            'id, employee_id, leave_type_id, start_date, end_date, days, reason, status, approved_by, approved_at, workspace_id, created_at, updated_at'
-          )
-          .eq('id', id)
-          .limit(500)
+        const res = await fetch('/api/hr/approval', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ request_type: 'leave', request_id: id, action: 'approve' }),
+        })
 
-          .single()
-
-        if (fetchError) throw fetchError
-        if (!request) throw new Error('找不到請假申請')
-
-        // 更新為已核准
-        const { error: updateError } = await supabase
-          .from('leave_requests')
-          .update({
-            status: 'approved',
-            approved_by: user.id,
-            approved_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', id)
-
-        if (updateError) throw updateError
-
-        // 更新假別餘額
-        const year = new Date(request.start_date).getFullYear()
-        const { data: balance, error: balanceError } = await supabase
-          .from('leave_balances')
-          .select(
-            'id, employee_id, leave_type_id, year, entitled_days, used_days, remaining_days, carry_over_days, notes, workspace_id, created_at, updated_at'
-          )
-          .eq('employee_id', request.employee_id)
-          .eq('leave_type_id', request.leave_type_id)
-          .eq('year', year)
-          .single()
-
-        if (!balanceError && balance) {
-          const newUsedDays = (balance.used_days || 0) + request.days
-          const newRemainingDays = (balance.entitled_days || 0) - newUsedDays
-
-          await supabase
-            .from('leave_balances')
-            .update({
-              used_days: newUsedDays,
-              remaining_days: newRemainingDays,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', balance.id)
+        if (!res.ok) {
+          const data = await res.json()
+          throw new Error(data.error || '審核失敗')
         }
-
-        // 發通知給申請人
-        try {
-          await fetch('/api/notifications', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              recipient_id: request.employee_id,
-              title: '請假申請已核准',
-              message: `${request.start_date} ~ ${request.end_date}，共 ${request.days} 天`,
-              module: 'hr',
-              type: 'info',
-              action_url: '/hr/leave',
-            }),
-          })
-        } catch {}
 
         await fetchRequests()
         return true
@@ -297,7 +242,7 @@ export function useLeaveRequests() {
   )
 
   /**
-   * 駁回請假申請
+   * 駁回請假申請（統一走 /api/hr/approval）
    */
   const rejectRequest = useCallback(
     async (id: string, reason: string): Promise<boolean> => {
@@ -307,42 +252,15 @@ export function useLeaveRequests() {
       setError(null)
 
       try {
-        const { error: updateError } = await supabase
-          .from('leave_requests')
-          .update({
-            status: 'rejected',
-            approved_by: user.id,
-            approved_at: new Date().toISOString(),
-            reject_reason: reason,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', id)
+        const res = await fetch('/api/hr/approval', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ request_type: 'leave', request_id: id, action: 'reject', reject_reason: reason }),
+        })
 
-        if (updateError) throw updateError
-
-        // 發通知給申請人
-        // 先查申請人 ID
-        const { data: reqData } = await supabase
-          .from('leave_requests')
-          .select('employee_id')
-          .eq('id', id)
-          .single()
-
-        if (reqData?.employee_id) {
-          try {
-            await fetch('/api/notifications', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                recipient_id: reqData.employee_id,
-                title: '請假申請已駁回',
-                message: reason ? `原因：${reason}` : undefined,
-                module: 'hr',
-                type: 'info',
-                action_url: '/hr/leave',
-              }),
-            })
-          } catch {}
+        if (!res.ok) {
+          const data = await res.json()
+          throw new Error(data.error || '駁回失敗')
         }
 
         await fetchRequests()
