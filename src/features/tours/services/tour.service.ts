@@ -75,10 +75,13 @@ class TourService extends BaseService<Tour & BaseEntity> {
     }
   }
 
-  // 檢查團號是否已存在
+  // 檢查團號是否已存在（直接查 DB，避免快取不一致）
   async isTourCodeExists(code: string): Promise<boolean> {
-    const allTours = await this.list()
-    return allTours.data.some(t => t.code === code)
+    const { count } = await supabase
+      .from('tours')
+      .select('id', { count: 'exact', head: true })
+      .eq('code', code)
+    return (count ?? 0) > 0
   }
 
   /**
@@ -99,25 +102,28 @@ class TourService extends BaseService<Tour & BaseEntity> {
       throw new Error(TOUR_SERVICE_LABELS.CANNOT_GET_WORKSPACE)
     }
 
-    // 獲取所有現有 tours
-    const allTours = await this.list()
+    // 直接從 DB 查同日期同城市的現有團號，避免快取不一致導致重複
+    const dateStr = formatDate(date).replace(/-/g, '').slice(2) // YYMMDD
+    const prefix = `${cityCode.toUpperCase()}${dateStr}`
+    const { data: existingTours } = await supabase
+      .from('tours')
+      .select('code')
+      .like('code', `${prefix}%`)
 
     // 使用統一的 code generator
     const code = generateTourCodeUtil(
       workspaceCode,
       cityCode.toUpperCase(),
       date.toISOString(),
-      allTours.data
+      existingTours || []
     )
 
     // 雙重檢查：確保生成的團號不存在
     const exists = await this.isTourCodeExists(code)
     if (exists) {
-      // 如果仍然重複，嘗試下一個字母
-      const dateStr = formatDate(date).replace(/-/g, '').slice(2) // YYMMDD
       const lastChar = code.slice(-1)
       const nextChar = String.fromCharCode(lastChar.charCodeAt(0) + 1)
-      return `${cityCode.toUpperCase()}${dateStr}${nextChar}`
+      return `${prefix}${nextChar}`
     }
 
     return code

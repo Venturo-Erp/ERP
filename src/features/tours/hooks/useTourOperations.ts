@@ -233,7 +233,28 @@ export function useTourOperations(params: UseTourOperationsParams) {
           tour_service_type: newTour.tour_service_type || 'tour_group',
         }
 
-        const createdTour = await actions.create(tourData)
+        // 建團：如果團號重複（23505），自動跳下一個字母重試
+        let createdTour: Awaited<ReturnType<typeof actions.create>>
+        let retries = 0
+        while (true) {
+          try {
+            createdTour = await actions.create(tourData)
+            break
+          } catch (err: unknown) {
+            const isDuplicate =
+              err instanceof Error &&
+              (err.message?.includes('23505') || err.message?.includes('duplicate'))
+            if (isDuplicate && retries < 5 && tourData.code) {
+              retries++
+              const lastChar = tourData.code.slice(-1)
+              const nextChar = String.fromCharCode(lastChar.charCodeAt(0) + 1)
+              tourData.code = tourData.code.slice(0, -1) + nextChar
+              logger.info(`團號重複，自動跳至 ${tourData.code}`)
+              continue
+            }
+            throw err
+          }
+        }
 
         // 寫入動態選人欄位指派（field_id → employee_id）
         if (newTour.role_assignments && !isProposalOrTemplate) {
