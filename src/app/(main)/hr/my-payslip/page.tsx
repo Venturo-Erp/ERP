@@ -28,6 +28,8 @@ interface PayrollRecord {
   overtime_hours: number
   paid_leave_days: number
   unpaid_leave_days: number
+  allowance_details: Record<string, number> | null
+  deduction_details: Record<string, number> | null
   year?: number
   month?: number
 }
@@ -67,10 +69,16 @@ export default function MyPayslipPage() {
 
         const mapped = (payrolls || []).map(r => {
           const period = periodMap.get(r.payroll_period_id)
-          return { ...r, year: period?.year, month: period?.month }
+          return {
+            ...r,
+            year: period?.year,
+            month: period?.month,
+            allowance_details: (typeof r.allowance_details === 'object' ? r.allowance_details : null) as Record<string, number> | null,
+            deduction_details: (typeof r.deduction_details === 'object' ? r.deduction_details : null) as Record<string, number> | null,
+          }
         })
 
-        setRecords(mapped)
+        setRecords(mapped as PayrollRecord[])
       } catch (err) {
         logger.error('載入薪資條失敗:', err)
       } finally {
@@ -128,8 +136,17 @@ export default function MyPayslipPage() {
                   <Row label="底薪" amount={selectedRecord.base_salary} />
                   <Row label="加班費" amount={selectedRecord.overtime_pay} />
                   <Row label="獎金" amount={selectedRecord.bonus} />
-                  <Row label="伙食津貼" amount={selectedRecord.meal_allowance} />
-                  <Row label="交通津貼" amount={selectedRecord.transportation_allowance} />
+                  {/* 津貼明細（從 allowance_details 動態讀取） */}
+                  {selectedRecord.allowance_details && Object.entries(selectedRecord.allowance_details).map(([name, amount]) => (
+                    <Row key={name} label={name} amount={amount} />
+                  ))}
+                  {/* fallback: 如果沒有 allowance_details，顯示舊欄位 */}
+                  {!selectedRecord.allowance_details && (
+                    <>
+                      <Row label="伙食津貼" amount={selectedRecord.meal_allowance} />
+                      <Row label="交通津貼" amount={selectedRecord.transportation_allowance} />
+                    </>
+                  )}
                 </div>
 
                 {/* 扣款 */}
@@ -137,7 +154,14 @@ export default function MyPayslipPage() {
                   <p className="text-xs font-semibold text-morandi-red border-b border-border/50 pb-1">扣款</p>
                   <Row label="無薪假扣除" amount={-selectedRecord.unpaid_leave_deduction} negative />
                   <Row label="遲到扣除" amount={-selectedRecord.late_deduction} negative />
-                  <Row label="其他扣除" amount={-selectedRecord.other_deductions} negative />
+                  {/* 法定扣款明細（從 deduction_details 動態讀取） */}
+                  {selectedRecord.deduction_details && Object.entries(selectedRecord.deduction_details).map(([name, amount]) => (
+                    <Row key={name} label={name} amount={-amount} negative />
+                  ))}
+                  {/* fallback: 如果沒有 deduction_details，顯示舊的其他扣除 */}
+                  {!selectedRecord.deduction_details && (
+                    <Row label="其他扣除" amount={-selectedRecord.other_deductions} negative />
+                  )}
                 </div>
 
                 {/* 合計 */}
