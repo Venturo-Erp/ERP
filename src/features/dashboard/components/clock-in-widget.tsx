@@ -37,6 +37,11 @@ export function ClockInWidget() {
   const [showLeaveDialog, setShowLeaveDialog] = useState(false)
   const [leaveTypes, setLeaveTypes] = useState<LeaveTypeOption[]>([])
 
+  // 薪資摘要
+  const [lastPayslip, setLastPayslip] = useState<{ net_salary: number; month: number; bonus: number } | null>(null)
+  // 請假餘額
+  const [leaveBalance, setLeaveBalance] = useState<{ total: number; used: number } | null>(null)
+
   // 請假表單
   const [leaveTypeId, setLeaveTypeId] = useState('')
   const [leaveStart, setLeaveStart] = useState('')
@@ -63,18 +68,65 @@ export function ClockInWidget() {
 
   useEffect(() => { fetchStatus() }, [fetchStatus])
 
-  // 載入假別
+  // 載入假別 + 薪資摘要 + 請假餘額
   useEffect(() => {
     const load = async () => {
-      const { data } = await supabase
+      // 假別
+      const { data: lt } = await supabase
         .from('leave_types')
         .select('id, name, code')
         .eq('is_active', true)
         .order('name')
-      if (data) setLeaveTypes(data)
+      if (lt) setLeaveTypes(lt)
+
+      if (!user?.id) return
+
+      // 最近薪資
+      try {
+        const now = new Date()
+        const lastMonth = now.getMonth() // 0-based = 上個月
+        const year = lastMonth === 0 ? now.getFullYear() - 1 : now.getFullYear()
+        const month = lastMonth === 0 ? 12 : lastMonth
+
+        const { data: periods } = await supabase
+          .from('payroll_periods')
+          .select('id, month')
+          .eq('year', year)
+          .eq('month', month)
+          .in('status', ['confirmed', 'paid'])
+          .limit(1)
+
+        if (periods?.length) {
+          const { data: record } = await supabase
+            .from('payroll_records')
+            .select('net_salary, bonus')
+            .eq('payroll_period_id', periods[0].id)
+            .eq('employee_id', user.id)
+            .single()
+
+          if (record) {
+            setLastPayslip({ net_salary: record.net_salary, bonus: record.bonus, month })
+          }
+        }
+      } catch {}
+
+      // 請假餘額
+      try {
+        const { data: balances } = await supabase
+          .from('leave_balances')
+          .select('entitled_days, used_days')
+          .eq('employee_id', user.id)
+          .eq('year', new Date().getFullYear())
+
+        if (balances?.length) {
+          const total = balances.reduce((s, b) => s + (b.entitled_days || 0), 0)
+          const used = balances.reduce((s, b) => s + (b.used_days || 0), 0)
+          setLeaveBalance({ total, used })
+        }
+      } catch {}
     }
     load()
-  }, [])
+  }, [user?.id])
 
   const handleClock = async (action: 'clock_in' | 'clock_out') => {
     setLoading(true)
@@ -252,6 +304,28 @@ export function ClockInWidget() {
               <ChevronRight size={14} className="text-morandi-gold" />
               <span className="text-[10px] font-medium text-morandi-primary">薪資</span>
             </Link>
+          {/* 薪資 + 假期摘要 */}
+          {(lastPayslip || leaveBalance) && (
+            <>
+              <div className="border-t border-border/50" />
+              <div className="flex items-center justify-between text-[10px]">
+                {lastPayslip && (
+                  <div className="text-morandi-secondary">
+                    <span>{lastPayslip.month}月薪資 </span>
+                    <span className="font-semibold text-morandi-primary">${lastPayslip.net_salary.toLocaleString()}</span>
+                    {lastPayslip.bonus > 0 && (
+                      <span className="text-morandi-gold ml-1">(獎金 ${lastPayslip.bonus.toLocaleString()})</span>
+                    )}
+                  </div>
+                )}
+                {leaveBalance && (
+                  <div className="text-morandi-secondary">
+                    餘假 <span className="font-semibold text-morandi-primary">{leaveBalance.total - leaveBalance.used}</span>/{leaveBalance.total}天
+                  </div>
+                )}
+              </div>
+            </>
+          )}
           </div>
         </div>
       </div>

@@ -389,6 +389,32 @@ export function usePayroll() {
 
         // 計算工作天數（不含週末）
         const workDays = countWorkDays(period.start_date, period.end_date)
+        const wsId = getRequiredWorkspaceId()
+
+        // 讀取租戶扣款設定
+        const { data: deductionTypes } = await supabase
+          .from('payroll_deduction_types' as never)
+          .select('*')
+          .eq('workspace_id', wsId)
+          .eq('is_active', true)
+          .order('sort_order')
+
+        // 讀取租戶津貼設定
+        const { data: allowanceTypes } = await supabase
+          .from('payroll_allowance_types' as never)
+          .select('*')
+          .eq('workspace_id', wsId)
+          .eq('is_active', true)
+          .order('sort_order')
+
+        // 讀取員工薪資設定
+        const { data: empConfigs } = await supabase
+          .from('employee_payroll_config' as never)
+          .select('*')
+
+        const empConfigMap = new Map(
+          (empConfigs || []).map((c: Record<string, unknown>) => [c.employee_id as string, c])
+        )
 
         // 刪除現有薪資紀錄
         await supabase.from('payroll_records').delete().eq('payroll_period_id', periodId)
@@ -402,6 +428,10 @@ export function usePayroll() {
             allowances?: number
           } | null
           const baseSalary = salaryInfo?.base_salary || 0
+          const empConfig = empConfigMap.get(emp.id) as {
+            insured_salary?: number
+            health_dependents?: number
+          } | undefined
 
           // 計算出勤
           const empAttendance = (attendanceRecords || []).filter(a => a.employee_id === emp.id)
@@ -432,29 +462,65 @@ export function usePayroll() {
           const dailyRate = baseSalary / 30
           const unpaidLeaveDeduction = Math.round(dailyRate * unpaidLeaveDays)
 
-          // 加項
+          // 加項 — 從津貼設定計算
           const bonus = salaryInfo?.bonus || 0
-          const allowances = salaryInfo?.allowances || 0
+          let mealAllowance = 0
+          let transportAllowance = 0
+          let totalAllowances = 0
+          const allowanceDetails: Record<string, number> = {}
+
+          for (const at of (allowanceTypes || []) as { code: string; name: string; default_amount: number }[]) {
+            const amount = at.default_amount || 0
+            if (amount > 0) {
+              allowanceDetails[at.name] = amount
+              totalAllowances += amount
+              if (at.code === 'meal') mealAllowance = amount
+              if (at.code === 'transport') transportAllowance = amount
+            }
+          }
+
+          // 減項 — 從扣款設定計算（勞保/健保/勞退等）
+          let statutory_deductions = 0
+          const deductionDetails: Record<string, number> = {}
+          const insuredSalary = empConfig?.insured_salary || baseSalary
+
+          for (const dt of (deductionTypes || []) as { code: string; name: string; calc_method: string; calc_config: Record<string, unknown>; is_employer_paid: boolean }[]) {
+            if (dt.is_employer_paid) continue // 雇主負擔不從員工薪資扣
+
+            let amount = 0
+            if (dt.calc_method === 'fixed') {
+              amount = Number(dt.calc_config?.amount) || 0
+            } else if (dt.calc_method === 'percentage') {
+              const rate = Number(dt.calc_config?.rate) || 0
+              const employeeShare = Number(dt.calc_config?.employee_share) || 1
+              amount = Math.round(insuredSalary * rate * employeeShare)
+            }
+
+            if (amount > 0) {
+              deductionDetails[dt.name] = amount
+              statutory_deductions += amount
+            }
+          }
 
           // 總額計算
-          const totalDeductions = unpaidLeaveDeduction
-          const grossSalary = baseSalary + overtimePay + bonus + allowances
+          const totalDeductions = unpaidLeaveDeduction + statutory_deductions
+          const grossSalary = baseSalary + overtimePay + bonus + totalAllowances
           const netSalary = grossSalary - totalDeductions
 
           payrollRecords.push({
-            workspace_id: getRequiredWorkspaceId(),
+            workspace_id: wsId,
             payroll_period_id: periodId,
             employee_id: emp.id,
             base_salary: baseSalary,
             overtime_pay: overtimePay,
             bonus,
-            allowances,
-            meal_allowance: 0,
-            transportation_allowance: 0,
+            allowances: totalAllowances,
+            meal_allowance: mealAllowance,
+            transportation_allowance: transportAllowance,
             other_additions: 0,
             unpaid_leave_deduction: unpaidLeaveDeduction,
             late_deduction: 0,
-            other_deductions: 0,
+            other_deductions: statutory_deductions,
             gross_salary: grossSalary,
             total_deductions: totalDeductions,
             net_salary: netSalary,
@@ -464,6 +530,8 @@ export function usePayroll() {
             paid_leave_days: paidLeaveDays,
             unpaid_leave_days: unpaidLeaveDays,
             late_count: lateCount,
+            allowance_details: allowanceDetails,
+            deduction_details: deductionDetails,
           })
         }
 
