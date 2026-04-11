@@ -343,17 +343,16 @@ const menuItems: MenuItem[] = [
     icon: UserSquare,
     requiredPermission: 'hr',
     children: [
-      { href: '/hr/clock-in', label: '打卡', icon: Clock },
-      { href: '/hr/my-attendance', label: '我的出勤', icon: Calendar },
-      { href: '/hr/my-payslip', label: '我的薪資條', icon: Wallet },
-      { href: '/hr/overtime', label: '加班申請', icon: Clock },
-      { href: '/hr/missed-clock', label: '補打卡申請', icon: Clock },
+      // 員工可見
       { href: '/hr/announcements', label: '公司公告', icon: Megaphone },
       { href: '/hr/training', label: '數位培訓', icon: BookOpen },
+      // 管理員功能
       { href: '/hr/roles', label: '職務管理', icon: UserCircleGear, requiredPermission: 'hr' },
       { href: '/hr', label: '員工管理', icon: Users, requiredPermission: 'hr' },
       { href: '/hr/attendance', label: '出勤管理', icon: Clock, requiredPermission: 'hr' },
       { href: '/hr/leave', label: '請假管理', icon: Calendar, requiredPermission: 'hr' },
+      { href: '/hr/overtime', label: '加班審核', icon: Clock, requiredPermission: 'hr' },
+      { href: '/hr/missed-clock', label: '補打卡審核', icon: Clock, requiredPermission: 'hr' },
       { href: '/hr/payroll', label: '薪資管理', icon: Wallet, requiredPermission: 'hr' },
       { href: '/hr/reports', label: '出勤月報', icon: BarChart3, requiredPermission: 'hr' },
       { href: '/hr/deductions', label: '扣款與津貼', icon: HandCoins, requiredPermission: 'hr' },

@@ -232,34 +232,25 @@ export function ClockInWidget() {
           <div className="border-t border-border/50" />
 
           {/* 快捷操作 */}
-          <div className="grid grid-cols-2 gap-2 flex-1">
+          <div className="grid grid-cols-4 gap-1.5 flex-1">
             <button
               onClick={() => setShowLeaveDialog(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card/70 border border-border/40 hover:border-morandi-gold/40 hover:bg-morandi-gold/5 transition-all text-left"
+              className="flex flex-col items-center gap-1 py-2 rounded-xl bg-card/70 border border-border/40 hover:border-morandi-gold/40 hover:bg-morandi-gold/5 transition-all"
             >
-              <Calendar size={14} className="text-morandi-gold flex-shrink-0" />
-              <span className="text-xs font-medium text-morandi-primary">請假</span>
+              <Calendar size={14} className="text-morandi-gold" />
+              <span className="text-[10px] font-medium text-morandi-primary">請假</span>
             </button>
-            <Link
-              href="/hr/overtime"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card/70 border border-border/40 hover:border-morandi-gold/40 hover:bg-morandi-gold/5 transition-all"
-            >
-              <Clock size={14} className="text-morandi-gold flex-shrink-0" />
-              <span className="text-xs font-medium text-morandi-primary">加班</span>
+            <Link href="/hr/overtime" className="flex flex-col items-center gap-1 py-2 rounded-xl bg-card/70 border border-border/40 hover:border-morandi-gold/40 hover:bg-morandi-gold/5 transition-all">
+              <Clock size={14} className="text-morandi-gold" />
+              <span className="text-[10px] font-medium text-morandi-primary">加班</span>
             </Link>
-            <Link
-              href="/hr/my-attendance"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card/70 border border-border/40 hover:border-morandi-gold/40 hover:bg-morandi-gold/5 transition-all"
-            >
-              <FileText size={14} className="text-morandi-gold flex-shrink-0" />
-              <span className="text-xs font-medium text-morandi-primary">出勤</span>
+            <Link href="/hr/my-attendance" className="flex flex-col items-center gap-1 py-2 rounded-xl bg-card/70 border border-border/40 hover:border-morandi-gold/40 hover:bg-morandi-gold/5 transition-all">
+              <FileText size={14} className="text-morandi-gold" />
+              <span className="text-[10px] font-medium text-morandi-primary">出勤</span>
             </Link>
-            <Link
-              href="/hr/my-payslip"
-              className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card/70 border border-border/40 hover:border-morandi-gold/40 hover:bg-morandi-gold/5 transition-all"
-            >
-              <ChevronRight size={14} className="text-morandi-gold flex-shrink-0" />
-              <span className="text-xs font-medium text-morandi-primary">薪資條</span>
+            <Link href="/hr/my-payslip" className="flex flex-col items-center gap-1 py-2 rounded-xl bg-card/70 border border-border/40 hover:border-morandi-gold/40 hover:bg-morandi-gold/5 transition-all">
+              <ChevronRight size={14} className="text-morandi-gold" />
+              <span className="text-[10px] font-medium text-morandi-primary">薪資</span>
             </Link>
           </div>
         </div>
