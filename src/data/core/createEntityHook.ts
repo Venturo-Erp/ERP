@@ -93,7 +93,6 @@ const WORKSPACE_SCOPED_TABLES = [
   'pnr_ai_queries',
   // === 其他 ===
   'airport_images',
-  'customer_groups',
   'leader_availability',
   'request_responses',
   'request_response_items',

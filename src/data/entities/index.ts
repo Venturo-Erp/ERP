@@ -236,34 +236,6 @@ export {
   invalidateSuppliers,
 } from './suppliers'
 
-// Customer Groups
-export {
-  customerGroupEntity,
-  useCustomerGroups,
-  useCustomerGroupsSlim,
-  useCustomerGroup,
-  useCustomerGroupsPaginated,
-  useCustomerGroupDictionary,
-  createCustomerGroup,
-  updateCustomerGroup,
-  deleteCustomerGroup,
-  invalidateCustomerGroups,
-} from './customer-groups'
-
-// Customer Group Members
-export {
-  customerGroupMemberEntity,
-  useCustomerGroupMembers,
-  useCustomerGroupMembersSlim,
-  useCustomerGroupMember,
-  useCustomerGroupMembersPaginated,
-  useCustomerGroupMemberDictionary,
-  createCustomerGroupMember,
-  updateCustomerGroupMember,
-  deleteCustomerGroupMember,
-  invalidateCustomerGroupMembers,
-} from './customer-group-members'
-
 // Airport Images
 export {
   airportImageEntity,
