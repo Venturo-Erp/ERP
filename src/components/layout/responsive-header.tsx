@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/select'
 import { useBreadcrumb, type BreadcrumbItem } from '@/hooks/useBreadcrumb'
 import { ChevronRight } from 'lucide-react'
-import { NotificationBell } from './notification-bell'
 import { COMP_LAYOUT_LABELS } from './constants/labels'
 
 interface ResponsiveHeaderProps {
@@ -331,8 +330,7 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
           )}
         </div>
 
-        {/* 通知鈴鐺 */}
-        <NotificationBell />
+        {/* 通知鈴鐺已移至浮動膠囊（MainLayout） */}
       </div>
     </div>
   )

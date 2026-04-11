@@ -49,6 +49,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Settings,
@@ -74,6 +75,7 @@ interface PaymentMethod {
   description: string | null
   placeholder: string | null // 付款資訊提示文字
   is_active: boolean
+  is_system: boolean
   sort_order: number
   debit_account_id: string | null
   credit_account_id: string | null
@@ -145,7 +147,7 @@ export default function FinanceSettingsPage() {
     setIsLoading(true)
     try {
       // 載入付款方式
-      const methodsRes = await fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}`)
+      const methodsRes = await fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}&include_inactive=true`)
       const methodsData = await methodsRes.json()
       setPaymentMethods(methodsData || [])
 
@@ -199,6 +201,30 @@ export default function FinanceSettingsPage() {
       await alert('儲存成功', 'success')
     } catch (error) {
       await alert('儲存失敗', 'error')
+    }
+  }
+
+  // 切換付款方式啟用/停用
+  const handleToggleMethodActive = async (method: PaymentMethod) => {
+    const newStatus = !method.is_active
+    const action = newStatus ? '啟用' : '停用'
+    const confirmed = await confirm(`確定要${action}「${method.name}」嗎？`, {
+      title: `${action}付款方式`,
+      type: 'warning',
+    })
+    if (!confirmed) return
+
+    try {
+      const res = await fetch('/api/finance/payment-methods', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: method.id, is_active: newStatus }),
+      })
+      if (!res.ok) throw new Error(`${action}失敗`)
+      await loadData()
+      await alert(`${action}成功`, 'success')
+    } catch (error) {
+      await alert(`${action}失敗`, 'error')
     }
   }
 
@@ -420,6 +446,7 @@ export default function FinanceSettingsPage() {
                   <TableRow>
                     <TableHead className="w-[60px]">排序</TableHead>
                     <TableHead>名稱</TableHead>
+                    <TableHead>說明</TableHead>
                     <TableHead>借方科目</TableHead>
                     <TableHead>貸方科目</TableHead>
                     <TableHead className="w-[80px]">狀態</TableHead>
@@ -429,15 +456,21 @@ export default function FinanceSettingsPage() {
                 <TableBody>
                   {receiptMethods.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                      <TableCell colSpan={7} className="text-center py-8 text-morandi-muted">
                         尚未設定收款方式
                       </TableCell>
                     </TableRow>
                   ) : (
                     receiptMethods.map(method => (
-                      <TableRow key={method.id}>
+                      <TableRow key={method.id} className={!method.is_active ? 'opacity-50' : ''}>
                         <TableCell className="text-morandi-muted">{method.sort_order}</TableCell>
-                        <TableCell className="font-medium">{method.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {method.name}
+                          {method.is_system && (
+                            <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">系統</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-morandi-muted text-sm">{method.description || '-'}</TableCell>
                         <TableCell className="text-morandi-muted text-sm">
                           {method.debit_account
                             ? `${method.debit_account.code} ${method.debit_account.name}`
@@ -449,9 +482,15 @@ export default function FinanceSettingsPage() {
                             : '-'}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={method.is_active ? 'default' : 'secondary'}>
-                            {method.is_active ? '啟用' : '停用'}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={method.is_active}
+                              onCheckedChange={() => handleToggleMethodActive(method)}
+                            />
+                            <span className={`text-xs ${method.is_active ? 'text-morandi-primary' : 'text-morandi-muted'}`}>
+                              {method.is_active ? '啟用' : '停用'}
+                            </span>
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
@@ -465,14 +504,16 @@ export default function FinanceSettingsPage() {
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteMethod(method)}
-                              className="text-status-danger hover:text-status-danger/80"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {!method.is_system && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteMethod(method)}
+                                className="text-status-danger hover:text-status-danger/80"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -493,6 +534,7 @@ export default function FinanceSettingsPage() {
                   <TableRow>
                     <TableHead className="w-[60px]">排序</TableHead>
                     <TableHead>名稱</TableHead>
+                    <TableHead>說明</TableHead>
                     <TableHead>借方科目</TableHead>
                     <TableHead>貸方科目</TableHead>
                     <TableHead className="w-[80px]">狀態</TableHead>
@@ -502,15 +544,21 @@ export default function FinanceSettingsPage() {
                 <TableBody>
                   {paymentMethodsList.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-morandi-muted">
+                      <TableCell colSpan={7} className="text-center py-8 text-morandi-muted">
                         尚未設定付款方式
                       </TableCell>
                     </TableRow>
                   ) : (
                     paymentMethodsList.map(method => (
-                      <TableRow key={method.id}>
+                      <TableRow key={method.id} className={!method.is_active ? 'opacity-50' : ''}>
                         <TableCell className="text-morandi-muted">{method.sort_order}</TableCell>
-                        <TableCell className="font-medium">{method.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {method.name}
+                          {method.is_system && (
+                            <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">系統</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-morandi-muted text-sm">{method.description || '-'}</TableCell>
                         <TableCell className="text-morandi-muted text-sm">
                           {method.debit_account
                             ? `${method.debit_account.code} ${method.debit_account.name}`
@@ -522,9 +570,15 @@ export default function FinanceSettingsPage() {
                             : '-'}
                         </TableCell>
                         <TableCell>
-                          <Badge variant={method.is_active ? 'default' : 'secondary'}>
-                            {method.is_active ? '啟用' : '停用'}
-                          </Badge>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={method.is_active}
+                              onCheckedChange={() => handleToggleMethodActive(method)}
+                            />
+                            <span className={`text-xs ${method.is_active ? 'text-morandi-primary' : 'text-morandi-muted'}`}>
+                              {method.is_active ? '啟用' : '停用'}
+                            </span>
+                          </div>
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
@@ -538,14 +592,16 @@ export default function FinanceSettingsPage() {
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteMethod(method)}
-                              className="text-status-danger hover:text-status-danger/80"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {!method.is_system && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteMethod(method)}
+                                className="text-status-danger hover:text-status-danger/80"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>

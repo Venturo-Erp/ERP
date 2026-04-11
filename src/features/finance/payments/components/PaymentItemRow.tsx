@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import type { PaymentItem, ReceiptType } from '../types'
-import { RECEIPT_TYPES, RECEIPT_TYPE_OPTIONS, BANK_ACCOUNTS } from '../types'
+import { BANK_ACCOUNTS } from '../types'
 import {
   ADD_RECEIPT_DIALOG_LABELS,
   BATCH_RECEIPT_DIALOG_LABELS,
@@ -45,7 +45,7 @@ interface PaymentItemRowProps {
   /** 唯讀模式（已確認的收款單） */
   readonly?: boolean
   /** 收款方式列表（從父組件傳入，避免重複載入） */
-  paymentMethods?: Array<{ id: string; name: string; placeholder?: string | null }>
+  paymentMethods?: Array<{ id: string; code: string; name: string; description?: string | null; placeholder?: string | null }>
   /** 是否有核帳權限（可填寫實收金額） */
   canConfirmReceipt?: boolean
 }
@@ -169,13 +169,23 @@ export function PaymentItemRow({
     }
   }
 
+  // 根據 receipt_type（DB name）找到對應的 code
+  const currentMethod = paymentMethods.find(m => m.name === String(item.receipt_type))
+  const currentCode = item.payment_method_code || currentMethod?.code || ''
+
   // 當收款方式變更時（使用 DB 字串值）
   const handleReceiptTypeChange = (value: string) => {
     const newType = value as unknown as ReceiptType
-    const updates: Partial<PaymentItem> = { receipt_type: newType }
+    const method = paymentMethods.find(m => m.name === value)
+    const updates: Partial<PaymentItem> = {
+      receipt_type: newType,
+      payment_method_code: method?.code,
+      payment_method_id: method?.id,
+    }
 
-    // 如果切換到 LinkPay，自動帶入預設值
-    if (newType === RECEIPT_TYPES.LINK_PAY || value === 'LinkPay' || value === 'LINE Pay') {
+    // 如果切換到 LinkPay 類型，自動帶入預設值
+    const code = method?.code || ''
+    if (code === 'LINKPAY' || code === 'LINEPAY') {
       // 預設付款截止日為 7 天後
       if (!item.pay_dateline) {
         const deadline = new Date()
@@ -261,7 +271,7 @@ export function PaymentItemRow({
               }}
               placeholder={
                 // 從 DB 讀取的 placeholder，沒有就用預設
-                paymentMethods.find(m => m.name === String(item.receipt_type))?.placeholder || ''
+                currentMethod?.placeholder || ''
               }
               disabled={readonly}
               className="input-no-focus w-full bg-transparent text-sm"
@@ -327,7 +337,7 @@ export function PaymentItemRow({
       </tr>
 
       {/* LinkPay 額外欄位 - 表頭 */}
-      {item.receipt_type === RECEIPT_TYPES.LINK_PAY && (
+      {(currentCode === 'LINKPAY' || currentCode === 'LINEPAY') && (
         <tr className="text-xs text-morandi-primary font-medium bg-card">
           <th className="text-left py-2.5 px-3 border-b border-border/50">Email *</th>
           <th className="text-left py-2.5 px-3 border-b border-border/50">
@@ -341,7 +351,7 @@ export function PaymentItemRow({
       )}
 
       {/* LinkPay 額外欄位 - 輸入 */}
-      {item.receipt_type === RECEIPT_TYPES.LINK_PAY && (
+      {(currentCode === 'LINKPAY' || currentCode === 'LINEPAY') && (
         <tr className="bg-card">
           <td className="py-2 px-3 border-b border-border/50">
             <input
@@ -394,7 +404,7 @@ export function PaymentItemRow({
       )}
 
       {/* LinkPay 產生的連結 */}
-      {item.receipt_type === RECEIPT_TYPES.LINK_PAY && generatedLink && (
+      {(currentCode === 'LINKPAY' || currentCode === 'LINEPAY') && generatedLink && (
         <tr className="bg-morandi-gold/10">
           <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-secondary">
             {PAYMENT_ITEM_ROW_LABELS.LABEL_1487}
@@ -422,6 +432,126 @@ export function PaymentItemRow({
             >
               {PAYMENT_ITEM_ROW_LABELS.LABEL_1670}
             </button>
+          </td>
+        </tr>
+      )}
+
+      {/* 現金額外欄位 */}
+      {currentCode === 'CASH' && !readonly && (
+        <tr className="bg-card">
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">經手人</td>
+          <td className="py-2 px-3 border-b border-border/50" colSpan={5}>
+            <input
+              type="text"
+              value={item.handler_name || ''}
+              onChange={e => onUpdate(item.id, { handler_name: e.target.value })}
+              placeholder="經手人姓名"
+              className="input-no-focus w-full bg-transparent text-sm"
+            />
+          </td>
+        </tr>
+      )}
+
+      {/* 匯款額外欄位 */}
+      {currentCode === 'TRANSFER' && !readonly && (
+        <tr className="bg-card">
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">匯入帳戶</td>
+          <td className="py-2 px-3 border-b border-border/50" colSpan={2}>
+            <Select
+              value={item.account_info || ''}
+              onValueChange={value => onUpdate(item.id, { account_info: value })}
+            >
+              <SelectTrigger className="h-8 text-sm w-full border-0 shadow-none bg-transparent px-0">
+                <SelectValue placeholder="請選擇帳戶" />
+              </SelectTrigger>
+              <SelectContent>
+                {BANK_ACCOUNTS.map(bank => (
+                  <SelectItem key={bank.value} value={bank.value}>{bank.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">手續費</td>
+          <td className="py-2 px-3 border-b border-border/50" colSpan={2}>
+            <input
+              type="number"
+              value={item.fees || ''}
+              onChange={e => onUpdate(item.id, { fees: Number(e.target.value) })}
+              placeholder="0"
+              className="input-no-focus w-full bg-transparent text-sm"
+            />
+          </td>
+        </tr>
+      )}
+
+      {/* 刷卡額外欄位 */}
+      {currentCode === 'CREDIT_CARD' && !readonly && (
+        <tr className="bg-card">
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">卡號末四碼</td>
+          <td className="py-2 px-3 border-b border-border/50">
+            <input
+              type="text"
+              maxLength={4}
+              value={item.card_last_four || ''}
+              onChange={e => onUpdate(item.id, { card_last_four: e.target.value.replace(/\D/g, '') })}
+              placeholder="1234"
+              className="input-no-focus w-full bg-transparent text-sm"
+            />
+          </td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">授權碼</td>
+          <td className="py-2 px-3 border-b border-border/50">
+            <input
+              type="text"
+              value={item.auth_code || ''}
+              onChange={e => onUpdate(item.id, { auth_code: e.target.value })}
+              placeholder="授權碼"
+              className="input-no-focus w-full bg-transparent text-sm"
+            />
+          </td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">手續費</td>
+          <td className="py-2 px-3 border-b border-border/50">
+            <input
+              type="number"
+              value={item.fees || ''}
+              onChange={e => onUpdate(item.id, { fees: Number(e.target.value) })}
+              placeholder="0"
+              className="input-no-focus w-full bg-transparent text-sm"
+            />
+          </td>
+        </tr>
+      )}
+
+      {/* 支票額外欄位 */}
+      {currentCode === 'CHECK' && !readonly && (
+        <tr className="bg-card">
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">支票號碼</td>
+          <td className="py-2 px-3 border-b border-border/50" colSpan={2}>
+            <input
+              type="text"
+              value={item.check_number || ''}
+              onChange={e => onUpdate(item.id, { check_number: e.target.value })}
+              placeholder="票據號碼"
+              className="input-no-focus w-full bg-transparent text-sm"
+            />
+          </td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">開票銀行</td>
+          <td className="py-2 px-3 border-b border-border/50" colSpan={2}>
+            <input
+              type="text"
+              value={item.check_bank || ''}
+              onChange={e => onUpdate(item.id, { check_bank: e.target.value })}
+              placeholder="銀行名稱"
+              className="input-no-focus w-full bg-transparent text-sm"
+            />
+          </td>
+        </tr>
+      )}
+
+      {/* 方式說明（從 DB 帶出） */}
+      {currentMethod?.description && !readonly && (
+        <tr className="bg-morandi-container/10">
+          <td className="py-1.5 px-3 border-b border-border/50 text-xs text-morandi-muted" colSpan={6}>
+            {currentMethod.description}
           </td>
         </tr>
       )}

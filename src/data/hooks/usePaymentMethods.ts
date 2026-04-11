@@ -4,8 +4,14 @@ import { useAuthStore } from '@/stores'
 
 export interface PaymentMethod {
   id: string
+  code: string
   name: string
+  type: 'receipt' | 'payment'
+  description: string | null
   placeholder?: string | null
+  is_active: boolean
+  is_system: boolean
+  sort_order: number
 }
 
 type PaymentMethodType = 'receipt' | 'payment'

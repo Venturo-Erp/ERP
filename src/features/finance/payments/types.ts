@@ -29,6 +29,8 @@ export const BANK_ACCOUNTS = [
 export interface PaymentItem {
   id: string
   receipt_type: ReceiptType
+  payment_method_code?: string // DB payment_methods.code (CASH, TRANSFER, CREDIT_CARD, CHECK, LINKPAY, etc.)
+  payment_method_id?: string // DB payment_methods.id
   amount: number
   actual_amount?: number // 實收金額（核帳用）
   transaction_date: string

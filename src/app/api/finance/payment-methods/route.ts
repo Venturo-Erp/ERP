@@ -12,16 +12,20 @@ export async function GET(request: NextRequest) {
   const supabase = await createApiClient()
   const searchParams = request.nextUrl.searchParams
   const type = searchParams.get('type') // 'receipt' | 'payment'
+  const includeInactive = searchParams.get('include_inactive') === 'true'
 
   // 明確用 workspace_id 過濾（super admin 的 RLS 會放行全部，所以不能只靠 RLS）
   const workspaceId = await getCurrentWorkspaceId()
   let query = supabase
     .from('payment_methods')
     .select(
-      'id, name, code, type, placeholder, is_active, sort_order, workspace_id, created_at, updated_at'
+      'id, name, code, type, description, placeholder, is_active, is_system, sort_order, workspace_id, created_at, updated_at'
     )
-    .eq('is_active', true)
     .order('sort_order')
+
+  if (!includeInactive) {
+    query = query.eq('is_active', true)
+  }
 
   if (workspaceId) {
     query = query.eq('workspace_id', workspaceId)
@@ -106,6 +110,17 @@ export async function DELETE(request: NextRequest) {
 
   if (!id) {
     return NextResponse.json({ error: 'id is required' }, { status: 400 })
+  }
+
+  // 檢查是否為系統預設方式
+  const { data: method } = await supabase
+    .from('payment_methods')
+    .select('is_system')
+    .eq('id', id)
+    .single()
+
+  if (method?.is_system) {
+    return NextResponse.json({ error: '系統預設方式不可刪除，只能停用' }, { status: 403 })
   }
 
   // RLS 會確保只能刪除自己租戶的資料

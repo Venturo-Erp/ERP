@@ -6,6 +6,7 @@ import { Sidebar } from './sidebar'
 import { MobileHeader } from './mobile-header'
 import { MobileSidebar } from './mobile-sidebar'
 import { cn } from '@/lib/utils'
+import { NotificationCapsule } from './notification-capsule'
 import { usePathname } from 'next/navigation'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import {
@@ -131,6 +132,9 @@ export function MainLayout({ children }: MainLayoutProps) {
       >
         <div className="h-full overflow-auto p-4 lg:p-6">{children}</div>
       </main>
+
+      {/* 浮動通知膠囊 — 有未讀通知時才顯示 */}
+      <NotificationCapsule />
     </div>
   )
 }
