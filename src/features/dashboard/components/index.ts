@@ -1,3 +1,4 @@
+export { ClockInWidget } from './clock-in-widget'
 export { CalculatorWidget } from './calculator-widget'
 export { CurrencyWidget } from './currency-widget'
 export { TimerWidget } from './timer-widget'

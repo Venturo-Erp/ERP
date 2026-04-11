@@ -17,10 +17,18 @@ import { WeatherWidget } from './weather-widget'
 import { WeatherWidgetWeekly } from './weather-widget-weekly'
 import { FlightWidget } from './flight-widget'
 import { SupplierQuickActionsWidget } from './supplier-quick-actions-widget'
+import { ClockInWidget } from './clock-in-widget'
 // PNR widget 已移至團內操作（TourPnrToolDialog）
 
 // 小工具配置
 export const AVAILABLE_WIDGETS: Array<Omit<WidgetConfig, 'id'> & { id: string }> = [
+  {
+    id: 'clock-in',
+    name: '打卡',
+    icon: Clock,
+    component: ClockInWidget,
+    span: 1,
+  },
   {
     id: 'supplier-quick-actions',
     name: '供應商專區',
