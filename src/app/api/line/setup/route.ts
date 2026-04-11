@@ -136,7 +136,8 @@ export async function POST(req: NextRequest) {
 
       const targetWorkspaceId = lineConfig.workspace_id
 
-      const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/line/webhook`
+      // 多租戶：每個 workspace 有專屬的 webhook URL
+      const webhookUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/line/webhook/${targetWorkspaceId}`
 
       // 設定 webhook
       const setRes = await fetch('https://api.line.me/v2/bot/channel/webhook/endpoint', {

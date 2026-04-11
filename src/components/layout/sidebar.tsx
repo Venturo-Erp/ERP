@@ -349,6 +349,7 @@ const menuItems: MenuItem[] = [
       { href: '/hr/attendance', label: '出勤管理', icon: Clock, requiredPermission: 'hr' },
       { href: '/hr/leave', label: '請假管理', icon: Calendar, requiredPermission: 'hr' },
       { href: '/hr/payroll', label: '薪資管理', icon: Wallet, requiredPermission: 'hr' },
+      { href: '/hr/settings', label: '人資設定', icon: Settings, requiredPermission: 'hr' },
     ],
   },
   {
