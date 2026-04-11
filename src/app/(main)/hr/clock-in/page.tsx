@@ -52,7 +52,7 @@ export default function ClockInPage() {
   const fetchStatus = useCallback(async () => {
     if (!user?.id) return
     try {
-      const res = await fetch(`/api/hr/clock-in?employee_id=${user.id}`)
+      const res = await fetch('/api/hr/clock-in')
       if (res.ok) {
         const data = await res.json()
         setClockStatus(data)
@@ -76,8 +76,6 @@ export default function ClockInPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          employee_id: user.id,
-          workspace_id: user.workspace_id,
           action,
           latitude: location?.lat,
           longitude: location?.lng,

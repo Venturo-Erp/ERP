@@ -533,11 +533,14 @@ async function processClockIn(event: LineEvent): Promise<boolean> {
 
     const { employee_id, workspace_id } = lineUsers[0]
 
-    // 呼叫打卡 API
+    // 呼叫打卡 API（以 internal secret 驗證身份）
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000'
     const clockRes = await fetch(`${baseUrl}/api/hr/clock-in`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-secret': supabaseKey,
+      },
       body: JSON.stringify({
         employee_id,
         workspace_id,
