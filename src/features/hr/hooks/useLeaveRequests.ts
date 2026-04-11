@@ -266,6 +266,22 @@ export function useLeaveRequests() {
             .eq('id', balance.id)
         }
 
+        // 發通知給申請人
+        try {
+          await fetch('/api/notifications', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              recipient_id: request.employee_id,
+              title: '請假申請已核准',
+              message: `${request.start_date} ~ ${request.end_date}，共 ${request.days} 天`,
+              module: 'hr',
+              type: 'info',
+              action_url: '/hr/leave',
+            }),
+          })
+        } catch {}
+
         await fetchRequests()
         return true
       } catch (err) {
@@ -303,6 +319,31 @@ export function useLeaveRequests() {
           .eq('id', id)
 
         if (updateError) throw updateError
+
+        // 發通知給申請人
+        // 先查申請人 ID
+        const { data: reqData } = await supabase
+          .from('leave_requests')
+          .select('employee_id')
+          .eq('id', id)
+          .single()
+
+        if (reqData?.employee_id) {
+          try {
+            await fetch('/api/notifications', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                recipient_id: reqData.employee_id,
+                title: '請假申請已駁回',
+                message: reason ? `原因：${reason}` : undefined,
+                module: 'hr',
+                type: 'info',
+                action_url: '/hr/leave',
+              }),
+            })
+          } catch {}
+        }
 
         await fetchRequests()
         return true

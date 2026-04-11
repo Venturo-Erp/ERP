@@ -95,12 +95,21 @@ export default function OvertimePage() {
       } as never)
 
       // 通知主管（找管理員）
-      const { data: admins } = await supabase
-        .from('employees')
+      // 找管理員：透過 roles.is_admin 判斷
+      const { data: adminRoles } = await supabase
+        .from('roles' as never)
         .select('id')
-        .eq('workspace_id', user?.workspace_id || '')
-        .in('role', ['admin', 'super_admin'] as never[])
-        .limit(5)
+        .eq('is_admin', true)
+      const adminRoleIds = (adminRoles || []).map((r: { id: string }) => r.id)
+
+      const { data: admins } = adminRoleIds.length > 0
+        ? await supabase
+            .from('employees')
+            .select('id')
+            .eq('workspace_id', user?.workspace_id || '')
+            .in('job_info->role_id' as never, adminRoleIds as never[])
+            .limit(5)
+        : { data: [] }
 
       if (admins?.length) {
         await fetch('/api/notifications', {

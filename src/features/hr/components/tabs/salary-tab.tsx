@@ -1,12 +1,15 @@
 'use client'
 
-import React, { forwardRef, useImperativeHandle, useState } from 'react'
+import React, { forwardRef, useImperativeHandle, useState, useEffect } from 'react'
 import { Employee } from '@/stores/types'
 import { TrendingUp } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { useUserStore } from '@/stores/user-store'
+import { supabase } from '@/lib/supabase/client'
 import { DateCell, CurrencyCell } from '@/components/table-cells'
 import { HR_LABELS } from './constants/labels'
+import { logger } from '@/lib/utils/logger'
 
 interface SalaryTabProps {
   employee: Employee
@@ -18,13 +21,47 @@ export const SalaryTab = forwardRef<{ handleSave: () => void }, SalaryTabProps>(
   ({ employee, isEditing }, ref) => {
     const employeeWithSalary = employee as Employee & { monthly_salary?: number }
     const [monthlySalary, setMonthlySalary] = useState(employeeWithSalary.monthly_salary ?? 30000)
+    const [insuredSalary, setInsuredSalary] = useState(0)
+    const [healthDependents, setHealthDependents] = useState(0)
     const { update } = useUserStore()
+
+    // 載入 employee_payroll_config
+    useEffect(() => {
+      const load = async () => {
+        try {
+          const { data } = await supabase
+            .from('employee_payroll_config' as never)
+            .select('insured_salary, health_dependents')
+            .eq('employee_id', employee.id)
+            .single()
+          if (data) {
+            const config = data as { insured_salary?: number; health_dependents?: number }
+            setInsuredSalary(config.insured_salary || 0)
+            setHealthDependents(config.health_dependents || 0)
+          }
+        } catch {}
+      }
+      load()
+    }, [employee.id])
 
     useImperativeHandle(ref, () => ({
       handleSave: async () => {
         await update(employee.id, { monthly_salary: monthlySalary } as Partial<
           Employee & { monthly_salary: number }
         >)
+        // 儲存 payroll config
+        try {
+          await supabase
+            .from('employee_payroll_config' as never)
+            .upsert({
+              employee_id: employee.id,
+              insured_salary: insuredSalary,
+              health_dependents: healthDependents,
+              updated_at: new Date().toISOString(),
+            } as never, { onConflict: 'employee_id' } as never)
+        } catch (err) {
+          logger.error('儲存薪資設定失敗:', err)
+        }
       },
     }))
 
@@ -57,6 +94,45 @@ export const SalaryTab = forwardRef<{ handleSave: () => void }, SalaryTabProps>(
             )}
           </div>
           <p className="text-xs text-morandi-secondary mt-2">{HR_LABELS.LABEL_3358}</p>
+        </div>
+
+        {/* 投保薪資與眷屬 */}
+        <div className="bg-morandi-container/10 rounded-lg p-4">
+          <h4 className="font-medium text-morandi-primary mb-3">投保設定</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label className="text-sm text-morandi-secondary">投保薪資</Label>
+              {isEditing ? (
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-sm text-morandi-secondary">NT$</span>
+                  <Input
+                    type="number"
+                    value={insuredSalary}
+                    onChange={e => setInsuredSalary(Number(e.target.value))}
+                    className="w-40"
+                  />
+                </div>
+              ) : (
+                <CurrencyCell amount={insuredSalary} className="text-lg font-medium text-morandi-primary mt-1" />
+              )}
+              <p className="text-xs text-morandi-muted mt-1">勞健保計算基礎</p>
+            </div>
+            <div>
+              <Label className="text-sm text-morandi-secondary">健保眷屬人數</Label>
+              {isEditing ? (
+                <Input
+                  type="number"
+                  min={0}
+                  value={healthDependents}
+                  onChange={e => setHealthDependents(Number(e.target.value))}
+                  className="w-24 mt-1"
+                />
+              ) : (
+                <p className="text-lg font-medium text-morandi-primary mt-1">{healthDependents} 人</p>
+              )}
+              <p className="text-xs text-morandi-muted mt-1">影響健保費用計算</p>
+            </div>
+          </div>
         </div>
 
         {/* 目前薪資資訊（舊系統 salary_info）*/}

@@ -188,10 +188,20 @@ export function useAttendanceRecords() {
           workHours = (clockOut.getTime() - clockIn.getTime()) / (1000 * 60 * 60)
         }
 
-        // 判斷狀態
+        // 判斷狀態（讀取租戶設定的上班時間）
         let status = input.status
         if (!status && input.clock_in) {
-          const expectedStart = '09:00' // 預設上班時間
+          let expectedStart = '09:00'
+          try {
+            const { data: settings } = await supabase
+              .from('workspace_attendance_settings' as never)
+              .select('work_start_time')
+              .eq('workspace_id', getRequiredWorkspaceId())
+              .single()
+            if (settings && (settings as { work_start_time?: string }).work_start_time) {
+              expectedStart = ((settings as { work_start_time: string }).work_start_time).slice(0, 5)
+            }
+          } catch {}
           status = input.clock_in > expectedStart ? 'late' : 'present'
         }
 
