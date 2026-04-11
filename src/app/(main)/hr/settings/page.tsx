@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Settings, ExternalLink, CheckCircle2, AlertCircle } from 'lucide-react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -46,6 +47,29 @@ const DEFAULT_SETTINGS: AttendanceSettings = {
   gps_radius_meters: 500,
   enable_line_clock: true,
   enable_web_clock: true,
+}
+
+/** 設定區塊：左邊說明 + 右邊內容 */
+function SettingSection({
+  title,
+  description,
+  children,
+}: {
+  title: string
+  description: string
+  children: React.ReactNode
+}) {
+  return (
+    <Card className="rounded-xl shadow-sm border border-border p-6">
+      <div className="grid md:grid-cols-[280px_1fr] gap-6">
+        <div>
+          <h3 className="text-sm font-semibold text-morandi-primary">{title}</h3>
+          <p className="text-xs text-morandi-muted mt-1 leading-relaxed">{description}</p>
+        </div>
+        <div className="space-y-4">{children}</div>
+      </div>
+    </Card>
+  )
 }
 
 export default function HRSettingsPage() {
@@ -150,7 +174,6 @@ export default function HRSettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'set_webhook' }),
       })
-
       await fetch('/api/line/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -159,7 +182,6 @@ export default function HRSettingsPage() {
 
       const lineRes = await fetch('/api/line/setup')
       if (lineRes.ok) setLineConfig(await lineRes.json())
-
       toast.success(`LINE Bot「${saveData.bot?.displayName}」設定完成！`)
       setLineToken('')
       setLineSecret('')
@@ -180,191 +202,196 @@ export default function HRSettingsPage() {
       title="人資設定"
       icon={Settings}
       headerActions={
-        <Button
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-        >
+        <Button onClick={handleSave} disabled={saving} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
           {saving ? '儲存中...' : '儲存設定'}
         </Button>
       }
     >
-      <div className="max-w-3xl mx-auto p-6 space-y-8">
-        {/* ====== 打卡時間 ====== */}
-        <section className="space-y-4">
-          <h2 className="text-sm font-semibold text-morandi-primary border-b border-border pb-2">打卡時間</h2>
+      <div className="p-6 space-y-6">
+        {/* 打卡時間 */}
+        <SettingSection title="打卡時間" description="設定公司的上下班時間與標準工時，系統會依此判斷遲到與加班。">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>上班時間</Label>
-              <Input type="time" value={settings.work_start_time} onChange={e => setSettings(s => ({ ...s, work_start_time: e.target.value }))} />
+              <Label className="text-sm font-medium text-morandi-primary">上班時間</Label>
+              <Input type="time" value={settings.work_start_time} onChange={e => setSettings(s => ({ ...s, work_start_time: e.target.value }))} className="mt-1.5" />
             </div>
             <div>
-              <Label>下班時間</Label>
-              <Input type="time" value={settings.work_end_time} onChange={e => setSettings(s => ({ ...s, work_end_time: e.target.value }))} />
+              <Label className="text-sm font-medium text-morandi-primary">下班時間</Label>
+              <Input type="time" value={settings.work_end_time} onChange={e => setSettings(s => ({ ...s, work_end_time: e.target.value }))} className="mt-1.5" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>標準工時（小時）</Label>
-              <Input type="number" value={settings.standard_work_hours} onChange={e => setSettings(s => ({ ...s, standard_work_hours: Number(e.target.value) }))} />
+              <Label className="text-sm font-medium text-morandi-primary">標準工時（小時）</Label>
+              <Input type="number" value={settings.standard_work_hours} onChange={e => setSettings(s => ({ ...s, standard_work_hours: Number(e.target.value) }))} className="mt-1.5" />
             </div>
             <div>
-              <Label>遲到寬限（分鐘）</Label>
-              <Input type="number" value={settings.late_threshold_minutes} onChange={e => setSettings(s => ({ ...s, late_threshold_minutes: Number(e.target.value) }))} />
+              <Label className="text-sm font-medium text-morandi-primary">遲到寬限（分鐘）</Label>
+              <Input type="number" value={settings.late_threshold_minutes} onChange={e => setSettings(s => ({ ...s, late_threshold_minutes: Number(e.target.value) }))} className="mt-1.5" />
               <p className="text-xs text-morandi-muted mt-1">0 = 超過上班時間即算遲到</p>
             </div>
           </div>
-          <div className="flex items-center justify-between py-2">
+          <div className="flex items-center justify-between pt-2 border-t border-border/50">
             <div>
-              <Label>允許忘打卡補登</Label>
+              <p className="text-sm font-medium text-morandi-primary">允許忘打卡補登</p>
               <p className="text-xs text-morandi-muted">員工可以申請補打卡</p>
             </div>
             <Switch checked={settings.allow_missed_clock_request} onCheckedChange={v => setSettings(s => ({ ...s, allow_missed_clock_request: v }))} />
           </div>
-        </section>
+        </SettingSection>
 
-        {/* ====== GPS 定位 ====== */}
-        <section className="space-y-4">
-          <h2 className="text-sm font-semibold text-morandi-primary border-b border-border pb-2">GPS 定位打卡</h2>
-          <div className="flex items-center justify-between py-2">
+        {/* GPS 定位 */}
+        <SettingSection title="GPS 定位打卡" description="開啟後員工打卡時需在指定地點範圍內，防止遠端打卡。">
+          <div className="flex items-center justify-between">
             <div>
-              <Label>要求 GPS 定位</Label>
+              <p className="text-sm font-medium text-morandi-primary">要求 GPS 定位</p>
               <p className="text-xs text-morandi-muted">打卡時必須在指定範圍內</p>
             </div>
             <Switch checked={settings.require_gps} onCheckedChange={v => setSettings(s => ({ ...s, require_gps: v }))} />
           </div>
           {settings.require_gps && (
-            <div className="grid grid-cols-3 gap-4 pl-4 border-l-2 border-morandi-gold/30">
+            <div className="grid grid-cols-3 gap-4 pt-3 border-t border-border/50">
               <div>
-                <Label>公司緯度</Label>
-                <Input type="number" step="0.0001" value={settings.gps_latitude || ''} onChange={e => setSettings(s => ({ ...s, gps_latitude: Number(e.target.value) || null }))} placeholder="25.0330" />
+                <Label className="text-sm font-medium text-morandi-primary">公司緯度</Label>
+                <Input type="number" step="0.0001" value={settings.gps_latitude || ''} onChange={e => setSettings(s => ({ ...s, gps_latitude: Number(e.target.value) || null }))} placeholder="25.0330" className="mt-1.5" />
               </div>
               <div>
-                <Label>公司經度</Label>
-                <Input type="number" step="0.0001" value={settings.gps_longitude || ''} onChange={e => setSettings(s => ({ ...s, gps_longitude: Number(e.target.value) || null }))} placeholder="121.5654" />
+                <Label className="text-sm font-medium text-morandi-primary">公司經度</Label>
+                <Input type="number" step="0.0001" value={settings.gps_longitude || ''} onChange={e => setSettings(s => ({ ...s, gps_longitude: Number(e.target.value) || null }))} placeholder="121.5654" className="mt-1.5" />
               </div>
               <div>
-                <Label>允許半徑（公尺）</Label>
-                <Input type="number" value={settings.gps_radius_meters} onChange={e => setSettings(s => ({ ...s, gps_radius_meters: Number(e.target.value) }))} />
+                <Label className="text-sm font-medium text-morandi-primary">允許半徑（公尺）</Label>
+                <Input type="number" value={settings.gps_radius_meters} onChange={e => setSettings(s => ({ ...s, gps_radius_meters: Number(e.target.value) }))} className="mt-1.5" />
               </div>
             </div>
           )}
-        </section>
+        </SettingSection>
 
-        {/* ====== 打卡管道 ====== */}
-        <section className="space-y-4">
-          <h2 className="text-sm font-semibold text-morandi-primary border-b border-border pb-2">打卡管道</h2>
-          <div className="flex items-center justify-between py-2">
+        {/* 打卡管道 */}
+        <SettingSection title="打卡管道" description="選擇允許員工使用哪些方式打卡。">
+          <div className="flex items-center justify-between">
             <div>
-              <Label>網頁打卡</Label>
+              <p className="text-sm font-medium text-morandi-primary">網頁打卡</p>
               <p className="text-xs text-morandi-muted">員工從 ERP 系統內打卡</p>
             </div>
             <Switch checked={settings.enable_web_clock} onCheckedChange={v => setSettings(s => ({ ...s, enable_web_clock: v }))} />
           </div>
-          <div className="flex items-center justify-between py-2">
+          <div className="flex items-center justify-between pt-3 border-t border-border/50">
             <div>
-              <Label>LINE 打卡</Label>
+              <p className="text-sm font-medium text-morandi-primary">LINE 打卡</p>
               <p className="text-xs text-morandi-muted">員工透過 LINE 傳「上班」「下班」打卡</p>
             </div>
             <Switch checked={settings.enable_line_clock} onCheckedChange={v => setSettings(s => ({ ...s, enable_line_clock: v }))} />
           </div>
-        </section>
+        </SettingSection>
 
-        {/* ====== LINE@ 設定 ====== */}
-        <section className="space-y-4">
-          <h2 className="text-sm font-semibold text-morandi-primary border-b border-border pb-2 flex items-center gap-2">
-            LINE@ 機器人設定
-            {lineConfig?.is_connected && (
-              <span className="flex items-center gap-1 text-xs font-normal text-morandi-green">
-                <CheckCircle2 size={14} /> 已連線
-              </span>
-            )}
-          </h2>
-
-          {lineConfig?.is_connected ? (
-            <div className="space-y-3">
-              <div className="bg-morandi-green/5 rounded-lg p-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-morandi-muted">Bot 名稱</span>
-                  <span className="font-medium text-morandi-primary">{lineConfig.bot_display_name}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-morandi-muted">Bot ID</span>
-                  <span className="font-mono text-xs text-morandi-secondary">{lineConfig.bot_basic_id}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-morandi-muted">Webhook</span>
-                  <span className="font-mono text-xs text-morandi-secondary truncate max-w-[200px]">{lineConfig.webhook_url}</span>
-                </div>
-              </div>
-              <div className="bg-morandi-container/30 rounded-lg p-3">
-                <p className="text-sm font-medium text-morandi-primary mb-2">員工打卡方式</p>
-                <ol className="text-xs text-morandi-secondary space-y-1 list-decimal pl-4">
-                  <li>員工加入公司的 LINE@ 好友</li>
-                  <li>傳送員工編號進行綁定（例如：E001）</li>
-                  <li>之後傳「上班」或「下班」即可打卡</li>
-                </ol>
-              </div>
+        {/* LINE@ 設定 */}
+        <Card className="rounded-xl shadow-sm border border-border p-6">
+          <div className="grid md:grid-cols-[280px_1fr] gap-6">
+            <div>
+              <h3 className="text-sm font-semibold text-morandi-primary flex items-center gap-2">
+                LINE@ 機器人
+                {lineConfig?.is_connected && (
+                  <span className="flex items-center gap-1 text-xs font-normal text-morandi-green">
+                    <CheckCircle2 size={12} /> 已連線
+                  </span>
+                )}
+              </h3>
+              <p className="text-xs text-morandi-muted mt-1 leading-relaxed">
+                設定公司的 LINE Official Account，讓員工可以透過 LINE 打卡、收到通知。
+              </p>
             </div>
-          ) : (
+
             <div className="space-y-4">
-              <div className="bg-status-warning-bg border border-status-warning/20 rounded-lg p-3 flex items-start gap-2">
-                <AlertCircle size={16} className="text-status-warning mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-morandi-primary">要啟用 LINE 打卡，需要先設定公司的 LINE@ 機器人</p>
-              </div>
+              {lineConfig?.is_connected ? (
+                <>
+                  <div className="bg-morandi-green/5 rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-morandi-muted">Bot 名稱</span>
+                      <span className="font-medium text-morandi-primary">{lineConfig.bot_display_name}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-morandi-muted">Bot ID</span>
+                      <span className="font-mono text-xs text-morandi-secondary">{lineConfig.bot_basic_id}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-morandi-muted">Webhook</span>
+                      <span className="font-mono text-xs text-morandi-secondary truncate max-w-[250px]">{lineConfig.webhook_url}</span>
+                    </div>
+                  </div>
+                  <div className="bg-morandi-container/30 rounded-lg p-3">
+                    <p className="text-sm font-medium text-morandi-primary mb-2">員工打卡方式</p>
+                    <ol className="text-xs text-morandi-secondary space-y-1 list-decimal pl-4">
+                      <li>員工加入公司的 LINE@ 好友</li>
+                      <li>傳送員工編號進行綁定（例如：E001）</li>
+                      <li>之後傳「上班」或「下班」即可打卡</li>
+                    </ol>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="bg-status-warning-bg border border-status-warning/20 rounded-lg p-3 flex items-start gap-2">
+                    <AlertCircle size={16} className="text-status-warning mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-morandi-primary">要啟用 LINE 打卡，需要先設定公司的 LINE@ 機器人</p>
+                  </div>
 
-              <div className="space-y-3">
-                <div className="flex gap-3 items-start">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-morandi-gold text-white text-xs flex items-center justify-center">1</span>
-                  <div>
-                    <p className="text-sm font-medium text-morandi-primary">建立 LINE Official Account</p>
-                    <p className="text-xs text-morandi-muted">前往 LINE Official Account Manager 建立帳號（免費方案即可）</p>
-                    <a href="https://manager.line.biz/" target="_blank" rel="noopener noreferrer" className="text-xs text-morandi-gold hover:underline inline-flex items-center gap-1 mt-1">
-                      開啟 LINE OA Manager <ExternalLink size={10} />
-                    </a>
+                  <div className="space-y-3">
+                    {[
+                      {
+                        step: 1,
+                        title: '建立 LINE Official Account',
+                        desc: '前往 LINE Official Account Manager 建立帳號（免費方案即可）',
+                        link: { url: 'https://manager.line.biz/', label: '開啟 LINE OA Manager' },
+                      },
+                      {
+                        step: 2,
+                        title: '啟用 Messaging API',
+                        desc: '在 LINE OA「設定」→「Messaging API」點擊啟用',
+                        link: { url: 'https://developers.line.biz/console/', label: '開啟 LINE Developers' },
+                      },
+                      {
+                        step: 3,
+                        title: '複製 Token 和 Secret',
+                        desc: '在 LINE Developers → Channel →「Messaging API」找到 Channel access token，「Basic settings」找到 Channel secret',
+                      },
+                      {
+                        step: 4,
+                        title: '貼到下方欄位，點擊完成設定',
+                      },
+                    ].map(item => (
+                      <div key={item.step} className="flex gap-3 items-start">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-morandi-gold text-white text-xs flex items-center justify-center font-medium">{item.step}</span>
+                        <div>
+                          <p className="text-sm font-medium text-morandi-primary">{item.title}</p>
+                          {item.desc && <p className="text-xs text-morandi-muted">{item.desc}</p>}
+                          {item.link && (
+                            <a href={item.link.url} target="_blank" rel="noopener noreferrer" className="text-xs text-morandi-gold hover:underline inline-flex items-center gap-1 mt-1">
+                              {item.link.label} <ExternalLink size={10} />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-                <div className="flex gap-3 items-start">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-morandi-gold text-white text-xs flex items-center justify-center">2</span>
-                  <div>
-                    <p className="text-sm font-medium text-morandi-primary">啟用 Messaging API</p>
-                    <p className="text-xs text-morandi-muted">在 LINE OA「設定」→「Messaging API」點擊啟用</p>
-                    <a href="https://developers.line.biz/console/" target="_blank" rel="noopener noreferrer" className="text-xs text-morandi-gold hover:underline inline-flex items-center gap-1 mt-1">
-                      開啟 LINE Developers <ExternalLink size={10} />
-                    </a>
-                  </div>
-                </div>
-                <div className="flex gap-3 items-start">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-morandi-gold text-white text-xs flex items-center justify-center">3</span>
-                  <div>
-                    <p className="text-sm font-medium text-morandi-primary">複製 Token 和 Secret</p>
-                    <p className="text-xs text-morandi-muted">在 LINE Developers → Channel →「Messaging API」找到 Channel access token，「Basic settings」找到 Channel secret</p>
-                  </div>
-                </div>
-                <div className="flex gap-3 items-start">
-                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-morandi-gold text-white text-xs flex items-center justify-center">4</span>
-                  <div>
-                    <p className="text-sm font-medium text-morandi-primary">貼到下方欄位，點擊完成設定</p>
-                  </div>
-                </div>
-              </div>
 
-              <div className="space-y-3 pt-3 border-t border-border">
-                <div>
-                  <Label>Channel Access Token</Label>
-                  <Input value={lineToken} onChange={e => setLineToken(e.target.value)} placeholder="貼上你的 Channel access token (long-lived)" className="font-mono text-xs" />
-                </div>
-                <div>
-                  <Label>Channel Secret</Label>
-                  <Input value={lineSecret} onChange={e => setLineSecret(e.target.value)} placeholder="貼上你的 Channel secret" className="font-mono text-xs" />
-                </div>
-                <Button onClick={handleLineSetup} disabled={lineSaving || !lineToken || !lineSecret} className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white">
-                  {lineSaving ? '設定中...' : '完成設定'}
-                </Button>
-              </div>
+                  <div className="space-y-3 pt-3 border-t border-border/50">
+                    <div>
+                      <Label className="text-sm font-medium text-morandi-primary">Channel Access Token</Label>
+                      <Input value={lineToken} onChange={e => setLineToken(e.target.value)} placeholder="貼上你的 Channel access token (long-lived)" className="font-mono text-xs mt-1.5" />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium text-morandi-primary">Channel Secret</Label>
+                      <Input value={lineSecret} onChange={e => setLineSecret(e.target.value)} placeholder="貼上你的 Channel secret" className="font-mono text-xs mt-1.5" />
+                    </div>
+                    <Button onClick={handleLineSetup} disabled={lineSaving || !lineToken || !lineSecret} className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white">
+                      {lineSaving ? '設定中...' : '完成設定'}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
-          )}
-        </section>
+          </div>
+        </Card>
       </div>
     </ContentPageLayout>
   )
