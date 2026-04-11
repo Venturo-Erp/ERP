@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
-import { ClockAlert, Plus, Check, X } from 'lucide-react'
+import { Clock, Plus, Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -151,7 +151,7 @@ export default function MissedClockPage() {
   return (
     <ContentPageLayout
       title="補打卡申請"
-      icon={ClockAlert}
+      icon={Clock}
       headerActions={
         <Button onClick={() => setShowDialog(true)} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
           <Plus size={16} className="mr-1" /> 申請補打卡

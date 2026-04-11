@@ -24,7 +24,7 @@ import { ClockInWidget } from './clock-in-widget'
 export const AVAILABLE_WIDGETS: Array<Omit<WidgetConfig, 'id'> & { id: string }> = [
   {
     id: 'clock-in',
-    name: '打卡',
+    name: '人資中心',
     icon: Clock,
     component: ClockInWidget,
     span: 1,
