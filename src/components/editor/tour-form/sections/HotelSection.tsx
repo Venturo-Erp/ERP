@@ -261,16 +261,6 @@ export function HotelSection({ data, updateField }: HotelSectionProps) {
         <h2 className="text-lg font-bold text-morandi-primary border-b-2 border-morandi-gold pb-2 flex-1">
           {COMP_EDITOR_LABELS.飯店資訊}
         </h2>
-        {hotels.length > 0 && (
-          <button
-            type="button"
-            onClick={addHotel}
-            className="flex items-center gap-1 px-3 py-1.5 bg-morandi-gold text-white rounded-lg hover:bg-morandi-gold-hover transition-colors text-sm"
-          >
-            <Plus size={16} />
-            {COMP_EDITOR_LABELS.ADD_9618}
-          </button>
-        )}
       </div>
 
       <div className="bg-morandi-container/20 p-4 rounded-lg space-y-3">

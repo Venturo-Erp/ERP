@@ -21,6 +21,7 @@ import type { PNR } from '@/types/pnr.types'
 import { COLUMN_LABELS, DEFAULT_COLUMNS } from './tour-print-constants'
 import { TOUR_PRINT_DIALOG_LABELS } from '../constants/labels'
 import { logger } from '@/lib/utils/logger'
+import { toast } from 'sonner'
 import {
   generateMembersPrintContent,
   generateFlightPrintContent,
@@ -127,14 +128,36 @@ interface TourPrintDialogProps {
 }
 
 export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDialogProps) {
+  // 依團類型決定要顯示哪些 tab
+  const tourServiceType = (tour as { tour_service_type?: string | null }).tour_service_type
+  const showFlightTab =
+    !tourServiceType ||
+    tourServiceType === 'tour_group' ||
+    tourServiceType === 'flight' ||
+    tourServiceType === 'flight_hotel'
+  const showHotelTab =
+    !tourServiceType ||
+    tourServiceType === 'tour_group' ||
+    tourServiceType === 'hotel' ||
+    tourServiceType === 'flight_hotel'
+
   const [activeTab, setActiveTab] = useState<'members' | 'flight' | 'hotel'>('members')
   const [columns, setColumns] = useState<ExportColumnsConfig>(DEFAULT_COLUMNS)
   // 只預選有資料的成員（有名字或護照資料的）
-  const [selectedMembers, setSelectedMembers] = useState<Set<string>>(
-    new Set(
-      members.filter(m => m.chinese_name || m.passport_name || m.passport_number).map(m => m.id)
+  const [selectedMembers, setSelectedMembers] = useState<Set<string>>(new Set())
+
+  // Bug 修正：當 members 變動或 dialog 開啟時，重新初始化選中清單
+  // （原本只在 mount 時用初始 members，若資料還沒載入就會是空的）
+  useEffect(() => {
+    if (!isOpen) return
+    setSelectedMembers(
+      new Set(
+        members
+          .filter(m => m.chinese_name || m.passport_name || m.passport_number)
+          .map(m => m.id)
+      )
     )
-  )
+  }, [isOpen, members])
   const [pnrData, setPnrData] = useState<PNR[]>([])
   const [loadingPnr, setLoadingPnr] = useState(false)
 
@@ -176,7 +199,14 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
         setPnrData(results)
         setLoadingPnr(false)
       }
-      fetchPnrs().catch(err => logger.error('[fetchPnrs]', err))
+      fetchPnrs().catch(err =>
+        logger.error('[fetchPnrs]', {
+          message: err?.message,
+          code: err?.code,
+          details: err?.details,
+          hint: err?.hint,
+        })
+      )
     }
   }, [isOpen, tour.id, members])
 
@@ -219,12 +249,20 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
   // 列印成員名單
   const handlePrintMembers = () => {
     const printMembers = members.filter(m => selectedMembers.has(m.id))
+    if (printMembers.length === 0) {
+      toast.error('沒有選取任何成員')
+      return
+    }
     openPrintWindow(generateMembersPrintContent({ tour, members: printMembers, columns }))
   }
 
   // 列印航班確認單
   const handlePrintFlightConfirmation = () => {
     const printMembers = members.filter(m => selectedMembers.has(m.id))
+    if (printMembers.length === 0) {
+      toast.error('沒有選取任何成員')
+      return
+    }
     openPrintWindow(
       generateFlightPrintContent({
         tour,
@@ -239,6 +277,10 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
   // 列印住宿確認單
   const handlePrintHotelConfirmation = () => {
     const printMembers = members.filter(m => selectedMembers.has(m.id))
+    if (printMembers.length === 0) {
+      toast.error('沒有選取任何成員')
+      return
+    }
     openPrintWindow(generateHotelPrintContent({ tour, members: printMembers }))
   }
 
@@ -250,8 +292,15 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
 
     if (selectedColumns.length === 0) return
 
+    // Bug 修正：跟列印一樣只匯出選中的成員，避免出現空 Excel
+    const exportMembers = members.filter(m => selectedMembers.has(m.id))
+    if (exportMembers.length === 0) {
+      toast.error('沒有選取任何成員，請先勾選要匯出的成員')
+      return
+    }
+
     const XLSX = await import('xlsx')
-    const data = members.map((member, idx) => {
+    const data = exportMembers.map((member, idx) => {
       const row: Record<string, string | number> = { 序: idx + 1 }
       selectedColumns.forEach(col => {
         const label = COLUMN_LABELS[col]
@@ -304,19 +353,28 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={v => setActiveTab(v as typeof activeTab)}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList
+            className="grid w-full"
+            style={{
+              gridTemplateColumns: `repeat(${1 + (showFlightTab ? 1 : 0) + (showHotelTab ? 1 : 0)}, minmax(0, 1fr))`,
+            }}
+          >
             <TabsTrigger value="members" className="gap-1">
               <Users size={14} />
               {TOUR_PRINT_DIALOG_LABELS.成員名單}
             </TabsTrigger>
-            <TabsTrigger value="flight" className="gap-1">
-              <Plane size={14} />
-              {TOUR_PRINT_DIALOG_LABELS.航班確認}
-            </TabsTrigger>
-            <TabsTrigger value="hotel" className="gap-1">
-              <Hotel size={14} />
-              {TOUR_PRINT_DIALOG_LABELS.住宿確認}
-            </TabsTrigger>
+            {showFlightTab && (
+              <TabsTrigger value="flight" className="gap-1">
+                <Plane size={14} />
+                {TOUR_PRINT_DIALOG_LABELS.航班確認}
+              </TabsTrigger>
+            )}
+            {showHotelTab && (
+              <TabsTrigger value="hotel" className="gap-1">
+                <Hotel size={14} />
+                {TOUR_PRINT_DIALOG_LABELS.住宿確認}
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* 成員名單 Tab */}

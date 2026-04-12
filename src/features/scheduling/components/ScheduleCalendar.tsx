@@ -194,7 +194,7 @@ export const ScheduleCalendar: React.FC<ScheduleCalendarProps> = ({
       <div className="inline-block min-w-full">
         {/* 表頭：日期 */}
         <div
-          className="grid sticky top-0 z-10 bg-morandi-container/60 border-b border-border"
+          className="grid sticky top-0 z-20 bg-card border-b border-border shadow-sm"
           style={{
             gridTemplateColumns: `200px repeat(${days.length}, minmax(${viewMode === 'week' ? '100px' : '40px'}, 1fr))`,
           }}

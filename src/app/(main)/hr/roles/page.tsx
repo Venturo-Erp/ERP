@@ -523,7 +523,7 @@ export default function RolesPage() {
                   {selectedRole ? (
                     <div>
                       {/* 表頭 */}
-                      <div className="flex items-center bg-morandi-bg/50 sticky top-0 border-b border-border">
+                      <div className="flex items-center bg-card sticky top-0 z-20 border-b border-border shadow-sm">
                         <div className="flex-1 p-4 font-semibold text-morandi-primary">
                           功能模組
                         </div>

@@ -432,7 +432,7 @@ export function PayrollManagementPage() {
             {/* 表格 */}
             <div className="max-h-[400px] overflow-auto border rounded-lg">
               <table className="w-full text-sm">
-                <thead className="bg-morandi-container/50 sticky top-0">
+                <thead className="bg-card sticky top-0 z-20 [&_tr]:bg-morandi-container/50">
                   <tr>
                     {recordColumns.map(col => (
                       <th

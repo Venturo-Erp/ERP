@@ -168,7 +168,7 @@ export function AttractionsList({
       data={sortedAttractions}
       loading={loading}
       onRowClick={onEdit as (row: unknown) => void}
-      initialPageSize={20}
+      initialPageSize={15}
       actions={(row: unknown, index: number) => {
         const attraction = row as Attraction
         const isFirst = index === 0

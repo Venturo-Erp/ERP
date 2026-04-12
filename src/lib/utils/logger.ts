@@ -94,6 +94,23 @@ function createLogEntry(
 /**
  * 輸出到 console
  */
+function normalizeErrorData(data: unknown): unknown {
+  if (!data || typeof data !== 'object') return data
+  // Error / PostgrestError：欄位常為 non-enumerable，devtools 會顯示成 {}
+  const d = data as Record<string, unknown>
+  if (d instanceof Error || 'message' in d || 'code' in d || 'details' in d || 'hint' in d) {
+    return {
+      message: d.message,
+      code: d.code,
+      details: d.details,
+      hint: d.hint,
+      name: (d as { name?: unknown }).name,
+      stack: (d as { stack?: unknown }).stack,
+    }
+  }
+  return data
+}
+
 function writeToConsole(entry: LogEntry): void {
   // 在生產環境的瀏覽器中，只輸出 error
   if (!isDevelopment && !isServer && entry.level !== 'error') {
@@ -109,7 +126,7 @@ function writeToConsole(entry: LogEntry): void {
       Object.keys(entry.context || {}).length > 0 ? ` ${JSON.stringify(entry.context)}` : ''
 
     if (entry.data) {
-      consoleMethod(prefix, entry.message, entry.data, contextStr)
+      consoleMethod(prefix, entry.message, normalizeErrorData(entry.data), contextStr)
     } else {
       consoleMethod(prefix, entry.message, contextStr)
     }

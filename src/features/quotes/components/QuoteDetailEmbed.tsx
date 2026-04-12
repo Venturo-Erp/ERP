@@ -310,6 +310,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
     '行李超重費用',
     '單人房差價',
   ])
+  const [insuranceText, setInsuranceText] = useState<string>('200萬旅責險+20萬意外醫療')
   const [showLocalPricingDialog, setShowLocalPricingDialog] = useState(false)
   const [localTiers, setLocalTiers] = useState<LocalTier[]>([])
 
@@ -585,7 +586,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
             <div className="border border-border bg-card rounded-xl shadow-sm overflow-hidden">
               <div ref={scrollRef} className="overflow-x-auto">
                 <table className="w-full min-w-[800px] border-collapse">
-                  <thead className="bg-morandi-gold-header border-b border-border sticky top-0 z-20">
+                  <thead className="bg-card border-b border-border sticky top-0 z-20 [&_tr]:bg-morandi-gold-header">
                     <tr>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-morandi-primary w-12 table-divider">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_2257}
@@ -660,6 +661,8 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
             localTiers={localTiers}
             excludedItems={excludedItems}
             onExcludedItemsChange={setExcludedItems}
+            insuranceText={insuranceText}
+            onInsuranceChange={setInsuranceText}
           />
         </div>
       </div>
@@ -689,6 +692,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
         itinerary={itinerary}
         departureDate={relatedTour?.departure_date || null}
         excludedItems={excludedItems}
+        insuranceText={insuranceText}
       />
 
       <LinkTourDialog

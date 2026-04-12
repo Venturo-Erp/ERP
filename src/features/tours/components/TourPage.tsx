@@ -187,16 +187,15 @@ export default function TourPage({ data, isPreview = false, viewMode = 'desktop'
       </div>
 
       {/* Leader Section */}
-      {data.showLeaderMeeting !== false &&
-        (data.leader?.name ||
-          data.leader?.domesticPhone ||
-          data.leader?.overseasPhone ||
-          data.meetingInfo?.time ||
-          data.meetingInfo?.location ||
-          (data.meetingPoints &&
-            data.meetingPoints.some(
-              (p: { time?: string; location?: string }) => p.time || p.location
-            ))) && (
+      {(data.leader?.name ||
+        data.leader?.domesticPhone ||
+        data.leader?.overseasPhone ||
+        data.meetingInfo?.time ||
+        data.meetingInfo?.location ||
+        (data.meetingPoints &&
+          data.meetingPoints.some(
+            (p: { time?: string; location?: string }) => p.time || p.location
+          ))) && (
           <>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="border-t border-border"></div>

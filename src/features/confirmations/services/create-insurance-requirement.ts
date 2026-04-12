@@ -49,6 +49,11 @@ export async function createInsuranceRequirement(
       workspace_id: workspaceId,
       tour_id: tourId,
       code,
+      handler_type: 'supplier',
+      category: 'other',
+      title: '旅遊責任險',
+      service_date: startDate,
+      quantity: memberCount,
       request_type: 'other',
       supplier_name: '保險公司',
       items: [
@@ -71,7 +76,12 @@ export async function createInsuranceRequirement(
     .single()
 
   if (error) {
-    logger.error('[保險] 建立失敗:', error)
+    logger.error('[保險] 建立失敗:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    })
     return null
   }
 

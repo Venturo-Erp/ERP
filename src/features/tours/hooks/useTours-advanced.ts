@@ -261,7 +261,6 @@ export function useTourDetails(tour_id: string) {
       待結團: ['已結團'],
       已結團: [],
       取消: ['開團'],
-      特殊團: [],
     }
 
     const { data: current, error: fetchError } = await supabase

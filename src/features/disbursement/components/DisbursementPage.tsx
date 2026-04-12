@@ -297,7 +297,7 @@ export function DisbursementPage() {
         onAdd={handleAdd}
         addLabel={DISBURSEMENT_LABELS.新增出納單}
         onRowClick={handleRowClick}
-        initialPageSize={20}
+        initialPageSize={15}
         headerChildren={
           <div className="flex items-center gap-6 text-sm">
             <div className="text-right">

@@ -203,7 +203,6 @@ export const TourOverview = React.memo(function TourOverview({
       進行中: 'bg-morandi-green text-white',
       待結案: 'bg-morandi-gold text-white',
       結案: 'bg-morandi-container text-morandi-secondary',
-      特殊團: 'bg-morandi-red text-white',
     }
     return badges[status || ''] || 'bg-morandi-container text-morandi-secondary'
   }

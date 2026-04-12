@@ -20,6 +20,7 @@ import {
   ReadCvLogo,
   Robot,
   TipJar,
+  User,
   UserCircleGear,
   UserSquare,
   UsersFour,
@@ -344,23 +345,11 @@ const menuItems: MenuItem[] = [
     requiredPermission: 'hr',
     children: [
       // 員工自助
-      { href: '/hr/my-attendance', label: '我的出勤', icon: Calendar },
-      { href: '/hr/my-leave', label: '我的請假', icon: Calendar },
-      { href: '/hr/my-payslip', label: '我的薪資條', icon: Wallet },
-      { href: '/hr/overtime', label: '加班申請', icon: Clock },
-      { href: '/hr/missed-clock', label: '補打卡', icon: Clock },
-      { href: '/hr/announcements', label: '公司公告', icon: Megaphone },
-      { href: '/hr/training', label: '數位培訓', icon: BookOpen },
-      // 管理員功能
-      { href: '/hr/roles', label: '職務管理', icon: UserCircleGear, requiredPermission: 'hr' },
+      { href: '/hr/my-attendance', label: '我的人資', icon: User },
+      // 管理員功能（每個頁面內部用 tabs 切換相關子功能）
       { href: '/hr', label: '員工管理', icon: Users, requiredPermission: 'hr' },
-      { href: '/hr/attendance', label: '出勤管理', icon: Clock, requiredPermission: 'hr' },
-      { href: '/hr/leave', label: '請假管理', icon: Calendar, requiredPermission: 'hr' },
-      { href: '/hr/overtime', label: '加班審核', icon: Clock, requiredPermission: 'hr' },
-      { href: '/hr/missed-clock', label: '補打卡審核', icon: Clock, requiredPermission: 'hr' },
+      { href: '/hr/attendance', label: '出勤與請假', icon: Clock, requiredPermission: 'hr' },
       { href: '/hr/payroll', label: '薪資管理', icon: Wallet, requiredPermission: 'hr' },
-      { href: '/hr/reports', label: '出勤月報', icon: BarChart3, requiredPermission: 'hr' },
-      { href: '/hr/deductions', label: '扣款與津貼', icon: HandCoins, requiredPermission: 'hr' },
       { href: '/hr/settings', label: '人資設定', icon: Settings, requiredPermission: 'hr' },
     ],
   },
@@ -618,7 +607,10 @@ export function Sidebar() {
 
     if (hasChildren) {
       return (
-        <li key={item.href}>
+        <li
+          key={`${item.href}-${item.label}`}
+          data-tutorial={`nav-${item.href.replace(/^\//, '').split('/')[0]}`}
+        >
           {/* 父項目 */}
           <div
             className={cn(
@@ -631,7 +623,10 @@ export function Sidebar() {
             <item.icon
               size={22}
               weight="duotone"
-              className="absolute left-4 top-1/2 -translate-y-1/2"
+              className={cn(
+                'absolute top-1/2 -translate-y-1/2',
+                showExpanded ? 'left-4' : 'left-1/2 -translate-x-1/2'
+              )}
             />
             {showExpanded && (
               <>
@@ -659,7 +654,10 @@ export function Sidebar() {
 
     // 沒有子項目的菜單項
     return (
-      <li key={item.href}>
+      <li
+        key={`${item.href}-${item.label}`}
+        data-tutorial={`nav-${item.href.replace(/^\//, '').split('/')[0]}`}
+      >
         <Link
           href={item.href}
           prefetch={false}
@@ -674,7 +672,12 @@ export function Sidebar() {
           <item.icon
             size={isChild ? 16 : 22}
             weight="duotone"
-            className={cn('absolute top-1/2 -translate-y-1/2', isChild ? 'left-8' : 'left-4')}
+            className={cn(
+              'absolute top-1/2 -translate-y-1/2',
+              showExpanded
+                ? isChild ? 'left-8' : 'left-4'
+                : 'left-1/2 -translate-x-1/2'
+            )}
           />
           {showExpanded && (
             <span className={cn('block text-left leading-11', isChild ? 'ml-14' : 'ml-12')}>
@@ -699,7 +702,10 @@ export function Sidebar() {
       {/* Logo區域 */}
       <div className="shrink-0 border-b border-border mx-3">
         <div className="h-18 flex items-center relative">
-          <div className="absolute left-5 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-lg bg-morandi-gold flex items-center justify-center shadow-sm flex-shrink-0 opacity-90">
+          <div className={cn(
+            'absolute top-1/2 -translate-y-1/2 w-10 h-10 rounded-lg bg-morandi-gold flex items-center justify-center shadow-sm flex-shrink-0 opacity-90',
+            showExpanded ? 'left-3' : 'left-1/2 -translate-x-1/2'
+          )}>
             <span className="text-white font-semibold text-lg">V</span>
           </div>
           {showExpanded && (

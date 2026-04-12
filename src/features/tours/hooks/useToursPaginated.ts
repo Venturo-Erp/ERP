@@ -27,7 +27,7 @@ import { TOUR_SERVICE_LABELS, TOURS_ADVANCED_LABELS } from '../constants/labels'
 export interface UseToursPaginatedParams {
   page: number
   pageSize: number
-  status?: string // 'all' | 'planning' | 'confirmed' | 'in_progress' | 'completed' | 'archived' | TOUR_SERVICE_LABELS.STATUS_SPECIAL
+  status?: string // 'all' | 'planning' | 'confirmed' | 'in_progress' | 'completed' | 'archived'
   search?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
@@ -98,24 +98,19 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
         if (status === 'archived') {
           // Show archived tours
           query = query.eq('archived', true)
-        } else if (status === TOUR_SERVICE_LABELS.STATUS_SPECIAL) {
-          // Show special tours (not archived)
-          query = query.eq('status', TOUR_SERVICE_LABELS.STATUS_SPECIAL).neq('archived', true)
         } else {
-          // Show specific status (not archived, not special, exclude proposal/template)
+          // Show specific status (exclude archived, utility tours, proposal/template)
           query = query
             .eq('status', status)
             .neq('archived', true)
-            .neq('status', TOUR_SERVICE_LABELS.STATUS_SPECIAL)
             .not('code', 'like', 'VISA%')
             .not('code', 'like', 'ESIM%')
             .or('tour_type.eq.official,tour_type.is.null')
         }
       } else {
-        // 'all' tab: exclude archived, special tours, utility tours, and proposal/template
+        // 'all' tab: exclude archived, utility tours, and proposal/template
         query = query
           .neq('archived', true)
-          .neq('status', TOUR_SERVICE_LABELS.STATUS_SPECIAL)
           .not('code', 'like', 'VISA%')
           .not('code', 'like', 'ESIM%')
           .or('tour_type.eq.official,tour_type.is.null')
@@ -374,7 +369,6 @@ export function useTourDetailsPaginated(tourId: string | null) {
       待結團: ['已結團'],
       已結團: [],
       取消: ['開團'],
-      特殊團: [],
     }
 
     const { data: current, error: fetchError } = await supabase

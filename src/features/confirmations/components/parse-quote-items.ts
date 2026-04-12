@@ -78,12 +78,38 @@ export function parseQuoteItems(
 }
 
 function parseTransportItems(quoteCategories: CostCategory[], items: QuoteItem[]): void {
-  // transport category（機票等）
+  // transport category（機票等）—— 成人/兒童/嬰兒聚合成一筆「機票」
   const transportCategory = quoteCategories.find(c => c.id === 'transport')
   if (transportCategory?.items) {
+    const ticketPaxTypes = ['成人', '兒童', '嬰兒', '小孩']
+    const ticketItems = transportCategory.items.filter(
+      i => i.name && ticketPaxTypes.includes(i.name) && (i.unit_price || 0) > 0
+    )
+
+    // 有任何一個機票價格就建立一筆「機票」需求
+    if (ticketItems.length > 0) {
+      const totalQty = ticketItems.reduce((sum, i) => sum + (i.quantity || 1), 0)
+      items.push({
+        category: 'transport',
+        supplierName: '機票',
+        title: '機票',
+        serviceDate: null,
+        quantity: totalQty,
+        key: `transport-機票`,
+        resourceType: ticketItems[0].resource_type,
+        resourceId: ticketItems[0].resource_id,
+        quotedPrice: ticketItems.reduce(
+          (sum, i) => sum + (i.unit_price || 0) * (i.quantity || 1),
+          0
+        ),
+        itinerary_item_id: ticketItems[0].itinerary_item_id || null,
+      })
+    }
+
+    // 其他非機票的 transport 項目照常
     for (const item of transportCategory.items) {
       if (!item.name) continue
-      if (['成人', '兒童', '嬰兒'].includes(item.name)) continue
+      if (ticketPaxTypes.includes(item.name)) continue
 
       const key = `transport-${item.name}-${item.name}-`
       items.push({

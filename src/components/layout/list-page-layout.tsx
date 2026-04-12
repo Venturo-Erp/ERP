@@ -197,7 +197,7 @@ export function ListPageLayout<T extends Record<string, any>>({
   }
 
   return (
-    <div className={className || 'h-full flex flex-col'}>
+    <div className={className || 'flex-1 min-h-0 flex flex-col'}>
       {/* Header 區域 */}
       <ResponsiveHeader
         title={title}

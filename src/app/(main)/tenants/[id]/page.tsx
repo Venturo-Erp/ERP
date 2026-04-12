@@ -71,7 +71,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
     const fetchData = async () => {
       setLoading(true)
 
-      // 取得租戶資料
+      // 取得租戶資料（API 會回傳員工人數與管理員資訊，透過 service_client 繞過 RLS）
       const wsRes = await fetch(`/api/workspaces/${id}`)
       if (!wsRes.ok) {
         toast({ title: '找不到租戶', variant: 'destructive' })
@@ -81,6 +81,8 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       const ws = await wsRes.json()
       setWorkspace(ws)
       setPremiumEnabled(ws.premium_enabled ?? false)
+      setEmployeeCount(ws.employee_count ?? 0)
+      setAdminName(ws.admin_name ?? null)
 
       // 取得功能權限
       const featuresRes = await fetch(`/api/permissions/features?workspace_id=${id}`)
@@ -105,24 +107,6 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         }
       } catch {
         // 忽略
-      }
-
-      // 取得員工人數
-      const { count } = await supabase
-        .from('employees')
-        .select('*', { count: 'exact', head: true })
-        .eq('workspace_id', id)
-      setEmployeeCount(count ?? 0)
-
-      // 取得管理員
-      const { data: adminData } = await supabase
-        .from('employees')
-        .select('chinese_name, display_name')
-        .eq('workspace_id', id)
-        .order('created_at')
-        .limit(1)
-      if (adminData?.[0]) {
-        setAdminName(adminData[0].chinese_name || adminData[0].display_name || '未知')
       }
 
       setLoading(false)

@@ -1,14 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useWorkspaceFeatures } from '@/lib/permissions'
+import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Save, AlertCircle } from 'lucide-react'
+import { logger } from '@/lib/utils/logger'
 
 // ============================================
 // 團控功能設定區塊
@@ -109,27 +111,51 @@ export function TourControllerSection({ workspaceId }: { workspaceId: string }) 
 // 旅行屬性功能設定區塊
 // ============================================
 export function TourAttributesSection({ workspaceId }: { workspaceId: string }) {
-  const { isFeatureEnabled } = useWorkspaceFeatures()
-  const hasTourAttributes = isFeatureEnabled('tour_attributes')
-  const [enabled, setEnabled] = useState(hasTourAttributes)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([
+    'tour_group',
     'flight',
     'flight_hotel',
     'hotel',
     'car_service',
-    'tour_group',
     'visa',
+    'esim',
   ])
   const [saving, setSaving] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  // 載入目前設定
+  useEffect(() => {
+    if (!workspaceId) return
+    const load = async () => {
+      try {
+        const { data } = await supabase
+          .from('workspaces')
+          .select('*')
+          .eq('id', workspaceId)
+          .single()
+        const cats = (data as { enabled_tour_categories?: string[] } | null)
+          ?.enabled_tour_categories
+        if (Array.isArray(cats) && cats.length > 0) {
+          setSelectedCategories(cats)
+        }
+      } catch (err) {
+        logger.error('載入團類型設定失敗:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+    void load()
+  }, [workspaceId])
 
   // 所有可用的團類型
   const tourCategories = [
-    { id: 'flight', label: '✈️ 機票', description: '純機票訂位與開票' },
-    { id: 'flight_hotel', label: '🏨 機加酒', description: '機票加住宿套裝' },
-    { id: 'hotel', label: '🛏️ 訂房', description: '純住宿預訂' },
-    { id: 'car_service', label: '🚗 派車', description: '交通接送服務' },
-    { id: 'tour_group', label: '🧳 旅遊團', description: '完整旅遊行程' },
-    { id: 'visa', label: '🛂 簽證', description: '簽證申請服務' },
+    { id: 'tour_group', label: '旅遊團', description: '完整旅遊行程' },
+    { id: 'flight', label: '機票', description: '純機票訂位與開票' },
+    { id: 'flight_hotel', label: '機加酒', description: '機票加住宿套裝' },
+    { id: 'hotel', label: '訂房', description: '純住宿預訂' },
+    { id: 'car_service', label: '派車', description: '交通接送服務' },
+    { id: 'visa', label: '簽證', description: '簽證申請服務' },
+    { id: 'esim', label: '網卡', description: 'eSIM 訂單管理' },
   ]
 
   // 切換單一類別
@@ -149,27 +175,34 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
     setSelectedCategories([])
   }
 
-  // 儲存旅行屬性功能設定
+  // 儲存團類型設定到 DB
   const handleSave = async () => {
+    if (selectedCategories.length === 0) {
+      toast.error('至少要選一個團類型')
+      return
+    }
     setSaving(true)
     try {
-      // TODO: 儲存到 workspace_feature_settings 表
-      // await saveTourAttributesSettings(workspaceId, enabled, selectedCategories)
-
-      if (enabled) {
-        toast.success(`已啟用 ${selectedCategories.length} 種團類型`)
-      } else {
-        toast.success('旅行屬性功能已停用')
-      }
+      const { error } = await (
+        supabase.from('workspaces') as unknown as {
+          update: (data: Record<string, unknown>) => {
+            eq: (col: string, val: string) => Promise<{ error: unknown }>
+          }
+        }
+      )
+        .update({ enabled_tour_categories: selectedCategories })
+        .eq('id', workspaceId)
+      if (error) throw error
+      toast.success(`已儲存，可用 ${selectedCategories.length} 種團類型`)
     } catch (error) {
-      console.error('儲存旅行屬性設定失敗:', error)
+      logger.error('儲存團類型設定失敗:', error)
       toast.error('儲存失敗')
     } finally {
       setSaving(false)
     }
   }
 
-  if (!hasTourAttributes) return null
+  if (loading) return null
 
   return (
     <Card className="p-6 space-y-4">
@@ -181,18 +214,8 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
       </div>
 
       <div className="space-y-4">
-        {/* 啟用開關 */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-0.5">
-            <Label htmlFor="tour-attributes-enabled">啟用旅行屬性功能</Label>
-            <p className="text-sm text-morandi-secondary">開啟後，開團時會顯示團類型選擇欄位</p>
-          </div>
-          <Switch id="tour-attributes-enabled" checked={enabled} onCheckedChange={setEnabled} />
-        </div>
-
-        {/* 團類型選擇（僅啟用時顯示） */}
-        {enabled && (
-          <div className="space-y-3">
+        {/* 團類型選擇 */}
+        <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>可選團類型</Label>
               <div className="flex gap-2">
@@ -245,17 +268,16 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
               ))}
             </div>
 
-            {/* 注意事項 */}
-            {enabled && selectedCategories.length > 0 && (
-              <div className="flex items-start gap-2 p-3 bg-morandi-gold/10 border border-morandi-gold/20 rounded-md">
-                <AlertCircle className="h-4 w-4 text-morandi-gold mt-0.5" />
-                <p className="text-sm text-morandi-secondary">
-                  開團時，必須從已選擇的 {selectedCategories.length} 種團類型中選擇一種
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+          {/* 注意事項 */}
+          {selectedCategories.length > 0 && (
+            <div className="flex items-start gap-2 p-3 bg-morandi-gold/10 border border-morandi-gold/20 rounded-md">
+              <AlertCircle className="h-4 w-4 text-morandi-gold mt-0.5" />
+              <p className="text-sm text-morandi-secondary">
+                開團時，可從已選擇的 {selectedCategories.length} 種團類型中選擇一種
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* 儲存按鈕 */}

@@ -694,7 +694,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
 
         <div className="max-h-48 overflow-y-auto border border-border rounded-lg">
           <table className="w-full text-xs">
-            <thead className="bg-morandi-background/50 sticky top-0">
+            <thead className="bg-card sticky top-0 z-20 [&_tr]:bg-morandi-background/50">
               <tr>
                 <th className="w-8 px-2 py-1.5 text-center">
                   <input

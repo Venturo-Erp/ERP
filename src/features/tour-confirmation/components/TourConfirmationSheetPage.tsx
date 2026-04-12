@@ -48,6 +48,27 @@ const CATEGORIES: { key: ConfirmationItemCategory; label: string }[] = [
   { key: 'other', label: COST_SUMMARY_LABELS.其他 },
 ]
 
+/** 依團類型過濾要顯示的類別（與 RequirementsList 一致） */
+function getCategoriesForTourType(
+  tourServiceType?: string | null
+): typeof CATEGORIES {
+  switch (tourServiceType) {
+    case 'flight':
+    case 'car_service':
+      return CATEGORIES.filter(c => c.key === 'transport')
+    case 'flight_hotel':
+      return CATEGORIES.filter(c => c.key === 'transport' || c.key === 'accommodation')
+    case 'hotel':
+      return CATEGORIES.filter(c => c.key === 'accommodation')
+    case 'visa':
+    case 'esim':
+      return CATEGORIES.filter(c => c.key === 'other')
+    case 'tour_group':
+    default:
+      return CATEGORIES
+  }
+}
+
 interface TourConfirmationSheetPageProps {
   tour: Tour
 }
@@ -395,7 +416,9 @@ export function TourConfirmationSheetPage({ tour }: TourConfirmationSheetPagePro
               </tr>
             </thead>
             <tbody>
-              {CATEGORIES.map(cat => {
+              {getCategoriesForTourType(
+                (tour as { tour_service_type?: string | null }).tour_service_type
+              ).map(cat => {
                 const categoryItems = groupedItems[cat.key]
 
                 return (

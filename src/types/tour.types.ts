@@ -561,6 +561,7 @@ export type TourServiceType =
   | 'car_service'
   | 'tour_group'
   | 'visa'
+  | 'esim'
 
 export type TourCategory =
   | 'domestic' // 國內

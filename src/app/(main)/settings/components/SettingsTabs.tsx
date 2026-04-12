@@ -1,15 +1,27 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
+import { useAuthStore } from '@/stores/auth-store'
 
-const tabs = [
+interface TabConfig {
+  value: string
+  label: string
+  href: string
+  adminOnly?: boolean
+}
+
+const ALL_TABS: TabConfig[] = [
   { value: 'personal', label: '個人設定', href: '/settings' },
-  { value: 'company', label: '公司設定', href: '/settings/company' },
+  { value: 'company', label: '公司設定', href: '/settings/company', adminOnly: true },
 ]
 
 export function SettingsTabs() {
   const pathname = usePathname()
   const router = useRouter()
+  const { isAdmin } = useAuthStore()
+
+  // 依權限過濾 — 非管理員看不到公司設定
+  const tabs = ALL_TABS.filter(tab => !tab.adminOnly || isAdmin)
 
   const getActiveTab = () => {
     if (pathname === '/settings/company') return 'company'
@@ -25,6 +37,7 @@ export function SettingsTabs() {
         return (
           <button
             key={tab.value}
+            data-tutorial={`tab-${tab.value}`}
             onClick={() => router.push(tab.href)}
             className={`px-4 py-1.5 text-sm font-medium transition-colors relative ${
               isActive

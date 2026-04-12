@@ -142,12 +142,17 @@ export async function fetchTourPnrs(tourId: string): Promise<unknown[]> {
   const { data, error } = await supabase
     .from('pnrs')
     .select(
-      'id, tour_id, record_locator, airline_code, status, pax_count, segments, passengers, workspace_id, created_at, updated_at'
+      'id, tour_id, record_locator, status, segments, passenger_names, workspace_id, created_at, updated_at'
     )
     .eq('tour_id', tourId)
     .limit(500)
   if (error) {
-    logger.error('查詢團 PNR 失敗:', error)
+    logger.error('查詢團 PNR 失敗:', {
+      message: error.message,
+      code: error.code,
+      details: error.details,
+      hint: error.hint,
+    })
     throw error
   }
   return data ?? []
@@ -161,7 +166,7 @@ export async function fetchPnrsByLocators(locators: string[]): Promise<unknown[]
   const { data, error } = await supabase
     .from('pnrs')
     .select(
-      'id, tour_id, record_locator, airline_code, status, pax_count, segments, passengers, workspace_id, created_at, updated_at'
+      'id, tour_id, record_locator, status, segments, passenger_names, workspace_id, created_at, updated_at'
     )
     .in('record_locator', locators)
     .limit(500)

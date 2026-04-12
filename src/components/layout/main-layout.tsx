@@ -7,6 +7,7 @@ import { MobileHeader } from './mobile-header'
 import { MobileSidebar } from './mobile-sidebar'
 import { cn } from '@/lib/utils'
 import { NotificationCapsule } from './notification-capsule'
+import { TutorialProvider } from '@/components/tutorial/tutorial-provider'
 import { usePathname } from 'next/navigation'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import {
@@ -130,11 +131,14 @@ export function MainLayout({ children }: MainLayoutProps) {
           transitionDuration: `${LAYOUT_TRANSITION_DURATION}ms`,
         }}
       >
-        <div className="h-full overflow-auto p-4 lg:p-6">{children}</div>
+        <div className="h-full flex flex-col p-4 lg:p-6">{children}</div>
       </main>
 
       {/* 浮動通知膠囊 — 有未讀通知時才顯示 */}
       <NotificationCapsule />
+
+      {/* 新手引導教學遮罩 */}
+      <TutorialProvider />
     </div>
   )
 }

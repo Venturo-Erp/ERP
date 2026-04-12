@@ -15,7 +15,6 @@ export const TOUR_FILTERS = {
   tab_proposal: '開團',
   tab_active: '待出發',
   tab_closed: '已結團',
-  tab_special: '特殊團',
   tab_archived: '封存',
   tab_proposals: '提案',
   tab_templates: '模板',
@@ -172,7 +171,6 @@ export const TOUR_SETTINGS = {
   controller_optional: '(選填)',
   controller_placeholder: '選擇團控人員...',
   controller_empty: '找不到團控人員',
-  special_tour: '特殊團',
 } as const
 
 // ============================================================

@@ -57,18 +57,12 @@ export function useVisaCreate(
 
       let selectedTour
 
-      // 如果沒選團號，使用預設簽證團
+      // 如果沒選團號，自動建立 ad-hoc 簽證團（出發日=今天）
       if (!contact_info.tour_id) {
-        const currentYear = new Date().getFullYear()
-        const defaultTourCode = `VISA-${currentYear}`
-        const existingDefaultTour = tours.find(t => t.code === defaultTourCode)
-
-        if (existingDefaultTour) {
-          selectedTour = existingDefaultTour
-        } else {
-          toast.error(`請先在簽證頁面設定 ${currentYear} 年預設簽證團，或在表單中選擇團號`)
-          return
-        }
+        const { tourService } = await import('@/features/tours/services/tour.service')
+        const firstApplicantName = applicants.find(a => a.name)?.name
+        selectedTour = await tourService.createAdHocTour('visa', firstApplicantName)
+        toast.success(`已建立簽證團：${selectedTour.code}`)
       } else {
         selectedTour = tours.find(t => t.id === contact_info.tour_id)
         if (!selectedTour) return

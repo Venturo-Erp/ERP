@@ -76,7 +76,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
   const [dailyItinerary, setDailyItinerary] = useState<DailyItineraryItem[]>([])
   const [hotels, setHotels] = useState<HotelInfo[]>([])
   const ws = useWorkspaceSettings()
-  const logoUrl = ws.logo_url || '/corner-logo.png'
+  const logoUrl = ws.logo_url || ''
   const companyName = ws.legal_name || ws.name || ''
   const companySubtitle = ws.subtitle || ''
 
@@ -253,7 +253,13 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
           >
             {/* Logo */}
             <div>
-              <img src={logoUrl} alt="公司 Logo" style={getLogoStyle('print')} />
+              {logoUrl ? (
+                <img src={logoUrl} alt="公司 Logo" style={getLogoStyle('print')} />
+              ) : (
+                <div className="text-xl font-bold" style={{ color: COLORS.primary }}>
+                  {companyName}
+                </div>
+              )}
             </div>
 
             {/* 標題 */}

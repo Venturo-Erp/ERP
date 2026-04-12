@@ -15,11 +15,38 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { ImageIcon } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import type { ActiveOrderConflict } from '@/lib/utils/sync-passport-image'
 import { batchUpdateConflictMembers, PASSPORT_FIELD_LABELS } from '@/lib/utils/sync-passport-image'
 import { PASSPORT_CONFLICT_LABELS as L } from '../constants/labels'
+
+// 簡單圖片顯示 + 載入失敗 fallback
+function PassportImage({ url, label }: { url?: string | null; label: string }) {
+  const [error, setError] = useState(false)
+  return (
+    <div className="space-y-1.5">
+      <div className="text-[11px] text-morandi-muted font-medium">{label}</div>
+      <div className="relative aspect-[3/2] w-full rounded-md overflow-hidden border border-border/60 bg-morandi-container/30 flex items-center justify-center">
+        {url && !error ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={url}
+            alt={label}
+            className="w-full h-full object-contain"
+            onError={() => setError(true)}
+          />
+        ) : (
+          <div className="flex flex-col items-center gap-1 text-morandi-muted text-[11px]">
+            <ImageIcon size={20} />
+            <span>{error ? '無法載入' : '無圖片'}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 interface PassportDataForUpdate {
   passport_number?: string | null
@@ -81,7 +108,7 @@ export function PassportConflictDialog({
 
         <div className="flex-1 overflow-y-auto space-y-3 py-2">
           {conflicts.map(conflict => (
-            <div key={conflict.memberId} className="border rounded-lg p-3 space-y-2 text-sm">
+            <div key={conflict.memberId} className="border rounded-lg p-3 space-y-3 text-sm">
               <div className="flex gap-4 text-muted-foreground">
                 <span>
                   {L.order}: {conflict.orderCode}
@@ -93,6 +120,19 @@ export function PassportConflictDialog({
                   {L.member}: {conflict.memberName}
                 </span>
               </div>
+
+              {/* 舊/新護照圖片對照 */}
+              <div className="grid grid-cols-2 gap-3">
+                <PassportImage
+                  url={conflict.oldPassportImageUrl}
+                  label={`舊護照（目前存的）`}
+                />
+                <PassportImage
+                  url={passportData.passport_image_url}
+                  label={`新護照（剛上傳）`}
+                />
+              </div>
+
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b">

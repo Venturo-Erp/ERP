@@ -171,6 +171,9 @@ export interface Todo {
   tour_request_id?: string // 連結需求單
   tour_id?: string // 連結團
 
+  // 看板欄位（Trello 風格）
+  column_id?: string | null // 所屬看板欄位 ID
+
   // 人員關係（共享機制）
   creator: string // 建立者
   assignee?: string // 被指派者（可選）

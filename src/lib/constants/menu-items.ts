@@ -66,13 +66,6 @@ export const MENU_ITEMS: MenuItem[] = [
     canHide: true,
   },
   {
-    id: 'itinerary',
-    label: '行程',
-    description: '行程規劃',
-    category: 'business',
-    canHide: true,
-  },
-  {
     id: 'customers',
     label: '客戶',
     description: '客戶資料管理',
@@ -228,7 +221,6 @@ export const MENU_HREF_TO_ID_MAP: Record<string, string> = {
   '/tours': 'tours',
   '/quotes': 'quotes',
   '/orders': 'orders',
-  '/itinerary': 'itinerary',
   '/customers': 'customers',
   '/todos': 'todos',
   '/calendar': 'calendar',

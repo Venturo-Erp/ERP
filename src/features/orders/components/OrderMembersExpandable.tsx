@@ -1236,6 +1236,29 @@ export function OrderMembersExpandable({
                   {sortedMembers.map((member, index) => (
                     <MemberRow
                       key={member.id}
+                      tourInfo={
+                        effectiveTour
+                          ? {
+                              id: effectiveTour.id,
+                              code: effectiveTour.code,
+                              name: effectiveTour.name,
+                            }
+                          : undefined
+                      }
+                      getOrderInfo={memberId => {
+                        const m = membersData.members.find(x => x.id === memberId)
+                        const orderIdForMember = (m as { order_id?: string } | undefined)?.order_id
+                        const targetOrderId = orderIdForMember || effectiveOrderId
+                        if (!targetOrderId) return undefined
+                        const o = membersData.tourOrders.find(x => x.id === targetOrderId)
+                        if (!o) return undefined
+                        return {
+                          id: o.id,
+                          order_number: (o as { order_number?: string }).order_number || '',
+                          contact_person: (o as { contact_person?: string | null }).contact_person,
+                          contact_phone: (o as { contact_phone?: string | null }).contact_phone,
+                        }
+                      }}
                       member={member}
                       index={index}
                       isEditMode={isAllEditMode}

@@ -85,18 +85,10 @@ export function AddVisaDialog({
     if (open && !hasInitialized) {
       const init = async () => {
         try {
-          const { tourService } = await import('@/features/tours/services/tour.service')
           const { invalidateTours } = await import('@/data')
-
-          // 1. 確保 SWR 快取已載入
+          // 確保 SWR 快取已載入
           await invalidateTours()
-
-          // 2. 取得或建立簽證專用團
-          const visaTour = await tourService.getOrCreateVisaTour()
-          if (visaTour && !contact_info.tour_id) {
-            setContactInfo(prev => ({ ...prev, tour_id: visaTour.id }))
-            setHasInitialized(true)
-          }
+          setHasInitialized(true)
         } catch (error: unknown) {
           logger.error('Failed to initialize visa dialog:', error)
         }
@@ -108,7 +100,7 @@ export function AddVisaDialog({
     if (!open) {
       setHasInitialized(false)
     }
-  }, [open, hasInitialized, contact_info.tour_id, setContactInfo])
+  }, [open, hasInitialized])
 
   // ✅ 當團號改變時，載入該團的訂單
   React.useEffect(() => {

@@ -250,84 +250,51 @@ class TourService extends BaseService<Tour & BaseEntity> {
   }
 
   /**
-   * 🔧 TOUR-04: 抽取共用邏輯 - 取得或建立特殊團
-   * @param type - 特殊團類型配置
-   * @param year - 年份
+   * 建立 ad-hoc 旅遊團 — 用於散客情境（如散客辦簽證、買網卡）
+   * 出發日 = 今天，名稱依類型 + 客戶名自動產生
+   * @param serviceType 團服務類型（visa / esim / flight 等）
+   * @param customerName 客戶名稱（會放入團名稱）
    */
-  private async getOrCreateSpecialTour(
-    type: { prefix: string; name: string; location: string },
-    year?: number
+  async createAdHocTour(
+    serviceType: 'visa' | 'esim' | 'flight' | 'flight_hotel' | 'hotel' | 'car_service',
+    customerName?: string
   ): Promise<Tour> {
-    const targetYear = year || new Date().getFullYear()
-    const tourCode = `${type.prefix}${targetYear}001`
-
-    // 🔧 直接查詢 Supabase（包含已刪除的資料）
-    try {
-      if (typeof window !== 'undefined') {
-        const { supabase } = await import('@/lib/supabase/client')
-        const { data, error } = await supabase
-          .from('tours')
-          .select(
-            'id, code, name, location, departure_date, return_date, status, current_participants, max_participants, workspace_id, archived, contract_archived_date, tour_type, outbound_flight, return_flight, is_deleted, confirmed_requirements, locked_itinerary_id, itinerary_id, quote_id, locked_quote_id, tour_leader_id, controller_id, country_id, price, selling_price_per_person, total_cost, total_revenue, profit, contract_status, description, days_count, created_at, created_by, updated_at, updated_by'
-          )
-          .eq('code', tourCode)
-          .maybeSingle()
-
-        if (!error && data) {
-          // 如果找到已刪除的特殊團，復原它
-          const typedData = data as Tour & { _deleted?: boolean }
-          if (typedData._deleted) {
-            const { data: updated, error: updateError } = await supabase
-              .from('tours')
-              .update({
-                _deleted: false,
-                _synced_at: null,
-                updated_at: this.now(),
-              })
-              .eq('id', typedData.id)
-              .select()
-              .single()
-
-            if (!updateError && updated) {
-              // SWR 快取失效，自動重新載入
-              await invalidateTours()
-              return updated as Tour
-            }
-          } else {
-            // 找到且未被刪除，直接返回
-            return data as Tour
-          }
-        }
-      }
-    } catch (error) {
-      // Supabase 查詢失敗，繼續嘗試本地 Store
-      logger.warn(
-        `[TourService] getOrCreate${type.prefix}Tour Supabase 查詢失敗，使用備用邏輯:`,
-        error
-      )
-    }
-
-    // 檢查本地 Store 是否有（未刪除的）
-    const allTours = await this.list()
-    const existingTour = allTours.data.find(t => t.code === tourCode)
-    if (existingTour) {
-      return existingTour
-    }
-
-    // 不存在則建立新的特殊團
     const today = new Date()
-    const yearStart = new Date(targetYear, 0, 1)
-    const departureDate = today > yearStart ? today : yearStart
+    const dateStr = formatDate(today)
+    const yymmdd = dateStr.replace(/-/g, '').slice(2)
 
-    const specialTour: Partial<Tour> = {
-      code: tourCode,
-      name: TOUR_SERVICE_LABELS.YEAR_TOUR_NAME(targetYear, type.name),
-      departure_date: formatDate(departureDate),
-      return_date: `${targetYear}-12-31`,
-      status: TOUR_SERVICE_LABELS.STATUS_SPECIAL,
-      location: type.location,
-      price: 0,
-      max_participants: 9999,
+    // 產生唯一團號 — 例如 V260412A001
+    const prefixMap: Record<string, string> = {
+      visa: 'V',
+      esim: 'E',
+      flight: 'F',
+      flight_hotel: 'FH',
+      hotel: 'H',
+      car_service: 'C',
+    }
+    const prefix = prefixMap[serviceType] || 'X'
+    const random = Math.random().toString(36).slice(2, 5).toUpperCase()
+    const code = `${prefix}${yymmdd}${random}`
+
+    const labelMap: Record<string, string> = {
+      visa: '簽證',
+      esim: '網卡',
+      flight: '機票',
+      flight_hotel: '機加酒',
+      hotel: '訂房',
+      car_service: '派車',
+    }
+    const typeLabel = labelMap[serviceType] || serviceType
+    const name = customerName ? `${customerName} ${typeLabel}` : `${typeLabel} ${dateStr}`
+
+    const adHocTour: Partial<Tour> = {
+      code,
+      name,
+      departure_date: dateStr,
+      return_date: dateStr,
+      status: '待出發',
+      tour_service_type: serviceType,
+      max_participants: 99,
       contract_status: 'pending',
       total_revenue: 0,
       total_cost: 0,
@@ -336,51 +303,7 @@ class TourService extends BaseService<Tour & BaseEntity> {
       updated_at: this.now(),
     }
 
-    return await this.create(specialTour as unknown as Tour & BaseEntity)
-  }
-
-  /**
-   * 取得或建立年度簽證專用團
-   * @param year - 年份 (如: 2025)
-   * @returns 簽證專用團
-   */
-  async getOrCreateVisaTour(year?: number): Promise<Tour> {
-    return this.getOrCreateSpecialTour(
-      {
-        prefix: 'VISA',
-        name: TOUR_SERVICE_LABELS.VISA_TOUR_NAME,
-        location: TOUR_SERVICE_LABELS.VISA_TOUR_LOCATION,
-      },
-      year
-    )
-  }
-
-  /**
-   * 取得或建立年度網卡專用團
-   * @param year - 年份 (如: 2025)
-   * @returns 網卡專用團
-   */
-  async getOrCreateEsimTour(year?: number): Promise<Tour> {
-    return this.getOrCreateSpecialTour(
-      {
-        prefix: 'ESIM',
-        name: TOUR_SERVICE_LABELS.ESIM_TOUR_NAME,
-        location: TOUR_SERVICE_LABELS.ESIM_TOUR_LOCATION,
-      },
-      year
-    )
-  }
-
-  /**
-   * 取得所有非特殊團的旅遊團（用於行事曆顯示）
-   * @returns 一般旅遊團列表
-   */
-  async listRegularTours() {
-    const allTours = await this.list()
-    return {
-      ...allTours,
-      data: allTours.data.filter(tour => tour.status !== TOUR_SERVICE_LABELS.STATUS_SPECIAL),
-    }
+    return await this.create(adHocTour as unknown as Tour & BaseEntity)
   }
 }
 

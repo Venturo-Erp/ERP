@@ -28,7 +28,7 @@ export async function GET() {
   }
 
   // 有權限 → 查所有 workspaces
-  const { data, error } = await supabase
+  const { data: workspaces, error } = await supabase
     .from('workspaces')
     .select('*')
     .order('created_at', { ascending: true })
@@ -37,7 +37,54 @@ export async function GET() {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json(data)
+  // 批次查詢所有員工（排除機器人）— 用來計算每個 workspace 的員工數 + 管理員
+  const { data: allEmployees } = await supabase
+    .from('employees')
+    .select('id, workspace_id, chinese_name, display_name, english_name, is_bot, roles')
+    .or('is_bot.is.null,is_bot.eq.false')
+
+  // 建立 workspace_id → 員工清單的 map
+  const byWorkspace = new Map<
+    string,
+    {
+      count: number
+      admin: { name: string; id: string } | null
+    }
+  >()
+  for (const emp of (allEmployees || []) as Array<{
+    id: string
+    workspace_id: string
+    chinese_name: string | null
+    display_name: string | null
+    english_name: string | null
+    roles: string[] | null
+  }>) {
+    const wsId = emp.workspace_id
+    if (!wsId) continue
+    const entry = byWorkspace.get(wsId) || { count: 0, admin: null }
+    entry.count += 1
+    // 找第一個 admin 當代表
+    if (!entry.admin && Array.isArray(emp.roles) && emp.roles.includes('admin')) {
+      entry.admin = {
+        id: emp.id,
+        name: emp.display_name || emp.chinese_name || emp.english_name || '',
+      }
+    }
+    byWorkspace.set(wsId, entry)
+  }
+
+  // 附加到每個 workspace
+  const enriched = (workspaces || []).map(ws => {
+    const entry = byWorkspace.get(ws.id)
+    return {
+      ...ws,
+      employee_count: entry?.count ?? 0,
+      admin_name: entry?.admin?.name ?? null,
+      admin_id: entry?.admin?.id ?? null,
+    }
+  })
+
+  return NextResponse.json(enriched)
 }
 
 /**
@@ -55,7 +102,14 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const supabase = createServiceClient()
   const body = await request.json()
-  const { name, code, type = 'travel_agency' } = body
+  const {
+    name,
+    code,
+    type = 'travel_agency',
+    adminName,
+    adminEmail,
+    adminEmployeeNumber = 'E001',
+  } = body
 
   if (!name || !code) {
     return NextResponse.json({ error: '缺少 name 或 code' }, { status: 400 })
@@ -157,9 +211,31 @@ export async function POST(request: NextRequest) {
     })
   }
 
+  // 6. 建立第一個管理員員工（必須要有一個員工，才能登入）
+  if (adminName) {
+    const { error: empError } = await supabase.from('employees').insert({
+      workspace_id: workspaceId,
+      employee_number: adminEmployeeNumber,
+      chinese_name: adminName,
+      display_name: adminName,
+      email: adminEmail || null,
+      roles: ['admin'],
+      role_id: adminRole.id, // 🔑 連結到剛建立的管理員角色（權限檢查用）
+      job_info: { role_id: adminRole.id, position: '管理員' },
+      is_active: true,
+      is_bot: false,
+      must_change_password: true, // 首次登入強制改密碼
+    })
+    if (empError) {
+      // 員工建失敗不回滾（workspace 已建成），但 log 出來
+      // eslint-disable-next-line no-console
+      console.error('建立管理員員工失敗:', empError)
+    }
+  }
+
   return NextResponse.json({
     success: true,
     workspace,
-    message: '租戶建立完成，已開啟基本功能並建立管理員角色',
+    message: '租戶建立完成，已開啟基本功能、建立管理員角色與第一個管理員員工',
   })
 }

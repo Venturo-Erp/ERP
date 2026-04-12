@@ -63,7 +63,7 @@ export const TableHeader = React.memo(function TableHeader({
   }
 
   return (
-    <thead className="sticky top-0 z-10 bg-morandi-gold-header border-b border-border">
+    <thead className="sticky top-0 z-20 bg-card border-b border-border [&_tr]:bg-morandi-gold-header">
       {/* 主標題行 */}
       <tr className="relative" data-enhanced-table-header-row>
         {/* Selection checkbox column */}

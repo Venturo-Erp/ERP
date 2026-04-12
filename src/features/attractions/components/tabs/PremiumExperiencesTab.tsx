@@ -404,7 +404,7 @@ export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperi
             columns={columns as unknown as Parameters<typeof EnhancedTable>[0]['columns']}
             data={filteredExperiences}
             loading={loading}
-            initialPageSize={20}
+            initialPageSize={15}
             onRowClick={handleEdit as (row: unknown) => void}
             actions={(row: unknown) => {
               const experience = row as PremiumExperience

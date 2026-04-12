@@ -52,6 +52,7 @@ export const MODULES: ModuleDefinition[] = [
       { code: 'orders', name: '訂單', description: '報名訂單、付款狀態' },
       { code: 'members', name: '團員', description: '團員資料、護照、聯絡資訊' },
       { code: 'itinerary', name: '行程', description: '每日行程內容' },
+      { code: 'display-itinerary', name: '展示行程', description: '對客展示用行程頁面編輯器' },
       { code: 'quote', name: '報價', description: '報價計算、成本' },
       { code: 'requirements', name: '需求', description: '供應商需求發送' },
       { code: 'confirmation-sheet', name: '團確單', description: '供應商確認單' },

@@ -12,7 +12,6 @@ const PAGE_TITLES: Record<string, string> = {
   '/calendar': COMP_LAYOUT_LABELS.行事曆,
   '/channel': COMP_LAYOUT_LABELS.工作空間,
   '/todos': COMP_LAYOUT_LABELS.待辦事項,
-  '/itinerary': COMP_LAYOUT_LABELS.行程管理,
   '/tours': COMP_LAYOUT_LABELS.旅遊團,
   '/orders': COMP_LAYOUT_LABELS.訂單,
   '/quotes': COMP_LAYOUT_LABELS.報價單,

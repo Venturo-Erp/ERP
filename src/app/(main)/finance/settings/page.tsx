@@ -11,7 +11,7 @@ const Table = ({ children, className }: { children: React.ReactNode; className?:
   <table className={`w-full text-sm ${className || ''}`}>{children}</table>
 )
 const TableHeader = ({ children }: { children: React.ReactNode }) => (
-  <thead className="bg-morandi-container/30 sticky top-0">{children}</thead>
+  <thead className="bg-card sticky top-0 z-20 [&_tr]:bg-morandi-container/30">{children}</thead>
 )
 const TableBody = ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>
 const TableRow = ({ children, className }: { children: React.ReactNode; className?: string }) => (

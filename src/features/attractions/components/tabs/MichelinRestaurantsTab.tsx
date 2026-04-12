@@ -316,7 +316,7 @@ export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRest
             columns={columns as unknown as Parameters<typeof EnhancedTable>[0]['columns']}
             data={filteredRestaurants}
             loading={loading}
-            initialPageSize={20}
+            initialPageSize={15}
             onRowClick={handleEdit as (row: unknown) => void}
             actions={(row: unknown) => {
               const restaurant = row as MichelinRestaurant

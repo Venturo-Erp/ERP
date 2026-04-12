@@ -195,6 +195,8 @@ export interface ActiveOrderConflict {
   memberName: string
   /** key: 欄位名, value: { old, new } */
   diffs: Record<string, { oldValue: string | null; newValue: string | null }>
+  /** 該成員目前存的護照圖（舊） — 給 UI 做對照 */
+  oldPassportImageUrl?: string | null
   /** 是否為簽證訂單 */
   isVisa: boolean
 }
@@ -342,6 +344,7 @@ export async function findActiveOrderConflicts(params: {
           tourName: order.tour_name || '',
           memberName: member.chinese_name || '',
           diffs,
+          oldPassportImageUrl: member.passport_image_url || null,
           isVisa: false,
         })
       }

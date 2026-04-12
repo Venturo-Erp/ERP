@@ -1,10 +1,8 @@
 'use client'
 
 import { LABELS } from './constants/labels'
-
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { ContentPageLayout } from '@/components/layout/content-page-layout'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -22,84 +20,116 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
+import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { useTodos } from '@/hooks/useTodos'
 import { useEmployeesSlim } from '@/data'
 import { useAuthStore } from '@/stores/auth-store'
 import { alertError } from '@/lib/ui/alert-dialog'
 import { useRequireAuthSync } from '@/hooks/useRequireAuth'
-import {
-  CheckCircle,
-  Clock,
-  ChevronDown,
-  X,
-  Star,
-  Receipt,
-  FileText,
-  Users,
-  DollarSign,
-  UserPlus,
-  AlertCircle,
-  Trash2,
-  Edit2,
-  Plus,
-} from 'lucide-react'
+import { X, Plus, GripVertical, Calendar, User, MoreHorizontal, Trash2, Pencil } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/utils/logger'
-import { EnhancedTable } from '@/components/ui/enhanced-table'
-import { DateCell } from '@/components/table-cells'
 import { TodoExpandedView } from '@/features/todos/components/todo-expanded-view'
 import { StarRating } from '@/components/ui/star-rating'
 import { Todo } from '@/stores/types'
 import { ConfirmDialog } from '@/components/dialog/confirm-dialog'
 import { useConfirmDialog } from '@/hooks/useConfirmDialog'
-import { TodoCard } from '@/features/todos/components/todo-card'
 import { DatePicker } from '@/components/ui/date-picker'
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  type DropResult,
+} from '@hello-pangea/dnd'
 
 export const dynamic = 'force-dynamic'
 
-const statusFilters = [
-  { value: 'active', label: LABELS.STATUS_ACTIVE },
-  { value: 'pending', label: LABELS.STATUS_PENDING },
-  { value: 'in_progress', label: LABELS.STATUS_IN_PROGRESS },
-  { value: 'completed', label: LABELS.STATUS_COMPLETED },
-]
+interface TodoColumn {
+  id: string
+  workspace_id: string
+  name: string
+  color: string
+  sort_order: number
+  is_system: boolean
+  mapped_status: string | null
+}
+
+// 欄位顏色對應
+const COLOR_MAP: Record<string, { border: string; text: string }> = {
+  gray: { border: 'border-morandi-muted', text: 'text-morandi-secondary' },
+  gold: { border: 'border-morandi-gold', text: 'text-morandi-gold' },
+  green: { border: 'border-morandi-green', text: 'text-morandi-green' },
+  red: { border: 'border-morandi-red', text: 'text-morandi-red' },
+  blue: { border: 'border-sky-500', text: 'text-sky-600' },
+  purple: { border: 'border-purple-500', text: 'text-purple-600' },
+}
 
 export default function TodosPage() {
-  // ✅ 使用純雲端 SWR hook（不再使用 IndexedDB）
   const {
     todos,
     create: addTodo,
     update: updateTodo,
-    delete: deleteTodo,
-    isLoading: isTodosLoading,
   } = useTodos()
-  const { user } = useAuthStore() // 取得當前登入用戶
+  const { user } = useAuthStore()
+  const { items: employees } = useEmployeesSlim()
   const searchParams = useSearchParams()
-  const router = useRouter()
-  const [statusFilter, setStatusFilter] = useState('active')
   const [expandedTodo, setExpandedTodo] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false) // 防止重複提交
-  const [quickAddValue, setQuickAddValue] = useState('') // 快速新增輸入框的值
+  const [quickAddColumn, setQuickAddColumn] = useState<string | null>(null)
+  const [quickAddValue, setQuickAddValue] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { confirm, confirmDialogProps } = useConfirmDialog()
 
-  // 處理從其他頁面跳轉來的情況
+  // 看板欄位
+  const [columns, setColumns] = useState<TodoColumn[]>([])
+  const [columnsLoading, setColumnsLoading] = useState(true)
+  const [editingColumnId, setEditingColumnId] = useState<string | null>(null)
+  const [editingColumnName, setEditingColumnName] = useState('')
+  const [isAddingColumn, setIsAddingColumn] = useState(false)
+  const [newColumnName, setNewColumnName] = useState('')
+
+  // 載入欄位
+  const loadColumns = useCallback(async () => {
+    try {
+      const res = await fetch('/api/todo-columns')
+      if (res.ok) {
+        const data = await res.json()
+        setColumns(data || [])
+      }
+    } catch (err) {
+      logger.error('載入欄位失敗:', err)
+    } finally {
+      setColumnsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadColumns()
+  }, [loadColumns])
+
+  // 處理跳轉
   useEffect(() => {
     const expandId = searchParams.get('expand')
-    if (expandId) {
-      setExpandedTodo(expandId)
-    }
+    if (expandId) setExpandedTodo(expandId)
   }, [searchParams])
 
-  // 篩選待辦 - 使用 useMemo 優化
-  const filteredTodos = useMemo(() => {
+  // 員工名稱
+  const getEmployeeName = useCallback(
+    (id?: string) => {
+      if (!id) return null
+      const emp = employees?.find(e => e.id === id)
+      return emp?.chinese_name || emp?.display_name || null
+    },
+    [employees]
+  )
+
+  // 篩選後的 todos
+  const visibleTodos = useMemo(() => {
     if (!todos || !Array.isArray(todos)) return []
     const currentUserId = user?.id
 
     return todos.filter(todo => {
-      // ✅ 可見性篩選 - 只顯示當前用戶相關的待辦 或 公開待辦
-      // 如果使用者尚未登入，暫時顯示所有待辦（等登入後再過濾）
       if (currentUserId) {
         const isCreator =
           (todo.creator || (todo as unknown as Record<string, unknown>).created_by_legacy) ===
@@ -107,241 +137,198 @@ export default function TodosPage() {
         const isAssignee = todo.assignee === currentUserId
         const inVisibility = todo.visibility?.includes(currentUserId)
         const isPublic = todo.is_public === true
-
-        // 建立者一定能看到自己的待辦（不受 visibility 限制）
-        if (isCreator) {
-          // 繼續執行後續篩選（狀態、搜尋等）
-        } else if (isPublic) {
-          // 公開的待辦所有人都能看到（繼續執行後續篩選）
-        } else if (!isAssignee && !inVisibility) {
-          // 不是建立者，也不是被指派者，也不在可見清單中，也不是公開 → 過濾掉
-          return false
-        }
+        if (!isCreator && !isPublic && !isAssignee && !inVisibility) return false
       }
-      // 如果 currentUserId 為空（尚未登入），不做可見性過濾，繼續執行後續篩選
-
-      // 狀態篩選
-      if (statusFilter === 'active') {
-        // 「未完成」= 待辦 + 進行中
-        if (todo.status !== 'pending' && todo.status !== 'in_progress') return false
-      } else if (statusFilter !== 'all') {
-        // 其他狀態直接比對
-        if (todo.status !== statusFilter) return false
-      }
-
-      // 搜尋篩選
       if (searchTerm && !todo.title.toLowerCase().includes(searchTerm.toLowerCase())) return false
-
       return true
     })
-  }, [todos, statusFilter, searchTerm, user?.id])
+  }, [todos, searchTerm, user?.id])
 
-  // 狀態標籤 - 使用 useCallback 優化
-  const getStatusLabel = useCallback((status: Todo['status']) => {
-    const statusMap = {
-      pending: LABELS.STATUS_PENDING,
-      in_progress: LABELS.STATUS_IN_PROGRESS,
-      completed: LABELS.STATUS_DONE,
-      cancelled: LABELS.STATUS_CANCELLED,
-    }
-    return statusMap[status]
-  }, [])
+  // 按 column_id 分組
+  const todosByColumn = useMemo(() => {
+    const map: Record<string, Todo[]> = {}
+    columns.forEach(col => {
+      map[col.id] = []
+    })
 
-  // 狀態顏色 - 使用 useCallback 優化
-  const getStatusColor = useCallback((status: Todo['status']) => {
-    const colorMap = {
-      pending: 'text-morandi-muted',
-      in_progress: 'text-morandi-gold',
-      completed: 'text-morandi-green',
-      cancelled: 'text-morandi-red',
-    }
-    return colorMap[status]
-  }, [])
+    // 找預設欄位（沒有 column_id 的 todo 會放這裡）
+    const defaultCol = columns.find(c => c.mapped_status === 'pending') || columns[0]
 
-  // 截止日期顏色 - 使用 useCallback 優化
-  const getDeadlineColor = useCallback((deadline?: string) => {
-    if (!deadline) return 'text-morandi-secondary'
+    visibleTodos.forEach(todo => {
+      const colId = todo.column_id || defaultCol?.id
+      if (colId && map[colId]) {
+        map[colId].push(todo)
+      }
+    })
 
-    const deadlineDate = new Date(deadline)
-    const today = new Date()
-    const diffDays = Math.ceil((deadlineDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    // 按優先級排序
+    Object.keys(map).forEach(key => {
+      map[key].sort((a, b) => (b.priority || 1) - (a.priority || 1))
+    })
 
-    if (diffDays < 0) return 'text-morandi-red' // 逾期
-    if (diffDays === 0) return 'text-morandi-gold' // 今天
-    if (diffDays <= 3) return 'text-morandi-gold/70' // 3天內
-    return 'text-morandi-secondary' // 充裕
-  }, [])
+    return map
+  }, [visibleTodos, columns])
 
-  const columns = [
-    {
-      key: 'title',
-      label: LABELS.COL_TITLE,
-      sortable: true,
-      render: (value: unknown, todo: Todo) => {
-        // 計算未讀留言數
-        const unreadCount = (todo.notes || []).filter(
-          note => note.author_id !== user?.id && !note.read_by?.includes(user?.id || '')
-        ).length
+  // 拖曳結束
+  const handleDragEnd = useCallback(
+    (result: DropResult) => {
+      const { draggableId, destination, source, type } = result
+      if (!destination) return
 
-        return (
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-morandi-primary">{String(value)}</span>
-              {/* 未讀留言紅點 */}
-              {unreadCount > 0 && (
-                <span className="flex items-center justify-center min-w-[18px] h-[18px] bg-status-danger text-white text-[10px] font-bold rounded-full px-1 animate-pulse">
-                  {unreadCount}
-                </span>
-              )}
-              {/* 公開標記 */}
-              {todo.is_public && (
-                <span className="text-[10px] bg-status-info-bg text-status-info px-1.5 py-0.5 rounded">
-                  {LABELS.LABEL_7239}
-                </span>
-              )}
-            </div>
-            {todo.related_items && todo.related_items.length > 0 && (
-              <div className="flex gap-1 mt-1">
-                {todo.related_items.map((item, index) => (
-                  <button
-                    key={index}
-                    onClick={e => {
-                      e.stopPropagation()
-                      const basePath = {
-                        group: '/tours',
-                        quote: '/quotes',
-                        order: '/orders',
-                        invoice: '/finance/treasury/disbursement',
-                        receipt: '/finance/payments',
-                      }[item.type]
-                      if (basePath) {
-                        router.push(`${basePath}?highlight=${item.id}`)
-                      }
-                    }}
-                    className="text-xs bg-morandi-gold/20 text-morandi-primary px-2 py-0.5 rounded hover:bg-morandi-gold/30 transition-colors"
-                  >
-                    {item.title}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )
-      },
-    },
-    {
-      key: 'priority',
-      label: LABELS.COL_PRIORITY,
-      sortable: true,
-      width: '120px',
-      render: (value: unknown, todo: Todo) => (
-        <div onClick={e => e.stopPropagation()}>
-          <StarRating
-            value={todo.priority}
-            onChange={newPriority =>
-              updateTodo(todo.id, { priority: newPriority as 1 | 2 | 3 | 4 | 5 })
-            }
-            size="sm"
-          />
-        </div>
-      ),
-    },
-    {
-      key: 'status',
-      label: LABELS.COL_STATUS,
-      sortable: true,
-      width: '100px',
-      render: (value: unknown) => (
-        <span className={cn('text-sm font-medium', getStatusColor(value as Todo['status']))}>
-          {getStatusLabel(value as Todo['status'])}
-        </span>
-      ),
-    },
-    {
-      key: 'deadline',
-      label: LABELS.COL_DEADLINE,
-      sortable: true,
-      width: '180px',
-      render: (value: unknown) => (
-        <div className={cn(getDeadlineColor(value ? String(value) : undefined))}>
-          <DateCell date={value ? String(value) : null} fallback={LABELS.NOT_SET} showIcon />
-        </div>
-      ),
-    },
-  ]
-
-  // 根據優先級取得列樣式
-  const getPriorityRowClass = useCallback((todo: Todo) => {
-    // 如果已完成，降低所有特效
-    const opacity = todo.status === 'completed' ? 'opacity-60' : ''
-
-    switch (todo.priority) {
-      case 5:
-        return cn(
-          'bg-gradient-to-r from-status-danger-bg via-rose-50/60 to-status-danger-bg',
-          'hover:from-status-danger-bg hover:via-rose-100/70 hover:to-status-danger-bg',
-          'shadow-sm shadow-status-danger-bg',
-          opacity
-        )
-      case 4:
-        return cn(
-          'bg-gradient-to-r from-status-warning-bg via-status-warning-bg/50 to-status-warning-bg',
-          'hover:from-status-warning-bg hover:via-status-warning-bg/60 hover:to-status-warning-bg',
-          opacity
-        )
-      case 3:
-        return cn(
-          'bg-gradient-to-r from-status-warning-bg/60 via-status-warning-bg/40 to-status-warning-bg/60',
-          'hover:from-status-warning-bg/70 hover:via-status-warning-bg/50 hover:to-status-warning-bg/70',
-          opacity
-        )
-      case 2:
-        return cn(
-          'bg-gradient-to-r from-status-info-bg via-morandi-container/30 to-status-info-bg',
-          'hover:from-status-info-bg hover:via-sky-100/40 hover:to-status-info-bg',
-          opacity
-        )
-      case 1:
-      default:
-        return cn(opacity)
-    }
-  }, [])
-
-  const handleRowClick = useCallback((todo: Todo) => {
-    setExpandedTodo(todo.id)
-  }, [])
-
-  const handleDeleteTodo = useCallback(
-    async (todo: Todo, e?: React.MouseEvent) => {
-      if (e) e.stopPropagation()
-
-      const confirmed = await confirm({
-        type: 'danger',
-        title: LABELS.DELETE_TODO_TITLE,
-        message: `${LABELS.DELETE_CONFIRM_PREFIX}${todo.title}${LABELS.DELETE_CONFIRM_SUFFIX}`,
-        details: [LABELS.DELETE_IRREVERSIBLE],
-        confirmLabel: LABELS.CONFIRM_DELETE,
-        cancelLabel: LABELS.CANCEL,
-      })
-
-      if (!confirmed) {
+      // 拖曳欄位順序
+      if (type === 'column') {
+        if (destination.index === source.index) return
+        const reordered = Array.from(columns)
+        const [moved] = reordered.splice(source.index, 1)
+        reordered.splice(destination.index, 0, moved)
+        // 更新 sort_order
+        const withOrder = reordered.map((col, idx) => ({ ...col, sort_order: idx + 1 }))
+        setColumns(withOrder)
+        fetch('/api/todo-columns', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reorder: withOrder.map(c => ({ id: c.id, sort_order: c.sort_order })),
+          }),
+        }).catch(err => logger.error('欄位排序失敗:', err))
         return
       }
 
-      try {
-        deleteTodo(todo.id)
-        // 如果正在顯示該待辦的詳細檢視，關閉它
-        if (expandedTodo === todo.id) {
-          setExpandedTodo(null)
-        }
-      } catch (err) {
-        logger.error('刪除待辦事項失敗:', err)
-        await alertError(LABELS.DELETE_FAILED)
+      // 拖曳卡片
+      const newColumnId = destination.droppableId
+      const todo = todos?.find(t => t.id === draggableId)
+      if (!todo || todo.column_id === newColumnId) return
+
+      // 對應到 status（系統欄位才設 status）
+      const targetColumn = columns.find(c => c.id === newColumnId)
+      const updates: Partial<Todo> = { column_id: newColumnId }
+      if (targetColumn?.mapped_status) {
+        updates.status = targetColumn.mapped_status as Todo['status']
+        updates.completed = targetColumn.mapped_status === 'completed'
       }
+
+      updateTodo(draggableId, updates)
     },
-    [deleteTodo, expandedTodo, confirm]
+    [columns, todos, updateTodo]
   )
 
+  // 快速新增卡片
+  const handleQuickAdd = useCallback(
+    async (columnId: string) => {
+      if (!quickAddValue.trim() || isSubmitting) return
+      const auth = useRequireAuthSync()
+      if (!auth.isAuthenticated) return
+
+      const column = columns.find(c => c.id === columnId)
+      const status = (column?.mapped_status || 'pending') as Todo['status']
+
+      setIsSubmitting(true)
+      try {
+        await addTodo({
+          title: quickAddValue.trim(),
+          priority: 1,
+          status,
+          completed: status === 'completed',
+          column_id: columnId,
+          creator: auth.user!.id,
+          visibility: [auth.user!.id],
+          related_items: [],
+          sub_tasks: [],
+          notes: [],
+          enabled_quick_actions: ['receipt', 'quote'],
+        })
+        setQuickAddValue('')
+        setQuickAddColumn(null)
+      } catch (error) {
+        logger.error('快速新增失敗:', error)
+        await alertError(LABELS.ADD_FAILED)
+      } finally {
+        setIsSubmitting(false)
+      }
+    },
+    [quickAddValue, isSubmitting, addTodo, columns]
+  )
+
+  // 新增欄位
+  const handleAddColumn = useCallback(async () => {
+    if (!newColumnName.trim()) return
+    try {
+      const res = await fetch('/api/todo-columns', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newColumnName.trim(), color: 'gray' }),
+      })
+      if (res.ok) {
+        const col = await res.json()
+        setColumns(prev => [...prev, col])
+        setNewColumnName('')
+        setIsAddingColumn(false)
+      }
+    } catch (err) {
+      logger.error('新增欄位失敗:', err)
+    }
+  }, [newColumnName])
+
+  // 重命名欄位
+  const handleRenameColumn = useCallback(async (columnId: string, name: string) => {
+    if (!name.trim()) {
+      setEditingColumnId(null)
+      return
+    }
+    try {
+      await fetch('/api/todo-columns', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: columnId, name: name.trim() }),
+      })
+      setColumns(prev => prev.map(c => (c.id === columnId ? { ...c, name: name.trim() } : c)))
+    } catch (err) {
+      logger.error('重命名失敗:', err)
+    } finally {
+      setEditingColumnId(null)
+    }
+  }, [])
+
+  // 刪除欄位
+  const handleDeleteColumn = useCallback(
+    async (column: TodoColumn) => {
+      const itemCount = todosByColumn[column.id]?.length || 0
+      const confirmed = await confirm({
+        type: 'danger',
+        title: `刪除欄位「${column.name}」`,
+        message:
+          itemCount > 0
+            ? `此欄位內有 ${itemCount} 張卡片，刪除後卡片會移到第一欄`
+            : '確定要刪除這個欄位嗎？',
+        confirmLabel: '刪除',
+        cancelLabel: '取消',
+      })
+      if (!confirmed) return
+
+      try {
+        const res = await fetch(`/api/todo-columns?id=${column.id}`, { method: 'DELETE' })
+        if (!res.ok) {
+          const err = await res.json()
+          await alertError(err.error || '刪除失敗')
+          return
+        }
+        // 卡片移到第一欄
+        const firstCol = columns.find(c => c.id !== column.id)
+        if (firstCol && itemCount > 0) {
+          const items = todosByColumn[column.id] || []
+          for (const todo of items) {
+            await updateTodo(todo.id, { column_id: firstCol.id })
+          }
+        }
+        setColumns(prev => prev.filter(c => c.id !== column.id))
+      } catch (err) {
+        logger.error('刪除欄位失敗:', err)
+      }
+    },
+    [columns, todosByColumn, updateTodo, confirm]
+  )
+
+  // 新增待辦（完整 Dialog）
   const handleAddTodo = useCallback(
     async (formData: {
       title: string
@@ -352,200 +339,326 @@ export default function TodosPage() {
       is_public: boolean
     }) => {
       const auth = useRequireAuthSync()
-
-      if (!auth.isAuthenticated) {
-        auth.showLoginRequired()
-        return
-      }
+      if (!auth.isAuthenticated) return
 
       try {
-        // 計算 visibility - 包含建立者和被指派者
         const visibilityList = [auth.user!.id]
         if (formData.assignee && formData.assignee !== auth.user!.id) {
           visibilityList.push(formData.assignee)
         }
 
-        const newTodoData = {
+        const firstCol = columns.find(c => c.mapped_status === 'pending') || columns[0]
+
+        await addTodo({
           title: formData.title,
           priority: formData.priority,
           deadline: formData.deadline || undefined,
-          status: 'pending' as const,
+          status: 'pending',
           completed: false,
+          column_id: firstCol?.id,
           creator: auth.user!.id,
           assignee: formData.assignee || undefined,
           visibility: visibilityList,
           is_public: formData.is_public,
-          related_items: [] as Todo['related_items'],
-          sub_tasks: [] as Todo['sub_tasks'],
-          notes: [] as Todo['notes'],
-          enabled_quick_actions: (formData.enabled_quick_actions || [
-            'receipt',
-            'quote',
-          ]) as Todo['enabled_quick_actions'],
-        }
-
-        await addTodo(newTodoData)
+          related_items: [],
+          sub_tasks: [],
+          notes: [],
+          enabled_quick_actions: formData.enabled_quick_actions || ['receipt', 'quote'],
+        })
         setIsAddDialogOpen(false)
-        logger.log('✅ 待辦事項新增成功:', formData.title)
       } catch (error) {
-        logger.error('新增待辦事項失敗:', error)
+        logger.error('新增失敗:', error)
         await alertError(LABELS.ADD_FAILED)
       }
     },
-    [addTodo]
+    [addTodo, columns]
   )
+
+  // 截止日期
+  const getDeadlineInfo = useCallback((deadline?: string) => {
+    if (!deadline) return null
+    const date = new Date(deadline)
+    const now = new Date()
+    const diffDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+    const formatted = date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })
+
+    if (diffDays < 0) return { text: `逾期 ${Math.abs(diffDays)} 天`, color: 'text-morandi-red bg-morandi-red/10' }
+    if (diffDays === 0) return { text: '今天', color: 'text-morandi-gold bg-morandi-gold/10' }
+    if (diffDays <= 3) return { text: `${diffDays} 天後`, color: 'text-morandi-gold/80 bg-morandi-gold/5' }
+    return { text: formatted, color: 'text-morandi-secondary bg-morandi-container/50' }
+  }, [])
+
+  // 點擊卡片（穩定 callback 避免 TodoCardMemo 重渲染）
+  const handleCardClick = useCallback((id: string) => {
+    setExpandedTodo(id)
+  }, [])
+
+  // 優先級左側邊框
+  const getPriorityBorder = useCallback((priority: number) => {
+    switch (priority) {
+      case 5: return 'border-l-morandi-red'
+      case 4: return 'border-l-orange-400'
+      case 3: return 'border-l-morandi-gold'
+      case 2: return 'border-l-sky-400'
+      default: return 'border-l-morandi-muted'
+    }
+  }, [])
 
   return (
     <ContentPageLayout
       title={LABELS.LABEL_9553}
-      showSearch={true}
+      showSearch
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
       searchPlaceholder={LABELS.SEARCH_PLACEHOLDER}
       onAdd={() => setIsAddDialogOpen(true)}
       addLabel={LABELS.ADD_TASK}
-      headerActions={
-        <Input
-          placeholder={LABELS.ADD_25}
-          className="w-64"
-          value={quickAddValue}
-          onChange={e => setQuickAddValue(e.target.value)}
-          onKeyDown={async e => {
-            // 使用原生事件檢查輸入法狀態，避免 React 狀態更新時序問題
-            if (
-              e.key === 'Enter' &&
-              quickAddValue.trim() &&
-              !isSubmitting &&
-              !e.nativeEvent.isComposing
-            ) {
-              e.preventDefault()
-              const auth = useRequireAuthSync()
-              if (!auth.isAuthenticated) {
-                auth.showLoginRequired()
-                return
-              }
-              const title = quickAddValue.trim()
-              setIsSubmitting(true)
-
-              const newTodoData = {
-                title,
-                priority: 1 as const,
-                status: 'pending' as const,
-                completed: false,
-                creator: auth.user!.id,
-                assignee: undefined,
-                visibility: [auth.user!.id],
-                related_items: [] as Todo['related_items'],
-                sub_tasks: [] as Todo['sub_tasks'],
-                notes: [] as Todo['notes'],
-                enabled_quick_actions: ['receipt', 'quote'] as Todo['enabled_quick_actions'],
-              }
-
-              try {
-                await addTodo(newTodoData)
-                setQuickAddValue('') // ✅ 修正：成功後才清空輸入框
-                logger.log('✅ 待辦事項新增成功:', title)
-              } catch (error) {
-                logger.error('快速新增失敗:', error)
-                await alertError(LABELS.ADD_FAILED)
-              } finally {
-                setIsSubmitting(false)
-              }
-            }
-          }}
-        />
-      }
-      headerChildren={
-        /* 狀態篩選 */
-        <div className="flex gap-2">
-          {statusFilters.map(filter => (
-            <button
-              key={filter.value}
-              onClick={() => setStatusFilter(filter.value)}
-              className={cn(
-                'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
-                statusFilter === filter.value
-                  ? 'bg-morandi-gold text-white'
-                  : 'text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/30'
-              )}
-            >
-              {filter.label}
-            </button>
-          ))}
-        </div>
-      }
+      className="h-full flex flex-col -m-4 lg:-m-6"
+      contentClassName="flex-1 overflow-hidden"
     >
-      {/* 待辦事項列表 */}
-      <div className="h-full overflow-hidden">
-        <EnhancedTable
-          columns={columns as unknown as Parameters<typeof EnhancedTable>[0]['columns']}
-          data={filteredTodos as unknown as Parameters<typeof EnhancedTable>[0]['data']}
-          onRowClick={
-            handleRowClick as unknown as Parameters<typeof EnhancedTable>[0]['onRowClick']
-          }
-          striped
-          rowClassName={
-            getPriorityRowClass as unknown as Parameters<typeof EnhancedTable>[0]['rowClassName']
-          }
-          actions={
-            ((todo: Todo) => (
-              <div className="flex items-center gap-1">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={e => {
-                    e.stopPropagation()
-                    const newStatus = todo.status === 'completed' ? 'pending' : 'completed'
-                    updateTodo(todo.id, {
-                      status: newStatus,
-                      completed: newStatus === 'completed',
-                    })
-                  }}
-                  className={cn(
-                    'h-7 px-2 gap-1 text-xs whitespace-nowrap',
-                    todo.status === 'completed'
-                      ? 'text-status-success hover:text-status-success hover:bg-status-success-bg'
-                      : 'text-morandi-secondary hover:text-status-success hover:bg-status-success-bg'
-                  )}
-                >
-                  <CheckCircle size={14} />
-                  {todo.status === 'completed' ? '取消' : '完成'}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={e => {
-                    e.stopPropagation()
-                    setExpandedTodo(todo.id)
-                  }}
-                  className="h-7 px-2 gap-1 text-xs hover:bg-morandi-gold/10 whitespace-nowrap"
-                >
-                  <Edit2 size={14} />
-                  編輯
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={e => handleDeleteTodo(todo, e)}
-                  className="h-7 px-2 gap-1 text-xs text-morandi-red hover:bg-morandi-red/10 whitespace-nowrap"
-                >
-                  <Trash2 size={14} />
-                  刪除
-                </Button>
+      {/* 看板 */}
+      <div className="h-full flex flex-col">
+      {columnsLoading ? (
+        <div className="flex-1 flex items-center justify-center text-morandi-muted">載入中...</div>
+      ) : (
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="board" type="column" direction="horizontal">
+            {(provided) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className="flex-1 overflow-x-auto overflow-y-hidden px-4 py-4"
+              >
+                <div className="flex gap-3 h-full min-w-max items-start">
+                  {columns.map((column, index) => {
+                    const items = todosByColumn[column.id] || []
+                    const colorClass = COLOR_MAP[column.color] || COLOR_MAP.gray
+
+                    return (
+                      <Draggable key={column.id} draggableId={column.id} index={index}>
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className="flex flex-col w-[300px] flex-shrink-0 max-h-full bg-morandi-container/40 rounded-xl border border-border/40 shadow-sm"
+                          >
+                            {/* 欄位標題 */}
+                            <div
+                              {...provided.dragHandleProps}
+                              className={cn(
+                                'flex items-center justify-between px-3 py-3 cursor-grab border-b-2 rounded-t-xl',
+                                colorClass.border
+                              )}
+                            >
+                              <div className="flex items-center gap-2 flex-1 min-w-0">
+                                {editingColumnId === column.id ? (
+                                  <Input
+                                    autoFocus
+                                    value={editingColumnName}
+                                    onChange={e => setEditingColumnName(e.target.value)}
+                                    onBlur={() => handleRenameColumn(column.id, editingColumnName)}
+                                    onKeyDown={e => {
+                                      if (e.key === 'Enter') handleRenameColumn(column.id, editingColumnName)
+                                      if (e.key === 'Escape') setEditingColumnId(null)
+                                    }}
+                                    onClick={e => e.stopPropagation()}
+                                    className="h-7 text-sm"
+                                  />
+                                ) : (
+                                  <span
+                                    className="text-sm font-semibold text-morandi-primary truncate"
+                                    onDoubleClick={() => {
+                                      setEditingColumnId(column.id)
+                                      setEditingColumnName(column.name)
+                                    }}
+                                  >
+                                    {column.name}
+                                  </span>
+                                )}
+                                <span className="text-xs text-morandi-muted bg-morandi-container/60 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                                  {items.length}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-0.5">
+                                <button
+                                  onClick={e => {
+                                    e.stopPropagation()
+                                    setQuickAddColumn(column.id)
+                                    setQuickAddValue('')
+                                  }}
+                                  className="p-1 rounded hover:bg-morandi-container/50 text-morandi-secondary hover:text-morandi-primary transition-colors"
+                                  title="新增卡片"
+                                >
+                                  <Plus size={16} />
+                                </button>
+                                {!column.is_system && (
+                                  <>
+                                    <button
+                                      onClick={e => {
+                                        e.stopPropagation()
+                                        setEditingColumnId(column.id)
+                                        setEditingColumnName(column.name)
+                                      }}
+                                      className="p-1 rounded hover:bg-morandi-container/50 text-morandi-secondary hover:text-morandi-primary transition-colors"
+                                      title="重命名"
+                                    >
+                                      <Pencil size={13} />
+                                    </button>
+                                    <button
+                                      onClick={e => {
+                                        e.stopPropagation()
+                                        handleDeleteColumn(column)
+                                      }}
+                                      className="p-1 rounded hover:bg-morandi-red/10 text-morandi-secondary hover:text-morandi-red transition-colors"
+                                      title="刪除欄位"
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* 快速新增 */}
+                            {quickAddColumn === column.id && (
+                              <div className="mx-2 mt-2 bg-card rounded-lg border border-border shadow-sm p-3">
+                                <Input
+                                  autoFocus
+                                  placeholder="輸入任務標題..."
+                                  value={quickAddValue}
+                                  onChange={e => setQuickAddValue(e.target.value)}
+                                  onKeyDown={e => {
+                                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                                      e.preventDefault()
+                                      handleQuickAdd(column.id)
+                                    }
+                                    if (e.key === 'Escape') setQuickAddColumn(null)
+                                  }}
+                                  className="h-8 text-sm mb-2"
+                                />
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    className="h-7 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                                    onClick={() => handleQuickAdd(column.id)}
+                                    disabled={!quickAddValue.trim() || isSubmitting}
+                                  >
+                                    新增
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 text-xs"
+                                    onClick={() => setQuickAddColumn(null)}
+                                  >
+                                    取消
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* 卡片列表 */}
+                            <Droppable droppableId={column.id} type="card">
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.droppableProps}
+                                  className={cn(
+                                    'flex-1 overflow-y-auto space-y-2 p-2 transition-colors min-h-[80px]',
+                                    snapshot.isDraggingOver && 'bg-morandi-gold/10'
+                                  )}
+                                >
+                                  {items.map((todo, index) => (
+                                    <TodoCardMemo
+                                      key={todo.id}
+                                      todo={todo}
+                                      index={index}
+                                      assigneeName={getEmployeeName(todo.assignee)}
+                                      currentUserId={user?.id}
+                                      onClick={handleCardClick}
+                                    />
+                                  ))}
+                                  {provided.placeholder}
+                                  {items.length === 0 && !snapshot.isDraggingOver && (
+                                    <div className="text-center py-8 text-sm text-morandi-muted/60">
+                                      拖曳卡片到這裡
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </Droppable>
+                          </div>
+                        )}
+                      </Draggable>
+                    )
+                  })}
+                  {provided.placeholder}
+
+                  {/* 新增欄位 */}
+                  <div className="w-[320px] flex-shrink-0">
+                    {isAddingColumn ? (
+                      <div className="bg-morandi-container/30 rounded-lg p-3">
+                        <Input
+                          autoFocus
+                          placeholder="欄位名稱..."
+                          value={newColumnName}
+                          onChange={e => setNewColumnName(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                              e.preventDefault()
+                              handleAddColumn()
+                            }
+                            if (e.key === 'Escape') {
+                              setIsAddingColumn(false)
+                              setNewColumnName('')
+                            }
+                          }}
+                          className="h-8 text-sm mb-2"
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            className="h-7 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                            onClick={handleAddColumn}
+                            disabled={!newColumnName.trim()}
+                          >
+                            新增欄位
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 text-xs"
+                            onClick={() => {
+                              setIsAddingColumn(false)
+                              setNewColumnName('')
+                            }}
+                          >
+                            取消
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setIsAddingColumn(true)}
+                        className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-morandi-container/20 hover:bg-morandi-container/40 text-morandi-secondary hover:text-morandi-primary transition-colors text-sm font-medium border-2 border-dashed border-border/50"
+                      >
+                        <Plus size={16} />
+                        新增欄位
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-            )) as unknown as Parameters<typeof EnhancedTable>[0]['actions']
-          }
-          searchableFields={['title']}
-          searchTerm={searchTerm}
-          showFilters={false}
-          initialPageSize={15}
-        />
+            )}
+          </Droppable>
+        </DragDropContext>
+      )}
       </div>
 
-      {/* 展開的待辦事項視圖 */}
+      {/* 展開卡片 */}
       {expandedTodo &&
         (() => {
-          const todo = todos.find(t => t.id === expandedTodo)
+          const todo = todos?.find(t => t.id === expandedTodo)
           if (!todo) return null
           return (
             <TodoExpandedView
@@ -556,7 +669,7 @@ export default function TodosPage() {
           )
         })()}
 
-      {/* 新增待辦事項對話框 */}
+      {/* 新增 Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent level={1} className="max-w-md">
           <DialogHeader>
@@ -567,13 +680,12 @@ export default function TodosPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Confirm Dialog */}
       <ConfirmDialog {...confirmDialogProps} />
     </ContentPageLayout>
   )
 }
 
-// 新增待辦事項表單組件
+// 新增待辦表單
 function AddTodoForm({
   onSubmit,
   onCancel,
@@ -705,3 +817,157 @@ function AddTodoForm({
     </form>
   )
 }
+
+// ============================================
+// 看板卡片（memo 化 — 避免拖曳時全部重渲染）
+// ============================================
+
+interface TodoCardMemoProps {
+  todo: Todo
+  index: number
+  assigneeName: string | null
+  currentUserId: string | undefined
+  onClick: (id: string) => void
+}
+
+function getPriorityBorderClass(priority: number) {
+  switch (priority) {
+    case 5: return 'border-l-morandi-red'
+    case 4: return 'border-l-orange-400'
+    case 3: return 'border-l-morandi-gold'
+    case 2: return 'border-l-sky-400'
+    default: return 'border-l-morandi-muted'
+  }
+}
+
+function getDeadlineBadge(deadline?: string) {
+  if (!deadline) return null
+  const date = new Date(deadline)
+  const now = new Date()
+  const diffDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  const formatted = date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })
+  if (diffDays < 0) return { text: `逾期 ${Math.abs(diffDays)} 天`, color: 'text-morandi-red bg-morandi-red/10' }
+  if (diffDays === 0) return { text: '今天', color: 'text-morandi-gold bg-morandi-gold/10' }
+  if (diffDays <= 3) return { text: `${diffDays} 天後`, color: 'text-morandi-gold/80 bg-morandi-gold/5' }
+  return { text: formatted, color: 'text-morandi-secondary bg-morandi-container/50' }
+}
+
+const TodoCardMemo = React.memo(function TodoCardMemo({
+  todo,
+  index,
+  assigneeName,
+  currentUserId,
+  onClick,
+}: TodoCardMemoProps) {
+  const deadlineInfo = getDeadlineBadge(todo.deadline)
+  const subTasksDone = todo.sub_tasks?.filter(s => s.done).length || 0
+  const subTasksTotal = todo.sub_tasks?.length || 0
+  const unreadNotes = (todo.notes || []).filter(
+    n => n.author_id !== currentUserId && !n.read_by?.includes(currentUserId || '')
+  ).length
+
+  return (
+    <Draggable draggableId={todo.id} index={index}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          onClick={() => onClick(todo.id)}
+          className={cn(
+            'group bg-card rounded-lg border border-border/60 shadow-sm cursor-pointer',
+            'hover:shadow-md hover:border-border',
+            'border-l-[3px]',
+            getPriorityBorderClass(todo.priority || 1),
+            snapshot.isDragging && 'shadow-xl rotate-[1deg]',
+            todo.status === 'completed' && 'opacity-60'
+          )}
+        >
+          <div className="p-3">
+            <div className="flex items-start gap-2">
+              <p className={cn(
+                'flex-1 text-sm font-medium text-morandi-primary leading-snug',
+                todo.status === 'completed' && 'line-through'
+              )}>
+                {todo.title}
+              </p>
+              {unreadNotes > 0 && (
+                <span className="flex-shrink-0 min-w-[18px] h-[18px] bg-morandi-red text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                  {unreadNotes}
+                </span>
+              )}
+            </div>
+
+            {todo.related_items && todo.related_items.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {todo.related_items.map((item, i) => (
+                  <span
+                    key={i}
+                    className="text-[10px] bg-morandi-gold/15 text-morandi-primary px-1.5 py-0.5 rounded"
+                  >
+                    {item.title}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {subTasksTotal > 0 && (
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex-1 h-1 bg-morandi-container/50 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-morandi-green rounded-full"
+                    style={{ width: `${(subTasksDone / subTasksTotal) * 100}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-morandi-muted">
+                  {subTasksDone}/{subTasksTotal}
+                </span>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between mt-2.5">
+              <div className="flex items-center gap-2">
+                <div className="flex">
+                  {Array.from({ length: todo.priority || 1 }).map((_, i) => (
+                    <span key={i} className="text-morandi-gold text-[10px]">★</span>
+                  ))}
+                </div>
+                {deadlineInfo && (
+                  <span className={cn(
+                    'text-[10px] px-1.5 py-0.5 rounded flex items-center gap-0.5',
+                    deadlineInfo.color
+                  )}>
+                    <Calendar size={10} />
+                    {deadlineInfo.text}
+                  </span>
+                )}
+              </div>
+              {assigneeName && (
+                <span className="text-[10px] text-morandi-secondary flex items-center gap-0.5">
+                  <User size={10} />
+                  {assigneeName}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </Draggable>
+  )
+}, (prev, next) => {
+  // 精準比對：只有以下欄位變化才重渲染
+  return (
+    prev.todo.id === next.todo.id &&
+    prev.todo.title === next.todo.title &&
+    prev.todo.status === next.todo.status &&
+    prev.todo.priority === next.todo.priority &&
+    prev.todo.deadline === next.todo.deadline &&
+    prev.todo.column_id === next.todo.column_id &&
+    prev.todo.sub_tasks === next.todo.sub_tasks &&
+    prev.todo.notes === next.todo.notes &&
+    prev.todo.related_items === next.todo.related_items &&
+    prev.index === next.index &&
+    prev.assigneeName === next.assigneeName &&
+    prev.currentUserId === next.currentUserId
+  )
+})

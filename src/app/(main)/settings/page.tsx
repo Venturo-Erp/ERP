@@ -3,10 +3,10 @@
 import { useAuthStore } from '@/stores/auth-store'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
-import { User, LogOut, AlertCircle, Lock, Camera } from 'lucide-react'
+import { User, LogOut, Lock } from 'lucide-react'
 import { useSettingsState } from './hooks/useSettingsState'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { SettingsTabs } from './components/SettingsTabs'
 import { EmployeeForm } from '@/features/hr/components/EmployeeForm'
 import {
@@ -25,7 +25,6 @@ export default function SettingsPage() {
   const { user, logout } = useAuthStore()
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [isSetupMode, setIsSetupMode] = useState(false)
 
   const {
     showPasswordSection,
@@ -38,18 +37,12 @@ export default function SettingsPage() {
     setPasswordUpdateLoading,
   } = useSettingsState()
 
+  // 若 URL 有 ?setup=true，自動展開改密碼區塊
   useEffect(() => {
-    const setupParam = searchParams.get('setup')
-    if (setupParam === 'true') {
-      setIsSetupMode(true)
+    if (searchParams.get('setup') === 'true') {
       setShowPasswordSection(true)
     }
   }, [searchParams, setShowPasswordSection])
-
-  const handleDismissSetup = () => {
-    setIsSetupMode(false)
-    router.replace('/settings')
-  }
 
   const { isAdmin } = useAuthStore()
   const hasSettingsAccess = isAdmin || user?.permissions?.includes('settings')
@@ -87,50 +80,7 @@ export default function SettingsPage() {
       }
     >
       <div>
-        {/* 首次設定提示 */}
-        {isSetupMode && (
-          <div className="bg-gradient-to-r from-morandi-gold/10 to-morandi-gold/5 border border-morandi-gold/30 rounded-xl p-6 mb-6">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 bg-morandi-gold/20 rounded-full flex items-center justify-center">
-                <AlertCircle className="w-6 h-6 text-morandi-gold" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-morandi-primary mb-2">歡迎使用系統</h3>
-                <p className="text-sm text-morandi-secondary mb-4">首次登入，建議先完成以下設定</p>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-card/60 rounded-lg">
-                    <div className="w-8 h-8 bg-morandi-gold/20 rounded-full flex items-center justify-center">
-                      <Lock className="w-4 h-4 text-morandi-gold" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-morandi-primary">修改密碼</p>
-                      <p className="text-xs text-morandi-secondary">設定專屬於你的安全密碼</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-card/60 rounded-lg">
-                    <div className="w-8 h-8 bg-morandi-gold/20 rounded-full flex items-center justify-center">
-                      <Camera className="w-4 h-4 text-morandi-gold" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-morandi-primary">上傳頭像</p>
-                      <p className="text-xs text-morandi-secondary">讓同事更容易認出你</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4 flex justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleDismissSetup}
-                    className="text-morandi-secondary hover:text-morandi-primary"
-                  >
-                    稍後再說
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* 首次登入歡迎提示已改由 TutorialProvider 處理 */}
 
         {/* 個人資料 - 毛玻璃卡片 */}
         <div className="settings-glass relative rounded-xl">

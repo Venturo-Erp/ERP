@@ -473,7 +473,7 @@ export function EmployeeForm({
               <div className="space-y-5">
                 {/* 姓名區塊 */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5" data-tutorial="field-chinese_name">
                     <Label className="text-xs font-semibold text-morandi-secondary uppercase">
                       中文姓名 <span className="text-morandi-red">*</span>
                     </Label>
@@ -526,23 +526,33 @@ export function EmployeeForm({
                     職務{' '}
                     {!isEditMode && mode === 'hr' && <span className="text-morandi-red">*</span>}
                   </Label>
-                  <select
-                    value={formData.role_id}
-                    onChange={e => setFormData({ ...formData, role_id: e.target.value })}
-                    className="w-full px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-white text-morandi-primary"
-                  >
-                    <option value="">請選擇職務</option>
-                    {roles.map(role => (
-                      <option key={role.id} value={role.id}>
-                        {role.name}
-                      </option>
-                    ))}
-                  </select>
+                  {mode === 'self' ? (
+                    // 個人設定：唯讀，職務由 HR 指派不可自改
+                    <div className="w-full px-3 py-2 border border-morandi-gold/20 rounded-lg bg-morandi-container/30 text-morandi-primary text-sm">
+                      {roles.find(r => r.id === formData.role_id)?.name || '尚未指派'}
+                      <span className="ml-2 text-xs text-morandi-muted">
+                        （由主管指派，如需調整請聯絡 HR）
+                      </span>
+                    </div>
+                  ) : (
+                    <select
+                      value={formData.role_id}
+                      onChange={e => setFormData({ ...formData, role_id: e.target.value })}
+                      className="w-full px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-white text-morandi-primary"
+                    >
+                      <option value="">請選擇職務</option>
+                      {roles.map(role => (
+                        <option key={role.id} value={role.id}>
+                          {role.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 {/* 聯絡資訊 */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
+                  <div className="space-y-1.5" data-tutorial="field-email">
                     <Label className="text-xs font-semibold text-morandi-secondary uppercase flex items-center gap-1">
                       <Mail size={12} /> Email <span className="text-morandi-red">*</span>
                     </Label>
@@ -847,6 +857,7 @@ export function EmployeeForm({
                 onClick={() => {
                   if (onPasswordChange) onPasswordChange()
                 }}
+                data-tutorial="btn-change-password"
               >
                 <Lock className="w-4 h-4 mr-2" />
                 修改密碼

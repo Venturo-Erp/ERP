@@ -36,15 +36,12 @@ export const ConfirmationsList: React.FC<ConfirmationsListProps> = ({
         render: (_: unknown, row: unknown) => {
           const conf = row as Confirmation
           const typeConfig = {
-            flight: { label: '航班', icon: '✈️', colorClass: 'text-morandi-secondary' },
-            accommodation: { label: '住宿', icon: '🏨', colorClass: 'text-status-warning' },
+            flight: { label: '航班', colorClass: 'text-morandi-secondary' },
+            accommodation: { label: '住宿', colorClass: 'text-status-warning' },
           }
           const config = typeConfig[conf.type]
           return (
-            <div className="flex items-center gap-2">
-              <span className="text-base">{config.icon}</span>
-              <span className={cn('text-sm font-medium', config.colorClass)}>{config.label}</span>
-            </div>
+            <span className={cn('text-sm font-medium', config.colorClass)}>{config.label}</span>
           )
         },
       },

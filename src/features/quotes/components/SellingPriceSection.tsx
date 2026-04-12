@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Save, Printer, Plus, X, ChevronDown, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
@@ -112,6 +112,36 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
   // 保險文字和不包含項目
   const [insuranceText, setInsuranceText] = useState(externalInsuranceText)
   const [excludedItems, setExcludedItems] = useState(externalExcludedItems)
+
+  // 拆成兩個獨立數字欄位，避免「一邊空就清空」造成輸入跳掉
+  const parseInsurance = (txt: string) => {
+    const m = txt.match(/^(\d+)萬旅責險\+(\d+)萬意外醫療$/)
+    return { liability: m ? m[1] : '', medical: m ? m[2] : '' }
+  }
+  const [liability, setLiability] = useState(() => parseInsurance(externalInsuranceText).liability)
+  const [medical, setMedical] = useState(() => parseInsurance(externalInsuranceText).medical)
+
+  // 同步外部 prop 變更（讀檔/重置）
+  useEffect(() => {
+    setInsuranceText(externalInsuranceText)
+    const p = parseInsurance(externalInsuranceText)
+    setLiability(p.liability)
+    setMedical(p.medical)
+  }, [externalInsuranceText])
+
+  // 全形→半形 + 只留數字
+  const normalizeDigits = (v: string) =>
+    v
+      .replace(/[\uFF10-\uFF19]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xfee0))
+      .replace(/\D/g, '')
+
+  const updateInsurance = (l: string, med: string) => {
+    setLiability(l)
+    setMedical(med)
+    const next = l && med ? `${l}萬旅責險+${med}萬意外醫療` : ''
+    setInsuranceText(next)
+    onInsuranceChange?.(next)
+  }
 
   const handlePriceChange = (identity: keyof SellingPrices, value: string) => {
     const normalized = normalizeNumber(value)
@@ -278,17 +308,11 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
         <div className="bg-card border border-morandi-gold/40 rounded-xl overflow-hidden shadow-sm">
           <div
             className={cn(
-              'bg-morandi-gold/15 px-4 py-2 flex items-center justify-between cursor-pointer select-none',
-              baseExpanded && 'border-b border-morandi-gold/30'
+              'bg-morandi-gold/15 px-4 py-2 flex items-center justify-between select-none',
+              'border-b border-morandi-gold/30'
             )}
-            onClick={() => setBaseExpanded(prev => !prev)}
           >
             <div className="flex items-center gap-1">
-              {baseExpanded ? (
-                <ChevronDown size={14} className="text-morandi-gold" />
-              ) : (
-                <ChevronRight size={14} className="text-morandi-gold" />
-              )}
               {tierPricings.length > 0 && (
                 <span className="text-xs font-semibold text-morandi-gold mr-1">砍次 1</span>
               )}
@@ -319,7 +343,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
               </span>
             </div>
           </div>
-          {baseExpanded && (
+          {(
             <table className="w-full text-sm">
               <thead className="border-b border-morandi-container/60">
                 <tr>
@@ -450,19 +474,11 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
           >
             <div
               className={cn(
-                'bg-morandi-container/30 px-4 py-2 flex items-center justify-between cursor-pointer select-none',
-                (tierExpanded[tier.id] ?? true) && 'border-b border-border'
+                'bg-morandi-container/30 px-4 py-2 flex items-center justify-between select-none',
+                'border-b border-border'
               )}
-              onClick={() =>
-                setTierExpanded(prev => ({ ...prev, [tier.id]: !(prev[tier.id] ?? true) }))
-              }
             >
               <div className="flex items-center gap-1">
-                {(tierExpanded[tier.id] ?? true) ? (
-                  <ChevronDown size={14} className="text-morandi-secondary" />
-                ) : (
-                  <ChevronRight size={14} className="text-morandi-secondary" />
-                )}
                 <span className="text-xs font-semibold text-morandi-secondary mr-1">
                   砍次 {tierIndex + 2}
                 </span>
@@ -508,7 +524,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                 )}
               </div>
             </div>
-            {(tierExpanded[tier.id] ?? true) && (
+            {(
               <table className="w-full text-sm">
                 <thead className="border-b border-border/60">
                   <tr>
@@ -608,23 +624,22 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                     <span>•</span>
                     <input
                       type="text"
-                      value={insuranceText}
-                      onChange={e => {
-                        setInsuranceText(e.target.value)
-                        onInsuranceChange?.(e.target.value)
-                      }}
-                      placeholder="輸入數字 (例如: 200/20)"
-                      onBlur={e => {
-                        const val = e.target.value.trim()
-                        const match = val.match(/^(\d+)\/(\d+)$/)
-                        if (match) {
-                          const formatted = `${match[1]}萬旅責險+${match[2]}萬意外醫療`
-                          setInsuranceText(formatted)
-                          onInsuranceChange?.(formatted)
-                        }
-                      }}
-                      className="flex-1 px-2 py-1 text-xs border rounded"
+                      inputMode="numeric"
+                      value={liability}
+                      onChange={e => updateInsurance(normalizeDigits(e.target.value), medical)}
+                      placeholder="200"
+                      className="w-16 px-2 py-1 text-xs border rounded"
                     />
+                    <span className="text-xs">萬旅責險 +</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={medical}
+                      onChange={e => updateInsurance(liability, normalizeDigits(e.target.value))}
+                      placeholder="20"
+                      className="w-16 px-2 py-1 text-xs border rounded"
+                    />
+                    <span className="text-xs">萬意外醫療</span>
                   </div>
                   {includedToggleItems.map(item => (
                     <label

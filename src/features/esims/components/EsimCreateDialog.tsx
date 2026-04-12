@@ -17,7 +17,6 @@ import {
 import { useEsims, createEsim, createOrder, invalidateTours } from '@/data'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTours } from '@/features/tours/hooks/useTours'
-import { tourService } from '@/features/tours/services/tour.service'
 import { fastMoveService } from '@/services/fastmove.service'
 import { RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
@@ -102,22 +101,16 @@ export function EsimCreateDialog({ open, onOpenChange }: EsimCreateDialogProps) 
     return options
   }, [tourOrders, selectedTourId])
 
-  // ✅ 當對話框打開時，載入團號資料並自動選擇網卡專用團
+  // ✅ 當對話框打開時，載入團號資料
   useEffect(() => {
     if (open && !hasInitialized) {
       const init = async () => {
         try {
-          // 1. 確保 SWR 快取已載入（如果需要強制刷新）
+          // 確保 SWR 快取已載入
           if (tours.length === 0) {
             await invalidateTours()
           }
-
-          // 2. 取得或建立網卡專用團
-          const esimTour = await tourService.getOrCreateEsimTour()
-          if (esimTour) {
-            setSelectedTourId(esimTour.id)
-            setHasInitialized(true)
-          }
+          setHasInitialized(true)
         } catch (error) {
           logger.error('Failed to initialize esim dialog:', error)
         }
@@ -128,6 +121,7 @@ export function EsimCreateDialog({ open, onOpenChange }: EsimCreateDialogProps) 
     // 對話框關閉時重置初始化狀態
     if (!open) {
       setHasInitialized(false)
+      setSelectedTourId('')
     }
   }, [open, hasInitialized, tours.length])
 
@@ -261,32 +255,25 @@ export function EsimCreateDialog({ open, onOpenChange }: EsimCreateDialogProps) 
     setEsimItems(esimItems.map(item => (item.id === id ? { ...item, [field]: value } : item)))
   }
 
-  // 不強制要求選擇團號（可以使用預設網卡團）
-  const canSubmit = esimItems.every(item => item.product_region && item.product_id && item.email)
+  // 不強制選擇團號（沒選會自動建立 ad-hoc 網卡團）
+  const canSubmit = esimItems.every(
+    item => item.product_region && item.product_id && item.email
+  )
 
   const handleSubmit = async () => {
     if (!canSubmit || !user) return
 
     try {
-      // 決定使用哪個團號
-      let finalGroupCode = groupCode
       let selectedTour = tours?.find(t => t.id === selectedTourId)
 
-      // 如果沒選團號，使用預設網卡團 ESIM-{year}
+      // 如果沒選團，自動建立 ad-hoc 網卡團（出發日=今天）
       if (!selectedTour) {
-        const currentYear = new Date().getFullYear()
-        const defaultEsimCode = `ESIM-${currentYear}`
-        const defaultEsimTour = tours?.find(t => t.code === defaultEsimCode)
-
-        if (defaultEsimTour) {
-          finalGroupCode = defaultEsimTour.code
-          selectedTour = defaultEsimTour
-        } else {
-          // 提示需要先建立預設網卡團
-          await alert(`請先建立 ${defaultEsimCode} 網卡團，或在表單中選擇團號`, 'warning')
-          return
-        }
+        const { tourService } = await import('@/features/tours/services/tour.service')
+        const customerName = contactPerson || (user as { display_name?: string }).display_name
+        selectedTour = await tourService.createAdHocTour('esim', customerName)
+        toast.success(`已建立網卡團：${selectedTour.code}`)
       }
+      const finalGroupCode = selectedTour.code
 
       // 取得或建立訂單
       let targetOrderNumber = orderNumber

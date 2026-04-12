@@ -89,6 +89,7 @@ export function usePublish({
     show_hotels: data.showHotels,
     show_pricing_details: data.showPricingDetails,
     show_price_tiers: data.showPriceTiers || false,
+    price_tiers: data.priceTiers || null,
     faqs: data.faqs || null,
     show_faqs: data.showFaqs || false,
     notices: data.notices || null,

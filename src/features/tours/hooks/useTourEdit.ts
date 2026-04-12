@@ -27,6 +27,7 @@ export interface EditFormData {
   return_date: string
   description: string
   enable_checkin: boolean
+  tour_service_type: string // 團類型 (tour_group / flight / hotel ...)
 }
 
 export interface ItinerarySyncInfo {
@@ -71,6 +72,7 @@ export function useTourEdit(params: UseTourEditParams) {
     return_date: '',
     description: '',
     enable_checkin: false,
+    tour_service_type: 'tour_group',
   })
 
   // Reset initialized state when dialog closes
@@ -107,6 +109,8 @@ export function useTourEdit(params: UseTourEditParams) {
       return_date: tour.return_date || '',
       description: tour.description || '',
       enable_checkin: tour.enable_checkin || false,
+      tour_service_type:
+        (tour as { tour_service_type?: string | null }).tour_service_type || 'tour_group',
     })
   }, [isOpen, tour, countries])
 
@@ -179,6 +183,7 @@ export function useTourEdit(params: UseTourEditParams) {
         return_date: formData.return_date,
         description: formData.description.trim(),
         enable_checkin: formData.enable_checkin,
+        tour_service_type: formData.tour_service_type,
         updated_at: new Date().toISOString(),
       }
 

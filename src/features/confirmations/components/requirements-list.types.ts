@@ -108,3 +108,39 @@ export function safeGetCategoryKey(category: string): CategoryKey {
   const validKeys: CategoryKey[] = ['transport', 'accommodation', 'meal', 'activity', 'other']
   return validKeys.includes(category as CategoryKey) ? (category as CategoryKey) : 'other'
 }
+
+/**
+ * 依團類型決定要顯示哪些需求類別
+ * - flight (機票)：只顯示機票（歸在 transport）
+ * - flight_hotel (機+酒)：機票 + 住宿
+ * - hotel (住宿)：只顯示住宿
+ * - car_service (派車)：只顯示交通
+ * - tour_group (旅遊團)：全部顯示
+ * - visa (簽證)：只顯示其他（簽證歸在其他）
+ */
+export function getCategoriesForTourType(
+  tourServiceType?: string | null
+): typeof CATEGORIES {
+  switch (tourServiceType) {
+    case 'flight':
+      // 機票：只顯示交通類（機票歸這）
+      return CATEGORIES.filter(c => c.key === 'transport')
+    case 'flight_hotel':
+      // 機+酒：交通 + 住宿
+      return CATEGORIES.filter(c => c.key === 'transport' || c.key === 'accommodation')
+    case 'hotel':
+      // 住宿：只顯示住宿
+      return CATEGORIES.filter(c => c.key === 'accommodation')
+    case 'car_service':
+      // 派車：只顯示交通
+      return CATEGORIES.filter(c => c.key === 'transport')
+    case 'visa':
+    case 'esim':
+      // 簽證 / 網卡：歸在其他
+      return CATEGORIES.filter(c => c.key === 'other')
+    case 'tour_group':
+    default:
+      // 旅遊團或未指定：全部
+      return CATEGORIES
+  }
+}

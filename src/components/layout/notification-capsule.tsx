@@ -227,13 +227,13 @@ export function NotificationCapsule() {
       )}
 
       {/* 膠囊按鈕 */}
-      <button
-        onClick={() => setOpen(!open)}
+      <div
         className={cn(
-          'flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg transition-all',
+          'flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg transition-all cursor-pointer',
           'bg-morandi-red/90 hover:bg-morandi-red text-white',
           'backdrop-blur-sm border border-white/10'
         )}
+        onClick={() => setOpen(!open)}
       >
         <Bell size={16} className="flex-shrink-0" />
         <span className="text-sm font-medium">
@@ -245,7 +245,7 @@ export function NotificationCapsule() {
         >
           <X size={14} />
         </button>
-      </button>
+      </div>
     </div>
   )
 }

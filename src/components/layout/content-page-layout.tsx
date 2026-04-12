@@ -148,7 +148,7 @@ export function ContentPageLayout({
   contentClassName,
 }: ContentPageLayoutProps) {
   return (
-    <div className={className || 'h-full flex flex-col'}>
+    <div className={className || 'flex-1 min-h-0 flex flex-col'}>
       {/* Header 區域 */}
       <ResponsiveHeader
         title={title}
@@ -182,8 +182,10 @@ export function ContentPageLayout({
         {headerChildren}
       </ResponsiveHeader>
 
-      {/* 內容區域 */}
-      <div className={contentClassName || 'flex-1 overflow-auto'}>{children}</div>
+      {/* 內容區域 — 預設 flex col 讓子元件可用 flex-1 填滿高度 */}
+      <div className={contentClassName || 'flex-1 overflow-auto flex flex-col min-h-0'}>
+        {children}
+      </div>
     </div>
   )
 }

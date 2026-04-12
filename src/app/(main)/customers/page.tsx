@@ -12,8 +12,6 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import {
-  Search,
-  X,
   Plus,
   AlertTriangle,
   Edit,
@@ -32,10 +30,6 @@ import { DateCell } from '@/components/table-cells'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
 import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
-import {
-  CustomerSearchDialog,
-  CustomerSearchParams,
-} from '@/components/customers/customer-search-dialog'
 import { useCustomers, createCustomer, updateCustomer, deleteCustomer } from '@/data'
 import type { Customer, CreateCustomerData } from '@/types/customer.types'
 import { confirm } from '@/lib/ui/alert-dialog'
@@ -43,8 +37,7 @@ import { supabase } from '@/lib/supabase/client'
 import { syncPassportImageToMembers } from '@/lib/utils/sync-passport-image'
 import { useRouter } from 'next/navigation'
 
-// 本地組件和 Hooks
-import { useCustomerSearch } from './hooks'
+// 本地組件
 import {
   CustomerAddDialog,
   CustomerDialog,
@@ -58,12 +51,37 @@ export default function CustomersPage() {
   const { items: customers } = useCustomers()
   const addCustomer = createCustomer
 
-  // 搜尋 Hook
-  const { searchParams, setSearchParams, filteredCustomers, hasActiveFilters, clearFilters } =
-    useCustomerSearch(customers)
+  // 搜尋（單一輸入框，比對所有主要欄位）
+  const [searchQuery, setSearchQuery] = useState('')
+  const filteredCustomers = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    const result = q
+      ? customers.filter(c =>
+          [
+            c.code,
+            c.name,
+            c.passport_name,
+            c.phone,
+            c.email,
+            c.passport_number,
+            c.national_id,
+            c.city,
+            c.address,
+          ]
+            .filter(Boolean)
+            .some(v => String(v).toLowerCase().includes(q))
+        )
+      : customers
+    return [...result].sort((a, b) => {
+      const aUnverified = a.verification_status !== 'verified'
+      const bUnverified = b.verification_status !== 'verified'
+      if (aUnverified && !bUnverified) return -1
+      if (!aUnverified && bUnverified) return 1
+      return (b.code || '').localeCompare(a.code || '')
+    })
+  }, [customers, searchQuery])
 
   // 對話框狀態
-  const [isAdvancedSearchOpen, setIsAdvancedSearchOpen] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isCustomerDialogOpen, setIsCustomerDialogOpen] = useState(false)
   const [customerDialogMode, setCustomerDialogMode] = useState<'view' | 'edit'>('view')
@@ -327,6 +345,10 @@ export default function CustomersPage() {
     <ContentPageLayout
       title={L.page_title}
       icon={Users}
+      showSearch={true}
+      searchTerm={searchQuery}
+      onSearchChange={setSearchQuery}
+      searchPlaceholder="搜尋編號 / 姓名 / 拼音 / 電話 / 護照 / 身分證..."
       headerActions={
         <div className="flex items-center gap-2">
           <Button
@@ -338,28 +360,6 @@ export default function CustomersPage() {
             <Users size={16} />
             <span className="hidden sm:inline">{L.btn_groups}</span>
           </Button>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsAdvancedSearchOpen(true)}
-            className="gap-2"
-          >
-            <Search size={16} />
-            <span className="hidden sm:inline">{L.btn_advanced_search}</span>
-          </Button>
-
-          {hasActiveFilters && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={clearFilters}
-              className="gap-2 text-morandi-red"
-            >
-              <X size={16} />
-              <span className="hidden sm:inline">{L.btn_clear_filters}</span>
-            </Button>
-          )}
 
           <Button
             variant="outline"
@@ -382,20 +382,8 @@ export default function CustomersPage() {
         </div>
       }
     >
-      {hasActiveFilters && (
-        <div className="px-4 py-2 bg-morandi-container/20 border-b border-border">
-          <div className="text-xs text-morandi-secondary">
-            {L.filter_applied(
-              Object.keys(searchParams).length,
-              filteredCustomers.length,
-              customers.length
-            )}
-          </div>
-        </div>
-      )}
-
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full">
+      <div className="flex-1 min-h-0 flex flex-col">
+        <div className="flex-1 min-h-0">
           <EnhancedTable
             columns={tableColumns}
             data={filteredCustomers}
@@ -462,14 +450,6 @@ export default function CustomersPage() {
           />
         </div>
       </div>
-
-      {/* 進階搜尋對話框 */}
-      <CustomerSearchDialog
-        open={isAdvancedSearchOpen}
-        onClose={() => setIsAdvancedSearchOpen(false)}
-        onSearch={setSearchParams}
-        initialValues={searchParams}
-      />
 
       {/* 新增顧客對話框 */}
       <CustomerAddDialog

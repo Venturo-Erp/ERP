@@ -54,7 +54,7 @@ import type {
   QuoteItem,
   CategoryKey,
 } from './requirements-list.types'
-import { CATEGORIES } from './requirements-list.types'
+import { CATEGORIES, getCategoriesForTourType } from './requirements-list.types'
 import { COMP_REQUIREMENTS_LABELS } from './constants/labels'
 import { groupItemsByCategory } from './parse-quote-items'
 import { coreItemsToQuoteItems } from './core-items-to-quote-items'
@@ -179,7 +179,7 @@ export function RequirementsList({
             .from('itineraries')
             .select('id, daily_itinerary')
             .eq('tour_id', tourId)
-            .single()
+            .maybeSingle()
           if (itineraryData) {
             setItinerary(itineraryData)
           }
@@ -617,9 +617,18 @@ export function RequirementsList({
     })
   }
 
+  // 依團類型決定要顯示的類別
+  const visibleCategories = useMemo(
+    () =>
+      getCategoriesForTourType(
+        (tour as { tour_service_type?: string | null } | null)?.tour_service_type
+      ),
+    [tour]
+  )
+
   const checkedQuoteItems = useMemo(() => {
     const result: { category: string; item: QuoteItem }[] = []
-    for (const cat of CATEGORIES) {
+    for (const cat of visibleCategories) {
       const items = itemsByCategory[cat.key]
       items.forEach((item, idx) => {
         const key = getItemKey(cat.key, item, idx)
@@ -1249,7 +1258,7 @@ export function RequirementsList({
                   </tr>
                 </thead>
                 <tbody>
-                  {CATEGORIES.map(cat => {
+                  {visibleCategories.map(cat => {
                     const categoryItems = itemsByCategory[cat.key]
                     if (categoryItems.length === 0) return null
 
@@ -1575,10 +1584,9 @@ export function RequirementsList({
 
                                 // 交通：區分機票和遊覽車
                                 if (cat.key === 'transport') {
-                                  // 機票（成人/小孩/嬰兒）
-                                  const isTicket = ['成人', '小孩', '嬰兒', '兒童'].some(
-                                    t => item.title?.includes(t) || supplierName?.includes(t)
-                                  )
+                                  // 機票（聚合後 title = '機票'）
+                                  const isTicket =
+                                    item.title === '機票' || supplierName === '機票'
 
                                   if (isTicket) {
                                     return (

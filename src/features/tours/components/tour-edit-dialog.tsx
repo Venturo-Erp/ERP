@@ -1,8 +1,15 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { X } from 'lucide-react'
 import { Tour } from '@/stores/types'
 import { useTourEdit } from '../hooks/useTourEdit'
@@ -11,6 +18,19 @@ import { Input } from '@/components/ui/input'
 import { SimpleDateInput } from '@/components/ui/simple-date-input'
 import { ItinerarySyncDialog } from './ItinerarySyncDialog'
 import { COMP_TOURS_LABELS } from '../constants/labels'
+import { useAuthStore } from '@/stores/auth-store'
+import { supabase } from '@/lib/supabase/client'
+import { logger } from '@/lib/utils/logger'
+
+const ALL_TOUR_CATEGORIES = [
+  { id: 'tour_group', label: '旅遊團' },
+  { id: 'flight', label: '機票' },
+  { id: 'flight_hotel', label: '機加酒' },
+  { id: 'hotel', label: '訂房' },
+  { id: 'car_service', label: '派車' },
+  { id: 'visa', label: '簽證' },
+  { id: 'esim', label: '網卡' },
+]
 
 interface TourEditDialogProps {
   isOpen: boolean
@@ -31,6 +51,33 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
     handleSync,
     closeSyncDialog,
   } = useTourEdit({ tour, isOpen, onClose, onSuccess })
+
+  // 讀取租戶啟用的團類型
+  const { user } = useAuthStore()
+  const [enabledIds, setEnabledIds] = useState<string[] | null>(null)
+  useEffect(() => {
+    if (!user?.workspace_id || !isOpen) return
+    const wsId = user.workspace_id
+    const load = async () => {
+      try {
+        const { data } = await supabase.from('workspaces').select('*').eq('id', wsId).single()
+        const ids = (data as { enabled_tour_categories?: string[] } | null)
+          ?.enabled_tour_categories
+        if (Array.isArray(ids) && ids.length > 0) {
+          setEnabledIds(ids)
+        } else {
+          setEnabledIds(ALL_TOUR_CATEGORIES.map(c => c.id))
+        }
+      } catch (err) {
+        logger.error('載入團類型設定失敗:', err)
+        setEnabledIds(ALL_TOUR_CATEGORIES.map(c => c.id))
+      }
+    }
+    void load()
+  }, [user?.workspace_id, isOpen])
+  const enabledTourCategories = ALL_TOUR_CATEGORIES.filter(cat =>
+    enabledIds ? enabledIds.includes(cat.id) : true
+  )
 
   // 🔧 核心表架構：國家變更 → 接收完整 {id, name, code}
   const handleCountryChange = (data: { id: string; name: string; code: string }) => {
@@ -99,6 +146,30 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
                 className="mt-1"
               />
             </div>
+
+            {/* 團類型（編輯模式可改 — 例如機票團後來變成機加酒） */}
+            {enabledTourCategories.length > 1 && (
+              <div>
+                <label className="text-sm font-medium text-morandi-primary">團類型</label>
+                <Select
+                  value={formData.tour_service_type || 'tour_group'}
+                  onValueChange={value =>
+                    setFormData(prev => ({ ...prev, tour_service_type: value }))
+                  }
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {enabledTourCategories.map(cat => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {/* 🔧 核心表架構：統一用 CountryAirportSelector */}
             <CountryAirportSelector

@@ -110,7 +110,6 @@ export function useTourPageState() {
       進行中: 'text-morandi-gold',
       結案: 'text-morandi-green',
       取消: 'text-morandi-red',
-      特殊團: 'text-purple-600',
     }
     return colors[status] || 'text-morandi-secondary'
   }, [])

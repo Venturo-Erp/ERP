@@ -90,7 +90,7 @@ export function PendingList({
         data={data}
         columns={columns}
         searchableFields={['request_number', 'code', 'tour_name']}
-        initialPageSize={20}
+        initialPageSize={15}
         searchTerm={searchTerm}
       />
     </>
@@ -161,7 +161,7 @@ export function CurrentOrderList({
         data={requests}
         columns={columns}
         searchableFields={['request_number', 'code', 'tour_name']}
-        initialPageSize={20}
+        initialPageSize={15}
         searchTerm={searchTerm}
       />
     </div>
@@ -209,7 +209,7 @@ export function HistoryList({ data, searchTerm, onPrintPDF }: HistoryListProps) 
       data={data}
       columns={columns}
       searchableFields={['order_number']}
-      initialPageSize={20}
+      initialPageSize={15}
       searchTerm={searchTerm}
     />
   )

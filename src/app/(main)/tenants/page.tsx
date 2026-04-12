@@ -9,7 +9,6 @@ import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Building2, Pencil } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useWorkspaceChannels } from '@/stores/workspace'
-import { useEmployeesSlim } from '@/data'
 import type { Workspace } from '@/stores/workspace'
 import { TableColumn } from '@/components/ui/enhanced-table'
 import { DateCell, ActionCell } from '@/components/table-cells'
@@ -18,7 +17,11 @@ import { logger } from '@/lib/utils/logger'
 import { CreateTenantDialog } from './create-tenant-dialog'
 import { EditTenantDialog } from './edit-tenant-dialog'
 
-type WorkspaceRow = Workspace & { employee_count: number }
+type WorkspaceRow = Workspace & {
+  employee_count: number
+  admin_name: string | null
+  admin_id: string | null
+}
 
 const WORKSPACE_TYPE_MAP: Record<string, string> = {
   travel_agency: LABELS.TYPE_TRAVEL_AGENCY,
@@ -30,11 +33,11 @@ const WORKSPACE_TYPE_MAP: Record<string, string> = {
 export default function TenantsPage() {
   const router = useRouter()
   const { updateWorkspace } = useWorkspaceChannels()
-  const { items: employees } = useEmployeesSlim()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingWorkspace, setEditingWorkspace] = useState<WorkspaceRow | null>(null)
   // 用 SWR 快取租戶列表（繞過 RLS，server 端檢查 tenants 權限）
-  const { data: allWorkspaces = [], mutate: refreshWorkspaces } = useSWR<Workspace[]>(
+  // API 現在會回傳 employee_count / admin_name / admin_id（已排除機器人）
+  const { data: allWorkspaces = [], mutate: refreshWorkspaces } = useSWR<WorkspaceRow[]>(
     'all-workspaces',
     async () => {
       const res = await fetch('/api/workspaces')
@@ -52,19 +55,8 @@ export default function TenantsPage() {
     [router]
   )
 
-  const getEmployeeCount = useCallback(
-    (workspaceId: string) => {
-      return (employees || []).filter(emp => emp.workspace_id === workspaceId).length
-    },
-    [employees]
-  )
-
-  const data: WorkspaceRow[] = useMemo(() => {
-    return (allWorkspaces || []).map(ws => ({
-      ...ws,
-      employee_count: getEmployeeCount(ws.id),
-    }))
-  }, [allWorkspaces, getEmployeeCount])
+  // API 已經回傳 employee_count / admin_name，直接用即可
+  const data: WorkspaceRow[] = useMemo(() => allWorkspaces || [], [allWorkspaces])
 
   const handleToggleActive = useCallback(
     async (workspace: WorkspaceRow, e?: React.MouseEvent) => {

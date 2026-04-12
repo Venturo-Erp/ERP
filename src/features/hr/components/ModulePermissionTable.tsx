@@ -405,7 +405,7 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
       <div className="border border-border rounded-lg overflow-hidden" style={{ maxHeight }}>
         <div className="overflow-y-auto" style={{ maxHeight }}>
           {/* 表頭 */}
-          <div className="flex items-center bg-morandi-bg/50 sticky top-0 border-b border-border">
+          <div className="flex items-center bg-card sticky top-0 z-20 border-b border-border shadow-sm">
             <div className="flex-1 p-4 font-semibold text-morandi-primary">功能模組</div>
             <div className="w-32 p-4 text-center font-semibold text-morandi-primary">可讀取</div>
             <div className="w-32 p-4 text-center font-semibold text-morandi-primary">可寫入</div>

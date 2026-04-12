@@ -2,7 +2,7 @@
 
 import { getTodayString } from '@/lib/utils/format-date'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -15,6 +15,9 @@ import { SimpleDateInput } from '@/components/ui/simple-date-input'
 import { CountryAirportSelector } from '@/components/selectors/CountryAirportSelector'
 import { useWorkspaceFeatures } from '@/lib/permissions'
 import { useDepartments, useEmployeesSlim } from '@/data'
+import { useAuthStore } from '@/stores/auth-store'
+import { supabase } from '@/lib/supabase/client'
+import { logger } from '@/lib/utils/logger'
 import type { NewTourData } from '../../types'
 import { TOUR_BASIC_INFO } from '../../constants'
 
@@ -27,22 +30,52 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
   const isProposalOrTemplate = newTour.tour_type === 'proposal' || newTour.tour_type === 'template'
   const { isFeatureEnabled, loading: featuresLoading } = useWorkspaceFeatures()
   const hasDepartments = isFeatureEnabled('departments')
-  const hasTourAttributes = isFeatureEnabled('tour_attributes')
   const { items: departments = [] } = useDepartments()
   const { items: employees = [] } = useEmployeesSlim()
 
-  // 暫時硬編碼可用的團類型（等後端 API 完成後改為從設定獲取）
-  const availableTourCategories = [
-    { id: 'flight', label: '✈️ 機票', enabled: true },
-    { id: 'flight_hotel', label: '🏨 機加酒', enabled: true },
-    { id: 'hotel', label: '🛏️ 訂房', enabled: true },
-    { id: 'car_service', label: '🚗 派車', enabled: true },
-    { id: 'tour_group', label: '🧳 旅遊團', enabled: true },
-    { id: 'visa', label: '🛂 簽證', enabled: true },
+  // 所有團類型定義
+  const ALL_TOUR_CATEGORIES = [
+    { id: 'tour_group', label: '旅遊團' },
+    { id: 'flight', label: '機票' },
+    { id: 'flight_hotel', label: '機加酒' },
+    { id: 'hotel', label: '訂房' },
+    { id: 'car_service', label: '派車' },
+    { id: 'visa', label: '簽證' },
+    { id: 'esim', label: '網卡' },
   ]
 
-  // 實際可用的團類型（根據租戶設定）
-  const enabledTourCategories = availableTourCategories.filter(cat => cat.enabled)
+  // 從租戶設定讀取啟用的團類型
+  const { user } = useAuthStore()
+  const [enabledIds, setEnabledIds] = useState<string[] | null>(null)
+  useEffect(() => {
+    if (!user?.workspace_id) return
+    const wsId = user.workspace_id
+    const load = async () => {
+      try {
+        const { data } = await supabase
+          .from('workspaces')
+          .select('*')
+          .eq('id', wsId)
+          .single()
+        const ids = (data as { enabled_tour_categories?: string[] } | null)?.enabled_tour_categories
+        if (Array.isArray(ids) && ids.length > 0) {
+          setEnabledIds(ids)
+        } else {
+          setEnabledIds(ALL_TOUR_CATEGORIES.map(c => c.id))
+        }
+      } catch (err) {
+        logger.error('載入團類型設定失敗:', err)
+        setEnabledIds(ALL_TOUR_CATEGORIES.map(c => c.id))
+      }
+    }
+    void load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.workspace_id])
+
+  // 過濾出實際可用的團類型
+  const enabledTourCategories = ALL_TOUR_CATEGORIES.filter(cat =>
+    enabledIds ? enabledIds.includes(cat.id) : true
+  )
 
   // 🔧 核心表架構：接收完整國家資料
   const handleCountryChange = (data: { id: string; name: string; code: string }) => {
@@ -91,16 +124,23 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
         />
       </div>
 
-      {/* 團類型選擇（必填） - 僅當租戶開啟 tour_attributes 功能時顯示 */}
-      {hasTourAttributes && (
+      {/* 團類型選擇（必填） — 只有當啟用 ≥ 2 種時才顯示下拉選單 */}
+      {enabledTourCategories.length > 1 && (
         <div>
           <label className="text-sm font-medium text-morandi-primary">
             團類型 <span className="text-red-500">*</span>
           </label>
           <Select
-            value={newTour.tour_service_type || 'tour_group'}
+            value={newTour.tour_service_type || enabledTourCategories[0]?.id || 'tour_group'}
             onValueChange={(
-              value: 'flight' | 'flight_hotel' | 'hotel' | 'car_service' | 'tour_group' | 'visa'
+              value:
+                | 'flight'
+                | 'flight_hotel'
+                | 'hotel'
+                | 'car_service'
+                | 'tour_group'
+                | 'visa'
+                | 'esim'
             ) =>
               setNewTour(prev => ({
                 ...prev,

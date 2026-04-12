@@ -119,6 +119,22 @@ else
   log "Hermes Agent 安裝完成"
 fi
 
+# 自動設定 Hermes 火山引擎 API
+if [[ -d ~/.hermes ]]; then
+  mkdir -p ~/.hermes
+  # 寫入 .env（API Key）
+  if ! grep -q "CUSTOM_API_KEY" ~/.hermes/.env 2>/dev/null; then
+    cat >> ~/.hermes/.env << 'ENVEOF'
+
+# 火山引擎 API（Venturo 統一設定）
+CUSTOM_API_BASE=https://ark.cn-beijing.volces.com/api/v3
+CUSTOM_API_KEY=fccf7910-c650-41ab-9eb7-afc2916187aa
+ENVEOF
+    log "Hermes API Key 已寫入"
+  fi
+  log "Hermes 設定完成（模型需手動選：hermes setup model → More providers → Custom endpoint → 選 101 deepseek-v3-2）"
+fi
+
 # ============================================================
 # 4. OpenClaw（AI 團隊管理）
 # ============================================================
@@ -221,9 +237,37 @@ log "工作目錄建立完成"
 # 完成
 # ============================================================
 echo ""
+LOCAL_IP_FINAL=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo "未知")
+HOSTNAME_FINAL=$(hostname)
+
 echo "╔══════════════════════════════════════════════╗"
 echo "║              安裝完成！                     ║"
 echo "╚══════════════════════════════════════════════╝"
+echo ""
+echo "┌──────────────────────────────────────────────┐"
+echo "│  ⚠️  請拍照或抄寫以下資訊給 William：        │"
+echo "│                                              │"
+echo "│  電腦名稱: $HOSTNAME_FINAL"
+echo "│  本機 IP:  $LOCAL_IP_FINAL"
+echo "│  SSH 指令: ssh $(whoami)@$LOCAL_IP_FINAL"
+echo "│  Mac 帳號: $(whoami)"
+echo "│                                              │"
+echo "└──────────────────────────────────────────────┘"
+echo ""
+
+# 也存一份到桌面方便查看
+cat > ~/Desktop/這台電腦資訊.txt << INFOEOF
+=== Venturo AI 工作站資訊 ===
+電腦名稱: $HOSTNAME_FINAL
+本機 IP: $LOCAL_IP_FINAL
+SSH 指令: ssh $(whoami)@$LOCAL_IP_FINAL
+Mac 帳號: $(whoami)
+安裝日期: $(date '+%Y-%m-%d %H:%M')
+
+把這些資訊傳給 William！
+INFOEOF
+log "已在桌面建立「這台電腦資訊.txt」"
+
 echo ""
 echo "已安裝的工具："
 echo "  ✓ Homebrew, Git, Python, Node.js"
@@ -231,42 +275,19 @@ echo "  ✓ Hermes Agent（AI 中樞大腦）"
 echo "  ✓ OpenClaw（AI 團隊管理）"
 echo "  ✓ Claude Code（程式開發）"
 echo "  ✓ Ollama（本地免費模型）"
-echo "  ✓ Tailscale（VPN 遠端存取）"
+echo "  ✓ SSH 遠端登入（已開啟）"
 echo "  ✓ jq, tmux"
 echo ""
-echo "下一步（需要手動操作）："
+echo "下一步（等 William 遠端設定，不用自己做）："
 echo ""
-echo "  1. 設定 Hermes Agent："
-echo "     $ hermes setup"
-echo "     - 選 Provider: volcengine 或 custom"
-echo "     - API Key: fccf7910-c650-41ab-9eb7-afc2916187aa"
-echo "     - 模型: deepseek-v3.2 或 minimax-m2.5"
+echo "  William 會用 SSH 連進來設定以下內容："
+echo "  - Hermes Agent API"
+echo "  - OpenClaw 團隊"
+echo "  - Git 帳號"
+echo "  - 角色分配（大腦/創意/工程/行銷）"
 echo ""
-echo "  2. 設定 OpenClaw："
-echo "     $ openclaw onboard"
-echo ""
-echo "  3. 設定 Tailscale："
-echo "     $ tailscale up"
-echo ""
-echo "  4. 下載本地模型（可選）："
-echo "     $ ollama pull qwen3:14b"
-echo "     $ ollama pull gemma3:12b"
-echo ""
-echo "  5. 設定 Git："
-echo "     $ git config --global user.name '你的名字'"
-echo "     $ git config --global user.email '你的 email'"
-echo ""
-echo "  6. Clone ERP 專案："
-echo "     $ cd ~/Projects"
-echo "     $ git clone https://github.com/Venturo-Erp/ERP.git venturo-erp"
-echo "     $ cd venturo-erp && npm install"
-echo ""
-echo "火山引擎 API 配置："
-echo "  Provider: volcengine"
-echo "  可用模型："
-echo "    - volcengine-plan/deepseek-v3.2（便宜日常用）"
-echo "    - volcengine-plan/minimax-m2.5（程式能力強）"
-echo "    - volcengine-plan/kimi-k2.5"
-echo "    - volcengine-plan/doubao-seed-2.0-pro"
-echo "    - volcengine-plan/glm-4.7"
+echo "MiniMax API 配置（William 設定用）："
+echo "  Provider: MiniMax China"
+echo "  模型: MiniMax-M2.5"
+echo "  設定指令: hermes setup model → More providers → MiniMax China"
 echo ""

@@ -8,7 +8,7 @@
  * - 下半部：每日分頁 tab（Day 1 | Day 2 | ...）
  */
 
-import { useState, useEffect, useCallback, useMemo, useRef, Fragment } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef, Fragment, lazy, Suspense } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -30,6 +30,8 @@ import {
   Plus,
   MapPin,
   Map,
+  Globe,
+  List,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -38,6 +40,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores'
+import { useWorkspaceFeatures } from '@/lib/permissions/hooks'
 import { useItineraries, createItinerary, updateItinerary } from '@/data'
 import { updateTour } from '@/data/entities/tours'
 import { useFlightSearch } from '@/hooks'
@@ -70,6 +73,10 @@ interface TourItineraryTabProps {
 // Main Component
 // ============================================================
 export function TourItineraryTab({ tour }: TourItineraryTabProps) {
+  const { isFeatureEnabled } = useWorkspaceFeatures()
+  const hasWebItinerary = isFeatureEnabled('itinerary')
+  const [itineraryMode, setItineraryMode] = useState<'simple' | 'web'>('simple')
+
   const { user: currentUser, isAdmin } = useAuthStore()
   const { items: itineraries, refresh } = useItineraries()
   const { syncToCore } = useSyncItineraryToCore()
@@ -1292,6 +1299,45 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   // Edit mode — 左右分割佈局（左 60% 行程編輯，右 40% 資源庫+地圖）
   // ============================================================
   return (
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* 簡易行程 / 網頁行程 切換（僅開通功能時顯示） */}
+      {hasWebItinerary && (
+        <div className="flex items-center gap-1 px-1 pb-3">
+          <button
+            onClick={() => setItineraryMode('simple')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              itineraryMode === 'simple'
+                ? 'bg-morandi-gold text-white'
+                : 'text-morandi-secondary hover:bg-morandi-container'
+            }`}
+          >
+            <List className="w-3.5 h-3.5" />
+            簡易行程
+          </button>
+          <button
+            onClick={() => setItineraryMode('web')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              itineraryMode === 'web'
+                ? 'bg-morandi-gold text-white'
+                : 'text-morandi-secondary hover:bg-morandi-container'
+            }`}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            網頁行程
+          </button>
+        </div>
+      )}
+
+      {/* 網頁行程 */}
+      {itineraryMode === 'web' && hasWebItinerary ? (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center text-morandi-muted py-16">
+            <Globe className="h-12 w-12 mx-auto mb-3 opacity-40" />
+            <p className="text-lg font-medium">網頁行程編輯器</p>
+            <p className="text-sm mt-1">即將推出 — 從 SSOT 核心表讀取資料，產出精美網頁行程</p>
+          </div>
+        </div>
+      ) : (
     <DndContext
       sensors={sensors}
       collisionDetection={pointerWithin}
@@ -1778,7 +1824,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 {/* -- Daily schedule table -- */}
                 <div className="rounded-xl border border-border overflow-hidden">
                   <table className="w-full border-separate border-spacing-0 text-sm">
-                    <thead className="sticky top-0 z-10">
+                    <thead className="sticky top-0 z-20 bg-card">
                       <tr className="bg-morandi-gold-header text-xs">
                         <th className="px-2 py-2 text-center w-16 font-medium border-r border-morandi-gold/20">
                           {TOUR_ITINERARY_TAB_LABELS.日期_表頭}
@@ -1889,5 +1935,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         />
       </div>
     </DndContext>
+      )}
+    </div>
   )
 }

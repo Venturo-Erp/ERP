@@ -275,6 +275,26 @@ export default function CompanySettingsPage() {
     loadCompanyData()
   }, [loadCompanyData])
 
+  // 載入完成後，如果 URL 有 hash 就滾動到目標欄位並高亮
+  useEffect(() => {
+    if (loading) return
+    if (typeof window === 'undefined') return
+    const hash = window.location.hash.replace('#', '')
+    if (!hash) return
+    // 等 DOM 渲染完成
+    const timer = setTimeout(() => {
+      const el = document.getElementById(hash)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        el.classList.add('ring-4', 'ring-morandi-gold', 'ring-offset-2', 'rounded-lg')
+        setTimeout(() => {
+          el.classList.remove('ring-4', 'ring-morandi-gold', 'ring-offset-2', 'rounded-lg')
+        }, 3000)
+      }
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [loading])
+
   const handleSave = async () => {
     if (!workspaceId) return
     setSaving(true)
@@ -372,14 +392,16 @@ export default function CompanySettingsPage() {
               <Input value={form.name} disabled className="mt-1.5 bg-morandi-container/30" />
             </div>
 
-            <ImageUploadField
-              label={COMPANY_LABELS.LOGO}
-              hint={COMPANY_LABELS.LOGO_HINT}
-              value={form.logo_url}
-              onChange={url => updateField('logo_url', url)}
-              fieldName="logo"
-              workspaceId={workspaceId}
-            />
+            <div id="field-logo_url" className="scroll-mt-24">
+              <ImageUploadField
+                label={COMPANY_LABELS.LOGO}
+                hint={COMPANY_LABELS.LOGO_HINT}
+                value={form.logo_url}
+                onChange={url => updateField('logo_url', url)}
+                fieldName="logo"
+                workspaceId={workspaceId}
+              />
+            </div>
 
             <div>
               <Label className="text-sm font-medium text-morandi-primary">
@@ -394,7 +416,7 @@ export default function CompanySettingsPage() {
               />
             </div>
 
-            <div>
+            <div id="field-legal_name" className="scroll-mt-24">
               <Label className="text-sm font-medium text-morandi-primary">
                 {COMPANY_LABELS.LEGAL_NAME}
               </Label>
@@ -427,7 +449,7 @@ export default function CompanySettingsPage() {
             <h2 className="text-xl font-semibold">{COMPANY_LABELS.CONTACT_INFO}</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-5">
-            <div>
+            <div id="field-address" className="scroll-mt-24">
               <Label className="text-sm font-medium text-morandi-primary">
                 {COMPANY_LABELS.ADDRESS}
               </Label>
@@ -438,7 +460,7 @@ export default function CompanySettingsPage() {
                 className="mt-1.5"
               />
             </div>
-            <div>
+            <div id="field-phone" className="scroll-mt-24">
               <Label className="text-sm font-medium text-morandi-primary">
                 {COMPANY_LABELS.PHONE}
               </Label>
@@ -460,7 +482,7 @@ export default function CompanySettingsPage() {
                 className="mt-1.5"
               />
             </div>
-            <div>
+            <div id="field-email" className="scroll-mt-24">
               <Label className="text-sm font-medium text-morandi-primary">
                 {COMPANY_LABELS.EMAIL}
               </Label>
@@ -492,7 +514,7 @@ export default function CompanySettingsPage() {
             <Briefcase className="h-6 w-6 text-morandi-gold" />
             <h2 className="text-xl font-semibold">{COMPANY_LABELS.BUSINESS_INFO}</h2>
           </div>
-          <div>
+          <div id="field-tax_id" className="scroll-mt-24">
             <Label className="text-sm font-medium text-morandi-primary">
               {COMPANY_LABELS.TAX_ID}
             </Label>
@@ -567,40 +589,48 @@ export default function CompanySettingsPage() {
             <h2 className="text-xl font-semibold">{COMPANY_LABELS.SEAL_INFO}</h2>
           </div>
           <div className="grid grid-cols-2 gap-6">
-            <ImageUploadField
-              label="大章（公司章）"
-              hint="公司正式印章（建議 PNG 透明背景）"
-              value={form.company_seal_url}
-              onChange={url => updateField('company_seal_url', url)}
-              fieldName="company-seal"
-              workspaceId={workspaceId}
-            />
-            <ImageUploadField
-              label="小章（負責人章）"
-              hint="負責人印章（建議 PNG 透明背景）"
-              value={form.personal_seal_url}
-              onChange={url => updateField('personal_seal_url', url)}
-              fieldName="personal-seal"
-              workspaceId={workspaceId}
-            />
+            <div id="field-company_seal_url" className="scroll-mt-24">
+              <ImageUploadField
+                label="大章（公司章）"
+                hint="公司正式印章（建議 PNG 透明背景）"
+                value={form.company_seal_url}
+                onChange={url => updateField('company_seal_url', url)}
+                fieldName="company-seal"
+                workspaceId={workspaceId}
+              />
+            </div>
+            <div id="field-personal_seal_url" className="scroll-mt-24">
+              <ImageUploadField
+                label="小章（負責人章）"
+                hint="負責人印章（建議 PNG 透明背景）"
+                value={form.personal_seal_url}
+                onChange={url => updateField('personal_seal_url', url)}
+                fieldName="personal-seal"
+                workspaceId={workspaceId}
+              />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-6 mt-6">
-            <ImageUploadField
-              label={COMPANY_LABELS.INVOICE_SEAL_IMAGE}
-              hint={COMPANY_LABELS.INVOICE_SEAL_IMAGE_HINT}
-              value={form.invoice_seal_image_url}
-              onChange={url => updateField('invoice_seal_image_url', url)}
-              fieldName="invoice-seal"
-              workspaceId={workspaceId}
-            />
-            <ImageUploadField
-              label="合約專用章"
-              hint="用於電子合約（建議 PNG 透明背景）"
-              value={form.contract_seal_image_url}
-              onChange={url => updateField('contract_seal_image_url', url)}
-              fieldName="contract-seal"
-              workspaceId={workspaceId}
-            />
+            <div id="field-invoice_seal_image_url" className="scroll-mt-24">
+              <ImageUploadField
+                label={COMPANY_LABELS.INVOICE_SEAL_IMAGE}
+                hint={COMPANY_LABELS.INVOICE_SEAL_IMAGE_HINT}
+                value={form.invoice_seal_image_url}
+                onChange={url => updateField('invoice_seal_image_url', url)}
+                fieldName="invoice-seal"
+                workspaceId={workspaceId}
+              />
+            </div>
+            <div id="field-contract_seal_image_url" className="scroll-mt-24">
+              <ImageUploadField
+                label="合約專用章"
+                hint="用於電子合約（建議 PNG 透明背景）"
+                value={form.contract_seal_image_url}
+                onChange={url => updateField('contract_seal_image_url', url)}
+                fieldName="contract-seal"
+                workspaceId={workspaceId}
+              />
+            </div>
           </div>
         </Card>
 

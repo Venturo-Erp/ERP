@@ -323,7 +323,7 @@ export const RequirementGanttChart: React.FC<RequirementGanttChartProps> = ({
         <div className="inline-block min-w-full">
           {/* 表頭 */}
           <div
-            className="grid sticky top-0 z-10 bg-morandi-container/60 border-b border-border"
+            className="grid sticky top-0 z-20 bg-card border-b border-border shadow-sm"
             style={{
               gridTemplateColumns: `220px repeat(${days.length}, minmax(${viewMode === 'week' ? '80px' : '35px'}, 1fr))`,
             }}

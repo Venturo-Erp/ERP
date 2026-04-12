@@ -232,10 +232,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       // 詳細團費
       showPricingDetails: itinerary.show_pricing_details,
       pricingDetails: itinerary.pricing_details,
-      // 價格方案（從 quotes 表讀取，透過 tours.quote_id）
+      // 價格方案：優先讀 itinerary.price_tiers（編輯器自存），fallback 到 quote.tier_pricings
       priceTiers:
+        (itinerary as { price_tiers?: unknown }).price_tiers ||
         (itinerary as { tour?: { quote?: { tier_pricings?: unknown } } }).tour?.quote
-          ?.tier_pricings || null,
+          ?.tier_pricings ||
+        null,
       showPriceTiers: itinerary.show_price_tiers,
       // 常見問題
       faqs: itinerary.faqs,

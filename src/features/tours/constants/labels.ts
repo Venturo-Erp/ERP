@@ -1046,14 +1046,8 @@ export const TOUR_SERVICE_LABELS = {
   STATUS_PROPOSAL: '開團',
   STATUS_ACTIVE: '待出發',
   STATUS_CANCELLED: '取消',
-  STATUS_SPECIAL: '特殊團',
   INVALID_STATUS_TRANSITION: (from: string, to: string) =>
     `不允許的狀態轉換：無法從 "${from}" 更新為 "${to}"`,
-  YEAR_TOUR_NAME: (year: number, name: string) => `${year}年度${name}`,
-  VISA_TOUR_NAME: '簽證專用團',
-  VISA_TOUR_LOCATION: '簽證專用',
-  ESIM_TOUR_NAME: '網卡專用團',
-  ESIM_TOUR_LOCATION: '網卡專用',
 }
 
 // ============================================================
