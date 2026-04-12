@@ -124,26 +124,24 @@ export default function HRSettingsPage() {
     if (!user?.workspace_id) return
     setSaving(true)
     try {
-      const { error } = await supabase
-        .from('workspace_attendance_settings' as never)
-        .upsert(
-          {
-            workspace_id: user.workspace_id,
-            work_start_time: settings.work_start_time,
-            work_end_time: settings.work_end_time,
-            late_threshold_minutes: settings.late_threshold_minutes,
-            standard_work_hours: settings.standard_work_hours,
-            allow_missed_clock_request: settings.allow_missed_clock_request,
-            require_gps: settings.require_gps,
-            gps_latitude: settings.gps_latitude,
-            gps_longitude: settings.gps_longitude,
-            gps_radius_meters: settings.gps_radius_meters,
-            enable_line_clock: settings.enable_line_clock,
-            enable_web_clock: settings.enable_web_clock,
-            updated_at: new Date().toISOString(),
-          } as never,
-          { onConflict: 'workspace_id' } as never
-        )
+      const { error } = await supabase.from('workspace_attendance_settings' as never).upsert(
+        {
+          workspace_id: user.workspace_id,
+          work_start_time: settings.work_start_time,
+          work_end_time: settings.work_end_time,
+          late_threshold_minutes: settings.late_threshold_minutes,
+          standard_work_hours: settings.standard_work_hours,
+          allow_missed_clock_request: settings.allow_missed_clock_request,
+          require_gps: settings.require_gps,
+          gps_latitude: settings.gps_latitude,
+          gps_longitude: settings.gps_longitude,
+          gps_radius_meters: settings.gps_radius_meters,
+          enable_line_clock: settings.enable_line_clock,
+          enable_web_clock: settings.enable_web_clock,
+          updated_at: new Date().toISOString(),
+        } as never,
+        { onConflict: 'workspace_id' } as never
+      )
       if (error) throw error
       toast.success('打卡設定已儲存')
     } catch (err) {
@@ -164,10 +162,17 @@ export default function HRSettingsPage() {
       const saveRes = await fetch('/api/line/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'save_messaging', channel_access_token: lineToken, channel_secret: lineSecret }),
+        body: JSON.stringify({
+          action: 'save_messaging',
+          channel_access_token: lineToken,
+          channel_secret: lineSecret,
+        }),
       })
       const saveData = await saveRes.json()
-      if (!saveRes.ok) { toast.error(saveData.error || '設定失敗'); return }
+      if (!saveRes.ok) {
+        toast.error(saveData.error || '設定失敗')
+        return
+      }
 
       await fetch('/api/line/setup', {
         method: 'POST',
@@ -194,7 +199,11 @@ export default function HRSettingsPage() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-[60vh] text-morandi-muted">載入中...</div>
+    return (
+      <div className="flex items-center justify-center min-h-[60vh] text-morandi-muted">
+        載入中...
+      </div>
+    )
   }
 
   return (
@@ -202,32 +211,63 @@ export default function HRSettingsPage() {
       title="人資設定"
       icon={Settings}
       headerActions={
-        <Button onClick={handleSave} disabled={saving} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
+        <Button
+          onClick={handleSave}
+          disabled={saving}
+          className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+        >
           {saving ? '儲存中...' : '儲存設定'}
         </Button>
       }
     >
       <div className="space-y-4">
         {/* 打卡時間 */}
-        <SettingSection title="打卡時間" description="設定上下班時間與標準工時，系統依此判斷遲到與加班。">
+        <SettingSection
+          title="打卡時間"
+          description="設定上下班時間與標準工時，系統依此判斷遲到與加班。"
+        >
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-sm font-medium text-morandi-primary">上班時間</Label>
-              <Input type="time" value={settings.work_start_time} onChange={e => setSettings(s => ({ ...s, work_start_time: e.target.value }))} className="mt-1.5" />
+              <Input
+                type="time"
+                value={settings.work_start_time}
+                onChange={e => setSettings(s => ({ ...s, work_start_time: e.target.value }))}
+                className="mt-1.5"
+              />
             </div>
             <div>
               <Label className="text-sm font-medium text-morandi-primary">下班時間</Label>
-              <Input type="time" value={settings.work_end_time} onChange={e => setSettings(s => ({ ...s, work_end_time: e.target.value }))} className="mt-1.5" />
+              <Input
+                type="time"
+                value={settings.work_end_time}
+                onChange={e => setSettings(s => ({ ...s, work_end_time: e.target.value }))}
+                className="mt-1.5"
+              />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label className="text-sm font-medium text-morandi-primary">標準工時（小時）</Label>
-              <Input type="number" value={settings.standard_work_hours} onChange={e => setSettings(s => ({ ...s, standard_work_hours: Number(e.target.value) }))} className="mt-1.5" />
+              <Input
+                type="number"
+                value={settings.standard_work_hours}
+                onChange={e =>
+                  setSettings(s => ({ ...s, standard_work_hours: Number(e.target.value) }))
+                }
+                className="mt-1.5"
+              />
             </div>
             <div>
               <Label className="text-sm font-medium text-morandi-primary">遲到寬限（分鐘）</Label>
-              <Input type="number" value={settings.late_threshold_minutes} onChange={e => setSettings(s => ({ ...s, late_threshold_minutes: Number(e.target.value) }))} className="mt-1.5" />
+              <Input
+                type="number"
+                value={settings.late_threshold_minutes}
+                onChange={e =>
+                  setSettings(s => ({ ...s, late_threshold_minutes: Number(e.target.value) }))
+                }
+                className="mt-1.5"
+              />
               <p className="text-xs text-morandi-muted mt-1">0 = 超過上班時間即算遲到</p>
             </div>
           </div>
@@ -236,7 +276,10 @@ export default function HRSettingsPage() {
               <p className="text-sm font-medium text-morandi-primary">允許忘打卡補登</p>
               <p className="text-xs text-morandi-muted">員工可以申請補打卡</p>
             </div>
-            <Switch checked={settings.allow_missed_clock_request} onCheckedChange={v => setSettings(s => ({ ...s, allow_missed_clock_request: v }))} />
+            <Switch
+              checked={settings.allow_missed_clock_request}
+              onCheckedChange={v => setSettings(s => ({ ...s, allow_missed_clock_request: v }))}
+            />
           </div>
         </SettingSection>
 
@@ -249,23 +292,54 @@ export default function HRSettingsPage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-morandi-primary">要求 GPS 定位</p>
-                <Switch checked={settings.require_gps} onCheckedChange={v => setSettings(s => ({ ...s, require_gps: v }))} />
+                <Switch
+                  checked={settings.require_gps}
+                  onCheckedChange={v => setSettings(s => ({ ...s, require_gps: v }))}
+                />
               </div>
               {settings.require_gps && (
                 <div className="space-y-3 pt-3 border-t border-border/50">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <Label className="text-xs text-morandi-muted">緯度</Label>
-                      <Input type="number" step="0.0001" value={settings.gps_latitude || ''} onChange={e => setSettings(s => ({ ...s, gps_latitude: Number(e.target.value) || null }))} placeholder="25.0330" className="mt-1" />
+                      <Input
+                        type="number"
+                        step="0.0001"
+                        value={settings.gps_latitude || ''}
+                        onChange={e =>
+                          setSettings(s => ({ ...s, gps_latitude: Number(e.target.value) || null }))
+                        }
+                        placeholder="25.0330"
+                        className="mt-1"
+                      />
                     </div>
                     <div>
                       <Label className="text-xs text-morandi-muted">經度</Label>
-                      <Input type="number" step="0.0001" value={settings.gps_longitude || ''} onChange={e => setSettings(s => ({ ...s, gps_longitude: Number(e.target.value) || null }))} placeholder="121.5654" className="mt-1" />
+                      <Input
+                        type="number"
+                        step="0.0001"
+                        value={settings.gps_longitude || ''}
+                        onChange={e =>
+                          setSettings(s => ({
+                            ...s,
+                            gps_longitude: Number(e.target.value) || null,
+                          }))
+                        }
+                        placeholder="121.5654"
+                        className="mt-1"
+                      />
                     </div>
                   </div>
                   <div>
                     <Label className="text-xs text-morandi-muted">允許半徑（公尺）</Label>
-                    <Input type="number" value={settings.gps_radius_meters} onChange={e => setSettings(s => ({ ...s, gps_radius_meters: Number(e.target.value) }))} className="mt-1" />
+                    <Input
+                      type="number"
+                      value={settings.gps_radius_meters}
+                      onChange={e =>
+                        setSettings(s => ({ ...s, gps_radius_meters: Number(e.target.value) }))
+                      }
+                      className="mt-1"
+                    />
                   </div>
                 </div>
               )}
@@ -282,14 +356,20 @@ export default function HRSettingsPage() {
                   <p className="text-sm text-morandi-primary">網頁打卡</p>
                   <p className="text-xs text-morandi-muted">從 ERP 系統內打卡</p>
                 </div>
-                <Switch checked={settings.enable_web_clock} onCheckedChange={v => setSettings(s => ({ ...s, enable_web_clock: v }))} />
+                <Switch
+                  checked={settings.enable_web_clock}
+                  onCheckedChange={v => setSettings(s => ({ ...s, enable_web_clock: v }))}
+                />
               </div>
               <div className="flex items-center justify-between pt-3 border-t border-border/50">
                 <div>
                   <p className="text-sm text-morandi-primary">LINE 打卡</p>
                   <p className="text-xs text-morandi-muted">傳「上班」「下班」打卡</p>
                 </div>
-                <Switch checked={settings.enable_line_clock} onCheckedChange={v => setSettings(s => ({ ...s, enable_line_clock: v }))} />
+                <Switch
+                  checked={settings.enable_line_clock}
+                  onCheckedChange={v => setSettings(s => ({ ...s, enable_line_clock: v }))}
+                />
               </div>
             </div>
           </Card>
@@ -318,15 +398,21 @@ export default function HRSettingsPage() {
                   <div className="bg-morandi-green/5 rounded-lg p-4 space-y-2">
                     <div className="flex justify-between text-sm">
                       <span className="text-morandi-muted">Bot 名稱</span>
-                      <span className="font-medium text-morandi-primary">{lineConfig.bot_display_name}</span>
+                      <span className="font-medium text-morandi-primary">
+                        {lineConfig.bot_display_name}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-morandi-muted">Bot ID</span>
-                      <span className="font-mono text-xs text-morandi-secondary">{lineConfig.bot_basic_id}</span>
+                      <span className="font-mono text-xs text-morandi-secondary">
+                        {lineConfig.bot_basic_id}
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-morandi-muted">Webhook</span>
-                      <span className="font-mono text-xs text-morandi-secondary truncate max-w-[250px]">{lineConfig.webhook_url}</span>
+                      <span className="font-mono text-xs text-morandi-secondary truncate max-w-[250px]">
+                        {lineConfig.webhook_url}
+                      </span>
                     </div>
                   </div>
                   <div className="bg-morandi-container/30 rounded-lg p-3">
@@ -342,7 +428,9 @@ export default function HRSettingsPage() {
                 <>
                   <div className="bg-status-warning-bg border border-status-warning/20 rounded-lg p-3 flex items-start gap-2">
                     <AlertCircle size={16} className="text-status-warning mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-morandi-primary">要啟用 LINE 打卡，需要先設定公司的 LINE@ 機器人</p>
+                    <p className="text-sm text-morandi-primary">
+                      要啟用 LINE 打卡，需要先設定公司的 LINE@ 機器人
+                    </p>
                   </div>
 
                   <div className="space-y-3">
@@ -357,7 +445,10 @@ export default function HRSettingsPage() {
                         step: 2,
                         title: '啟用 Messaging API',
                         desc: '在 LINE OA「設定」→「Messaging API」點擊啟用',
-                        link: { url: 'https://developers.line.biz/console/', label: '開啟 LINE Developers' },
+                        link: {
+                          url: 'https://developers.line.biz/console/',
+                          label: '開啟 LINE Developers',
+                        },
                       },
                       {
                         step: 3,
@@ -370,12 +461,19 @@ export default function HRSettingsPage() {
                       },
                     ].map(item => (
                       <div key={item.step} className="flex gap-3 items-start">
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-morandi-gold text-white text-xs flex items-center justify-center font-medium">{item.step}</span>
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-morandi-gold text-white text-xs flex items-center justify-center font-medium">
+                          {item.step}
+                        </span>
                         <div>
                           <p className="text-sm font-medium text-morandi-primary">{item.title}</p>
                           {item.desc && <p className="text-xs text-morandi-muted">{item.desc}</p>}
                           {item.link && (
-                            <a href={item.link.url} target="_blank" rel="noopener noreferrer" className="text-xs text-morandi-gold hover:underline inline-flex items-center gap-1 mt-1">
+                            <a
+                              href={item.link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-morandi-gold hover:underline inline-flex items-center gap-1 mt-1"
+                            >
                               {item.link.label} <ExternalLink size={10} />
                             </a>
                           )}
@@ -386,14 +484,32 @@ export default function HRSettingsPage() {
 
                   <div className="space-y-3 pt-3 border-t border-border/50">
                     <div>
-                      <Label className="text-sm font-medium text-morandi-primary">Channel Access Token</Label>
-                      <Input value={lineToken} onChange={e => setLineToken(e.target.value)} placeholder="貼上你的 Channel access token (long-lived)" className="font-mono text-xs mt-1.5" />
+                      <Label className="text-sm font-medium text-morandi-primary">
+                        Channel Access Token
+                      </Label>
+                      <Input
+                        value={lineToken}
+                        onChange={e => setLineToken(e.target.value)}
+                        placeholder="貼上你的 Channel access token (long-lived)"
+                        className="font-mono text-xs mt-1.5"
+                      />
                     </div>
                     <div>
-                      <Label className="text-sm font-medium text-morandi-primary">Channel Secret</Label>
-                      <Input value={lineSecret} onChange={e => setLineSecret(e.target.value)} placeholder="貼上你的 Channel secret" className="font-mono text-xs mt-1.5" />
+                      <Label className="text-sm font-medium text-morandi-primary">
+                        Channel Secret
+                      </Label>
+                      <Input
+                        value={lineSecret}
+                        onChange={e => setLineSecret(e.target.value)}
+                        placeholder="貼上你的 Channel secret"
+                        className="font-mono text-xs mt-1.5"
+                      />
                     </div>
-                    <Button onClick={handleLineSetup} disabled={lineSaving || !lineToken || !lineSecret} className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white">
+                    <Button
+                      onClick={handleLineSetup}
+                      disabled={lineSaving || !lineToken || !lineSecret}
+                      className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                    >
                       {lineSaving ? '設定中...' : '完成設定'}
                     </Button>
                   </div>

@@ -123,14 +123,8 @@ export function PassportConflictDialog({
 
               {/* 舊/新護照圖片對照 */}
               <div className="grid grid-cols-2 gap-3">
-                <PassportImage
-                  url={conflict.oldPassportImageUrl}
-                  label={`舊護照（目前存的）`}
-                />
-                <PassportImage
-                  url={passportData.passport_image_url}
-                  label={`新護照（剛上傳）`}
-                />
+                <PassportImage url={conflict.oldPassportImageUrl} label={`舊護照（目前存的）`} />
+                <PassportImage url={passportData.passport_image_url} label={`新護照（剛上傳）`} />
               </div>
 
               <table className="w-full text-xs">

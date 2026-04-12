@@ -197,15 +197,7 @@ export function AddReceiptDialog({
     initialize()
       .catch(err => logger.error('[initialize]', err))
       .finally(() => setDialogLoading(false))
-  }, [
-    open,
-    defaultTourId,
-    defaultOrderId,
-    resetForm,
-    setFormData,
-    editingReceipt,
-    setPaymentItems,
-  ])
+  }, [open, defaultTourId, defaultOrderId, resetForm, setFormData, editingReceipt, setPaymentItems])
 
   // 如果只有一個訂單，自動帶入（編輯模式除外）
   useEffect(() => {
@@ -247,7 +239,10 @@ export function AddReceiptDialog({
         // 如果沒有傳入 onUpdate，使用預設的 supabase update
         const defaultUpdate = async (receiptId: string, data: Partial<Receipt>) => {
           const { supabase } = await import('@/lib/supabase/client')
-          const { error } = await supabase.from('receipts').update(data as Record<string, unknown>).eq('id', receiptId)
+          const { error } = await supabase
+            .from('receipts')
+            .update(data as Record<string, unknown>)
+            .eq('id', receiptId)
           if (error) throw error
         }
         const result = await updateReceiptWithItems({
@@ -377,11 +372,13 @@ export function AddReceiptDialog({
     if (!editingReceipt) return
 
     // 如果沒有傳入 onDelete，使用預設的 supabase delete
-    const deleteFunc = onDelete || (async (receiptId: string) => {
-      const { supabase } = await import('@/lib/supabase/client')
-      const { error } = await supabase.from('receipts').delete().eq('id', receiptId)
-      if (error) throw error
-    })
+    const deleteFunc =
+      onDelete ||
+      (async (receiptId: string) => {
+        const { supabase } = await import('@/lib/supabase/client')
+        const { error } = await supabase.from('receipts').delete().eq('id', receiptId)
+        if (error) throw error
+      })
 
     const confirmed = await confirm(
       ADD_RECEIPT_TOAST_LABELS.DELETE_CONFIRM(editingReceipt.receipt_number),
@@ -761,10 +758,15 @@ export function AddReceiptDialog({
                   setIsSubmitting(true)
                   try {
                     await handleSubmit()
-                    const updateFunc = onUpdate || (async (id: string, data: Partial<Receipt>) => {
-                      const { supabase } = await import('@/lib/supabase/client')
-                      await supabase.from('receipts').update(data as Record<string, unknown>).eq('id', id)
-                    })
+                    const updateFunc =
+                      onUpdate ||
+                      (async (id: string, data: Partial<Receipt>) => {
+                        const { supabase } = await import('@/lib/supabase/client')
+                        await supabase
+                          .from('receipts')
+                          .update(data as Record<string, unknown>)
+                          .eq('id', id)
+                      })
                     await updateFunc(editingReceipt.id, {
                       status: '2',
                       updated_by: user?.id,
@@ -848,8 +850,12 @@ export function AddReceiptDialog({
               >
                 <Save size={16} />
                 {isSubmitting
-                  ? (isEditMode ? ADD_RECEIPT_DIALOG_LABELS.更新中 : ADD_RECEIPT_DIALOG_LABELS.建立中)
-                  : (isEditMode ? ADD_RECEIPT_DIALOG_LABELS.更新收款單 : ADD_RECEIPT_DIALOG_LABELS.新增收款單)}
+                  ? isEditMode
+                    ? ADD_RECEIPT_DIALOG_LABELS.更新中
+                    : ADD_RECEIPT_DIALOG_LABELS.建立中
+                  : isEditMode
+                    ? ADD_RECEIPT_DIALOG_LABELS.更新收款單
+                    : ADD_RECEIPT_DIALOG_LABELS.新增收款單}
               </Button>
             )}
 
@@ -861,10 +867,15 @@ export function AddReceiptDialog({
                   setIsSubmitting(true)
                   try {
                     await handleSubmit()
-                    const updateFunc = onUpdate || (async (id: string, data: Partial<Receipt>) => {
-                      const { supabase } = await import('@/lib/supabase/client')
-                      await supabase.from('receipts').update(data as Record<string, unknown>).eq('id', id)
-                    })
+                    const updateFunc =
+                      onUpdate ||
+                      (async (id: string, data: Partial<Receipt>) => {
+                        const { supabase } = await import('@/lib/supabase/client')
+                        await supabase
+                          .from('receipts')
+                          .update(data as Record<string, unknown>)
+                          .eq('id', id)
+                      })
                     await updateFunc(editingReceipt.id, {
                       status: '1',
                       actual_amount: totalActualAmount || totalAmount,

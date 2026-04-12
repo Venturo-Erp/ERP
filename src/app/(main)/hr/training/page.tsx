@@ -35,7 +35,9 @@ export default function TrainingPage() {
               <Video size={20} className="text-status-info" />
             </div>
             <h4 className="text-sm font-semibold text-morandi-primary">線上課程</h4>
-            <p className="text-xs text-morandi-muted mt-1">影片課程、直播教學、錄播回放，員工隨時隨地學習</p>
+            <p className="text-xs text-morandi-muted mt-1">
+              影片課程、直播教學、錄播回放，員工隨時隨地學習
+            </p>
           </Card>
 
           <Card className="rounded-xl border border-border p-5">
@@ -43,7 +45,9 @@ export default function TrainingPage() {
               <BookOpen size={20} className="text-morandi-green" />
             </div>
             <h4 className="text-sm font-semibold text-morandi-primary">學習進度</h4>
-            <p className="text-xs text-morandi-muted mt-1">追蹤每位員工的學習完成率、測驗成績、學習時數</p>
+            <p className="text-xs text-morandi-muted mt-1">
+              追蹤每位員工的學習完成率、測驗成績、學習時數
+            </p>
           </Card>
 
           <Card className="rounded-xl border border-border p-5">

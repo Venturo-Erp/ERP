@@ -147,7 +147,9 @@ export default function FinanceSettingsPage() {
     setIsLoading(true)
     try {
       // 載入付款方式
-      const methodsRes = await fetch(`/api/finance/payment-methods?workspace_id=${workspaceId}&include_inactive=true`)
+      const methodsRes = await fetch(
+        `/api/finance/payment-methods?workspace_id=${workspaceId}&include_inactive=true`
+      )
       const methodsData = await methodsRes.json()
       setPaymentMethods(methodsData || [])
 
@@ -432,7 +434,7 @@ export default function FinanceSettingsPage() {
       icon={Settings}
       tabs={tabs}
       activeTab={activeSection}
-      onTabChange={(value) => setActiveSection(value as typeof activeSection)}
+      onTabChange={value => setActiveSection(value as typeof activeSection)}
       headerActions={renderAddButton()}
     >
       {/* 內容區 */}
@@ -467,10 +469,14 @@ export default function FinanceSettingsPage() {
                         <TableCell className="font-medium">
                           {method.name}
                           {method.is_system && (
-                            <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">系統</Badge>
+                            <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">
+                              系統
+                            </Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-morandi-muted text-sm">{method.description || '-'}</TableCell>
+                        <TableCell className="text-morandi-muted text-sm">
+                          {method.description || '-'}
+                        </TableCell>
                         <TableCell className="text-morandi-muted text-sm">
                           {method.debit_account
                             ? `${method.debit_account.code} ${method.debit_account.name}`
@@ -487,7 +493,9 @@ export default function FinanceSettingsPage() {
                               checked={method.is_active}
                               onCheckedChange={() => handleToggleMethodActive(method)}
                             />
-                            <span className={`text-xs ${method.is_active ? 'text-morandi-primary' : 'text-morandi-muted'}`}>
+                            <span
+                              className={`text-xs ${method.is_active ? 'text-morandi-primary' : 'text-morandi-muted'}`}
+                            >
                               {method.is_active ? '啟用' : '停用'}
                             </span>
                           </div>
@@ -555,10 +563,14 @@ export default function FinanceSettingsPage() {
                         <TableCell className="font-medium">
                           {method.name}
                           {method.is_system && (
-                            <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">系統</Badge>
+                            <Badge variant="outline" className="ml-2 text-[10px] px-1.5 py-0">
+                              系統
+                            </Badge>
                           )}
                         </TableCell>
-                        <TableCell className="text-morandi-muted text-sm">{method.description || '-'}</TableCell>
+                        <TableCell className="text-morandi-muted text-sm">
+                          {method.description || '-'}
+                        </TableCell>
                         <TableCell className="text-morandi-muted text-sm">
                           {method.debit_account
                             ? `${method.debit_account.code} ${method.debit_account.name}`
@@ -575,7 +587,9 @@ export default function FinanceSettingsPage() {
                               checked={method.is_active}
                               onCheckedChange={() => handleToggleMethodActive(method)}
                             />
-                            <span className={`text-xs ${method.is_active ? 'text-morandi-primary' : 'text-morandi-muted'}`}>
+                            <span
+                              className={`text-xs ${method.is_active ? 'text-morandi-primary' : 'text-morandi-muted'}`}
+                            >
                               {method.is_active ? '啟用' : '停用'}
                             </span>
                           </div>

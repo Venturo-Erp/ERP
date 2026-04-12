@@ -147,7 +147,11 @@ async function handleClockIn(
     .limit(1)
 
   if (!lineUsers?.length || !lineUsers[0].employee_id) {
-    await reply(config, event.replyToken!, '❌ 你尚未綁定員工帳號，請先傳送員工編號進行綁定（例如：E001）')
+    await reply(
+      config,
+      event.replyToken!,
+      '❌ 你尚未綁定員工帳號，請先傳送員工編號進行綁定（例如：E001）'
+    )
     return
   }
 
@@ -209,20 +213,18 @@ async function handleEmployeeBinding(
   const profile = profileRes.ok ? await profileRes.json() : null
 
   // 更新或建立 line_users 紀錄
-  await supabase
-    .from('line_users')
-    .upsert(
-      {
-        user_id: lineUserId,
-        workspace_id: workspaceId,
-        employee_id: employee.id,
-        display_name: profile?.displayName || null,
-        picture_url: profile?.pictureUrl || null,
-        followed_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id' }
-    )
+  await supabase.from('line_users').upsert(
+    {
+      user_id: lineUserId,
+      workspace_id: workspaceId,
+      employee_id: employee.id,
+      display_name: profile?.displayName || null,
+      picture_url: profile?.pictureUrl || null,
+      followed_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'user_id' }
+  )
 
   const name = employee.display_name || employee.chinese_name || employee.employee_number
   await reply(

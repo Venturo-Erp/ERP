@@ -6,42 +6,42 @@
 
 ## 🌐 中文路由對照表
 
-| 中文名稱 | 路由 | 頁面檔案 |
-|---------|------|---------|
-| 首頁 | `/dashboard` | `src/app/(main)/dashboard/` |
-| 旅遊團列表 | `/tours` | `src/app/(main)/tours/page.tsx` |
-| 旅遊團詳情 | `/tours/[code]` | `src/app/(main)/tours/[code]/page.tsx` |
-| 訂單列表 | `/orders` | `src/app/(main)/orders/page.tsx` |
-| 收款管理 | `/finance/payments` | `src/app/(main)/finance/payments/page.tsx` |
-| 請款管理 | `/finance/requests` | `src/app/(main)/finance/requests/page.tsx` |
-| 金庫總覽 | `/finance/treasury` | `src/app/(main)/finance/treasury/page.tsx` |
-| 出納管理 | `/finance/treasury/disbursement` | `src/app/(main)/finance/treasury/disbursement/page.tsx` |
-| 財務報表 | `/finance/reports` | `src/app/(main)/finance/reports/page.tsx` |
-| 財務設定 | `/finance/settings` | `src/app/(main)/finance/settings/page.tsx` |
-| 代轉發票 | `/finance/travel-invoice` | `src/app/(main)/finance/travel-invoice/page.tsx` |
-| 行程管理 | `/itinerary` | `src/app/(main)/itinerary/page.tsx` |
-| 行程編輯器 | `/itinerary/new` | `src/app/(main)/itinerary/new/page.tsx` |
-| 行程預覽（公開） | `/view/[id]` | `src/app/view/[id]/page.tsx` |
-| 客戶管理 | `/customers` | `src/app/(main)/customers/page.tsx` |
-| 簽證管理 | `/visas` | `src/app/(main)/visas/page.tsx` |
-| 人資管理 | `/hr` | `src/app/(main)/hr/page.tsx` |
-| 職務管理 | `/hr/roles` | `src/app/(main)/hr/roles/page.tsx` |
-| 出勤管理 | `/hr/attendance` | `src/app/(main)/hr/attendance/page.tsx` |
-| 請假管理 | `/hr/leave` | `src/app/(main)/hr/leave/page.tsx` |
-| 薪資管理 | `/hr/payroll` | `src/app/(main)/hr/payroll/page.tsx` |
-| 租戶管理 | `/tenants` | `src/app/(main)/tenants/page.tsx` |
-| 租戶詳情 | `/tenants/[id]` | `src/app/(main)/tenants/[id]/page.tsx` |
-| 旅遊資料庫 | `/database/attractions` | `src/app/(main)/database/attractions/page.tsx` |
-| 供應商管理 | `/database/suppliers` | `src/app/(main)/database/suppliers/page.tsx` |
-| 封存管理 | `/database/archive-management` | `src/app/(main)/database/archive-management/page.tsx` |
-| 設定 | `/settings` | `src/app/(main)/settings/page.tsx` |
-| 行事曆 | `/calendar` | `src/app/(main)/calendar/page.tsx` |
-| 頻道 | `/channel` | `src/app/(main)/channel/page.tsx` |
-| 待辦事項 | `/todos` | `src/app/(main)/todos/page.tsx` |
-| AI 機器人 | `/ai-bot` | `src/app/(main)/ai-bot/page.tsx` |
-| 會計-傳票 | `/accounting/vouchers` | `src/app/(main)/accounting/vouchers/page.tsx` |
-| 會計-科目 | `/accounting/accounts` | `src/app/(main)/accounting/accounts/page.tsx` |
-| 報價單 | `/quotes` | 內嵌在旅遊團詳情的報價分頁 |
+| 中文名稱         | 路由                             | 頁面檔案                                                |
+| ---------------- | -------------------------------- | ------------------------------------------------------- |
+| 首頁             | `/dashboard`                     | `src/app/(main)/dashboard/`                             |
+| 旅遊團列表       | `/tours`                         | `src/app/(main)/tours/page.tsx`                         |
+| 旅遊團詳情       | `/tours/[code]`                  | `src/app/(main)/tours/[code]/page.tsx`                  |
+| 訂單列表         | `/orders`                        | `src/app/(main)/orders/page.tsx`                        |
+| 收款管理         | `/finance/payments`              | `src/app/(main)/finance/payments/page.tsx`              |
+| 請款管理         | `/finance/requests`              | `src/app/(main)/finance/requests/page.tsx`              |
+| 金庫總覽         | `/finance/treasury`              | `src/app/(main)/finance/treasury/page.tsx`              |
+| 出納管理         | `/finance/treasury/disbursement` | `src/app/(main)/finance/treasury/disbursement/page.tsx` |
+| 財務報表         | `/finance/reports`               | `src/app/(main)/finance/reports/page.tsx`               |
+| 財務設定         | `/finance/settings`              | `src/app/(main)/finance/settings/page.tsx`              |
+| 代轉發票         | `/finance/travel-invoice`        | `src/app/(main)/finance/travel-invoice/page.tsx`        |
+| 行程管理         | `/itinerary`                     | `src/app/(main)/itinerary/page.tsx`                     |
+| 行程編輯器       | `/itinerary/new`                 | `src/app/(main)/itinerary/new/page.tsx`                 |
+| 行程預覽（公開） | `/view/[id]`                     | `src/app/view/[id]/page.tsx`                            |
+| 客戶管理         | `/customers`                     | `src/app/(main)/customers/page.tsx`                     |
+| 簽證管理         | `/visas`                         | `src/app/(main)/visas/page.tsx`                         |
+| 人資管理         | `/hr`                            | `src/app/(main)/hr/page.tsx`                            |
+| 職務管理         | `/hr/roles`                      | `src/app/(main)/hr/roles/page.tsx`                      |
+| 出勤管理         | `/hr/attendance`                 | `src/app/(main)/hr/attendance/page.tsx`                 |
+| 請假管理         | `/hr/leave`                      | `src/app/(main)/hr/leave/page.tsx`                      |
+| 薪資管理         | `/hr/payroll`                    | `src/app/(main)/hr/payroll/page.tsx`                    |
+| 租戶管理         | `/tenants`                       | `src/app/(main)/tenants/page.tsx`                       |
+| 租戶詳情         | `/tenants/[id]`                  | `src/app/(main)/tenants/[id]/page.tsx`                  |
+| 旅遊資料庫       | `/database/attractions`          | `src/app/(main)/database/attractions/page.tsx`          |
+| 供應商管理       | `/database/suppliers`            | `src/app/(main)/database/suppliers/page.tsx`            |
+| 封存管理         | `/database/archive-management`   | `src/app/(main)/database/archive-management/page.tsx`   |
+| 設定             | `/settings`                      | `src/app/(main)/settings/page.tsx`                      |
+| 行事曆           | `/calendar`                      | `src/app/(main)/calendar/page.tsx`                      |
+| 頻道             | `/channel`                       | `src/app/(main)/channel/page.tsx`                       |
+| 待辦事項         | `/todos`                         | `src/app/(main)/todos/page.tsx`                         |
+| AI 機器人        | `/ai-bot`                        | `src/app/(main)/ai-bot/page.tsx`                        |
+| 會計-傳票        | `/accounting/vouchers`           | `src/app/(main)/accounting/vouchers/page.tsx`           |
+| 會計-科目        | `/accounting/accounts`           | `src/app/(main)/accounting/accounts/page.tsx`           |
+| 報價單           | `/quotes`                        | 內嵌在旅遊團詳情的報價分頁                              |
 
 ---
 
@@ -130,21 +130,21 @@ src/
 
 ## 🗄️ 資料表對應
 
-| 資料表                 | Entity Hook             | 位置                                        |
-| ---------------------- | ----------------------- | ------------------------------------------- |
-| `tours`                | `useTours`              | `src/data/entities/tours.ts`                |
-| `orders`               | `useOrders`             | `src/data/entities/orders.ts`               |
-| `receipts`             | `useReceipts`           | `src/data/entities/receipts.ts`             |
-| `payment_requests`     | `usePaymentRequests`    | `src/data/entities/payment-requests.ts`     |
-| `attractions`          | `useAttractions`        | `src/data/entities/attractions.ts`          |
-| `members`              | `useMembers`            | `src/data/entities/members.ts`              |
-| `employees`            | `useEmployees`          | `src/data/entities/employees.ts`            |
-| `tour_itinerary_items` | `useTourItineraryItems` | `src/data/entities/tour-itinerary-items.ts` |
-| `workspace_roles`      | `useWorkspaceRoles`     | `src/data/hooks/useWorkspaceRoles.ts`       |
-| `payment_methods`(收款) | `usePaymentMethodsCached('receipt')` | `src/data/hooks/usePaymentMethods.ts` |
-| `payment_methods`(請款) | `usePaymentMethodsCached('payment')` | `src/data/hooks/usePaymentMethods.ts` |
-| `workspace_selector_fields` | — (API fetch)     | `src/app/api/job-roles/selector-fields/route.ts` |
-| `payment_request_items` | `usePaymentRequestItems` | `src/data/entities/payment-request-items.ts` |
+| 資料表                      | Entity Hook                          | 位置                                             |
+| --------------------------- | ------------------------------------ | ------------------------------------------------ |
+| `tours`                     | `useTours`                           | `src/data/entities/tours.ts`                     |
+| `orders`                    | `useOrders`                          | `src/data/entities/orders.ts`                    |
+| `receipts`                  | `useReceipts`                        | `src/data/entities/receipts.ts`                  |
+| `payment_requests`          | `usePaymentRequests`                 | `src/data/entities/payment-requests.ts`          |
+| `attractions`               | `useAttractions`                     | `src/data/entities/attractions.ts`               |
+| `members`                   | `useMembers`                         | `src/data/entities/members.ts`                   |
+| `employees`                 | `useEmployees`                       | `src/data/entities/employees.ts`                 |
+| `tour_itinerary_items`      | `useTourItineraryItems`              | `src/data/entities/tour-itinerary-items.ts`      |
+| `workspace_roles`           | `useWorkspaceRoles`                  | `src/data/hooks/useWorkspaceRoles.ts`            |
+| `payment_methods`(收款)     | `usePaymentMethodsCached('receipt')` | `src/data/hooks/usePaymentMethods.ts`            |
+| `payment_methods`(請款)     | `usePaymentMethodsCached('payment')` | `src/data/hooks/usePaymentMethods.ts`            |
+| `workspace_selector_fields` | — (API fetch)                        | `src/app/api/job-roles/selector-fields/route.ts` |
+| `payment_request_items`     | `usePaymentRequestItems`             | `src/data/entities/payment-request-items.ts`     |
 
 ---
 
@@ -226,21 +226,23 @@ src/
 
 ## ⚡ 快取系統
 
-| 資料 | 快取方式 | 檔案 |
-|------|---------|------|
-| **Feature flags** | 模組級快取（登入一次，session 共用） | `src/lib/permissions/hooks.ts` |
-| **收款/請款方式** | SWR hook | `src/data/hooks/usePaymentMethods.ts` |
-| **角色列表** | SWR hook | `src/data/hooks/useWorkspaceRoles.ts` |
-| **旅遊團/訂單等** | SWR entity hook | `src/data/entities/*.ts` |
-| **選人欄位** | API fetch（Dialog 開啟時） | `src/features/tours/components/tour-form/TourSettings.tsx` |
+| 資料              | 快取方式                             | 檔案                                                       |
+| ----------------- | ------------------------------------ | ---------------------------------------------------------- |
+| **Feature flags** | 模組級快取（登入一次，session 共用） | `src/lib/permissions/hooks.ts`                             |
+| **收款/請款方式** | SWR hook                             | `src/data/hooks/usePaymentMethods.ts`                      |
+| **角色列表**      | SWR hook                             | `src/data/hooks/useWorkspaceRoles.ts`                      |
+| **旅遊團/訂單等** | SWR entity hook                      | `src/data/entities/*.ts`                                   |
+| **選人欄位**      | API fetch（Dialog 開啟時）           | `src/features/tours/components/tour-form/TourSettings.tsx` |
 
 ### 快取原則
+
 - 不常變的資料（權限、設定）→ 模組快取或 SWR，登入後只 fetch 一次
 - 常變的資料（旅遊團、訂單）→ SWR 自動 revalidate
 - 即時資料 → Supabase Realtime
 - **禁止**在 component 裡直接 `fetch()` 或 `supabase.from()`，用 hook
 
 ### 參考架構
+
 - Carbon ERP（Supabase + React）：`/Users/william/Projects/reference/carbon`
 - NocoBase（權限顆粒度）：`/Users/william/Projects/reference/nocobase`
 - SaaS Starter Kit（多租戶）：`/Users/william/Projects/reference/saas-starter-kit`
@@ -249,39 +251,39 @@ src/
 
 ## 🔄 SSOT（Single Source of Truth）
 
-| 資料 | 真相來源 | 怎麼讀 |
-|------|---------|--------|
-| 行程核心 | `tour_itinerary_items` | `useTourItineraryItemsByTour(tourId)` |
-| 飯店資訊（編輯） | `hotels` 表 | `HotelSection.tsx` 用 `useHotels()` 即時讀取 |
-| 飯店資訊（預覽） | `hotels` 表 | API `enrichHotels()` 即時補資料 |
-| 景點資訊（預覽） | `attractions` 表 | API `enrichDailyItinerary()` 即時補資料 |
-| 收款方式設定 | `payment_methods` 表 | `usePaymentMethodsCached()` hook |
-| 飯店/景點 API | — | `src/app/api/itineraries/[id]/route.ts` |
+| 資料             | 真相來源               | 怎麼讀                                       |
+| ---------------- | ---------------------- | -------------------------------------------- |
+| 行程核心         | `tour_itinerary_items` | `useTourItineraryItemsByTour(tourId)`        |
+| 飯店資訊（編輯） | `hotels` 表            | `HotelSection.tsx` 用 `useHotels()` 即時讀取 |
+| 飯店資訊（預覽） | `hotels` 表            | API `enrichHotels()` 即時補資料              |
+| 景點資訊（預覽） | `attractions` 表       | API `enrichDailyItinerary()` 即時補資料      |
+| 收款方式設定     | `payment_methods` 表   | `usePaymentMethodsCached()` hook             |
+| 飯店/景點 API    | —                      | `src/app/api/itineraries/[id]/route.ts`      |
 
 ---
 
 ## 🎨 UI 規範速查
 
-| 規範 | 值 | 檔案 |
-|------|---|------|
-| 表頭背景 | `.bg-morandi-gold-header` = `rgba(201,170,124,0.12)` | `src/app/globals.css` |
-| 表頭文字 | `text-morandi-primary`（黑字） | 同上 |
-| 表格 border | `border-separate border-spacing-0`，不用 `border-collapse` | `DayRow.tsx` 為範例 |
-| responsive-header 排列 | 標題→功能→ flex-1 →分頁→按鈕 | `src/components/layout/responsive-header.tsx` |
-| Loader 動畫 | 幾何描邊 | `src/components/ui/loader.tsx` |
-| Orb Loader | 熔岩球（轉場用） | `src/components/ui/orb-loader.tsx` |
-| EnhancedTable width | 用數字字串，自動加 px（如 `width: '120'`） | `src/components/ui/enhanced-table/` |
+| 規範                   | 值                                                         | 檔案                                          |
+| ---------------------- | ---------------------------------------------------------- | --------------------------------------------- |
+| 表頭背景               | `.bg-morandi-gold-header` = `rgba(201,170,124,0.12)`       | `src/app/globals.css`                         |
+| 表頭文字               | `text-morandi-primary`（黑字）                             | 同上                                          |
+| 表格 border            | `border-separate border-spacing-0`，不用 `border-collapse` | `DayRow.tsx` 為範例                           |
+| responsive-header 排列 | 標題→功能→ flex-1 →分頁→按鈕                               | `src/components/layout/responsive-header.tsx` |
+| Loader 動畫            | 幾何描邊                                                   | `src/components/ui/loader.tsx`                |
+| Orb Loader             | 熔岩球（轉場用）                                           | `src/components/ui/orb-loader.tsx`            |
+| EnhancedTable width    | 用數字字串，自動加 px（如 `width: '120'`）                 | `src/components/ui/enhanced-table/`           |
 
 ---
 
 ## 📊 財務報表邏輯
 
-| 類型 | 條件 | 備註 |
-|------|------|------|
-| 收入 | 收款單 `status = '1'`（已確認） | 未確認不顯示 |
-| 支出 | 請款單 `status = 'billed'` 或 `'paid'` | pending/approved 不算支出 |
-| 按供應商 | 從 `payment_request_items` 展開 | 不只看主表 supplier_name |
-| 檔案 | `src/features/finance/reports/components/OverviewTab.tsx` | |
+| 類型     | 條件                                                      | 備註                      |
+| -------- | --------------------------------------------------------- | ------------------------- |
+| 收入     | 收款單 `status = '1'`（已確認）                           | 未確認不顯示              |
+| 支出     | 請款單 `status = 'billed'` 或 `'paid'`                    | pending/approved 不算支出 |
+| 按供應商 | 從 `payment_request_items` 展開                           | 不只看主表 supplier_name  |
+| 檔案     | `src/features/finance/reports/components/OverviewTab.tsx` |                           |
 
 ---
 

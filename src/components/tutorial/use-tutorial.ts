@@ -74,11 +74,7 @@ export function useTutorial() {
     }
     try {
       const [{ data: ws }, { count }, { data: me }] = await Promise.all([
-        supabase
-          .from('workspaces')
-          .select('*')
-          .eq('id', user.workspace_id)
-          .single(),
+        supabase.from('workspaces').select('*').eq('id', user.workspace_id).single(),
         supabase
           .from('employees')
           .select('id', { count: 'exact', head: true })
@@ -166,9 +162,7 @@ export function useTutorial() {
 
     // Step 2: 確認中文姓名 — 第一次走過時一定顯示
     const showStep2 =
-      !skipPersonalOnCompanyPage &&
-      (isFirstWalkthrough || needsNameCheck) &&
-      !isAck('confirm-name')
+      !skipPersonalOnCompanyPage && (isFirstWalkthrough || needsNameCheck) && !isAck('confirm-name')
     if (showStep2) {
       return {
         id: 'confirm-name',
@@ -213,9 +207,7 @@ export function useTutorial() {
       // 在 /settings/company 時一個欄位一個欄位引導
       if (pathname === '/settings/company') {
         // 找第一個還沒 ack 的缺欄位
-        const nextField = missingFields.find(
-          f => !isAck(`company-field-${f.key}`)
-        )
+        const nextField = missingFields.find(f => !isAck(`company-field-${f.key}`))
         if (nextField) {
           const missingIndex = missingFields.findIndex(f => f.key === nextField.key)
           const totalMissing = missingFields.length
@@ -283,7 +275,13 @@ export function useTutorial() {
     skipPersonalOnCompanyPage,
   ])
 
-  const STEP_ORDER = ['change-password', 'confirm-name', 'confirm-email', 'company-info', 'add-employee']
+  const STEP_ORDER = [
+    'change-password',
+    'confirm-name',
+    'confirm-email',
+    'company-info',
+    'add-employee',
+  ]
   const totalSteps = STEP_ORDER.length
   const stepNumber = (() => {
     if (!currentStep) return 0
@@ -365,7 +363,14 @@ export function useTutorial() {
     }
     // add-employee 在任何頁面都顯示
     return currentStep
-  }, [sessionDismissed, currentStep, isPersonalStep, isOnDashboard, isOnSettings, isOnSettingsCompany])
+  }, [
+    sessionDismissed,
+    currentStep,
+    isPersonalStep,
+    isOnDashboard,
+    isOnSettings,
+    isOnSettingsCompany,
+  ])
 
   return {
     loading,

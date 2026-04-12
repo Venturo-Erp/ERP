@@ -43,28 +43,41 @@ export default function HRReportsPage() {
         // 撈所有員工出勤
         const { data: records } = await supabase
           .from('attendance_records')
-          .select(`
+          .select(
+            `
             employee_id, date, clock_in, clock_out, work_hours, overtime_hours, status,
             employee:employees!attendance_records_employee_id_fkey(display_name, chinese_name)
-          `)
+          `
+          )
           .gte('date', startDate)
           .lte('date', endDate)
           .order('employee_id')
 
-        if (!records) { setSummaries([]); return }
+        if (!records) {
+          setSummaries([])
+          return
+        }
 
         // 按員工彙總
         const map = new Map<string, EmployeeSummary>()
         for (const r of records) {
-          const emp = r.employee as { display_name: string | null; chinese_name: string | null } | null
+          const emp = r.employee as {
+            display_name: string | null
+            chinese_name: string | null
+          } | null
           const name = emp?.display_name || emp?.chinese_name || '未知'
 
           if (!map.has(r.employee_id)) {
             map.set(r.employee_id, {
               employee_id: r.employee_id,
               employee_name: name,
-              total_days: 0, present_days: 0, late_days: 0, absent_days: 0, leave_days: 0,
-              total_hours: 0, overtime_hours: 0,
+              total_days: 0,
+              present_days: 0,
+              late_days: 0,
+              absent_days: 0,
+              leave_days: 0,
+              total_hours: 0,
+              overtime_hours: 0,
             })
           }
           const s = map.get(r.employee_id)!
@@ -99,9 +112,21 @@ export default function HRReportsPage() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Label className="text-sm text-morandi-secondary">年</Label>
-            <Input type="number" value={year} onChange={e => setYear(Number(e.target.value))} className="w-20 h-8 text-sm" />
+            <Input
+              type="number"
+              value={year}
+              onChange={e => setYear(Number(e.target.value))}
+              className="w-20 h-8 text-sm"
+            />
             <Label className="text-sm text-morandi-secondary">月</Label>
-            <Input type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} className="w-16 h-8 text-sm" />
+            <Input
+              type="number"
+              min={1}
+              max={12}
+              value={month}
+              onChange={e => setMonth(Number(e.target.value))}
+              className="w-16 h-8 text-sm"
+            />
           </div>
         </div>
 
@@ -131,7 +156,9 @@ export default function HRReportsPage() {
             <thead>
               <tr className="bg-morandi-container/40 border-b border-border/60">
                 <th className="text-left px-4 py-2 font-medium text-morandi-secondary">員工</th>
-                <th className="text-center px-3 py-2 font-medium text-morandi-secondary">出勤天數</th>
+                <th className="text-center px-3 py-2 font-medium text-morandi-secondary">
+                  出勤天數
+                </th>
                 <th className="text-center px-3 py-2 font-medium text-morandi-secondary">正常</th>
                 <th className="text-center px-3 py-2 font-medium text-morandi-secondary">遲到</th>
                 <th className="text-center px-3 py-2 font-medium text-morandi-secondary">缺勤</th>
@@ -142,20 +169,41 @@ export default function HRReportsPage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={8} className="text-center py-8 text-morandi-muted">載入中...</td></tr>
+                <tr>
+                  <td colSpan={8} className="text-center py-8 text-morandi-muted">
+                    載入中...
+                  </td>
+                </tr>
               ) : summaries.length === 0 ? (
-                <tr><td colSpan={8} className="text-center py-8 text-morandi-muted">本月無資料</td></tr>
+                <tr>
+                  <td colSpan={8} className="text-center py-8 text-morandi-muted">
+                    本月無資料
+                  </td>
+                </tr>
               ) : (
                 summaries.map(s => (
-                  <tr key={s.employee_id} className="border-b border-border/30 hover:bg-morandi-container/20">
-                    <td className="px-4 py-2 font-medium text-morandi-primary">{s.employee_name}</td>
+                  <tr
+                    key={s.employee_id}
+                    className="border-b border-border/30 hover:bg-morandi-container/20"
+                  >
+                    <td className="px-4 py-2 font-medium text-morandi-primary">
+                      {s.employee_name}
+                    </td>
                     <td className="text-center px-3 py-2">{s.total_days}</td>
                     <td className="text-center px-3 py-2 text-morandi-green">{s.present_days}</td>
-                    <td className="text-center px-3 py-2 text-status-warning">{s.late_days || '-'}</td>
-                    <td className="text-center px-3 py-2 text-morandi-red">{s.absent_days || '-'}</td>
-                    <td className="text-center px-3 py-2 text-status-info">{s.leave_days || '-'}</td>
+                    <td className="text-center px-3 py-2 text-status-warning">
+                      {s.late_days || '-'}
+                    </td>
+                    <td className="text-center px-3 py-2 text-morandi-red">
+                      {s.absent_days || '-'}
+                    </td>
+                    <td className="text-center px-3 py-2 text-status-info">
+                      {s.leave_days || '-'}
+                    </td>
                     <td className="text-center px-3 py-2">{s.total_hours.toFixed(1)}</td>
-                    <td className="text-center px-3 py-2 text-morandi-gold">{s.overtime_hours.toFixed(1)}</td>
+                    <td className="text-center px-3 py-2 text-morandi-gold">
+                      {s.overtime_hours.toFixed(1)}
+                    </td>
                   </tr>
                 ))
               )}

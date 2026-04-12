@@ -216,57 +216,54 @@ export function TourAttributesSection({ workspaceId }: { workspaceId: string }) 
       <div className="space-y-4">
         {/* 團類型選擇 */}
         <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>可選團類型</Label>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={selectAll}
-                  disabled={selectedCategories.length === tourCategories.length}
-                >
-                  全選
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={clearAll}
-                  disabled={selectedCategories.length === 0}
-                >
-                  清除
-                </Button>
-              </div>
+          <div className="flex items-center justify-between">
+            <Label>可選團類型</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={selectAll}
+                disabled={selectedCategories.length === tourCategories.length}
+              >
+                全選
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={clearAll}
+                disabled={selectedCategories.length === 0}
+              >
+                清除
+              </Button>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {tourCategories.map(category => (
-                <div
-                  key={category.id}
-                  className={`flex items-start space-x-3 p-3 rounded-md border ${
-                    selectedCategories.includes(category.id)
-                      ? 'border-morandi-gold bg-morandi-gold/5'
-                      : 'border-morandi-border'
-                  }`}
-                >
-                  <Checkbox
-                    id={`category-${category.id}`}
-                    checked={selectedCategories.includes(category.id)}
-                    onCheckedChange={() => toggleCategory(category.id)}
-                  />
-                  <div className="space-y-1">
-                    <Label
-                      htmlFor={`category-${category.id}`}
-                      className="font-medium cursor-pointer"
-                    >
-                      {category.label}
-                    </Label>
-                    <p className="text-xs text-morandi-secondary">{category.description}</p>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {tourCategories.map(category => (
+              <div
+                key={category.id}
+                className={`flex items-start space-x-3 p-3 rounded-md border ${
+                  selectedCategories.includes(category.id)
+                    ? 'border-morandi-gold bg-morandi-gold/5'
+                    : 'border-morandi-border'
+                }`}
+              >
+                <Checkbox
+                  id={`category-${category.id}`}
+                  checked={selectedCategories.includes(category.id)}
+                  onCheckedChange={() => toggleCategory(category.id)}
+                />
+                <div className="space-y-1">
+                  <Label htmlFor={`category-${category.id}`} className="font-medium cursor-pointer">
+                    {category.label}
+                  </Label>
+                  <p className="text-xs text-morandi-secondary">{category.description}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
+          </div>
 
           {/* 注意事項 */}
           {selectedCategories.length > 0 && (

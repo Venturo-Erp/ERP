@@ -24,7 +24,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   // 查真人員工（排除機器人）
   const { data: employees } = await supabase
     .from('employees')
-    .select('id, employee_number, chinese_name, display_name, english_name, roles, is_bot, created_at')
+    .select(
+      'id, employee_number, chinese_name, display_name, english_name, roles, is_bot, created_at'
+    )
     .eq('workspace_id', workspaceId)
     .or('is_bot.is.null,is_bot.eq.false')
     .order('created_at', { ascending: true })
@@ -41,12 +43,14 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }>
 
   // 找第一個 admin
-  const adminEmployee = realEmployees.find(
-    e => Array.isArray(e.roles) && e.roles.includes('admin')
-  ) || realEmployees[0] // fallback：沒 admin 就取第一個員工
+  const adminEmployee =
+    realEmployees.find(e => Array.isArray(e.roles) && e.roles.includes('admin')) || realEmployees[0] // fallback：沒 admin 就取第一個員工
 
   const adminName = adminEmployee
-    ? adminEmployee.display_name || adminEmployee.chinese_name || adminEmployee.english_name || '未知'
+    ? adminEmployee.display_name ||
+      adminEmployee.chinese_name ||
+      adminEmployee.english_name ||
+      '未知'
     : null
 
   return NextResponse.json({

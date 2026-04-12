@@ -100,8 +100,18 @@ export default function ClockInPage() {
   }
 
   const twTime = new Date(currentTime.toLocaleString('en-US', { timeZone: 'Asia/Taipei' }))
-  const timeStr = twTime.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false })
-  const dateStr = twTime.toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
+  const timeStr = twTime.toLocaleTimeString('zh-TW', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  })
+  const dateStr = twTime.toLocaleDateString('zh-TW', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'long',
+  })
 
   const hasClockedIn = !!clockStatus?.clock_in
   const hasClockedOut = !!clockStatus?.clock_out
@@ -122,12 +132,14 @@ export default function ClockInPage() {
 
         {/* GPS 狀態 */}
         <div className="flex justify-center">
-          <div className={cn(
-            'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs',
-            location
-              ? 'bg-morandi-green/10 text-morandi-green'
-              : 'bg-status-warning-bg text-status-warning'
-          )}>
+          <div
+            className={cn(
+              'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs',
+              location
+                ? 'bg-morandi-green/10 text-morandi-green'
+                : 'bg-status-warning-bg text-status-warning'
+            )}
+          >
             <MapPin size={12} />
             {location
               ? `已定位 (${location.lat.toFixed(4)}, ${location.lng.toFixed(4)})`

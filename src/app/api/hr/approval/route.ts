@@ -89,7 +89,12 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (mcReq) {
-        const mc = mcReq as unknown as { date: string; clock_type: string; requested_time: string; employee_id: string }
+        const mc = mcReq as unknown as {
+          date: string
+          clock_type: string
+          requested_time: string
+          employee_id: string
+        }
         const supabase = getSupabaseAdminClient()
         const { data: existing } = await supabase
           .from('attendance_records')
@@ -124,7 +129,12 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (leaveReq) {
-        const lr = leaveReq as unknown as { employee_id: string; leave_type_id: string; days: number; start_date: string }
+        const lr = leaveReq as unknown as {
+          employee_id: string
+          leave_type_id: string
+          days: number
+          start_date: string
+        }
         const year = new Date(lr.start_date).getFullYear()
 
         const { data: balance } = await from('leave_balances')
@@ -147,9 +157,8 @@ export async function POST(request: NextRequest) {
     const label = LABEL_MAP[request_type]
     const resultText = action === 'approve' ? '已核准' : '已駁回'
     const notifyTitle = `${label}申請${resultText}`
-    const notifyMessage = action === 'reject' && reject_reason
-      ? `原因：${reject_reason}`
-      : undefined
+    const notifyMessage =
+      action === 'reject' && reject_reason ? `原因：${reject_reason}` : undefined
 
     await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/notifications`, {
       method: 'POST',

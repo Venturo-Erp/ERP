@@ -216,8 +216,8 @@ body {
 }
 
 /* 全站 checkbox / radio 品牌色 */
-input[type="checkbox"],
-input[type="radio"] {
+input[type='checkbox'],
+input[type='radio'] {
   accent-color: var(--morandi-gold);
 }
 
@@ -450,36 +450,72 @@ input[type="radio"] {
 }
 
 @keyframes pathRect {
-  25% { stroke-dashoffset: 64; }
-  50% { stroke-dashoffset: 128; }
-  75% { stroke-dashoffset: 192; }
-  100% { stroke-dashoffset: 256; }
+  25% {
+    stroke-dashoffset: 64;
+  }
+  50% {
+    stroke-dashoffset: 128;
+  }
+  75% {
+    stroke-dashoffset: 192;
+  }
+  100% {
+    stroke-dashoffset: 256;
+  }
 }
 
 @keyframes dotRect {
-  25% { transform: translate(0, 0); }
-  50% { transform: translate(18px, -18px); }
-  75% { transform: translate(0, -36px); }
-  100% { transform: translate(-18px, -18px); }
+  25% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(18px, -18px);
+  }
+  75% {
+    transform: translate(0, -36px);
+  }
+  100% {
+    transform: translate(-18px, -18px);
+  }
 }
 
 @keyframes pathTriangle {
-  33% { stroke-dashoffset: 74; }
-  66% { stroke-dashoffset: 147; }
-  100% { stroke-dashoffset: 221; }
+  33% {
+    stroke-dashoffset: 74;
+  }
+  66% {
+    stroke-dashoffset: 147;
+  }
+  100% {
+    stroke-dashoffset: 221;
+  }
 }
 
 @keyframes dotTriangle {
-  33% { transform: translate(0, 0); }
-  66% { transform: translate(10px, -18px); }
-  100% { transform: translate(-10px, -18px); }
+  33% {
+    transform: translate(0, 0);
+  }
+  66% {
+    transform: translate(10px, -18px);
+  }
+  100% {
+    transform: translate(-10px, -18px);
+  }
 }
 
 @keyframes pathCircle {
-  25% { stroke-dashoffset: 125; }
-  50% { stroke-dashoffset: 175; }
-  75% { stroke-dashoffset: 225; }
-  100% { stroke-dashoffset: 275; }
+  25% {
+    stroke-dashoffset: 125;
+  }
+  50% {
+    stroke-dashoffset: 175;
+  }
+  75% {
+    stroke-dashoffset: 225;
+  }
+  100% {
+    stroke-dashoffset: 275;
+  }
 }
 
 /* ========== Orb Loader 熔岩球動畫（行程生成轉場用） ========== */
@@ -575,31 +611,61 @@ input[type="radio"] {
 }
 
 @keyframes orb-rotation {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes orb-roundness {
-  0% { filter: contrast(15); }
-  20% { filter: contrast(3); }
-  40% { filter: contrast(3); }
-  60% { filter: contrast(15); }
-  100% { filter: contrast(15); }
+  0% {
+    filter: contrast(15);
+  }
+  20% {
+    filter: contrast(3);
+  }
+  40% {
+    filter: contrast(3);
+  }
+  60% {
+    filter: contrast(15);
+  }
+  100% {
+    filter: contrast(15);
+  }
 }
 
 @keyframes orb-colorize {
-  0% { filter: hue-rotate(0deg); }
-  20% { filter: hue-rotate(-30deg); }
-  40% { filter: hue-rotate(-60deg); }
-  60% { filter: hue-rotate(-90deg); }
-  80% { filter: hue-rotate(-45deg); }
-  100% { filter: hue-rotate(0deg); }
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    filter: hue-rotate(-30deg);
+  }
+  40% {
+    filter: hue-rotate(-60deg);
+  }
+  60% {
+    filter: hue-rotate(-90deg);
+  }
+  80% {
+    filter: hue-rotate(-45deg);
+  }
+  100% {
+    filter: hue-rotate(0deg);
+  }
 }
 
 /* ========== Search Pill（Uiverse.io by Smit-Prajapati，奶茶配色） ========== */
 .search-pill {
   position: relative;
-  background: linear-gradient(135deg, rgba(var(--morandi-gold-rgb), 0.35) 0%, rgba(var(--morandi-gold-rgb), 0.28) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--morandi-gold-rgb), 0.35) 0%,
+    rgba(var(--morandi-gold-rgb), 0.28) 100%
+  );
   border-radius: 1000px;
   padding: 10px;
   display: grid;
@@ -612,7 +678,11 @@ input[type="radio"] {
   position: relative;
   width: 100%;
   border-radius: 50px;
-  background: linear-gradient(135deg, rgba(var(--morandi-gold-rgb), 0.15) 0%, rgba(var(--morandi-gold-rgb), 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--morandi-gold-rgb), 0.15) 0%,
+    rgba(var(--morandi-gold-rgb), 0.1) 100%
+  );
   padding: 5px;
   display: flex;
   align-items: center;
@@ -630,22 +700,36 @@ input[type="radio"] {
 .search-pill-inner::before {
   top: -1px;
   left: -1px;
-  background: linear-gradient(0deg, rgba(var(--morandi-gold-rgb), 0.15) 0%, rgb(255, 255, 255) 100%);
+  background: linear-gradient(
+    0deg,
+    rgba(var(--morandi-gold-rgb), 0.15) 0%,
+    rgb(255, 255, 255) 100%
+  );
   z-index: -1;
 }
 
 .search-pill-inner::after {
   bottom: -1px;
   right: -1px;
-  background: linear-gradient(0deg, rgba(var(--morandi-gold-rgb), 0.4) 0%, rgba(var(--morandi-gold-rgb), 0.2) 100%);
-  box-shadow: rgba(var(--morandi-gold-rgb), 0.7) 3px 3px 5px 0px, rgba(var(--morandi-gold-rgb), 0.5) 5px 5px 20px 0px;
+  background: linear-gradient(
+    0deg,
+    rgba(var(--morandi-gold-rgb), 0.4) 0%,
+    rgba(var(--morandi-gold-rgb), 0.2) 100%
+  );
+  box-shadow:
+    rgba(var(--morandi-gold-rgb), 0.7) 3px 3px 5px 0px,
+    rgba(var(--morandi-gold-rgb), 0.5) 5px 5px 20px 0px;
   z-index: -2;
 }
 
 .search-pill-input {
   padding: 10px;
   width: 100%;
-  background: linear-gradient(135deg, rgba(var(--morandi-gold-rgb), 0.12) 0%, rgba(var(--morandi-gold-rgb), 0.08) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(var(--morandi-gold-rgb), 0.12) 0%,
+    rgba(var(--morandi-gold-rgb), 0.08) 100%
+  );
   border: none;
   color: var(--morandi-primary);
   font-size: 14px;
@@ -659,7 +743,11 @@ input[type="radio"] {
 
 .search-pill-input:focus {
   outline: none;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(var(--morandi-gold-rgb), 0.08) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(var(--morandi-gold-rgb), 0.08) 100%
+  );
 }
 
 .search-pill-icon {

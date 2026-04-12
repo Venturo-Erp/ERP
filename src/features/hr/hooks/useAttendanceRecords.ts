@@ -199,7 +199,7 @@ export function useAttendanceRecords() {
               .eq('workspace_id', getRequiredWorkspaceId())
               .single()
             if (settings && (settings as { work_start_time?: string }).work_start_time) {
-              expectedStart = ((settings as { work_start_time: string }).work_start_time).slice(0, 5)
+              expectedStart = (settings as { work_start_time: string }).work_start_time.slice(0, 5)
             }
           } catch {}
           status = input.clock_in > expectedStart ? 'late' : 'present'

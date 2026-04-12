@@ -236,12 +236,7 @@ export function TutorialOverlay({
           {/* 按鈕 */}
           <div className="flex items-center gap-2 px-4 pb-4">
             {step.canSkip && onSkip && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onSkip}
-                className="h-8 text-xs flex-1"
-              >
+              <Button variant="ghost" size="sm" onClick={onSkip} className="h-8 text-xs flex-1">
                 稍後再說
               </Button>
             )}

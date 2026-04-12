@@ -61,8 +61,7 @@ export function TourEditDialog({ isOpen, onClose, tour, onSuccess }: TourEditDia
     const load = async () => {
       try {
         const { data } = await supabase.from('workspaces').select('*').eq('id', wsId).single()
-        const ids = (data as { enabled_tour_categories?: string[] } | null)
-          ?.enabled_tour_categories
+        const ids = (data as { enabled_tour_categories?: string[] } | null)?.enabled_tour_categories
         if (Array.isArray(ids) && ids.length > 0) {
           setEnabledIds(ids)
         } else {

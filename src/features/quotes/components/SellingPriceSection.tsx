@@ -343,7 +343,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
               </span>
             </div>
           </div>
-          {(
+          {
             <table className="w-full text-sm">
               <thead className="border-b border-morandi-container/60">
                 <tr>
@@ -463,7 +463,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                   ))}
               </tbody>
             </table>
-          )}
+          }
         </div>
 
         {/* 檻次表列表 */}
@@ -524,7 +524,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                 )}
               </div>
             </div>
-            {(
+            {
               <table className="w-full text-sm">
                 <thead className="border-b border-border/60">
                   <tr>
@@ -585,7 +585,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                   />
                 </tbody>
               </table>
-            )}
+            }
           </div>
         ))}
 

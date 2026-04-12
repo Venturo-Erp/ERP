@@ -51,7 +51,11 @@ export async function POST(request: NextRequest) {
 
     // LINE / 內部呼叫：用 service role key 驗證
     const internalSecret = request.headers.get('x-internal-secret')
-    if (internalSecret === process.env.SUPABASE_SERVICE_ROLE_KEY && body.employee_id && body.workspace_id) {
+    if (
+      internalSecret === process.env.SUPABASE_SERVICE_ROLE_KEY &&
+      body.employee_id &&
+      body.workspace_id
+    ) {
       employeeId = body.employee_id
       workspaceId = body.workspace_id
     } else {
@@ -72,12 +76,17 @@ export async function POST(request: NextRequest) {
       .eq('workspace_id', workspaceId)
       .single()
 
-    const settings = settingsRow as { work_start_time?: string; standard_work_hours?: number } | null
+    const settings = settingsRow as {
+      work_start_time?: string
+      standard_work_hours?: number
+    } | null
 
     // 不存在時自動建立預設值
     if (!settings) {
-      await from('workspace_attendance_settings')
-        .upsert({ workspace_id: workspaceId }, { onConflict: 'workspace_id' })
+      await from('workspace_attendance_settings').upsert(
+        { workspace_id: workspaceId },
+        { onConflict: 'workspace_id' }
+      )
     }
 
     const workStartTime = settings?.work_start_time || '09:00:00'
@@ -101,9 +110,10 @@ export async function POST(request: NextRequest) {
       }
 
       const status = currentTime > workStartTime ? 'late' : 'present'
-      const locationNote = latitude && longitude
-        ? `[${source}] ${latitude.toFixed(6)},${longitude.toFixed(6)}`
-        : `[${source}]`
+      const locationNote =
+        latitude && longitude
+          ? `[${source}] ${latitude.toFixed(6)},${longitude.toFixed(6)}`
+          : `[${source}]`
       const fullNotes = notes ? `${locationNote} ${notes}` : locationNote
 
       if (existing) {
@@ -129,18 +139,16 @@ export async function POST(request: NextRequest) {
         time: currentTime,
         date: today,
         status,
-        message: status === 'late'
-          ? `上班打卡成功（遲到）- ${timeDisplay}`
-          : `上班打卡成功 - ${timeDisplay}`,
+        message:
+          status === 'late'
+            ? `上班打卡成功（遲到）- ${timeDisplay}`
+            : `上班打卡成功 - ${timeDisplay}`,
       })
     }
 
     if (action === 'clock_out') {
       if (!existing?.clock_in) {
-        return NextResponse.json(
-          { error: '今天尚未打上班卡，請先打上班卡' },
-          { status: 400 }
-        )
+        return NextResponse.json({ error: '今天尚未打上班卡，請先打上班卡' }, { status: 400 })
       }
       if (existing.clock_out) {
         return NextResponse.json(
@@ -152,7 +160,8 @@ export async function POST(request: NextRequest) {
       const clockInParts = (existing.clock_in as string).split(':').map(Number)
       const clockOutParts = currentTime.split(':').map(Number)
       const workHours =
-        (clockOutParts[0] - clockInParts[0]) +
+        clockOutParts[0] -
+        clockInParts[0] +
         (clockOutParts[1] - clockInParts[1]) / 60 +
         (clockOutParts[2] - clockInParts[2]) / 3600
       const overtimeHours = Math.max(0, workHours - standardHours)

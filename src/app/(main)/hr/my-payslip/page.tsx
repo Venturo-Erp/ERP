@@ -56,7 +56,10 @@ export default function MyPayslipPage() {
           .in('status', ['confirmed', 'paid'])
           .order('month', { ascending: false })
 
-        if (!periods?.length) { setRecords([]); return }
+        if (!periods?.length) {
+          setRecords([])
+          return
+        }
 
         const periodIds = periods.map(p => p.id)
         const periodMap = new Map(periods.map(p => [p.id, p]))
@@ -73,8 +76,12 @@ export default function MyPayslipPage() {
             ...r,
             year: period?.year,
             month: period?.month,
-            allowance_details: (typeof r.allowance_details === 'object' ? r.allowance_details : null) as Record<string, number> | null,
-            deduction_details: (typeof r.deduction_details === 'object' ? r.deduction_details : null) as Record<string, number> | null,
+            allowance_details: (typeof r.allowance_details === 'object'
+              ? r.allowance_details
+              : null) as Record<string, number> | null,
+            deduction_details: (typeof r.deduction_details === 'object'
+              ? r.deduction_details
+              : null) as Record<string, number> | null,
           }
         })
 
@@ -93,7 +100,12 @@ export default function MyPayslipPage() {
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Label className="text-sm text-morandi-secondary">年度</Label>
-          <Input type="number" value={year} onChange={e => setYear(Number(e.target.value))} className="w-20 h-8 text-sm" />
+          <Input
+            type="number"
+            value={year}
+            onChange={e => setYear(Number(e.target.value))}
+            className="w-20 h-8 text-sm"
+          />
         </div>
 
         {loading ? (
@@ -109,15 +121,24 @@ export default function MyPayslipPage() {
                   key={r.id}
                   onClick={() => setSelectedRecord(r)}
                   className={`rounded-xl border p-4 cursor-pointer transition-all hover:shadow-md ${
-                    selectedRecord?.id === r.id ? 'border-morandi-gold bg-morandi-gold/5' : 'border-border'
+                    selectedRecord?.id === r.id
+                      ? 'border-morandi-gold bg-morandi-gold/5'
+                      : 'border-border'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-morandi-primary">{r.year} 年 {r.month} 月</p>
-                      <p className="text-xs text-morandi-muted mt-0.5">出勤 {r.work_days} 天 · 加班 {r.overtime_hours}h</p>
+                      <p className="text-sm font-semibold text-morandi-primary">
+                        {r.year} 年 {r.month} 月
+                      </p>
+                      <p className="text-xs text-morandi-muted mt-0.5">
+                        出勤 {r.work_days} 天 · 加班 {r.overtime_hours}h
+                      </p>
                     </div>
-                    <CurrencyCell amount={r.net_salary} className="text-lg font-bold text-morandi-primary" />
+                    <CurrencyCell
+                      amount={r.net_salary}
+                      className="text-lg font-bold text-morandi-primary"
+                    />
                   </div>
                 </Card>
               ))}
@@ -132,14 +153,17 @@ export default function MyPayslipPage() {
 
                 {/* 收入 */}
                 <div className="space-y-2 mb-4">
-                  <p className="text-xs font-semibold text-morandi-green border-b border-border/50 pb-1">收入</p>
+                  <p className="text-xs font-semibold text-morandi-green border-b border-border/50 pb-1">
+                    收入
+                  </p>
                   <Row label="底薪" amount={selectedRecord.base_salary} />
                   <Row label="加班費" amount={selectedRecord.overtime_pay} />
                   <Row label="獎金" amount={selectedRecord.bonus} />
                   {/* 津貼明細（從 allowance_details 動態讀取） */}
-                  {selectedRecord.allowance_details && Object.entries(selectedRecord.allowance_details).map(([name, amount]) => (
-                    <Row key={name} label={name} amount={amount} />
-                  ))}
+                  {selectedRecord.allowance_details &&
+                    Object.entries(selectedRecord.allowance_details).map(([name, amount]) => (
+                      <Row key={name} label={name} amount={amount} />
+                    ))}
                   {/* fallback: 如果沒有 allowance_details，顯示舊欄位 */}
                   {!selectedRecord.allowance_details && (
                     <>
@@ -151,13 +175,20 @@ export default function MyPayslipPage() {
 
                 {/* 扣款 */}
                 <div className="space-y-2 mb-4">
-                  <p className="text-xs font-semibold text-morandi-red border-b border-border/50 pb-1">扣款</p>
-                  <Row label="無薪假扣除" amount={-selectedRecord.unpaid_leave_deduction} negative />
+                  <p className="text-xs font-semibold text-morandi-red border-b border-border/50 pb-1">
+                    扣款
+                  </p>
+                  <Row
+                    label="無薪假扣除"
+                    amount={-selectedRecord.unpaid_leave_deduction}
+                    negative
+                  />
                   <Row label="遲到扣除" amount={-selectedRecord.late_deduction} negative />
                   {/* 法定扣款明細（從 deduction_details 動態讀取） */}
-                  {selectedRecord.deduction_details && Object.entries(selectedRecord.deduction_details).map(([name, amount]) => (
-                    <Row key={name} label={name} amount={-amount} negative />
-                  ))}
+                  {selectedRecord.deduction_details &&
+                    Object.entries(selectedRecord.deduction_details).map(([name, amount]) => (
+                      <Row key={name} label={name} amount={-amount} negative />
+                    ))}
                   {/* fallback: 如果沒有 deduction_details，顯示舊的其他扣除 */}
                   {!selectedRecord.deduction_details && (
                     <Row label="其他扣除" amount={-selectedRecord.other_deductions} negative />
@@ -172,7 +203,10 @@ export default function MyPayslipPage() {
                   </div>
                   <div className="flex justify-between text-base">
                     <span className="font-semibold text-morandi-primary">實發金額</span>
-                    <CurrencyCell amount={selectedRecord.net_salary} className="font-bold text-morandi-primary text-lg" />
+                    <CurrencyCell
+                      amount={selectedRecord.net_salary}
+                      className="font-bold text-morandi-primary text-lg"
+                    />
                   </div>
                 </div>
 
@@ -190,11 +224,15 @@ export default function MyPayslipPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-morandi-muted">有薪假</span>
-                      <span className="text-morandi-primary">{selectedRecord.paid_leave_days} 天</span>
+                      <span className="text-morandi-primary">
+                        {selectedRecord.paid_leave_days} 天
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-morandi-muted">無薪假</span>
-                      <span className="text-morandi-red">{selectedRecord.unpaid_leave_days} 天</span>
+                      <span className="text-morandi-red">
+                        {selectedRecord.unpaid_leave_days} 天
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -216,7 +254,9 @@ function Row({ label, amount, negative }: { label: string; amount: number; negat
   return (
     <div className="flex justify-between text-sm">
       <span className="text-morandi-secondary">{label}</span>
-      <span className={negative ? 'text-morandi-red' : ''}>{negative && '-'}${Math.abs(amount).toLocaleString()}</span>
+      <span className={negative ? 'text-morandi-red' : ''}>
+        {negative && '-'}${Math.abs(amount).toLocaleString()}
+      </span>
     </div>
   )
 }

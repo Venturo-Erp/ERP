@@ -255,7 +255,12 @@ export function useLeaveRequests() {
         const res = await fetch('/api/hr/approval', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ request_type: 'leave', request_id: id, action: 'reject', reject_reason: reason }),
+          body: JSON.stringify({
+            request_type: 'leave',
+            request_id: id,
+            action: 'reject',
+            reject_reason: reason,
+          }),
         })
 
         if (!res.ok) {

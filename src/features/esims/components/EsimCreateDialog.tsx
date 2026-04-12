@@ -256,9 +256,7 @@ export function EsimCreateDialog({ open, onOpenChange }: EsimCreateDialogProps) 
   }
 
   // 不強制選擇團號（沒選會自動建立 ad-hoc 網卡團）
-  const canSubmit = esimItems.every(
-    item => item.product_region && item.product_id && item.email
-  )
+  const canSubmit = esimItems.every(item => item.product_region && item.product_id && item.email)
 
   const handleSubmit = async () => {
     if (!canSubmit || !user) return

@@ -207,7 +207,9 @@ export default function TenantsPage() {
 
       <EditTenantDialog
         open={!!editingWorkspace}
-        onOpenChange={open => { if (!open) setEditingWorkspace(null) }}
+        onOpenChange={open => {
+          if (!open) setEditingWorkspace(null)
+        }}
         workspace={editingWorkspace}
         onComplete={() => {
           setEditingWorkspace(null)

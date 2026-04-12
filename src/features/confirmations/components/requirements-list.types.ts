@@ -118,9 +118,7 @@ export function safeGetCategoryKey(category: string): CategoryKey {
  * - tour_group (旅遊團)：全部顯示
  * - visa (簽證)：只顯示其他（簽證歸在其他）
  */
-export function getCategoriesForTourType(
-  tourServiceType?: string | null
-): typeof CATEGORIES {
+export function getCategoriesForTourType(tourServiceType?: string | null): typeof CATEGORIES {
   switch (tourServiceType) {
     case 'flight':
       // 機票：只顯示交通類（機票歸這）

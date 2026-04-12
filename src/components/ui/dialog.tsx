@@ -129,62 +129,68 @@ interface DialogContentProps extends React.ComponentPropsWithoutRef<
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   DialogContentProps
->(({ className, children, size = 'lg', level, nested = false, overlayClassName, ...props }, ref) => {
-  // 向後兼容：nested={true} 等同於 level={2}
-  const effectiveLevel: DialogLevel = level ?? (nested ? 2 : 1)
-  const zIndex = DIALOG_Z_INDEX[effectiveLevel]
-  const showOverlay = effectiveLevel === 1
+>(
+  (
+    { className, children, size = 'lg', level, nested = false, overlayClassName, ...props },
+    ref
+  ) => {
+    // 向後兼容：nested={true} 等同於 level={2}
+    const effectiveLevel: DialogLevel = level ?? (nested ? 2 : 1)
+    const zIndex = DIALOG_Z_INDEX[effectiveLevel]
+    const showOverlay = effectiveLevel === 1
 
-  return (
-    <DialogPortal>
-      {/*
+    return (
+      <DialogPortal>
+        {/*
         Dialog 遮罩設計：
         - Level 1: bg-black/60 (60% 黑色) + 背景模糊
         - Level 2+: 透明遮罩（避免多重黑色疊加）
       */}
-      <DialogPrimitive.Overlay
-        onDragOver={e => e.preventDefault()}
-        onDrop={e => e.preventDefault()}
-        className={cn(
-          'fixed inset-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-          overlayClassName || (showOverlay
-            ? 'bg-morandi-primary/40 backdrop-blur-sm'
-            : 'bg-morandi-primary/20 backdrop-blur-sm')
-        )}
-        style={{ zIndex: zIndex.overlay }}
-      />
-      <DialogPrimitive.Content
-        ref={ref}
-        aria-describedby={undefined}
-        onOpenAutoFocus={e => e.preventDefault()}
-        onCloseAutoFocus={e => {
-          e.preventDefault()
-          // 移除焦點，避免 aria-hidden 警告
-          if (document.activeElement instanceof HTMLElement) {
-            document.activeElement.blur()
-          }
-        }}
-        aria-labelledby={undefined}
-        className={cn(
-          'fixed left-[50%] top-[50%] grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border border-morandi-container bg-card p-8 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-xl',
-          DIALOG_SIZES[size],
-          className
-        )}
-        style={{ zIndex: zIndex.content }}
-        {...props}
-      >
-        {children}
-        <DialogPrimitive.Close
-          className="absolute right-1 top-1 h-7 w-7 flex items-center justify-center rounded-full text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/60 transition-all cursor-pointer focus:outline-none"
-          style={{ zIndex: zIndex.close }}
+        <DialogPrimitive.Overlay
+          onDragOver={e => e.preventDefault()}
+          onDrop={e => e.preventDefault()}
+          className={cn(
+            'fixed inset-0 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+            overlayClassName ||
+              (showOverlay
+                ? 'bg-morandi-primary/40 backdrop-blur-sm'
+                : 'bg-morandi-primary/20 backdrop-blur-sm')
+          )}
+          style={{ zIndex: zIndex.overlay }}
+        />
+        <DialogPrimitive.Content
+          ref={ref}
+          aria-describedby={undefined}
+          onOpenAutoFocus={e => e.preventDefault()}
+          onCloseAutoFocus={e => {
+            e.preventDefault()
+            // 移除焦點，避免 aria-hidden 警告
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur()
+            }
+          }}
+          aria-labelledby={undefined}
+          className={cn(
+            'fixed left-[50%] top-[50%] grid w-full translate-x-[-50%] translate-y-[-50%] gap-4 border border-morandi-container bg-card p-8 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-xl',
+            DIALOG_SIZES[size],
+            className
+          )}
+          style={{ zIndex: zIndex.content }}
+          {...props}
         >
-          <X className="h-3.5 w-3.5" />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
-      </DialogPrimitive.Content>
-    </DialogPortal>
-  )
-})
+          {children}
+          <DialogPrimitive.Close
+            className="absolute right-1 top-1 h-7 w-7 flex items-center justify-center rounded-full text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-container/60 transition-all cursor-pointer focus:outline-none"
+            style={{ zIndex: zIndex.close }}
+          >
+            <X className="h-3.5 w-3.5" />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        </DialogPrimitive.Content>
+      </DialogPortal>
+    )
+  }
+)
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (

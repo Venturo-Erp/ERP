@@ -51,14 +51,15 @@ export const SalaryTab = forwardRef<{ handleSave: () => void }, SalaryTabProps>(
         >)
         // 儲存 payroll config
         try {
-          await supabase
-            .from('employee_payroll_config' as never)
-            .upsert({
+          await supabase.from('employee_payroll_config' as never).upsert(
+            {
               employee_id: employee.id,
               insured_salary: insuredSalary,
               health_dependents: healthDependents,
               updated_at: new Date().toISOString(),
-            } as never, { onConflict: 'employee_id' } as never)
+            } as never,
+            { onConflict: 'employee_id' } as never
+          )
         } catch (err) {
           logger.error('儲存薪資設定失敗:', err)
         }
@@ -113,7 +114,10 @@ export const SalaryTab = forwardRef<{ handleSave: () => void }, SalaryTabProps>(
                   />
                 </div>
               ) : (
-                <CurrencyCell amount={insuredSalary} className="text-lg font-medium text-morandi-primary mt-1" />
+                <CurrencyCell
+                  amount={insuredSalary}
+                  className="text-lg font-medium text-morandi-primary mt-1"
+                />
               )}
               <p className="text-xs text-morandi-muted mt-1">勞健保計算基礎</p>
             </div>
@@ -128,7 +132,9 @@ export const SalaryTab = forwardRef<{ handleSave: () => void }, SalaryTabProps>(
                   className="w-24 mt-1"
                 />
               ) : (
-                <p className="text-lg font-medium text-morandi-primary mt-1">{healthDependents} 人</p>
+                <p className="text-lg font-medium text-morandi-primary mt-1">
+                  {healthDependents} 人
+                </p>
               )}
               <p className="text-xs text-morandi-muted mt-1">影響健保費用計算</p>
             </div>

@@ -428,11 +428,16 @@ export function usePayroll() {
             allowances?: number
           } | null
           // 優先用 monthly_salary（主欄位），fallback 到 salary_info.base_salary（舊欄位）
-          const baseSalary = (emp as Record<string, unknown>).monthly_salary as number || salaryInfo?.base_salary || 0
-          const empConfig = empConfigMap.get(emp.id) as {
-            insured_salary?: number
-            health_dependents?: number
-          } | undefined
+          const baseSalary =
+            ((emp as Record<string, unknown>).monthly_salary as number) ||
+            salaryInfo?.base_salary ||
+            0
+          const empConfig = empConfigMap.get(emp.id) as
+            | {
+                insured_salary?: number
+                health_dependents?: number
+              }
+            | undefined
 
           // 計算出勤
           const empAttendance = (attendanceRecords || []).filter(a => a.employee_id === emp.id)
@@ -470,7 +475,11 @@ export function usePayroll() {
           let totalAllowances = 0
           const allowanceDetails: Record<string, number> = {}
 
-          for (const at of (allowanceTypes || []) as { code: string; name: string; default_amount: number }[]) {
+          for (const at of (allowanceTypes || []) as {
+            code: string
+            name: string
+            default_amount: number
+          }[]) {
             const amount = at.default_amount || 0
             if (amount > 0) {
               allowanceDetails[at.name] = amount
@@ -485,7 +494,13 @@ export function usePayroll() {
           const deductionDetails: Record<string, number> = {}
           const insuredSalary = empConfig?.insured_salary || baseSalary
 
-          for (const dt of (deductionTypes || []) as { code: string; name: string; calc_method: string; calc_config: Record<string, unknown>; is_employer_paid: boolean }[]) {
+          for (const dt of (deductionTypes || []) as {
+            code: string
+            name: string
+            calc_method: string
+            calc_config: Record<string, unknown>
+            is_employer_paid: boolean
+          }[]) {
             if (dt.is_employer_paid) continue // 雇主負擔不從員工薪資扣
 
             let amount = 0

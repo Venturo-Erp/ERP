@@ -152,9 +152,7 @@ export function TourPrintDialog({ isOpen, tour, members, onClose }: TourPrintDia
     if (!isOpen) return
     setSelectedMembers(
       new Set(
-        members
-          .filter(m => m.chinese_name || m.passport_name || m.passport_number)
-          .map(m => m.id)
+        members.filter(m => m.chinese_name || m.passport_name || m.passport_number).map(m => m.id)
       )
     )
   }, [isOpen, members])

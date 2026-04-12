@@ -77,15 +77,35 @@ export default function MyAttendancePage() {
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2">
             <Label className="text-sm text-morandi-secondary">年</Label>
-            <Input type="number" value={year} onChange={e => setYear(Number(e.target.value))} className="w-20 h-8 text-sm" />
+            <Input
+              type="number"
+              value={year}
+              onChange={e => setYear(Number(e.target.value))}
+              className="w-20 h-8 text-sm"
+            />
             <Label className="text-sm text-morandi-secondary">月</Label>
-            <Input type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))} className="w-16 h-8 text-sm" />
+            <Input
+              type="number"
+              min={1}
+              max={12}
+              value={month}
+              onChange={e => setMonth(Number(e.target.value))}
+              className="w-16 h-8 text-sm"
+            />
           </div>
           <div className="flex items-center gap-4 text-xs text-morandi-secondary">
-            <span>出勤 <b className="text-morandi-primary">{presentDays}</b> 天</span>
-            <span>遲到 <b className="text-status-warning">{lateDays}</b> 天</span>
-            <span>工時 <b className="text-morandi-primary">{totalHours.toFixed(1)}</b>h</span>
-            <span>加班 <b className="text-morandi-gold">{totalOvertime.toFixed(1)}</b>h</span>
+            <span>
+              出勤 <b className="text-morandi-primary">{presentDays}</b> 天
+            </span>
+            <span>
+              遲到 <b className="text-status-warning">{lateDays}</b> 天
+            </span>
+            <span>
+              工時 <b className="text-morandi-primary">{totalHours.toFixed(1)}</b>h
+            </span>
+            <span>
+              加班 <b className="text-morandi-gold">{totalOvertime.toFixed(1)}</b>h
+            </span>
           </div>
         </div>
 
@@ -105,24 +125,44 @@ export default function MyAttendancePage() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={7} className="text-center py-8 text-morandi-muted">載入中...</td></tr>
+                <tr>
+                  <td colSpan={7} className="text-center py-8 text-morandi-muted">
+                    載入中...
+                  </td>
+                </tr>
               ) : records.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-8 text-morandi-muted">本月無出勤紀錄</td></tr>
+                <tr>
+                  <td colSpan={7} className="text-center py-8 text-morandi-muted">
+                    本月無出勤紀錄
+                  </td>
+                </tr>
               ) : (
                 records.map(r => {
                   const d = new Date(r.date)
                   const weekday = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()]
                   const statusInfo = STATUS_MAP[r.status || ''] || { label: '-', color: '' }
                   return (
-                    <tr key={r.id} className="border-b border-border/30 hover:bg-morandi-container/20">
+                    <tr
+                      key={r.id}
+                      className="border-b border-border/30 hover:bg-morandi-container/20"
+                    >
                       <td className="px-4 py-2 text-morandi-primary">{r.date}</td>
                       <td className="px-4 py-2 text-morandi-secondary">{weekday}</td>
                       <td className="px-4 py-2 font-mono">{r.clock_in?.slice(0, 5) || '-'}</td>
                       <td className="px-4 py-2 font-mono">{r.clock_out?.slice(0, 5) || '-'}</td>
-                      <td className="px-4 py-2">{r.work_hours ? `${r.work_hours.toFixed(1)}h` : '-'}</td>
-                      <td className="px-4 py-2 text-morandi-gold">{r.overtime_hours ? `${r.overtime_hours.toFixed(1)}h` : '-'}</td>
                       <td className="px-4 py-2">
-                        <span className={cn('px-2 py-0.5 rounded text-xs font-medium', statusInfo.color)}>
+                        {r.work_hours ? `${r.work_hours.toFixed(1)}h` : '-'}
+                      </td>
+                      <td className="px-4 py-2 text-morandi-gold">
+                        {r.overtime_hours ? `${r.overtime_hours.toFixed(1)}h` : '-'}
+                      </td>
+                      <td className="px-4 py-2">
+                        <span
+                          className={cn(
+                            'px-2 py-0.5 rounded text-xs font-medium',
+                            statusInfo.color
+                          )}
+                        >
                           {statusInfo.label}
                         </span>
                       </td>

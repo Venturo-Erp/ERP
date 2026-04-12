@@ -57,8 +57,14 @@ export default function AnnouncementsPage() {
         .limit(50)
 
       const mapped = (data || []).map((a: Record<string, unknown>) => {
-        const creator = a.creator as { display_name: string | null; chinese_name: string | null } | null
-        return { ...a, creator_name: creator?.display_name || creator?.chinese_name || '' } as Announcement
+        const creator = a.creator as {
+          display_name: string | null
+          chinese_name: string | null
+        } | null
+        return {
+          ...a,
+          creator_name: creator?.display_name || creator?.chinese_name || '',
+        } as Announcement
       })
       setAnnouncements(mapped)
     } catch (err) {
@@ -68,24 +74,36 @@ export default function AnnouncementsPage() {
     }
   }, [])
 
-  useEffect(() => { fetchAnnouncements() }, [fetchAnnouncements])
+  useEffect(() => {
+    fetchAnnouncements()
+  }, [fetchAnnouncements])
 
   const handleSubmit = async () => {
-    if (!formTitle.trim()) { toast.error('請填寫標題'); return }
+    if (!formTitle.trim()) {
+      toast.error('請填寫標題')
+      return
+    }
     setSaving(true)
     try {
       if (editingId) {
-        await supabase.from('announcements' as never).update({
-          title: formTitle, content: formContent || null,
-          category: formCategory, is_pinned: formPinned,
-          updated_at: new Date().toISOString(),
-        } as never).eq('id', editingId)
+        await supabase
+          .from('announcements' as never)
+          .update({
+            title: formTitle,
+            content: formContent || null,
+            category: formCategory,
+            is_pinned: formPinned,
+            updated_at: new Date().toISOString(),
+          } as never)
+          .eq('id', editingId)
         toast.success('公告已更新')
       } else {
         await supabase.from('announcements' as never).insert({
           workspace_id: user?.workspace_id,
-          title: formTitle, content: formContent || null,
-          category: formCategory, is_pinned: formPinned,
+          title: formTitle,
+          content: formContent || null,
+          category: formCategory,
+          is_pinned: formPinned,
           published_at: new Date().toISOString(),
           created_by: user?.id,
         } as never)
@@ -104,7 +122,10 @@ export default function AnnouncementsPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('確定要刪除此公告？')) return
-    await supabase.from('announcements' as never).delete().eq('id', id)
+    await supabase
+      .from('announcements' as never)
+      .delete()
+      .eq('id', id)
     toast.success('已刪除')
     fetchAnnouncements()
   }
@@ -137,7 +158,13 @@ export default function AnnouncementsPage() {
       icon={Megaphone}
       headerActions={
         isAdmin ? (
-          <Button onClick={() => { resetForm(); setShowDialog(true) }} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
+          <Button
+            onClick={() => {
+              resetForm()
+              setShowDialog(true)
+            }}
+            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+          >
             <Plus size={16} className="mr-1" /> 發布公告
           </Button>
         ) : undefined
@@ -152,22 +179,48 @@ export default function AnnouncementsPage() {
           announcements.map(a => {
             const cat = CATEGORY_MAP[a.category] || CATEGORY_MAP.general
             return (
-              <Card key={a.id} className={cn('rounded-xl border border-border p-5', a.is_pinned && 'border-morandi-gold/40 bg-morandi-gold/5')}>
+              <Card
+                key={a.id}
+                className={cn(
+                  'rounded-xl border border-border p-5',
+                  a.is_pinned && 'border-morandi-gold/40 bg-morandi-gold/5'
+                )}
+              >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       {a.is_pinned && <Pin size={12} className="text-morandi-gold" />}
-                      <span className={cn('px-2 py-0.5 rounded text-[10px] font-medium', cat.color)}>{cat.label}</span>
+                      <span
+                        className={cn('px-2 py-0.5 rounded text-[10px] font-medium', cat.color)}
+                      >
+                        {cat.label}
+                      </span>
                       <span className="text-xs text-morandi-muted">{formatDate(a.created_at)}</span>
-                      {a.creator_name && <span className="text-xs text-morandi-muted">· {a.creator_name}</span>}
+                      {a.creator_name && (
+                        <span className="text-xs text-morandi-muted">· {a.creator_name}</span>
+                      )}
                     </div>
                     <h3 className="text-sm font-semibold text-morandi-primary">{a.title}</h3>
-                    {a.content && <p className="text-sm text-morandi-secondary mt-1 whitespace-pre-line">{a.content}</p>}
+                    {a.content && (
+                      <p className="text-sm text-morandi-secondary mt-1 whitespace-pre-line">
+                        {a.content}
+                      </p>
+                    )}
                   </div>
                   {isAdmin && (
                     <div className="flex gap-1 flex-shrink-0">
-                      <button onClick={() => handleEdit(a)} className="p-1.5 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 rounded"><Edit2 size={14} /></button>
-                      <button onClick={() => handleDelete(a.id)} className="p-1.5 text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 rounded"><Trash2 size={14} /></button>
+                      <button
+                        onClick={() => handleEdit(a)}
+                        className="p-1.5 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 rounded"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(a.id)}
+                        className="p-1.5 text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 rounded"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   )}
                 </div>
@@ -179,11 +232,18 @@ export default function AnnouncementsPage() {
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent level={1} className="max-w-lg">
-          <DialogHeader><DialogTitle>{editingId ? '編輯公告' : '發布公告'}</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>{editingId ? '編輯公告' : '發布公告'}</DialogTitle>
+          </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
               <Label>標題</Label>
-              <Input value={formTitle} onChange={e => setFormTitle(e.target.value)} placeholder="公告標題" className="mt-1" />
+              <Input
+                value={formTitle}
+                onChange={e => setFormTitle(e.target.value)}
+                placeholder="公告標題"
+                className="mt-1"
+              />
             </div>
             <div>
               <Label>內容</Label>
@@ -210,12 +270,21 @@ export default function AnnouncementsPage() {
               </div>
               <div className="flex items-end">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={formPinned} onChange={e => setFormPinned(e.target.checked)} className="rounded" />
+                  <input
+                    type="checkbox"
+                    checked={formPinned}
+                    onChange={e => setFormPinned(e.target.checked)}
+                    className="rounded"
+                  />
                   <span className="text-sm text-morandi-primary">置頂</span>
                 </label>
               </div>
             </div>
-            <Button onClick={handleSubmit} disabled={saving} className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white">
+            <Button
+              onClick={handleSubmit}
+              disabled={saving}
+              className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            >
               {saving ? '儲存中...' : editingId ? '更新公告' : '發布公告'}
             </Button>
           </div>

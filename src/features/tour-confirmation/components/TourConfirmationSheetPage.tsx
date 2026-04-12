@@ -49,9 +49,7 @@ const CATEGORIES: { key: ConfirmationItemCategory; label: string }[] = [
 ]
 
 /** 依團類型過濾要顯示的類別（與 RequirementsList 一致） */
-function getCategoriesForTourType(
-  tourServiceType?: string | null
-): typeof CATEGORIES {
+function getCategoriesForTourType(tourServiceType?: string | null): typeof CATEGORIES {
   switch (tourServiceType) {
     case 'flight':
     case 'car_service':

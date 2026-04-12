@@ -140,9 +140,7 @@ export function NotificationCapsule() {
       ref={panelRef}
       className={cn(
         'fixed bottom-6 right-6 z-[9999] transition-all duration-300 ease-in-out',
-        isVisible
-          ? 'translate-y-0 opacity-100'
-          : 'translate-y-4 opacity-0 pointer-events-none'
+        isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'
       )}
     >
       {/* 展開的通知面板 */}
@@ -166,9 +164,7 @@ export function NotificationCapsule() {
           {/* 通知列表 */}
           <div className="overflow-y-auto max-h-[400px]">
             {notifications.length === 0 ? (
-              <div className="py-12 text-center text-sm text-morandi-muted">
-                沒有通知
-              </div>
+              <div className="py-12 text-center text-sm text-morandi-muted">沒有通知</div>
             ) : (
               notifications.map(n => (
                 <button
@@ -199,24 +195,17 @@ export function NotificationCapsule() {
                       <p
                         className={cn(
                           'text-sm mt-1 leading-snug',
-                          n.is_read
-                            ? 'text-morandi-secondary'
-                            : 'text-morandi-primary font-medium'
+                          n.is_read ? 'text-morandi-secondary' : 'text-morandi-primary font-medium'
                         )}
                       >
                         {n.title}
                       </p>
                       {n.message && (
-                        <p className="text-xs text-morandi-muted mt-0.5 truncate">
-                          {n.message}
-                        </p>
+                        <p className="text-xs text-morandi-muted mt-0.5 truncate">{n.message}</p>
                       )}
                     </div>
                     {n.action_url && (
-                      <ExternalLink
-                        size={12}
-                        className="text-morandi-muted flex-shrink-0 mt-2"
-                      />
+                      <ExternalLink size={12} className="text-morandi-muted flex-shrink-0 mt-2" />
                     )}
                   </div>
                 </button>
@@ -236,9 +225,7 @@ export function NotificationCapsule() {
         onClick={() => setOpen(!open)}
       >
         <Bell size={16} className="flex-shrink-0" />
-        <span className="text-sm font-medium">
-          {unreadCount} 則通知
-        </span>
+        <span className="text-sm font-medium">{unreadCount} 則通知</span>
         <button
           onClick={handleDismiss}
           className="ml-1 p-0.5 rounded-full hover:bg-white/20 transition-colors"

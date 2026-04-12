@@ -88,21 +88,13 @@ export function EditTenantDialog({
           </div>
 
           <div>
-            <label className="text-sm font-medium text-morandi-primary">
-              {LABELS.FIELD_CODE}
-            </label>
-            <Input
-              value={workspace?.code || ''}
-              disabled
-              className="mt-1"
-            />
+            <label className="text-sm font-medium text-morandi-primary">{LABELS.FIELD_CODE}</label>
+            <Input value={workspace?.code || ''} disabled className="mt-1" />
             <p className="text-xs text-morandi-secondary mt-1">{LABELS.FIELD_CODE_HINT}</p>
           </div>
 
           <div>
-            <label className="text-sm font-medium text-morandi-primary">
-              {LABELS.FIELD_TYPE}
-            </label>
+            <label className="text-sm font-medium text-morandi-primary">{LABELS.FIELD_TYPE}</label>
             <Select value={type} onValueChange={setType}>
               <SelectTrigger className="mt-1">
                 <SelectValue placeholder={LABELS.FIELD_TYPE_PLACEHOLDER} />

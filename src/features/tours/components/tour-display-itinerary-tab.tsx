@@ -66,7 +66,8 @@ type EditorMode = 'web' | 'print'
 function buildDefaultFromTour(tour: Tour): TourFormData {
   const departureDate = tour.departure_date ? new Date(tour.departure_date) : new Date()
   const returnDate = tour.return_date ? new Date(tour.return_date) : new Date()
-  const days = Math.ceil((returnDate.getTime() - departureDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+  const days =
+    Math.ceil((returnDate.getTime() - departureDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
   const airportCode = tour.airport_code || ''
 
   return {
@@ -310,27 +311,21 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
     [tourData]
   )
 
-  const handleVersionChange = useCallback(
-    (index: number, versionData?: ItineraryVersionRecord) => {
-      setCurrentVersionIndex(index)
-      if (versionData) {
-        setTourData(prev => ({
-          ...prev,
-          dailyItinerary: (versionData.daily_itinerary || []) as unknown as DailyItinerary[],
-          features: (versionData.features || prev.features) as unknown as Feature[],
-          focusCards: (versionData.focus_cards || prev.focusCards) as unknown as FocusCard[],
-        }))
-      }
-    },
-    []
-  )
+  const handleVersionChange = useCallback((index: number, versionData?: ItineraryVersionRecord) => {
+    setCurrentVersionIndex(index)
+    if (versionData) {
+      setTourData(prev => ({
+        ...prev,
+        dailyItinerary: (versionData.daily_itinerary || []) as unknown as DailyItinerary[],
+        features: (versionData.features || prev.features) as unknown as Feature[],
+        focusCards: (versionData.focus_cards || prev.focusCards) as unknown as FocusCard[],
+      }))
+    }
+  }, [])
 
-  const handleVersionRecordsChange = useCallback(
-    (records: ItineraryVersionRecord[]) => {
-      // version records are managed by PublishButton
-    },
-    []
-  )
+  const handleVersionRecordsChange = useCallback((records: ItineraryVersionRecord[]) => {
+    // version records are managed by PublishButton
+  }, [])
 
   // 建立新展示行程
   const handleCreate = async (type: EditorMode) => {
@@ -372,12 +367,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
         {/* 工具列 */}
         <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/30">
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setMode('web')}
-              className="gap-1"
-            >
+            <Button variant="ghost" size="sm" onClick={() => setMode('web')} className="gap-1">
               <Monitor className="w-4 h-4" />
               網頁版
             </Button>
@@ -386,11 +376,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
               紙本版
             </Button>
           </div>
-          <Button
-            size="sm"
-            onClick={() => window.print()}
-            className="gap-1"
-          >
+          <Button size="sm" onClick={() => window.print()} className="gap-1">
             <Printer className="w-4 h-4" />
             列印
           </Button>
@@ -435,12 +421,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
               <Monitor className="w-4 h-4" />
               網頁版
             </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setMode('print')}
-              className="gap-1"
-            >
+            <Button variant="ghost" size="sm" onClick={() => setMode('print')} className="gap-1">
               <Printer className="w-4 h-4" />
               紙本版
             </Button>
@@ -461,7 +442,9 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
             id: linkedItinerary?.id,
             status: linkedItinerary?.status || '草稿',
             tourId: tour.id,
-            version_records: linkedItinerary?.version_records as ItineraryVersionRecord[] | undefined,
+            version_records: linkedItinerary?.version_records as
+              | ItineraryVersionRecord[]
+              | undefined,
           }}
           currentVersionIndex={currentVersionIndex}
           onVersionChange={handleVersionChange}

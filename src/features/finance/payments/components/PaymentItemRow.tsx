@@ -45,7 +45,13 @@ interface PaymentItemRowProps {
   /** 唯讀模式（已確認的收款單） */
   readonly?: boolean
   /** 收款方式列表（從父組件傳入，避免重複載入） */
-  paymentMethods?: Array<{ id: string; code: string; name: string; description?: string | null; placeholder?: string | null }>
+  paymentMethods?: Array<{
+    id: string
+    code: string
+    name: string
+    description?: string | null
+    placeholder?: string | null
+  }>
   /** 是否有核帳權限（可填寫實收金額） */
   canConfirmReceipt?: boolean
 }
@@ -439,7 +445,9 @@ export function PaymentItemRow({
       {/* 現金額外欄位 */}
       {currentCode === 'CASH' && !readonly && (
         <tr className="bg-card">
-          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">經手人</td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">
+            經手人
+          </td>
           <td className="py-2 px-3 border-b border-border/50" colSpan={5}>
             <input
               type="text"
@@ -455,7 +463,9 @@ export function PaymentItemRow({
       {/* 匯款額外欄位 */}
       {currentCode === 'TRANSFER' && !readonly && (
         <tr className="bg-card">
-          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">匯入帳戶</td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">
+            匯入帳戶
+          </td>
           <td className="py-2 px-3 border-b border-border/50" colSpan={2}>
             <Select
               value={item.account_info || ''}
@@ -466,12 +476,16 @@ export function PaymentItemRow({
               </SelectTrigger>
               <SelectContent>
                 {BANK_ACCOUNTS.map(bank => (
-                  <SelectItem key={bank.value} value={bank.value}>{bank.label}</SelectItem>
+                  <SelectItem key={bank.value} value={bank.value}>
+                    {bank.label}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </td>
-          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">手續費</td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">
+            手續費
+          </td>
           <td className="py-2 px-3 border-b border-border/50" colSpan={2}>
             <input
               type="number"
@@ -487,18 +501,24 @@ export function PaymentItemRow({
       {/* 刷卡額外欄位 */}
       {currentCode === 'CREDIT_CARD' && !readonly && (
         <tr className="bg-card">
-          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">卡號末四碼</td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">
+            卡號末四碼
+          </td>
           <td className="py-2 px-3 border-b border-border/50">
             <input
               type="text"
               maxLength={4}
               value={item.card_last_four || ''}
-              onChange={e => onUpdate(item.id, { card_last_four: e.target.value.replace(/\D/g, '') })}
+              onChange={e =>
+                onUpdate(item.id, { card_last_four: e.target.value.replace(/\D/g, '') })
+              }
               placeholder="1234"
               className="input-no-focus w-full bg-transparent text-sm"
             />
           </td>
-          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">授權碼</td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">
+            授權碼
+          </td>
           <td className="py-2 px-3 border-b border-border/50">
             <input
               type="text"
@@ -508,7 +528,9 @@ export function PaymentItemRow({
               className="input-no-focus w-full bg-transparent text-sm"
             />
           </td>
-          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">手續費</td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">
+            手續費
+          </td>
           <td className="py-2 px-3 border-b border-border/50">
             <input
               type="number"
@@ -524,7 +546,9 @@ export function PaymentItemRow({
       {/* 支票額外欄位 */}
       {currentCode === 'CHECK' && !readonly && (
         <tr className="bg-card">
-          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">支票號碼</td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">
+            支票號碼
+          </td>
           <td className="py-2 px-3 border-b border-border/50" colSpan={2}>
             <input
               type="text"
@@ -534,7 +558,9 @@ export function PaymentItemRow({
               className="input-no-focus w-full bg-transparent text-sm"
             />
           </td>
-          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">開票銀行</td>
+          <td className="py-2 px-3 border-b border-border/50 text-xs text-morandi-primary font-medium">
+            開票銀行
+          </td>
           <td className="py-2 px-3 border-b border-border/50" colSpan={2}>
             <input
               type="text"
@@ -550,7 +576,10 @@ export function PaymentItemRow({
       {/* 方式說明（從 DB 帶出） */}
       {currentMethod?.description && !readonly && (
         <tr className="bg-morandi-container/10">
-          <td className="py-1.5 px-3 border-b border-border/50 text-xs text-morandi-muted" colSpan={6}>
+          <td
+            className="py-1.5 px-3 border-b border-border/50 text-xs text-morandi-muted"
+            colSpan={6}
+          >
             {currentMethod.description}
           </td>
         </tr>

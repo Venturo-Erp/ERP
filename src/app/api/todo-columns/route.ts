@@ -47,7 +47,13 @@ export async function POST(request: NextRequest) {
 
   const { data, error } = await supabase
     .from('todo_columns')
-    .insert({ workspace_id: workspaceId, name, color, sort_order: finalSortOrder, is_system: false })
+    .insert({
+      workspace_id: workspaceId,
+      name,
+      color,
+      sort_order: finalSortOrder,
+      is_system: false,
+    })
     .select()
     .single()
 
@@ -67,10 +73,7 @@ export async function PUT(request: NextRequest) {
   // 批量重新排序
   if (body.reorder && Array.isArray(body.reorder)) {
     for (const item of body.reorder) {
-      await supabase
-        .from('todo_columns')
-        .update({ sort_order: item.sort_order })
-        .eq('id', item.id)
+      await supabase.from('todo_columns').update({ sort_order: item.sort_order }).eq('id', item.id)
     }
     return NextResponse.json({ success: true })
   }

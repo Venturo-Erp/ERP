@@ -36,7 +36,9 @@ export function ClockInWidget() {
     }
   }, [user?.id])
 
-  useEffect(() => { fetchStatus() }, [fetchStatus])
+  useEffect(() => {
+    fetchStatus()
+  }, [fetchStatus])
 
   const handleClock = async (action: 'clock_in' | 'clock_out') => {
     setLoading(true)
@@ -47,16 +49,24 @@ export function ClockInWidget() {
         body: JSON.stringify({ action, source: 'web' }),
       })
       const data = await res.json()
-      if (res.ok) { toast.success(data.message); fetchStatus() }
-      else toast.error(data.error)
-    } catch { toast.error('打卡失敗') }
-    finally { setLoading(false) }
+      if (res.ok) {
+        toast.success(data.message)
+        fetchStatus()
+      } else toast.error(data.error)
+    } catch {
+      toast.error('打卡失敗')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const twTime = new Date(currentTime.getTime() + 8 * 60 * 60 * 1000)
   const timeStr = twTime.toISOString().split('T')[1].slice(0, 8)
   const dateStr = currentTime.toLocaleDateString('zh-TW', {
-    month: 'long', day: 'numeric', weekday: 'short', timeZone: 'Asia/Taipei',
+    month: 'long',
+    day: 'numeric',
+    weekday: 'short',
+    timeZone: 'Asia/Taipei',
   })
 
   const hasClockedIn = !!clockStatus?.clock_in
@@ -68,15 +78,19 @@ export function ClockInWidget() {
         <div className="p-5 space-y-4 h-full flex flex-col">
           {/* Header */}
           <div className="flex items-start gap-3">
-            <div className={cn(
-              'rounded-full p-2.5 text-white shadow-lg shadow-black/10',
-              'bg-gradient-to-br from-morandi-gold/80 to-morandi-gold',
-              'ring-2 ring-border/50 ring-offset-1 ring-offset-background/20'
-            )}>
+            <div
+              className={cn(
+                'rounded-full p-2.5 text-white shadow-lg shadow-black/10',
+                'bg-gradient-to-br from-morandi-gold/80 to-morandi-gold',
+                'ring-2 ring-border/50 ring-offset-1 ring-offset-background/20'
+              )}
+            >
               <LogIn className="w-5 h-5 drop-shadow-sm" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-morandi-primary leading-tight tracking-wide">打卡</p>
+              <p className="text-sm font-semibold text-morandi-primary leading-tight tracking-wide">
+                打卡
+              </p>
               <p className="text-xs text-morandi-secondary/90 mt-1">{dateStr}</p>
             </div>
           </div>

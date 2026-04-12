@@ -1585,8 +1585,7 @@ export function RequirementsList({
                                 // 交通：區分機票和遊覽車
                                 if (cat.key === 'transport') {
                                   // 機票（聚合後 title = '機票'）
-                                  const isTicket =
-                                    item.title === '機票' || supplierName === '機票'
+                                  const isTicket = item.title === '機票' || supplierName === '機票'
 
                                   if (isTicket) {
                                     return (

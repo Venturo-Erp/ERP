@@ -35,12 +35,7 @@ import { Todo } from '@/stores/types'
 import { ConfirmDialog } from '@/components/dialog/confirm-dialog'
 import { useConfirmDialog } from '@/hooks/useConfirmDialog'
 import { DatePicker } from '@/components/ui/date-picker'
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-  type DropResult,
-} from '@hello-pangea/dnd'
+import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 
 export const dynamic = 'force-dynamic'
 
@@ -65,11 +60,7 @@ const COLOR_MAP: Record<string, { border: string; text: string }> = {
 }
 
 export default function TodosPage() {
-  const {
-    todos,
-    create: addTodo,
-    update: updateTodo,
-  } = useTodos()
+  const { todos, create: addTodo, update: updateTodo } = useTodos()
   const { user } = useAuthStore()
   const { items: employees } = useEmployeesSlim()
   const searchParams = useSearchParams()
@@ -382,9 +373,11 @@ export default function TodosPage() {
     const diffDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
     const formatted = date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })
 
-    if (diffDays < 0) return { text: `逾期 ${Math.abs(diffDays)} 天`, color: 'text-morandi-red bg-morandi-red/10' }
+    if (diffDays < 0)
+      return { text: `逾期 ${Math.abs(diffDays)} 天`, color: 'text-morandi-red bg-morandi-red/10' }
     if (diffDays === 0) return { text: '今天', color: 'text-morandi-gold bg-morandi-gold/10' }
-    if (diffDays <= 3) return { text: `${diffDays} 天後`, color: 'text-morandi-gold/80 bg-morandi-gold/5' }
+    if (diffDays <= 3)
+      return { text: `${diffDays} 天後`, color: 'text-morandi-gold/80 bg-morandi-gold/5' }
     return { text: formatted, color: 'text-morandi-secondary bg-morandi-container/50' }
   }, [])
 
@@ -396,11 +389,16 @@ export default function TodosPage() {
   // 優先級左側邊框
   const getPriorityBorder = useCallback((priority: number) => {
     switch (priority) {
-      case 5: return 'border-l-morandi-red'
-      case 4: return 'border-l-orange-400'
-      case 3: return 'border-l-morandi-gold'
-      case 2: return 'border-l-sky-400'
-      default: return 'border-l-morandi-muted'
+      case 5:
+        return 'border-l-morandi-red'
+      case 4:
+        return 'border-l-orange-400'
+      case 3:
+        return 'border-l-morandi-gold'
+      case 2:
+        return 'border-l-sky-400'
+      default:
+        return 'border-l-morandi-muted'
     }
   }, [])
 
@@ -418,241 +416,246 @@ export default function TodosPage() {
     >
       {/* 看板 */}
       <div className="h-full flex flex-col">
-      {columnsLoading ? (
-        <div className="flex-1 flex items-center justify-center text-morandi-muted">載入中...</div>
-      ) : (
-        <DragDropContext onDragEnd={handleDragEnd}>
-          <Droppable droppableId="board" type="column" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="flex-1 overflow-x-auto overflow-y-hidden px-4 py-4"
-              >
-                <div className="flex gap-3 h-full min-w-max items-start">
-                  {columns.map((column, index) => {
-                    const items = todosByColumn[column.id] || []
-                    const colorClass = COLOR_MAP[column.color] || COLOR_MAP.gray
+        {columnsLoading ? (
+          <div className="flex-1 flex items-center justify-center text-morandi-muted">
+            載入中...
+          </div>
+        ) : (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="board" type="column" direction="horizontal">
+              {provided => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className="flex-1 overflow-x-auto overflow-y-hidden px-4 py-4"
+                >
+                  <div className="flex gap-3 h-full min-w-max items-start">
+                    {columns.map((column, index) => {
+                      const items = todosByColumn[column.id] || []
+                      const colorClass = COLOR_MAP[column.color] || COLOR_MAP.gray
 
-                    return (
-                      <Draggable key={column.id} draggableId={column.id} index={index}>
-                        {(provided) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className="flex flex-col w-[300px] flex-shrink-0 max-h-full bg-morandi-container/40 rounded-xl border border-border/40 shadow-sm"
-                          >
-                            {/* 欄位標題 */}
+                      return (
+                        <Draggable key={column.id} draggableId={column.id} index={index}>
+                          {provided => (
                             <div
-                              {...provided.dragHandleProps}
-                              className={cn(
-                                'flex items-center justify-between px-3 py-3 cursor-grab border-b-2 rounded-t-xl',
-                                colorClass.border
-                              )}
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className="flex flex-col w-[300px] flex-shrink-0 max-h-full bg-morandi-container/40 rounded-xl border border-border/40 shadow-sm"
                             >
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                {editingColumnId === column.id ? (
-                                  <Input
-                                    autoFocus
-                                    value={editingColumnName}
-                                    onChange={e => setEditingColumnName(e.target.value)}
-                                    onBlur={() => handleRenameColumn(column.id, editingColumnName)}
-                                    onKeyDown={e => {
-                                      if (e.key === 'Enter') handleRenameColumn(column.id, editingColumnName)
-                                      if (e.key === 'Escape') setEditingColumnId(null)
-                                    }}
-                                    onClick={e => e.stopPropagation()}
-                                    className="h-7 text-sm"
-                                  />
-                                ) : (
-                                  <span
-                                    className="text-sm font-semibold text-morandi-primary truncate"
-                                    onDoubleClick={() => {
-                                      setEditingColumnId(column.id)
-                                      setEditingColumnName(column.name)
-                                    }}
-                                  >
-                                    {column.name}
-                                  </span>
+                              {/* 欄位標題 */}
+                              <div
+                                {...provided.dragHandleProps}
+                                className={cn(
+                                  'flex items-center justify-between px-3 py-3 cursor-grab border-b-2 rounded-t-xl',
+                                  colorClass.border
                                 )}
-                                <span className="text-xs text-morandi-muted bg-morandi-container/60 px-1.5 py-0.5 rounded-full flex-shrink-0">
-                                  {items.length}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-0.5">
-                                <button
-                                  onClick={e => {
-                                    e.stopPropagation()
-                                    setQuickAddColumn(column.id)
-                                    setQuickAddValue('')
-                                  }}
-                                  className="p-1 rounded hover:bg-morandi-container/50 text-morandi-secondary hover:text-morandi-primary transition-colors"
-                                  title="新增卡片"
-                                >
-                                  <Plus size={16} />
-                                </button>
-                                {!column.is_system && (
-                                  <>
-                                    <button
-                                      onClick={e => {
-                                        e.stopPropagation()
+                              >
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  {editingColumnId === column.id ? (
+                                    <Input
+                                      autoFocus
+                                      value={editingColumnName}
+                                      onChange={e => setEditingColumnName(e.target.value)}
+                                      onBlur={() =>
+                                        handleRenameColumn(column.id, editingColumnName)
+                                      }
+                                      onKeyDown={e => {
+                                        if (e.key === 'Enter')
+                                          handleRenameColumn(column.id, editingColumnName)
+                                        if (e.key === 'Escape') setEditingColumnId(null)
+                                      }}
+                                      onClick={e => e.stopPropagation()}
+                                      className="h-7 text-sm"
+                                    />
+                                  ) : (
+                                    <span
+                                      className="text-sm font-semibold text-morandi-primary truncate"
+                                      onDoubleClick={() => {
                                         setEditingColumnId(column.id)
                                         setEditingColumnName(column.name)
                                       }}
-                                      className="p-1 rounded hover:bg-morandi-container/50 text-morandi-secondary hover:text-morandi-primary transition-colors"
-                                      title="重命名"
                                     >
-                                      <Pencil size={13} />
-                                    </button>
-                                    <button
-                                      onClick={e => {
-                                        e.stopPropagation()
-                                        handleDeleteColumn(column)
-                                      }}
-                                      className="p-1 rounded hover:bg-morandi-red/10 text-morandi-secondary hover:text-morandi-red transition-colors"
-                                      title="刪除欄位"
-                                    >
-                                      <Trash2 size={13} />
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                            </div>
-
-                            {/* 快速新增 */}
-                            {quickAddColumn === column.id && (
-                              <div className="mx-2 mt-2 bg-card rounded-lg border border-border shadow-sm p-3">
-                                <Input
-                                  autoFocus
-                                  placeholder="輸入任務標題..."
-                                  value={quickAddValue}
-                                  onChange={e => setQuickAddValue(e.target.value)}
-                                  onKeyDown={e => {
-                                    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-                                      e.preventDefault()
-                                      handleQuickAdd(column.id)
-                                    }
-                                    if (e.key === 'Escape') setQuickAddColumn(null)
-                                  }}
-                                  className="h-8 text-sm mb-2"
-                                />
-                                <div className="flex gap-2">
-                                  <Button
-                                    size="sm"
-                                    className="h-7 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-                                    onClick={() => handleQuickAdd(column.id)}
-                                    disabled={!quickAddValue.trim() || isSubmitting}
+                                      {column.name}
+                                    </span>
+                                  )}
+                                  <span className="text-xs text-morandi-muted bg-morandi-container/60 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                                    {items.length}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-0.5">
+                                  <button
+                                    onClick={e => {
+                                      e.stopPropagation()
+                                      setQuickAddColumn(column.id)
+                                      setQuickAddValue('')
+                                    }}
+                                    className="p-1 rounded hover:bg-morandi-container/50 text-morandi-secondary hover:text-morandi-primary transition-colors"
+                                    title="新增卡片"
                                   >
-                                    新增
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-7 text-xs"
-                                    onClick={() => setQuickAddColumn(null)}
-                                  >
-                                    取消
-                                  </Button>
+                                    <Plus size={16} />
+                                  </button>
+                                  {!column.is_system && (
+                                    <>
+                                      <button
+                                        onClick={e => {
+                                          e.stopPropagation()
+                                          setEditingColumnId(column.id)
+                                          setEditingColumnName(column.name)
+                                        }}
+                                        className="p-1 rounded hover:bg-morandi-container/50 text-morandi-secondary hover:text-morandi-primary transition-colors"
+                                        title="重命名"
+                                      >
+                                        <Pencil size={13} />
+                                      </button>
+                                      <button
+                                        onClick={e => {
+                                          e.stopPropagation()
+                                          handleDeleteColumn(column)
+                                        }}
+                                        className="p-1 rounded hover:bg-morandi-red/10 text-morandi-secondary hover:text-morandi-red transition-colors"
+                                        title="刪除欄位"
+                                      >
+                                        <Trash2 size={13} />
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               </div>
-                            )}
 
-                            {/* 卡片列表 */}
-                            <Droppable droppableId={column.id} type="card">
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.droppableProps}
-                                  className={cn(
-                                    'flex-1 overflow-y-auto space-y-2 p-2 transition-colors min-h-[80px]',
-                                    snapshot.isDraggingOver && 'bg-morandi-gold/10'
-                                  )}
-                                >
-                                  {items.map((todo, index) => (
-                                    <TodoCardMemo
-                                      key={todo.id}
-                                      todo={todo}
-                                      index={index}
-                                      assigneeName={getEmployeeName(todo.assignee)}
-                                      currentUserId={user?.id}
-                                      onClick={handleCardClick}
-                                    />
-                                  ))}
-                                  {provided.placeholder}
-                                  {items.length === 0 && !snapshot.isDraggingOver && (
-                                    <div className="text-center py-8 text-sm text-morandi-muted/60">
-                                      拖曳卡片到這裡
-                                    </div>
-                                  )}
+                              {/* 快速新增 */}
+                              {quickAddColumn === column.id && (
+                                <div className="mx-2 mt-2 bg-card rounded-lg border border-border shadow-sm p-3">
+                                  <Input
+                                    autoFocus
+                                    placeholder="輸入任務標題..."
+                                    value={quickAddValue}
+                                    onChange={e => setQuickAddValue(e.target.value)}
+                                    onKeyDown={e => {
+                                      if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                                        e.preventDefault()
+                                        handleQuickAdd(column.id)
+                                      }
+                                      if (e.key === 'Escape') setQuickAddColumn(null)
+                                    }}
+                                    className="h-8 text-sm mb-2"
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      className="h-7 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                                      onClick={() => handleQuickAdd(column.id)}
+                                      disabled={!quickAddValue.trim() || isSubmitting}
+                                    >
+                                      新增
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 text-xs"
+                                      onClick={() => setQuickAddColumn(null)}
+                                    >
+                                      取消
+                                    </Button>
+                                  </div>
                                 </div>
                               )}
-                            </Droppable>
-                          </div>
-                        )}
-                      </Draggable>
-                    )
-                  })}
-                  {provided.placeholder}
 
-                  {/* 新增欄位 */}
-                  <div className="w-[320px] flex-shrink-0">
-                    {isAddingColumn ? (
-                      <div className="bg-morandi-container/30 rounded-lg p-3">
-                        <Input
-                          autoFocus
-                          placeholder="欄位名稱..."
-                          value={newColumnName}
-                          onChange={e => setNewColumnName(e.target.value)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-                              e.preventDefault()
-                              handleAddColumn()
-                            }
-                            if (e.key === 'Escape') {
-                              setIsAddingColumn(false)
-                              setNewColumnName('')
-                            }
-                          }}
-                          className="h-8 text-sm mb-2"
-                        />
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            className="h-7 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-                            onClick={handleAddColumn}
-                            disabled={!newColumnName.trim()}
-                          >
-                            新增欄位
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 text-xs"
-                            onClick={() => {
-                              setIsAddingColumn(false)
-                              setNewColumnName('')
+                              {/* 卡片列表 */}
+                              <Droppable droppableId={column.id} type="card">
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    className={cn(
+                                      'flex-1 overflow-y-auto space-y-2 p-2 transition-colors min-h-[80px]',
+                                      snapshot.isDraggingOver && 'bg-morandi-gold/10'
+                                    )}
+                                  >
+                                    {items.map((todo, index) => (
+                                      <TodoCardMemo
+                                        key={todo.id}
+                                        todo={todo}
+                                        index={index}
+                                        assigneeName={getEmployeeName(todo.assignee)}
+                                        currentUserId={user?.id}
+                                        onClick={handleCardClick}
+                                      />
+                                    ))}
+                                    {provided.placeholder}
+                                    {items.length === 0 && !snapshot.isDraggingOver && (
+                                      <div className="text-center py-8 text-sm text-morandi-muted/60">
+                                        拖曳卡片到這裡
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </Droppable>
+                            </div>
+                          )}
+                        </Draggable>
+                      )
+                    })}
+                    {provided.placeholder}
+
+                    {/* 新增欄位 */}
+                    <div className="w-[320px] flex-shrink-0">
+                      {isAddingColumn ? (
+                        <div className="bg-morandi-container/30 rounded-lg p-3">
+                          <Input
+                            autoFocus
+                            placeholder="欄位名稱..."
+                            value={newColumnName}
+                            onChange={e => setNewColumnName(e.target.value)}
+                            onKeyDown={e => {
+                              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                                e.preventDefault()
+                                handleAddColumn()
+                              }
+                              if (e.key === 'Escape') {
+                                setIsAddingColumn(false)
+                                setNewColumnName('')
+                              }
                             }}
-                          >
-                            取消
-                          </Button>
+                            className="h-8 text-sm mb-2"
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              className="h-7 text-xs bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                              onClick={handleAddColumn}
+                              disabled={!newColumnName.trim()}
+                            >
+                              新增欄位
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 text-xs"
+                              onClick={() => {
+                                setIsAddingColumn(false)
+                                setNewColumnName('')
+                              }}
+                            >
+                              取消
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setIsAddingColumn(true)}
-                        className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-morandi-container/20 hover:bg-morandi-container/40 text-morandi-secondary hover:text-morandi-primary transition-colors text-sm font-medium border-2 border-dashed border-border/50"
-                      >
-                        <Plus size={16} />
-                        新增欄位
-                      </button>
-                    )}
+                      ) : (
+                        <button
+                          onClick={() => setIsAddingColumn(true)}
+                          className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-morandi-container/20 hover:bg-morandi-container/40 text-morandi-secondary hover:text-morandi-primary transition-colors text-sm font-medium border-2 border-dashed border-border/50"
+                        >
+                          <Plus size={16} />
+                          新增欄位
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-      )}
+              )}
+            </Droppable>
+          </DragDropContext>
+        )}
       </div>
 
       {/* 展開卡片 */}
@@ -832,11 +835,16 @@ interface TodoCardMemoProps {
 
 function getPriorityBorderClass(priority: number) {
   switch (priority) {
-    case 5: return 'border-l-morandi-red'
-    case 4: return 'border-l-orange-400'
-    case 3: return 'border-l-morandi-gold'
-    case 2: return 'border-l-sky-400'
-    default: return 'border-l-morandi-muted'
+    case 5:
+      return 'border-l-morandi-red'
+    case 4:
+      return 'border-l-orange-400'
+    case 3:
+      return 'border-l-morandi-gold'
+    case 2:
+      return 'border-l-sky-400'
+    default:
+      return 'border-l-morandi-muted'
   }
 }
 
@@ -846,128 +854,133 @@ function getDeadlineBadge(deadline?: string) {
   const now = new Date()
   const diffDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
   const formatted = date.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' })
-  if (diffDays < 0) return { text: `逾期 ${Math.abs(diffDays)} 天`, color: 'text-morandi-red bg-morandi-red/10' }
+  if (diffDays < 0)
+    return { text: `逾期 ${Math.abs(diffDays)} 天`, color: 'text-morandi-red bg-morandi-red/10' }
   if (diffDays === 0) return { text: '今天', color: 'text-morandi-gold bg-morandi-gold/10' }
-  if (diffDays <= 3) return { text: `${diffDays} 天後`, color: 'text-morandi-gold/80 bg-morandi-gold/5' }
+  if (diffDays <= 3)
+    return { text: `${diffDays} 天後`, color: 'text-morandi-gold/80 bg-morandi-gold/5' }
   return { text: formatted, color: 'text-morandi-secondary bg-morandi-container/50' }
 }
 
-const TodoCardMemo = React.memo(function TodoCardMemo({
-  todo,
-  index,
-  assigneeName,
-  currentUserId,
-  onClick,
-}: TodoCardMemoProps) {
-  const deadlineInfo = getDeadlineBadge(todo.deadline)
-  const subTasksDone = todo.sub_tasks?.filter(s => s.done).length || 0
-  const subTasksTotal = todo.sub_tasks?.length || 0
-  const unreadNotes = (todo.notes || []).filter(
-    n => n.author_id !== currentUserId && !n.read_by?.includes(currentUserId || '')
-  ).length
+const TodoCardMemo = React.memo(
+  function TodoCardMemo({ todo, index, assigneeName, currentUserId, onClick }: TodoCardMemoProps) {
+    const deadlineInfo = getDeadlineBadge(todo.deadline)
+    const subTasksDone = todo.sub_tasks?.filter(s => s.done).length || 0
+    const subTasksTotal = todo.sub_tasks?.length || 0
+    const unreadNotes = (todo.notes || []).filter(
+      n => n.author_id !== currentUserId && !n.read_by?.includes(currentUserId || '')
+    ).length
 
-  return (
-    <Draggable draggableId={todo.id} index={index}>
-      {(provided, snapshot) => (
-        <div
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          {...provided.dragHandleProps}
-          onClick={() => onClick(todo.id)}
-          className={cn(
-            'group bg-card rounded-lg border border-border/60 shadow-sm cursor-pointer',
-            'hover:shadow-md hover:border-border',
-            'border-l-[3px]',
-            getPriorityBorderClass(todo.priority || 1),
-            snapshot.isDragging && 'shadow-xl rotate-[1deg]',
-            todo.status === 'completed' && 'opacity-60'
-          )}
-        >
-          <div className="p-3">
-            <div className="flex items-start gap-2">
-              <p className={cn(
-                'flex-1 text-sm font-medium text-morandi-primary leading-snug',
-                todo.status === 'completed' && 'line-through'
-              )}>
-                {todo.title}
-              </p>
-              {unreadNotes > 0 && (
-                <span className="flex-shrink-0 min-w-[18px] h-[18px] bg-morandi-red text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
-                  {unreadNotes}
-                </span>
-              )}
-            </div>
-
-            {todo.related_items && todo.related_items.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
-                {todo.related_items.map((item, i) => (
-                  <span
-                    key={i}
-                    className="text-[10px] bg-morandi-gold/15 text-morandi-primary px-1.5 py-0.5 rounded"
-                  >
-                    {item.title}
-                  </span>
-                ))}
-              </div>
+    return (
+      <Draggable draggableId={todo.id} index={index}>
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+            onClick={() => onClick(todo.id)}
+            className={cn(
+              'group bg-card rounded-lg border border-border/60 shadow-sm cursor-pointer',
+              'hover:shadow-md hover:border-border',
+              'border-l-[3px]',
+              getPriorityBorderClass(todo.priority || 1),
+              snapshot.isDragging && 'shadow-xl rotate-[1deg]',
+              todo.status === 'completed' && 'opacity-60'
             )}
-
-            {subTasksTotal > 0 && (
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex-1 h-1 bg-morandi-container/50 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-morandi-green rounded-full"
-                    style={{ width: `${(subTasksDone / subTasksTotal) * 100}%` }}
-                  />
-                </div>
-                <span className="text-[10px] text-morandi-muted">
-                  {subTasksDone}/{subTasksTotal}
-                </span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between mt-2.5">
-              <div className="flex items-center gap-2">
-                <div className="flex">
-                  {Array.from({ length: todo.priority || 1 }).map((_, i) => (
-                    <span key={i} className="text-morandi-gold text-[10px]">★</span>
-                  ))}
-                </div>
-                {deadlineInfo && (
-                  <span className={cn(
-                    'text-[10px] px-1.5 py-0.5 rounded flex items-center gap-0.5',
-                    deadlineInfo.color
-                  )}>
-                    <Calendar size={10} />
-                    {deadlineInfo.text}
+          >
+            <div className="p-3">
+              <div className="flex items-start gap-2">
+                <p
+                  className={cn(
+                    'flex-1 text-sm font-medium text-morandi-primary leading-snug',
+                    todo.status === 'completed' && 'line-through'
+                  )}
+                >
+                  {todo.title}
+                </p>
+                {unreadNotes > 0 && (
+                  <span className="flex-shrink-0 min-w-[18px] h-[18px] bg-morandi-red text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                    {unreadNotes}
                   </span>
                 )}
               </div>
-              {assigneeName && (
-                <span className="text-[10px] text-morandi-secondary flex items-center gap-0.5">
-                  <User size={10} />
-                  {assigneeName}
-                </span>
+
+              {todo.related_items && todo.related_items.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {todo.related_items.map((item, i) => (
+                    <span
+                      key={i}
+                      className="text-[10px] bg-morandi-gold/15 text-morandi-primary px-1.5 py-0.5 rounded"
+                    >
+                      {item.title}
+                    </span>
+                  ))}
+                </div>
               )}
+
+              {subTasksTotal > 0 && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="flex-1 h-1 bg-morandi-container/50 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-morandi-green rounded-full"
+                      style={{ width: `${(subTasksDone / subTasksTotal) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-morandi-muted">
+                    {subTasksDone}/{subTasksTotal}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between mt-2.5">
+                <div className="flex items-center gap-2">
+                  <div className="flex">
+                    {Array.from({ length: todo.priority || 1 }).map((_, i) => (
+                      <span key={i} className="text-morandi-gold text-[10px]">
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  {deadlineInfo && (
+                    <span
+                      className={cn(
+                        'text-[10px] px-1.5 py-0.5 rounded flex items-center gap-0.5',
+                        deadlineInfo.color
+                      )}
+                    >
+                      <Calendar size={10} />
+                      {deadlineInfo.text}
+                    </span>
+                  )}
+                </div>
+                {assigneeName && (
+                  <span className="text-[10px] text-morandi-secondary flex items-center gap-0.5">
+                    <User size={10} />
+                    {assigneeName}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
-    </Draggable>
-  )
-}, (prev, next) => {
-  // 精準比對：只有以下欄位變化才重渲染
-  return (
-    prev.todo.id === next.todo.id &&
-    prev.todo.title === next.todo.title &&
-    prev.todo.status === next.todo.status &&
-    prev.todo.priority === next.todo.priority &&
-    prev.todo.deadline === next.todo.deadline &&
-    prev.todo.column_id === next.todo.column_id &&
-    prev.todo.sub_tasks === next.todo.sub_tasks &&
-    prev.todo.notes === next.todo.notes &&
-    prev.todo.related_items === next.todo.related_items &&
-    prev.index === next.index &&
-    prev.assigneeName === next.assigneeName &&
-    prev.currentUserId === next.currentUserId
-  )
-})
+        )}
+      </Draggable>
+    )
+  },
+  (prev, next) => {
+    // 精準比對：只有以下欄位變化才重渲染
+    return (
+      prev.todo.id === next.todo.id &&
+      prev.todo.title === next.todo.title &&
+      prev.todo.status === next.todo.status &&
+      prev.todo.priority === next.todo.priority &&
+      prev.todo.deadline === next.todo.deadline &&
+      prev.todo.column_id === next.todo.column_id &&
+      prev.todo.sub_tasks === next.todo.sub_tasks &&
+      prev.todo.notes === next.todo.notes &&
+      prev.todo.related_items === next.todo.related_items &&
+      prev.index === next.index &&
+      prev.assigneeName === next.assigneeName &&
+      prev.currentUserId === next.currentUserId
+    )
+  }
+)

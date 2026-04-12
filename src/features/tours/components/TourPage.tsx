@@ -196,19 +196,19 @@ export default function TourPage({ data, isPreview = false, viewMode = 'desktop'
           data.meetingPoints.some(
             (p: { time?: string; location?: string }) => p.time || p.location
           ))) && (
-          <>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="border-t border-border"></div>
-            </div>
-            <div id="leader">
-              {isLuxury ? (
-                <TourLeaderSectionLuxury data={data} viewMode={viewMode} />
-              ) : (
-                <TourLeaderSection data={data} viewMode={viewMode} coverStyle={style} />
-              )}
-            </div>
-          </>
-        )}
+        <>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="border-t border-border"></div>
+          </div>
+          <div id="leader">
+            {isLuxury ? (
+              <TourLeaderSectionLuxury data={data} viewMode={viewMode} />
+            ) : (
+              <TourLeaderSection data={data} viewMode={viewMode} coverStyle={style} />
+            )}
+          </div>
+        </>
+      )}
 
       {/* Hotels Section */}
       {data.showHotels !== false && data.hotels && data.hotels.length > 0 && (

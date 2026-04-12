@@ -6,7 +6,13 @@
  */
 
 import { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -57,9 +63,24 @@ interface QuickVisaDialogProps {
 }
 
 const COMMON_COUNTRIES = [
-  '日本', '韓國', '泰國', '越南', '新加坡', '馬來西亞',
-  '印尼', '菲律賓', '美國', '加拿大', '英國', '法國',
-  '德國', '義大利', '西班牙', '澳洲', '紐西蘭', '中國',
+  '日本',
+  '韓國',
+  '泰國',
+  '越南',
+  '新加坡',
+  '馬來西亞',
+  '印尼',
+  '菲律賓',
+  '美國',
+  '加拿大',
+  '英國',
+  '法國',
+  '德國',
+  '義大利',
+  '西班牙',
+  '澳洲',
+  '紐西蘭',
+  '中國',
 ]
 
 const VISA_TYPES = [
@@ -124,9 +145,11 @@ export function QuickVisaDialog({
       // 產生簽證單號：V{團號}-{隨機4碼}
       const visaCode = `V${effectiveTour.code}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`
 
-      const { error } = await (supabase.from('visas') as unknown as {
-        insert: (data: Record<string, unknown>) => Promise<{ error: unknown }>
-      }).insert({
+      const { error } = await (
+        supabase.from('visas') as unknown as {
+          insert: (data: Record<string, unknown>) => Promise<{ error: unknown }>
+        }
+      ).insert({
         code: visaCode,
         applicant_name: applicantName,
         country,
@@ -265,7 +288,11 @@ export function QuickVisaDialog({
           {/* 送件日期 */}
           <div className="space-y-1.5">
             <Label>預計送件日期</Label>
-            <DatePicker value={submissionDate} onChange={setSubmissionDate} placeholder="選擇日期" />
+            <DatePicker
+              value={submissionDate}
+              onChange={setSubmissionDate}
+              placeholder="選擇日期"
+            />
           </div>
 
           {/* 急件 */}

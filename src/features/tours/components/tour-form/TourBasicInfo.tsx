@@ -52,11 +52,7 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
     const wsId = user.workspace_id
     const load = async () => {
       try {
-        const { data } = await supabase
-          .from('workspaces')
-          .select('*')
-          .eq('id', wsId)
-          .single()
+        const { data } = await supabase.from('workspaces').select('*').eq('id', wsId).single()
         const ids = (data as { enabled_tour_categories?: string[] } | null)?.enabled_tour_categories
         if (Array.isArray(ids) && ids.length > 0) {
           setEnabledIds(ids)

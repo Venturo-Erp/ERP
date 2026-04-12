@@ -103,7 +103,9 @@ export async function POST(request: NextRequest) {
 
         if (balances.length > 0) {
           await supabaseAdmin.from('leave_balances').insert(balances as never)
-          logger.log(`Leave balances initialized for ${employee.employee_number}: ${balances.length} types`)
+          logger.log(
+            `Leave balances initialized for ${employee.employee_number}: ${balances.length} types`
+          )
         }
       }
     } catch (balanceError) {

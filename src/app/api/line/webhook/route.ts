@@ -527,14 +527,18 @@ async function processClockIn(event: LineEvent): Promise<boolean> {
     )
     const lineUsers = await lineUserRes.json()
     if (!lineUsers?.length || !lineUsers[0].employee_id) {
-      await replyText(event.replyToken!, '❌ 你尚未綁定員工帳號，請先傳送員工編號進行綁定（例如：E001）')
+      await replyText(
+        event.replyToken!,
+        '❌ 你尚未綁定員工帳號，請先傳送員工編號進行綁定（例如：E001）'
+      )
       return true
     }
 
     const { employee_id, workspace_id } = lineUsers[0]
 
     // 呼叫打卡 API（以 internal secret 驗證身份）
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000'
+    const baseUrl =
+      process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'http://localhost:3000'
     const clockRes = await fetch(`${baseUrl}/api/hr/clock-in`, {
       method: 'POST',
       headers: {

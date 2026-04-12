@@ -49,7 +49,9 @@ export default function MissedClockPage() {
     try {
       let query = supabase
         .from('missed_clock_requests' as never)
-        .select('*, employee:employees!missed_clock_requests_employee_id_fkey(display_name, chinese_name)')
+        .select(
+          '*, employee:employees!missed_clock_requests_employee_id_fkey(display_name, chinese_name)'
+        )
         .order('created_at', { ascending: false })
         .limit(50)
 
@@ -57,8 +59,14 @@ export default function MissedClockPage() {
 
       const { data } = await query
       const mapped = (data || []).map((r: Record<string, unknown>) => {
-        const emp = r.employee as { display_name: string | null; chinese_name: string | null } | null
-        return { ...r, employee_name: emp?.display_name || emp?.chinese_name || '未知' } as MissedClockRequest
+        const emp = r.employee as {
+          display_name: string | null
+          chinese_name: string | null
+        } | null
+        return {
+          ...r,
+          employee_name: emp?.display_name || emp?.chinese_name || '未知',
+        } as MissedClockRequest
       })
       setRequests(mapped)
     } catch (err) {
@@ -68,7 +76,9 @@ export default function MissedClockPage() {
     }
   }, [user?.id, isAdmin])
 
-  useEffect(() => { fetchRequests() }, [fetchRequests])
+  useEffect(() => {
+    fetchRequests()
+  }, [fetchRequests])
 
   const handleSubmit = async () => {
     if (!formDate || !formTime || !formReason.trim()) {
@@ -94,14 +104,15 @@ export default function MissedClockPage() {
         .eq('is_admin', true)
       const adminRoleIds = (adminRoles || []).map((r: { id: string }) => r.id)
 
-      const { data: admins } = adminRoleIds.length > 0
-        ? await supabase
-            .from('employees')
-            .select('id')
-            .eq('workspace_id', user?.workspace_id || '')
-            .in('job_info->role_id' as never, adminRoleIds as never[])
-            .limit(5)
-        : { data: [] }
+      const { data: admins } =
+        adminRoleIds.length > 0
+          ? await supabase
+              .from('employees')
+              .select('id')
+              .eq('workspace_id', user?.workspace_id || '')
+              .in('job_info->role_id' as never, adminRoleIds as never[])
+              .limit(5)
+          : { data: [] }
 
       if (admins?.length) {
         await fetch('/api/notifications', {
@@ -145,7 +156,9 @@ export default function MissedClockPage() {
         const data = await res.json()
         toast.error(data.error)
       }
-    } catch { toast.error('操作失敗') }
+    } catch {
+      toast.error('操作失敗')
+    }
   }
 
   return (
@@ -153,7 +166,10 @@ export default function MissedClockPage() {
       title="補打卡申請"
       icon={Clock}
       headerActions={
-        <Button onClick={() => setShowDialog(true)} className="bg-morandi-gold hover:bg-morandi-gold-hover text-white">
+        <Button
+          onClick={() => setShowDialog(true)}
+          className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+        >
           <Plus size={16} className="mr-1" /> 申請補打卡
         </Button>
       }
@@ -162,39 +178,72 @@ export default function MissedClockPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-morandi-container/40 border-b border-border/60">
-              {isAdmin && <th className="text-left px-4 py-2 font-medium text-morandi-secondary">員工</th>}
+              {isAdmin && (
+                <th className="text-left px-4 py-2 font-medium text-morandi-secondary">員工</th>
+              )}
               <th className="text-left px-4 py-2 font-medium text-morandi-secondary">日期</th>
               <th className="text-left px-4 py-2 font-medium text-morandi-secondary">類型</th>
               <th className="text-left px-4 py-2 font-medium text-morandi-secondary">時間</th>
               <th className="text-left px-4 py-2 font-medium text-morandi-secondary">原因</th>
               <th className="text-left px-4 py-2 font-medium text-morandi-secondary">狀態</th>
-              {isAdmin && <th className="text-left px-4 py-2 font-medium text-morandi-secondary">操作</th>}
+              {isAdmin && (
+                <th className="text-left px-4 py-2 font-medium text-morandi-secondary">操作</th>
+              )}
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="text-center py-8 text-morandi-muted">載入中...</td></tr>
+              <tr>
+                <td colSpan={7} className="text-center py-8 text-morandi-muted">
+                  載入中...
+                </td>
+              </tr>
             ) : requests.length === 0 ? (
-              <tr><td colSpan={7} className="text-center py-8 text-morandi-muted">沒有補打卡申請</td></tr>
+              <tr>
+                <td colSpan={7} className="text-center py-8 text-morandi-muted">
+                  沒有補打卡申請
+                </td>
+              </tr>
             ) : (
               requests.map(r => {
                 const s = STATUS_MAP[r.status] || STATUS_MAP.pending
                 return (
-                  <tr key={r.id} className="border-b border-border/30 hover:bg-morandi-container/20">
-                    {isAdmin && <td className="px-4 py-2 font-medium text-morandi-primary">{r.employee_name}</td>}
+                  <tr
+                    key={r.id}
+                    className="border-b border-border/30 hover:bg-morandi-container/20"
+                  >
+                    {isAdmin && (
+                      <td className="px-4 py-2 font-medium text-morandi-primary">
+                        {r.employee_name}
+                      </td>
+                    )}
                     <td className="px-4 py-2">{r.date}</td>
                     <td className="px-4 py-2">{r.clock_type === 'clock_in' ? '上班' : '下班'}</td>
                     <td className="px-4 py-2 font-mono">{r.requested_time?.slice(0, 5)}</td>
-                    <td className="px-4 py-2 text-morandi-secondary truncate max-w-[200px]">{r.reason}</td>
+                    <td className="px-4 py-2 text-morandi-secondary truncate max-w-[200px]">
+                      {r.reason}
+                    </td>
                     <td className="px-4 py-2">
-                      <span className={cn('px-2 py-0.5 rounded text-xs font-medium', s.color)}>{s.label}</span>
+                      <span className={cn('px-2 py-0.5 rounded text-xs font-medium', s.color)}>
+                        {s.label}
+                      </span>
                     </td>
                     {isAdmin && (
                       <td className="px-4 py-2">
                         {r.status === 'pending' && (
                           <div className="flex gap-1">
-                            <button onClick={() => handleApproval(r.id, 'approve')} className="p-1 text-morandi-green hover:bg-morandi-green/10 rounded"><Check size={14} /></button>
-                            <button onClick={() => handleApproval(r.id, 'reject')} className="p-1 text-morandi-red hover:bg-morandi-red/10 rounded"><X size={14} /></button>
+                            <button
+                              onClick={() => handleApproval(r.id, 'approve')}
+                              className="p-1 text-morandi-green hover:bg-morandi-green/10 rounded"
+                            >
+                              <Check size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleApproval(r.id, 'reject')}
+                              className="p-1 text-morandi-red hover:bg-morandi-red/10 rounded"
+                            >
+                              <X size={14} />
+                            </button>
                           </div>
                         )}
                       </td>
@@ -209,30 +258,55 @@ export default function MissedClockPage() {
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent level={1} className="max-w-md">
-          <DialogHeader><DialogTitle>申請補打卡</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>申請補打卡</DialogTitle>
+          </DialogHeader>
           <div className="space-y-4 pt-2">
             <div>
               <Label>日期</Label>
-              <Input type="date" value={formDate} onChange={e => setFormDate(e.target.value)} className="mt-1" />
+              <Input
+                type="date"
+                value={formDate}
+                onChange={e => setFormDate(e.target.value)}
+                className="mt-1"
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>類型</Label>
-                <select value={formType} onChange={e => setFormType(e.target.value as 'clock_in' | 'clock_out')} className="mt-1 w-full h-9 rounded-lg border border-border px-3 text-sm">
+                <select
+                  value={formType}
+                  onChange={e => setFormType(e.target.value as 'clock_in' | 'clock_out')}
+                  className="mt-1 w-full h-9 rounded-lg border border-border px-3 text-sm"
+                >
                   <option value="clock_in">上班打卡</option>
                   <option value="clock_out">下班打卡</option>
                 </select>
               </div>
               <div>
                 <Label>實際時間</Label>
-                <Input type="time" value={formTime} onChange={e => setFormTime(e.target.value)} className="mt-1" />
+                <Input
+                  type="time"
+                  value={formTime}
+                  onChange={e => setFormTime(e.target.value)}
+                  className="mt-1"
+                />
               </div>
             </div>
             <div>
               <Label>原因（必填）</Label>
-              <Input value={formReason} onChange={e => setFormReason(e.target.value)} placeholder="忘記打卡的原因" className="mt-1" />
+              <Input
+                value={formReason}
+                onChange={e => setFormReason(e.target.value)}
+                placeholder="忘記打卡的原因"
+                className="mt-1"
+              />
             </div>
-            <Button onClick={handleSubmit} disabled={saving} className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white">
+            <Button
+              onClick={handleSubmit}
+              disabled={saving}
+              className="w-full bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+            >
               {saving ? '提交中...' : '提交申請'}
             </Button>
           </div>

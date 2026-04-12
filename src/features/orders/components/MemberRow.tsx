@@ -73,12 +73,14 @@ interface MemberRowProps {
   onSetAsLeader?: (memberId: string) => void
   /** 快速辦簽證用 */
   tourInfo?: { id: string; code: string; name?: string }
-  getOrderInfo?: (memberId: string) => {
-    id: string
-    order_number: string
-    contact_person?: string | null
-    contact_phone?: string | null
-  } | undefined
+  getOrderInfo?: (memberId: string) =>
+    | {
+        id: string
+        order_number: string
+        contact_person?: string | null
+        contact_phone?: string | null
+      }
+    | undefined
 }
 
 export function MemberRow({
