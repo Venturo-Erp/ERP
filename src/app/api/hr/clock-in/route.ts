@@ -14,10 +14,10 @@ function getTaiwanDateTime() {
 }
 
 /** 動態表名查詢（繞過型別限制，新表尚未更新 types） */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 function from(table: string) {
   const supabase = getSupabaseAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   return supabase.from(table as any)
 }
 

@@ -65,7 +65,6 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
       }
     }
     void load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.workspace_id])
 
   // 過濾出實際可用的團類型

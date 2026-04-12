@@ -3,10 +3,9 @@ import { getServerAuth } from '@/lib/auth/server-auth'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function from(table: string) {
   const supabase = getSupabaseAdminClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   return supabase.from(table as any)
 }
 

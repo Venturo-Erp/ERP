@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
     })
     if (empError) {
       // 員工建失敗不回滾（workspace 已建成），但 log 出來
-      // eslint-disable-next-line no-console
+
       console.error('建立管理員員工失敗:', empError)
     }
   }

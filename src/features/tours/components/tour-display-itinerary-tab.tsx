@@ -213,7 +213,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
     if (linkedItinerary) {
       setTourData(itineraryToFormData(linkedItinerary as unknown as Record<string, unknown>))
     }
-  }, [linkedItinerary?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [linkedItinerary?.id])
 
   // Print data state
   const [printData, setPrintData] = useState({

@@ -339,7 +339,6 @@ export function AttractionsMap({
     }
 
     updateMarkers()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- nearbyAttractions 已經是穩定的陣列
   }, [
     JSON.stringify(nearbyAttractions.map(a => a.id)),
     mapCenter?.lat,

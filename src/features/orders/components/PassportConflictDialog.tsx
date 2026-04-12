@@ -30,7 +30,6 @@ function PassportImage({ url, label }: { url?: string | null; label: string }) {
       <div className="text-[11px] text-morandi-muted font-medium">{label}</div>
       <div className="relative aspect-[3/2] w-full rounded-md overflow-hidden border border-border/60 bg-morandi-container/30 flex items-center justify-center">
         {url && !error ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={url}
             alt={label}

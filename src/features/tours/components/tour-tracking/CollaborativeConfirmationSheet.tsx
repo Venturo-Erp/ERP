@@ -108,7 +108,6 @@ export function CollaborativeConfirmationSheet({
     const printWindow = window.open('', '_blank')
     if (!printWindow) return
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const response = request.supplier_response as Record<string, unknown> | null
     const selectedPrice =
       request.selected_tier != null

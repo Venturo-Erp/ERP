@@ -318,7 +318,6 @@ export function useTutorial() {
   // 換頁時重新載入資料（不重置 acknowledgedSteps —— 才能看到下一步）
   useEffect(() => {
     if (user?.workspace_id) loadState()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, user?.workspace_id])
 
   // 「知道了」— 標記當前步驟為已確認，載入最新資料讓下一步出現
