@@ -27,6 +27,7 @@ import { Switch } from '@/components/ui/switch'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 import { TeamSettingsTab } from '@/features/hr/components/TeamSettingsTab'
+import { HrAdminTabs } from '../components/HrAdminTabs'
 
 interface Role {
   id: string
@@ -392,6 +393,7 @@ export default function RolesPage() {
     <ContentPageLayout
       title="職務管理"
       icon={Shield}
+      headerChildren={<HrAdminTabs group="employee" />}
       breadcrumb={[
         { label: '人資管理', href: '/hr' },
         { label: '職務管理', href: '/hr/roles' },

@@ -17,6 +17,7 @@ import {
 } from '@/data'
 import { Employee } from '@/stores/types'
 import { EmployeeForm } from '@/features/hr/components/EmployeeForm'
+import { HrAdminTabs } from './components/HrAdminTabs'
 import {
   SalaryPaymentDialog,
   SalaryPaymentData,
@@ -95,27 +96,15 @@ export default function HRPage() {
   }, [users, activeTab, isAdmin])
 
   const tabOptions = useMemo(() => {
-    const baseTabs: { value: EmployeeTab; label: string; count: number }[] = [
-      {
-        value: 'active',
-        label: LABELS.TAB_ACTIVE,
-        count: users.filter(e => e.employee_type !== 'bot' && e.status !== 'terminated').length,
-      },
-      {
-        value: 'terminated',
-        label: LABELS.TAB_TERMINATED,
-        count: users.filter(e => e.employee_type !== 'bot' && e.status === 'terminated').length,
-      },
+    const baseTabs: { value: EmployeeTab; label: string }[] = [
+      { value: 'active', label: LABELS.TAB_ACTIVE },
+      { value: 'terminated', label: LABELS.TAB_TERMINATED },
     ]
     if (isAdmin) {
-      baseTabs.push({
-        value: 'bot',
-        label: LABELS.TAB_BOT,
-        count: users.filter(e => e.employee_type === 'bot').length,
-      })
+      baseTabs.push({ value: 'bot', label: LABELS.TAB_BOT })
     }
     return baseTabs
-  }, [users, isAdmin])
+  }, [isAdmin])
 
   const getStatusLabel = (status: Employee['status']) => {
     const statusMap = {
@@ -449,6 +438,7 @@ export default function HRPage() {
       <ListPageLayout
         title={LABELS.MANAGE_3470}
         icon={Users}
+        beforeTable={<HrAdminTabs group="employee" />}
         data={filteredEmployees}
         columns={columns}
         searchFields={['display_name', 'employee_number', 'personal_info'] as (keyof Employee)[]}
