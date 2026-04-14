@@ -394,17 +394,32 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
 
       setLoading(true)
       try {
-        // 讀取團的航班資訊
+        // 讀取團的基本資訊（SSOT：航班從 itineraries 讀，不從 tours）
         const { data: tour } = await supabase
           .from('tours')
-          .select('code, name, outbound_flight, return_flight, departure_date, return_date')
+          .select('code, name, departure_date, return_date')
           .eq('id', todo.tour_id)
           .single()
 
+        // 航班從 itineraries 讀
+        const { data: itinerary } = await supabase
+          .from('itineraries')
+          .select('outbound_flight, return_flight')
+          .eq('tour_id', todo.tour_id)
+          .order('updated_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
         if (tour) {
+          // 航班可能是陣列（多段）或單一物件，取第一筆
+          const pickFlight = (raw: unknown): Record<string, unknown> | null => {
+            if (!raw) return null
+            const f = Array.isArray(raw) ? raw[0] : raw
+            return (f as Record<string, unknown>) || null
+          }
           setFlightInfo({
-            outbound: tour.outbound_flight as unknown as Record<string, unknown> | null,
-            return: tour.return_flight as unknown as Record<string, unknown> | null,
+            outbound: pickFlight(itinerary?.outbound_flight),
+            return: pickFlight(itinerary?.return_flight),
             tourCode: tour.code,
             tourName: tour.name,
             departureDate: tour.departure_date || '',

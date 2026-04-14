@@ -14,11 +14,11 @@ async function sendInsuranceForTour(
   isManual = false,
   isChange = false
 ) {
-  // 團資料
+  // 團資料（SSOT：航班屬於 itineraries，不從 tours 讀）
   const { data: tour } = (await supabase
     .from('tours')
     .select(
-      'id, code, name, departure_date, return_date, days_count, airport_code, outbound_flight, return_flight, tour_leader_id, country_id'
+      'id, code, name, departure_date, return_date, days_count, airport_code, tour_leader_id, country_id'
     )
     .eq('id', tourId)
     .single()) as {
@@ -30,13 +30,22 @@ async function sendInsuranceForTour(
       return_date: string | null
       days_count: number | null
       airport_code: string | null
-      outbound_flight: unknown
-      return_flight: unknown
       tour_leader_id: string | null
       country_id: string | null
     } | null
   }
   if (!tour) return { success: false, error: 'Tour not found' }
+
+  // 航班從 itineraries 讀（SSOT：跟著公司行程表保險）
+  const { data: itinerary } = (await supabase
+    .from('itineraries')
+    .select('outbound_flight, return_flight')
+    .eq('tour_id', tour.id)
+    .order('updated_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()) as {
+    data: { outbound_flight: unknown; return_flight: unknown } | null
+  }
 
   // 國家
   let countryName = '台灣'
@@ -60,8 +69,14 @@ async function sendInsuranceForTour(
 
   const isLocal = countryName === '台灣' || countryName === 'Taiwan'
   const location = isLocal ? '台灣' : `${countryName} ${tour.airport_code || ''}`
-  const outFlight = (tour.outbound_flight as { flightNumber?: string })?.flightNumber || ''
-  const retFlight = (tour.return_flight as { flightNumber?: string })?.flightNumber || ''
+  // 航班可能是陣列（多段）或單一物件，取第一筆
+  const pickFlightNumber = (raw: unknown): string => {
+    if (!raw) return ''
+    const f = Array.isArray(raw) ? raw[0] : raw
+    return (f as { flightNumber?: string })?.flightNumber || ''
+  }
+  const outFlight = pickFlightNumber(itinerary?.outbound_flight)
+  const retFlight = pickFlightNumber(itinerary?.return_flight)
   const flightInfo = [outFlight, retFlight].filter(Boolean).join(' / ')
 
   // 領隊
