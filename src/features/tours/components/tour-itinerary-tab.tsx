@@ -876,7 +876,10 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         departure_date: tour.departure_date || '',
         tour_code: tour.code || '',
         cover_image: '',
-        country: tour.location || '',
+        // SSOT：country/city 屬於 tours（country_id + airport_code），itineraries
+        // 不再保存自己的副本。歷史上這裡曾經寫 tour.location，是污染來源。
+        // 寫空字串而非省略是為了相容 schema 型別。
+        country: '',
         city: '',
         status: '開團' as const,
         features: [],

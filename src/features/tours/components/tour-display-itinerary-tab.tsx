@@ -78,11 +78,9 @@ function buildDefaultFromTour(tour: Tour, countryName = ''): TourFormData {
     departureDate: departureDate.toLocaleDateString('zh-TW'),
     tourCode: tour.code || '',
     coverImage: '',
-    // 國家：優先用已解析的 country name（來自 country_id lookup），不要用 tour.location
-    // （tour.location 是舊欄位，可能存城市名，會造成「上海/上海」的錯誤顯示）
-    country: countryName || '',
-    // CoverInfoSection 用 city 欄位查機場圖片庫，接受 2-4 位英文代碼 → 用團的機場代號當預設
-    city: airportCode || '',
+    // SSOT：country/city 的真相是 tours.country_id / airport_code，永遠以 tour 為準
+    country: countryName,
+    city: airportCode,
     outboundFlight: {
       airline: '',
       flightNumber: '',
@@ -130,7 +128,8 @@ function itineraryToFormData(
   tour?: Tour,
   countryName = ''
 ): TourFormData {
-  const fallbackCity = tour?.airport_code || ''
+  // SSOT：永遠以 tour 為準，無視 itineraries.country/city（歷史包袱，可能含髒資料）
+  const ssotCity = tour?.airport_code || ''
   const rawOutbound = itinerary.outbound_flight
   const rawReturn = itinerary.return_flight
   const outbound = (Array.isArray(rawOutbound) ? rawOutbound[0] : rawOutbound) as
@@ -150,8 +149,8 @@ function itineraryToFormData(
     coverStyle: itinerary.cover_style as TourFormData['coverStyle'],
     flightStyle: itinerary.flight_style as TourFormData['flightStyle'],
     itineraryStyle: itinerary.itinerary_style as TourFormData['itineraryStyle'],
-    country: (itinerary.country as string) || countryName || '',
-    city: (itinerary.city as string) || fallbackCity,
+    country: countryName,
+    city: ssotCity,
     outboundFlight: outbound || {
       airline: '',
       flightNumber: '',
@@ -503,6 +502,9 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
             <TourForm
               data={{
                 ...tourData,
+                // SSOT：每次 render 都用 tour 真值蓋掉，無視 tourData/itinerary 內的副本
+                country: countryName,
+                city: tour.airport_code || '',
                 meetingPoints: tourData.meetingPoints || [{ time: '', location: '' }],
                 hotels: tourData.hotels || [],
                 showFeatures: tourData.showFeatures !== false,
@@ -511,6 +513,9 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
               }}
               onChange={newData => {
                 const {
+                  // SSOT：忽略 country/city 的回寫，避免污染 tourData
+                  country: _ctry,
+                  city: _city,
                   meetingPoints: _mp,
                   hotels: _h,
                   showFeatures: _sf,

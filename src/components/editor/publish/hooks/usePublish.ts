@@ -77,8 +77,10 @@ export function usePublish({
     flight_style: data.flightStyle || 'original',
     itinerary_style: data.itineraryStyle || 'original',
     price_note: data.priceNote || null,
-    country: data.country,
-    city: data.city,
+    // SSOT：country/city 屬於 tours.country_id / airport_code，itineraries 不再保存副本。
+    // 顯示時請從 tour 直接讀。寫空字串而非 null 是為了相容 schema 型別。
+    country: '',
+    city: '',
     status: (data.status || '開團') as '開團' | '待出發',
     outbound_flight: data.outboundFlight,
     return_flight: data.returnFlight,
