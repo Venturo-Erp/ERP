@@ -14,7 +14,6 @@ import { useToast } from '@/components/ui/use-toast'
 import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
-import { syncTripToOnline } from '../services/syncToOnline'
 import { useTourConfirmationSheet } from '../hooks/useTourConfirmationSheet'
 import { useTourSheetData } from '../hooks/useTourSheetData'
 import { useInlineEditing } from '../hooks/useInlineEditing'
@@ -253,11 +252,7 @@ export function TourConfirmationSheetPage({ tour }: TourConfirmationSheetPagePro
         if (sheetError) throw sheetError
       }
 
-      const syncResult = await syncTripToOnline(tour.id)
-      if (!syncResult.success) {
-        logger.warn('同步到 Online 失敗:', syncResult.message)
-      }
-
+      // Online 功能已暫停，移除同步邏輯
       alert(TOUR_CONFIRMATION_SHEET_PAGE_LABELS.交接完成_n_n確認單狀態已更新_n行程已同步到_Onlin)
       reload()
     } catch (err) {
