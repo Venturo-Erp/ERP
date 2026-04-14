@@ -1064,6 +1064,27 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           .day-date { font-size: 11px; color: #999; }
           .footer { margin-top: 24px; text-align: center; font-size: 11px; color: #ccc; border-top: 1px solid #eee; padding-top: 12px; }
           svg { display: none; }
+          /* Tailwind utility fallbacks — iframe 沒有 Tailwind，必須 inline 補上列印中用到的 class */
+          .grid { display: grid; }
+          .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+          .flex { display: flex; }
+          .items-center { align-items: center; }
+          .gap-2 { gap: 0.5rem; }
+          .px-0 { padding-left: 0; padding-right: 0; }
+          .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+          .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+          .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+          .border-l { border-left: 1px solid #e5e5e5; }
+          .shrink-0 { flex-shrink: 0; }
+          .font-medium { font-weight: 500; }
+          .font-semibold { font-weight: 600; }
+          .align-middle { vertical-align: middle; }
+          .text-center { text-align: center; }
+          .text-\[12px\] { font-size: 12px; }
+          .text-\[13px\] { font-size: 13px; }
+          .text-muted-foreground { color: #8b8680; }
+          .text-morandi-gold { color: #B8A99A; }
+          .mr-2 { margin-right: 0.5rem; }
         </style>
       </head>
       <body>
