@@ -79,6 +79,8 @@ export interface ListPageLayoutProps<T extends Record<string, any>> {
   // ========== 自訂擴展 ==========
   /** Header 右側自訂操作 */
   headerActions?: React.ReactNode
+  /** 操作欄位寬度（例如 "200px"），給有 renderActions 的列表用 */
+  actionsWidth?: string
   /** 表格前的自訂內容 */
   beforeTable?: React.ReactNode
   /** 表格後的自訂內容 */
@@ -162,6 +164,7 @@ export function ListPageLayout<T extends Record<string, any>>({
   addLabel = COMP_LAYOUT_LABELS.新增,
   addDisabled = false,
   headerActions,
+  actionsWidth,
   beforeTable,
   afterTable,
   expandedRows,
@@ -230,6 +233,7 @@ export function ListPageLayout<T extends Record<string, any>>({
             loading={loading}
             onRowClick={onRowClick as ((row: RowData, rowIndex?: number) => void) | undefined}
             actions={renderActions as ((row: RowData) => React.ReactNode) | undefined}
+            actionsWidth={actionsWidth}
             expandable={
               renderExpanded && expandedRows && onToggleExpand
                 ? {

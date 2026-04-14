@@ -75,6 +75,8 @@ export interface ActionButton {
 export interface ActionCellProps {
   actions: ActionButton[]
   className?: string
+  /** 只顯示圖示、不顯示文字（報價單等空間極度有限的情況用） */
+  iconOnly?: boolean
 }
 
 export interface AvatarCellProps {
@@ -312,13 +314,14 @@ export function DateRangeCell({
  * />
  * ```
  */
-export function ActionCell({ actions, className }: ActionCellProps) {
+export function ActionCell({ actions, className, iconOnly = false }: ActionCellProps) {
   return (
     <div className={cn('flex items-center gap-1', className)}>
       {actions.map((action, index) => {
         const IconComponent = action.icon
         const buttonClass = cn(
-          'p-1 rounded transition-colors',
+          'rounded transition-colors flex items-center gap-1 text-xs font-medium',
+          iconOnly ? 'p-1' : 'px-2 py-1',
           action.variant === 'danger' && 'text-morandi-red hover:bg-morandi-red/10',
           action.variant === 'warning' && 'text-status-warning hover:bg-status-warning-bg',
           action.variant === 'success' && 'text-morandi-green hover:bg-morandi-green/10',
@@ -340,7 +343,8 @@ export function ActionCell({ actions, className }: ActionCellProps) {
             title={action.label}
             disabled={action.disabled}
           >
-            <IconComponent size={16} />
+            <IconComponent size={14} />
+            {!iconOnly && <span>{action.label}</span>}
           </button>
         )
       })}

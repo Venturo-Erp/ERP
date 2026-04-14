@@ -8,33 +8,19 @@ import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { useUserStore, userStoreHelpers } from '@/stores/user-store'
-import { useWorkspaceChannels } from '@/stores/workspace'
-import {
-  usePaymentRequests,
-  createPaymentRequest as createPaymentRequestApi,
-  createPaymentRequestItem,
-  invalidatePaymentRequests,
-} from '@/data'
 import { Employee } from '@/stores/types'
 import { EmployeeForm } from '@/features/hr/components/EmployeeForm'
-import { HrAdminTabs } from './components/HrAdminTabs'
-import {
-  SalaryPaymentDialog,
-  SalaryPaymentData,
-} from '@/features/hr/components/salary-payment-dialog'
-import { Users, Edit2, Trash2, UserX, DollarSign, Bot, Copy, Download } from 'lucide-react'
-import { QRCodeSVG } from 'qrcode.react'
+import { useRouter } from 'next/navigation'
+import { HR_ADMIN_TABS } from './components/hr-admin-tabs'
+import { Users, Edit2, Trash2, UserX, Bot, Download } from 'lucide-react'
 import type { UserRole } from '@/lib/rbac-config'
 import { TableColumn } from '@/components/ui/enhanced-table'
 import { DateCell, ActionCell } from '@/components/table-cells'
 import { ConfirmDialog } from '@/components/dialog/confirm-dialog'
 import { useConfirmDialog } from '@/hooks/useConfirmDialog'
-import { generateCompanyPaymentRequestCode } from '@/stores/utils/code-generator'
 import { useAuthStore } from '@/stores/auth-store'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-
-type EmployeeTab = 'active' | 'terminated' | 'bot'
 
 // 職務類型
 interface Role {
@@ -44,15 +30,10 @@ interface Role {
 }
 
 export default function HRPage() {
+  const router = useRouter()
   const { items: users, fetchAll, update: updateUser, delete: deleteUser } = useUserStore()
-  const { workspaces, loadWorkspaces: fetchWorkspaces } = useWorkspaceChannels()
-  const { items: paymentRequests } = usePaymentRequests()
-  const currentUser = useAuthStore(state => state.user)
   const [expandedEmployee, setExpandedEmployee] = useState<string | null>(null)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [isSalaryPaymentDialogOpen, setIsSalaryPaymentDialogOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<EmployeeTab>('active')
-  const [lineBindingEmployee, setLineBindingEmployee] = useState<Employee | null>(null)
   const { confirm, confirmDialogProps } = useConfirmDialog()
   const [rolesData, setRolesData] = useState<Role[]>([])
 
@@ -60,7 +41,6 @@ export default function HRPage() {
 
   useEffect(() => {
     fetchAll()
-    fetchWorkspaces()
 
     // 載入職務列表
     const loadRoles = async () => {
@@ -77,34 +57,12 @@ export default function HRPage() {
     loadRoles()
   }, [])
 
-  const filteredEmployees = useMemo(() => {
-    return users.filter(emp => {
-      const isBot = emp.employee_type === 'bot'
-      const isTerminated = emp.status === 'terminated'
-
-      switch (activeTab) {
-        case 'active':
-          return !isBot && !isTerminated
-        case 'terminated':
-          return !isBot && isTerminated
-        case 'bot':
-          return isBot && isAdmin
-        default:
-          return !isBot && !isTerminated
-      }
-    })
-  }, [users, activeTab, isAdmin])
-
-  const tabOptions = useMemo(() => {
-    const baseTabs: { value: EmployeeTab; label: string }[] = [
-      { value: 'active', label: LABELS.TAB_ACTIVE },
-      { value: 'terminated', label: LABELS.TAB_TERMINATED },
-    ]
-    if (isAdmin) {
-      baseTabs.push({ value: 'bot', label: LABELS.TAB_BOT })
-    }
-    return baseTabs
-  }, [isAdmin])
+  // 員工列表：只顯示在職的真人（不含 bot、不含已離職）
+  const filteredEmployees = useMemo(
+    () =>
+      users.filter(emp => emp.employee_type !== 'bot' && emp.status !== 'terminated'),
+    [users]
+  )
 
   const getStatusLabel = (status: Employee['status']) => {
     const statusMap = {
@@ -225,14 +183,6 @@ export default function HRPage() {
     }
   }
 
-  const getWorkspaceName = useCallback(
-    (workspaceId: string | undefined) => {
-      if (!workspaceId) return LABELS.NOT_SET
-      const workspace = workspaces.find(w => w.id === workspaceId)
-      return workspace ? workspace.name : LABELS.UNKNOWN_OFFICE
-    },
-    [workspaces]
-  )
 
   const columns: TableColumn<Employee>[] = useMemo(
     () => [
@@ -240,12 +190,14 @@ export default function HRPage() {
         key: 'employee_number',
         label: LABELS.COL_EMPLOYEE_NUMBER,
         sortable: true,
+        width: '80px',
         render: value => <span className="font-mono text-sm">{String(value || '')}</span>,
       },
       {
         key: 'display_name',
         label: LABELS.COL_NAME,
         sortable: true,
+        width: '100px',
         render: (value, employee: Employee) => (
           <span className="font-medium">
             {String(value || employee.chinese_name || LABELS.UNNAMED_EMPLOYEE)}
@@ -253,19 +205,10 @@ export default function HRPage() {
         ),
       },
       {
-        key: 'workspace_id',
-        label: LABELS.COL_WORKSPACE,
-        sortable: true,
-        render: (_value, employee: Employee) => (
-          <span className="text-sm font-medium text-morandi-primary">
-            {getWorkspaceName(employee.workspace_id)}
-          </span>
-        ),
-      },
-      {
         key: 'job_info',
         label: '職務',
         sortable: false,
+        width: '100px',
         render: (_value, employee: Employee) => {
           // 從職務列表取得職務名稱
           const role = rolesData.find(r => r.id === employee.job_info?.role_id)
@@ -280,6 +223,7 @@ export default function HRPage() {
         key: 'personal_info',
         label: LABELS.COL_CONTACT,
         sortable: false,
+        width: '200px',
         render: (_value, employee: Employee) => {
           const info = employee.personal_info as {
             phone?: string | string[]
@@ -301,6 +245,7 @@ export default function HRPage() {
         key: 'status',
         label: LABELS.COL_STATUS,
         sortable: true,
+        width: '70px',
         render: (_value, employee: Employee) => (
           <span
             className={`px-2 py-1 rounded text-sm font-medium ${getStatusColor(employee.status)}`}
@@ -313,42 +258,15 @@ export default function HRPage() {
         key: 'hire_date',
         label: LABELS.COL_HIRE_DATE,
         sortable: true,
+        width: '100px',
         render: (_value, employee: Employee) => {
           if (!employee.job_info?.hire_date)
             return <span className="text-morandi-muted text-sm">{LABELS.NOT_SET}</span>
           return <DateCell date={employee.job_info.hire_date} />
         },
       },
-      {
-        key: 'line_user_id',
-        label: 'LINE',
-        sortable: false,
-        render: (_value, employee: Employee) => {
-          const lineUserId = (employee as unknown as { line_user_id?: string }).line_user_id
-          if (lineUserId) {
-            return (
-              <span className="px-2 py-1 rounded text-xs font-medium bg-morandi-green/10 text-morandi-green">
-                ✅ 已綁定
-              </span>
-            )
-          }
-          return (
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-7 text-xs"
-              onClick={e => {
-                e.stopPropagation()
-                setLineBindingEmployee(employee)
-              }}
-            >
-              綁定
-            </Button>
-          )
-        },
-      },
     ],
-    [getWorkspaceName, rolesData]
+    [rolesData]
   )
 
   const renderActions = useCallback(
@@ -382,101 +300,41 @@ export default function HRPage() {
     []
   )
 
-  const handleSalaryPaymentSubmit = async (data: SalaryPaymentData) => {
-    try {
-      const totalAmount = data.employee_salaries.reduce((sum, s) => sum + s.amount, 0)
-      const code = generateCompanyPaymentRequestCode('SAL', data.request_date, paymentRequests)
-
-      const newRequest = await createPaymentRequestApi({
-        code,
-        request_number: code,
-        request_date: data.request_date,
-        request_type: LABELS.SALARY_REQUEST_TYPE,
-        request_category: 'company',
-        expense_type: 'SAL',
-        amount: totalAmount,
-        is_special_billing: data.is_special_billing,
-        notes: data.notes || `${data.employee_salaries.length}${LABELS.SALARY_NOTES_SUFFIX}`,
-        status: 'pending',
-        created_by: currentUser?.id,
-        created_by_name: currentUser?.display_name || currentUser?.chinese_name,
-      })
-
-      if (newRequest?.id) {
-        for (let i = 0; i < data.employee_salaries.length; i++) {
-          const salary = data.employee_salaries[i]
-          const itemNumber = `${code}-${String.fromCharCode(65 + i)}`
-
-          await createPaymentRequestItem({
-            request_id: newRequest.id,
-            item_number: itemNumber,
-            category: '其他' as const,
-            supplier_id: salary.employee_id,
-            supplier_name: salary.employee_name,
-            description: `${salary.employee_name}${LABELS.SALARY_DESC_SUFFIX}`,
-            unit_price: salary.amount,
-            quantity: 1,
-            subtotal: salary.amount,
-            sort_order: i,
-          } as Parameters<typeof createPaymentRequestItem>[0])
-        }
-      }
-
-      await invalidatePaymentRequests()
-      toast.success(
-        `${LABELS.SALARY_SUCCESS_PREFIX}${data.employee_salaries.length}${LABELS.SALARY_SUCCESS_MID}${totalAmount.toLocaleString()}${LABELS.SALARY_SUCCESS_SUFFIX}`
-      )
-      logger.log('建立薪資請款成功：', data)
-    } catch (error) {
-      logger.error('建立薪資請款失敗：', error)
-      toast.error(LABELS.SALARY_FAILED)
-    }
-  }
-
   return (
     <>
       <ListPageLayout
         title={LABELS.MANAGE_3470}
         icon={Users}
-        beforeTable={<HrAdminTabs group="employee" />}
+        statusTabs={HR_ADMIN_TABS.employee}
+        activeStatusTab="/hr"
+        onStatusTabChange={href => router.push(href)}
         data={filteredEmployees}
         columns={columns}
         searchFields={['display_name', 'employee_number', 'personal_info'] as (keyof Employee)[]}
         searchPlaceholder={LABELS.SEARCH_PLACEHOLDER}
         onRowClick={handleEmployeeClick}
         renderActions={renderActions}
+        actionsWidth="280px"
         bordered={true}
-        statusTabs={tabOptions}
-        activeStatusTab={activeTab}
-        onStatusTabChange={tab => setActiveTab(tab as EmployeeTab)}
         defaultSort={{ key: 'employee_number', direction: 'asc' }}
         headerActions={
-          <div className="flex gap-3">
-            <Button
-              onClick={() => setIsSalaryPaymentDialogOpen(true)}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center"
-            >
-              <DollarSign className="w-4 h-4 mr-2" />
-              {LABELS.LABEL_5426}
-            </Button>
-            <Button
-              onClick={() => {
-                setIsAddDialogOpen(true)
-              }}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center"
-              style={{ pointerEvents: 'auto', position: 'relative', zIndex: 9999 }}
-            >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              {LABELS.ADD_EMPLOYEE}
-            </Button>
-          </div>
+          <Button
+            onClick={() => {
+              setIsAddDialogOpen(true)
+            }}
+            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center"
+            style={{ pointerEvents: 'auto', position: 'relative', zIndex: 9999 }}
+          >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            {LABELS.ADD_EMPLOYEE}
+          </Button>
         }
       />
 
@@ -517,63 +375,8 @@ export default function HRPage() {
         </DialogContent>
       </Dialog>
 
-      <SalaryPaymentDialog
-        open={isSalaryPaymentDialogOpen}
-        onOpenChange={setIsSalaryPaymentDialogOpen}
-        employees={users}
-        onSubmit={handleSalaryPaymentSubmit}
-      />
-
       <ConfirmDialog {...confirmDialogProps} />
 
-      {/* LINE 綁定 Dialog */}
-      <Dialog open={!!lineBindingEmployee} onOpenChange={() => setLineBindingEmployee(null)}>
-        <DialogContent level={1} className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <span className="text-morandi-green">📱</span> LINE 綁定
-            </DialogTitle>
-          </DialogHeader>
-          {lineBindingEmployee && (
-            <div className="flex flex-col items-center gap-4 py-4">
-              <div className="bg-white p-4 rounded-lg shadow-sm">
-                <QRCodeSVG
-                  value={`https://line.me/R/oaMessage/${process.env.NEXT_PUBLIC_LINE_BOT_ID || '@745gftqd'}?綁定 ${lineBindingEmployee.employee_number || lineBindingEmployee.id.slice(0, 8)}`}
-                  size={180}
-                  level="M"
-                />
-              </div>
-              <div className="text-center">
-                <p className="font-medium text-morandi-primary">
-                  {lineBindingEmployee.display_name || lineBindingEmployee.chinese_name || '員工'}
-                </p>
-                <p className="text-sm text-morandi-secondary mt-1">請掃描 QR Code 完成綁定</p>
-              </div>
-              <div className="flex gap-2 w-full">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={() => {
-                    const empCode =
-                      lineBindingEmployee.employee_number || lineBindingEmployee.id.slice(0, 8)
-                    const url = `https://line.me/R/oaMessage/${process.env.NEXT_PUBLIC_LINE_BOT_ID || '@745gftqd'}?綁定 ${empCode}`
-                    navigator.clipboard.writeText(url)
-                    toast.success('連結已複製')
-                  }}
-                >
-                  <Copy className="w-4 h-4 mr-1" />
-                  複製連結
-                </Button>
-              </div>
-              <p className="text-xs text-morandi-muted text-center">
-                掃碼後會打開 LINE 對話
-                <br />
-                自動傳送綁定指令完成綁定
-              </p>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   )
 }

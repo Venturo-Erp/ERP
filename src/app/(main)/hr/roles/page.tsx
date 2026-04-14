@@ -5,7 +5,7 @@
  * 支援模組 + 分頁的細粒度權限設定
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,12 +22,13 @@ import { Shield, Plus, Trash2, Save, Loader2, Users, Star, Check } from 'lucide-
 import { useAuthStore } from '@/stores'
 import { type TabPermission } from '@/features/hr/components/ModulePermissionTable'
 import { MODULES, type ModuleDefinition } from '@/lib/permissions'
+import { useWorkspaceFeatures } from '@/lib/permissions/hooks'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { ChevronRight, ChevronDown } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
-import { TeamSettingsTab } from '@/features/hr/components/TeamSettingsTab'
-import { HrAdminTabs } from '../components/HrAdminTabs'
+import { useRouter } from 'next/navigation'
+import { HR_ADMIN_TABS } from '../components/hr-admin-tabs'
 
 interface Role {
   id: string
@@ -38,10 +39,17 @@ interface Role {
 }
 
 export default function RolesPage() {
+  const router = useRouter()
   const { user } = useAuthStore()
   const { toast } = useToast()
+  const { isFeatureEnabled, loading: featuresLoading } = useWorkspaceFeatures()
 
-  const [activeTab, setActiveTab] = useState('permissions')
+  // 只顯示這個 workspace 已啟用的模組
+  const visibleModules = useMemo(
+    () => MODULES.filter(m => isFeatureEnabled(m.code)),
+    [isFeatureEnabled]
+  )
+
   const [roles, setRoles] = useState<Role[]>([])
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
   const [permissions, setPermissions] = useState<TabPermission[]>([])
@@ -393,22 +401,15 @@ export default function RolesPage() {
     <ContentPageLayout
       title="職務管理"
       icon={Shield}
-      headerChildren={<HrAdminTabs group="employee" />}
+      tabs={HR_ADMIN_TABS.employee}
+      activeTab="/hr/roles"
+      onTabChange={href => router.push(href)}
       breadcrumb={[
         { label: '人資管理', href: '/hr' },
         { label: '職務管理', href: '/hr/roles' },
       ]}
-      tabs={[
-        { value: 'permissions', label: '職務權限' },
-        { value: 'team', label: '團務設定' },
-      ]}
-      activeTab={activeTab}
-      onTabChange={setActiveTab}
     >
-      {activeTab === 'team' ? (
-        <TeamSettingsTab />
-      ) : (
-        <>
+      <>
           <div className="grid grid-cols-12 gap-6 h-full min-h-[500px]">
             {/* 左側：職務列表 */}
             <div className="col-span-3 flex flex-col">
@@ -537,8 +538,8 @@ export default function RolesPage() {
                         </div>
                       </div>
 
-                      {/* 模組列表 */}
-                      {MODULES.map(module => renderModuleRow(module))}
+                      {/* 模組列表（只列出 workspace 已啟用的功能） */}
+                      {visibleModules.map(module => renderModuleRow(module))}
                     </div>
                   ) : (
                     <div className="flex items-center justify-center h-full text-morandi-secondary">
@@ -609,7 +610,6 @@ export default function RolesPage() {
             </DialogContent>
           </Dialog>
         </>
-      )}
     </ContentPageLayout>
   )
 }
