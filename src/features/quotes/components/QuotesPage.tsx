@@ -77,14 +77,14 @@ export const QuotesPage: React.FC = () => {
     // 只顯示有報價單的團
     let result = tours.filter(tour => tour.id && (tourQuoteCounts[tour.id] || 0) > 0)
 
-    // 搜尋篩選
+    // 搜尋篩選 — name / code / airport_code（不再用已廢棄的 tour.location）
     if (searchTerm) {
       const term = searchTerm.toLowerCase()
       result = result.filter(
         tour =>
           tour.code?.toLowerCase().includes(term) ||
           tour.name?.toLowerCase().includes(term) ||
-          tour.location?.toLowerCase().includes(term)
+          tour.airport_code?.toLowerCase().includes(term)
       )
     }
 

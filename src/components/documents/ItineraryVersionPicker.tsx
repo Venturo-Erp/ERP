@@ -67,17 +67,17 @@ export function ItineraryVersionPicker({ isOpen, onClose, tour }: ItineraryVersi
     i => i.tour_id === tour.id && !(i as { _deleted?: boolean })._deleted
   )
 
-  // 根據 country_id 和 airport_code 查詢名稱
+  // 根據 country_id 和 airport_code 查詢名稱（SSOT，不再 fallback 到 tour.location）
   const countryName = (() => {
-    if (!tour.country_id) return tour.location || ''
+    if (!tour.country_id) return ''
     const country = countries.find(c => c.id === tour.country_id)
     return country?.name || ''
   })()
 
   const cityName = (() => {
-    if (!tour.airport_code) return tour.location || ''
+    if (!tour.airport_code) return ''
     const city = cities.find(c => c.id === tour.airport_code)
-    return city?.name || tour.location || ''
+    return city?.name || ''
   })()
 
   // 計算天數

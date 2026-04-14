@@ -62,14 +62,14 @@ export function useTours(params?: PageRequest): UseEntityResult<Tour> {
   const processedTours = (() => {
     let result = [...allTours]
 
-    // 搜尋過濾
+    // 搜尋過濾 — 命中 name / code / airport_code（不再用已廢棄的 tour.location）
     if (params?.search) {
       const searchLower = params.search.toLowerCase()
       result = result.filter(
         tour =>
           tour.name.toLowerCase().includes(searchLower) ||
           tour.code.toLowerCase().includes(searchLower) ||
-          (tour.location || '').toLowerCase().includes(searchLower)
+          (tour.airport_code || '').toLowerCase().includes(searchLower)
       )
     }
 

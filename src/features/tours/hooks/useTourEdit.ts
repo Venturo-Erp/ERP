@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { Tour, Itinerary, DailyItineraryDay } from '@/stores/types'
 import type { Json } from '@/types/database.types'
 import { useCountries } from '@/data'
+import { useAirports } from '@/features/tours/hooks/useAirports'
 import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { mutate } from 'swr'
@@ -52,6 +53,7 @@ export function useTourEdit(params: UseTourEditParams) {
   const { tour, isOpen, onClose, onSuccess } = params
 
   const { items: countries } = useCountries()
+  const { airports } = useAirports()
 
   // Form state
   const [submitting, setSubmitting] = useState(false)
@@ -99,12 +101,17 @@ export function useTourEdit(params: UseTourEditParams) {
       countryName = country?.name || ''
     }
 
+    // SSOT：airportCityName 從 airport_code 反查，不再 fallback 到已廢棄的 tour.location
+    const airportCityName = tour.airport_code
+      ? airports.find(a => a.iata_code === tour.airport_code)?.city_name_zh || ''
+      : ''
+
     setFormData({
       name: tour.name,
       countryId,
       countryName,
       airportCode: tour.airport_code || '',
-      airportCityName: tour.location || '',
+      airportCityName,
       departure_date: tour.departure_date || '',
       return_date: tour.return_date || '',
       description: tour.description || '',
