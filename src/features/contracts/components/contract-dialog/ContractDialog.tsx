@@ -35,6 +35,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useContractForm } from './useContractForm'
+import { useTourDisplay } from '@/features/tours/utils/tour-display'
 import { ContractFormFields } from './ContractFormFields'
 import { COMP_CONTRACTS_LABELS } from '../constants/labels'
 
@@ -54,6 +55,8 @@ const CONTRACT_TEMPLATE_LABELS: Record<ContractTemplate, string> = {
 }
 
 export function ContractDialog({ isOpen, onClose, tour, mode }: ContractDialogProps) {
+  // SSOT：目的地顯示字串
+  const { displayString: tourDestinationDisplay } = useTourDisplay(tour)
   // 視圖狀態：'main' | 'form' | 'select-members'
   const [viewMode, setViewMode] = useState<'main' | 'form' | 'select-members'>('main')
   // 多選旅客的 IDs
@@ -462,7 +465,7 @@ export function ContractDialog({ isOpen, onClose, tour, mode }: ContractDialogPr
                         {CONTRACT_DIALOG_LABELS.LABEL_5475}
                       </div>
                       <div className="text-sm text-morandi-primary font-medium">
-                        {tour.location}
+                        {tourDestinationDisplay}
                       </div>
                     </div>
                   </div>

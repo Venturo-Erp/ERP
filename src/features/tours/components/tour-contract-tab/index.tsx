@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tour, Order } from '@/stores/types'
 import { ContractTemplate } from '@/types/tour.types'
+import { useTourDisplay } from '@/features/tours/utils/tour-display'
 import { useToast } from '@/components/ui/use-toast'
 import { supabase } from '@/lib/supabase/client'
 import {
@@ -60,25 +61,6 @@ interface Contract {
   status: string
   signed_at?: string
   member_ids: string[]
-}
-
-// 自動判斷合約類型
-function getContractTemplate(tour: Tour): ContractTemplate {
-  const location = tour.location?.toLowerCase() || ''
-
-  if (
-    location.includes('台灣') ||
-    location.includes('taiwan') ||
-    location.includes('澎湖') ||
-    location.includes('金門') ||
-    location.includes('馬祖') ||
-    location.includes('綠島') ||
-    location.includes('蘭嶼')
-  ) {
-    return 'domestic'
-  }
-
-  return 'international'
 }
 
 const CONTRACT_TEMPLATE_LABELS: Record<ContractTemplate, string> = {
@@ -410,8 +392,9 @@ export function TourContractTab({ tour }: TourContractTabProps) {
     }
   }
 
-  // 自動判斷的合約類型
-  const autoContractType = getContractTemplate(tour)
+  // 自動判斷的合約類型 — 從 country_id 解析（國家 = 台灣 → 國內團）
+  const { isDomestic, displayString: tourDestinationDisplay } = useTourDisplay(tour)
+  const autoContractType: ContractTemplate = isDomestic ? 'domestic' : 'international'
 
   if (loading) {
     return (
@@ -431,7 +414,9 @@ export function TourContractTab({ tour }: TourContractTabProps) {
           <span className="font-medium text-morandi-primary">
             {CONTRACT_TEMPLATE_LABELS[autoContractType]}
           </span>
-          <span className="text-morandi-secondary">（目的地：{tour.location || '未設定'}）</span>
+          <span className="text-morandi-secondary">
+            （目的地：{tourDestinationDisplay || '未設定'}）
+          </span>
         </div>
       </div>
 
@@ -792,7 +777,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-morandi-secondary">目的地：</span>
-                  <span className="font-medium">{tour.location || '未設定'}</span>
+                  <span className="font-medium">{tourDestinationDisplay || '未設定'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-morandi-secondary">合約類型：</span>

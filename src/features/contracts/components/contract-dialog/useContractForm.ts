@@ -3,6 +3,7 @@ import { Tour, ContractTemplate } from '@/types/tour.types'
 import { Order, Member } from '@/types/order.types'
 import { useTours, updateTour, useOrdersSlim, useItineraries, useQuotes } from '@/data'
 import { prepareContractData, ContractData } from '@/lib/contract-utils'
+import { useTourDisplay } from '@/features/tours/utils/tour-display'
 import { alert, alertSuccess, alertError } from '@/lib/ui/alert-dialog'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
@@ -28,6 +29,8 @@ export function useContractForm({ tour, mode, isOpen }: UseContractFormProps) {
   const { items: orders, loading: ordersLoading } = useOrdersSlim()
   const { items: itineraries } = useItineraries()
   const { items: quotes } = useQuotes()
+  // SSOT：從 country_id / airport_code 解析目的地顯示字串
+  const { displayString: tourDestinationDisplay } = useTourDisplay(tour)
 
   const [selectedTemplate, setSelectedTemplate] = useState<ContractTemplate | ''>('')
   const [contractNotes, setContractNotes] = useState('')
@@ -159,7 +162,9 @@ export function useContractForm({ tour, mode, isOpen }: UseContractFormProps) {
                 tour,
                 selectedOrder as Order,
                 firstMember as unknown as Member,
-                itinerary
+                itinerary,
+                undefined,
+                tourDestinationDisplay
               )
               setContractData(autoData)
             } else if (linkedQuote) {
@@ -173,7 +178,7 @@ export function useContractForm({ tour, mode, isOpen }: UseContractFormProps) {
                 travelerIdNumber: '',
                 travelerPhone: linkedQuote.contact_phone || '',
                 tourName: tour.name || '',
-                tourDestination: tour.location || '',
+                tourDestination: tourDestinationDisplay,
                 tourCode: tour.code || '',
                 gatherYear: '',
                 gatherMonth: '',
@@ -195,7 +200,9 @@ export function useContractForm({ tour, mode, isOpen }: UseContractFormProps) {
             tour,
             selectedOrder as Order,
             firstMember as unknown as Member,
-            itinerary
+            itinerary,
+            undefined,
+            tourDestinationDisplay
           )
           setContractData(autoData)
         } else if (linkedQuote) {
@@ -209,7 +216,7 @@ export function useContractForm({ tour, mode, isOpen }: UseContractFormProps) {
             travelerIdNumber: '',
             travelerPhone: linkedQuote.contact_phone || '',
             tourName: tour.name || '',
-            tourDestination: tour.location || '',
+            tourDestination: tourDestinationDisplay,
             tourCode: tour.code || '',
             gatherYear: '',
             gatherMonth: '',
@@ -238,7 +245,9 @@ export function useContractForm({ tour, mode, isOpen }: UseContractFormProps) {
             tour,
             selectedOrder as Order,
             firstMember as unknown as Member,
-            itinerary
+            itinerary,
+            undefined,
+            tourDestinationDisplay
           )
           setContractData(autoData)
         } else {
@@ -349,7 +358,7 @@ export function useContractForm({ tour, mode, isOpen }: UseContractFormProps) {
             travelerIdNumber: '',
             travelerPhone: linkedQuote?.contact_phone || '',
             tourName: tour.name || '',
-            tourDestination: tour.location || '',
+            tourDestination: tourDestinationDisplay,
             tourCode: tour.code || '',
             gatherYear,
             gatherMonth,

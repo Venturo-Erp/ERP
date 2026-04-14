@@ -2,25 +2,18 @@ import { NextRequest, NextResponse } from 'next/server'
 import { nanoid } from 'nanoid'
 import { createApiClient, getCurrentWorkspaceId } from '@/lib/supabase/api-client'
 
-// 自動判斷合約類型
-function getContractTemplate(location?: string): string {
-  const loc = location?.toLowerCase() || ''
-
-  // 國內旅遊
-  if (
-    loc.includes('台灣') ||
-    loc.includes('taiwan') ||
-    loc.includes('澎湖') ||
-    loc.includes('金門') ||
-    loc.includes('馬祖') ||
-    loc.includes('綠島') ||
-    loc.includes('蘭嶼')
-  ) {
-    return 'domestic'
-  }
-
-  // 國外旅遊 - 預設團體
-  return 'international'
+// 自動判斷合約類型 — 從 country_id 解析出國家名，台灣 = 國內團
+async function getContractTemplate(
+  supabase: Awaited<ReturnType<typeof createApiClient>>,
+  countryId: string | null | undefined
+): Promise<string> {
+  if (!countryId) return 'international'
+  const { data } = await supabase
+    .from('countries')
+    .select('name')
+    .eq('id', countryId)
+    .single()
+  return data?.name === '台灣' ? 'domestic' : 'international'
 }
 
 // 產生合約編號
@@ -68,7 +61,7 @@ export async function POST(request: NextRequest) {
     // 取得團資訊（RLS 會自動過濾）
     const { data: tour, error: tourError } = await supabase
       .from('tours')
-      .select('id, code, name, location, departure_date, return_date')
+      .select('id, code, name, country_id, airport_code, departure_date, return_date')
       .eq('id', tourId)
       .single()
 
@@ -87,7 +80,29 @@ export async function POST(request: NextRequest) {
 
     // 產生合約編號和類型
     const contractCode = generateContractCode(tour.code)
-    const template = getContractTemplate(tour.location)
+    const template = await getContractTemplate(supabase, tour.country_id)
+
+    // 解析目的地顯示字串（airport_code → 城市名 → 國家名 → 機場代碼）
+    let tourDestinationDisplay = ''
+    if (tour.airport_code) {
+      const { data: airport } = await supabase
+        .from('ref_airports')
+        .select('city_name_zh')
+        .eq('iata_code', tour.airport_code)
+        .maybeSingle()
+      tourDestinationDisplay = airport?.city_name_zh || ''
+    }
+    if (!tourDestinationDisplay && tour.country_id) {
+      const { data: country } = await supabase
+        .from('countries')
+        .select('name')
+        .eq('id', tour.country_id)
+        .maybeSingle()
+      tourDestinationDisplay = country?.name || ''
+    }
+    if (!tourDestinationDisplay) {
+      tourDestinationDisplay = tour.airport_code || ''
+    }
 
     // 組合 contract_data（合約變數）
     const today = new Date()
@@ -117,7 +132,7 @@ export async function POST(request: NextRequest) {
 
       // 旅遊團資訊
       tourName: tour.name || '',
-      tourDestination: tour.location || '',
+      tourDestination: tourDestinationDisplay,
       tourCode: tour.code || '',
 
       // 集合資訊（出發日期）

@@ -175,7 +175,10 @@ export function prepareContractData(
   order: Order,
   member?: Member,
   itinerary?: Itinerary,
-  depositAmount?: number
+  depositAmount?: number,
+  // SSOT：tour 的目的地顯示字串請由呼叫端用 useTourDisplay 解析後傳入，
+  // 不再從已廢棄的 tour.location 讀
+  tourDestinationDisplay = ''
 ): Partial<ContractData> {
   const today = new Date()
 
@@ -276,7 +279,7 @@ export function prepareContractData(
 
     // 旅遊團資訊
     tourName: tour.name,
-    tourDestination: tour.location || '',
+    tourDestination: tourDestinationDisplay,
     tourCode: tour.code,
 
     // 集合資訊
