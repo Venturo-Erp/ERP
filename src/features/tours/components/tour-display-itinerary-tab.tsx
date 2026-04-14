@@ -15,7 +15,7 @@ import { PrintItineraryForm } from '@/features/itinerary/components/PrintItinera
 import { PrintItineraryPreview } from '@/features/itinerary/components/PrintItineraryPreview'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useItineraries } from '@/data'
+import { useItineraries, updateTour } from '@/data'
 import type {
   FlightInfo,
   Feature,
@@ -79,7 +79,8 @@ function buildDefaultFromTour(tour: Tour): TourFormData {
     tourCode: tour.code || '',
     coverImage: '',
     country: tour.location || '',
-    city: tour.location || '',
+    // CoverInfoSection 用 city 欄位查機場圖片庫，接受 2-4 位英文代碼 → 用團的機場代號當預設
+    city: airportCode || tour.location || '',
     outboundFlight: {
       airline: '',
       flightNumber: '',
@@ -122,7 +123,11 @@ function buildDefaultFromTour(tour: Tour): TourFormData {
 /**
  * 從 DB itinerary 資料轉換為 TourFormData
  */
-function itineraryToFormData(itinerary: Record<string, unknown>): TourFormData {
+function itineraryToFormData(
+  itinerary: Record<string, unknown>,
+  tour?: Tour
+): TourFormData {
+  const fallbackCity = tour?.airport_code || tour?.location || ''
   const rawOutbound = itinerary.outbound_flight
   const rawReturn = itinerary.return_flight
   const outbound = (Array.isArray(rawOutbound) ? rawOutbound[0] : rawOutbound) as
@@ -142,8 +147,8 @@ function itineraryToFormData(itinerary: Record<string, unknown>): TourFormData {
     coverStyle: itinerary.cover_style as TourFormData['coverStyle'],
     flightStyle: itinerary.flight_style as TourFormData['flightStyle'],
     itineraryStyle: itinerary.itinerary_style as TourFormData['itineraryStyle'],
-    country: (itinerary.country as string) || '',
-    city: (itinerary.city as string) || '',
+    country: (itinerary.country as string) || tour?.location || '',
+    city: (itinerary.city as string) || fallbackCity,
     outboundFlight: outbound || {
       airline: '',
       flightNumber: '',
@@ -207,7 +212,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
   // Tour form data state
   const [tourData, setTourData] = useState<TourFormData>(() => {
     if (linkedItinerary) {
-      return itineraryToFormData(linkedItinerary as unknown as Record<string, unknown>)
+      return itineraryToFormData(linkedItinerary as unknown as Record<string, unknown>, tour)
     }
     return buildDefaultFromTour(tour)
   })
@@ -215,9 +220,11 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
   // 當找到已有的展示行程時更新
   useEffect(() => {
     if (linkedItinerary) {
-      setTourData(itineraryToFormData(linkedItinerary as unknown as Record<string, unknown>))
+      setTourData(
+        itineraryToFormData(linkedItinerary as unknown as Record<string, unknown>, tour)
+      )
     }
-  }, [linkedItinerary?.id])
+  }, [linkedItinerary?.id, tour])
 
   // Print data state
   const [printData, setPrintData] = useState({
@@ -453,6 +460,15 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
           currentVersionIndex={currentVersionIndex}
           onVersionChange={handleVersionChange}
           onVersionRecordsChange={handleVersionRecordsChange}
+          onCreated={async newId => {
+            // 嵌入在 tour 分頁時不能被 router.replace 導走；改成回寫 tours.itinerary_id
+            try {
+              await updateTour(tour.id, { itinerary_id: newId })
+              toast.success('展示行程已建立')
+            } catch (error) {
+              logger.error('展示行程建立後回寫 tours.itinerary_id 失敗:', error)
+            }
+          }}
         />
       </div>
 

@@ -26,6 +26,8 @@ interface UsePublishProps {
   currentVersionIndex: number
   onVersionChange: (index: number, versionData?: ItineraryVersionRecord) => void
   onVersionRecordsChange?: (versionRecords: ItineraryVersionRecord[]) => void
+  // 嵌入在 tour 分頁等非獨立路由時，提供此 callback 取代預設的 router.replace
+  onCreated?: (newItineraryId: string) => void
 }
 
 export function usePublish({
@@ -33,6 +35,7 @@ export function usePublish({
   currentVersionIndex,
   onVersionChange,
   onVersionRecordsChange,
+  onCreated,
 }: UsePublishProps) {
   const [saving, setSaving] = useState(false)
   const [versionNote, setVersionNote] = useState('')
@@ -175,7 +178,11 @@ export function usePublish({
         } as Parameters<typeof createItinerary>[0])
 
         if (newItinerary?.id) {
-          router.replace(`/itinerary/new?itinerary_id=${newItinerary.id}`)
+          if (onCreated) {
+            onCreated(newItinerary.id)
+          } else {
+            router.replace(`/itinerary/new?itinerary_id=${newItinerary.id}`)
+          }
         }
       }
     } catch (error) {

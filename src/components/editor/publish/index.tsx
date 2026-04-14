@@ -34,6 +34,7 @@ interface PublishButtonProps {
   currentVersionIndex: number
   onVersionChange: (index: number, versionData?: ItineraryVersionRecord) => void
   onVersionRecordsChange?: (versionRecords: ItineraryVersionRecord[]) => void
+  onCreated?: (newItineraryId: string) => void
 }
 
 export function PublishButton({
@@ -41,6 +42,7 @@ export function PublishButton({
   currentVersionIndex,
   onVersionChange,
   onVersionRecordsChange,
+  onCreated,
 }: PublishButtonProps) {
   const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [showSaveAsNewDialog, setShowSaveAsNewDialog] = useState(false)
@@ -67,6 +69,7 @@ export function PublishButton({
     currentVersionIndex,
     onVersionChange,
     onVersionRecordsChange,
+    onCreated,
   })
 
   // 載入版本

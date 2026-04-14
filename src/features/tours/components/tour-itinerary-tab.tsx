@@ -260,21 +260,23 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           }
           if (itinerary.outbound_flight) {
             const outbound = itinerary.outbound_flight
-            if (Array.isArray(outbound)) {
-              setOutboundFlights(outbound as FlightInfo[])
-            } else {
-              setOutboundFlights([outbound as FlightInfo])
-            }
+            const outboundArr = (
+              Array.isArray(outbound) ? outbound : [outbound]
+            ) as FlightInfo[]
+            setOutboundFlights(outboundArr)
+            const firstDate = outboundArr[0]?.departureDate
+            if (firstDate) setOutboundFlightDate(firstDate)
           } else {
             setOutboundFlights([{ ...emptyFlight }])
           }
           if (itinerary.return_flight) {
             const returnFlt = itinerary.return_flight
-            if (Array.isArray(returnFlt)) {
-              setReturnFlights(returnFlt as FlightInfo[])
-            } else {
-              setReturnFlights([returnFlt as FlightInfo])
-            }
+            const returnArr = (
+              Array.isArray(returnFlt) ? returnFlt : [returnFlt]
+            ) as FlightInfo[]
+            setReturnFlights(returnArr)
+            const firstDate = returnArr[0]?.departureDate
+            if (firstDate) setReturnFlightDate(firstDate)
           } else {
             setReturnFlights([{ ...emptyFlight }])
           }
@@ -882,12 +884,12 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
         daily_itinerary: displayDailyItinerary,
         outbound_flight:
           outboundFlights.length > 0
-            ? outboundFlights.map(f => ({
+            ? outboundFlights.map((f, i) => ({
                 airline: f.airline || '',
                 flightNumber: f.flightNumber || '',
                 departureAirport: f.departureAirport || '',
                 departureTime: f.departureTime || '',
-                departureDate: '',
+                departureDate: f.departureDate || (i === 0 ? outboundFlightDate : '') || '',
                 arrivalAirport: f.arrivalAirport || '',
                 arrivalTime: f.arrivalTime || '',
                 duration: '',
@@ -895,12 +897,12 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
             : undefined,
         return_flight:
           returnFlights.length > 0
-            ? returnFlights.map(f => ({
+            ? returnFlights.map((f, i) => ({
                 airline: f.airline || '',
                 flightNumber: f.flightNumber || '',
                 departureAirport: f.departureAirport || '',
                 departureTime: f.departureTime || '',
-                departureDate: '',
+                departureDate: f.departureDate || (i === 0 ? returnFlightDate : '') || '',
                 arrivalAirport: f.arrivalAirport || '',
                 arrivalTime: f.arrivalTime || '',
                 duration: '',
