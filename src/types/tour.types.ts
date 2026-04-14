@@ -423,7 +423,12 @@ export interface Tour extends BaseEntity {
   name: string // 團名
   tour_type?: TourType | null // 團類型：official/proposal/template
   days_count?: number | null // 天數（提案/模板用）
-  location?: string | null // 目的地（相容舊欄位：destination）
+  /**
+   * @deprecated 已退役欄位（原為「目的地」字串，現由 country_id + airport_code 衍生）。
+   * 顯示用途請改用 useTourDisplay / getTourDestinationDisplay helper。
+   * 新程式碼禁止讀寫此欄位。DB 欄位本身將在所有寫入點停止後另行 migration drop。
+   */
+  location?: string | null
   country_id?: string | null // 國家 ID
   airport_code?: string | null // 機場代號
   departure_date: string | null // 出發日期 (ISO 8601)（提案/模板可為 null）

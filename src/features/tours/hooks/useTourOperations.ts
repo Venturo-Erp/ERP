@@ -500,7 +500,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
           // 模板 → 複製一份新團（用 unknown 繞過嚴格型別，實際欄位由 Supabase 驗證）
           const newTourData = {
             name: tour.name,
-            location: tour.location || '',
+            // SSOT：location 是已廢棄的舊欄位，新團不再寫入
             country_id: tour.country_id || null, // ✅ 保留國家
             airport_code: tour.airport_code || null, // ✅ 保留機場代碼
             tour_type: 'official' as const,

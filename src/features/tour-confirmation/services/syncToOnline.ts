@@ -78,13 +78,32 @@ export async function syncTripToOnline(tourId: string): Promise<SyncResult> {
     const { data: tour, error: tourError } = await supabase
       .from('tours')
       .select(
-        'workspace_id, code, name, departure_date, return_date, location, outbound_flight, return_flight'
+        'workspace_id, code, name, departure_date, return_date, country_id, airport_code, outbound_flight, return_flight'
       )
       .eq('id', tourId)
       .single()
 
     if (tourError || !tour) {
       return { success: false, message: SYNC_LABELS.TOUR_NOT_FOUND }
+    }
+
+    // SSOT：從 airport_code → 城市名 → 國家名 衍生目的地字串
+    let tourDestination: string | null = null
+    if (tour.airport_code) {
+      const { data: airport } = await supabase
+        .from('ref_airports')
+        .select('city_name_zh')
+        .eq('iata_code', tour.airport_code)
+        .maybeSingle()
+      tourDestination = airport?.city_name_zh || null
+    }
+    if (!tourDestination && tour.country_id) {
+      const { data: country } = await supabase
+        .from('countries')
+        .select('name')
+        .eq('id', tour.country_id)
+        .maybeSingle()
+      tourDestination = country?.name || null
     }
 
     // 2. 取得行程表資料
@@ -111,7 +130,7 @@ export async function syncTripToOnline(tourId: string): Promise<SyncResult> {
       name: tour.name,
       departure_date: tour.departure_date || '',
       return_date: tour.return_date || '',
-      destination: tour.location ?? null,
+      destination: tourDestination,
       daily_itinerary: Array.isArray(dailyItinerary) ? dailyItinerary : [],
       leader_info: (itinerary?.leader as unknown as LeaderInfo) ?? null,
       meeting_info: (itinerary?.meeting_info as unknown as MeetingInfo) ?? null,

@@ -13,6 +13,7 @@ import {
 } from '@/data'
 import { supabase } from '@/lib/supabase/client'
 import { FullCalendarEvent } from '../types'
+import { useTourDisplayResolver } from '@/features/tours/utils/tour-display'
 import type { CalendarEvent } from '@/types/calendar.types'
 import type { DatesSetArg } from '@fullcalendar/core'
 import useSWR from 'swr'
@@ -59,6 +60,8 @@ export function useCalendarEvents() {
 
   // 使用日期範圍載入團資料（只載入需要的月份）
   const { items: tours } = useToursForCalendar(dateRange)
+  // SSOT：從 country_id / airport_code 解析目的地顯示字串
+  const resolveTourDisplay = useTourDisplayResolver()
   const { items: customers } = useCustomersSlim()
   const { settings } = useCalendarStore()
   const { items: calendarEvents } = useCalendarEventList()
@@ -195,14 +198,14 @@ export function useCalendarEvents() {
             type: 'tour' as const,
             tour_id: tour.id,
             code: tour.code || '',
-            location: tour.location || '',
+            location: resolveTourDisplay(tour).displayString,
             participants: actualMembers,
             max_participants: tour.max_participants || 0,
             status: tour.status || '',
           },
         } as FullCalendarEvent
       })
-  }, [tours, getEventColor])
+  }, [tours, getEventColor, resolveTourDisplay])
 
   // 轉換個人事項為日曆事件（只顯示當前用戶的個人事項）
   const personalCalendarEvents: FullCalendarEvent[] = useMemo(() => {
