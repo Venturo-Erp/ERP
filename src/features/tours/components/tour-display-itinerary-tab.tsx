@@ -123,8 +123,12 @@ function buildDefaultFromTour(tour: Tour): TourFormData {
  * 從 DB itinerary 資料轉換為 TourFormData
  */
 function itineraryToFormData(itinerary: Record<string, unknown>): TourFormData {
-  const outbound = itinerary.outbound_flight as FlightInfo | undefined
-  const ret = itinerary.return_flight as FlightInfo | undefined
+  const rawOutbound = itinerary.outbound_flight
+  const rawReturn = itinerary.return_flight
+  const outbound = (Array.isArray(rawOutbound) ? rawOutbound[0] : rawOutbound) as
+    | FlightInfo
+    | undefined
+  const ret = (Array.isArray(rawReturn) ? rawReturn[0] : rawReturn) as FlightInfo | undefined
   const meetingInfo = itinerary.meeting_info as MeetingPoint | undefined
 
   return {
