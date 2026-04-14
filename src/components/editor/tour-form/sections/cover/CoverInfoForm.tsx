@@ -1,8 +1,7 @@
 'use client'
 import React from 'react'
 import { getBrandTagline } from '@/lib/tenant'
-import { TourFormData, CityOption, CoverStyleType } from '../../types'
-import { Combobox } from '@/components/ui/combobox'
+import { TourFormData, CoverStyleType } from '../../types'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -24,14 +23,9 @@ import { COMP_EDITOR_LABELS } from '../../../constants/labels'
 
 interface CoverInfoFormProps {
   data: TourFormData
-  selectedCountry: string
-  setSelectedCountry: (country: string) => void
-  setSelectedCountryCode: (code: string) => void
-  allDestinations: CityOption[]
-  availableCities: CityOption[]
-  countryNameToCode: Record<string, string>
+  // 註：國家/城市/機場相關 props 已移除——SSOT 由 tours.country_id / airport_code 負責，
+  // 此表單不再露出這些欄位
   updateField: (field: string, value: unknown) => void
-  updateCity: (city: string) => void
   onChange: (data: TourFormData) => void
   coverStyleOptions: Array<{
     value: CoverStyleType
@@ -46,14 +40,7 @@ interface CoverInfoFormProps {
 
 export function CoverInfoForm({
   data,
-  selectedCountry,
-  setSelectedCountry,
-  setSelectedCountryCode,
-  allDestinations,
-  availableCities,
-  countryNameToCode,
   updateField,
-  updateCity,
   onChange,
   coverStyleOptions,
   onCoverStyleChange,
@@ -148,31 +135,10 @@ export function CoverInfoForm({
           />
         </div>
 
-        {/* 🎯 SSOT：國家和機場代碼從 tours 表繼承，唯讀顯示 */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-morandi-primary mb-1">國家</label>
-            <Input
-              type="text"
-              value={selectedCountry || data.country || ''}
-              readOnly
-              disabled
-              className="h-9 bg-muted cursor-not-allowed"
-              placeholder="從旅遊團帶入"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-morandi-primary mb-1">機場代碼</label>
-            <Input
-              type="text"
-              value={data.city || ''}
-              readOnly
-              disabled
-              className="h-9 bg-muted cursor-not-allowed"
-              placeholder="從旅遊團帶入"
-            />
-          </div>
-        </div>
+        {/* SSOT：國家/機場代碼是 tours 的屬性（country_id + airport_code），
+            屬於「編輯旅遊團基本資料」對話框的職責；展示行程不再露出這兩個欄位，
+            避免使用者誤以為這裡可以改。封面圖片庫底層仍然以 tour.airport_code
+            自動載入該機場的圖庫照片，使用者也可直接上傳照片。 */}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>

@@ -132,14 +132,7 @@ export function CoverInfoSection({
         {/* 表單區塊 - 在 50% 寬度下，改用垂直排列 */}
         <CoverInfoForm
           data={data}
-          selectedCountry={selectedCountry}
-          setSelectedCountry={setSelectedCountry}
-          setSelectedCountryCode={setSelectedCountryCode}
-          allDestinations={allDestinations}
-          availableCities={availableCities}
-          countryNameToCode={countryNameToCode}
           updateField={updateField}
-          updateCity={updateCity}
           onChange={onChange}
           coverStyleOptions={coverStyleOptions}
           onCoverStyleChange={handleCoverStyleChange}
