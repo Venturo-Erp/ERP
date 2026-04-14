@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button'
 import { AlertCircle, X } from 'lucide-react'
 import { NewTourData } from '../types'
 import type { OrderFormData } from '@/features/orders/components/add-order-form'
-import { useTourForm } from '../hooks/useTourForm'
-import { TourBasicInfo, TourFlightInfo, TourSettings, TourOrderSection } from './tour-form'
+import { TourBasicInfo, TourSettings, TourOrderSection } from './tour-form'
 import { TOUR_FORM } from '../constants'
 
 interface TourFormShellProps {
@@ -38,12 +37,7 @@ export function TourFormShell({
   onSubmit,
   isFromProposal,
 }: TourFormShellProps) {
-  // 使用自定義 hook 處理航班查詢邏輯
-  const { loadingOutbound, loadingReturn, handleSearchOutbound, handleSearchReturn } = useTourForm({
-    newTour,
-    setNewTour,
-  })
-
+  // SSOT：航班屬於旅遊團「行程編輯」分頁，開團時不再選填航班
   const isProposalOrTemplate = newTour.tour_type === 'proposal' || newTour.tour_type === 'template'
 
   // 決定標題
@@ -147,20 +141,9 @@ export function TourFormShell({
               <div className="space-y-4">
                 <TourBasicInfo newTour={newTour} setNewTour={setNewTour} />
 
-                {/* 提案/模板不顯示航班和設定 */}
+                {/* 提案/模板不顯示設定區 */}
                 {!isProposalOrTemplate && (
-                  <>
-                    <TourFlightInfo
-                      newTour={newTour}
-                      setNewTour={setNewTour}
-                      loadingOutbound={loadingOutbound}
-                      loadingReturn={loadingReturn}
-                      handleSearchOutbound={handleSearchOutbound}
-                      handleSearchReturn={handleSearchReturn}
-                    />
-
-                    <TourSettings newTour={newTour} setNewTour={setNewTour} />
-                  </>
+                  <TourSettings newTour={newTour} setNewTour={setNewTour} />
                 )}
               </div>
             </div>

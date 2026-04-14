@@ -179,20 +179,6 @@ export function useTourOperations(params: UseTourOperationsParams) {
           code = generatedCode
         }
 
-        // 解析航班文字為 FlightInfo（簡單格式：航空公司 班次 時間）
-        const parseFlightText = (text?: string): import('@/stores/types').FlightInfo | null => {
-          if (!text?.trim()) return null
-          // 存儲原始文字到 flightNumber，其他欄位留空讓用戶在行程表中填寫
-          return {
-            airline: '',
-            flightNumber: text.trim(),
-            departureAirport: '',
-            departureTime: '',
-            arrivalAirport: '',
-            arrivalTime: '',
-          }
-        }
-
         // 🔧 核心表架構：直接使用前端傳來的 countryId，不查詢
         let countryId: string | undefined
         if (newTour.countryCode === '__custom__') {
@@ -205,7 +191,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
           name: newTour.name,
           tour_type: newTour.tour_type || 'official',
           days_count: isProposalOrTemplate ? newTour.days_count || null : null,
-          location: cityName || '',
+          // SSOT：location 是已廢棄欄位，新團不寫入；目的地由 country_id + airport_code 衍生
           country_id: countryId,
           airport_code: cityCode || undefined,
           departure_date: isProposalOrTemplate ? null : newTour.departure_date,
@@ -222,12 +208,7 @@ export function useTourOperations(params: UseTourOperationsParams) {
           quote_id: fromQuoteId || undefined,
           enable_checkin: isProposalOrTemplate ? false : newTour.enable_checkin || false,
           controller_id: isProposalOrTemplate ? undefined : newTour.controller_id || undefined,
-          outbound_flight: isProposalOrTemplate
-            ? undefined
-            : parseFlightText(newTour.outbound_flight_text),
-          return_flight: isProposalOrTemplate
-            ? undefined
-            : parseFlightText(newTour.return_flight_text),
+          // SSOT：航班屬於旅遊團「行程編輯」分頁，開團時不寫入 outbound_flight / return_flight
           workspace_id: workspaceId,
           department_id: newTour.department_id || undefined,
           tour_service_type: newTour.tour_service_type || 'tour_group',

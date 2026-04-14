@@ -34,10 +34,9 @@ export interface NewTourData {
   enable_checkin?: boolean // 是否開啟報到功能
   controller_id?: string // 團控人員 ID（舊欄位，保留向後相容）
   role_assignments?: Record<string, string> // 動態選人欄位 { fieldId: employeeId }
-  outbound_flight_number?: string // 去程航班號碼 (如: BR190)
-  outbound_flight_text?: string // 去程航班文字 (如: BR 190 07:25-11:45)
-  return_flight_number?: string // 回程航班號碼 (如: BR191)
-  return_flight_text?: string // 回程航班文字 (如: BR 191 13:00-16:30)
+  // 註：航班屬於旅遊團「行程編輯」分頁的 SSOT，開團時不再選填，
+  // 已移除 outbound_flight_number / outbound_flight_text /
+  // return_flight_number / return_flight_text 四個欄位
   department_id?: string // 部門 ID（有 departments 功能時）
 }
 
