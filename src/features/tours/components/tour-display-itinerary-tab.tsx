@@ -15,7 +15,7 @@ import { PrintItineraryForm } from '@/features/itinerary/components/PrintItinera
 import { PrintItineraryPreview } from '@/features/itinerary/components/PrintItineraryPreview'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useItineraries, updateTour } from '@/data'
+import { useItineraries, updateTour, useCountries } from '@/data'
 import type {
   FlightInfo,
   Feature,
@@ -63,7 +63,7 @@ type EditorMode = 'web' | 'print'
 /**
  * 從團資料建立預設的展示行程資料
  */
-function buildDefaultFromTour(tour: Tour): TourFormData {
+function buildDefaultFromTour(tour: Tour, countryName = ''): TourFormData {
   const departureDate = tour.departure_date ? new Date(tour.departure_date) : new Date()
   const returnDate = tour.return_date ? new Date(tour.return_date) : new Date()
   const days =
@@ -78,9 +78,11 @@ function buildDefaultFromTour(tour: Tour): TourFormData {
     departureDate: departureDate.toLocaleDateString('zh-TW'),
     tourCode: tour.code || '',
     coverImage: '',
-    country: tour.location || '',
+    // 國家：優先用已解析的 country name（來自 country_id lookup），不要用 tour.location
+    // （tour.location 是舊欄位，可能存城市名，會造成「上海/上海」的錯誤顯示）
+    country: countryName || '',
     // CoverInfoSection 用 city 欄位查機場圖片庫，接受 2-4 位英文代碼 → 用團的機場代號當預設
-    city: airportCode || tour.location || '',
+    city: airportCode || '',
     outboundFlight: {
       airline: '',
       flightNumber: '',
@@ -125,9 +127,10 @@ function buildDefaultFromTour(tour: Tour): TourFormData {
  */
 function itineraryToFormData(
   itinerary: Record<string, unknown>,
-  tour?: Tour
+  tour?: Tour,
+  countryName = ''
 ): TourFormData {
-  const fallbackCity = tour?.airport_code || tour?.location || ''
+  const fallbackCity = tour?.airport_code || ''
   const rawOutbound = itinerary.outbound_flight
   const rawReturn = itinerary.return_flight
   const outbound = (Array.isArray(rawOutbound) ? rawOutbound[0] : rawOutbound) as
@@ -147,7 +150,7 @@ function itineraryToFormData(
     coverStyle: itinerary.cover_style as TourFormData['coverStyle'],
     flightStyle: itinerary.flight_style as TourFormData['flightStyle'],
     itineraryStyle: itinerary.itinerary_style as TourFormData['itineraryStyle'],
-    country: (itinerary.country as string) || tour?.location || '',
+    country: (itinerary.country as string) || countryName || '',
     city: (itinerary.city as string) || fallbackCity,
     outboundFlight: outbound || {
       airline: '',
@@ -195,6 +198,13 @@ function itineraryToFormData(
 
 export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) {
   const { items: itineraries } = useItineraries()
+  const { items: countries } = useCountries()
+
+  // 解析 country_id → 國家名稱（與 useTourEdit 相同邏輯，避免依賴已廢棄的 tour.location）
+  const countryName = useMemo(() => {
+    if (!tour.country_id) return ''
+    return countries.find(c => c.id === tour.country_id)?.name || ''
+  }, [countries, tour.country_id])
 
   // 找到該團關聯的展示行程
   const linkedItinerary = useMemo(
@@ -212,19 +222,29 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
   // Tour form data state
   const [tourData, setTourData] = useState<TourFormData>(() => {
     if (linkedItinerary) {
-      return itineraryToFormData(linkedItinerary as unknown as Record<string, unknown>, tour)
+      return itineraryToFormData(
+        linkedItinerary as unknown as Record<string, unknown>,
+        tour,
+        countryName
+      )
     }
-    return buildDefaultFromTour(tour)
+    return buildDefaultFromTour(tour, countryName)
   })
 
-  // 當找到已有的展示行程時更新
+  // 當找到已有的展示行程或 countryName 解析完成時更新
   useEffect(() => {
     if (linkedItinerary) {
       setTourData(
-        itineraryToFormData(linkedItinerary as unknown as Record<string, unknown>, tour)
+        itineraryToFormData(
+          linkedItinerary as unknown as Record<string, unknown>,
+          tour,
+          countryName
+        )
       )
+    } else {
+      setTourData(buildDefaultFromTour(tour, countryName))
     }
-  }, [linkedItinerary?.id, tour])
+  }, [linkedItinerary?.id, tour, countryName])
 
   // Print data state
   const [printData, setPrintData] = useState({
