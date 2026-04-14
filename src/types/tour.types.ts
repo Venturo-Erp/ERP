@@ -490,9 +490,14 @@ export interface Tour extends BaseEntity {
   tier_pricings?: TierPricing[] | null
   accommodation_days?: number | null
 
-  // 航班資訊（支援多航段轉機）
-  outbound_flight?: FlightInfo | FlightInfo[] | null // 去程航班
-  return_flight?: FlightInfo | FlightInfo[] | null // 回程航班
+  /**
+   * @deprecated 航班 SSOT 已移到 itineraries.outbound_flight / return_flight。
+   * 請從 itineraries 讀取，新程式碼禁止讀寫此欄位。
+   * DB 欄位本身將在所有讀取點停止後另行 migration drop。
+   */
+  outbound_flight?: FlightInfo | FlightInfo[] | null
+  /** @deprecated 同 outbound_flight，請從 itineraries 讀取 */
+  return_flight?: FlightInfo | FlightInfo[] | null
 
   // 版本鎖定欄位已移除 - 公司規範：一團一份，不需版本鎖定
 
