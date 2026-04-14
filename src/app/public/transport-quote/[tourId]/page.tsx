@@ -62,9 +62,29 @@ export default async function TransportQuotePage({
   // 查詢團資料
   const { data: tour } = await supabase
     .from('tours')
-    .select('code, name, departure_date, return_date, location, current_participants')
+    .select('code, name, departure_date, return_date, country_id, airport_code, current_participants')
     .eq('id', tourId)
     .single()
+
+  // SSOT：從 airport_code → 城市名 → 國家名 衍生目的地顯示字串
+  let tourDestinationDisplay = ''
+  if (tour?.airport_code) {
+    const { data: airport } = await supabase
+      .from('ref_airports')
+      .select('city_name_zh')
+      .eq('iata_code', tour.airport_code)
+      .maybeSingle()
+    tourDestinationDisplay = airport?.city_name_zh || ''
+  }
+  if (!tourDestinationDisplay && tour?.country_id) {
+    const { data: country } = await supabase
+      .from('countries')
+      .select('name')
+      .eq('id', tour.country_id)
+      .maybeSingle()
+    tourDestinationDisplay = country?.name || ''
+  }
+  if (!tourDestinationDisplay) tourDestinationDisplay = tour?.airport_code || ''
 
   // 查詢核心表項目
   const { data: coreItems } = await supabase
@@ -148,7 +168,7 @@ export default async function TransportQuotePage({
           <div className="bg-gradient-to-r from-morandi-gold to-morandi-gold-hover px-6 py-4 text-white">
             <h1 className="text-2xl font-bold">{tour.name}</h1>
             <div className="mt-2 flex items-center gap-6 text-sm opacity-90">
-              <span>目的地：{tour.location || '—'}</span>
+              <span>目的地：{tourDestinationDisplay || '—'}</span>
               <span>出發日期：{tour.departure_date || '—'}</span>
               <span>行程天數：{totalDays || '—'} 天</span>
               <span>團隊人數：{tour.current_participants || '—'} 人</span>

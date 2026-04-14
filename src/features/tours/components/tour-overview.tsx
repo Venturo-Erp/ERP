@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useMemo } from 'react'
 import { Tour } from '@/stores/types'
 import { useOrdersSlim, useReceipts, usePaymentRequests, useMembers } from '@/data'
+import { useTourDisplay } from '@/features/tours/utils/tour-display'
 import { formatCurrency } from '@/lib/utils/format-currency'
 import { useWorkspaceChannels } from '@/stores/workspace-store'
 import {
@@ -48,6 +49,7 @@ export const TourOverview = React.memo(function TourOverview({
   const { items: allReceipts } = useReceipts()
   const { items: allMembers } = useMembers()
   const { channels } = useWorkspaceChannels()
+  const { displayString: tourDestinationDisplay } = useTourDisplay(tour)
 
   // 訂單與團員計算
   const orderIds = useMemo(
@@ -216,7 +218,7 @@ export const TourOverview = React.memo(function TourOverview({
             <span className="text-sm font-semibold text-morandi-primary">{tour.code}</span>
             <div className="flex items-center gap-1.5 text-morandi-secondary">
               <MapPin size={14} />
-              <span>{tour.location}</span>
+              <span>{tourDestinationDisplay}</span>
             </div>
             <div className="flex items-center gap-1.5 text-morandi-secondary">
               <Calendar size={14} />

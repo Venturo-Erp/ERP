@@ -8,6 +8,7 @@ import { Copy, Download, Printer, QrCode, Calendar, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
 import { formatDateMonthDayChinese } from '@/lib/utils/format-date'
 import { COMP_TOURS_LABELS, CHECKIN_QR_CODE_LABELS } from '../../constants/labels'
+import { useTourDisplay } from '@/features/tours/utils/tour-display'
 
 interface CheckinQRCodeProps {
   tour: Tour
@@ -18,6 +19,7 @@ const ONLINE_BASE_URL = process.env.NEXT_PUBLIC_ONLINE_URL || 'https://online.ve
 
 export function CheckinQRCode({ tour }: CheckinQRCodeProps) {
   const qrRef = useRef<HTMLDivElement>(null)
+  const { displayString: tourDestinationDisplay } = useTourDisplay(tour)
 
   // 產生報到 URL
   const checkinUrl = `${ONLINE_BASE_URL}/checkin/${tour.code}`
@@ -190,10 +192,10 @@ export function CheckinQRCode({ tour }: CheckinQRCodeProps) {
                 <Calendar size={14} />
                 {formatDateMonthDayChinese(tour.departure_date)}
               </span>
-              {tour.location && (
+              {tourDestinationDisplay && (
                 <span className="flex items-center gap-1">
                   <MapPin size={14} />
-                  {tour.location}
+                  {tourDestinationDisplay}
                 </span>
               )}
             </div>

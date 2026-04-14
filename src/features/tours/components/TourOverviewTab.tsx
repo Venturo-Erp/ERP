@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Tour, Quote } from '@/stores/types'
 import { useQuotes, useOrdersSlim } from '@/data'
+import { useTourDisplay } from '@/features/tours/utils/tour-display'
 import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { DateCell, CurrencyCell } from '@/components/table-cells'
@@ -17,6 +18,7 @@ interface TourOverviewTabProps {
 export function TourOverviewTab({ tour }: TourOverviewTabProps) {
   const { items: quotes } = useQuotes()
   const { items: orders } = useOrdersSlim()
+  const { displayString: tourDestinationDisplay } = useTourDisplay(tour)
 
   // Find tour's quote (approved or latest)
   const tourQuote =
@@ -112,7 +114,7 @@ export function TourOverviewTab({ tour }: TourOverviewTabProps) {
             </div>
             <div className="flex justify-between">
               <span className="text-morandi-secondary">{TOUR_OVERVIEW.label_destination}</span>
-              <span className="text-morandi-primary">{tour.location}</span>
+              <span className="text-morandi-primary">{tourDestinationDisplay}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-morandi-secondary">{TOUR_OVERVIEW.label_departure}</span>

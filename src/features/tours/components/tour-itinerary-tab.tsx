@@ -43,6 +43,7 @@ import { useAuthStore } from '@/stores'
 import { useWorkspaceFeatures } from '@/lib/permissions/hooks'
 import { useItineraries, createItinerary, updateItinerary } from '@/data'
 import { updateTour } from '@/data/entities/tours'
+import { useTourDisplay } from '@/features/tours/utils/tour-display'
 import { useFlightSearch } from '@/hooks'
 // syncItineraryToQuote 已移除 — 報價單直接讀核心表，不需要同步
 import {
@@ -138,13 +139,8 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
     )
   }, [returnFlightNumber])
 
-  // Domestic check
-  const isDomestic = useMemo(() => {
-    const dest = (tour.location || '').toLowerCase()
-    return (
-      dest.includes(TOUR_ITINERARY_TAB_LABELS.TAIWAN) || dest.includes('taiwan') || dest === 'tw'
-    )
-  }, [tour.location])
+  // SSOT：是否為國內團 + 目的地顯示字串
+  const { isDomestic, displayString: tourDestinationDisplay } = useTourDisplay(tour)
 
   // Calculate days: 日期差 > days_count > 預設 5
   const calculateDays = useCallback(() => {
@@ -1168,7 +1164,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 <span className="meta-label text-muted-foreground">
                   {TOUR_ITINERARY_TAB_LABELS.目的地_冒號}
                 </span>
-                {tour.location || '-'}
+                {tourDestinationDisplay || '-'}
               </div>
               <div>
                 <span className="meta-label text-muted-foreground">
@@ -1899,7 +1895,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                               })
                             }}
                             mentionInputRefs={mentionInputRefs}
-                            tourLocation={tour.location || ''}
+                            tourLocation={tourDestinationDisplay}
                             getDateLabel={getDateLabel}
                             getPreviousAccommodation={getPreviousAccommodation}
                             disabledAttractionIds={disabledAttractionIds}
@@ -1928,7 +1924,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 <ResourcePanel
                   className="flex-1 overflow-hidden"
                   countryId={tour.country_id || ''}
-                  locationName={tour.location || ''}
+                  locationName={tourDestinationDisplay}
                   tourId={tour.id}
                   tourCode={tour.code || ''}
                   canEditDatabase={canEditDatabase}

@@ -8,6 +8,7 @@ import React, { useMemo } from 'react'
 import type { Tour } from '@/stores/types'
 import type { ItineraryEditorContext } from './itinerary-editor/types'
 import { PackageItineraryDialog } from './itinerary-editor'
+import { useTourDisplay } from '@/features/tours/utils/tour-display'
 
 interface TourItineraryDialogProps {
   isOpen: boolean
@@ -16,6 +17,9 @@ interface TourItineraryDialogProps {
 }
 
 export function TourItineraryDialog({ isOpen, onClose, tour }: TourItineraryDialogProps) {
+  // SSOT：destination 從 country_id / airport_code 衍生
+  const { displayString: tourDestinationDisplay } = useTourDisplay(tour)
+
   // 直接從 Tour 建立 ItineraryEditorContext
   const context = useMemo(
     (): ItineraryEditorContext => ({
@@ -26,14 +30,14 @@ export function TourItineraryDialog({ isOpen, onClose, tour }: TourItineraryDial
       days: null,
       country_id: tour.country_id || null,
       airport_code: tour.airport_code || null,
-      destination: tour.location || null,
+      destination: tourDestinationDisplay || null,
       version_name: '行程版本',
       quote_id: tour.quote_id || null,
       group_size: tour.max_participants || null,
       workspace_id: tour.workspace_id || '',
       title: tour.name,
     }),
-    [tour]
+    [tour, tourDestinationDisplay]
   )
 
   return (

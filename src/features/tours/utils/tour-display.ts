@@ -91,3 +91,25 @@ export function useTourDisplay(
     return { countryName, cityName, displayString, isDomestic }
   }, [tour, countries, airports])
 }
+
+/**
+ * 給 list 渲染用：載入 countries / airports 一次後回傳 resolver function。
+ * 在 list iteration 內呼叫 resolver(tour) 取得每一筆的 displayString，
+ * 不需要 per-row 呼叫 hook。
+ */
+export function useTourDisplayResolver() {
+  const { items: countries } = useCountries()
+  const { airports } = useAirports()
+
+  return useMemo(() => {
+    const c = countries as CountryLite[]
+    const a = airports as AirportLite[]
+    return (tour: Pick<Tour, 'country_id' | 'airport_code'> | null | undefined) => {
+      if (!tour) return { countryName: '', cityName: '', displayString: '', isDomestic: false }
+      const countryName = getTourCountryName(tour, c)
+      const cityName = getTourCityName(tour, a)
+      const displayString = cityName || countryName || tour.airport_code || ''
+      return { countryName, cityName, displayString, isDomestic: countryName === '台灣' }
+    }
+  }, [countries, airports])
+}

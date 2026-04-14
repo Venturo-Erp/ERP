@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Plus, Link, Loader2, MapPin, Calendar, Plane } from 'lucide-react'
 import { useToursSlim, invalidateTours } from '@/data'
 import type { Tour } from '@/stores/types'
+import { useTourDisplayResolver } from '@/features/tours/utils/tour-display'
 import { LINK_TOUR_DIALOG_LABELS } from '../constants/labels'
 
 interface LinkTourDialogProps {
@@ -35,6 +36,7 @@ export function LinkTourDialog({
 }: LinkTourDialogProps) {
   const [step, setStep] = useState<DialogStep>('select')
   const { items: tours, loading: loadingTours } = useToursSlim()
+  const resolveTourDisplay = useTourDisplayResolver()
 
   // SWR 自動處理資料載入，在需要時手動刷新
   useEffect(() => {
@@ -164,12 +166,15 @@ export function LinkTourDialog({
                           </span>
                         </div>
                         <div className="flex items-center gap-3 text-xs text-[var(--morandi-secondary)] mt-1">
-                          {tour.location && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {tour.location}
-                            </span>
-                          )}
+                          {(() => {
+                            const display = resolveTourDisplay(tour).displayString
+                            return display ? (
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {display}
+                              </span>
+                            ) : null
+                          })()}
                           {tour.departure_date && (
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
