@@ -705,13 +705,12 @@ export function ResourcePanel({
         )}
       </div>
 
-      {/* 地圖面板（可收合）— 暫時隱藏
-      <ResourceMapPanel
+{/* 地圖面板（可收合）- 暫時隱藏 */}
+      {/* <ResourceMapPanel
         tourId={tourId || null}
         tourCode={tourCode || null}
         countryId={resolvedCountryId || null}
-      />
-      */}
+      /> */}
 
       {/* 資源詳情 Dialog */}
       <ResourceDetailDialog

@@ -63,8 +63,8 @@ async function saveUserToDb(
 
   if (!supabaseUrl || !supabaseKey) return
 
-  // 先查詢 LINE Bot 屬於哪個 workspace
-  let workspaceId = '8ef05a74-1f87-48ab-afd3-9bfeb423935d' // 預設值
+  // 先查詢 LINE Bot 屬於哪個 workspace（必需）
+  let workspaceId: string | null = null
 
   try {
     const configRes = await fetch(
@@ -84,7 +84,12 @@ async function saveUserToDb(
       }
     }
   } catch (error) {
-    // 忽略錯誤，使用預設值
+    logger.error('[LINE] Failed to get workspace config:', error)
+  }
+
+  if (!workspaceId) {
+    logger.error('[LINE] No workspace config found, cannot save user')
+    return
   }
 
   await fetch(`${supabaseUrl}/rest/v1/line_users`, {
@@ -181,8 +186,8 @@ async function saveGroupToDb(
 
   if (!supabaseUrl || !supabaseKey) return
 
-  // 先查詢 LINE Bot 屬於哪個 workspace
-  let workspaceId = '8ef05a74-1f87-48ab-afd3-9bfeb423935d' // 預設值
+  // 先查詢 LINE Bot 屬於哪個 workspace（必需）
+  let workspaceId: string | null = null
 
   try {
     const configRes = await fetch(
@@ -202,7 +207,12 @@ async function saveGroupToDb(
       }
     }
   } catch (error) {
-    // 忽略錯誤，使用預設值
+    logger.error('[LINE] Failed to get workspace config:', error)
+  }
+
+  if (!workspaceId) {
+    logger.error('[LINE] No workspace config found, cannot save group')
+    return
   }
 
   await fetch(`${supabaseUrl}/rest/v1/line_groups`, {
@@ -445,8 +455,8 @@ async function saveConversationToDb(
 
   if (!supabaseUrl || !supabaseKey) return
 
-  // 先查詢 LINE Bot 屬於哪個 workspace
-  let workspaceId = '8ef05a74-1f87-48ab-afd3-9bfeb423935d' // 預設值
+  // 先查詢 LINE Bot 屬於哪個 workspace（必需）
+  let workspaceId: string | null = null
 
   try {
     const configRes = await fetch(
@@ -466,7 +476,12 @@ async function saveConversationToDb(
       }
     }
   } catch (error) {
-    // 忽略錯誤，使用預設值
+    logger.error('[LINE] Failed to get workspace config:', error)
+  }
+
+  if (!workspaceId) {
+    logger.error('[LINE] No workspace config found, cannot save conversation')
+    return
   }
 
   try {

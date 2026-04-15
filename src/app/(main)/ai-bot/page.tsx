@@ -17,6 +17,7 @@ import {
   RefreshCw,
   Settings,
   MessagesSquare,
+  BookOpen,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
@@ -25,6 +26,7 @@ import { LineSetupWizard } from './components/LineSetupWizard'
 import { LineConnectionsTab } from './components/LineConnectionsTab'
 import { RealConversations } from './components/RealConversations'
 import { AISettingsTab } from './components/AISettingsTab'
+import { KnowledgeTab } from './components/KnowledgeTab'
 
 interface LineGroup {
   id: string
@@ -67,6 +69,12 @@ interface LineConfig {
   bot_basic_id?: string
 }
 
+interface MetaConfig {
+  setup_step: number
+  is_connected: boolean
+  app_id?: string
+}
+
 export default function AIBotManagementPage() {
   const [groups, setGroups] = useState<LineGroup[]>([])
   const [users, setUsers] = useState<LineUser[]>([])
@@ -74,18 +82,25 @@ export default function AIBotManagementPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [lineConfig, setLineConfig] = useState<LineConfig>({ setup_step: 0, is_connected: false })
+  const [metaConfig, setMetaConfig] = useState<MetaConfig>({ setup_step: 0, is_connected: false })
 
   const isConnected = lineConfig.is_connected && lineConfig.setup_step >= 4
+  const isMetaConnected = metaConfig.is_connected && metaConfig.setup_step >= 3
 
   const loadConfig = useCallback(async () => {
     try {
-      const res = await fetch('/api/line/setup')
-      const data = await res.json()
-      setLineConfig(data)
+      const [lineRes, metaRes] = await Promise.all([
+        fetch('/api/line/setup'),
+        fetch('/api/meta/setup'),
+      ])
+      const lineData = await lineRes.json()
+      const metaData = await metaRes.json()
+      setLineConfig(lineData)
+      setMetaConfig(metaData)
     } catch {
       // 忽略
     }
-  }, [])
+}, [])
 
   const loadData = useCallback(async () => {
     // 總是載入資料，即使未連線也顯示（資料可能已存在）
@@ -242,6 +257,10 @@ export default function AIBotManagementPage() {
               <Bot className="h-4 w-4 mr-2" />
               AI 設定
             </TabsTrigger>
+            <TabsTrigger value="knowledge">
+              <BookOpen className="h-4 w-4 mr-2" />
+              知識庫
+            </TabsTrigger>
           </TabsList>
 
           {/* 平台連線 */}
@@ -284,34 +303,50 @@ export default function AIBotManagementPage() {
                         統一回覆。
                       </p>
                     </div>
-                    <Badge variant="outline" className="shrink-0">
-                      準備中
-                    </Badge>
+                    {isMetaConnected ? (
+                      <Badge className="shrink-0 bg-green-500">已連線</Badge>
+                    ) : metaConfig.setup_step > 0 ? (
+                      <Badge variant="outline" className="shrink-0 text-orange-500 border-orange-500">
+                        設定中
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="shrink-0">
+                        未連線
+                      </Badge>
+                    )}
                   </div>
-                  <div className="border-t pt-3">
-                    <p className="text-xs text-muted-foreground mb-2">前置作業（你可以先完成）：</p>
-                    <ol className="list-decimal list-inside space-y-1.5 text-sm text-morandi-secondary">
-                      <li>
-                        前往{' '}
-                        <a
-                          href="https://developers.facebook.com/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-morandi-gold underline"
-                        >
-                          Meta for Developers
-                        </a>{' '}
-                        註冊開發者帳號
-                      </li>
-                      <li>
-                        建立一個 App → 選擇 <strong>Business</strong> 類型
-                      </li>
-                      <li>
-                        在 App 中加入 <strong>Messenger</strong> 和 <strong>Instagram</strong> 產品
-                      </li>
-                      <li>連結你的 Facebook 粉絲專頁和 Instagram 商業帳號</li>
-                    </ol>
-                  </div>
+                  {isMetaConnected ? (
+                    <div className="border-t pt-3">
+                      <p className="text-sm text-muted-foreground">
+                        已連線至 Meta 平台 (App ID: {metaConfig.app_id})
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="border-t pt-3">
+                      <p className="text-xs text-muted-foreground mb-2">前置作業（你可以先完成）：</p>
+                      <ol className="list-decimal list-inside space-y-1.5 text-sm text-morandi-secondary">
+                        <li>
+                          前往{' '}
+                          <a
+                            href="https://developers.facebook.com/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-morandi-gold underline"
+                          >
+                            Meta for Developers
+                          </a>{' '}
+                          註冊開發者帳號
+                        </li>
+                        <li>
+                          建立一個 App → 選擇 <strong>Business</strong> 類型
+                        </li>
+                        <li>
+                          在 App 中加入 <strong>Messenger</strong> 和 <strong>Instagram</strong> 產品
+                        </li>
+                        <li>連結你的 Facebook 粉絲專頁和 Instagram 商業帳號</li>
+                      </ol>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -372,6 +407,11 @@ export default function AIBotManagementPage() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          {/* 知識庫 */}
+          <TabsContent value="knowledge" className="mt-4">
+            <KnowledgeTab isConnected={isConnected} />
           </TabsContent>
         </Tabs>
       </div>

@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
+import { SimpleModeTab } from './SimpleModeTab'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -217,8 +219,23 @@ export function AISettingsTab() {
     return <div className="py-12 text-center text-morandi-secondary">載入中...</div>
   }
 
+  const [modeTab, setModeTab] = useState<'simple' | 'advanced'>('simple')
+
   return (
     <div className="space-y-6 max-w-3xl">
+      {/* 模式切換 */}
+      <Tabs value={modeTab} onValueChange={v => setModeTab(v as 'simple' | 'advanced')}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="simple">簡單模式</TabsTrigger>
+          <TabsTrigger value="advanced">進階設定</TabsTrigger>
+        </TabsList>
+
+        {/* 簡單模式 */}
+        {modeTab === 'simple' && <SimpleModeTab />}
+
+        {/* 進階設定（原本的完整設定） */}
+        {modeTab === 'advanced' && (
+          <>
       {/* ── A. Style Selector ─────────────────────────────────────────── */}
       <Card>
         <CardHeader>
@@ -390,6 +407,9 @@ export function AISettingsTab() {
           {saving ? '儲存中...' : '儲存設定'}
         </Button>
       </div>
+          </>
+        )}
+      </Tabs>
     </div>
   )
 }

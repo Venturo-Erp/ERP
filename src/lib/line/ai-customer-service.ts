@@ -207,7 +207,24 @@ async function generateAIResponse(
     description: string | null
     tags: string[] | null
   }[] = [],
-  wsId: string = FALLBACK_WORKSPACE_ID
+  itineraries: {
+    id: string
+    name: string
+    destination: string | null
+    duration_days: number | null
+    price_adult: number | null
+    description: string | null
+  }[] = [],
+  suppliers: {
+    id: string
+    name: string
+    category: string | null
+    location: string | null
+    contact_phone: string | null
+    description: string | null
+  }[] = [],
+  wsId: string = FALLBACK_WORKSPACE_ID,
+  responseMode: string = 'recommend'
 ): Promise<string> {
   // Read settings from DB
   const rawSystemPrompt = await getAISetting(
@@ -254,12 +271,38 @@ async function generateAIResponse(
 
   let context = ''
 
-  if (dataSourcesEnabled.tours && tours.length > 0) {
+  // 根據 response_mode 調整回覆策略
+  let responseStrategy = ''
+  switch (responseMode) {
+    case 'passive':
+      responseStrategy = '客戶問什麼就回答什麼，不需要主動追問需求或推薦。'
+      break
+    case 'recommend':
+      responseStrategy = '了解客戶需求後，主動推薦合適的行程或景點。'
+      break
+    case 'guide_booking':
+      responseStrategy = '積極引導客戶預約諮詢或報名，適時說「幫您安排專人聯繫」或「預約免費諮詢」。'
+      break
+    default:
+      responseStrategy = '了解客戶需求後，主動推薦合適的行程或景點。'
+  }
+
+  if (tours.length > 0) {
     context += `我們的行程資料：\n${JSON.stringify(tours, null, 2)}\n\n`
   }
 
-  if (dataSourcesEnabled.attractions && attractions.length > 0) {
+  if (attractions.length > 0) {
     context += `推薦景點清單：\n${attractions.map(a => `- ${a.name}（${a.city_id || a.country_id || ''}${a.category ? ` / ${a.category}` : ''}）${a.description ? `：${a.description}` : ''}${a.tags && a.tags.length > 0 ? ` #${a.tags.join(' #')}` : ''}`).join('\n')}\n\n`
+  }
+
+  // 新增行程資料庫內容
+  if (itineraries.length > 0) {
+    context += `精選行程方案：\n${itineraries.map(i => `- ${i.name}（${i.destination || ''}，${i.duration_days ? `${i.duration_days}天` : ''}，${i.price_adult ? `成人價 ${i.price_adult} 元` : ''}）${i.description ? `：${i.description}` : ''}`).join('\n')}\n\n`
+  }
+
+  // 新增供應商資料內容
+  if (suppliers.length > 0) {
+    context += `合作供應商：\n${suppliers.map(s => `- ${s.name}（${s.category || ''}${s.location ? ` - ${s.location}` : ''}）${s.description ? `：${s.description}` : ''}`).join('\n')}\n\n`
   }
 
   if (!context) {
@@ -278,6 +321,8 @@ async function generateAIResponse(
 
   const prompt = `${systemPrompt}
 
+回覆策略：${responseStrategy}
+
 ${conversationContext}客戶意圖：${intent}
 客戶最新訊息：${userMessage}
 
@@ -285,11 +330,11 @@ ${context}
 
 規則：
 1. 當客戶提到目的地時，先列出 2-3 個該地的熱門亮點或體驗（如美食、景點、文化體驗），用簡短大標題勾起興趣，再引導他們說出想要的風格
-2. 依照上方對話流程引導客戶，逐步收集旅伴人數（有小孩請確認年齡）、預算、旅行風格
+2. ${responseMode === 'passive' ? '客戶問什麼就回答什麼，不需要過度追問。' : '依照上方對話流程引導客戶，逐步收集旅伴人數（有小孩請確認年齡）、預算、旅行風格'}
 3. 只根據我們的行程資料和景點清單回答，不提其他旅行社。如果資料庫沒有資料，可用你的知識簡要介紹但不要編造具體價格
 4. 如果有價格資訊，明確列出
 5. 如果推薦景點，說明推薦理由（適合誰、有什麼特色）
-6. 我們是私人包團客製化，費用比一般團高，但如果客戶預算有限，也可協助報名網路旅行團（目前有優惠）
+6. ${responseMode === 'guide_booking' ? '適時引導預約：「幫您安排專人聯繫」或「預約免費諮詢」。' : '我們是私人包團客製化，費用比一般團高，但如果客戶預算有限，也可協助報名網路旅行團（目前有優惠）'}
 7. 回覆字數不超過 ${maxLength} 字
 
 回覆：`
@@ -352,6 +397,81 @@ async function saveConversation(
 }
 
 /**
+ * 查詢行程資料庫（itineraries 表）
+ */
+async function queryItineraries(
+  destination?: string,
+  limit: number = 5
+): Promise<
+  {
+    id: string
+    name: string
+    destination: string | null
+    duration_days: number | null
+    price_adult: number | null
+    description: string | null
+  }[]
+> {
+  let query = supabase
+    .from('itineraries')
+    .select('id, name, destination, duration_days, price_adult, description')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (destination) {
+    query = query.or(`name.ilike.%${destination}%,destination.ilike.%${destination}%`)
+  }
+
+  const { data, error } = await query
+  if (error) {
+    logger.error('[LINE AI] Query itineraries error:', error)
+    return []
+  }
+  return data || []
+}
+
+/**
+ * 查詢供應商資料（suppliers 表）
+ */
+async function querySuppliers(
+  category?: string,
+  destination?: string,
+  limit: number = 5
+): Promise<
+  {
+    id: string
+    name: string
+    category: string | null
+    location: string | null
+    contact_phone: string | null
+    description: string | null
+  }[]
+> {
+  let query = supabase
+    .from('suppliers')
+    .select('id, name, category, location, contact_phone, description')
+    .eq('is_active', true)
+    .order('name')
+    .limit(limit)
+
+  if (category) {
+    query = query.eq('category', category)
+  }
+
+  if (destination) {
+    query = query.or(`name.ilike.%${destination}%,location.ilike.%${destination}%`)
+  }
+
+  const { data, error } = await query
+  if (error) {
+    logger.error('[LINE AI] Query suppliers error:', error)
+    return []
+  }
+  return data || []
+}
+
+/**
  * 主要的 AI 客服處理函數
  */
 export async function handleAICustomerService(
@@ -367,22 +487,76 @@ export async function handleAICustomerService(
     // 1. 分析意圖（提示詞從 DB 讀取）
     const { intent, destination, tourCode, city, category } = await analyzeIntent(userMessage, wsId)
 
-    // 2. 讀取資料來源設定
-    const dataSourcesRaw = await getAISetting(
+    // 2. 讀取資料來源設定（新格式：simple_data_sources + 舊格式：data_sources 向後相容）
+    const simpleSourcesRaw = await getAISetting(
+      wsId,
+      'ai_prompt',
+      'simple_data_sources',
+      ''
+    )
+    const oldSourcesRaw = await getAISetting(
       wsId,
       'ai_prompt',
       'data_sources',
       '{"attractions":true,"tours":true}'
     )
-    let dataSourcesEnabled = { attractions: true, tours: true }
-    try {
-      const parsed = JSON.parse(dataSourcesRaw) as { attractions?: boolean; tours?: boolean }
-      dataSourcesEnabled = {
-        attractions: parsed.attractions !== false,
-        tours: parsed.tours !== false,
+
+    // 解析資料來源設定
+    let dataSourcesEnabled = { attractions: true, tours: true, itineraries: true, suppliers: false, quotes: false }
+    let responseMode = 'recommend'
+
+    // 先嘗試新格式
+    if (simpleSourcesRaw) {
+      try {
+        const parsed = JSON.parse(simpleSourcesRaw) as {
+          attractions?: boolean
+          tours?: boolean
+          itineraries?: boolean
+          suppliers?: boolean
+          quotes?: boolean
+        }
+        dataSourcesEnabled = {
+          attractions: parsed.attractions !== false,
+          tours: parsed.tours !== false,
+          itineraries: parsed.itineraries !== false,
+          suppliers: parsed.suppliers === true,
+          quotes: parsed.quotes === true,
+        }
+      } catch {
+        // 回退到舊格式
+        try {
+          const parsed = JSON.parse(oldSourcesRaw) as { attractions?: boolean; tours?: boolean }
+          dataSourcesEnabled = {
+            attractions: parsed.attractions !== false,
+            tours: parsed.tours !== false,
+            itineraries: true,
+            suppliers: false,
+            quotes: false,
+          }
+        } catch {
+          // keep defaults
+        }
       }
-    } catch {
-      // keep defaults
+    } else {
+      // 舊格式向後相容
+      try {
+        const parsed = JSON.parse(oldSourcesRaw) as { attractions?: boolean; tours?: boolean }
+        dataSourcesEnabled = {
+          attractions: parsed.attractions !== false,
+          tours: parsed.tours !== false,
+          itineraries: true,
+          suppliers: false,
+          quotes: false,
+        }
+      } catch {
+        // keep defaults
+      }
+    }
+
+    // 讀取回覆方向設定
+    const responseModeRaw = await getAISetting(wsId, 'ai_prompt', 'response_mode', 'recommend')
+    if (['passive', 'recommend', 'guide_booking'].includes(responseModeRaw)) {
+      responseMode = responseModeRaw
     }
 
     // 3. 查詢相關行程（依資料來源設定）
@@ -403,7 +577,36 @@ export async function handleAICustomerService(
       attractions = await queryAttractions(city, category, destination, 5)
     }
 
-    // 5. 生成 AI 回覆（系統提示詞、字數、風格皆從 DB 讀取）
+    // 5. 查詢行程資料庫（itineraries 表）
+    let itineraries: {
+      id: string
+      name: string
+      destination: string | null
+      duration_days: number | null
+      price_adult: number | null
+      description: string | null
+    }[] = []
+
+    if (dataSourcesEnabled.itineraries && destination) {
+      itineraries = await queryItineraries(destination, 5)
+    }
+
+    // 6. 查詢供應商資料（suppliers 表）
+    let suppliers: {
+      id: string
+      name: string
+      category: string | null
+      location: string | null
+      contact_phone: string | null
+      description: string | null
+    }[] = []
+
+    if (dataSourcesEnabled.suppliers && destination) {
+      suppliers = await querySuppliers(undefined, destination, 5)
+    }
+
+    // 7. 生成 AI 回覆（系統提示詞、字數、風格皆從 DB 讀取）
+    // 根據 response_mode 調整提示詞
     const aiResponse = await generateAIResponse(
       platform,
       userId,
@@ -411,7 +614,10 @@ export async function handleAICustomerService(
       intent,
       tours,
       attractions,
-      wsId
+      itineraries,
+      suppliers,
+      wsId,
+      responseMode
     )
 
     // 6. 儲存對話記錄

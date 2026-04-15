@@ -4,10 +4,6 @@ import { createClient } from '@supabase/supabase-js'
 import { logger } from '@/lib/utils/logger'
 import { handleAICustomerService } from '@/lib/line/ai-customer-service'
 
-const VERIFY_TOKEN = process.env.META_WEBHOOK_VERIFY_TOKEN || 'venturo_meta_webhook_2024'
-const PAGE_ACCESS_TOKEN = process.env.META_PAGE_ACCESS_TOKEN || ''
-const APP_SECRET = process.env.META_APP_SECRET || ''
-
 // Message ID 去重（防止 Meta 重送 webhook 導致重複回覆）
 const processedMessages = new Set<string>()
 const MAX_PROCESSED = 1000
@@ -36,13 +32,50 @@ function getSupabase() {
   )
 }
 
+interface MetaConfig {
+  verify_token: string | null
+  page_access_token: string | null
+  app_secret: string | null
+  app_id: string | null
+}
+
+/**
+ * 從數據庫讀取 Meta 配置
+ */
+async function getMetaConfig(): Promise<MetaConfig> {
+  const supabase = getSupabase()
+  
+  const { data, error } = await supabase
+    .from('workspace_meta_config')
+    .select('verify_token, page_access_token, app_secret, app_id')
+    .limit(1)
+    .single()
+
+  if (error || !data) {
+    logger.warn('[Meta] No config found in database, using defaults')
+    return {
+      verify_token: process.env.META_VERIFY_TOKEN || 'venturo_meta_webhook_2024',
+      page_access_token: process.env.META_PAGE_ACCESS_TOKEN || '',
+      app_secret: process.env.META_APP_SECRET || '',
+      app_id: process.env.META_APP_ID || '',
+    }
+  }
+
+  return {
+    verify_token: data.verify_token || process.env.META_VERIFY_TOKEN || 'venturo_meta_webhook_2024',
+    page_access_token: data.page_access_token || process.env.META_PAGE_ACCESS_TOKEN || '',
+    app_secret: data.app_secret || process.env.META_APP_SECRET || '',
+    app_id: data.app_id || process.env.META_APP_ID || '',
+  }
+}
+
 /**
  * 驗證 Meta Webhook 簽章 (X-Hub-Signature-256)
  */
-function validateSignature(rawBody: string, signature: string | null): boolean {
-  if (!signature || !APP_SECRET) return false
+function validateSignature(rawBody: string, signature: string | null, appSecret: string): boolean {
+  if (!signature || !appSecret) return false
   try {
-    const expected = 'sha256=' + createHmac('sha256', APP_SECRET).update(rawBody).digest('hex')
+    const expected = 'sha256=' + createHmac('sha256', appSecret).update(rawBody).digest('hex')
     return timingSafeEqual(Buffer.from(expected), Buffer.from(signature))
   } catch {
     return false
@@ -53,6 +86,7 @@ function validateSignature(rawBody: string, signature: string | null): boolean {
  * GET /api/meta/webhook — Meta Webhook 驗證
  */
 export async function GET(request: NextRequest) {
+  const config = await getMetaConfig()
   const { searchParams } = request.nextUrl
   const mode = searchParams.get('hub.mode')
   const token = searchParams.get('hub.verify_token')
@@ -62,16 +96,16 @@ export async function GET(request: NextRequest) {
     mode,
     token,
     challenge,
-    expectedToken: VERIFY_TOKEN,
+    expectedToken: config.verify_token,
     allParams: Object.fromEntries(searchParams.entries()),
   })
 
-  if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+  if (mode === 'subscribe' && token === config.verify_token) {
     logger.info('Meta webhook verified successfully')
     return new NextResponse(challenge, { status: 200 })
   }
 
-  logger.warn('Meta webhook verification failed', { mode, token, expectedToken: VERIFY_TOKEN })
+  logger.warn('Meta webhook verification failed', { mode, token, expectedToken: config.verify_token })
   return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 }
 
@@ -81,14 +115,15 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    const config = await getMetaConfig()
     const rawBody = await request.text()
 
     // 驗證簽章（開發階段僅 warn，不擋）
     const signature = request.headers.get('x-hub-signature-256')
-    if (APP_SECRET && !validateSignature(rawBody, signature)) {
+    if (config.app_secret && !validateSignature(rawBody, signature, config.app_secret)) {
       logger.warn('[Meta] Invalid signature', {
         receivedSig: signature?.substring(0, 20),
-        hasAppSecret: !!APP_SECRET,
+        hasAppSecret: !!config.app_secret,
       })
       // 開發階段先不擋，等上線再啟用
       // return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
@@ -111,7 +146,7 @@ export async function POST(request: NextRequest) {
           }
 
           if (event.message) {
-            await handleIncomingMessage(object, event)
+            await handleIncomingMessage(object, event, config.page_access_token)
           }
         }
       }
@@ -204,14 +239,14 @@ async function getRecentRoundCount(platform: string, userId: string): Promise<nu
 /**
  * 透過 Graph API 回覆訊息，回傳 message_id
  */
-async function sendReply(senderId: string, text: string): Promise<string | null> {
-  if (!PAGE_ACCESS_TOKEN) {
+async function sendReply(senderId: string, text: string, pageAccessToken: string | null): Promise<string | null> {
+  if (!pageAccessToken) {
     logger.warn('[Meta] PAGE_ACCESS_TOKEN not set, cannot reply')
     return null
   }
 
   const res = await fetch(
-    `https://graph.facebook.com/v21.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+    `https://graph.facebook.com/v21.0/me/messages?access_token=${pageAccessToken}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -243,7 +278,7 @@ async function sendReply(senderId: string, text: string): Promise<string | null>
   return messageId
 }
 
-async function handleIncomingMessage(platform: string, event: MetaMessageEvent) {
+async function handleIncomingMessage(platform: string, event: MetaMessageEvent, pageAccessToken: string | null) {
   // Facebook: sender.id, Instagram: sender.instagram_user_id
   const senderId = event.sender.id || event.sender.instagram_user_id || ''
   const messageText = event.message.text
@@ -279,7 +314,7 @@ async function handleIncomingMessage(platform: string, event: MetaMessageEvent) 
   // 檢查是否觸發轉接關鍵字
   if (HANDOVER_KEYWORDS.some(kw => messageText.includes(kw))) {
     logger.info(`[Meta] Handover keyword detected from ${senderId}`)
-    await sendReply(senderId, HANDOVER_MESSAGE)
+    await sendReply(senderId, HANDOVER_MESSAGE, pageAccessToken)
     humanHandoverUsers.set(senderId, Date.now())
     return
   }
@@ -289,7 +324,7 @@ async function handleIncomingMessage(platform: string, event: MetaMessageEvent) 
   const roundCount = await getRecentRoundCount(actualPlatform, senderId)
   if (roundCount >= MAX_AI_ROUNDS) {
     logger.info(`[Meta] User ${senderId} reached ${roundCount} rounds, triggering handover`)
-    await sendReply(senderId, HANDOVER_MESSAGE)
+    await sendReply(senderId, HANDOVER_MESSAGE, pageAccessToken)
     humanHandoverUsers.set(senderId, Date.now())
     return
   }
@@ -297,7 +332,6 @@ async function handleIncomingMessage(platform: string, event: MetaMessageEvent) 
   try {
     // 呼叫 AI 客服（跟 LINE 共用同一套邏輯）
     // platform: 'messenger' for Facebook, 'instagram' for Instagram DM
-    const actualPlatform = platform === 'instagram' ? 'instagram' : 'messenger'
     const aiResponse = await handleAICustomerService(
       actualPlatform,
       senderId,
@@ -305,9 +339,9 @@ async function handleIncomingMessage(platform: string, event: MetaMessageEvent) 
       messageText
     )
 
-    await sendReply(senderId, aiResponse)
+    await sendReply(senderId, aiResponse, pageAccessToken)
   } catch (error) {
     logger.error('[Meta] AI response error:', error)
-    await sendReply(senderId, '感謝您的訊息！我們已收到，將盡快回覆您。')
+    await sendReply(senderId, '感謝您的訊息！我們已收到，將盡快回覆您。', pageAccessToken)
   }
 }
