@@ -121,7 +121,7 @@ export const TOUR_BASIC_INFO = {
   label_name: '旅遊團名稱',
   label_departure: '出發日期',
   label_return: '返回日期',
-  label_description: '描述',
+  label_description: '備註',
   label_days_count: '天數',
 } as const
 

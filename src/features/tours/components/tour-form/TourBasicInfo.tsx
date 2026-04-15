@@ -269,6 +269,7 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
         <Input
           value={newTour.description || ''}
           onChange={e => setNewTour(prev => ({ ...prev, description: e.target.value }))}
+          placeholder="內部備註，客人看不到"
           className="mt-1"
         />
       </div>

@@ -74,7 +74,8 @@ function buildDefaultFromTour(tour: Tour, countryName = ''): TourFormData {
     tagline: 'Corner Travel',
     title: tour.name || '',
     subtitle: '精緻旅遊',
-    description: tour.description || '',
+    // 注意：tours.description 是內部備註，不該被展示行程當對客描述用
+    description: '',
     departureDate: departureDate.toLocaleDateString('zh-TW'),
     tourCode: tour.code || '',
     coverImage: '',
