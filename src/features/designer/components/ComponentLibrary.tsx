@@ -130,13 +130,13 @@ export function ComponentLibrary({ onInsertComponent, templateData }: ComponentL
         <div
           className={cn(
             'w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0 transition-colors',
-            'bg-stone-50 group-hover:bg-stone-100'
+            'bg-morandi-container/50 group-hover:bg-morandi-container'
           )}
         >
           {IconComp ? (
-            <IconComp size={16} className="text-stone-600" />
+            <IconComp size={16} className="text-morandi-secondary" />
           ) : (
-            <LayoutTemplate size={16} className="text-stone-600" />
+            <LayoutTemplate size={16} className="text-morandi-secondary" />
           )}
         </div>
         <div className="flex-1 min-w-0">

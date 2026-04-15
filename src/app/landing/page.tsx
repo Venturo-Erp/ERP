@@ -19,7 +19,7 @@ function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-amber-50/30">
       <div className="mx-auto max-w-5xl px-6 py-24 sm:py-32 text-center">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-tight">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-morandi-primary leading-tight">
           {LANDING_LABELS.HERO_TITLE}
         </h1>
         <p className="mt-6 text-lg sm:text-xl text-morandi-secondary max-w-2xl mx-auto leading-relaxed">
@@ -35,7 +35,7 @@ function HeroSection() {
           </Link>
           <a
             href={LANDING_LABELS.CTA_MAILTO}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-card px-8 py-3.5 text-base font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border border-morandi-muted bg-card px-8 py-3.5 text-base font-semibold text-morandi-primary shadow-sm hover:bg-morandi-container/50 transition-colors"
           >
             {LANDING_LABELS.CTA_SECONDARY}
           </a>
@@ -43,7 +43,7 @@ function HeroSection() {
       </div>
       {/* Decorative gradient blob */}
       <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-status-warning-bg/30 blur-3xl" />
-      <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-slate-200/40 blur-3xl" />
+      <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-morandi-container/40 blur-3xl" />
     </section>
   )
 }
@@ -73,21 +73,21 @@ function PainPointsSection() {
   return (
     <section className="bg-card py-20 sm:py-24">
       <div className="mx-auto max-w-5xl px-6">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center text-slate-900">
+        <h2 className="text-3xl sm:text-4xl font-bold text-center text-morandi-primary">
           {LANDING_LABELS.PAIN_SECTION_TITLE}
         </h2>
         <div className="mt-14 grid gap-8 sm:grid-cols-3">
           {PAIN_POINTS.map(point => (
             <div
               key={point.before}
-              className="rounded-xl border border-slate-100 bg-slate-50/50 p-6 transition-shadow hover:shadow-md"
+              className="rounded-xl border border-border bg-morandi-container/50/50 p-6 transition-shadow hover:shadow-md"
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-status-warning-bg text-status-warning">
                 <point.icon size={24} />
               </div>
               <div className="mt-5 flex items-center gap-2 text-sm">
-                <span className="line-through text-slate-400">{point.before}</span>
-                <ChevronRight size={14} className="text-slate-300" />
+                <span className="line-through text-morandi-muted">{point.before}</span>
+                <ChevronRight size={14} className="text-morandi-muted" />
                 <span className="font-semibold text-status-warning">{point.after}</span>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-morandi-secondary">{point.description}</p>
@@ -119,24 +119,24 @@ const FEATURES = [
 
 function FeaturesSection() {
   return (
-    <section className="bg-slate-50 py-20 sm:py-24">
+    <section className="bg-morandi-container/50 py-20 sm:py-24">
       <div className="mx-auto max-w-5xl px-6">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center text-slate-900">
+        <h2 className="text-3xl sm:text-4xl font-bold text-center text-morandi-primary">
           {LANDING_LABELS.FEATURES_TITLE}
         </h2>
         <div className="mt-14 grid gap-8 sm:grid-cols-3">
           {FEATURES.map(feature => (
             <div
               key={feature.title}
-              className="rounded-xl bg-card border border-slate-100 p-6 shadow-sm"
+              className="rounded-xl bg-card border border-border p-6 shadow-sm"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-morandi-container text-morandi-primary">
                 <feature.icon size={24} />
               </div>
-              <h3 className="mt-4 text-lg font-semibold text-slate-900">{feature.title}</h3>
+              <h3 className="mt-4 text-lg font-semibold text-morandi-primary">{feature.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-morandi-secondary">{feature.description}</p>
               {/* Screenshot placeholder */}
-              <div className="mt-4 flex h-36 items-center justify-center rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 text-sm text-slate-400">
+              <div className="mt-4 flex h-36 items-center justify-center rounded-lg border-2 border-dashed border-border bg-morandi-container/50 text-sm text-morandi-muted">
                 {LANDING_LABELS.LABEL_3045}
               </div>
             </div>
@@ -162,7 +162,7 @@ function PlanCard({ name, price, period, features, popular, badge }: PlanCardPro
       className={`relative rounded-xl border p-6 ${
         popular
           ? 'border-status-warning/40 bg-status-warning-bg/30 shadow-lg ring-1 ring-amber-200'
-          : 'border-slate-200 bg-card shadow-sm'
+          : 'border-border bg-card shadow-sm'
       }`}
     >
       {popular && (
@@ -171,14 +171,14 @@ function PlanCard({ name, price, period, features, popular, badge }: PlanCardPro
         </span>
       )}
       {badge && (
-        <span className="inline-block rounded-full bg-rose-100 px-3 py-0.5 text-xs font-semibold text-rose-700 mb-3">
+        <span className="inline-block rounded-full bg-cat-pink-bg px-3 py-0.5 text-xs font-semibold text-cat-pink mb-3">
           {badge}
         </span>
       )}
-      <h3 className="text-lg font-semibold text-slate-900">{name}</h3>
+      <h3 className="text-lg font-semibold text-morandi-primary">{name}</h3>
       <div className="mt-3 flex items-baseline gap-1">
-        <span className="text-3xl font-bold text-slate-900">{price}</span>
-        <span className="text-sm text-slate-500">{period}</span>
+        <span className="text-3xl font-bold text-morandi-primary">{price}</span>
+        <span className="text-sm text-morandi-secondary">{period}</span>
       </div>
       <ul className="mt-6 space-y-3">
         {features.map(feat => (
@@ -193,7 +193,7 @@ function PlanCard({ name, price, period, features, popular, badge }: PlanCardPro
         className={`mt-6 block w-full rounded-lg py-2.5 text-center text-sm font-semibold transition-colors ${
           popular
             ? 'bg-morandi-gold text-white hover:bg-morandi-gold-hover'
-            : 'border border-slate-300 bg-card text-slate-700 hover:bg-slate-50'
+            : 'border border-morandi-muted bg-card text-morandi-primary hover:bg-morandi-container/50'
         }`}
       >
         {LANDING_LABELS.PLAN_CTA}
@@ -206,7 +206,7 @@ function PricingSection() {
   return (
     <section className="bg-card py-20 sm:py-24">
       <div className="mx-auto max-w-5xl px-6">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center text-slate-900">
+        <h2 className="text-3xl sm:text-4xl font-bold text-center text-morandi-primary">
           {LANDING_LABELS.PRICING_TITLE}
         </h2>
         <p className="mt-3 text-center text-morandi-secondary">{LANDING_LABELS.PRICING_SUBTITLE}</p>
@@ -239,13 +239,13 @@ function PricingSection() {
 
 function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-slate-50 py-12">
+    <footer className="border-t border-border bg-morandi-container/50 py-12">
       <div className="mx-auto max-w-5xl px-6">
         <div className="grid gap-8 sm:grid-cols-2">
           <div>
             <div className="flex items-center gap-2">
               <Sparkles size={20} className="text-status-warning" />
-              <span className="text-lg font-bold text-slate-900">
+              <span className="text-lg font-bold text-morandi-primary">
                 {LANDING_LABELS.FOOTER_BRAND}
               </span>
             </div>
@@ -254,7 +254,7 @@ function Footer() {
             </p>
           </div>
           <div className="sm:text-right">
-            <h4 className="text-sm font-semibold text-slate-900">
+            <h4 className="text-sm font-semibold text-morandi-primary">
               {LANDING_LABELS.FOOTER_CONTACT_TITLE}
             </h4>
             <a
@@ -266,7 +266,7 @@ function Footer() {
             </a>
           </div>
         </div>
-        <div className="mt-10 border-t border-slate-200 pt-6 text-center text-xs text-slate-400">
+        <div className="mt-10 border-t border-border pt-6 text-center text-xs text-morandi-muted">
           {LANDING_LABELS.FOOTER_COPYRIGHT.replace('{year}', getCurrentYear().toString())}
         </div>
       </div>

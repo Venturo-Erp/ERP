@@ -197,13 +197,16 @@ import { ALERT_ERROR, ALERT_SUCCESS } from '@/lib/ui/form-classes'
 
 ---
 
-## 9. 歷史包袱待清理
+## 9. 合法例外（這些地方可以不走主題變數）
 
-_（隨時間更新）_
+以下路徑**刻意**不套主題系統，它們各有獨立的美術設計語言：
 
-- `src/components/print-templates/`、`src/lib/print/PrintTemplate.tsx`：列印模板，保留硬編 `bg-white text-black`
-- `src/features/designer/templates/`：設計器模板，有自己的色彩系統（用來產生美編行程表 PDF）
-- 部分 public marketing landing 頁（`src/app/(public)/p/customized/*`）：使用 `public-*` 變數而非 `morandi-*`，這是刻意的獨立設計
+- `src/components/print-templates/`、`src/lib/print/PrintTemplate.tsx`：列印模板，保留硬編 `bg-white text-black`（紙本永遠白底黑字）
+- `src/features/designer/templates/`：行程設計器模板，產生美編 PDF 用，有自己的色彩系統
+- `src/features/tours/components/sections/*Collage*`, `*Luxury*`, `*Art*` 等：對客行程型錄 section 樣式，屬於品牌美編，可用 hex 固定色（如 `bg-[#C6FF00]` 螢光綠強調色）
+- `src/app/(public)/p/customized/*`（舊版 marketing landing）：獨立設計語言
+
+_新增例外時請在這裡登記。_
 
 ## 10. 類別色例外（categorical colors）
 

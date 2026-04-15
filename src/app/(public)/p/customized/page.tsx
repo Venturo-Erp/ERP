@@ -96,7 +96,7 @@ export default async function WishlistIndexPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
       {/* Header */}
-      <header className="bg-slate-900/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-10">
+      <header className="bg-morandi-primary/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold text-white">{companyInfo.name}</h1>
           <a href={`tel:${companyInfo.phone}`} className="text-sm text-white/60 hover:text-white">

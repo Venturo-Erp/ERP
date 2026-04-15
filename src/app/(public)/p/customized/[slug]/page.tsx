@@ -321,7 +321,7 @@ export default function WishlistDetailPage({ params }: { params: Promise<{ slug:
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-morandi-primary">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     )
@@ -329,7 +329,7 @@ export default function WishlistDetailPage({ params }: { params: Promise<{ slug:
 
   if (notFound) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-morandi-primary">
         <MapPin className="w-16 h-16 text-white/20 mb-4" />
         <p className="text-xl font-medium mb-2 text-white">找不到此頁面</p>
         <p className="text-white/60 mb-6">此頁面可能已下架或連結錯誤</p>
@@ -343,7 +343,7 @@ export default function WishlistDetailPage({ params }: { params: Promise<{ slug:
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
       {/* Header */}
-      <header className="bg-slate-900/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-20">
+      <header className="bg-morandi-primary/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/p/customized" className="text-white/60 hover:text-white">
@@ -392,7 +392,7 @@ export default function WishlistDetailPage({ params }: { params: Promise<{ slug:
                     `}
                   >
                     {/* 圖片 */}
-                    <div className="aspect-[4/3] bg-slate-800 relative">
+                    <div className="aspect-[4/3] bg-morandi-primary/90 relative">
                       {item.image_url ? (
                         <img
                           src={item.image_url}

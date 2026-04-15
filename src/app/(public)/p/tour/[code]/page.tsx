@@ -298,7 +298,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
                 className={`text-sm font-medium transition-all ${
                   activeDay === index
                     ? 'text-public-primary font-bold border-b-2 border-public-primary pb-1'
-                    : 'text-slate-500 hover:text-public-primary'
+                    : 'text-morandi-secondary hover:text-public-primary'
                 }`}
               >
                 Day {index + 1}
@@ -306,8 +306,8 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
             ))}
           </nav>
           <div className="flex items-center gap-4">
-            <Share2 className="w-5 h-5 text-slate-600 hover:text-public-primary cursor-pointer transition-all" />
-            <Heart className="w-5 h-5 text-slate-600 hover:text-public-primary cursor-pointer transition-all" />
+            <Share2 className="w-5 h-5 text-morandi-secondary hover:text-public-primary cursor-pointer transition-all" />
+            <Heart className="w-5 h-5 text-morandi-secondary hover:text-public-primary cursor-pointer transition-all" />
             <Link href={`/p/tour/${code}/register${ref ? `?ref=${ref}` : ''}`}>
               <Button className="bg-gradient-to-r from-[#00113a] to-[#002366] text-white px-6 py-2 rounded-md text-sm hover:opacity-90">
                 立即報名
@@ -319,7 +319,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
 
       {/* Sticky Day Navigation */}
       {dailyItinerary.length > 0 && (
-        <nav className="sticky top-[72px] z-40 bg-card/60 backdrop-blur-md border-b border-slate-200/20 py-2">
+        <nav className="sticky top-[72px] z-40 bg-card/60 backdrop-blur-md border-b border-border/20 py-2">
           <div
             className="max-w-7xl mx-auto px-6 flex justify-center md:justify-start gap-2 overflow-x-auto"
             style={{ scrollbarWidth: 'none' }}
@@ -331,7 +331,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   activeDay === index
                     ? 'bg-public-primary text-white font-bold'
-                    : 'text-morandi-primary hover:bg-slate-100 hover:text-public-primary'
+                    : 'text-morandi-primary hover:bg-morandi-container hover:text-public-primary'
                 }`}
               >
                 Day {index + 1}
@@ -375,7 +375,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
             dailyItinerary.map((day, index) => (
               <section key={index} id={`day${index + 1}`} className="relative pl-12 scroll-mt-48">
                 {/* Timeline */}
-                <div className="absolute left-0 top-0 bottom-0 w-px bg-slate-200 ml-4"></div>
+                <div className="absolute left-0 top-0 bottom-0 w-px bg-morandi-container ml-4"></div>
                 <div className="absolute left-0 top-2 w-8 h-8 rounded-full bg-public-accent flex items-center justify-center">
                   <span className="text-white text-xs font-bold">
                     {String(index + 1).padStart(2, '0')}
@@ -428,9 +428,9 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
 
                   {/* Accommodation */}
                   {day.accommodation && (
-                    <div className="p-6 bg-slate-50 rounded-xl">
+                    <div className="p-6 bg-morandi-container/50 rounded-xl">
                       <div className="flex items-center gap-4">
-                        <Hotel className="w-5 h-5 text-slate-400" />
+                        <Hotel className="w-5 h-5 text-morandi-muted" />
                         <span className="text-morandi-primary font-medium">
                           住宿：{day.accommodation}
                         </span>
@@ -442,9 +442,9 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
             ))
           ) : (
             <section className="text-center py-16">
-              <MapPin className="w-12 h-12 mx-auto text-slate-300 mb-4" />
-              <h2 className="text-xl font-bold text-slate-400 mb-2">行程規劃中</h2>
-              <p className="text-slate-400">詳細行程將於近期更新</p>
+              <MapPin className="w-12 h-12 mx-auto text-morandi-muted mb-4" />
+              <h2 className="text-xl font-bold text-morandi-muted mb-2">行程規劃中</h2>
+              <p className="text-morandi-muted">詳細行程將於近期更新</p>
             </section>
           )}
         </div>
@@ -453,8 +453,8 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
         <aside className="md:w-[380px]">
           <div className="sticky top-40 space-y-6">
             {/* Price Card */}
-            <div className="bg-card p-8 rounded-2xl shadow-sm border border-slate-100">
-              <div className="text-slate-500 text-xs font-bold tracking-widest uppercase mb-2">
+            <div className="bg-card p-8 rounded-2xl shadow-sm border border-border">
+              <div className="text-morandi-secondary text-xs font-bold tracking-widest uppercase mb-2">
                 行程價格
               </div>
               <div className="flex items-baseline gap-2 mb-8">
@@ -463,10 +463,10 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
                     <span className="text-4xl font-extrabold text-public-primary">
                       TWD {tour.selling_price_per_person.toLocaleString()}
                     </span>
-                    <span className="text-slate-400 text-sm">/ 人</span>
+                    <span className="text-morandi-muted text-sm">/ 人</span>
                   </>
                 ) : (
-                  <span className="text-2xl font-bold text-slate-500">洽詢報價</span>
+                  <span className="text-2xl font-bold text-morandi-secondary">洽詢報價</span>
                 )}
               </div>
 
@@ -483,7 +483,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
                   <a href={`tel:${companyInfo.phone}`} className="block">
                     <Button
                       variant="outline"
-                      className="w-full border-public-primary text-public-primary py-4 rounded-xl font-bold hover:bg-slate-50 transition-all"
+                      className="w-full border-public-primary text-public-primary py-4 rounded-xl font-bold hover:bg-morandi-container/50 transition-all"
                     >
                       諮詢專屬顧問
                     </Button>
@@ -492,7 +492,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
               </div>
 
               {/* Info */}
-              <div className="mt-8 pt-8 border-t border-slate-100 space-y-4">
+              <div className="mt-8 pt-8 border-t border-border space-y-4">
                 {tour.departure_date && (
                   <div className="flex items-center gap-3 text-sm text-morandi-primary">
                     <Calendar className="w-4 h-4 text-morandi-green" />
@@ -519,8 +519,8 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
 
               {/* Itinerary Summary */}
               {dailyItinerary.length > 0 && (
-                <div className="mt-8 pt-8 border-t border-slate-100">
-                  <div className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">
+                <div className="mt-8 pt-8 border-t border-border">
+                  <div className="text-xs font-bold text-morandi-secondary uppercase tracking-widest mb-4">
                     行程摘要
                   </div>
                   <ul className="space-y-3">
@@ -553,13 +553,13 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
       </main>
 
       {/* Footer with Employee Info */}
-      <footer className="bg-slate-50 border-t border-slate-200 py-12 mt-24">
+      <footer className="bg-morandi-container/50 border-t border-border py-12 mt-24">
         <div className="max-w-7xl mx-auto px-8">
           {/* Employee Card */}
           {employee && (
-            <div className="bg-card rounded-2xl p-8 shadow-sm border border-slate-100 mb-8 max-w-xl mx-auto">
+            <div className="bg-card rounded-2xl p-8 shadow-sm border border-border mb-8 max-w-xl mx-auto">
               <div className="text-center mb-6">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
+                <span className="text-xs font-bold text-morandi-secondary uppercase tracking-widest">
                   您的專屬顧問
                 </span>
               </div>
@@ -580,7 +580,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
                     {employee.display_name || '專屬顧問'}
                   </h3>
                   {employee.employee_number && (
-                    <p className="text-sm text-slate-500 mb-2">
+                    <p className="text-sm text-morandi-secondary mb-2">
                       員工編號：{employee.employee_number}
                     </p>
                   )}
@@ -604,13 +604,13 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
             {companyInfo.phone && (
               <a
                 href={`tel:${companyInfo.phone}`}
-                className="flex items-center gap-2 text-slate-600 hover:text-public-primary"
+                className="flex items-center gap-2 text-morandi-secondary hover:text-public-primary"
               >
                 <Phone className="w-4 h-4" />
                 {companyInfo.phone}
               </a>
             )}
-            <div className="text-slate-400 text-xs">
+            <div className="text-morandi-muted text-xs">
               © {new Date().getFullYear()} {companyInfo.name}. All rights reserved.
             </div>
           </div>

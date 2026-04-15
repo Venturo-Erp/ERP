@@ -33,6 +33,17 @@
   --morandi-container: #e8e5e0;
   --morandi-muted: #b8b2aa;
 
+  /* 類別色 — 用於需要區分類別的 UI（獎金類型、dashboard 統計、角色 badge 等）
+     跟主題連動，每套主題有自己的調和版本；類別彼此之間保持可辨識度 */
+  --cat-purple: #a08ab5;
+  --cat-purple-bg: #efe8f3;
+  --cat-orange: #c49a74;
+  --cat-orange-bg: #f5ebe0;
+  --cat-pink: #c48a9e;
+  --cat-pink-bg: #f5e7ed;
+  --cat-indigo: #8a95b5;
+  --cat-indigo-bg: #e8ebf3;
+
   /* 品牌色 */
   --brand-line: #06c755; /* LINE 綠 */
   --brand-line-hover: #05b34c;
@@ -136,6 +147,16 @@
   --morandi-container: #e5e7ea;
   --morandi-muted: #a8adb5;
 
+  /* 類別色（冷調版本） */
+  --cat-purple: #8e85a3;
+  --cat-purple-bg: #ebe8f0;
+  --cat-orange: #a68570;
+  --cat-orange-bg: #efe5dc;
+  --cat-pink: #a67587;
+  --cat-pink-bg: #efe1e6;
+  --cat-indigo: #7682a3;
+  --cat-indigo-bg: #e4e7f0;
+
   --gradient-gold-light: #c9ccd1;
   --gradient-gold-mid: #9ea3ac;
   --gradient-gold-dark: #6c727a;
@@ -185,6 +206,16 @@
   --morandi-red: #c44545;
   --morandi-container: #f8fafc; /* Light Surface */
   --morandi-muted: rgba(4, 14, 32, 0.45);
+
+  /* 類別色（飽和清晰版本，跟 airtable 藍對比） */
+  --cat-purple: #7c3aed;
+  --cat-purple-bg: #f3e9ff;
+  --cat-orange: #d97706;
+  --cat-orange-bg: #fff0db;
+  --cat-pink: #ec4899;
+  --cat-pink-bg: #fce4ef;
+  --cat-indigo: #4f46e5;
+  --cat-indigo-bg: #e6e5fc;
 
   --gradient-gold-light: #cfdef5;
   --gradient-gold-mid: #6b94d9;
@@ -260,6 +291,16 @@
   --color-morandi-red: var(--morandi-red);
   --color-morandi-container: var(--morandi-container);
   --color-morandi-muted: var(--morandi-muted);
+
+  /* 類別色 */
+  --color-cat-purple: var(--cat-purple);
+  --color-cat-purple-bg: var(--cat-purple-bg);
+  --color-cat-orange: var(--cat-orange);
+  --color-cat-orange-bg: var(--cat-orange-bg);
+  --color-cat-pink: var(--cat-pink);
+  --color-cat-pink-bg: var(--cat-pink-bg);
+  --color-cat-indigo: var(--cat-indigo);
+  --color-cat-indigo-bg: var(--cat-indigo-bg);
 
   /* 語義顏色 - 用於狀態指示 */
   --color-status-info: var(--status-info);

@@ -68,7 +68,7 @@ export function ImportMealsDialog({ isOpen, onClose, meals, onImport }: ImportMe
       case '午餐':
         return <Cloud className="w-3.5 h-3.5 text-status-info" />
       case '晚餐':
-        return <Moon className="w-3.5 h-3.5 text-indigo-500" />
+        return <Moon className="w-3.5 h-3.5 text-cat-indigo" />
       default:
         return <UtensilsCrossed className="w-3.5 h-3.5" />
     }

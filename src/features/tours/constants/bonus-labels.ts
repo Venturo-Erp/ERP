@@ -22,8 +22,8 @@ export const BONUS_TYPE_COLORS: Record<BonusSettingType, string> = {
   [BonusSettingType.PROFIT_TAX]: 'text-morandi-red',
   [BonusSettingType.OP_BONUS]: 'text-status-info',
   [BonusSettingType.SALE_BONUS]: 'text-morandi-green',
-  [BonusSettingType.TEAM_BONUS]: 'text-purple-600',
-  [BonusSettingType.ADMINISTRATIVE_EXPENSES]: 'text-orange-600',
+  [BonusSettingType.TEAM_BONUS]: 'text-cat-purple',
+  [BonusSettingType.ADMINISTRATIVE_EXPENSES]: 'text-cat-orange',
 }
 
 /** 獎金類型 badge 顏色 */
@@ -31,8 +31,8 @@ export const BONUS_TYPE_BADGE_VARIANTS: Record<BonusSettingType, string> = {
   [BonusSettingType.PROFIT_TAX]: 'bg-morandi-red/15 text-morandi-red',
   [BonusSettingType.OP_BONUS]: 'bg-status-info-bg text-status-info',
   [BonusSettingType.SALE_BONUS]: 'bg-morandi-green/15 text-morandi-green',
-  [BonusSettingType.TEAM_BONUS]: 'bg-purple-100 text-purple-700',
-  [BonusSettingType.ADMINISTRATIVE_EXPENSES]: 'bg-orange-100 text-orange-700',
+  [BonusSettingType.TEAM_BONUS]: 'bg-cat-purple-bg text-cat-purple',
+  [BonusSettingType.ADMINISTRATIVE_EXPENSES]: 'bg-cat-orange-bg text-cat-orange',
 }
 
 /** 利潤表標籤 */

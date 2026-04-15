@@ -74,7 +74,7 @@ export function RestaurantSearchInput({
     <div className="flex gap-3 flex-wrap">
       {/* 國家選擇 */}
       <Select value={selectedCountryId || '__all__'} onValueChange={onCountryChange}>
-        <SelectTrigger className="h-11 px-4 border-morandi-container rounded-xl text-sm bg-card min-w-[120px] focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
+        <SelectTrigger className="h-11 px-4 border-morandi-container rounded-xl text-sm bg-card min-w-[120px] focus:ring-2 focus:ring-cat-pink/30 focus:border-cat-pink">
           <SelectValue placeholder={COMP_EDITOR_LABELS.全部國家} />
         </SelectTrigger>
         <SelectContent>
@@ -90,7 +90,7 @@ export function RestaurantSearchInput({
       {/* 區域選擇 */}
       {selectedCountryId && regions.length > 0 && (
         <Select value={selectedRegionId || '__all__'} onValueChange={onRegionChange}>
-          <SelectTrigger className="h-11 px-4 border-morandi-container rounded-xl text-sm bg-card min-w-[120px] focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
+          <SelectTrigger className="h-11 px-4 border-morandi-container rounded-xl text-sm bg-card min-w-[120px] focus:ring-2 focus:ring-cat-pink/30 focus:border-cat-pink">
             <SelectValue placeholder={COMP_EDITOR_LABELS.全部區域} />
           </SelectTrigger>
           <SelectContent>
@@ -107,7 +107,7 @@ export function RestaurantSearchInput({
       {/* 城市選擇 */}
       {selectedCountryId && cities.length > 0 && (
         <Select value={selectedCityId || '__all__'} onValueChange={onCityChange}>
-          <SelectTrigger className="h-11 px-4 border-morandi-container rounded-xl text-sm bg-card min-w-[120px] focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
+          <SelectTrigger className="h-11 px-4 border-morandi-container rounded-xl text-sm bg-card min-w-[120px] focus:ring-2 focus:ring-cat-pink/30 focus:border-cat-pink">
             <SelectValue placeholder={COMP_EDITOR_LABELS.全部城市} />
           </SelectTrigger>
           <SelectContent>
@@ -124,7 +124,7 @@ export function RestaurantSearchInput({
       {/* 分類選擇 */}
       {!showMichelinOnly && (
         <Select value={selectedCategory || '__all__'} onValueChange={onCategoryChange}>
-          <SelectTrigger className="h-11 px-4 border-morandi-container rounded-xl text-sm bg-card min-w-[120px] focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
+          <SelectTrigger className="h-11 px-4 border-morandi-container rounded-xl text-sm bg-card min-w-[120px] focus:ring-2 focus:ring-cat-pink/30 focus:border-cat-pink">
             <SelectValue placeholder={COMP_EDITOR_LABELS.全部分類} />
           </SelectTrigger>
           <SelectContent>
@@ -160,7 +160,7 @@ export function RestaurantSearchInput({
           value={searchQuery}
           onChange={e => onSearchChange(e.target.value)}
           placeholder={COMP_EDITOR_LABELS.搜尋餐廳}
-          className="pl-10 h-11 rounded-xl border-morandi-container focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500"
+          className="pl-10 h-11 rounded-xl border-morandi-container focus:ring-2 focus:ring-cat-pink/30 focus:border-cat-pink"
         />
       </div>
     </div>

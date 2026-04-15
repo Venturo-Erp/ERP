@@ -199,7 +199,7 @@ export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperi
       case 'ultra_exclusive':
         return 'bg-morandi-container text-morandi-secondary border-morandi-secondary/30'
       case 'highly_exclusive':
-        return 'bg-rose-100 text-rose-800 border-rose-300'
+        return 'bg-cat-pink-bg text-cat-pink border-cat-pink/30'
       case 'exclusive':
         return 'bg-status-warning-bg text-status-warning border-status-warning/30'
       case 'premium':

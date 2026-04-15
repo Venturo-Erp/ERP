@@ -231,11 +231,11 @@ export const STATUS_CONFIGS: Record<StatusType, Record<string, StatusConfig>> = 
       borderColor: 'border-morandi-green/30',
     },
     已出發: {
-      color: 'text-emerald-700',
+      color: 'text-morandi-green',
       label: '已出發',
       icon: Truck,
-      bgColor: 'bg-emerald-50',
-      borderColor: 'border-emerald-200',
+      bgColor: 'bg-morandi-green/10',
+      borderColor: 'border-morandi-green',
     },
     待結團: {
       color: 'text-morandi-red',

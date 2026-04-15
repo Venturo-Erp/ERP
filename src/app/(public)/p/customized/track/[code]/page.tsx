@@ -170,7 +170,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+      <div className="min-h-screen flex items-center justify-center bg-morandi-primary">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     )
@@ -178,7 +178,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
 
   if (notFound) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-900">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-morandi-primary">
         <MapPin className="w-16 h-16 text-white/20 mb-4" />
         <p className="text-xl font-medium mb-2 text-white">找不到此詢價單</p>
         <p className="text-white/60 mb-6">追蹤碼可能有誤，請確認後重試</p>
@@ -195,7 +195,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
       {/* Header */}
-      <header className="bg-slate-900/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-20">
+      <header className="bg-morandi-primary/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link href="/p/customized" className="text-white/60 hover:text-white">
@@ -300,7 +300,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
               <MessageCircle className="w-5 h-5" />
               備註與對話
             </h3>
-            <div className="bg-slate-800/50 rounded-lg p-4 whitespace-pre-wrap text-white/80 text-sm">
+            <div className="bg-morandi-primary/90/50 rounded-lg p-4 whitespace-pre-wrap text-white/80 text-sm">
               {inquiry.notes}
             </div>
           </div>
@@ -325,7 +325,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
             onChange={e => setAdditionalNotes(e.target.value)}
             placeholder="有任何問題或想補充的嗎？"
             rows={3}
-            className="bg-slate-800/50 border-white/10 text-white placeholder:text-white/30"
+            className="bg-morandi-primary/90/50 border-white/10 text-white placeholder:text-white/30"
           />
           <Button
             className="mt-3"

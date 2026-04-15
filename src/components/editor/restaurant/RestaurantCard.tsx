@@ -59,7 +59,7 @@ export function RestaurantCard({ restaurant, isSelected, onToggle }: RestaurantC
         border-2 hover:shadow-md
         ${
           isSelected
-            ? 'border-rose-500 bg-status-danger-bg shadow-sm'
+            ? 'border-cat-pink bg-status-danger-bg shadow-sm'
             : isMichelin
               ? 'border-morandi-red/30 bg-status-danger-bg hover:bg-status-danger-bg'
               : 'border-transparent bg-morandi-container/20 hover:bg-morandi-container/30'
@@ -127,7 +127,7 @@ export function RestaurantCard({ restaurant, isSelected, onToggle }: RestaurantC
 
       {/* 選中標記 */}
       {isSelected && (
-        <div className="absolute top-2 right-2 w-5 h-5 bg-rose-500 rounded-full flex items-center justify-center">
+        <div className="absolute top-2 right-2 w-5 h-5 bg-cat-pink rounded-full flex items-center justify-center">
           <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>

@@ -163,7 +163,7 @@ export function RestaurantSelector({
       >
         <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-rose-50 to-transparent">
           <DialogTitle className="flex items-center gap-2 text-lg">
-            <UtensilsCrossed className="text-rose-500" size={22} />
+            <UtensilsCrossed className="text-cat-pink" size={22} />
             {COMP_EDITOR_LABELS.SELECT_6249}
           </DialogTitle>
         </DialogHeader>
@@ -203,8 +203,8 @@ export function RestaurantSelector({
 
           {/* 已選擇提示 */}
           {selectedIds.size > 0 && (
-            <div className="text-sm text-rose-800 bg-rose-100 px-4 py-2.5 rounded-xl border border-rose-200 flex items-center gap-2">
-              <div className="w-6 h-6 bg-rose-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+            <div className="text-sm text-cat-pink bg-cat-pink-bg px-4 py-2.5 rounded-xl border border-cat-pink/30 flex items-center gap-2">
+              <div className="w-6 h-6 bg-cat-pink rounded-full flex items-center justify-center text-white text-xs font-bold">
                 {selectedIds.size}
               </div>
               已選擇 {selectedIds.size} 間餐廳
@@ -219,7 +219,7 @@ export function RestaurantSelector({
           <Button
             onClick={handleConfirm}
             disabled={selectedIds.size === 0}
-            className="bg-rose-500 hover:bg-rose-600 text-white rounded-xl min-w-[120px]"
+            className="bg-cat-pink hover:bg-cat-pink/80 text-white rounded-xl min-w-[120px]"
           >
             新增餐廳 ({selectedIds.size})
           </Button>

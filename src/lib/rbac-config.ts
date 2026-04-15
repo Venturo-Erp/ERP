@@ -73,7 +73,7 @@ export const ROLES: Record<UserRole, RoleConfig> = {
     id: 'bot',
     label: '機器人',
     description: '系統自動化帳號',
-    color: 'text-purple-600 bg-purple-100 border-purple-200',
+    color: 'text-cat-purple bg-cat-purple-bg border-cat-purple/30',
   },
 }
 

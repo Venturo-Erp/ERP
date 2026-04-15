@@ -164,8 +164,8 @@ export function useStatsData() {
         label: DASHBOARD_LABELS.statDepositsThisWeek,
         value: `NT$ ${depositsThisWeek.toLocaleString()}`,
         icon: Briefcase,
-        color: 'text-purple-600',
-        bgColor: 'bg-purple-50',
+        color: 'text-cat-purple',
+        bgColor: 'bg-cat-purple-bg',
       },
       {
         id: 'toursThisWeek',
@@ -180,8 +180,8 @@ export function useStatsData() {
         label: DASHBOARD_LABELS.statToursThisMonth,
         value: `${toursThisMonth} ${DASHBOARD_LABELS.statTourUnit}`,
         icon: Calendar,
-        color: 'text-pink-600',
-        bgColor: 'bg-pink-50',
+        color: 'text-cat-pink',
+        bgColor: 'bg-cat-pink-bg',
       },
     ]
 

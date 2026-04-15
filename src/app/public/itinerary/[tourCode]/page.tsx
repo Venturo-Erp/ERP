@@ -87,9 +87,9 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
     <>
       <div className="min-h-screen bg-background">
         {/* TopNavBar */}
-        <nav className="fixed top-0 w-full z-50 bg-stone-50/80 backdrop-blur-md">
+        <nav className="fixed top-0 w-full z-50 bg-morandi-container/50/80 backdrop-blur-md">
           <div className="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto">
-            <div className="text-2xl font-serif tracking-tight text-stone-800">
+            <div className="text-2xl font-serif tracking-tight text-morandi-primary">
               Corner Travel Collection
             </div>
             <button
@@ -276,7 +276,7 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
         </section>
 
         {/* Footer */}
-        <footer className="bg-stone-100 py-12 border-t border-stone-200">
+        <footer className="bg-morandi-container py-12 border-t border-border">
           <div className="max-w-7xl mx-auto px-4 flex flex-col items-center">
             <p className="text-xs text-morandi-secondary font-medium tracking-widest uppercase">
               © 2024 Corner Travel Collection. All rights reserved.

@@ -380,7 +380,7 @@ export function MemberRow({
 
       {/* 團體模式：PNR 欄位 */}
       {mode === 'tour' && showPnrColumn && (
-        <td className="border border-morandi-gold/20 px-2 py-1 bg-sky-50/50">
+        <td className="border border-morandi-gold/20 px-2 py-1 bg-status-info-bg/50">
           {isEditMode ? (
             <input
               type="text"
@@ -402,7 +402,7 @@ export function MemberRow({
 
       {/* 團體模式：機票號碼 */}
       {mode === 'tour' && cv.ticket_number && (
-        <td className="border border-morandi-gold/20 px-2 py-1 bg-sky-50/50">
+        <td className="border border-morandi-gold/20 px-2 py-1 bg-status-info-bg/50">
           {isEditMode ? (
             <input
               type="text"
