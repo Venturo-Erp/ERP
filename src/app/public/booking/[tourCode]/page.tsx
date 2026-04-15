@@ -142,7 +142,7 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
 
           <div className="space-y-12">
             {dailyItinerary.map((day, index) => (
-              <article key={index} className="bg-white rounded-3xl shadow-lg overflow-hidden group">
+              <article key={index} className="bg-card rounded-3xl shadow-lg overflow-hidden group">
                 <div className="grid lg:grid-cols-12">
                   {/* Day Number */}
                   <div className="lg:col-span-2 bg-morandi-primary p-8 text-white flex flex-col justify-between items-start relative overflow-hidden">
@@ -200,7 +200,7 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
                         <h5 className="text-xs font-bold text-morandi-secondary uppercase tracking-widest mb-3">
                           Stay
                         </h5>
-                        <div className="bg-white p-4 shadow-sm rounded-sm border border-gray-100">
+                        <div className="bg-card p-4 shadow-sm rounded-sm border border-gray-100">
                           <div className="font-serif font-bold text-lg mb-1">
                             {day.accommodation}
                           </div>
@@ -215,7 +215,7 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
         </main>
 
         {/* 底部業務資訊 */}
-        <section className="py-16 bg-white border-t border-gray-100">
+        <section className="py-16 bg-card border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
             {salesPerson && (
               <div className="text-center">

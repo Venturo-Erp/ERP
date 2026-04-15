@@ -104,7 +104,7 @@ export function ElementLibrary({
   const categories = Object.entries(STICKER_CATEGORIES) as [StickerCategory, string][]
 
   return (
-    <div className="w-64 h-full bg-white border-r border-border flex flex-col">
+    <div className="w-64 h-full bg-card border-r border-border flex flex-col">
       <div className="p-3 border-b border-border h-[42px] flex items-center">
         <h3 className="font-medium text-sm text-morandi-primary">{DESIGNER_LABELS.元素庫}</h3>
       </div>
@@ -286,7 +286,7 @@ export function QuickInsertBar({
   onAddText,
 }: Omit<ElementLibraryProps, 'onAddSticker'>) {
   return (
-    <div className="flex items-center gap-1 p-1 bg-white rounded-lg shadow-sm border border-border">
+    <div className="flex items-center gap-1 p-1 bg-card rounded-lg shadow-sm border border-border">
       <Button
         variant="ghost"
         size="sm"

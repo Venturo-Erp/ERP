@@ -35,7 +35,7 @@ function HeroSection() {
           </Link>
           <a
             href={LANDING_LABELS.CTA_MAILTO}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-8 py-3.5 text-base font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-card px-8 py-3.5 text-base font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
           >
             {LANDING_LABELS.CTA_SECONDARY}
           </a>
@@ -71,7 +71,7 @@ const PAIN_POINTS = [
 
 function PainPointsSection() {
   return (
-    <section className="bg-white py-20 sm:py-24">
+    <section className="bg-card py-20 sm:py-24">
       <div className="mx-auto max-w-5xl px-6">
         <h2 className="text-3xl sm:text-4xl font-bold text-center text-slate-900">
           {LANDING_LABELS.PAIN_SECTION_TITLE}
@@ -128,7 +128,7 @@ function FeaturesSection() {
           {FEATURES.map(feature => (
             <div
               key={feature.title}
-              className="rounded-xl bg-white border border-slate-100 p-6 shadow-sm"
+              className="rounded-xl bg-card border border-slate-100 p-6 shadow-sm"
             >
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
                 <feature.icon size={24} />
@@ -162,7 +162,7 @@ function PlanCard({ name, price, period, features, popular, badge }: PlanCardPro
       className={`relative rounded-xl border p-6 ${
         popular
           ? 'border-amber-300 bg-amber-50/30 shadow-lg ring-1 ring-amber-200'
-          : 'border-slate-200 bg-white shadow-sm'
+          : 'border-slate-200 bg-card shadow-sm'
       }`}
     >
       {popular && (
@@ -193,7 +193,7 @@ function PlanCard({ name, price, period, features, popular, badge }: PlanCardPro
         className={`mt-6 block w-full rounded-lg py-2.5 text-center text-sm font-semibold transition-colors ${
           popular
             ? 'bg-amber-600 text-white hover:bg-amber-700'
-            : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+            : 'border border-slate-300 bg-card text-slate-700 hover:bg-slate-50'
         }`}
       >
         {LANDING_LABELS.PLAN_CTA}
@@ -204,7 +204,7 @@ function PlanCard({ name, price, period, features, popular, badge }: PlanCardPro
 
 function PricingSection() {
   return (
-    <section className="bg-white py-20 sm:py-24">
+    <section className="bg-card py-20 sm:py-24">
       <div className="mx-auto max-w-5xl px-6">
         <h2 className="text-3xl sm:text-4xl font-bold text-center text-slate-900">
           {LANDING_LABELS.PRICING_TITLE}

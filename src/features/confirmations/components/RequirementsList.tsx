@@ -1101,7 +1101,7 @@ export function RequirementsList({
                   {pendingCancellations.map(req => (
                     <div
                       key={req.id}
-                      className="flex items-center gap-3 bg-white rounded px-3 py-2 border border-morandi-red/30"
+                      className="flex items-center gap-3 bg-card rounded px-3 py-2 border border-morandi-red/30"
                     >
                       <div className="flex-1">
                         <p className="text-sm font-medium text-morandi-primary">
@@ -1817,7 +1817,7 @@ export function RequirementsList({
                                                   return (
                                                     <div
                                                       key={req.id}
-                                                      className="bg-white border border-morandi-gold/20 rounded-lg p-3 text-sm"
+                                                      className="bg-card border border-morandi-gold/20 rounded-lg p-3 text-sm"
                                                     >
                                                       <div className="flex items-center justify-between">
                                                         <div className="flex items-center gap-2">

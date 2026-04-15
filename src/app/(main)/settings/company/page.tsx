@@ -174,7 +174,7 @@ function ImageUploadField({
           <img
             src={value}
             alt={label}
-            className="max-h-32 rounded-lg border border-border object-contain bg-white p-2"
+            className="max-h-32 rounded-lg border border-border object-contain bg-card p-2"
           />
           <button
             type="button"

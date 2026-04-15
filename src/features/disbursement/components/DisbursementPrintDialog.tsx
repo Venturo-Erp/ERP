@@ -236,7 +236,7 @@ export function DisbursementPrintDialog({
             </div>
           ) : (
             <div
-              className="shadow-lg bg-white"
+              className="shadow-lg bg-card"
               style={{
                 width: '210mm',
                 minHeight: '297mm',

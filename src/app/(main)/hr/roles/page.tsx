@@ -311,7 +311,7 @@ export default function RolesPage() {
       <div key={module.code}>
         {/* 模組行 */}
         <div
-          className={`flex items-center border-t border-border ${hasTabs ? 'bg-morandi-bg/30' : 'bg-white'}`}
+          className={`flex items-center border-t border-border ${hasTabs ? 'bg-morandi-bg/30' : 'bg-card'}`}
         >
           <div className="flex-1 p-4 flex items-center gap-2">
             {hasTabs ? (
@@ -369,7 +369,7 @@ export default function RolesPage() {
           module.tabs.map(tab => {
             const perm = getPermission(module.code, tab.code)
             return (
-              <div key={tab.code} className="flex items-center border-t border-border bg-white">
+              <div key={tab.code} className="flex items-center border-t border-border bg-card">
                 <div className="flex-1 p-4 pl-12 flex items-center gap-2">
                   <div className="w-1 h-4 bg-border rounded-full" />
                   <span className="text-sm text-morandi-primary">{tab.name}</span>
@@ -413,7 +413,7 @@ export default function RolesPage() {
           <div className="grid grid-cols-12 gap-6 h-full min-h-[500px]">
             {/* 左側：職務列表 */}
             <div className="col-span-3 flex flex-col">
-              <div className="bg-white border border-border rounded-lg flex flex-col h-full">
+              <div className="bg-card border border-border rounded-lg flex flex-col h-full">
                 <div className="flex items-center justify-between p-4 border-b border-border">
                   <h3 className="font-semibold text-morandi-primary">職務列表</h3>
                   <Button
@@ -486,7 +486,7 @@ export default function RolesPage() {
 
             {/* 右側：權限設定 */}
             <div className="col-span-9 flex flex-col">
-              <div className="bg-white border border-border rounded-lg flex flex-col h-full">
+              <div className="bg-card border border-border rounded-lg flex flex-col h-full">
                 <div className="flex items-center justify-between p-4 border-b border-border">
                   <div className="flex items-center gap-3">
                     <h3 className="font-semibold text-morandi-primary">

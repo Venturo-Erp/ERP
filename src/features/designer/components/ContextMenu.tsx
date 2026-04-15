@@ -226,7 +226,7 @@ export function ContextMenu({
 
   return (
     <div
-      className="fixed z-50 min-w-[180px] bg-white rounded-lg shadow-lg border border-border py-1"
+      className="fixed z-50 min-w-[180px] bg-card rounded-lg shadow-lg border border-border py-1"
       style={{ left: position.x, top: position.y }}
     >
       {menuItems.map((item, index) => {

@@ -346,7 +346,7 @@ export function TourConfirmationSheetPage({ tour }: TourConfirmationSheetPagePro
       {/* 列印內容區域 */}
       <div
         id="print-content"
-        className="border border-border rounded-lg overflow-hidden print:border-0 print:rounded-none print:overflow-visible bg-white"
+        className="border border-border rounded-lg overflow-hidden print:border-0 print:rounded-none print:overflow-visible bg-card"
       >
         {/* 團基本資訊 */}
         <TourInfoSection

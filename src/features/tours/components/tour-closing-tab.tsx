@@ -293,7 +293,7 @@ export function TourClosingTab({ tour }: TourClosingTabProps) {
       <BonusSettingTab tour={tour} />
 
       {/* 結案狀態 + PDF */}
-      <div className="flex items-center justify-between bg-white border border-border rounded-lg px-4 py-3">
+      <div className="flex items-center justify-between bg-card border border-border rounded-lg px-4 py-3">
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium text-morandi-primary">結案狀態</span>
           <span

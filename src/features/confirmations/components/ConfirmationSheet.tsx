@@ -235,7 +235,7 @@ export function ConfirmationSheet({ tourId }: ConfirmationSheetProps) {
 
       {/* A4 等比例容器 */}
       <div
-        className="bg-white mx-auto shadow-sm print:shadow-none"
+        className="bg-card mx-auto shadow-sm print:shadow-none"
         style={{
           width: '210mm',
           minHeight: '297mm',

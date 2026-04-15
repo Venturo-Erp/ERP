@@ -474,7 +474,7 @@ export function ResourcePanel({
       </div>
 
       {/* 地區篩選 + 類型分頁（4欄平均） */}
-      <div className="grid grid-cols-4 border-b-2 border-border bg-white">
+      <div className="grid grid-cols-4 border-b-2 border-border bg-card">
         {/* 地區篩選 - 下拉選單按鈕 */}
         <div className="relative border-r border-border group">
           <button
@@ -503,7 +503,7 @@ export function ResourcePanel({
           {/* 下拉選單 */}
           <div
             id="country-dropdown-menu"
-            className="hidden absolute top-full left-0 w-48 max-h-60 overflow-y-auto bg-white border border-border rounded-md shadow-lg z-50 mt-1"
+            className="hidden absolute top-full left-0 w-48 max-h-60 overflow-y-auto bg-card border border-border rounded-md shadow-lg z-50 mt-1"
           >
             <button
               onClick={() => {

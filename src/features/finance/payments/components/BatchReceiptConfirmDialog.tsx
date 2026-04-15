@@ -466,7 +466,7 @@ export function BatchReceiptConfirmDialog({
                       handleNoteChange(editingIndex, e.target.value)
                     }
                   }}
-                  className="bg-white"
+                  className="bg-card"
                   rows={2}
                 />
               </div>

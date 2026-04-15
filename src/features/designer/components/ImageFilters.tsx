@@ -132,7 +132,7 @@ export function ImageFilters({ adjustments, onChange }: ImageFiltersProps) {
       {/* 預覽效果 */}
       <div className="mt-4 p-2 bg-morandi-container/30 rounded-lg">
         <span className="text-xs text-morandi-secondary block mb-2">CSS Filter</span>
-        <code className="text-[10px] break-all bg-white p-1 rounded block">
+        <code className="text-[10px] break-all bg-card p-1 rounded block">
           {getFilterCSS(localAdjustments)}
         </code>
       </div>

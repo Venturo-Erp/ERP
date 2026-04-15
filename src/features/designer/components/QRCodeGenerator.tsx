@@ -131,7 +131,7 @@ export function QRCodeGenerator({ onGenerate }: QRCodeGeneratorProps) {
           <div
             className={cn(
               'w-32 h-32 border-2 border-dashed rounded-lg flex items-center justify-center',
-              previewUrl ? 'border-morandi-gold bg-white' : 'border-border bg-morandi-container/30'
+              previewUrl ? 'border-morandi-gold bg-card' : 'border-border bg-morandi-container/30'
             )}
           >
             {previewUrl ? (

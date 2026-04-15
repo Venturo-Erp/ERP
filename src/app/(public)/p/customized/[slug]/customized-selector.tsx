@@ -116,7 +116,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white/70 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
+      <header className="bg-card/70 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="text-2xl font-bold tracking-tight text-public-secondary">御風旅遊</div>
           <a href="tel:07-9585361" className="text-public-secondary font-medium hidden sm:block">
@@ -159,7 +159,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                         ${
                           selected
                             ? 'bg-status-info-bg ring-2 ring-public-secondary scale-[1.02]'
-                            : 'bg-white shadow-sm hover:shadow-md hover:scale-[1.01]'
+                            : 'bg-card shadow-sm hover:shadow-md hover:scale-[1.01]'
                         }
                       `}
                     >
@@ -228,7 +228,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
 
         {/* 右側：已選清單 */}
         <aside className="w-80 hidden lg:block">
-          <div className="sticky top-24 bg-white rounded-2xl shadow-lg p-6">
+          <div className="sticky top-24 bg-card rounded-2xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-public-secondary mb-2">已選景點</h2>
             <p className="text-sm text-morandi-primary mb-6">{selectedItems.length} 個景點</p>
 
@@ -285,7 +285,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
       </main>
 
       {/* 手機版底部固定按鈕 */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.1)] p-4">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-card shadow-[0_-4px_20px_rgba(0,0,0,0.1)] p-4">
         <button
           onClick={() => setShowForm(true)}
           disabled={selectedItems.length === 0}
@@ -306,8 +306,8 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
 
       {/* 表單 Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-morandi-primary/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-card rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-border flex justify-between items-center">
               <h2 className="text-xl font-bold text-morandi-primary">填寫聯絡資料</h2>
               <button

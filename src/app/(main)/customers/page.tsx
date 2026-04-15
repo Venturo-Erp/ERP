@@ -518,7 +518,7 @@ export default function CustomersPage() {
               ) : (
                 // 未綁定，顯示 QR Code
                 <>
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="bg-card p-4 rounded-lg shadow-sm">
                     <QRCodeSVG
                       value={`https://line.me/R/oaMessage/${process.env.NEXT_PUBLIC_LINE_BOT_ID || '@745gftqd'}?綁定 ${lineBindingCustomer.code}`}
                       size={180}

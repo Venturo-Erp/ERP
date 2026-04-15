@@ -347,7 +347,7 @@ export default function ReceiptTestPage() {
       <div>
         <h2 className="font-semibold mb-4">列印預覽</h2>
         <div
-          className="bg-white border-2 border-dashed border-gray-300 overflow-hidden"
+          className="bg-card border-2 border-dashed border-morandi-muted overflow-hidden"
           style={{
             width: '214mm',
             height: '140mm',

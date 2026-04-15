@@ -618,7 +618,7 @@ export function TourPnrToolDialog({
                         className={cn(
                           'flex items-center gap-3 px-3 py-2 rounded-lg border text-sm transition-colors',
                           hasMatch
-                            ? 'border-l-[3px] border-l-[#7a9e7e] border-r-border border-y-border bg-white'
+                            ? 'border-l-[3px] border-l-[#7a9e7e] border-r-border border-y-border bg-card'
                             : hasSuggestion
                               ? 'border-l-[3px] border-l-status-info border-r-border border-y-border bg-status-info-bg'
                               : 'border-l-[3px] border-l-morandi-gold border-r-border border-y-border bg-morandi-gold/5'
@@ -682,7 +682,7 @@ export function TourPnrToolDialog({
                             <div>
                               <div className="text-xs text-morandi-gold">{LABELS.查無此旅客}</div>
                               <select
-                                className="mt-1 text-xs border border-border rounded px-1.5 py-0.5 bg-white"
+                                className="mt-1 text-xs border border-border rounded px-1.5 py-0.5 bg-card"
                                 value=""
                                 onChange={e => handleMemberSelect(i, e.target.value || null)}
                               >

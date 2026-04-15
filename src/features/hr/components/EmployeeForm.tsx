@@ -396,7 +396,7 @@ export function EmployeeForm({
   return (
     <form onSubmit={handleSubmit} className="h-full">
       {/* Character Card 風格 */}
-      <div className="bg-white rounded-xl overflow-hidden border-l-4 border-morandi-gold h-full flex">
+      <div className="bg-card rounded-xl overflow-hidden border-l-4 border-morandi-gold h-full flex">
         {/* 左側：照片（固定寬度，高度填滿） */}
         <div className="w-72 bg-gradient-to-b from-morandi-container to-morandi-container/50 p-8 flex flex-col items-center justify-center flex-shrink-0">
           <div className="relative group mb-4">
@@ -538,7 +538,7 @@ export function EmployeeForm({
                     <select
                       value={formData.role_id}
                       onChange={e => setFormData({ ...formData, role_id: e.target.value })}
-                      className="w-full px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-white text-morandi-primary"
+                      className="w-full px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-card text-morandi-primary"
                     >
                       <option value="">請選擇職務</option>
                       {roles.map(role => (
@@ -731,7 +731,7 @@ export function EmployeeForm({
                     <Label className="text-xs font-semibold text-morandi-secondary uppercase">
                       發薪日
                     </Label>
-                    <select className="w-full px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-white text-morandi-primary">
+                    <select className="w-full px-3 py-2 border border-morandi-gold/30 rounded-lg focus:border-morandi-gold focus:outline-none bg-card text-morandi-primary">
                       <option value="5">每月 5 日</option>
                       <option value="10">每月 10 日</option>
                       <option value="15">每月 15 日</option>

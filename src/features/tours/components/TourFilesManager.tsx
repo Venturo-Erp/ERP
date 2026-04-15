@@ -368,7 +368,7 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
                     className={cn(
                       'text-xs px-2 py-0.5 rounded-full',
                       selectedFolder?.id === folder.id
-                        ? 'bg-white/20 text-white'
+                        ? 'bg-card/20 text-white'
                         : 'bg-morandi-gold/10 text-morandi-gold'
                     )}
                   >
@@ -382,7 +382,7 @@ export function TourFilesManager({ tourId, tourCode }: TourFilesManagerProps) {
       </div>
 
       {/* 右側：檔案列表 */}
-      <div className="flex-1 flex flex-col border border-morandi-muted rounded-lg bg-white">
+      <div className="flex-1 flex flex-col border border-morandi-muted rounded-lg bg-card">
         {/* 標題列 */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-morandi-muted">
           <div>

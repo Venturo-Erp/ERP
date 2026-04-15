@@ -135,7 +135,7 @@ export function SignaturePad({
 
       {/* 簽名區域 - touch-none 防止觸控時縮放/滾動 */}
       <div
-        className="border-2 border-dashed border-morandi-gold/50 rounded-lg overflow-hidden bg-white touch-none"
+        className="border-2 border-dashed border-morandi-gold/50 rounded-lg overflow-hidden bg-card touch-none"
         style={{ touchAction: 'none' }}
       >
         <canvas

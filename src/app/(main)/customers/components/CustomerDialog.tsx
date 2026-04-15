@@ -207,7 +207,7 @@ export function CustomerDialog({
                 {/* 編輯按鈕 - 右下角 */}
                 <button
                   onClick={() => setIsEditorOpen(true)}
-                  className="absolute bottom-3 right-3 p-2 bg-white/90 hover:bg-white rounded-full shadow-md transition-all opacity-80 hover:opacity-100"
+                  className="absolute bottom-3 right-3 p-2 bg-card/90 hover:bg-card rounded-full shadow-md transition-all opacity-80 hover:opacity-100"
                   title="編輯照片"
                 >
                   <Pencil size={16} className="text-morandi-primary" />
@@ -236,7 +236,7 @@ export function CustomerDialog({
                   value={formData.name}
                   onChange={e => updateField('name', e.target.value)}
                   readOnly={!isEdit}
-                  className={`h-10 bg-white ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 bg-card ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -248,7 +248,7 @@ export function CustomerDialog({
                   value={formData.passport_name}
                   onChange={e => updateField('passport_name', e.target.value.toUpperCase())}
                   readOnly={!isEdit}
-                  className={`h-10 font-mono bg-white ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 font-mono bg-card ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -260,7 +260,7 @@ export function CustomerDialog({
                   value={formData.passport_number}
                   onChange={e => updateField('passport_number', e.target.value)}
                   readOnly={!isEdit}
-                  className={`h-10 font-mono bg-white ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 font-mono bg-card ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -278,7 +278,7 @@ export function CustomerDialog({
                   <Input
                     value={formData.passport_expiry || ''}
                     readOnly
-                    className="h-10 bg-white cursor-default"
+                    className="h-10 bg-card cursor-default"
                   />
                 )}
               </FormField>
@@ -294,7 +294,7 @@ export function CustomerDialog({
                   <Input
                     value={formData.birth_date || ''}
                     readOnly
-                    className="h-10 bg-white cursor-default"
+                    className="h-10 bg-card cursor-default"
                   />
                 )}
               </FormField>
@@ -307,7 +307,7 @@ export function CustomerDialog({
                   value={formData.national_id}
                   onChange={e => updateField('national_id', e.target.value)}
                   readOnly={!isEdit}
-                  className={`h-10 font-mono bg-white ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 font-mono bg-card ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -316,7 +316,7 @@ export function CustomerDialog({
                   value={formData.phone}
                   onChange={e => updateField('phone', e.target.value)}
                   readOnly={!isEdit}
-                  className={`h-10 bg-white ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 bg-card ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -326,7 +326,7 @@ export function CustomerDialog({
                   value={formData.email}
                   onChange={e => updateField('email', e.target.value)}
                   readOnly={!isEdit}
-                  className={`h-10 bg-white ${!isEdit ? 'cursor-default' : ''}`}
+                  className={`h-10 bg-card ${!isEdit ? 'cursor-default' : ''}`}
                 />
               </FormField>
 
@@ -338,7 +338,7 @@ export function CustomerDialog({
                     onChange={e => updateField('dietary_restrictions', e.target.value)}
                     readOnly={!isEdit}
                     placeholder={isEdit ? L.placeholder_dietary : ''}
-                    className={`h-10 bg-white ${!isEdit ? 'cursor-default' : ''}`}
+                    className={`h-10 bg-card ${!isEdit ? 'cursor-default' : ''}`}
                   />
                 </FormField>
               </div>

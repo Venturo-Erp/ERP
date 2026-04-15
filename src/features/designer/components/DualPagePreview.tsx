@@ -155,7 +155,7 @@ export function DualPagePreview({
         title={`${DESIGNER_LABELS.點擊編輯}${page.name}`}
       >
         <div
-          className="absolute inset-0 bg-white shadow-lg rounded overflow-hidden"
+          className="absolute inset-0 bg-card shadow-lg rounded overflow-hidden"
           style={{ backgroundColor: page.backgroundColor }}
         >
           <PageThumbnail page={page} scale={zoom} />

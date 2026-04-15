@@ -123,7 +123,7 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
       {enabledTourCategories.length > 1 && (
         <div>
           <label className="text-sm font-medium text-morandi-primary">
-            團類型 <span className="text-red-500">*</span>
+            團類型 <span className="text-morandi-red">*</span>
           </label>
           <Select
             value={newTour.tour_service_type || enabledTourCategories[0]?.id || 'tour_group'}

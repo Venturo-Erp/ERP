@@ -485,7 +485,7 @@ export function TransportQuoteDialog({
                     {daySchedules.map((day, idx) => (
                       <tr
                         key={day.dayNumber}
-                        className={idx % 2 === 0 ? 'bg-white' : 'bg-background'}
+                        className={idx % 2 === 0 ? 'bg-card' : 'bg-background'}
                       >
                         <td className="border border-morandi-container px-3 py-2">
                           <div className="font-semibold text-[var(--morandi-gold)]">

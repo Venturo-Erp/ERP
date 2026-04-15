@@ -112,7 +112,7 @@ export const CanvasArea = forwardRef<HTMLDivElement, CanvasAreaProps>(function C
               dpi={300}
             >
               <div
-                className="bg-white shadow-lg rounded"
+                className="bg-card shadow-lg rounded"
                 style={{
                   width: canvasWidth,
                   height: canvasHeight,
@@ -148,7 +148,7 @@ export const CanvasArea = forwardRef<HTMLDivElement, CanvasAreaProps>(function C
 
       {/* Quick Actions (bottom left) */}
       <div className="absolute bottom-4 left-4 flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={onImageUpload} className="gap-1 bg-white">
+        <Button variant="outline" size="sm" onClick={onImageUpload} className="gap-1 bg-card">
           <Upload size={14} />
           {DESIGNER_LABELS.UPLOAD_IMAGE}
         </Button>

@@ -174,7 +174,7 @@ export function CheckinQRCode({ tour }: CheckinQRCodeProps) {
       <div className="flex flex-col md:flex-row gap-6">
         {/* QR Code */}
         <div className="flex-shrink-0">
-          <div ref={qrRef} className="bg-white p-4 rounded-lg border border-border inline-block">
+          <div ref={qrRef} className="bg-card p-4 rounded-lg border border-border inline-block">
             <QRCodeSVG value={checkinUrl} size={160} level="M" includeMargin={false} />
           </div>
         </div>

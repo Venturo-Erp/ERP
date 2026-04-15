@@ -419,14 +419,14 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
             <div className="h-12 bg-morandi-green/90 text-white px-6 flex items-center">
               <h2 className="text-sm font-semibold">編輯表單</h2>
             </div>
-            <div className="flex-1 overflow-y-auto bg-white">
+            <div className="flex-1 overflow-y-auto bg-card">
               <PrintItineraryForm data={printData} onChange={setPrintData} />
             </div>
           </div>
 
           {/* 右側：預覽 */}
-          <div className="w-1/2 bg-gray-100 flex flex-col print:w-full">
-            <div className="h-12 bg-white border-b px-6 flex items-center justify-between print:hidden">
+          <div className="w-1/2 bg-morandi-container flex flex-col print:w-full">
+            <div className="h-12 bg-card border-b px-6 flex items-center justify-between print:hidden">
               <h2 className="text-sm font-semibold text-muted-foreground">列印預覽</h2>
               <span className="text-xs text-muted-foreground">A4 (210mm x 297mm)</span>
             </div>
@@ -498,7 +498,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
           <div className="h-12 bg-morandi-gold/90 text-white px-6 flex items-center">
             <h2 className="text-sm font-semibold">編輯表單</h2>
           </div>
-          <div className="flex-1 overflow-y-auto bg-white">
+          <div className="flex-1 overflow-y-auto bg-card">
             <TourForm
               data={{
                 ...tourData,
@@ -538,9 +538,9 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
         </div>
 
         {/* 右側：預覽 */}
-        <div className="w-1/2 bg-white flex flex-col">
+        <div className="w-1/2 bg-card flex flex-col">
           {/* 預覽工具列 */}
-          <div className="h-12 bg-white border-b px-6 flex items-center justify-between">
+          <div className="h-12 bg-card border-b px-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h2 className="text-sm font-semibold text-muted-foreground">即時預覽</h2>
               <div className="flex gap-1 bg-muted/50 rounded-lg p-0.5">
@@ -549,7 +549,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
                   className={cn(
                     'px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1',
                     viewMode === 'desktop'
-                      ? 'bg-white shadow-sm text-foreground'
+                      ? 'bg-card shadow-sm text-foreground'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
@@ -561,7 +561,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
                   className={cn(
                     'px-2.5 py-1 rounded-md text-xs font-medium transition-colors flex items-center gap-1',
                     viewMode === 'mobile'
-                      ? 'bg-white shadow-sm text-foreground'
+                      ? 'bg-card shadow-sm text-foreground'
                       : 'text-muted-foreground hover:text-foreground'
                   )}
                 >
@@ -588,7 +588,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
                         <div className="bg-black w-[120px] h-[34px] rounded-full" />
                       </div>
                       <div
-                        className="bg-white rounded-[37px] overflow-hidden relative"
+                        className="bg-card rounded-[37px] overflow-hidden relative"
                         style={{ width: '390px', height: '844px' }}
                       >
                         <div
@@ -606,7 +606,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
                   </div>
                 ) : (
                   <div
-                    className="bg-white shadow-2xl rounded-lg overflow-hidden"
+                    className="bg-card shadow-2xl rounded-lg overflow-hidden"
                     style={{ width: '1200px', height: '800px' }}
                   >
                     <div className="w-full h-full overflow-y-auto">

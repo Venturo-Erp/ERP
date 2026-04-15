@@ -35,7 +35,7 @@ export function UnifiedTraditionalView({
   const ws = useWorkspaceSettings()
 
   return (
-    <div className="bg-white flex flex-col min-h-full">
+    <div className="bg-card flex flex-col min-h-full">
       {/* 標題區 */}
       <div className="flex justify-between items-start mb-6">
         <h2
@@ -142,7 +142,7 @@ export function UnifiedTraditionalView({
           value={note}
           onChange={e => setNote(e.target.value)}
           placeholder="其他說明或備註事項..."
-          className="min-h-[80px] border-morandi-muted focus:border-morandi-gold bg-white"
+          className="min-h-[80px] border-morandi-muted focus:border-morandi-gold bg-card"
         />
       </div>
 
@@ -493,7 +493,7 @@ function CancellationTable({ items }: { items: Array<Record<string, unknown>> })
         </thead>
         <tbody>
           {items.map((item, idx) => (
-            <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-morandi-red/10'}>
+            <tr key={idx} className={idx % 2 === 0 ? 'bg-card' : 'bg-morandi-red/10'}>
               <td className="border border-morandi-red/30 px-3 py-2 font-medium">
                 {String(item.name || '—')}
               </td>

@@ -309,7 +309,7 @@ export function VehicleEditor({
               'flex-1 px-2 py-1.5 text-xs rounded border transition-colors',
               (columnSettings.layoutMode || 'list') === 'list'
                 ? 'bg-morandi-gold text-white border-morandi-gold'
-                : 'bg-white border-border hover:border-morandi-gold'
+                : 'bg-card border-border hover:border-morandi-gold'
             )}
           >
             {DESIGNER_LABELS.LABEL_9146}
@@ -326,7 +326,7 @@ export function VehicleEditor({
               'flex-1 px-2 py-1.5 text-xs rounded border transition-colors',
               columnSettings.layoutMode === 'grid'
                 ? 'bg-morandi-gold text-white border-morandi-gold'
-                : 'bg-white border-border hover:border-morandi-gold'
+                : 'bg-card border-border hover:border-morandi-gold'
             )}
           >
             {DESIGNER_LABELS.LABEL_2441}

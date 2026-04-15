@@ -40,7 +40,7 @@ export function QuotePageLayout({
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-morandi-container/30 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-border">
+        <div className="bg-card rounded-xl shadow-lg overflow-hidden border border-border">
           {/* 標頭區（統一格式） */}
           <div className="bg-gradient-to-r from-morandi-gold to-morandi-gold-hover px-6 py-4 text-white">
             <div className="flex justify-between items-start">

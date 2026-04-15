@@ -1254,7 +1254,7 @@ function BankDialog({
               id="isDefault"
               checked={isDefault}
               onChange={e => setIsDefault(e.target.checked)}
-              className="h-4 w-4 rounded border-gray-300"
+              className="h-4 w-4 rounded border-morandi-muted"
             />
             <Label htmlFor="isDefault">設為預設帳戶</Label>
           </div>

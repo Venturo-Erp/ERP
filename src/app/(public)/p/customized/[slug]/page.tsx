@@ -383,11 +383,11 @@ export default function WishlistDetailPage({ params }: { params: Promise<{ slug:
                     key={item.id}
                     onClick={() => toggleItem(item)}
                     className={`
-                      relative bg-white/5 backdrop-blur-sm border rounded-xl overflow-hidden cursor-pointer transition-all
+                      relative bg-card/5 backdrop-blur-sm border rounded-xl overflow-hidden cursor-pointer transition-all
                       ${
                         isSelected
                           ? 'ring-2 ring-primary border-primary bg-primary/10'
-                          : 'border-white/10 hover:border-white/30 hover:bg-white/10'
+                          : 'border-white/10 hover:border-white/30 hover:bg-card/10'
                       }
                     `}
                   >
@@ -433,7 +433,7 @@ export default function WishlistDetailPage({ params }: { params: Promise<{ slug:
 
           {/* 右側：已選景點 */}
           <div className="w-80 flex-shrink-0">
-            <div className="sticky top-24 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
+            <div className="sticky top-24 bg-card/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5">
               <h3 className="font-bold text-lg mb-1 text-white">已選景點</h3>
               <p className="text-sm text-white/50 mb-4">{selectedItems.length} 個景點</p>
 
@@ -446,7 +446,7 @@ export default function WishlistDetailPage({ params }: { params: Promise<{ slug:
                   {selectedItems.map((item, index) => (
                     <div
                       key={item.item_id}
-                      className="flex items-center gap-2 p-2 bg-white/5 rounded-lg group"
+                      className="flex items-center gap-2 p-2 bg-card/5 rounded-lg group"
                     >
                       <span className="w-6 h-6 rounded-full bg-primary/20 text-primary text-xs flex items-center justify-center font-medium">
                         {index + 1}
@@ -695,7 +695,7 @@ export default function WishlistDetailPage({ params }: { params: Promise<{ slug:
                 {matchingCustomers.map(c => (
                   <div
                     key={c.id}
-                    className="flex items-center justify-between p-2 bg-white rounded border cursor-pointer hover:border-primary"
+                    className="flex items-center justify-between p-2 bg-card rounded border cursor-pointer hover:border-primary"
                     onClick={async () => {
                       // 綁定到這個客戶
                       const res = await fetch('/api/customers/link-line', {
@@ -831,7 +831,7 @@ export default function WishlistDetailPage({ params }: { params: Promise<{ slug:
             </p>
 
             {/* QR Code */}
-            <div className="bg-white rounded-xl p-6 mb-6 inline-block mx-auto">
+            <div className="bg-card rounded-xl p-6 mb-6 inline-block mx-auto">
               <QRCodeSVG value={trackingUrl} size={180} level="M" includeMargin={false} />
             </div>
 
@@ -841,7 +841,7 @@ export default function WishlistDetailPage({ params }: { params: Promise<{ slug:
             <div className="bg-muted rounded-lg p-4 mb-6">
               <p className="text-xs text-muted-foreground mb-2">或複製連結：</p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 text-xs bg-white px-2 py-1.5 rounded border truncate">
+                <code className="flex-1 text-xs bg-card px-2 py-1.5 rounded border truncate">
                   {trackingUrl}
                 </code>
                 <Button size="icon" variant="outline" className="h-8 w-8" onClick={copyTrackingUrl}>

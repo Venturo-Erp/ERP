@@ -148,7 +148,7 @@ export function ComponentLibrary({ onInsertComponent, templateData }: ComponentL
   }
 
   return (
-    <div className="w-64 h-full bg-white border-r border-border flex flex-col">
+    <div className="w-64 h-full bg-card border-r border-border flex flex-col">
       {/* 標題 */}
       <div className="p-3 border-b border-border h-[42px] flex items-center">
         <h3 className="font-medium text-sm text-morandi-primary">{DESIGNER_LABELS.LABEL_7516}</h3>

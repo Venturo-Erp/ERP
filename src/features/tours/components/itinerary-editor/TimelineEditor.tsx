@@ -93,7 +93,7 @@ export function TimelineEditor({
               Day {d.day}
               {hasActivities && (
                 <span
-                  className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white' : 'bg-morandi-gold'}`}
+                  className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-card' : 'bg-morandi-gold'}`}
                 />
               )}
             </button>
@@ -275,7 +275,7 @@ export function TimelineEditor({
                       onUpdateActivity(idx, actIdx, 'startTime', val)
                     }}
                     placeholder="09:00"
-                    className="w-[42px] px-0.5 py-2 text-xs text-center bg-transparent border-0 focus:outline-none focus:bg-white"
+                    className="w-[42px] px-0.5 py-2 text-xs text-center bg-transparent border-0 focus:outline-none focus:bg-card"
                   />
                   <span className="text-morandi-muted text-[10px]">~</span>
                   <input
@@ -291,7 +291,7 @@ export function TimelineEditor({
                       onUpdateActivity(idx, actIdx, 'endTime', val)
                     }}
                     placeholder="10:30"
-                    className="w-[42px] px-0.5 py-2 text-xs text-center bg-transparent border-0 focus:outline-none focus:bg-white"
+                    className="w-[42px] px-0.5 py-2 text-xs text-center bg-transparent border-0 focus:outline-none focus:bg-card"
                   />
                 </div>
 
@@ -307,7 +307,7 @@ export function TimelineEditor({
                     }}
                     placeholder={ITINERARY_DIALOG_LABELS.景點名稱}
                     rows={1}
-                    className="flex-1 px-2 py-2 text-xs bg-transparent border-0 focus:outline-none focus:bg-white resize-none leading-tight"
+                    className="flex-1 px-2 py-2 text-xs bg-transparent border-0 focus:outline-none focus:bg-card resize-none leading-tight"
                     style={{ minHeight: '32px' }}
                   />
                   <button

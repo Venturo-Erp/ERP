@@ -237,7 +237,7 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
       <div key={module.code}>
         {/* 模組行 */}
         <div
-          className={`flex items-center border-t border-border ${hasTabs ? 'bg-morandi-bg/30' : 'bg-white'}`}
+          className={`flex items-center border-t border-border ${hasTabs ? 'bg-morandi-bg/30' : 'bg-card'}`}
         >
           <div className="flex-1 p-4 flex items-center gap-2">
             {hasTabs ? (
@@ -327,7 +327,7 @@ export function ModulePermissionTable(props: ModulePermissionTableProps) {
             const perm = getRolePermission(module.code, tab.code)
 
             return (
-              <div key={tab.code} className="flex items-center border-t border-border bg-white">
+              <div key={tab.code} className="flex items-center border-t border-border bg-card">
                 <div className="flex-1 p-4 pl-12 flex items-center gap-2">
                   <div className="w-1 h-4 bg-border rounded-full" />
                   <span className="text-sm text-morandi-primary">{tab.name}</span>

@@ -647,7 +647,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
             {/* 去程 - 可點選 */}
             <div
               onClick={() => handleCopyFlight('outbound')}
-              className="flex items-center gap-2 p-2 rounded bg-white/50 cursor-pointer hover:bg-white/80 transition-colors group"
+              className="flex items-center gap-2 p-2 rounded bg-card/50 cursor-pointer hover:bg-card/80 transition-colors group"
             >
               <span className="text-morandi-muted w-10">去程</span>
               <span className="flex-1 font-mono">
@@ -662,7 +662,7 @@ function TicketForm({ todo, onUpdate, onClose }: FormProps) {
             {/* 回程 - 可點選 */}
             <div
               onClick={() => handleCopyFlight('return')}
-              className="flex items-center gap-2 p-2 rounded bg-white/50 cursor-pointer hover:bg-white/80 transition-colors group"
+              className="flex items-center gap-2 p-2 rounded bg-card/50 cursor-pointer hover:bg-card/80 transition-colors group"
             >
               <span className="text-morandi-muted w-10">回程</span>
               <span className="flex-1 font-mono">

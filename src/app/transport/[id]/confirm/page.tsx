@@ -46,7 +46,7 @@ export default async function TransportConfirmPage({ params }: PageProps) {
   if (error || !item) {
     return (
       <div className="min-h-screen bg-morandi-container flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
+        <div className="bg-card rounded-lg shadow-lg p-8 max-w-md w-full text-center">
           <div className="text-6xl mb-4">❌</div>
           <h1 className="text-xl font-bold text-morandi-primary mb-2">找不到預訂資訊</h1>
           <p className="text-morandi-secondary">連結可能已失效或預訂已取消</p>
@@ -59,7 +59,7 @@ export default async function TransportConfirmPage({ params }: PageProps) {
   if (item.booking_confirmed_at) {
     return (
       <div className="min-h-screen bg-morandi-container flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
+        <div className="bg-card rounded-lg shadow-lg p-8 max-w-md w-full text-center">
           <div className="text-6xl mb-4">✅</div>
           <h1 className="text-xl font-bold text-morandi-primary mb-2">已確認</h1>
           <p className="text-morandi-secondary mb-4">司機資訊已提交，感謝您的配合！</p>
@@ -93,7 +93,7 @@ export default async function TransportConfirmPage({ params }: PageProps) {
         </div>
 
         {/* 團資訊 */}
-        <div className="bg-white border-x border-border p-6">
+        <div className="bg-card border-x border-border p-6">
           <h2 className="font-medium text-morandi-primary mb-3">團體資訊</h2>
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div>

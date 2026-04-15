@@ -104,7 +104,7 @@ export default function SettingsPage() {
           />
         </div>
         <style>{`
-          .settings-glass .bg-white {
+          .settings-glass .bg-card {
             background: rgba(255,255,255,0.25) !important;
             backdrop-filter: blur(24px) !important;
             -webkit-backdrop-filter: blur(24px) !important;

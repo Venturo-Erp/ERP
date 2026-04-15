@@ -192,7 +192,7 @@ export function LayerPanel({
   const hasSelection = selectedObjectIds.length > 0
 
   return (
-    <div className="w-48 h-full bg-white border-l border-border flex flex-col">
+    <div className="w-48 h-full bg-card border-l border-border flex flex-col">
       {/* 標題 */}
       <div className="p-3 border-b border-border flex items-center gap-2">
         <Layers size={16} className="text-morandi-gold" />

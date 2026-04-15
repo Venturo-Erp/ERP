@@ -153,7 +153,7 @@ export function PropertiesPanel({
 
   if (!selectedObject) {
     return (
-      <div className="w-64 h-full bg-white border-l border-border flex flex-col">
+      <div className="w-64 h-full bg-card border-l border-border flex flex-col">
         <div className="p-3 border-b border-border">
           <h3 className="font-medium text-sm text-morandi-primary">{DESIGNER_LABELS.屬性}</h3>
         </div>
@@ -169,7 +169,7 @@ export function PropertiesPanel({
   const isText = isTextType((properties.type as string) || '') || allAreText
 
   return (
-    <div className="w-64 h-full bg-white border-l border-border flex flex-col overflow-hidden">
+    <div className="w-64 h-full bg-card border-l border-border flex flex-col overflow-hidden">
       <div className="p-3 border-b border-border flex items-center gap-2">
         {getTypeIcon(properties.type as string)}
         <h3 className="font-medium text-sm text-morandi-primary">

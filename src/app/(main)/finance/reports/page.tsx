@@ -111,7 +111,7 @@ export default function ReportsPage() {
                       onClick={() => setDetailGranularity(opt.value)}
                       className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                         detailGranularity === opt.value
-                          ? 'bg-white text-morandi-primary shadow-sm'
+                          ? 'bg-card text-morandi-primary shadow-sm'
                           : 'text-morandi-secondary hover:text-morandi-primary'
                       }`}
                     >

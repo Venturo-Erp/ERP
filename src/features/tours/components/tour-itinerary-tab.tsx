@@ -1479,7 +1479,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 <Input
                                   value={flight.flightNumber || ''}
@@ -1493,7 +1493,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-20 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-20 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 <Input
                                   value={flight.departureAirport || ''}
@@ -1507,7 +1507,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 <Input
                                   value={flight.departureTime || ''}
@@ -1519,7 +1519,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 <span className="text-muted-foreground w-4 text-center text-xs">
                                   →
@@ -1536,7 +1536,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 <Input
                                   value={flight.arrivalTime || ''}
@@ -1548,7 +1548,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 {index === 0 ? (
                                   <div className="flex-1 flex items-center justify-end gap-1">
@@ -1675,7 +1675,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 <Input
                                   value={flight.flightNumber || ''}
@@ -1689,7 +1689,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-20 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-20 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 <Input
                                   value={flight.departureAirport || ''}
@@ -1703,7 +1703,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 <Input
                                   value={flight.departureTime || ''}
@@ -1715,7 +1715,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 <span className="text-muted-foreground w-4 text-center text-xs">
                                   →
@@ -1732,7 +1732,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-14 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 <Input
                                   value={flight.arrivalTime || ''}
@@ -1744,7 +1744,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                       )
                                     )
                                   }
-                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-white focus-visible:border focus-visible:rounded"
+                                  className="h-7 text-sm w-16 px-1 border-0 border-b border-border/30 rounded-none bg-transparent focus-visible:bg-card focus-visible:border focus-visible:rounded"
                                 />
                                 {index === 0 ? (
                                   <div className="flex-1 flex items-center justify-end gap-1">

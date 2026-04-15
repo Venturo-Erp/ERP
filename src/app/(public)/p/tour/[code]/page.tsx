@@ -285,7 +285,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
   return (
     <div className="min-h-screen bg-background text-morandi-primary">
       {/* Top Header */}
-      <header className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
+      <header className="bg-card/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
         <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
           <div className="text-xl font-bold tracking-tight text-public-primary">
             {companyInfo.name}
@@ -319,7 +319,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
 
       {/* Sticky Day Navigation */}
       {dailyItinerary.length > 0 && (
-        <nav className="sticky top-[72px] z-40 bg-white/60 backdrop-blur-md border-b border-slate-200/20 py-2">
+        <nav className="sticky top-[72px] z-40 bg-card/60 backdrop-blur-md border-b border-slate-200/20 py-2">
           <div
             className="max-w-7xl mx-auto px-6 flex justify-center md:justify-start gap-2 overflow-x-auto"
             style={{ scrollbarWidth: 'none' }}
@@ -453,7 +453,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
         <aside className="md:w-[380px]">
           <div className="sticky top-40 space-y-6">
             {/* Price Card */}
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
+            <div className="bg-card p-8 rounded-2xl shadow-sm border border-slate-100">
               <div className="text-slate-500 text-xs font-bold tracking-widest uppercase mb-2">
                 行程價格
               </div>
@@ -557,7 +557,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
         <div className="max-w-7xl mx-auto px-8">
           {/* Employee Card */}
           {employee && (
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 mb-8 max-w-xl mx-auto">
+            <div className="bg-card rounded-2xl p-8 shadow-sm border border-slate-100 mb-8 max-w-xl mx-auto">
               <div className="text-center mb-6">
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">
                   您的專屬顧問

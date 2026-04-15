@@ -131,7 +131,7 @@ export default async function WishlistIndexPage() {
               <Link
                 key={template.id}
                 href={`/p/customized/${template.slug}`}
-                className="group block bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1"
+                className="group block bg-card/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden hover:bg-card/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-1"
               >
                 {/* 封面圖 */}
                 <div className="aspect-[4/3] bg-gradient-to-br from-primary/30 to-primary/10 relative overflow-hidden">

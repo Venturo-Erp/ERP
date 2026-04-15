@@ -248,7 +248,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 <summary className="inline cursor-pointer text-xs text-morandi-secondary hover:text-status-info ml-2">
                   （隱藏 {category.hiddenItems.length} 個）
                 </summary>
-                <div className="absolute mt-1 bg-white border border-border rounded-lg shadow-lg p-2 z-10 space-y-1">
+                <div className="absolute mt-1 bg-card border border-border rounded-lg shadow-lg p-2 z-10 space-y-1">
                   {category.hiddenItems.map(h => (
                     <button
                       key={h.id}

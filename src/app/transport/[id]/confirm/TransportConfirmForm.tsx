@@ -67,7 +67,7 @@ export function TransportConfirmForm({ itemId, defaultValues }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-white border-x border-b border-border rounded-b-lg p-6"
+      className="bg-card border-x border-b border-border rounded-b-lg p-6"
     >
       <h2 className="font-medium text-morandi-primary mb-4">司機資訊</h2>
 

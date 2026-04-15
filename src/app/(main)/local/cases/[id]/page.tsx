@@ -136,7 +136,7 @@ export default function LocalCaseDetailPage() {
         ) : (
           <div className="max-w-2xl space-y-6">
             {/* 基本資訊 */}
-            <section className="bg-white rounded-lg border border-border p-4">
+            <section className="bg-card rounded-lg border border-border p-4">
               <h3 className="text-sm font-medium text-morandi-primary mb-3">委託資訊</h3>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function LocalCaseDetailPage() {
             </section>
 
             {/* 報價區 */}
-            <section className="bg-white rounded-lg border border-border p-4">
+            <section className="bg-card rounded-lg border border-border p-4">
               <h3 className="text-sm font-medium text-morandi-primary mb-3">Local 報價</h3>
 
               {caseData.quoted_cost != null && caseData.response_status === 'quoted' && (

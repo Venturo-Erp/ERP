@@ -230,7 +230,7 @@ export function SupplierRequestsPage() {
               <span
                 className={cn(
                   'ml-1.5 px-1.5 py-0.5 rounded-full text-xs',
-                  filterStatus === tab.value ? 'bg-white/20' : 'bg-morandi-container'
+                  filterStatus === tab.value ? 'bg-card/20' : 'bg-morandi-container'
                 )}
               >
                 {tab.count}

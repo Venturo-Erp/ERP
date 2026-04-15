@@ -228,7 +228,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
 
         <div className="grid md:grid-cols-2 gap-6">
           {/* 詢價資訊 */}
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+          <div className="bg-card/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
             <h3 className="font-bold text-white mb-4">詢價資訊</h3>
 
             <div className="space-y-4">
@@ -272,7 +272,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
           </div>
 
           {/* 已選景點 */}
-          <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+          <div className="bg-card/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
             <h3 className="font-bold text-white mb-4">
               已選景點（{inquiry?.selected_items?.length || 0}）
             </h3>
@@ -281,7 +281,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
               {inquiry?.selected_items?.map((item, index) => (
                 <div
                   key={item.item_id}
-                  className="flex items-center gap-2 p-2 bg-white/5 rounded-lg"
+                  className="flex items-center gap-2 p-2 bg-card/5 rounded-lg"
                 >
                   <span className="w-6 h-6 rounded-full bg-primary/20 text-primary text-xs flex items-center justify-center font-medium">
                     {index + 1}
@@ -295,7 +295,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
 
         {/* 備註/對話 */}
         {inquiry?.notes && (
-          <div className="mt-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+          <div className="mt-6 bg-card/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
             <h3 className="font-bold text-white mb-4 flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
               備註與對話
@@ -318,7 +318,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
         )}
 
         {/* 追加留言 */}
-        <div className="mt-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+        <div className="mt-6 bg-card/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
           <h3 className="font-bold text-white mb-4">追加留言</h3>
           <Textarea
             value={additionalNotes}

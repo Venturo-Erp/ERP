@@ -398,7 +398,7 @@ export default function CustomizedTourEditPage({ params }: { params: Promise<{ i
                 {items.map((item, index) => (
                   <div
                     key={item.id}
-                    className="flex gap-3 p-3 bg-white border rounded-lg shadow-sm group hover:shadow-md transition-shadow"
+                    className="flex gap-3 p-3 bg-card border rounded-lg shadow-sm group hover:shadow-md transition-shadow"
                   >
                     {/* 序號 */}
                     <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
@@ -470,7 +470,7 @@ export default function CustomizedTourEditPage({ params }: { params: Promise<{ i
               {/* 國家篩選 */}
               <div className="flex gap-2">
                 <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                  <SelectTrigger className="w-40 bg-white">
+                  <SelectTrigger className="w-40 bg-card">
                     <SelectValue placeholder="選擇國家" />
                   </SelectTrigger>
                   <SelectContent>
@@ -489,7 +489,7 @@ export default function CustomizedTourEditPage({ params }: { params: Promise<{ i
                     value={searchTerm}
                     onChange={e => setSearchTerm(e.target.value)}
                     placeholder="搜尋景點..."
-                    className="pl-10 bg-white"
+                    className="pl-10 bg-card"
                   />
                   {searchTerm && (
                     <Button
@@ -513,7 +513,7 @@ export default function CustomizedTourEditPage({ params }: { params: Promise<{ i
                   <div
                     key={attraction.id}
                     className={`
-                      relative flex gap-3 p-3 bg-white border rounded-lg cursor-pointer transition-all
+                      relative flex gap-3 p-3 bg-card border rounded-lg cursor-pointer transition-all
                       ${
                         isAdded
                           ? 'opacity-50 cursor-not-allowed border-morandi-green/30 bg-morandi-green/10'

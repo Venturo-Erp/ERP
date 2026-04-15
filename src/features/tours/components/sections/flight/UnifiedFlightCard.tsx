@@ -468,7 +468,7 @@ function ArtFlightCard({
           {/* 中間箭頭 */}
           <div className="flex-1 flex items-center justify-center px-4">
             <div
-              className="w-full h-[2px] relative transition-colors duration-300 group-hover:bg-white"
+              className="w-full h-[2px] relative transition-colors duration-300 group-hover:bg-card"
               style={{ backgroundColor: theme.colors.primary }}
             >
               <Plane

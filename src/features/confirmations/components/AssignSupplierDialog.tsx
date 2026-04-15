@@ -701,7 +701,7 @@ export function AssignSupplierDialog({
             </DialogHeader>
 
             {/* PDF 預覽 */}
-            <div className="flex-1 overflow-auto border rounded-md bg-white min-h-0">
+            <div className="flex-1 overflow-auto border rounded-md bg-card min-h-0">
               <iframe
                 srcDoc={generateHtml()}
                 className="w-full h-[50vh] border-0"

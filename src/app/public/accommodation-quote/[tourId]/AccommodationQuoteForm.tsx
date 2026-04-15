@@ -128,7 +128,7 @@ export function AccommodationQuoteForm({
                     type="text"
                     value={room.roomType}
                     readOnly
-                    className="w-full px-2 py-1 text-sm bg-white border border-border rounded"
+                    className="w-full px-2 py-1 text-sm bg-card border border-border rounded"
                   />
                 </div>
                 <div>
@@ -137,7 +137,7 @@ export function AccommodationQuoteForm({
                     type="number"
                     value={room.quantity}
                     readOnly
-                    className="w-full px-2 py-1 text-sm bg-white border border-border rounded"
+                    className="w-full px-2 py-1 text-sm bg-card border border-border rounded"
                   />
                 </div>
                 <div>

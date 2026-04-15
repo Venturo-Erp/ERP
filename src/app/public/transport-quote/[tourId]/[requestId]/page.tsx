@@ -173,7 +173,7 @@ export default async function TransportQuoteWithRequestPage({
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-morandi-container/30 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-border">
+        <div className="bg-card rounded-xl shadow-lg overflow-hidden border border-border">
           {/* 標頭 */}
           <div className="bg-gradient-to-r from-morandi-gold to-morandi-gold-hover px-6 py-4 text-white">
             <h1 className="text-2xl font-bold">{tour.name}</h1>
@@ -222,7 +222,7 @@ export default async function TransportQuoteWithRequestPage({
                       .join('、')
 
                   return (
-                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-background'}>
+                    <tr key={idx} className={idx % 2 === 0 ? 'bg-card' : 'bg-background'}>
                       <td className="border border-morandi-container px-3 py-2">
                         <div className="font-semibold text-morandi-gold">Day {day.dayNumber}</div>
                         <div className="text-xs text-morandi-secondary">
@@ -287,7 +287,7 @@ export default async function TransportQuoteWithRequestPage({
                     return (
                       <div
                         key={h.id}
-                        className="bg-white border border-border rounded-lg p-3 text-sm"
+                        className="bg-card border border-border rounded-lg p-3 text-sm"
                       >
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-morandi-secondary text-xs">

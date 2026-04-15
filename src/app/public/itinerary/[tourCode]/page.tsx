@@ -121,7 +121,7 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
               <span className="text-public-muted font-serif italic mb-2 block">Flight Details</span>
               <h2 className="text-4xl font-serif font-medium text-morandi-primary">航班資訊</h2>
             </div>
-            <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+            <div className="bg-card rounded-3xl shadow-lg overflow-hidden">
               <table className="w-full">
                 <thead className="bg-morandi-primary text-white">
                   <tr>
@@ -175,7 +175,7 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
             {dailyItinerary.map((day, index) => (
               <article
                 key={index}
-                className="bg-white rounded-3xl shadow-lg overflow-hidden group hover:shadow-2xl transition-shadow duration-300"
+                className="bg-card rounded-3xl shadow-lg overflow-hidden group hover:shadow-2xl transition-shadow duration-300"
               >
                 <div className="grid lg:grid-cols-12">
                   {/* Day Number */}
@@ -236,7 +236,7 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
                         <h5 className="text-xs font-bold text-morandi-secondary uppercase tracking-widest mb-3">
                           Stay
                         </h5>
-                        <div className="bg-white p-4 shadow-sm rounded-sm border border-gray-100">
+                        <div className="bg-card p-4 shadow-sm rounded-sm border border-gray-100">
                           <div className="font-serif font-bold text-lg mb-1">
                             {day.accommodation}
                           </div>
@@ -251,7 +251,7 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
         </main>
 
         {/* 底部業務資訊 + CTA */}
-        <section className="py-16 bg-white border-t border-gray-100">
+        <section className="py-16 bg-card border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
             {salesPerson && (
               <div className="text-center">

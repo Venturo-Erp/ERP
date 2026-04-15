@@ -177,7 +177,7 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
                 value={props.searchTerm || ''}
                 onChange={e => props.onSearchChange?.(e.target.value)}
                 placeholder={props.searchPlaceholder || COMP_LAYOUT_LABELS.搜尋_2}
-                className="block w-full text-sm h-10 px-4 pr-10 text-morandi-primary bg-white rounded-lg border border-transparent appearance-none focus:border-border focus:outline-none focus:ring-1 focus:ring-morandi-gold/40 placeholder:text-morandi-secondary/50"
+                className="block w-full text-sm h-10 px-4 pr-10 text-morandi-primary bg-card rounded-lg border border-transparent appearance-none focus:border-border focus:outline-none focus:ring-1 focus:ring-morandi-gold/40 placeholder:text-morandi-secondary/50"
               />
               <div className="absolute top-2.5 right-3">
                 {props.searchTerm ? (

@@ -185,7 +185,7 @@ export function MapExplorerDialog({
         {/* Content */}
         <div className="flex flex-1 overflow-hidden">
           {/* 左側：景點列表 */}
-          <div className="w-72 border-r bg-white overflow-y-auto">
+          <div className="w-72 border-r bg-card overflow-y-auto">
             <div className="p-4 border-b bg-background">
               <div className="text-sm font-medium text-morandi-secondary">
                 周邊景點（{nearbyAttractions.length}）

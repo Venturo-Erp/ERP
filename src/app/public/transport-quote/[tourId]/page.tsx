@@ -163,7 +163,7 @@ export default async function TransportQuotePage({
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-morandi-container/30 py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-border">
+        <div className="bg-card rounded-xl shadow-lg overflow-hidden border border-border">
           {/* 標頭 */}
           <div className="bg-gradient-to-r from-morandi-gold to-morandi-gold-hover px-6 py-4 text-white">
             <h1 className="text-2xl font-bold">{tour.name}</h1>
@@ -212,7 +212,7 @@ export default async function TransportQuotePage({
                       .join('、')
 
                   return (
-                    <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-background'}>
+                    <tr key={idx} className={idx % 2 === 0 ? 'bg-card' : 'bg-background'}>
                       <td className="border border-morandi-container px-3 py-2">
                         <div className="font-semibold text-morandi-gold">Day {day.dayNumber}</div>
                         <div className="text-xs text-morandi-secondary">
@@ -255,7 +255,7 @@ export default async function TransportQuotePage({
                 <div className="text-4xl mb-4">✅</div>
                 <h3 className="text-xl font-semibold text-green-900 mb-2">預訂已確認</h3>
                 <p className="text-morandi-green mb-4">司機資訊已提交完成</p>
-                <div className="bg-white rounded-lg p-4 text-left text-sm max-w-xs mx-auto">
+                <div className="bg-card rounded-lg p-4 text-left text-sm max-w-xs mx-auto">
                   <div className="grid grid-cols-2 gap-2">
                     <span className="text-morandi-secondary">司機姓名</span>
                     <span className="font-medium">

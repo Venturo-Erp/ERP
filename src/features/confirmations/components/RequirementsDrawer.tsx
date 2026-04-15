@@ -98,7 +98,7 @@ export function RequirementsDrawer({
   }
 
   return (
-    <div className="border border-morandi-gold/30 rounded-lg overflow-hidden bg-white">
+    <div className="border border-morandi-gold/30 rounded-lg overflow-hidden bg-card">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-morandi-container/50 border-b border-morandi-gold/20">

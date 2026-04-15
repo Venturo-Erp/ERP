@@ -293,7 +293,7 @@ export function CustomerVerifyDialog({
                   {/* 重新上傳按鈕 */}
                   <label
                     htmlFor="customer-passport-reupload"
-                    className="absolute bottom-2 right-2 p-2 bg-white/90 hover:bg-white rounded-lg cursor-pointer shadow-sm border"
+                    className="absolute bottom-2 right-2 p-2 bg-card/90 hover:bg-card rounded-lg cursor-pointer shadow-sm border"
                     title={t('passport.reupload')}
                     onClick={e => e.stopPropagation()}
                   >

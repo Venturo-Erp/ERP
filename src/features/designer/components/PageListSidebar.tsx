@@ -250,7 +250,7 @@ export function PageListSidebar({
             onClick={() => onSelectPage(index)}
           >
             {/* 縮圖預覽區 */}
-            <div className="aspect-[559/794] bg-white rounded-t flex items-center justify-center text-xs text-morandi-secondary overflow-hidden">
+            <div className="aspect-[559/794] bg-card rounded-t flex items-center justify-center text-xs text-morandi-secondary overflow-hidden">
               {/* 簡易預覽：顯示頁面名稱 */}
               <div className="text-center p-2">
                 <div className="text-morandi-primary font-medium truncate">{page.name}</div>

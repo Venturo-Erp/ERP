@@ -81,7 +81,7 @@ export function BookingDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent level={1} className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+      <DialogContent level={1} className="max-w-4xl max-h-[90vh] overflow-y-auto bg-card">
         <form onSubmit={handleSubmit} className="space-y-8 p-6">
           {/* Hero */}
           <div className="text-center border-b border-border pb-6">
@@ -111,7 +111,7 @@ export function BookingDialog({
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
                   placeholder="姓名"
                   required
-                  className="bg-white"
+                  className="bg-card"
                 />
               </div>
               <div className="space-y-2">
@@ -124,7 +124,7 @@ export function BookingDialog({
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
                   placeholder="email@example.com"
                   required
-                  className="bg-white"
+                  className="bg-card"
                 />
               </div>
               <div className="space-y-2">
@@ -137,7 +137,7 @@ export function BookingDialog({
                   onChange={e => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="+886 912 345 678"
                   required
-                  className="bg-white"
+                  className="bg-card"
                 />
               </div>
               <div className="space-y-2">
@@ -151,7 +151,7 @@ export function BookingDialog({
                   onChange={e =>
                     setFormData({ ...formData, memberCount: parseInt(e.target.value) })
                   }
-                  className="bg-white"
+                  className="bg-card"
                 />
               </div>
             </div>
@@ -167,7 +167,7 @@ export function BookingDialog({
             {travelers.map((traveler, index) => (
               <div
                 key={traveler.id}
-                className="bg-white p-8 rounded-xl ring-1 ring-gray-200 shadow-sm relative"
+                className="bg-card p-8 rounded-xl ring-1 ring-gray-200 shadow-sm relative"
               >
                 <div className="absolute top-4 right-4 text-8xl font-serif font-bold text-gray-100 select-none">
                   {String(index + 1).padStart(2, '0')}
@@ -181,7 +181,7 @@ export function BookingDialog({
                       value={traveler.chineseName}
                       onChange={e => updateTraveler(traveler.id, 'chineseName', e.target.value)}
                       placeholder="王小明"
-                      className="bg-white"
+                      className="bg-card"
                     />
                   </div>
                   <div className="space-y-2">
@@ -192,7 +192,7 @@ export function BookingDialog({
                       value={traveler.pinyinName}
                       onChange={e => updateTraveler(traveler.id, 'pinyinName', e.target.value)}
                       placeholder="WANG XIAO MING"
-                      className="bg-white"
+                      className="bg-card"
                     />
                   </div>
                   <div className="space-y-2">
@@ -203,7 +203,7 @@ export function BookingDialog({
                       type="date"
                       value={traveler.dateOfBirth}
                       onChange={e => updateTraveler(traveler.id, 'dateOfBirth', e.target.value)}
-                      className="bg-white"
+                      className="bg-card"
                     />
                   </div>
                 </div>

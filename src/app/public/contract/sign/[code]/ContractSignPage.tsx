@@ -517,7 +517,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
         {/* 頂部資訊列 */}
-        <div className="bg-white border-b border-border shadow-sm sticky top-0 z-10">
+        <div className="bg-card border-b border-border shadow-sm sticky top-0 z-10">
           <div className="px-4 py-3">
             <div className="max-w-4xl mx-auto flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -557,11 +557,11 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
         <div className="flex-1 overflow-hidden p-4">
           <div className="max-w-4xl mx-auto h-full">
             {loading ? (
-              <div className="bg-white rounded-lg shadow-lg h-full flex items-center justify-center">
+              <div className="bg-card rounded-lg shadow-lg h-full flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
               </div>
             ) : error ? (
-              <div className="bg-white rounded-lg shadow-lg h-full flex items-center justify-center">
+              <div className="bg-card rounded-lg shadow-lg h-full flex items-center justify-center">
                 <div className="text-center text-morandi-red">
                   <p>{error}</p>
                 </div>
@@ -570,7 +570,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
               <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className="bg-white rounded-lg shadow-lg h-full overflow-y-auto"
+                className="bg-card rounded-lg shadow-lg h-full overflow-y-auto"
                 style={{ maxHeight: 'calc(100vh - 200px)' }}
               >
                 {/* 合約 HTML 內容（含簽名） */}
@@ -802,7 +802,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
         </div>
 
         {/* 底部按鈕區 */}
-        <div className="bg-white border-t border-border shadow-lg px-4 py-4 sticky bottom-0">
+        <div className="bg-card border-t border-border shadow-lg px-4 py-4 sticky bottom-0">
           <div className="max-w-4xl mx-auto">
             {savedSignature ? (
               /* 簽署完成：顯示狀態 + 列印按鈕 */
@@ -853,7 +853,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
   if (step === 'fill-info') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex flex-col">
-        <div className="bg-white border-b border-border px-4 py-4">
+        <div className="bg-card border-b border-border px-4 py-4">
           <div className="max-w-md mx-auto flex items-center">
             <button
               onClick={() => setStep('preview')}
@@ -866,7 +866,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
         </div>
 
         <div className="flex-1 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+          <div className="bg-card rounded-xl shadow-lg p-6 w-full max-w-md">
             <div className="mb-6 pb-4 border-b border-gray-100">
               <div className="text-sm text-gray-500 mb-1">{TEMPLATE_LABELS[contract.template]}</div>
               <div className="font-semibold text-gray-900">{contract.tours.name}</div>
@@ -955,7 +955,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex flex-col">
         {/* 頂部 */}
-        <div className="bg-white border-b border-border px-4 py-4">
+        <div className="bg-card border-b border-border px-4 py-4">
           <div className="max-w-md mx-auto flex items-center">
             <button
               onClick={() => setStep('preview')}
@@ -969,7 +969,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
 
         {/* 簽名區 */}
         <div className="flex-1 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md">
+          <div className="bg-card rounded-xl shadow-lg p-6 w-full max-w-md">
             {/* 合約摘要 */}
             <div className="mb-6 pb-6 border-b border-gray-100">
               <div className="text-sm text-gray-500 mb-1">{TEMPLATE_LABELS[contract.template]}</div>
@@ -1040,7 +1040,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
   if (step === 'success') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
+        <div className="bg-card rounded-xl shadow-lg p-8 max-w-md text-center">
           <div className="w-20 h-20 bg-morandi-green/15 rounded-full flex items-center justify-center mx-auto mb-6">
             <Check className="w-10 h-10 text-morandi-green" />
           </div>

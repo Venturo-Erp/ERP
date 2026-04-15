@@ -160,7 +160,7 @@ export function DesignerToolbar({
 
   return (
     <TooltipProvider>
-      <div className="flex items-center gap-1 p-2 bg-white border-b border-border overflow-x-auto">
+      <div className="flex items-center gap-1 p-2 bg-card border-b border-border overflow-x-auto">
         {/* 隱藏的檔案輸入 */}
         <input
           ref={fileInputRef}

@@ -52,7 +52,7 @@ export function QuoteCard({ request, onAccept, onReject }: QuoteCardProps) {
 
   return (
     <>
-      <div className="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-shadow">
+      <div className="border rounded-lg p-4 bg-card shadow-sm hover:shadow-md transition-shadow">
         {/* 標頭 */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">

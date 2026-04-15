@@ -133,7 +133,7 @@ export function ImageMaskFillDialog({
                 />
                 <button
                   type="button"
-                  className="absolute top-2 right-2 p-1 bg-white rounded-full shadow"
+                  className="absolute top-2 right-2 p-1 bg-card rounded-full shadow"
                   onClick={e => {
                     e.stopPropagation()
                     setImageUrl(null)

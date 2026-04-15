@@ -422,7 +422,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
       {/* 已建立的合約 */}
       {contracts.filter(c => c.status !== 'cancelled').length > 0 && (
-        <div className="bg-white border border-border rounded-lg">
+        <div className="bg-card border border-border rounded-lg">
           <div className="px-4 py-3 border-b border-border">
             <div className="flex items-center gap-2">
               <FileSignature className="w-4 h-4 text-morandi-gold" />
@@ -529,7 +529,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
       {/* 未簽約團員 */}
       {membersWithoutContract.length > 0 && (
-        <div className="bg-white border border-border rounded-lg">
+        <div className="bg-card border border-border rounded-lg">
           <div className="px-4 py-3 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-morandi-secondary" />
@@ -580,7 +580,7 @@ export function TourContractTab({ tour }: TourContractTabProps) {
 
       {/* 已取消合約歷史 */}
       {contracts.filter(c => c.status === 'cancelled').length > 0 && (
-        <details className="bg-white border border-border rounded-lg">
+        <details className="bg-card border border-border rounded-lg">
           <summary className="px-4 py-3 cursor-pointer text-sm text-morandi-secondary hover:text-morandi-primary select-none">
             已取消合約（{contracts.filter(c => c.status === 'cancelled').length}）
           </summary>

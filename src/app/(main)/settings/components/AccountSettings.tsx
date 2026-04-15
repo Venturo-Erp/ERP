@@ -198,7 +198,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
   return (
     <div className="space-y-6">
       {/* Character Card */}
-      <div className="bg-white rounded-2xl shadow-md overflow-hidden border-l-4 border-morandi-gold">
+      <div className="bg-card rounded-2xl shadow-md overflow-hidden border-l-4 border-morandi-gold">
         {/* Top Section: Avatar & Quick Info */}
         <div className="flex flex-col md:flex-row">
           {/* Avatar */}

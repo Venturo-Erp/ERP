@@ -228,7 +228,7 @@ export function NotificationCapsule() {
         <span className="text-sm font-medium">{unreadCount} 則通知</span>
         <button
           onClick={handleDismiss}
-          className="ml-1 p-0.5 rounded-full hover:bg-white/20 transition-colors"
+          className="ml-1 p-0.5 rounded-full hover:bg-card/20 transition-colors"
         >
           <X size={14} />
         </button>

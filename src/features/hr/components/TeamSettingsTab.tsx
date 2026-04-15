@@ -168,7 +168,7 @@ export function TeamSettingsTab() {
   return (
     <div>
       {/* 選人欄位區塊 */}
-      <div className="bg-white border border-border rounded-lg p-6">
+      <div className="bg-card border border-border rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <ListChecks className="h-5 w-5 text-morandi-gold" />

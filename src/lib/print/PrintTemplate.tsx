@@ -97,7 +97,7 @@ export const PrintTemplate = forwardRef<HTMLDivElement, PrintTemplateProps>(func
       ref={ref}
       className={cn(
         'print-template bg-white text-black',
-        showBorder && 'border border-dashed border-gray-300',
+        showBorder && 'border border-dashed border-morandi-muted',
         className
       )}
       style={{

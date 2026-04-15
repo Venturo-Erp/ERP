@@ -44,7 +44,7 @@ export function RightPanel({
   onImageFill,
 }: RightPanelProps) {
   return (
-    <div className="w-64 h-full bg-white border-l border-border flex flex-col">
+    <div className="w-64 h-full bg-card border-l border-border flex flex-col">
       <Tabs
         defaultValue={selectedObject ? 'properties' : 'template'}
         className="flex-1 min-h-0 flex flex-col"

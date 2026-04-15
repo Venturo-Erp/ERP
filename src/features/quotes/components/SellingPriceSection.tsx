@@ -334,7 +334,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                 disabled={isReadOnly || hasLocalPricing}
                 title={hasLocalPricing ? '人數由 Local 報價控制，請修改 Local 報價' : ''}
                 className={cn(
-                  'w-12 h-7 px-1 text-sm font-semibold text-center text-morandi-primary bg-white/50 border border-morandi-gold/30 rounded focus:outline-none focus:ring-1 focus:ring-morandi-gold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+                  'w-12 h-7 px-1 text-sm font-semibold text-center text-morandi-primary bg-card/50 border border-morandi-gold/30 rounded focus:outline-none focus:ring-1 focus:ring-morandi-gold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
                   (isReadOnly || hasLocalPricing) && 'cursor-not-allowed opacity-60'
                 )}
               />
@@ -493,7 +493,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
                   }}
                   disabled={isReadOnly}
                   className={cn(
-                    'w-12 h-7 px-1 text-sm font-medium text-center text-morandi-primary bg-white/50 border border-border rounded focus:outline-none focus:ring-1 focus:ring-morandi-gold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
+                    'w-12 h-7 px-1 text-sm font-medium text-center text-morandi-primary bg-card/50 border border-border rounded focus:outline-none focus:ring-1 focus:ring-morandi-gold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none',
                     isReadOnly && 'cursor-not-allowed opacity-60'
                   )}
                 />

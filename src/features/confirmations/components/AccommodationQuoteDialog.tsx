@@ -196,7 +196,7 @@ export function AccommodationQuoteDialog({
           }
 
           /* 主容器 */
-          .bg-white {
+          .bg-card {
             background: white;
             min-height: calc(297mm - 30mm);
             display: flex;
@@ -413,7 +413,7 @@ export function AccommodationQuoteDialog({
         <div className="flex-1 overflow-y-auto p-6 bg-morandi-container/50">
           {loadingData ? (
             <div
-              className="bg-white mx-auto shadow-lg p-8 space-y-6"
+              className="bg-card mx-auto shadow-lg p-8 space-y-6"
               style={{ width: '210mm', minHeight: '297mm' }}
             >
               <Skeleton className="h-8 w-[200px] mx-auto" />
@@ -428,7 +428,7 @@ export function AccommodationQuoteDialog({
           ) : (
             <div
               ref={printContentRef}
-              className="bg-white mx-auto shadow-lg"
+              className="bg-card mx-auto shadow-lg"
               style={{
                 width: '210mm',
                 minHeight: '297mm',
@@ -457,7 +457,7 @@ export function AccommodationQuoteDialog({
         </div>
 
         {/* 底部發送按鈕 */}
-        <div className="flex-shrink-0 border-t border-border p-4 bg-white space-y-3">
+        <div className="flex-shrink-0 border-t border-border p-4 bg-card space-y-3">
           {/* LINE 群組選擇 */}
           {selectedMethod === 'line' && (
             <div className="flex items-center gap-3">

@@ -165,7 +165,7 @@ export function DateRangeSelector({
             onClick={() => handleGranularityChange(g)}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
               granularity === g
-                ? 'bg-white text-morandi-primary shadow-sm'
+                ? 'bg-card text-morandi-primary shadow-sm'
                 : 'text-morandi-secondary hover:text-morandi-primary'
             }`}
           >
