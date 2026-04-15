@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { dynamicFrom } from '@/lib/supabase/typed-client'
@@ -81,7 +82,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: '請至少填寫 App ID、Page Access Token 或 App Secret' }, { status: 400 })
     }
 
-    const supabase = getSupabaseAdminClient()
+    const supabase = getSupabaseAdminClient() as unknown as SupabaseClient
     const workspaceId = auth.data.workspaceId
 
     // 檢查是否已有設定
@@ -161,7 +162,7 @@ export async function DELETE() {
     const auth = await getServerAuth()
     if (!auth.success) return NextResponse.json({ error: '請先登入' }, { status: 401 })
 
-    const supabase = getSupabaseAdminClient()
+    const supabase = getSupabaseAdminClient() as unknown as SupabaseClient
     const workspaceId = auth.data.workspaceId
 
     const { error: deleteError } = await supabase

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getServerAuth } from '@/lib/auth/server-auth'
 
@@ -20,7 +21,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category')
     const keyword = searchParams.get('keyword')
 
-    const supabase = getSupabaseAdminClient()
+    const supabase = getSupabaseAdminClient() as unknown as SupabaseClient
 
     let query = supabase
       .from('knowledge_base')
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '缺少 category' }, { status: 400 })
     }
 
-    const supabase = getSupabaseAdminClient()
+    const supabase = getSupabaseAdminClient() as unknown as SupabaseClient
 
     const { data, error } = await supabase
       .from('knowledge_base')

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getServerAuth } from '@/lib/auth/server-auth'
 
@@ -26,7 +27,7 @@ export async function PUT(
     const body = await request.json()
     const { category, question, answer, keywords, is_active } = body
 
-    const supabase = getSupabaseAdminClient()
+    const supabase = getSupabaseAdminClient() as unknown as SupabaseClient
 
     const updateData: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
@@ -79,7 +80,7 @@ export async function DELETE(
       return NextResponse.json({ error: '缺少 ID' }, { status: 400 })
     }
 
-    const supabase = getSupabaseAdminClient()
+    const supabase = getSupabaseAdminClient() as unknown as SupabaseClient
 
     // 軟刪除：設定 is_active 為 false
     const { error } = await supabase

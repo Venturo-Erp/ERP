@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getServerAuth } from '@/lib/auth/server-auth'
 
@@ -25,7 +26,7 @@ export async function GET(
       return NextResponse.json({ error: '缺少對話 ID' }, { status: 400 })
     }
 
-    const supabase = getSupabaseAdminClient()
+    const supabase = getSupabaseAdminClient() as unknown as SupabaseClient
 
     // 先確認對話存在且屬於該工作區
     const { data: conversationData, error: conversationError } = await supabase
@@ -99,7 +100,7 @@ export async function PATCH(
       return NextResponse.json({ error: '缺少對話 ID' }, { status: 400 })
     }
 
-    const supabase = getSupabaseAdminClient()
+    const supabase = getSupabaseAdminClient() as unknown as SupabaseClient
 
     // 標記該對話所有 user 發送的訊息為已讀
     const { error } = await supabase
