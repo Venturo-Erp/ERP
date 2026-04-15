@@ -193,7 +193,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
   const StatusIcon = statusInfo.icon
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+    <div className="min-h-screen bg-gradient-to-b from-morandi-primary to-morandi-primary/90">
       {/* Header */}
       <header className="bg-morandi-primary/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">

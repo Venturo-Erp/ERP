@@ -293,7 +293,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
           <div className="p-6">
             <div className="grid grid-cols-3 gap-4">
               <div className="flex items-center gap-3 p-3 rounded-lg border border-border">
-                <MessageCircle className="h-5 w-5 text-[#06C755]" />
+                <MessageCircle className="h-5 w-5 text-brand-line" />
                 <div className="flex-1">
                   <div className="text-sm font-medium">LINE</div>
                   <div className="text-xs text-morandi-muted">

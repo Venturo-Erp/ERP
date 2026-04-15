@@ -35,7 +35,7 @@ export function MultiImageTemplate({
   return (
     <div className="bg-card rounded-xl shadow-lg overflow-hidden">
       {/* 標題區 */}
-      <div className="p-6 bg-gradient-to-r from-[#8da399] to-[#6b8577]">
+      <div className="p-6 bg-gradient-to-r from-morandi-green to-morandi-green/80">
         <div className="text-white/80 text-sm mb-1">{dateDisplay}</div>
         <div className="flex items-baseline gap-3">
           <span className="text-4xl font-light text-white/30">0{dayIndex + 1}</span>

@@ -484,7 +484,7 @@ function CancellationTable({ items }: { items: Array<Record<string, unknown>> })
       </div>
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="bg-gradient-to-r from-red-200 to-red-300 text-morandi-primary">
+          <tr className="bg-gradient-to-r from-morandi-red/30 to-morandi-red/40 text-morandi-primary">
             <th className="border border-morandi-red px-3 py-2 text-left">項目名稱</th>
             <th className="border border-morandi-red px-3 py-2 text-left">日期</th>
             <th className="border border-morandi-red px-3 py-2 text-left w-20">數量</th>

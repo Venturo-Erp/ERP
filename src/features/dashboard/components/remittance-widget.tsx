@@ -246,7 +246,7 @@ export function RemittanceWidget() {
                   className={cn(
                     'rounded-xl p-3 shadow-md border transition-all',
                     index === 0
-                      ? 'bg-gradient-to-br from-status-success-bg/90 to-emerald-100/90 border-morandi-green/30'
+                      ? 'bg-gradient-to-br from-status-success-bg/90 to-morandi-green/10/90 border-morandi-green/30'
                       : 'bg-card/70 border-border/40'
                   )}
                 >

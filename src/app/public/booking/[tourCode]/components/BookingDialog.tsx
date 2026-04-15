@@ -177,7 +177,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
             {travelers.map((traveler, index) => (
               <div
                 key={traveler.id}
-                className="bg-card p-8 rounded-xl ring-1 ring-gray-200 shadow-sm relative"
+                className="bg-card p-8 rounded-xl ring-1 ring-border shadow-sm relative"
               >
                 <div className="absolute top-4 right-4 text-8xl font-serif font-bold text-morandi-container select-none">
                   {String(index + 1).padStart(2, '0')}

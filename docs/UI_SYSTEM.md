@@ -199,14 +199,49 @@ import { ALERT_ERROR, ALERT_SUCCESS } from '@/lib/ui/form-classes'
 
 ## 9. 合法例外（這些地方可以不走主題變數）
 
-以下路徑**刻意**不套主題系統，它們各有獨立的美術設計語言：
+以下路徑**刻意**不套主題系統，各有技術或設計原因：
 
-- `src/components/print-templates/`、`src/lib/print/PrintTemplate.tsx`：列印模板，保留硬編 `bg-white text-black`（紙本永遠白底黑字）
-- `src/features/designer/templates/`：行程設計器模板，產生美編 PDF 用，有自己的色彩系統
-- `src/features/tours/components/sections/*Collage*`, `*Luxury*`, `*Art*` 等：對客行程型錄 section 樣式，屬於品牌美編，可用 hex 固定色（如 `bg-[#C6FF00]` 螢光綠強調色）
-- `src/app/(public)/p/customized/*`（舊版 marketing landing）：獨立設計語言
+### 🎨 獨立設計語言
+這些地方有自己的美術風格，脫離 ERP 主題系統：
+- `src/components/print-templates/`、`src/lib/print/PrintTemplate.tsx`：列印模板（紙本永遠白底黑字）
+- `src/features/designer/templates/`、`designer/components/`、`designer/hooks/`：行程設計器模板，產生美編 PDF 用，有自己的色彩系統
+- `src/features/tours/themes/`：對客行程型錄主題（luxury / art / dreamscape / collage / nature / gemini 等風格），獨立配色
+- `src/features/tours/components/sections/*Collage*`, `*Luxury*`, `*Art*` 等：對客行程型錄 section 樣式，屬於品牌美編，可用 hex 固定色
+- `src/lib/constants/morandi-colors.ts`：莫蘭迪色 palette 常數，給 tour themes 消費
 
-_新增例外時請在這裡登記。_
+### 🖨 iframe / 列印預覽（CSS 不繼承 `:root` 變數）
+這些檔案把 CSS 寫在字串裡注入 iframe，iframe 是獨立 document，`:root` 變數不會繼承，所以只能用 hex：
+- `src/features/quotes/components/PrintableQuickQuote.tsx`
+- `src/features/confirmations/components/*QuoteDialog.tsx`（內嵌列印 CSS）
+- `src/features/tours/components/tour-itinerary-tab.tsx`（列印預覽 iframe）
+- `src/features/tours/components/sections/utils/itineraryLuxuryUtils.ts`
+
+### 🎯 Color picker 色盤（使用者挑色）
+預設色盤必須是固定色，不能跟主題變，不然使用者不知道自己在選什麼色：
+- `src/components/ui/rich-text-input.tsx`：富文字編輯器的文字顏色選擇器
+- `src/features/designer/components/GradientPicker.tsx`：漸層選擇器
+
+### 🎨 Illustration / Sticker / 插圖資源
+- `src/features/designer/components/core/illustration-library.ts`：SVG 插圖色彩
+- `src/features/designer/components/core/sticker-paths.ts`：貼紙 SVG 路徑色
+
+### 📤 外部輸出（LINE / Email / Map API）
+這些 hex 會送到外部系統渲染，跟 ERP 主題無關：
+- `src/app/api/line/send-*.ts`：LINE 訊息樣板（LINE 自己渲染）
+- `src/app/api/transport/send-booking/route.ts`：Email 樣板
+- `src/lib/line/send-requirement.ts`：LINE 發送訊息
+- `src/features/attractions/components/AttractionsMap.tsx`：Google Maps API 標記色（傳給 Google Maps）
+
+### 📁 資料分類 metadata（存在 DB / 用於分類）
+- `src/lib/utils/tour-folders.ts`：旅遊團資料夾分類色
+- `src/features/calendar/hooks/useCalendarEvents.ts`：月曆事件顏色 metadata
+- `src/features/itinerary/hooks/useTemplates.ts`：行程模板預覽色
+- `src/components/shared/react-datasheet-wrapper/constants.ts`：試算表 cell 色常數
+
+### 🔄 loading / 特效動畫
+- `src/components/module-loading.tsx`：載入動畫 CSS keyframes 顏色
+
+_新增例外時請在這裡登記類別，並說明為什麼。_
 
 ## 10. 類別色例外（categorical colors）
 

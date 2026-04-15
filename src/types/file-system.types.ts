@@ -237,22 +237,26 @@ export interface FileSystemState {
 // Colors use Morandi palette hex values (morandi-gold, status-info, morandi-green, etc.)
 // Note: hex colors below match the Morandi palette and are used in inline JS styles (backgroundColor)
 // where CSS variables/Tailwind classes are not available.
+/**
+ * 檔案類別顏色：用 CSS 變數，切換主題時自動變色。
+ * 消費端應該用 `style={{ color: info.color }}` 而非 Tailwind 類別。
+ */
 export const FILE_CATEGORY_INFO: Record<
   FileCategory,
   { label: string; icon: string; color: string }
 > = {
-  contract: { label: '合約', icon: 'FileSignature', color: '#c9aa7c' },
-  quote: { label: '報價單', icon: 'FileText', color: '#8ba4b4' },
-  itinerary: { label: '行程表', icon: 'Map', color: '#9fa68f' },
-  passport: { label: '護照', icon: 'CreditCard', color: '#c9aa7c' },
-  visa: { label: '簽證', icon: 'Stamp', color: '#c08374' },
-  ticket: { label: '機票', icon: 'Plane', color: '#8ba4b4' },
-  voucher: { label: '住宿憑證', icon: 'Building2', color: '#8b8680' },
-  invoice: { label: '發票收據', icon: 'Receipt', color: '#9fa68f' },
-  insurance: { label: '保險', icon: 'Shield', color: '#d4a574' },
-  photo: { label: '照片', icon: 'Image', color: '#c08374' },
-  email_attachment: { label: '郵件附件', icon: 'Paperclip', color: '#8b8680' },
-  other: { label: '其他', icon: 'File', color: '#b8b2aa' },
+  contract: { label: '合約', icon: 'FileSignature', color: 'var(--morandi-gold)' },
+  quote: { label: '報價單', icon: 'FileText', color: 'var(--status-info)' },
+  itinerary: { label: '行程表', icon: 'Map', color: 'var(--morandi-green)' },
+  passport: { label: '護照', icon: 'CreditCard', color: 'var(--morandi-gold)' },
+  visa: { label: '簽證', icon: 'Stamp', color: 'var(--morandi-red)' },
+  ticket: { label: '機票', icon: 'Plane', color: 'var(--status-info)' },
+  voucher: { label: '住宿憑證', icon: 'Building2', color: 'var(--morandi-secondary)' },
+  invoice: { label: '發票收據', icon: 'Receipt', color: 'var(--morandi-green)' },
+  insurance: { label: '保險', icon: 'Shield', color: 'var(--status-warning)' },
+  photo: { label: '照片', icon: 'Image', color: 'var(--cat-pink)' },
+  email_attachment: { label: '郵件附件', icon: 'Paperclip', color: 'var(--morandi-secondary)' },
+  other: { label: '其他', icon: 'File', color: 'var(--morandi-muted)' },
 }
 
 // ============================================================================

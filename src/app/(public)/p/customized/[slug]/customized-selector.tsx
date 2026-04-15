@@ -172,7 +172,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-[#92f1fe] to-[#006872] flex items-center justify-center">
+                          <div className="w-full h-full bg-gradient-to-br from-public-secondary/30 to-public-secondary flex items-center justify-center">
                             <MapPin size={48} className="text-white/50" />
                           </div>
                         )}
@@ -272,7 +272,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
                 transition-all
                 ${
                   selectedItems.length > 0
-                    ? 'bg-gradient-to-r from-[#006872] to-[#00838f] shadow-lg hover:shadow-xl'
+                    ? 'bg-gradient-to-r from-public-secondary to-public-secondary/80 shadow-lg hover:shadow-xl'
                     : 'bg-morandi-muted cursor-not-allowed'
                 }
               `}
@@ -294,7 +294,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
             flex items-center justify-center gap-2
             ${
               selectedItems.length > 0
-                ? 'bg-gradient-to-r from-[#006872] to-[#00838f]'
+                ? 'bg-gradient-to-r from-public-secondary to-public-secondary/80'
                 : 'bg-morandi-muted cursor-not-allowed'
             }
           `}
@@ -452,7 +452,7 @@ export function CustomizedSelector({ template, groupedItems }: CustomizedSelecto
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-4 bg-gradient-to-r from-[#006872] to-[#00838f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                className="w-full py-4 bg-gradient-to-r from-public-secondary to-public-secondary/80 text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
               >
                 {submitting ? '送出中...' : '確認送出'}
               </button>

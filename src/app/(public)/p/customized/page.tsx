@@ -94,7 +94,7 @@ export default async function WishlistIndexPage() {
   const { templates, companyInfo } = await getPublishedTemplates()
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+    <div className="min-h-screen bg-gradient-to-b from-morandi-primary to-morandi-primary/90">
       {/* Header */}
       <header className="bg-morandi-primary/80 backdrop-blur-sm border-b border-white/10 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -107,7 +107,7 @@ export default async function WishlistIndexPage() {
 
       {/* Hero - 未來放 3D 地球 */}
       <section className="py-20 px-4 text-center relative">
-        <div className="w-48 h-48 mx-auto mb-8 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-2xl shadow-blue-500/30">
+        <div className="w-48 h-48 mx-auto mb-8 rounded-full bg-gradient-to-br from-status-info to-status-info/70 flex items-center justify-center shadow-2xl shadow-status-info/30">
           <Globe className="w-24 h-24 text-white animate-pulse" />
         </div>
         <h2 className="text-4xl font-bold mb-4 text-white">探索世界</h2>

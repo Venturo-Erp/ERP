@@ -204,7 +204,7 @@ export default function PublicRequestPage() {
             onClick={() => setSubmitted(false)}
             style={{
               marginTop: 16,
-              color: '#8B6914',
+              color: 'var(--morandi-gold-hover)',
               textDecoration: 'underline',
               background: 'none',
               border: 'none',
@@ -224,7 +224,7 @@ export default function PublicRequestPage() {
   const cellStyle: React.CSSProperties = { border: '1px solid #333', padding: '8px 10px' }
   const thStyle: React.CSSProperties = {
     ...cellStyle,
-    background: '#f0f0f0',
+    background: 'var(--morandi-container)',
     fontWeight: 'bold',
     textAlign: 'center',
   }
@@ -619,7 +619,7 @@ export default function PublicRequestPage() {
             disabled={submitting}
             style={{
               border: 'none',
-              background: '#8B6914',
+              background: 'var(--morandi-gold-hover)',
               color: '#fff',
               fontWeight: 'bold',
               padding: '12px 32px',

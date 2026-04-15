@@ -17,7 +17,7 @@ import { LANDING_LABELS } from './constants/labels'
 
 function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-amber-50/30">
+    <section className="relative overflow-hidden bg-gradient-to-br from-morandi-container/50 via-card to-morandi-gold/10">
       <div className="mx-auto max-w-5xl px-6 py-24 sm:py-32 text-center">
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-morandi-primary leading-tight">
           {LANDING_LABELS.HERO_TITLE}
@@ -161,7 +161,7 @@ function PlanCard({ name, price, period, features, popular, badge }: PlanCardPro
     <div
       className={`relative rounded-xl border p-6 ${
         popular
-          ? 'border-status-warning/40 bg-status-warning-bg/30 shadow-lg ring-1 ring-amber-200'
+          ? 'border-status-warning/40 bg-status-warning-bg/30 shadow-lg ring-1 ring-status-warning/40'
           : 'border-border bg-card shadow-sm'
       }`}
     >

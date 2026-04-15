@@ -309,7 +309,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
             <Share2 className="w-5 h-5 text-morandi-secondary hover:text-public-primary cursor-pointer transition-all" />
             <Heart className="w-5 h-5 text-morandi-secondary hover:text-public-primary cursor-pointer transition-all" />
             <Link href={`/p/tour/${code}/register${ref ? `?ref=${ref}` : ''}`}>
-              <Button className="bg-gradient-to-r from-[#00113a] to-[#002366] text-white px-6 py-2 rounded-md text-sm hover:opacity-90">
+              <Button className="bg-gradient-to-r from-public-primary to-public-accent text-white px-6 py-2 rounded-md text-sm hover:opacity-90">
                 立即報名
               </Button>
             </Link>
@@ -350,9 +350,9 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
             className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-[#00113a] via-[#002366] to-[#00113a]" />
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-public-primary via-public-accent to-public-primary" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#00113a]/70 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-public-primary/70 to-transparent"></div>
         <div className="relative z-10 max-w-4xl">
           {daysCount > 0 && (
             <span className="bg-morandi-green text-white px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase mb-4 inline-block">
@@ -475,7 +475,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
                   href={`/p/tour/${code}/register${ref ? `?ref=${ref}` : ''}`}
                   className="block"
                 >
-                  <Button className="w-full bg-gradient-to-r from-[#00113a] to-[#002366] text-white py-4 rounded-xl font-bold hover:shadow-lg transition-all">
+                  <Button className="w-full bg-gradient-to-r from-public-primary to-public-accent text-white py-4 rounded-xl font-bold hover:shadow-lg transition-all">
                     立即預約
                   </Button>
                 </Link>

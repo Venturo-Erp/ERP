@@ -202,7 +202,7 @@ export function AccountSettings({ user }: AccountSettingsProps) {
         {/* Top Section: Avatar & Quick Info */}
         <div className="flex flex-col md:flex-row">
           {/* Avatar */}
-          <div className="w-full md:w-80 bg-gradient-to-br from-morandi-container to-white p-10 flex flex-col items-center justify-center">
+          <div className="w-full md:w-80 bg-gradient-to-br from-morandi-container to-card p-10 flex flex-col items-center justify-center">
             <div className="relative group">
               <div
                 onClick={() => fileInputRef.current?.click()}

@@ -222,7 +222,7 @@ export function GeminiItineraryForm({ data, onChange }: GeminiItineraryFormProps
   return (
     <div className="space-y-6 p-6">
       {/* AI 功能提示 */}
-      <div className="bg-gradient-to-r from-status-info-bg to-purple-50 border border-morandi-secondary/30 rounded-lg p-4">
+      <div className="bg-gradient-to-r from-status-info-bg to-cat-purple-bg border border-morandi-secondary/30 rounded-lg p-4">
         <div className="flex items-center gap-2 text-status-info font-medium mb-2">
           <Sparkles size={18} />
           <span>{ITINERARY_LABELS.GEMINI_AI_TITLE}</span>
@@ -303,7 +303,7 @@ export function GeminiItineraryForm({ data, onChange }: GeminiItineraryFormProps
                 onClick={() => handleGenerateImage('cover')}
                 disabled={generatingImage === 'cover' || !data.city}
                 size="sm"
-                className="bg-gradient-to-r from-status-info to-purple-600 hover:from-status-info/90 hover:to-purple-600 text-white"
+                className="bg-gradient-to-r from-status-info to-cat-purple hover:from-status-info/90 hover:to-cat-purple text-white"
               >
                 {generatingImage === 'cover' ? (
                   <Loader2 size={14} className="animate-spin" />

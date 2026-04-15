@@ -79,7 +79,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#f0ebe3] via-[#f8f5f0] to-[#e8e0d6]">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-card to-morandi-container">
       <div
         className="w-full max-w-[380px] mx-4"
         style={{
@@ -97,7 +97,7 @@ export default function LoginPage() {
         >
           Venturo
         </h1>
-        <p className="text-center text-xs text-[#aaa] mt-1">旅遊資源管理系統</p>
+        <p className="text-center text-xs text-morandi-muted mt-1">旅遊資源管理系統</p>
 
         {/* 錯誤訊息 */}
         {error && (
@@ -141,7 +141,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#aaa] hover:text-[#666] mt-[7px]"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-morandi-muted hover:text-morandi-secondary mt-[7px]"
             >
               {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
@@ -158,7 +158,7 @@ export default function LoginPage() {
             />
             <label
               htmlFor="rememberMe"
-              className="text-[11px] text-[#aaa] cursor-pointer select-none"
+              className="text-[11px] text-morandi-muted cursor-pointer select-none"
             >
               記住我（30 天內免重新登入）
             </label>

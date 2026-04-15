@@ -198,7 +198,7 @@ export function FlightWidget() {
       <div
         className={cn(
           'h-full rounded-2xl border border-border/70 shadow-lg backdrop-blur-md transition-all duration-300 hover:shadow-lg hover:border-border/80',
-          'bg-gradient-to-br from-status-info-bg via-card to-indigo-50'
+          'bg-gradient-to-br from-status-info-bg via-card to-status-info-bg'
         )}
       >
         <div className="p-5 space-y-4 h-full flex flex-col">
@@ -207,7 +207,7 @@ export function FlightWidget() {
             <div
               className={cn(
                 'rounded-full p-2.5 text-white shadow-lg shadow-black/10',
-                'bg-gradient-to-br from-morandi-gold/10 to-indigo-100/60',
+                'bg-gradient-to-br from-morandi-gold/10 to-status-info-bg/60',
                 'ring-2 ring-border/50 ring-offset-1 ring-offset-background/20'
               )}
             >
@@ -326,7 +326,7 @@ export function FlightWidget() {
               disabled={isPending}
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md',
-                'bg-gradient-to-br from-morandi-gold/10 to-indigo-100/60 hover:from-morandi-gold/15 hover:to-indigo-200/60',
+                'bg-gradient-to-br from-morandi-gold/10 to-status-info-bg/60 hover:from-morandi-gold/15 hover:to-status-info-bg/60',
                 'text-morandi-primary disabled:opacity-50 disabled:cursor-not-allowed',
                 'flex items-center justify-center gap-2'
               )}
@@ -361,7 +361,7 @@ export function FlightWidget() {
               {/* 航班號與狀態 */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-morandi-gold/10 to-indigo-100/60 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-morandi-gold/10 to-status-info-bg/60 flex items-center justify-center">
                     <Plane className="w-4 h-4 text-morandi-primary" />
                   </div>
                   <div>

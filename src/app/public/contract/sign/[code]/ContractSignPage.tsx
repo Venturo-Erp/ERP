@@ -416,7 +416,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             <tbody>
               ${dailyData
                 .map((day, idx) => {
-                  const bg = idx % 2 === 0 ? '#fff' : '#FAFAF8'
+                  const bg = idx % 2 === 0 ? 'var(--card)' : 'var(--morandi-container)'
                   return `
                   <tr style="background: ${bg};">
                     <td rowspan="${1 + (day.note ? 1 : 0) + 1 + (day.accommodation ? 1 : 0)}" style="padding: 6px 8px; text-align: center; vertical-align: middle; font-weight: 600; color: ${MORANDI_COLORS.gold}; border-top: ${border}; border-right: ${border};">${day.date || day.dayLabel}</td>
@@ -696,7 +696,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                       </thead>
                       <tbody>
                         {dailyData.map((day, idx) => {
-                          const bg = idx % 2 === 0 ? '#fff' : '#FAFAF8'
+                          const bg = idx % 2 === 0 ? 'var(--card)' : 'var(--morandi-container)'
                           const border = `1px solid ${MORANDI_COLORS.border}`
                           return (
                             <React.Fragment key={idx}>
@@ -852,7 +852,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
   // 補填資訊頁面
   if (step === 'fill-info') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex flex-col">
+      <div className="min-h-screen bg-gradient-to-b from-morandi-gold/10 to-card flex flex-col">
         <div className="bg-card border-b border-border px-4 py-4">
           <div className="max-w-md mx-auto flex items-center">
             <button
@@ -953,7 +953,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
   // 簽名頁面
   if (step === 'sign') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex flex-col">
+      <div className="min-h-screen bg-gradient-to-b from-morandi-gold/10 to-card flex flex-col">
         {/* 頂部 */}
         <div className="bg-card border-b border-border px-4 py-4">
           <div className="max-w-md mx-auto flex items-center">
@@ -1039,7 +1039,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
   // 成功頁面
   if (step === 'success') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-morandi-green/10 to-card flex items-center justify-center p-4">
         <div className="bg-card rounded-xl shadow-lg p-8 max-w-md text-center">
           <div className="w-20 h-20 bg-morandi-green/15 rounded-full flex items-center justify-center mx-auto mb-6">
             <Check className="w-10 h-10 text-morandi-green" />

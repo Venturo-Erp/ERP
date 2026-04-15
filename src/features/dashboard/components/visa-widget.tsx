@@ -212,7 +212,7 @@ export function VisaWidget() {
       <div
         className={cn(
           'h-full rounded-2xl border border-border/70 shadow-lg backdrop-blur-md transition-all duration-300 hover:shadow-lg hover:border-border/80',
-          'bg-gradient-to-br from-emerald-50 via-card to-teal-50'
+          'bg-gradient-to-br from-morandi-green/10 via-card to-morandi-green/10'
         )}
       >
         <div className="p-5 space-y-4 h-full flex flex-col">
@@ -221,7 +221,7 @@ export function VisaWidget() {
             <div
               className={cn(
                 'rounded-full p-2.5 text-white shadow-lg shadow-black/10',
-                'bg-gradient-to-br from-emerald-200/60 to-teal-100/60',
+                'bg-gradient-to-br from-morandi-green/30/60 to-morandi-green/20/60',
                 'ring-2 ring-border/50 ring-offset-1 ring-offset-background/20'
               )}
             >
@@ -284,7 +284,7 @@ export function VisaWidget() {
               disabled={loading}
               className={cn(
                 'w-full px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 shadow-md',
-                'bg-gradient-to-br from-morandi-green/60 to-teal-100/60 hover:from-morandi-green/80 hover:to-teal-200/60',
+                'bg-gradient-to-br from-morandi-green/60 to-morandi-green/20/60 hover:from-morandi-green/80 hover:to-morandi-green/20/60',
                 'text-morandi-primary disabled:opacity-50 disabled:cursor-not-allowed',
                 'flex items-center justify-center gap-2'
               )}

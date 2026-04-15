@@ -376,7 +376,7 @@ export function TransportQuoteForm({
             type="button"
             disabled={submitting}
             onClick={() => handleSubmitWithStatus('confirmed')}
-            className="py-6 bg-gradient-to-r from-morandi-gold to-morandi-gold-hover hover:from-green-700 hover:to-green-800 text-white font-semibold"
+            className="py-6 bg-gradient-to-r from-morandi-gold to-morandi-gold-hover hover:from-morandi-gold-hover hover:to-morandi-gold-hover text-white font-semibold"
           >
             <div className="text-center">
               <div className="text-lg">✅ 報價+留車</div>

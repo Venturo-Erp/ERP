@@ -93,7 +93,7 @@ export function AccommodationQuoteForm({
             type="text"
             value={contact}
             onChange={e => setContact(e.target.value)}
-            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
+            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-transparent"
             placeholder="請輸入聯絡人姓名"
             required
           />
@@ -106,7 +106,7 @@ export function AccommodationQuoteForm({
             type="tel"
             value={phone}
             onChange={e => setPhone(e.target.value)}
-            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
+            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-transparent"
             placeholder="請輸入聯絡電話"
             required
           />
@@ -150,7 +150,7 @@ export function AccommodationQuoteForm({
                       newRooms[idx].unitPrice = parseInt(e.target.value) || 0
                       setRooms(newRooms)
                     }}
-                    className="w-full px-2 py-1 text-sm border border-border rounded focus:ring-2 focus:ring-[#c9a96e]"
+                    className="w-full px-2 py-1 text-sm border border-border rounded focus:ring-2 focus:ring-morandi-gold"
                     placeholder="0"
                     required
                   />
@@ -186,7 +186,7 @@ export function AccommodationQuoteForm({
         <textarea
           value={notes}
           onChange={e => setNotes(e.target.value)}
-          className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-[#c9a96e] focus:border-transparent"
+          className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-transparent"
           placeholder="如有其他說明事項，請在此填寫"
           rows={3}
         />
