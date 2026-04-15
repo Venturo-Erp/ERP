@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
-import { ChevronUp, ChevronDown, ChevronsUpDown, Filter } from 'lucide-react'
+import { ChevronUp, ChevronDown, Filter } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { TableColumn, SelectionConfig, RowData } from './types'
 import { ENHANCED_TABLE_LABELS } from './constants/labels'
@@ -43,7 +43,7 @@ export const TableHeader = React.memo(function TableHeader({
   selection,
   actions,
   actionsHeader,
-  actionsWidth = '100px',
+  actionsWidth = '220px',
   allVisibleSelected,
   someVisibleSelected,
   onSort,
@@ -52,13 +52,26 @@ export const TableHeader = React.memo(function TableHeader({
   onToggleSelectAll,
 }: TableHeaderProps) {
   const getSortIcon = (columnKey: string) => {
-    if (sortColumn !== columnKey) {
-      return <ChevronsUpDown size={12} className="text-morandi-secondary opacity-50" />
-    }
-    return sortDirection === 'asc' ? (
-      <ChevronUp size={12} className="text-morandi-gold transition-colors" />
-    ) : (
-      <ChevronDown size={12} className="text-morandi-gold transition-colors" />
+    const isActive = sortColumn === columnKey
+    const ascActive = isActive && sortDirection === 'asc'
+    const descActive = isActive && sortDirection === 'desc'
+    return (
+      <span className="inline-flex flex-col items-center -space-y-[3px] leading-none">
+        <ChevronUp
+          size={10}
+          className={cn(
+            'transition-colors',
+            ascActive ? 'text-morandi-gold' : 'text-morandi-secondary/40'
+          )}
+        />
+        <ChevronDown
+          size={10}
+          className={cn(
+            'transition-colors',
+            descActive ? 'text-morandi-gold' : 'text-morandi-secondary/40'
+          )}
+        />
+      </span>
     )
   }
 
@@ -122,7 +135,7 @@ export const TableHeader = React.memo(function TableHeader({
         {actions && (
           <th className="text-left py-2.5 px-4 text-xs relative" style={{ width: actionsWidth }}>
             {actionsHeader || (
-              <span className="font-medium text-morandi-secondary">
+              <span className="text-xs font-medium text-morandi-primary">
                 {ENHANCED_TABLE_LABELS.ACTIONS}
               </span>
             )}

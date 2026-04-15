@@ -219,11 +219,11 @@ export default async function AccommodationQuotePage({
 
             {/* 已提交：顯示報價結果 */}
             {isSubmitted ? (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <div className="bg-morandi-green/10 border border-morandi-green/30 rounded-lg p-6">
                 <div className="text-center mb-4">
                   <div className="text-4xl mb-2">✅</div>
                   <h3 className="text-xl font-semibold text-green-900">報價已提交</h3>
-                  <p className="text-sm text-green-700 mt-1">
+                  <p className="text-sm text-morandi-green mt-1">
                     提交時間：{new Date(quoteData!.submitted_at!).toLocaleString('zh-TW')}
                   </p>
                 </div>
@@ -239,7 +239,7 @@ export default async function AccommodationQuotePage({
                   </div>
                   <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-morandi-secondary">總金額：</span>
-                    <span className="font-bold text-lg text-green-700">
+                    <span className="font-bold text-lg text-morandi-green">
                       ${quoteData!.totalCost?.toLocaleString()} 元
                     </span>
                   </div>

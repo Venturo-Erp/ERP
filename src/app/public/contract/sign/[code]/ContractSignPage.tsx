@@ -522,7 +522,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             <div className="max-w-4xl mx-auto flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {savedSignature ? (
-                  <Check className="w-5 h-5 text-green-600" />
+                  <Check className="w-5 h-5 text-morandi-green" />
                 ) : (
                   <FileSignature className="w-5 h-5 text-amber-600" />
                 )}
@@ -530,7 +530,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   <div className="font-medium text-gray-900 flex items-center gap-2">
                     {TEMPLATE_LABELS[contract.template] || '旅遊合約'}
                     {savedSignature && (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-green/15 text-morandi-green">
                         已簽署
                       </span>
                     )}
@@ -547,7 +547,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
           {/* 閱讀進度條 */}
           <div className="w-full h-1 bg-gray-100">
             <div
-              className="h-full bg-amber-500 transition-all duration-300"
+              className="h-full bg-morandi-gold transition-all duration-300"
               style={{ width: `${readingProgress}%` }}
             />
           </div>
@@ -562,7 +562,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
               </div>
             ) : error ? (
               <div className="bg-white rounded-lg shadow-lg h-full flex items-center justify-center">
-                <div className="text-center text-red-500">
+                <div className="text-center text-morandi-red">
                   <p>{error}</p>
                 </div>
               </div>
@@ -807,7 +807,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             {savedSignature ? (
               /* 簽署完成：顯示狀態 + 列印按鈕 */
               <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
-                <div className="flex items-center gap-2 text-green-600 font-medium">
+                <div className="flex items-center gap-2 text-morandi-green font-medium">
                   <Check className="w-5 h-5" />
                   {isSigned
                     ? `已於 ${new Date(contract.signed_at!).toLocaleDateString('zh-TW')} 簽署完成`
@@ -832,7 +832,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                 <Button
                   size="lg"
                   onClick={() => setStep('fill-info')}
-                  className="bg-amber-500 hover:bg-amber-600"
+                  className="bg-morandi-gold hover:bg-morandi-gold-hover"
                 >
                   <FileSignature className="w-5 h-5 mr-2" />
                   我已閱讀，進行電子簽署
@@ -879,27 +879,27 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  聯絡電話 <span className="text-red-500">*</span>
+                  聯絡電話 <span className="text-morandi-red">*</span>
                 </label>
                 <input
                   type="tel"
                   value={signerPhone}
                   onChange={e => setSignerPhone(e.target.value)}
                   placeholder="請輸入手機或市話"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold outline-none"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  住（居）所地址 <span className="text-red-500">*</span>
+                  住（居）所地址 <span className="text-morandi-red">*</span>
                 </label>
                 <input
                   type="text"
                   value={signerAddress}
                   onChange={e => setSignerAddress(e.target.value)}
                   placeholder="請輸入通訊地址"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold outline-none"
                 />
               </div>
 
@@ -912,19 +912,19 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   value={signerIdNumber}
                   onChange={e => setSignerIdNumber(e.target.value)}
                   placeholder="選填"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold outline-none"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">{error}</div>
+              <div className="mt-4 p-3 bg-morandi-red/10 text-morandi-red rounded-lg text-sm">{error}</div>
             )}
 
             <div className="mt-6">
               <Button
                 size="lg"
-                className="w-full bg-amber-500 hover:bg-amber-600"
+                className="w-full bg-morandi-gold hover:bg-morandi-gold-hover"
                 onClick={() => {
                   if (!signerPhone.trim()) {
                     setError('請輸入聯絡電話')
@@ -1010,7 +1010,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   </Button>
                   <Button
                     type="button"
-                    className="flex-1 bg-amber-500 hover:bg-amber-600"
+                    className="flex-1 bg-morandi-gold hover:bg-morandi-gold-hover"
                     onClick={handleConfirmSign}
                   >
                     <Check className="w-4 h-4 mr-1" />
@@ -1024,7 +1024,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             )}
 
             {error && (
-              <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-lg text-sm">{error}</div>
+              <div className="mt-4 p-3 bg-morandi-red/10 text-morandi-red rounded-lg text-sm">{error}</div>
             )}
 
             <p className="text-xs text-gray-400 text-center mt-6">
@@ -1041,8 +1041,8 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center p-4">
         <div className="bg-white rounded-xl shadow-lg p-8 max-w-md text-center">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Check className="w-10 h-10 text-green-600" />
+          <div className="w-20 h-20 bg-morandi-green/15 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Check className="w-10 h-10 text-morandi-green" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">簽署完成！</h1>
           <p className="text-gray-600 mb-6">
@@ -1061,7 +1061,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             <Button
               size="lg"
               onClick={() => (window.location.href = '/')}
-              className="bg-amber-500 hover:bg-amber-600"
+              className="bg-morandi-gold hover:bg-morandi-gold-hover"
             >
               回到首頁
             </Button>

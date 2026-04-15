@@ -59,19 +59,16 @@ export default function OrdersPage() {
   }, [tours])
 
   const filteredOrders = orders.filter(order => {
+    // 排除簽證專用 / 網卡專用訂單（這兩個分頁已移除）
+    const isVisaOrEsim =
+      order.tour_name?.includes(ORDERS_PAGE_LABELS.VISA_TOUR) ||
+      order.tour_name?.includes(ORDERS_PAGE_LABELS.ESIM_TOUR)
+    if (isVisaOrEsim) return false
+
     let matchesFilter: boolean
     switch (statusFilter) {
       case 'all':
-        matchesFilter = !(
-          order.tour_name?.includes(ORDERS_PAGE_LABELS.VISA_TOUR) ||
-          order.tour_name?.includes(ORDERS_PAGE_LABELS.ESIM_TOUR)
-        )
-        break
-      case 'visa-only':
-        matchesFilter = order.tour_name?.includes(ORDERS_PAGE_LABELS.VISA_TOUR) ?? false
-        break
-      case 'sim-only':
-        matchesFilter = order.tour_name?.includes(ORDERS_PAGE_LABELS.ESIM_TOUR) ?? false
+        matchesFilter = true
         break
       default:
         matchesFilter = order.payment_status === statusFilter
@@ -169,8 +166,6 @@ export default function OrdersPage() {
         { value: 'unpaid', label: ORDERS_PAGE_LABELS.TAB_UNPAID, icon: AlertCircle },
         { value: 'partial', label: ORDERS_PAGE_LABELS.TAB_PARTIAL, icon: Clock },
         { value: 'paid', label: ORDERS_PAGE_LABELS.TAB_PAID, icon: CheckCircle },
-        { value: 'visa-only', label: LABELS.TAB_VISA, icon: Shield },
-        { value: 'sim-only', label: LABELS.TAB_SIM, icon: Wifi },
       ]}
       activeTab={statusFilter}
       onTabChange={setStatusFilter}

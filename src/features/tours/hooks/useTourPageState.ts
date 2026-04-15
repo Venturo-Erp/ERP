@@ -20,8 +20,8 @@ export function useTourPageState() {
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [expandedRows, setExpandedRows] = useState<string[]>([])
 
-  // 先用預設值，避免 hydration mismatch
-  const [activeStatusTab, setActiveStatusTabState] = useState('all')
+  // 先用預設值，避免 hydration mismatch；預設進「待出發」分頁
+  const [activeStatusTab, setActiveStatusTabState] = useState('待出發')
 
   // 客戶端 mount 後從 localStorage 讀取上次的狀態 Tab
   useEffect(() => {

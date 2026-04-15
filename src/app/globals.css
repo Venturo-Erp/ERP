@@ -19,7 +19,7 @@
 /* 莫蘭迪主題（預設） */
 :root,
 [data-theme='morandi'] {
-  /* 主色系 */
+  /* 主色系（莫蘭迪金 — 預設主題） */
   --morandi-primary: #3a3633;
   --morandi-secondary: #8b8680;
   --morandi-gold: #c9aa7c;
@@ -117,6 +117,105 @@
   --muted-foreground: #8b8680;
   --ring: #c9aa7c;
   --input: #d4c4b0;
+}
+
+/* ─────────────────────────────────────────────
+   鐵灰主題（iron gray）— 變數名保留 morandi-* 歷史名稱，值覆寫為冷調鐵灰
+   ───────────────────────────────────────────── */
+[data-theme='iron'] {
+  --morandi-primary: #2d3139;
+  --morandi-secondary: #787d85;
+  --morandi-gold: #5d6670;
+  --morandi-gold-rgb: 93, 102, 112;
+  --morandi-gold-hover: #484f57;
+  --morandi-gold-light: rgba(93, 102, 112, 0.12);
+  --morandi-gold-light-end: #e9ebee;
+  --morandi-green: #6f9285;
+  --morandi-green-rgb: 111, 146, 133;
+  --morandi-red: #b3716a;
+  --morandi-container: #e5e7ea;
+  --morandi-muted: #a8adb5;
+
+  --gradient-gold-light: #c9ccd1;
+  --gradient-gold-mid: #9ea3ac;
+  --gradient-gold-dark: #6c727a;
+  --gradient-brown-light: #c9ccd1;
+  --gradient-brown-mid: #8a9099;
+  --gradient-brown-dark: #5d6670;
+  --gradient-primary-dark: #3a3f46;
+
+  --background: #f4f5f7;
+  --border: #c9ccd1;
+  --popover-foreground: #2d3139;
+  --accent: #e5e7ea;
+  --accent-foreground: #2d3139;
+
+  --input-border: #c9ccd1;
+  --input-border-hover: #8a9099;
+  --input-border-focus: #5d6670;
+  --input-disabled-bg: #eef0f3;
+  --input-readonly-bg: #f6f7f9;
+  --input-text: #2d3139;
+  --input-placeholder: #a8adb5;
+
+  --primary: #5d6670;
+  --secondary: #e5e7ea;
+  --secondary-foreground: #2d3139;
+  --destructive: #b3716a;
+  --muted: #e5e7ea;
+  --muted-foreground: #787d85;
+  --ring: #5d6670;
+  --input: #c9ccd1;
+}
+
+/* ─────────────────────────────────────────────
+   Airtable 主題 — Swiss-precision 企業風
+   白底 + 深海軍藍文字 + Airtable Blue 主色
+   ───────────────────────────────────────────── */
+[data-theme='airtable'] {
+  --morandi-primary: #181d26; /* Deep Navy 文字 */
+  --morandi-secondary: #333333; /* Dark Gray 次要 */
+  --morandi-gold: #1b61c9; /* Airtable Blue（原金色位） */
+  --morandi-gold-rgb: 27, 97, 201;
+  --morandi-gold-hover: #254fad; /* Mid Blue hover */
+  --morandi-gold-light: rgba(27, 97, 201, 0.08);
+  --morandi-gold-light-end: #eaf2fc;
+  --morandi-green: #006400; /* Success Green */
+  --morandi-green-rgb: 0, 100, 0;
+  --morandi-red: #c44545;
+  --morandi-container: #f8fafc; /* Light Surface */
+  --morandi-muted: rgba(4, 14, 32, 0.45);
+
+  --gradient-gold-light: #cfdef5;
+  --gradient-gold-mid: #6b94d9;
+  --gradient-gold-dark: #1b61c9;
+  --gradient-brown-light: #cfdef5;
+  --gradient-brown-mid: #4a7bc7;
+  --gradient-brown-dark: #254fad;
+  --gradient-primary-dark: #0f1620;
+
+  --background: #ffffff;
+  --border: #e0e2e6;
+  --popover-foreground: #181d26;
+  --accent: #f8fafc;
+  --accent-foreground: #181d26;
+
+  --input-border: #e0e2e6;
+  --input-border-hover: #1b61c9;
+  --input-border-focus: #1b61c9;
+  --input-disabled-bg: #f1f4f8;
+  --input-readonly-bg: #f8fafc;
+  --input-text: #181d26;
+  --input-placeholder: rgba(4, 14, 32, 0.45);
+
+  --primary: #1b61c9;
+  --secondary: #f8fafc;
+  --secondary-foreground: #181d26;
+  --destructive: #c44545;
+  --muted: #f1f4f8;
+  --muted-foreground: rgba(4, 14, 32, 0.69);
+  --ring: #1b61c9;
+  --input: #e0e2e6;
 }
 
 @theme inline {

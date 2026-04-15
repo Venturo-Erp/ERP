@@ -18,7 +18,7 @@ import { FinanceLabels, PAYMENT_METHOD_MAP } from '../constants/labels'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
 import { TableColumn } from '@/components/ui/enhanced-table'
-import { Plus, FileDown, Layers, Edit2, CheckSquare, Loader2 } from 'lucide-react'
+import { Plus, Edit2, CheckSquare, Loader2 } from 'lucide-react'
 import { alert } from '@/lib/ui/alert-dialog'
 import { DateCell, StatusCell, ActionCell, CurrencyCell } from '@/components/table-cells'
 
@@ -41,7 +41,6 @@ import { usePaymentData } from './hooks/usePaymentData'
 import { useAuthStore } from '@/stores'
 
 // Utils
-import { exportReceiptsToExcel } from '@/lib/excel/receipt-excel'
 
 // Types
 import type { Receipt, ReceiptItem } from '@/stores'
@@ -116,10 +115,6 @@ export default function PaymentsPage() {
       logger.error(FinanceLabels.createReceiptFailedPrefix + ':', error)
       void alert(FinanceLabels.createReceiptFailedTitle, 'error')
     }
-  }
-
-  const handleExportExcel = () => {
-    exportReceiptsToExcel(receipts)
   }
 
   // 表格欄位
@@ -233,44 +228,14 @@ export default function PaymentsPage() {
         defaultSort={{ key: 'receipt_date', direction: 'desc' }}
         initialPageSize={15}
         headerActions={
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExportExcel}
-              className="text-morandi-secondary"
-            >
-              <FileDown size={16} className="mr-2" />
-              {FinanceLabels.exportExcel}
-            </Button>
-            {canBatchConfirm && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setIsBatchConfirmDialogOpen(true)}
-                className="text-morandi-gold border-morandi-gold hover:bg-morandi-gold/10"
-              >
-                <CheckSquare size={16} className="mr-2" />
-                {FinanceLabels.batchConfirm}
-              </Button>
-            )}
-            <Button
-              size="sm"
-              onClick={() => setIsBatchDialogOpen(true)}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-            >
-              <Layers size={16} className="mr-2" />
-              {FinanceLabels.batchPayment}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => setIsDialogOpen(true)}
-              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-            >
-              <Plus size={16} className="mr-2" />
-              {FinanceLabels.addPayment}
-            </Button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsDialogOpen(true)}
+            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-colors"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {FinanceLabels.addPayment}
+          </button>
         }
       />
 

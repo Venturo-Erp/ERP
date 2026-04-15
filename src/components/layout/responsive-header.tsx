@@ -265,10 +265,10 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
         )}
 
         {/* 功能區域 */}
-        {props.children && <div className="flex items-center mr-4">{props.children}</div>}
+        {props.children && <div className="flex items-center">{props.children}</div>}
 
         {/* 操作區（日期選擇等功能） */}
-        {props.actions && <div className="flex items-center mr-4">{props.actions}</div>}
+        {props.actions && <div className="flex items-center">{props.actions}</div>}
 
         {/* 彈性空間：把 tabs 推到最右 */}
         <div className="flex-1" />
@@ -307,7 +307,7 @@ export const ResponsiveHeader = memo(function ResponsiveHeader(props: Responsive
         )}
 
         {/* 自訂操作按鈕 */}
-        {props.customActions && <div className="flex items-center mr-4">{props.customActions}</div>}
+        {props.customActions && <div className="flex items-center">{props.customActions}</div>}
 
         {/* 新增按鈕 */}
         <div className="flex items-center gap-3">

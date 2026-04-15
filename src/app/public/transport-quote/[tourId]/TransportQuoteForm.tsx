@@ -46,10 +46,10 @@ function DriverInfoFormInline({ itemId }: { itemId: string }) {
 
   if (submitted) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
+      <div className="bg-morandi-green/10 border border-morandi-green/30 rounded-lg p-6 text-center">
         <div className="text-4xl mb-2">✅</div>
         <h3 className="text-lg font-semibold text-green-900">預訂完成！</h3>
-        <p className="text-green-700 text-sm mt-1">感謝您的配合</p>
+        <p className="text-morandi-green text-sm mt-1">感謝您的配合</p>
       </div>
     )
   }
@@ -59,7 +59,7 @@ function DriverInfoFormInline({ itemId }: { itemId: string }) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>
-            司機姓名 <span className="text-red-500">*</span>
+            司機姓名 <span className="text-morandi-red">*</span>
           </Label>
           <Input
             value={form.driver_name}
@@ -70,7 +70,7 @@ function DriverInfoFormInline({ itemId }: { itemId: string }) {
         </div>
         <div>
           <Label>
-            司機電話 <span className="text-red-500">*</span>
+            司機電話 <span className="text-morandi-red">*</span>
           </Label>
           <Input
             value={form.driver_phone}
@@ -98,11 +98,11 @@ function DriverInfoFormInline({ itemId }: { itemId: string }) {
           />
         </div>
       </div>
-      {error && <div className="text-red-600 text-sm">{error}</div>}
+      {error && <div className="text-morandi-red text-sm">{error}</div>}
       <Button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-blue-600 hover:bg-blue-700"
+        className="w-full bg-morandi-gold hover:bg-morandi-gold-hover"
       >
         {isSubmitting ? '提交中...' : '✓ 確認提交司機資訊'}
       </Button>
@@ -188,11 +188,11 @@ export function TransportQuoteForm({
     if (submittedStatus === 'confirmed') {
       // 報價+留車 → 顯示填司機資訊
       return (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+        <div className="bg-status-info-bg border border-status-info/30 rounded-lg p-6">
           <div className="text-center mb-6">
             <div className="text-4xl mb-2">🎉</div>
             <h3 className="text-xl font-semibold text-blue-900">報價+留車已提交</h3>
-            <p className="text-blue-700 mt-1">請填寫司機資訊以完成預訂</p>
+            <p className="text-status-info mt-1">請填寫司機資訊以完成預訂</p>
           </div>
           <DriverInfoFormInline itemId={itemId || ''} />
         </div>
@@ -201,10 +201,10 @@ export function TransportQuoteForm({
 
     // 僅報價
     return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+      <div className="bg-status-warning-bg border border-status-warning/30 rounded-lg p-8 text-center">
         <div className="text-4xl mb-4">📋</div>
         <h3 className="text-xl font-semibold text-yellow-900 mb-2">報價已提交</h3>
-        <p className="text-yellow-700 mb-4">等待旅行社確認，確認後會通知您留車</p>
+        <p className="text-status-warning mb-4">等待旅行社確認，確認後會通知您留車</p>
       </div>
     )
   }
@@ -220,7 +220,7 @@ export function TransportQuoteForm({
         {/* 車資 */}
         <div>
           <Label htmlFor="totalFare" className="text-base font-semibold">
-            車資（總金額）<span className="text-red-500">*</span>
+            車資（總金額）<span className="text-morandi-red">*</span>
           </Label>
           <div className="flex items-center gap-2 mt-2">
             <Input
@@ -376,7 +376,7 @@ export function TransportQuoteForm({
             type="button"
             disabled={submitting}
             onClick={() => handleSubmitWithStatus('confirmed')}
-            className="py-6 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold"
+            className="py-6 bg-gradient-to-r from-morandi-gold to-morandi-gold-hover hover:from-green-700 hover:to-green-800 text-white font-semibold"
           >
             <div className="text-center">
               <div className="text-lg">✅ 報價+留車</div>

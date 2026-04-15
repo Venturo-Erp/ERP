@@ -33,10 +33,10 @@ const QuickPNR = lazy(() =>
   import('../quick-actions/quick-pnr').then(m => ({ default: m.QuickPNR }))
 )
 
+// 註：PNR 快速動作暫時隱藏（功能還沒整合完成）
 const quickActionTabs: QuickActionTabConfig[] = [
   { key: 'receipt' as const, label: QUICK_ACTION_LABELS.receipt, icon: Receipt },
   { key: 'invoice' as const, label: QUICK_ACTION_LABELS.invoice, icon: FileText },
-  { key: 'pnr' as const, label: QUICK_ACTION_LABELS.pnr, icon: Plane },
   { key: 'share' as const, label: QUICK_ACTION_LABELS.share, icon: UserPlus },
 ]
 

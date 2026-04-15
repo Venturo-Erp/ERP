@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -25,8 +24,17 @@ import { useTodos } from '@/hooks/useTodos'
 import { useEmployeesSlim } from '@/data'
 import { useAuthStore } from '@/stores/auth-store'
 import { alertError } from '@/lib/ui/alert-dialog'
-import { useRequireAuthSync } from '@/hooks/useRequireAuth'
-import { X, Plus, GripVertical, Calendar, User, MoreHorizontal, Trash2, Pencil } from 'lucide-react'
+import {
+  X,
+  Plus,
+  GripVertical,
+  Calendar,
+  User,
+  MoreHorizontal,
+  Trash2,
+  Pencil,
+  Check,
+} from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/utils/logger'
 import { TodoExpandedView } from '@/features/todos/components/todo-expanded-view'
@@ -60,7 +68,7 @@ const COLOR_MAP: Record<string, { border: string; text: string }> = {
 }
 
 export default function TodosPage() {
-  const { todos, create: addTodo, update: updateTodo } = useTodos()
+  const { todos, create: addTodo, update: updateTodo, delete: removeTodo } = useTodos()
   const { user } = useAuthStore()
   const { items: employees } = useEmployeesSlim()
   const searchParams = useSearchParams()
@@ -127,8 +135,7 @@ export default function TodosPage() {
           currentUserId
         const isAssignee = todo.assignee === currentUserId
         const inVisibility = todo.visibility?.includes(currentUserId)
-        const isPublic = todo.is_public === true
-        if (!isCreator && !isPublic && !isAssignee && !inVisibility) return false
+        if (!isCreator && !isAssignee && !inVisibility) return false
       }
       if (searchTerm && !todo.title.toLowerCase().includes(searchTerm.toLowerCase())) return false
       return true
@@ -207,8 +214,13 @@ export default function TodosPage() {
   const handleQuickAdd = useCallback(
     async (columnId: string) => {
       if (!quickAddValue.trim() || isSubmitting) return
-      const auth = useRequireAuthSync()
-      if (!auth.isAuthenticated) return
+
+      // 直接從 store 取最新 user，避免 hydration timing 或 closure stale
+      const currentUser = useAuthStore.getState().user
+      if (!currentUser?.id) {
+        await alertError('請先登入')
+        return
+      }
 
       const column = columns.find(c => c.id === columnId)
       const status = (column?.mapped_status || 'pending') as Todo['status']
@@ -221,8 +233,8 @@ export default function TodosPage() {
           status,
           completed: status === 'completed',
           column_id: columnId,
-          creator: auth.user!.id,
-          visibility: [auth.user!.id],
+          creator: currentUser.id,
+          visibility: [currentUser.id],
           related_items: [],
           sub_tasks: [],
           notes: [],
@@ -327,14 +339,16 @@ export default function TodosPage() {
       deadline: string
       assignee: string
       enabled_quick_actions: ('receipt' | 'invoice' | 'group' | 'quote' | 'assign')[]
-      is_public: boolean
     }) => {
-      const auth = useRequireAuthSync()
-      if (!auth.isAuthenticated) return
+      const currentUser = useAuthStore.getState().user
+      if (!currentUser?.id) {
+        await alertError('請先登入')
+        return
+      }
 
       try {
-        const visibilityList = [auth.user!.id]
-        if (formData.assignee && formData.assignee !== auth.user!.id) {
+        const visibilityList = [currentUser.id]
+        if (formData.assignee && formData.assignee !== currentUser.id) {
           visibilityList.push(formData.assignee)
         }
 
@@ -347,10 +361,9 @@ export default function TodosPage() {
           status: 'pending',
           completed: false,
           column_id: firstCol?.id,
-          creator: auth.user!.id,
+          creator: currentUser.id,
           assignee: formData.assignee || undefined,
           visibility: visibilityList,
-          is_public: formData.is_public,
           related_items: [],
           sub_tasks: [],
           notes: [],
@@ -385,6 +398,47 @@ export default function TodosPage() {
   const handleCardClick = useCallback((id: string) => {
     setExpandedTodo(id)
   }, [])
+
+  // 切換優先級
+  const handleChangePriority = useCallback(
+    async (todo: Todo, priority: number) => {
+      if (priority === todo.priority) return
+      await updateTodo(todo.id, { priority: priority as 1 | 2 | 3 | 4 | 5 })
+    },
+    [updateTodo]
+  )
+
+  // 切換完成狀態
+  const handleToggleComplete = useCallback(
+    async (todo: Todo) => {
+      const nowCompleted = !todo.completed
+      // 切換時把 status 也同步到對應欄位
+      const targetStatus: Todo['status'] = nowCompleted ? 'completed' : 'pending'
+      const targetColumn =
+        columns.find(c => c.mapped_status === targetStatus) || columns[0]
+      await updateTodo(todo.id, {
+        completed: nowCompleted,
+        status: targetStatus,
+        column_id: targetColumn?.id,
+      })
+    },
+    [updateTodo, columns]
+  )
+
+  // 刪除卡片
+  const handleDeleteTodo = useCallback(
+    async (todo: Todo) => {
+      const confirmed = window.confirm(`確定刪除「${todo.title}」？`)
+      if (!confirmed) return
+      try {
+        await removeTodo(todo.id)
+      } catch (err) {
+        logger.error('刪除失敗:', err)
+        await alertError('刪除失敗')
+      }
+    },
+    [removeTodo]
+  )
 
   // 優先級左側邊框
   const getPriorityBorder = useCallback((priority: number) => {
@@ -579,6 +633,9 @@ export default function TodosPage() {
                                         assigneeName={getEmployeeName(todo.assignee)}
                                         currentUserId={user?.id}
                                         onClick={handleCardClick}
+                                        onToggleComplete={handleToggleComplete}
+                                        onDelete={handleDeleteTodo}
+                                        onChangePriority={handleChangePriority}
                                       />
                                     ))}
                                     {provided.placeholder}
@@ -699,7 +756,6 @@ function AddTodoForm({
     deadline: string
     assignee: string
     enabled_quick_actions: ('receipt' | 'invoice' | 'group' | 'quote' | 'assign')[]
-    is_public: boolean
   }) => void
   onCancel: () => void
 }) {
@@ -716,7 +772,6 @@ function AddTodoForm({
       | 'quote'
       | 'assign'
     )[],
-    is_public: false,
   })
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -791,19 +846,6 @@ function AddTodoForm({
         </Select>
       </div>
 
-      <div>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <Checkbox
-            checked={formData.is_public}
-            onCheckedChange={checked => setFormData({ ...formData, is_public: checked as boolean })}
-          />
-          <span className="text-sm font-medium text-morandi-primary">
-            {LABELS.PUBLIC_TO_COMPANY}
-          </span>
-        </label>
-        <p className="text-xs text-morandi-secondary mt-1 ml-6">{LABELS.EDIT_8913}</p>
-      </div>
-
       <div className="flex gap-2 pt-4">
         <Button
           type="submit"
@@ -831,21 +873,36 @@ interface TodoCardMemoProps {
   assigneeName: string | null
   currentUserId: string | undefined
   onClick: (id: string) => void
+  onToggleComplete: (todo: Todo) => void
+  onDelete: (todo: Todo) => void
+  onChangePriority: (todo: Todo, priority: number) => void
 }
 
-function getPriorityBorderClass(priority: number) {
+/**
+ * 依優先級取 RGB（對應星級顏色），用於半透明 radial gradient 卡片背景
+ */
+function getPriorityRgb(priority: number): string {
   switch (priority) {
     case 5:
-      return 'border-l-morandi-red'
+      return '190, 100, 100' // morandi-red
     case 4:
-      return 'border-l-orange-400'
+      return '251, 146, 60' // orange-400
     case 3:
-      return 'border-l-morandi-gold'
+      return '201, 170, 124' // morandi-gold
     case 2:
-      return 'border-l-sky-400'
+      return '56, 189, 248' // sky-400
     default:
-      return 'border-l-morandi-muted'
+      return '139, 134, 128' // morandi-muted
   }
+}
+
+/**
+ * Uiverse radial-gradient 半透明效果：中心淡、邊緣聚集
+ * 刻意用低透明度讓文字仍清楚可讀
+ */
+function getPriorityCardBackground(priority: number): string {
+  const rgb = getPriorityRgb(priority)
+  return `radial-gradient(circle, rgba(${rgb},0.04) 0%, rgba(${rgb},0.12) 80%, rgba(${rgb},0.22) 100%), #ffffff`
 }
 
 function getDeadlineBadge(deadline?: string) {
@@ -863,8 +920,18 @@ function getDeadlineBadge(deadline?: string) {
 }
 
 const TodoCardMemo = React.memo(
-  function TodoCardMemo({ todo, index, assigneeName, currentUserId, onClick }: TodoCardMemoProps) {
+  function TodoCardMemo({
+    todo,
+    index,
+    assigneeName,
+    currentUserId,
+    onClick,
+    onToggleComplete,
+    onDelete,
+    onChangePriority,
+  }: TodoCardMemoProps) {
     const deadlineInfo = getDeadlineBadge(todo.deadline)
+    const [hoverPriority, setHoverPriority] = useState<number | null>(null)
     const subTasksDone = todo.sub_tasks?.filter(s => s.done).length || 0
     const subTasksTotal = todo.sub_tasks?.length || 0
     const unreadNotes = (todo.notes || []).filter(
@@ -879,17 +946,44 @@ const TodoCardMemo = React.memo(
             {...provided.draggableProps}
             {...provided.dragHandleProps}
             onClick={() => onClick(todo.id)}
+            style={{
+              ...provided.draggableProps.style,
+              background: getPriorityCardBackground(todo.priority || 1),
+            }}
             className={cn(
-              'group bg-card rounded-lg border border-border/60 shadow-sm cursor-pointer',
-              'hover:shadow-md hover:border-border',
-              'border-l-[3px]',
-              getPriorityBorderClass(todo.priority || 1),
+              'group rounded-lg border border-border/20 cursor-pointer',
               snapshot.isDragging && 'shadow-xl rotate-[1deg]',
               todo.status === 'completed' && 'opacity-60'
             )}
           >
-            <div className="p-3">
-              <div className="flex items-start gap-2">
+            <div className="p-3 relative">
+              {/* Hover actions */}
+              <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation()
+                    onToggleComplete(todo)
+                  }}
+                  title={todo.completed ? '標為未完成' : '標為完成'}
+                  className="p-1 rounded bg-card/80 border border-border hover:bg-morandi-green/10 hover:border-morandi-green hover:text-morandi-green text-morandi-secondary transition-colors"
+                >
+                  <Check size={12} />
+                </button>
+                <button
+                  type="button"
+                  onClick={e => {
+                    e.stopPropagation()
+                    onDelete(todo)
+                  }}
+                  title="刪除"
+                  className="p-1 rounded bg-card/80 border border-border hover:bg-morandi-red/10 hover:border-morandi-red hover:text-morandi-red text-morandi-secondary transition-colors"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+
+              <div className="flex items-start gap-2 pr-14">
                 <p
                   className={cn(
                     'flex-1 text-sm font-medium text-morandi-primary leading-snug',
@@ -934,12 +1028,33 @@ const TodoCardMemo = React.memo(
 
               <div className="flex items-center justify-between mt-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {Array.from({ length: todo.priority || 1 }).map((_, i) => (
-                      <span key={i} className="text-morandi-gold text-[10px]">
-                        ★
-                      </span>
-                    ))}
+                  {/* 星級：hover 預覽、click 切換 */}
+                  <div
+                    className="flex items-center"
+                    onMouseLeave={() => setHoverPriority(null)}
+                  >
+                    {[1, 2, 3, 4, 5].map(level => {
+                      const active = level <= (hoverPriority ?? todo.priority ?? 1)
+                      return (
+                        <button
+                          key={level}
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation()
+                            onChangePriority(todo, level)
+                          }}
+                          onMouseEnter={() => setHoverPriority(level)}
+                          title={`優先級 ${level}`}
+                          className={cn(
+                            'text-[12px] leading-none px-[1px] transition-colors',
+                            active ? 'text-morandi-gold' : 'text-morandi-muted/30',
+                            'hover:scale-110'
+                          )}
+                        >
+                          ★
+                        </button>
+                      )
+                    })}
                   </div>
                   {deadlineInfo && (
                     <span

@@ -2,7 +2,6 @@
 
 import React from 'react'
 import { ResponsiveHeader } from '@/components/layout/responsive-header'
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +17,6 @@ import {
   Plus,
   FileText,
   Copy,
-  ChevronDown,
 } from 'lucide-react'
 import { TOUR_FILTERS } from '../constants'
 
@@ -48,12 +46,11 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
   showReceivedTab,
   receivedCount,
 }) => {
-  // 基本 tabs
+  // 基本 tabs（封存分頁已隱藏，需要時從 DB `archived=true` 還是能取到）
   const baseTabs = [
-    { value: 'all', label: TOUR_FILTERS.tab_all, icon: BarChart3 },
     { value: '待出發', label: TOUR_FILTERS.tab_active, icon: Calendar },
+    { value: 'all', label: TOUR_FILTERS.tab_all, icon: BarChart3 },
     { value: '已結團', label: TOUR_FILTERS.tab_closed, icon: FileCheck },
-    { value: 'archived', label: TOUR_FILTERS.tab_archived, icon: Archive },
     { value: 'proposal', label: TOUR_FILTERS.tab_proposals, icon: FileText },
     { value: 'template', label: TOUR_FILTERS.tab_templates, icon: Copy },
   ]
@@ -86,11 +83,13 @@ export const TourFilters: React.FC<TourFiltersProps> = ({
       customActions={
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="bg-morandi-gold hover:bg-morandi-gold-hover text-white gap-1.5">
-              <Plus size={16} />
-              新增旅遊團
-              <ChevronDown size={16} />
-            </Button>
+            <button
+              type="button"
+              className="bg-morandi-gold hover:bg-morandi-gold-hover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center transition-colors"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              新增專案
+            </button>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end">

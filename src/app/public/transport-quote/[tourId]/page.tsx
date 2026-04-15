@@ -251,10 +251,10 @@ export default async function TransportQuotePage({
             {/* 根據狀態顯示不同內容 */}
             {requestStatus === 'driver_confirmed' ? (
               // 已確認司機資訊
-              <div className="bg-green-50 border border-green-200 rounded-lg p-8 text-center">
+              <div className="bg-morandi-green/10 border border-morandi-green/30 rounded-lg p-8 text-center">
                 <div className="text-4xl mb-4">✅</div>
                 <h3 className="text-xl font-semibold text-green-900 mb-2">預訂已確認</h3>
-                <p className="text-green-700 mb-4">司機資訊已提交完成</p>
+                <p className="text-morandi-green mb-4">司機資訊已提交完成</p>
                 <div className="bg-white rounded-lg p-4 text-left text-sm max-w-xs mx-auto">
                   <div className="grid grid-cols-2 gap-2">
                     <span className="text-morandi-secondary">司機姓名</span>
@@ -274,20 +274,20 @@ export default async function TransportQuotePage({
               </div>
             ) : requestStatus === 'accepted' ? (
               // 已成交，等待填寫司機資訊
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <div className="bg-status-info-bg border border-status-info/30 rounded-lg p-6">
                 <div className="text-center mb-6">
                   <div className="text-4xl mb-2">🎉</div>
                   <h3 className="text-xl font-semibold text-blue-900">恭喜！您的報價已被選用</h3>
-                  <p className="text-blue-700 mt-1">請填寫司機資訊以完成預訂</p>
+                  <p className="text-status-info mt-1">請填寫司機資訊以完成預訂</p>
                 </div>
                 <DriverInfoForm itemId={itemId || ''} />
               </div>
             ) : requestStatus === 'quoted' ? (
               // 已報價，等待確認
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center">
+              <div className="bg-status-warning-bg border border-status-warning/30 rounded-lg p-8 text-center">
                 <div className="text-4xl mb-4">⏳</div>
                 <h3 className="text-xl font-semibold text-yellow-900 mb-2">報價已提交</h3>
-                <p className="text-yellow-700">等待旅行社確認中，請耐心等候</p>
+                <p className="text-status-warning">等待旅行社確認中，請耐心等候</p>
               </div>
             ) : requestStatus === 'rejected' ? (
               // 未選用

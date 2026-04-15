@@ -87,7 +87,7 @@ export function AccommodationQuoteForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-morandi-primary mb-1">
-            聯絡人 <span className="text-red-500">*</span>
+            聯絡人 <span className="text-morandi-red">*</span>
           </label>
           <input
             type="text"
@@ -100,7 +100,7 @@ export function AccommodationQuoteForm({
         </div>
         <div>
           <label className="block text-sm font-medium text-morandi-primary mb-1">
-            聯絡電話 <span className="text-red-500">*</span>
+            聯絡電話 <span className="text-morandi-red">*</span>
           </label>
           <input
             type="tel"
@@ -116,7 +116,7 @@ export function AccommodationQuoteForm({
       {/* 房型報價 */}
       <div>
         <label className="block text-sm font-medium text-morandi-primary mb-2">
-          房型報價 <span className="text-red-500">*</span>
+          房型報價 <span className="text-morandi-red">*</span>
         </label>
         <div className="space-y-3">
           {rooms.map((room, idx) => (

@@ -212,7 +212,7 @@ export function BookingDialog({
                   <button
                     type="button"
                     onClick={() => removeTraveler(traveler.id)}
-                    className="absolute top-4 left-4 text-red-500 text-sm hover:underline"
+                    className="absolute top-4 left-4 text-morandi-red text-sm hover:underline"
                   >
                     移除
                   </button>

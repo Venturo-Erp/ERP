@@ -172,6 +172,26 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
     if (creatingQuick) return
     setCreatingQuick(true)
     try {
+      // 產生 code：tour.code-QQ01 / QQ02 …（沿用主報價單的 pattern）
+      let quickQuoteCode: string | undefined
+      if (tour.code) {
+        const { data: existingQQs } = await supabase
+          .from('quotes')
+          .select('code')
+          .eq('tour_id', tour.id)
+          .eq('quote_type', 'quick')
+          .like('code', `${tour.code}-QQ%`)
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+        let nextNum = 1
+        if (existingQQs && existingQQs.length > 0 && existingQQs[0].code) {
+          const match = existingQQs[0].code.match(/-QQ(\d+)$/)
+          if (match) nextNum = parseInt(match[1], 10) + 1
+        }
+        quickQuoteCode = `${tour.code}-QQ${String(nextNum).padStart(2, '0')}`
+      }
+
       const newQuote = await createQuote({
         quote_type: 'quick',
         tour_id: tour.id,
@@ -187,6 +207,7 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
         workspace_id: user?.workspace_id || '',
         created_by: user?.id,
         created_by_name: user?.display_name || user?.chinese_name || '',
+        ...(quickQuoteCode ? { code: quickQuoteCode } : {}),
         quick_quote_items: [
           {
             id: crypto.randomUUID(),
@@ -206,8 +227,17 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
         toast.success('快速報價單已建立')
       }
     } catch (err) {
-      logger.error('建立快速報價單失敗', err)
-      toast.error('建立快速報價單失敗')
+      const detail =
+        err && typeof err === 'object'
+          ? {
+              message: (err as { message?: string }).message,
+              code: (err as { code?: string }).code,
+              details: (err as { details?: string }).details,
+              hint: (err as { hint?: string }).hint,
+            }
+          : err
+      logger.error('建立快速報價單失敗', detail)
+      toast.error(`建立快速報價單失敗：${(err as { message?: string })?.message || '未知錯誤'}`)
     } finally {
       setCreatingQuick(false)
     }

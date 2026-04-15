@@ -81,7 +81,7 @@ export function MealQuoteForm({ tourId, requestId, defaultPax }: MealQuoteFormPr
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-morandi-primary mb-1">
-            聯絡人 <span className="text-red-500">*</span>
+            聯絡人 <span className="text-morandi-red">*</span>
           </label>
           <input
             type="text"
@@ -94,7 +94,7 @@ export function MealQuoteForm({ tourId, requestId, defaultPax }: MealQuoteFormPr
         </div>
         <div>
           <label className="block text-sm font-medium text-morandi-primary mb-1">
-            聯絡電話 <span className="text-red-500">*</span>
+            聯絡電話 <span className="text-morandi-red">*</span>
           </label>
           <input
             type="tel"
@@ -112,7 +112,7 @@ export function MealQuoteForm({ tourId, requestId, defaultPax }: MealQuoteFormPr
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-morandi-primary mb-1">
-              用餐人數 <span className="text-red-500">*</span>
+              用餐人數 <span className="text-morandi-red">*</span>
             </label>
             <input
               type="number"
@@ -126,7 +126,7 @@ export function MealQuoteForm({ tourId, requestId, defaultPax }: MealQuoteFormPr
           </div>
           <div>
             <label className="block text-sm font-medium text-morandi-primary mb-1">
-              單價 (元/人) <span className="text-red-500">*</span>
+              單價 (元/人) <span className="text-morandi-red">*</span>
             </label>
             <input
               type="number"

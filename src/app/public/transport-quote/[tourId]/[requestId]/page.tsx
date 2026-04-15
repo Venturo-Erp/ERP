@@ -301,22 +301,22 @@ export default async function TransportQuoteWithRequestPage({
                           <div>聯絡人：{quoteData?.contact || '—'}</div>
                           <div className="flex gap-2 flex-wrap">
                             {quoteData?.includesParking && (
-                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                              <span className="bg-morandi-green/15 text-morandi-green px-2 py-0.5 rounded">
                                 ✓ 停車費
                               </span>
                             )}
                             {quoteData?.includesToll && (
-                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                              <span className="bg-morandi-green/15 text-morandi-green px-2 py-0.5 rounded">
                                 ✓ 過路費
                               </span>
                             )}
                             {quoteData?.includesAccommodation && (
-                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                              <span className="bg-morandi-green/15 text-morandi-green px-2 py-0.5 rounded">
                                 ✓ 司機住宿
                               </span>
                             )}
                             {quoteData?.includesTip && (
-                              <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">
+                              <span className="bg-morandi-green/15 text-morandi-green px-2 py-0.5 rounded">
                                 ✓ 小費
                               </span>
                             )}
@@ -336,11 +336,11 @@ export default async function TransportQuoteWithRequestPage({
 
             {/* 已提交：顯示報價結果 */}
             {isSubmitted && quoteData ? (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+              <div className="bg-morandi-green/10 border border-morandi-green/30 rounded-lg p-6">
                 <div className="text-center mb-4">
                   <div className="text-4xl mb-2">✅</div>
                   <h3 className="text-xl font-semibold text-green-900">報價已提交</h3>
-                  <p className="text-sm text-green-700 mt-1">
+                  <p className="text-sm text-morandi-green mt-1">
                     提交時間：
                     {quoteData?.submitted_at
                       ? new Date(quoteData.submitted_at).toLocaleString('zh-TW')
@@ -359,7 +359,7 @@ export default async function TransportQuoteWithRequestPage({
                   </div>
                   <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-morandi-secondary">總車資：</span>
-                    <span className="font-bold text-lg text-green-700">
+                    <span className="font-bold text-lg text-morandi-green">
                       ${quoteData.totalFare?.toLocaleString()} 元
                     </span>
                   </div>

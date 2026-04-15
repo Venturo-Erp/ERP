@@ -12,6 +12,7 @@ interface TabConfig {
 
 const ALL_TABS: TabConfig[] = [
   { value: 'personal', label: '個人設定', href: '/settings' },
+  { value: 'appearance', label: '外觀主題', href: '/settings/appearance' },
   { value: 'company', label: '公司設定', href: '/settings/company', adminOnly: true },
 ]
 
@@ -25,6 +26,7 @@ export function SettingsTabs() {
 
   const getActiveTab = () => {
     if (pathname === '/settings/company') return 'company'
+    if (pathname === '/settings/appearance') return 'appearance'
     return 'personal'
   }
 

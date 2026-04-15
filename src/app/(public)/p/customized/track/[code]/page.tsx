@@ -52,7 +52,7 @@ interface CompanyInfo {
 }
 
 const STATUS_MAP = {
-  pending: { label: '等待處理', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
+  pending: { label: '等待處理', color: 'bg-status-warning-bg text-yellow-800', icon: Clock },
   contacted: { label: '已聯繫', color: 'bg-status-info/10 text-status-info', icon: Phone },
   quoted: {
     label: '已報價',

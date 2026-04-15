@@ -265,27 +265,6 @@ export function DisbursementPage() {
     }
   }, [])
 
-  // 統計：本週（週一～週日）
-  const thisWeekOrders = useMemo(() => {
-    const now = new Date()
-    const dayOfWeek = now.getDay()
-    const monday = new Date(now)
-    monday.setDate(now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
-    monday.setHours(0, 0, 0, 0)
-    const sunday = new Date(monday)
-    sunday.setDate(monday.getDate() + 6)
-    sunday.setHours(23, 59, 59, 999)
-
-    return disbursement_orders.filter(o => {
-      const date = new Date(o.disbursement_date || o.created_at || '')
-      return date >= monday && date <= sunday
-    })
-  }, [disbursement_orders])
-  const thisWeekAmount = useMemo(
-    () => thisWeekOrders.reduce((sum, o) => sum + (o.amount || 0), 0),
-    [thisWeekOrders]
-  )
-
   return (
     <>
       <ListPageLayout<DisbursementOrder>
@@ -298,28 +277,6 @@ export function DisbursementPage() {
         addLabel={DISBURSEMENT_LABELS.新增出納單}
         onRowClick={handleRowClick}
         initialPageSize={15}
-        headerChildren={
-          <div className="flex items-center gap-6 text-sm">
-            <div className="text-right">
-              <span className="text-morandi-muted">{DISBURSEMENT_LABELS.待出帳}</span>
-              <span className="ml-2 font-semibold text-morandi-gold">
-                {pendingRequests.length}
-                {DISBURSEMENT_LABELS.筆}
-              </span>
-            </div>
-            <div className="text-right">
-              <span className="text-morandi-muted">{DISBURSEMENT_LABELS.本週出帳}</span>
-              <span className="ml-2 font-semibold text-morandi-primary">
-                {thisWeekOrders.length}
-                {DISBURSEMENT_LABELS.筆}
-              </span>
-            </div>
-            <div className="text-right flex items-center gap-2">
-              <span className="text-morandi-muted">{DISBURSEMENT_LABELS.本週金額}</span>
-              <CurrencyCell amount={thisWeekAmount} className="font-semibold text-morandi-green" />
-            </div>
-          </div>
-        }
         renderActions={(row: DisbursementOrder) => (
           <div className="flex items-center gap-1">
             {row.status === 'pending' && (

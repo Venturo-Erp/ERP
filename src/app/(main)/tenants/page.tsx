@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useWorkspaceChannels } from '@/stores/workspace'
 import type { Workspace } from '@/stores/workspace'
 import { TableColumn } from '@/components/ui/enhanced-table'
-import { DateCell, ActionCell } from '@/components/table-cells'
+import { ActionCell } from '@/components/table-cells'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 import { CreateTenantDialog } from './create-tenant-dialog'
@@ -81,12 +81,14 @@ export default function TenantsPage() {
         key: 'name',
         label: LABELS.COL_NAME,
         sortable: true,
+        width: '180px',
         render: value => <span className="font-medium">{String(value || '')}</span>,
       },
       {
         key: 'code',
         label: LABELS.COL_CODE,
         sortable: true,
+        width: '120px',
         render: value => (
           <span className="font-mono text-sm text-morandi-primary">{String(value || '')}</span>
         ),
@@ -95,6 +97,7 @@ export default function TenantsPage() {
         key: 'type',
         label: LABELS.COL_TYPE,
         sortable: true,
+        width: '100px',
         render: value => (
           <span className="text-sm">
             {WORKSPACE_TYPE_MAP[String(value || '')] || LABELS.TYPE_UNKNOWN}
@@ -105,6 +108,7 @@ export default function TenantsPage() {
         key: 'employee_count',
         label: LABELS.COL_EMPLOYEE_COUNT,
         sortable: true,
+        width: '100px',
         render: value => (
           <span className="text-sm">
             {String(value || 0)}
@@ -116,6 +120,7 @@ export default function TenantsPage() {
         key: 'is_active',
         label: LABELS.COL_STATUS,
         sortable: true,
+        width: '90px',
         render: (_value, row: WorkspaceRow) => (
           <span
             className={`px-2 py-1 rounded text-sm font-medium ${
@@ -127,15 +132,6 @@ export default function TenantsPage() {
             {row.is_active ? LABELS.STATUS_ACTIVE : LABELS.STATUS_INACTIVE}
           </span>
         ),
-      },
-      {
-        key: 'created_at',
-        label: LABELS.COL_CREATED_AT,
-        sortable: true,
-        render: (_value, row: WorkspaceRow) => {
-          if (!row.created_at) return <span className="text-morandi-muted text-sm">-</span>
-          return <DateCell date={row.created_at} />
-        },
       },
     ],
     []
@@ -177,6 +173,7 @@ export default function TenantsPage() {
         searchFields={['name', 'code'] as (keyof WorkspaceRow)[]}
         searchPlaceholder={LABELS.SEARCH_PLACEHOLDER}
         renderActions={renderActions}
+        actionsWidth="200px"
         bordered={true}
         emptyMessage={LABELS.EMPTY_MESSAGE}
         onRowClick={handleRowClick}
