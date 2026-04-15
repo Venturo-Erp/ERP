@@ -48,7 +48,7 @@ function DriverInfoFormInline({ itemId }: { itemId: string }) {
     return (
       <div className="bg-morandi-green/10 border border-morandi-green/30 rounded-lg p-6 text-center">
         <div className="text-4xl mb-2">✅</div>
-        <h3 className="text-lg font-semibold text-green-900">預訂完成！</h3>
+        <h3 className="text-lg font-semibold text-morandi-green">預訂完成！</h3>
         <p className="text-morandi-green text-sm mt-1">感謝您的配合</p>
       </div>
     )
@@ -191,7 +191,7 @@ export function TransportQuoteForm({
         <div className="bg-status-info-bg border border-status-info/30 rounded-lg p-6">
           <div className="text-center mb-6">
             <div className="text-4xl mb-2">🎉</div>
-            <h3 className="text-xl font-semibold text-blue-900">報價+留車已提交</h3>
+            <h3 className="text-xl font-semibold text-status-info">報價+留車已提交</h3>
             <p className="text-status-info mt-1">請填寫司機資訊以完成預訂</p>
           </div>
           <DriverInfoFormInline itemId={itemId || ''} />
@@ -203,7 +203,7 @@ export function TransportQuoteForm({
     return (
       <div className="bg-status-warning-bg border border-status-warning/30 rounded-lg p-8 text-center">
         <div className="text-4xl mb-4">📋</div>
-        <h3 className="text-xl font-semibold text-yellow-900 mb-2">報價已提交</h3>
+        <h3 className="text-xl font-semibold text-morandi-primary mb-2">報價已提交</h3>
         <p className="text-status-warning mb-4">等待旅行社確認，確認後會通知您留車</p>
       </div>
     )
@@ -380,7 +380,7 @@ export function TransportQuoteForm({
           >
             <div className="text-center">
               <div className="text-lg">✅ 報價+留車</div>
-              <div className="text-xs text-green-100 mt-1">（已預訂）</div>
+              <div className="text-xs text-morandi-green/80 mt-1">（已預訂）</div>
             </div>
           </Button>
         </div>

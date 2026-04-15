@@ -52,7 +52,7 @@ interface CompanyInfo {
 }
 
 const STATUS_MAP = {
-  pending: { label: '等待處理', color: 'bg-status-warning-bg text-yellow-800', icon: Clock },
+  pending: { label: '等待處理', color: 'bg-status-warning-bg text-status-warning', icon: Clock },
   contacted: { label: '已聯繫', color: 'bg-status-info/10 text-status-info', icon: Phone },
   quoted: {
     label: '已報價',
@@ -64,7 +64,7 @@ const STATUS_MAP = {
     color: 'bg-morandi-green/10 text-morandi-green',
     icon: CheckCircle,
   },
-  cancelled: { label: '已取消', color: 'bg-gray-100 text-gray-800', icon: Clock },
+  cancelled: { label: '已取消', color: 'bg-morandi-container text-morandi-primary', icon: Clock },
 }
 
 export default function TrackInquiryPage({ params }: { params: Promise<{ code: string }> }) {

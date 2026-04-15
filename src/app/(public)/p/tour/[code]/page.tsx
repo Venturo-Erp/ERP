@@ -244,8 +244,8 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">找不到行程</h1>
-          <p className="text-gray-600 mb-8">此行程不存在或已被移除</p>
+          <h1 className="text-4xl font-bold text-morandi-primary mb-4">找不到行程</h1>
+          <p className="text-morandi-secondary mb-8">此行程不存在或已被移除</p>
           <Link href="/">
             <Button>返回首頁</Button>
           </Link>

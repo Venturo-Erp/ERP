@@ -101,8 +101,8 @@ export default function LoginPage() {
 
         {/* 錯誤訊息 */}
         {error && (
-          <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-2">
-            <AlertCircle size={16} className="text-red-400 mt-0.5 shrink-0" />
+          <div className="mt-4 p-3 bg-morandi-red/10 border border-morandi-red/30 rounded-2xl flex items-start gap-2">
+            <AlertCircle size={16} className="text-morandi-red mt-0.5 shrink-0" />
             <span className="text-xs text-morandi-red">{error}</span>
           </div>
         )}

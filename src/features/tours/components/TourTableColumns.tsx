@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { DateCell } from '@/components/table-cells'
 import { TOUR_TABLE } from '../constants'
 import { getStatusConfig } from '@/lib/status-config'
+import { useTourDisplayResolver } from '../utils/tour-display'
 
 interface UseTourTableColumnsParams {
   ordersByTourId?: Map<string, { sales_person: string | null; assistant: string | null }>
@@ -116,6 +117,7 @@ interface UseTemplateTableColumnsParams {
 }
 
 export function useTemplateTableColumns({ onConvert }: UseTemplateTableColumnsParams) {
+  const resolveDisplay = useTourDisplayResolver()
   return useMemo<TableColumn[]>(
     () => [
       {
@@ -130,11 +132,13 @@ export function useTemplateTableColumns({ onConvert }: UseTemplateTableColumnsPa
       {
         key: 'location',
         label: TOUR_TABLE.col_location,
-        sortable: true,
+        sortable: false,
         width: '120px',
-        render: value => (
-          <span className="text-sm text-morandi-primary">{String(value || '-')}</span>
-        ),
+        render: (_value, row) => {
+          const tour = row as Tour
+          const { displayString } = resolveDisplay(tour)
+          return <span className="text-sm text-morandi-primary">{displayString || '-'}</span>
+        },
       },
       {
         key: 'days_count',
@@ -174,6 +178,6 @@ export function useTemplateTableColumns({ onConvert }: UseTemplateTableColumnsPa
         },
       },
     ],
-    [onConvert]
+    [onConvert, resolveDisplay]
   )
 }

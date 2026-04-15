@@ -88,7 +88,7 @@ export default function SettingsPage() {
           <div className="absolute inset-0 -z-10 rounded-xl overflow-hidden">
             <div className="absolute -top-20 -right-20 w-80 h-80 bg-morandi-gold/40 rounded-full blur-3xl animate-pulse" />
             <div className="absolute -bottom-10 -left-20 w-80 h-80 bg-rose-300/25 rounded-full blur-3xl" />
-            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-200/30 rounded-full blur-3xl" />
+            <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-96 h-96 bg-status-warning-bg/30 rounded-full blur-3xl" />
             <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-morandi-gold/20 rounded-full blur-3xl" />
           </div>
           <EmployeeForm

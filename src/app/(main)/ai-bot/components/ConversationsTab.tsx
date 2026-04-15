@@ -378,7 +378,7 @@ function ThreadItem({
       className={cn(
         'w-full text-left rounded-lg border p-3 transition-colors hover:bg-muted/50',
         isSelected ? 'border-morandi-gold bg-morandi-gold/5' : 'border-border',
-        thread.needs_followup_count > 0 && !isSelected && 'border-amber-200'
+        thread.needs_followup_count > 0 && !isSelected && 'border-status-warning/30'
       )}
     >
       <div className="flex items-start gap-3">
@@ -407,7 +407,7 @@ function ThreadItem({
               {thread.message_count} 則
             </Badge>
             {thread.needs_followup_count > 0 && (
-              <Badge className="bg-amber-100 text-amber-800 text-[10px] px-1.5 py-0">
+              <Badge className="bg-status-warning-bg text-status-warning text-[10px] px-1.5 py-0">
                 {thread.needs_followup_count} 待跟進
               </Badge>
             )}
@@ -556,10 +556,10 @@ function ThreadDetail({
 
                   {/* 跟進操作（如果需要） */}
                   {needsFollowUp(msg.intent) && msg.follow_up_status !== 'done' && (
-                    <div className="ml-9 mb-3 p-3 rounded-lg border border-amber-200 bg-amber-50/50">
+                    <div className="ml-9 mb-3 p-3 rounded-lg border border-status-warning/30 bg-status-warning-bg/50">
                       <div className="flex items-center gap-2 mb-2">
-                        <AlertCircle className="h-3.5 w-3.5 text-amber-600" />
-                        <span className="text-xs font-medium text-amber-800">
+                        <AlertCircle className="h-3.5 w-3.5 text-status-warning" />
+                        <span className="text-xs font-medium text-status-warning">
                           此對話需要人工跟進
                         </span>
                       </div>

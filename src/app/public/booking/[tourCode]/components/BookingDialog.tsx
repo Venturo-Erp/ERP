@@ -101,13 +101,13 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
             <h1 className="text-4xl font-serif tracking-tight leading-tight mb-4">
               {itinerary.title}
             </h1>
-            <p className="text-gray-600 text-sm">
+            <p className="text-morandi-secondary text-sm">
               Complete your dossier for the upcoming excursion
             </p>
           </div>
 
           {/* Contact Info */}
-          <section className="bg-gray-50 p-8 rounded-xl border-l-4 border-morandi-primary">
+          <section className="bg-morandi-container/50 p-8 rounded-xl border-l-4 border-morandi-primary">
             <h2 className="text-xl font-serif mb-6 flex items-center gap-2">
               <span className="text-2xl">👤</span> Contact Intelligence
             </h2>
@@ -171,7 +171,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
           <div className="space-y-6">
             <div className="flex items-end justify-between border-b border-border pb-4">
               <h2 className="text-2xl font-serif italic">Traveler Dossiers</h2>
-              <p className="text-sm text-gray-500">Entry {travelers.length} total</p>
+              <p className="text-sm text-morandi-muted">Entry {travelers.length} total</p>
             </div>
 
             {travelers.map((traveler, index) => (
@@ -179,7 +179,7 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
                 key={traveler.id}
                 className="bg-card p-8 rounded-xl ring-1 ring-gray-200 shadow-sm relative"
               >
-                <div className="absolute top-4 right-4 text-8xl font-serif font-bold text-gray-100 select-none">
+                <div className="absolute top-4 right-4 text-8xl font-serif font-bold text-morandi-container select-none">
                   {String(index + 1).padStart(2, '0')}
                 </div>
                 <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -233,10 +233,10 @@ export function BookingDialog({ open, onClose, itinerary, salesPersonId }: Booki
             <button
               type="button"
               onClick={addTraveler}
-              className="w-full py-6 border-2 border-dashed border-gray-300 rounded-xl hover:border-morandi-primary hover:bg-gray-50 transition-all flex flex-col items-center justify-center gap-2"
+              className="w-full py-6 border-2 border-dashed border-morandi-muted rounded-xl hover:border-morandi-primary hover:bg-morandi-container/50 transition-all flex flex-col items-center justify-center gap-2"
             >
               <span className="text-2xl">+</span>
-              <span className="text-sm font-bold uppercase tracking-widest text-gray-600">
+              <span className="text-sm font-bold uppercase tracking-widest text-morandi-secondary">
                 Add Traveler Dossier
               </span>
             </button>

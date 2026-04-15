@@ -599,7 +599,7 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
                           <TourPreview data={processedData} viewMode="mobile" />
                         </div>
                         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10">
-                          <div className="w-32 h-1 bg-gray-300 rounded-full" />
+                          <div className="w-32 h-1 bg-morandi-muted rounded-full" />
                         </div>
                       </div>
                     </div>

@@ -515,7 +515,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
   // 預覽頁面
   if (step === 'preview') {
     return (
-      <div className="min-h-screen bg-gray-100 flex flex-col">
+      <div className="min-h-screen bg-morandi-container flex flex-col">
         {/* 頂部資訊列 */}
         <div className="bg-card border-b border-border shadow-sm sticky top-0 z-10">
           <div className="px-4 py-3">
@@ -524,10 +524,10 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                 {savedSignature ? (
                   <Check className="w-5 h-5 text-morandi-green" />
                 ) : (
-                  <FileSignature className="w-5 h-5 text-amber-600" />
+                  <FileSignature className="w-5 h-5 text-status-warning" />
                 )}
                 <div>
-                  <div className="font-medium text-gray-900 flex items-center gap-2">
+                  <div className="font-medium text-morandi-primary flex items-center gap-2">
                     {TEMPLATE_LABELS[contract.template] || '旅遊合約'}
                     {savedSignature && (
                       <span className="text-xs px-2 py-0.5 rounded-full bg-morandi-green/15 text-morandi-green">
@@ -535,17 +535,17 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                       </span>
                     )}
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-morandi-muted">
                     {contract.tours.name} · {contract.code}
                   </div>
                 </div>
               </div>
-              <div className="text-sm text-gray-500">{contract.workspaces.name}</div>
+              <div className="text-sm text-morandi-muted">{contract.workspaces.name}</div>
             </div>
           </div>
 
           {/* 閱讀進度條 */}
-          <div className="w-full h-1 bg-gray-100">
+          <div className="w-full h-1 bg-morandi-container">
             <div
               className="h-full bg-morandi-gold transition-all duration-300"
               style={{ width: `${readingProgress}%` }}
@@ -558,7 +558,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
           <div className="max-w-4xl mx-auto h-full">
             {loading ? (
               <div className="bg-card rounded-lg shadow-lg h-full flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+                <Loader2 className="w-8 h-8 animate-spin text-morandi-gold" />
               </div>
             ) : error ? (
               <div className="bg-card rounded-lg shadow-lg h-full flex items-center justify-center">
@@ -608,34 +608,34 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
 
                 {/* 附件：團員名單表格 */}
                 {contract.include_member_list && contract.members.length > 1 && (
-                  <div className="border-t-2 border-gray-200 p-8">
-                    <h3 className="text-base font-semibold text-gray-900 mb-4">
+                  <div className="border-t-2 border-border p-8">
+                    <h3 className="text-base font-semibold text-morandi-primary mb-4">
                       附件一：簽約團員名單（{contract.members.length} 人）
                     </h3>
                     <table className="w-full text-sm border-collapse">
                       <thead>
-                        <tr className="border-b-2 border-gray-300">
-                          <th className="text-left py-2 px-3 font-medium text-gray-600 w-10">
+                        <tr className="border-b-2 border-morandi-muted">
+                          <th className="text-left py-2 px-3 font-medium text-morandi-secondary w-10">
                             序號
                           </th>
-                          <th className="text-left py-2 px-3 font-medium text-gray-600">姓名</th>
-                          <th className="text-left py-2 px-3 font-medium text-gray-600">
+                          <th className="text-left py-2 px-3 font-medium text-morandi-secondary">姓名</th>
+                          <th className="text-left py-2 px-3 font-medium text-morandi-secondary">
                             身分證字號 / 護照號碼
                           </th>
-                          <th className="text-left py-2 px-3 font-medium text-gray-600">
+                          <th className="text-left py-2 px-3 font-medium text-morandi-secondary">
                             出生日期
                           </th>
                         </tr>
                       </thead>
                       <tbody>
                         {contract.members.map((member, idx) => (
-                          <tr key={member.id} className="border-b border-gray-200">
-                            <td className="py-2 px-3 text-gray-500">{idx + 1}</td>
-                            <td className="py-2 px-3 font-medium text-gray-900">
+                          <tr key={member.id} className="border-b border-border">
+                            <td className="py-2 px-3 text-morandi-muted">{idx + 1}</td>
+                            <td className="py-2 px-3 font-medium text-morandi-primary">
                               {member.chinese_name || '-'}
                             </td>
-                            <td className="py-2 px-3 text-gray-700">{member.id_number || '-'}</td>
-                            <td className="py-2 px-3 text-gray-700">
+                            <td className="py-2 px-3 text-morandi-primary">{member.id_number || '-'}</td>
+                            <td className="py-2 px-3 text-morandi-primary">
                               {member.birth_date
                                 ? new Date(member.birth_date).toLocaleDateString('zh-TW')
                                 : '-'}
@@ -649,8 +649,8 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
 
                 {/* 附件：簡易行程表（跟報價單同款式） */}
                 {contract.include_itinerary && dailyData.length > 0 && (
-                  <div className="border-t-2 border-gray-200 p-8">
-                    <h3 className="text-base font-semibold text-gray-900 mb-4">
+                  <div className="border-t-2 border-border p-8">
+                    <h3 className="text-base font-semibold text-morandi-primary mb-4">
                       {contract.include_member_list && contract.members.length > 1
                         ? '附件二'
                         : '附件一'}
@@ -820,12 +820,12 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
               </div>
             ) : !canSign ? (
               <div className="text-center">
-                <div className="flex items-center justify-center gap-2 text-gray-500 mb-2">
+                <div className="flex items-center justify-center gap-2 text-morandi-muted mb-2">
                   <ChevronDown className="w-4 h-4 animate-bounce" />
                   <span>請閱讀完整合約內容</span>
                   <ChevronDown className="w-4 h-4 animate-bounce" />
                 </div>
-                <p className="text-xs text-gray-400">滾動至合約底部後即可簽署</p>
+                <p className="text-xs text-morandi-muted">滾動至合約底部後即可簽署</p>
               </div>
             ) : (
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -857,20 +857,20 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
           <div className="max-w-md mx-auto flex items-center">
             <button
               onClick={() => setStep('preview')}
-              className="text-gray-500 hover:text-gray-700 mr-4"
+              className="text-morandi-muted hover:text-morandi-primary mr-4"
             >
               ← 返回合約
             </button>
-            <h1 className="text-lg font-semibold text-gray-900">確認簽約人資訊</h1>
+            <h1 className="text-lg font-semibold text-morandi-primary">確認簽約人資訊</h1>
           </div>
         </div>
 
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="bg-card rounded-xl shadow-lg p-6 w-full max-w-md">
-            <div className="mb-6 pb-4 border-b border-gray-100">
-              <div className="text-sm text-gray-500 mb-1">{TEMPLATE_LABELS[contract.template]}</div>
-              <div className="font-semibold text-gray-900">{contract.tours.name}</div>
-              <div className="text-sm text-gray-600 mt-1">
+            <div className="mb-6 pb-4 border-b border-border">
+              <div className="text-sm text-morandi-muted mb-1">{TEMPLATE_LABELS[contract.template]}</div>
+              <div className="font-semibold text-morandi-primary">{contract.tours.name}</div>
+              <div className="text-sm text-morandi-secondary mt-1">
                 簽約人：{contract.signer_name}
                 {contract.member_ids?.length > 1 && ` 等 ${contract.member_ids.length} 人`}
               </div>
@@ -878,7 +878,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-morandi-primary mb-1">
                   聯絡電話 <span className="text-morandi-red">*</span>
                 </label>
                 <input
@@ -886,12 +886,12 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   value={signerPhone}
                   onChange={e => setSignerPhone(e.target.value)}
                   placeholder="請輸入手機或市話"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold outline-none"
+                  className="w-full px-3 py-2 border border-morandi-muted rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-morandi-primary mb-1">
                   住（居）所地址 <span className="text-morandi-red">*</span>
                 </label>
                 <input
@@ -899,12 +899,12 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   value={signerAddress}
                   onChange={e => setSignerAddress(e.target.value)}
                   placeholder="請輸入通訊地址"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold outline-none"
+                  className="w-full px-3 py-2 border border-morandi-muted rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-morandi-primary mb-1">
                   身分證字號（統一編號）
                 </label>
                 <input
@@ -912,7 +912,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                   value={signerIdNumber}
                   onChange={e => setSignerIdNumber(e.target.value)}
                   placeholder="選填"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold outline-none"
+                  className="w-full px-3 py-2 border border-morandi-muted rounded-lg focus:ring-2 focus:ring-morandi-gold focus:border-morandi-gold outline-none"
                 />
               </div>
             </div>
@@ -943,7 +943,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
               </Button>
             </div>
 
-            <p className="text-xs text-gray-400 text-center mt-4">以上資訊將記載於合約中</p>
+            <p className="text-xs text-morandi-muted text-center mt-4">以上資訊將記載於合約中</p>
           </div>
         </div>
       </div>
@@ -959,11 +959,11 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
           <div className="max-w-md mx-auto flex items-center">
             <button
               onClick={() => setStep('preview')}
-              className="text-gray-500 hover:text-gray-700 mr-4"
+              className="text-morandi-muted hover:text-morandi-primary mr-4"
             >
               ← 返回合約
             </button>
-            <h1 className="text-lg font-semibold text-gray-900">電子簽署</h1>
+            <h1 className="text-lg font-semibold text-morandi-primary">電子簽署</h1>
           </div>
         </div>
 
@@ -971,10 +971,10 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="bg-card rounded-xl shadow-lg p-6 w-full max-w-md">
             {/* 合約摘要 */}
-            <div className="mb-6 pb-6 border-b border-gray-100">
-              <div className="text-sm text-gray-500 mb-1">{TEMPLATE_LABELS[contract.template]}</div>
-              <div className="font-semibold text-gray-900">{contract.tours.name}</div>
-              <div className="text-sm text-gray-600 mt-1">
+            <div className="mb-6 pb-6 border-b border-border">
+              <div className="text-sm text-morandi-muted mb-1">{TEMPLATE_LABELS[contract.template]}</div>
+              <div className="font-semibold text-morandi-primary">{contract.tours.name}</div>
+              <div className="text-sm text-morandi-secondary mt-1">
                 簽約人：
                 {contract.signer_type === 'company' ? contract.company_name : contract.signer_name}
                 {contract.member_ids?.length > 1 && ` 等 ${contract.member_ids.length} 人`}
@@ -984,14 +984,14 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             {/* 簽名板或預覽 */}
             {signing ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-amber-500 mb-4" />
-                <p className="text-gray-600">簽署中...</p>
+                <Loader2 className="w-8 h-8 animate-spin text-morandi-gold mb-4" />
+                <p className="text-morandi-secondary">簽署中...</p>
               </div>
             ) : signaturePreview ? (
               // 簽名預覽
               <div className="space-y-4">
-                <div className="text-sm text-gray-600 text-center">請確認您的簽名：</div>
-                <div className="border-2 border-amber-200 rounded-lg p-4 bg-amber-50">
+                <div className="text-sm text-morandi-secondary text-center">請確認您的簽名：</div>
+                <div className="border-2 border-status-warning/30 rounded-lg p-4 bg-status-warning-bg">
                   <img
                     src={signaturePreview}
                     alt="簽名預覽"
@@ -1027,7 +1027,7 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
               <div className="mt-4 p-3 bg-morandi-red/10 text-morandi-red rounded-lg text-sm">{error}</div>
             )}
 
-            <p className="text-xs text-gray-400 text-center mt-6">
+            <p className="text-xs text-morandi-muted text-center mt-6">
               簽署後將記錄您的 IP 位址及時間戳記，作為簽署證明
             </p>
           </div>
@@ -1044,13 +1044,13 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
           <div className="w-20 h-20 bg-morandi-green/15 rounded-full flex items-center justify-center mx-auto mb-6">
             <Check className="w-10 h-10 text-morandi-green" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">簽署完成！</h1>
-          <p className="text-gray-600 mb-6">
+          <h1 className="text-2xl font-bold text-morandi-primary mb-2">簽署完成！</h1>
+          <p className="text-morandi-secondary mb-6">
             您的電子簽名已成功提交。
             <br />
             旅行社將會收到通知。
           </p>
-          <div className="text-sm text-gray-400 mb-6">
+          <div className="text-sm text-morandi-muted mb-6">
             合約編號：{contract.code}
             <br />
             簽署時間：{new Date().toLocaleString('zh-TW')}

@@ -74,8 +74,8 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">找不到行程</h1>
-          <p className="text-gray-600">此行程可能已被刪除或連結錯誤</p>
+          <h1 className="text-2xl font-bold text-morandi-primary mb-2">找不到行程</h1>
+          <p className="text-morandi-secondary">此行程可能已被刪除或連結錯誤</p>
         </div>
       </div>
     )
@@ -141,19 +141,19 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
                 </thead>
                 <tbody>
                   {itinerary.flights.map((flight, index) => (
-                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50">
+                    <tr key={index} className="border-b border-border hover:bg-morandi-container/50">
                       <td className="px-6 py-4 font-mono font-bold text-morandi-primary">
                         {flight.flightNumber}
                       </td>
                       <td className="px-6 py-4">
                         <div className="font-medium">{flight.departure}</div>
-                        <div className="text-sm text-gray-500">{flight.departureTime}</div>
+                        <div className="text-sm text-morandi-muted">{flight.departureTime}</div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="font-medium">{flight.arrival}</div>
-                        <div className="text-sm text-gray-500">{flight.arrivalTime}</div>
+                        <div className="text-sm text-morandi-muted">{flight.arrivalTime}</div>
                       </td>
-                      <td className="px-6 py-4 text-gray-600">{flight.airline}</td>
+                      <td className="px-6 py-4 text-morandi-secondary">{flight.airline}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -192,7 +192,7 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
                   </div>
 
                   {/* Content */}
-                  <div className="lg:col-span-7 p-8 lg:p-10 border-r border-gray-100">
+                  <div className="lg:col-span-7 p-8 lg:p-10 border-r border-border">
                     <h3 className="text-2xl font-bold text-morandi-primary mb-6">{day.title}</h3>
                     <p className="text-morandi-secondary leading-loose mb-8 whitespace-pre-line">
                       {day.description}
@@ -200,9 +200,9 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
                   </div>
 
                   {/* Dining & Stay */}
-                  <div className="lg:col-span-3 bg-gray-50 p-8 flex flex-col justify-center space-y-8">
+                  <div className="lg:col-span-3 bg-morandi-container/50 p-8 flex flex-col justify-center space-y-8">
                     {(day.breakfast || day.lunch || day.dinner) && (
-                      <div className="relative pl-6 border-l border-gray-200">
+                      <div className="relative pl-6 border-l border-border">
                         <span className="absolute -left-1.5 top-0 w-3 h-3 bg-public-muted rounded-full border-2 border-white"></span>
                         <h5 className="text-xs font-bold text-morandi-secondary uppercase tracking-widest mb-3">
                           Dining
@@ -231,12 +231,12 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
                     )}
 
                     {day.accommodation && (
-                      <div className="relative pl-6 border-l border-gray-200">
+                      <div className="relative pl-6 border-l border-border">
                         <span className="absolute -left-1.5 top-0 w-3 h-3 bg-morandi-primary rounded-full border-2 border-white"></span>
                         <h5 className="text-xs font-bold text-morandi-secondary uppercase tracking-widest mb-3">
                           Stay
                         </h5>
-                        <div className="bg-card p-4 shadow-sm rounded-sm border border-gray-100">
+                        <div className="bg-card p-4 shadow-sm rounded-sm border border-border">
                           <div className="font-serif font-bold text-lg mb-1">
                             {day.accommodation}
                           </div>
@@ -251,16 +251,16 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
         </main>
 
         {/* 底部業務資訊 + CTA */}
-        <section className="py-16 bg-card border-t border-gray-100">
+        <section className="py-16 bg-card border-t border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
             {salesPerson && (
               <div className="text-center">
-                <p className="text-sm text-gray-500 mb-2">專屬業務</p>
+                <p className="text-sm text-morandi-muted mb-2">專屬業務</p>
                 <p className="text-2xl font-serif font-bold text-morandi-primary">
                   {salesPerson.display_name || salesPerson.name}
                 </p>
                 {salesPerson.email && (
-                  <p className="text-sm text-gray-600 mt-1">{salesPerson.email}</p>
+                  <p className="text-sm text-morandi-secondary mt-1">{salesPerson.email}</p>
                 )}
               </div>
             )}
@@ -271,14 +271,14 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
             >
               <span className="font-serif text-xl font-bold tracking-[0.3em]">我要報名</span>
             </button>
-            <p className="text-xs text-gray-500">專員將在 24 小時內與您聯繫</p>
+            <p className="text-xs text-morandi-muted">專員將在 24 小時內與您聯繫</p>
           </div>
         </section>
 
         {/* Footer */}
         <footer className="bg-stone-100 py-12 border-t border-stone-200">
           <div className="max-w-7xl mx-auto px-4 flex flex-col items-center">
-            <p className="text-xs text-gray-600 font-medium tracking-widest uppercase">
+            <p className="text-xs text-morandi-secondary font-medium tracking-widest uppercase">
               © 2024 Corner Travel Collection. All rights reserved.
             </p>
           </div>

@@ -144,8 +144,8 @@ export default async function ActivityQuotePage({
 
             {/* {COMPANY_NAME}備註 */}
             {request.note && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h3 className="font-semibold text-amber-900 mb-2">{COMPANY_NAME}備註</h3>
+              <div className="bg-status-warning-bg border border-status-warning/30 rounded-lg p-4">
+                <h3 className="font-semibold text-morandi-primary mb-2">{COMPANY_NAME}備註</h3>
                 <p className="text-sm text-morandi-primary whitespace-pre-wrap">{request.note}</p>
               </div>
             )}
@@ -204,7 +204,7 @@ export default async function ActivityQuotePage({
               <div className="bg-morandi-green/10 border border-morandi-green/30 rounded-lg p-6">
                 <div className="text-center mb-4">
                   <div className="text-4xl mb-2">✅</div>
-                  <h3 className="text-xl font-semibold text-green-900">報價已提交</h3>
+                  <h3 className="text-xl font-semibold text-morandi-green">報價已提交</h3>
                   <p className="text-sm text-morandi-green mt-1">
                     提交時間：{new Date(quoteData!.submitted_at!).toLocaleString('zh-TW')}
                   </p>

@@ -204,3 +204,29 @@ _（隨時間更新）_
 - `src/components/print-templates/`、`src/lib/print/PrintTemplate.tsx`：列印模板，保留硬編 `bg-white text-black`
 - `src/features/designer/templates/`：設計器模板，有自己的色彩系統（用來產生美編行程表 PDF）
 - 部分 public marketing landing 頁（`src/app/(public)/p/customized/*`）：使用 `public-*` 變數而非 `morandi-*`，這是刻意的獨立設計
+
+## 10. 類別色例外（categorical colors）
+
+某些場景**必須用不同顏色來區分類別**，這類色**不走主題變數**，直接用 Tailwind palette：
+
+### 合理用途
+
+- **獎金類型標籤**（`bonus-labels.ts`）：獎勵獎金綠、稅金紅、OP 藍、團務紫、行政橘──每種類型必須視覺可辨
+- **Dashboard 統計卡**（`use-stats-data.ts`）：4-5 張並排卡片必須用對比色區分
+- **Todo 欄位顏色**（`/todos`）：使用者自選欄位顏色（看板背景色），不是主題
+- **角色 badge**（`rbac-config.ts`）：Admin / OP / 業務 不同角色用不同色
+- **餐點圖示**（早/午/晚餐）：語義區分
+- **RBAC role 色**：與主題無關的類別標示
+
+### 原則
+
+1. 類別色**可以**用 `bg-purple-*`, `text-indigo-*`, `bg-pink-50` 等
+2. 但應該**寫成常數**（像 `bonus-labels.ts` 那樣集中）而非散落各處
+3. 類別色**不會**跟主題切換變色——這是刻意的
+4. 如果某個 UI 只是想「看起來不一樣」而不是真的要分類，那它**不算類別色**，該用主色（`morandi-gold`）
+
+### 反例
+
+- ❌ 只是想讓 CTA 按鈕「看起來特別」而用 `bg-amber-600`：錯，CTA 應該一律 `bg-morandi-gold`
+- ❌ 錯誤訊息紅色用 `text-red-500`：錯，應該用 `text-morandi-red`（主題化的紅）
+- ✅ 獎金類型 5 種，其中一種要用紫色區分：OK，寫在 `bonus-labels.ts`

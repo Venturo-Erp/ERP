@@ -242,8 +242,8 @@ export default async function TransportQuotePage({
 
             {/* 旅行社備註 */}
             {note && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h3 className="font-semibold text-amber-900 mb-2">{COMPANY_NAME}備註</h3>
+              <div className="bg-status-warning-bg border border-status-warning/30 rounded-lg p-4">
+                <h3 className="font-semibold text-morandi-primary mb-2">{COMPANY_NAME}備註</h3>
                 <p className="text-sm text-morandi-primary">{note}</p>
               </div>
             )}
@@ -253,7 +253,7 @@ export default async function TransportQuotePage({
               // 已確認司機資訊
               <div className="bg-morandi-green/10 border border-morandi-green/30 rounded-lg p-8 text-center">
                 <div className="text-4xl mb-4">✅</div>
-                <h3 className="text-xl font-semibold text-green-900 mb-2">預訂已確認</h3>
+                <h3 className="text-xl font-semibold text-morandi-green mb-2">預訂已確認</h3>
                 <p className="text-morandi-green mb-4">司機資訊已提交完成</p>
                 <div className="bg-card rounded-lg p-4 text-left text-sm max-w-xs mx-auto">
                   <div className="grid grid-cols-2 gap-2">
@@ -277,7 +277,7 @@ export default async function TransportQuotePage({
               <div className="bg-status-info-bg border border-status-info/30 rounded-lg p-6">
                 <div className="text-center mb-6">
                   <div className="text-4xl mb-2">🎉</div>
-                  <h3 className="text-xl font-semibold text-blue-900">恭喜！您的報價已被選用</h3>
+                  <h3 className="text-xl font-semibold text-status-info">恭喜！您的報價已被選用</h3>
                   <p className="text-status-info mt-1">請填寫司機資訊以完成預訂</p>
                 </div>
                 <DriverInfoForm itemId={itemId || ''} />
@@ -286,7 +286,7 @@ export default async function TransportQuotePage({
               // 已報價，等待確認
               <div className="bg-status-warning-bg border border-status-warning/30 rounded-lg p-8 text-center">
                 <div className="text-4xl mb-4">⏳</div>
-                <h3 className="text-xl font-semibold text-yellow-900 mb-2">報價已提交</h3>
+                <h3 className="text-xl font-semibold text-morandi-primary mb-2">報價已提交</h3>
                 <p className="text-status-warning">等待旅行社確認中，請耐心等候</p>
               </div>
             ) : requestStatus === 'rejected' ? (

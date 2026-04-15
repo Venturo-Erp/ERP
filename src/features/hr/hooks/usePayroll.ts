@@ -105,9 +105,9 @@ export const PAYROLL_PERIOD_STATUS_LABELS: Record<PayrollPeriodStatus, string> =
 
 export const PAYROLL_PERIOD_STATUS_COLORS: Record<PayrollPeriodStatus, string> = {
   draft: 'bg-morandi-container text-morandi-primary',
-  processing: 'bg-yellow-100 text-yellow-700',
-  confirmed: 'bg-blue-100 text-blue-700',
-  paid: 'bg-green-100 text-green-700',
+  processing: 'bg-status-warning-bg text-status-warning',
+  confirmed: 'bg-status-info-bg text-status-info',
+  paid: 'bg-morandi-green/15 text-morandi-green',
 }
 
 // ============================================

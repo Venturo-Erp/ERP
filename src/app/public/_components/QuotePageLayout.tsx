@@ -69,8 +69,8 @@ export function QuotePageLayout({
 
             {/* 備註區（統一樣式） */}
             {note && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                <h3 className="font-semibold text-amber-900 mb-2">{finalNoteTitle}</h3>
+              <div className="bg-status-warning-bg border border-status-warning/30 rounded-lg p-4">
+                <h3 className="font-semibold text-morandi-primary mb-2">{finalNoteTitle}</h3>
                 <p className="text-sm text-morandi-primary whitespace-pre-wrap">{note}</p>
               </div>
             )}

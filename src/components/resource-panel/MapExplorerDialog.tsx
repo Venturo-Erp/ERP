@@ -223,7 +223,7 @@ export function MapExplorerDialog({
                           attraction.distance < 1
                             ? 'bg-morandi-green/10 text-morandi-green'
                             : attraction.distance < 3
-                              ? 'bg-yellow-100 text-yellow-700'
+                              ? 'bg-status-warning-bg text-status-warning'
                               : 'bg-morandi-container text-morandi-secondary'
                         }`}
                       >

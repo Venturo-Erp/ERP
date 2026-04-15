@@ -72,11 +72,11 @@ export const ATTENDANCE_STATUS_LABELS: Record<AttendanceStatus, string> = {
 }
 
 export const ATTENDANCE_STATUS_COLORS: Record<AttendanceStatus, string> = {
-  present: 'bg-green-100 text-green-700',
-  absent: 'bg-red-100 text-red-700',
-  late: 'bg-yellow-100 text-yellow-700',
-  early_leave: 'bg-orange-100 text-orange-700',
-  on_leave: 'bg-blue-100 text-blue-700',
+  present: 'bg-morandi-green/15 text-morandi-green',
+  absent: 'bg-morandi-red/15 text-morandi-red',
+  late: 'bg-status-warning-bg text-status-warning',
+  early_leave: 'bg-status-warning-bg text-status-warning',
+  on_leave: 'bg-status-info-bg text-status-info',
 }
 
 // ============================================

@@ -83,7 +83,7 @@ interface UseCalculableInputReturn {
  *   onChange={handleChange}
  *   onKeyDown={handleKeyDown}
  *   onBlur={handleBlur}
- *   className={isExpression ? 'bg-amber-50' : ''}
+ *   className={isExpression ? 'bg-status-warning-bg' : ''}
  * />
  */
 export function useCalculableInput(

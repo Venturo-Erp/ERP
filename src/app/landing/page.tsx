@@ -22,13 +22,13 @@ function HeroSection() {
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-tight">
           {LANDING_LABELS.HERO_TITLE}
         </h1>
-        <p className="mt-6 text-lg sm:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+        <p className="mt-6 text-lg sm:text-xl text-morandi-secondary max-w-2xl mx-auto leading-relaxed">
           {LANDING_LABELS.HERO_SUBTITLE}
         </p>
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-8 py-3.5 text-base font-semibold text-white shadow-md hover:bg-amber-700 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-morandi-gold px-8 py-3.5 text-base font-semibold text-white shadow-md hover:bg-morandi-gold-hover transition-colors"
           >
             {LANDING_LABELS.CTA_PRIMARY}
             <ArrowRight size={18} />
@@ -42,7 +42,7 @@ function HeroSection() {
         </div>
       </div>
       {/* Decorative gradient blob */}
-      <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-amber-200/30 blur-3xl" />
+      <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-status-warning-bg/30 blur-3xl" />
       <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-slate-200/40 blur-3xl" />
     </section>
   )
@@ -82,15 +82,15 @@ function PainPointsSection() {
               key={point.before}
               className="rounded-xl border border-slate-100 bg-slate-50/50 p-6 transition-shadow hover:shadow-md"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100 text-amber-700">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-status-warning-bg text-status-warning">
                 <point.icon size={24} />
               </div>
               <div className="mt-5 flex items-center gap-2 text-sm">
                 <span className="line-through text-slate-400">{point.before}</span>
                 <ChevronRight size={14} className="text-slate-300" />
-                <span className="font-semibold text-amber-700">{point.after}</span>
+                <span className="font-semibold text-status-warning">{point.after}</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">{point.description}</p>
+              <p className="mt-3 text-sm leading-relaxed text-morandi-secondary">{point.description}</p>
             </div>
           ))}
         </div>
@@ -134,7 +134,7 @@ function FeaturesSection() {
                 <feature.icon size={24} />
               </div>
               <h3 className="mt-4 text-lg font-semibold text-slate-900">{feature.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-600">{feature.description}</p>
+              <p className="mt-2 text-sm leading-relaxed text-morandi-secondary">{feature.description}</p>
               {/* Screenshot placeholder */}
               <div className="mt-4 flex h-36 items-center justify-center rounded-lg border-2 border-dashed border-slate-200 bg-slate-50 text-sm text-slate-400">
                 {LANDING_LABELS.LABEL_3045}
@@ -161,12 +161,12 @@ function PlanCard({ name, price, period, features, popular, badge }: PlanCardPro
     <div
       className={`relative rounded-xl border p-6 ${
         popular
-          ? 'border-amber-300 bg-amber-50/30 shadow-lg ring-1 ring-amber-200'
+          ? 'border-status-warning/40 bg-status-warning-bg/30 shadow-lg ring-1 ring-amber-200'
           : 'border-slate-200 bg-card shadow-sm'
       }`}
     >
       {popular && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-amber-600 px-4 py-1 text-xs font-semibold text-white">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-morandi-gold px-4 py-1 text-xs font-semibold text-white">
           {LANDING_LABELS.PLAN_POPULAR}
         </span>
       )}
@@ -182,8 +182,8 @@ function PlanCard({ name, price, period, features, popular, badge }: PlanCardPro
       </div>
       <ul className="mt-6 space-y-3">
         {features.map(feat => (
-          <li key={feat} className="flex items-start gap-2 text-sm text-slate-600">
-            <Check size={16} className="mt-0.5 shrink-0 text-amber-600" />
+          <li key={feat} className="flex items-start gap-2 text-sm text-morandi-secondary">
+            <Check size={16} className="mt-0.5 shrink-0 text-status-warning" />
             {feat}
           </li>
         ))}
@@ -192,7 +192,7 @@ function PlanCard({ name, price, period, features, popular, badge }: PlanCardPro
         href="/login"
         className={`mt-6 block w-full rounded-lg py-2.5 text-center text-sm font-semibold transition-colors ${
           popular
-            ? 'bg-amber-600 text-white hover:bg-amber-700'
+            ? 'bg-morandi-gold text-white hover:bg-morandi-gold-hover'
             : 'border border-slate-300 bg-card text-slate-700 hover:bg-slate-50'
         }`}
       >
@@ -209,7 +209,7 @@ function PricingSection() {
         <h2 className="text-3xl sm:text-4xl font-bold text-center text-slate-900">
           {LANDING_LABELS.PRICING_TITLE}
         </h2>
-        <p className="mt-3 text-center text-slate-600">{LANDING_LABELS.PRICING_SUBTITLE}</p>
+        <p className="mt-3 text-center text-morandi-secondary">{LANDING_LABELS.PRICING_SUBTITLE}</p>
         <div className="mt-14 grid gap-8 sm:grid-cols-3">
           <PlanCard
             name={LANDING_LABELS.PLAN_FREE_NAME}
@@ -244,12 +244,12 @@ function Footer() {
         <div className="grid gap-8 sm:grid-cols-2">
           <div>
             <div className="flex items-center gap-2">
-              <Sparkles size={20} className="text-amber-600" />
+              <Sparkles size={20} className="text-status-warning" />
               <span className="text-lg font-bold text-slate-900">
                 {LANDING_LABELS.FOOTER_BRAND}
               </span>
             </div>
-            <p className="mt-3 max-w-sm text-sm leading-relaxed text-slate-600">
+            <p className="mt-3 max-w-sm text-sm leading-relaxed text-morandi-secondary">
               {LANDING_LABELS.FOOTER_DESCRIPTION}
             </p>
           </div>
@@ -259,7 +259,7 @@ function Footer() {
             </h4>
             <a
               href={`mailto:${LANDING_LABELS.FOOTER_EMAIL}`}
-              className="mt-2 inline-flex items-center gap-1.5 text-sm text-slate-600 hover:text-amber-700 transition-colors"
+              className="mt-2 inline-flex items-center gap-1.5 text-sm text-morandi-secondary hover:text-status-warning transition-colors"
             >
               <Mail size={14} />
               {LANDING_LABELS.FOOTER_EMAIL}
