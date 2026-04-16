@@ -1,18 +1,47 @@
 /**
- * Simple in-memory rate limiter
- * No external dependencies needed
+ * Distributed rate limiter using Supabase PostgreSQL
+ * Falls back to in-memory Map if Supabase is unavailable
  */
 
+import { getSupabaseAdminClient } from '@/lib/supabase/admin'
+import { logger } from '@/lib/utils/logger'
+
+// In-memory fallback（Supabase 連不上時使用）
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 
 /**
- * Check if a request is within rate limit
- * @param key - Unique key (e.g., IP + route)
- * @param limit - Max requests per window
- * @param windowMs - Time window in milliseconds
- * @returns true if allowed, false if rate limited
+ * Check rate limit using Supabase (distributed, cross-instance)
  */
-export function rateLimit(key: string, limit: number, windowMs: number): boolean {
+async function rateLimitDistributed(
+  key: string,
+  limit: number,
+  windowSeconds: number
+): Promise<boolean> {
+  try {
+    const supabase = getSupabaseAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('check_rate_limit', {
+      p_key: key,
+      p_limit: limit,
+      p_window_seconds: windowSeconds,
+    })
+
+    if (error) {
+      logger.warn('Rate limit RPC error, falling back to in-memory:', error.message)
+      return rateLimitInMemory(key, limit, windowSeconds * 1000)
+    }
+
+    return data as boolean
+  } catch {
+    // Supabase 連不上，使用 in-memory fallback
+    return rateLimitInMemory(key, limit, windowSeconds * 1000)
+  }
+}
+
+/**
+ * In-memory rate limit fallback
+ */
+function rateLimitInMemory(key: string, limit: number, windowMs: number): boolean {
   const now = Date.now()
   const record = rateLimitMap.get(key)
 
@@ -41,16 +70,19 @@ export function getClientIp(request: Request): string {
  * Helper: check rate limit and return 429 response if exceeded
  * Returns null if allowed, Response if rate limited
  */
-export function checkRateLimit(
+export async function checkRateLimit(
   request: Request,
   route: string,
   limit: number = 10,
   windowMs: number = 60_000
-): Response | null {
+): Promise<Response | null> {
   const ip = getClientIp(request)
   const key = `${route}:${ip}`
+  const windowSeconds = Math.ceil(windowMs / 1000)
 
-  if (!rateLimit(key, limit, windowMs)) {
+  const allowed = await rateLimitDistributed(key, limit, windowSeconds)
+
+  if (!allowed) {
     return Response.json(
       { success: false, error: '請求過於頻繁，請稍後再試', code: 'RATE_LIMITED' },
       { status: 429 }

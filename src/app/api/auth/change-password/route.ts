@@ -16,7 +16,7 @@ import { getServerAuth } from '@/lib/auth/server-auth'
 export async function POST(request: NextRequest) {
   try {
     // 🔒 Rate limiting: 5 requests per minute
-    const rateLimited = checkRateLimit(request, 'change-password', 5, 60_000)
+    const rateLimited = await checkRateLimit(request, 'change-password', 5, 60_000)
     if (rateLimited) return rateLimited
 
     // 🔒 Session 檢查：必須已登入

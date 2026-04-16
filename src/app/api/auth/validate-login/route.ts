@@ -1,5 +1,5 @@
 import { captureException } from '@/lib/error-tracking'
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
 import { ApiError, successResponse } from '@/lib/api/response'
@@ -8,13 +8,16 @@ import { validateBody } from '@/lib/api/validation'
 import { validateLoginSchema } from '@/lib/validations/api-schemas'
 import { SignJWT } from 'jose'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'venturo_dev_jwt_secret_local_only'
-const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET)
+const JWT_SECRET = process.env.JWT_SECRET
+if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('JWT_SECRET environment variable is required in production')
+}
+const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET || 'venturo_dev_jwt_secret_local_only')
 
 export async function POST(request: NextRequest) {
   try {
     // 🔒 Rate limiting: 10 requests per minute (login attempts)
-    const rateLimited = checkRateLimit(request, 'validate-login', 10, 60_000)
+    const rateLimited = await checkRateLimit(request, 'validate-login', 10, 60_000)
     if (rateLimited) return rateLimited
 
     const validation = await validateBody(request, validateLoginSchema)
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest) {
     const { data: employee, error: empError } = await supabase
       .from('employees')
       .select(
-        'id, employee_number, display_name, english_name, email, avatar, status, password_hash, supabase_user_id, workspace_id, job_info, permissions, is_active, created_at, updated_at'
+        'id, employee_number, display_name, english_name, email, avatar, status, password_hash, supabase_user_id, workspace_id, job_info, permissions, is_active, created_at, updated_at, login_failed_count, login_locked_until'
       )
       .ilike('employee_number', username)
       .eq('workspace_id', workspace.id)
@@ -60,6 +63,15 @@ export async function POST(request: NextRequest) {
     // 3. 檢查帳號狀態
     if (employee.status === 'terminated') {
       return ApiError.unauthorized('此帳號已停用')
+    }
+
+    // 3.5 檢查帳號鎖定狀態（5 次失敗鎖定 15 分鐘）
+    const lockedUntil = (employee as Record<string, unknown>).login_locked_until as string | null
+    if (lockedUntil && new Date(lockedUntil) > new Date()) {
+      const remainingMinutes = Math.ceil(
+        (new Date(lockedUntil).getTime() - Date.now()) / 60_000
+      )
+      return ApiError.unauthorized(`帳號已鎖定，請 ${remainingMinutes} 分鐘後再試`)
     }
 
     // 4. 查詢 auth email（優先從 auth.users 取，fallback 用 employees.email）
@@ -86,7 +98,34 @@ export async function POST(request: NextRequest) {
     })
 
     if (signInError) {
+      // 登入失敗：累加失敗計數
+      const currentFailCount = ((employee as Record<string, unknown>).login_failed_count as number) || 0
+      const newFailCount = currentFailCount + 1
+      const MAX_FAILED_ATTEMPTS = 5
+      const LOCKOUT_MINUTES = 15
+
+      const updateData: Record<string, unknown> = { login_failed_count: newFailCount }
+      if (newFailCount >= MAX_FAILED_ATTEMPTS) {
+        updateData.login_locked_until = new Date(
+          Date.now() + LOCKOUT_MINUTES * 60_000
+        ).toISOString()
+        logger.warn(`🔒 帳號 ${username}@${code} 已鎖定 ${LOCKOUT_MINUTES} 分鐘（連續 ${newFailCount} 次失敗）`)
+      }
+
+      await supabase
+        .from('employees')
+        .update(updateData)
+        .eq('id', employee.id)
+
       return ApiError.unauthorized('帳號或密碼錯誤')
+    }
+
+    // 登入成功：重置失敗計數
+    if (((employee as Record<string, unknown>).login_failed_count as number) > 0) {
+      await supabase
+        .from('employees')
+        .update({ login_failed_count: 0, login_locked_until: null })
+        .eq('id', employee.id)
     }
 
     // 6. 回傳員工資料（不含密碼）+ auth email
@@ -164,16 +203,31 @@ export async function POST(request: NextRequest) {
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setIssuer('venturo-app')
-      .setExpirationTime('30d')
+      .setExpirationTime('14d')
       .sign(JWT_SECRET_KEY)
 
-    return successResponse({
-      employee: employeeData,
-      workspaceId: workspace.id,
-      workspaceCode: workspace.code,
-      authEmail,
-      jwt,
+    // 9. 設定 httpOnly cookie + 回傳資料（JWT 不再放 response body）
+    const response = NextResponse.json({
+      success: true,
+      data: {
+        employee: employeeData,
+        workspaceId: workspace.id,
+        workspaceCode: workspace.code,
+        authEmail,
+        permissions: rolePermissions,
+        isAdmin,
+      },
     })
+
+    response.cookies.set('auth-token', jwt, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 14 * 24 * 60 * 60, // 14 天，與 JWT 一致
+    })
+
+    return response
   } catch (error) {
     logger.error('Validate login error:', error)
     captureException(error, { module: 'auth.validate-login' })

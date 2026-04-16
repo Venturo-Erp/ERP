@@ -33,7 +33,7 @@ interface TaishinWebhookRequest {
 export async function POST(req: NextRequest) {
   try {
     // 🔒 Rate limiting: 1000 requests per minute (webhook - relaxed limit)
-    const rateLimited = checkRateLimit(req, 'linkpay-webhook', 1000, 60_000)
+    const rateLimited = await checkRateLimit(req, 'linkpay-webhook', 1000, 60_000)
     if (rateLimited) return rateLimited
 
     const body: TaishinWebhookRequest = await req.json()

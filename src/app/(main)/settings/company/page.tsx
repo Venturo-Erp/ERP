@@ -240,27 +240,27 @@ export default function CompanySettingsPage() {
 
       if (error) throw error
       if (data) {
-        const d = data as unknown as Record<string, string | null>
+        const d = data as unknown as Record<string, string | number | null>
         setForm({
-          name: d.name ?? '',
-          description: d.description ?? '',
-          logo_url: d.logo_url ?? '',
-          legal_name: d.legal_name ?? '',
-          subtitle: d.subtitle ?? '',
-          address: d.address ?? '',
-          phone: d.phone ?? '',
-          fax: d.fax ?? '',
-          email: d.email ?? '',
-          website: d.website ?? '',
-          tax_id: d.tax_id ?? '',
-          bank_name: d.bank_name ?? '',
-          bank_branch: d.bank_branch ?? '',
-          bank_account: d.bank_account ?? '',
-          bank_account_name: d.bank_account_name ?? '',
-          company_seal_url: d.company_seal_url ?? '',
-          personal_seal_url: d.personal_seal_url ?? '',
-          invoice_seal_image_url: d.invoice_seal_image_url ?? '',
-          contract_seal_image_url: d.contract_seal_image_url ?? '',
+          name: (d.name as string) ?? '',
+          description: (d.description as string) ?? '',
+          logo_url: (d.logo_url as string) ?? '',
+          legal_name: (d.legal_name as string) ?? '',
+          subtitle: (d.subtitle as string) ?? '',
+          address: (d.address as string) ?? '',
+          phone: (d.phone as string) ?? '',
+          fax: (d.fax as string) ?? '',
+          email: (d.email as string) ?? '',
+          website: (d.website as string) ?? '',
+          tax_id: (d.tax_id as string) ?? '',
+          bank_name: (d.bank_name as string) ?? '',
+          bank_branch: (d.bank_branch as string) ?? '',
+          bank_account: (d.bank_account as string) ?? '',
+          bank_account_name: (d.bank_account_name as string) ?? '',
+          company_seal_url: (d.company_seal_url as string) ?? '',
+          personal_seal_url: (d.personal_seal_url as string) ?? '',
+          invoice_seal_image_url: (d.invoice_seal_image_url as string) ?? '',
+          contract_seal_image_url: (d.contract_seal_image_url as string) ?? '',
         })
       }
     } catch (error) {
@@ -300,7 +300,10 @@ export default function CompanySettingsPage() {
     setSaving(true)
     try {
       const { name: _name, ...updateData } = form
-      const { error } = await supabase.from('workspaces').update(updateData).eq('id', workspaceId)
+      const saveData: Record<string, unknown> = {
+        ...updateData,
+      }
+      const { error } = await supabase.from('workspaces').update(saveData).eq('id', workspaceId)
 
       if (error) throw error
       toast.success(COMPANY_LABELS.SAVE_SUCCESS)

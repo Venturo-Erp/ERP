@@ -12,7 +12,7 @@ import { checkRateLimit } from '@/lib/rate-limit'
 export async function POST(request: NextRequest) {
   try {
     // 🔒 Rate limiting: 20 requests per minute (file upload)
-    const rateLimited = checkRateLimit(request, 'storage-upload', 20, 60_000)
+    const rateLimited = await checkRateLimit(request, 'storage-upload', 20, 60_000)
     if (rateLimited) return rateLimited
 
     // 🔒 安全檢查：需要已登入用戶
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // 🔒 Rate limiting: 20 requests per minute (file delete)
-    const rateLimited = checkRateLimit(request, 'storage-delete', 20, 60_000)
+    const rateLimited = await checkRateLimit(request, 'storage-delete', 20, 60_000)
     if (rateLimited) return rateLimited
 
     // 🔒 安全檢查：需要已登入用戶

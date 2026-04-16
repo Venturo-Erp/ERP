@@ -49,6 +49,9 @@ export const LABELS = {
   FIELD_CODE_DUPLICATE: '此公司代碼已被使用',
   FIELD_TYPE: '類型',
   FIELD_TYPE_PLACEHOLDER: '選擇公司類型',
+  FIELD_MAX_EMPLOYEES: '員工帳號上限',
+  FIELD_MAX_EMPLOYEES_PLACEHOLDER: '無限制',
+  FIELD_MAX_EMPLOYEES_HINT: '設定此租戶可建立的最大員工數量，留空表示無限制',
 
   // Dialog - Step 2
   STEP2_TITLE: '第一位管理員',

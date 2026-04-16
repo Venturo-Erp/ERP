@@ -36,6 +36,7 @@ interface Step1Data {
   name: string
   code: string
   type: string
+  maxEmployees: string
 }
 
 interface Step2Data {
@@ -64,7 +65,7 @@ export function CreateTenantDialog({
   const [copied, setCopied] = useState(false)
   const [codeError, setCodeError] = useState('')
 
-  const [step1, setStep1] = useState<Step1Data>({ name: '', code: '', type: '' })
+  const [step1, setStep1] = useState<Step1Data>({ name: '', code: '', type: '', maxEmployees: '' })
   const [step2, setStep2] = useState<Step2Data>({
     employeeNumber: 'E001',
     name: '',
@@ -78,7 +79,7 @@ export function CreateTenantDialog({
     setCreating(false)
     setCopied(false)
     setCodeError('')
-    setStep1({ name: '', code: '', type: '' })
+    setStep1({ name: '', code: '', type: '', maxEmployees: '' })
     setStep2({ employeeNumber: 'E001', name: '', email: '', password: '12345678' })
     setLoginInfo(null)
   }, [])
@@ -144,6 +145,7 @@ export function CreateTenantDialog({
           workspaceName: step1.name,
           workspaceCode: step1.code,
           workspaceType: step1.type || null,
+          maxEmployees: step1.maxEmployees ? parseInt(step1.maxEmployees, 10) : null,
           adminEmployeeNumber: step2.employeeNumber,
           adminName: step2.name,
           adminEmail: step2.email,
@@ -277,6 +279,21 @@ export function CreateTenantDialog({
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-morandi-primary mb-2 block">
+                  {LABELS.FIELD_MAX_EMPLOYEES}
+                </label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={step1.maxEmployees}
+                  onChange={e => setStep1(prev => ({ ...prev, maxEmployees: e.target.value }))}
+                  placeholder={LABELS.FIELD_MAX_EMPLOYEES_PLACEHOLDER}
+                  className="border-morandi-container/30 max-w-[160px]"
+                />
+                <p className="text-xs text-morandi-muted mt-1">{LABELS.FIELD_MAX_EMPLOYEES_HINT}</p>
               </div>
             </div>
 

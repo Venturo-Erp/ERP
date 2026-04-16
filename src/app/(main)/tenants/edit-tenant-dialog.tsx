@@ -27,7 +27,7 @@ const WORKSPACE_TYPES = [
 interface EditTenantDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  workspace: { id: string; name: string; code?: string | null; type?: string | null } | null
+  workspace: { id: string; name: string; code?: string | null; type?: string | null; max_employees?: number | null } | null
   onComplete: () => void
 }
 
@@ -40,12 +40,14 @@ export function EditTenantDialog({
   const { updateWorkspace } = useWorkspaceChannels()
   const [name, setName] = useState('')
   const [type, setType] = useState('')
+  const [maxEmployees, setMaxEmployees] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (workspace && open) {
       setName(workspace.name)
       setType(workspace.type || 'travel_agency')
+      setMaxEmployees(workspace.max_employees != null ? String(workspace.max_employees) : '')
     }
   }, [workspace, open])
 
@@ -57,7 +59,8 @@ export function EditTenantDialog({
       await updateWorkspace(workspace.id, {
         name: name.trim(),
         type,
-      })
+        max_employees: maxEmployees ? parseInt(maxEmployees, 10) : null,
+      } as Parameters<typeof updateWorkspace>[1])
       toast.success(LABELS.TOAST_EDIT_SUCCESS)
       onComplete()
     } catch (error) {
@@ -107,6 +110,21 @@ export function EditTenantDialog({
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-morandi-primary">
+              {LABELS.FIELD_MAX_EMPLOYEES}
+            </label>
+            <Input
+              type="number"
+              min="1"
+              value={maxEmployees}
+              onChange={e => setMaxEmployees(e.target.value)}
+              placeholder={LABELS.FIELD_MAX_EMPLOYEES_PLACEHOLDER}
+              className="mt-1 max-w-[160px]"
+            />
+            <p className="text-xs text-morandi-secondary mt-1">{LABELS.FIELD_MAX_EMPLOYEES_HINT}</p>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">

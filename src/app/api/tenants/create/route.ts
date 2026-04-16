@@ -22,6 +22,7 @@ interface CreateTenantRequest {
   workspaceName: string
   workspaceCode: string
   workspaceType: string | null
+  maxEmployees: number | null
 
   // 第一個管理員資訊
   adminEmployeeNumber: string
@@ -97,6 +98,7 @@ export async function POST(request: NextRequest) {
       workspaceName,
       workspaceCode: newWorkspaceCode,
       workspaceType,
+      maxEmployees,
       adminEmployeeNumber,
       adminName,
       adminEmail,
@@ -135,6 +137,7 @@ export async function POST(request: NextRequest) {
         name: workspaceName,
         code: newWorkspaceCode,
         type: workspaceType,
+        max_employees: maxEmployees ?? null,
         is_active: true,
         premium_enabled: false,
       })

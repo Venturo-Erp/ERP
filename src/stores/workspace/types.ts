@@ -13,6 +13,7 @@ export interface Workspace {
   created_by?: string | null
   created_at?: string | null
   updated_at?: string | null
+  max_employees?: number | null
   _deleted?: boolean | null
   _needs_sync?: boolean | null
   _synced_at?: string | null

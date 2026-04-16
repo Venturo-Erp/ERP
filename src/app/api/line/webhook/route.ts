@@ -653,7 +653,7 @@ async function handleAIMessage(event: LineEvent) {
 export async function POST(req: NextRequest) {
   try {
     // Rate limiting
-    const rateLimited = checkRateLimit(req, 'line-webhook', 100, 60_000)
+    const rateLimited = await checkRateLimit(req, 'line-webhook', 100, 60_000)
     if (rateLimited) return rateLimited
 
     // 簽名驗證
