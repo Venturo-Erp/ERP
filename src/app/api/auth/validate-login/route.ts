@@ -7,6 +7,7 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { validateBody } from '@/lib/api/validation'
 import { validateLoginSchema } from '@/lib/validations/api-schemas'
 import { SignJWT } from 'jose'
+import { randomUUID } from 'crypto'
 
 const JWT_SECRET = process.env.JWT_SECRET
 if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
@@ -193,8 +194,11 @@ export async function POST(request: NextRequest) {
     // 管理員權限由 role_tab_permissions 控制，不再加 '*'
 
     // 8. 產生 JWT（server-side 簽名）
+    const jti = randomUUID()
+
     const jwt = await new SignJWT({
       sub: employeeData.id,
+      jti,
       employee_number: employeeData.employee_number,
       permissions: rolePermissions,
       is_admin: isAdmin,
@@ -205,6 +209,12 @@ export async function POST(request: NextRequest) {
       .setIssuer('venturo-app')
       .setExpirationTime('14d')
       .sign(JWT_SECRET_KEY)
+
+    // 儲存 jti 到 DB（同時清除舊裝置的 session）
+    await supabase
+      .from('employees')
+      .update({ active_jti: jti })
+      .eq('id', employee.id)
 
     // 9. 設定 httpOnly cookie + 回傳資料（JWT 不再放 response body）
     const response = NextResponse.json({

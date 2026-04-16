@@ -5194,6 +5194,7 @@ export type Database = {
       }
       employees: {
         Row: {
+          active_jti: string | null
           attendance: Json | null
           avatar: string | null
           avatar_url: string | null
@@ -5235,6 +5236,7 @@ export type Database = {
           workspace_id: string | null
         }
         Insert: {
+          active_jti?: string | null
           attendance?: Json | null
           avatar?: string | null
           avatar_url?: string | null
@@ -5276,6 +5278,7 @@ export type Database = {
           workspace_id?: string | null
         }
         Update: {
+          active_jti?: string | null
           attendance?: Json | null
           avatar?: string | null
           avatar_url?: string | null

@@ -318,6 +318,19 @@ export const useAuthStore = create<AuthState>()(
             ensureAuthSync().catch(err => {
               logger.warn('⚠️ Auth sync on rehydrate failed:', err)
             })
+
+            // 驗證 server-side session 是否仍有效（防止 concurrent session）
+            fetch('/api/auth/check-session')
+              .then(res => {
+                if (!res.ok) {
+                  // Session 已被新裝置取代或已清除，強制登出
+                  logger.warn('⚠️ Session invalid or replaced by another device, logging out')
+                  useAuthStore.getState().logout()
+                }
+              })
+              .catch(err => {
+                logger.warn('⚠️ check-session failed:', err)
+              })
           }
         }
       },
