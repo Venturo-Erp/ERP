@@ -31,6 +31,7 @@ export const LABELS = {
 
   // Actions
   ADD_TENANT: '新增租戶',
+  DELETE_TENANT: '永久刪除',
 
   // Empty state
   EMPTY_MESSAGE: '目前沒有任何租戶',

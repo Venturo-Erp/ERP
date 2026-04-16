@@ -6,7 +6,7 @@ import React, { useState, useMemo, useCallback } from 'react'
 import useSWR from 'swr'
 import { useRouter } from 'next/navigation'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
-import { Building2, Pencil } from 'lucide-react'
+import { Building2, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useWorkspaceChannels } from '@/stores/workspace'
 import type { Workspace } from '@/stores/workspace'
@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 import { CreateTenantDialog } from './create-tenant-dialog'
 import { EditTenantDialog } from './edit-tenant-dialog'
+import { DeleteTenantDialog } from './delete-tenant-dialog'
 
 type WorkspaceRow = Workspace & {
   employee_count: number
@@ -35,6 +36,7 @@ export default function TenantsPage() {
   const { updateWorkspace } = useWorkspaceChannels()
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingWorkspace, setEditingWorkspace] = useState<WorkspaceRow | null>(null)
+  const [deletingWorkspace, setDeletingWorkspace] = useState<{ id: string; name: string; code: string } | null>(null)
   // 用 SWR 快取租戶列表（繞過 RLS，server 端檢查 tenants 權限）
   // API 現在會回傳 employee_count / admin_name / admin_id（已排除機器人）
   const { data: allWorkspaces = [], mutate: refreshWorkspaces } = useSWR<WorkspaceRow[]>(
@@ -152,6 +154,13 @@ export default function TenantsPage() {
             onClick: () => handleToggleActive(workspace),
             variant: workspace.is_active ? ('warning' as const) : undefined,
           },
+          {
+            icon: Trash2,
+            label: LABELS.DELETE_TENANT,
+            onClick: () =>
+              setDeletingWorkspace({ id: workspace.id, name: workspace.name ?? '', code: workspace.code ?? '' }),
+            variant: 'danger' as const,
+          },
         ]}
       />
     ),
@@ -210,6 +219,18 @@ export default function TenantsPage() {
         workspace={editingWorkspace}
         onComplete={() => {
           setEditingWorkspace(null)
+          refreshWorkspaces()
+        }}
+      />
+
+      <DeleteTenantDialog
+        open={!!deletingWorkspace}
+        onOpenChange={open => {
+          if (!open) setDeletingWorkspace(null)
+        }}
+        workspace={deletingWorkspace}
+        onComplete={() => {
+          setDeletingWorkspace(null)
           refreshWorkspaces()
         }}
       />
