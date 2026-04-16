@@ -126,6 +126,21 @@ function setSecureCookie(token: string, _rememberMe: boolean = false): void {
   }
 }
 
+/**
+ * 從 cookie 讀取 auth-token
+ */
+function getAuthTokenFromCookie(): string | null {
+  if (typeof document === 'undefined') return null
+  const cookies = document.cookie.split(';')
+  for (const cookie of cookies) {
+    const [name, value] = cookie.trim().split('=')
+    if (name === 'auth-token') {
+      return value
+    }
+  }
+  return null
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -143,6 +158,14 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
+        // 將目前 token 加入黑名單（在清除 cookie 之前）
+        const currentToken = getAuthTokenFromCookie()
+        if (currentToken) {
+          const { addTokenToBlacklist } = await import('@/lib/auth')
+          addTokenToBlacklist(currentToken)
+          logger.log('🚫 Token 已加入黑名單')
+        }
+
         try {
           const { supabase } = await import('@/lib/supabase/client')
           await supabase.auth.signOut()

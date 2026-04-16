@@ -1,10 +1,55 @@
 import bcrypt from 'bcryptjs'
 
+// Token Blacklist key in localStorage
+const TOKEN_BLACKLIST_KEY = 'token-blacklist'
+
 export interface AuthPayload {
   id: string
   employee_number: string
   permissions: string[]
   role: string
+}
+
+/**
+ * Get token blacklist from localStorage
+ */
+function getTokenBlacklist(): Set<string> {
+  if (typeof window === 'undefined') return new Set()
+  try {
+    const stored = localStorage.getItem(TOKEN_BLACKLIST_KEY)
+    return stored ? new Set(JSON.parse(stored)) : new Set()
+  } catch {
+    return new Set()
+  }
+}
+
+/**
+ * Add token to blacklist in localStorage
+ */
+export function addTokenToBlacklist(token: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    const blacklist = getTokenBlacklist()
+    blacklist.add(token)
+    localStorage.setItem(TOKEN_BLACKLIST_KEY, JSON.stringify([...blacklist]))
+  } catch (err) {
+    console.warn('Failed to add token to blacklist:', err)
+  }
+}
+
+/**
+ * Check if token is in blacklist
+ */
+export function isTokenBlacklisted(token: string): boolean {
+  return getTokenBlacklist().has(token)
+}
+
+/**
+ * Clear all tokens from blacklist (for testing/cleanup)
+ */
+export function clearTokenBlacklist(): void {
+  if (typeof window === 'undefined') return
+  localStorage.removeItem(TOKEN_BLACKLIST_KEY)
 }
 
 // 生成 token（瀏覽器相容版本，使用 base64 編碼）
@@ -25,6 +70,11 @@ export function generateToken(payload: AuthPayload, _rememberMe: boolean = false
 
 // 驗證 token（瀏覽器相容版本）
 export function verifyToken(token: string): AuthPayload | null {
+  // 檢查 token 是否在黑名單中
+  if (isTokenBlacklisted(token)) {
+    return null
+  }
+
   try {
     // 使用 base64 解碼
     const decoded = JSON.parse(atob(token))
