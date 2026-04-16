@@ -45,6 +45,7 @@ import {
   ImportCustomersDialog,
 } from './components'
 import { CUSTOMER_PAGE_LABELS as L, CUSTOMER_IMPORT_LABELS } from './constants/labels'
+import { WatermarkOverlay } from '@/components/security/WatermarkOverlay'
 
 export default function CustomersPage() {
   const router = useRouter()
@@ -342,6 +343,8 @@ export default function CustomersPage() {
   )
 
   return (
+    <>
+    <WatermarkOverlay />
     <ContentPageLayout
       title={L.page_title}
       icon={Users}
@@ -558,5 +561,6 @@ export default function CustomersPage() {
         </DialogContent>
       </Dialog>
     </ContentPageLayout>
+    </>
   )
 }

@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server'
 import ExcelJS from 'exceljs'
 import { logger } from '@/lib/utils/logger'
 import { applyPrivacyMask, parsePrivacySettings } from '@/lib/privacy/mask'
+import { applyExcelWatermark } from '@/lib/privacy/excel-watermark'
+import { cookies } from 'next/headers'
+import { jwtVerify } from 'jose'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
@@ -20,6 +23,22 @@ export async function POST(request: Request) {
 
     if (!tourId || !tourCode) {
       return NextResponse.json({ success: false, error: '缺少必要參數' }, { status: 400 })
+    }
+
+    // 從 JWT cookie 取得匯出者資訊
+    let exporterName = '未知使用者'
+    try {
+      const cookieStore = await cookies()
+      const token = cookieStore.get('auth-token')?.value
+      if (token) {
+        const secret = new TextEncoder().encode(
+          process.env.JWT_SECRET || 'venturo_dev_jwt_secret_local_only'
+        )
+        const { payload } = await jwtVerify(token, secret)
+        exporterName = (payload.display_name as string) || (payload.employee_number as string) || '未知使用者'
+      }
+    } catch {
+      // token 無效時使用預設值
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -135,6 +154,12 @@ export async function POST(request: Request) {
     })
 
     ws.columns = [{ width: 5 }, { width: 12 }, { width: 14 }, { width: 14 }]
+
+    // 加浮水印（頁首/頁尾顯示匯出者資訊）
+    applyExcelWatermark(ws, {
+      exportedBy: exporterName,
+      workspaceCode: tourCode.split('-')[0] || tourCode,
+    })
 
     // 4. 上傳到 Supabase Storage
     const buffer = await wb.xlsx.writeBuffer()

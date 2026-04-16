@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/utils/logger'
 import { applyPrivacyMask, parsePrivacySettings } from '@/lib/privacy/mask'
+import { applyExcelWatermark } from '@/lib/privacy/excel-watermark'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
@@ -166,6 +167,12 @@ async function sendInsuranceForTour(
   )
 
   ws.columns = [{ width: 5 }, { width: 12 }, { width: 14 }, { width: 14 }]
+
+  // 加浮水印（系統自動匯出）
+  applyExcelWatermark(ws, {
+    exportedBy: '系統自動匯出',
+    workspaceCode: tour.code.split('-')[0] || tour.code,
+  })
 
   const xlsxBuf = (await wb.xlsx.writeBuffer()) as unknown as Buffer
   const xlsxName = `${tour.code}_members_${Date.now()}.xlsx`
