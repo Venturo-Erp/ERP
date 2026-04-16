@@ -544,23 +544,7 @@ export async function POST(request: NextRequest) {
         await supabaseAdmin.from('countries').insert(newCountries)
         logger.log(`Seeded ${newCountries.length} countries`)
       }
-      // 複製城市/機場
-      const { data: cornerAirports } = await supabaseAdmin
-        .from('ref_airports')
-        .select(
-          'iata_code, icao_code, english_name, name_zh, city_code, city_name_en, city_name_zh, country_code, timezone, workspace_id, is_favorite, usage_count, latitude, longitude'
-        )
-        .eq('workspace_id', CORNER_WS)
-      if (cornerAirports && cornerAirports.length > 0) {
-        const newAirports = cornerAirports.map(a => ({
-          ...a,
-          workspace_id: workspace.id,
-          is_favorite: false,
-          usage_count: 0,
-        }))
-        await supabaseAdmin.from('ref_airports').insert(newAirports)
-        logger.log(`Seeded ${newAirports.length} airports`)
-      }
+      // Stage 1 起 ref_airports 為全域單一表，新 tenant 無需複製機場資料。
     } catch (seedError) {
       logger.warn('Failed to seed base data:', seedError)
     }

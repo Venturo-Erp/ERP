@@ -5,20 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  AlertTriangle,
-  Bot,
-  MessageCircle,
-  Users,
-  User,
-  Link2,
-  Search,
-  RefreshCw,
-  Settings,
-  MessagesSquare,
-  BookOpen,
-} from 'lucide-react'
+import { AlertTriangle, Bot, MessageCircle, Search, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { logger } from '@/lib/utils/logger'
@@ -83,6 +70,7 @@ export default function AIBotManagementPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [lineConfig, setLineConfig] = useState<LineConfig>({ setup_step: 0, is_connected: false })
   const [metaConfig, setMetaConfig] = useState<MetaConfig>({ setup_step: 0, is_connected: false })
+  const [activeTab, setActiveTab] = useState('platform')
 
   const isConnected = lineConfig.is_connected && lineConfig.setup_step >= 4
   const isMetaConnected = metaConfig.is_connected && metaConfig.setup_step >= 3
@@ -158,14 +146,20 @@ export default function AIBotManagementPage() {
     loadConfig()
   }
 
-  // 統計
-  const unboundGroups = groups.filter(g => !g.supplier_id && !g.category)
-  const unboundUsers = users.filter(u => !u.supplier_id && !u.employee_id)
 
   return (
     <ContentPageLayout
       title="AI & 機器人管理"
       icon={Bot}
+      tabs={[
+        { value: 'platform', label: '平台連線' },
+        { value: 'connections', label: '群組 & 好友' },
+        { value: 'conversations', label: '對話記錄' },
+        { value: 'ai', label: 'AI 設定' },
+        { value: 'knowledge', label: '知識庫' },
+      ]}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
       headerActions={
         <Button
           onClick={() => {
@@ -181,90 +175,10 @@ export default function AIBotManagementPage() {
         </Button>
       }
     >
-      <div className="max-w-6xl mx-auto space-y-6 p-6">
-        {/* 統計卡片 */}
-        <div className="grid grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-morandi-gold/10">
-                  <Users className="h-5 w-5 text-morandi-gold" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{groups.length}</div>
-                  <div className="text-sm text-muted-foreground">群組</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-status-info/10">
-                  <User className="h-5 w-5 text-status-info" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{users.length}</div>
-                  <div className="text-sm text-muted-foreground">好友</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-status-warning/10">
-                  <Link2 className="h-5 w-5 text-status-warning" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{unboundGroups.length}</div>
-                  <div className="text-sm text-muted-foreground">待分類群組</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-morandi-secondary/10">
-                  <MessageCircle className="h-5 w-5 text-morandi-secondary" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold">{unboundUsers.length}</div>
-                  <div className="text-sm text-muted-foreground">待辨識好友</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* 主要內容 */}
-        <Tabs defaultValue="platform">
-          <TabsList>
-            <TabsTrigger value="platform">
-              <Settings className="h-4 w-4 mr-2" />
-              平台連線
-            </TabsTrigger>
-            <TabsTrigger value="connections">
-              <Users className="h-4 w-4 mr-2" />
-              群組 & 好友
-            </TabsTrigger>
-            <TabsTrigger value="conversations">
-              <MessagesSquare className="h-4 w-4 mr-2" />
-              對話記錄
-            </TabsTrigger>
-            <TabsTrigger value="ai">
-              <Bot className="h-4 w-4 mr-2" />
-              AI 設定
-            </TabsTrigger>
-            <TabsTrigger value="knowledge">
-              <BookOpen className="h-4 w-4 mr-2" />
-              知識庫
-            </TabsTrigger>
-          </TabsList>
-
-          {/* 平台連線 */}
-          <TabsContent value="platform" className="mt-4 space-y-6">
+      <div className="p-6 space-y-6">
+        {/* 平台連線 */}
+        {activeTab === 'platform' && (
+          <div className="space-y-6">
             <div>
               <h3 className="text-sm font-semibold text-morandi-secondary mb-3 flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" />
@@ -350,10 +264,12 @@ export default function AIBotManagementPage() {
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
+          </div>
+        )}
 
-          {/* 群組 & 好友 */}
-          <TabsContent value="connections" className="mt-4 space-y-6">
+        {/* 群組 & 好友 */}
+        {activeTab === 'connections' && (
+          <div className="space-y-6">
             {/* 總是顯示資料，即使未連線（資料可能已存在） */}
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -388,32 +304,28 @@ export default function AIBotManagementPage() {
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
+          </div>
+        )}
 
-          {/* 對話記錄 */}
-          <TabsContent value="conversations" className="mt-4">
-            <RealConversations />
-          </TabsContent>
+        {/* 對話記錄 */}
+        {activeTab === 'conversations' && <RealConversations />}
 
-          {/* AI 設定 */}
-          <TabsContent value="ai" className="mt-4">
-            {isConnected ? (
-              <AISettingsTab />
-            ) : (
-              <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
-                  <Bot className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                  <p>請先在「平台連線」完成 LINE Bot 設定</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
+        {/* AI 設定 */}
+        {activeTab === 'ai' && (
+          isConnected ? (
+            <AISettingsTab />
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center text-muted-foreground">
+                <Bot className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p>請先在「平台連線」完成 LINE Bot 設定</p>
+              </CardContent>
+            </Card>
+          )
+        )}
 
-          {/* 知識庫 */}
-          <TabsContent value="knowledge" className="mt-4">
-            <KnowledgeTab isConnected={isConnected} />
-          </TabsContent>
-        </Tabs>
+        {/* 知識庫 */}
+        {activeTab === 'knowledge' && <KnowledgeTab isConnected={isConnected} />}
       </div>
     </ContentPageLayout>
   )

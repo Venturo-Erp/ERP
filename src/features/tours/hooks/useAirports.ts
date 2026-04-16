@@ -1,10 +1,12 @@
 /**
- * useAirports - 統一機場資料來源
+ * useAirports - 統一「交通節點 + 目的地」資料來源
  *
- * 從 ref_airports 讀取，取代舊的 useTourDestinations
- * - is_favorite = true 的機場排在最前面
- * - 按國家篩選
- * - 支援搜尋
+ * 讀取：
+ *   - ref_airports（全域 IATA 機場，Stage 1 起去除 workspace_id）
+ *   - ref_destinations（全域非機場目的地，如 宜蘭 YLN、墾丁 KTG）
+ *
+ * 兩者在回傳的 airports 陣列中以 iata_code 作為 key 混排，
+ * 使 CountryAirportSelector / generateTourCode 等呼叫端無需修改。
  */
 
 import { useCallback, useMemo } from 'react'
@@ -25,6 +27,8 @@ export interface Airport {
   timezone: string | null
   is_favorite: boolean
   usage_count: number
+  /** true 表示來自 ref_destinations（非機場目的地） */
+  is_destination?: boolean
 }
 
 interface CountryInfo {
@@ -32,43 +36,85 @@ interface CountryInfo {
   code: string
 }
 
-// SWR 快取 key
-const AIRPORTS_CACHE_KEY = 'entity:ref_airports:list'
+const AIRPORTS_CACHE_KEY = 'entity:ref_airports+destinations:list'
 const COUNTRIES_CACHE_KEY = 'entity:countries:slim'
 
-// SWR 配置
 const SWR_CONFIG = {
   revalidateOnFocus: false,
   revalidateOnReconnect: true,
   dedupingInterval: 60000,
 }
 
-// Fetcher（按使用次數排序）
 async function fetchAirports(): Promise<Airport[]> {
-  const { data, error } = await supabase
-    .from('ref_airports')
-    .select(
-      'iata_code, icao_code, english_name, name_zh, city_code, city_name_en, city_name_zh, country_code, timezone, latitude, longitude, is_favorite, usage_count, workspace_id, created_at'
-    )
-    .order('usage_count', { ascending: false, nullsFirst: true })
-    .order('city_name_zh', { ascending: true })
-    .limit(500)
+  const [airportsRes, destinationsRes] = await Promise.all([
+    supabase
+      .from('ref_airports')
+      .select(
+        'iata_code, icao_code, english_name, name_zh, city_code, city_name_en, city_name_zh, country_code, timezone, latitude, longitude, is_favorite, usage_count'
+      )
+      .order('usage_count', { ascending: false, nullsFirst: true })
+      .order('city_name_zh', { ascending: true })
+      .limit(1000),
+    supabase
+      .from('ref_destinations')
+      .select('code, short_alias, country_code, name_zh, name_en, latitude, longitude'),
+  ])
 
-  if (error) {
-    logger.error('載入機場資料失敗:', error)
-    throw error
+  if (airportsRes.error) {
+    logger.error('載入機場資料失敗:', airportsRes.error)
+    throw airportsRes.error
+  }
+  if (destinationsRes.error) {
+    logger.error('載入目的地資料失敗:', destinationsRes.error)
   }
 
-  // 去重：多租戶可能有重複的 iata_code，只保留第一筆（usage_count 最高的）
-  const seen = new Set<string>()
-  const unique: Airport[] = []
-  for (const airport of (data || []) as Airport[]) {
-    if (!seen.has(airport.iata_code)) {
-      seen.add(airport.iata_code)
-      unique.push(airport)
-    }
-  }
-  return unique
+  const airports: Airport[] = ((airportsRes.data || []) as Array<Partial<Airport>>).map(a => ({
+    iata_code: a.iata_code as string,
+    icao_code: a.icao_code ?? null,
+    english_name: a.english_name ?? null,
+    name_zh: a.name_zh ?? null,
+    city_name_en: a.city_name_en ?? null,
+    city_name_zh: a.city_name_zh ?? null,
+    country_code: a.country_code ?? null,
+    latitude: a.latitude ?? null,
+    longitude: a.longitude ?? null,
+    timezone: a.timezone ?? null,
+    is_favorite: a.is_favorite ?? false,
+    usage_count: a.usage_count ?? 0,
+    is_destination: false,
+  }))
+
+  const destinations: Airport[] = ((destinationsRes.data || []) as Array<{
+    code: string
+    short_alias: string | null
+    country_code: string
+    name_zh: string | null
+    name_en: string | null
+    latitude: number | null
+    longitude: number | null
+  }>)
+    .filter(d => !!d.short_alias)
+    .map(d => ({
+      iata_code: d.short_alias as string,
+      icao_code: null,
+      english_name: d.name_en,
+      name_zh: d.name_zh,
+      city_name_en: d.name_en,
+      city_name_zh: d.name_zh,
+      country_code: d.country_code,
+      latitude: d.latitude,
+      longitude: d.longitude,
+      timezone: null,
+      is_favorite: false,
+      usage_count: 0,
+      is_destination: true,
+    }))
+
+  // iata_code 去重（機場優先於目的地）
+  const byCode = new Map<string, Airport>()
+  for (const a of airports) byCode.set(a.iata_code, a)
+  for (const d of destinations) if (!byCode.has(d.iata_code)) byCode.set(d.iata_code, d)
+  return Array.from(byCode.values())
 }
 
 // 從 countries 表讀取國家（含 code 用於對照）
@@ -186,28 +232,12 @@ export function useAirports(options: UseAirportsOptions = {}) {
     []
   )
 
-  // 標記機場為常用（增加 usage_count）
-  const markAsUsed = useCallback(
-    async (iataCode: string) => {
-      // 先取得目前的 usage_count
-      const airport = airports.find(a => a.iata_code === iataCode)
-      const currentCount = airport?.usage_count || 0
-
-      const { error } = await supabase
-        .from('ref_airports')
-        .update({ usage_count: currentCount + 1 })
-        .eq('iata_code', iataCode)
-
-      if (error) {
-        logger.error('更新 usage_count 失敗:', error)
-        return
-      }
-
-      // 重新載入
-      mutate(AIRPORTS_CACHE_KEY)
-    },
-    [airports]
-  )
+  // Stage 1：ref_airports 全域化後，usage_count 寫入需 super admin；
+  // 一般業務的「常用」計次會在 Stage 1.5 以 workspace_airports overlay 表重做。
+  // 目前保留 markAsUsed 介面為 no-op，避免破壞呼叫端。
+  const markAsUsed = useCallback(async (_iataCode: string) => {
+    // intentionally no-op — see comment above
+  }, [])
 
   // 轉換格式：相容舊的 TourDestination 格式（用過的機場）
   const destinations = useMemo(() => {

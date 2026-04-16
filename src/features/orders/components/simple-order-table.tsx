@@ -8,8 +8,8 @@ import { deleteOrder } from '@/data'
 import { recalculateParticipants } from '@/features/tours/services/tour-stats.service'
 import { recalculateReceiptStats } from '@/features/finance/payments/services/receipt-core.service'
 import { logger } from '@/lib/utils/logger'
-import { User, Trash2, FileText, Pencil, Stamp, Plus } from 'lucide-react'
-import { CurrencyCell } from '@/components/table-cells'
+import { User, Trash2, FileText, Pencil, Plus, HandCoins } from 'lucide-react'
+import { Wallet as PhWallet, ReadCvLogo } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { Order, Tour } from '@/stores/types'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
@@ -108,13 +108,6 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       label: COMP_ORDERS_LABELS.LABEL_8362,
       sortable: true,
     },
-    {
-      key: 'paid_amount',
-      label: COMP_ORDERS_LABELS.LABEL_PAID_AMOUNT,
-      align: 'right',
-      width: '120px',
-      render: value => <CurrencyCell amount={(value as number) || 0} variant="income" />,
-    },
   ]
 
   return (
@@ -124,7 +117,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       data={orders}
       striped
       showFilters={false}
-      actionsWidth="230px"
+      actionsWidth="1%"
       actionsHeader={
         onAdd ? (
           <div className="flex justify-end">
@@ -158,7 +151,10 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
         ),
       }}
       actions={order => (
-        <div className="flex items-center gap-1">
+        <div
+          className="flex items-center gap-1 justify-end whitespace-nowrap"
+          onClick={e => e.stopPropagation()}
+        >
           {/* 展開成員 */}
           <Button
             size="sm"
@@ -168,15 +164,15 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
               handleToggleExpand(order.id)
             }}
             className={cn(
-              'h-8 w-8 p-0 text-morandi-secondary hover:text-morandi-blue hover:bg-morandi-blue/10',
-              expanded.includes(order.id) && 'text-morandi-blue bg-morandi-blue/10'
+              'h-7 px-2 gap-1 text-xs text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-gold-light',
+              expanded.includes(order.id) && 'text-morandi-primary bg-morandi-gold-light'
             )}
-            title={COMP_ORDERS_LABELS.查看成員}
           >
-            <User size={16} />
+            <User size={12} />
+            成員
           </Button>
 
-          {/* 快速收款 */}
+          {/* 收款 */}
           <Button
             size="sm"
             variant="ghost"
@@ -190,10 +186,10 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
                 )
               }
             }}
-            className="h-8 w-8 p-0 text-morandi-secondary hover:text-morandi-green hover:bg-morandi-green/10 font-bold text-base"
-            title={COMP_ORDERS_LABELS.快速收款}
+            className="h-7 px-2 gap-1 text-xs text-morandi-green hover:text-morandi-green hover:bg-morandi-green/10"
           >
-            $
+            <PhWallet size={12} weight="regular" />
+            收款
           </Button>
 
           {/* 開發票 */}
@@ -205,14 +201,14 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
                 e.stopPropagation()
                 onQuickInvoice(order)
               }}
-              className="h-8 w-8 p-0 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10"
-              title={COMP_ORDERS_LABELS.開發票}
+              className="h-7 px-2 gap-1 text-xs text-morandi-gold hover:text-morandi-gold hover:bg-morandi-gold/10"
             >
-              <FileText size={14} />
+              <FileText size={12} />
+              開發票
             </Button>
           )}
 
-          {/* 快速請款 */}
+          {/* 請款 */}
           <Button
             size="sm"
             variant="ghost"
@@ -226,10 +222,10 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
                 )
               }
             }}
-            className="h-8 w-8 p-0 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10"
-            title={COMP_ORDERS_LABELS.快速請款}
+            className="h-7 px-2 gap-1 text-xs text-morandi-gold hover:text-morandi-gold-hover hover:bg-morandi-gold-light"
           >
-            ¥
+            <HandCoins size={12} />
+            請款
           </Button>
 
           {/* 簽證 */}
@@ -241,10 +237,10 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
                 e.stopPropagation()
                 onQuickVisa(order)
               }}
-              className="h-8 w-8 p-0 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10"
-              title={COMP_ORDERS_LABELS.快速開簽證單}
+              className="h-7 px-2 gap-1 text-xs text-morandi-primary hover:text-morandi-primary hover:bg-morandi-gold-light"
             >
-              <Stamp size={14} />
+              <ReadCvLogo size={12} weight="regular" />
+              簽證
             </Button>
           )}
 
@@ -257,10 +253,10 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
                 e.stopPropagation()
                 onEdit(order)
               }}
-              className="h-8 w-8 p-0 text-morandi-secondary hover:text-morandi-blue hover:bg-morandi-blue/10"
-              title={COMP_ORDERS_LABELS.編輯訂單}
+              className="h-7 px-2 gap-1 text-xs text-morandi-primary hover:text-morandi-primary hover:bg-morandi-gold-light"
             >
-              <Pencil size={14} />
+              <Pencil size={12} />
+              編輯
             </Button>
           )}
 
@@ -269,10 +265,10 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
             size="sm"
             variant="ghost"
             onClick={e => handleDelete(order, e)}
-            className="h-8 w-8 p-0 text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10"
-            title={COMP_ORDERS_LABELS.刪除訂單}
+            className="h-7 px-2 gap-1 text-xs text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
           >
-            <Trash2 size={14} />
+            <Trash2 size={12} />
+            刪除
           </Button>
         </div>
       )}

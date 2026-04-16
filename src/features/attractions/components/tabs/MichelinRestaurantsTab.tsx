@@ -44,7 +44,7 @@ interface MichelinRestaurantsTabProps {
 export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRestaurantsTabProps) {
   const [restaurants, setRestaurants] = useState<MichelinRestaurant[]>([])
   const [loading, setLoading] = useState(true)
-  const [countries, setCountries] = useState<Array<{ id: string; name: string; emoji?: string }>>(
+  const [countries, setCountries] = useState<Array<{ id: string; name: string }>>(
     []
   )
   const [cities, setCities] = useState<Array<{ id: string; name: string }>>([])
@@ -79,14 +79,11 @@ export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRest
         if (countryIds.length > 0) {
           supabase
             .from('countries')
-            .select('id, name, emoji')
+            .select('id, name')
             .in('id', countryIds)
             .limit(500)
             .then(({ data }) => {
-              if (data)
-                setCountries(
-                  data.map(c => ({ id: c.id, name: c.name, emoji: c.emoji ?? undefined }))
-                )
+              if (data) setCountries(data.map(c => ({ id: c.id, name: c.name })))
             })
         }
 

@@ -117,6 +117,7 @@ export function AISettingsTab() {
 
   // Track if prompt was manually edited after style selection
   const [promptDirty, setPromptDirty] = useState(false)
+  const [modeTab, setModeTab] = useState<'simple' | 'advanced'>('simple')
 
   useEffect(() => {
     loadSettings()
@@ -218,8 +219,6 @@ export function AISettingsTab() {
   if (loading) {
     return <div className="py-12 text-center text-morandi-secondary">載入中...</div>
   }
-
-  const [modeTab, setModeTab] = useState<'simple' | 'advanced'>('simple')
 
   return (
     <div className="space-y-6 max-w-3xl">

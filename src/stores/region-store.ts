@@ -9,7 +9,6 @@ export interface Country {
   id: string
   name: string
   name_en: string
-  emoji?: string
   code?: string
   has_regions: boolean
   display_order: number

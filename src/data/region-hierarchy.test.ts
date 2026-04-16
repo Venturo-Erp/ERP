@@ -37,12 +37,11 @@ describe('getAllCountries', () => {
     expect(countries.length).toBe(Object.keys(COUNTRIES).length)
   })
 
-  it('each country should have id, name, nameEn, emoji', () => {
+  it('each country should have id, name, nameEn', () => {
     for (const country of getAllCountries()) {
       expect(country.id).toBeTruthy()
       expect(country.name).toBeTruthy()
       expect(country.nameEn).toBeTruthy()
-      expect(country.emoji).toBeTruthy()
     }
   })
 })

@@ -25,35 +25,19 @@ export async function GET() {
     const auth = await getServerAuth()
     if (!auth.success) return NextResponse.json({ error: '請先登入' }, { status: 401 })
 
-    // 先嘗試讀取當前工作區的設定
-    const { data: workspaceData, error: workspaceError } = await dynamicFrom('workspace_meta_config')
+    // 用 admin client 繞過 RLS（server 端已驗證 workspace 所有權）
+    const admin = getSupabaseAdminClient() as unknown as SupabaseClient
+    const { data: workspaceData } = await admin
+      .from('workspace_meta_config')
       .select('setup_step, is_connected, app_id, connected_at')
       .eq('workspace_id', auth.data.workspaceId)
-      .single()
+      .maybeSingle()
 
-    if (workspaceError && workspaceError.code !== 'PGRST116') {
-      logger.error('Meta setup GET error:', workspaceError)
-      return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
-    }
-
-    // 如果當前工作區有設定，返回它
     if (workspaceData) {
       return NextResponse.json(workspaceData)
     }
 
-    // 如果沒有，嘗試讀取第一個可用的設定（超級管理員視角）
-    const { data: firstConfig, error: firstError } = await dynamicFrom('workspace_meta_config')
-      .select('setup_step, is_connected, app_id, connected_at')
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .single()
-
-    if (firstError && firstError.code !== 'PGRST116') {
-      logger.error('Meta setup GET first config error:', firstError)
-      return NextResponse.json({ error: '系統錯誤' }, { status: 500 })
-    }
-
-    return NextResponse.json(firstConfig || { setup_step: 0, is_connected: false })
+    return NextResponse.json({ setup_step: 0, is_connected: false })
   } catch (error) {
     logger.error('Meta setup GET error:', error)
     return NextResponse.json({ error: '系統錯誤' }, { status: 500 })

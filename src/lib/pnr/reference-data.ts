@@ -109,7 +109,7 @@ async function fetchAllReferenceData(): Promise<ReferenceData> {
       supabase
         .from('ref_airports')
         .select(
-          'iata_code, icao_code, english_name, name_zh, city_code, city_name_en, city_name_zh, country_code, timezone, latitude, longitude, is_favorite, usage_count, workspace_id, created_at'
+          'iata_code, icao_code, english_name, name_zh, city_code, city_name_en, city_name_zh, country_code, timezone, latitude, longitude, is_favorite, usage_count, created_at'
         )
         .limit(2000),
       supabase

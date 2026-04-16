@@ -28,7 +28,6 @@ export interface Country {
   id: string
   name: string
   nameEn: string
-  emoji: string
   regions?: Region[]
   cities?: City[] // 沒有地區分類的國家直接用城市
 }
@@ -51,7 +50,6 @@ export const COUNTRIES: Record<string, Country> = {
     id: 'japan',
     name: '日本',
     nameEn: 'Japan',
-    emoji: '🇯🇵',
     regions: [
       {
         id: 'hokkaido',
@@ -194,7 +192,6 @@ export const COUNTRIES: Record<string, Country> = {
     id: 'thailand',
     name: '泰國',
     nameEn: 'Thailand',
-    emoji: '🇹🇭',
     cities: [
       { id: 'bangkok', name: '曼谷', nameEn: 'Bangkok', country: 'thailand' },
       { id: 'chiang-mai', name: '清邁', nameEn: 'Chiang Mai', country: 'thailand' },
@@ -210,7 +207,6 @@ export const COUNTRIES: Record<string, Country> = {
     id: 'korea',
     name: '韓國',
     nameEn: 'South Korea',
-    emoji: '🇰🇷',
     cities: [
       { id: 'seoul', name: '首爾', nameEn: 'Seoul', country: 'korea' },
       { id: 'busan', name: '釜山', nameEn: 'Busan', country: 'korea' },
@@ -224,7 +220,6 @@ export const COUNTRIES: Record<string, Country> = {
     id: 'china',
     name: '中國',
     nameEn: 'China',
-    emoji: '🇨🇳',
     regions: [
       {
         id: 'east',

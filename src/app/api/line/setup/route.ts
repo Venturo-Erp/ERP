@@ -25,28 +25,28 @@ export async function GET() {
     const auth = await getServerAuth()
     if (!auth.success) return NextResponse.json({ error: '請先登入' }, { status: 401 })
 
-    // 先嘗試讀取當前工作區的設定
-    const { data: workspaceData } = await dynamicFrom('workspace_line_config')
+    // 用 admin client 讀取，避免 RLS 阻擋（server 端已驗證 workspace）
+    // 之前用 dynamicFrom（browser client）沒 session context，RLS 讀不到
+    const admin = getSupabaseAdminClient()
+    const { data: workspaceData } = await (admin as unknown as {
+      from: (t: string) => {
+        select: (c: string) => {
+          eq: (k: string, v: string) => { maybeSingle: () => Promise<{ data: LineConfig | null }> }
+        }
+      }
+    })
+      .from('workspace_line_config')
       .select(
         'setup_step, is_connected, bot_display_name, bot_basic_id, bot_user_id, webhook_url, connected_at'
       )
       .eq('workspace_id', auth.data.workspaceId)
-      .single()
+      .maybeSingle()
 
-    // 如果當前工作區沒有設定，讀取第一個可用的設定
     if (workspaceData) {
       return NextResponse.json(workspaceData)
     }
 
-    const { data: firstConfig } = await dynamicFrom('workspace_line_config')
-      .select(
-        'setup_step, is_connected, bot_display_name, bot_basic_id, bot_user_id, webhook_url, connected_at'
-      )
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .single()
-
-    return NextResponse.json(firstConfig || { setup_step: 0, is_connected: false })
+    return NextResponse.json({ setup_step: 0, is_connected: false })
   } catch (error) {
     logger.error('LINE setup GET error:', error)
     return NextResponse.json({ error: '系統錯誤' }, { status: 500 })

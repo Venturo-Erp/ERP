@@ -51,7 +51,6 @@ export async function seedRegions(): Promise<void> {
         id: crypto.randomUUID(),
         name: countryData.name,
         name_en: countryData.nameEn,
-        emoji: countryData.emoji,
         code: countryId,
         has_regions: !!countryData.regions,
         display_order: countryOrder++,

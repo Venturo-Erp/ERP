@@ -59,7 +59,7 @@ interface CategoryTransportationRate {
 }
 
 // 此元件只需要 Country 的部分欄位
-type Country = Pick<FullCountry, 'id' | 'name' | 'emoji'>
+type Country = Pick<FullCountry, 'id' | 'name'>
 
 interface CategorySectionProps {
   category: CostCategory

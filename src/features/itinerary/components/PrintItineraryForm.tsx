@@ -136,7 +136,6 @@ export function PrintItineraryForm({ data, onChange }: PrintItineraryFormProps) 
                     .sort((a, b) => a.display_order - b.display_order)
                     .map(country => (
                       <SelectItem key={country.id} value={country.name}>
-                        {country.emoji ? `${country.emoji} ` : ''}
                         {country.name}
                       </SelectItem>
                     ))}

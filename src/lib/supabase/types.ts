@@ -1267,6 +1267,7 @@ export type Database = {
           city_id: string | null
           contact_name: string | null
           country_id: string
+          country_code: string | null
           created_at: string | null
           created_by: string | null
           data_verified: boolean | null
@@ -1335,6 +1336,7 @@ export type Database = {
           city_id?: string | null
           contact_name?: string | null
           country_id?: string
+          country_code?: string | null
           created_at?: string | null
           created_by?: string | null
           data_verified?: boolean | null
@@ -2625,6 +2627,7 @@ export type Database = {
           background_image_url: string | null
           background_image_url_2: string | null
           country_id: string
+          country_code: string | null
           created_at: string | null
           description: string | null
           display_order: number | null
@@ -2667,6 +2670,7 @@ export type Database = {
           background_image_url?: string | null
           background_image_url_2?: string | null
           country_id?: string
+          country_code?: string | null
           created_at?: string | null
           description?: string | null
           display_order?: number | null
@@ -6661,6 +6665,7 @@ export type Database = {
           commission_rate: number | null
           concierge_service: boolean | null
           country_id: string
+          country_code: string | null
           created_at: string | null
           created_by: string | null
           currency: string | null
@@ -6777,6 +6782,7 @@ export type Database = {
           commission_rate?: number | null
           concierge_service?: boolean | null
           country_id?: string
+          country_code?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
@@ -6860,6 +6866,7 @@ export type Database = {
           category: string | null
           city_id: string | null
           country_id: string | null
+          country_code: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -6880,6 +6887,7 @@ export type Database = {
           category?: string | null
           city_id?: string | null
           country_id?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -6900,6 +6908,7 @@ export type Database = {
           category?: string | null
           city_id?: string | null
           country_id?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -8753,6 +8762,7 @@ export type Database = {
           city_id: string
           commission_rate: number | null
           country_id: string
+          country_code: string | null
           created_at: string | null
           created_by: string | null
           cuisine_type: string[] | null
@@ -8875,6 +8885,7 @@ export type Database = {
           city_id?: string
           commission_rate?: number | null
           country_id?: string
+          country_code?: string | null
           created_at?: string | null
           created_by?: string | null
           cuisine_type?: string[] | null
@@ -11362,6 +11373,7 @@ export type Database = {
           combine_with: string[] | null
           commission_rate: number | null
           country_id: string
+          country_code: string | null
           created_at: string | null
           created_by: string | null
           currency: string | null
@@ -11516,6 +11528,7 @@ export type Database = {
           combine_with?: string[] | null
           commission_rate?: number | null
           country_id?: string
+          country_code?: string | null
           created_at?: string | null
           created_by?: string | null
           currency?: string | null
@@ -11967,6 +11980,7 @@ export type Database = {
           contact_phone: string | null
           converted_to_tour: boolean | null
           country_id: string | null
+          country_code: string | null
           created_at: string
           created_by: string | null
           created_by_name: string | null
@@ -12038,6 +12052,7 @@ export type Database = {
           contact_phone?: string | null
           converted_to_tour?: boolean | null
           country_id?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           created_by_name?: string | null
@@ -12109,6 +12124,7 @@ export type Database = {
           contact_phone?: string | null
           converted_to_tour?: boolean | null
           country_id?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           created_by_name?: string | null
@@ -12463,7 +12479,6 @@ export type Database = {
           name_zh: string | null
           timezone: string | null
           usage_count: number | null
-          workspace_id: string
         }
         Insert: {
           city_code?: string | null
@@ -12480,7 +12495,6 @@ export type Database = {
           name_zh?: string | null
           timezone?: string | null
           usage_count?: number | null
-          workspace_id: string
         }
         Update: {
           city_code?: string | null
@@ -12497,15 +12511,143 @@ export type Database = {
           name_zh?: string | null
           timezone?: string | null
           usage_count?: number | null
+        }
+        Relationships: []
+      }
+      ref_countries: {
+        Row: {
+          code: string
+          name_zh: string
+          name_en: string
+          continent: string | null
+          is_active: boolean
+          created_at: string | null
+        }
+        Insert: {
+          code: string
+          name_zh: string
+          name_en: string
+          continent?: string | null
+          is_active?: boolean
+          created_at?: string | null
+        }
+        Update: {
+          code?: string
+          name_zh?: string
+          name_en?: string
+          continent?: string | null
+          is_active?: boolean
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      workspace_countries: {
+        Row: {
+          workspace_id: string
+          country_code: string
+          is_enabled: boolean
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          workspace_id: string
+          country_code: string
+          is_enabled?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
           workspace_id?: string
+          country_code?: string
+          is_enabled?: boolean
+          created_at?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: 'ref_airports_workspace_id_fkey'
+            foreignKeyName: 'workspace_countries_workspace_id_fkey'
             columns: ['workspace_id']
             isOneToOne: false
             referencedRelation: 'workspaces'
             referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'workspace_countries_country_code_fkey'
+            columns: ['country_code']
+            isOneToOne: false
+            referencedRelation: 'ref_countries'
+            referencedColumns: ['code']
+          },
+        ]
+      }
+      ref_destinations: {
+        Row: {
+          code: string
+          short_alias: string | null
+          country_code: string
+          name_zh: string | null
+          name_zh_tw: string | null
+          name_zh_cn: string | null
+          name_en: string | null
+          name_ja: string | null
+          name_ko: string | null
+          name_th: string | null
+          type: string | null
+          parent_code: string | null
+          default_airport: string | null
+          google_maps_url: string | null
+          google_place_id: string | null
+          latitude: number | null
+          longitude: number | null
+          created_at: string | null
+        }
+        Insert: {
+          code: string
+          short_alias?: string | null
+          country_code: string
+          name_zh?: string | null
+          name_zh_tw?: string | null
+          name_zh_cn?: string | null
+          name_en?: string | null
+          name_ja?: string | null
+          name_ko?: string | null
+          name_th?: string | null
+          type?: string | null
+          parent_code?: string | null
+          default_airport?: string | null
+          google_maps_url?: string | null
+          google_place_id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          created_at?: string | null
+        }
+        Update: {
+          code?: string
+          short_alias?: string | null
+          country_code?: string
+          name_zh?: string | null
+          name_zh_tw?: string | null
+          name_zh_cn?: string | null
+          name_en?: string | null
+          name_ja?: string | null
+          name_ko?: string | null
+          name_th?: string | null
+          type?: string | null
+          parent_code?: string | null
+          default_airport?: string | null
+          google_maps_url?: string | null
+          google_place_id?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'ref_destinations_parent_code_fkey'
+            columns: ['parent_code']
+            isOneToOne: false
+            referencedRelation: 'ref_destinations'
+            referencedColumns: ['code']
           },
         ]
       }
@@ -12799,6 +12941,7 @@ export type Database = {
       regions: {
         Row: {
           country_id: string
+          country_code: string | null
           created_at: string | null
           description: string | null
           display_order: number | null
@@ -12823,6 +12966,7 @@ export type Database = {
         }
         Update: {
           country_id?: string
+          country_code?: string | null
           created_at?: string | null
           description?: string | null
           display_order?: number | null
@@ -13094,6 +13238,7 @@ export type Database = {
           city_id: string
           commission_rate: number | null
           country_id: string
+          country_code: string | null
           created_at: string | null
           created_by: string | null
           cuisine_type: string[] | null
@@ -13216,6 +13361,7 @@ export type Database = {
           city_id?: string
           commission_rate?: number | null
           country_id?: string
+          country_code?: string | null
           created_at?: string | null
           created_by?: string | null
           cuisine_type?: string[] | null
@@ -14041,6 +14187,7 @@ export type Database = {
           contact_person: string | null
           country: string | null
           country_id: string | null
+          country_code: string | null
           created_at: string
           created_by: string | null
           currency: string | null
@@ -14083,6 +14230,7 @@ export type Database = {
           contact_person?: string | null
           country?: string | null
           country_id?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -14125,6 +14273,7 @@ export type Database = {
           contact_person?: string | null
           country?: string | null
           country_id?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -16750,6 +16899,7 @@ export type Database = {
           contract_template: string | null
           controller_id: string | null
           country_id: string | null
+          country_code: string | null
           created_at: string
           created_by: string | null
           current_participants: number | null
@@ -16818,6 +16968,7 @@ export type Database = {
           contract_template?: string | null
           controller_id?: string | null
           country_id?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           current_participants?: number | null
@@ -16886,6 +17037,7 @@ export type Database = {
           contract_template?: string | null
           controller_id?: string | null
           country_id?: string | null
+          country_code?: string | null
           created_at?: string
           created_by?: string | null
           current_participants?: number | null
@@ -17060,6 +17212,7 @@ export type Database = {
           category: string | null
           cost_vnd: number | null
           country_id: string | null
+          country_code: string | null
           country_name: string
           created_at: string | null
           created_by: string | null
@@ -17089,6 +17242,7 @@ export type Database = {
           category?: string | null
           cost_vnd?: number | null
           country_id?: string | null
+          country_code?: string | null
           country_name: string
           created_at?: string | null
           created_by?: string | null
@@ -17118,6 +17272,7 @@ export type Database = {
           category?: string | null
           cost_vnd?: number | null
           country_id?: string | null
+          country_code?: string | null
           country_name?: string
           created_at?: string | null
           created_by?: string | null

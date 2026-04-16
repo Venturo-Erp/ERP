@@ -55,9 +55,7 @@ interface PremiumExperiencesTabProps {
 export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperiencesTabProps) {
   const [experiences, setExperiences] = useState<PremiumExperience[]>([])
   const [loading, setLoading] = useState(true)
-  const [countries, setCountries] = useState<Array<{ id: string; name: string; emoji?: string }>>(
-    []
-  )
+  const [countries, setCountries] = useState<Array<{ id: string; name: string }>>([])
   const [cities, setCities] = useState<Array<{ id: string; name: string }>>([])
 
   const [editingExperience, setEditingExperience] = useState<PremiumExperience | null>(null)
@@ -90,14 +88,11 @@ export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperi
         if (countryIds.length > 0) {
           supabase
             .from('countries')
-            .select('id, name, emoji')
+            .select('id, name')
             .in('id', countryIds)
             .limit(500)
             .then(({ data }) => {
-              if (data)
-                setCountries(
-                  data.map(c => ({ id: c.id, name: c.name, emoji: c.emoji ?? undefined }))
-                )
+              if (data) setCountries(data.map(c => ({ id: c.id, name: c.name })))
             })
         }
 

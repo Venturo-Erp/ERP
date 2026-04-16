@@ -71,7 +71,6 @@ export default function RegionsTab() {
         key: 'name',
         label: REGIONS_TAB_LABELS.國家名稱,
         sortable: true,
-        filterable: true,
         render: (_value, row) => (
           <div>
             <div className="font-medium text-foreground">{row.name}</div>
