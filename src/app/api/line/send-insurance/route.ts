@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import ExcelJS from 'exceljs'
 import { logger } from '@/lib/utils/logger'
+import { applyPrivacyMask, parsePrivacySettings } from '@/lib/privacy/mask'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
@@ -51,7 +52,25 @@ export async function POST(request: Request) {
       targetGroup = group
     }
 
-    // 2. 取團員（透過 order_members）
+    // 2. 取得旅遊團資料（含 workspace_id）
+    const { data: tour } = await supabase
+      .from('tours')
+      .select('workspace_id')
+      .eq('id', tourId)
+      .single()
+
+    // 2.5 取得隱私設定（從 tour 的 workspace）
+    const privacySettings = parsePrivacySettings(null)
+    if (tour?.workspace_id) {
+      const { data: ws } = await supabase
+        .from('workspaces')
+        .select('export_privacy_settings')
+        .eq('id', tour.workspace_id)
+        .single()
+      Object.assign(privacySettings, parsePrivacySettings(ws?.export_privacy_settings))
+    }
+
+    // 3. 取團員（透過 order_members）
     const { data: orders } = await supabase.from('orders').select('id').eq('tour_id', tourId)
 
     const orderIds = orders?.map(o => o.id) || []
@@ -67,7 +86,7 @@ export async function POST(request: Request) {
       members = (data as unknown as typeof members) || []
     }
 
-    // 3. 產生 Excel
+    // 4. 產生 Excel
     const wb = new ExcelJS.Workbook()
     const ws = wb.addWorksheet('團員名單')
 
@@ -99,7 +118,12 @@ export async function POST(request: Request) {
 
     members.forEach((m, i) => {
       const c = m.customer || { name: '', national_id: null, birth_date: null }
-      const row = ws.addRow([i + 1, c.name || '', c.national_id || '', c.birth_date || ''])
+      const row = ws.addRow([
+        i + 1,
+        c.name || '',
+        applyPrivacyMask(c.national_id, 'mask_id_number', privacySettings),
+        c.birth_date || '',
+      ])
       row.eachCell(cell => {
         cell.border = {
           top: { style: 'thin' },

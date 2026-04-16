@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/utils/logger'
+import { applyPrivacyMask, parsePrivacySettings } from '@/lib/privacy/mask'
 
 const LINE_API_URL = 'https://api.line.me/v2/bot/message/push'
 
@@ -18,7 +19,7 @@ async function sendInsuranceForTour(
   const { data: tour } = (await supabase
     .from('tours')
     .select(
-      'id, code, name, departure_date, return_date, days_count, airport_code, tour_leader_id, country_id'
+      'id, code, name, departure_date, return_date, days_count, airport_code, tour_leader_id, country_id, workspace_id'
     )
     .eq('id', tourId)
     .single()) as {
@@ -32,6 +33,7 @@ async function sendInsuranceForTour(
       airport_code: string | null
       tour_leader_id: string | null
       country_id: string | null
+      workspace_id: string
     } | null
   }
   if (!tour) return { success: false, error: 'Tour not found' }
@@ -111,6 +113,14 @@ async function sendInsuranceForTour(
 
   const representative = leaderName || members[0]?.customer?.name || '-'
 
+  // 取得隱私設定
+  const { data: workspace } = await supabase
+    .from('workspaces')
+    .select('export_privacy_settings')
+    .eq('id', tour.workspace_id)
+    .single()
+  const privacySettings = parsePrivacySettings(workspace?.export_privacy_settings)
+
   // 產生 Excel
   const ExcelJS = (await import('exceljs')).default
   const wb = new ExcelJS.Workbook()
@@ -141,7 +151,7 @@ async function sendInsuranceForTour(
       const row = ws.addRow([
         i + 1,
         m.customer?.name || '',
-        m.customer?.national_id || '',
+        applyPrivacyMask(m.customer?.national_id, 'mask_id_number', privacySettings),
         m.customer?.birth_date || '',
       ])
       row.eachCell(c => {

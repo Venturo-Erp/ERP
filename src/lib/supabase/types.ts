@@ -20162,6 +20162,7 @@ export type Database = {
           description: string | null
           email: string | null
           employee_number_prefix: string | null
+          export_privacy_settings: Json | null
           fax: string | null
           icon: string | null
           id: string
@@ -20200,6 +20201,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           employee_number_prefix?: string | null
+          export_privacy_settings?: Json | null
           fax?: string | null
           icon?: string | null
           id?: string
@@ -20238,6 +20240,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           employee_number_prefix?: string | null
+          export_privacy_settings?: Json | null
           fax?: string | null
           icon?: string | null
           id?: string
