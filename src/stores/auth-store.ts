@@ -116,30 +116,8 @@ interface AuthState {
   setHasHydrated: (hasHydrated: boolean) => void
 }
 
-function setSecureCookie(token: string, _rememberMe: boolean = false): void {
-  const maxAge = 30 * 24 * 60 * 60 // 30 days — 登入後不應該頻繁要求重新登入
-  const secure =
-    typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'Secure; ' : ''
-
-  if (typeof window !== 'undefined') {
-    document.cookie = `auth-token=${token}; path=/; max-age=${maxAge}; SameSite=Lax; ${secure}`
-  }
-}
-
-/**
- * 從 cookie 讀取 auth-token
- */
-function getAuthTokenFromCookie(): string | null {
-  if (typeof document === 'undefined') return null
-  const cookies = document.cookie.split(';')
-  for (const cookie of cookies) {
-    const [name, value] = cookie.trim().split('=')
-    if (name === 'auth-token') {
-      return value
-    }
-  }
-  return null
-}
+// Cookie 已改為 httpOnly（server-side 設定），前端不再需要讀寫 auth-token cookie
+// setSecureCookie / getAuthTokenFromCookie 已移除
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -158,14 +136,6 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        // 將目前 token 加入黑名單（在清除 cookie 之前）
-        const currentToken = getAuthTokenFromCookie()
-        if (currentToken) {
-          const { addTokenToBlacklist } = await import('@/lib/auth')
-          addTokenToBlacklist(currentToken)
-          logger.log('🚫 Token 已加入黑名單')
-        }
-
         try {
           const { supabase } = await import('@/lib/supabase/client')
           await supabase.auth.signOut()
@@ -174,13 +144,16 @@ export const useAuthStore = create<AuthState>()(
           logger.warn('⚠️ Supabase Auth logout failed:', error)
         }
 
+        // 呼叫 server API 清除 httpOnly cookie
+        try {
+          await fetch('/api/auth/logout', { method: 'POST' })
+          logger.log('✅ Server-side auth cookie cleared')
+        } catch (error) {
+          logger.warn('⚠️ Server logout failed:', error)
+        }
+
         // 重置 Auth 同步狀態
         resetAuthSyncState()
-
-        if (typeof window !== 'undefined') {
-          const secure = window.location.protocol === 'https:' ? 'Secure; ' : ''
-          document.cookie = `auth-token=; path=/; max-age=0; SameSite=Lax; ${secure}`
-        }
 
         set({
           user: null,
@@ -248,31 +221,15 @@ export const useAuthStore = create<AuthState>()(
           // 4. 查詢 workspace 資訊並構建 User 物件
           const workspaceInfo = await fetchWorkspaceInfo(employeeData.workspace_id)
 
-          // 5. 權限從 validate-login API 的 JWT 取得（server-side 已計算好）
-          // 解析 JWT payload 取得權限
-          // 5. 權限從 validate-login API 的 JWT 取得（server-side 已計算好）
-          const jwt = (validateResult.data?.jwt ?? validateResult.jwt) as string
-          let rolePermissions: string[] = []
-          let jwtIsAdmin = false
-          if (jwt) {
-            try {
-              const payload = JSON.parse(atob(jwt.split('.')[1]))
-              rolePermissions = payload.permissions || []
-              jwtIsAdmin = payload.is_admin || false
-            } catch {
-              // JWT 解析失敗
-            }
-          }
+          // 5. 權限從 validate-login API 的 response body 取得（server-side 已計算好）
+          // Cookie 已由 server-side 的 Set-Cookie header 設定（httpOnly）
+          const rolePermissions = (validateResult.data?.permissions ?? []) as string[]
+          const jwtIsAdmin = (validateResult.data?.isAdmin ?? false) as boolean
 
           const user = buildUserFromEmployee(employeeData, workspaceInfo, {
             rolePermissions,
             isAdmin: jwtIsAdmin,
           })
-
-          // 6. 設定 JWT cookie
-          if (jwt) {
-            setSecureCookie(jwt, rememberMe)
-          }
 
           get().setUser(user, jwtIsAdmin)
 

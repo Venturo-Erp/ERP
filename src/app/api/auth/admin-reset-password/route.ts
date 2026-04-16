@@ -43,7 +43,7 @@ async function checkIsAdmin(employeeId: string): Promise<boolean> {
 export async function POST(request: NextRequest) {
   try {
     // 🔒 Rate limiting: 5 requests per minute
-    const rateLimited = checkRateLimit(request, 'admin-reset-password', 5, 60_000)
+    const rateLimited = await checkRateLimit(request, 'admin-reset-password', 5, 60_000)
     if (rateLimited) return rateLimited
 
     // 🔒 安全檢查：需要已登入用戶

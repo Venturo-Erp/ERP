@@ -4,7 +4,11 @@
  */
 
 // Quick Login Secret - server-only（不使用 NEXT_PUBLIC_ 前綴，防止前端洩漏）
-const QUICK_LOGIN_SECRET = process.env.QUICK_LOGIN_SECRET || 'venturo_dev_quick_login_local_only'
+const QUICK_LOGIN_SECRET = process.env.QUICK_LOGIN_SECRET
+if (!QUICK_LOGIN_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('QUICK_LOGIN_SECRET environment variable is required in production')
+}
+const QUICK_LOGIN_SECRET_VALUE = QUICK_LOGIN_SECRET || 'venturo_dev_quick_login_local_only'
 const TOKEN_EXPIRY_MS = 8 * 60 * 60 * 1000 // 8 小時
 
 /**
@@ -35,7 +39,7 @@ async function generateHmacBrowser(message: string, secret: string): Promise<str
 export async function generateQuickLoginToken(profileId: string): Promise<string> {
   const timestamp = Date.now()
   const payload = `${profileId}-${timestamp}`
-  const signature = await generateHmacBrowser(payload, QUICK_LOGIN_SECRET)
+  const signature = await generateHmacBrowser(payload, QUICK_LOGIN_SECRET_VALUE)
 
   return `quick-login-v2-${profileId}-${timestamp}-${signature}`
 }
@@ -88,7 +92,7 @@ export async function verifyQuickLoginToken(token: string): Promise<boolean> {
   try {
     const payload = `${profileId}-${timestamp}`
     const encoder = new TextEncoder()
-    const keyData = encoder.encode(QUICK_LOGIN_SECRET)
+    const keyData = encoder.encode(QUICK_LOGIN_SECRET_VALUE)
     const messageData = encoder.encode(payload)
 
     const key = await crypto.subtle.importKey(

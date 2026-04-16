@@ -34,14 +34,31 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: '無法取得租戶資訊' }, { status: 400 })
     }
 
-    // 2. 取得 workspace code
+    // 2. 取得 workspace code + 員工上限
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
-      .select('code')
+      .select('code, max_employees')
       .eq('id', currentUser.workspace_id)
       .single()
 
     const workspaceCode = workspace?.code?.toLowerCase() || 'corner'
+
+    // 2.5 檢查員工數量上限
+    const maxEmployees = (workspace as Record<string, unknown>)?.max_employees as number | null
+    if (maxEmployees != null) {
+      const { count } = await supabaseAdmin
+        .from('employees')
+        .select('*', { count: 'exact', head: true })
+        .eq('workspace_id', currentUser.workspace_id)
+        .eq('is_active', true)
+
+      if (count != null && count >= maxEmployees) {
+        return NextResponse.json(
+          { message: `已達員工數量上限（${maxEmployees} 人），請升級方案或聯繫管理員` },
+          { status: 403 }
+        )
+      }
+    }
 
     // 3. 建立 Supabase Auth 帳號
     const authEmail = `${workspaceCode}_${employeeData.employee_number.toLowerCase()}@venturo.com`

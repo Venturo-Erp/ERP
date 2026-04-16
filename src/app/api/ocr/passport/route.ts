@@ -20,7 +20,7 @@ import { parsePassportText } from './passport-parser'
 export async function POST(request: NextRequest) {
   try {
     // 🔒 Rate limiting: 10 requests per minute (OCR processing is resource intensive)
-    const rateLimited = checkRateLimit(request, 'ocr-passport', 10, 60_000)
+    const rateLimited = await checkRateLimit(request, 'ocr-passport', 10, 60_000)
     if (rateLimited) return rateLimited
 
     // 🔒 安全檢查：驗證用戶身份（護照資料敏感）

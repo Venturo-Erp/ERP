@@ -121,7 +121,7 @@ function formatEndDate(dateStr: string): string {
 export async function POST(req: NextRequest) {
   try {
     // 🔒 Rate limiting: 10 requests per minute
-    const rateLimited = checkRateLimit(req, 'linkpay', 10, 60_000)
+    const rateLimited = await checkRateLimit(req, 'linkpay', 10, 60_000)
     if (rateLimited) return rateLimited
 
     // 驗證登入狀態

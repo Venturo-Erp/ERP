@@ -18,6 +18,7 @@ import {
   Plus,
   Pencil,
   Trash2,
+  Users,
 } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -70,6 +71,7 @@ interface CompanyFormData {
   personal_seal_url: string
   invoice_seal_image_url: string
   contract_seal_image_url: string
+  max_employees: string // 用 string 方便 Input 操作，儲存時轉 number
 }
 
 const INITIAL_FORM: CompanyFormData = {
@@ -92,6 +94,7 @@ const INITIAL_FORM: CompanyFormData = {
   personal_seal_url: '',
   invoice_seal_image_url: '',
   contract_seal_image_url: '',
+  max_employees: '',
 }
 
 function ImageUploadField({
@@ -233,34 +236,35 @@ export default function CompanySettingsPage() {
       const { data, error } = await supabase
         .from('workspaces')
         .select(
-          'name, description, logo_url, legal_name, subtitle, address, phone, fax, email, website, tax_id, bank_name, bank_branch, bank_account, bank_account_name, company_seal_url, personal_seal_url, invoice_seal_image_url, contract_seal_image_url'
+          'name, description, logo_url, legal_name, subtitle, address, phone, fax, email, website, tax_id, bank_name, bank_branch, bank_account, bank_account_name, company_seal_url, personal_seal_url, invoice_seal_image_url, contract_seal_image_url, max_employees'
         )
         .eq('id', workspaceId)
         .single()
 
       if (error) throw error
       if (data) {
-        const d = data as unknown as Record<string, string | null>
+        const d = data as unknown as Record<string, string | number | null>
         setForm({
-          name: d.name ?? '',
-          description: d.description ?? '',
-          logo_url: d.logo_url ?? '',
-          legal_name: d.legal_name ?? '',
-          subtitle: d.subtitle ?? '',
-          address: d.address ?? '',
-          phone: d.phone ?? '',
-          fax: d.fax ?? '',
-          email: d.email ?? '',
-          website: d.website ?? '',
-          tax_id: d.tax_id ?? '',
-          bank_name: d.bank_name ?? '',
-          bank_branch: d.bank_branch ?? '',
-          bank_account: d.bank_account ?? '',
-          bank_account_name: d.bank_account_name ?? '',
-          company_seal_url: d.company_seal_url ?? '',
-          personal_seal_url: d.personal_seal_url ?? '',
-          invoice_seal_image_url: d.invoice_seal_image_url ?? '',
-          contract_seal_image_url: d.contract_seal_image_url ?? '',
+          name: (d.name as string) ?? '',
+          description: (d.description as string) ?? '',
+          logo_url: (d.logo_url as string) ?? '',
+          legal_name: (d.legal_name as string) ?? '',
+          subtitle: (d.subtitle as string) ?? '',
+          address: (d.address as string) ?? '',
+          phone: (d.phone as string) ?? '',
+          fax: (d.fax as string) ?? '',
+          email: (d.email as string) ?? '',
+          website: (d.website as string) ?? '',
+          tax_id: (d.tax_id as string) ?? '',
+          bank_name: (d.bank_name as string) ?? '',
+          bank_branch: (d.bank_branch as string) ?? '',
+          bank_account: (d.bank_account as string) ?? '',
+          bank_account_name: (d.bank_account_name as string) ?? '',
+          company_seal_url: (d.company_seal_url as string) ?? '',
+          personal_seal_url: (d.personal_seal_url as string) ?? '',
+          invoice_seal_image_url: (d.invoice_seal_image_url as string) ?? '',
+          contract_seal_image_url: (d.contract_seal_image_url as string) ?? '',
+          max_employees: d.max_employees != null ? String(d.max_employees) : '',
         })
       }
     } catch (error) {
@@ -299,8 +303,12 @@ export default function CompanySettingsPage() {
     if (!workspaceId) return
     setSaving(true)
     try {
-      const { name: _name, ...updateData } = form
-      const { error } = await supabase.from('workspaces').update(updateData).eq('id', workspaceId)
+      const { name: _name, max_employees: maxEmpStr, ...updateData } = form
+      const saveData: Record<string, unknown> = {
+        ...updateData,
+        max_employees: maxEmpStr ? parseInt(maxEmpStr, 10) : null,
+      }
+      const { error } = await supabase.from('workspaces').update(saveData).eq('id', workspaceId)
 
       if (error) throw error
       toast.success(COMPANY_LABELS.SAVE_SUCCESS)
@@ -629,6 +637,32 @@ export default function CompanySettingsPage() {
                 onChange={url => updateField('contract_seal_image_url', url)}
                 fieldName="contract-seal"
                 workspaceId={workspaceId}
+              />
+            </div>
+          </div>
+        </Card>
+
+        {/* SaaS 方案設定 */}
+        <Card className="rounded-xl shadow-lg border border-border p-8">
+          <div className="flex items-center gap-3 mb-6">
+            <Users className="h-6 w-6 text-morandi-gold" />
+            <h2 className="text-xl font-semibold">方案設定</h2>
+          </div>
+          <div className="space-y-5">
+            <div>
+              <Label className="text-sm font-medium text-morandi-primary">
+                員工帳號上限
+              </Label>
+              <p className="text-xs text-morandi-secondary mb-2">
+                設定此工作區可建立的最大員工數量，留空表示無限制
+              </p>
+              <Input
+                type="number"
+                min="1"
+                value={form.max_employees}
+                onChange={e => updateField('max_employees', e.target.value)}
+                placeholder="無限制"
+                className="mt-1.5 max-w-[200px]"
               />
             </div>
           </div>
