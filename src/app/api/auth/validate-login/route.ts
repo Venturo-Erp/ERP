@@ -8,6 +8,8 @@ import { validateBody } from '@/lib/api/validation'
 import { validateLoginSchema } from '@/lib/validations/api-schemas'
 import { SignJWT } from 'jose'
 import { randomUUID } from 'crypto'
+// audit: SaaS 操作稽核記錄
+import { writeAuditLog } from '@/lib/audit'
 
 const JWT_SECRET = process.env.JWT_SECRET
 if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
@@ -216,7 +218,18 @@ export async function POST(request: NextRequest) {
       .update({ active_jti: jti })
       .eq('id', employee.id)
 
-    // 9. 設定 httpOnly cookie + 回傳資料（JWT 不再放 response body）
+    // 9. 寫入 audit log（登入成功）
+    await writeAuditLog({
+      workspace_id: workspace.id,
+      employee_id: employee.id,
+      employee_name: employeeData.display_name || employeeData.english_name || null,
+      action: 'login',
+      resource_type: 'auth',
+      resource_id: employee.id,
+      resource_name: employee.employee_number,
+    })
+
+    // 10. 設定 httpOnly cookie + 回傳資料（JWT 不再放 response body）
     const response = NextResponse.json({
       success: true,
       data: {

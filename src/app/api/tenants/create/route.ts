@@ -16,6 +16,8 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { successResponse, errorResponse, ErrorCode } from '@/lib/api/response'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { logger } from '@/lib/utils/logger'
+// audit: SaaS 操作稽核記錄
+import { writeAuditLog } from '@/lib/audit'
 
 interface CreateTenantRequest {
   // Workspace 資訊
@@ -565,6 +567,16 @@ export async function POST(request: NextRequest) {
     }
 
     logger.log(`Tenant created successfully: ${newWorkspaceCode}`)
+
+    // 寫入 audit log
+    await writeAuditLog({
+      workspace_id: workspace.id,
+      employee_id: auth.data.employeeId,
+      action: 'create',
+      resource_type: 'tenant',
+      resource_id: workspace.id,
+      resource_name: workspaceName,
+    })
 
     // 返回登入資訊（ERP 用員工編號+密碼登入，不需要 email）
     return successResponse({

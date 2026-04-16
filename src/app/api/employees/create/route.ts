@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { logger } from '@/lib/utils/logger'
+// audit: SaaS 操作稽核記錄
+import { writeAuditLog } from '@/lib/audit'
 
 /**
  * POST /api/employees/create
@@ -95,6 +97,19 @@ export async function POST(request: NextRequest) {
     }
 
     logger.log(`Employee created: ${employee.employee_number}`)
+
+    // 4.5 寫入 audit log
+    await writeAuditLog({
+      workspace_id: currentUser.workspace_id,
+      employee_id: auth.data.employeeId,
+      action: 'create',
+      resource_type: 'employee',
+      resource_id: employee.id,
+      resource_name:
+        (employeeData as Record<string, unknown>).display_name as string ||
+        (employeeData as Record<string, unknown>).chinese_name as string ||
+        employee.employee_number,
+    })
 
     // 5. 自動初始化請假餘額
     try {

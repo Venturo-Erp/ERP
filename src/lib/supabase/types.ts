@@ -32,6 +32,56 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          id: string
+          workspace_id: string | null
+          employee_id: string | null
+          employee_name: string | null
+          action: string
+          resource_type: string
+          resource_id: string | null
+          resource_name: string | null
+          changes: Record<string, unknown> | null
+          metadata: Record<string, unknown> | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          workspace_id?: string | null
+          employee_id?: string | null
+          employee_name?: string | null
+          action: string
+          resource_type: string
+          resource_id?: string | null
+          resource_name?: string | null
+          changes?: Record<string, unknown> | null
+          metadata?: Record<string, unknown> | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          workspace_id?: string | null
+          employee_id?: string | null
+          employee_name?: string | null
+          action?: string
+          resource_type?: string
+          resource_id?: string | null
+          resource_name?: string | null
+          changes?: Record<string, unknown> | null
+          metadata?: Record<string, unknown> | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'audit_logs_workspace_id_fkey'
+            columns: ['workspace_id']
+            isOneToOne: false
+            referencedRelation: 'workspaces'
+            referencedColumns: ['id']
+          }
+        ]
+      }
       accounting_accounts: {
         Row: {
           available_credit: number | null

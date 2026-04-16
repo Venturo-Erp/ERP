@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { jwtVerify } from 'jose'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
+import { writeAuditLog } from '@/lib/audit'
 
 const JWT_SECRET = process.env.JWT_SECRET
 const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET || 'venturo_dev_jwt_secret_local_only')
@@ -24,6 +25,13 @@ export async function POST() {
           .from('employees')
           .update({ active_jti: null })
           .eq('id', employeeId)
+
+        await writeAuditLog({
+          employee_id: employeeId,
+          action: 'logout',
+          resource_type: 'auth',
+          resource_id: employeeId,
+        })
       }
     } catch {
       // token 無效，繼續清 cookie
