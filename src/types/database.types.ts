@@ -13533,6 +13533,7 @@ export type Database = {
           name_zh: string
           name_en: string
           continent: string | null
+          sub_region: string | null
           is_active: boolean
           created_at: string | null
         }
@@ -13541,6 +13542,7 @@ export type Database = {
           name_zh: string
           name_en: string
           continent?: string | null
+          sub_region?: string | null
           is_active?: boolean
           created_at?: string | null
         }
@@ -13549,6 +13551,7 @@ export type Database = {
           name_zh?: string
           name_en?: string
           continent?: string | null
+          sub_region?: string | null
           is_active?: boolean
           created_at?: string | null
         }

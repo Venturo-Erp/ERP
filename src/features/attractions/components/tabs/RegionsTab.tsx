@@ -3,50 +3,139 @@
 /**
  * RegionsTab - 地區管理標籤頁
  *
- * [Refactored] 使用 @/data hooks 取代直接 Supabase 查詢
- * - useCountries: 國家列表
- * - useRegions: 地區列表
- * - useCities: 城市列表
+ * 按子區域（東北亞/東南亞/西歐…）分組顯示國家。
+ * 資料來自舊 countries 表 + ref_countries.sub_region 合併。
+ * Stage 4a：可切換國家啟用/停用（workspace_countries overlay）。
  */
 
-import { useState, useMemo } from 'react'
-import { Check } from 'lucide-react'
+import { useState, useMemo, useCallback } from 'react'
+import { Check, ChevronDown, ChevronRight } from 'lucide-react'
+import useSWR, { mutate } from 'swr'
 import { useCountries, useRegions, useCities } from '@/data'
-import { EnhancedTable, TableColumn } from '@/components/ui/enhanced-table'
+import { supabase } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { ATTRACTIONS_LIST_LABELS, REGIONS_TAB_LABELS } from '../../constants/labels'
+import { REGIONS_TAB_LABELS } from '../../constants/labels'
+import { toast } from 'sonner'
 
-// 使用 @/data 中定義的型別
 type Country = NonNullable<ReturnType<typeof useCountries>['items']>[number]
-type Region = NonNullable<ReturnType<typeof useRegions>['items']>[number]
 type City = NonNullable<ReturnType<typeof useCities>['items']>[number]
 
+const SUB_REGION_ORDER = [
+  '東北亞',
+  '東南亞',
+  '中東',
+  '西歐',
+  '南歐',
+  '北歐',
+  '中東歐',
+  '北美',
+  '南美',
+  '大洋洲',
+  '非洲',
+  '其他',
+]
+
+interface RefCountryInfo {
+  sub_region: string
+  is_enabled: boolean
+}
+
+const WC_CACHE_KEY = 'workspace_countries:map'
+
+async function fetchRefAndWorkspaceCountries(): Promise<Record<string, RefCountryInfo>> {
+  const [refRes, wcRes] = await Promise.all([
+    supabase.from('ref_countries').select('code, sub_region'),
+    supabase.from('workspace_countries').select('country_code, is_enabled'),
+  ])
+
+  const map: Record<string, RefCountryInfo> = {}
+  for (const row of refRes.data || []) {
+    map[row.code] = {
+      sub_region: row.sub_region || '其他',
+      is_enabled: true,
+    }
+  }
+  for (const row of wcRes.data || []) {
+    if (map[row.country_code]) {
+      map[row.country_code].is_enabled = row.is_enabled
+    }
+  }
+  return map
+}
+
 export default function RegionsTab() {
-  // 使用 @/data hooks 載入資料（自動快取、去重、重試）
   const { items: countries = [], loading: countriesLoading } = useCountries()
   const { items: regions = [] } = useRegions()
   const { items: cities = [] } = useCities()
 
-  const loading = countriesLoading
+  const { data: refMap = {} } = useSWR(WC_CACHE_KEY, fetchRefAndWorkspaceCountries, {
+    revalidateOnFocus: false,
+    dedupingInterval: 60000,
+  })
 
-  // 城市管理視窗
+  const [collapsedRegions, setCollapsedRegions] = useState<Set<string>>(new Set())
   const [isCitiesDialogOpen, setIsCitiesDialogOpen] = useState(false)
   const [selectedCountry, setSelectedCountry] = useState<Country | null>(null)
+  const [toggling, setToggling] = useState<string | null>(null)
 
-  // 開啟城市管理視窗
+  const toggleRegion = (region: string) => {
+    setCollapsedRegions(prev => {
+      const next = new Set(prev)
+      if (next.has(region)) next.delete(region)
+      else next.add(region)
+      return next
+    })
+  }
+
+  const handleToggleCountry = useCallback(
+    async (countryCode: string, currentEnabled: boolean) => {
+      setToggling(countryCode)
+      try {
+        const { error } = await supabase
+          .from('workspace_countries')
+          .update({ is_enabled: !currentEnabled })
+          .eq('country_code', countryCode)
+
+        if (error) throw error
+        await mutate(WC_CACHE_KEY)
+      } catch {
+        toast.error('更新失敗')
+      } finally {
+        setToggling(null)
+      }
+    },
+    []
+  )
+
+  const grouped = useMemo(() => {
+    const groups: Record<string, Country[]> = {}
+    for (const c of countries) {
+      const info = c.code ? refMap[c.code] : undefined
+      const sub = info?.sub_region || '其他'
+      if (!groups[sub]) groups[sub] = []
+      groups[sub].push(c)
+    }
+    return SUB_REGION_ORDER.filter(r => groups[r]?.length).map(r => ({
+      region: r,
+      countries: groups[r].sort((a, b) => a.name.localeCompare(b.name, 'zh-TW')),
+    }))
+  }, [countries, refMap])
+
+  const getCityCount = (countryId: string) =>
+    cities.filter(c => c.country_id === countryId).length
+
   const handleOpenCitiesDialog = (country: Country) => {
     setSelectedCountry(country)
     setIsCitiesDialogOpen(true)
   }
 
-  // 取得選中國家的城市
   const countryCities = useMemo(() => {
     if (!selectedCountry) return []
     return cities.filter(c => c.country_id === selectedCountry.id)
   }, [cities, selectedCountry])
 
-  // 按地區分組城市
   const citiesByRegion = useMemo(() => {
     const grouped: Record<string, City[]> = { '': [] }
     countryCities.forEach(city => {
@@ -57,84 +146,100 @@ export default function RegionsTab() {
     return grouped
   }, [countryCities])
 
-  // 取得地區名稱
   const getRegionName = (regionId: string) => {
     if (!regionId) return REGIONS_TAB_LABELS.未分類
     const region = regions.find(r => r.id === regionId)
     return region?.name || regionId
   }
 
-  // 國家表格欄位
-  const countryColumns: TableColumn<Country>[] = useMemo(
-    () => [
-      {
-        key: 'name',
-        label: REGIONS_TAB_LABELS.國家名稱,
-        sortable: true,
-        render: (_value, row) => (
-          <div>
-            <div className="font-medium text-foreground">{row.name}</div>
-            <div className="text-xs text-muted-foreground">{row.name_en}</div>
-          </div>
-        ),
-      },
-      {
-        key: 'code',
-        label: REGIONS_TAB_LABELS.代碼,
-        render: (_value, row) => <span className="text-sm font-mono">{row.code || '-'}</span>,
-      },
-      {
-        key: 'has_regions',
-        label: REGIONS_TAB_LABELS.有地區,
-        render: (_value, row) => (
-          <span className={row.has_regions ? 'text-status-success' : 'text-muted-foreground'}>
-            {row.has_regions ? '是' : REGIONS_TAB_LABELS.否}
-          </span>
-        ),
-      },
-      {
-        key: 'is_active',
-        label: ATTRACTIONS_LIST_LABELS.狀態,
-        render: (_value, row) => (
-          <span className={row.is_active ? 'text-status-success' : 'text-muted-foreground'}>
-            {row.is_active ? '啟用' : ATTRACTIONS_LIST_LABELS.停用}
-          </span>
-        ),
-      },
-      {
-        key: 'id',
-        label: REGIONS_TAB_LABELS.城市,
-        render: (_value, row) => {
-          const cityCount = cities.filter(c => c.country_id === row.id).length
-          return (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleOpenCitiesDialog(row)}
-              className="h-8 px-3 text-xs"
-            >
-              {cityCount} 城市
-            </Button>
-          )
-        },
-      },
-    ],
-    [cities]
-  )
+  if (countriesLoading) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground">
+        載入中...
+      </div>
+    )
+  }
 
   return (
     <div className="h-full flex flex-col">
-      {/* 表格內容 */}
       <div className="flex-1 overflow-auto">
-        <EnhancedTable<Country>
-          columns={countryColumns}
-          data={countries}
-          isLoading={loading}
-          emptyMessage={REGIONS_TAB_LABELS.尚無國家資料}
-        />
+        <div className="divide-y divide-border/40">
+          {grouped.map(({ region, countries: regionCountries }) => {
+            const isCollapsed = collapsedRegions.has(region)
+            const enabledCount = regionCountries.filter(
+              c => c.code && refMap[c.code]?.is_enabled !== false
+            ).length
+            return (
+              <div key={region}>
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-morandi-container/30 hover:bg-morandi-container/50 transition-colors text-left"
+                  onClick={() => toggleRegion(region)}
+                >
+                  {isCollapsed ? (
+                    <ChevronRight size={16} className="text-morandi-muted" />
+                  ) : (
+                    <ChevronDown size={16} className="text-morandi-muted" />
+                  )}
+                  <span className="text-sm font-semibold text-morandi-primary">{region}</span>
+                  <span className="text-xs text-morandi-secondary">
+                    {enabledCount}/{regionCountries.length} 啟用
+                  </span>
+                </button>
+
+                {!isCollapsed && (
+                  <div className="divide-y divide-border/20">
+                    {regionCountries.map(country => {
+                      const cityCount = getCityCount(country.id)
+                      const info = country.code ? refMap[country.code] : undefined
+                      const isEnabled = info?.is_enabled !== false
+                      return (
+                        <div
+                          key={country.id}
+                          className={`flex items-center px-4 py-2.5 transition-colors ${
+                            isEnabled ? 'hover:bg-muted/30' : 'opacity-50 bg-muted/10'
+                          }`}
+                        >
+                          <div className="w-10">
+                            <Switch
+                              checked={isEnabled}
+                              disabled={toggling === country.code}
+                              onCheckedChange={() =>
+                                country.code && handleToggleCountry(country.code, isEnabled)
+                              }
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0 ml-2">
+                            <div className="font-medium text-sm text-foreground">
+                              {country.name}
+                            </div>
+                            <div className="text-xs text-muted-foreground">{country.name_en}</div>
+                          </div>
+                          <div className="w-16 text-center">
+                            <span className="text-xs font-mono text-muted-foreground">
+                              {country.code || '-'}
+                            </span>
+                          </div>
+                          <div className="w-24 text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleOpenCitiesDialog(country)}
+                              className="h-7 px-2 text-xs"
+                            >
+                              {cityCount} 城市
+                            </Button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
       </div>
 
-      {/* 城市管理視窗 */}
       <Dialog open={isCitiesDialogOpen} onOpenChange={setIsCitiesDialogOpen}>
         <DialogContent level={1} className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
