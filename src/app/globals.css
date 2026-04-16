@@ -16,6 +16,12 @@
 @import 'tailwindcss';
 @import 'leaflet/dist/leaflet.css';
 
+/* 🎨 Design Tokens System (新的設計 token 系統)
+   由 UI Designer + UX Architect + Code Reviewer 會議決議
+   詳見: src/lib/design-tokens/README.md */
+@import '../lib/design-tokens/primitives.css';
+@import '../lib/design-tokens/semantic.css';
+
 /* 莫蘭迪主題（預設） */
 :root,
 [data-theme='morandi'] {

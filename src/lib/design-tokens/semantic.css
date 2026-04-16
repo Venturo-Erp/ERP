@@ -1,0 +1,209 @@
+/**
+ * Semantic Design Tokens
+ *
+ * Layer 2: 語義化別名，帶意圖的命名
+ * 指向 Primitive tokens，提供應用語境的語義
+ *
+ * 命名規則: --color-{intent}
+ * 例: --color-primary, --color-danger, --color-surface
+ *
+ * 優點: 變更主題時只需改這層的指向，不動元件程式碼
+ */
+
+:root,
+[data-theme='morandi'] {
+  /* ─────────────────────────────────────
+     Primary Intent
+     ───────────────────────────────────── */
+
+  --color-primary: var(--color-primary-900);
+  --color-primary-text: var(--color-primary-900);
+  --color-primary-light: var(--color-secondary-400);
+
+  /* ─────────────────────────────────────
+     Accent Intent (Strong emphasis)
+     ───────────────────────────────────── */
+
+  --color-accent: var(--color-gold-500);
+  --color-accent-hover: var(--color-gold-600);
+  --color-accent-light: var(--color-gold-light);
+
+  /* ─────────────────────────────────────
+     Secondary Intent
+     ───────────────────────────────────── */
+
+  --color-secondary: var(--color-secondary-700);
+  --color-secondary-light: var(--color-secondary-400);
+
+  /* ─────────────────────────────────────
+     Status Colors (語義狀態)
+     ───────────────────────────────────── */
+
+  /* Info - 資訊/通知 */
+  --color-status-info: #8ba4b4;
+  --color-status-info-bg: #f0f4f6;
+  --color-status-info-border: #a8c4d0;
+
+  /* Success - 成功/完成 */
+  --color-status-success: var(--color-green-500);
+  --color-status-success-bg: #f4f6f2;
+  --color-status-success-border: #b8d4a8;
+
+  /* Warning - 警告/注意 */
+  --color-status-warning: #d4a574;
+  --color-status-warning-bg: #faf6f0;
+  --color-status-warning-border: #e8c9a0;
+
+  /* Danger - 危險/錯誤 */
+  --color-status-danger: var(--color-red-500);
+  --color-status-danger-bg: #faf4f2;
+  --color-status-danger-border: #d4a8a0;
+
+  /* Neutral - 中性 */
+  --color-status-neutral: var(--color-secondary-700);
+  --color-status-neutral-bg: #f6f5f3;
+  --color-status-neutral-border: #d4ccc0;
+
+  /* ─────────────────────────────────────
+     Surface & Background
+     ───────────────────────────────────── */
+
+  --color-surface: var(--color-card);
+  --color-surface-muted: var(--color-secondary-400);
+  --color-surface-container: var(--color-container);
+  --color-background: var(--color-background);
+
+  /* ─────────────────────────────────────
+     Text & Foreground
+     ───────────────────────────────────── */
+
+  --color-text-primary: var(--color-primary-900);
+  --color-text-secondary: var(--color-secondary-700);
+  --color-text-muted: var(--color-muted);
+  --color-text-inverse: #ffffff;
+
+  /* ─────────────────────────────────────
+     Border & Divider
+     ───────────────────────────────────── */
+
+  --color-border-default: var(--color-border);
+  --color-border-muted: var(--color-container);
+  --color-border-subtle: #e8e5e0;
+
+  /* ─────────────────────────────────────
+     Interactive States
+     ───────────────────────────────────── */
+
+  --color-interactive-hover: #f6f4f1;
+  --color-interactive-focus: var(--color-accent);
+  --color-interactive-active: var(--color-gold-600);
+  --color-interactive-disabled: var(--color-muted);
+
+  /* ─────────────────────────────────────
+     Category Colors (via semantic intent)
+     ───────────────────────────────────── */
+
+  --color-category-purple: var(--color-category-purple);
+  --color-category-purple-bg: var(--color-category-purple-bg);
+
+  --color-category-orange: var(--color-category-orange);
+  --color-category-orange-bg: var(--color-category-orange-bg);
+
+  --color-category-pink: var(--color-category-pink);
+  --color-category-pink-bg: var(--color-category-pink-bg);
+
+  --color-category-indigo: var(--color-category-indigo);
+  --color-category-indigo-bg: var(--color-category-indigo-bg);
+
+  /* ─────────────────────────────────────
+     Brand Colors
+     ───────────────────────────────────── */
+
+  --color-brand-line: var(--color-brand-line);
+  --color-brand-line-hover: var(--color-brand-line-hover);
+  --color-brand-telegram: var(--color-brand-telegram);
+  --color-brand-facebook: var(--color-brand-facebook);
+
+  /* ─────────────────────────────────────
+     Legacy Morandi Names (backward compatibility)
+     ───────────────────────────────────── */
+
+  --morandi-primary: var(--color-primary);
+  --morandi-secondary: var(--color-secondary);
+  --morandi-gold: var(--color-accent);
+  --morandi-gold-rgb: var(--color-gold-rgb);
+  --morandi-gold-hover: var(--color-accent-hover);
+  --morandi-gold-light: var(--color-accent-light);
+  --morandi-gold-light-end: var(--color-gold-light-end);
+  --morandi-green: var(--color-status-success);
+  --morandi-green-rgb: var(--color-green-rgb);
+  --morandi-red: var(--color-status-danger);
+  --morandi-container: var(--color-surface-container);
+  --morandi-muted: var(--color-text-muted);
+
+  --status-info: var(--color-status-info);
+  --status-info-bg: var(--color-status-info-bg);
+  --status-success: var(--color-status-success);
+  --status-success-bg: var(--color-status-success-bg);
+  --status-warning: var(--color-status-warning);
+  --status-warning-bg: var(--color-status-warning-bg);
+  --status-danger: var(--color-status-danger);
+  --status-danger-bg: var(--color-status-danger-bg);
+  --status-neutral: var(--color-status-neutral);
+  --status-neutral-bg: var(--color-status-neutral-bg);
+
+  --background: var(--color-background);
+  --card: var(--color-surface);
+  --border: var(--color-border-default);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-text-primary);
+  --accent: var(--color-surface-container);
+  --accent-foreground: var(--color-text-primary);
+
+  --foreground: var(--color-text-primary);
+  --card-foreground: var(--color-text-primary);
+  --border-muted: var(--color-border-muted);
+
+  /* 表單元素 */
+  --input-border: var(--color-border-default);
+  --input-border-hover: var(--color-accent-hover);
+  --input-border-focus: var(--color-accent);
+  --input-bg: var(--color-surface);
+  --input-disabled-bg: var(--color-surface-muted);
+  --input-readonly-bg: #f8f6f4;
+  --input-text: var(--color-text-primary);
+  --input-placeholder: var(--color-text-muted);
+
+  /* Shadcn 標準變數 */
+  --primary: var(--color-accent);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-surface-container);
+  --secondary-foreground: var(--color-text-primary);
+  --destructive: var(--color-status-danger);
+  --destructive-foreground: #ffffff;
+  --muted: var(--color-surface-muted);
+  --muted-foreground: var(--color-text-secondary);
+  --ring: var(--color-accent);
+  --input: var(--color-border-default);
+}
+
+/* ─────────────────────────────────────
+   Iron Theme - 覆寫語義 token 指向
+   ───────────────────────────────────── */
+[data-theme='iron'] {
+  /* 只需改 Semantic 層的指向，不動 Primitive */
+  --color-primary: var(--color-primary-900);
+  --color-accent: var(--color-gold-500);
+  --color-accent-hover: var(--color-gold-600);
+  --color-secondary: var(--color-secondary-700);
+  --color-green: var(--color-green-500);
+
+  /* Legacy names for compatibility */
+  --morandi-primary: var(--color-primary-900);
+  --morandi-gold: var(--color-gold-500);
+  --morandi-gold-hover: var(--color-gold-600);
+  --morandi-green: var(--color-green-500);
+
+  --primary: var(--color-gold-500);
+  --ring: var(--color-gold-500);
+}

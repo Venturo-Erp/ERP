@@ -1,0 +1,161 @@
+/**
+ * Primitive Design Tokens
+ *
+ * Layer 1: 原始色值，不帶語義，像調色盤
+ * 作為 SSOT（Single Source of Truth），所有顏色定義都從這裡開始
+ *
+ * 命名規則: --color-{hue}-{shade}
+ * 例: --color-gold-500, --color-brown-300
+ */
+
+:root {
+  /* ─────────────────────────────────────
+     Primary Color Palette
+     ───────────────────────────────────── */
+
+  /* 莫蘭迪深褐（主色） */
+  --color-primary-900: #3a3633;
+  --color-primary-700: #4a4540;
+
+  /* 莫蘭迪金（強調色，也用於按鈕、重點） */
+  --color-gold-500: #c9aa7c;
+  --color-gold-400: #d4c5a9;
+  --color-gold-600: #b8996b;
+  --color-gold-light: #d4c5a9;
+  --color-gold-light-end: #f7efe2;
+
+  /* 莫蘭迪金 RGB版本（用於 rgba） */
+  --color-gold-rgb: 201, 170, 124;
+
+  /* 莫蘭迪次要色 */
+  --color-secondary-700: #8b8680;
+  --color-secondary-400: #e8e5e0;
+
+  /* 莫蘭迪綠 */
+  --color-green-500: #9fa68f;
+  --color-green-rgb: 159, 166, 143;
+
+  /* 莫蘭迪紅 */
+  --color-red-500: #c08374;
+
+  /* ─────────────────────────────────────
+     Category Colors (用於區分類別)
+     ───────────────────────────────────── */
+
+  --color-category-purple: #a08ab5;
+  --color-category-purple-bg: #efe8f3;
+
+  --color-category-orange: #c49a74;
+  --color-category-orange-bg: #f5ebe0;
+
+  --color-category-pink: #c48a9e;
+  --color-category-pink-bg: #f5e7ed;
+
+  --color-category-indigo: #8a95b5;
+  --color-category-indigo-bg: #e8ebf3;
+
+  /* ─────────────────────────────────────
+     Brand Colors (第三方品牌)
+     ───────────────────────────────────── */
+
+  --color-brand-line: #06c755;
+  --color-brand-line-hover: #05b34c;
+  --color-brand-telegram: #0088cc;
+  --color-brand-facebook: #1877f2;
+
+  /* ─────────────────────────────────────
+     Editor Theme Colors
+     ───────────────────────────────────── */
+
+  --color-editor-blue: #4a6fa5;
+  --color-editor-blue-light: #8da399;
+  --color-editor-green: #2c5f4d;
+  --color-editor-accent: #c76d54;
+
+  /* ─────────────────────────────────────
+     Public Page Colors
+     ───────────────────────────────────── */
+
+  --color-public-primary: #00113a;
+  --color-public-secondary: #006970;
+  --color-public-accent: #002366;
+  --color-public-muted: #c0b090;
+
+  /* ─────────────────────────────────────
+     Gradient Colors
+     ───────────────────────────────────── */
+
+  --color-gradient-gold-light: #d4c5a9;
+  --color-gradient-gold-mid: #c9b896;
+  --color-gradient-gold-dark: #bfad87;
+  --color-gradient-brown-light: #d4c4a8;
+  --color-gradient-brown-mid: #b5986a;
+  --color-gradient-brown-dark: #a08968;
+
+  /* ─────────────────────────────────────
+     Calendar Status Colors
+     ───────────────────────────────────── */
+
+  --color-cal-proposal: #9bb5d6;
+  --color-cal-in-progress: #a8c4a2;
+  --color-cal-pending-close: #d4b896;
+  --color-cal-closed: #b8b3ae;
+  --color-cal-special: #d4a5a5;
+  --color-cal-personal: #b8a9d1;
+  --color-cal-birthday: #e6b8c8;
+  --color-cal-company: #e0c3a0;
+
+  /* ─────────────────────────────────────
+     Neutral/Structural Colors
+     ───────────────────────────────────── */
+
+  --color-container: #e8e5e0;
+  --color-muted: #b8b2aa;
+  --color-background: #f6f4f1;
+  --color-card: #ffffff;
+  --color-border: #d4c4b0;
+  --color-popover: #ffffff;
+}
+
+/* ─────────────────────────────────────
+   Iron Theme (Cold palette)
+   ───────────────────────────────────── */
+[data-theme='iron'] {
+  /* 鐵灰冷調版本 */
+  --color-primary-900: #2d3139;
+  --color-primary-700: #3a3f4a;
+
+  --color-gold-500: #5d6670;
+  --color-gold-400: #6f7a88;
+  --color-gold-600: #484f57;
+  --color-gold-light: #6f7a88;
+  --color-gold-light-end: #e9ebee;
+
+  --color-gold-rgb: 93, 102, 112;
+
+  --color-secondary-700: #787d85;
+  --color-secondary-400: #e5e7ea;
+
+  --color-green-500: #6f9285;
+  --color-green-rgb: 111, 146, 133;
+
+  --color-red-500: #b3716a;
+
+  /* 類別色冷調版本 */
+  --color-category-purple: #7a7fa8;
+  --color-category-purple-bg: #eff0f5;
+
+  --color-category-orange: #8a7e70;
+  --color-category-orange-bg: #f5f1ed;
+
+  --color-category-pink: #9a7a8e;
+  --color-category-pink-bg: #f5f0f3;
+
+  --color-category-indigo: #7a8aaD;
+  --color-category-indigo-bg: #eff1f5;
+
+  --color-container: #e5e7ea;
+  --color-muted: #a8adb5;
+  --color-background: #f7f8f9;
+  --color-border: #d0d4da;
+}
