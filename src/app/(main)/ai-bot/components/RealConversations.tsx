@@ -159,9 +159,7 @@ export function RealConversations() {
       })
       // 更新本地未讀數
       setConversations(prev =>
-        prev.map(conv =>
-          conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
-        )
+        prev.map(conv => (conv.id === conversationId ? { ...conv, unread_count: 0 } : conv))
       )
     } catch (error) {
       console.error('標記已讀失敗:', error)
@@ -339,8 +337,8 @@ export function RealConversations() {
                           msg.sender_type === 'user'
                             ? 'bg-muted'
                             : msg.is_ai_reply
-                            ? 'bg-morandi-gold/20 border border-morandi-gold/30'
-                            : 'bg-status-info text-white'
+                              ? 'bg-morandi-gold/20 border border-morandi-gold/30'
+                              : 'bg-status-info text-white'
                         }`}
                       >
                         <div className="text-xs font-medium mb-1 flex items-center gap-2">

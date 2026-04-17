@@ -77,9 +77,7 @@ export function isDomesticTour(
 // ============================================================
 
 /** 取得旅遊團「目的地」顯示字串 + 是否國內團的 hook */
-export function useTourDisplay(
-  tour: Pick<Tour, 'country_id' | 'airport_code'> | null | undefined
-) {
+export function useTourDisplay(tour: Pick<Tour, 'country_id' | 'airport_code'> | null | undefined) {
   const { items: countries } = useCountries()
   const { airports } = useAirports()
 

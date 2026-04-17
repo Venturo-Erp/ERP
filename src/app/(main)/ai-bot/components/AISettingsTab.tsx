@@ -235,177 +235,185 @@ export function AISettingsTab() {
         {/* 進階設定（原本的完整設定） */}
         {modeTab === 'advanced' && (
           <>
-      {/* ── A. Style Selector ─────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">風格選擇</CardTitle>
-          <CardDescription>選擇 AI 客服的對話風格，選擇後會自動填入提示詞</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {STYLE_OPTIONS.map(option => {
-            const isSelected = selectedStyle === option.key
-            return (
-              <button
-                key={option.key}
-                type="button"
-                onClick={() => handleStyleSelect(option.key)}
-                className={[
-                  'w-full text-left rounded-xl border-2 p-4 transition-all duration-150',
-                  isSelected
-                    ? 'border-morandi-gold bg-morandi-gold/5'
-                    : 'border-border hover:border-morandi-gold/50',
-                ].join(' ')}
-              >
-                <div className="flex items-start gap-3">
-                  {/* Radio indicator */}
-                  <span
-                    className={[
-                      'mt-0.5 flex h-4 w-4 shrink-0 rounded-full border-2 items-center justify-center',
-                      isSelected ? 'border-morandi-gold' : 'border-muted-foreground/40',
-                    ].join(' ')}
-                  >
-                    {isSelected && <span className="h-2 w-2 rounded-full bg-morandi-gold block" />}
-                  </span>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-base">{option.emoji}</span>
-                      <span className="font-medium text-morandi-primary">{option.label}</span>
-                      <span className="text-xs text-morandi-secondary">{option.subtitle}</span>
-                      {option.key === 'luxury' && (
-                        <Badge
-                          variant="outline"
-                          className="text-xs text-morandi-gold border-morandi-gold/50 ml-auto"
+            {/* ── A. Style Selector ─────────────────────────────────────────── */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">風格選擇</CardTitle>
+                <CardDescription>選擇 AI 客服的對話風格，選擇後會自動填入提示詞</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {STYLE_OPTIONS.map(option => {
+                  const isSelected = selectedStyle === option.key
+                  return (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => handleStyleSelect(option.key)}
+                      className={[
+                        'w-full text-left rounded-xl border-2 p-4 transition-all duration-150',
+                        isSelected
+                          ? 'border-morandi-gold bg-morandi-gold/5'
+                          : 'border-border hover:border-morandi-gold/50',
+                      ].join(' ')}
+                    >
+                      <div className="flex items-start gap-3">
+                        {/* Radio indicator */}
+                        <span
+                          className={[
+                            'mt-0.5 flex h-4 w-4 shrink-0 rounded-full border-2 items-center justify-center',
+                            isSelected ? 'border-morandi-gold' : 'border-muted-foreground/40',
+                          ].join(' ')}
                         >
-                          預設
-                        </Badge>
-                      )}
-                    </div>
+                          {isSelected && (
+                            <span className="h-2 w-2 rounded-full bg-morandi-gold block" />
+                          )}
+                        </span>
 
-                    {/* Chat bubble preview */}
-                    <div className="mt-2 bg-morandi-container rounded-lg px-3 py-2 text-sm text-morandi-secondary leading-relaxed">
-                      <span className="text-xs text-morandi-muted block mb-1">範例回覆：</span>
-                      {option.example}
-                    </div>
-                  </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-base">{option.emoji}</span>
+                            <span className="font-medium text-morandi-primary">{option.label}</span>
+                            <span className="text-xs text-morandi-secondary">
+                              {option.subtitle}
+                            </span>
+                            {option.key === 'luxury' && (
+                              <Badge
+                                variant="outline"
+                                className="text-xs text-morandi-gold border-morandi-gold/50 ml-auto"
+                              >
+                                預設
+                              </Badge>
+                            )}
+                          </div>
+
+                          {/* Chat bubble preview */}
+                          <div className="mt-2 bg-morandi-container rounded-lg px-3 py-2 text-sm text-morandi-secondary leading-relaxed">
+                            <span className="text-xs text-morandi-muted block mb-1">
+                              範例回覆：
+                            </span>
+                            {option.example}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </CardContent>
+            </Card>
+
+            {/* ── B. Response Length ────────────────────────────────────────── */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">回覆字數上限</CardTitle>
+                <CardDescription>控制每次 AI 回覆的最大字數</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-2 flex-wrap">
+                  {MAX_LENGTH_OPTIONS.map(len => (
+                    <button
+                      key={len}
+                      type="button"
+                      onClick={() => setMaxLength(len)}
+                      className={[
+                        'px-4 py-2 rounded-lg border text-sm font-medium transition-all',
+                        maxLength === len
+                          ? 'border-morandi-gold bg-morandi-gold/10 text-morandi-primary'
+                          : 'border-border text-morandi-secondary hover:border-morandi-gold/50',
+                      ].join(' ')}
+                    >
+                      {len} 字
+                    </button>
+                  ))}
                 </div>
-              </button>
-            )
-          })}
-        </CardContent>
-      </Card>
+              </CardContent>
+            </Card>
 
-      {/* ── B. Response Length ────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">回覆字數上限</CardTitle>
-          <CardDescription>控制每次 AI 回覆的最大字數</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2 flex-wrap">
-            {MAX_LENGTH_OPTIONS.map(len => (
-              <button
-                key={len}
-                type="button"
-                onClick={() => setMaxLength(len)}
-                className={[
-                  'px-4 py-2 rounded-lg border text-sm font-medium transition-all',
-                  maxLength === len
-                    ? 'border-morandi-gold bg-morandi-gold/10 text-morandi-primary'
-                    : 'border-border text-morandi-secondary hover:border-morandi-gold/50',
-                ].join(' ')}
-              >
-                {len} 字
-              </button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            {/* ── C. Data Sources ───────────────────────────────────────────── */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">資料來源</CardTitle>
+                <CardDescription>選擇 AI 可以查詢的資料庫</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {(
+                  [
+                    { key: 'attractions', label: '景點資料庫', detail: 'attractions table' },
+                    { key: 'tours', label: '行程資料庫', detail: 'tours table' },
+                  ] as const
+                ).map(({ key, label, detail }) => (
+                  <label key={key} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={dataSources[key]}
+                      onChange={e => setDataSources(prev => ({ ...prev, [key]: e.target.checked }))}
+                      className="h-4 w-4 rounded border-border accent-morandi-gold cursor-pointer"
+                    />
+                    <span className="text-sm font-medium text-morandi-primary">{label}</span>
+                    <span className="text-xs text-morandi-muted">{detail}</span>
+                  </label>
+                ))}
+              </CardContent>
+            </Card>
 
-      {/* ── C. Data Sources ───────────────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">資料來源</CardTitle>
-          <CardDescription>選擇 AI 可以查詢的資料庫</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {(
-            [
-              { key: 'attractions', label: '景點資料庫', detail: 'attractions table' },
-              { key: 'tours', label: '行程資料庫', detail: 'tours table' },
-            ] as const
-          ).map(({ key, label, detail }) => (
-            <label key={key} className="flex items-center gap-3 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={dataSources[key]}
-                onChange={e => setDataSources(prev => ({ ...prev, [key]: e.target.checked }))}
-                className="h-4 w-4 rounded border-border accent-morandi-gold cursor-pointer"
-              />
-              <span className="text-sm font-medium text-morandi-primary">{label}</span>
-              <span className="text-xs text-morandi-muted">{detail}</span>
-            </label>
-          ))}
-        </CardContent>
-      </Card>
+            {/* ── D. Custom Prompt Editor ───────────────────────────────────── */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">自訂提示詞</CardTitle>
+                <CardDescription>
+                  選擇風格後自動填入，也可手動修改細節
+                  {promptDirty && (
+                    <span className="ml-2 text-morandi-gold text-xs">（已自訂）</span>
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <textarea
+                  value={customPrompt}
+                  onChange={e => {
+                    setCustomPrompt(e.target.value)
+                    setPromptDirty(true)
+                  }}
+                  rows={12}
+                  className="w-full px-3 py-2 border border-border rounded-lg text-sm resize-y focus:outline-none focus:ring-1 focus:ring-morandi-gold font-mono leading-relaxed"
+                  placeholder="系統提示詞..."
+                />
+                <p className="text-xs text-morandi-muted mt-2">
+                  提示：提示詞中的{' '}
+                  <code className="bg-morandi-container px-1 rounded">{'{max_length}'}</code>{' '}
+                  會自動替換為上方設定的字數。
+                </p>
+              </CardContent>
+            </Card>
 
-      {/* ── D. Custom Prompt Editor ───────────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">自訂提示詞</CardTitle>
-          <CardDescription>
-            選擇風格後自動填入，也可手動修改細節
-            {promptDirty && <span className="ml-2 text-morandi-gold text-xs">（已自訂）</span>}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <textarea
-            value={customPrompt}
-            onChange={e => {
-              setCustomPrompt(e.target.value)
-              setPromptDirty(true)
-            }}
-            rows={12}
-            className="w-full px-3 py-2 border border-border rounded-lg text-sm resize-y focus:outline-none focus:ring-1 focus:ring-morandi-gold font-mono leading-relaxed"
-            placeholder="系統提示詞..."
-          />
-          <p className="text-xs text-morandi-muted mt-2">
-            提示：提示詞中的{' '}
-            <code className="bg-morandi-container px-1 rounded">{'{max_length}'}</code>{' '}
-            會自動替換為上方設定的字數。
-          </p>
-        </CardContent>
-      </Card>
+            {/* ── E. Conversation Flow Preview ─────────────────────────────── */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">對話流程</CardTitle>
+                <CardDescription>AI 客服會依序引導客戶提供以下資訊</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ol className="space-y-2">
+                  {CONVERSATION_FLOW.map(({ step, label, detail }) => (
+                    <li key={step} className="flex items-start gap-3">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-morandi-gold/15 text-morandi-gold text-xs font-semibold">
+                        {step}
+                      </span>
+                      <div className="pt-0.5">
+                        <span className="text-sm font-medium text-morandi-primary">{label}</span>
+                        <span className="text-sm text-morandi-secondary"> — {detail}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </CardContent>
+            </Card>
 
-      {/* ── E. Conversation Flow Preview ─────────────────────────────── */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">對話流程</CardTitle>
-          <CardDescription>AI 客服會依序引導客戶提供以下資訊</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ol className="space-y-2">
-            {CONVERSATION_FLOW.map(({ step, label, detail }) => (
-              <li key={step} className="flex items-start gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-morandi-gold/15 text-morandi-gold text-xs font-semibold">
-                  {step}
-                </span>
-                <div className="pt-0.5">
-                  <span className="text-sm font-medium text-morandi-primary">{label}</span>
-                  <span className="text-sm text-morandi-secondary"> — {detail}</span>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </CardContent>
-      </Card>
-
-      {/* ── Save Button ───────────────────────────────────────────────── */}
-      <div className="flex justify-end pb-4">
-        <Button onClick={handleSave} disabled={saving} className="min-w-28">
-          {saving ? '儲存中...' : '儲存設定'}
-        </Button>
-      </div>
+            {/* ── Save Button ───────────────────────────────────────────────── */}
+            <div className="flex justify-end pb-4">
+              <Button onClick={handleSave} disabled={saving} className="min-w-28">
+                {saving ? '儲存中...' : '儲存設定'}
+              </Button>
+            </div>
           </>
         )}
       </Tabs>

@@ -281,7 +281,8 @@ async function generateAIResponse(
       responseStrategy = '了解客戶需求後，主動推薦合適的行程或景點。'
       break
     case 'guide_booking':
-      responseStrategy = '積極引導客戶預約諮詢或報名，適時說「幫您安排專人聯繫」或「預約免費諮詢」。'
+      responseStrategy =
+        '積極引導客戶預約諮詢或報名，適時說「幫您安排專人聯繫」或「預約免費諮詢」。'
       break
     default:
       responseStrategy = '了解客戶需求後，主動推薦合適的行程或景點。'
@@ -488,12 +489,7 @@ export async function handleAICustomerService(
     const { intent, destination, tourCode, city, category } = await analyzeIntent(userMessage, wsId)
 
     // 2. 讀取資料來源設定（新格式：simple_data_sources + 舊格式：data_sources 向後相容）
-    const simpleSourcesRaw = await getAISetting(
-      wsId,
-      'ai_prompt',
-      'simple_data_sources',
-      ''
-    )
+    const simpleSourcesRaw = await getAISetting(wsId, 'ai_prompt', 'simple_data_sources', '')
     const oldSourcesRaw = await getAISetting(
       wsId,
       'ai_prompt',
@@ -502,7 +498,13 @@ export async function handleAICustomerService(
     )
 
     // 解析資料來源設定
-    let dataSourcesEnabled = { attractions: true, tours: true, itineraries: true, suppliers: false, quotes: false }
+    let dataSourcesEnabled = {
+      attractions: true,
+      tours: true,
+      itineraries: true,
+      suppliers: false,
+      quotes: false,
+    }
     let responseMode = 'recommend'
 
     // 先嘗試新格式

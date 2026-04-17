@@ -9,10 +9,7 @@ export const dynamic = 'force-dynamic'
 
 export default function AppearanceSettingsPage() {
   return (
-    <ContentPageLayout
-      title="設定"
-      headerActions={<SettingsTabs />}
-    >
+    <ContentPageLayout title="設定" headerActions={<SettingsTabs />}>
       <div className="max-w-3xl mx-auto space-y-6 py-6">
         <div className="bg-card rounded-xl border border-border/60 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">

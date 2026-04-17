@@ -28,13 +28,18 @@ export async function GET() {
     // 用 admin client 讀取，避免 RLS 阻擋（server 端已驗證 workspace）
     // 之前用 dynamicFrom（browser client）沒 session context，RLS 讀不到
     const admin = getSupabaseAdminClient()
-    const { data: workspaceData } = await (admin as unknown as {
-      from: (t: string) => {
-        select: (c: string) => {
-          eq: (k: string, v: string) => { maybeSingle: () => Promise<{ data: LineConfig | null }> }
+    const { data: workspaceData } = await (
+      admin as unknown as {
+        from: (t: string) => {
+          select: (c: string) => {
+            eq: (
+              k: string,
+              v: string
+            ) => { maybeSingle: () => Promise<{ data: LineConfig | null }> }
+          }
         }
       }
-    })
+    )
       .from('workspace_line_config')
       .select(
         'setup_step, is_connected, bot_display_name, bot_basic_id, bot_user_id, webhook_url, connected_at'

@@ -8,11 +8,7 @@ async function getContractTemplate(
   countryId: string | null | undefined
 ): Promise<string> {
   if (!countryId) return 'international'
-  const { data } = await supabase
-    .from('countries')
-    .select('name')
-    .eq('id', countryId)
-    .single()
+  const { data } = await supabase.from('countries').select('name').eq('id', countryId).single()
   return data?.name === '台灣' ? 'domestic' : 'international'
 }
 

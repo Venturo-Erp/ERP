@@ -618,7 +618,9 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                           <th className="text-left py-2 px-3 font-medium text-morandi-secondary w-10">
                             序號
                           </th>
-                          <th className="text-left py-2 px-3 font-medium text-morandi-secondary">姓名</th>
+                          <th className="text-left py-2 px-3 font-medium text-morandi-secondary">
+                            姓名
+                          </th>
                           <th className="text-left py-2 px-3 font-medium text-morandi-secondary">
                             身分證字號 / 護照號碼
                           </th>
@@ -634,7 +636,9 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
                             <td className="py-2 px-3 font-medium text-morandi-primary">
                               {member.chinese_name || '-'}
                             </td>
-                            <td className="py-2 px-3 text-morandi-primary">{member.id_number || '-'}</td>
+                            <td className="py-2 px-3 text-morandi-primary">
+                              {member.id_number || '-'}
+                            </td>
                             <td className="py-2 px-3 text-morandi-primary">
                               {member.birth_date
                                 ? new Date(member.birth_date).toLocaleDateString('zh-TW')
@@ -868,7 +872,9 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="bg-card rounded-xl shadow-lg p-6 w-full max-w-md">
             <div className="mb-6 pb-4 border-b border-border">
-              <div className="text-sm text-morandi-muted mb-1">{TEMPLATE_LABELS[contract.template]}</div>
+              <div className="text-sm text-morandi-muted mb-1">
+                {TEMPLATE_LABELS[contract.template]}
+              </div>
               <div className="font-semibold text-morandi-primary">{contract.tours.name}</div>
               <div className="text-sm text-morandi-secondary mt-1">
                 簽約人：{contract.signer_name}
@@ -918,7 +924,9 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             </div>
 
             {error && (
-              <div className="mt-4 p-3 bg-morandi-red/10 text-morandi-red rounded-lg text-sm">{error}</div>
+              <div className="mt-4 p-3 bg-morandi-red/10 text-morandi-red rounded-lg text-sm">
+                {error}
+              </div>
             )}
 
             <div className="mt-6">
@@ -972,7 +980,9 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
           <div className="bg-card rounded-xl shadow-lg p-6 w-full max-w-md">
             {/* 合約摘要 */}
             <div className="mb-6 pb-6 border-b border-border">
-              <div className="text-sm text-morandi-muted mb-1">{TEMPLATE_LABELS[contract.template]}</div>
+              <div className="text-sm text-morandi-muted mb-1">
+                {TEMPLATE_LABELS[contract.template]}
+              </div>
               <div className="font-semibold text-morandi-primary">{contract.tours.name}</div>
               <div className="text-sm text-morandi-secondary mt-1">
                 簽約人：
@@ -1024,7 +1034,9 @@ export function ContractSignPage({ contract }: ContractSignPageProps) {
             )}
 
             {error && (
-              <div className="mt-4 p-3 bg-morandi-red/10 text-morandi-red rounded-lg text-sm">{error}</div>
+              <div className="mt-4 p-3 bg-morandi-red/10 text-morandi-red rounded-lg text-sm">
+                {error}
+              </div>
             )}
 
             <p className="text-xs text-morandi-muted text-center mt-6">

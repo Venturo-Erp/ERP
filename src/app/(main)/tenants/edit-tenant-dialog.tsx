@@ -80,7 +80,8 @@ export function EditTenantDialog({
         <div className="space-y-4 pt-2">
           <div>
             <label className="text-sm font-medium text-morandi-primary">
-              {LABELS.FIELD_NAME} <span className="text-morandi-red">{LABELS.FIELD_NAME_REQUIRED}</span>
+              {LABELS.FIELD_NAME}{' '}
+              <span className="text-morandi-red">{LABELS.FIELD_NAME_REQUIRED}</span>
             </label>
             <Input
               value={name}

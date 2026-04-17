@@ -8,16 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Calendar,
-  FileCheck,
-  MapPin,
-  BarChart3,
-  Archive,
-  Plus,
-  FileText,
-  Copy,
-} from 'lucide-react'
+import { Calendar, FileCheck, MapPin, BarChart3, Archive, Plus, FileText, Copy } from 'lucide-react'
 import { TOUR_FILTERS } from '../constants'
 
 interface TourFiltersProps {

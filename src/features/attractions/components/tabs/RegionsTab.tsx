@@ -89,25 +89,22 @@ export default function RegionsTab() {
     })
   }
 
-  const handleToggleCountry = useCallback(
-    async (countryCode: string, currentEnabled: boolean) => {
-      setToggling(countryCode)
-      try {
-        const { error } = await supabase
-          .from('workspace_countries')
-          .update({ is_enabled: !currentEnabled })
-          .eq('country_code', countryCode)
+  const handleToggleCountry = useCallback(async (countryCode: string, currentEnabled: boolean) => {
+    setToggling(countryCode)
+    try {
+      const { error } = await supabase
+        .from('workspace_countries')
+        .update({ is_enabled: !currentEnabled })
+        .eq('country_code', countryCode)
 
-        if (error) throw error
-        await mutate(WC_CACHE_KEY)
-      } catch {
-        toast.error('更新失敗')
-      } finally {
-        setToggling(null)
-      }
-    },
-    []
-  )
+      if (error) throw error
+      await mutate(WC_CACHE_KEY)
+    } catch {
+      toast.error('更新失敗')
+    } finally {
+      setToggling(null)
+    }
+  }, [])
 
   const grouped = useMemo(() => {
     const groups: Record<string, Country[]> = {}
@@ -123,8 +120,7 @@ export default function RegionsTab() {
     }))
   }, [countries, refMap])
 
-  const getCityCount = (countryId: string) =>
-    cities.filter(c => c.country_id === countryId).length
+  const getCityCount = (countryId: string) => cities.filter(c => c.country_id === countryId).length
 
   const handleOpenCitiesDialog = (country: Country) => {
     setSelectedCountry(country)
@@ -154,9 +150,7 @@ export default function RegionsTab() {
 
   if (countriesLoading) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground">
-        載入中...
-      </div>
+      <div className="flex items-center justify-center h-full text-muted-foreground">載入中...</div>
     )
   }
 

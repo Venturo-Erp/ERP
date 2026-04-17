@@ -410,206 +410,204 @@ export default function RolesPage() {
       ]}
     >
       <>
-          <div className="grid grid-cols-12 gap-6 h-full min-h-[500px]">
-            {/* 左側：職務列表 */}
-            <div className="col-span-3 flex flex-col">
-              <div className="bg-card border border-border rounded-lg flex flex-col h-full">
-                <div className="flex items-center justify-between p-4 border-b border-border">
-                  <h3 className="font-semibold text-morandi-primary">職務列表</h3>
-                  <Button
-                    size="sm"
-                    onClick={() => setIsDialogOpen(true)}
-                    className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    新增
-                  </Button>
-                </div>
+        <div className="grid grid-cols-12 gap-6 h-full min-h-[500px]">
+          {/* 左側：職務列表 */}
+          <div className="col-span-3 flex flex-col">
+            <div className="bg-card border border-border rounded-lg flex flex-col h-full">
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <h3 className="font-semibold text-morandi-primary">職務列表</h3>
+                <Button
+                  size="sm"
+                  onClick={() => setIsDialogOpen(true)}
+                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  新增
+                </Button>
+              </div>
 
-                <div className="flex-1 overflow-y-auto p-4">
-                  {loading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-6 w-6 animate-spin text-morandi-secondary" />
-                    </div>
-                  ) : roles.length === 0 ? (
-                    <div className="text-center py-8 text-morandi-secondary">
-                      <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                      <p>尚未建立角色</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {roles.map(role => (
-                        <div
-                          key={role.id}
-                          className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                            selectedRole?.id === role.id
-                              ? 'border-morandi-gold bg-morandi-gold/5 shadow-sm'
-                              : 'border-border hover:border-morandi-gold/50 hover:bg-morandi-bg/50'
-                          }`}
-                          onClick={() => setSelectedRole(role)}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              {selectedRole?.id === role.id && (
-                                <Check className="h-4 w-4 text-morandi-gold" />
-                              )}
-                              <span className="font-medium text-morandi-primary text-sm">
-                                {role.name}
-                              </span>
-                              {role.is_admin && (
-                                <Badge className="bg-morandi-gold/20 text-morandi-gold border-morandi-gold/30 text-xs">
-                                  <Star className="h-3 w-3" />
-                                </Badge>
-                              )}
-                            </div>
-                            {!role.is_admin && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0 hover:bg-morandi-red/10"
-                                onClick={e => {
-                                  e.stopPropagation()
-                                  handleDeleteRole(role)
-                                }}
-                              >
-                                <Trash2 className="h-3 w-3 text-morandi-red" />
-                              </Button>
+              <div className="flex-1 overflow-y-auto p-4">
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-morandi-secondary" />
+                  </div>
+                ) : roles.length === 0 ? (
+                  <div className="text-center py-8 text-morandi-secondary">
+                    <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>尚未建立角色</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {roles.map(role => (
+                      <div
+                        key={role.id}
+                        className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                          selectedRole?.id === role.id
+                            ? 'border-morandi-gold bg-morandi-gold/5 shadow-sm'
+                            : 'border-border hover:border-morandi-gold/50 hover:bg-morandi-bg/50'
+                        }`}
+                        onClick={() => setSelectedRole(role)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {selectedRole?.id === role.id && (
+                              <Check className="h-4 w-4 text-morandi-gold" />
+                            )}
+                            <span className="font-medium text-morandi-primary text-sm">
+                              {role.name}
+                            </span>
+                            {role.is_admin && (
+                              <Badge className="bg-morandi-gold/20 text-morandi-gold border-morandi-gold/30 text-xs">
+                                <Star className="h-3 w-3" />
+                              </Badge>
                             )}
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* 右側：權限設定 */}
-            <div className="col-span-9 flex flex-col">
-              <div className="bg-card border border-border rounded-lg flex flex-col h-full">
-                <div className="flex items-center justify-between p-4 border-b border-border">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-morandi-primary">
-                      {selectedRole ? `${selectedRole.name} 的權限` : '請選擇職務'}
-                    </h3>
-                    {selectedRole && (
-                      <div className="flex items-center gap-4 text-xs text-morandi-secondary">
-                        <span className="flex items-center gap-1">
-                          <div className="w-3 h-3 rounded bg-morandi-green" /> 可讀取
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <div className="w-3 h-3 rounded bg-morandi-gold" /> 可寫入
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <div className="w-2 h-2 rounded-full bg-morandi-gold" /> 部分開啟
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                  {selectedRole && (
-                    <Button
-                      onClick={handleSavePermissions}
-                      disabled={saving}
-                      className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-                    >
-                      {saving ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4 mr-2" />
-                      )}
-                      儲存
-                    </Button>
-                  )}
-                </div>
-
-                <div className="flex-1 overflow-y-auto">
-                  {selectedRole ? (
-                    <div>
-                      {/* 表頭 */}
-                      <div className="flex items-center bg-card sticky top-0 z-20 border-b border-border shadow-sm">
-                        <div className="flex-1 p-4 font-semibold text-morandi-primary">
-                          功能模組
-                        </div>
-                        <div className="w-32 p-4 text-center font-semibold text-morandi-primary">
-                          可讀取
-                        </div>
-                        <div className="w-32 p-4 text-center font-semibold text-morandi-primary">
-                          可寫入
+                          {!role.is_admin && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 hover:bg-morandi-red/10"
+                              onClick={e => {
+                                e.stopPropagation()
+                                handleDeleteRole(role)
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3 text-morandi-red" />
+                            </Button>
+                          )}
                         </div>
                       </div>
-
-                      {/* 模組列表（只列出 workspace 已啟用的功能） */}
-                      {visibleModules.map(module => renderModuleRow(module))}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-full text-morandi-secondary">
-                      <div className="text-center">
-                        <Shield className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                        <p>請從左側選擇一個角色</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {selectedRole?.is_admin && (
-                  <div className="p-4 border-t border-border bg-morandi-bg/30">
-                    <p className="text-sm text-morandi-secondary text-center">
-                      管理員角色擁有所有權限，無法修改
-                    </p>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* 新增職務 Dialog — 仍在 permissions tab 條件區塊內 */}
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogContent level={1} className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle className="text-morandi-primary">新增職務</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div>
-                  <Label htmlFor="name" className="text-morandi-primary">
-                    角色名稱
-                  </Label>
-                  <Input
-                    id="name"
-                    value={editingRole.name}
-                    onChange={e => setEditingRole({ ...editingRole, name: e.target.value })}
-                    placeholder="例如：業務、會計、助理"
-                    className="mt-1"
-                  />
+          {/* 右側：權限設定 */}
+          <div className="col-span-9 flex flex-col">
+            <div className="bg-card border border-border rounded-lg flex flex-col h-full">
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <div className="flex items-center gap-3">
+                  <h3 className="font-semibold text-morandi-primary">
+                    {selectedRole ? `${selectedRole.name} 的權限` : '請選擇職務'}
+                  </h3>
+                  {selectedRole && (
+                    <div className="flex items-center gap-4 text-xs text-morandi-secondary">
+                      <span className="flex items-center gap-1">
+                        <div className="w-3 h-3 rounded bg-morandi-green" /> 可讀取
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <div className="w-3 h-3 rounded bg-morandi-gold" /> 可寫入
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <div className="w-2 h-2 rounded-full bg-morandi-gold" /> 部分開啟
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <Label htmlFor="description" className="text-morandi-primary">
-                    說明（選填）
-                  </Label>
-                  <Input
-                    id="description"
-                    value={editingRole.description}
-                    onChange={e => setEditingRole({ ...editingRole, description: e.target.value })}
-                    placeholder="這個角色的職責說明"
-                    className="mt-1"
-                  />
-                </div>
+                {selectedRole && (
+                  <Button
+                    onClick={handleSavePermissions}
+                    disabled={saving}
+                    className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                  >
+                    {saving ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    儲存
+                  </Button>
+                )}
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  取消
-                </Button>
-                <Button
-                  onClick={handleCreateRole}
-                  disabled={saving || !editingRole.name}
-                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-                >
-                  {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                  建立
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </>
+
+              <div className="flex-1 overflow-y-auto">
+                {selectedRole ? (
+                  <div>
+                    {/* 表頭 */}
+                    <div className="flex items-center bg-card sticky top-0 z-20 border-b border-border shadow-sm">
+                      <div className="flex-1 p-4 font-semibold text-morandi-primary">功能模組</div>
+                      <div className="w-32 p-4 text-center font-semibold text-morandi-primary">
+                        可讀取
+                      </div>
+                      <div className="w-32 p-4 text-center font-semibold text-morandi-primary">
+                        可寫入
+                      </div>
+                    </div>
+
+                    {/* 模組列表（只列出 workspace 已啟用的功能） */}
+                    {visibleModules.map(module => renderModuleRow(module))}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-morandi-secondary">
+                    <div className="text-center">
+                      <Shield className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                      <p>請從左側選擇一個角色</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {selectedRole?.is_admin && (
+                <div className="p-4 border-t border-border bg-morandi-bg/30">
+                  <p className="text-sm text-morandi-secondary text-center">
+                    管理員角色擁有所有權限，無法修改
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 新增職務 Dialog — 仍在 permissions tab 條件區塊內 */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent level={1} className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-morandi-primary">新增職務</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="name" className="text-morandi-primary">
+                  角色名稱
+                </Label>
+                <Input
+                  id="name"
+                  value={editingRole.name}
+                  onChange={e => setEditingRole({ ...editingRole, name: e.target.value })}
+                  placeholder="例如：業務、會計、助理"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="description" className="text-morandi-primary">
+                  說明（選填）
+                </Label>
+                <Input
+                  id="description"
+                  value={editingRole.description}
+                  onChange={e => setEditingRole({ ...editingRole, description: e.target.value })}
+                  placeholder="這個角色的職責說明"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+                取消
+              </Button>
+              <Button
+                onClick={handleCreateRole}
+                disabled={saving || !editingRole.name}
+                className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+              >
+                {saving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                建立
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
     </ContentPageLayout>
   )
 }

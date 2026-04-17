@@ -256,9 +256,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           }
           if (itinerary.outbound_flight) {
             const outbound = itinerary.outbound_flight
-            const outboundArr = (
-              Array.isArray(outbound) ? outbound : [outbound]
-            ) as FlightInfo[]
+            const outboundArr = (Array.isArray(outbound) ? outbound : [outbound]) as FlightInfo[]
             setOutboundFlights(outboundArr)
             const firstDate = outboundArr[0]?.departureDate
             if (firstDate) setOutboundFlightDate(firstDate)
@@ -267,9 +265,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           }
           if (itinerary.return_flight) {
             const returnFlt = itinerary.return_flight
-            const returnArr = (
-              Array.isArray(returnFlt) ? returnFlt : [returnFlt]
-            ) as FlightInfo[]
+            const returnArr = (Array.isArray(returnFlt) ? returnFlt : [returnFlt]) as FlightInfo[]
             setReturnFlights(returnArr)
             const firstDate = returnArr[0]?.departureDate
             if (firstDate) setReturnFlightDate(firstDate)

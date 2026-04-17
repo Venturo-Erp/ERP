@@ -12,10 +12,7 @@ export function ModuleLoading() {
 
 function BirdLoader({ delay }: { delay: string }) {
   return (
-    <div
-      className={styles.loader}
-      style={{ ['--d' as string]: delay } as React.CSSProperties}
-    >
+    <div className={styles.loader} style={{ ['--d' as string]: delay } as React.CSSProperties}>
       <svg
         className="legl"
         xmlns="http://www.w3.org/2000/svg"
@@ -137,12 +134,7 @@ function BirdLoader({ delay }: { delay: string }) {
         viewBox="0 0 163.40011 85.20095"
       >
         <g transform="translate(-176.25,-207.64957)">
-          <g
-            stroke="#000000"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeMiterlimit="10"
-          >
+          <g stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeMiterlimit="10">
             <path
               d="M295.5,273.1829c0,0 -57.38915,6.69521 -76.94095,-9.01465c-13.65063,-10.50609 15.70098,-20.69467 -2.5451,-19.94465c-30.31027,2.05753 -38.51396,-26.84135 -38.51396,-26.84135c0,0 6.50084,13.30023 18.93224,19.17888c9.53286,4.50796 26.23632,-1.02541 32.09529,4.95137c3.62417,3.69704 2.8012,6.33005 0.66517,8.49452c-3.79415,3.84467 -11.7312,6.21103 -6.24682,10.43645c22.01082,16.95812 72.55412,12.73944 72.55412,12.73944z"
               fill="#000000"

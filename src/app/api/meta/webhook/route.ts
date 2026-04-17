@@ -44,7 +44,7 @@ interface MetaConfig {
  */
 async function getMetaConfig(): Promise<MetaConfig> {
   const supabase = getSupabase()
-  
+
   const { data, error } = await supabase
     .from('workspace_meta_config')
     .select('verify_token, page_access_token, app_secret, app_id')
@@ -105,7 +105,11 @@ export async function GET(request: NextRequest) {
     return new NextResponse(challenge, { status: 200 })
   }
 
-  logger.warn('Meta webhook verification failed', { mode, token, expectedToken: config.verify_token })
+  logger.warn('Meta webhook verification failed', {
+    mode,
+    token,
+    expectedToken: config.verify_token,
+  })
   return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 }
 
@@ -239,7 +243,11 @@ async function getRecentRoundCount(platform: string, userId: string): Promise<nu
 /**
  * 透過 Graph API 回覆訊息，回傳 message_id
  */
-async function sendReply(senderId: string, text: string, pageAccessToken: string | null): Promise<string | null> {
+async function sendReply(
+  senderId: string,
+  text: string,
+  pageAccessToken: string | null
+): Promise<string | null> {
   if (!pageAccessToken) {
     logger.warn('[Meta] PAGE_ACCESS_TOKEN not set, cannot reply')
     return null
@@ -278,7 +286,11 @@ async function sendReply(senderId: string, text: string, pageAccessToken: string
   return messageId
 }
 
-async function handleIncomingMessage(platform: string, event: MetaMessageEvent, pageAccessToken: string | null) {
+async function handleIncomingMessage(
+  platform: string,
+  event: MetaMessageEvent,
+  pageAccessToken: string | null
+) {
   // Facebook: sender.id, Instagram: sender.instagram_user_id
   const senderId = event.sender.id || event.sender.instagram_user_id || ''
   const messageText = event.message.text

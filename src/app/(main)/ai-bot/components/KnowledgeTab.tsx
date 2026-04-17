@@ -381,9 +381,7 @@ export function KnowledgeTab({ isConnected }: KnowledgeTabProps) {
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingItem ? '編輯知識' : '新增知識'}</DialogTitle>
-            <DialogDescription>
-              建立 AI 客服可以使用的問答知識
-            </DialogDescription>
+            <DialogDescription>建立 AI 客服可以使用的問答知識</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
@@ -419,9 +417,7 @@ export function KnowledgeTab({ isConnected }: KnowledgeTabProps) {
                 onChange={e => setFormData(prev => ({ ...prev, question: e.target.value }))}
                 placeholder="例如：你們有做日本行程嗎？"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                客戶可能會問的問題
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">客戶可能會問的問題</p>
             </div>
 
             {/* 答案 */}
@@ -440,17 +436,13 @@ export function KnowledgeTab({ isConnected }: KnowledgeTabProps) {
 
             {/* 關鍵字 */}
             <div>
-              <label className="text-sm font-medium text-morandi-primary block mb-2">
-                關鍵字
-              </label>
+              <label className="text-sm font-medium text-morandi-primary block mb-2">關鍵字</label>
               <Input
                 value={formData.keywords}
                 onChange={e => setFormData(prev => ({ ...prev, keywords: e.target.value }))}
                 placeholder="日本, 東北, 溫泉 (用逗號分隔)"
               />
-              <p className="text-xs text-muted-foreground mt-1">
-                額外的關鍵字，有助於增加匹配機會
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">額外的關鍵字，有助於增加匹配機會</p>
             </div>
           </div>
 

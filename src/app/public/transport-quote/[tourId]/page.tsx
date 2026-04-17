@@ -62,7 +62,9 @@ export default async function TransportQuotePage({
   // 查詢團資料
   const { data: tour } = await supabase
     .from('tours')
-    .select('code, name, departure_date, return_date, country_id, airport_code, current_participants')
+    .select(
+      'code, name, departure_date, return_date, country_id, airport_code, current_participants'
+    )
     .eq('id', tourId)
     .single()
 

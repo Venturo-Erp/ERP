@@ -141,7 +141,10 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
                 </thead>
                 <tbody>
                   {itinerary.flights.map((flight, index) => (
-                    <tr key={index} className="border-b border-border hover:bg-morandi-container/50">
+                    <tr
+                      key={index}
+                      className="border-b border-border hover:bg-morandi-container/50"
+                    >
                       <td className="px-6 py-4 font-mono font-bold text-morandi-primary">
                         {flight.flightNumber}
                       </td>

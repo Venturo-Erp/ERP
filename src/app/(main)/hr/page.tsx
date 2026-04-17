@@ -59,8 +59,7 @@ export default function HRPage() {
 
   // 員工列表：只顯示在職的真人（不含 bot、不含已離職）
   const filteredEmployees = useMemo(
-    () =>
-      users.filter(emp => emp.employee_type !== 'bot' && emp.status !== 'terminated'),
+    () => users.filter(emp => emp.employee_type !== 'bot' && emp.status !== 'terminated'),
     [users]
   )
 
@@ -182,7 +181,6 @@ export default function HRPage() {
       toast.error(LABELS.DELETE_FAILED)
     }
   }
-
 
   const columns: TableColumn<Employee>[] = useMemo(
     () => [
@@ -376,7 +374,6 @@ export default function HRPage() {
       </Dialog>
 
       <ConfirmDialog {...confirmDialogProps} />
-
     </>
   )
 }

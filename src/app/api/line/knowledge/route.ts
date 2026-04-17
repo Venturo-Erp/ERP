@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     if (keyword) {
       const kw = keyword.toLowerCase()
       results = results.filter(
-        (item) =>
+        item =>
           item.question?.toLowerCase().includes(kw) ||
           item.answer?.toLowerCase().includes(kw) ||
           item.keywords?.some((k: string) => k.toLowerCase().includes(kw))

@@ -90,7 +90,9 @@ function PainPointsSection() {
                 <ChevronRight size={14} className="text-morandi-muted" />
                 <span className="font-semibold text-status-warning">{point.after}</span>
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-morandi-secondary">{point.description}</p>
+              <p className="mt-3 text-sm leading-relaxed text-morandi-secondary">
+                {point.description}
+              </p>
             </div>
           ))}
         </div>
@@ -134,7 +136,9 @@ function FeaturesSection() {
                 <feature.icon size={24} />
               </div>
               <h3 className="mt-4 text-lg font-semibold text-morandi-primary">{feature.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-morandi-secondary">{feature.description}</p>
+              <p className="mt-2 text-sm leading-relaxed text-morandi-secondary">
+                {feature.description}
+              </p>
               {/* Screenshot placeholder */}
               <div className="mt-4 flex h-36 items-center justify-center rounded-lg border-2 border-dashed border-border bg-morandi-container/50 text-sm text-morandi-muted">
                 {LANDING_LABELS.LABEL_3045}

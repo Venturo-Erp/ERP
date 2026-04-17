@@ -88,7 +88,7 @@ export default function AIBotManagementPage() {
     } catch {
       // 忽略
     }
-}, [])
+  }, [])
 
   const loadData = useCallback(async () => {
     // 總是載入資料，即使未連線也顯示（資料可能已存在）
@@ -145,7 +145,6 @@ export default function AIBotManagementPage() {
   const handleSetupComplete = () => {
     loadConfig()
   }
-
 
   return (
     <ContentPageLayout
@@ -220,7 +219,10 @@ export default function AIBotManagementPage() {
                     {isMetaConnected ? (
                       <Badge className="shrink-0 bg-green-500">已連線</Badge>
                     ) : metaConfig.setup_step > 0 ? (
-                      <Badge variant="outline" className="shrink-0 text-orange-500 border-orange-500">
+                      <Badge
+                        variant="outline"
+                        className="shrink-0 text-orange-500 border-orange-500"
+                      >
                         設定中
                       </Badge>
                     ) : (
@@ -237,7 +239,9 @@ export default function AIBotManagementPage() {
                     </div>
                   ) : (
                     <div className="border-t pt-3">
-                      <p className="text-xs text-muted-foreground mb-2">前置作業（你可以先完成）：</p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        前置作業（你可以先完成）：
+                      </p>
                       <ol className="list-decimal list-inside space-y-1.5 text-sm text-morandi-secondary">
                         <li>
                           前往{' '}
@@ -255,7 +259,8 @@ export default function AIBotManagementPage() {
                           建立一個 App → 選擇 <strong>Business</strong> 類型
                         </li>
                         <li>
-                          在 App 中加入 <strong>Messenger</strong> 和 <strong>Instagram</strong> 產品
+                          在 App 中加入 <strong>Messenger</strong> 和 <strong>Instagram</strong>{' '}
+                          產品
                         </li>
                         <li>連結你的 Facebook 粉絲專頁和 Instagram 商業帳號</li>
                       </ol>
@@ -311,8 +316,8 @@ export default function AIBotManagementPage() {
         {activeTab === 'conversations' && <RealConversations />}
 
         {/* AI 設定 */}
-        {activeTab === 'ai' && (
-          isConnected ? (
+        {activeTab === 'ai' &&
+          (isConnected ? (
             <AISettingsTab />
           ) : (
             <Card>
@@ -321,8 +326,7 @@ export default function AIBotManagementPage() {
                 <p>請先在「平台連線」完成 LINE Bot 設定</p>
               </CardContent>
             </Card>
-          )
-        )}
+          ))}
 
         {/* 知識庫 */}
         {activeTab === 'knowledge' && <KnowledgeTab isConnected={isConnected} />}

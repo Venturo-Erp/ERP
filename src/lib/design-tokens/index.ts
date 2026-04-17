@@ -174,8 +174,6 @@ export const TOKEN_REGISTRY = {
 
 export const MIGRATION_GUIDE = {
   documentation: 'https://docs.example.com/design-tokens',
-  sprintPlan:
-    'https://docs.example.com/design-tokens/sprint-plan',
-  troubleshooting:
-    'https://docs.example.com/design-tokens/troubleshooting',
+  sprintPlan: 'https://docs.example.com/design-tokens/sprint-plan',
+  troubleshooting: 'https://docs.example.com/design-tokens/troubleshooting',
 } as const

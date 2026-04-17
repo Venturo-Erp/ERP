@@ -84,15 +84,17 @@ async function fetchAirports(): Promise<Airport[]> {
     is_destination: false,
   }))
 
-  const destinations: Airport[] = ((destinationsRes.data || []) as Array<{
-    code: string
-    short_alias: string | null
-    country_code: string
-    name_zh: string | null
-    name_en: string | null
-    latitude: number | null
-    longitude: number | null
-  }>)
+  const destinations: Airport[] = (
+    (destinationsRes.data || []) as Array<{
+      code: string
+      short_alias: string | null
+      country_code: string
+      name_zh: string | null
+      name_en: string | null
+      latitude: number | null
+      longitude: number | null
+    }>
+  )
     .filter(d => !!d.short_alias)
     .map(d => ({
       iata_code: d.short_alias as string,

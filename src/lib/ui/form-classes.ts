@@ -93,12 +93,10 @@ export const ALERT_INFO =
 // ============================================================
 // Card — 內容卡片
 // ============================================================
-export const CARD_BASE =
-  'rounded-xl border border-border/60 bg-card shadow-sm'
+export const CARD_BASE = 'rounded-xl border border-border/60 bg-card shadow-sm'
 
 // 大卡片（section container）
-export const CARD_SECTION =
-  'rounded-2xl border border-border/60 bg-card shadow-sm p-6'
+export const CARD_SECTION = 'rounded-2xl border border-border/60 bg-card shadow-sm p-6'
 
 // ============================================================
 // Helper — 讓呼叫端可以 append 自訂 className

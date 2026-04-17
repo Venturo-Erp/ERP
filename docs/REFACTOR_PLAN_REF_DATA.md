@@ -11,6 +11,7 @@
 這份文件是整個參考資料（國家 / 機場 / 目的地）SSOT 重構的**單一計畫來源**。任何時候回來 review，只需要看這一份。
 
 同時這份重構必須配合 `CLAUDE.md` 的硬性規則執行：
+
 - 動手前讀 `docs/CODE_MAP.md`
 - 改 symbol 前跑 `gitnexus_impact`
 - 不用 `--no-verify` 繞 hook
@@ -39,6 +40,7 @@
 ### 資料層現況（2026-04-15 從 DB 取得）
 
 **`ref_airports`：per-workspace 架構，不是全域共享**
+
 - 現有 3 個 workspace（CORNER 主租戶 + 富順 + 勁揚）
 - 每個 workspace 各有 87 筆 unique IATA → 總計 **259 列**
 - 每新增一個 workspace 都會再複製一份
@@ -74,26 +76,29 @@
 
 ### 資料層級
 
-| 層級 | 表 | 擁有者 | 寫入權限 | 性質 |
-|---|---|---|---|---|
-| **L1 全球參考** | `ref_countries`、`ref_airports`、`ref_destinations` | 平台（Venturo） | super admin only | 客觀世界事實 |
-| **L2 租戶 overlay** | `workspace_countries`（第一版只有啟用開關） | 該租戶 | 該租戶 | 啟用範圍 |
-| **L3 租戶業務** | `tours`、`itineraries` 等既有表 | 該租戶 | 該租戶 | 引用 L1 的自然鍵 |
+| 層級                | 表                                                  | 擁有者          | 寫入權限         | 性質             |
+| ------------------- | --------------------------------------------------- | --------------- | ---------------- | ---------------- |
+| **L1 全球參考**     | `ref_countries`、`ref_airports`、`ref_destinations` | 平台（Venturo） | super admin only | 客觀世界事實     |
+| **L2 租戶 overlay** | `workspace_countries`（第一版只有啟用開關）         | 該租戶          | 該租戶           | 啟用範圍         |
+| **L3 租戶業務**     | `tours`、`itineraries` 等既有表                     | 該租戶          | 該租戶           | 引用 L1 的自然鍵 |
 
 ### 三張 L1 表的職責分工
 
 **`ref_countries`**
+
 - PK = ISO 2 碼（`code`）
 - 欄位：`code`、`name_zh`、`name_en`、`emoji`、`continent`、`is_active`
 - 249 個國家一次灌滿
 
 **`ref_airports`**（純 IATA）
+
 - PK = IATA 3 碼（`iata_code`）
 - 只存「世界上真的存在的機場」
 - 清掉所有假 IATA（YLN、KTG、NTO、CHW、MLC、TYN 等）
 - 無 `workspace_id` 欄位（不再 per-workspace）
 
 **`ref_destinations`**（非機場目的地）
+
 - PK = 自訂 code，例：`TW-YILAN`、`TW-KENTING`、`TW-LIUQIU`、`TH-PATTAYA`、`JP-KYOTO`
 - 選填欄位：`short_alias`（三碼速記，例 YLN、KTG、PAT、KYT）
 - 必填：`country_code`、`name_zh`、`name_en`
@@ -129,12 +134,12 @@
 
 **目標**：把 TYN 這顆命名衝突炸彈拆掉，同時補 HHQ seed 漏洞。
 
-| 步驟 | 動作 | 驗證 |
-|---|---|---|
+| 步驟  | 動作                                                                                             | 驗證                                                                    |
+| ----- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
 | 0.5.1 | `ref_airports` 裡所有 3 個 workspace 的 TYN 行改名為 `TYU`（或其他未被 IATA 佔用的代號）代表桃園 | `SELECT iata_code FROM ref_airports WHERE city_name_zh='桃園'` 回傳 TYU |
-| 0.5.2 | 灌 HHQ（Hua Hin 華欣）正式 IATA 資料到 `ref_airports` | 3 個 workspace 各出現 1 筆 HHQ |
-| 0.5.3 | grep 整個 codebase 是否有 hardcode `'TYN'` 字串（`src/lib/constants/airports.ts` 等） | 全部更新或確認無 |
-| 0.5.4 | `tours.airport_code = 'TYN'` 的筆數（預期 0 筆，根據盤點） | 確認為 0 |
+| 0.5.2 | 灌 HHQ（Hua Hin 華欣）正式 IATA 資料到 `ref_airports`                                            | 3 個 workspace 各出現 1 筆 HHQ                                          |
+| 0.5.3 | grep 整個 codebase 是否有 hardcode `'TYN'` 字串（`src/lib/constants/airports.ts` 等）            | 全部更新或確認無                                                        |
+| 0.5.4 | `tours.airport_code = 'TYN'` 的筆數（預期 0 筆，根據盤點）                                       | 確認為 0                                                                |
 
 **業務感受**：無差別（0 tours 受影響）
 **底層變化**：TYN 不再撞太原、華欣從真 IATA 能正確 lookup
@@ -147,53 +152,61 @@
 **目標**：`ref_airports` 從 per-workspace 3 份拷貝變成單一全域表，同時把假 IATA 搬到 `ref_destinations`。
 
 #### 1A：建立 `ref_destinations`（新表）
-| 步驟 | 動作 |
-|---|---|
-| 1.1 | 建 `ref_destinations` 表（schema 如第三節所述，含多語言欄位） |
-| 1.2 | 建立 short_alias unique index，避開 IATA 命名空間 |
-| 1.3 | RLS：SELECT 任何 authenticated user；其餘只限 super admin |
+
+| 步驟 | 動作                                                          |
+| ---- | ------------------------------------------------------------- |
+| 1.1  | 建 `ref_destinations` 表（schema 如第三節所述，含多語言欄位） |
+| 1.2  | 建立 short_alias unique index，避開 IATA 命名空間             |
+| 1.3  | RLS：SELECT 任何 authenticated user；其餘只限 super admin     |
 
 #### 1B：搬家假 IATA
-| 步驟 | 動作 | 驗證 |
-|---|---|---|
-| 1.4 | 把 YLN、KTG、CHW、NTO、MLC 這 5 筆從 `ref_airports` 搬到 `ref_destinations`（保留原 short_alias） | `ref_destinations` 出現 5 筆台灣非機場目的地 |
-| 1.5 | 從 `ref_airports` 刪除這 5 筆（3 個 workspace × 5 = 15 筆被刪） | `ref_airports` 總列數從 259 降到 244 |
-| 1.6 | `tours.airport_code` 若有對應到這 5 碼的也需更新（0 筆，驗證後跳過） | 0 |
+
+| 步驟 | 動作                                                                                              | 驗證                                         |
+| ---- | ------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| 1.4  | 把 YLN、KTG、CHW、NTO、MLC 這 5 筆從 `ref_airports` 搬到 `ref_destinations`（保留原 short_alias） | `ref_destinations` 出現 5 筆台灣非機場目的地 |
+| 1.5  | 從 `ref_airports` 刪除這 5 筆（3 個 workspace × 5 = 15 筆被刪）                                   | `ref_airports` 總列數從 259 降到 244         |
+| 1.6  | `tours.airport_code` 若有對應到這 5 碼的也需更新（0 筆，驗證後跳過）                              | 0                                            |
 
 #### 1C：`ref_airports` 全域化
-| 步驟 | 動作 | 驗證 |
-|---|---|---|
-| 1.7 | 選擇主 workspace（CORNER）的 `ref_airports` 資料作為 canonical | 保留 87 筆 |
-| 1.8 | 刪除其他 2 個 workspace 的重複資料 | 總列數 87 |
-| 1.9 | DROP `workspace_id` 欄位 | schema check |
+
+| 步驟 | 動作                                                                                      | 驗證                |
+| ---- | ----------------------------------------------------------------------------------------- | ------------------- |
+| 1.7  | 選擇主 workspace（CORNER）的 `ref_airports` 資料作為 canonical                            | 保留 87 筆          |
+| 1.8  | 刪除其他 2 個 workspace 的重複資料                                                        | 總列數 87           |
+| 1.9  | DROP `workspace_id` 欄位                                                                  | schema check        |
 | 1.10 | 重寫 RLS：任何 authenticated user 可 SELECT；INSERT/UPDATE/DELETE 只限 `is_super_admin()` | 一般帳號 write 失敗 |
-| 1.11 | 廢除 `/api/airports` 的 POST（或加 super admin 守門） | 403 on non-admin |
+| 1.11 | 廢除 `/api/airports` 的 POST（或加 super admin 守門）                                     | 403 on non-admin    |
 
 #### 1D：UI / query 層配合
-| 步驟 | 動作 | 驗證 |
-|---|---|---|
-| 1.12 | `useAirports()`、`CountryAirportSelector`、`destination-selector`：讀 `ref_airports` 時不再帶 workspace_id 過濾 | 機場選單正常 |
-| 1.13 | 搜尋框 UNION `ref_destinations.short_alias` + `ref_destinations.name_zh`（同一個 dropdown 通吃） | 打 YLN 能找到宜蘭 |
-| 1.14 | `generateTourCode()` 接受 destination short_alias 或 IATA 當輸入 | 建一個宜蘭團驗證團號 `JY-YLN...A` |
+
+| 步驟 | 動作                                                                                                            | 驗證                              |
+| ---- | --------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| 1.12 | `useAirports()`、`CountryAirportSelector`、`destination-selector`：讀 `ref_airports` 時不再帶 workspace_id 過濾 | 機場選單正常                      |
+| 1.13 | 搜尋框 UNION `ref_destinations.short_alias` + `ref_destinations.name_zh`（同一個 dropdown 通吃）                | 打 YLN 能找到宜蘭                 |
+| 1.14 | `generateTourCode()` 接受 destination short_alias 或 IATA 當輸入                                                | 建一個宜蘭團驗證團號 `JY-YLN...A` |
 
 **業務感受**：
+
 - 下拉選單看起來一樣（機場 + 目的地混排，以代號為主標）
 - 團號生成照舊
 - 建團流程完全一樣
 - 唯一差別：新增目的地時，打「小琉球」也能找到（原本找不到）
 
 **底層變化**：
+
 - `ref_airports` 從 259 列 → 87 列（節省 67% 儲存）
 - 假 IATA 搬到正確的家
 - TYN、MLC 命名衝突消失
 - `ref_destinations` 就位，下一階段業務表可以開始用它
 
 **回滾方式**：
+
 - 保留舊資料 snapshot
 - 可用 revert migration 恢復 per-workspace 架構
 - 但理論上一旦驗證通過就不需要 revert
 
 ⚠️ **這是本次重構的核心刀，完成後務必全站煙霧測試**：
+
 - 建新團（出國 + 國內）
 - 開啟歷史團
 - 機場/目的地下拉選單
@@ -206,13 +219,13 @@
 
 **目標**：建立乾淨的 `ref_countries`，為後續業務表 FK 遷移做準備。
 
-| 步驟 | 動作 | 驗證 |
-|---|---|---|
-| 2.1 | 建 `ref_countries` 表（PK = ISO code），加基本欄位 | schema |
-| 2.2 | 灌 ISO 3166-1 249 筆國家資料 | count = 249 |
-| 2.3 | RLS：同 `ref_airports` | 測試 |
-| 2.4 | 建 `workspace_countries` overlay 表（只有 `is_enabled`） | schema |
-| 2.5 | 寫 helper `is_country_enabled()` | SQL 測試 |
+| 步驟 | 動作                                                     | 驗證        |
+| ---- | -------------------------------------------------------- | ----------- |
+| 2.1  | 建 `ref_countries` 表（PK = ISO code），加基本欄位       | schema      |
+| 2.2  | 灌 ISO 3166-1 249 筆國家資料                             | count = 249 |
+| 2.3  | RLS：同 `ref_airports`                                   | 測試        |
+| 2.4  | 建 `workspace_countries` overlay 表（只有 `is_enabled`） | schema      |
+| 2.5  | 寫 helper `is_country_enabled()`                         | SQL 測試    |
 
 **業務感受**：無差別
 **風險**：🟢 低（純新增）
@@ -224,6 +237,7 @@
 **目標**：把 13 張依賴舊 `countries` 的表改成指向 `ref_countries.code`（text）。
 
 **子步驟**（每張表一個 migration，分批上線）：
+
 - 3A：3 張硬 FK（`luxury_hotels`、`restaurants`、`transportation_rates`）
 - 3B：10 張軟參考表（`attractions`、`quotes` 等）
 - 3C：`cities` / `regions` 只換 FK 指向，不動表結構
@@ -231,6 +245,7 @@
 **詳細步驟與原 v1 相同**（保持 24 個檔案的更新路徑）。
 
 ⚠️ 這個 Stage 風險最高，必須：
+
 - 逐表 `gitnexus_impact` 分析
 - 逐批 smoke test
 - 保留舊 `countries` 表做 compatibility view 至少 2 週
@@ -241,14 +256,14 @@
 
 **目標**：在 `/settings/workspaces` 加國家啟用開關 + 主場國家設定。
 
-| 步驟 | 動作 |
-|---|---|
-| 4.1 | 新增「國家範圍」區塊（按洲分組 + toggle） |
-| 4.2 | 新增「主場國家」下拉（`workspaces.home_country_code`） |
-| 4.3 | 新增「輸入模式」選擇（airport-first / destination-first / hybrid） |
-| 4.4 | `CountryAirportSelector` 加 workspace_countries JOIN 過濾 |
-| 4.5 | **歷史資料不過濾**（舊團即使國家已停用也照常顯示） |
-| 4.6 | 顯示 helper：`displayCountry(code, workspace)` → 主場國顯示「國內」 |
+| 步驟 | 動作                                                                |
+| ---- | ------------------------------------------------------------------- |
+| 4.1  | 新增「國家範圍」區塊（按洲分組 + toggle）                           |
+| 4.2  | 新增「主場國家」下拉（`workspaces.home_country_code`）              |
+| 4.3  | 新增「輸入模式」選擇（airport-first / destination-first / hybrid）  |
+| 4.4  | `CountryAirportSelector` 加 workspace_countries JOIN 過濾           |
+| 4.5  | **歷史資料不過濾**（舊團即使國家已停用也照常顯示）                  |
+| 4.6  | 顯示 helper：`displayCountry(code, workspace)` → 主場國顯示「國內」 |
 
 ---
 
@@ -263,26 +278,28 @@
 
 ## 五、風險總表（根據實際盤點更新）
 
-| Stage | 風險 | 原因 | 緩解 |
-|---|---|---|---|
-| 0.5 | 🟢 極低 | 0 tours 用 TYN、HHQ 補漏 | 幾乎零風險 |
-| 1 | 🟢 低 | 0 tours 用假 IATA、per-workspace → global 只是刪重複 | 保 snapshot |
-| 2 | 🟢 低 | 純新增 | — |
-| 3 | 🔴 高 | 24 檔案 + 3 硬 FK 業務表 | 分批 + smoke test + gitnexus |
-| 4 | 🟡 中 | UI 過濾邏輯可能誤擋歷史 | 歷史路徑明確跳過過濾 |
-| 5 | 🟢 低 | 漏改會失敗，但有 view | compat view |
+| Stage | 風險    | 原因                                                 | 緩解                         |
+| ----- | ------- | ---------------------------------------------------- | ---------------------------- |
+| 0.5   | 🟢 極低 | 0 tours 用 TYN、HHQ 補漏                             | 幾乎零風險                   |
+| 1     | 🟢 低   | 0 tours 用假 IATA、per-workspace → global 只是刪重複 | 保 snapshot                  |
+| 2     | 🟢 低   | 純新增                                               | —                            |
+| 3     | 🔴 高   | 24 檔案 + 3 硬 FK 業務表                             | 分批 + smoke test + gitnexus |
+| 4     | 🟡 中   | UI 過濾邏輯可能誤擋歷史                              | 歷史路徑明確跳過過濾         |
+| 5     | 🟢 低   | 漏改會失敗，但有 view                                | compat view                  |
 
 ---
 
 ## 六、檢查清單
 
 ### Stage 0.5 完成條件
+
 - [ ] TYN 改名完成，0 tours 受影響
 - [ ] HHQ 正式進 seed
 - [ ] `src/lib/constants/airports.ts` hardcode 檢查完成
 - [ ] smoke test：開 PROP-X1OHIARA 團，華欣顯示正常
 
 ### Stage 1 完成條件
+
 - [ ] `ref_destinations` 表存在、RLS 正確
 - [ ] YLN/KTG/CHW/NTO/MLC 在 `ref_destinations` 而非 `ref_airports`
 - [ ] `ref_airports` 總列數 = 87（從 259 降下來）
@@ -292,20 +309,24 @@
 - [ ] 3 個 workspace 都能正常建團
 
 ### Stage 2 完成條件
+
 - [ ] `ref_countries` 249 筆
 - [ ] `workspace_countries` 表就位
 
 ### Stage 3 完成條件
+
 - [ ] 13 張業務表全部指向 `ref_countries.code`
 - [ ] 24 檔案全部通過 type-check
 - [ ] 全站 smoke test 通過
 
 ### Stage 4 完成條件
+
 - [ ] 租戶管理頁有國家啟用區塊
 - [ ] 主場國家顯示為「國內」
 - [ ] 歷史團不受過濾影響
 
 ### Stage 5 完成條件
+
 - [ ] 舊 `countries` 表 DROP
 - [ ] 無引用遺跡
 
@@ -313,14 +334,14 @@
 
 ## 七、尚未定案 / 刻意擱置
 
-| 項目 | 決定 | 理由 |
-|---|---|---|
-| `cities` / `regions` 拆成 `ref_cities` / `ref_regions` | ❌ 不做 | 避免雪球；FK 改指向即可 |
-| 景點 / 飯店 / 餐廳 UI 重構 | ❌ 另案 | 不同軌道，等 SSOT 穩了再處理 |
-| 租戶自訂機場能力（`/api/airports` POST） | ❌ 廢除 | 只有 super admin 能動 ref |
-| 交通節點擴充（火車站、港口、客運站） | ⏸️ 預留 | `ref_transit_hubs` 概念已留，第一版只啟用 airport type |
-| 多語言欄位灌值 | ⏸️ 選填 | Phase 1 只填繁中 + 英文，其他語言等需要時 API 補 |
-| Google Maps API 整合 | ⏸️ 另案 | BUSINESS_MAP 已規劃但非本次範圍 |
+| 項目                                                   | 決定    | 理由                                                   |
+| ------------------------------------------------------ | ------- | ------------------------------------------------------ |
+| `cities` / `regions` 拆成 `ref_cities` / `ref_regions` | ❌ 不做 | 避免雪球；FK 改指向即可                                |
+| 景點 / 飯店 / 餐廳 UI 重構                             | ❌ 另案 | 不同軌道，等 SSOT 穩了再處理                           |
+| 租戶自訂機場能力（`/api/airports` POST）               | ❌ 廢除 | 只有 super admin 能動 ref                              |
+| 交通節點擴充（火車站、港口、客運站）                   | ⏸️ 預留 | `ref_transit_hubs` 概念已留，第一版只啟用 airport type |
+| 多語言欄位灌值                                         | ⏸️ 選填 | Phase 1 只填繁中 + 英文，其他語言等需要時 API 補       |
+| Google Maps API 整合                                   | ⏸️ 另案 | BUSINESS_MAP 已規劃但非本次範圍                        |
 
 ---
 

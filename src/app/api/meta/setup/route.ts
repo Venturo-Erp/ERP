@@ -53,17 +53,14 @@ export async function POST(req: NextRequest) {
     if (!auth.success) return NextResponse.json({ error: '請先登入' }, { status: 401 })
 
     const body = await req.json()
-    const { 
-      verify_token, 
-      page_access_token, 
-      app_secret, 
-      app_id,
-      setup_step 
-    } = body
+    const { verify_token, page_access_token, app_secret, app_id, setup_step } = body
 
     // 驗證必要欄位
     if (!app_id && !page_access_token && !app_secret) {
-      return NextResponse.json({ error: '請至少填寫 App ID、Page Access Token 或 App Secret' }, { status: 400 })
+      return NextResponse.json(
+        { error: '請至少填寫 App ID、Page Access Token 或 App Secret' },
+        { status: 400 }
+      )
     }
 
     const supabase = getSupabaseAdminClient() as unknown as SupabaseClient
@@ -77,7 +74,7 @@ export async function POST(req: NextRequest) {
       .single()
 
     const now = new Date().toISOString()
-    
+
     // 根據 setup_step 判斷連線狀態
     // step 0: 未開始
     // step 1: 已填寫基本資料
@@ -108,18 +105,16 @@ export async function POST(req: NextRequest) {
       }
     } else {
       // 建立新設定
-      const { error: insertError } = await supabase
-        .from('workspace_meta_config')
-        .insert({
-          workspace_id: workspaceId,
-          verify_token,
-          page_access_token,
-          app_secret,
-          app_id,
-          setup_step: setup_step || 1,
-          is_connected: isConnected,
-          connected_at: connectedAt,
-        })
+      const { error: insertError } = await supabase.from('workspace_meta_config').insert({
+        workspace_id: workspaceId,
+        verify_token,
+        page_access_token,
+        app_secret,
+        app_id,
+        setup_step: setup_step || 1,
+        is_connected: isConnected,
+        connected_at: connectedAt,
+      })
 
       if (insertError) {
         logger.error('Meta setup insert error:', insertError)
@@ -127,8 +122,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       setup_step: setup_step || 1,
       is_connected: isConnected,
     })

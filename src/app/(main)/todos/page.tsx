@@ -417,8 +417,7 @@ export default function TodosPage() {
       const nowCompleted = !todo.completed
       // 切換時把 status 也同步到對應欄位
       const targetStatus: Todo['status'] = nowCompleted ? 'completed' : 'pending'
-      const targetColumn =
-        columns.find(c => c.mapped_status === targetStatus) || columns[0]
+      const targetColumn = columns.find(c => c.mapped_status === targetStatus) || columns[0]
       await updateTodo(todo.id, {
         completed: nowCompleted,
         status: targetStatus,
@@ -1032,10 +1031,7 @@ const TodoCardMemo = React.memo(
               <div className="flex items-center justify-between mt-2.5">
                 <div className="flex items-center gap-2">
                   {/* 星級：hover 預覽、click 切換 */}
-                  <div
-                    className="flex items-center"
-                    onMouseLeave={() => setHoverPriority(null)}
-                  >
+                  <div className="flex items-center" onMouseLeave={() => setHoverPriority(null)}>
                     {[1, 2, 3, 4, 5].map(level => {
                       const active = level <= (hoverPriority ?? todo.priority ?? 1)
                       return (

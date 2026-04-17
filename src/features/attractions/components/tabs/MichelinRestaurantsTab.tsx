@@ -44,9 +44,7 @@ interface MichelinRestaurantsTabProps {
 export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRestaurantsTabProps) {
   const [restaurants, setRestaurants] = useState<MichelinRestaurant[]>([])
   const [loading, setLoading] = useState(true)
-  const [countries, setCountries] = useState<Array<{ id: string; name: string }>>(
-    []
-  )
+  const [countries, setCountries] = useState<Array<{ id: string; name: string }>>([])
   const [cities, setCities] = useState<Array<{ id: string; name: string }>>([])
 
   const [editingRestaurant, setEditingRestaurant] = useState<MichelinRestaurant | null>(null)

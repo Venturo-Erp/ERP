@@ -7,10 +7,7 @@ import { getServerAuth } from '@/lib/auth/server-auth'
  * PUT /api/line/knowledge/[id]
  * 更新知識庫項目
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const auth = await getServerAuth()
     if (!auth.success) {
