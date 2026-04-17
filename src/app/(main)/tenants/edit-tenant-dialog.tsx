@@ -27,7 +27,13 @@ const WORKSPACE_TYPES = [
 interface EditTenantDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  workspace: { id: string; name: string; code?: string | null; type?: string | null; max_employees?: number | null } | null
+  workspace: {
+    id: string
+    name: string
+    code?: string | null
+    type?: string | null
+    max_employees?: number | null
+  } | null
   onComplete: () => void
 }
 

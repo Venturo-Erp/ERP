@@ -68,9 +68,7 @@ export async function POST(request: NextRequest) {
     // 3.5 檢查帳號鎖定狀態（5 次失敗鎖定 15 分鐘）
     const lockedUntil = (employee as Record<string, unknown>).login_locked_until as string | null
     if (lockedUntil && new Date(lockedUntil) > new Date()) {
-      const remainingMinutes = Math.ceil(
-        (new Date(lockedUntil).getTime() - Date.now()) / 60_000
-      )
+      const remainingMinutes = Math.ceil((new Date(lockedUntil).getTime() - Date.now()) / 60_000)
       return ApiError.unauthorized(`帳號已鎖定，請 ${remainingMinutes} 分鐘後再試`)
     }
 
@@ -99,7 +97,8 @@ export async function POST(request: NextRequest) {
 
     if (signInError) {
       // 登入失敗：累加失敗計數
-      const currentFailCount = ((employee as Record<string, unknown>).login_failed_count as number) || 0
+      const currentFailCount =
+        ((employee as Record<string, unknown>).login_failed_count as number) || 0
       const newFailCount = currentFailCount + 1
       const MAX_FAILED_ATTEMPTS = 5
       const LOCKOUT_MINUTES = 15
@@ -109,13 +108,12 @@ export async function POST(request: NextRequest) {
         updateData.login_locked_until = new Date(
           Date.now() + LOCKOUT_MINUTES * 60_000
         ).toISOString()
-        logger.warn(`🔒 帳號 ${username}@${code} 已鎖定 ${LOCKOUT_MINUTES} 分鐘（連續 ${newFailCount} 次失敗）`)
+        logger.warn(
+          `🔒 帳號 ${username}@${code} 已鎖定 ${LOCKOUT_MINUTES} 分鐘（連續 ${newFailCount} 次失敗）`
+        )
       }
 
-      await supabase
-        .from('employees')
-        .update(updateData)
-        .eq('id', employee.id)
+      await supabase.from('employees').update(updateData).eq('id', employee.id)
 
       return ApiError.unauthorized('帳號或密碼錯誤')
     }
