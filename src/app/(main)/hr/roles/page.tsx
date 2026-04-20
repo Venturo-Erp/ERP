@@ -33,7 +33,7 @@ import { useRoles, type Role } from '@/data/hooks/useRoles'
 
 export default function RolesPage() {
   const router = useRouter()
-  const { user } = useAuthStore()
+  const { user, isAdmin } = useAuthStore()
   const { toast } = useToast()
   const { isFeatureEnabled, isTabEnabled, loading: featuresLoading } = useWorkspaceFeatures()
 
@@ -415,6 +415,29 @@ export default function RolesPage() {
             )
           })}
       </div>
+    )
+  }
+
+  // 權限檢查：只有 admin 能管理職務與權限
+  if (!isAdmin) {
+    return (
+      <ContentPageLayout
+        title="職務管理"
+        icon={Shield}
+        breadcrumb={[
+          { label: '人資管理', href: '/hr' },
+          { label: '職務管理', href: '/hr/roles' },
+        ]}
+      >
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="p-8 text-center rounded-lg border border-morandi-border bg-morandi-surface">
+            <Shield className="h-12 w-12 mx-auto text-morandi-red mb-4" />
+            <p className="text-morandi-secondary">
+              權限不足,只有管理員能進入職務管理
+            </p>
+          </div>
+        </div>
+      </ContentPageLayout>
     )
   }
 
