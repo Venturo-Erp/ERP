@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useToursSlim, useOrders, useSuppliersSlim } from '@/data'
+import { useEligibleEmployees } from '@/data/hooks/useEligibleEmployees'
 import { useAuthStore } from '@/stores'
 import { RequestFormData, RequestItem } from '../types'
 import type { PaymentItemCategory } from '@/stores/types'
@@ -23,6 +24,8 @@ export function useRequestForm() {
   const { items: tours } = useToursSlim()
   const { items: orders } = useOrders()
   const { items: suppliers } = useSuppliersSlim()
+  // 代墊人候選：職務勾了「finance.advance_payment」can_write 的在職員工
+  const { employees: advanceEmployees } = useEligibleEmployees('finance', 'advance_payment')
 
   // 獲取當前登入用戶
   const currentUser = useAuthStore(state => state.user)
@@ -111,16 +114,23 @@ export function useRequestForm() {
     [requestItems]
   )
 
-  // 供應商清單（員工墊付請改走代墊功能，不再混入供應商）
+  // 供應商 + 合格代墊員工（代墊人下拉從 type='employee' 過濾）
   const combinedSuppliers = useMemo(
-    () =>
-      suppliers.map(s => ({
+    () => [
+      ...suppliers.map(s => ({
         id: s.id,
         name: s.name,
         type: 'supplier' as const,
         group: 'supplier',
       })),
-    [suppliers]
+      ...advanceEmployees.map(e => ({
+        id: e.id,
+        name: e.display_name || e.chinese_name || e.english_name || '',
+        type: 'employee' as const,
+        group: 'employee',
+      })),
+    ],
+    [suppliers, advanceEmployees]
   )
 
   // Add a new empty item to the list
