@@ -106,54 +106,71 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
     )
   }
 
+  // 團類型下拉 JSX（兩處可能用到）
+  const tourTypeSelect = enabledTourCategories.length > 1 && (
+    <div>
+      <label className="text-sm font-medium text-morandi-primary">
+        團類型 <span className="text-morandi-red">*</span>
+      </label>
+      <Select
+        value={newTour.tour_service_type || enabledTourCategories[0]?.id || 'tour_group'}
+        onValueChange={(
+          value:
+            | 'flight'
+            | 'flight_hotel'
+            | 'hotel'
+            | 'car_service'
+            | 'tour_group'
+            | 'visa'
+            | 'esim'
+        ) =>
+          setNewTour(prev => ({
+            ...prev,
+            tour_service_type: value,
+          }))
+        }
+      >
+        <SelectTrigger className="mt-1">
+          <SelectValue placeholder="選擇團類型..." />
+        </SelectTrigger>
+        <SelectContent>
+          {enabledTourCategories.map(category => (
+            <SelectItem key={category.id} value={category.id}>
+              {category.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  )
+
   return (
     <div className="space-y-4">
-      <div>
-        <label className="text-sm font-medium text-morandi-primary">
-          {TOUR_BASIC_INFO.label_name}
-        </label>
-        <Input
-          value={newTour.name}
-          onChange={e => setNewTour(prev => ({ ...prev, name: e.target.value }))}
-          className="mt-1"
-        />
-      </div>
-
-      {/* 團類型選擇（必填） — 只有當啟用 ≥ 2 種時才顯示下拉選單 */}
-      {enabledTourCategories.length > 1 && (
+      {/* 團名 + 團類型 一半一半（若團類型下拉有啟用）*/}
+      {tourTypeSelect ? (
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium text-morandi-primary">
+              {TOUR_BASIC_INFO.label_name}
+            </label>
+            <Input
+              value={newTour.name}
+              onChange={e => setNewTour(prev => ({ ...prev, name: e.target.value }))}
+              className="mt-1"
+            />
+          </div>
+          {tourTypeSelect}
+        </div>
+      ) : (
         <div>
           <label className="text-sm font-medium text-morandi-primary">
-            團類型 <span className="text-morandi-red">*</span>
+            {TOUR_BASIC_INFO.label_name}
           </label>
-          <Select
-            value={newTour.tour_service_type || enabledTourCategories[0]?.id || 'tour_group'}
-            onValueChange={(
-              value:
-                | 'flight'
-                | 'flight_hotel'
-                | 'hotel'
-                | 'car_service'
-                | 'tour_group'
-                | 'visa'
-                | 'esim'
-            ) =>
-              setNewTour(prev => ({
-                ...prev,
-                tour_service_type: value,
-              }))
-            }
-          >
-            <SelectTrigger className="mt-1">
-              <SelectValue placeholder="選擇團類型..." />
-            </SelectTrigger>
-            <SelectContent>
-              {enabledTourCategories.map(category => (
-                <SelectItem key={category.id} value={category.id}>
-                  {category.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            value={newTour.name}
+            onChange={e => setNewTour(prev => ({ ...prev, name: e.target.value }))}
+            className="mt-1"
+          />
         </div>
       )}
 
@@ -262,17 +279,7 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
         </div>
       )}
 
-      <div>
-        <label className="text-sm font-medium text-morandi-primary">
-          {TOUR_BASIC_INFO.label_description}
-        </label>
-        <Input
-          value={newTour.description || ''}
-          onChange={e => setNewTour(prev => ({ ...prev, description: e.target.value }))}
-          placeholder="內部備註，客人看不到"
-          className="mt-1"
-        />
-      </div>
+      {/* 備註已搬到 TourFormShell（與團控並排 grid-cols-2）2026-04-18 */}
     </div>
   )
 }

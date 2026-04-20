@@ -6,15 +6,19 @@
  */
 
 import { logger } from '@/lib/utils/logger'
-import React, { useState, useCallback, useEffect } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { FolderArchive } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { CompanyAssetsList } from './CompanyAssetsList'
 import { CompanyAssetsDialog } from './CompanyAssetsDialog'
 import { supabase } from '@/lib/supabase/client'
-import { mutate as globalMutate } from 'swr'
-import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
+import {
+  useCompanyAssets,
+  createCompanyAsset,
+  updateCompanyAsset,
+  deleteCompanyAsset,
+} from '@/data'
 import { useAuthStore } from '@/stores'
 import { confirm, alert } from '@/lib/ui/alert-dialog'
 import type { CompanyAsset, CompanyAssetType } from '@/types/company-asset.types'
@@ -27,7 +31,6 @@ export const CompanyAssetsPage: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEditMode, setIsEditMode] = useState(false)
   const [editingAsset, setEditingAsset] = useState<CompanyAsset | null>(null)
-  const [assets, setAssets] = useState<CompanyAsset[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [previewAsset, setPreviewAsset] = useState<CompanyAsset | null>(null)
 
@@ -43,40 +46,16 @@ export const CompanyAssetsPage: React.FC = () => {
   // 管理員或有 accounting 權限的可以存取
   const isAdminOrAccountant = isAdmin || user?.permissions?.includes('accounting')
 
-  // 載入資料
-  const fetchAssets = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('company_assets')
-        .select(
-          'id, name, description, category, folder_id, file_url, file_type, file_size, tags, workspace_id, created_at, created_by, updated_at'
-        )
-        .order('created_at', { ascending: false })
-        .limit(500)
+  const { items: assets } = useCompanyAssets()
 
-      if (error) throw error
-
-      // 過濾受限資源（非管理者/會計看不到）
-      const filteredData = (data || []).filter(asset => {
-        const assetWithRestricted = asset as typeof asset & { restricted?: boolean }
-        if (!assetWithRestricted.restricted) return true
-        return isAdminOrAccountant
-      })
-
-      setAssets(filteredData as unknown as CompanyAsset[])
-    } catch (error) {
-      logger.error(COMPANY_ASSETS_LABELS.載入公司資源失敗, error)
-    }
-  }, [isAdminOrAccountant])
-
-  useEffect(() => {
-    fetchAssets()
-  }, [fetchAssets])
-
-  // 過濾資源
-  const filteredAssets = assets.filter(asset =>
-    searchQuery ? asset.name?.toLowerCase().includes(searchQuery.toLowerCase()) : true
-  )
+  const filteredAssets = useMemo(() => {
+    const visibleAssets = (assets as unknown as CompanyAsset[]).filter(asset =>
+      asset.restricted ? isAdminOrAccountant : true
+    )
+    if (!searchQuery) return visibleAssets
+    const keyword = searchQuery.toLowerCase()
+    return visibleAssets.filter(asset => asset.name?.toLowerCase().includes(keyword))
+  }, [assets, isAdminOrAccountant, searchQuery])
 
   const handleOpenAddDialog = useCallback(() => {
     setIsEditMode(false)
@@ -97,42 +76,30 @@ export const CompanyAssetsPage: React.FC = () => {
     setIsDialogOpen(true)
   }, [])
 
-  const handleDelete = useCallback(
-    async (asset: CompanyAsset) => {
-      const confirmed = await confirm(`確定要刪除「${asset.name}」嗎？`, {
-        title: COMPANY_ASSETS_LABELS.刪除資源,
-        type: 'warning',
-      })
-      if (!confirmed) return
+  const handleDelete = useCallback(async (asset: CompanyAsset) => {
+    const confirmed = await confirm(`確定要刪除「${asset.name}」嗎？`, {
+      title: COMPANY_ASSETS_LABELS.刪除資源,
+      type: 'warning',
+    })
+    if (!confirmed) return
 
-      try {
-        const response = await fetch(
-          `/api/storage/upload?bucket=company-assets&path=${encodeURIComponent(asset.file_path)}`,
-          { method: 'DELETE' }
-        )
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || COMPANY_ASSETS_LABELS.刪除失敗)
-        }
-
-        const { error } = await supabase.from('company_assets').delete().eq('id', asset.id)
-        if (error) throw error
-
-        globalMutate(
-          (key: string) => typeof key === 'string' && key.startsWith('entity:company_assets'),
-          undefined,
-          { revalidate: true }
-        )
-        invalidate_cache_pattern('entity:company_assets')
-        await alert(COMPANY_ASSETS_LABELS.刪除成功, 'success')
-        fetchAssets()
-      } catch (error) {
-        logger.error(COMPANY_ASSETS_LABELS.刪除失敗, error)
-        await alert(COMPANY_ASSETS_LABELS.刪除失敗, 'error')
+    try {
+      const response = await fetch(
+        `/api/storage/upload?bucket=company-assets&path=${encodeURIComponent(asset.file_path)}`,
+        { method: 'DELETE' }
+      )
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || COMPANY_ASSETS_LABELS.刪除失敗)
       }
-    },
-    [fetchAssets]
-  )
+
+      await deleteCompanyAsset(asset.id)
+      await alert(COMPANY_ASSETS_LABELS.刪除成功, 'success')
+    } catch (error) {
+      logger.error(COMPANY_ASSETS_LABELS.刪除失敗, error)
+      await alert(COMPANY_ASSETS_LABELS.刪除失敗, 'error')
+    }
+  }, [])
 
   const handlePreview = useCallback((asset: CompanyAsset) => {
     setPreviewAsset(asset)
@@ -205,7 +172,7 @@ export const CompanyAssetsPage: React.FC = () => {
     setIsLoading(true)
     try {
       if (isEditMode && editingAsset) {
-        const updateData: Record<string, unknown> = {
+        const updateData: Partial<CompanyAsset> = {
           name: formData.name,
           asset_type: formData.asset_type,
           restricted: formData.restricted,
@@ -225,18 +192,7 @@ export const CompanyAssetsPage: React.FC = () => {
           updateData.mime_type = formData.file.type
         }
 
-        const { error } = await supabase
-          .from('company_assets')
-          .update(updateData)
-          .eq('id', editingAsset.id)
-
-        if (error) throw error
-        globalMutate(
-          (key: string) => typeof key === 'string' && key.startsWith('entity:company_assets'),
-          undefined,
-          { revalidate: true }
-        )
-        invalidate_cache_pattern('entity:company_assets')
+        await updateCompanyAsset(editingAsset.id, updateData)
         await alert(COMPANY_ASSETS_LABELS.更新成功, 'success')
       } else {
         const file = formData.file!
@@ -249,7 +205,7 @@ export const CompanyAssetsPage: React.FC = () => {
         const userName =
           user?.display_name || user?.chinese_name || user?.personal_info?.email || 'Unknown'
 
-        const { error: dbError } = await supabase.from('company_assets').insert({
+        await createCompanyAsset({
           name: formData.name,
           asset_type: formData.asset_type,
           file_path: filePath,
@@ -259,21 +215,13 @@ export const CompanyAssetsPage: React.FC = () => {
           uploaded_by_name: userName,
           description: formData.restricted ? COMPANY_ASSETS_LABELS.受限資源 : null,
           restricted: formData.restricted,
+          folder_id: null,
           workspace_id: user?.workspace_id ?? null,
         })
-
-        if (dbError) throw dbError
-        globalMutate(
-          (key: string) => typeof key === 'string' && key.startsWith('entity:company_assets'),
-          undefined,
-          { revalidate: true }
-        )
-        invalidate_cache_pattern('entity:company_assets')
         await alert(COMPANY_ASSETS_LABELS.新增成功, 'success')
       }
 
       handleCloseDialog()
-      fetchAssets()
     } catch (error) {
       logger.error(COMPANY_ASSETS_LABELS.儲存失敗, error)
       await alert(
@@ -283,7 +231,7 @@ export const CompanyAssetsPage: React.FC = () => {
     } finally {
       setIsLoading(false)
     }
-  }, [formData, isEditMode, editingAsset, user, handleCloseDialog, fetchAssets])
+  }, [formData, isEditMode, editingAsset, user, handleCloseDialog])
 
   return (
     <ContentPageLayout

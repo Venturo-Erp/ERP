@@ -47,10 +47,11 @@ export function MemberActions({
               e.stopPropagation()
               onEdit(member, 'verify')
             }}
-            className="text-status-warning hover:text-morandi-gold hover:bg-morandi-gold/10 transition-colors p-1 rounded"
+            className="inline-flex items-center gap-1 text-status-warning hover:text-morandi-gold hover:bg-morandi-gold/10 transition-colors px-1.5 py-1 rounded text-xs"
             title={COMP_ORDERS_LABELS.待驗證_點擊驗證}
           >
             <AlertTriangle size={14} />
+            <span>待驗證</span>
           </button>
         )}
         {/* 設為/取消領隊按鈕 */}
@@ -60,7 +61,7 @@ export function MemberActions({
               e.stopPropagation()
               onSetAsLeader(member.id)
             }}
-            className={`transition-colors p-1 rounded ${
+            className={`inline-flex items-center gap-1 transition-colors px-1.5 py-1 rounded text-xs ${
               isLeader
                 ? 'text-morandi-gold bg-morandi-gold/10 hover:bg-morandi-gold/20'
                 : 'text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10'
@@ -68,6 +69,7 @@ export function MemberActions({
             title={isLeader ? '取消領隊' : COMP_ORDERS_LABELS.勾選設為領隊}
           >
             <Crown size={14} />
+            <span>{isLeader ? '取消領隊' : '設為領隊'}</span>
           </button>
         )}
         {/* 辦簽證按鈕 */}
@@ -77,10 +79,11 @@ export function MemberActions({
               e.stopPropagation()
               setVisaOpen(true)
             }}
-            className="text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 transition-colors p-1 rounded"
+            className="inline-flex items-center gap-1 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 transition-colors px-1.5 py-1 rounded text-xs"
             title="快速辦簽證"
           >
             <Plane size={14} />
+            <span>辦簽證</span>
           </button>
         )}
         {/* 編輯按鈕 */}
@@ -89,10 +92,11 @@ export function MemberActions({
             e.stopPropagation()
             onEdit(member, 'edit')
           }}
-          className="text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 transition-colors p-1 rounded"
+          className="inline-flex items-center gap-1 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10 transition-colors px-1.5 py-1 rounded text-xs"
           title={COMP_ORDERS_LABELS.編輯成員}
         >
           <Pencil size={14} />
+          <span>編輯</span>
         </button>
         {/* 刪除按鈕 */}
         <button
@@ -100,10 +104,11 @@ export function MemberActions({
             e.stopPropagation()
             onDelete(member.id)
           }}
-          className="text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 transition-colors p-1 rounded"
+          className="inline-flex items-center gap-1 text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 transition-colors px-1.5 py-1 rounded text-xs"
           title={COMP_ORDERS_LABELS.刪除成員}
         >
           <Trash2 size={14} />
+          <span>刪除</span>
         </button>
       </div>
 

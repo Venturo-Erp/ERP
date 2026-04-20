@@ -69,14 +69,6 @@ export const DEFAULT_NAV_ITEMS: NavItem[] = [
     href: '/orders',
     requiredPermission: 'orders',
   },
-  // 報價單已整合到旅遊團中，從團的視角操作
-  // {
-  //   id: 'quotes',
-  //   icon: 'Calculator',
-  //   label: '報價單',
-  //   href: '/quotes',
-  //   requiredPermission: 'quotes',
-  // },
   {
     id: 'finance',
     icon: 'CreditCard',

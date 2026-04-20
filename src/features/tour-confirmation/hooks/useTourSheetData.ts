@@ -333,31 +333,25 @@ export function useTourSheetData({ tourId, quoteId, departureDate }: UseTourShee
       try {
         const { data: quote } = await supabase
           .from('quotes')
-          .select('versions')
+          .select('categories')
           .eq('id', quoteId)
           .maybeSingle()
 
-        if (!quote?.versions) return
-
-        // 取得最新版本的 categories
-        const versions = quote.versions as Array<{
-          categories?: Array<{
-            id: string
-            name: string
-            items?: Array<{
-              name?: string
-              day?: number
-              quantity?: number | null
+        const categories = quote?.categories as
+          | Array<{
+              id: string
+              name: string
+              items?: Array<{
+                name?: string
+                day?: number
+                quantity?: number | null
+              }>
             }>
-          }>
-        }>
-        if (!versions || versions.length === 0) return
-
-        const latestVersion = versions[versions.length - 1]
-        if (!latestVersion?.categories) return
+          | null
+        if (!categories) return
 
         // 找住宿類別
-        const accommodationCategory = latestVersion.categories.find(
+        const accommodationCategory = categories.find(
           cat => cat.id === 'accommodation' || cat.name === '住宿'
         )
         if (!accommodationCategory?.items) return

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
 import { LINK_CONFIRMATION_LABELS } from '../../constants/labels'
+import { formatMoney } from '@/lib/utils/format-currency'
 
 interface ConfirmationItem {
   id: string
@@ -137,7 +138,7 @@ export function LinkConfirmationDialog({
                   </div>
                   {item.unit_price ? (
                     <span className="text-sm text-morandi-secondary">
-                      {item.currency || 'TWD'} {item.unit_price.toLocaleString()}
+                      {item.currency || 'TWD'} {formatMoney(item.unit_price)}
                     </span>
                   ) : null}
                 </div>

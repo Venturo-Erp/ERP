@@ -1,0 +1,324 @@
+{
+  "schema_version": 2,
+  "started_at": "2026-04-18T00:00:00+08:00",
+  "updated_at": "2026-04-18T06:10:00+08:00",
+  "round": 1,
+  "scope": "12_core_routes",
+  "scope_note": "第一輪砍到 12 核心 + 3 已 audit 基礎頁。其他 119 路由標 BLOCKED_SHALLOW。2026-04-18 William 重排優先順序：end-to-end happy path = 登入 → 建團 → 建單 → 請款 → 收款（國家選單要沒問題）。下一輪優先 /tours/[code] 建團。",
+  "cron_job_id": "d869ef3f",
+  "stages": {
+    "audit": "Shallow audit → VENTURO_ROUTE_AUDIT/NN-xxx.md",
+    "blueprint": "Blueprint 骨架 8 節 → docs/blueprints/NN-xxx.md",
+    "fix_green": "🟢 技術債修復（不動 DB、不需業務決策）",
+    "shippable": "code_green（符合所有 INVARIANT + 🟢 修完）; human_verified 由 William 手動",
+    "verified": "type-check + gitnexus detect_changes + d=1 分析"
+  },
+  "stats": {
+    "audit_done": 15,
+    "blueprint_done": 5,
+    "fix_green_done": 1,
+    "shippable_code_green": 0,
+    "shippable_human_verified": 0,
+    "verified": 0,
+    "blocked_routes": 4,
+    "pending_migrations": 1,
+    "total_d1_warnings": 0,
+    "invariant_violations_found": 10,
+    "invariant_violations_fixed": 0
+  },
+  "routes_core": [
+    {
+      "id": "01-login",
+      "path": "/login",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/01-login.md" },
+        "blueprint": { "status": "done", "file": "docs/blueprints/01-login.md", "date": "2026-04-18" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [
+        { "type": "business_decision", "topic": "must_change_password flow", "adr": "L2" },
+        { "type": "business_decision", "topic": "is_bot 擋登入?", "adr": "§4" },
+        { "type": "business_decision", "topic": "rememberMe 行為 A/B/C", "adr": "L3" },
+        { "type": "business_decision", "topic": "username 欄位重構啟動時機", "adr": "L2" },
+        { "type": "technical_bug", "topic": "is_active=false 未擋", "severity": "P0", "fixable_in_stage_c": true }
+      ],
+      "pending_migrations": [],
+      "d1_impacts": [],
+      "invariant_exceptions": [
+        { "inv": "INV-P01", "reason": "245 行 / styled in JSX / 唯一前門", "adr": "L4" }
+      ]
+    },
+    {
+      "id": "02-dashboard",
+      "path": "/dashboard",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/02-dashboard.md" },
+        "blueprint": { "status": "done", "file": "docs/blueprints/02-dashboard.md", "date": "2026-04-18" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [
+        { "type": "business_decision", "topic": "widget settings localStorage vs DB", "adr": "D2" },
+        { "type": "technical_verify", "topic": "雙胞胎 weather widget 哪個 dead", "fixable_in_stage_c": true },
+        { "type": "technical_verify", "topic": "selectedStats 是否 dead 欄位", "fixable_in_stage_c": true }
+      ],
+      "decided": [
+        { "adr": "D1", "topic": "/ vs /dashboard 重複路由", "decision": "B: / 為主、刪 /dashboard", "date": "2026-04-18" }
+      ],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "03-tools",
+      "path": "/tools/* (flight-itinerary, hotel-voucher, reset-db)",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/03-tools.md" },
+        "blueprint": { "status": "done", "file": "docs/blueprints/03-tools.md", "date": "2026-04-18" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [
+        { "type": "technical_bug", "topic": "reset-db 無 admin guard", "severity": "P0", "fixable_in_stage_c": true, "inv_violated": "INV-A02" },
+        { "type": "business_decision", "topic": "flight/hotel 是半成品還是已用?", "adr": "T3" },
+        { "type": "business_decision", "topic": "會計是否看 voucher 工具?", "adr": "§4" }
+      ],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "04-quotes",
+      "path": "/quotes",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/04-quotes.md" },
+        "blueprint": { "status": "pending" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "05-quotes-id",
+      "path": "/quotes/[id]",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/05-quotes-id.md" },
+        "blueprint": { "status": "pending" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "06-quotes-quick",
+      "path": "/quotes/quick/[id]",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/06-quotes-quick.md" },
+        "blueprint": { "status": "done", "file": "docs/blueprints/06-quotes-quick.md" },
+        "fix_green": { "status": "done", "count": 8, "date": "2026-04-18" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [
+        {
+          "file": "quick_items_array_check.sql",
+          "purpose": "ADD CONSTRAINT jsonb_typeof(quick_quote_items) = 'array'",
+          "status": "draft"
+        }
+      ],
+      "d1_impacts": [
+        { "symbol": "useTourItineraryItemsByTour", "callers_count": 8, "risk": "low" }
+      ]
+    },
+    {
+      "id": "07-tours",
+      "path": "/tours",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/07-tours.md" },
+        "blueprint": { "status": "pending" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "08-tours-code",
+      "path": "/tours/[code]",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/08-tours-code.md" },
+        "blueprint": { "status": "pending" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "09-finance-requests",
+      "path": "/finance/requests",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/09-finance-requests.md" },
+        "blueprint": { "status": "pending" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "10-finance-payments",
+      "path": "/finance/payments",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/10-finance-payments.md" },
+        "blueprint": { "status": "pending" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "11-finance-travel-invoice",
+      "path": "/finance/travel-invoice",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/11-finance-travel-invoice.md" },
+        "blueprint": { "status": "pending" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "12-orders",
+      "path": "/orders",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/12-orders.md" },
+        "blueprint": { "status": "pending" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "13-customers",
+      "path": "/customers",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/13-customers.md" },
+        "blueprint": { "status": "pending" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "14-calendar",
+      "path": "/calendar",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/14-calendar.md" },
+        "blueprint": { "status": "pending" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "15-channel",
+      "path": "/channel",
+      "priority": "core",
+      "stages": {
+        "audit": { "status": "done", "file": "VENTURO_ROUTE_AUDIT/15-channel.md" },
+        "blueprint": { "status": "pending" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [],
+      "pending_migrations": [],
+      "d1_impacts": []
+    },
+    {
+      "id": "16-hr-roles",
+      "path": "/hr/roles",
+      "priority": "core",
+      "note": "2026-04-18 William 重排加入：建團前置（選業務的下拉來源）",
+      "stages": {
+        "audit": { "status": "merged_into_blueprint", "reason": "原不在 12 核心、無 audit、Stage A+B 合併" },
+        "blueprint": { "status": "done", "file": "docs/blueprints/16-hr-roles.md", "date": "2026-04-18" },
+        "fix_green": { "status": "pending" },
+        "shippable_code_green": { "status": "pending" },
+        "verified": { "status": "pending" }
+      },
+      "blockers": [
+        { "type": "business_decision", "topic": "預設職務模板（業務/會計/領隊?）", "adr": "§2" },
+        { "type": "business_decision", "topic": "只 admin 管還是 HR 主管也能?", "adr": "§4" },
+        { "type": "technical_bug", "topic": "無 admin guard", "severity": "P0", "fixable_in_stage_c": true, "inv_violated": "INV-A02" }
+      ],
+      "pending_migrations": [
+        { "file": "20260418_drop_employee_job_roles.sql", "purpose": "ADR-R2 Option A: 單一主職務", "status": "draft_with_preflight_checks" }
+      ],
+      "decided": [
+        { "adr": "R2", "topic": "員工↔職務結構", "decision": "A: 單一主職務、刪 employee_job_roles", "date": "2026-04-18", "migration": "20260418_drop_employee_job_roles.sql" }
+      ],
+      "d1_impacts": []
+    }
+  ],
+  "end_to_end_path_order": [
+    "01-login",
+    "16-hr-roles",
+    "08-tours-code",
+    "07-tours",
+    "12-orders",
+    "09-finance-requests",
+    "10-finance-payments"
+  ],
+  "routes_deferred_shallow": {
+    "count": 119,
+    "status": "BLOCKED_SHALLOW_ROUND_2",
+    "note": "Glob 實掃 134 - 15 core = 119。第二輪每個做 15 分 shallow audit、不做 Blueprint。",
+    "list_source": "Run `find src/app -name page.tsx` at round 2 start"
+  }
+}

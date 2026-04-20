@@ -1,8 +1,15 @@
 import styles from './module-loading.module.css'
 
-export function ModuleLoading() {
+export function ModuleLoading({
+  fullscreen = false,
+  className = '',
+}: { fullscreen?: boolean; className?: string } = {}) {
   return (
-    <div className="w-full h-full min-h-[400px] flex items-center justify-center gap-16 py-12">
+    <div
+      className={`w-full flex items-center justify-center gap-8 py-12 ${
+        fullscreen ? 'min-h-screen' : 'h-full min-h-[400px]'
+      } ${className}`}
+    >
       <BirdLoader delay="0s" />
       <BirdLoader delay="-0.33s" />
       <BirdLoader delay="-0.66s" />

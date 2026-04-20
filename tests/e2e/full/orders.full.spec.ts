@@ -40,17 +40,10 @@ test.describe('訂單管理 - 完整功能測試', () => {
       await expect(addButton).toBeEnabled()
     })
 
-    test('顯示搜尋按鈕並可展開搜尋框', async ({ authenticatedPage: page }) => {
-      // 搜尋按鈕（放大鏡圖標）
-      const searchButton = page.locator('button[title="搜尋"]')
-      await expect(searchButton).toBeVisible()
-
-      // 點擊展開搜尋框
-      await searchButton.click()
-
-      // 等待搜尋框出現
-      const searchInput = page.locator('input[placeholder*="搜尋訂單"]')
-      await expect(searchInput).toBeVisible({ timeout: 3000 })
+    test('搜尋框直接可見（ResponsiveHeader、不是展開式）', async ({ authenticatedPage: page }) => {
+      // 搜尋 input 是直接顯示的、沒有先點按鈕展開
+      const searchInput = page.locator('input[placeholder*="搜尋"]').first()
+      await expect(searchInput).toBeVisible()
     })
   })
 
@@ -79,22 +72,19 @@ test.describe('訂單管理 - 完整功能測試', () => {
 
   test.describe('搜尋功能', () => {
     test('可以輸入搜尋關鍵字', async ({ authenticatedPage: page }) => {
-      // 先點擊搜尋按鈕展開搜尋框
-      const searchButton = page.locator('button[title="搜尋"]')
-      await searchButton.click()
+      // 搜尋 input 直接可見
+      const searchInput = page.locator('input[placeholder*="搜尋"]').first()
+      await expect(searchInput).toBeVisible()
 
-      // 等待搜尋框出現
-      const searchInput = page.locator('input[placeholder*="搜尋訂單"]')
-      await expect(searchInput).toBeVisible({ timeout: 3000 })
-
-      // 輸入搜尋關鍵字
+      // 輸入
       await searchInput.fill('測試')
       await expect(searchInput).toHaveValue('測試')
 
-      // 清空搜尋（點擊 X 按鈕）
+      // 有輸入時、清除 button (title="清除搜尋") 會出現
       const clearButton = page.locator('button[title="清除搜尋"]')
-      if (await clearButton.isVisible()) {
+      if (await clearButton.isVisible().catch(() => false)) {
         await clearButton.click()
+        await expect(searchInput).toHaveValue('')
       }
     })
   })

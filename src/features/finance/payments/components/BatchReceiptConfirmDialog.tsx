@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/components/ui/use-toast'
 import { cn } from '@/lib/utils'
+import { formatMoney } from '@/lib/utils/format-currency'
 import { RECEIPT_TYPE_OPTIONS } from '../types'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores'
@@ -338,7 +339,7 @@ export function BatchReceiptConfirmDialog({
                         {item.receipt.notes || '-'}
                       </td>
                       <td className="py-3 px-3 text-sm text-right font-medium">
-                        ${(item.receipt.receipt_amount || 0).toLocaleString()}
+                        ${formatMoney(item.receipt.receipt_amount || 0)}
                       </td>
                       <td className="py-3 px-3 text-right">
                         {item.isEditing ? (
@@ -358,7 +359,7 @@ export function BatchReceiptConfirmDialog({
                                 'text-morandi-red'
                             )}
                           >
-                            ${item.actualAmount.toLocaleString()}
+                            ${formatMoney(item.actualAmount)}
                             {item.status === 'abnormal' &&
                               item.actualAmount !== item.receipt.receipt_amount && (
                                 <AlertCircle size={14} className="inline ml-1" />
@@ -433,7 +434,7 @@ export function BatchReceiptConfirmDialog({
                         合計
                       </td>
                       <td className="py-2.5 px-3 text-right font-medium">
-                        ${totalAmount.toLocaleString()}
+                        ${formatMoney(totalAmount)}
                       </td>
                       <td
                         className={cn(
@@ -441,7 +442,7 @@ export function BatchReceiptConfirmDialog({
                           totalActual !== totalAmount && 'text-morandi-red'
                         )}
                       >
-                        ${totalActual.toLocaleString()}
+                        ${formatMoney(totalActual)}
                       </td>
                       <td></td>
                     </tr>

@@ -89,7 +89,7 @@ const CATEGORIES = [
       {
         icon: Calculator,
         label: WORKBENCH_LABELS.ITEM_QUOTES,
-        href: '/quotes',
+        href: '/tours',  // 報價已整合進團詳情 tab、這裡先導去團列表
         color: 'bg-morandi-gold/10 text-morandi-gold',
       },
       {

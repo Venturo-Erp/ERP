@@ -11,6 +11,7 @@ import { TodoCard } from '@/components/mobile/cards'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/stores/auth-store'
 import { logger } from '@/lib/utils/logger'
+import { ModuleLoading } from '@/components/module-loading'
 import { M_LABELS } from './constants/labels'
 
 interface Tour {
@@ -117,11 +118,7 @@ export default function MobileHomePage() {
   })
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-morandi-gold" />
-      </div>
-    )
+    return <ModuleLoading fullscreen />
   }
 
   return (

@@ -15,17 +15,25 @@ import { PrintItineraryForm } from '@/features/itinerary/components/PrintItinera
 import { PrintItineraryPreview } from '@/features/itinerary/components/PrintItineraryPreview'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useItineraries, updateTour, useCountries } from '@/data'
+import {
+  useItineraries,
+  updateTour,
+  useCountries,
+  useTourItineraryDays,
+  useTourItineraryItems,
+} from '@/data'
 import type {
   FlightInfo,
   Feature,
   FocusCard,
   DailyItinerary,
+  Activity,
   MeetingPoint,
   TourFormData,
 } from '@/components/editor/tour-form/types'
 import type { Tour } from '@/stores/types'
 import type { ItineraryVersionRecord } from '@/stores/types'
+import { COMP_TOURS_LABELS } from '@/features/tours/constants/labels'
 import {
   Building2,
   UtensilsCrossed,
@@ -123,11 +131,15 @@ function buildDefaultFromTour(tour: Tour, countryName = ''): TourFormData {
 
 /**
  * 從 DB itinerary 資料轉換為 TourFormData
+ *
+ * @param overrideDailyItinerary 若新表（tour_itinerary_days + tour_itinerary_items）有資料，
+ *   從 primary 路徑帶入；否則為 undefined，fallback 讀 JSONB `daily_itinerary`
  */
 function itineraryToFormData(
   itinerary: Record<string, unknown>,
   tour?: Tour,
-  countryName = ''
+  countryName = '',
+  overrideDailyItinerary?: DailyItinerary[]
 ): TourFormData {
   // SSOT：永遠以 tour 為準，無視 itineraries.country/city（歷史包袱，可能含髒資料）
   const ssotCity = tour?.airport_code || ''
@@ -190,7 +202,9 @@ function itineraryToFormData(
     notices: itinerary.notices as TourFormData['notices'],
     cancellationPolicy: itinerary.cancellation_policy as TourFormData['cancellationPolicy'],
     itinerarySubtitle: (itinerary.itinerary_subtitle as string) || '',
-    dailyItinerary: (itinerary.daily_itinerary as DailyItinerary[]) || [],
+    // Primary：新表（tour_itinerary_days + tour_itinerary_items）組出來的版本
+    // Fallback：JSONB `daily_itinerary`（若新表對這個 tour 沒 rows）
+    dailyItinerary: overrideDailyItinerary ?? (itinerary.daily_itinerary as DailyItinerary[]) ?? [],
     price: itinerary.price as string | null,
     priceNote: itinerary.price_note as string | null,
   }
@@ -199,6 +213,9 @@ function itineraryToFormData(
 export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) {
   const { items: itineraries } = useItineraries()
   const { items: countries } = useCountries()
+  // Phase 5a: 展示資料讀新表（tour_itinerary_days + tour_itinerary_items）
+  const { items: allItineraryDays } = useTourItineraryDays()
+  const { items: allItineraryItems } = useTourItineraryItems()
 
   // 解析 country_id → 國家名稱（與 useTourEdit 相同邏輯，避免依賴已廢棄的 tour.location）
   const countryName = useMemo(() => {
@@ -211,6 +228,112 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
     () => itineraries.find(it => it.tour_id === tour.id),
     [itineraries, tour.id]
   )
+
+  // Phase 5a: 從新表組 DailyItinerary[]（相容 JSONB 結構給下游元件）
+  // 若新表對這個 tour 沒任何 row，回傳 undefined → 觸發 JSONB fallback
+  const composedDailyItinerary = useMemo<DailyItinerary[] | undefined>(() => {
+    const dayRows = allItineraryDays.filter(d => d.tour_id === tour.id)
+    if (dayRows.length === 0) return undefined // fallback 到 JSONB
+
+    const itemRows = allItineraryItems.filter(i => i.tour_id === tour.id)
+    const departureDate = tour.departure_date ? new Date(tour.departure_date) : null
+
+    // day_number → date 字串（YYYY-MM-DD）
+    const dateForDay = (dayNumber: number): string => {
+      if (!departureDate) return ''
+      const d = new Date(departureDate)
+      d.setDate(d.getDate() + (dayNumber - 1))
+      const yyyy = d.getFullYear()
+      const mm = String(d.getMonth() + 1).padStart(2, '0')
+      const dd = String(d.getDate()).padStart(2, '0')
+      return `${yyyy}-${mm}-${dd}`
+    }
+
+    // meal preset → 顯示字串
+    const presetToMealText = (preset: string | null): string => {
+      if (preset === 'hotel') return COMP_TOURS_LABELS.飯店早餐
+      if (preset === 'self') return COMP_TOURS_LABELS.敬請自理
+      if (preset === 'airline') return COMP_TOURS_LABELS.機上簡餐
+      return ''
+    }
+
+    // 依 day_number 排序
+    const sortedDays = [...dayRows].sort(
+      (a, b) => (a.day_number || 0) - (b.day_number || 0)
+    )
+
+    return sortedDays.map(dayRow => {
+      const dn = dayRow.day_number
+      const dayItems = itemRows
+        .filter(i => i.day_number === dn)
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+
+      // Activities：category='activities'
+      const activities: Activity[] = dayItems
+        .filter(i => i.category === 'activities')
+        .map(i => ({
+          icon: '📍',
+          title: i.title || '',
+          description: i.description || '',
+          attraction_id: i.resource_id || undefined,
+        }))
+
+      // Meals：優先用 preset 推字串，preset 為 null 時從 items 抓 title
+      const mealItems = dayItems.filter(i => i.category === 'meals')
+      const mealByType = (sub: 'breakfast' | 'lunch' | 'dinner') =>
+        mealItems.find(i => i.sub_category === sub)
+
+      const resolveMeal = (preset: string | null, sub: 'breakfast' | 'lunch' | 'dinner') => {
+        const presetText = presetToMealText(preset)
+        if (presetText) return presetText
+        return mealByType(sub)?.title || mealByType(sub)?.resource_name || ''
+      }
+
+      const breakfast = resolveMeal(dayRow.breakfast_preset, 'breakfast')
+      const lunch = resolveMeal(dayRow.lunch_preset, 'lunch')
+      const dinner = resolveMeal(dayRow.dinner_preset, 'dinner')
+
+      // meal_ids（給下游 syncToCore 用，這裡保留但展示不直接使用）
+      const mealIds = {
+        breakfast: mealByType('breakfast')?.resource_id || undefined,
+        lunch: mealByType('lunch')?.resource_id || undefined,
+        dinner: mealByType('dinner')?.resource_id || undefined,
+      }
+
+      // Accommodation
+      const accommodationItem = dayItems.find(i => i.category === 'accommodation')
+      const accommodation =
+        accommodationItem?.resource_name || accommodationItem?.title || ''
+      const accommodationId = accommodationItem?.resource_id || undefined
+
+      const dayDate = dateForDay(dn)
+
+      // 相容 JSONB 結構；額外保留 accommodation_id / meal_ids 於物件上（現欄位型別未宣告，
+      // 下游 sync 透過 `as Record<string, unknown>` 讀取）
+      const daily: DailyItinerary & {
+        accommodation_id?: string
+        meal_ids?: { breakfast?: string; lunch?: string; dinner?: string }
+      } = {
+        dayLabel: `Day ${dn}`,
+        date: dayDate,
+        title: dayRow.title || '',
+        highlight: '', // 新表沒這欄位 → 空字串
+        description: dayRow.note || '',
+        activities,
+        recommendations: [], // 新表沒這欄位 → 空陣列
+        meals: { breakfast, lunch, dinner },
+        accommodation,
+        isSameAccommodation: dayRow.is_same_accommodation || false,
+        images: [], // 新表沒這欄位 → 空陣列
+        accommodation_id: accommodationId,
+        meal_ids: mealIds,
+      }
+      // route 不在 DailyItinerary interface 裡，但 JSONB 原格式有、下游有讀
+      ;(daily as unknown as { route?: string }).route = dayRow.route || ''
+
+      return daily
+    })
+  }, [allItineraryDays, allItineraryItems, tour.id, tour.departure_date])
 
   const [mode, setMode] = useState<EditorMode>('web')
   const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop')
@@ -225,26 +348,36 @@ export function TourDisplayItineraryTab({ tour }: TourDisplayItineraryTabProps) 
       return itineraryToFormData(
         linkedItinerary as unknown as Record<string, unknown>,
         tour,
-        countryName
+        countryName,
+        composedDailyItinerary
       )
     }
-    return buildDefaultFromTour(tour, countryName)
+    // 沒 linkedItinerary 但新表有資料 → 以預設 + 新表 dailyItinerary 開場
+    const base = buildDefaultFromTour(tour, countryName)
+    if (composedDailyItinerary) {
+      return { ...base, dailyItinerary: composedDailyItinerary }
+    }
+    return base
   })
 
-  // 當找到已有的展示行程或 countryName 解析完成時更新
+  // 當找到已有的展示行程、countryName 解析完成、或新表資料更新時重算
   useEffect(() => {
     if (linkedItinerary) {
       setTourData(
         itineraryToFormData(
           linkedItinerary as unknown as Record<string, unknown>,
           tour,
-          countryName
+          countryName,
+          composedDailyItinerary
         )
       )
     } else {
-      setTourData(buildDefaultFromTour(tour, countryName))
+      const base = buildDefaultFromTour(tour, countryName)
+      setTourData(
+        composedDailyItinerary ? { ...base, dailyItinerary: composedDailyItinerary } : base
+      )
     }
-  }, [linkedItinerary?.id, tour, countryName])
+  }, [linkedItinerary?.id, tour, countryName, composedDailyItinerary])
 
   // Print data state
   const [printData, setPrintData] = useState({

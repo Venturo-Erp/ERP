@@ -6,9 +6,9 @@ import { COMPANY_NAME, COMPANY_NAME_EN } from '@/lib/tenant'
  */
 
 import { useEffect, useState, useMemo, useCallback } from 'react'
-import { mutate as globalMutate } from 'swr'
-import { invalidate_cache_pattern } from '@/lib/cache/indexeddb-cache'
 import React from 'react'
+import { useTourRequests, deleteTourRequest, updateTourRequest } from '@/data'
+import { useTourItineraryItemsByTour } from '@/features/tours/hooks/useTourItineraryItems'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -81,7 +81,15 @@ export function RequirementsList({
   const [tour, setTour] = useState<Tour | null>(null)
   const [itinerary, setItinerary] = useState<any>(null) // 行程表資料（包含 daily_itinerary）
   const [linkedQuoteId, setLinkedQuoteId] = useState<string | null>(propQuoteId || null)
-  const [existingRequests, setExistingRequests] = useState<TourRequest[]>([])
+  // 需求單：走 SWR entity hook，filter by tour_id（SWR type 比 local type 欄位多）
+  const { items: allTourRequests, refresh: refreshRequests } = useTourRequests()
+  const existingRequests = useMemo(
+    () =>
+      (allTourRequests as Array<{ tour_id: string | null }>).filter(
+        r => tourId && r.tour_id === tourId
+      ) as unknown as TourRequest[],
+    [allTourRequests, tourId]
+  )
   // quoteCategories 已移除 — 需求單直接讀核心表
   const [quoteGroupSize, setQuoteGroupSize] = useState<number | null>(null)
   const [memberAgeBreakdown, setMemberAgeBreakdown] = useState<{
@@ -124,7 +132,10 @@ export function RequirementsList({
   const [showCoreRequestDialog, setShowCoreRequestDialog] = useState(false)
   const [selectedSupplierName, setSelectedSupplierName] = useState<string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('')
-  const [coreItems, setCoreItems] = useState<TourItineraryItem[]>([])
+  // 核心表項目：走專屬 hook（已自帶 tour_id filter）
+  const { items: coreItems, refresh: refreshCoreItems } = useTourItineraryItemsByTour(
+    tourId || null
+  )
   // 🆕 從分房系統讀取的房型資料（按飯店分組）
   const [tourRoomsByHotel, setTourRoomsByHotel] = useState<
     Record<string, { room_type: string; capacity: number; quantity: number }[]>
@@ -201,25 +212,7 @@ export function RequirementsList({
             )
           }
 
-          const { data: requests } = await supabase
-            .from('tour_requests')
-            .select(
-              'id, code, supplier_name, supplier_id, supplier_contact, request_type, items, status, hidden, note, created_at, sent_at, sent_via, sent_to, replied_at, confirmed_at, source_type, source_id, created_by'
-            )
-            .eq('tour_id', tourId)
-            .order('created_at', { ascending: true })
-          setExistingRequests((requests as unknown as TourRequest[]) || [])
-
-          // 直接讀核心表（不依賴 quote_id）
-          const { data: items } = await supabase
-            .from('tour_itinerary_items')
-            .select(
-              'id, tour_id, day_number, sort_order, category, sub_category, title, description, resource_type, resource_name, resource_id, supplier_id, supplier_name, service_date, service_date_end, estimated_cost, confirmed_cost, actual_expense, booking_status, booking_reference, booking_confirmed_at, confirmation_status, confirmation_item_id, handled_by, request_status, request_id, quote_status, quoted_cost, show_on_brochure, show_on_quote, show_on_web, workspace_id, created_at, updated_at'
-            )
-            .eq('tour_id', tourId)
-            .order('day_number', { ascending: true })
-            .order('sort_order', { ascending: true })
-          setCoreItems((items as TourItineraryItem[]) || [])
+          // tour_requests + tour_itinerary_items 改走 SWR entity hook（見頂部）
           setStartDate(tourData.departure_date || null)
 
           // 🆕 讀取分房系統的房型資料
@@ -328,11 +321,13 @@ export function RequirementsList({
       } catch (error) {
         logger.error(COMP_REQUIREMENTS_LABELS.載入需求資料失敗, error)
       } finally {
+        // SWR-owned 資料來源也跟著刷新（tour_requests / tour_itinerary_items）
+        await Promise.all([refreshRequests(), refreshCoreItems()])
         setLoading(false)
         setRefreshing(false)
       }
     },
-    [tourId, propQuoteId, tour?.departure_date]
+    [tourId, propQuoteId, tour?.departure_date, refreshRequests, refreshCoreItems]
   )
 
   useEffect(() => {
@@ -482,9 +477,7 @@ export function RequirementsList({
             .update({ hidden })
             .eq('id', existingRequestId)
           if (error) throw error
-          setExistingRequests(prev =>
-            prev.map(r => (r.id === existingRequestId ? { ...r, hidden } : r))
-          )
+          await refreshRequests()
         } else if (itemData && user?.workspace_id) {
           const code = `RQ${Date.now().toString().slice(-8)}`
           const insertData = {
@@ -517,8 +510,7 @@ export function RequirementsList({
             )
             .single()
           if (error) throw error
-          if (newRequest)
-            setExistingRequests(prev => [...prev, newRequest as unknown as TourRequest])
+          if (newRequest) await refreshRequests()
         }
         toast({
           title: hidden ? COMP_REQUIREMENTS_LABELS.已隱藏 : COMP_REQUIREMENTS_LABELS.已恢復顯示,
@@ -564,9 +556,7 @@ export function RequirementsList({
             .update({ items: updatedItems } as never)
             .eq('id', match.id)
           if (error) throw error
-          setExistingRequests(prev =>
-            prev.map(r => (r.id === match.id ? { ...r, items: updatedItems } : r))
-          )
+          await refreshRequests()
         } else if (user?.workspace_id) {
           // 建立新的 draft request
           const code = `RQ${Date.now().toString().slice(-8)}`
@@ -595,7 +585,7 @@ export function RequirementsList({
             )
             .single()
           if (error) throw error
-          if (newReq) setExistingRequests(prev => [...prev, newReq as unknown as TourRequest])
+          if (newReq) await refreshRequests()
         }
       } catch (error) {
         logger.error('自動存檔失敗', error)
@@ -909,16 +899,14 @@ export function RequirementsList({
             }
 
             if (toReject.length > 0) {
-              // 更新狀態為 rejected
-              await supabase
-                .from('tour_requests')
-                .update({
-                  status: 'rejected',
-                  note: `已選擇其他供應商（${delegation.supplier_name || ''}）`,
-                  updated_by: user.id,
-                  needs_cancellation_notice: true, // 標記需要發送取消通知
-                } as never)
-                .in('id', toReject)
+              // 更新狀態為 rejected（走 updateTourRequest，SWR 自動 invalidate）
+              const rejectPayload = {
+                status: 'rejected',
+                note: `已選擇其他供應商（${delegation.supplier_name || ''}）`,
+                updated_by: user.id,
+                needs_cancellation_notice: true, // 標記需要發送取消通知
+              } as unknown as Parameters<typeof updateTourRequest>[1]
+              await Promise.all(toReject.map(id => updateTourRequest(id, rejectPayload)))
 
               // 檢查需要發送的通知
               const { data: rejectedRequests } = await supabase
@@ -973,26 +961,18 @@ export function RequirementsList({
     [user, tourId, coreItems, toast, loadData]
   )
 
-  // 刪除委託
+  // 刪除委託（SWR entity hook 自動處理 cache invalidation）
   const handleDeleteRequest = useCallback(
     async (delegationId: string) => {
       if (!confirm('確定要刪除此委託？')) return
       try {
-        const { error } = await supabase.from('tour_requests').delete().eq('id', delegationId)
-        if (error) throw error
-        globalMutate(
-          (key: string) => typeof key === 'string' && key.startsWith('entity:tour_requests'),
-          undefined,
-          { revalidate: true }
-        )
-        invalidate_cache_pattern('entity:tour_requests')
+        await deleteTourRequest(delegationId)
         toast({ title: '已刪除委託' })
-        await loadData(false)
       } catch {
         toast({ title: '刪除失敗', variant: 'destructive' })
       }
     },
-    [supabase, toast, loadData]
+    [toast]
   )
 
   // 🆕 產生單一供應商的需求單

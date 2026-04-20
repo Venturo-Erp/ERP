@@ -81,8 +81,6 @@ const menuItems: MenuItem[] = [
     icon: ShoppingCart,
     requiredPermission: 'orders',
   },
-  // 報價單已整合到旅遊團中，從團的視角操作
-  // { href: '/quotes', label: '報價單', icon: Calculator, requiredPermission: 'quotes' },
   {
     href: '/finance',
     label: COMP_LAYOUT_LABELS.財務系統,

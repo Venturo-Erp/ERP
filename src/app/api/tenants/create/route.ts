@@ -242,10 +242,10 @@ export async function POST(request: NextRequest) {
       // 找到管理員職務的 ID
       const adminRole = createdRoles?.find(r => r.name === '管理員')
       if (adminRole) {
-        // 更新第一個管理員的 job_info.role_id
+        // 存到頂層 role_id（2026-04-18 統一、不再寫 job_info.role_id）
         await supabaseAdmin
           .from('employees')
-          .update({ job_info: { role_id: adminRole.id } })
+          .update({ role_id: adminRole.id })
           .eq('id', employee.id)
         logger.log(`Admin employee role_id set: ${adminRole.id}`)
 
@@ -275,6 +275,13 @@ export async function POST(request: NextRequest) {
           can_write: true,
         }))
 
+        // 管理員下拉資格：可當承辦業務 / 助理 / 團控（小公司老闆常兼三職）
+        const adminEligibilityPermissions = [
+          { role_id: adminRole.id, module_code: 'tours', tab_code: 'as_sales', can_read: true, can_write: true },
+          { role_id: adminRole.id, module_code: 'tours', tab_code: 'as_assistant', can_read: true, can_write: true },
+          { role_id: adminRole.id, module_code: 'tours', tab_code: 'as_tour_controller', can_read: true, can_write: true },
+        ]
+
         // 設定預設權限（其他職務）
         const accountingRole = createdRoles?.find(r => r.name === '會計')
         const salesRole = createdRoles?.find(r => r.name === '業務')
@@ -283,6 +290,7 @@ export async function POST(request: NextRequest) {
         const defaultTabPermissions = [
           // 管理員權限
           ...adminPermissions,
+          ...adminEligibilityPermissions,
           // 會計權限
           ...(accountingRole
             ? [
@@ -354,6 +362,14 @@ export async function POST(request: NextRequest) {
                   can_read: true,
                   can_write: true,
                 },
+                // 下拉資格：業務可當「承辦業務」（開團時選得到）
+                {
+                  role_id: salesRole.id,
+                  module_code: 'tours',
+                  tab_code: 'as_sales',
+                  can_read: true,
+                  can_write: true,
+                },
                 {
                   role_id: salesRole.id,
                   module_code: 'orders',
@@ -405,6 +421,14 @@ export async function POST(request: NextRequest) {
                   role_id: assistantRole.id,
                   module_code: 'tours',
                   tab_code: null,
+                  can_read: true,
+                  can_write: true,
+                },
+                // 下拉資格：助理可當「助理」（開團時選得到）
+                {
+                  role_id: assistantRole.id,
+                  module_code: 'tours',
+                  tab_code: 'as_assistant',
                   can_read: true,
                   can_write: true,
                 },

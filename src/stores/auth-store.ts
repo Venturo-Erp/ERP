@@ -187,10 +187,11 @@ export const useAuthStore = create<AuthState>()(
           const validateResult = await validateResponse.json()
 
           if (!validateResult.success) {
-            logger.warn(`⚠️ 登入驗證失敗: ${validateResult.message}`)
+            const errMsg = validateResult.error || validateResult.message
+            logger.warn(`⚠️ 登入驗證失敗: ${errMsg}`)
             return {
               success: false,
-              message: validateResult.message || '帳號或密碼錯誤',
+              message: errMsg || '帳號或密碼錯誤',
             }
           }
 

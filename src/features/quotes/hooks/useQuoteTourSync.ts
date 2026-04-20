@@ -59,7 +59,7 @@ export const useQuoteTourSync = ({
 
   const clearTourParam = () => {
     if (searchParams.get('tour_id')) {
-      router.replace('/quotes')
+      router.replace('/tours')  // /quotes 已廢棄、整合進團詳情 tab
     }
   }
 

@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { Tour, Order } from '@/stores/types'
-import { supabase } from '@/lib/supabase/client'
 import { SimpleOrderTable } from '@/features/orders/components/simple-order-table'
 import { AddReceiptDialog } from '@/features/finance/payments'
 import dynamic from 'next/dynamic'
@@ -13,19 +12,17 @@ const AddRequestDialog = dynamic(
   { ssr: false }
 )
 
-// 訂單列表只需要的欄位（29 欄 → 15 欄）
-const ORDER_LIST_SELECT =
-  'id, order_number, code, contact_person, sales_person, assistant, tour_id, tour_name, paid_amount, remaining_amount, total_amount, status, member_count, created_at, workspace_id'
 import { InvoiceDialog } from '@/features/finance/components/invoice-dialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AddOrderForm, type OrderFormData } from '@/features/orders/components/add-order-form'
 import { OrderEditDialog } from '@/features/orders/components/order-edit-dialog'
-import { createOrder } from '@/data'
+import { createOrder, invalidateOrders } from '@/data'
+import { useOrdersListSlim } from '@/hooks/useListSlim'
 import { recalculateParticipants } from '@/features/tours/services/tour-stats.service'
 import type { Order as OrderType } from '@/types/order.types'
 import { logger } from '@/lib/utils/logger'
-import { COMP_TOURS_LABELS, TOUR_ORDERS_LABELS } from '../constants/labels'
+import { TOUR_ORDERS_LABELS } from '../constants/labels'
 import { useAuthStore } from '@/stores'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -35,8 +32,11 @@ interface TourOrdersProps {
 }
 
 export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
+  const { items: allOrders, isLoading: loading } = useOrdersListSlim()
+  const orders = useMemo(
+    () => allOrders.filter(o => o.tour_id === tour.id),
+    [allOrders, tour.id]
+  )
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const currentWorkspace = useAuthStore(state => state.user?.workspace_id)
   const { toast } = useToast()
@@ -58,29 +58,6 @@ export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
   const [selectedOrderForInvoice, setSelectedOrderForInvoice] = useState<Order | null>(null)
 
   // 注意：已移除 onChildDialogChange 邏輯，改用 Dialog level 系統處理多重遮罩
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true)
-      try {
-        const { data, error } = await supabase
-          .from('orders')
-          .select(ORDER_LIST_SELECT)
-          .eq('tour_id', tour.id)
-          .order('created_at', { ascending: false })
-
-        if (error) throw error
-        setOrders((data || []) as Order[])
-      } catch (err) {
-        logger.error(COMP_TOURS_LABELS.載入訂單失敗, err)
-        setOrders([])
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchOrders()
-  }, [tour.id])
 
   // 處理快速收款
   const handleQuickReceipt = useCallback((order: Order) => {
@@ -106,18 +83,10 @@ export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
     setInvoiceDialogOpen(true)
   }, [])
 
-  // 收款成功後重新載入訂單
-  const handleReceiptSuccess = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('orders')
-      .select(ORDER_LIST_SELECT)
-      .eq('tour_id', tour.id)
-      .order('created_at', { ascending: false })
-
-    if (!error && data) {
-      setOrders(data as Order[])
-    }
-  }, [tour.id])
+  // 收款成功後重新載入訂單（SWR 會刷新所有 orders 訂閱者）
+  const handleReceiptSuccess = useCallback(() => {
+    invalidateOrders()
+  }, [])
 
   // 請款成功後的處理
   const handleRequestSuccess = useCallback(() => {
@@ -153,13 +122,7 @@ export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
         setAddDialogOpen(false)
         toast({ title: TOUR_ORDERS_LABELS.新增訂單成功 })
 
-        // 重新載入訂單
-        const { data, error } = await supabase
-          .from('orders')
-          .select(ORDER_LIST_SELECT)
-          .eq('tour_id', tour.id)
-          .order('created_at', { ascending: false })
-        if (!error && data) setOrders(data as Order[])
+        // createOrder 已透過 SWR 更新快取，不需再手動 refetch
 
         // 重算團人數
         recalculateParticipants(tour.id).catch(err => {
@@ -191,7 +154,6 @@ export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
           onQuickPaymentRequest={handleQuickPaymentRequest}
           onQuickInvoice={handleQuickInvoice}
           onEdit={handleEdit}
-          onAdd={() => setAddDialogOpen(true)}
         />
       </div>
 

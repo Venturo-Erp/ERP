@@ -21,6 +21,7 @@ import { supabase } from '@/lib/supabase/client'
 import { MemberCard } from '@/components/mobile/cards/MemberCard'
 import { PaymentCard } from '@/components/mobile/cards/PaymentCard'
 import { TodoCard } from '@/components/mobile/cards/TodoCard'
+import { ModuleLoading } from '@/components/module-loading'
 import { ID_LABELS } from './constants/labels'
 
 type TabType = 'overview' | 'members' | 'rooms' | 'vehicles' | 'finance' | 'todos'
@@ -399,11 +400,7 @@ export default function TourDetailPage() {
   }, [activeTab, tour?.code])
 
   if (isLoading || !tour) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-morandi-gold" />
-      </div>
-    )
+    return <ModuleLoading fullscreen className="bg-background" />
   }
 
   const status = STATUS_CONFIG[tour.status || '開團'] || STATUS_CONFIG['開團']

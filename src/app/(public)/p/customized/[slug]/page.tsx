@@ -36,6 +36,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { supabase } from '@/lib/supabase/client'
 import { logger } from '@/lib/utils/logger'
+import { ModuleLoading } from '@/components/module-loading'
 
 interface CustomizedTour {
   id: string
@@ -320,11 +321,7 @@ export default function WishlistDetailPage({ params }: { params: Promise<{ slug:
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-morandi-primary">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    )
+    return <ModuleLoading fullscreen className="bg-morandi-primary" />
   }
 
   if (notFound) {

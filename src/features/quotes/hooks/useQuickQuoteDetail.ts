@@ -3,7 +3,8 @@
 import { getTodayString } from '@/lib/utils/format-date'
 
 import { logger } from '@/lib/utils/logger'
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect } from 'react'
+import { nanoid } from 'nanoid'
 import { Quote, QuickQuoteItem } from '@/stores/types'
 import { alert } from '@/lib/ui/alert-dialog'
 
@@ -38,8 +39,7 @@ export function useQuickQuoteDetail({ quote, onUpdate }: UseQuickQuoteDetailProp
     handler_name: quote.handler_name || 'William',
     issue_date: quote.issue_date || getTodayString(),
     received_amount: quote.received_amount || 0,
-    expense_description:
-      (quote as typeof quote & { expense_description?: string }).expense_description || '',
+    expense_description: quote.expense_description || '',
   })
 
   // 項目管理
@@ -68,7 +68,7 @@ export function useQuickQuoteDetail({ quote, onUpdate }: UseQuickQuoteDetailProp
   // 項目操作
   const addItem = () => {
     const newItem: QuickQuoteItem = {
-      id: `item-${Date.now()}`,
+      id: nanoid(),
       description: '',
       quantity: 1,
       unit_price: 0,
@@ -83,46 +83,21 @@ export function useQuickQuoteDetail({ quote, onUpdate }: UseQuickQuoteDetailProp
     setItems(prev => prev.filter(item => item.id !== id))
   }
 
-  // Auto-save debounce
-  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pendingItemsRef = useRef<QuickQuoteItem[] | null>(null)
-
-  const triggerAutoSave = useCallback(() => {
-    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current)
-    autoSaveTimer.current = setTimeout(async () => {
-      const latestItems = pendingItemsRef.current
-      if (!latestItems) return
-      try {
-        await onUpdate({ quick_quote_items: latestItems })
-        logger.log('✅ [QuickQuote] 自動存檔')
-      } catch (error) {
-        logger.error('❌ [QuickQuote] 自動存檔失敗:', error)
-      }
-      pendingItemsRef.current = null
-    }, 800) // 800ms debounce
-  }, [onUpdate])
-
   const updateItem = <K extends keyof QuickQuoteItem>(
     id: string,
     field: K,
     value: QuickQuoteItem[K]
   ) => {
-    setItems(prev => {
-      const updated = prev.map(item => {
-        if (item.id === id) {
-          const u = { ...item, [field]: value }
-          if (field === 'quantity' || field === 'unit_price') {
-            u.amount = u.quantity * u.unit_price
-          }
-          return u
+    setItems(prev =>
+      prev.map(item => {
+        if (item.id !== id) return item
+        const u = { ...item, [field]: value }
+        if (field === 'quantity' || field === 'unit_price') {
+          u.amount = u.quantity * u.unit_price
         }
-        return item
+        return u
       })
-      // 🔧 關閉自動存檔，改成手動點「儲存」按鈕
-      // pendingItemsRef.current = updated
-      // triggerAutoSave()
-      return updated
-    })
+    )
   }
 
   // 重新排序項目

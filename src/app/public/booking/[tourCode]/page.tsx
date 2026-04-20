@@ -4,6 +4,7 @@ import { use, useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { BookingDialog } from './components/BookingDialog'
 import { logger } from '@/lib/utils/logger'
+import { ModuleLoading } from '@/components/module-loading'
 
 interface Itinerary {
   id: string
@@ -80,11 +81,7 @@ export default function PublicItineraryPage({ params }: { params: Promise<{ tour
   }, [tourCode, salesPersonRef])
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-morandi-primary"></div>
-      </div>
-    )
+    return <ModuleLoading fullscreen />
   }
 
   if (!itinerary) {

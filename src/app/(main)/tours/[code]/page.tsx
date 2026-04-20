@@ -7,11 +7,13 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Button } from '@/components/ui/button'
-import { Loader2, MapPin, MessageSquare } from 'lucide-react'
+import { MapPin, MessageSquare } from 'lucide-react'
+import { ModuleLoading } from '@/components/module-loading'
 import { fetchTourIdByCode } from '@/data'
 import { useTourDetails } from '@/features/tours/hooks/useTours-advanced'
 import { useWorkspaceChannels } from '@/stores/workspace-store'
 import { TOUR_TABS, TourTabContent } from '@/features/tours/components/TourTabs'
+import { useVisibleModuleTabs } from '@/lib/permissions/hooks'
 import { CODE_LABELS } from './constants/labels'
 import { TOUR_DETAIL_PAGE_LABELS } from '@/features/tours/constants/labels'
 
@@ -37,6 +39,9 @@ export default function TourDetailPage() {
   // 分頁：URL 有指定就用，否則預設總覽
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview')
   const [forceShowPnr, setForceShowPnr] = useState(false)
+
+  // 依 workspace 功能權限過濾可見的 tab（會自動隱藏未開通的付費 tab，如合約、展示行程）
+  const visibleTabs = useVisibleModuleTabs('tours', TOUR_TABS)
 
   // 監聽分頁變更，更新 URL 和 localStorage
   useEffect(() => {
@@ -85,9 +90,7 @@ export default function TourDetailPage() {
           { label: code, href: `/tours/${code}` },
         ]}
       >
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="animate-spin text-morandi-secondary" size={32} />
-        </div>
+        <ModuleLoading />
       </ContentPageLayout>
     )
   }
@@ -123,7 +126,7 @@ export default function TourDetailPage() {
         { label: TOUR_DETAIL_PAGE_LABELS.BREADCRUMB_TOURS, href: '/tours' },
         { label: `${tour.code} ${tour.name}`, href: `/tours/${code}` },
       ]}
-      tabs={[...TOUR_TABS]}
+      tabs={visibleTabs}
       activeTab={activeTab}
       onTabChange={setActiveTab}
       headerActions={

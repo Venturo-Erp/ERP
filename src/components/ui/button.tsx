@@ -15,6 +15,13 @@ const buttonVariants = cva(
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
+        // Morandi 色系常用組合（避免各檔案手寫 className）
+        'morandi-gold':
+          'text-morandi-gold border border-morandi-gold/50 hover:bg-morandi-gold/10 hover:border-morandi-gold',
+        'morandi-destructive':
+          'text-morandi-red border border-morandi-red/30 hover:bg-morandi-red/10',
+        'morandi-destructive-ghost':
+          'text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10',
       },
       size: {
         default: 'h-10 px-4 py-2',

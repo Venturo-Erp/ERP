@@ -1,3 +1,5 @@
+// 📌 開發新 widget 前必讀：docs/WIDGET_DEVELOPMENT_GUIDE.md
+// 特別是付費 widget、同步要加租戶管理頁的開關（見指南 Step 3）
 import {
   Calculator,
   DollarSign,

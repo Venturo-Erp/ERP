@@ -29,19 +29,12 @@ export const BREADCRUMB_CONFIG: Record<string, BreadcrumbConfig> = {
   // ========== 業務管理 ==========
   '/tours': { label: '團管理', parent: '/' },
   '/orders': { label: '訂單管理', parent: '/' },
-  '/quotes': { label: '報價單', parent: '/' },
-  '/quotes/[id]': { label: '報價詳情', parent: '/quotes' },
   '/contracts': { label: '合約管理', parent: '/' },
   '/confirmations': { label: '確認單', parent: '/' },
   '/confirmations/[id]': { label: '確認單詳情', parent: '/confirmations' },
   '/tour-requests': { label: '需求確認單', parent: '/' },
 
-  // ========== 行程管理 ==========
-  '/itinerary': { label: '行程表', parent: '/' },
-  '/itinerary/new': { label: '新建行程', parent: '/itinerary' },
-  '/itinerary/print': { label: '列印預覽', parent: '/itinerary' },
-  '/itinerary/block-editor': { label: '區塊編輯器', parent: '/itinerary' },
-  '/itinerary/brochure-designer': { label: '宣傳冊設計', parent: '/itinerary' },
+  // 註：/quotes 和 /itinerary 已整合進 /tours/[code] 的 tabs、不再是獨立路由（2026-04-20）
 
   // ========== 客戶管理 ==========
   '/customers': { label: '客戶管理', parent: '/' },

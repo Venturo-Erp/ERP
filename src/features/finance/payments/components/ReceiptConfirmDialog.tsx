@@ -5,6 +5,7 @@
  */
 
 import { RECEIPT_CONFIRM_LABELS } from '../../constants/labels'
+import { formatMoney } from '@/lib/utils/format-currency'
 
 import { useState } from 'react'
 import { Check, X, AlertCircle, Trash2 } from 'lucide-react'
@@ -250,7 +251,7 @@ export function ReceiptConfirmDialog({
                   {receipt.notes || '-'}
                 </td>
                 <td className="py-3 px-3 border-b border-r border-border text-sm text-right font-medium">
-                  NT$ {(receipt.receipt_amount || 0).toLocaleString()}
+                  NT$ {formatMoney(receipt.receipt_amount || 0)}
                 </td>
                 {!isConfirmed && (
                   <td className="py-2 px-3 border-b border-border text-center">
@@ -285,7 +286,7 @@ export function ReceiptConfirmDialog({
                       receipt.actual_amount !== receipt.receipt_amount && 'text-morandi-red'
                     )}
                   >
-                    NT$ {(receipt.actual_amount || 0).toLocaleString()}
+                    NT$ {formatMoney(receipt.actual_amount || 0)}
                     {receipt.actual_amount !== receipt.receipt_amount && (
                       <AlertCircle size={14} className="inline ml-1" />
                     )}

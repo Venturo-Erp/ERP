@@ -14,7 +14,6 @@ const PAGE_TITLES: Record<string, string> = {
   '/todos': COMP_LAYOUT_LABELS.待辦事項,
   '/tours': COMP_LAYOUT_LABELS.旅遊團,
   '/orders': COMP_LAYOUT_LABELS.訂單,
-  '/quotes': COMP_LAYOUT_LABELS.報價單,
   '/contracts': COMP_LAYOUT_LABELS.合約,
   '/customers': COMP_LAYOUT_LABELS.客戶,
   '/finance': COMP_LAYOUT_LABELS.財務系統,

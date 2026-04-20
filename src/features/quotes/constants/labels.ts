@@ -532,10 +532,6 @@ export const QUOTE_HOOKS_LABELS = {
   // useQuoteSave
   QUOTE_SAVE_SUCCESS: '報價單已儲存',
 
-  // useQuoteVersion
-  VERSION_CREATE_SUCCESS: '新版本已建立',
-  VERSION_CREATE_FAILED: '建立版本失敗',
-
   // useQuoteGroupCostUpdate
   COST_UPDATE_SUCCESS: '成本已更新',
   COST_UPDATE_FAILED: '更新成本失敗',

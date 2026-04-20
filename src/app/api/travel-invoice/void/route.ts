@@ -16,7 +16,7 @@ import { voidInvoiceSchema } from '@/lib/validations/api-schemas'
 
 /**
  * 檢查員工是否有作廢發票的權限
- * 檢查 job_info.role_id 對應的職務是否為管理員
+ * 檢查職務是否為管理員（role_id 優先讀頂層、fallback nested、2026-04-18 統一過渡期）
  */
 async function checkVoidPermission(employeeId: string): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
@@ -24,7 +24,7 @@ async function checkVoidPermission(employeeId: string): Promise<boolean> {
   // 取得員工的職務 ID
   const { data: employee, error } = await adminClient
     .from('employees')
-    .select('job_info, permissions')
+    .select('role_id, job_info, permissions')
     .eq('id', employeeId)
     .single()
 
@@ -36,14 +36,16 @@ async function checkVoidPermission(employeeId: string): Promise<boolean> {
     return true
   }
 
-  // 檢查職務是否為管理員
+  // 檢查職務是否為管理員（先頂層、後 nested）
   const jobInfo = employee.job_info as { role_id?: string } | null
-  if (!jobInfo?.role_id) return false
+  const roleId =
+    (employee as unknown as { role_id?: string }).role_id || jobInfo?.role_id
+  if (!roleId) return false
 
   const { data: role } = await adminClient
     .from('workspace_roles')
     .select('is_admin')
-    .eq('id', jobInfo.role_id)
+    .eq('id', roleId)
     .single()
 
   return role?.is_admin === true

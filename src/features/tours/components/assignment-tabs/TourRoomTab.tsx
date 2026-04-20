@@ -15,7 +15,8 @@ import { createTourRoom, deleteTourRoom } from '@/data/entities/tour-rooms'
 import { useAuthStore } from '@/stores'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, Trash2, Bed, Hotel, Save } from 'lucide-react'
+import { Plus, Bed, Hotel, Save } from 'lucide-react'
+import { InlineEditTable, type InlineEditColumn } from '@/components/ui/inline-edit-table'
 import { toast } from 'sonner'
 import { confirm } from '@/lib/ui/alert-dialog'
 import type { TourRoomStatus } from '@/types/room-vehicle.types'
@@ -343,62 +344,77 @@ export function TourRoomTab({ tourId, tour, members, tourNights }: TourRoomTabPr
       </div>
 
       {/* 房型輸入列表 */}
-      <div className="py-4 space-y-2">
-        {/* 表頭 */}
-        <div className="grid grid-cols-[1fr_80px_80px_40px] gap-2 px-2 text-xs text-morandi-muted">
-          <span>房型名稱</span>
-          <span className="text-center">／幾人房</span>
-          <span className="text-center">／數量</span>
-          <span></span>
-        </div>
-
-        {/* 輸入行 */}
-        {roomTypeRows.map((row, index) => (
-          <div key={row.id} className="grid grid-cols-[1fr_80px_80px_40px] gap-2 items-center">
-            <Input
-              value={row.room_type}
-              onChange={e => updateRow(row.id, 'room_type', e.target.value)}
-              placeholder="標準雙人房..."
-              className="h-9"
-            />
-            <Input
-              type="number"
-              min={1}
-              max={10}
-              value={row.capacity || ''}
-              onChange={e => updateRow(row.id, 'capacity', parseInt(e.target.value) || 2)}
-              placeholder="2"
-              className="h-9 text-center"
-            />
-            <Input
-              type="number"
-              min={0}
-              value={row.quantity || ''}
-              onChange={e => updateRow(row.id, 'quantity', parseInt(e.target.value) || 0)}
-              placeholder="0"
-              className="h-9 text-center"
-            />
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-9 w-9 p-0 text-morandi-muted hover:text-morandi-red"
-              onClick={() => removeRow(row.id)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
-        ))}
-
-        {/* 新增行按鈕 */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={addRow}
-          className="w-full mt-2 gap-1 text-morandi-muted"
-        >
-          <Plus className="h-4 w-4" />
-          新增房型
-        </Button>
+      <div className="py-4">
+        <InlineEditTable<RoomTypeRow>
+          variant="minimal"
+          rows={roomTypeRows}
+          columns={
+            [
+              {
+                key: 'room_type',
+                label: '房型名稱',
+                render: ({ row }) => (
+                  <Input
+                    value={row.room_type}
+                    onChange={e => updateRow(row.id, 'room_type', e.target.value)}
+                    placeholder="標準雙人房..."
+                    className="h-9"
+                  />
+                ),
+              },
+              {
+                key: 'capacity',
+                label: '／幾人房',
+                width: '80px',
+                align: 'center',
+                render: ({ row }) => (
+                  <Input
+                    type="number"
+                    min={1}
+                    max={10}
+                    value={row.capacity || ''}
+                    onChange={e => updateRow(row.id, 'capacity', parseInt(e.target.value) || 2)}
+                    placeholder="2"
+                    className="h-9 text-center"
+                  />
+                ),
+              },
+              {
+                key: 'quantity',
+                label: '／數量',
+                width: '80px',
+                align: 'center',
+                render: ({ row }) => (
+                  <Input
+                    type="number"
+                    min={0}
+                    value={row.quantity || ''}
+                    onChange={e => updateRow(row.id, 'quantity', parseInt(e.target.value) || 0)}
+                    placeholder="0"
+                    className="h-9 text-center"
+                  />
+                ),
+              },
+            ] satisfies InlineEditColumn<RoomTypeRow>[]
+          }
+          onRemove={index => removeRow(roomTypeRows[index].id)}
+          canRemove={() => true}
+          footer={
+            <tr>
+              <td colSpan={4} className="pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={addRow}
+                  className="w-full gap-1 text-morandi-muted"
+                >
+                  <Plus className="h-4 w-4" />
+                  新增房型
+                </Button>
+              </td>
+            </tr>
+          }
+        />
       </div>
 
       {/* 統計與儲存 */}

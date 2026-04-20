@@ -34,6 +34,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabase/client'
+import { ModuleLoading } from '@/components/module-loading'
 
 interface TourData {
   id: string
@@ -232,11 +233,7 @@ export default function PublicTourPage({ params }: { params: Promise<{ code: str
 
   // Loading
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-public-primary"></div>
-      </div>
-    )
+    return <ModuleLoading fullscreen className="bg-background" />
   }
 
   // 404

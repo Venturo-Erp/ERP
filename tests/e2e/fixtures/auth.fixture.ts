@@ -19,12 +19,12 @@ export async function login(page: Page, credentials = TEST_CREDENTIALS) {
   await page.goto('/login')
 
   // 等待頁面載入
-  await page.waitForSelector('input[placeholder="輸入公司代號"]')
+  await page.waitForSelector('input[placeholder="公司代號"]')
 
   // 填寫表單
-  await page.fill('input[placeholder="輸入公司代號"]', credentials.companyCode)
-  await page.fill('input[placeholder="例：E001"]', credentials.username)
-  await page.fill('input[placeholder="輸入密碼"]', credentials.password)
+  await page.fill('input[placeholder="公司代號"]', credentials.companyCode)
+  await page.fill('input[placeholder="帳號（例：E001）"]', credentials.username)
+  await page.fill('input[placeholder="密碼"]', credentials.password)
 
   // 點擊登入按鈕
   await page.click('button[type="submit"]')

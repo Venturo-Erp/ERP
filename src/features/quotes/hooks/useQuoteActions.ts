@@ -39,7 +39,7 @@ interface UseQuoteActionsProps {
   // 快速報價單相關
   quickQuoteItems?: QuickQuoteItem[]
   quickQuoteCustomerInfo?: QuickQuoteCustomerInfo
-  // 砍次表相關
+  // 檻次表相關
   tierPricings?: TierPricing[]
   // 核心表相關
   coreItems?: TourItineraryItem[]

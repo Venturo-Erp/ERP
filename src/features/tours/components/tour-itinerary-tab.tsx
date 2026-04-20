@@ -30,8 +30,6 @@ import {
   Plus,
   MapPin,
   Map,
-  Globe,
-  List,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -40,8 +38,14 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { logger } from '@/lib/utils/logger'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores'
-import { useWorkspaceFeatures } from '@/lib/permissions/hooks'
-import { useItineraries, createItinerary, updateItinerary } from '@/data'
+import {
+  useItineraries,
+  createItinerary,
+  updateItinerary,
+  useTourItineraryDays,
+  createTourItineraryDay,
+  deleteTourItineraryDay,
+} from '@/data'
 import { updateTour } from '@/data/entities/tours'
 import { useTourDisplay } from '@/features/tours/utils/tour-display'
 import { useFlightSearch } from '@/hooks'
@@ -56,7 +60,6 @@ import type { FlightInfo } from '@/types/flight.types'
 import { COMP_TOURS_LABELS, TOUR_ITINERARY_TAB_LABELS } from '../constants/labels'
 import { getPreviewDailyData as computePreviewData } from '@/features/tours/components/itinerary-editor/format-itinerary'
 import { ResourcePanel } from '@/components/resource-panel/ResourcePanel'
-import { type MentionInputHandle } from './mention-input'
 import { DayRow, type DailyScheduleItem } from './itinerary/DayRow'
 import { useItineraryDrag } from '../hooks/useItineraryDrag'
 import { createSupabaseBrowserClient } from '@/lib/supabase/client'
@@ -74,14 +77,15 @@ interface TourItineraryTabProps {
 // Main Component
 // ============================================================
 export function TourItineraryTab({ tour }: TourItineraryTabProps) {
-  const { isFeatureEnabled } = useWorkspaceFeatures()
-  const hasWebItinerary = isFeatureEnabled('itinerary')
-  const [itineraryMode, setItineraryMode] = useState<'simple' | 'web'>('simple')
-
   const { user: currentUser, isAdmin } = useAuthStore()
   const { items: itineraries, refresh } = useItineraries()
   const { syncToCore } = useSyncItineraryToCore()
   const { items: coreItems, refresh: refreshCoreItems } = useTourItineraryItemsByTour(tour.id)
+  const { items: allItineraryDays } = useTourItineraryDays()
+  const tourItineraryDays = useMemo(
+    () => allItineraryDays.filter(d => d.tour_id === tour.id),
+    [allItineraryDays, tour.id]
+  )
 
   // 權限：是否可以編輯資料庫
   const canEditDatabase = isAdmin || currentUser?.permissions?.includes('database') || false
@@ -100,7 +104,6 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   const pendingSaveRef = useRef<(() => Promise<void>) | null>(null)
   const [currentItineraryId, setCurrentItineraryId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit')
-  const mentionInputRefs = useRef<Record<number, MentionInputHandle | null>>({})
 
   // Form data
   const [title, setTitle] = useState('')
@@ -337,6 +340,13 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               }
             }
 
+            // 新表優先：若 tour_itinerary_days 有 rows，day-level metadata 從新表讀
+            const daysByNumber: Record<number, (typeof tourItineraryDays)[number]> = {}
+            for (const d of tourItineraryDays) {
+              if (d.day_number) daysByNumber[d.day_number] = d
+            }
+            const hasNewTableRows = tourItineraryDays.length > 0
+
             const schedule = (
               itinerary.daily_itinerary as Array<{
                 title?: string
@@ -351,6 +361,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               const coreMeals = coreMealsByDay[dayNum]
               const coreAccom = coreAccomByDay[dayNum]
               const coreActs = coreActivitiesByDay[dayNum]
+              const dayRow = daysByNumber[dayNum]
 
               const breakfast = coreMeals?.breakfast || day.meals?.breakfast || ''
               const lunch = coreMeals?.lunch || day.meals?.lunch || ''
@@ -380,17 +391,47 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                 routeText = ''
               }
 
+              // 新表優先：如果該 tour 有 tour_itinerary_days row，override day-level 欄位
+              const route = hasNewTableRows ? (dayRow?.route ?? '') : routeText
+              const note = hasNewTableRows
+                ? dayRow?.note || undefined
+                : day.description || undefined
+              const blocks = hasNewTableRows
+                ? ((dayRow?.blocks as DailyScheduleItem['blocks']) ?? undefined)
+                : undefined
+              const sameAsPrevious = hasNewTableRows
+                ? dayRow?.is_same_accommodation ?? false
+                : day.isSameAccommodation || false
+              const hotelBreakfast = hasNewTableRows
+                ? dayRow?.breakfast_preset === 'hotel'
+                : breakfast === COMP_TOURS_LABELS.飯店早餐
+              const lunchSelf = hasNewTableRows
+                ? dayRow?.lunch_preset === 'self'
+                : lunch === COMP_TOURS_LABELS.敬請自理
+              const dinnerSelf = hasNewTableRows
+                ? dayRow?.dinner_preset === 'self'
+                : dinner === COMP_TOURS_LABELS.敬請自理
+              const lunchAirline = hasNewTableRows
+                ? dayRow?.lunch_preset === 'airline'
+                : false
+              const dinnerAirline = hasNewTableRows
+                ? dayRow?.dinner_preset === 'airline'
+                : false
+
               return {
                 day: dayNum,
-                route: routeText,
+                route,
                 meals: { breakfast, lunch, dinner },
                 accommodation,
-                hotelBreakfast: breakfast === COMP_TOURS_LABELS.飯店早餐,
-                lunchSelf: lunch === COMP_TOURS_LABELS.敬請自理,
-                dinnerSelf: dinner === COMP_TOURS_LABELS.敬請自理,
-                sameAsPrevious: day.isSameAccommodation || false,
+                hotelBreakfast,
+                lunchSelf,
+                dinnerSelf,
+                lunchAirline,
+                dinnerAirline,
+                sameAsPrevious,
                 attractions: attractions.length > 0 ? attractions : undefined,
-                note: day.description || undefined,
+                blocks,
+                note,
                 accommodationId: coreAccomIdByDay[dayNum] || undefined,
                 mealIds: coreMealIdsByDay[dayNum] || undefined,
               }
@@ -425,6 +466,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
     tour.return_date,
     itineraries.length,
     coreItems.length,
+    tourItineraryDays.length,
   ])
 
   // Update day schedule (with ID clearing for accommodation/meals)
@@ -649,32 +691,6 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
     }
     return ids
   }, [dailySchedule])
-
-  // Handle mention (@) attraction selection
-  const handleMentionSelect = useCallback(
-    (dayIdx: number, attraction: { id: string; name: string }) => {
-      // 檢查整個行程是否已有這個景點（景點唯一性）
-      const existingDay = dailySchedule.findIndex((day, idx) =>
-        day.attractions?.some(a => a.id === attraction.id)
-      )
-
-      if (existingDay !== -1) {
-        // 景點已存在於其他天
-        toast.error(`此景點已在 Day ${existingDay + 1} 排入行程，無法重複新增`, { duration: 5000 })
-        return
-      }
-
-      setDailySchedule(prev => {
-        const newSchedule = [...prev]
-        const day = newSchedule[dayIdx]
-        if (!day) return prev
-        const existing = day.attractions || []
-        newSchedule[dayIdx] = { ...day, attractions: [...existing, attraction] }
-        return newSchedule
-      })
-    },
-    [dailySchedule]
-  )
 
   // Preview data
   const getPreviewDailyData = useCallback(() => {
@@ -922,6 +938,34 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
           // 回寫 tours.itinerary_id（讓需求分頁等功能能找到行程）
           await updateTour(tour.id, { itinerary_id: newItinerary.id })
           toast.success(TOUR_ITINERARY_TAB_LABELS.行程表已建立)
+        }
+      }
+
+      // Dual-write: 同步 day-level metadata 到 tour_itinerary_days（Phase 2 過渡策略）
+      // delete-then-insert：先清掉這個 tour 的舊 rows，再依 dailySchedule 重建
+      if (savedItineraryId) {
+        try {
+          for (const d of tourItineraryDays) {
+            await deleteTourItineraryDay(d.id)
+          }
+          for (const day of dailySchedule) {
+            await createTourItineraryDay({
+              tour_id: tour.id,
+              itinerary_id: savedItineraryId,
+              day_number: day.day,
+              title: day.route || null,
+              route: day.route || null,
+              note: day.note || null,
+              blocks: (day.blocks as unknown[]) || null,
+              is_same_accommodation: day.sameAsPrevious || false,
+              breakfast_preset: day.hotelBreakfast ? 'hotel' : null,
+              lunch_preset: day.lunchSelf ? 'self' : day.lunchAirline ? 'airline' : null,
+              dinner_preset: day.dinnerSelf ? 'self' : day.dinnerAirline ? 'airline' : null,
+            })
+          }
+        } catch (err) {
+          logger.error('tour_itinerary_days dual-write 失敗', err)
+          toast.error('每日行程表同步失敗（主存檔已完成）')
         }
       }
 
@@ -1310,45 +1354,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
   // ============================================================
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* 簡易行程 / 網頁行程 切換（僅開通功能時顯示） */}
-      {hasWebItinerary && (
-        <div className="flex items-center gap-1 px-1 pb-3">
-          <button
-            onClick={() => setItineraryMode('simple')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              itineraryMode === 'simple'
-                ? 'bg-morandi-gold text-white'
-                : 'text-morandi-secondary hover:bg-morandi-container'
-            }`}
-          >
-            <List className="w-3.5 h-3.5" />
-            簡易行程
-          </button>
-          <button
-            onClick={() => setItineraryMode('web')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              itineraryMode === 'web'
-                ? 'bg-morandi-gold text-white'
-                : 'text-morandi-secondary hover:bg-morandi-container'
-            }`}
-          >
-            <Globe className="w-3.5 h-3.5" />
-            網頁行程
-          </button>
-        </div>
-      )}
-
-      {/* 網頁行程 */}
-      {itineraryMode === 'web' && hasWebItinerary ? (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center text-morandi-muted py-16">
-            <Globe className="h-12 w-12 mx-auto mb-3 opacity-40" />
-            <p className="text-lg font-medium">網頁行程編輯器</p>
-            <p className="text-sm mt-1">即將推出 — 從 SSOT 核心表讀取資料，產出精美網頁行程</p>
-          </div>
-        </div>
-      ) : (
-        <DndContext
+      <DndContext
           sensors={sensors}
           collisionDetection={pointerWithin}
           onDragStart={handleDragStart}
@@ -1874,7 +1880,6 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                             updateDaySchedule={updateDaySchedule}
                             removeAttraction={removeAttraction}
                             reorderAttractions={reorderAttractions}
-                            handleMentionSelect={handleMentionSelect}
                             updateBlocks={(dayIdx, blocks) => {
                               setDailySchedule(prev => {
                                 const newSchedule = [...prev]
@@ -1882,7 +1887,6 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
                                 return newSchedule
                               })
                             }}
-                            mentionInputRefs={mentionInputRefs}
                             tourLocation={tourDestinationDisplay}
                             getDateLabel={getDateLabel}
                             getPreviousAccommodation={getPreviousAccommodation}
@@ -1957,7 +1961,6 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
             />
           </div>
         </DndContext>
-      )}
     </div>
   )
 }

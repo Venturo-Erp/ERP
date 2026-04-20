@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { RequestDateInput } from './RequestDateInput'
+import { formatMoney } from '@/lib/utils/format-currency'
 import { useRequestOperations } from '../hooks/useRequestOperations'
 import { useAuthStore } from '@/stores/auth-store'
 import { PaymentItemCategory } from '@/stores/types'
@@ -191,7 +192,7 @@ export function QuickRequestFromItemDialog({
 
             {item.estimatedCost > 0 && (
               <div className="text-xs text-morandi-secondary">
-                預估成本：NT$ {item.estimatedCost.toLocaleString()}
+                預估成本：NT$ {formatMoney(item.estimatedCost)}
               </div>
             )}
           </div>

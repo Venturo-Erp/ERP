@@ -5,7 +5,11 @@ import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Star, Edit2, Power, Trash2, X, Save } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
-import { deleteMichelinRestaurant } from '@/data/entities/michelin-restaurants'
+import {
+  useMichelinRestaurants,
+  updateMichelinRestaurant,
+  deleteMichelinRestaurant,
+} from '@/data/entities/michelin-restaurants'
 import { toast } from 'sonner'
 import { EnhancedTable } from '@/components/ui/enhanced-table'
 import { cn } from '@/lib/utils'
@@ -42,68 +46,44 @@ interface MichelinRestaurantsTabProps {
 }
 
 export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRestaurantsTabProps) {
-  const [restaurants, setRestaurants] = useState<MichelinRestaurant[]>([])
-  const [loading, setLoading] = useState(true)
+  const { items, loading } = useMichelinRestaurants()
+  const restaurants = items as unknown as MichelinRestaurant[]
+
   const [countries, setCountries] = useState<Array<{ id: string; name: string }>>([])
   const [cities, setCities] = useState<Array<{ id: string; name: string }>>([])
 
   const [editingRestaurant, setEditingRestaurant] = useState<MichelinRestaurant | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-  // 載入餐廳資料
+  // 載入用到的國家和城市資料
   useEffect(() => {
-    loadRestaurants()
-  }, [])
+    if (restaurants.length === 0) return
 
-  async function loadRestaurants() {
-    try {
-      const { data, error } = await supabase
-        .from('michelin_restaurants')
-        .select(
-          'id, name, english_name, description, country_id, city_id, michelin_stars, cuisine_type, address, images, is_active, created_at'
-        )
-        .order('michelin_stars', { ascending: false })
-        .order('name')
-        .limit(1000)
+    const countryIds = Array.from(new Set(restaurants.map(r => r.country_id).filter(Boolean)))
+    const cityIds = Array.from(new Set(restaurants.map(r => r.city_id).filter(Boolean)))
 
-      if (error) throw error
-      setRestaurants((data as MichelinRestaurant[]) || [])
-
-      // 載入用到的國家和城市資料
-      if (data && data.length > 0) {
-        const countryIds = Array.from(new Set(data.map(r => r.country_id).filter(Boolean)))
-        const cityIds = Array.from(new Set(data.map(r => r.city_id).filter(Boolean)))
-
-        if (countryIds.length > 0) {
-          supabase
-            .from('countries')
-            .select('id, name')
-            .in('id', countryIds)
-            .limit(500)
-            .then(({ data }) => {
-              if (data) setCountries(data.map(c => ({ id: c.id, name: c.name })))
-            })
-        }
-
-        if (cityIds.length > 0) {
-          supabase
-            .from('cities')
-            .select('id, name')
-            .in('id', cityIds)
-            .limit(500)
-            .then(({ data }) => {
-              if (data) setCities(data.map(c => ({ id: c.id, name: c.name })))
-            })
-        }
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      logger.error('載入米其林餐廳失敗:', error)
-      toast.error(MICHELIN_RESTAURANTS_TAB_LABELS.載入失敗 + errorMessage)
-    } finally {
-      setLoading(false)
+    if (countryIds.length > 0) {
+      supabase
+        .from('countries')
+        .select('id, name')
+        .in('id', countryIds)
+        .limit(500)
+        .then(({ data }) => {
+          if (data) setCountries(data.map(c => ({ id: c.id, name: c.name })))
+        })
     }
-  }
+
+    if (cityIds.length > 0) {
+      supabase
+        .from('cities')
+        .select('id, name')
+        .in('id', cityIds)
+        .limit(500)
+        .then(({ data }) => {
+          if (data) setCities(data.map(c => ({ id: c.id, name: c.name })))
+        })
+    }
+  }, [restaurants])
 
   // 刪除餐廳
   const handleDelete = async (id: string) => {
@@ -115,9 +95,9 @@ export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRest
 
     try {
       await deleteMichelinRestaurant(id)
-      await loadRestaurants()
       toast.success(MICHELIN_RESTAURANTS_TAB_LABELS.刪除成功)
     } catch (error) {
+      logger.error('刪除米其林餐廳失敗:', error)
       toast.error(MICHELIN_RESTAURANTS_TAB_LABELS.刪除失敗)
     }
   }
@@ -139,16 +119,11 @@ export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRest
     if (!editingRestaurant) return
 
     try {
-      const { error } = await supabase
-        .from('michelin_restaurants')
-        .update(updatedData)
-        .eq('id', editingRestaurant.id)
-
-      if (error) throw error
-      await loadRestaurants()
+      await updateMichelinRestaurant(editingRestaurant.id, updatedData as never)
       handleCloseEdit()
       toast.success(MICHELIN_RESTAURANTS_TAB_LABELS.更新成功)
     } catch (error) {
+      logger.error('更新米其林餐廳失敗:', error)
       toast.error(MICHELIN_RESTAURANTS_TAB_LABELS.更新失敗)
     }
   }
@@ -156,24 +131,12 @@ export default function MichelinRestaurantsTab({ selectedCountry }: MichelinRest
   // 切換啟用狀態
   const handleToggleStatus = async (restaurant: MichelinRestaurant) => {
     const newStatus = !restaurant.is_active
-    setRestaurants(prev =>
-      prev.map(item => (item.id === restaurant.id ? { ...item, is_active: newStatus } : item))
-    )
 
     try {
-      const { error } = await supabase
-        .from('michelin_restaurants')
-        .update({ is_active: newStatus })
-        .eq('id', restaurant.id)
-
-      if (error) throw error
+      await updateMichelinRestaurant(restaurant.id, { is_active: newStatus } as never)
       toast.success(newStatus ? '已啟用' : MICHELIN_RESTAURANTS_TAB_LABELS.已停用)
     } catch (error) {
-      setRestaurants(prev =>
-        prev.map(item =>
-          item.id === restaurant.id ? { ...item, is_active: restaurant.is_active } : item
-        )
-      )
+      logger.error('切換米其林餐廳狀態失敗:', error)
       toast.error(MICHELIN_RESTAURANTS_TAB_LABELS.更新失敗)
     }
   }

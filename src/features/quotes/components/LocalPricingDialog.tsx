@@ -10,9 +10,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Plus, Trash2, MapPin, AlertTriangle, X, Check } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { MapPin, AlertTriangle, X, Check, Plus } from 'lucide-react'
 import { ACCOMMODATION_ITEM_ROW_LABELS, LOCAL_PRICING_DIALOG_LABELS } from '../constants/labels'
+import { InlineEditTable, type InlineEditColumn } from '@/components/ui/inline-edit-table'
 
 export interface LocalTier {
   id: string
@@ -147,53 +147,67 @@ export const LocalPricingDialog: React.FC<LocalPricingDialogProps> = ({
         </div>
 
         {/* 檻次輸入區 */}
-        <div className="space-y-3">
-          <div className="grid grid-cols-[80px_1fr_1fr_40px] gap-2 text-xs text-morandi-secondary font-medium px-1">
-            <span>{LOCAL_PRICING_DIALOG_LABELS.檻次}</span>
-            <span>{LOCAL_PRICING_DIALOG_LABELS.人數門檻}</span>
-            <span>{LOCAL_PRICING_DIALOG_LABELS.單價成本}</span>
-            <span></span>
-          </div>
-
-          {tiers.map((tier, index) => (
-            <div key={tier.id} className="grid grid-cols-[80px_1fr_1fr_40px] gap-2 items-center">
-              <span className="text-sm text-morandi-secondary px-1">
-                {LOCAL_PRICING_DIALOG_LABELS.檻次編號.replace('{index}', `${index + 1}`)}
-              </span>
-              <Input
-                type="number"
-                value={tier.participants || ''}
-                onChange={e => handleUpdateTier(tier.id, 'participants', e.target.value)}
-                placeholder={LOCAL_PRICING_DIALOG_LABELS.人數}
-                className="h-9 text-sm"
-              />
-              <Input
-                type="number"
-                value={tier.unitPrice || ''}
-                onChange={e => handleUpdateTier(tier.id, 'unitPrice', e.target.value)}
-                placeholder={ACCOMMODATION_ITEM_ROW_LABELS.單價}
-                className="h-9 text-sm"
-              />
-              <button
-                onClick={() => handleRemoveTier(tier.id)}
-                disabled={tiers.length <= 1}
-                className={cn(
-                  'w-8 h-8 flex items-center justify-center rounded transition-colors',
-                  tiers.length <= 1
-                    ? 'text-morandi-muted cursor-not-allowed'
-                    : 'text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10'
-                )}
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-          ))}
-
-          <Button variant="outline" size="sm" onClick={handleAddTier} className="w-full gap-2">
-            <Plus size={14} />
-            {LOCAL_PRICING_DIALOG_LABELS.新增檻次}
-          </Button>
-        </div>
+        <InlineEditTable<LocalTier>
+          variant="minimal"
+          rows={tiers}
+          columns={
+            [
+              {
+                key: 'index',
+                label: LOCAL_PRICING_DIALOG_LABELS.檻次,
+                width: '80px',
+                render: ({ index }) => (
+                  <span className="text-sm text-morandi-secondary">
+                    {LOCAL_PRICING_DIALOG_LABELS.檻次編號.replace('{index}', `${index + 1}`)}
+                  </span>
+                ),
+              },
+              {
+                key: 'participants',
+                label: LOCAL_PRICING_DIALOG_LABELS.人數門檻,
+                render: ({ row }) => (
+                  <Input
+                    type="number"
+                    value={row.participants || ''}
+                    onChange={e => handleUpdateTier(row.id, 'participants', e.target.value)}
+                    placeholder={LOCAL_PRICING_DIALOG_LABELS.人數}
+                    className="h-9 text-sm"
+                  />
+                ),
+              },
+              {
+                key: 'unitPrice',
+                label: LOCAL_PRICING_DIALOG_LABELS.單價成本,
+                render: ({ row }) => (
+                  <Input
+                    type="number"
+                    value={row.unitPrice || ''}
+                    onChange={e => handleUpdateTier(row.id, 'unitPrice', e.target.value)}
+                    placeholder={ACCOMMODATION_ITEM_ROW_LABELS.單價}
+                    className="h-9 text-sm"
+                  />
+                ),
+              },
+            ] satisfies InlineEditColumn<LocalTier>[]
+          }
+          onRemove={index => handleRemoveTier(tiers[index].id)}
+          canRemove={() => tiers.length > 1}
+          footer={
+            <tr>
+              <td colSpan={4} className="pt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAddTier}
+                  className="w-full gap-2"
+                >
+                  <Plus size={14} />
+                  {LOCAL_PRICING_DIALOG_LABELS.新增檻次}
+                </Button>
+              </td>
+            </tr>
+          }
+        />
 
         {/* 對應提示 */}
         {matchedTier && matchedTier.unitPrice > 0 && (

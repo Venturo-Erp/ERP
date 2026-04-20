@@ -277,9 +277,6 @@ export function TourConfirmationWizard({
                             <div>
                               <div className="font-medium">
                                 {quote.name || quote.code || TOUR_WIZARD.unnamed_quote}
-                                <span className="ml-2 text-xs text-muted-foreground">
-                                  v{quote.version}
-                                </span>
                               </div>
                               <div className="text-sm text-muted-foreground flex items-center gap-1">
                                 {quote.code} · <DateCell date={quote.created_at} showIcon={false} />
@@ -377,10 +374,7 @@ export function TourConfirmationWizard({
                       </div>
                       <div className="font-medium">
                         {selectedQuote ? (
-                          <>
-                            {selectedQuote.name || selectedQuote.code || TOUR_WIZARD.unnamed} (v
-                            {selectedQuote.version})
-                          </>
+                          <>{selectedQuote.name || selectedQuote.code || TOUR_WIZARD.unnamed}</>
                         ) : (
                           <span className="text-muted-foreground">{TOUR_WIZARD.not_selected}</span>
                         )}

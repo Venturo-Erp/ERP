@@ -22,7 +22,6 @@ import { TourFormShell } from './TourFormShell'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { ArchiveReasonDialog } from './ArchiveReasonDialog'
 import { LinkItineraryToTourDialog } from './LinkItineraryToTourDialog'
-import { LinkDocumentsToTourDialog } from './LinkDocumentsToTourDialog'
 import { TourItineraryDialog } from './TourItineraryDialog'
 import { ContractDialog } from '@/features/contracts/components/ContractDialog'
 import { TourClosingDialog } from './TourClosingDialog'
@@ -128,9 +127,6 @@ export const ToursPage: React.FC = () => {
     tourItineraryDialogTour,
     openTourItineraryDialog,
     closeTourItineraryDialog,
-    quoteDialogTour,
-    openQuoteDialog,
-    closeQuoteDialog,
     contractDialogState,
     openContractDialog,
     closeContractDialog,
@@ -203,24 +199,41 @@ export const ToursPage: React.FC = () => {
   const handleAddOrder = useCallback(
     async (orderData: OrderFormData) => {
       try {
+        const tour = addOrderDialogTour
+        if (!tour) return
+
+        // 產生訂單編號（格式：{團號}-O{兩位流水號}、與 /orders 頁面一致）
+        const tourOrders = allOrders.filter(o => o.tour_id === orderData.tour_id)
+        const nextOrderNumber = tourOrders.length + 1
+        const orderNumber = `${tour.code}-O${nextOrderNumber.toString().padStart(2, '0')}`
+
+        // 從 tour.selling_price_per_person 估算初始金額
+        const sellingPricePerPerson = tour.selling_price_per_person || 0
+        const estimatedPeople = orderData.member_count || 2
+        const initialTotalAmount = sellingPricePerPerson * estimatedPeople
+
         await createOrder({
+          order_number: orderNumber,
           tour_id: orderData.tour_id,
+          tour_name: tour.name,
           contact_person: orderData.contact_person,
           sales_person: orderData.sales_person,
           assistant: orderData.assistant,
           member_count: orderData.member_count || 0,
-          total_amount: orderData.total_amount || 0,
+          total_amount: orderData.total_amount || initialTotalAmount,
           paid_amount: 0,
-          remaining_amount: orderData.total_amount || 0,
+          payment_status: 'unpaid',
+          remaining_amount: orderData.total_amount || initialTotalAmount,
           workspace_id: user?.workspace_id,
         })
         toast.success('訂單建立成功')
         setAddOrderDialogTour(null)
+        router.push(`/tours/${tour.code}?tab=orders`)
       } catch (error) {
         toast.error(error instanceof Error ? error.message : '建立訂單失敗')
       }
     },
-    [user?.workspace_id]
+    [user?.workspace_id, addOrderDialogTour, allOrders, router]
   )
 
   const { handleCreateChannel } = useTourChannelOperations({
@@ -239,7 +252,6 @@ export const ToursPage: React.FC = () => {
     itineraries,
     handleCreateChannel,
     onOpenItineraryDialog: openItineraryDialog,
-    onOpenQuoteDialog: openQuoteDialog,
     onOpenContractDialog: openContractDialog,
     onCloseTour: openClosingDialog,
     onOpenArchiveDialog: openArchiveDialog,
@@ -417,14 +429,6 @@ export const ToursPage: React.FC = () => {
           isOpen={!!itineraryDialogTour}
           onClose={closeItineraryDialog}
           tour={itineraryDialogTour}
-        />
-      )}
-
-      {quoteDialogTour && (
-        <LinkDocumentsToTourDialog
-          isOpen={!!quoteDialogTour}
-          onClose={closeQuoteDialog}
-          tour={quoteDialogTour}
         />
       )}
 

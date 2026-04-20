@@ -23,10 +23,6 @@ import { alert } from '@/lib/ui/alert-dialog'
 import { DateCell, StatusCell, ActionCell, CurrencyCell } from '@/components/table-cells'
 
 // Dynamic imports for dialogs (reduce initial bundle)
-const BatchConfirmReceiptDialog = dynamic(
-  () => import('./components').then(m => m.BatchConfirmReceiptDialog),
-  { loading: () => null }
-)
 const AddReceiptDialog = dynamic(
   () => import('@/features/finance/payments').then(m => m.AddReceiptDialog),
   { loading: () => null }
@@ -62,16 +58,12 @@ export default function PaymentsPage() {
   } = usePaymentData()
   const { user, isAdmin } = useAuthStore()
 
-  // 檢查是否為可批量確認的角色（管理員或有會計權限）
-  const canBatchConfirm = isAdmin || user?.permissions?.includes('accounting')
-
   // 讀取 URL 參數（從快速收款按鈕傳入）
   const urlOrderId = searchParams.get('order_id')
 
   // UI 狀態
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isBatchDialogOpen, setIsBatchDialogOpen] = useState(false)
-  const [isBatchConfirmDialogOpen, setIsBatchConfirmDialogOpen] = useState(false)
   const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null)
 
   // 如果有 URL 參數，自動開啟新增對話框
@@ -253,12 +245,6 @@ export default function PaymentsPage() {
       {/* 批量收款對話框 */}
       <BatchReceiptDialog open={isBatchDialogOpen} onOpenChange={setIsBatchDialogOpen} />
 
-      {/* 批量確認收款對話框 */}
-      <BatchConfirmReceiptDialog
-        open={isBatchConfirmDialogOpen}
-        onOpenChange={setIsBatchConfirmDialogOpen}
-        onSuccess={invalidateReceipts}
-      />
     </>
   )
 }

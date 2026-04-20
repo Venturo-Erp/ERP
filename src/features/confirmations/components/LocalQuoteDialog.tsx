@@ -88,7 +88,7 @@ export function LocalQuoteDialog({
 
   const [loadingData, setLoadingData] = useState(false)
 
-  // 並行載入 LINE 群組 + 砍次資料
+  // 並行載入 LINE 群組 + 檻次資料
   useEffect(() => {
     if (!open) return
     setSelectedMethod(null)

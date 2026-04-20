@@ -8,6 +8,19 @@ export interface ModuleTab {
   code: string
   name: string
   description?: string
+  /**
+   * 是否為「下拉資格」tab（非功能權限、而是「可否出現在某下拉」的開關）
+   * - true：admin 也可以個別取消（例：老闆不想出現在代墊款下拉）
+   * - false/undefined：admin 鎖死全開（一般功能權限）
+   */
+  isEligibility?: boolean
+  /**
+   * 分頁級功能分類（用於 workspace 層級開關）
+   * - 'basic' / undefined：預設開、workspace 可選擇關
+   * - 'premium'：預設關、workspace 付費/勾選後才開
+   * workspace_features 用 `{module}.{tab}` 格式存（例：'tours.contract'）
+   */
+  category?: 'basic' | 'premium'
 }
 
 export interface ModuleDefinition {
@@ -18,13 +31,9 @@ export interface ModuleDefinition {
 }
 
 // 模組與分頁定義（順序與側邊欄一致）
+// 註：首頁（dashboard）為個人工作空間（筆記 / 打卡 / widget 偏好）、不受職務權限控管
+// 註：租戶管理（tenants）為 Venturo 超管內部功能、不開放給租戶職務管理
 export const MODULES: ModuleDefinition[] = [
-  {
-    code: 'dashboard',
-    name: '首頁',
-    description: '儀表板總覽',
-    tabs: [],
-  },
   {
     code: 'calendar',
     name: '行事曆',
@@ -52,14 +61,37 @@ export const MODULES: ModuleDefinition[] = [
       { code: 'orders', name: '訂單', description: '報名訂單、付款狀態' },
       { code: 'members', name: '團員', description: '團員資料、護照、聯絡資訊' },
       { code: 'itinerary', name: '行程', description: '每日行程內容' },
-      { code: 'display-itinerary', name: '展示行程', description: '對客展示用行程頁面編輯器' },
+      {
+        code: 'display-itinerary',
+        name: '展示行程',
+        description: '對客展示用行程頁面編輯器',
+        category: 'premium',
+      },
       { code: 'quote', name: '報價', description: '報價計算、成本' },
       { code: 'requirements', name: '需求', description: '供應商需求發送' },
       { code: 'confirmation-sheet', name: '團確單', description: '供應商確認單' },
-      { code: 'contract', name: '合約', description: '旅遊合約、電子簽約' },
+      { code: 'contract', name: '合約', description: '旅遊合約、電子簽約', category: 'premium' },
       { code: 'checkin', name: '報到', description: '團員報到狀態' },
-      { code: 'files', name: '檔案', description: '團務相關文件' },
       { code: 'closing', name: '結案', description: '結團報表、損益確認' },
+      // ===== 下拉資格（勾寫入 = 出現在該下拉、admin 可個別取消）=====
+      {
+        code: 'as_sales',
+        name: '可當承辦業務',
+        description: '勾寫入 → 出現在訂單「承辦業務」下拉',
+        isEligibility: true,
+      },
+      {
+        code: 'as_assistant',
+        name: '可當助理',
+        description: '勾寫入 → 出現在訂單「助理」下拉',
+        isEligibility: true,
+      },
+      {
+        code: 'as_tour_controller',
+        name: '可當團控',
+        description: '勾寫入 → 出現在建團「團控」下拉',
+        isEligibility: true,
+      },
     ],
   },
   {
@@ -95,6 +127,14 @@ export const MODULES: ModuleDefinition[] = [
       { code: 'travel-invoice', name: '代轉發票', description: '代收代付發票' },
       { code: 'reports', name: '報表管理', description: '財務報表' },
       { code: 'settings', name: '財務設定', description: '付款方式、科目設定' },
+      // ===== 下拉資格（admin 可個別取消）=====
+      {
+        code: 'advance_payment',
+        name: '可代墊款',
+        description: '勾寫入 → 出現在請款頁「代墊款人」下拉',
+        isEligibility: true,
+      },
+      // 注意：發票開立人 復用現有 travel-invoice 權限、不另設
     ],
   },
   {

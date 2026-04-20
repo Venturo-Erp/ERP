@@ -42,6 +42,7 @@ import {
 } from '@/data'
 import type { Department } from '@/data'
 import { TourControllerSection, TourAttributesSection } from './tour-features-section'
+import { ModuleLoading } from '@/components/module-loading'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
@@ -349,9 +350,7 @@ export default function CompanySettingsPage() {
   if (loading) {
     return (
       <ContentPageLayout title={COMPANY_LABELS.TITLE}>
-        <div className="max-w-4xl mx-auto p-6 flex items-center justify-center min-h-[400px]">
-          <Loader2 className="h-8 w-8 animate-spin text-morandi-gold" />
-        </div>
+        <ModuleLoading />
       </ContentPageLayout>
     )
   }

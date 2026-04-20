@@ -1,6 +1,7 @@
 'use client'
 
 import { getTodayString } from '@/lib/utils/format-date'
+import { formatMoney } from '@/lib/utils/format-currency'
 import { logger } from '@/lib/utils/logger'
 
 import { useState, useEffect, useMemo } from 'react'
@@ -203,8 +204,8 @@ export function useInvoiceDialog({
     if (currentOrder && totalAmount > (currentOrder.paid_amount ?? 0)) {
       const confirmed = await confirm(
         INVOICE_LABELS.AMOUNT_EXCEED_CONFIRM(
-          totalAmount.toLocaleString(),
-          (currentOrder.paid_amount ?? 0).toLocaleString()
+          formatMoney(totalAmount),
+          formatMoney(currentOrder.paid_amount ?? 0)
         ),
         { title: INVOICE_LABELS.AMOUNT_EXCEED_TITLE, type: 'warning' }
       )

@@ -193,7 +193,7 @@ export function AssignmentSection({ todo, onUpdate, readOnly = false }: Assignme
                 onClick={() => {
                   const basePath = {
                     group: '/tours',
-                    quote: '/quotes',
+                    quote: '/tours',  // 報價已整合進 /tours/[code] tab、無獨立 /quotes 路由
                     order: '/orders',
                     invoice: '/finance/treasury/disbursement',
                     receipt: '/finance/payments',

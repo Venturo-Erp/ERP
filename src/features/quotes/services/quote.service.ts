@@ -72,8 +72,6 @@ class QuoteService extends BaseService<Quote> {
       id: _id,
       created_at: _created,
       updated_at: _updated,
-      version: _ver,
-      versions: _vers,
       code: _code,
       is_pinned: _pinned,
       ...rest

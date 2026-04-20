@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import TourPage from '@/features/tours/components/TourPage'
-import { Loader2 } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
+import { ModuleLoading } from '@/components/module-loading'
 import { PUBLIC_VIEW_LABELS } from './constants/labels'
 
 interface ItineraryData {
@@ -68,12 +68,7 @@ export default function PublicViewClient({ id }: PublicViewClientProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-morandi-background">
-        <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-morandi-primary mx-auto mb-4" />
-          <p className="text-morandi-secondary">{PUBLIC_VIEW_LABELS.LOADING_ITINERARY}</p>
-        </div>
-      </div>
+      <ModuleLoading fullscreen className="bg-morandi-background" />
     )
   }
 

@@ -99,8 +99,7 @@ export function EmployeeForm({
   const [personalOverrides, setPersonalOverrides] = useState<PermissionOverride[]>([])
 
   // 團務職務（workspace_job_roles）
-  const [jobRoles, setJobRoles] = useState<{ id: string; name: string }[]>([])
-  const [selectedJobRoles, setSelectedJobRoles] = useState<Set<string>>(new Set())
+  // 2026-04-18 移除：jobRoles / selectedJobRoles（原 employee_job_roles 多對多、ADR-R2 Option A 改單一職務）
 
   const [formData, setFormData] = useState({
     chinese_name: employee?.chinese_name || '',
@@ -121,31 +120,15 @@ export function EmployeeForm({
     emergency_contact_relation: employee?.personal_info?.emergency_contact?.relationship || '',
     emergency_contact_phone: employee?.personal_info?.emergency_contact?.phone || '',
     emergency_contact_address: employee?.personal_info?.emergency_contact?.address || '',
-    role_id: employee?.job_info?.role_id || '',
+    // role_id 優先讀頂層、fallback nested（舊資料過渡期）
+    role_id:
+      ((employee as unknown as Record<string, unknown>)?.role_id as string) ||
+      employee?.job_info?.role_id ||
+      '',
     base_salary: employee?.salary_info?.base_salary || 0,
   })
 
-  // 載入團務職務定義 + 員工已選職務
-  useEffect(() => {
-    if (!user?.workspace_id) return
-    const load = async () => {
-      const { data } = (await supabase
-        .from('workspace_roles')
-        .select('id, name')
-        .eq('workspace_id', user.workspace_id!)
-        .order('sort_order')) as { data: { id: string; name: string }[] | null }
-      setJobRoles(data || [])
-
-      if (employeeId) {
-        const { data: assigned } = (await supabase
-          .from('employee_job_roles' as never)
-          .select('role_id')
-          .eq('employee_id', employeeId)) as { data: { role_id: string }[] | null }
-        setSelectedJobRoles(new Set((assigned || []).map(a => a.role_id)))
-      }
-    }
-    load()
-  }, [user?.workspace_id, employeeId])
+  // 2026-04-18 移除：載入 workspace_roles + employee_job_roles 的 useEffect（已改用 useWorkspaceRoles SWR hook）
 
   // 職務列表改用 SWR 快取
   useEffect(() => {
@@ -218,7 +201,10 @@ export function EmployeeForm({
         emergency_contact_relation: employee.personal_info?.emergency_contact?.relationship || '',
         emergency_contact_phone: employee.personal_info?.emergency_contact?.phone || '',
         emergency_contact_address: employee.personal_info?.emergency_contact?.address || '',
-        role_id: employee.job_info?.role_id || '',
+        role_id:
+          ((employee as unknown as Record<string, unknown>).role_id as string) ||
+          employee.job_info?.role_id ||
+          '',
         base_salary: employee.salary_info?.base_salary || 0,
       })
       setAvatarPreview(employee.avatar_url || null)
@@ -280,9 +266,10 @@ export function EmployeeForm({
             address: formData.emergency_contact_address,
           },
         },
+        // role_id 改存頂層（2026-04-18 統一、不再寫 job_info.role_id）
+        role_id: formData.role_id || null,
         job_info: {
           position: formData.position,
-          role_id: formData.role_id || undefined,
           hire_date: formData.hire_date,
         },
         salary_info: {
@@ -324,38 +311,7 @@ export function EmployeeForm({
         )
       }
 
-      // 儲存團務職務
-      const empId =
-        employeeId ||
-        (
-          (
-            await supabase
-              .from('employees')
-              .select('id')
-              .eq('chinese_name', formData.chinese_name)
-              .single()
-          ).data as { id: string } | null
-        )?.id
-      if (empId) {
-        const ejrTable = supabase.from('employee_job_roles' as never) as unknown as {
-          delete: () => { eq: (col: string, val: string) => Promise<unknown> }
-          insert: (data: unknown[]) => Promise<unknown>
-        }
-        await ejrTable.delete().eq('employee_id', empId)
-        if (selectedJobRoles.size > 0) {
-          const inserts = Array.from(selectedJobRoles).map(role_id => ({
-            employee_id: empId,
-            role_id,
-          }))
-          await ejrTable.insert(inserts)
-        }
-        globalMutate(
-          (key: string) => typeof key === 'string' && key.startsWith('entity:employee_job_roles'),
-          undefined,
-          { revalidate: true }
-        )
-        invalidate_cache_pattern('entity:employee_job_roles')
-      }
+      // 2026-04-18 移除：employee_job_roles 多對多儲存邏輯（ADR-R2 Option A 改單一職務、role_id 已在 payload 頂層）
 
       // 儲存員工的個人覆寫
       if (isEditMode && employeeId) {

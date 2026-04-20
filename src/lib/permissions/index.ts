@@ -45,7 +45,6 @@ export const FEATURE_PERMISSIONS: PermissionConfig[] = [
   { id: 'todos', label: '待辦事項', category: '全部', routes: ['/todos'] },
   { id: 'tours', label: '旅遊團', category: '核心', routes: ['/tours'] },
   { id: 'orders', label: '訂單', category: '核心', routes: ['/orders'] },
-  { id: 'quotes', label: '報價單', category: '核心', routes: ['/quotes'] },
   { id: 'finance', label: '財務', category: '核心', routes: ['/finance', '/accounting'] },
   { id: 'database', label: '資料管理', category: '核心', routes: ['/database'] },
   { id: 'hr', label: '人資', category: '管理', routes: ['/hr'] },
@@ -79,7 +78,6 @@ const ROUTE_TO_MODULE: Record<string, string> = {
   '/visas': 'visas',
   '/design': 'design',
   '/office': 'office',
-  '/quotes': 'tours', // 報價整合到旅遊團
   '/customers': 'database', // 顧客在資料管理
 }
 

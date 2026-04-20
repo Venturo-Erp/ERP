@@ -81,10 +81,7 @@ export interface Quote {
   categories?: QuoteCategory[] // 費用分類（標準報價單用）- 臨時編輯狀態
   total_cost?: number // 總成本
   total_amount?: number // 總金額
-  version?: number // 版本號（向下相容）
-  versions?: QuoteVersion[] // 版本歷史（所有版本都存在這裡）
-  current_version_index?: number // 當前編輯的版本索引（對應 versions 陣列）
-  tier_pricings?: TierPricing[] // 砍次表（不同人數對應不同價格）
+  tier_pricings?: TierPricing[] // 檻次表（不同人數對應不同價格）
   expense_description?: string // 費用說明（快速報價單用）
   created_at: string
   updated_at: string
@@ -99,7 +96,6 @@ export interface Quote {
   confirmed_by_email?: string // 確認者 Email
   confirmed_by_phone?: string // 確認者電話
   confirmed_by_staff_id?: string // 業務確認者 ID
-  confirmed_version?: number // 確認時鎖定的版本
   confirmation_ip?: string // 確認時 IP（稽核用）
   confirmation_user_agent?: string // 確認時瀏覽器資訊（稽核用）
   confirmation_notes?: string // 確認備註
@@ -120,49 +116,6 @@ export interface QuickQuoteItem {
   quantity_formula?: string // 數量公式（如 "10+5"）
   cost_formula?: string // 成本公式
   unit_price_formula?: string // 單價公式
-}
-
-export interface QuoteVersion {
-  id: string
-  version: number
-  mode: 'detailed' | 'simple' // 版本模式：詳細（成本分析）或 簡易（請款單）
-  name?: string // 版本名稱（如：客戶名稱、報價單名稱）- 可選以向下兼容
-  version_name?: string // 版本顯示名稱（用於版本選擇器）
-  notes?: string // 修改說明
-  total_amount?: number // 版本總金額
-  created_at: string
-  updated_at?: string // 版本更新時間（選填）
-
-  // === 詳細模式 (detailed) 專用欄位 ===
-  categories?: QuoteCategory[] // 成本分類
-  total_cost?: number // 總成本
-  group_size?: number // 團體人數
-  accommodation_days?: number // 住宿天數
-  participant_counts?: {
-    adult: number
-    child_with_bed: number
-    child_no_bed: number
-    single_room: number
-    infant: number
-  } // 多身份人數統計
-  selling_prices?: {
-    adult: number
-    child_with_bed: number
-    child_no_bed: number
-    single_room: number
-    infant: number
-  } // 多身份售價
-
-  // === 簡易模式 (simple) 專用欄位 ===
-  quick_quote_items?: QuickQuoteItem[] // 報價項目
-  customer_name?: string // 客戶名稱
-  contact_person?: string // 聯絡人
-  contact_phone?: string // 聯絡電話
-  contact_address?: string // 通訊地址
-  handler_name?: string // 承辦業務
-  issue_date?: string // 開單日期
-  received_amount?: number // 已收金額
-  expense_description?: string // 費用說明
 }
 
 export interface QuoteCategory {
@@ -191,7 +144,7 @@ export interface QuoteItem {
   updated_at?: string // 可選，向後相容
 }
 
-// 砍次表價格（用於比較不同人數的報價）
+// 檻次表價格（用於比較不同人數的報價）
 export interface TierPricing {
   id: string // 唯一識別
   participant_count: number // 總人數（用於重新計算成本）

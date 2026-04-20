@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { supabase } from '@/lib/supabase/client'
+import { ModuleLoading } from '@/components/module-loading'
 
 interface Inquiry {
   id: string
@@ -169,11 +170,7 @@ export default function TrackInquiryPage({ params }: { params: Promise<{ code: s
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-morandi-primary">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    )
+    return <ModuleLoading fullscreen className="bg-morandi-primary" />
   }
 
   if (notFound) {

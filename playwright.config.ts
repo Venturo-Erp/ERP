@@ -1,4 +1,9 @@
 import { defineConfig, devices } from '@playwright/test'
+import { config as loadEnv } from 'dotenv'
+import { resolve } from 'path'
+
+// 載入測試環境變數（TEST_COMPANY_CODE=TESTUX 等）
+loadEnv({ path: resolve(__dirname, '.env.test.local') })
 
 /**
  * Playwright 配置 - 全頁面 E2E 測試
@@ -17,8 +22,9 @@ export default defineConfig({
 
   use: {
     baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',         // 失敗保留 trace（可互動回放）
     screenshot: 'only-on-failure',
+    video: 'retain-on-failure',         // 失敗保留錄影 MP4
     // 使用已儲存的登入狀態
     storageState: './tests/e2e/.auth/user.json',
   },

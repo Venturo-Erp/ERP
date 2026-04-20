@@ -21,6 +21,7 @@ import {
 } from '@dnd-kit/core'
 import { arrayMove, SortableContext, rectSortingStrategy, useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { ModuleLoading } from '@/components/module-loading'
 import { DASHBOARD_LABELS } from '@/features/dashboard/constants/labels'
 
 // Sortable Widget Component (remains the same)
@@ -118,12 +119,7 @@ export function DashboardClient() {
 
   if (isLoading || widgetsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-morandi-gold/20 mx-auto"></div>
-          <p className="mt-4 text-morandi-muted">{DASHBOARD_LABELS.loading}</p>
-        </div>
-      </div>
+      <ModuleLoading fullscreen />
     )
   }
 

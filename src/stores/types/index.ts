@@ -48,7 +48,6 @@ export type {
   QuoteRegion,
   Quote,
   QuickQuoteItem,
-  QuoteVersion,
   QuoteCategory,
   QuoteItem,
   Supplier,

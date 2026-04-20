@@ -4,8 +4,9 @@ import { useState, useMemo, useCallback } from 'react'
 import { Combobox } from '@/components/ui/combobox'
 import { Input } from '@/components/ui/input'
 import { FormDialog } from '@/components/dialog/form-dialog'
-import { useAirports, type Airport } from '@/features/tours/hooks/useAirports'
+import { useAirports } from '@/features/tours/hooks/useAirports'
 import { useCountries, invalidateCountries } from '@/data' // 🔧 核心表架構
+import { useCountryAirports } from '@/data/hooks/useCountryAirports'
 import { SELECTORS_LABELS } from './constants/labels'
 import { logger } from '@/lib/utils/logger'
 
@@ -51,11 +52,16 @@ export function CountryAirportSelector({
   const {
     countries: hookCountries,
     countryNameToCode,
-    getAirportsByCountry,
     getAirport,
     addAirport,
     loading,
   } = useAirports({ enabled: true })
+
+  // 🔧 新架構：依國家查所有機場 + 陸路城市（同城多機場分開列）
+  const currentCountryCode =
+    countriesData.find(c => c.name === (countryName || country || ''))?.code ||
+    countryNameToCode[countryName || country || '']
+  const { options: countryAirportOptions } = useCountryAirports(currentCountryCode)
 
   // 向下相容：優先用 countryName，fallback 到 country
   const displayCountryName = countryName || country || ''
@@ -95,24 +101,11 @@ export function CountryAirportSelector({
     return hookCountries.map(c => ({ value: c, label: c }))
   }, [externalCountries, countriesData, hookCountries])
 
-  // 根據國家取得機場列表
+  // 🔧 新架構：該國所有機場 + 沒機場的城市（同城多機場分開列）
   const availableAirports = useMemo(() => {
     if (!displayCountryName) return []
-
-    const airports = getAirportsByCountry(displayCountryName)
-
-    // favorite 已經排在前面了（由 useAirports 處理）
-    return airports.map(a => ({
-      value: a.iata_code,
-      label: formatAirportLabel(a),
-    }))
-  }, [displayCountryName, getAirportsByCountry])
-
-  // 格式化機場顯示（只顯示城市名）
-  function formatAirportLabel(airport: Airport): string {
-    const city = airport.city_name_zh || airport.city_name_en || airport.iata_code
-    return `${city} (${airport.iata_code})`
-  }
+    return countryAirportOptions.map(opt => ({ value: opt.value, label: opt.label }))
+  }, [displayCountryName, countryAirportOptions])
 
   // 🔧 核心表架構：傳完整國家資料
   const handleCountryChange = useCallback(

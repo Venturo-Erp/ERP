@@ -20,6 +20,7 @@ import { useEffect, useCallback, useState, useMemo, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import * as fabric from 'fabric'
 import { Button } from '@/components/ui/button'
+import { ModuleLoading } from '@/components/module-loading'
 import { useDocumentStore, type BrochureEntityType } from '@/stores/document-store'
 import { useAuthStore } from '@/stores/auth-store'
 import { toast } from 'sonner'
@@ -798,13 +799,10 @@ export default function DesignerPageContent() {
     if (isCheckingExisting) {
       return (
         <div
-          className="fixed inset-0 flex items-center justify-center bg-background transition-all duration-300"
+          className="fixed inset-0 bg-background transition-all duration-300"
           style={{ left: sidebarWidth }}
         >
-          <div className="text-center">
-            <div className="w-8 h-8 border-2 border-morandi-gold border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-morandi-secondary">{DESIGNER_LABELS.LOADING_DESIGN}</p>
-          </div>
+          <ModuleLoading fullscreen />
         </div>
       )
     }

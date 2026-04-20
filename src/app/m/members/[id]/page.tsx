@@ -8,6 +8,7 @@ import { DateCell, CurrencyCell } from '@/components/table-cells'
 import { supabase } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { logger } from '@/lib/utils/logger'
+import { ModuleLoading } from '@/components/module-loading'
 import { ID_LABELS } from './constants/labels'
 
 interface MemberDetail {
@@ -106,11 +107,7 @@ export default function MemberDetailPage() {
   }, [memberId])
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-morandi-gold" />
-      </div>
-    )
+    return <ModuleLoading fullscreen />
   }
 
   if (!member) {

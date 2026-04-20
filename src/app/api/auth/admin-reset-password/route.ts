@@ -10,26 +10,28 @@ import { adminResetPasswordSchema } from '@/lib/validations/api-schemas'
 
 /**
  * 檢查員工是否為管理員（透過職務系統）
+ * role_id 優先讀頂層、fallback nested（2026-04-18 統一過渡期）
  */
 async function checkIsAdmin(employeeId: string): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
 
-  // 從 job_info.role_id 查 workspace_roles.is_admin
   const { data: employee, error } = await adminClient
     .from('employees')
-    .select('job_info')
+    .select('role_id, job_info')
     .eq('id', employeeId)
     .single()
 
   if (error || !employee) return false
 
   const jobInfo = employee.job_info as { role_id?: string } | null
-  if (!jobInfo?.role_id) return false
+  const roleId =
+    (employee as unknown as { role_id?: string }).role_id || jobInfo?.role_id
+  if (!roleId) return false
 
   const { data: role } = await adminClient
     .from('workspace_roles')
     .select('is_admin')
-    .eq('id', jobInfo.role_id)
+    .eq('id', roleId)
     .single()
 
   return role?.is_admin ?? false

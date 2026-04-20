@@ -4,6 +4,7 @@ import { ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { MobileNav } from './MobileNav'
 import { useAuthStore } from '@/stores/auth-store'
+import { ModuleLoading } from '@/components/module-loading'
 
 interface MobileLayoutProps {
   children: ReactNode
@@ -21,11 +22,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
   }, [_hasHydrated, user, router])
 
   if (!_hasHydrated) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-morandi-gold" />
-      </div>
-    )
+    return <ModuleLoading fullscreen className="bg-background" />
   }
 
   if (!user) {

@@ -149,7 +149,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
 
     setSellingPrices(prev => ({ ...prev, [identity]: newPrice }))
 
-    // 同步更新第一個砍次的售價（確保存檔時不丟失）
+    // 同步更新第一個檻次的售價（確保存檔時不丟失）
     if (tierPricings.length > 0) {
       setTierPricings(prev =>
         prev.map((tier, index) => {
@@ -165,9 +165,9 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
         })
       )
 
-      // 提醒：如果有多個砍次，售價需要各自設定
+      // 提醒：如果有多個檻次，售價需要各自設定
       if (tierPricings.length > 1) {
-        toast.info('💡 不同人數的售價已分開設定，記得檢查其他砍次', { duration: 3000 })
+        toast.info('💡 不同人數的售價已分開設定，記得檢查其他檻次', { duration: 3000 })
       }
     }
   }
@@ -203,9 +203,9 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
       })
     )
 
-    // 提醒：修改砍次售價時，提醒檢查其他砍次
+    // 提醒：修改檻次售價時，提醒檢查其他檻次
     if (tierPricings.length > 1) {
-      toast.info('💡 不同人數的售價已分開設定，記得檢查其他砍次', { duration: 3000 })
+      toast.info('💡 不同人數的售價已分開設定，記得檢查其他檻次', { duration: 3000 })
     }
   }
 
@@ -314,7 +314,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
           >
             <div className="flex items-center gap-1">
               {tierPricings.length > 0 && (
-                <span className="text-xs font-semibold text-morandi-gold mr-1">砍次 1</span>
+                <span className="text-xs font-semibold text-morandi-gold mr-1">檻次 1</span>
               )}
               <input
                 onClick={e => e.stopPropagation()}
@@ -480,7 +480,7 @@ export const SellingPriceSection: React.FC<SellingPriceSectionProps> = ({
             >
               <div className="flex items-center gap-1">
                 <span className="text-xs font-semibold text-morandi-secondary mr-1">
-                  砍次 {tierIndex + 2}
+                  檻次 {tierIndex + 2}
                 </span>
                 <input
                   onClick={e => e.stopPropagation()}

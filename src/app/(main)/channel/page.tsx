@@ -8,7 +8,7 @@ import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
 import { MobileHeader } from '@/components/layout/mobile-header'
 import { MobileSidebar } from '@/components/layout/mobile-sidebar'
-import { WORKSPACE_LABELS } from './constants/labels'
+import { ModuleLoading } from '@/components/module-loading'
 
 export default function WorkspacePage() {
   const { sidebarCollapsed } = useAuthStore()
@@ -50,14 +50,7 @@ export default function WorkspacePage() {
 
   // 載入中顯示 loading
   if (!hasLoaded) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-morandi-gold mx-auto"></div>
-          <p className="mt-3 text-sm text-morandi-muted">{WORKSPACE_LABELS.LOADING_5447}</p>
-        </div>
-      </div>
-    )
+    return <ModuleLoading fullscreen />
   }
 
   // 工作空間頁面使用自訂 layout，最大化聊天區域

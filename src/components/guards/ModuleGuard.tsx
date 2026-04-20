@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { useWorkspaceFeatures } from '@/lib/permissions'
 import { useAuthStore } from '@/stores'
-import { PageLoader } from '@/components/ui/loader'
+import { ModuleLoading } from '@/components/module-loading'
 
 interface ModuleGuardProps {
   children: React.ReactNode
@@ -67,7 +67,7 @@ export function ModuleGuard({ children }: ModuleGuardProps) {
   }, [pathname, loading, isRouteAvailable, router, isAdmin, features.length])
 
   if (loading || !checked) {
-    return <PageLoader />
+    return <ModuleLoading fullscreen />
   }
 
   return <>{children}</>

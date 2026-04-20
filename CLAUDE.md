@@ -1,5 +1,79 @@
 # CLAUDE.md - Venturo ERP 開發規範
 
+## 🛑 DB 紅線（違反會打斷登入、反覆修好幾次）
+
+### 絕對不准對 `workspaces` 表下 `FORCE ROW LEVEL SECURITY`
+**原因**：FORCE RLS 讓 service_role 也被 policy 擋。登入 API 用 admin client 查 workspace code → 空結果 → 回「找不到此代號」。
+**症狀**：所有人登入都失敗、但 workspace 在 DB 明明存在。
+**歷史**：2026-04-20 遇過、`20260419050000_fix_rls_medium_risk_tables.sql` 是 FORCE RLS 的元兇、`20260420d_fix_workspaces_force_rls.sql` 關掉它、`tests/e2e/login-api.spec.ts` 守門。
+**規則**：
+- `workspaces` RLS **可以開**、但 **FORCE RLS 必須關**（`NO FORCE`）。
+- 任何動 RLS policy 的 migration、**必須** 先跑 `tests/e2e/login-api.spec.ts`。
+- Admin client 必須 per-request、**不准** singleton（避免 stale state）。詳見 `src/lib/supabase/admin.ts`。
+
+---
+
+## 🚨 策略題前必做（避免誤判商業方向）
+
+**當使用者問以下類型問題、回答前先讀 `docs/BUSINESS_MAP.md`**：
+
+- 「**該怎麼賣 / 賣給誰 / 收多少**」
+- 「**目標客戶**是誰 / 多大規模」
+- 「**商業模式** / 定價 / 方案」
+- 「**UX 方向** / 角色化介面 / 使用者類型」
+- 「**競爭對手 / 差異化**」
+- 「**Phase 1 / 優先順序 / 路線圖**」
+
+**必讀的段落**：
+- `## 🚀 ERP 差異化策略` — 核心賣點是 AI 客服不是純 ERP
+- `## 💰 階段式商業模式` — 託管服務、不是 SaaS 自助
+- `## 🎯 產品定位` — 目標客戶：無官網、社群接單的小旅行社（1-10 人）
+- `## 🌍 國際化與多語言策略` — Google Maps 是基礎
+
+**不讀就答的風險**：我會用「一般 SaaS」的泛化假設、誤導你往錯誤方向做。今早（2026-04-19）就發生過。
+
+---
+
+## 🧠 四大行為原則（Karpathy Skills）
+
+這些原則**凌駕所有其他規則**。任何任務開始前先審視。
+
+### 1. Think Before Coding — 想清楚再寫
+- 先說出假設、不確定就問
+- 看到多種解釋不要默默選一個、都列出來讓使用者選
+- 看到更簡單的做法、有底氣就說出來推回去
+- 不清楚就停、指出哪裡不清楚
+
+### 2. Simplicity First — 最少代碼解決問題
+- 沒有要求的功能不要寫
+- 單次使用的代碼不要抽象化
+- 沒有要求的「彈性」「可設定」不要加
+- 不可能發生的錯誤情境不要寫 try/catch
+- 200 行能縮成 50 行、就重寫
+- 自問：「資深工程師會覺得這太繞嗎？」會、就簡化
+
+### 3. Surgical Changes — 只動要動的
+- 不要順便「改進」周邊代碼、注釋、格式
+- 不要重構沒壞的東西
+- Style 照既有風格、即使你不喜歡
+- 看到無關的 dead code、提一下、別刪
+- 你的改動造成的孤兒（unused imports / vars）才由你清
+- 測試法：每行改動、都能追溯到使用者要求
+
+### 4. Goal-Driven Execution — 目標驗證法
+- 「加驗證」→ 寫測試覆蓋 invalid input、再實作讓測試通過
+- 「修 bug」→ 先寫重現 bug 的測試、再修
+- 「重構 X」→ 確認重構前後測試都通過
+- 多步任務先列計劃：
+  ```
+  1. [步驟] → 驗證：[檢查]
+  2. [步驟] → 驗證：[檢查]
+  ```
+
+**成功判定**：diff 變精簡、因為過度複雜而重寫的次數變少、澄清問題發生在實作**之前**而非之後。
+
+---
+
 ## 🧭 第一步：查地圖，不要盲掃
 
 開始任何任務前，**先讀對應的 map 檔案**，不要用 grep/find 盤查整個專案。
@@ -10,6 +84,7 @@
 | 改產品/功能邏輯 | `docs/BUSINESS_MAP.md` — 商業規則、資料流、定價   |
 | 改 UI/文案/品牌 | `docs/BRAND_MAP.md` — 品牌定位、色系、客群        |
 | 找頁面路由      | `docs/SITEMAP.md` 或 `.claude/CLAUDE.md` 的路由表 |
+| 新增 Dashboard Widget | `docs/WIDGET_DEVELOPMENT_GUIDE.md` — 付費 widget **必同步**租戶管理頁開通 UI |
 
 **禁止**：不讀 map 就開始 `grep -rn` 或 `find` 全掃。Map 已經索引好了，比搜尋快 10 倍。
 
@@ -74,10 +149,9 @@ const { items, updateItem } = useTourItineraryItemsByTour(tourId)
 _統一規範，不管誰開發都走同一套。_
 
 <!-- gitnexus:start -->
-
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **venturo-erp** (30788 symbols, 48697 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **venturo-erp** (31017 symbols, 48977 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -111,36 +185,35 @@ This project is indexed by GitNexus as **venturo-erp** (30788 symbols, 48697 rel
 
 ## Tools Quick Reference
 
-| Tool             | When to use                   | Command                                                                 |
-| ---------------- | ----------------------------- | ----------------------------------------------------------------------- |
-| `query`          | Find code by concept          | `gitnexus_query({query: "auth validation"})`                            |
-| `context`        | 360-degree view of one symbol | `gitnexus_context({name: "validateUser"})`                              |
-| `impact`         | Blast radius before editing   | `gitnexus_impact({target: "X", direction: "upstream"})`                 |
-| `detect_changes` | Pre-commit scope check        | `gitnexus_detect_changes({scope: "staged"})`                            |
-| `rename`         | Safe multi-file rename        | `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` |
-| `cypher`         | Custom graph queries          | `gitnexus_cypher({query: "MATCH ..."})`                                 |
+| Tool | When to use | Command |
+|------|-------------|---------|
+| `query` | Find code by concept | `gitnexus_query({query: "auth validation"})` |
+| `context` | 360-degree view of one symbol | `gitnexus_context({name: "validateUser"})` |
+| `impact` | Blast radius before editing | `gitnexus_impact({target: "X", direction: "upstream"})` |
+| `detect_changes` | Pre-commit scope check | `gitnexus_detect_changes({scope: "staged"})` |
+| `rename` | Safe multi-file rename | `gitnexus_rename({symbol_name: "old", new_name: "new", dry_run: true})` |
+| `cypher` | Custom graph queries | `gitnexus_cypher({query: "MATCH ..."})` |
 
 ## Impact Risk Levels
 
-| Depth | Meaning                               | Action                |
-| ----- | ------------------------------------- | --------------------- |
-| d=1   | WILL BREAK — direct callers/importers | MUST update these     |
-| d=2   | LIKELY AFFECTED — indirect deps       | Should test           |
-| d=3   | MAY NEED TESTING — transitive         | Test if critical path |
+| Depth | Meaning | Action |
+|-------|---------|--------|
+| d=1 | WILL BREAK — direct callers/importers | MUST update these |
+| d=2 | LIKELY AFFECTED — indirect deps | Should test |
+| d=3 | MAY NEED TESTING — transitive | Test if critical path |
 
 ## Resources
 
-| Resource                                     | Use for                                  |
-| -------------------------------------------- | ---------------------------------------- |
-| `gitnexus://repo/venturo-erp/context`        | Codebase overview, check index freshness |
-| `gitnexus://repo/venturo-erp/clusters`       | All functional areas                     |
-| `gitnexus://repo/venturo-erp/processes`      | All execution flows                      |
-| `gitnexus://repo/venturo-erp/process/{name}` | Step-by-step execution trace             |
+| Resource | Use for |
+|----------|---------|
+| `gitnexus://repo/venturo-erp/context` | Codebase overview, check index freshness |
+| `gitnexus://repo/venturo-erp/clusters` | All functional areas |
+| `gitnexus://repo/venturo-erp/processes` | All execution flows |
+| `gitnexus://repo/venturo-erp/process/{name}` | Step-by-step execution trace |
 
 ## Self-Check Before Finishing
 
 Before completing any code modification task, verify:
-
 1. `gitnexus_impact` was run for all modified symbols
 2. No HIGH/CRITICAL risk warnings were ignored
 3. `gitnexus_detect_changes()` confirms changes match expected scope
@@ -166,13 +239,13 @@ To check whether embeddings exist, inspect `.gitnexus/meta.json` — the `stats.
 
 ## CLI
 
-| Task                                         | Read this skill file                                        |
-| -------------------------------------------- | ----------------------------------------------------------- |
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md`       |
-| Blast radius / "What breaks if I change X?"  | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?"             | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md`       |
-| Rename / extract / split / refactor          | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md`     |
-| Tools, resources, schema reference           | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md`           |
-| Index, status, clean, wiki CLI commands      | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md`             |
+| Task | Read this skill file |
+|------|---------------------|
+| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
+| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
+| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
+| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
+| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
+| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->

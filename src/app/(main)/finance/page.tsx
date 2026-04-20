@@ -20,8 +20,8 @@ import {
   Wallet,
   BarChart3,
   AlertTriangle,
-  Loader2,
 } from 'lucide-react'
+import { ModuleLoading } from '@/components/module-loading'
 
 export default function FinancePage() {
   const {
@@ -139,12 +139,7 @@ export default function FinancePage() {
   const totalPages = Math.ceil(transactionsCount / transactionsPageSize)
 
   if (isLoading && transactions.length === 0) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center">
-        <Loader2 className="w-12 h-12 animate-spin text-morandi-gold" />
-        <p className="mt-4 text-morandi-secondary">{FINANCE_PAGE_LABELS.LOADING_DATA}</p>
-      </div>
-    )
+    return <ModuleLoading />
   }
 
   return (

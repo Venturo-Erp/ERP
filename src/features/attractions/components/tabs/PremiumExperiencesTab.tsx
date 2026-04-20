@@ -1,12 +1,14 @@
 'use client'
 
-import { logger } from '@/lib/utils/logger'
 import { useState, useEffect, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Sparkles, Award, Users, Clock, Edit2, Power, Trash2, X, Save } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
-import { deletePremiumExperience } from '@/data/entities/premium-experiences'
-import { dynamicFrom } from '@/lib/supabase/typed-client'
+import {
+  usePremiumExperiences,
+  updatePremiumExperience,
+  deletePremiumExperience,
+} from '@/data/entities/premium-experiences'
 import { toast } from 'sonner'
 import { EnhancedTable } from '@/components/ui/enhanced-table'
 import { cn } from '@/lib/utils'
@@ -53,68 +55,43 @@ interface PremiumExperiencesTabProps {
 }
 
 export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperiencesTabProps) {
-  const [experiences, setExperiences] = useState<PremiumExperience[]>([])
-  const [loading, setLoading] = useState(true)
+  const { items, loading } = usePremiumExperiences()
+  const experiences = items as unknown as PremiumExperience[]
   const [countries, setCountries] = useState<Array<{ id: string; name: string }>>([])
   const [cities, setCities] = useState<Array<{ id: string; name: string }>>([])
 
   const [editingExperience, setEditingExperience] = useState<PremiumExperience | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-  // 載入體驗資料
+  // 載入用到的國家和城市資料
   useEffect(() => {
-    loadExperiences()
-  }, [])
+    if (experiences.length === 0) return
 
-  async function loadExperiences() {
-    try {
-      const { data, error } = await supabase
-        .from('premium_experiences')
-        .select(
-          'id, name, english_name, description, category, country_id, city_id, exclusivity_level, images, is_active, is_featured, created_at'
-        )
-        .order('exclusivity_level', { ascending: false })
-        .order('name')
-        .limit(1000)
+    const countryIds = Array.from(new Set(experiences.map(e => e.country_id).filter(Boolean)))
+    const cityIds = Array.from(new Set(experiences.map(e => e.city_id).filter(Boolean)))
 
-      if (error) throw error
-      setExperiences((data as unknown as PremiumExperience[]) || [])
-
-      // 載入用到的國家和城市資料
-      if (data && data.length > 0) {
-        const countryIds = Array.from(new Set(data.map(e => e.country_id).filter(Boolean)))
-        const cityIds = Array.from(new Set(data.map(e => e.city_id).filter(Boolean)))
-
-        if (countryIds.length > 0) {
-          supabase
-            .from('countries')
-            .select('id, name')
-            .in('id', countryIds)
-            .limit(500)
-            .then(({ data }) => {
-              if (data) setCountries(data.map(c => ({ id: c.id, name: c.name })))
-            })
-        }
-
-        if (cityIds.length > 0) {
-          supabase
-            .from('cities')
-            .select('id, name')
-            .in('id', cityIds)
-            .limit(500)
-            .then(({ data }) => {
-              if (data) setCities(data.map(c => ({ id: c.id, name: c.name })))
-            })
-        }
-      }
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      logger.error('載入頂級體驗失敗:', error)
-      toast.error(MICHELIN_RESTAURANTS_TAB_LABELS.載入失敗 + errorMessage)
-    } finally {
-      setLoading(false)
+    if (countryIds.length > 0) {
+      supabase
+        .from('countries')
+        .select('id, name')
+        .in('id', countryIds)
+        .limit(500)
+        .then(({ data }) => {
+          if (data) setCountries(data.map(c => ({ id: c.id, name: c.name })))
+        })
     }
-  }
+
+    if (cityIds.length > 0) {
+      supabase
+        .from('cities')
+        .select('id, name')
+        .in('id', cityIds)
+        .limit(500)
+        .then(({ data }) => {
+          if (data) setCities(data.map(c => ({ id: c.id, name: c.name })))
+        })
+    }
+  }, [experiences])
 
   // 刪除體驗
   const handleDelete = async (id: string) => {
@@ -126,7 +103,6 @@ export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperi
 
     try {
       await deletePremiumExperience(id)
-      await loadExperiences()
       toast.success(MICHELIN_RESTAURANTS_TAB_LABELS.刪除成功)
     } catch (error) {
       toast.error(MICHELIN_RESTAURANTS_TAB_LABELS.刪除失敗)
@@ -150,12 +126,7 @@ export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperi
     if (!editingExperience) return
 
     try {
-      const { error } = await dynamicFrom('premium_experiences')
-        .update(updatedData)
-        .eq('id', editingExperience.id)
-
-      if (error) throw error
-      await loadExperiences()
+      await updatePremiumExperience(editingExperience.id, updatedData as never)
       handleCloseEdit()
       toast.success(MICHELIN_RESTAURANTS_TAB_LABELS.更新成功)
     } catch (error) {
@@ -166,24 +137,10 @@ export default function PremiumExperiencesTab({ selectedCountry }: PremiumExperi
   // 切換啟用狀態
   const handleToggleStatus = async (experience: PremiumExperience) => {
     const newStatus = !experience.is_active
-    setExperiences(prev =>
-      prev.map(item => (item.id === experience.id ? { ...item, is_active: newStatus } : item))
-    )
-
     try {
-      const { error } = await supabase
-        .from('premium_experiences')
-        .update({ is_active: newStatus })
-        .eq('id', experience.id)
-
-      if (error) throw error
+      await updatePremiumExperience(experience.id, { is_active: newStatus } as never)
       toast.success(newStatus ? '已啟用' : MICHELIN_RESTAURANTS_TAB_LABELS.已停用)
     } catch (error) {
-      setExperiences(prev =>
-        prev.map(item =>
-          item.id === experience.id ? { ...item, is_active: experience.is_active } : item
-        )
-      )
       toast.error(PREMIUM_EXPERIENCES_TAB_LABELS.更新失敗)
     }
   }

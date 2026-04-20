@@ -86,10 +86,10 @@ export const useQuoteSave = ({
           }
         : {}
 
-      // 砍次表資料
+      // 檻次表資料
       const tierPricingsData = tierPricings || []
 
-      // 報價單存 header + 售價 + 人數 + 快速報價欄位 + 砍次表
+      // 報價單存 header + 售價 + 人數 + 快速報價欄位 + 檻次表
       const quoteHeaderData: Partial<Quote> = {
         name: quoteName,
         total_cost,

@@ -1,6 +1,6 @@
 // ============================
 // 報價相關型別定義（Store 版本）
-// 注意：Quote, QuickQuoteItem, QuoteVersion, QuoteCategory, QuoteItem
+// 注意：Quote, QuickQuoteItem, QuoteCategory, QuoteItem
 // 此處定義的是 Store 使用的精簡版（無 BaseEntity），
 // 與 @/types/quote.types.ts 的 DAL 版本（含 BaseEntity）不同。
 // 統一工作待後續進行。
@@ -17,7 +17,6 @@ export type { QuoteRegion, TierPricing } from '@/types/quote-store.types'
 export type {
   Quote,
   QuickQuoteItem,
-  QuoteVersion,
   QuoteCategory,
   QuoteItem,
 } from '@/types/quote-store.types'

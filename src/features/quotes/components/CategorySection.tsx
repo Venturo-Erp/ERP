@@ -225,7 +225,7 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
     <React.Fragment>
       {/* 分類標題行 - sticky 凍結在表頭下方 */}
       <tr className="bg-[rgba(138,131,122,0.08)] border-b border-morandi-container/60 sticky top-[41px] z-10">
-        <td colSpan={2} className="py-3 px-4 text-sm font-semibold text-morandi-charcoal">
+        <td colSpan={2} className="py-3 px-4 text-xs font-medium text-morandi-primary">
           <div className="flex items-center space-x-2">
             {/* 折疊箭頭 */}
             <button
@@ -288,11 +288,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
               onClick={() => handleAddRow(category.id)}
               disabled={isReadOnly}
               className={cn(
-                'text-morandi-primary hover:bg-morandi-gold/10',
+                'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                 isReadOnly && 'cursor-not-allowed opacity-60'
               )}
             >
-              <Plus size={12} className="mr-1" />
+              <Plus size={12} className="mr-0.5" />
               {CATEGORY_SECTION_LABELS.新增房型}
             </Button>
           ) : category.id === 'group-transport' ? (
@@ -304,11 +304,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   onClick={onOpenLocalPricingDialog}
                   disabled={isReadOnly}
                   className={cn(
-                    'text-morandi-primary hover:bg-morandi-gold/10',
+                    'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                     isReadOnly && 'cursor-not-allowed opacity-60'
                   )}
                 >
-                  <MapPin size={12} className="mr-1" />
+                  <MapPin size={12} className="mr-0.5" />
                   Local
                 </Button>
               )}
@@ -318,11 +318,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddRow(category.id)}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-primary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
-                <Plus size={12} className="mr-1" />
+                <Plus size={12} className="mr-0.5" />
                 {CATEGORY_SECTION_LABELS.ADD}
               </Button>
               <Button
@@ -331,11 +331,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddTransportRow(category.id)}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-primary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
-                <Car size={12} className="mr-1" />
+                <Car size={12} className="mr-0.5" />
                 {CATEGORY_SECTION_LABELS.LABEL_138}
               </Button>
               <Button
@@ -344,11 +344,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddGuideRow(category.id)}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-primary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
-                <Users size={12} className="mr-1" />
+                <Users size={12} className="mr-0.5" />
                 {CATEGORY_SECTION_LABELS.LABEL_8731}
               </Button>
             </div>
@@ -373,11 +373,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                       onClick={() => handleAddAdultTicket(category.id)}
                       disabled={isReadOnly || hasAdult}
                       className={cn(
-                        'text-morandi-primary hover:bg-morandi-gold/10',
+                        'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                         (isReadOnly || hasAdult) && 'cursor-not-allowed opacity-60'
                       )}
                     >
-                      <Plus size={12} className="mr-1" />
+                      <Plus size={12} className="mr-0.5" />
                       {CATEGORY_SECTION_LABELS.成人}
                     </Button>
                     <Button
@@ -386,11 +386,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                       onClick={() => handleAddChildTicket(category.id)}
                       disabled={isReadOnly || hasChild}
                       className={cn(
-                        'text-morandi-primary hover:bg-morandi-gold/10',
+                        'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                         (isReadOnly || hasChild) && 'cursor-not-allowed opacity-60'
                       )}
                     >
-                      <Plus size={12} className="mr-1" />
+                      <Plus size={12} className="mr-0.5" />
                       {CATEGORY_SECTION_LABELS.LABEL_475}
                     </Button>
                     <Button
@@ -399,11 +399,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                       onClick={() => handleAddInfantTicket(category.id)}
                       disabled={isReadOnly || hasInfant}
                       className={cn(
-                        'text-morandi-primary hover:bg-morandi-gold/10',
+                        'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                         (isReadOnly || hasInfant) && 'cursor-not-allowed opacity-60'
                       )}
                     >
-                      <Plus size={12} className="mr-1" />
+                      <Plus size={12} className="mr-0.5" />
                       {CATEGORY_SECTION_LABELS.LABEL_2772}
                     </Button>
                   </>
@@ -415,11 +415,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddRow(category.id)}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-primary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
-                <Plus size={12} className="mr-1" />
+                <Plus size={12} className="mr-0.5" />
                 {CATEGORY_SECTION_LABELS.LABEL_7496}
               </Button>
             </div>
@@ -431,11 +431,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddLunchMeal()}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-primary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
-                <Plus size={12} className="mr-1" />
+                <Plus size={12} className="mr-0.5" />
                 {CATEGORY_SECTION_LABELS.LABEL_5098}
               </Button>
             </div>
@@ -447,11 +447,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddActivity()}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-primary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
-                <Plus size={12} className="mr-1" />
+                <Plus size={12} className="mr-0.5" />
                 {CATEGORY_SECTION_LABELS.ADD}
               </Button>
             </div>
@@ -463,11 +463,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddRow(category.id, { quantity: null, name: '小費' })}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-primary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
-                <Plus size={12} className="mr-1" />
+                <Plus size={12} className="mr-0.5" />
                 小費
               </Button>
               <Button
@@ -476,11 +476,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddRow(category.id, { quantity: 1, name: '出差費' })}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-primary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
-                <Plus size={12} className="mr-1" />
+                <Plus size={12} className="mr-0.5" />
                 出差費
               </Button>
             </div>
@@ -492,11 +492,11 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                 onClick={() => handleAddRow(category.id)}
                 disabled={isReadOnly}
                 className={cn(
-                  'text-morandi-primary hover:bg-morandi-gold/10',
+                  'text-morandi-primary hover:bg-morandi-gold/10 h-7 text-xs',
                   isReadOnly && 'cursor-not-allowed opacity-60'
                 )}
               >
-                <Plus size={12} className="mr-1" />
+                <Plus size={12} className="mr-0.5" />
                 {CATEGORY_SECTION_LABELS.ADD}
               </Button>
             </div>
@@ -593,17 +593,17 @@ export const CategorySection: React.FC<CategorySectionProps> = ({
                   .reduce((sum, item) => sum + (item.total || 0), 0)
                 return adultTicketTotal.toLocaleString()
               } else if (category.id === 'group-transport') {
-                // 團體分攤：Local 報價只計算第一個砍次（最便宜的）
+                // 團體分攤：Local 報價只計算第一個檻次（最便宜的）
                 let total = 0
                 let hasSeenLocalPricing = false
                 for (const item of category.items) {
                   if (item.name?.startsWith('Local 報價')) {
-                    // Local 報價：只計算第一個（最小單位砍次）
+                    // Local 報價：只計算第一個（最小單位檻次）
                     if (!hasSeenLocalPricing) {
                       total += item.total || 0
                       hasSeenLocalPricing = true
                     }
-                    // 其他 Local 砍次不計入小計
+                    // 其他 Local 檻次不計入小計
                   } else {
                     // 非 Local 報價：正常計算
                     total += item.total || 0

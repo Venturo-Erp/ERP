@@ -15,7 +15,7 @@ import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Tour } from '@/stores/types'
 import { COMP_TOURS_LABELS } from '../constants/labels'
-import { useWorkspaceFeatures } from '@/lib/permissions/hooks'
+import { useVisibleModuleTabs } from '@/lib/permissions/hooks'
 
 // Loading placeholder
 const TabLoading = () => (
@@ -51,11 +51,6 @@ const TourCheckin = dynamic(
 const TourRequirementsTab = dynamic(
   () =>
     import('@/features/tours/components/tour-requirements-tab').then(m => m.TourRequirementsTab),
-  { loading: () => <TabLoading /> }
-)
-
-const TourFilesManager = dynamic(
-  () => import('@/features/tours/components/TourFilesManager').then(m => m.TourFilesManager),
   { loading: () => <TabLoading /> }
 )
 
@@ -118,7 +113,6 @@ export const TOUR_TABS = [
   { value: 'confirmation-sheet', label: COMP_TOURS_LABELS.團確單 },
   { value: 'contract', label: '合約' },
   { value: 'checkin', label: COMP_TOURS_LABELS.報到 },
-  { value: 'files', label: COMP_TOURS_LABELS.檔案 },
   { value: 'closing', label: COMP_TOURS_LABELS.結案 },
 ] as const
 
@@ -196,8 +190,6 @@ export function TourTabContent({
       return <TourItineraryTab tour={tour} />
     case 'display-itinerary':
       return <TourDisplayItineraryTab tour={tour} />
-    case 'files':
-      return <TourFilesManager tourId={tour.id} tourCode={tour.code || ''} />
     case 'overview':
       return (
         <div className="space-y-6">
@@ -235,7 +227,7 @@ export function TourTabs({
   onAddRequest,
 }: TourTabsProps) {
   const [activeTab, setActiveTab] = useState<TourTabValue>(defaultTab)
-  const { isFeatureEnabled } = useWorkspaceFeatures()
+  const featureVisibleTabs = useVisibleModuleTabs('tours', TOUR_TABS)
 
   const handleTabChange = useCallback(
     (tab: TourTabValue) => {
@@ -245,16 +237,10 @@ export function TourTabs({
     [onTabChange]
   )
 
-  const visibleTabs = useMemo(() => {
-    const featureHidden: TourTabValue[] = []
-    // 展示行程需要 itinerary feature 啟用
-    if (!isFeatureEnabled('itinerary')) {
-      featureHidden.push('display-itinerary')
-    }
-    return TOUR_TABS.filter(
-      tab => !hiddenTabs.includes(tab.value) && !featureHidden.includes(tab.value)
-    )
-  }, [hiddenTabs, isFeatureEnabled])
+  const visibleTabs = useMemo(
+    () => featureVisibleTabs.filter(tab => !hiddenTabs.includes(tab.value)),
+    [hiddenTabs, featureVisibleTabs]
+  )
 
   return (
     <div className="flex flex-col h-full">

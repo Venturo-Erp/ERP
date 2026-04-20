@@ -7,7 +7,7 @@
  */
 
 import React from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, ChevronUp, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -74,28 +74,53 @@ export function AddMemberDialog({
 
         <div className="space-y-6">
           {/* 手動新增 */}
-          <div className="space-y-3">
+          <div className="flex items-center justify-between gap-4">
             <h4 className="text-sm font-medium text-morandi-primary">
               {COMP_ORDERS_LABELS.手動新增空白成員}
             </h4>
             <div className="flex items-center gap-2">
-              <Input
-                type="number"
-                min="1"
-                max="50"
-                value={memberCount}
-                onChange={e => {
-                  const val = e.target.value
-                  onCountChange(val === '' ? '' : parseInt(val, 10))
-                }}
-                className="w-24"
-                placeholder={COMP_ORDERS_LABELS.人數}
-              />
-              <span className="text-sm text-morandi-muted">{COMP_ORDERS_LABELS.人數}</span>
-              <Button onClick={onConfirm} disabled={!memberCount || memberCount < 1} size="sm">
-                <Plus size={16} className="mr-1" />
-                {COMP_ORDERS_LABELS.新增}
-              </Button>
+              <div className="flex items-center gap-2">
+                <div className="relative w-20">
+                  <Input
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={memberCount}
+                    onChange={e => {
+                      const val = e.target.value
+                      onCountChange(val === '' ? '' : parseInt(val, 10))
+                    }}
+                    className="pr-6 text-right [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield]"
+                    placeholder={COMP_ORDERS_LABELS.人數}
+                  />
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const cur = typeof memberCount === 'number' ? memberCount : 0
+                        onCountChange(Math.min(50, cur + 1))
+                      }}
+                      className="h-3.5 w-4 flex items-center justify-center text-morandi-secondary hover:text-morandi-primary"
+                    >
+                      <ChevronUp size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const cur = typeof memberCount === 'number' ? memberCount : 1
+                        onCountChange(Math.max(1, cur - 1))
+                      }}
+                      className="h-3.5 w-4 flex items-center justify-center text-morandi-secondary hover:text-morandi-primary"
+                    >
+                      <ChevronDown size={12} />
+                    </button>
+                  </div>
+                </div>
+                <Button onClick={onConfirm} disabled={!memberCount || memberCount < 1} size="sm">
+                  <Plus size={16} className="mr-1" />
+                  {COMP_ORDERS_LABELS.新增}
+                </Button>
+              </div>
             </div>
           </div>
 

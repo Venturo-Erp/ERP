@@ -671,3 +671,14 @@ export {
   deleteTourItineraryItem,
   invalidateTourItineraryItems,
 } from './tour-itinerary-items'
+
+// Tour Itinerary Days（day-level metadata，補足 tour_itinerary_items 缺的每日資料）
+export {
+  tourItineraryDayEntity,
+  useTourItineraryDays,
+  useTourItineraryDay,
+  createTourItineraryDay,
+  updateTourItineraryDay,
+  deleteTourItineraryDay,
+  invalidateTourItineraryDays,
+} from './tour-itinerary-days'

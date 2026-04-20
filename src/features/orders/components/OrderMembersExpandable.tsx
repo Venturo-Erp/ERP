@@ -954,11 +954,11 @@ export function OrderMembersExpandable({
 
   return (
     <div
-      className={`flex flex-col h-full overflow-hidden ${embedded ? '' : 'border border-border rounded-xl bg-card'}`}
+      className={`flex flex-col h-full overflow-hidden ${embedded ? 'bg-morandi-gold-light/40 rounded-lg border border-morandi-gold/30' : 'border border-border rounded-xl bg-card'}`}
     >
       {/* 區塊標題行 */}
       <div
-        className={`flex-shrink-0 flex items-center justify-between px-4 py-2 ${embedded ? '' : 'bg-morandi-gold-header border-b border-border/60'}`}
+        className={`flex-shrink-0 flex items-center justify-between px-4 py-2 ${embedded ? 'bg-morandi-gold-header border-b border-morandi-gold/20' : 'bg-morandi-gold-header border-b border-border/60'}`}
       >
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-morandi-primary">
@@ -1037,15 +1037,17 @@ export function OrderMembersExpandable({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 px-2"
+            className="h-8 px-2 gap-1"
             onClick={() => memberExport.setIsExportDialogOpen(true)}
           >
             <Printer size={14} />
+            列印
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 px-2">
+              <Button variant="ghost" size="sm" className="h-8 px-2 gap-1">
                 <Settings size={14} />
+                設定
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 max-h-[70vh] overflow-y-auto">
@@ -1184,12 +1186,12 @@ export function OrderMembersExpandable({
           {/* 只在訂單模式下顯示「新增」按鈕，團體模式下應該在訂單詳細頁面新增 */}
           {mode === 'order' && (
             <Button
-              variant="default"
+              variant="ghost"
               size="sm"
-              className="h-8 px-3"
+              className="h-8 px-2 gap-1 text-morandi-gold hover:text-morandi-gold hover:bg-morandi-gold/10"
               onClick={membersData.handleAddMember}
             >
-              <Plus size={14} className="mr-1" />
+              <Plus size={14} />
               {COMP_ORDERS_LABELS.新增}
             </Button>
           )}
@@ -1198,15 +1200,7 @@ export function OrderMembersExpandable({
 
       {/* Table */}
       <div className="flex-1 overflow-auto">
-        {membersData.loading && sortedMembers.length === 0 ? (
-          <div className="space-y-3 p-4">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-[80%]" />
-          </div>
-        ) : (
+        {
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
@@ -1342,7 +1336,7 @@ export function OrderMembersExpandable({
               </SortableContext>
             </table>
           </DndContext>
-        )}
+        }
       </div>
 
       {/* Dialogs */}

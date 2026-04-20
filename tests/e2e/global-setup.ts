@@ -13,11 +13,11 @@ async function globalSetup(config: FullConfig) {
 
   // 登入
   await page.goto(`${baseURL}/login`)
-  await page.waitForSelector('input[placeholder="輸入公司代號"]')
+  await page.waitForSelector('input[placeholder="公司代號"]')
 
-  await page.fill('input[placeholder="輸入公司代號"]', TEST_CREDENTIALS.companyCode)
-  await page.fill('input[placeholder="例：E001"]', TEST_CREDENTIALS.username)
-  await page.fill('input[placeholder="輸入密碼"]', TEST_CREDENTIALS.password)
+  await page.fill('input[placeholder="公司代號"]', TEST_CREDENTIALS.companyCode)
+  await page.fill('input[placeholder="帳號（例：E001）"]', TEST_CREDENTIALS.username)
+  await page.fill('input[placeholder="密碼"]', TEST_CREDENTIALS.password)
   await page.click('button[type="submit"]')
 
   // 等待登入成功

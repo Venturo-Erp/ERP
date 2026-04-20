@@ -76,6 +76,8 @@ export interface User {
     notes?: string
   }[]
   status: 'active' | 'probation' | 'leave' | 'terminated'
+  terminated_at?: string | null // 離職生效時間
+  terminated_by?: string | null // 執行離職動作的管理員 employee.id
   employee_type?: 'human' | 'bot' // 員工類型：人類或機器人
   avatar?: string
   avatar_url?: string | null // 頭像 URL（DB 標準欄位）

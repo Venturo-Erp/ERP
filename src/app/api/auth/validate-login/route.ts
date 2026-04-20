@@ -2,17 +2,10 @@ import { captureException } from '@/lib/error-tracking'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { logger } from '@/lib/utils/logger'
-import { ApiError, successResponse } from '@/lib/api/response'
+import { ApiError } from '@/lib/api/response'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { validateBody } from '@/lib/api/validation'
 import { validateLoginSchema } from '@/lib/validations/api-schemas'
-import { SignJWT } from 'jose'
-
-const JWT_SECRET = process.env.JWT_SECRET
-if (!JWT_SECRET && process.env.NODE_ENV === 'production') {
-  throw new Error('JWT_SECRET environment variable is required in production')
-}
-const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET || 'venturo_dev_jwt_secret_local_only')
 
 export async function POST(request: NextRequest) {
   try {
@@ -42,14 +35,27 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. 查詢員工（大小寫不敏感）
-    const { data: employee, error: empError } = await supabase
-      .from('employees')
-      .select(
-        'id, employee_number, display_name, english_name, email, avatar, status, password_hash, supabase_user_id, workspace_id, job_info, permissions, is_active, created_at, updated_at, login_failed_count, login_locked_until'
-      )
-      .ilike('employee_number', username)
-      .eq('workspace_id', workspace.id)
-      .maybeSingle()
+    // 支援兩種登入：員工編號（E001）或 email（amin@xxx.com）
+    const isEmail = username.includes('@')
+    const selectFields =
+      'id, employee_number, display_name, english_name, email, avatar, status, password_hash, supabase_user_id, workspace_id, role_id, job_info, permissions, is_active, created_at, updated_at, login_failed_count, login_locked_until'
+
+    const lookupResult = isEmail
+      ? await supabase
+          .from('employees')
+          .select(selectFields)
+          .eq('workspace_id', workspace.id)
+          .ilike('email', username)
+          .maybeSingle()
+      : await supabase
+          .from('employees')
+          .select(selectFields)
+          .eq('workspace_id', workspace.id)
+          .ilike('employee_number', username)
+          .maybeSingle()
+
+    const employee = lookupResult.data
+    const empError = lookupResult.error
 
     if (empError) {
       logger.error('Employee query error:', empError)
@@ -132,14 +138,17 @@ export async function POST(request: NextRequest) {
     // 7. 從職務系統取得權限（統一用 role_tab_permissions）
     let rolePermissions: string[] = []
     let isAdmin = false
+    // 優先讀 top-level role_id（新架構）、fallback 到 job_info.role_id（舊資料）
     const jobInfo = employee.job_info as { role_id?: string } | null
+    const roleId =
+      (employee as Record<string, unknown>).role_id as string | undefined ?? jobInfo?.role_id
 
-    if (jobInfo?.role_id) {
+    if (roleId) {
       // 查職務是否為管理員
       const { data: role } = await supabase
         .from('workspace_roles')
         .select('is_admin')
-        .eq('id', jobInfo.role_id)
+        .eq('id', roleId)
         .single()
 
       isAdmin = role?.is_admin || false
@@ -148,7 +157,7 @@ export async function POST(request: NextRequest) {
       const { data: tabPerms } = await supabase
         .from('role_tab_permissions')
         .select('module_code, tab_code, can_read, can_write')
-        .eq('role_id', jobInfo.role_id)
+        .eq('role_id', roleId)
 
       const permSet = new Set<string>()
 
@@ -188,24 +197,8 @@ export async function POST(request: NextRequest) {
       rolePermissions = Array.from(permSet)
     }
 
-    // 管理員權限由 role_tab_permissions 控制，不再加 '*'
-
-    // 8. 產生 JWT（server-side 簽名）
-    const jwt = await new SignJWT({
-      sub: employeeData.id,
-      employee_number: employeeData.employee_number,
-      permissions: rolePermissions,
-      is_admin: isAdmin,
-      workspace_id: workspace.id,
-    })
-      .setProtectedHeader({ alg: 'HS256' })
-      .setIssuedAt()
-      .setIssuer('venturo-app')
-      .setExpirationTime('14d')
-      .sign(JWT_SECRET_KEY)
-
-    // 9. 設定 httpOnly cookie + 回傳資料（JWT 不再放 response body）
-    const response = NextResponse.json({
+    // 8. 回傳資料（Session 由 client-side supabase.auth.signInWithPassword 建立）
+    return NextResponse.json({
       success: true,
       data: {
         employee: employeeData,
@@ -216,16 +209,6 @@ export async function POST(request: NextRequest) {
         isAdmin,
       },
     })
-
-    response.cookies.set('auth-token', jwt, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 14 * 24 * 60 * 60, // 14 天，與 JWT 一致
-    })
-
-    return response
   } catch (error) {
     logger.error('Validate login error:', error)
     captureException(error, { module: 'auth.validate-login' })

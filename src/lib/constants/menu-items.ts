@@ -219,7 +219,6 @@ export const MENU_HREF_TO_ID_MAP: Record<string, string> = {
   '/workspace': 'workspace',
   '/settings': 'settings',
   '/tours': 'tours',
-  '/quotes': 'quotes',
   '/orders': 'orders',
   '/customers': 'customers',
   '/todos': 'todos',

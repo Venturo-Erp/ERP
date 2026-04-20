@@ -314,7 +314,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
   const [showLocalPricingDialog, setShowLocalPricingDialog] = useState(false)
   const [localTiers, setLocalTiers] = useState<LocalTier[]>([])
 
-  // 從 categories 還原 Local 砍次（用於對話框顯示）
+  // 從 categories 還原 Local 檻次（用於對話框顯示）
   useEffect(() => {
     const groupTransportCategory = categories.find(cat => cat.id === 'group-transport')
     if (groupTransportCategory) {
@@ -425,7 +425,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
       // 儲存檔次資料（持久化）
       setLocalTiers(tiers)
 
-      // 把第一個砍次的人數同步到報價單總人數（全部設為成人）
+      // 把第一個檻次的人數同步到報價單總人數（全部設為成人）
       if (tiers.length > 0 && tiers[0].participants > 0) {
         setParticipantCounts({
           adult: tiers[0].participants,
@@ -477,7 +477,7 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
             item => !item.name.startsWith(QUOTE_DETAIL_EMBED_LABELS.Local_報價)
           )
 
-          // 每個砍次新增一列
+          // 每個檻次新增一列
           sortedTiers.forEach((tier, index) => {
             const newItem: CostItem = {
               id: `local-${tier.participants}-${Date.now()}-${index}`,
@@ -585,25 +585,36 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
           <div className={cn('w-full', isReadOnly && 'opacity-70 pointer-events-none select-none')}>
             <div className="border border-border bg-card rounded-xl shadow-sm overflow-hidden">
               <div ref={scrollRef} className="overflow-x-auto">
-                <table className="w-full min-w-[800px] border-collapse">
+                <table className="w-full min-w-[800px] border-collapse table-fixed">
+                  <colgroup>
+                    <col style={{ width: '100px' }} />
+                    <col />
+                    <col style={{ width: '80px' }} />
+                    <col style={{ width: '112px' }} />
+                    <col style={{ width: '112px' }} />
+                    <col style={{ width: '96px' }} />
+                  </colgroup>
                   <thead className="bg-card border-b border-border sticky top-0 z-20 [&_tr]:bg-morandi-gold-header">
                     <tr>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-morandi-primary w-12 table-divider">
+                      <th
+                        className="text-center py-3 px-4 text-xs font-medium text-morandi-primary table-divider"
+                        style={{ whiteSpace: 'nowrap', wordBreak: 'keep-all' }}
+                      >
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_2257}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-primary w-70 table-divider">
+                      <th className="text-center py-3 px-4 text-xs font-medium text-morandi-primary table-divider">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_7325}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-primary w-20 table-divider">
+                      <th className="text-center py-3 px-4 text-xs font-medium text-morandi-primary table-divider whitespace-nowrap">
                         {QUOTE_DETAIL_EMBED_LABELS.QUANTITY}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-primary w-28 table-divider">
+                      <th className="text-center py-3 px-4 text-xs font-medium text-morandi-primary table-divider whitespace-nowrap">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_9413}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-primary w-28 table-divider whitespace-nowrap">
+                      <th className="text-center py-3 px-4 text-xs font-medium text-morandi-primary table-divider whitespace-nowrap">
                         {QUOTE_DETAIL_EMBED_LABELS.LABEL_832}
                       </th>
-                      <th className="text-center py-3 px-4 text-sm font-semibold text-morandi-primary w-24">
+                      <th className="text-center py-3 px-4 text-xs font-medium text-morandi-primary whitespace-nowrap">
                         {QUOTE_DETAIL_EMBED_LABELS.ACTIONS}
                       </th>
                     </tr>

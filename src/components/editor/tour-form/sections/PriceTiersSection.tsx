@@ -14,7 +14,7 @@ import { COMP_EDITOR_LABELS } from '../../constants/labels'
 interface PriceTiersSectionProps {
   data: TourFormData
   onChange: (data: TourFormData) => void
-  quoteTierPricings?: TierPricing[] // 從報價單帶入的砍次表
+  quoteTierPricings?: TierPricing[] // 從報價單帶入的檻次表
 }
 
 // 格式化價格（加千分位逗號）
@@ -70,7 +70,7 @@ const getDefaultPriceTiers = (): PriceTier[] => [
 export function PriceTiersSection({ data, onChange, quoteTierPricings }: PriceTiersSectionProps) {
   const priceTiers = data.priceTiers || getDefaultPriceTiers()
 
-  // 從報價單帶入砍次表
+  // 從報價單帶入檻次表
   const importFromQuote = () => {
     if (!quoteTierPricings || quoteTierPricings.length === 0) return
     const converted = convertFromQuoteTierPricings(quoteTierPricings)

@@ -2,10 +2,10 @@
 
 import React from 'react'
 import { Input } from '@/components/ui/input'
-import { Check, Hotel, MapPin, X } from 'lucide-react'
+import { Check, Hotel, MapPin, Plane, X } from 'lucide-react'
 import { COMP_TOURS_LABELS } from '../../constants/labels'
 import { DroppableZone } from './DroppableZone'
-import { MentionInput, type MentionInputHandle } from '../mention-input'
+import { useRestaurants } from '@/data'
 
 export type ItineraryBlock =
   | { type: 'text'; content: string }
@@ -19,6 +19,8 @@ export interface DailyScheduleItem {
   hotelBreakfast?: boolean
   lunchSelf?: boolean
   dinnerSelf?: boolean
+  lunchAirline?: boolean
+  dinnerAirline?: boolean
   sameAsPrevious?: boolean
   attractions?: { id: string; name: string; verified?: boolean }[]
   blocks?: ItineraryBlock[]
@@ -29,6 +31,135 @@ export interface DailyScheduleItem {
     lunch?: string
     dinner?: string
   }
+}
+
+type MealKey = 'breakfast' | 'lunch' | 'dinner'
+
+interface RestaurantItem {
+  id: string
+  name?: string | null
+  english_name?: string | null
+}
+
+interface MealComboboxProps {
+  mealKey: MealKey
+  placeholder: string
+  restaurants: RestaurantItem[]
+  onPick: (restaurant: { id: string; name: string }) => void
+  onPlainText: (text: string) => void
+  extraRightPadding: boolean
+}
+
+function MealCombobox({
+  placeholder,
+  restaurants,
+  onPick,
+  onPlainText,
+  extraRightPadding,
+}: MealComboboxProps) {
+  const [text, setText] = React.useState('')
+  const [open, setOpen] = React.useState(false)
+  const [highlight, setHighlight] = React.useState(-1)
+  const wrapperRef = React.useRef<HTMLDivElement>(null)
+
+  const filtered = React.useMemo(() => {
+    const q = text.trim().toLowerCase()
+    if (!q) return [] as RestaurantItem[]
+    return restaurants
+      .filter(r => {
+        const name = (r.name || '').toLowerCase()
+        const en = (r.english_name || '').toLowerCase()
+        return name.includes(q) || en.includes(q)
+      })
+      .slice(0, 10)
+  }, [restaurants, text])
+
+  React.useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [])
+
+  const commit = (r: RestaurantItem) => {
+    const name = r.name || ''
+    onPick({ id: r.id, name })
+    setText('')
+    setOpen(false)
+    setHighlight(-1)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      if (filtered.length > 0) {
+        setOpen(true)
+        setHighlight(h => (h < filtered.length - 1 ? h + 1 : h))
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setHighlight(h => (h > 0 ? h - 1 : 0))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      if (open && highlight >= 0 && highlight < filtered.length) {
+        commit(filtered[highlight])
+      } else if (text.trim()) {
+        onPlainText(text.trim())
+        setText('')
+        setOpen(false)
+        setHighlight(-1)
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      setOpen(false)
+      setHighlight(-1)
+    }
+  }
+
+  return (
+    <div ref={wrapperRef} className="relative w-full">
+      <Input
+        value={text}
+        onChange={e => {
+          setText(e.target.value)
+          setOpen(true)
+          setHighlight(-1)
+        }}
+        onFocus={() => {
+          if (text.trim()) setOpen(true)
+        }}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        className={`h-8 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent placeholder:text-muted-foreground/70 ${extraRightPadding ? 'pr-6' : ''}`}
+      />
+      {open && filtered.length > 0 && (
+        <div className="absolute left-0 right-0 top-full mt-1 z-50 bg-card border border-border rounded-md shadow-lg overflow-hidden max-h-64 overflow-y-auto">
+          {filtered.map((r, i) => (
+            <button
+              key={r.id}
+              type="button"
+              onMouseDown={e => {
+                e.preventDefault()
+                commit(r)
+              }}
+              onMouseEnter={() => setHighlight(i)}
+              className={`w-full px-3 py-1.5 text-left text-xs transition-colors ${
+                highlight === i ? 'bg-morandi-gold/15' : 'hover:bg-morandi-container/40'
+              }`}
+            >
+              <span className="text-morandi-primary">{r.name}</span>
+              {r.english_name && (
+                <span className="ml-1 text-muted-foreground">{r.english_name}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 interface DayRowProps {
@@ -42,9 +173,7 @@ interface DayRowProps {
     dayIdx: number,
     newOrder: { id: string; name: string; verified?: boolean }[]
   ) => void
-  handleMentionSelect: (dayIdx: number, attraction: { id: string; name: string }) => void
   updateBlocks?: (dayIdx: number, blocks: ItineraryBlock[]) => void
-  mentionInputRefs: React.MutableRefObject<Record<number, MentionInputHandle | null>>
   tourLocation: string
   getDateLabel: (idx: number) => string
   getPreviousAccommodation: (index: number) => string
@@ -66,9 +195,7 @@ export function DayRow({
   updateDaySchedule,
   removeAttraction,
   reorderAttractions,
-  handleMentionSelect,
   updateBlocks,
-  mentionInputRefs,
   tourLocation,
   getDateLabel,
   getPreviousAccommodation,
@@ -84,6 +211,73 @@ export function DayRow({
   const cLast = mainRowIsTableBottom ? CELL_LAST_NO_B : CELL_LAST
 
   const routeInputRef = React.useRef<HTMLInputElement>(null)
+
+  // 餐廳清單（Combobox 搜尋資料）
+  const { items: restaurants } = useRestaurants()
+  const restaurantOptions = (restaurants || []) as RestaurantItem[]
+
+  // 選餐廳：寫 meals.xxx + mealIds.xxx，並清掉該餐的 preset flags
+  const handlePickRestaurant = React.useCallback(
+    (mealKey: MealKey, r: { id: string; name: string }) => {
+      updateDaySchedule(idx, `meals.${mealKey}`, r.name)
+      updateDaySchedule(idx, `mealIds.${mealKey}`, r.id)
+      if (mealKey === 'breakfast') {
+        updateDaySchedule(idx, 'hotelBreakfast', false)
+      } else if (mealKey === 'lunch') {
+        updateDaySchedule(idx, 'lunchSelf', false)
+        updateDaySchedule(idx, 'lunchAirline', false)
+      } else {
+        updateDaySchedule(idx, 'dinnerSelf', false)
+        updateDaySchedule(idx, 'dinnerAirline', false)
+      }
+    },
+    [idx, updateDaySchedule]
+  )
+
+  // 純文字輸入：寫 meals.xxx，清 mealIds.xxx
+  const handlePlainTextMeal = React.useCallback(
+    (mealKey: MealKey, text: string) => {
+      updateDaySchedule(idx, `meals.${mealKey}`, text)
+      updateDaySchedule(idx, `mealIds.${mealKey}`, '')
+    },
+    [idx, updateDaySchedule]
+  )
+
+  // 清除某餐的文字與 id
+  const handleClearMeal = React.useCallback(
+    (mealKey: MealKey) => {
+      updateDaySchedule(idx, `meals.${mealKey}`, '')
+      updateDaySchedule(idx, `mealIds.${mealKey}`, '')
+    },
+    [idx, updateDaySchedule]
+  )
+
+  // 勾一個 preset：互斥清掉其他
+  const toggleLunchPreset = React.useCallback(
+    (which: 'self' | 'airline') => {
+      const isSelf = which === 'self'
+      const currentlyOn = isSelf ? !!day.lunchSelf : !!day.lunchAirline
+      const next = !currentlyOn
+      updateDaySchedule(idx, 'lunchSelf', isSelf ? next : false)
+      updateDaySchedule(idx, 'lunchAirline', isSelf ? false : next)
+      updateDaySchedule(idx, 'meals.lunch', '')
+      updateDaySchedule(idx, 'mealIds.lunch', '')
+    },
+    [idx, day.lunchSelf, day.lunchAirline, updateDaySchedule]
+  )
+
+  const toggleDinnerPreset = React.useCallback(
+    (which: 'self' | 'airline') => {
+      const isSelf = which === 'self'
+      const currentlyOn = isSelf ? !!day.dinnerSelf : !!day.dinnerAirline
+      const next = !currentlyOn
+      updateDaySchedule(idx, 'dinnerSelf', isSelf ? next : false)
+      updateDaySchedule(idx, 'dinnerAirline', isSelf ? false : next)
+      updateDaySchedule(idx, 'meals.dinner', '')
+      updateDaySchedule(idx, 'mealIds.dinner', '')
+    },
+    [idx, day.dinnerSelf, day.dinnerAirline, updateDaySchedule]
+  )
 
   // 插入景點：名字插到游標位置 + 加到 attractions 列表
   const handleInsertAttraction = React.useCallback(
@@ -281,10 +475,7 @@ export function DayRow({
                     <span>{day.meals.breakfast}</span>
                     <button
                       type="button"
-                      onClick={() => {
-                        updateDaySchedule(idx, 'meals.breakfast', '')
-                        updateDaySchedule(idx, 'hotelBreakfast', false)
-                      }}
+                      onClick={() => handleClearMeal('breakfast')}
                       className="hover:text-destructive"
                     >
                       <X size={10} />
@@ -292,11 +483,13 @@ export function DayRow({
                   </div>
                 </div>
               ) : (
-                <Input
-                  value=""
-                  onChange={e => updateDaySchedule(idx, 'meals.breakfast', e.target.value)}
+                <MealCombobox
+                  mealKey="breakfast"
                   placeholder={COMP_TOURS_LABELS.早餐}
-                  className={`h-8 text-sm border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent placeholder:text-muted-foreground/70 ${!isFirst ? 'pr-6' : ''}`}
+                  restaurants={restaurantOptions}
+                  onPick={r => handlePickRestaurant('breakfast', r)}
+                  onPlainText={t => handlePlainTextMeal('breakfast', t)}
+                  extraRightPadding={!isFirst}
                 />
               )}
               {!isFirst && (
@@ -307,6 +500,7 @@ export function DayRow({
                     updateDaySchedule(idx, 'hotelBreakfast', next)
                     // 互斥：勾飯店早餐時清餐廳，取消時也清
                     updateDaySchedule(idx, 'meals.breakfast', '')
+                    updateDaySchedule(idx, 'mealIds.breakfast', '')
                   }}
                   className="absolute right-1.5 top-1/2 -translate-y-1/2 z-10"
                   title={COMP_TOURS_LABELS.飯店早餐}
@@ -330,13 +524,19 @@ export function DayRow({
                     <span>{COMP_TOURS_LABELS.敬請自理}</span>
                   </div>
                 </div>
+              ) : day.lunchAirline ? (
+                <div className="flex items-center px-2">
+                  <div className="inline-flex items-center gap-1 bg-morandi-gold/10 text-morandi-gold border border-morandi-gold/30 rounded-full px-2 py-0.5 text-xs">
+                    <span>{COMP_TOURS_LABELS.機上簡餐}</span>
+                  </div>
+                </div>
               ) : day.meals.lunch ? (
                 <div className="flex items-center px-2">
                   <div className="inline-flex items-center gap-1 bg-status-warning/10 text-status-warning border border-status-warning/30 rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.lunch}</span>
                     <button
                       type="button"
-                      onClick={() => updateDaySchedule(idx, 'meals.lunch', '')}
+                      onClick={() => handleClearMeal('lunch')}
                       className="hover:text-destructive"
                     >
                       <X size={10} />
@@ -344,28 +544,37 @@ export function DayRow({
                   </div>
                 </div>
               ) : (
-                <Input
-                  value=""
-                  onChange={e => updateDaySchedule(idx, 'meals.lunch', e.target.value)}
+                <MealCombobox
+                  mealKey="lunch"
                   placeholder={COMP_TOURS_LABELS.午餐}
-                  className="h-8 text-sm pr-6 border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent placeholder:text-muted-foreground/70"
+                  restaurants={restaurantOptions}
+                  onPick={r => handlePickRestaurant('lunch', r)}
+                  onPlainText={t => handlePlainTextMeal('lunch', t)}
+                  extraRightPadding
                 />
               )}
-              <button
-                type="button"
-                onClick={() => {
-                  const next = !day.lunchSelf
-                  updateDaySchedule(idx, 'lunchSelf', next)
-                  updateDaySchedule(idx, 'meals.lunch', '')
-                }}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2"
-                title={COMP_TOURS_LABELS.敬請自理}
-              >
-                <Check
-                  size={12}
-                  className={`transition-opacity ${day.lunchSelf ? 'text-morandi-gold opacity-100' : 'text-muted-foreground opacity-30 hover:opacity-60'}`}
-                />
-              </button>
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => toggleLunchPreset('self')}
+                  title={COMP_TOURS_LABELS.敬請自理}
+                >
+                  <Check
+                    size={12}
+                    className={`transition-opacity ${day.lunchSelf ? 'text-morandi-gold opacity-100' : 'text-muted-foreground opacity-30 hover:opacity-60'}`}
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleLunchPreset('airline')}
+                  title={COMP_TOURS_LABELS.機上簡餐}
+                >
+                  <Plane
+                    size={12}
+                    className={`transition-opacity ${day.lunchAirline ? 'text-morandi-gold opacity-100' : 'text-muted-foreground opacity-30 hover:opacity-60'}`}
+                  />
+                </button>
+              </div>
             </div>
           </DroppableZone>
         </td>
@@ -381,13 +590,19 @@ export function DayRow({
                     <span>{COMP_TOURS_LABELS.敬請自理}</span>
                   </div>
                 </div>
+              ) : day.dinnerAirline ? (
+                <div className="flex items-center px-2">
+                  <div className="inline-flex items-center gap-1 bg-morandi-gold/10 text-morandi-gold border border-morandi-gold/30 rounded-full px-2 py-0.5 text-xs">
+                    <span>{COMP_TOURS_LABELS.機上簡餐}</span>
+                  </div>
+                </div>
               ) : day.meals.dinner ? (
                 <div className="flex items-center px-2">
                   <div className="inline-flex items-center gap-1 bg-status-warning/10 text-status-warning border border-status-warning/30 rounded-full px-2 py-0.5 text-xs">
                     <span>{day.meals.dinner}</span>
                     <button
                       type="button"
-                      onClick={() => updateDaySchedule(idx, 'meals.dinner', '')}
+                      onClick={() => handleClearMeal('dinner')}
                       className="hover:text-destructive"
                     >
                       <X size={10} />
@@ -395,28 +610,37 @@ export function DayRow({
                   </div>
                 </div>
               ) : (
-                <Input
-                  value=""
-                  onChange={e => updateDaySchedule(idx, 'meals.dinner', e.target.value)}
+                <MealCombobox
+                  mealKey="dinner"
                   placeholder={COMP_TOURS_LABELS.晚餐}
-                  className="h-8 text-sm pr-6 border-0 shadow-none focus-visible:ring-0 rounded-none px-2 bg-transparent placeholder:text-muted-foreground/70"
+                  restaurants={restaurantOptions}
+                  onPick={r => handlePickRestaurant('dinner', r)}
+                  onPlainText={t => handlePlainTextMeal('dinner', t)}
+                  extraRightPadding
                 />
               )}
-              <button
-                type="button"
-                onClick={() => {
-                  const next = !day.dinnerSelf
-                  updateDaySchedule(idx, 'dinnerSelf', next)
-                  updateDaySchedule(idx, 'meals.dinner', '')
-                }}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2"
-                title={COMP_TOURS_LABELS.敬請自理}
-              >
-                <Check
-                  size={12}
-                  className={`transition-opacity ${day.dinnerSelf ? 'text-morandi-gold opacity-100' : 'text-muted-foreground opacity-30 hover:opacity-60'}`}
-                />
-              </button>
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+                <button
+                  type="button"
+                  onClick={() => toggleDinnerPreset('self')}
+                  title={COMP_TOURS_LABELS.敬請自理}
+                >
+                  <Check
+                    size={12}
+                    className={`transition-opacity ${day.dinnerSelf ? 'text-morandi-gold opacity-100' : 'text-muted-foreground opacity-30 hover:opacity-60'}`}
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleDinnerPreset('airline')}
+                  title={COMP_TOURS_LABELS.機上簡餐}
+                >
+                  <Plane
+                    size={12}
+                    className={`transition-opacity ${day.dinnerAirline ? 'text-morandi-gold opacity-100' : 'text-muted-foreground opacity-30 hover:opacity-60'}`}
+                  />
+                </button>
+              </div>
             </div>
           </DroppableZone>
         </td>

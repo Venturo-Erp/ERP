@@ -15,12 +15,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
-import { Loader2, FileText, Plus, Star, Receipt } from 'lucide-react'
+import { Loader2, FileText, Plus, Star, Receipt, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { logger } from '@/lib/utils/logger'
 import { getTodayString } from '@/lib/utils/format-date'
 import { cn } from '@/lib/utils'
+import { confirm } from '@/lib/ui/alert-dialog'
 import { useAuthStore } from '@/stores'
 import type { Tour } from '@/stores/types'
 import type { Quote } from '@/stores/types'
@@ -49,6 +50,10 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
 
   // 當前選中的版本
   const [selectedVersion, setSelectedVersion] = useState<'main' | string>('main')
+
+  // Inline 重新命名狀態
+  const [editingQuoteId, setEditingQuoteId] = useState<string | null>(null)
+  const [editingName, setEditingName] = useState('')
 
   // ========== 載入主報價單 ==========
   useEffect(() => {
@@ -243,6 +248,67 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
     }
   }
 
+  // ========== 進入 inline 重新命名 ==========
+  const startRenameQuickQuote = (quote: Quote) => {
+    setEditingQuoteId(quote.id)
+    setEditingName(quote.name || quote.customer_name || '')
+  }
+
+  // ========== 儲存 inline 重新命名 ==========
+  const commitRenameQuickQuote = async () => {
+    const id = editingQuoteId
+    if (!id) return
+    const trimmed = editingName.trim()
+    // 取消編輯 UI（不等 save 完成，畫面先回）
+    setEditingQuoteId(null)
+
+    // 若沒變動就不打 API
+    const target = quickQuotes.find(q => q.id === id)
+    const originalName = target?.name || ''
+    if (trimmed === originalName) return
+
+    try {
+      const { error } = await supabase
+        .from('quotes')
+        .update({ name: trimmed || null })
+        .eq('id', id)
+      if (error) throw error
+      await loadQuickQuotes()
+    } catch (err) {
+      logger.error('更新快速報價名稱失敗', err)
+      toast.error('更新失敗')
+    }
+  }
+
+  const cancelRenameQuickQuote = () => {
+    setEditingQuoteId(null)
+    setEditingName('')
+  }
+
+  // ========== 刪除快速報價單 ==========
+  const handleDeleteQuickQuote = async (quote: Quote) => {
+    const label = quote.name || quote.customer_name || '此快速報價'
+    const ok = await confirm(`確定要刪除「${label}」？此動作無法還原。`, {
+      type: 'warning',
+      title: '刪除快速報價',
+      confirmText: '刪除',
+      cancelText: '取消',
+    })
+    if (!ok) return
+
+    try {
+      const { error } = await supabase.from('quotes').delete().eq('id', quote.id)
+      if (error) throw error
+      // 如果刪的是正在選中的，切回主報價單
+      if (selectedVersion === quote.id) setSelectedVersion('main')
+      await loadQuickQuotes()
+      toast.success('已刪除快速報價')
+    } catch (err) {
+      logger.error('刪除快速報價失敗', err)
+      toast.error('刪除失敗')
+    }
+  }
+
   // ========== 渲染 ==========
   const isLoading = loadingMain || loadingQuick
 
@@ -281,26 +347,90 @@ export function TourQuoteTabV2({ tour }: TourQuoteTabV2Props) {
 
         {/* 快速報價列表 */}
         <div className="flex-1 overflow-y-auto">
-          {quickQuotes.map((quote, index) => (
-            <button
-              key={quote.id}
-              onClick={() => setSelectedVersion(quote.id)}
-              className={cn(
-                'w-full flex items-center gap-2 px-3 py-2.5 text-sm border-b border-border/20 transition-colors',
-                selectedVersion === quote.id
-                  ? 'bg-morandi-gold/10 border-l-2 border-l-morandi-gold text-morandi-primary'
-                  : 'hover:bg-morandi-container/30 text-morandi-secondary'
-              )}
-            >
-              <Receipt size={12} className="shrink-0" />
-              <div className="min-w-0 text-left">
-                <div className="truncate text-xs">
-                  {quote.customer_name || `快速報價 ${index + 1}`}
+          {quickQuotes.map((quote, index) => {
+            const displayName = quote.name || quote.customer_name || `快速報價 ${index + 1}`
+            const isActive = selectedVersion === quote.id
+            const isEditing = editingQuoteId === quote.id
+            return (
+              <div
+                key={quote.id}
+                onClick={() => {
+                  if (isEditing) return
+                  setSelectedVersion(quote.id)
+                }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={e => {
+                  if (isEditing) return
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setSelectedVersion(quote.id)
+                  }
+                }}
+                className={cn(
+                  'group relative flex items-center gap-2 px-3 py-3 text-sm border-b border-border/30 cursor-pointer transition-colors',
+                  isActive
+                    ? 'bg-morandi-gold/10 border-l-2 border-l-morandi-gold text-morandi-primary'
+                    : 'hover:bg-morandi-container/30 text-morandi-secondary'
+                )}
+              >
+                <Receipt size={12} className="shrink-0" />
+                <div className="min-w-0 text-left flex-1">
+                  {isEditing ? (
+                    <input
+                      autoFocus
+                      type="text"
+                      value={editingName}
+                      onChange={e => setEditingName(e.target.value)}
+                      onClick={e => e.stopPropagation()}
+                      onBlur={commitRenameQuickQuote}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          commitRenameQuickQuote()
+                        } else if (e.key === 'Escape') {
+                          e.preventDefault()
+                          cancelRenameQuickQuote()
+                        }
+                      }}
+                      placeholder="輸入名稱"
+                      className="w-full bg-transparent text-xs text-morandi-primary outline-none border-b border-morandi-gold/60 focus:border-morandi-gold"
+                    />
+                  ) : (
+                    <div className="truncate text-xs">{displayName}</div>
+                  )}
+                  <div className="text-[10px] opacity-60">{quote.issue_date || ''}</div>
                 </div>
-                <div className="text-[10px] opacity-60">{quote.issue_date || ''}</div>
+                {/* Hover 操作按鈕（編輯中不顯示） */}
+                {!isEditing && (
+                  <div className="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation()
+                        startRenameQuickQuote(quote)
+                      }}
+                      className="p-1 text-morandi-secondary hover:text-morandi-gold transition-colors"
+                      title="重新命名"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={e => {
+                        e.stopPropagation()
+                        handleDeleteQuickQuote(quote)
+                      }}
+                      className="p-1 text-morandi-secondary hover:text-morandi-red transition-colors"
+                      title="刪除"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                )}
               </div>
-            </button>
-          ))}
+            )
+          })}
         </div>
 
         {/* 新增按鈕 */}

@@ -2,18 +2,13 @@ import { NextResponse } from 'next/server'
 
 /**
  * POST /api/auth/logout
- * 清除 httpOnly auth-token cookie
+ *
+ * 保留此 endpoint 供 client 呼叫、維持兼容性。
+ * 實際的 session 清除由 client 端的 `supabase.auth.signOut()` 處理
+ * （Supabase SSR 會自動清掉 session cookies）。
+ *
+ * 舊的自家 JWT（auth-token cookie）已移除（2026-04-18）。
  */
 export async function POST() {
-  const response = NextResponse.json({ success: true })
-
-  response.cookies.set('auth-token', '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 0, // 立即過期
-  })
-
-  return response
+  return NextResponse.json({ success: true })
 }

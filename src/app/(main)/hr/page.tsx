@@ -12,14 +12,13 @@ import { Employee } from '@/stores/types'
 import { EmployeeForm } from '@/features/hr/components/EmployeeForm'
 import { useRouter } from 'next/navigation'
 import { HR_ADMIN_TABS } from './components/hr-admin-tabs'
-import { Users, Edit2, Trash2, UserX, Bot, Download } from 'lucide-react'
+import { Users, Edit2, UserX, Bot, Download } from 'lucide-react'
 import type { UserRole } from '@/lib/rbac-config'
 import { TableColumn } from '@/components/ui/enhanced-table'
 import { DateCell, ActionCell } from '@/components/table-cells'
 import { ConfirmDialog } from '@/components/dialog/confirm-dialog'
 import { useConfirmDialog } from '@/hooks/useConfirmDialog'
 import { useAuthStore } from '@/stores/auth-store'
-import { supabase } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 // 職務類型
@@ -31,7 +30,7 @@ interface Role {
 
 export default function HRPage() {
   const router = useRouter()
-  const { items: users, fetchAll, update: updateUser, delete: deleteUser } = useUserStore()
+  const { items: users, fetchAll, update: updateUser } = useUserStore()
   const [expandedEmployee, setExpandedEmployee] = useState<string | null>(null)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const { confirm, confirmDialogProps } = useConfirmDialog()
@@ -107,78 +106,17 @@ export default function HRPage() {
     }
 
     try {
-      await updateUser(employee.id, { status: 'terminated' })
+      const currentUserId = useAuthStore.getState().user?.id
+      await updateUser(employee.id, {
+        status: 'terminated',
+        terminated_at: new Date().toISOString(),
+        terminated_by: currentUserId ?? null,
+      })
       if (expandedEmployee === employee.id) {
         setExpandedEmployee(null)
       }
     } catch (err) {
       toast.error(LABELS.TERMINATE_FAILED)
-    }
-  }
-
-  const handleDeleteEmployee = async (employee: Employee, e?: React.MouseEvent) => {
-    if (e) {
-      e.stopPropagation()
-    }
-
-    const employeeName = employee.display_name || employee.chinese_name || LABELS.UNNAMED_EMPLOYEE
-    const confirmed = await confirm({
-      type: 'danger',
-      title: LABELS.DELETE_TITLE,
-      message: `${LABELS.DELETE_CONFIRM_PREFIX}${employeeName}${LABELS.DELETE_CONFIRM_SUFFIX}`,
-      details: [
-        LABELS.DELETE_DETAIL_1,
-        LABELS.DELETE_DETAIL_2,
-        LABELS.DELETE_DETAIL_3,
-        '',
-        LABELS.DELETE_DETAIL_4,
-      ],
-      confirmLabel: LABELS.DELETE_CONFIRM_LABEL,
-      cancelLabel: LABELS.CANCEL,
-    })
-
-    if (!confirmed) {
-      return
-    }
-
-    try {
-      // 檢查員工是否有關聯資料
-      const [tours, orders, receipts, payments] = await Promise.all([
-        supabase
-          .from('tours')
-          .select('id', { count: 'exact', head: true })
-          .or(`created_by.eq.${employee.id},controller_id.eq.${employee.id}`),
-        supabase
-          .from('orders')
-          .select('id', { count: 'exact', head: true })
-          .or(`sales_person_id.eq.${employee.id},assistant_id.eq.${employee.id}`),
-        supabase
-          .from('receipts')
-          .select('id', { count: 'exact', head: true })
-          .eq('created_by', employee.id),
-        supabase
-          .from('payment_requests')
-          .select('id', { count: 'exact', head: true })
-          .eq('created_by', employee.id),
-      ])
-
-      const blockers: string[] = []
-      if (tours.count && tours.count > 0) blockers.push(`${tours.count} 個旅遊團`)
-      if (orders.count && orders.count > 0) blockers.push(`${orders.count} 筆訂單`)
-      if (receipts.count && receipts.count > 0) blockers.push(`${receipts.count} 筆收款單`)
-      if (payments.count && payments.count > 0) blockers.push(`${payments.count} 筆請款單`)
-
-      if (blockers.length > 0) {
-        toast.error(`無法刪除：此員工關聯 ${blockers.join('、')}`)
-        return
-      }
-
-      await deleteUser(employee.id)
-      if (expandedEmployee === employee.id) {
-        setExpandedEmployee(null)
-      }
-    } catch (err) {
-      toast.error(LABELS.DELETE_FAILED)
     }
   }
 
@@ -209,7 +147,10 @@ export default function HRPage() {
         width: '100px',
         render: (_value, employee: Employee) => {
           // 從職務列表取得職務名稱
-          const role = rolesData.find(r => r.id === employee.job_info?.role_id)
+          // role_id 優先讀頂層、fallback nested（2026-04-18 統一過渡期）
+          const empRoleId =
+            (employee as unknown as { role_id?: string }).role_id || employee.job_info?.role_id
+          const role = rolesData.find(r => r.id === empRoleId)
           return (
             <span className={`text-sm ${role ? 'text-morandi-primary' : 'text-morandi-muted'}`}>
               {role?.name || LABELS.NOT_SET}
@@ -282,16 +223,10 @@ export default function HRPage() {
                   icon: UserX,
                   label: LABELS.ACTION_TERMINATE,
                   onClick: () => handleTerminateEmployee(employee),
-                  variant: 'warning' as const,
+                  variant: 'danger' as const,
                 },
               ]
             : []),
-          {
-            icon: Trash2,
-            label: LABELS.ACTION_DELETE,
-            onClick: () => handleDeleteEmployee(employee),
-            variant: 'danger' as const,
-          },
         ]}
       />
     ),
@@ -315,25 +250,8 @@ export default function HRPage() {
         actionsWidth="280px"
         bordered={true}
         defaultSort={{ key: 'employee_number', direction: 'asc' }}
-        headerActions={
-          <Button
-            onClick={() => {
-              setIsAddDialogOpen(true)
-            }}
-            className="bg-morandi-gold hover:bg-morandi-gold-hover text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center"
-            style={{ pointerEvents: 'auto', position: 'relative', zIndex: 9999 }}
-          >
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            {LABELS.ADD_EMPLOYEE}
-          </Button>
-        }
+        onAdd={() => setIsAddDialogOpen(true)}
+        addLabel={LABELS.ADD_EMPLOYEE}
       />
 
       {expandedEmployee && (

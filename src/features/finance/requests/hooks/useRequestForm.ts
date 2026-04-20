@@ -1,9 +1,8 @@
 import { useState, useCallback, useMemo } from 'react'
-import { useToursSlim, useOrders, useSuppliersSlim, useEmployeesSlim } from '@/data'
+import { useToursSlim, useOrders, useSuppliersSlim } from '@/data'
 import { useAuthStore } from '@/stores'
 import { RequestFormData, RequestItem } from '../types'
 import type { PaymentItemCategory } from '@/stores/types'
-import { REQUEST_FORM_HOOK_LABELS } from '../../constants/labels'
 
 // 計算下一個週四（如果今天是週四，跳到下週四）
 function getNextThursdayDate(): string {
@@ -24,7 +23,6 @@ export function useRequestForm() {
   const { items: tours } = useToursSlim()
   const { items: orders } = useOrders()
   const { items: suppliers } = useSuppliersSlim()
-  const { items: employees } = useEmployeesSlim()
 
   // 獲取當前登入用戶
   const currentUser = useAuthStore(state => state.user)
@@ -113,29 +111,17 @@ export function useRequestForm() {
     [requestItems]
   )
 
-  // Combine suppliers and employees into one list
-  const combinedSuppliers = useMemo(() => {
-    const supplierList = suppliers.map(s => ({
-      id: s.id,
-      name: s.name,
-      type: 'supplier' as const,
-      group: REQUEST_FORM_HOOK_LABELS.SUPPLIER,
-    }))
-
-    // 過濾掉機器人（BOT001）
-    const employeeList = employees
-      .filter(
-        e => e.employee_number !== 'BOT001' && e.id !== '00000000-0000-0000-0000-000000000001'
-      )
-      .map(e => ({
-        id: e.id,
-        name: e.display_name,
-        type: 'employee' as const,
-        group: REQUEST_FORM_HOOK_LABELS.EMPLOYEE,
-      }))
-
-    return [...supplierList, ...employeeList]
-  }, [suppliers, employees])
+  // 供應商清單（員工墊付請改走代墊功能，不再混入供應商）
+  const combinedSuppliers = useMemo(
+    () =>
+      suppliers.map(s => ({
+        id: s.id,
+        name: s.name,
+        type: 'supplier' as const,
+        group: 'supplier',
+      })),
+    [suppliers]
+  )
 
   // Add a new empty item to the list
   const addNewEmptyItem = useCallback(() => {

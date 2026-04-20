@@ -29,58 +29,38 @@ import { ChevronRight, ChevronDown } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 import { useRouter } from 'next/navigation'
 import { HR_ADMIN_TABS } from '../components/hr-admin-tabs'
-
-interface Role {
-  id: string
-  name: string
-  description: string | null
-  is_admin: boolean
-  sort_order: number
-}
+import { useRoles, type Role } from '@/data/hooks/useRoles'
 
 export default function RolesPage() {
   const router = useRouter()
   const { user } = useAuthStore()
   const { toast } = useToast()
-  const { isFeatureEnabled, loading: featuresLoading } = useWorkspaceFeatures()
+  const { isFeatureEnabled, isTabEnabled, loading: featuresLoading } = useWorkspaceFeatures()
 
-  // 只顯示這個 workspace 已啟用的模組
+  // 只顯示這個 workspace 已啟用的模組、且過濾掉 workspace 沒開通的 tab（例如未付費的合約）
   const visibleModules = useMemo(
-    () => MODULES.filter(m => isFeatureEnabled(m.code)),
-    [isFeatureEnabled]
+    () =>
+      MODULES.filter(m => isFeatureEnabled(m.code)).map(m => ({
+        ...m,
+        tabs: m.tabs.filter(t => isTabEnabled(m.code, t.code, t.category)),
+      })),
+    [isFeatureEnabled, isTabEnabled]
   )
 
-  const [roles, setRoles] = useState<Role[]>([])
+  const { roles, loading, mutate: mutateRoles } = useRoles()
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
   const [permissions, setPermissions] = useState<TabPermission[]>([])
   const [expandedModules, setExpandedModules] = useState<string[]>([])
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingRole, setEditingRole] = useState({ name: '', description: '' })
 
-  // 載入職務列表
+  // 預設選中第一筆（當列表載入且尚無選中時）
   useEffect(() => {
-    const fetchRoles = async () => {
-      setLoading(true)
-      try {
-        // 不需要傳 workspace_id，API 會自動取得
-        const res = await fetch('/api/roles')
-        if (res.ok) {
-          const data = await res.json()
-          setRoles(data)
-          if (data.length > 0 && !selectedRole) {
-            setSelectedRole(data[0])
-          }
-        }
-      } catch (err) {
-        logger.error('Failed to fetch roles:', err)
-      }
-      setLoading(false)
+    if (!selectedRole && roles.length > 0) {
+      setSelectedRole(roles[0])
     }
-
-    fetchRoles()
-  }, [])
+  }, [roles, selectedRole])
 
   // 載入選中角色的權限
   useEffect(() => {
@@ -237,7 +217,7 @@ export default function RolesPage() {
 
       if (res.ok) {
         const newRole = await res.json()
-        setRoles([...roles, newRole])
+        await mutateRoles()
         setSelectedRole(newRole)
         setIsDialogOpen(false)
         setEditingRole({ name: '', description: '' })
@@ -256,15 +236,43 @@ export default function RolesPage() {
 
     setSaving(true)
     try {
+      const payload = permissions.filter(p => p.can_read || p.can_write)
+      logger.log('[ROLES] PUT payload', {
+        role: selectedRole.name,
+        role_id: selectedRole.id,
+        count: payload.length,
+        permissions: payload,
+      })
+
       const res = await fetch(`/api/roles/${selectedRole.id}/tab-permissions`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ permissions }),
       })
 
-      if (res.ok) {
-        toast({ title: '已儲存權限' })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        logger.error('[ROLES] Save failed', { status: res.status, body })
+        toast({
+          title: '儲存失敗',
+          description: body.error || `HTTP ${res.status}`,
+          variant: 'destructive',
+        })
+        return
       }
+
+      // 存完重新 fetch 驗證（確保 DB 狀態反映到 UI）
+      const verifyRes = await fetch(`/api/roles/${selectedRole.id}/tab-permissions`)
+      if (verifyRes.ok) {
+        const data = await verifyRes.json()
+        logger.log('[ROLES] Post-save verify', {
+          role: selectedRole.name,
+          count: data.length,
+          permissions: data,
+        })
+        setPermissions(data)
+      }
+      toast({ title: '已儲存權限' })
     } catch (err) {
       logger.error('Failed to save permissions:', err)
       toast({ title: '儲存失敗', variant: 'destructive' })
@@ -284,10 +292,11 @@ export default function RolesPage() {
     try {
       const res = await fetch(`/api/roles/${role.id}`, { method: 'DELETE' })
       if (res.ok) {
-        setRoles(roles.filter(r => r.id !== role.id))
+        // 若刪的是選中的，先切到另一筆（用當前 roles 計算 fallback）
         if (selectedRole?.id === role.id) {
           setSelectedRole(roles.find(r => r.id !== role.id) || null)
         }
+        await mutateRoles()
         toast({ title: '已刪除職務' })
       }
     } catch (err) {
@@ -368,25 +377,33 @@ export default function RolesPage() {
           isExpanded &&
           module.tabs.map(tab => {
             const perm = getPermission(module.code, tab.code)
+            // 下拉資格 tab：admin 也可個別取消（例：老闆不想出現在代墊款下拉）
+            const adminCanEdit = tab.isEligibility === true
+            const effectiveDisabled = isAdmin && !adminCanEdit
             return (
               <div key={tab.code} className="flex items-center border-t border-border bg-card">
                 <div className="flex-1 p-4 pl-12 flex items-center gap-2">
                   <div className="w-1 h-4 bg-border rounded-full" />
                   <span className="text-sm text-morandi-primary">{tab.name}</span>
+                  {tab.isEligibility && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-morandi-gold/10 text-morandi-gold border border-morandi-gold/30">
+                      下拉資格
+                    </span>
+                  )}
                 </div>
                 <div className="w-32 p-4 flex justify-center">
                   <Switch
-                    checked={isAdmin || (perm?.can_read ?? false)}
+                    checked={(isAdmin && !adminCanEdit) || (perm?.can_read ?? false)}
                     onCheckedChange={() => toggleTabPermission(module.code, tab.code, 'can_read')}
-                    disabled={isAdmin}
+                    disabled={effectiveDisabled}
                     className="data-[state=checked]:bg-morandi-green"
                   />
                 </div>
                 <div className="w-32 p-4 flex justify-center">
                   <Switch
-                    checked={isAdmin || (perm?.can_write ?? false)}
+                    checked={(isAdmin && !adminCanEdit) || (perm?.can_write ?? false)}
                     onCheckedChange={() => toggleTabPermission(module.code, tab.code, 'can_write')}
-                    disabled={isAdmin}
+                    disabled={effectiveDisabled}
                     className="data-[state=checked]:bg-morandi-gold"
                   />
                 </div>
@@ -408,22 +425,17 @@ export default function RolesPage() {
         { label: '人資管理', href: '/hr' },
         { label: '職務管理', href: '/hr/roles' },
       ]}
+      onAdd={() => setIsDialogOpen(true)}
+      addLabel="新增職務"
+      contentClassName="flex-1 overflow-hidden flex flex-col min-h-0 p-0"
     >
       <>
-        <div className="grid grid-cols-12 gap-6 h-full min-h-[500px]">
+        <div className="grid grid-cols-12 gap-6 flex-1 min-h-0 auto-rows-fr">
           {/* 左側：職務列表 */}
-          <div className="col-span-3 flex flex-col">
+          <div className="col-span-3 flex flex-col min-h-0">
             <div className="bg-card border border-border rounded-lg flex flex-col h-full">
-              <div className="flex items-center justify-between p-4 border-b border-border">
+              <div className="flex items-center px-4 h-14 border-b border-border">
                 <h3 className="font-semibold text-morandi-primary">職務列表</h3>
-                <Button
-                  size="sm"
-                  onClick={() => setIsDialogOpen(true)}
-                  className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  新增
-                </Button>
               </div>
 
               <div className="flex-1 overflow-y-auto p-4">
@@ -441,7 +453,7 @@ export default function RolesPage() {
                     {roles.map(role => (
                       <div
                         key={role.id}
-                        className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                        className={`group p-3 rounded-lg border cursor-pointer transition-all ${
                           selectedRole?.id === role.id
                             ? 'border-morandi-gold bg-morandi-gold/5 shadow-sm'
                             : 'border-border hover:border-morandi-gold/50 hover:bg-morandi-bg/50'
@@ -456,17 +468,12 @@ export default function RolesPage() {
                             <span className="font-medium text-morandi-primary text-sm">
                               {role.name}
                             </span>
-                            {role.is_admin && (
-                              <Badge className="bg-morandi-gold/20 text-morandi-gold border-morandi-gold/30 text-xs">
-                                <Star className="h-3 w-3" />
-                              </Badge>
-                            )}
                           </div>
                           {!role.is_admin && (
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="h-6 w-6 p-0 hover:bg-morandi-red/10"
+                              className="h-6 w-6 p-0 hover:bg-morandi-red/10 opacity-0 group-hover:opacity-100 transition-opacity"
                               onClick={e => {
                                 e.stopPropagation()
                                 handleDeleteRole(role)
@@ -485,9 +492,9 @@ export default function RolesPage() {
           </div>
 
           {/* 右側：權限設定 */}
-          <div className="col-span-9 flex flex-col">
+          <div className="col-span-9 flex flex-col min-h-0">
             <div className="bg-card border border-border rounded-lg flex flex-col h-full">
-              <div className="flex items-center justify-between p-4 border-b border-border">
+              <div className="flex items-center justify-between px-4 h-14 border-b border-border">
                 <div className="flex items-center gap-3">
                   <h3 className="font-semibold text-morandi-primary">
                     {selectedRole ? `${selectedRole.name} 的權限` : '請選擇職務'}
@@ -506,16 +513,17 @@ export default function RolesPage() {
                     </div>
                   )}
                 </div>
-                {selectedRole && (
+                {selectedRole && !selectedRole.is_admin && (
                   <Button
                     onClick={handleSavePermissions}
                     disabled={saving}
-                    className="bg-morandi-gold hover:bg-morandi-gold-hover text-white"
+                    size="sm"
+                    className="h-8 bg-morandi-gold hover:bg-morandi-gold-hover text-white"
                   >
                     {saving ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
                     ) : (
-                      <Save className="h-4 w-4 mr-2" />
+                      <Save className="h-3.5 w-3.5 mr-1.5" />
                     )}
                     儲存
                   </Button>

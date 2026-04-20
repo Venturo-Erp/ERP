@@ -48,19 +48,10 @@ export const QuotesList: React.FC<QuotesListProps> = ({
         render: (value, row) => {
           const quote = row as Quote
           const displayName = stripHtml(quote.name)
-          // 版本數量
-          const versions = (quote as Quote & { versions?: Array<unknown> }).versions
-          const versionCount = versions?.length || 0
-          const extraVersions = versionCount > 1 ? versionCount - 1 : 0
           return (
             <div className="flex items-center gap-2">
               {quote.is_pinned && <Pin size={14} className="text-morandi-gold" />}
               <span className="text-sm font-medium text-morandi-primary">{displayName || '-'}</span>
-              {extraVersions > 0 && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-morandi-gold/10 text-morandi-gold font-medium">
-                  +{extraVersions}
-                </span>
-              )}
             </div>
           )
         },

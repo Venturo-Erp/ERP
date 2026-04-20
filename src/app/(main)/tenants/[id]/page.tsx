@@ -13,25 +13,24 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/components/ui/use-toast'
 import { supabase } from '@/lib/supabase/client'
-import {
-  Building2,
-  Save,
-  Loader2,
-  Lock,
-  Unlock,
-  Sparkles,
-  Bot,
-  MessageCircle,
-  ExternalLink,
-  Users,
-} from 'lucide-react'
-import Link from 'next/link'
+import { Building2, Save, Loader2, Sparkles, Users, Settings2 } from 'lucide-react'
+import { ModuleLoading } from '@/components/module-loading'
+import { invalidateFeatureCache } from '@/lib/permissions/hooks'
 import {
   FEATURES,
+  MODULES,
   getBasicFeatures,
   getPremiumFeatures,
   getEnterpriseFeatures,
 } from '@/lib/permissions'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 
 interface Workspace {
   id: string
@@ -57,14 +56,11 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
   const [workspace, setWorkspace] = useState<Workspace | null>(null)
   const [features, setFeatures] = useState<WorkspaceFeature[]>([])
   const [premiumEnabled, setPremiumEnabled] = useState(false)
-  const [lineConfig, setLineConfig] = useState<{
-    is_connected: boolean
-    bot_display_name?: string
-  } | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [employeeCount, setEmployeeCount] = useState(0)
   const [adminName, setAdminName] = useState<string | null>(null)
+  const [tabModalModuleCode, setTabModalModuleCode] = useState<string | null>(null)
 
   // 載入資料
   useEffect(() => {
@@ -88,26 +84,19 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
       const featuresRes = await fetch(`/api/permissions/features?workspace_id=${id}`)
       const featuresData: WorkspaceFeature[] = featuresRes.ok ? await featuresRes.json() : []
 
-      // 初始化功能列表
+      // 初始化功能列表（module 級 + tab 級、tab 級 code 格式為 `{module}.{tab}`）
       const featureMap = new Map<string, boolean>(
         featuresData.map(f => [f.feature_code, f.enabled])
       )
-      const allFeatures: WorkspaceFeature[] = FEATURES.map(f => ({
+      const moduleFeatures: WorkspaceFeature[] = FEATURES.map(f => ({
         feature_code: f.code,
         enabled: featureMap.get(f.code) ?? false,
       }))
-      setFeatures(allFeatures)
-
-      // 取得 LINE 連線狀態
-      try {
-        const lineRes = await fetch('/api/line/setup')
-        if (lineRes.ok) {
-          const lineData = await lineRes.json()
-          setLineConfig(lineData)
-        }
-      } catch {
-        // 忽略
-      }
+      // 保留所有 tab 級的 row（不覆蓋、不丟失）
+      const tabFeatures: WorkspaceFeature[] = featuresData.filter(f =>
+        f.feature_code.includes('.')
+      )
+      setFeatures([...moduleFeatures, ...tabFeatures])
 
       setLoading(false)
     }
@@ -122,12 +111,35 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
     )
   }
 
+  // 切換 tab 級功能（`{module}.{tab}` 格式）
+  const toggleTabFeature = (moduleCode: string, tabCode: string, nextEnabled: boolean) => {
+    const key = `${moduleCode}.${tabCode}`
+    setFeatures(prev => {
+      const existing = prev.find(f => f.feature_code === key)
+      if (existing) {
+        return prev.map(f => (f.feature_code === key ? { ...f, enabled: nextEnabled } : f))
+      }
+      return [...prev, { feature_code: key, enabled: nextEnabled }]
+    })
+  }
+
+  // 查詢 tab 啟用狀態（給 Modal 用）
+  const isTabFeatureEnabled = (
+    moduleCode: string,
+    tabCode: string,
+    category?: 'basic' | 'premium'
+  ): boolean => {
+    const key = `${moduleCode}.${tabCode}`
+    const feature = features.find(f => f.feature_code === key)
+    if (category === 'premium') return feature?.enabled === true
+    return feature?.enabled !== false
+  }
+
   // 儲存
   const handleSave = async () => {
     setSaving(true)
 
     try {
-      // 儲存功能權限
       const res = await fetch('/api/permissions/features', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -138,27 +150,74 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
         }),
       })
 
-      if (res.ok) {
-        toast({ title: '已儲存' })
-      } else {
-        throw new Error('儲存失敗')
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        toast({
+          title: '儲存失敗',
+          description: body.error || `HTTP ${res.status}`,
+          variant: 'destructive',
+        })
+        return
       }
-    } catch {
-      toast({ title: '儲存失敗', variant: 'destructive' })
+
+      // 清 feature cache、讓其他頁面立即看到最新狀態（合約 tab 等）
+      invalidateFeatureCache()
+      toast({ title: '已儲存' })
+    } catch (err) {
+      toast({
+        title: '儲存失敗',
+        description: err instanceof Error ? err.message : '未知錯誤',
+        variant: 'destructive',
+      })
     } finally {
       setSaving(false)
     }
   }
 
-  // 合併付費和企業功能
-  const premiumAndEnterpriseFeatures = [...getPremiumFeatures(), ...getEnterpriseFeatures()]
+  // 付費加購清單 = 付費模組 + 免費模組裡的付費 tab、統一平列
+  // 'tenants' 為 Venturo 超管內部功能、不在租戶功能清單露出
+  const INTERNAL_FEATURES = new Set(['tenants'])
+
+  // 1. 付費的整個模組（會計、頻道等）
+  const premiumModules = [...getPremiumFeatures(), ...getEnterpriseFeatures()]
+    .filter(f => !INTERNAL_FEATURES.has(f.code))
+    .map(f => ({
+      code: f.code,
+      name: f.name,
+      subtitle: f.description,
+      kind: 'module' as const,
+    }))
+
+  // 2. 免費模組裡的付費 tab（合約、展示行程、未來加進來的）
+  const premiumTabAddons = MODULES.flatMap(m =>
+    m.tabs
+      .filter(t => t.category === 'premium' && !t.isEligibility)
+      .map(t => ({
+        code: `${m.code}.${t.code}`,
+        name: t.name,
+        subtitle: `屬於 ${m.name}`,
+        kind: 'tab' as const,
+      }))
+  )
+
+  // 統一排序：先模組、後 tab；未來要按 usage_count 排可以再擴充
+  const allAddons = [...premiumModules, ...premiumTabAddons]
+
+  // 檢查模組是否有可控制的「基本」分頁（付費 tab 不在這個 Modal 出現）
+  const hasManageableTabs = (moduleCode: string): boolean => {
+    const mod = MODULES.find(m => m.code === moduleCode)
+    return !!mod && mod.tabs.some(t => !t.isEligibility && t.category !== 'premium')
+  }
+
+  // 當前 Modal 對應的 module
+  const activeTabModule = tabModalModuleCode
+    ? MODULES.find(m => m.code === tabModalModuleCode)
+    : null
 
   if (loading) {
     return (
       <ContentPageLayout title="載入中..." icon={Building2}>
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-morandi-gold" />
-        </div>
+        <ModuleLoading />
       </ContentPageLayout>
     )
   }
@@ -267,71 +326,6 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        {/* 渠道連線狀態 */}
-        <div
-          className="rounded-[24px] overflow-hidden"
-          style={{
-            background: 'linear-gradient(0deg, rgb(255, 255, 255) 0%, rgb(250, 247, 243) 100%)',
-            border: '3px solid white',
-            boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
-          }}
-        >
-          <div className="px-6 py-4 border-b border-morandi-gold/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Bot className="h-4 w-4 text-morandi-gold" />
-                <h3 className="font-semibold text-morandi-primary">渠道連線</h3>
-              </div>
-              <Link
-                href="/ai-bot"
-                className="text-sm text-morandi-gold hover:underline flex items-center gap-1"
-              >
-                管理 <ExternalLink className="h-3 w-3" />
-              </Link>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="flex items-center gap-3 p-3 rounded-lg border border-border">
-                <MessageCircle className="h-5 w-5 text-brand-line" />
-                <div className="flex-1">
-                  <div className="text-sm font-medium">LINE</div>
-                  <div className="text-xs text-morandi-muted">
-                    {lineConfig?.bot_display_name || '未設定'}
-                  </div>
-                </div>
-                <Badge
-                  className={
-                    lineConfig?.is_connected
-                      ? 'bg-morandi-green/20 text-morandi-green'
-                      : 'bg-morandi-secondary/20 text-morandi-secondary'
-                  }
-                >
-                  {lineConfig?.is_connected ? '已連接' : '未連接'}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg border border-border opacity-50">
-                <svg className="h-5 w-5 text-morandi-muted" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-                </svg>
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-morandi-muted">Instagram</div>
-                  <div className="text-xs text-morandi-muted">即將推出</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 rounded-lg border border-border opacity-50">
-                <svg className="h-5 w-5 text-morandi-muted" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                </svg>
-                <div className="flex-1">
-                  <div className="text-sm font-medium text-morandi-muted">Facebook</div>
-                  <div className="text-xs text-morandi-muted">即將推出</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* 基本功能卡片 */}
         <div
           className="rounded-[24px] overflow-hidden"
@@ -344,8 +338,8 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
           <div className="px-6 py-4 border-b border-morandi-gold/20">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-morandi-green"></div>
-              <h3 className="font-semibold text-morandi-primary">基本功能</h3>
-              <span className="text-sm text-morandi-secondary">（免費）</span>
+              <h3 className="font-semibold text-morandi-primary">核心方案</h3>
+              <span className="text-sm text-morandi-secondary">月費包含</span>
             </div>
           </div>
           <div className="p-6">
@@ -353,6 +347,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
               {getBasicFeatures().map(feature => {
                 const current = features.find(f => f.feature_code === feature.code)
                 const isEnabled = current?.enabled ?? false
+                const showTabs = hasManageableTabs(feature.code)
 
                 return (
                   <div
@@ -365,10 +360,22 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                     }}
                   >
                     <span className="text-sm font-medium text-morandi-primary">{feature.name}</span>
-                    <Switch
-                      checked={isEnabled}
-                      onCheckedChange={() => toggleFeature(feature.code)}
-                    />
+                    <div className="flex items-center gap-2">
+                      {showTabs && (
+                        <button
+                          type="button"
+                          onClick={() => setTabModalModuleCode(feature.code)}
+                          title="管理分頁"
+                          className="p-1 rounded hover:bg-morandi-gold/10 text-morandi-secondary hover:text-morandi-gold"
+                        >
+                          <Settings2 className="h-4 w-4" />
+                        </button>
+                      )}
+                      <Switch
+                        checked={isEnabled}
+                        onCheckedChange={() => toggleFeature(feature.code)}
+                      />
+                    </div>
                   </div>
                 )
               })}
@@ -376,7 +383,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        {/* 付費功能卡片 */}
+        {/* 付費加購卡片 */}
         <div
           className="rounded-[24px] overflow-hidden"
           style={{
@@ -385,58 +392,50 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
             boxShadow: 'rgba(180, 160, 120, 0.15) 0px 12px 24px -8px',
           }}
         >
-          <div className={`px-6 py-4 border-b border-morandi-gold/20`}>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles
-                  className={`h-4 w-4 ${premiumEnabled ? 'text-morandi-gold' : 'text-morandi-muted'}`}
-                />
-                <h3
-                  className={`font-semibold ${premiumEnabled ? 'text-morandi-primary' : 'text-morandi-secondary'}`}
-                >
-                  付費功能
-                </h3>
-                {premiumEnabled ? (
-                  <Badge className="bg-morandi-gold/20 text-morandi-gold border-morandi-gold/30">
-                    <Unlock className="h-3 w-3 mr-1" />
-                    已開通
-                  </Badge>
-                ) : (
-                  <Badge variant="outline" className="text-morandi-secondary border-border">
-                    <Lock className="h-3 w-3 mr-1" />
-                    未開通
-                  </Badge>
-                )}
-              </div>
-              <Switch checked={premiumEnabled} onCheckedChange={setPremiumEnabled} />
+          <div className="px-6 py-4 border-b border-morandi-gold/20">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-morandi-gold" />
+              <h3 className="font-semibold text-morandi-primary">付費加購</h3>
+              <span className="text-sm text-morandi-secondary">按需求開通</span>
             </div>
-            {premiumEnabled && workspace?.premium_expires_at && (
-              <div className="text-sm text-morandi-secondary mt-2">
-                到期日：{new Date(workspace.premium_expires_at).toLocaleDateString('zh-TW')}
-              </div>
-            )}
           </div>
-          <div className={`p-6 ${!premiumEnabled ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className="p-6">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {premiumAndEnterpriseFeatures.map(feature => {
-                const current = features.find(f => f.feature_code === feature.code)
+              {allAddons.map(addon => {
+                const current = features.find(f => f.feature_code === addon.code)
                 const isEnabled = current?.enabled ?? false
 
                 return (
                   <div
-                    key={feature.code}
-                    className="flex items-center justify-between px-4 py-3 rounded-[16px] transition-all hover:shadow-sm"
+                    key={addon.code}
+                    className="flex items-center justify-between gap-3 px-4 py-3 rounded-[16px] transition-all hover:shadow-sm"
                     style={{
                       background:
                         'linear-gradient(0deg, rgb(250, 247, 240) 0%, rgb(245, 240, 232) 100%)',
                       boxShadow: 'rgba(180, 160, 120, 0.3) 0px 8px 20px -4px',
                     }}
                   >
-                    <span className="text-sm font-medium text-morandi-primary">{feature.name}</span>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="text-sm font-medium text-morandi-primary truncate">
+                        {addon.name}
+                      </span>
+                      {addon.subtitle && (
+                        <span className="text-xs text-morandi-secondary truncate">
+                          {addon.subtitle}
+                        </span>
+                      )}
+                    </div>
                     <Switch
                       checked={isEnabled}
-                      onCheckedChange={() => toggleFeature(feature.code)}
-                      disabled={!premiumEnabled}
+                      onCheckedChange={next => {
+                        if (addon.kind === 'module') {
+                          toggleFeature(addon.code)
+                        } else {
+                          // tab 級：addon.code 已是 `{module}.{tab}` 格式
+                          const [moduleCode, ...tabParts] = addon.code.split('.')
+                          toggleTabFeature(moduleCode, tabParts.join('.'), next)
+                        }
+                      }}
                     />
                   </div>
                 )
@@ -445,6 +444,60 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
       </div>
+
+      {/* 管理分頁 Modal */}
+      <Dialog
+        open={!!tabModalModuleCode}
+        onOpenChange={open => !open && setTabModalModuleCode(null)}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{activeTabModule?.name} — 管理分頁</DialogTitle>
+            <DialogDescription>
+              勾選這家租戶能使用的基本分頁、付費加購項目請到「付費加購」區塊開通
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto py-2">
+            {activeTabModule?.tabs
+              .filter(tab => !tab.isEligibility && tab.category !== 'premium')
+              .map(tab => {
+                const checked = isTabFeatureEnabled(activeTabModule.code, tab.code, tab.category)
+                return (
+                  <div
+                    key={tab.code}
+                    className="flex items-center justify-between px-4 py-3 rounded-[16px] transition-all hover:shadow-sm"
+                    style={{
+                      background:
+                        'linear-gradient(0deg, rgb(250, 247, 240) 0%, rgb(245, 240, 232) 100%)',
+                      boxShadow: 'rgba(180, 160, 120, 0.3) 0px 8px 20px -4px',
+                    }}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-sm font-medium text-morandi-primary truncate">
+                        {tab.name}
+                      </span>
+                    </div>
+                    <Switch
+                      checked={checked}
+                      onCheckedChange={next =>
+                        toggleTabFeature(activeTabModule.code, tab.code, next)
+                      }
+                    />
+                  </div>
+                )
+              })}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setTabModalModuleCode(null)}
+              className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold/10"
+            >
+              關閉
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ContentPageLayout>
   )
 }

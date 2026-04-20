@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from 'react'
-import { Plus, X, FileInput, AlertCircle, Trash2, Save, Layers } from 'lucide-react'
+import { Plus, X, AlertCircle, Trash2, Save, Layers } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,10 @@ import {
 import { RequestDateInput } from './RequestDateInput'
 import { ExpenseTypeSelector } from './ExpenseTypeSelector'
 import { CurrencyCell } from '@/components/table-cells'
+import { InlineEditTable, type InlineEditColumn } from '@/components/ui/inline-edit-table'
+import { UnallocatedAmountWarning } from '@/features/finance/components/UnallocatedAmountWarning'
+import { useResetOnTabChange } from '@/hooks/useResetOnTabChange'
+import { formatMoney } from '@/lib/utils/format-currency'
 import { EditableRequestItemList } from './RequestItemList'
 import { CreateSupplierDialog } from './CreateSupplierDialog'
 import { CostTransferDialog } from './CostTransferDialog'
@@ -184,6 +188,9 @@ export function AddRequestDialog({
 
   // === Edit mode ===
   const isEditMode = !!editingRequest
+
+  // 切 tab 時清空表單（編輯模式停用）
+  useResetOnTabChange(activeTab, resetForm, !isEditMode)
 
   const { items: dbRequestItems, refresh: refreshRequestItems } = usePaymentRequestItems()
   const [localItems, setLocalItems] = useState<RequestItem[]>([])
@@ -802,7 +809,7 @@ export function AddRequestDialog({
         }
         if (unallocatedAmount !== 0) {
           void alert(
-            `還有 NT$ ${Math.abs(unallocatedAmount).toLocaleString()} ${unallocatedAmount > 0 ? ADD_REQUEST_FORM_LABELS.未分配 : BATCH_RECEIPT_DIALOG_LABELS.超出}，請確認分配金額`,
+            `還有 NT$ ${formatMoney(Math.abs(unallocatedAmount))} ${unallocatedAmount > 0 ? ADD_REQUEST_FORM_LABELS.未分配 : BATCH_RECEIPT_DIALOG_LABELS.超出}，請確認分配金額`,
             'warning'
           )
           return
@@ -834,12 +841,9 @@ export function AddRequestDialog({
             })
 
             // 建立品項（帶獨立編號如 HND260328A-I01-1）
-            // 員工不在 suppliers 表，supplier_id 設空避免 FK 衝突
-            const batchSupplier = suppliers.find(s => s.id === batchSupplierId)
-            const isEmployee = batchSupplier?.type === 'employee'
             await addPaymentItem(request.id, {
               category: batchCategory,
-              supplier_id: isEmployee ? '' : batchSupplierId || '',
+              supplier_id: batchSupplierId || '',
               supplier_name: batchSupplierName || null,
               description: batchDescription || batchCategory,
               unit_price: allocation.allocated_amount,
@@ -946,12 +950,11 @@ export function AddRequestDialog({
                 : v => {
                     const mode = v as RequestMode
                     setActiveTab(mode)
-                    // 同步更新 formData.request_category
-                    if (mode === 'company') {
-                      setFormData(prev => ({ ...prev, request_category: 'company' }))
-                    } else {
-                      setFormData(prev => ({ ...prev, request_category: 'tour' }))
-                    }
+                    // 同步更新 formData.request_category（切 tab 時 useResetOnTabChange 會先清空）
+                    setFormData(prev => ({
+                      ...prev,
+                      request_category: mode === 'company' ? 'company' : 'tour',
+                    }))
                   }
             }
             className="flex-1 flex flex-col overflow-hidden"
@@ -1093,7 +1096,10 @@ export function AddRequestDialog({
             </TabsContent>
 
             {/* 批量請款 */}
-            <TabsContent value="batch" className="flex-1 overflow-y-auto mt-4 space-y-6">
+            <TabsContent
+              value="batch"
+              className="flex-1 overflow-y-auto pt-4 border-t border-morandi-container/30 space-y-6"
+            >
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label>{ADD_REQUEST_FORM_LABELS.請款日期}</Label>
@@ -1150,40 +1156,93 @@ export function AddRequestDialog({
                     />
                   </div>
                 </div>
-                <div>
-                  <Label>{ADD_REQUEST_FORM_LABELS.說明}</Label>
-                  <Input
-                    placeholder={ADD_REQUEST_DIALOG_LABELS.請款說明_選填}
-                    value={batchDescription}
-                    onChange={e => setBatchDescription(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>付款方式</Label>
-                  <Select
-                    value={batchPaymentMethodId || ''}
-                    onValueChange={value => setBatchPaymentMethodId(value || undefined)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="選擇付款方式（選填）" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {paymentMethods.map(method => (
-                        <SelectItem key={method.id} value={method.id}>
-                          {method.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>{ADD_REQUEST_FORM_LABELS.說明}</Label>
+                    <Input
+                      placeholder={ADD_REQUEST_DIALOG_LABELS.請款說明_選填}
+                      value={batchDescription}
+                      onChange={e => setBatchDescription(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label>付款方式</Label>
+                    <Select
+                      value={batchPaymentMethodId || ''}
+                      onValueChange={value => setBatchPaymentMethodId(value || undefined)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="選擇付款方式（選填）" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {paymentMethods.map(method => (
+                          <SelectItem key={method.id} value={method.id}>
+                            {method.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
               <div className="space-y-3 pt-4 border-t border-morandi-container/30">
-                <div className="flex items-center justify-between">
-                  <Label className="text-base font-semibold">
-                    {ADD_REQUEST_FORM_LABELS.旅遊團分配}
-                  </Label>
-                  <div className="flex gap-2">
+                <InlineEditTable<TourAllocation>
+                  title={ADD_REQUEST_FORM_LABELS.旅遊團分配}
+                  rows={tourAllocations}
+                  columns={
+                    [
+                      {
+                        key: 'tour',
+                        label: ADD_REQUEST_FORM_LABELS.旅遊團,
+                        render: ({ row, index }) => (
+                          <Combobox
+                            options={[
+                              ...(row.tour_id
+                                ? [
+                                    {
+                                      value: row.tour_id,
+                                      label: `${row.tour_code} - ${row.tour_name}`,
+                                    },
+                                  ]
+                                : []),
+                              ...availableTours.map(tour => ({
+                                value: tour.id,
+                                label: `${tour.code} - ${tour.name}`,
+                              })),
+                            ]}
+                            value={row.tour_id}
+                            onChange={value => selectTour(index, value)}
+                            placeholder={ADD_REQUEST_DIALOG_LABELS.搜尋旅遊團}
+                          />
+                        ),
+                      },
+                      {
+                        key: 'allocated_amount',
+                        label: ADD_REQUEST_FORM_LABELS.分配金額,
+                        width: '160px',
+                        align: 'right',
+                        render: ({ row, onUpdate }) => (
+                          <input
+                            type="number"
+                            placeholder="0"
+                            value={row.allocated_amount || ''}
+                            onChange={e =>
+                              onUpdate({ allocated_amount: parseFloat(e.target.value) || 0 })
+                            }
+                            className="input-no-focus w-full bg-transparent text-sm text-right"
+                          />
+                        ),
+                      },
+                    ] satisfies InlineEditColumn<TourAllocation>[]
+                  }
+                  onUpdate={(index, patch) => updateTourAllocation(index, patch)}
+                  onAdd={addTourAllocation}
+                  onRemove={removeTourAllocation}
+                  canRemove={() => true}
+                  addLabel={ADD_REQUEST_FORM_LABELS.新增旅遊團}
+                  emptyMessage={ADD_REQUEST_FORM_LABELS.ADD_3774}
+                  headerExtra={
                     <Button
                       size="sm"
                       variant="outline"
@@ -1192,128 +1251,27 @@ export function AddRequestDialog({
                     >
                       {ADD_REQUEST_FORM_LABELS.平均分配}
                     </Button>
-                    <Button size="sm" variant="outline" onClick={addTourAllocation}>
-                      <Plus className="h-4 w-4 mr-1" />
-                      {ADD_REQUEST_FORM_LABELS.新增旅遊團}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* 表格式旅遊團分配 */}
-                <div className="border border-border rounded-lg overflow-hidden">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="text-xs text-morandi-primary font-medium bg-morandi-container/40">
-                        <th className="text-left py-2.5 px-3 border-b border-r border-border">
-                          {ADD_REQUEST_FORM_LABELS.旅遊團}
-                        </th>
-                        <th className="text-right py-2.5 px-3 border-b border-r border-border w-40">
-                          {ADD_REQUEST_FORM_LABELS.分配金額}
-                        </th>
-                        <th className="text-center py-2.5 px-3 border-b border-border w-16">
-                          {ADD_REQUEST_FORM_LABELS.操作}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tourAllocations.length === 0 ? (
-                        <tr>
-                          <td
-                            colSpan={3}
-                            className="text-center py-6 text-morandi-secondary text-sm bg-card"
-                          >
-                            {ADD_REQUEST_FORM_LABELS.ADD_3774}
-                          </td>
-                        </tr>
-                      ) : (
-                        tourAllocations.map((allocation, index) => (
-                          <tr key={index} className="bg-card hover:bg-morandi-container/10">
-                            <td className="py-2 px-3 border-b border-r border-border">
-                              <Combobox
-                                options={[
-                                  // 已選擇的旅遊團（如果有的話）
-                                  ...(allocation.tour_id
-                                    ? [
-                                        {
-                                          value: allocation.tour_id,
-                                          label: `${allocation.tour_code} - ${allocation.tour_name}`,
-                                        },
-                                      ]
-                                    : []),
-                                  // 可選的旅遊團
-                                  ...availableTours.map(tour => ({
-                                    value: tour.id,
-                                    label: `${tour.code} - ${tour.name}`,
-                                  })),
-                                ]}
-                                value={allocation.tour_id}
-                                onChange={value => selectTour(index, value)}
-                                placeholder={ADD_REQUEST_DIALOG_LABELS.搜尋旅遊團}
-                              />
-                            </td>
-                            <td className="py-2 px-3 border-b border-r border-border">
-                              <input
-                                type="number"
-                                placeholder="0"
-                                value={allocation.allocated_amount || ''}
-                                onChange={e =>
-                                  updateTourAllocation(index, {
-                                    allocated_amount: parseFloat(e.target.value) || 0,
-                                  })
-                                }
-                                className="input-no-focus w-full bg-transparent text-sm text-right"
-                              />
-                            </td>
-                            <td className="py-2 px-3 border-b border-border text-center">
-                              <span
-                                onClick={() => removeTourAllocation(index)}
-                                className="text-morandi-secondary cursor-pointer hover:text-morandi-red text-sm"
-                                title={ADD_RECEIPT_DIALOG_LABELS.刪除}
-                              >
-                                ✕
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                      {/* 總計行 */}
-                      <tr className="bg-morandi-container/20 font-medium">
-                        <td className="py-2.5 px-3 border-r border-border text-sm text-morandi-primary">
-                          {ADD_REQUEST_FORM_LABELS.共N行(tourAllocations.length)}
-                        </td>
-                        <td className="py-2.5 px-3 border-r border-border text-right">
-                          <CurrencyCell amount={totalAllocatedAmount} className="text-sm" />
-                        </td>
-                        <td className="py-2.5 px-3 border-border"></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                  }
+                  footer={
+                    <tr className="bg-morandi-container/20 font-medium">
+                      <td className="py-2.5 px-3 text-sm text-morandi-primary">
+                        {ADD_REQUEST_FORM_LABELS.共N行(tourAllocations.length)}
+                      </td>
+                      <td className="py-2.5 px-3 text-right">
+                        <CurrencyCell amount={totalAllocatedAmount} className="text-sm" />
+                      </td>
+                      <td />
+                    </tr>
+                  }
+                />
 
                 {/* 未分配提示 */}
-                {unallocatedAmount !== 0 && (
-                  <div
-                    className={cn(
-                      'flex items-center justify-between px-3 py-2 rounded-lg text-sm',
-                      unallocatedAmount > 0
-                        ? 'bg-morandi-gold/10 text-morandi-gold'
-                        : 'bg-morandi-red/10 text-morandi-red'
-                    )}
-                  >
-                    <div className="flex items-center gap-2">
-                      <AlertCircle className="h-4 w-4 shrink-0" />
-                      <span>
-                        {unallocatedAmount > 0
-                          ? ADD_REQUEST_FORM_LABELS.還有金額未分配
-                          : BATCH_RECEIPT_DIALOG_LABELS.分配金額超過總金額}
-                      </span>
-                    </div>
-                    <div className="font-medium">
-                      {ADD_REQUEST_FORM_LABELS.未分配}：
-                      <CurrencyCell amount={Math.abs(unallocatedAmount)} className="inline" />
-                    </div>
-                  </div>
-                )}
+                <UnallocatedAmountWarning
+                  amount={unallocatedAmount}
+                  underMessage={ADD_REQUEST_FORM_LABELS.還有金額未分配}
+                  overMessage={BATCH_RECEIPT_DIALOG_LABELS.分配金額超過總金額}
+                  labelSuffix={ADD_REQUEST_FORM_LABELS.未分配}
+                />
               </div>
 
               <div>
@@ -1328,7 +1286,10 @@ export function AddRequestDialog({
 
             {/* 公司請款 */}
             {canCreateCompanyPayment && (
-              <TabsContent value="company" className="flex-1 overflow-y-auto mt-4 space-y-6">
+              <TabsContent
+                value="company"
+                className="flex-1 overflow-y-auto pt-4 border-t border-morandi-container/30 space-y-6"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <ExpenseTypeSelector
                     value={formData.expense_type as CompanyExpenseType | ''}
@@ -1401,14 +1362,15 @@ export function AddRequestDialog({
               </span>
               <span className="text-lg font-semibold text-morandi-gold whitespace-nowrap">
                 NT${' '}
-                {(isEditMode
-                  ? localItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0)
-                  : activeTab === 'batch'
-                    ? batchTotalAmount
-                    : activeTab === 'tour' && importFromRequests
-                      ? selectedRequestTotal
-                      : total_amount
-                ).toLocaleString()}
+                {formatMoney(
+                  isEditMode
+                    ? localItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0)
+                    : activeTab === 'batch'
+                      ? batchTotalAmount
+                      : activeTab === 'tour' && importFromRequests
+                        ? selectedRequestTotal
+                        : total_amount
+                )}
               </span>
             </div>
             {/* 右側：按鈕 */}

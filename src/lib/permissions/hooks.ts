@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useAuthStore } from '@/stores'
 import { getFeaturesByRoute } from './features'
+import { getModuleByCode } from './module-tabs'
 import { logger } from '@/lib/utils/logger'
 
 interface WorkspaceFeature {
@@ -44,6 +45,16 @@ const featureCache = {
   loaded: false,
   loading: false,
   promise: null as Promise<void> | null,
+}
+
+/**
+ * 強制清快取、下次 useWorkspaceFeatures 會重 fetch
+ * 用途：寫入 workspace_features 後呼叫、讓其他頁面立即看到最新狀態
+ */
+export function invalidateFeatureCache() {
+  featureCache.loaded = false
+  featureCache.loading = false
+  featureCache.promise = null
 }
 
 export function useWorkspaceFeatures() {
@@ -151,6 +162,23 @@ export function useWorkspaceFeatures() {
     [isFeatureEnabled]
   )
 
+  /**
+   * 檢查 tab 是否啟用（workspace 級、細粒度）
+   * - category='premium'：需要 workspace 付費大開關 + `{module}.{tab}` 明確 enabled=true（預設關）
+   * - category='basic' / undefined：workspace_features 沒指定 → 視為開；明確 false 才關
+   */
+  const isTabEnabled = useCallback(
+    (moduleCode: string, tabCode: string, category?: 'basic' | 'premium'): boolean => {
+      const key = `${moduleCode}.${tabCode}`
+      const feature = features.find(f => f.feature_code === key)
+      if (category === 'premium') {
+        return premiumEnabled && feature?.enabled === true
+      }
+      return feature?.enabled !== false
+    },
+    [features, premiumEnabled]
+  )
+
   // 已啟用的功能代碼列表
   const enabledFeatures = useMemo(
     () => features.filter(f => f.enabled).map(f => f.feature_code),
@@ -161,9 +189,44 @@ export function useWorkspaceFeatures() {
     features,
     loading,
     isFeatureEnabled,
+    isTabEnabled,
     isRouteAvailable,
     enabledFeatures,
   }
+}
+
+/**
+ * 過濾頁面 tab 列表、只保留當前租戶可見的（考慮 basic / premium 分類與付費大開關）
+ *
+ * 用法：
+ * ```tsx
+ * const TOUR_TABS = [{ value: 'contract', label: '合約' }, ...] as const
+ * const visibleTabs = useVisibleModuleTabs('tours', TOUR_TABS)
+ * ```
+ *
+ * 規則：
+ * - tab 在 module-tabs.ts 中沒定義 → 視為一律可見（例如自訂 tab）
+ * - 定義為 `category: 'premium'` → 需要付費大開關 + 功能小開關
+ * - 其他（basic）→ 預設開，只有 workspace 明確關才隱藏
+ * - `isEligibility: true` 的 tab（下拉資格類）→ 不受功能門檻管制、一律可見
+ */
+export function useVisibleModuleTabs<T extends { value: string }>(
+  moduleCode: string,
+  tabs: readonly T[]
+): T[] {
+  const { isTabEnabled } = useWorkspaceFeatures()
+
+  return useMemo(() => {
+    const moduleDef = getModuleByCode(moduleCode)
+    if (!moduleDef) return [...tabs]
+
+    return tabs.filter(tab => {
+      const moduleTab = moduleDef.tabs.find(t => t.code === tab.value)
+      if (!moduleTab) return true
+      if (moduleTab.isEligibility) return true
+      return isTabEnabled(moduleCode, tab.value, moduleTab.category)
+    })
+  }, [moduleCode, tabs, isTabEnabled])
 }
 
 /**

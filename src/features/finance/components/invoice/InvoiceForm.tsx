@@ -10,6 +10,7 @@ import { TravelInvoiceItem, BuyerInfo } from '@/stores/travel-invoice-store'
 import type { Order } from '@/types/order.types'
 import type { Tour } from '@/types/tour.types'
 import { INVOICE_LABELS } from './constants/labels'
+import { formatMoney } from '@/lib/utils/format-currency'
 
 interface InvoiceFormProps {
   fixedOrder?: Order
@@ -301,7 +302,7 @@ export function InvoiceForm({
                 />
               </td>
               <td className="py-1 px-2 border border-border text-right text-sm font-medium bg-muted/20">
-                {item.itemAmt.toLocaleString()}
+                {formatMoney(item.itemAmt)}
               </td>
               <td className="py-1 px-2 border border-border text-center">
                 <span

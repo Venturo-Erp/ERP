@@ -18,7 +18,8 @@ import { useEsims, createEsim, createOrder, invalidateTours } from '@/data'
 import { useAuthStore } from '@/stores/auth-store'
 import { useTours } from '@/features/tours/hooks/useTours'
 import { fastMoveService } from '@/services/fastmove.service'
-import { RefreshCw } from 'lucide-react'
+import { RefreshCw, Plus } from 'lucide-react'
+import { InlineEditTable, type InlineEditColumn } from '@/components/ui/inline-edit-table'
 import { toast } from 'sonner'
 import type { FastMoveProduct, Esim } from '@/types/esim.types'
 import type { Order } from '@/types'
@@ -480,97 +481,117 @@ export function EsimCreateDialog({ open, onOpenChange }: EsimCreateDialogProps) 
       <div className="border-t border-border"></div>
 
       {/* 下半部：批次網卡列表 */}
-      <div className="space-y-2">
-        {esimItems.map((item, index) => (
-          <div
-            key={item.id}
-            className="grid grid-cols-[140px_180px_70px_1fr_120px_40px] gap-2 items-center"
-          >
-            <div className="flex items-center gap-1">
-              <Select
-                value={item.product_region}
-                onValueChange={value => updateEsimItem(item.id, 'product_region', value)}
-              >
-                <SelectTrigger className="w-full h-10">
-                  <SelectValue placeholder={LABELS.productRegion} />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_REGIONS.map(region => (
-                    <SelectItem key={region.value} value={region.value}>
-                      {region.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={fetchProducts}
-                disabled={isLoadingProducts}
-                className="h-8 w-8 p-0 hover:bg-morandi-gray/10 flex-shrink-0"
-              >
-                <RefreshCw className={`h-4 w-4 ${isLoadingProducts ? 'animate-spin' : ''}`} />
-              </Button>
-            </div>
-
-            <Combobox
-              value={item.product_id}
-              onChange={value => updateEsimItem(item.id, 'product_id', value)}
-              options={productOptions.filter(p => {
-                const product = products.find(pr => pr.product_id === p.value)
-                return !item.product_region || product?.product_region === item.product_region
-              })}
-              placeholder={LABELS.selectProduct}
-              disabled={!item.product_region || products.length === 0}
-              showSearchIcon
-            />
-
-            <Select
-              value={String(item.quantity)}
-              onValueChange={value => updateEsimItem(item.id, 'quantity', Number(value))}
-            >
-              <SelectTrigger className="w-full h-10">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                  <SelectItem key={num} value={String(num)}>
-                    {num}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <Input
-              type="email"
-              value={item.email}
-              onChange={e => updateEsimItem(item.id, 'email', e.target.value)}
-              placeholder={LABELS.receiveEmail}
-            />
-
-            <Input
-              value={item.note}
-              onChange={e => updateEsimItem(item.id, 'note', e.target.value)}
-              placeholder={LABELS.notePlaceholder}
-            />
-
-            <Button
-              type="button"
-              onClick={index === esimItems.length - 1 ? addEsimItem : () => removeEsimItem(item.id)}
-              size="sm"
-              className={
-                index === esimItems.length - 1
-                  ? 'h-8 w-8 p-0 flex-shrink-0 bg-morandi-gold hover:bg-morandi-gold-hover text-white'
-                  : 'h-8 w-8 p-0 flex-shrink-0 text-morandi-red hover:bg-status-danger-bg'
-              }
-              variant={index === esimItems.length - 1 ? 'default' : 'ghost'}
-            >
-              {index === esimItems.length - 1 ? '+' : '✕'}
-            </Button>
-          </div>
-        ))}
-      </div>
+      <InlineEditTable<EsimItem>
+        variant="minimal"
+        rows={esimItems}
+        columns={
+          [
+            {
+              key: 'product_region',
+              label: LABELS.productRegion,
+              width: '170px',
+              render: ({ row }) => (
+                <div className="flex items-center gap-1">
+                  <Select
+                    value={row.product_region}
+                    onValueChange={value => updateEsimItem(row.id, 'product_region', value)}
+                  >
+                    <SelectTrigger className="w-full h-10">
+                      <SelectValue placeholder={LABELS.productRegion} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PRODUCT_REGIONS.map(region => (
+                        <SelectItem key={region.value} value={region.value}>
+                          {region.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={fetchProducts}
+                    disabled={isLoadingProducts}
+                    className="h-8 w-8 p-0 hover:bg-morandi-gray/10 flex-shrink-0"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isLoadingProducts ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
+              ),
+            },
+            {
+              key: 'product_id',
+              label: LABELS.selectProduct,
+              width: '180px',
+              render: ({ row }) => (
+                <Combobox
+                  value={row.product_id}
+                  onChange={value => updateEsimItem(row.id, 'product_id', value)}
+                  options={productOptions.filter(p => {
+                    const product = products.find(pr => pr.product_id === p.value)
+                    return !row.product_region || product?.product_region === row.product_region
+                  })}
+                  placeholder={LABELS.selectProduct}
+                  disabled={!row.product_region || products.length === 0}
+                  showSearchIcon
+                />
+              ),
+            },
+            {
+              key: 'quantity',
+              label: '數量',
+              width: '70px',
+              align: 'center',
+              render: ({ row }) => (
+                <Select
+                  value={String(row.quantity)}
+                  onValueChange={value => updateEsimItem(row.id, 'quantity', Number(value))}
+                >
+                  <SelectTrigger className="w-full h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                      <SelectItem key={num} value={String(num)}>
+                        {num}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ),
+            },
+            {
+              key: 'email',
+              label: LABELS.receiveEmail,
+              render: ({ row }) => (
+                <Input
+                  type="email"
+                  value={row.email}
+                  onChange={e => updateEsimItem(row.id, 'email', e.target.value)}
+                  placeholder={LABELS.receiveEmail}
+                />
+              ),
+            },
+            {
+              key: 'note',
+              label: '備註',
+              width: '120px',
+              render: ({ row }) => (
+                <Input
+                  value={row.note}
+                  onChange={e => updateEsimItem(row.id, 'note', e.target.value)}
+                  placeholder={LABELS.notePlaceholder}
+                />
+              ),
+            },
+          ] satisfies InlineEditColumn<EsimItem>[]
+        }
+        onAdd={addEsimItem}
+        onRemove={index => removeEsimItem(esimItems[index].id)}
+        canRemove={() => esimItems.length > 1}
+        addLabel="新增網卡"
+      />
     </FormDialog>
   )
 }

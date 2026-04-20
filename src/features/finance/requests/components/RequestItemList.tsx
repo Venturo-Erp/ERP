@@ -11,19 +11,15 @@ import {
 } from '@/components/ui/select'
 import { Combobox } from '@/components/ui/combobox'
 import { DatePicker } from '@/components/ui/date-picker'
-import { Trash2, Plus, Link2, UserCheck, X, BookOpen, ArrowRightLeft } from 'lucide-react'
+import { UserCheck, X, ArrowRightLeft } from 'lucide-react'
 import { RequestItem, categoryOptions } from '../types'
 import {
   useAccountingSubjects,
   getDefaultSubjectByCategory,
 } from '../../hooks/useAccountingSubjects'
 import { CurrencyCell } from '@/components/table-cells'
-import {
-  REQUEST_DETAIL_DIALOG_LABELS,
-  REQUEST_ITEM_LIST_LABELS,
-  LINK_CONFIRMATION_LABELS,
-} from '../../constants/labels'
-import { LinkConfirmationDialog } from './LinkConfirmationDialog'
+import { REQUEST_DETAIL_DIALOG_LABELS, REQUEST_ITEM_LIST_LABELS } from '../../constants/labels'
+import { InlineEditTable, type InlineEditColumn } from '@/components/ui/inline-edit-table'
 
 interface SupplierOption {
   id: string
@@ -212,9 +208,6 @@ export function EditableRequestItemList({
   paymentMethods = [],
   onTransfer,
 }: EditableRequestItemListProps) {
-  const [linkDialogOpen, setLinkDialogOpen] = useState(false)
-  const [linkingItemId, setLinkingItemId] = useState<string | null>(null)
-  const linkingItem = items.find(i => i.id === linkingItemId)
   const total_amount = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
 
   // 會計科目選項
@@ -228,317 +221,224 @@ export function EditableRequestItemList({
   // 無 focus 樣式的 input class（使用 globals.css 的 input-no-focus）
   const inputClass = 'input-no-focus w-full h-10 px-2 bg-transparent text-sm'
 
-  return (
-    <div className="flex-1 flex flex-col min-h-0">
-      <h3 className="text-sm font-medium text-morandi-primary mb-3">
-        {REQUEST_ITEM_LIST_LABELS.LABEL_475}
-      </h3>
-
-      {/* 外框 */}
-      <div className="border border-border/50 rounded-lg overflow-hidden flex-1 flex flex-col min-h-0">
-        {/* 表頭 */}
-        <div className="bg-morandi-gold-header border-b border-border">
-          <div className="grid grid-cols-[110px_100px_80px_1fr_1fr_96px_64px_112px_40px_48px] px-3 py-2.5">
-            <span className="text-sm font-semibold text-morandi-primary">日期</span>
-            <span className="text-sm font-semibold text-morandi-primary">付款方式</span>
-            <span className="text-sm font-semibold text-morandi-primary">
-              {REQUEST_ITEM_LIST_LABELS.LABEL_2946}
-            </span>
-            <span className="text-sm font-semibold text-morandi-primary">
-              {REQUEST_ITEM_LIST_LABELS.LABEL_561}
-            </span>
-            <span className="text-sm font-semibold text-morandi-primary">
-              {REQUEST_ITEM_LIST_LABELS.LABEL_6008}
-            </span>
-            <span className="text-sm font-semibold text-morandi-primary text-right">
-              {REQUEST_ITEM_LIST_LABELS.LABEL_9413}
-            </span>
-            <span className="text-sm font-semibold text-morandi-primary text-center">
-              {REQUEST_ITEM_LIST_LABELS.QUANTITY}
-            </span>
-            <span className="text-sm font-semibold text-morandi-primary text-right">
-              {REQUEST_ITEM_LIST_LABELS.LABEL_832}
-            </span>
-            <span className="text-sm font-semibold text-morandi-primary text-center">
-              <Link2 size={14} className="inline" />
-            </span>
-            <span></span>
-          </div>
-        </div>
-
-        {/* 項目區域 - 自動填滿可用空間，超出可滾動 */}
-        <div className="flex-1 overflow-y-auto">
-          {items.map((item, index) => (
-            <div
-              key={item.id}
-              className="grid grid-cols-[110px_100px_80px_1fr_1fr_96px_64px_112px_40px_48px] px-3 py-2 border-b border-border/50 items-center"
-            >
-              {/* Date */}
-              <div>
-                <DatePicker
-                  value={item.request_date || ''}
-                  onChange={date => updateItem(item.id, { request_date: date })}
-                  placeholder="選擇日期"
-                  disabled={disabled}
-                  hideYear
-                  buttonClassName="h-10 p-0 px-2 border-0 shadow-none bg-transparent text-sm"
-                />
-              </div>
-
-              {/* Payment Method */}
-              <div>
-                <Select
-                  value={item.payment_method_id || ''}
-                  onValueChange={value =>
-                    updateItem(item.id, { payment_method_id: value || undefined })
-                  }
-                  disabled={disabled}
-                >
-                  <SelectTrigger className="input-no-focus h-10 border-0 shadow-none bg-transparent text-sm px-2">
-                    <SelectValue placeholder="付款方式" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {paymentMethods.map(method => (
-                      <SelectItem key={method.id} value={method.id}>
-                        {method.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Category - 選擇時自動帶入會計科目 */}
-              <div>
-                <Select
-                  value={item.category}
-                  onValueChange={value => {
-                    // 自動帶入對應的會計科目
-                    const defaultSubject = getDefaultSubjectByCategory(value, subjects)
-                    updateItem(item.id, {
-                      category: value as RequestItem['category'],
-                      accounting_subject_id: defaultSubject?.id || null,
-                      accounting_subject_name: defaultSubject
-                        ? `${defaultSubject.code} ${defaultSubject.name}`
-                        : null,
-                    })
-                  }}
-                  disabled={disabled}
-                >
-                  <SelectTrigger className="input-no-focus h-10 border-0 shadow-none bg-transparent text-sm px-2">
-                    <SelectValue placeholder="類別" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categoryOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Supplier */}
-              <div>
-                <Combobox
-                  options={supplierOptions}
-                  value={item.selected_id || item.supplier_id}
-                  onChange={value => {
-                    const supplier = suppliers.find(s => s.id === value)
-                    const isEmployee = supplier?.type === 'employee'
-                    updateItem(item.id, {
-                      // 員工不在 suppliers 表，supplier_id 設空避免 FK 衝突
-                      supplier_id: isEmployee ? '' : value,
-                      supplierName: supplier?.name || '',
-                      is_employee: isEmployee,
-                      selected_id: value, // 保留選中 ID 供 Combobox 顯示
-                    })
-                  }}
-                  placeholder={REQUEST_ITEM_LIST_LABELS.選擇供應商}
-                  className="input-no-focus [&_input]:h-9 [&_input]:px-1 [&_input]:bg-transparent"
-                  onCreate={onCreateSupplier}
-                  showSearchIcon={false}
-                  disabled={disabled}
-                />
-              </div>
-
-              {/* Description */}
-              <div className="flex items-center gap-1">
-                <DeferredInput
-                  value={item.description}
-                  onChange={val => updateItem(item.id, { description: val })}
-                  className={`${inputClass} flex-1 disabled:cursor-default disabled:text-morandi-primary`}
-                  disabled={disabled}
-                />
-                {!item.advanced_by ? (
-                  <button
-                    type="button"
-                    onClick={() => updateItem(item.id, { advanced_by: '_pending' })}
-                    disabled={disabled}
-                    className="shrink-0 p-1 rounded hover:bg-morandi-container/20 text-morandi-muted hover:text-morandi-primary transition-colors disabled:cursor-default disabled:text-morandi-primary"
-                    title={disabled ? '此請款單已加入出納單，無法修改' : '員工代墊'}
-                  >
-                    <UserCheck size={14} />
-                  </button>
-                ) : (
-                  <div className="shrink-0 flex items-center gap-1">
-                    <Combobox
-                      options={suppliers
-                        .filter(s => s.type === 'employee')
-                        .map(s => ({ value: s.id, label: s.name || '未命名' }))}
-                      value={item.advanced_by === '_pending' ? '' : item.advanced_by}
-                      onChange={value => {
-                        const emp = suppliers.find(s => s.id === value)
-                        updateItem(item.id, {
-                          advanced_by: value,
-                          advanced_by_name: emp?.name || '',
-                        })
-                      }}
-                      placeholder="代墊人"
-                      className="[&_input]:h-7 [&_input]:text-xs [&_input]:px-1 [&_input]:bg-morandi-gold/10 w-[120px]"
-                      showSearchIcon={false}
-                      disabled={disabled}
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateItem(item.id, { advanced_by: undefined, advanced_by_name: undefined })
-                      }
-                      disabled={disabled}
-                      className="shrink-0 p-0.5 rounded hover:bg-morandi-red/10 text-morandi-muted hover:text-morandi-red disabled:cursor-default disabled:text-morandi-primary"
-                      title={disabled ? '此請款單已加入出納單，無法修改' : '取消代墊'}
-                    >
-                      <X size={12} />
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Unit Price */}
-              <div>
-                <CalcInput
-                  value={item.unit_price}
-                  onChange={val => updateItem(item.id, { unit_price: val })}
-                  placeholder="0"
-                  className={`${inputClass} text-right placeholder:text-morandi-muted`}
-                  disabled={disabled}
-                />
-              </div>
-
-              {/* Quantity */}
-              <div>
-                <CalcInput
-                  value={item.quantity}
-                  onChange={val => updateItem(item.id, { quantity: val || 1 })}
-                  placeholder="1"
-                  className={`${inputClass} text-center placeholder:text-morandi-muted`}
-                  disabled={disabled}
-                />
-              </div>
-
-              {/* Subtotal */}
-              <div className="text-right pr-2">
-                <CurrencyCell
-                  amount={item.unit_price * item.quantity}
-                  className="text-morandi-gold"
-                />
-              </div>
-
-              {/* Link to confirmation */}
-              <div className="text-center">
-                {tourId ? (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={LINK_CONFIRMATION_LABELS.LINK_BUTTON}
-                    onClick={() => {
-                      setLinkingItemId(item.id)
-                      setLinkDialogOpen(true)
-                    }}
-                    disabled={disabled}
-                    className={`h-7 w-7 ${item.confirmation_item_id ? 'text-morandi-green' : 'text-morandi-muted hover:text-morandi-secondary'} disabled:cursor-default disabled:text-morandi-primary`}
-                    title={
-                      disabled
-                        ? '此請款單已加入出納單，無法連結確認單'
-                        : item.confirmation_item_id
-                          ? LINK_CONFIRMATION_LABELS.LINKED
-                          : LINK_CONFIRMATION_LABELS.LINK_BUTTON
-                    }
-                  >
-                    <Link2 size={14} />
-                  </Button>
-                ) : (
-                  <span />
-                )}
-              </div>
-
-              {/* Actions */}
-              <div className="text-center">
-                {index === 0 ? (
-                  disabled && onTransfer ? (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Transfer"
-                      onClick={onTransfer}
-                      className="h-8 w-8 text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10"
-                      title="成本轉移"
-                    >
-                      <ArrowRightLeft size={16} />
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label="Button"
-                      onClick={addNewEmptyItem}
-                      disabled={disabled}
-                      className="h-8 w-8 text-morandi-gold hover:bg-morandi-gold/10 disabled:cursor-default disabled:text-morandi-primary"
-                      title={REQUEST_ITEM_LIST_LABELS.新增項目}
-                    >
-                      <Plus size={16} />
-                    </Button>
-                  )
-                ) : (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Delete"
-                    onClick={() => removeItem(item.id)}
-                    disabled={disabled}
-                    className="h-8 w-8 text-morandi-secondary hover:text-morandi-red hover:bg-morandi-red/10 disabled:cursor-default disabled:text-morandi-primary"
-                    title={
-                      disabled
-                        ? '此請款單已加入出納單，無法刪除項目'
-                        : REQUEST_DETAIL_DIALOG_LABELS.刪除項目
-                    }
-                  >
-                    <Trash2 size={16} />
-                  </Button>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {/* 空白佔位列，確保始終顯示 4 列高度 */}
-        </div>
-      </div>
-      {/* 外框結束 */}
-
-      {/* Link Confirmation Dialog */}
-      {tourId && (
-        <LinkConfirmationDialog
-          open={linkDialogOpen}
-          onOpenChange={setLinkDialogOpen}
-          tourId={tourId}
-          category={linkingItem?.category}
-          currentItemId={linkingItem?.confirmation_item_id ?? null}
-          onSelect={confirmationItemId => {
-            if (linkingItemId) {
-              updateItem(linkingItemId, { confirmation_item_id: confirmationItemId })
-            }
-          }}
+  const columns: InlineEditColumn<RequestItem>[] = [
+    {
+      key: 'date',
+      label: '日期',
+      width: '110px',
+      render: ({ row, onUpdate }) => (
+        <DatePicker
+          value={row.request_date || ''}
+          onChange={date => onUpdate({ request_date: date })}
+          placeholder="選擇日期"
+          disabled={disabled}
+          hideYear
+          buttonClassName="h-10 p-0 px-2 border-0 shadow-none bg-transparent text-sm"
         />
-      )}
-    </div>
+      ),
+    },
+    {
+      key: 'payment_method',
+      label: '付款方式',
+      width: '100px',
+      render: ({ row, onUpdate }) => (
+        <Select
+          value={row.payment_method_id || ''}
+          onValueChange={value => onUpdate({ payment_method_id: value || undefined })}
+          disabled={disabled}
+        >
+          <SelectTrigger className="input-no-focus h-10 border-0 shadow-none bg-transparent text-sm px-2">
+            <SelectValue placeholder="付款方式" />
+          </SelectTrigger>
+          <SelectContent>
+            {paymentMethods.map(method => (
+              <SelectItem key={method.id} value={method.id}>
+                {method.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ),
+    },
+    {
+      key: 'category',
+      label: REQUEST_ITEM_LIST_LABELS.LABEL_2946,
+      width: '80px',
+      render: ({ row, onUpdate }) => (
+        <Select
+          value={row.category}
+          onValueChange={value => {
+            const defaultSubject = getDefaultSubjectByCategory(value, subjects)
+            onUpdate({
+              category: value as RequestItem['category'],
+              accounting_subject_id: defaultSubject?.id || null,
+              accounting_subject_name: defaultSubject
+                ? `${defaultSubject.code} ${defaultSubject.name}`
+                : null,
+            })
+          }}
+          disabled={disabled}
+        >
+          <SelectTrigger className="input-no-focus h-10 border-0 shadow-none bg-transparent text-sm px-2">
+            <SelectValue placeholder="類別" />
+          </SelectTrigger>
+          <SelectContent>
+            {categoryOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ),
+    },
+    {
+      key: 'supplier',
+      label: REQUEST_ITEM_LIST_LABELS.LABEL_561,
+      render: ({ row, onUpdate }) => (
+        <Combobox
+          options={supplierOptions}
+          value={row.selected_id || row.supplier_id}
+          onChange={value => {
+            const supplier = suppliers.find(s => s.id === value)
+            const isEmployee = supplier?.type === 'employee'
+            onUpdate({
+              supplier_id: isEmployee ? '' : value,
+              supplierName: supplier?.name || '',
+              is_employee: isEmployee,
+              selected_id: value,
+            })
+          }}
+          placeholder={REQUEST_ITEM_LIST_LABELS.選擇供應商}
+          className="input-no-focus [&_input]:h-9 [&_input]:px-1 [&_input]:bg-transparent"
+          onCreate={onCreateSupplier}
+          showSearchIcon={false}
+          disabled={disabled}
+        />
+      ),
+    },
+    {
+      key: 'description',
+      label: REQUEST_ITEM_LIST_LABELS.LABEL_6008,
+      render: ({ row, onUpdate }) => (
+        <div className="flex items-center gap-1">
+          <DeferredInput
+            value={row.description}
+            onChange={val => onUpdate({ description: val })}
+            className={`${inputClass} flex-1 disabled:cursor-default disabled:text-morandi-primary`}
+            disabled={disabled}
+          />
+          {!row.advanced_by ? (
+            <button
+              type="button"
+              onClick={() => onUpdate({ advanced_by: '_pending' })}
+              disabled={disabled}
+              className="shrink-0 p-1 rounded hover:bg-morandi-container/20 text-morandi-muted hover:text-morandi-primary transition-colors disabled:cursor-default disabled:text-morandi-primary"
+              title={disabled ? '此請款單已加入出納單，無法修改' : '員工代墊'}
+            >
+              <UserCheck size={14} />
+            </button>
+          ) : (
+            <div className="shrink-0 flex items-center gap-1">
+              <Combobox
+                options={suppliers
+                  .filter(s => s.type === 'employee')
+                  .map(s => ({ value: s.id, label: s.name || '未命名' }))}
+                value={row.advanced_by === '_pending' ? '' : row.advanced_by}
+                onChange={value => {
+                  const emp = suppliers.find(s => s.id === value)
+                  onUpdate({
+                    advanced_by: value,
+                    advanced_by_name: emp?.name || '',
+                  })
+                }}
+                placeholder="代墊人"
+                className="[&_input]:h-7 [&_input]:text-xs [&_input]:px-1 [&_input]:bg-morandi-gold/10 w-[120px]"
+                showSearchIcon={false}
+                disabled={disabled}
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  onUpdate({ advanced_by: undefined, advanced_by_name: undefined })
+                }
+                disabled={disabled}
+                className="shrink-0 p-0.5 rounded hover:bg-morandi-red/10 text-morandi-muted hover:text-morandi-red disabled:cursor-default disabled:text-morandi-primary"
+                title={disabled ? '此請款單已加入出納單，無法修改' : '取消代墊'}
+              >
+                <X size={12} />
+              </button>
+            </div>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'unit_price',
+      label: REQUEST_ITEM_LIST_LABELS.LABEL_9413,
+      width: '96px',
+      align: 'right',
+      render: ({ row, onUpdate }) => (
+        <CalcInput
+          value={row.unit_price}
+          onChange={val => onUpdate({ unit_price: val })}
+          placeholder="0"
+          className={`${inputClass} text-right placeholder:text-morandi-muted`}
+          disabled={disabled}
+        />
+      ),
+    },
+    {
+      key: 'quantity',
+      label: REQUEST_ITEM_LIST_LABELS.QUANTITY,
+      width: '64px',
+      align: 'center',
+      render: ({ row, onUpdate }) => (
+        <CalcInput
+          value={row.quantity}
+          onChange={val => onUpdate({ quantity: val || 1 })}
+          placeholder="1"
+          className={`${inputClass} text-center placeholder:text-morandi-muted`}
+          disabled={disabled}
+        />
+      ),
+    },
+    {
+      key: 'subtotal',
+      label: REQUEST_ITEM_LIST_LABELS.LABEL_832,
+      width: '112px',
+      align: 'right',
+      render: ({ row }) => (
+        <CurrencyCell amount={row.unit_price * row.quantity} className="text-morandi-gold" />
+      ),
+    },
+  ]
+
+  return (
+    <InlineEditTable<RequestItem>
+      title={REQUEST_ITEM_LIST_LABELS.LABEL_475}
+      rows={items}
+      columns={columns}
+      onUpdate={(index, patch) => updateItem(items[index].id, patch)}
+      onAdd={disabled ? undefined : addNewEmptyItem}
+      onRemove={disabled ? undefined : index => removeItem(items[index].id)}
+      canRemove={() => items.length > 1}
+      readonly={disabled}
+      addLabel={REQUEST_ITEM_LIST_LABELS.新增項目}
+      headerExtra={
+        disabled && onTransfer ? (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onTransfer}
+            className="text-morandi-secondary hover:text-morandi-gold hover:bg-morandi-gold/10"
+          >
+            <ArrowRightLeft size={14} className="mr-1" />
+            成本轉移
+          </Button>
+        ) : undefined
+      }
+      className="flex-1"
+    />
   )
 }

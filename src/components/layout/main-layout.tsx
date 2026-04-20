@@ -7,7 +7,7 @@ import { MobileHeader } from './mobile-header'
 import { MobileSidebar } from './mobile-sidebar'
 import { cn } from '@/lib/utils'
 import { NotificationCapsule } from './notification-capsule'
-import { TutorialProvider } from '@/components/tutorial/tutorial-provider'
+// import { TutorialProvider } from '@/components/tutorial/tutorial-provider'  // 2026-04-18 暫關、不影響上線進度
 import { usePathname } from 'next/navigation'
 import { useSwipeNavigation } from '@/hooks/useSwipeNavigation'
 import {
@@ -53,7 +53,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     if (!isClient) return
 
     // 需要 workspace 資料的路由前綴
-    const ROUTES_NEED_WORKSPACE = ['/tours', '/orders', '/quotes', '/contracts', '/finance']
+    const ROUTES_NEED_WORKSPACE = ['/tours', '/orders', '/contracts', '/finance']
     const needsWorkspace = ROUTES_NEED_WORKSPACE.some(route => pathname.startsWith(route))
 
     if (!needsWorkspace) return
@@ -137,8 +137,8 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* 浮動通知膠囊 — 有未讀通知時才顯示 */}
       <NotificationCapsule />
 
-      {/* 新手引導教學遮罩 */}
-      <TutorialProvider />
+      {/* 新手引導教學遮罩 — 2026-04-18 暫關（William）*/}
+      {/* <TutorialProvider /> */}
     </div>
   )
 }

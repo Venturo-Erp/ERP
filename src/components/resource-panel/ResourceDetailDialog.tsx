@@ -222,11 +222,22 @@ export function ResourceDetailDialog({
     const files = e.target.files
     if (!files || files.length === 0) return
 
+    // 過濾非圖片檔（browser 的 accept="image/*" 只是建議，不強制）
+    const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'))
+    if (imageFiles.length === 0) {
+      toast.error('請選擇圖片檔（PDF、影片等格式不支援）')
+      e.target.value = ''
+      return
+    }
+    if (imageFiles.length < files.length) {
+      toast.warning(`已過濾 ${files.length - imageFiles.length} 個非圖片檔`)
+    }
+
     setUploading(true)
     try {
       const newImageUrls: string[] = []
 
-      for (const file of Array.from(files)) {
+      for (const file of imageFiles) {
         const ext = file.name.split('.').pop()
         const filePath = `${resource.type}s/${resource.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
 
@@ -335,12 +346,14 @@ export function ResourceDetailDialog({
         ) : (
           <div
             className={
-              hasImages || isEditing ? 'grid grid-cols-[300px_1fr] gap-6 items-start' : 'space-y-4'
+              hasImages || isEditing
+                ? 'grid grid-cols-[400px_1fr] gap-6 items-stretch'
+                : 'space-y-4'
             }
           >
             {/* 左側：圖片 */}
             {(hasImages || isEditing) && (
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2 min-w-0 max-h-[500px]">
                 {/* 主圖 */}
                 {allImages.length > 0 ? (
                   <div className="relative aspect-[4/3] rounded-lg overflow-hidden bg-muted">
@@ -410,9 +423,9 @@ export function ResourceDetailDialog({
                     ))}
                   </div>
                 )}
-                {/* 上傳照片按鈕（編輯模式） */}
+                {/* 上傳照片按鈕（編輯模式，推到底部對齊右側按鈕列） */}
                 {isEditing && (
-                  <label className="flex items-center justify-center gap-1.5 px-3 py-2 border border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors text-sm text-muted-foreground">
+                  <label className="mt-auto flex items-center justify-center gap-1.5 px-3 py-2 border border-dashed border-border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors text-sm text-muted-foreground">
                     {uploading ? (
                       <Loader2 size={14} className="animate-spin" />
                     ) : (

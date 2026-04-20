@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import { useAuthStore } from '@/stores/auth-store'
 import { hasPermissionForRoute } from '@/lib/permissions'
 import { logger } from '@/lib/utils/logger'
-import { LIB_LABELS } from './constants/labels'
+import { ModuleLoading } from '@/components/module-loading'
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -13,12 +13,12 @@ interface AuthGuardProps {
 }
 
 /**
- * 檢查 auth-token cookie 是否存在
- * 用於同步 middleware 的 token 清除操作
+ * 檢查 Supabase session cookie 是否存在（2026-04-18 改用 Supabase Auth）
+ * @supabase/ssr 把 session 存成 `sb-<project-ref>-auth-token` 開頭的 cookies
  */
 function hasAuthCookie(): boolean {
   if (typeof document === 'undefined') return false
-  return document.cookie.split(';').some(c => c.trim().startsWith('auth-token='))
+  return document.cookie.split(';').some(c => c.trim().startsWith('sb-'))
 }
 
 /**
@@ -196,25 +196,11 @@ export function AuthGuard({ children, requiredPermission }: AuthGuardProps) {
 
   // 如果正在恢復 user 資料，顯示載入畫面
   if (isRecovering) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-morandi-gold/20 mx-auto mb-4"></div>
-          <p className="text-morandi-secondary">{LIB_LABELS.LOADING_6912}</p>
-        </div>
-      </div>
-    )
+    return <ModuleLoading fullscreen />
   }
 
   // 如果都沒有，顯示載入畫面（很快就會跳轉到登入頁）
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-morandi-gold/20 mx-auto mb-4"></div>
-        <p className="text-morandi-secondary">{LIB_LABELS.LOADING_6912}</p>
-      </div>
-    </div>
-  )
+  return <ModuleLoading fullscreen />
 }
 
 /**

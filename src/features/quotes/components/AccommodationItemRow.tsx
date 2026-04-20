@@ -110,16 +110,17 @@ export const AccommodationItemRow: React.FC<AccommodationItemRowProps> = ({
         {item.total.toLocaleString()}
       </td>
 
-      {/* 備註 / 操作合併欄 */}
-      <td colSpan={2} className="py-3 px-4 text-sm text-morandi-secondary">
-        <div className="flex items-center justify-between">
+      {/* 操作欄（原本 colSpan=2 跟表頭 6 欄對不上、改成 1 欄） */}
+      <td className="py-3 px-4 text-sm text-morandi-secondary">
+        <div className="flex items-center justify-between gap-2">
           <input
             type="text"
             value={isSameAsPrevious ? ACCOMMODATION_ITEM_ROW_LABELS.續住 : item.note || ''}
             onChange={e => handleUpdateItem(categoryId, item.id, 'note', e.target.value)}
-            className={`${inputClass} flex-1 ${item.note?.startsWith('⚠️') ? 'text-morandi-gold font-medium' : ''}`}
+            className={`${inputClass} flex-1 min-w-0 ${item.note?.startsWith('⚠️') ? 'text-morandi-gold font-medium' : ''}`}
             placeholder={ACCOMMODATION_ITEM_ROW_LABELS.備註}
             disabled={isReadOnly || isSameAsPrevious}
+            title={item.note || undefined}
           />
           <div className="flex items-center gap-1 ml-2 flex-shrink-0">
             {!isReadOnly && (

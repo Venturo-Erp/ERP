@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -11,17 +11,12 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Combobox } from '@/components/ui/combobox'
-import { useEmployeesSlim } from '@/data'
 import { updateOrder } from '@/data'
-import type { Order, Employee } from '@/stores/types'
-import type { SyncableEntity } from '@/types'
+import type { Order } from '@/stores/types'
 import { X } from 'lucide-react'
 import { logger } from '@/lib/utils/logger'
 import { COMP_ORDERS_LABELS } from '../constants/labels'
-import { useWorkspaceRoles } from '@/data/hooks'
-
-// 型別守衛：檢查 Employee 是否包含同步欄位
-type EmployeeWithSync = Employee & Partial<SyncableEntity>
+import { useEligibleEmployees } from '@/data/hooks/useEligibleEmployees'
 
 interface OrderEditDialogProps {
   open: boolean
@@ -31,19 +26,16 @@ interface OrderEditDialogProps {
 }
 
 export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderEditDialogProps) {
-  const { items: employees } = useEmployeesSlim()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { roles: workspaceRoles } = useWorkspaceRoles()
   const [formData, setFormData] = useState({
     contact_person: '',
     sales_person: '',
     assistant: '',
   })
 
-  // 取得特定職務名稱的 role_id
-  const getRoleIdByName = (name: string) => {
-    return workspaceRoles.find(r => r.name === name)?.id
-  }
+  // 下拉資格：查「職務有 tours.as_sales / as_assistant can_write=true」的員工
+  const { employees: salesPersons } = useEligibleEmployees('tours', 'as_sales')
+  const { employees: assistants } = useEligibleEmployees('tours', 'as_assistant')
 
   // 當 order 變更時重設表單
   useEffect(() => {
@@ -55,59 +47,6 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
       })
     }
   }, [order])
-
-  // 排序函數：按員工編號排序
-  const sortByEmployeeNumber = (a: Employee, b: Employee) => {
-    const numA = a.employee_number || ''
-    const numB = b.employee_number || ''
-    return numA.localeCompare(numB, 'en', { numeric: true })
-  }
-
-  // 篩選業務人員（業務 + 管理員）
-  const salesPersons = useMemo(() => {
-    const activeEmployees = employees.filter(emp => {
-      const empWithSync = emp as EmployeeWithSync
-      const notDeleted = !empWithSync._deleted
-      const isActive = emp.status === 'active'
-      // 排除機器人
-      const notBot =
-        emp.employee_number !== 'BOT001' && emp.id !== '00000000-0000-0000-0000-000000000001'
-      return notDeleted && isActive && notBot
-    })
-
-    const salesRoleId = getRoleIdByName('業務')
-    const adminRoleId = getRoleIdByName('管理員')
-
-    const qualified = activeEmployees.filter(
-      emp => emp.job_info?.role_id === salesRoleId || emp.job_info?.role_id === adminRoleId
-    )
-
-    const result = qualified.length > 0 ? qualified : activeEmployees
-    return result.sort(sortByEmployeeNumber)
-  }, [employees, workspaceRoles])
-
-  // 篩選助理（助理 + 管理員）
-  const assistants = useMemo(() => {
-    const activeEmployees = employees.filter(emp => {
-      const empWithSync = emp as EmployeeWithSync
-      const notDeleted = !empWithSync._deleted
-      const isActive = emp.status === 'active'
-      // 排除機器人
-      const notBot =
-        emp.employee_number !== 'BOT001' && emp.id !== '00000000-0000-0000-0000-000000000001'
-      return notDeleted && isActive && notBot
-    })
-
-    const assistantRoleId = getRoleIdByName('助理')
-    const adminRoleId = getRoleIdByName('管理員')
-
-    const qualified = activeEmployees.filter(
-      emp => emp.job_info?.role_id === assistantRoleId || emp.job_info?.role_id === adminRoleId
-    )
-
-    const result = qualified.length > 0 ? qualified : activeEmployees
-    return result.sort(sortByEmployeeNumber)
-  }, [employees, workspaceRoles])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -169,8 +108,8 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
               </label>
               <Combobox
                 options={salesPersons.map(emp => ({
-                  value: emp.display_name || emp.english_name,
-                  label: `${emp.display_name || emp.english_name} (${emp.employee_number})`,
+                  value: emp.display_name || emp.english_name || '',
+                  label: `${emp.display_name || emp.english_name || ''} (${emp.employee_number ?? ''})`,
                 }))}
                 value={formData.sales_person}
                 onChange={value => setFormData(prev => ({ ...prev, sales_person: value }))}
@@ -188,8 +127,8 @@ export function OrderEditDialog({ open, onOpenChange, order, level = 2 }: OrderE
               </label>
               <Combobox
                 options={assistants.map(emp => ({
-                  value: emp.display_name || emp.english_name,
-                  label: `${emp.display_name || emp.english_name} (${emp.employee_number})`,
+                  value: emp.display_name || emp.english_name || '',
+                  label: `${emp.display_name || emp.english_name || ''} (${emp.employee_number ?? ''})`,
                 }))}
                 value={formData.assistant}
                 onChange={value => setFormData(prev => ({ ...prev, assistant: value }))}

@@ -4,6 +4,7 @@
  */
 
 import { formatDate } from '@/lib/utils/format-date'
+import { formatMoney } from '@/lib/utils/format-currency'
 import { useState, useEffect } from 'react'
 import { usePaymentMethodsCached } from '@/data/hooks'
 import { Link2, Loader2, Trash2 } from 'lucide-react'
@@ -301,7 +302,7 @@ export function PaymentItemRow({
           <input
             type="text"
             inputMode="numeric"
-            value={item.amount ? item.amount.toLocaleString() : ''}
+            value={item.amount ? formatMoney(item.amount) : ''}
             onChange={e => {
               const raw = e.target.value.replace(/,/g, '')
               const num = parseInt(raw, 10)
@@ -319,7 +320,7 @@ export function PaymentItemRow({
             <input
               type="text"
               inputMode="numeric"
-              value={item.actual_amount ? item.actual_amount.toLocaleString() : ''}
+              value={item.actual_amount ? formatMoney(item.actual_amount) : ''}
               onChange={e => {
                 const raw = e.target.value.replace(/,/g, '')
                 const num = parseInt(raw, 10)

@@ -8,7 +8,7 @@ import { deleteOrder } from '@/data'
 import { recalculateParticipants } from '@/features/tours/services/tour-stats.service'
 import { recalculateReceiptStats } from '@/features/finance/payments/services/receipt-core.service'
 import { logger } from '@/lib/utils/logger'
-import { User, Trash2, FileText, Pencil, Plus, HandCoins } from 'lucide-react'
+import { User, Trash2, FileText, SquarePen, Plus, HandCoins } from 'lucide-react'
 import { Wallet as PhWallet, ReadCvLogo } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { Order, Tour } from '@/stores/types'
@@ -76,11 +76,21 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
     )
   }, [])
 
+  const formatMoney = (n?: number | null) =>
+    typeof n === 'number' ? `$${n.toLocaleString()}` : '-'
+
+  const statusColor: Record<string, string> = {
+    unpaid: 'text-morandi-red',
+    partial: 'text-morandi-gold',
+    paid: 'text-morandi-green',
+  }
+
   const columns: TableColumn<Order>[] = [
     {
       key: 'order_number',
       label: COMP_ORDERS_LABELS.LABEL_7017,
       sortable: true,
+      width: '150px',
       render: value => <span className="font-medium">{String(value || '')}</span>,
     },
     ...(showTourInfo
@@ -89,6 +99,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
             key: 'tour_name',
             label: COMP_ORDERS_LABELS.LABEL_8875,
             sortable: true,
+            width: '220px',
           },
         ] as TableColumn<Order>[])
       : []),
@@ -96,10 +107,11 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       key: 'contact_person',
       label: COMP_ORDERS_LABELS.LABEL_7009,
       sortable: true,
+      width: '130px',
       render: value => (
         <div className="flex items-center gap-1.5">
           <User size={14} className="text-morandi-secondary shrink-0" />
-          <span className="font-medium">{String(value || '')}</span>
+          <span className="font-medium truncate">{String(value || '')}</span>
         </div>
       ),
     },
@@ -107,6 +119,35 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       key: 'sales_person',
       label: COMP_ORDERS_LABELS.LABEL_8362,
       sortable: true,
+      width: '90px',
+    },
+    {
+      key: 'member_count',
+      label: '人數',
+      sortable: true,
+      width: '60px',
+      render: value => (
+        <span className="tabular-nums">{typeof value === 'number' ? value : 0}</span>
+      ),
+    },
+    {
+      key: 'total_amount',
+      label: '金額',
+      sortable: true,
+      width: '130px',
+      render: (value, row) => {
+        const paid = (row as Order).paid_amount || 0
+        const total = typeof value === 'number' ? value : 0
+        const status = String((row as Order).payment_status || 'unpaid')
+        return (
+          <div className="flex flex-col leading-tight">
+            <span className="tabular-nums font-medium">{formatMoney(total)}</span>
+            <span className={cn('text-[10px] tabular-nums', statusColor[status])}>
+              已收 {formatMoney(paid)}
+            </span>
+          </div>
+        )
+      },
     },
   ]
 
@@ -117,7 +158,7 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       data={orders}
       striped
       showFilters={false}
-      actionsWidth="1%"
+      actionsWidth="440px"
       actionsHeader={
         onAdd ? (
           <div className="flex justify-end">
@@ -152,29 +193,42 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       }}
       actions={order => (
         <div
-          className="flex items-center gap-1 justify-end whitespace-nowrap"
+          className="flex items-center gap-1 justify-start whitespace-nowrap"
           onClick={e => e.stopPropagation()}
         >
+          {/* 編輯 */}
+          {onEdit && (
+            <Button
+              variant="ghost"
+              onClick={e => {
+                e.stopPropagation()
+                onEdit(order)
+              }}
+              className="h-7 px-1.5 gap-0.5 text-xs text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-gold-light"
+            >
+              <SquarePen size={14} />
+              編輯
+            </Button>
+          )}
+
           {/* 展開成員 */}
           <Button
-            size="sm"
             variant="ghost"
             onClick={e => {
               e.stopPropagation()
               handleToggleExpand(order.id)
             }}
             className={cn(
-              'h-7 px-2 gap-1 text-xs text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-gold-light',
+              'h-7 px-1.5 gap-0.5 text-xs text-morandi-secondary hover:text-morandi-primary hover:bg-morandi-gold-light',
               expanded.includes(order.id) && 'text-morandi-primary bg-morandi-gold-light'
             )}
           >
-            <User size={12} />
+            <User size={14} />
             成員
           </Button>
 
           {/* 收款 */}
           <Button
-            size="sm"
             variant="ghost"
             onClick={e => {
               e.stopPropagation()
@@ -186,31 +240,14 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
                 )
               }
             }}
-            className="h-7 px-2 gap-1 text-xs text-morandi-green hover:text-morandi-green hover:bg-morandi-green/10"
+            className="h-7 px-1.5 gap-0.5 text-xs text-morandi-green hover:text-morandi-green hover:bg-morandi-green/10"
           >
-            <PhWallet size={12} weight="regular" />
+            <PhWallet size={14} weight="regular" />
             收款
           </Button>
 
-          {/* 開發票 */}
-          {onQuickInvoice && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={e => {
-                e.stopPropagation()
-                onQuickInvoice(order)
-              }}
-              className="h-7 px-2 gap-1 text-xs text-morandi-gold hover:text-morandi-gold hover:bg-morandi-gold/10"
-            >
-              <FileText size={12} />
-              開發票
-            </Button>
-          )}
-
           {/* 請款 */}
           <Button
-            size="sm"
             variant="ghost"
             onClick={e => {
               e.stopPropagation()
@@ -222,52 +259,49 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
                 )
               }
             }}
-            className="h-7 px-2 gap-1 text-xs text-morandi-gold hover:text-morandi-gold-hover hover:bg-morandi-gold-light"
+            className="h-7 px-1.5 gap-0.5 text-xs text-morandi-gold hover:text-morandi-gold-hover hover:bg-morandi-gold-light"
           >
-            <HandCoins size={12} />
+            <HandCoins size={14} />
             請款
           </Button>
+
+          {/* 開發票 */}
+          {onQuickInvoice && (
+            <Button
+              variant="ghost"
+              onClick={e => {
+                e.stopPropagation()
+                onQuickInvoice(order)
+              }}
+              className="h-7 px-1.5 gap-0.5 text-xs text-morandi-gold hover:text-morandi-gold hover:bg-morandi-gold/10"
+            >
+              <FileText size={14} />
+              發票
+            </Button>
+          )}
 
           {/* 簽證 */}
           {onQuickVisa && (
             <Button
-              size="sm"
               variant="ghost"
               onClick={e => {
                 e.stopPropagation()
                 onQuickVisa(order)
               }}
-              className="h-7 px-2 gap-1 text-xs text-morandi-primary hover:text-morandi-primary hover:bg-morandi-gold-light"
+              className="h-7 px-1.5 gap-0.5 text-xs text-morandi-primary hover:text-morandi-primary hover:bg-morandi-gold-light"
             >
-              <ReadCvLogo size={12} weight="regular" />
+              <ReadCvLogo size={14} weight="regular" />
               簽證
-            </Button>
-          )}
-
-          {/* 編輯 */}
-          {onEdit && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={e => {
-                e.stopPropagation()
-                onEdit(order)
-              }}
-              className="h-7 px-2 gap-1 text-xs text-morandi-primary hover:text-morandi-primary hover:bg-morandi-gold-light"
-            >
-              <Pencil size={12} />
-              編輯
             </Button>
           )}
 
           {/* 刪除 */}
           <Button
-            size="sm"
             variant="ghost"
             onClick={e => handleDelete(order, e)}
-            className="h-7 px-2 gap-1 text-xs text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
+            className="h-7 px-1.5 gap-0.5 text-xs text-morandi-red hover:text-morandi-red hover:bg-morandi-red/10"
           >
-            <Trash2 size={12} />
+            <Trash2 size={14} />
             刪除
           </Button>
         </div>

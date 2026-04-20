@@ -33,7 +33,6 @@ export interface Quote extends BaseEntity {
   status?: string // 報價狀態
   total_amount?: number // 總金額
   total_cost?: number // 總成本
-  version?: number // 版本號
   valid_until?: string // 有效期限 (ISO 8601)
   notes?: string // 備註
   is_active?: boolean // 是否啟用
@@ -57,8 +56,6 @@ export interface Quote extends BaseEntity {
 
   // 擴展欄位（用於詳細頁）
   categories?: QuoteCategory[] // 報價分類（臨時編輯狀態）
-  versions?: QuoteVersion[] // 歷史版本（所有版本都存在這裡）
-  current_version_index?: number // 當前編輯的版本索引（對應 versions 陣列）
   participant_counts?: Record<string, number> // 參與人數統計
   selling_prices?: Record<string, number> // 銷售價格
 
@@ -72,7 +69,6 @@ export interface Quote extends BaseEntity {
   confirmed_by_email?: string // 確認者 Email
   confirmed_by_phone?: string // 確認者電話
   confirmed_by_staff_id?: string // 業務確認者 ID
-  confirmed_version?: number // 確認時鎖定的版本
   confirmation_ip?: string // 確認時 IP（稽核用）
   confirmation_user_agent?: string // 確認時瀏覽器資訊（稽核用）
   confirmation_notes?: string // 確認備註
@@ -93,22 +89,6 @@ export interface QuickQuoteItem {
   quantity_formula?: string // 數量公式（如 "10+5"）
   cost_formula?: string // 成本公式
   unit_price_formula?: string // 單價公式
-}
-
-/**
- * QuoteVersion - 報價版本
- */
-export interface QuoteVersion extends BaseEntity {
-  quote_id: string // 報價單 ID
-  version: number // 版本號
-  name: string // 版本名稱（如：客戶名稱、報價單名稱）
-  total_amount: number // 總金額
-  total_cost?: number // 總成本
-  changes?: string // 變更說明
-  notes?: string // 備註說明
-  created_by?: string // 建立人 ID
-  created_by_name?: string // 建立人姓名
-  snapshot?: string // 快照資料（JSON 格式）
 }
 
 /**
@@ -373,7 +353,6 @@ export interface QuoteConfirmationLog {
   confirmed_by_email?: string
   confirmed_by_phone?: string
   confirmed_by_staff_id?: string
-  confirmed_version?: number
   ip_address?: string
   user_agent?: string
   notes?: string

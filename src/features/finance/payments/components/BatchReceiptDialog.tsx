@@ -40,7 +40,9 @@ interface OrderAllocationWithNote {
   allocated_amount: number
   notes: string
 }
-import { Plus, DollarSign, AlertCircle, X, Check } from 'lucide-react'
+import { Plus, DollarSign, X, Check } from 'lucide-react'
+import { UnallocatedAmountWarning } from '@/features/finance/components/UnallocatedAmountWarning'
+import { formatMoney } from '@/lib/utils/format-currency'
 import { cn } from '@/lib/utils'
 import { alert } from '@/lib/ui/alert-dialog'
 import { CurrencyCell } from '@/components/table-cells'
@@ -573,28 +575,13 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
             </div>
 
             {/* 未分配提示 */}
-            {unallocatedAmount !== 0 && totalAmount > 0 && (
-              <div
-                className={cn(
-                  'flex items-center justify-between px-3 py-2 rounded-lg text-sm',
-                  unallocatedAmount > 0
-                    ? 'bg-morandi-gold/10 text-morandi-gold'
-                    : 'bg-morandi-red/10 text-morandi-red'
-                )}
-              >
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 shrink-0" />
-                  <span>
-                    {unallocatedAmount > 0
-                      ? BATCH_RECEIPT_FORM_LABELS.還有金額未分配
-                      : BATCH_RECEIPT_DIALOG_LABELS.分配金額超過總金額}
-                  </span>
-                </div>
-                <div className="font-medium">
-                  未分配：
-                  <CurrencyCell amount={Math.abs(unallocatedAmount)} className="inline" />
-                </div>
-              </div>
+            {totalAmount > 0 && (
+              <UnallocatedAmountWarning
+                amount={unallocatedAmount}
+                underMessage={BATCH_RECEIPT_FORM_LABELS.還有金額未分配}
+                overMessage={BATCH_RECEIPT_DIALOG_LABELS.分配金額超過總金額}
+                labelSuffix="未分配"
+              />
             )}
           </div>
         </div>
@@ -608,7 +595,7 @@ export function BatchReceiptDialog({ open, onOpenChange }: BatchReceiptDialogPro
               )}
             </span>
             <span className="inline-block min-w-[100px] text-right font-semibold text-morandi-gold ml-2">
-              NT$ {totalAmount.toLocaleString()}
+              NT$ {formatMoney(totalAmount)}
             </span>
           </div>
           <div className="flex-1" />

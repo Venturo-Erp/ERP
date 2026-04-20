@@ -7,6 +7,7 @@ import { AlertCircle, X } from 'lucide-react'
 import { NewTourData } from '../types'
 import type { OrderFormData } from '@/features/orders/components/add-order-form'
 import { TourBasicInfo, TourSettings, TourOrderSection } from './tour-form'
+import { Input } from '@/components/ui/input'
 import { TOUR_FORM } from '../constants'
 
 interface TourFormShellProps {
@@ -141,9 +142,34 @@ export function TourFormShell({
               <div className="space-y-4">
                 <TourBasicInfo newTour={newTour} setNewTour={setNewTour} />
 
-                {/* 提案/模板不顯示設定區 */}
-                {!isProposalOrTemplate && (
-                  <TourSettings newTour={newTour} setNewTour={setNewTour} />
+                {/* 備註 + 團控 一半一半（提案/模板不顯示團控）*/}
+                {!isProposalOrTemplate ? (
+                  <div className="grid grid-cols-2 gap-4 items-start">
+                    <div>
+                      <label className="text-sm font-medium text-morandi-primary">備註</label>
+                      <Input
+                        value={newTour.description || ''}
+                        onChange={e =>
+                          setNewTour(prev => ({ ...prev, description: e.target.value }))
+                        }
+                        placeholder="內部備註，客人看不到"
+                        className="mt-1"
+                      />
+                    </div>
+                    <TourSettings newTour={newTour} setNewTour={setNewTour} />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="text-sm font-medium text-morandi-primary">備註</label>
+                    <Input
+                      value={newTour.description || ''}
+                      onChange={e =>
+                        setNewTour(prev => ({ ...prev, description: e.target.value }))
+                      }
+                      placeholder="內部備註，客人看不到"
+                      className="mt-1"
+                    />
+                  </div>
                 )}
               </div>
             </div>

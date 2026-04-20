@@ -124,7 +124,7 @@ export const useQuoteState = () => {
     infant: 0,
   })
 
-  // 追蹤是否已經載入過砍次表，避免重複載入覆蓋用戶編輯
+  // 追蹤是否已經載入過檻次表，避免重複載入覆蓋用戶編輯
   const hasLoadedTierPricings = useRef(false)
 
   // 當 quote 載入後，更新 header 狀態（categories 由核心表效果處理）
@@ -211,7 +211,7 @@ export const useQuoteState = () => {
       setSellingPrices(sp as SellingPrices)
     }
 
-    // 砍次表
+    // 檻次表
     if (!hasLoadedTierPricings.current) {
       const tp = (fullTour?.tier_pricings ??
         (quote as typeof quote & { tier_pricings?: TierPricing[] })?.tier_pricings) as
@@ -348,7 +348,7 @@ export const useQuoteState = () => {
       (quote as typeof quote & { expense_description?: string })?.expense_description || '',
   })
 
-  // 砍次表狀態（由 effect 從 fullTour 或 quote 載入）
+  // 檻次表狀態（由 effect 從 fullTour 或 quote 載入）
   const [tierPricings, setTierPricings] = useState<TierPricing[]>([])
 
   // 保險文字和費用不包含項目
@@ -421,7 +421,7 @@ export const useQuoteState = () => {
     setQuickQuoteItems,
     quickQuoteCustomerInfo,
     setQuickQuoteCustomerInfo,
-    // 砍次表相關
+    // 檻次表相關
     tierPricings,
     setTierPricings,
     // 保險和不包含項目

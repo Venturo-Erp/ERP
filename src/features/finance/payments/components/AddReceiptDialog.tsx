@@ -20,6 +20,10 @@ import { usePaymentForm } from '../hooks/usePaymentForm'
 import { useReceiptMutations, type LinkPayResult } from '../hooks/useReceiptMutations'
 import { recalculateReceiptStats } from '../services/receipt-core.service'
 import { PaymentItemRow } from './PaymentItemRow'
+import { InlineEditTable, type InlineEditColumn } from '@/components/ui/inline-edit-table'
+import { useResetOnTabChange } from '@/hooks/useResetOnTabChange'
+import { formatMoney } from '@/lib/utils/format-currency'
+import type { PaymentItem } from '../types'
 import { Input } from '@/components/ui/input'
 import type { Receipt } from '@/stores'
 import { useAuthStore } from '@/stores'
@@ -90,6 +94,19 @@ export function AddReceiptDialog({
 
   // Tab 狀態
   const [activeTab, setActiveTab] = useState('tour')
+
+  // 切 tab 時清空表單，避免殘留資料污染另一種收款類型
+  useResetOnTabChange(activeTab, resetForm, !isEditMode)
+
+  // 收款項目表格的欄位定義（團體/公司共用；cell 內容由 PaymentItemRow 透過 rowRender 提供）
+  const receiptColumns: InlineEditColumn<PaymentItem>[] = [
+    { key: 'method', label: ADD_RECEIPT_DIALOG_LABELS.LABEL_5187, width: '110px', render: () => null },
+    { key: 'date', label: ADD_RECEIPT_DIALOG_LABELS.LABEL_1182, width: '150px', render: () => null },
+    { key: 'detail', label: ADD_RECEIPT_DIALOG_LABELS.LABEL_6465, width: '180px', render: () => null },
+    { key: 'remarks', label: ADD_RECEIPT_DIALOG_LABELS.REMARKS, render: () => null },
+    { key: 'amount', label: '收款金額', width: '120px', align: 'right', render: () => null },
+    { key: 'actual', label: '實收金額', width: '120px', align: 'right', render: () => null },
+  ]
 
   // 提交狀態（防止重複點擊）
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -315,7 +332,7 @@ export function AddReceiptDialog({
           title: ADD_RECEIPT_TOAST_LABELS.CREATE_SUCCESS,
           description: ADD_RECEIPT_TOAST_LABELS.CREATED(
             result.itemCount,
-            result.totalAmount.toLocaleString()
+            formatMoney(result.totalAmount)
           ),
         })
         resetForm()
@@ -503,98 +520,42 @@ export function AddReceiptDialog({
               </div>
             ) : (
               <>
-                {/* 收款項目 - 文青風表格 */}
                 <div className="flex-1 flex flex-col overflow-hidden pt-4 border-t border-morandi-container/30">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-morandi-primary">
-                      {ADD_RECEIPT_DIALOG_LABELS.LABEL_4595}
-                    </h3>
-                    {/* 未確認的收款單都可以新增/刪除項目 */}
-                    {!isConfirmed && (
-                      <Button
-                        onClick={addPaymentItem}
-                        size="sm"
-                        variant="outline"
-                        className="text-morandi-gold border-morandi-gold/50 hover:bg-morandi-gold/10 hover:border-morandi-gold"
-                      >
-                        <Plus size={14} className="mr-2" />
-                        {ADD_RECEIPT_DIALOG_LABELS.ADD_2089}
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="flex-1 overflow-auto">
-                    {/* 項目表格 */}
-                    <div className="border border-border/50 rounded-lg overflow-hidden">
-                      <table className="w-full border-collapse">
-                        <thead>
-                          <tr className="bg-morandi-gold-header border-b border-border">
-                            <th
-                              className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
-                              style={{ width: '110px' }}
-                            >
-                              {ADD_RECEIPT_DIALOG_LABELS.LABEL_5187}
-                            </th>
-                            <th
-                              className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
-                              style={{ width: '150px' }}
-                            >
-                              {ADD_RECEIPT_DIALOG_LABELS.LABEL_1182}
-                            </th>
-                            <th
-                              className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
-                              style={{ width: '180px' }}
-                            >
-                              {ADD_RECEIPT_DIALOG_LABELS.LABEL_6465}
-                            </th>
-                            <th className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary">
-                              {ADD_RECEIPT_DIALOG_LABELS.REMARKS}
-                            </th>
-                            <th
-                              className="text-right py-2.5 px-3 text-sm font-semibold text-morandi-primary"
-                              style={{ width: '120px' }}
-                            >
-                              收款金額
-                            </th>
-                            <th
-                              className="text-right py-2.5 px-3 text-sm font-semibold text-morandi-primary"
-                              style={{ width: '120px' }}
-                            >
-                              實收金額
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {paymentItems.map((item, index) => (
-                            <PaymentItemRow
-                              key={item.id}
-                              item={item}
-                              index={index}
-                              onUpdate={updatePaymentItem}
-                              onRemove={removePaymentItem}
-                              canRemove={paymentItems.length > 1}
-                              isNewRow={!isEditMode && index === paymentItems.length - 1}
-                              readonly={isConfirmed}
-                              canConfirmReceipt={!!isAccountant}
-                              paymentMethods={paymentMethods}
-                              orderInfo={
-                                selectedOrder
-                                  ? {
-                                      order_number: selectedOrder.order_number || undefined,
-                                      tour_name: selectedOrder.tour_name || undefined,
-                                      contact_person: selectedOrder.contact_person || undefined,
-                                      contact_email:
-                                        (selectedOrder as { contact_email?: string })
-                                          .contact_email || undefined,
-                                    }
-                                  : undefined
+                  <InlineEditTable<PaymentItem>
+                    title={ADD_RECEIPT_DIALOG_LABELS.LABEL_4595}
+                    rows={paymentItems}
+                    columns={receiptColumns}
+                    onAdd={isConfirmed ? undefined : addPaymentItem}
+                    addLabel={ADD_RECEIPT_DIALOG_LABELS.ADD_2089}
+                    readonly={isConfirmed}
+                    className="flex-1 overflow-auto"
+                    rowRender={(item, index) => (
+                      <PaymentItemRow
+                        key={item.id}
+                        item={item}
+                        index={index}
+                        onUpdate={updatePaymentItem}
+                        onRemove={removePaymentItem}
+                        canRemove={paymentItems.length > 1}
+                        isNewRow={!isEditMode && index === paymentItems.length - 1}
+                        readonly={isConfirmed}
+                        canConfirmReceipt={!!isAccountant}
+                        paymentMethods={paymentMethods}
+                        orderInfo={
+                          selectedOrder
+                            ? {
+                                order_number: selectedOrder.order_number || undefined,
+                                tour_name: selectedOrder.tour_name || undefined,
+                                contact_person: selectedOrder.contact_person || undefined,
+                                contact_email:
+                                  (selectedOrder as { contact_email?: string }).contact_email ||
+                                  undefined,
                               }
-                            />
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
+                            : undefined
+                        }
+                      />
+                    )}
+                  />
                 </div>
 
                 {/* LinkPay 結果區域 */}
@@ -660,77 +621,31 @@ export function AddReceiptDialog({
 
           {/* 公司收款 */}
           <TabsContent value="company" className="flex-1 flex flex-col overflow-hidden">
-            {/* 收款項目 */}
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-morandi-primary">收款項目</h3>
-                {!isConfirmed && (
-                  <Button
-                    onClick={addPaymentItem}
-                    size="sm"
-                    variant="outline"
-                    className="text-morandi-gold border-morandi-gold/50 hover:bg-morandi-gold/10 hover:border-morandi-gold"
-                  >
-                    <Plus size={14} className="mr-2" />
-                    新增項目
-                  </Button>
+            <div className="flex-1 flex flex-col overflow-hidden pt-4 border-t border-morandi-container/30">
+              <InlineEditTable<PaymentItem>
+                title={ADD_RECEIPT_DIALOG_LABELS.LABEL_4595}
+                rows={paymentItems}
+                columns={receiptColumns}
+                onAdd={isConfirmed ? undefined : addPaymentItem}
+                addLabel={ADD_RECEIPT_DIALOG_LABELS.ADD_2089}
+                readonly={isConfirmed}
+                className="flex-1 overflow-auto"
+                rowRender={(item, index) => (
+                  <PaymentItemRow
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    onUpdate={updatePaymentItem}
+                    onRemove={removePaymentItem}
+                    canRemove={paymentItems.length > 1}
+                    isNewRow={!isEditMode && index === paymentItems.length - 1}
+                    mode="company"
+                    readonly={isConfirmed}
+                    canConfirmReceipt={!!isAccountant}
+                    paymentMethods={paymentMethods}
+                  />
                 )}
-              </div>
-
-              <div className="flex-1 overflow-auto">
-                <div className="border border-border/50 rounded-lg overflow-hidden">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-morandi-gold-header border-b border-border">
-                        <th
-                          className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
-                          style={{ width: '110px' }}
-                        >
-                          收款方式
-                        </th>
-                        <th
-                          className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
-                          style={{ width: '150px' }}
-                        >
-                          收款日期
-                        </th>
-                        <th
-                          className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary"
-                          style={{ width: '180px' }}
-                        >
-                          收款項目
-                        </th>
-                        <th className="text-left py-2.5 px-3 text-sm font-semibold text-morandi-primary">
-                          備註
-                        </th>
-                        <th
-                          className="text-right py-2.5 px-3 text-sm font-semibold text-morandi-primary"
-                          style={{ width: '140px' }}
-                        >
-                          金額
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paymentItems.map((item, index) => (
-                        <PaymentItemRow
-                          key={item.id}
-                          item={item}
-                          index={index}
-                          onUpdate={updatePaymentItem}
-                          onRemove={removePaymentItem}
-                          canRemove={paymentItems.length > 1}
-                          isNewRow={!isEditMode && index === paymentItems.length - 1}
-                          mode="company"
-                          readonly={isConfirmed}
-                          canConfirmReceipt={!!isAccountant}
-                          paymentMethods={paymentMethods}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              />
             </div>
           </TabsContent>
         </Tabs>
@@ -743,7 +658,7 @@ export function AddReceiptDialog({
               {ADD_RECEIPT_DIALOG_LABELS.TOTAL_6550}
             </span>
             <span className="text-lg font-semibold text-morandi-gold whitespace-nowrap">
-              NT$ {totalAmount.toLocaleString()}
+              NT$ {formatMoney(totalAmount)}
             </span>
           </div>
 
