@@ -240,7 +240,7 @@ export function EditableRequestItemList({
     {
       key: 'payment_method',
       label: '付款方式',
-      width: '100px',
+      width: '140px',
       render: ({ row, onUpdate }) => (
         <Select
           value={row.payment_method_id || ''}
@@ -263,7 +263,7 @@ export function EditableRequestItemList({
     {
       key: 'category',
       label: REQUEST_ITEM_LIST_LABELS.LABEL_2946,
-      width: '80px',
+      width: '104px',
       render: ({ row, onUpdate }) => (
         <Select
           value={row.category}
