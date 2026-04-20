@@ -16,6 +16,7 @@ import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import { successResponse, errorResponse, ErrorCode } from '@/lib/api/response'
 import { getServerAuth } from '@/lib/auth/server-auth'
 import { logger } from '@/lib/utils/logger'
+import { MODULES } from '@/lib/permissions/module-tabs'
 
 interface CreateTenantRequest {
   // Workspace 資訊
@@ -520,11 +521,32 @@ export async function POST(request: NextRequest) {
       ...premiumFeatures.map(code => ({ feature_code: code, enabled: false })),
     ]
 
-    const featuresToInsert = defaultFeatures.map(f => ({
-      workspace_id: workspace.id,
-      feature_code: f.feature_code,
-      enabled: f.enabled,
-    }))
+    // 2026-04-20：從 MODULES 自動 seed tab-level feature rows
+    // 配合 isTabEnabled 改為嚴格（default-deny）、避免新租戶所有 tab 空白
+    const enabledModules = new Set(freeFeatures)
+    const tabFeatures: { feature_code: string; enabled: boolean }[] = []
+    for (const m of MODULES) {
+      for (const t of m.tabs) {
+        if (t.isEligibility) continue // eligibility 不是 feature toggle
+        const key = `${m.code}.${t.code}`
+        // basic tab 跟隨 module 預設、premium tab 一律預設關（要明確 opt-in）
+        const enabled = enabledModules.has(m.code) && t.category !== 'premium'
+        tabFeatures.push({ feature_code: key, enabled })
+      }
+    }
+
+    const featuresToInsert = [
+      ...defaultFeatures.map(f => ({
+        workspace_id: workspace.id,
+        feature_code: f.feature_code,
+        enabled: f.enabled,
+      })),
+      ...tabFeatures.map(f => ({
+        workspace_id: workspace.id,
+        feature_code: f.feature_code,
+        enabled: f.enabled,
+      })),
+    ]
 
     const { error: featuresError } = await supabaseAdmin
       .from('workspace_features')

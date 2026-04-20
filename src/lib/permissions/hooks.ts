@@ -164,8 +164,13 @@ export function useWorkspaceFeatures() {
 
   /**
    * 檢查 tab 是否啟用（workspace 級、細粒度）
-   * - category='premium'：需要 workspace 付費大開關 + `{module}.{tab}` 明確 enabled=true（預設關）
-   * - category='basic' / undefined：workspace_features 沒指定 → 視為開；明確 false 才關
+   * - category='premium'：需要 workspace 付費大開關 + `{module}.{tab}` 明確 enabled=true
+   * - category='basic' / undefined：必須有 row 且 enabled=true
+   *
+   * 2026-04-20 改為嚴格（default-deny）：
+   * 之前預設開、導致「租戶沒明確設定的 tab 都出現在權限清單」
+   * 現在所有 workspace 建立時會自動 seed 所有 tab row（migration 已跑）
+   * 之後新 workspace 建立、要同步 seed（見 Step 3 trigger）
    */
   const isTabEnabled = useCallback(
     (moduleCode: string, tabCode: string, category?: 'basic' | 'premium'): boolean => {
@@ -174,7 +179,7 @@ export function useWorkspaceFeatures() {
       if (category === 'premium') {
         return premiumEnabled && feature?.enabled === true
       }
-      return feature?.enabled !== false
+      return feature?.enabled === true
     },
     [features, premiumEnabled]
   )
