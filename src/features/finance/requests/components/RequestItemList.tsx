@@ -223,21 +223,6 @@ export function EditableRequestItemList({
 
   const columns: InlineEditColumn<RequestItem>[] = [
     {
-      key: 'date',
-      label: '日期',
-      width: '110px',
-      render: ({ row, onUpdate }) => (
-        <DatePicker
-          value={row.custom_request_date || ''}
-          onChange={date => onUpdate({ custom_request_date: date })}
-          placeholder="選擇日期"
-          disabled={disabled}
-          hideYear
-          buttonClassName="h-10 p-0 px-2 border-0 shadow-none bg-transparent text-sm"
-        />
-      ),
-    },
-    {
       key: 'payment_method',
       label: '付款方式',
       width: '140px',

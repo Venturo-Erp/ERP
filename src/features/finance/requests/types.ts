@@ -23,8 +23,7 @@ export interface BatchRequestFormData {
 
 export interface RequestItem {
   id: string
-  custom_request_date: string // 請款日期（每項目獨立、對應 DB payment_request_items.custom_request_date）
-  payment_method_id?: string // 付款方式（每項目獨立）
+  payment_method_id?: string // 付款方式（每項目獨立、用於會計傳票）
   category: PaymentRequestItem['category']
   supplier_id: string
   supplierName: string | null

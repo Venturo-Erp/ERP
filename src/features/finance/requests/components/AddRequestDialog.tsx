@@ -360,10 +360,6 @@ export function AddRequestDialog({
       .filter(item => item.request_id === currentRequestId)
       .map(item => ({
         id: item.id,
-        custom_request_date:
-          ((item as unknown as Record<string, unknown>).custom_request_date as string) ||
-          currentRequest?.request_date ||
-          '',
         payment_method_id: (item as unknown as Record<string, unknown>).payment_method_id as
           | string
           | undefined,
@@ -431,7 +427,6 @@ export function AddRequestDialog({
       ...prev,
       {
         id: newId,
-        custom_request_date: currentRequest?.request_date || '',
         payment_method_id: undefined,
         category: '' as PaymentItemCategory,
         supplier_id: '',
@@ -478,7 +473,6 @@ export function AddRequestDialog({
           subtotal: item.unit_price * item.quantity,
           sort_order: localItems.indexOf(item) + 1,
           payment_method_id: item.payment_method_id || null,
-          custom_request_date: item.custom_request_date || null,
           advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
           item_number: `${currentRequest.code}-${dbEditableItems.length + idx + 1}`,
@@ -497,7 +491,6 @@ export function AddRequestDialog({
           quantity: item.quantity,
           subtotal: item.unit_price * item.quantity,
           payment_method_id: item.payment_method_id || null,
-          custom_request_date: item.custom_request_date || null,
           advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
         }
@@ -891,7 +884,6 @@ export function AddRequestDialog({
             .filter(item => selectedRequestItems[item.id]?.selected)
             .map(item => ({
               id: Math.random().toString(36).substr(2, 9),
-              custom_request_date: getTodayString(),
               payment_method_id: undefined,
               category: item.category as PaymentItemCategory,
               supplier_id: item.supplierId,
