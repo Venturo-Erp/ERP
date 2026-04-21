@@ -10,24 +10,26 @@ import { resetEmployeePasswordSchema } from '@/lib/validations/api-schemas'
 
 /**
  * 檢查員工是否為管理員或超級管理員
+ * role_id 來源：top-level `role_id` 優先、fallback `job_info.role_id`（跟 validate-login 一致）
  */
 async function checkIsAdmin(employeeId: string): Promise<boolean> {
   const adminClient = getSupabaseAdminClient()
   const { data: employee, error } = await adminClient
     .from('employees')
-    .select('job_info')
+    .select('role_id, job_info')
     .eq('id', employeeId)
     .single()
 
   if (error || !employee) return false
 
-  const jobInfo = employee.job_info as { role_id?: string } | null
-  if (!jobInfo?.role_id) return false
+  const e = employee as { role_id?: string | null; job_info?: { role_id?: string } | null }
+  const roleId = e.role_id || e.job_info?.role_id
+  if (!roleId) return false
 
   const { data: role } = await adminClient
     .from('workspace_roles')
     .select('is_admin')
-    .eq('id', jobInfo.role_id)
+    .eq('id', roleId)
     .single()
 
   return role?.is_admin ?? false
