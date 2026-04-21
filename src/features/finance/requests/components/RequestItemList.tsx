@@ -228,8 +228,8 @@ export function EditableRequestItemList({
       width: '110px',
       render: ({ row, onUpdate }) => (
         <DatePicker
-          value={row.request_date || ''}
-          onChange={date => onUpdate({ request_date: date })}
+          value={row.custom_request_date || ''}
+          onChange={date => onUpdate({ custom_request_date: date })}
           placeholder="選擇日期"
           disabled={disabled}
           hideYear

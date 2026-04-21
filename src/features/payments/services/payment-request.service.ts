@@ -164,8 +164,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
       sort_order: itemData.sort_order,
       tour_request_id: itemData.tour_request_id || null, // 關聯需求單
       payment_method_id: itemData.payment_method_id || null,
-      custom_request_date:
-        ((itemData as Record<string, unknown>).request_date as string | null) || null,
+      custom_request_date: itemData.custom_request_date || null,
       advanced_by: ((itemData as Record<string, unknown>).advanced_by as string) || null,
       advanced_by_name: ((itemData as Record<string, unknown>).advanced_by_name as string) || null,
       // workspace_id auto-set by DB trigger
@@ -240,8 +239,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
         sort_order: itemData.sort_order,
         tour_request_id: itemData.tour_request_id || null,
         payment_method_id: itemData.payment_method_id || null,
-        custom_request_date:
-          ((itemData as Record<string, unknown>).request_date as string | null) || null,
+        custom_request_date: itemData.custom_request_date || null,
         created_at: now,
         updated_at: now,
       }
@@ -319,10 +317,9 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     if (itemData.sort_order !== undefined) dbUpdate.sort_order = itemData.sort_order
     if (itemData.payment_method_id !== undefined)
       dbUpdate.payment_method_id = itemData.payment_method_id || null
-    // UI request_date → DB custom_request_date
-    const uiRequestDate = (itemData as unknown as Record<string, unknown>).request_date
-    if (uiRequestDate !== undefined) dbUpdate.custom_request_date = (uiRequestDate as string) || null
-    // unit_price → unitprice (DB column name)
+    if (itemData.custom_request_date !== undefined)
+      dbUpdate.custom_request_date = itemData.custom_request_date || null
+    // unit_price → unitprice (JS camelCase 慣例 vs DB 原始名、保留 mapping)
     if (itemData.unit_price !== undefined) dbUpdate.unitprice = itemData.unit_price
 
     // 直接使用 Supabase 更新項目

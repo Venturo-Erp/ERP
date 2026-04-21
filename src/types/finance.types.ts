@@ -104,6 +104,7 @@ export interface PaymentRequestItem {
   accounting_subject_id?: string | null // 會計科目 ID（關聯 accounting_subjects）
   accounting_subject_name?: string | null // 會計科目名稱（顯示用）
   payment_method_id?: string | null // 付款方式 ID（關聯 payment_methods.id）
+  custom_request_date?: string | null // 項目獨立請款日期（對應 DB payment_request_items.custom_request_date）
   created_at: string
   updated_at: string
 }
