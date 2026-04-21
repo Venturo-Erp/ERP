@@ -18,7 +18,6 @@ import type { Tour } from '@/stores/types'
 import { useToursForm } from '../hooks/useToursForm'
 import { TourFilters } from './TourFilters'
 import { TourTable } from './TourTable'
-import { TablePagination } from '@/components/ui/enhanced-table'
 import { TourFormShell } from './TourFormShell'
 import { DeleteConfirmDialog } from './DeleteConfirmDialog'
 import { ArchiveReasonDialog } from './ArchiveReasonDialog'
@@ -93,9 +92,7 @@ export const ToursPage: React.FC = () => {
   const {
     filteredTours,
     loading,
-    currentPage,
     setCurrentPage,
-    totalCount,
     activeStatusTab,
     setActiveStatusTab,
     searchQuery,
@@ -104,10 +101,6 @@ export const ToursPage: React.FC = () => {
     actions,
     handleSortChange,
   } = useToursPage()
-
-  const pageSize = 20
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
-  const startIndex = (currentPage - 1) * pageSize
 
   // Local/DMC：查詢收到的委託數量
   useEffect(() => {
@@ -376,17 +369,6 @@ export const ToursPage: React.FC = () => {
             onConvertTour={handleConvertTour}
           />
         </div>
-        <TablePagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          pageSize={pageSize}
-          startIndex={startIndex}
-          totalItems={totalCount}
-          onPageChange={setCurrentPage}
-          onPageSizeChange={() => {
-            /* pageSize fixed at 20 for server-side hook; future: lift pageSize into hook */
-          }}
-        />
       </div>
 
       {/* TourForm only for create mode */}

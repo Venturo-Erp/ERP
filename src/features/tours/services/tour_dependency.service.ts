@@ -62,9 +62,39 @@ export async function checkTourPaidOrders(
 
 /**
  * 刪除旅遊團的空訂單（沒有團員的）
+ *
+ * 注意：Wave 6 Batch 3 把 order_members.order_id 改 RESTRICT、
+ * 所以這裡必須真的 filter「沒 members 的 order」、不能 blind delete。
  */
 export async function deleteTourEmptyOrders(tourId: string): Promise<void> {
-  const { error } = await supabase.from('orders').delete().eq('tour_id', tourId)
+  // 1. 查該團所有 orders
+  const { data: allOrders, error: queryError } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('tour_id', tourId)
+  if (queryError) {
+    logger.error('查詢旅遊團訂單失敗:', queryError)
+    throw queryError
+  }
+  const orderIds = (allOrders ?? []).map(o => o.id)
+  if (orderIds.length === 0) return
+
+  // 2. 查哪些 order 有 members
+  const { data: membersData, error: memberError } = await supabase
+    .from('order_members')
+    .select('order_id')
+    .in('order_id', orderIds)
+  if (memberError) {
+    logger.error('查詢團員失敗:', memberError)
+    throw memberError
+  }
+  const ordersWithMembers = new Set((membersData ?? []).map(m => m.order_id as string))
+  const emptyOrderIds = orderIds.filter(id => !ordersWithMembers.has(id))
+
+  if (emptyOrderIds.length === 0) return
+
+  // 3. 只刪空訂單
+  const { error } = await supabase.from('orders').delete().in('id', emptyOrderIds)
   if (error) {
     logger.error('刪除空訂單失敗:', error)
     throw new Error(TOUR_DEPENDENCY_LABELS.DELETE_EMPTY_ORDER_FAILED(error.message))
