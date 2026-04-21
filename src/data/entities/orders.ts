@@ -18,7 +18,7 @@ import type { Order } from '@/stores/types'
 export const orderEntity = createEntityHook<Order>('orders', {
   list: {
     select:
-      'id,code,order_number,tour_id,tour_name,contact_person,contact_phone,contact_email,customer_id,sales_person,assistant,status,payment_status,paid_amount,remaining_amount,total_amount,member_count,adult_count,child_count,infant_count,total_people,is_active,workspace_id,created_at,created_by,updated_at,updated_by',
+      'id,code,order_number,tour_id,tour_name,contact_person,contact_phone,contact_email,customer_id,sales_person,assistant,status,payment_status,paid_amount,remaining_amount,total_amount,member_count,adult_count,is_active,workspace_id,created_at,created_by,updated_at,updated_by',
     orderBy: {
       column: 'created_at',
       ascending: false,
