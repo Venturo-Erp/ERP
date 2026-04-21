@@ -499,7 +499,8 @@ CREATE TABLE public.example (
 - [ ] 有 created_at, updated_at
 - [ ] RLS 政策正確設定
 - [ ] 加入 WORKSPACE_SCOPED_TABLES（如果需要）
-- [ ] **審計欄位 FK 正確**（見下節）
+- [ ] **審計欄位 FK 正確**（見第八節）
+- [ ] **編號 / 識別碼欄位 UNIQUE 含 `workspace_id`**（見第九節）
 
 ---
 
@@ -580,6 +581,57 @@ return {
 }
 ```
 所以整個 front-end `currentUser?.id` 永遠是 `employees.id`。跟 Supabase Auth 的 `auth.users.id` 是不同 uuid。
+
+---
+
+## 九、多租戶表編號 UNIQUE 規範
+
+> 起源：2026-04-21 migration `20260421120000_tenant_scoped_unique_codes.sql`。
+> 事件：御風租戶建不出當日第一張出納單、撞角落租戶的 `DO260423-001`。13 張多租戶表的單欄全域 UNIQUE 全部踩到同一個反模式。
+
+### 9.1 鐵律
+
+**有 `workspace_id` 的表、編號 / 識別碼欄位的 UNIQUE 必須含 `workspace_id`**：
+
+```sql
+-- ❌ 錯：全域 UNIQUE、新租戶會撞到別家
+CREATE TABLE disbursement_orders (
+  code TEXT UNIQUE,     -- 禁止
+  workspace_id UUID NOT NULL,
+  ...
+);
+
+-- ✅ 對：tenant-scoped UNIQUE、每家租戶獨立編號空間
+CREATE TABLE disbursement_orders (
+  code TEXT NOT NULL,
+  workspace_id UUID NOT NULL,
+  ...
+  UNIQUE (workspace_id, code)
+);
+```
+
+### 9.2 為什麼
+
+- **可用性**：客戶端 SELECT 被 RLS 擋 → 看到 0 筆 → 算 nextNum=1 → INSERT 撞別家 `-001` → 23505 炸。retry 沒用（每次都算出同編號）
+- **資訊洩漏**：全域 UNIQUE 下、租戶可以用 INSERT 探測「別家今天開幾張單」—— 看不到內容但看得到**數量**，對競爭對手是營運情報
+
+### 9.3 例外
+
+全域 UNIQUE **只有**下列情境合理：
+- 外部系統給的識別碼、全球唯一（LINE user_id、eSIM 序號、RFC 5322 Message-ID 等）
+- 一個 workspace 一份的設定表（UNIQUE 就是 `workspace_id` 本身）
+- 共用資料表（無 workspace_id，如 `ref_cities`、`ref_destinations`）
+
+### 9.4 公開 URL 例外情境
+
+如果 `code` 被公開 URL 當全域 key 查詢（無 workspace 參數），改 tenant-scoped 會炸短網址。此類表需先決 URL 設計（短 UUID vs 路徑加租戶識別），**不該保留全域 UNIQUE 當作「設計取捨」**。
+
+目前已知（待 Batch 2 處理）：`tours.code`、`tour_requests.code`、`contracts.code`
+
+### 9.5 受影響的 migration 歷史
+
+- 2026-04-21：13 張表從全域 UNIQUE 改 tenant-scoped（`20260421120000_tenant_scoped_unique_codes.sql`）
+- 新增表時、CI 應擋住違反 9.1 的 migration（TODO：寫 `tests/e2e/db-schema-invariants.spec.ts` 守門）
 
 ---
 
