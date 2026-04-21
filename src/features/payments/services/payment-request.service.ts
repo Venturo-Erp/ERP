@@ -164,6 +164,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
       sort_order: itemData.sort_order,
       tour_request_id: itemData.tour_request_id || null, // 關聯需求單
       payment_method_id: itemData.payment_method_id || null,
+      custom_request_date: itemData.custom_request_date || null,
       advanced_by: ((itemData as Record<string, unknown>).advanced_by as string) || null,
       advanced_by_name: ((itemData as Record<string, unknown>).advanced_by_name as string) || null,
       // workspace_id auto-set by DB trigger
@@ -238,6 +239,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
         sort_order: itemData.sort_order,
         tour_request_id: itemData.tour_request_id || null,
         payment_method_id: itemData.payment_method_id || null,
+        custom_request_date: itemData.custom_request_date || null,
         created_at: now,
         updated_at: now,
       }
@@ -315,8 +317,8 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     if (itemData.sort_order !== undefined) dbUpdate.sort_order = itemData.sort_order
     if (itemData.payment_method_id !== undefined)
       dbUpdate.payment_method_id = itemData.payment_method_id || null
-    // 注意：custom_request_date 已廢止（請款日期統一在 payment_requests.request_date 主表層）、
-    //       不再接收 item 層的日期輸入
+    if (itemData.custom_request_date !== undefined)
+      dbUpdate.custom_request_date = itemData.custom_request_date || null
     // unit_price → unitprice (JS camelCase 慣例 vs DB 原始名、保留 mapping)
     if (itemData.unit_price !== undefined) dbUpdate.unitprice = itemData.unit_price
 

@@ -360,6 +360,10 @@ export function AddRequestDialog({
       .filter(item => item.request_id === currentRequestId)
       .map(item => ({
         id: item.id,
+        custom_request_date:
+          ((item as unknown as Record<string, unknown>).custom_request_date as string) ||
+          currentRequest?.request_date ||
+          '',
         payment_method_id: (item as unknown as Record<string, unknown>).payment_method_id as
           | string
           | undefined,
@@ -427,6 +431,7 @@ export function AddRequestDialog({
       ...prev,
       {
         id: newId,
+        custom_request_date: currentRequest?.request_date || '',
         payment_method_id: undefined,
         category: '' as PaymentItemCategory,
         supplier_id: '',
@@ -473,6 +478,7 @@ export function AddRequestDialog({
           subtotal: item.unit_price * item.quantity,
           sort_order: localItems.indexOf(item) + 1,
           payment_method_id: item.payment_method_id || null,
+          custom_request_date: item.custom_request_date || null,
           advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
           item_number: `${currentRequest.code}-${dbEditableItems.length + idx + 1}`,
@@ -491,6 +497,7 @@ export function AddRequestDialog({
           quantity: item.quantity,
           subtotal: item.unit_price * item.quantity,
           payment_method_id: item.payment_method_id || null,
+          custom_request_date: item.custom_request_date || null,
           advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
         }
@@ -884,6 +891,7 @@ export function AddRequestDialog({
             .filter(item => selectedRequestItems[item.id]?.selected)
             .map(item => ({
               id: Math.random().toString(36).substr(2, 9),
+              custom_request_date: getTodayString(),
               payment_method_id: undefined,
               category: item.category as PaymentItemCategory,
               supplier_id: item.supplierId,
@@ -895,14 +903,39 @@ export function AddRequestDialog({
             }))
         }
 
-        await createRequest(
-          formData,
-          itemsToSubmit,
-          selectedTour.name || '',
-          selectedTour.code || '',
-          selectedOrder?.order_number ?? undefined,
-          currentUser?.display_name || currentUser?.chinese_name || ''
-        )
+        // 按 item.custom_request_date 分組、不同日期的 items 各自建一張請款單
+        // （一張請款單 = 一個付款日期；用戶在一個 Dialog 輸入多個日期、系統自動拆多張）
+        const groups = new Map<string, RequestItem[]>()
+        for (const it of itemsToSubmit) {
+          const d = it.custom_request_date || formData.request_date
+          if (!groups.has(d)) groups.set(d, [])
+          groups.get(d)!.push(it)
+        }
+
+        // 預先估算起始編號（避免 loop 中 SWR 未 refresh、code 重複）
+        const tourCode = selectedTour.code || ''
+        const existingCount = payment_requests.filter(
+          r => r.tour_code === tourCode || r.code?.startsWith(`${tourCode}-I`)
+        ).length
+
+        let offset = 0
+        for (const [groupDate, groupItems] of groups) {
+          offset++
+          const code = `${tourCode}-I${String(existingCount + offset).padStart(2, '0')}`
+          await createRequest(
+            { ...formData, request_date: groupDate },
+            groupItems,
+            selectedTour.name || '',
+            tourCode,
+            selectedOrder?.order_number ?? undefined,
+            currentUser?.display_name || currentUser?.chinese_name || '',
+            code
+          )
+        }
+
+        if (groups.size > 1) {
+          await alert(`已依日期自動拆分為 ${groups.size} 張請款單`, 'success')
+        }
         handleCancel()
         onSuccess?.()
       }

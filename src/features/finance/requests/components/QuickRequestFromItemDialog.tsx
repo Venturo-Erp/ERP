@@ -117,6 +117,7 @@ export function QuickRequestFromItemDialog({
         [
           {
             id: Math.random().toString(36).substr(2, 9),
+            custom_request_date: requestDate,
             payment_method_id: undefined,
             category: item.category as PaymentItemCategory,
             supplier_id: item.supplierId,

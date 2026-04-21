@@ -50,7 +50,8 @@ export function useRequestOperations() {
       tourName: string,
       tourCode: string,
       orderNumber?: string,
-      createdByName?: string // 請款人姓名
+      createdByName?: string, // 請款人姓名
+      codeOverride?: string // 外部預先產好 code（用於 group by 日期拆多張時避免重複編號）
     ) => {
       if (!items || items.length === 0) return null
       if (!workspaceId) throw new Error(REQUEST_OPERATIONS_LABELS.CANNOT_GET_WORKSPACE)
@@ -65,7 +66,8 @@ export function useRequestOperations() {
         }
 
         const expenseType = formData.expense_type as CompanyExpenseType
-        const requestCode = generateCompanyRequestCode(expenseType, formData.request_date)
+        const requestCode =
+          codeOverride || generateCompanyRequestCode(expenseType, formData.request_date)
         const expenseTypeName = EXPENSE_TYPE_CONFIG[expenseType]?.name || expenseType
 
         // Create company payment request
@@ -114,8 +116,8 @@ export function useRequestOperations() {
         // 團體請款
         if (!formData.tour_id) return null
 
-        // 生成請款單編號：團號-I01
-        const requestCode = generateRequestCode(tourCode)
+        // 生成請款單編號：團號-I01（或使用外部 override）
+        const requestCode = codeOverride || generateRequestCode(tourCode)
 
         // Create payment request (明確傳入 workspace_id)
         const request = await createPaymentRequest({
