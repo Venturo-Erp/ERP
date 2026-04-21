@@ -1,6 +1,5 @@
 'use client'
 
-import { getTodayString } from '@/lib/utils/format-date'
 
 import React, { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
@@ -256,7 +255,6 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
                   }
                 })
               }}
-              min={getTodayString()}
               className="mt-1"
               required
             />
@@ -270,7 +268,7 @@ export function TourBasicInfo({ newTour, setNewTour }: TourBasicInfoProps) {
               onChange={return_date => {
                 setNewTour(prev => ({ ...prev, return_date }))
               }}
-              min={newTour.departure_date || getTodayString()}
+              min={newTour.departure_date}
               defaultMonth={newTour.departure_date}
               className="mt-1"
               required
