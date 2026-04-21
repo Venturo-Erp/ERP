@@ -322,7 +322,12 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                     toast({ title: '找不到此租戶的管理員', variant: 'destructive' })
                     return
                   }
-                  const defaultPw = workspace?.default_password || '0000'
+                  // 預設密碼至少 8 字元（API 驗證最低長度）
+                  // 若 workspace 已設 default_password 且 >= 8 字元、用它；否則用 `{code}0000`
+                  const defaultPw =
+                    workspace?.default_password && workspace.default_password.length >= 8
+                      ? workspace.default_password
+                      : `${workspace?.code || 'TENANT'}0000`
                   try {
                     const res = await fetch('/api/auth/reset-employee-password', {
                       method: 'POST',
