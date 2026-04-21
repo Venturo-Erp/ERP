@@ -35,7 +35,7 @@ function getNextThursday(): Date {
 
 // 生成出納單號：DOYYMMDD-NNN（根據出帳日期，流水號從 001 開始）
 async function generateDisbursementNumber(
-  existingOrders: DisbursementOrder[],
+  _existingOrders: DisbursementOrder[],
   disbursementDate?: string
 ): Promise<string> {
   const date = disbursementDate ? new Date(disbursementDate) : new Date()
@@ -44,11 +44,16 @@ async function generateDisbursementNumber(
   const dd = String(date.getDate()).padStart(2, '0')
   const prefix = `DO${yy}${mm}${dd}`
 
-  // 找出同一出帳日期的既有出納單，取最大流水號 +1
-  const sameDayOrders = existingOrders.filter(o => o.order_number?.startsWith(prefix))
+  // 直接查 DB 取當天最大流水號、避免 SWR 快取 stale 造成 unique 撞號
+  const { data, error } = await supabase
+    .from('disbursement_orders')
+    .select('order_number')
+    .like('order_number', `${prefix}-%`)
+  if (error) throw error
+
   let nextNum = 1
-  for (const order of sameDayOrders) {
-    const match = order.order_number?.match(/-(\d+)$/)
+  for (const row of data ?? []) {
+    const match = (row.order_number as string | null)?.match(/-(\d+)$/)
     if (match) {
       const num = parseInt(match[1], 10)
       if (num >= nextNum) nextNum = num + 1
