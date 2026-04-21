@@ -45,23 +45,24 @@ async function generateDisbursementNumber(
   const prefix = `DO${yy}${mm}${dd}`
 
   // 直接查 DB 取當天最大流水號、避免 SWR 快取 stale 造成 unique 撞號
-  // unique constraint 在 `code` 欄位（disbursement_orders_code_key）、所以 code / order_number 兩者都掃、取 max
-  const { data, error } = await supabase
-    .from('disbursement_orders')
-    .select('code, order_number')
-    .or(`code.like.${prefix}-%,order_number.like.${prefix}-%`)
-  if (error) throw error
+  // unique constraint 在 `code`、所以只查 code（先前用 .or() 在 PostgREST 的 `%` wildcard 可能沒正確轉譯、回空陣列、nextNum 永遠 1 → 撞號）
+  const [codeRes, orderRes] = await Promise.all([
+    supabase.from('disbursement_orders').select('code').like('code', `${prefix}-%`),
+    supabase.from('disbursement_orders').select('order_number').like('order_number', `${prefix}-%`),
+  ])
+  if (codeRes.error) throw codeRes.error
+  if (orderRes.error) throw orderRes.error
 
   let nextNum = 1
-  for (const row of data ?? []) {
-    for (const value of [row.code, row.order_number]) {
-      const match = (value as string | null)?.match(/-(\d+)$/)
-      if (match) {
-        const num = parseInt(match[1], 10)
-        if (num >= nextNum) nextNum = num + 1
-      }
+  const extractNum = (value: string | null | undefined) => {
+    const match = value?.match(/-(\d+)$/)
+    if (match) {
+      const num = parseInt(match[1], 10)
+      if (num >= nextNum) nextNum = num + 1
     }
   }
+  for (const row of codeRes.data ?? []) extractNum(row.code as string | null)
+  for (const row of orderRes.data ?? []) extractNum(row.order_number as string | null)
 
   return `${prefix}-${String(nextNum).padStart(3, '0')}`
 }
