@@ -39,6 +39,8 @@ interface EditableRequestItemListProps {
   disabled?: boolean
   paymentMethods?: Array<{ id: string; name: string }>
   onTransfer?: () => void
+  /** 隱藏 item 級日期欄（編輯模式用、SSOT：只有 header.request_date 才是真相）*/
+  hideDateColumn?: boolean
 }
 
 /**
@@ -207,6 +209,7 @@ export function EditableRequestItemList({
   disabled = false,
   paymentMethods = [],
   onTransfer,
+  hideDateColumn = false,
 }: EditableRequestItemListProps) {
   const total_amount = items.reduce((sum, item) => sum + item.unit_price * item.quantity, 0)
 
@@ -417,11 +420,14 @@ export function EditableRequestItemList({
     },
   ]
 
+  // SSOT：編輯模式下隱藏 item 級日期欄、header.request_date 才是唯一真相
+  const visibleColumns = hideDateColumn ? columns.filter(c => c.key !== 'date') : columns
+
   return (
     <InlineEditTable<RequestItem>
       title={REQUEST_ITEM_LIST_LABELS.LABEL_475}
       rows={items}
-      columns={columns}
+      columns={visibleColumns}
       onUpdate={(index, patch) => updateItem(items[index].id, patch)}
       onAdd={disabled ? undefined : addNewEmptyItem}
       onRemove={disabled ? undefined : index => removeItem(items[index].id)}

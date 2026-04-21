@@ -45,18 +45,21 @@ async function generateDisbursementNumber(
   const prefix = `DO${yy}${mm}${dd}`
 
   // 直接查 DB 取當天最大流水號、避免 SWR 快取 stale 造成 unique 撞號
+  // unique constraint 在 `code` 欄位（disbursement_orders_code_key）、所以 code / order_number 兩者都掃、取 max
   const { data, error } = await supabase
     .from('disbursement_orders')
-    .select('order_number')
-    .like('order_number', `${prefix}-%`)
+    .select('code, order_number')
+    .or(`code.like.${prefix}-%,order_number.like.${prefix}-%`)
   if (error) throw error
 
   let nextNum = 1
   for (const row of data ?? []) {
-    const match = (row.order_number as string | null)?.match(/-(\d+)$/)
-    if (match) {
-      const num = parseInt(match[1], 10)
-      if (num >= nextNum) nextNum = num + 1
+    for (const value of [row.code, row.order_number]) {
+      const match = (value as string | null)?.match(/-(\d+)$/)
+      if (match) {
+        const num = parseInt(match[1], 10)
+        if (num >= nextNum) nextNum = num + 1
+      }
     }
   }
 
@@ -172,30 +175,58 @@ export function useCreateDisbursement({
 
     setIsSubmitting(true)
     try {
-      // 生成出納單號
-      const orderNumber = await generateDisbursementNumber(disbursement_orders, disbursementDate)
+      // 根治 race condition：client 生號 + insert 兩步中間、別人可能插隊
+      // 做法：遇 23505 重複鍵就重新生號重試、最多 5 次
+      // 正常情況第 1 次就成功、有並發才會重試、重試成本低
+      const MAX_RETRIES = 5
+      let data: { id: string; code?: string } | null = null
+      let orderNumber = ''
+      for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+        orderNumber = await generateDisbursementNumber(disbursement_orders, disbursementDate)
 
-      // 直接使用 Supabase 建立出納單（繞過 store 的 workspace_id 檢查）
+        const { data: inserted, error } = await dynamicFrom('disbursement_orders')
+          .insert({
+            id: crypto.randomUUID(),
+            code: orderNumber,
+            order_number: orderNumber,
+            disbursement_date: disbursementDate,
+            payment_request_ids: selectedRequestIds,
+            amount: selectedAmount,
+            status: 'pending',
+            workspace_id: user?.workspace_id || null,
+            created_by: user?.id || null,
+          })
+          .select()
+          .single()
 
-      const { data, error } = await dynamicFrom('disbursement_orders')
-        .insert({
-          id: crypto.randomUUID(),
-          code: orderNumber,
-          order_number: orderNumber,
-          disbursement_date: disbursementDate,
-          payment_request_ids: selectedRequestIds,
-          amount: selectedAmount,
-          status: 'pending',
-          workspace_id: user?.workspace_id || null,
-          created_by: user?.id || null,
-        })
-        .select()
-        .single()
+        if (!error) {
+          data = inserted as { id: string; code?: string }
+          break
+        }
 
-      if (error) {
-        logger.error(DISBURSEMENT_LABELS.Supabase_錯誤, error)
-        throw new Error(error.message)
+        // 撞號 → 重新生號重試
+        if (error.code === '23505' && attempt < MAX_RETRIES - 1) {
+          logger.warn(
+            `[出納單] 編號 ${orderNumber} 撞號、重試 ${attempt + 1}/${MAX_RETRIES}`,
+            error.message
+          )
+          continue
+        }
+
+        // 其他錯 or 撞號耗盡重試
+        logger.error(
+          DISBURSEMENT_LABELS.Supabase_錯誤,
+          JSON.stringify(error),
+          error.message,
+          error.code
+        )
+        if (error.code === '23505') {
+          throw new Error(`出納單號 ${orderNumber} 連續 ${MAX_RETRIES} 次撞號、請稍後再試`)
+        }
+        throw new Error(error.message || '建立出納單失敗')
       }
+
+      if (!data) throw new Error('建立出納單失敗（未預期）')
 
       // 更新請款單狀態為 confirmed（已加入出納單，尚未出帳）
       const tour_ids_to_recalculate = new Set<string>()

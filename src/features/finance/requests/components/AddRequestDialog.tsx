@@ -478,7 +478,8 @@ export function AddRequestDialog({
           subtotal: item.unit_price * item.quantity,
           sort_order: localItems.indexOf(item) + 1,
           payment_method_id: item.payment_method_id || null,
-          custom_request_date: item.custom_request_date || null,
+          // SSOT：item 不存日期、header.request_date 才是真相
+          custom_request_date: null,
           advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
           item_number: `${currentRequest.code}-${dbEditableItems.length + idx + 1}`,
@@ -497,7 +498,8 @@ export function AddRequestDialog({
           quantity: item.quantity,
           subtotal: item.unit_price * item.quantity,
           payment_method_id: item.payment_method_id || null,
-          custom_request_date: item.custom_request_date || null,
+          // SSOT：item 不存日期、header.request_date 才是真相
+          custom_request_date: null,
           advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
         }
@@ -1096,6 +1098,20 @@ export function AddRequestDialog({
               value="tour"
               className="flex-1 overflow-y-auto pt-4 border-t border-morandi-container/30 space-y-6"
             >
+              {/* 請款日期（header 級、和列表顯示的一致） */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <RequestDateInput
+                  value={formData.request_date}
+                  onChange={(date, isSpecialBilling) =>
+                    setFormData(prev => ({
+                      ...prev,
+                      request_date: date,
+                      is_special_billing: isSpecialBilling,
+                    }))
+                  }
+                />
+              </div>
+
               <EditableRequestItemList
                 items={isEditMode ? localItems : requestItems}
                 suppliers={suppliers}
@@ -1106,6 +1122,7 @@ export function AddRequestDialog({
                 tourId={formData.tour_id || null}
                 disabled={isEditMode && !canEdit}
                 paymentMethods={paymentMethods}
+                hideDateColumn={isEditMode}
                 onTransfer={
                   isEditMode && !canEdit && currentRequest
                     ? () => setCostTransferOpen(true)

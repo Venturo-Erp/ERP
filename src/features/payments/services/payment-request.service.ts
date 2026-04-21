@@ -164,7 +164,9 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
       sort_order: itemData.sort_order,
       tour_request_id: itemData.tour_request_id || null, // 關聯需求單
       payment_method_id: itemData.payment_method_id || null,
-      custom_request_date: itemData.custom_request_date || null,
+      // SSOT：item 不存日期、parent payment_requests.request_date 才是唯一真相
+      // （form 仍可用 custom_request_date 做建立時的多日期分拆、但永遠不落地）
+      custom_request_date: null,
       advanced_by: ((itemData as Record<string, unknown>).advanced_by as string) || null,
       advanced_by_name: ((itemData as Record<string, unknown>).advanced_by_name as string) || null,
       // workspace_id auto-set by DB trigger
@@ -239,7 +241,8 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
         sort_order: itemData.sort_order,
         tour_request_id: itemData.tour_request_id || null,
         payment_method_id: itemData.payment_method_id || null,
-        custom_request_date: itemData.custom_request_date || null,
+        // SSOT：item 不存日期、parent.request_date 才是真相（見 addItem 同欄位說明）
+        custom_request_date: null,
         created_at: now,
         updated_at: now,
       }
@@ -317,8 +320,8 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     if (itemData.sort_order !== undefined) dbUpdate.sort_order = itemData.sort_order
     if (itemData.payment_method_id !== undefined)
       dbUpdate.payment_method_id = itemData.payment_method_id || null
-    if (itemData.custom_request_date !== undefined)
-      dbUpdate.custom_request_date = itemData.custom_request_date || null
+    // SSOT：item 不能改日期、忽略任何 custom_request_date 更新
+    // （想改請款日期請改 parent payment_requests.request_date）
     // unit_price → unitprice (JS camelCase 慣例 vs DB 原始名、保留 mapping)
     if (itemData.unit_price !== undefined) dbUpdate.unitprice = itemData.unit_price
 
