@@ -213,10 +213,13 @@ export function EditableRequestItemList({
   // 會計科目選項
   const { subjects, costOptions } = useAccountingSubjects()
 
-  const supplierOptions = suppliers.map(s => ({
-    value: s.id,
-    label: s.name || REQUEST_DETAIL_DIALOG_LABELS.未命名,
-  }))
+  // 供應商下拉只要供應商、員工走獨立的「代墊人」欄位（line 344）
+  const supplierOptions = suppliers
+    .filter(s => s.type === 'supplier')
+    .map(s => ({
+      value: s.id,
+      label: s.name || REQUEST_DETAIL_DIALOG_LABELS.未命名,
+    }))
 
   // 無 focus 樣式的 input class（使用 globals.css 的 input-no-focus）
   const inputClass = 'input-no-focus w-full h-10 px-2 bg-transparent text-sm'
