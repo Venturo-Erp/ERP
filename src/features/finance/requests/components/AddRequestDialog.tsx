@@ -522,13 +522,18 @@ export function AddRequestDialog({
           .eq('id', item.id)
       }
 
-      // 4. Update request total + payment method
+      // 4. Update request total + payment method + order (edit 模式允許改訂單)
       const newTotal = localItems.reduce((sum, i) => sum + i.unit_price * i.quantity, 0)
+      const editedOrder = formData.order_id
+        ? orders.find(o => o.id === formData.order_id)
+        : undefined
       const { error: amountError } = await supabase
         .from('payment_requests')
         .update({
           amount: newTotal,
           payment_method_id: localPaymentMethodId || null,
+          order_id: formData.order_id || null,
+          order_number: editedOrder?.order_number ?? null,
         })
         .eq('id', currentRequest.id)
       if (amountError) {
@@ -1005,7 +1010,7 @@ export function AddRequestDialog({
                             ? ADD_REQUEST_DIALOG_LABELS.請先選擇旅遊團
                             : BATCH_RECEIPT_DIALOG_LABELS.搜尋訂單
                         }
-                        disabled={isEditMode || !formData.tour_id}
+                        disabled={!formData.tour_id}
                         className="w-[300px]"
                         maxHeight="300px"
                       />

@@ -13,7 +13,7 @@ export const paymentRequestItemEntity = createEntityHook<PaymentRequestItem>(
   {
     list: {
       select:
-        'id,request_id,item_number,category,supplier_id,supplier_name,description,tour_id,tour_request_id,quantity,unitprice,subtotal,payment_method,custom_request_date,sort_order,workspace_id,created_at,created_by,updated_at,updated_by,advanced_by,advanced_by_name',
+        'id,request_id,item_number,category,supplier_id,supplier_name,description,tour_id,tour_request_id,quantity,unitprice,subtotal,payment_method,payment_method_id,custom_request_date,sort_order,workspace_id,created_at,created_by,updated_at,updated_by,advanced_by,advanced_by_name',
       orderBy: { column: 'sort_order', ascending: true },
     },
     slim: {
