@@ -355,6 +355,20 @@ A3 agent 修正：dead UI 實際只 2 個真 dead（`BatchReceiptConfirmDialog` 
 
 ## 🏛️ Post-Launch 資料治理（2026-04-21 討論、需獨立專案）
 
+### [POST-SCHEMA] payment_requests.payment_method_id 缺 FK
+
+**背景**：2026-04-21 查 CNX260524A-I01 bug 時發現、`payment_requests.payment_method_id` 欄位沒有 FK 約束到 `payment_methods(id)`、理論上可以存任何 UUID、連不存在的 payment_method 也能存。
+
+**風險**：資料一致性、孤兒 id（payment_method 被刪後、request 還指到消失的 id）
+
+**修法**（Post-Launch、純 schema）：
+- `ALTER TABLE public.payment_requests ADD CONSTRAINT payment_requests_payment_method_id_fkey FOREIGN KEY (payment_method_id) REFERENCES public.payment_methods(id) ON DELETE SET NULL;`
+- 加之前要先清乾淨：查 payment_method_id NOT IN (select id from payment_methods) 的 row、看要 SET NULL 還是其他處理
+
+**為什麼不現在做**：非緊急、Corner 實際資料沒孤兒（剛查過）、等 retention policy 設計一起做
+
+---
+
 ### [POST-GOV] 資料 Retention Policy 設計
 
 **背景**：Wave 6 B7 一度把 traveler_profiles 整群改 RESTRICT 想擋「真刪客戶」、但 William 指出這只是把問題擋在門口、不是真解決。真正的做法是：

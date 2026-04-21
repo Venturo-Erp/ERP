@@ -1,0 +1,20 @@
+{
+  "employees": [{"code":"CORNER","cnt":"5"},{"code":"JINGYAO","cnt":"1"},{"code":"TESTUX","cnt":"3"},{"code":"YUFEN","cnt":"1"}],
+  "tours": [{"code":"CORNER","cnt":"32"},{"code":"JINGYAO","cnt":"1"},{"code":"TESTUX","cnt":"10"},{"code":"YUFEN","cnt":"2"}],
+  "orders": [{"code":"CORNER","cnt":"20"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"3"},{"code":"YUFEN","cnt":"2"}],
+  "order_members": [{"code":"CORNER","cnt":"107"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"0"},{"code":"YUFEN","cnt":"7"}],
+  "customers": [{"code":"CORNER","cnt":"385"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"0"},{"code":"YUFEN","cnt":"0"}],
+  "itineraries": [{"code":"CORNER","cnt":"21"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"0"},{"code":"YUFEN","cnt":"1"}],
+  "tour_itinerary_items": [{"code":"CORNER","cnt":"347"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"4"},{"code":"YUFEN","cnt":"2"}],
+  "quotes": [{"code":"CORNER","cnt":"50"},{"code":"JINGYAO","cnt":"2"},{"code":"TESTUX","cnt":"0"},{"code":"YUFEN","cnt":"3"}],
+  "payment_requests": [{"code":"CORNER","cnt":"11"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"3"},{"code":"YUFEN","cnt":"0"}],
+  "payment_request_items": [{"code":"CORNER","cnt":"27"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"0"},{"code":"YUFEN","cnt":"0"}],
+  "receipts": [{"code":"CORNER","cnt":"18"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"3"},{"code":"YUFEN","cnt":"0"}],
+  "travel_invoices": [{"code":"CORNER","cnt":"0"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"0"},{"code":"YUFEN","cnt":"0"}],
+  "confirmations": [{"code":"CORNER","cnt":"12"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"0"},{"code":"YUFEN","cnt":"0"}],
+  "files": [{"code":"CORNER","cnt":"1"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"0"},{"code":"YUFEN","cnt":"0"}],
+  "folders": [{"code":"CORNER","cnt":"408"},{"code":"JINGYAO","cnt":"12"},{"code":"TESTUX","cnt":"120"},{"code":"YUFEN","cnt":"24"}],
+  "visas": [{"code":"CORNER","cnt":"0"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"0"},{"code":"YUFEN","cnt":"0"}],
+  "esims": [{"code":"CORNER","cnt":"91"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"0"},{"code":"YUFEN","cnt":"0"}],
+  "suppliers": [{"code":"CORNER","cnt":"13"},{"code":"JINGYAO","cnt":"0"},{"code":"TESTUX","cnt":"0"},{"code":"YUFEN","cnt":"0"}]
+}

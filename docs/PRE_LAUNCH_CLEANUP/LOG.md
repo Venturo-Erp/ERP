@@ -5,6 +5,72 @@
 
 ---
 
+## 2026-04-21 11:05 — Post-deploy bug fixes：orders.ts + payment_request_items schema drift
+
+### 背景
+大 commit 31394bb4 部署後、William 測試新建請款單 `CNX260524A-I01` 立即暴露 3 個 bug：
+1. 選團後下拉看不到訂單
+2. 存檔後自動選第一個訂單但 DB 是 NULL
+3. 付款方式選了、離開再進來空白
+
+### Bug 1：orders.ts list.select stale（已 hotfix 32045c76）
+Wave 5 已 DROP `orders.child_count/infant_count/total_people`、但 `src/data/entities/orders.ts` 的 list.select 還留著、Supabase query 報 "column does not exist"、`useOrders` 回空陣列、`/finance/requests` 選團後 `filteredOrders` 過濾結果為 0。
+
+### Bug 2：payment_request_items 的 payment_method 大漂移（本次完整修復）
+
+**完整 root cause**：
+- **DB column 叫 `payment_method`**（text type、有 DEFAULT `'transfer'::text`）
+- **所有 code 都用 `payment_method_id`**（想存 uuid 指 `payment_methods.id`）
+- `addItem`/`addItems` 根本沒把 `payment_method_id` 放進 insert object
+- → 每次 insert、DB 用 default `'transfer'` 填 `payment_method`、`payment_method_id` 從未寫入
+- → UI 讀 `row.payment_method_id` 永遠 undefined、下拉永遠空白
+- 結果：**27 筆 Corner items 的 payment_method 全部是 'transfer'**（DB default 填的、和用戶選什麼無關）
+
+**修法 C（加新欄位 + backfill）**：
+
+DB（Management API）：
+1. `ALTER payment_request_items ADD COLUMN payment_method_id uuid REFERENCES payment_methods(id) ON DELETE SET NULL`
+2. `ALTER payment_request_items ALTER COLUMN payment_method DROP DEFAULT`（避免未來繼續填 'transfer'）
+3. Backfill：27 筆 `payment_method='transfer'` → `payment_method_id = d6e2b71f-...`（TRANSFER_OUT「匯款」type=payment）
+   - 有 `enforce_payment_request_items_lock` trigger 擋 billed items、用 `SET LOCAL session_replication_role = replica` 繞過
+4. 補 CNX260524A-I01 的 `order_id = 7fc75237-...` / `order_number = 'CNX260524A-O01'`（該團唯一訂單、orders.ts 壞時沒選成功）
+
+Code：
+- `payment-request.service.ts`：addItem / addItems / updateItem 加 `payment_method_id` 欄位映射、select 字串多處加 `payment_method_id`
+- `finance.types.ts` PaymentRequestItem interface 加 `payment_method_id?: string | null`
+- `lib/supabase/types.ts` 手動補 `payment_request_items` 的 Row/Insert/Update 的 `payment_method_id`（沒 full regen types、避免引入其他 drift 的 stale errors）
+
+### 其他發現（但未修、記 Post-Launch）
+- `payment_requests.payment_method_id` **沒 FK 約束**（→ 加進 BACKLOG Post-Launch schema 題）
+- `src/types/database.types.ts` 與 DB 真實 schema 有大量 drift（orders.child_count / tour_requests.supplier_contact / tour_requests.sent_to 等）— regen 會炸出十幾個 stale errors、超出今天 scope
+
+### 為什麼會發生（最重要反省）
+
+**舊 schema + 新 UI 沒同步**。某時期 payment_request_items 欄位 `payment_method` 是存字串 code（'transfer'、'cash'）。後來 UI 改成走 payment_methods 表 + UUID 指向、type interface 也改用 `payment_method_id`、但：
+1. **DB 欄位沒 rename**（還叫 `payment_method`）
+2. **DB DEFAULT 沒移除**（繼續填 'transfer'）
+3. **Service 層 insert / update 沒加 `payment_method_id`** 的 column mapping
+4. **所有 code 無聲失敗**（Supabase 對未知欄位是 silent 丟棄）
+5. **沒自動化檢查** 來抓「code 欄位 vs DB 欄位」的 drift
+
+Wave 0-6 是 DB 結構改動、沒把每個改動的 code 對照查清。orders.ts 的 stale select 也是同類病。
+
+### 驗證
+- BEFORE / AFTER row snapshot：**0 diff**（所有 protected workspace）
+- Type-check：0 錯
+- Playwright smoke + login-api：23/23 (43.8s)
+- 27 筆 payment_method='transfer' 全 backfill 成 d6e2b71f-... UUID
+- CNX260524A-I01 的 order_id / order_number 補齊
+
+### 歸檔
+- SQL：`supabase/migrations/_applied/2026-04-21/bugfix_payment_request_items_payment_method_id.sql`
+- Hotfix commit 32045c76（orders.ts）已在 prod
+
+### 改了 skill 避免重現
+在 `venturo-pre-launch-cleanup` skill 加「Schema-Code 一致性檢查」強制步驟。詳見下一個 LOG entry。
+
+---
+
 ## 2026-04-21 09:54 — Wave 6 Batch 7 回滾 + SSOT 反省 + session 整理
 
 ### 為什麼回滾

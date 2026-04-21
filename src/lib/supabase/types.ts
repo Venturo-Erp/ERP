@@ -9684,6 +9684,7 @@ export type Database = {
           item_number: string | null
           notes: string | null
           payment_method: string | null
+          payment_method_id: string | null
           quantity: number | null
           request_id: string | null
           sort_order: number | null
@@ -9710,6 +9711,7 @@ export type Database = {
           item_number?: string | null
           notes?: string | null
           payment_method?: string | null
+          payment_method_id?: string | null
           quantity?: number | null
           request_id?: string | null
           sort_order?: number | null
@@ -9736,6 +9738,7 @@ export type Database = {
           item_number?: string | null
           notes?: string | null
           payment_method?: string | null
+          payment_method_id?: string | null
           quantity?: number | null
           request_id?: string | null
           sort_order?: number | null

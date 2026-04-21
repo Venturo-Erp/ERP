@@ -75,7 +75,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data, error } = await supabase
       .from('payment_request_items')
       .select(
-        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
+        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
       )
       .order('sort_order', { ascending: true })
       .limit(5000)
@@ -110,7 +110,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data, error } = await supabase
       .from('payment_request_items')
       .select(
-        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
+        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
       )
       .eq('request_id', requestId)
       .order('sort_order', { ascending: true })
@@ -163,6 +163,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
       notes: itemData.notes,
       sort_order: itemData.sort_order,
       tour_request_id: itemData.tour_request_id || null, // 關聯需求單
+      payment_method_id: itemData.payment_method_id || null,
       advanced_by: ((itemData as Record<string, unknown>).advanced_by as string) || null,
       advanced_by_name: ((itemData as Record<string, unknown>).advanced_by_name as string) || null,
       // workspace_id auto-set by DB trigger
@@ -236,6 +237,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
         notes: itemData.notes,
         sort_order: itemData.sort_order,
         tour_request_id: itemData.tour_request_id || null,
+        payment_method_id: itemData.payment_method_id || null,
         created_at: now,
         updated_at: now,
       }
@@ -285,7 +287,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data: existingItem, error: fetchError } = await supabase
       .from('payment_request_items')
       .select(
-        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
+        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
       )
       .eq('id', itemId)
       .single()
@@ -311,6 +313,8 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     if (itemData.quantity !== undefined) dbUpdate.quantity = itemData.quantity
     if (itemData.notes !== undefined) dbUpdate.notes = itemData.notes
     if (itemData.sort_order !== undefined) dbUpdate.sort_order = itemData.sort_order
+    if (itemData.payment_method_id !== undefined)
+      dbUpdate.payment_method_id = itemData.payment_method_id || null
     // unit_price → unitprice (DB column name)
     if (itemData.unit_price !== undefined) dbUpdate.unitprice = itemData.unit_price
 
@@ -407,7 +411,7 @@ class PaymentRequestService extends BaseService<PaymentRequest> {
     const { data, error } = await supabase
       .from('payment_request_items')
       .select(
-        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
+        'id, request_id, description, quantity, unitprice, subtotal, category, tour_id, tour_request_id, supplier_id, supplier_name, sort_order, item_number, notes, payment_method, payment_method_id, advanced_by, advanced_by_name, confirmation_item_id, custom_request_date, workspace_id, created_at, created_by, updated_at, updated_by'
       )
       .eq('request_id', requestId)
       .eq('category', category)

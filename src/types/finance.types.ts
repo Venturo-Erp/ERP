@@ -103,6 +103,7 @@ export interface PaymentRequestItem {
   sort_order: number // 排序
   accounting_subject_id?: string | null // 會計科目 ID（關聯 accounting_subjects）
   accounting_subject_name?: string | null // 會計科目名稱（顯示用）
+  payment_method_id?: string | null // 付款方式 ID（關聯 payment_methods.id）
   created_at: string
   updated_at: string
 }
