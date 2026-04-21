@@ -355,6 +355,27 @@ A3 agent 修正：dead UI 實際只 2 個真 dead（`BatchReceiptConfirmDialog` 
 
 ## 🏛️ Post-Launch 資料治理（2026-04-21 討論、需獨立專案）
 
+### [POST-CODE] Wave 6 RESTRICT parent 的 child cleanup 全掃
+
+**背景**：2026-04-21 Wave 6 把 189 個 CASCADE FK 改 RESTRICT。原本某些 code 依賴 CASCADE 連帶刪、改 RESTRICT 後必須顯式清 children 才能刪 parent。
+
+已處理（用戶撞到才修）：
+- `handleDeleteTour` 漏清 folders / tour_rooms / tour_members 等 16 張配置表（今天補完）
+- `deleteTourEmptyOrders` 函式名說「刪空訂單」但 blind delete 所有訂單（今天補 filter）
+
+**還沒掃的 parent**（類似病可能潛伏）：
+- orders(id) 子表：member_count / custom_cost_values 等
+- quotes(id) 子表
+- customers(id) 子表：assigned_itineraries / customization_requests 等
+- suppliers(id) 子表：cost_templates / folders / price_list 等
+- 所有 Wave 6 Batch 1-9 改的 parent
+
+**要做的**：grep 所有 `.delete().eq('X_id', ...)` 或 `.from('X').delete()`、對照 Wave 6 改的 RESTRICT children、確認該 code 是否有 pre-cleanup。
+
+**優先級**：Post-Launch、用戶撞到才急。不卡上線。
+
+---
+
 ### [POST-SCHEMA] payment_requests.payment_method_id 缺 FK
 
 **背景**：2026-04-21 查 CNX260524A-I01 bug 時發現、`payment_requests.payment_method_id` 欄位沒有 FK 約束到 `payment_methods(id)`、理論上可以存任何 UUID、連不存在的 payment_method 也能存。
