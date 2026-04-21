@@ -16,13 +16,23 @@ export interface TourDependencyCheck {
 
 /**
  * 檢查旅遊團是否有不可刪除的關聯資料
+ *
+ * 業務/財務類子表（有資料 → 擋刪除）：
+ *   - receipts（收款）
+ *   - payment_requests（請款）
+ *   - visas（簽證）
+ *   - travel_invoices（發票）
  */
 export async function checkTourDependencies(tourId: string): Promise<TourDependencyCheck> {
-  // 只檢查請款單和收款單，有財務資料時才阻擋刪除
-  const [receipts, payments] = await Promise.all([
+  const [receipts, payments, visas, invoices] = await Promise.all([
     supabase.from('receipts').select('id', { count: 'exact', head: true }).eq('tour_id', tourId),
     supabase
       .from('payment_requests')
+      .select('id', { count: 'exact', head: true })
+      .eq('tour_id', tourId),
+    supabase.from('visas').select('id', { count: 'exact', head: true }).eq('tour_id', tourId),
+    supabase
+      .from('travel_invoices')
       .select('id', { count: 'exact', head: true })
       .eq('tour_id', tourId),
   ])
@@ -33,8 +43,43 @@ export async function checkTourDependencies(tourId: string): Promise<TourDepende
     blockers.push(TOUR_DEPENDENCY_LABELS.RECEIPTS_COUNT(receipts.count))
   if (payments.count && payments.count > 0)
     blockers.push(TOUR_DEPENDENCY_LABELS.PAYMENTS_COUNT(payments.count))
+  if (visas.count && visas.count > 0) blockers.push(`簽證 ${visas.count} 筆`)
+  if (invoices.count && invoices.count > 0) blockers.push(`發票 ${invoices.count} 張`)
 
   return { blockers, hasBlockers: blockers.length > 0 }
+}
+
+/**
+ * 清除旅遊團的配置類關聯資料（UI 設定、排房/排車、確認單等）
+ *
+ * 注意：Wave 6 Batch 2 把這些 FK 改 RESTRICT、必須在刪 tour 前顯式清掉。
+ * 業務/財務類（receipts/payment_requests/visas/travel_invoices）不在這、
+ * 有資料時 checkTourDependencies 會擋、不會走到這一步。
+ */
+export async function deleteTourConfigurationData(tourId: string): Promise<void> {
+  const results = await Promise.all([
+    supabase.from('designer_drafts').delete().eq('tour_id', tourId),
+    supabase.from('folders').delete().eq('tour_id', tourId),
+    supabase.from('members').delete().eq('tour_id', tourId),
+    supabase.from('tour_addons').delete().eq('tour_id', tourId),
+    supabase.from('tour_bonus_settings').delete().eq('tour_id', tourId),
+    supabase.from('tour_custom_cost_fields').delete().eq('tour_id', tourId),
+    supabase.from('tour_departure_data').delete().eq('tour_id', tourId),
+    supabase.from('tour_documents').delete().eq('tour_id', tourId),
+    supabase.from('tour_itinerary_days').delete().eq('tour_id', tourId),
+    supabase.from('tour_meal_settings').delete().eq('tour_id', tourId),
+    supabase.from('tour_member_fields').delete().eq('tour_id', tourId),
+    supabase.from('tour_members').delete().eq('tour_id', tourId),
+    supabase.from('tour_role_assignments').delete().eq('tour_id', tourId),
+    supabase.from('tour_rooms').delete().eq('tour_id', tourId),
+    supabase.from('tour_tables').delete().eq('tour_id', tourId),
+    supabase.from('tour_vehicles').delete().eq('tour_id', tourId),
+  ])
+  const failed = results.find(r => r.error)
+  if (failed?.error) {
+    logger.error('清除旅遊團配置資料失敗:', failed.error)
+    throw new Error(`清除旅遊團配置資料失敗：${failed.error.message}`)
+  }
 }
 
 /**

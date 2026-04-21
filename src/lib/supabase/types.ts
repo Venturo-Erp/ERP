@@ -15373,6 +15373,66 @@ export type Database = {
           },
         ]
       }
+      tour_itinerary_days: {
+        Row: {
+          id: string
+          tour_id: string | null
+          itinerary_id: string | null
+          workspace_id: string | null
+          day_number: number | null
+          title: string | null
+          route: string | null
+          note: string | null
+          blocks: Json | null
+          is_same_accommodation: boolean | null
+          breakfast_preset: string | null
+          lunch_preset: string | null
+          dinner_preset: string | null
+          created_at: string | null
+          updated_at: string | null
+          created_by: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          id?: string
+          tour_id?: string | null
+          itinerary_id?: string | null
+          workspace_id?: string | null
+          day_number?: number | null
+          title?: string | null
+          route?: string | null
+          note?: string | null
+          blocks?: Json | null
+          is_same_accommodation?: boolean | null
+          breakfast_preset?: string | null
+          lunch_preset?: string | null
+          dinner_preset?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          id?: string
+          tour_id?: string | null
+          itinerary_id?: string | null
+          workspace_id?: string | null
+          day_number?: number | null
+          title?: string | null
+          route?: string | null
+          note?: string | null
+          blocks?: Json | null
+          is_same_accommodation?: boolean | null
+          breakfast_preset?: string | null
+          lunch_preset?: string | null
+          dinner_preset?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          created_by?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       tour_itinerary_items: {
         Row: {
           actual_expense: number | null

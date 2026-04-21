@@ -16,6 +16,7 @@ import { TOUR_OPERATIONS_LABELS } from '../constants/labels'
 import {
   checkTourDependencies,
   deleteTourEmptyOrders,
+  deleteTourConfigurationData,
   unlinkTourQuotes,
   unlinkTourItineraries,
 } from '@/features/tours/services/tour_dependency.service'
@@ -383,6 +384,9 @@ export function useTourOperations(params: UseTourOperationsParams) {
         // 斷開報價單和行程表連結
         await unlinkTourQuotes(tour.id)
         await unlinkTourItineraries(tour.id)
+
+        // 清除 16 張配置類子表（Wave 6 Batch 2 改 RESTRICT 後必須顯式清）
+        await deleteTourConfigurationData(tour.id)
 
         // 刪除空訂單
         await deleteTourEmptyOrders(tour.id)
