@@ -5,22 +5,18 @@
  *
  * 功能：
  * - 顯示出納單即時預覽
- * - 提供列印和下載 PDF 功能
  * - 使用 iframe 列印確保穩定
  */
 
 import { useCallback, useRef, useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Printer, Download, Loader2 } from 'lucide-react'
+import { Printer, Loader2 } from 'lucide-react'
 import type { DisbursementOrder, PaymentRequest, PaymentRequestItem } from '@/stores/types'
 import { supabase } from '@/lib/supabase/client'
 import { PrintDisbursementPreview } from './PrintDisbursementPreview'
-import { generateDisbursementPDF } from '@/lib/pdf/disbursement-pdf'
-import { alert } from '@/lib/ui/alert-dialog'
 import { logger } from '@/lib/utils/logger'
 import { DISBURSEMENT_LABELS } from '../constants/labels'
-import { updateDisbursementOrder } from '@/data'
 
 interface DisbursementPrintDialogProps {
   order: DisbursementOrder | null
@@ -167,37 +163,6 @@ export function DisbursementPrintDialog({
     }, 100)
   }, [order?.order_number])
 
-  // 下載 PDF 並上傳到 Storage
-  const handleDownloadPDF = useCallback(async () => {
-    if (!order) return
-
-    try {
-      const blob = await generateDisbursementPDF({
-        order,
-        paymentRequests,
-        paymentRequestItems,
-      })
-
-      // 上傳到 Supabase Storage
-      const filename = `disbursement/${order.order_number || order.id}.pdf`
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filename, blob, { contentType: 'application/pdf', upsert: true })
-
-      if (!uploadError && uploadData) {
-        const { data: urlData } = supabase.storage.from('documents').getPublicUrl(filename)
-        if (urlData?.publicUrl) {
-          await updateDisbursementOrder(order.id, { pdf_url: urlData.publicUrl })
-        }
-      } else if (uploadError) {
-        logger.error('Upload disbursement PDF failed:', uploadError)
-      }
-    } catch (error) {
-      logger.error(DISBURSEMENT_LABELS.下載_PDF_失敗_2, error)
-      void alert(DISBURSEMENT_LABELS.下載_PDF_失敗, 'error')
-    }
-  }, [order, paymentRequests, paymentRequestItems])
-
   if (!order) return null
 
   return (
@@ -216,10 +181,6 @@ export function DisbursementPrintDialog({
               <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2">
                 <Printer size={16} />
                 {DISBURSEMENT_LABELS.PRINT}
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="gap-2">
-                <Download size={16} />
-                {DISBURSEMENT_LABELS.LABEL_3604}
               </Button>
             </div>
           </div>

@@ -216,7 +216,8 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
     const ws = useWorkspaceSettings()
     const workspaceName = ws.name || useAuthStore.getState().user?.workspace_name || ''
     const companyFullName = ws.legal_name || workspaceName || ''
-    const logoUrl = ws.logo_url || '/corner-logo.png' // fallback
+    const logoUrl = ws.logo_url
+    const subtitle = ws.subtitle
 
     const processedItems = useMemo(
       () => processItems(paymentRequests, paymentRequestItems),
@@ -279,7 +280,6 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
         ref={ref}
         style={{
           width: '100%',
-          maxWidth: '680px',
           minHeight: '400px',
           padding: '32px 28px',
           margin: '0 auto',
@@ -300,20 +300,22 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
             borderBottom: `1px solid ${COLORS.gold}`,
           }}
         >
-          {/* Logo 區域 - 左上 */}
-          <div
-            style={{
-              position: 'absolute',
-              left: 0,
-              top: 0,
-            }}
-          >
-            <img
-              src={logoUrl}
-              alt={DISBURSEMENT_LABELS.公司Logo_Alt}
-              style={getLogoStyle('print')}
-            />
-          </div>
+          {/* Logo 區域 - 左上（沒設 logo_url 就留空、避免洩漏其他租戶 logo）*/}
+          {logoUrl && (
+            <div
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+              }}
+            >
+              <img
+                src={logoUrl}
+                alt={DISBURSEMENT_LABELS.公司Logo_Alt}
+                style={getLogoStyle('print')}
+              />
+            </div>
+          )}
 
           {/* 標題 - 置中 */}
           <div style={{ textAlign: 'center', padding: '8px 0' }}>
@@ -968,16 +970,18 @@ export const PrintDisbursementPreview = forwardRef<HTMLDivElement, PrintDisburse
             textAlign: 'center',
           }}
         >
-          <p
-            style={{
-              fontSize: '11px',
-              fontStyle: 'italic',
-              color: COLORS.lightGray,
-              margin: '0 0 8px 0',
-            }}
-          >
-            {DISBURSEMENT_LABELS.COMPANY_SLOGAN}
-          </p>
+          {subtitle && (
+            <p
+              style={{
+                fontSize: '11px',
+                fontStyle: 'italic',
+                color: COLORS.lightGray,
+                margin: '0 0 8px 0',
+              }}
+            >
+              {subtitle}
+            </p>
+          )}
           <p
             style={{
               fontSize: '10px',

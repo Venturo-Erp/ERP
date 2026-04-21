@@ -10,8 +10,6 @@ export const DISBURSEMENT_LABELS = {
   找不到請款項目資料: '⚠️ 找不到請款項目資料',
   找不到關聯的請款單資料: '⚠️ 找不到關聯的請款單資料',
   生成_PDF_失敗_請稍後再試: '❌ 生成 PDF 失敗，請稍後再試',
-  下載_PDF_失敗: '下載 PDF 失敗',
-  下載_PDF_失敗_2: '下載 PDF 失敗:',
   全部狀態: '全部狀態',
   公司: '公司',
   出帳日期: '出帳日期',
@@ -109,7 +107,6 @@ export const DISBURSEMENT_LABELS = {
   本週金額: '本週金額',
 
   PRINT: '列印',
-  LABEL_3604: '下載 PDF',
   LOADING_2648: '載入資料中...',
 
   LABEL_3745: '出帳日期 *',
@@ -119,7 +116,6 @@ export const DISBURSEMENT_LABELS = {
   CLEAR: '清除',
   LABEL_6208: '請款編號',
   NOT_FOUND_1858: '沒有符合條件的請款單',
-  COMPANY_SLOGAN: '─ 如果可以，讓我們一起探索世界的每個角落 ─',
   COMPANY_FULL_NAME: '', // 動態從 workspace 讀取
   PRINT_PREVIEW: '列印預覽',
   DISBURSEMENT_TITLE: '出納單',
