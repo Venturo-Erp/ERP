@@ -496,6 +496,7 @@ export function AddRequestDialog({
           quantity: item.quantity,
           subtotal: item.unit_price * item.quantity,
           sort_order: localItems.indexOf(item) + 1,
+          payment_method_id: item.payment_method_id || null,
           advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
           item_number: `${currentRequest.code}-${dbEditableItems.length + idx + 1}`,
@@ -513,6 +514,7 @@ export function AddRequestDialog({
           unitprice: item.unit_price,
           quantity: item.quantity,
           subtotal: item.unit_price * item.quantity,
+          payment_method_id: item.payment_method_id || null,
           advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
         }
@@ -679,11 +681,14 @@ export function AddRequestDialog({
       } else {
         setActiveTab('tour')
       }
-      // Set formData for tour/order selectors
+      // Set formData for tour/order selectors + 保留原請款日期 / 付款方式
+      const editingRecord = editingRequest as unknown as Record<string, string | null | undefined>
       setFormData(prev => ({
         ...prev,
         tour_id: editingRequest.tour_id || '',
-        order_id: (editingRequest as unknown as Record<string, string>).order_id || '',
+        order_id: editingRecord.order_id || '',
+        request_date: editingRequest.request_date || prev.request_date,
+        payment_method_id: editingRecord.payment_method_id || undefined,
       }))
       return
     }
