@@ -22,7 +22,6 @@ export interface Quote {
   id: string
   workspace_id?: string // 工作區 ID
   code?: string // 報價單編號 (Q20250001 或自訂編號如 JP-BASIC)
-  quote_number?: string // 報價單號碼 (QUOTE-2025-0001) - 向下相容
   quote_type: 'standard' | 'quick' // 報價單類型（standard: 團體報價單, quick: 快速報價單）
   name?: string // 團體名稱（標準報價單必填，快速報價單選填）
   destination?: string // 目的地（向後相容）
@@ -37,9 +36,7 @@ export interface Quote {
 
   // 客戶資訊
   customer_name?: string // 客戶名稱
-  contact_person?: string // 聯絡人
   contact_phone?: string // 聯絡電話（標準報價單）
-  contact_email?: string // Email
 
   // 快速報價單專用欄位
   contact_address?: string // 通訊地址（快速報價單用）
@@ -55,10 +52,7 @@ export interface Quote {
   // 需求資訊
   group_size?: number // 團體人數（向下相容：總人數）
   accommodation_days?: number // 住宿天數
-  requirements?: string // 需求說明
-  budget_range?: string // 預算範圍
   valid_until?: string // 報價有效期
-  payment_terms?: string // 付款條件
 
   // 多身份人數統計
   participant_counts?: {

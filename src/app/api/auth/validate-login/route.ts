@@ -70,6 +70,9 @@ export async function POST(request: NextRequest) {
     if (employee.status === 'terminated') {
       return ApiError.unauthorized('此帳號已停用')
     }
+    if (employee.is_active === false) {
+      return ApiError.unauthorized('此帳號已停用')
+    }
 
     // 3.5 檢查帳號鎖定狀態（5 次失敗鎖定 15 分鐘）
     const lockedUntil = (employee as Record<string, unknown>).login_locked_until as string | null

@@ -131,7 +131,7 @@ export function useTodos() {
       const { error } = await supabase.from('todos').insert({
         ...todoWithoutCreator,
         workspace_id: workspace_id!, // 確保有值
-        created_by_legacy: creator,
+        created_by: creator,
       } as never)
 
       if (error) throw error

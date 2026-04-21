@@ -12,10 +12,11 @@ export async function GET(
   const { userId } = await params
   const supabase = await createApiClient()
 
-  // 從 employees.job_info 取得 role_id
+  // 優先讀 top-level role_id（新架構）、fallback 到 job_info.role_id（舊資料）
+  // 與 validate-login 的讀法一致
   const { data: employee, error: employeeError } = await supabase
     .from('employees')
-    .select('job_info')
+    .select('role_id, job_info')
     .eq('id', userId)
     .single()
 
@@ -24,7 +25,8 @@ export async function GET(
   }
 
   const jobInfo = employee.job_info as { role_id?: string } | null
-  const roleId = jobInfo?.role_id
+  const roleId =
+    (employee as Record<string, unknown>).role_id as string | undefined ?? jobInfo?.role_id
 
   if (!roleId) {
     // 沒有指定角色，回傳空

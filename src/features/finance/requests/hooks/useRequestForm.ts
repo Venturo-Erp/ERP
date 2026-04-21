@@ -2,22 +2,9 @@ import { useState, useCallback, useMemo } from 'react'
 import { useToursSlim, useOrders, useSuppliersSlim } from '@/data'
 import { useEligibleEmployees } from '@/data/hooks/useEligibleEmployees'
 import { useAuthStore } from '@/stores'
+import { getTodayString } from '@/lib/utils/format-date'
 import { RequestFormData, RequestItem } from '../types'
 import type { PaymentItemCategory } from '@/stores/types'
-
-// 計算下一個週四（如果今天是週四，跳到下週四）
-function getNextThursdayDate(): string {
-  const today = new Date()
-  const dayOfWeek = today.getDay()
-  let daysUntilThursday = 4 - dayOfWeek
-  if (daysUntilThursday <= 0) daysUntilThursday += 7
-  const nextThursday = new Date(today)
-  nextThursday.setDate(today.getDate() + daysUntilThursday)
-  const year = nextThursday.getFullYear()
-  const month = String(nextThursday.getMonth() + 1).padStart(2, '0')
-  const day = String(nextThursday.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
 
 export function useRequestForm() {
   // 使用 @/data 的 SWR hooks（和 usePaymentForm 一致）
@@ -35,24 +22,17 @@ export function useRequestForm() {
     tour_id: '',
     order_id: '',
     expense_type: '', // 公司請款時使用
-    request_date: (() => {
-      const today = new Date()
-      let d = 4 - today.getDay()
-      if (d <= 0) d += 7
-      const t = new Date(today)
-      t.setDate(today.getDate() + d)
-      return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`
-    })(),
+    request_date: getTodayString(),
     notes: '',
     is_special_billing: false,
-    created_by: currentUser?.id || '',
+    created_by: currentUser?.id || undefined,
     payment_method_id: '', // 付款方式
   })
 
   const [requestItems, setRequestItems] = useState<RequestItem[]>(() => [
     {
       id: Math.random().toString(36).substr(2, 9),
-      request_date: getNextThursdayDate(),
+      request_date: getTodayString(),
       payment_method_id: undefined,
       category: '' as PaymentItemCategory, // 不預設類別，由用戶選擇
       supplier_id: '',
@@ -137,7 +117,7 @@ export function useRequestForm() {
   const addNewEmptyItem = useCallback(() => {
     const newItem: RequestItem = {
       id: Math.random().toString(36).substr(2, 9),
-      request_date: getNextThursdayDate(),
+      request_date: getTodayString(),
       payment_method_id: undefined,
       category: '' as PaymentItemCategory, // 不預設類別，由用戶選擇
       supplier_id: '',
@@ -168,15 +148,15 @@ export function useRequestForm() {
       tour_id: '',
       order_id: '',
       expense_type: '',
-      request_date: getNextThursdayDate(), // ✅ 預設下週四
+      request_date: getTodayString(), // 預設今天
       notes: '',
       is_special_billing: false,
-      created_by: currentUser?.id || '',
+      created_by: currentUser?.id || undefined,
     })
     setRequestItems([
       {
         id: Math.random().toString(36).substr(2, 9),
-        request_date: getNextThursdayDate(),
+        request_date: getTodayString(),
         payment_method_id: undefined,
         category: '' as PaymentItemCategory, // 不預設類別，由用戶選擇
         supplier_id: '',

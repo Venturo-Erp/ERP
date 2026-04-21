@@ -430,7 +430,7 @@ export const PASSPORT_UPLOAD_LABELS = {
 // ============================================================
 export const SIMPLE_ORDER_TABLE_LABELS = {
   DELETE_CONFIRM: (orderNumber: string) =>
-    `確定要刪除訂單「${orderNumber}」嗎？\n\n此操作會影響：\n- 團員名單將被移除\n- 收款記錄將被刪除\n- 旅遊團人數統計將更新\n\n此操作無法復原！`,
+    `確定要刪除訂單「${orderNumber}」嗎？\n\n此操作無法復原。`,
 }
 
 // ============================================================

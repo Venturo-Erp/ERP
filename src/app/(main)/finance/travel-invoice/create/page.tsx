@@ -122,7 +122,6 @@ export default function CreateInvoicePage() {
         tax_type,
         buyerInfo,
         items,
-        created_by: 'current_user',
       })
 
       router.push('/finance/travel-invoice')

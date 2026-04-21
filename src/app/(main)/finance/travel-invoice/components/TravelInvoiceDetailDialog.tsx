@@ -57,7 +57,7 @@ export function TravelInvoiceDetailDialog({
     }
 
     try {
-      await voidInvoice(invoice.id, voidReason, 'current_user')
+      await voidInvoice(invoice.id, voidReason)
       setShowVoidDialog(false)
       setVoidReason('')
     } catch (error) {

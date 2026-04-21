@@ -112,7 +112,7 @@ export function QuickRequestFromItemDialog({
           request_date: requestDate,
           notes: note || `${item.category} - ${item.title}`,
           is_special_billing: false,
-          created_by: user?.id || '',
+          created_by: user?.id || undefined,
         },
         [
           {

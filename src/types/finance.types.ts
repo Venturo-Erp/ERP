@@ -64,6 +64,8 @@ export interface PaymentRequest {
   created_by?: string | null // 請款人 ID
   created_by_name?: string | null // 請款人姓名（快照）
   workspace_id?: string
+  is_deleted?: boolean | null // 軟刪除 flag
+  deleted_at?: string | null // 軟刪除時間（ISO 8601）
   created_at: string
   updated_at: string
 }

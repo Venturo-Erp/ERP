@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores'
 import { deleteOrder } from '@/data'
+import { supabase } from '@/lib/supabase/client'
 import { recalculateParticipants } from '@/features/tours/services/tour-stats.service'
 import { recalculateReceiptStats } from '@/features/finance/payments/services/receipt-core.service'
 import { logger } from '@/lib/utils/logger'
@@ -49,12 +50,45 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
 
   const handleDelete = useCallback(async (order: Order, e: React.MouseEvent) => {
     e.stopPropagation()
+
+    // 檢查財務 / 業務關聯單據是否存在
+    // 團員（order_members）不擋、因為人員身份已在顧客管理、團員記錄可直接刪
+    // 真正要守護的是：請款單 / 收款單 / 需求單 / 確認單
+    const [reqRes, rcptRes, trReqRes, confRes] = await Promise.all([
+      supabase.from('payment_requests').select('id', { count: 'exact', head: true }).eq('order_id', order.id),
+      supabase.from('receipts').select('id', { count: 'exact', head: true }).eq('order_id', order.id),
+      supabase.from('tour_requests').select('id', { count: 'exact', head: true }).eq('order_id', order.id),
+      supabase.from('confirmations').select('id', { count: 'exact', head: true }).eq('order_id', order.id),
+    ])
+
+    const blockers: string[] = []
+    if ((reqRes.count || 0) > 0) blockers.push(`請款單 ${reqRes.count} 張`)
+    if ((rcptRes.count || 0) > 0) blockers.push(`收款單 ${rcptRes.count} 張`)
+    if ((trReqRes.count || 0) > 0) blockers.push(`需求單 ${trReqRes.count} 張`)
+    if ((confRes.count || 0) > 0) blockers.push(`確認單 ${confRes.count} 張`)
+
+    if (blockers.length > 0) {
+      await alert(
+        `此訂單還有關聯單據、無法刪除：\n・${blockers.join('\n・')}\n\n請先處理這些單據再刪訂單。`,
+        'warning'
+      )
+      return
+    }
+
     const confirmed = await confirm(
       SIMPLE_ORDER_TABLE_LABELS.DELETE_CONFIRM(order.order_number || ''),
       { title: COMP_ORDERS_LABELS.刪除訂單, type: 'warning' }
     )
     if (!confirmed) return
+
     try {
+      // 先清團員（避開 order_members RESTRICT FK）
+      const { error: memDelError } = await supabase
+        .from('order_members')
+        .delete()
+        .eq('order_id', order.id)
+      if (memDelError) throw memDelError
+
       const tour_id = order.tour_id
       await deleteOrder(order.id)
       if (tour_id) {
@@ -65,8 +99,17 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
           logger.error('[OrderTable] 重算收入失敗:', err)
         )
       }
-    } catch {
-      await alert(COMP_ORDERS_LABELS.刪除失敗_請稍後再試, 'error')
+    } catch (err) {
+      logger.error('[OrderTable] 刪除訂單失敗:', err)
+      const msg = err instanceof Error ? err.message : ''
+      if (msg.includes('foreign key')) {
+        await alert(
+          '此訂單還有其他關聯資料、無法刪除。請聯繫工程確認。',
+          'error'
+        )
+      } else {
+        await alert(COMP_ORDERS_LABELS.刪除失敗_請稍後再試, 'error')
+      }
     }
   }, [])
 
@@ -75,15 +118,6 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       prev.includes(orderId) ? prev.filter(x => x !== orderId) : [...prev, orderId]
     )
   }, [])
-
-  const formatMoney = (n?: number | null) =>
-    typeof n === 'number' ? `$${n.toLocaleString()}` : '-'
-
-  const statusColor: Record<string, string> = {
-    unpaid: 'text-morandi-red',
-    partial: 'text-morandi-gold',
-    paid: 'text-morandi-green',
-  }
 
   const columns: TableColumn<Order>[] = [
     {
@@ -129,25 +163,6 @@ export const SimpleOrderTable = React.memo(function SimpleOrderTable({
       render: value => (
         <span className="tabular-nums">{typeof value === 'number' ? value : 0}</span>
       ),
-    },
-    {
-      key: 'total_amount',
-      label: '金額',
-      sortable: true,
-      width: '130px',
-      render: (value, row) => {
-        const paid = (row as Order).paid_amount || 0
-        const total = typeof value === 'number' ? value : 0
-        const status = String((row as Order).payment_status || 'unpaid')
-        return (
-          <div className="flex flex-col leading-tight">
-            <span className="tabular-nums font-medium">{formatMoney(total)}</span>
-            <span className={cn('text-[10px] tabular-nums', statusColor[status])}>
-              已收 {formatMoney(paid)}
-            </span>
-          </div>
-        )
-      },
     },
   ]
 

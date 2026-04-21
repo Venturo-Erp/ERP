@@ -175,7 +175,8 @@ export interface Todo {
   column_id?: string | null // 所屬看板欄位 ID
 
   // 人員關係（共享機制）
-  creator: string // 建立者
+  creator: string // 建立者（@deprecated 改用 created_by）
+  created_by?: string | null // 建立者 employee id
   assignee?: string // 被指派者（可選）
   visibility: string[] // 可見人員ID列表 = [creator, assignee]
   is_public?: boolean // 是否公開給全公司（只有建立者+共享者可編輯，其他人只能查看）

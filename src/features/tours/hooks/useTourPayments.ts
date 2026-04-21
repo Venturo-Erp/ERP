@@ -376,7 +376,6 @@ export function useTourPayments({
         items: invoiceItems,
         order_id: invoiceOrderId || undefined,
         tour_id: tour.id,
-        created_by: 'current_user',
       })
       toast({
         title: TOUR_PAYMENTS_LABELS.SUCCESS,

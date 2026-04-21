@@ -2,21 +2,9 @@
 
 import { useMemo, useState, useCallback } from 'react'
 import { Tour, Order } from '@/stores/types'
-import { SimpleOrderTable } from '@/features/orders/components/simple-order-table'
-import { AddReceiptDialog } from '@/features/finance/payments'
-import dynamic from 'next/dynamic'
-
-const AddRequestDialog = dynamic(
-  () =>
-    import('@/features/finance/requests/components/AddRequestDialog').then(m => m.AddRequestDialog),
-  { ssr: false }
-)
-
-import { InvoiceDialog } from '@/features/finance/components/invoice-dialog'
-import { Button } from '@/components/ui/button'
+import { OrderListView } from '@/features/orders/components/OrderListView'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { AddOrderForm, type OrderFormData } from '@/features/orders/components/add-order-form'
-import { OrderEditDialog } from '@/features/orders/components/order-edit-dialog'
 import { createOrder, invalidateOrders } from '@/data'
 import { useOrdersListSlim } from '@/hooks/useListSlim'
 import { recalculateParticipants } from '@/features/tours/services/tour-stats.service'
@@ -31,8 +19,8 @@ interface TourOrdersProps {
   onChildDialogChange?: (hasOpen: boolean) => void
 }
 
-export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
-  const { items: allOrders, isLoading: loading } = useOrdersListSlim()
+export function TourOrders({ tour }: TourOrdersProps) {
+  const { items: allOrders } = useOrdersListSlim()
   const orders = useMemo(
     () => allOrders.filter(o => o.tour_id === tour.id),
     [allOrders, tour.id]
@@ -41,59 +29,14 @@ export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
   const currentWorkspace = useAuthStore(state => state.user?.workspace_id)
   const { toast } = useToast()
 
-  // 收款對話框狀態
-  const [receiptDialogOpen, setReceiptDialogOpen] = useState(false)
-  const [selectedOrderForReceipt, setSelectedOrderForReceipt] = useState<Order | null>(null)
-
-  // 請款對話框狀態
-  const [requestDialogOpen, setRequestDialogOpen] = useState(false)
-  const [selectedOrderForRequest, setSelectedOrderForRequest] = useState<Order | null>(null)
-
-  // 編輯對話框狀態
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [selectedOrderForEdit, setSelectedOrderForEdit] = useState<Order | null>(null)
-
-  // 發票對話框狀態
-  const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false)
-  const [selectedOrderForInvoice, setSelectedOrderForInvoice] = useState<Order | null>(null)
-
-  // 注意：已移除 onChildDialogChange 邏輯，改用 Dialog level 系統處理多重遮罩
-
-  // 處理快速收款
-  const handleQuickReceipt = useCallback((order: Order) => {
-    setSelectedOrderForReceipt(order)
-    setReceiptDialogOpen(true)
-  }, [])
-
-  // 處理快速請款
-  const handleQuickPaymentRequest = useCallback((order: Order) => {
-    setSelectedOrderForRequest(order)
-    setRequestDialogOpen(true)
-  }, [])
-
-  // 處理編輯訂單
-  const handleEdit = useCallback((order: Order) => {
-    setSelectedOrderForEdit(order)
-    setEditDialogOpen(true)
-  }, [])
-
-  // 處理開發票
-  const handleQuickInvoice = useCallback((order: Order) => {
-    setSelectedOrderForInvoice(order)
-    setInvoiceDialogOpen(true)
-  }, [])
-
-  // 收款成功後重新載入訂單（SWR 會刷新所有 orders 訂閱者）
   const handleReceiptSuccess = useCallback(() => {
     invalidateOrders()
   }, [])
 
-  // 請款成功後的處理
   const handleRequestSuccess = useCallback(() => {
     toast({ title: TOUR_ORDERS_LABELS.請款成功 })
-  }, [])
+  }, [toast])
 
-  // 新增訂單
   const handleAddOrder = useCallback(
     async (orderData: OrderFormData) => {
       if (!currentWorkspace) return
@@ -122,9 +65,6 @@ export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
         setAddDialogOpen(false)
         toast({ title: TOUR_ORDERS_LABELS.新增訂單成功 })
 
-        // createOrder 已透過 SWR 更新快取，不需再手動 refetch
-
-        // 重算團人數
         recalculateParticipants(tour.id).catch(err => {
           logger.error('重算團人數失敗:', err)
         })
@@ -133,49 +73,21 @@ export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
         toast({ title: TOUR_ORDERS_LABELS.新增訂單失敗, variant: 'destructive' })
       }
     },
-    [currentWorkspace, orders.length, tour.code, tour.id, tour.name]
+    [currentWorkspace, orders.length, tour.code, tour.id, tour.name, toast]
   )
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-morandi-secondary">{TOUR_ORDERS_LABELS.載入中}</div>
-      </div>
-    )
-  }
 
   return (
     <>
       <div className="flex flex-col h-full">
-        <SimpleOrderTable
+        <OrderListView
           orders={orders as OrderType[]}
           showTourInfo={false}
-          onQuickReceipt={handleQuickReceipt}
-          onQuickPaymentRequest={handleQuickPaymentRequest}
-          onQuickInvoice={handleQuickInvoice}
-          onEdit={handleEdit}
+          onReceiptSuccess={handleReceiptSuccess}
+          onRequestSuccess={handleRequestSuccess}
         />
       </div>
 
-      {/* 收款對話框 */}
-      <AddReceiptDialog
-        open={receiptDialogOpen}
-        onOpenChange={setReceiptDialogOpen}
-        defaultTourId={tour.id}
-        defaultOrderId={selectedOrderForReceipt?.id}
-        onSuccess={handleReceiptSuccess}
-      />
-
-      {/* 請款對話框 */}
-      <AddRequestDialog
-        open={requestDialogOpen}
-        onOpenChange={setRequestDialogOpen}
-        defaultTourId={tour.id}
-        defaultOrderId={selectedOrderForRequest?.id}
-        onSuccess={handleRequestSuccess}
-      />
-
-      {/* 新增訂單對話框 */}
+      {/* 新增訂單對話框（此頁專屬） */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent level={2} className="max-w-lg">
           <DialogHeader>
@@ -188,32 +100,6 @@ export function TourOrders({ tour, onChildDialogChange }: TourOrdersProps) {
           />
         </DialogContent>
       </Dialog>
-
-      {/* 編輯訂單對話框 */}
-      {selectedOrderForEdit && (
-        <OrderEditDialog
-          open={editDialogOpen}
-          onOpenChange={open => {
-            setEditDialogOpen(open)
-            if (!open) {
-              setSelectedOrderForEdit(null)
-              handleReceiptSuccess()
-            }
-          }}
-          order={selectedOrderForEdit as OrderType}
-        />
-      )}
-
-      {/* 發票對話框 */}
-      <InvoiceDialog
-        open={invoiceDialogOpen}
-        onOpenChange={open => {
-          setInvoiceDialogOpen(open)
-          if (!open) handleReceiptSuccess()
-        }}
-        defaultOrderId={selectedOrderForInvoice?.id}
-        defaultTourId={tour.id}
-      />
     </>
   )
 }

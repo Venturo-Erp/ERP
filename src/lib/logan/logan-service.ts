@@ -7,9 +7,11 @@ import { chat, checkOllamaStatus, type OllamaMessage } from './ollama'
 import { getSupabaseAdminClient } from '@/lib/supabase/admin'
 import type { Json } from '@/lib/supabase/types'
 
-// Logan AI 使用 VENTURO 機器人的 ID
-export const LOGAN_ID = '00000000-0000-0000-0000-000000000001'
-export const LOGAN_EMPLOYEE_NUMBER = 'BOT001'
+// Logan AI employee（employee_number='LOGAN'）
+// 注意：`00000000-...-000000000001` 是 VENTURO 機器人（BOT001）、不是 Logan
+// 歷史上這裡寫錯過、`cron/sync-logan-knowledge/route.ts` 才是對的 000002
+export const LOGAN_ID = '00000000-0000-0000-0000-000000000002'
+export const LOGAN_EMPLOYEE_NUMBER = 'LOGAN'
 
 /**
  * Logan 的系統提示詞

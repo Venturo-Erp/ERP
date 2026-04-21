@@ -100,7 +100,7 @@ export function QuickAddResource({
         ...(type === 'attraction' ? { workspace_id: workspaceId } : {}),
       }
 
-      // 酒店/餐廳需要 city_id — 自動抓該國第一個城市
+      // city_id 為選填；有該國城市就自動帶入第一筆，沒有就留空、之後再補
       if (type !== 'attraction') {
         const { data: cities } = await supabase
           .from('cities')
@@ -108,12 +108,9 @@ export function QuickAddResource({
           .eq('country_id', countryId)
           .limit(1)
 
-        if (!cities || cities.length === 0) {
-          setError('該國家尚無城市資料，請先建立城市')
-          setSaving(false)
-          return
+        if (cities && cities.length > 0) {
+          insertData.city_id = (cities[0] as { id: string }).id
         }
-        insertData.city_id = (cities[0] as { id: string }).id
       }
 
       const { data, error: dbError } = await supabase

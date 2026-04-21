@@ -11,6 +11,8 @@
  */
 
 import { logger } from '@/lib/utils/logger'
+import { useAuthStore } from '@/stores'
+import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
@@ -34,7 +36,6 @@ const BatchReceiptDialog = dynamic(
 
 // Hooks
 import { usePaymentData } from './hooks/usePaymentData'
-import { useAuthStore } from '@/stores'
 
 // Utils
 
@@ -206,6 +207,8 @@ export default function PaymentsPage() {
       ),
     },
   ]
+
+  if (!isAdmin) return <UnauthorizedPage />
 
   return (
     <>

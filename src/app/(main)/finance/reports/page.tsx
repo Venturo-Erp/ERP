@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useMemo } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { useAuthStore } from '@/stores'
+import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import {
@@ -56,6 +58,7 @@ function getDefaultRange(): DateRange {
 }
 
 export default function ReportsPage() {
+  const isAdmin = useAuthStore(state => state.isAdmin)
   const searchParams = useSearchParams()
   const router = useRouter()
   const initialTab = (searchParams.get('tab') as TabValue) || 'overview'
@@ -89,6 +92,8 @@ export default function ReportsPage() {
     ],
     []
   )
+
+  if (!isAdmin) return <UnauthorizedPage />
 
   return (
     <ContentPageLayout

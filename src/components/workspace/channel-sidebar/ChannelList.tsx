@@ -114,7 +114,7 @@ export function ChannelList({
     group_id: null,
     is_favorite: false,
     order: 0,
-    created_by: '',
+    created_by: null,
     workspace_id: '',
     description: '',
     is_archived: false,

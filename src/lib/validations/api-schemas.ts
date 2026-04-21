@@ -74,7 +74,6 @@ export const issueInvoiceSchema = z.object({
 export const voidInvoiceSchema = z.object({
   invoiceId: z.string().min(1, '缺少發票 ID'),
   voidReason: z.string().min(1, '請填寫作廢原因'),
-  operatedBy: z.string().optional(),
 })
 
 export const batchIssueInvoiceSchema = z.object({

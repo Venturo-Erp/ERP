@@ -1,13 +1,10 @@
 'use client'
 
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { Tour } from '@/stores/types'
 import { City } from '@/stores/region-store'
 import { NewTourData, TourExtraFields, DeleteConfirmState } from '../types'
 import { OrderFormData } from '@/features/orders/components/add-order-form'
-
-// localStorage key for status tab memory
-const STATUS_TAB_KEY = 'venturo-tours-status-tab'
 
 export function useTourPageState() {
   // Selected tour
@@ -20,22 +17,8 @@ export function useTourPageState() {
   const [selectedRows, setSelectedRows] = useState<string[]>([])
   const [expandedRows, setExpandedRows] = useState<string[]>([])
 
-  // 先用預設值，避免 hydration mismatch；預設進「待出發」分頁
-  const [activeStatusTab, setActiveStatusTabState] = useState('待出發')
-
-  // 客戶端 mount 後從 localStorage 讀取上次的狀態 Tab
-  useEffect(() => {
-    const saved = localStorage.getItem(STATUS_TAB_KEY)
-    if (saved) setActiveStatusTabState(saved)
-  }, [])
-
-  // 包裝 setActiveStatusTab，同時保存到 localStorage
-  const setActiveStatusTab = useCallback((tab: string) => {
-    setActiveStatusTabState(tab)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STATUS_TAB_KEY, tab)
-    }
-  }, [])
+  // 每次進入預設「待出發」、不記憶上次的 tab（William 2026-04-21 決策）
+  const [activeStatusTab, setActiveStatusTab] = useState('待出發')
   const [viewMode, setViewMode] = useState<'card' | 'list'>('list')
   const [searchQuery, setSearchQuery] = useState('')
   const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirmState>({

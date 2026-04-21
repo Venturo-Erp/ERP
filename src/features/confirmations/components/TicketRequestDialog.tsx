@@ -116,7 +116,6 @@ export function TicketRequestDialog({ open, onClose, tour, totalPax }: TicketReq
         priority: 3,
         status: 'pending',
         created_by: user.id,
-        created_by_legacy: user.id,
         assignee: selectedEmployee,
         visibility: [user.id, selectedEmployee].filter(Boolean),
         task_type: 'ticket',

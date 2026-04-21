@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -117,6 +118,7 @@ interface ExpenseCategory {
 }
 
 export default function FinanceSettingsPage() {
+  const isAdmin = useAuthStore(state => state.isAdmin)
   const [activeSection, setActiveSection] = useState<
     'receipt' | 'payment' | 'bank' | 'category' | 'company_expense' | 'company_income' | 'bonus'
   >('receipt')
@@ -427,6 +429,8 @@ export default function FinanceSettingsPage() {
       </Button>
     )
   }
+
+  if (!isAdmin) return <UnauthorizedPage />
 
   return (
     <ContentPageLayout

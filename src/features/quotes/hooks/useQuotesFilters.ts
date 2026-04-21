@@ -36,7 +36,6 @@ export const useQuotesFilters = ({
         quote.name?.toLowerCase().includes(searchLower) ||
         quote.customer_name?.toLowerCase().includes(searchLower) ||
         quote.code?.toLowerCase().includes(searchLower) ||
-        quote.quote_number?.toLowerCase().includes(searchLower) ||
         quote.status?.toLowerCase().includes(searchLower)
 
       // 作者篩選

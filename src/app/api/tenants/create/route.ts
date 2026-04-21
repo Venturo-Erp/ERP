@@ -566,7 +566,7 @@ export async function POST(request: NextRequest) {
         description: '公司公告頻道',
         type: 'PUBLIC',
         is_announcement: true,
-        created_by: auth.data.user.id,
+        created_by: auth.data.employeeId,
       })
       logger.log('Announcement channel created')
     } catch (channelError) {

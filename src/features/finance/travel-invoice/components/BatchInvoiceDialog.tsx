@@ -87,7 +87,7 @@ export function BatchInvoiceDialog({
           buyerUBN: buyerUBN || undefined,
           buyerEmail: buyerEmail || undefined,
         },
-        created_by: user?.id || '',
+        created_by: user?.id || undefined,
         workspace_id: workspaceId,
       })
 

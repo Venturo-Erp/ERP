@@ -9,6 +9,7 @@ import { AlertTriangle, Pencil, Trash2, Crown, Plane } from 'lucide-react'
 import type { OrderMember } from '../../types/order-member.types'
 import { COMP_ORDERS_LABELS } from '../../constants/labels'
 import { QuickVisaDialog } from '@/features/visas/components/QuickVisaDialog'
+import { useWorkspaceFeatures } from '@/lib/permissions/hooks'
 
 interface MemberActionsProps {
   member: OrderMember
@@ -35,7 +36,8 @@ export function MemberActions({
 }: MemberActionsProps) {
   const isLeader = member.identity === COMP_ORDERS_LABELS.領隊_2
   const [visaOpen, setVisaOpen] = useState(false)
-  const canOpenVisa = !!tourInfo && !!orderInfo
+  const { isFeatureEnabled } = useWorkspaceFeatures()
+  const canOpenVisa = !!tourInfo && !!orderInfo && isFeatureEnabled('visas')
 
   return (
     <td className="border border-morandi-gold/20 px-2 py-1 bg-card">

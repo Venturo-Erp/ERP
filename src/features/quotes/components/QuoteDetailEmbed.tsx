@@ -562,13 +562,12 @@ export function QuoteDetailEmbed({ quoteId, showHeader = true }: QuoteDetailEmbe
           router={router}
           accommodationDays={accommodationDays}
           contactInfo={{
-            contact_person: quote.contact_person || '',
+            contact_person: '',
             contact_phone: quote.contact_phone || '',
             contact_address: quote.contact_address || '',
           }}
           onContactInfoChange={info => {
             updateQuote(quote.id, {
-              contact_person: info.contact_person,
               contact_phone: info.contact_phone,
               contact_address: info.contact_address,
             })

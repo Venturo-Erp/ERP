@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
   try {
     const validation = await validateBody(request, voidInvoiceSchema)
     if (!validation.success) return validation.error
-    const { invoiceId, voidReason, operatedBy } = validation.data
+    const { invoiceId, voidReason } = validation.data
 
     const supabase = getSupabaseAdminClient()
 
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
         status: 'voided',
         void_date: new Date().toISOString(),
         void_reason: voidReason,
-        voided_by: operatedBy,
+        voided_by: auth.data.employeeId,
         updated_at: new Date().toISOString(),
       })
       .eq('id', invoiceId)

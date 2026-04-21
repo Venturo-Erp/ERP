@@ -11,6 +11,16 @@
 - 任何動 RLS policy 的 migration、**必須** 先跑 `tests/e2e/login-api.spec.ts`。
 - Admin client 必須 per-request、**不准** singleton（避免 stale state）。詳見 `src/lib/supabase/admin.ts`。
 
+### 審計欄位 FK 一律指 `employees(id)`，不是 `auth.users(id)`
+**原因**：front-end `currentUser?.id` 從 `useAuthStore` 拿的是 `employees.id`，不是 `auth.users.id`。如果 FK 指 `auth.users`，insert 必炸（FK violation）。
+**症狀**：建立行程表 / 信件 / 供應商 / 確認單等 INSERT 失敗、console 顯示 `violates foreign key constraint "<tbl>_created_by_fkey"`。
+**歷史**：2026-04-20 全面清查、17 表 30 FK 全部切到 employees（見 `docs/REFACTOR_PLAN_AUDIT_TRAIL_FK.md`）。
+**規則**：
+- `created_by`、`updated_by`、`performed_by`、`uploaded_by`、`locked_by`、`last_unlocked_by` 等 → `REFERENCES public.employees(id) ON DELETE SET NULL`
+- 僅「這個 row 就是一個 Supabase 用戶本身」的欄位（`user_id`、`sender_id`、`friend_id` 等）才保留 FK 到 `auth.users`
+- Client 端寫入：`created_by: currentUser?.id || undefined`（**不是** `|| ''`、**不是** 寫死字串）
+- 詳細見 `docs/DATABASE_DESIGN_STANDARDS.md` §8
+
 ---
 
 ## 🚨 策略題前必做（避免誤判商業方向）
@@ -151,7 +161,7 @@ _統一規範，不管誰開發都走同一套。_
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **venturo-erp** (31017 symbols, 48977 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **venturo-erp** (31596 symbols, 49426 relationships, 300 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 

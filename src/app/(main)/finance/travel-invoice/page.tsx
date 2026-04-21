@@ -7,6 +7,8 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { FileText, Eye, ListChecks } from 'lucide-react'
+import { useAuthStore } from '@/stores'
+import { UnauthorizedPage } from '@/components/unauthorized-page'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { TableColumn as Column } from '@/components/ui/enhanced-table'
 import { ContentContainer } from '@/components/layout/content-container'
@@ -32,6 +34,7 @@ const statusTabs = [
 ]
 
 export default function TravelInvoicePage() {
+  const isAdmin = useAuthStore(state => state.isAdmin)
   const { invoices, isLoading, error, fetchInvoices } = useTravelInvoiceStore()
   const { items: tours } = useToursListSlim()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -42,6 +45,9 @@ export default function TravelInvoicePage() {
   useEffect(() => {
     fetchInvoices()
   }, [fetchInvoices])
+
+  if (!isAdmin) return <UnauthorizedPage />
+
 
   // 轉換 tours 為 Combobox 選項格式
   const tourOptions = useMemo(() => {

@@ -75,8 +75,8 @@ export function CreateReceiptDialog({ order, open, onClose, onSuccess }: CreateR
         status: '0',
         notes: note,
         workspace_id: user?.workspace_id || '',
-        created_by: user?.id || '',
-        updated_by: user?.id || '',
+        created_by: user?.id || undefined,
+        updated_by: user?.id || undefined,
         deleted_at: null,
       }
 

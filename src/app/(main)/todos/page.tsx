@@ -133,9 +133,7 @@ export default function TodosPage() {
 
     return todos.filter(todo => {
       if (currentUserId) {
-        const isCreator =
-          (todo.creator || (todo as unknown as Record<string, unknown>).created_by_legacy) ===
-          currentUserId
+        const isCreator = (todo.creator || todo.created_by) === currentUserId
         const isAssignee = todo.assignee === currentUserId
         const inVisibility = todo.visibility?.includes(currentUserId)
         if (!isCreator && !isAssignee && !inVisibility) return false

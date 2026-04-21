@@ -66,7 +66,7 @@ export function EnvelopeDialog({ isOpen, onClose, tour }: EnvelopeDialogProps) {
       const linkedQuote = quotes.find(q => q.tour_id === tour.id)
       if (linkedQuote) {
         // 優先使用聯絡人，否則使用客戶名稱
-        setRecipient(linkedQuote.contact_person || linkedQuote.customer_name || '')
+        setRecipient(linkedQuote.customer_name || '')
         // 帶入通訊地址（快速報價單有此欄位）
         setRecipientAddress(linkedQuote.contact_address || '')
         // 帶入聯絡電話

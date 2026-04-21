@@ -499,6 +499,87 @@ CREATE TABLE public.example (
 - [ ] 有 created_at, updated_at
 - [ ] RLS 政策正確設定
 - [ ] 加入 WORKSPACE_SCOPED_TABLES（如果需要）
+- [ ] **審計欄位 FK 正確**（見下節）
+
+---
+
+## 八、審計欄位慣例（`created_by` / `updated_by` / 等）
+
+> 這一節起源於 2026-04-20 `REFACTOR_PLAN_AUDIT_TRAIL_FK.md` 重構。
+> 當時全系統 17 張表、30+ 欄位亂指，結果 client 傳 employee id 但 FK 要 auth uid → 存檔就炸。
+> 規則定出來後，新表務必照做。
+
+### 8.1 誰指誰、為什麼
+
+**ERP 內部操作追溯 → `employees(id)`**
+- 場景：「哪位員工建立/修改這筆業務資料」
+- 欄位名：`created_by`、`updated_by`、`performed_by`、`uploaded_by`、`locked_by`、`last_unlocked_by`
+- FK：`REFERENCES public.employees(id) ON DELETE SET NULL`
+- 例外：無（即使是 Supabase Auth 登入進來，也要記 employee.id，因為 UI 顯示的是員工姓名）
+
+**用戶身份/社交/traveler → `auth.users(id)`**
+- 場景：「這個 row 就是一個 Supabase 用戶本身」、社交關係、私訊
+- 欄位名：`user_id`、`sender_id`、`receiver_id`、`friend_id`、`supabase_user_id`
+- FK：`REFERENCES auth.users(id)`（cascade 策略依語意）
+- 典型例子：`profiles.id`、`traveler_profiles.id`、`friends.*`、`private_messages.*`、`employees.user_id`、`employees.supabase_user_id`
+
+### 8.2 新表審計欄位模板
+
+```sql
+CREATE TABLE public.your_new_table (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  -- ... business columns ...
+
+  workspace_id uuid NOT NULL REFERENCES public.workspaces(id) ON DELETE CASCADE,
+
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  created_by uuid REFERENCES public.employees(id) ON DELETE SET NULL,
+  updated_by uuid REFERENCES public.employees(id) ON DELETE SET NULL
+);
+```
+
+**重點**：
+- `ON DELETE SET NULL`（不要 CASCADE，不要 NO ACTION）——員工離職刪 row 時、不要把他建立過的業務資料全刪
+- `created_by` 和 `updated_by` 都 nullable——允許系統操作（如 trigger 自動寫入）時留 NULL
+- 不要加 NOT NULL 到這些欄位上（除非有非常明確的業務需求）
+
+### 8.3 Code 端寫入規則
+
+```typescript
+// ✅ 正確
+const { user: currentUser } = useAuthStore()
+await createItem({
+  ...data,
+  created_by: currentUser?.id || undefined,  // undefined 讓 DB 留 NULL
+  updated_by: currentUser?.id || undefined,
+})
+
+// ❌ 錯誤：傳空字串會 FK 炸
+created_by: currentUser?.id || '',
+
+// ❌ 錯誤：傳寫死字串會 FK 炸
+created_by: 'current_user',
+
+// ❌ 錯誤：傳 auth.users uid（employee.id 和 auth.users.id 不是同一個）
+const { data: { user: authUser } } = await supabase.auth.getUser()
+created_by: authUser.id,  // NO，這是 Supabase auth uid，不是 employee.id
+
+// ✅ 如果在 Server API route 中、沒有 currentUser context
+const auth = await getServerAuth()
+created_by: auth.data.employeeId,  // getServerAuth 回傳 employee id
+```
+
+### 8.4 為什麼 `currentUser.id` = `employee.id`？
+
+看 `src/stores/auth-store.ts` `buildUserFromEmployee`：
+```ts
+return {
+  id: employeeData.id,  // 這就是 employees.id
+  // ...
+}
+```
+所以整個 front-end `currentUser?.id` 永遠是 `employees.id`。跟 Supabase Auth 的 `auth.users.id` 是不同 uuid。
 
 ---
 

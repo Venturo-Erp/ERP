@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { useAuthStore } from '@/stores'
+import { UnauthorizedPage } from '@/components/unauthorized-page'
 import dynamic from 'next/dynamic'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { usePayments } from '@/features/payments/hooks/usePayments'
@@ -18,6 +20,7 @@ const AddRequestDialog = dynamic(
 )
 
 export default function RequestsPage() {
+  const isAdmin = useAuthStore(state => state.isAdmin)
   const searchParams = useSearchParams()
   const router = useRouter()
   const { payment_requests, loading, loadPaymentRequests } = usePayments()
@@ -56,6 +59,8 @@ export default function RequestsPage() {
   const handleRowClick = (request: PaymentRequest) => {
     setSelectedRequest(request)
   }
+
+  if (!isAdmin) return <UnauthorizedPage />
 
   return (
     <>

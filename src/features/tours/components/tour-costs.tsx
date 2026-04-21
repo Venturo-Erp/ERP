@@ -119,7 +119,7 @@ export const TourCosts = React.memo(function TourCosts({
         total_amount: data.amount,
         status: data.status === '已確認' ? 'confirmed' : 'pending',
         note: data.description,
-        created_by: '',
+        created_by: null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       }

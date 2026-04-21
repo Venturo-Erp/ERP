@@ -660,11 +660,9 @@ export function ResourcePanel({
                           .eq('country_id', countryIdToUse)
                           .limit(1)
 
-                        if (!cities || cities.length === 0) {
-                          alert('該國家尚無城市資料，請先建立城市')
-                          return
+                        if (cities && cities.length > 0) {
+                          insertData.city_id = cities[0].id
                         }
-                        insertData.city_id = cities[0].id
                       }
 
                       const { data, error: dbError } = await supabase

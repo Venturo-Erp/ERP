@@ -5,15 +5,11 @@ import { LABELS } from './constants/labels'
 import React, { useState, useEffect, useMemo } from 'react'
 import { ContentPageLayout } from '@/components/layout/content-page-layout'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { QuickReceipt } from '@/features/todos/components/quick-actions/quick-receipt'
 import { useOrdersListSlim, useToursListSlim } from '@/hooks/useListSlim'
 import { useWorkspaceChannels } from '@/stores/workspace-store'
-import { ShoppingCart, AlertCircle, CheckCircle, Clock, Shield, Wifi } from 'lucide-react'
-import { SimpleOrderTable } from '@/features/orders/components/simple-order-table'
+import { ShoppingCart, AlertCircle, CheckCircle, Clock } from 'lucide-react'
+import { OrderListView } from '@/features/orders/components/OrderListView'
 import { AddOrderForm } from '@/features/orders/components/add-order-form'
-import { OrderEditDialog } from '@/features/orders/components/order-edit-dialog'
-import { InvoiceDialog } from '@/features/finance/components/invoice-dialog'
-import { BatchVisaDialog } from '@/features/orders/components/BatchVisaDialog'
 import type { Order } from '@/stores/types'
 import { logger } from '@/lib/utils/logger'
 import { alert as showAlert } from '@/lib/ui/alert-dialog'
@@ -27,29 +23,10 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
-  // 🔥 快速收款對話框狀態
-  const [isReceiptDialogOpen, setIsReceiptDialogOpen] = useState(false)
-  const [selectedOrderForReceipt, setSelectedOrderForReceipt] = useState<{
-    orderId: string
-    tourId: string
-  } | null>(null)
-
-  // 發票對話框狀態
-  const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false)
-  const [selectedOrderForInvoice, setSelectedOrderForInvoice] = useState<Order | null>(null)
-
-  // 編輯對話框狀態
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [selectedOrderForEdit, setSelectedOrderForEdit] = useState<Order | null>(null)
-  const [isVisaDialogOpen, setIsVisaDialogOpen] = useState(false)
-  const [selectedOrderForVisa, setSelectedOrderForVisa] = useState<Order | null>(null)
-
-  // 🔥 載入 workspace（只執行一次）
   useEffect(() => {
     loadWorkspaces()
   }, [])
 
-  // 🔧 優化：建立 tour 出發日期 Map，避免排序時 O(n²) 查詢
   const tourDepartureDates = useMemo(() => {
     const map = new Map<string, number>()
     tours.forEach(t => {
@@ -59,21 +36,12 @@ export default function OrdersPage() {
   }, [tours])
 
   const filteredOrders = orders.filter(order => {
-    // 排除簽證專用 / 網卡專用訂單（這兩個分頁已移除）
     const isVisaOrEsim =
       order.tour_name?.includes(ORDERS_PAGE_LABELS.VISA_TOUR) ||
       order.tour_name?.includes(ORDERS_PAGE_LABELS.ESIM_TOUR)
     if (isVisaOrEsim) return false
 
-    let matchesFilter: boolean
-    switch (statusFilter) {
-      case 'all':
-        matchesFilter = true
-        break
-      default:
-        matchesFilter = order.payment_status === statusFilter
-        break
-    }
+    const matchesFilter = statusFilter === 'all' || order.payment_status === statusFilter
 
     const searchLower = searchQuery.toLowerCase()
     const matchesSearch =
@@ -88,7 +56,6 @@ export default function OrdersPage() {
     return matchesFilter && matchesSearch
   })
 
-  // 按出發日期排序（近的在前）- 使用 Map 做 O(1) 查詢
   const sortedOrders = [...filteredOrders].sort((a, b) => {
     const dateA = a.tour_id ? (tourDepartureDates.get(a.tour_id) ?? 0) : 0
     const dateB = b.tour_id ? (tourDepartureDates.get(b.tour_id) ?? 0) : 0
@@ -116,13 +83,10 @@ export default function OrdersPage() {
     }
 
     try {
-      // 計算該團的訂單序號 (格式: {團號}-O{2位數})
       const tourOrders = orders.filter(o => o.tour_id === orderData.tour_id)
       const nextOrderNumber = tourOrders.length + 1
       const orderNumber = `${selectedTour.code}-O${nextOrderNumber.toString().padStart(2, '0')}`
 
-      // 🆕 價格鏈：從 tour 的 selling_price_per_person 計算初始 total_amount
-      // 假設 2 人作為初始值，之後加團員時會重新計算
       const estimatedPeople = 2
       const sellingPricePerPerson = selectedTour.selling_price_per_person || 0
       const initialTotalAmount = sellingPricePerPerson * estimatedPeople
@@ -130,7 +94,6 @@ export default function OrdersPage() {
       await addOrder({
         order_number: orderNumber,
         tour_id: orderData.tour_id,
-        // code 會由 createCloudHook 自動生成（格式：O000001）
         tour_name: selectedTour.name,
         contact_person: orderData.contact_person,
         contact_phone: null,
@@ -173,24 +136,11 @@ export default function OrdersPage() {
       addLabel={LABELS.ADD_ORDER}
       contentClassName="flex-1 overflow-auto flex flex-col"
     >
-      {/* 訂單列表 */}
-      <SimpleOrderTable
+      <OrderListView
         className="flex-1"
         orders={sortedOrders}
         tours={tours}
         showTourInfo={true}
-        onQuickInvoice={order => {
-          setSelectedOrderForInvoice(order)
-          setIsInvoiceDialogOpen(true)
-        }}
-        onQuickVisa={order => {
-          setSelectedOrderForVisa(order)
-          setIsVisaDialogOpen(true)
-        }}
-        onEdit={order => {
-          setSelectedOrderForEdit(order)
-          setIsEditDialogOpen(true)
-        }}
       />
 
       {/* 新增訂單對話框 */}
@@ -202,55 +152,6 @@ export default function OrdersPage() {
           <AddOrderForm onSubmit={handleAddOrder} onCancel={() => setIsAddDialogOpen(false)} />
         </DialogContent>
       </Dialog>
-
-      {/* 🔥 快速收款對話框 */}
-      <Dialog open={isReceiptDialogOpen} onOpenChange={setIsReceiptDialogOpen}>
-        <DialogContent level={1} className="max-w-xl">
-          <DialogHeader>
-            <DialogTitle>{LABELS.QUICK_RECEIPT}</DialogTitle>
-          </DialogHeader>
-          <QuickReceipt
-            defaultTourId={selectedOrderForReceipt?.tourId}
-            defaultOrderId={selectedOrderForReceipt?.orderId}
-            onSubmit={() => {
-              setIsReceiptDialogOpen(false)
-              setSelectedOrderForReceipt(null)
-            }}
-          />
-        </DialogContent>
-      </Dialog>
-
-      {/* 發票對話框 */}
-      <InvoiceDialog
-        open={isInvoiceDialogOpen}
-        onOpenChange={open => {
-          setIsInvoiceDialogOpen(open)
-          if (!open) setSelectedOrderForInvoice(null)
-        }}
-        defaultOrderId={selectedOrderForInvoice?.id}
-        defaultTourId={selectedOrderForInvoice?.tour_id || undefined}
-      />
-
-      {/* 編輯訂單對話框 */}
-      <OrderEditDialog
-        open={isEditDialogOpen}
-        onOpenChange={open => {
-          setIsEditDialogOpen(open)
-          if (!open) setSelectedOrderForEdit(null)
-        }}
-        order={selectedOrderForEdit}
-        level={1}
-      />
-
-      {/* 批次簽證對話框 */}
-      <BatchVisaDialog
-        open={isVisaDialogOpen}
-        onOpenChange={open => {
-          setIsVisaDialogOpen(open)
-          if (!open) setSelectedOrderForVisa(null)
-        }}
-        order={selectedOrderForVisa}
-      />
     </ContentPageLayout>
   )
 }

@@ -65,7 +65,7 @@ export default function InvoiceDetailPage() {
     }
 
     try {
-      await voidInvoice(currentInvoice.id, voidReason, 'current_user')
+      await voidInvoice(currentInvoice.id, voidReason)
       setShowVoidDialog(false)
       setVoidReason('')
     } catch (error) {

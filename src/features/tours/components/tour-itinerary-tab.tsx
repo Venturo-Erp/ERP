@@ -598,7 +598,7 @@ export function TourItineraryTab({ tour }: TourItineraryTabProps) {
               status: 'draft',
               note: `行程異動，取消「${attractionName}」，煩請協助取消預訂`,
               items: originalRequest.items,
-              created_by: currentUser?.id || '',
+              created_by: currentUser?.id || undefined,
             })
 
             toast.success(

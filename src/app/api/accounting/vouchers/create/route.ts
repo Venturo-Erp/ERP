@@ -96,6 +96,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: '借方或貸方金額不能為零' }, { status: 400 })
     }
 
+    // 解析當前員工 id（audit 欄位一律用 employee.id 而非 auth uid）
+    const { data: empRow } = await supabase
+      .from('employees')
+      .select('id')
+      .or(`id.eq.${session.user.id},supabase_user_id.eq.${session.user.id}`)
+      .limit(1)
+      .maybeSingle()
+    const employeeId = empRow?.id ?? null
+
     // 生成傳票編號
     const voucherNo = await generateVoucherNo(supabase, workspaceId, validated.voucher_date)
 
@@ -110,7 +119,7 @@ export async function POST(request: NextRequest) {
         status: 'posted',
         total_debit: totalDebit,
         total_credit: totalCredit,
-        created_by: session.user.id,
+        created_by: employeeId,
         source_type: validated.source_type || null,
         source_id: validated.source_id || null,
       })

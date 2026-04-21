@@ -148,6 +148,15 @@ export async function POST(request: NextRequest) {
       workspaceId = userData.workspace_id
     }
 
+    // 解析當前員工 id（audit 欄位一律用 employee.id 而非 auth uid）
+    const { data: empRow } = await supabase
+      .from('employees')
+      .select('id')
+      .or(`id.eq.${session.user.id},supabase_user_id.eq.${session.user.id}`)
+      .limit(1)
+      .maybeSingle()
+    const employeeId = empRow?.id ?? null
+
     // 解析 body
     const body = await request.json()
     const validated = periodClosingSchema.parse(body)
@@ -224,7 +233,7 @@ export async function POST(request: NextRequest) {
         status: 'locked', // 結轉傳票鎖定，無法修改
         total_debit: Math.abs(netIncome),
         total_credit: Math.abs(netIncome),
-        created_by: session.user.id,
+        created_by: employeeId,
       })
       .select()
       .single()
@@ -334,7 +343,7 @@ export async function POST(request: NextRequest) {
       period_end: validated.period_end,
       closing_voucher_id: voucher.id,
       net_income: netIncome,
-      closed_by: session.user.id,
+      closed_by: employeeId,
     })
 
     if (closingError) {

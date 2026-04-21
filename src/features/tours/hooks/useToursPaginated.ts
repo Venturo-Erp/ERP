@@ -88,27 +88,37 @@ export function useToursPaginated(params: UseToursPaginatedParams): UseToursPagi
         .order(sortBy, { ascending: sortOrder === 'asc' })
 
       // ✅ Server-side status filtering
+      // 「待出發 / 進行中 / 已完成」狀態**不存 DB**、完全由 departure_date / return_date 計算（SSOT）
+      // 時區問題記入 BACKLOG 後續處理、目前用 UTC today（與 UI 計算一致、避免分類 vs 顯示不同步）
+      const todayStr = new Date().toISOString().split('T')[0]
+
       if (status === 'proposal') {
         // 提案分頁：只顯示 tour_type=proposal
         query = query.eq('tour_type', 'proposal').neq('archived', true)
       } else if (status === 'template') {
         // 模板分頁：只顯示 tour_type=template
         query = query.eq('tour_type', 'template').neq('archived', true)
-      } else if (status && status !== 'all') {
-        if (status === 'archived') {
-          // Show archived tours
-          query = query.eq('archived', true)
-        } else {
-          // Show specific status (exclude archived, utility tours, proposal/template)
-          query = query
-            .eq('status', status)
-            .neq('archived', true)
-            .not('code', 'like', 'VISA%')
-            .not('code', 'like', 'ESIM%')
-            .or('tour_type.eq.official,tour_type.is.null')
-        }
+      } else if (status === 'archived') {
+        // 封存分頁
+        query = query.eq('archived', true)
+      } else if (status === '待出發') {
+        // 待出發：還沒結束的團（包含進行中）— return_date >= today
+        query = query
+          .gte('return_date', todayStr)
+          .neq('archived', true)
+          .not('code', 'like', 'VISA%')
+          .not('code', 'like', 'ESIM%')
+          .or('tour_type.eq.official,tour_type.is.null')
+      } else if (status === '已結團') {
+        // 已結團：回程日期已過 — return_date < today
+        query = query
+          .lt('return_date', todayStr)
+          .neq('archived', true)
+          .not('code', 'like', 'VISA%')
+          .not('code', 'like', 'ESIM%')
+          .or('tour_type.eq.official,tour_type.is.null')
       } else {
-        // 'all' tab: exclude archived, utility tours, and proposal/template
+        // 'all' 或其他 tab：排除封存、工具團、提案/模板
         query = query
           .neq('archived', true)
           .not('code', 'like', 'VISA%')

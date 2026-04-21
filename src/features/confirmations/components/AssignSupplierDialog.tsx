@@ -1056,7 +1056,6 @@ export function AssignSupplierDialog({
                         priority: 3,
                         status: 'pending',
                         created_by: user?.id,
-                        created_by_legacy: user?.id || '00000000-0000-0000-0000-000000000000',
                         assignee: selectedEmployeeId,
                         visibility: [user?.id, selectedEmployeeId].filter(Boolean),
                         task_type: taskType,

@@ -143,7 +143,7 @@ export function IssueInvoiceDialog({
         items,
         orders: [{ order_id: orderId, amount }],
         tour_id: tourId,
-        created_by: user?.id || '',
+        created_by: user?.id || undefined,
         workspace_id: workspaceId,
       })
 

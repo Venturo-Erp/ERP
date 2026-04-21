@@ -428,7 +428,7 @@ export function AddReceiptDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent level={2} className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col">
+      <DialogContent level={1} className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col">
         {/* 收款類型 Tab - 包住整個 header 和內容 */}
         <Tabs
           value={activeTab}

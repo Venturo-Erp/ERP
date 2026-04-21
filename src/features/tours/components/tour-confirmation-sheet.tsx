@@ -215,7 +215,7 @@ export function TourConfirmationSheet({ tourId }: TourConfirmationSheetProps) {
             description,
             status: 'draft',
             handler_type: 'internal',
-            created_by: currentUser?.id || '',
+            created_by: currentUser?.id || undefined,
             created_by_name: currentUser?.name || '',
           }),
         })

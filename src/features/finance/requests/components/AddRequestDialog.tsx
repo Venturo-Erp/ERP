@@ -38,7 +38,7 @@ import { recalculateExpenseStats } from '@/features/finance/payments/services/ex
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
 import { alert, confirm } from '@/lib/ui/alert-dialog'
-import { formatDate } from '@/lib/utils/format-date'
+import { formatDate, getTodayString } from '@/lib/utils/format-date'
 import { useWorkspaceId } from '@/lib/workspace-context'
 import { useAuthStore } from '@/stores/auth-store'
 import {
@@ -106,8 +106,9 @@ interface TourAllocation {
 
 type RequestMode = 'tour' | 'batch' | 'company'
 
-// 計算下一個週四（如果今天是週四，跳到下週四）
-function getNextThursdayDate(): string {
+// @deprecated 週四預設是 Corner 專屬規則、其他租戶不適用、已改用 getTodayString()
+// 保留函式本體以防萬一、未來 workspace 設定上線後可做成 config
+function _getTodayString(): string {
   const today = new Date()
   const dayOfWeek = today.getDay() // 0=週日, 1=週一, ..., 4=週四
 
@@ -174,7 +175,7 @@ export function AddRequestDialog({
   )
 
   // === 批量請款狀態 ===
-  const [batchDate, setBatchDate] = useState(getNextThursdayDate())
+  const [batchDate, setBatchDate] = useState(getTodayString())
   const [batchCategory, setBatchCategory] = useState<PaymentItemCategory>('' as PaymentItemCategory) // 不預設類別，由用戶選擇
   const [batchSupplierId, setBatchSupplierId] = useState('')
   const [batchDescription, setBatchDescription] = useState('')
@@ -686,7 +687,7 @@ export function AddRequestDialog({
     setSelectedRequestItems({})
 
     // 重置批量請款（預設兩個空白行）
-    setBatchDate(getNextThursdayDate())
+    setBatchDate(getTodayString())
     setBatchCategory(REQUEST_TYPE_LABELS.CAT_OTHER as PaymentItemCategory)
     setBatchSupplierId('')
     setBatchDescription('')
@@ -771,7 +772,7 @@ export function AddRequestDialog({
     resetForm()
     setImportFromRequests(false)
     setSelectedRequestItems({})
-    setBatchDate(getNextThursdayDate())
+    setBatchDate(getTodayString())
     setBatchCategory(REQUEST_TYPE_LABELS.CAT_OTHER as PaymentItemCategory)
     setBatchSupplierId('')
     setBatchDescription('')
@@ -897,7 +898,7 @@ export function AddRequestDialog({
             .filter(item => selectedRequestItems[item.id]?.selected)
             .map(item => ({
               id: Math.random().toString(36).substr(2, 9),
-              request_date: getNextThursdayDate(),
+              request_date: getTodayString(),
               payment_method_id: undefined,
               category: item.category as PaymentItemCategory,
               supplier_id: item.supplierId,
@@ -939,7 +940,7 @@ export function AddRequestDialog({
     <>
       <Dialog open={open} onOpenChange={isEditMode ? handleOpenChange : onOpenChange}>
         <DialogContent
-          level={2}
+          level={1}
           className="max-w-[95vw] w-[95vw] h-[90vh] flex flex-col overflow-hidden"
         >
           <Tabs

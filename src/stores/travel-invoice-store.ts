@@ -126,7 +126,7 @@ interface TravelInvoiceState {
     order_id?: string
     orders?: { order_id: string; amount: number }[]
     tour_id?: string
-    created_by: string
+    created_by?: string
     workspace_id?: string
   }) => Promise<IssueInvoiceResponse>
   batchIssueInvoice: (data: {
@@ -134,10 +134,10 @@ interface TravelInvoiceState {
     order_ids: string[]
     invoice_date: string
     buyerInfo: BuyerInfo
-    created_by: string
+    created_by?: string
     workspace_id?: string
   }) => Promise<TravelInvoice>
-  voidInvoice: (invoiceId: string, voidReason: string, operatedBy: string) => Promise<void>
+  voidInvoice: (invoiceId: string, voidReason: string) => Promise<void>
   allowanceInvoice: (
     invoiceId: string,
     allowanceAmount: number,
@@ -271,13 +271,13 @@ export const useTravelInvoiceStore = create<TravelInvoiceState>((set, get) => ({
     }
   },
 
-  voidInvoice: async (invoiceId, voidReason, operatedBy) => {
+  voidInvoice: async (invoiceId, voidReason) => {
     set({ isLoading: true, error: null })
     try {
       const response = await fetch('/api/travel-invoice/void', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ invoiceId, voidReason, operatedBy }),
+        body: JSON.stringify({ invoiceId, voidReason }),
       })
 
       const result = await response.json()

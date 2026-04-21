@@ -146,7 +146,8 @@ class DisbursementOrderService extends BaseService<DisbursementOrder> {
       amount: totalAmount,
       status: 'pending' as const,
       notes: note,
-      created_by: '1', // 使用實際用戶ID
+      // created_by 由 DB trigger 或呼叫端覆寫；這裡不要寫死不合法的 uuid
+      created_by: null as unknown as string,
       id: '',
       created_at: this.now(),
       updated_at: this.now(),

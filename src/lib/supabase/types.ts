@@ -7010,7 +7010,6 @@ export type Database = {
           cover_template_id: string | null
           created_at: string
           created_by: string | null
-          created_by_legacy_user_id: string | null
           daily_itinerary: Json | null
           daily_template_id: string | null
           departure_date: string | null
@@ -7084,7 +7083,6 @@ export type Database = {
           cover_template_id?: string | null
           created_at?: string
           created_by?: string | null
-          created_by_legacy_user_id?: string | null
           daily_itinerary?: Json | null
           daily_template_id?: string | null
           departure_date?: string | null
@@ -7158,7 +7156,6 @@ export type Database = {
           cover_template_id?: string | null
           created_at?: string
           created_by?: string | null
-          created_by_legacy_user_id?: string | null
           daily_itinerary?: Json | null
           daily_template_id?: string | null
           departure_date?: string | null
@@ -14404,7 +14401,6 @@ export type Database = {
           completed: boolean | null
           created_at: string | null
           created_by: string | null
-          created_by_legacy: string
           deadline: string | null
           enabled_quick_actions: string[] | null
           id: string
@@ -14429,7 +14425,6 @@ export type Database = {
           completed?: boolean | null
           created_at?: string | null
           created_by?: string | null
-          created_by_legacy: string
           deadline?: string | null
           enabled_quick_actions?: string[] | null
           id?: string
@@ -14454,7 +14449,6 @@ export type Database = {
           completed?: boolean | null
           created_at?: string | null
           created_by?: string | null
-          created_by_legacy?: string
           deadline?: string | null
           enabled_quick_actions?: string[] | null
           id?: string
@@ -14478,13 +14472,6 @@ export type Database = {
           {
             foreignKeyName: 'todos_assignee_fkey'
             columns: ['assignee']
-            isOneToOne: false
-            referencedRelation: 'employees'
-            referencedColumns: ['id']
-          },
-          {
-            foreignKeyName: 'todos_creator_fkey'
-            columns: ['created_by_legacy']
             isOneToOne: false
             referencedRelation: 'employees'
             referencedColumns: ['id']

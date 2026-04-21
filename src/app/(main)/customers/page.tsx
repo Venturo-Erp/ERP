@@ -407,15 +407,11 @@ export default function CustomersPage() {
                 {/* LINE 綁定按鈕 */}
                 <button
                   className={`p-1 rounded transition-colors ${
-                    (customer as unknown as Record<string, unknown>).line_user_id
+                    customer.line_user_id
                       ? 'text-brand-line hover:bg-brand-line/10'
                       : 'text-morandi-secondary hover:text-brand-line hover:bg-brand-line/10'
                   }`}
-                  title={
-                    (customer as unknown as Record<string, unknown>).line_user_id
-                      ? '已綁定 LINE'
-                      : '綁定 LINE'
-                  }
+                  title={customer.line_user_id ? '已綁定 LINE' : '綁定 LINE'}
                   onClick={e => {
                     e.stopPropagation()
                     setLineBindingCustomer(customer)
@@ -497,7 +493,7 @@ export default function CustomersPage() {
           </DialogHeader>
           {lineBindingCustomer && (
             <div className="flex flex-col items-center gap-4 py-4">
-              {(lineBindingCustomer as unknown as Record<string, unknown>).line_user_id ? (
+              {lineBindingCustomer.line_user_id ? (
                 // 已綁定
                 <div className="text-center">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-brand-line/10 flex items-center justify-center">
@@ -507,11 +503,8 @@ export default function CustomersPage() {
                   <p className="text-sm text-brand-line mt-1">✓ 已綁定 LINE</p>
                   <p className="text-xs text-morandi-secondary mt-2">
                     綁定時間：
-                    {(lineBindingCustomer as unknown as Record<string, unknown>).line_linked_at
-                      ? new Date(
-                          (lineBindingCustomer as unknown as Record<string, unknown>)
-                            .line_linked_at as string
-                        ).toLocaleDateString('zh-TW')
+                    {lineBindingCustomer.line_linked_at
+                      ? new Date(lineBindingCustomer.line_linked_at).toLocaleDateString('zh-TW')
                       : '未知'}
                   </p>
                 </div>

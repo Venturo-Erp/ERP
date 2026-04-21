@@ -221,7 +221,6 @@ export function useInvoiceDialog({
         items,
         order_id: orderId || undefined,
         tour_id: tourId || undefined,
-        created_by: 'current_user',
       })
 
       // 根據是否預約顯示不同訊息

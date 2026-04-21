@@ -4,10 +4,13 @@ import { useState } from 'react'
 import { logger } from '@/lib/utils/logger'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertCircle, CheckCircle2, Database, Trash2, RefreshCw } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Database, Trash2, RefreshCw, ShieldAlert } from 'lucide-react'
 import { RESET_DB_LABELS } from './constants/labels'
+import { usePermissions } from '@/lib/permissions/hooks'
+import { confirm } from '@/lib/ui/alert-dialog'
 
 export default function ResetDBPage() {
+  const { isAdmin } = usePermissions()
   const [status, setStatus] = useState<'idle' | 'deleting' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
 
@@ -33,6 +36,12 @@ export default function ResetDBPage() {
   }
 
   const handleReset = async () => {
+    const ok = await confirm(
+      '即將清空本機 IndexedDB（快取資料），此操作不可復原。確定繼續？',
+      'warning'
+    )
+    if (!ok) return
+
     try {
       setStatus('deleting')
 
@@ -101,6 +110,24 @@ export default function ResetDBPage() {
 
   const handleReload = () => {
     window.location.reload()
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted p-8">
+        <Card className="max-w-2xl w-full">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ShieldAlert className="w-6 h-6 text-status-danger" />
+              需要管理員權限
+            </CardTitle>
+            <CardDescription>
+              此工具會清空本機 IndexedDB 快取，僅限管理員使用。
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    )
   }
 
   return (
