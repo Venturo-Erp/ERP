@@ -361,7 +361,7 @@ export function AddRequestDialog({
       .map(item => ({
         id: item.id,
         request_date:
-          ((item as unknown as Record<string, unknown>).request_date as string) ||
+          ((item as unknown as Record<string, unknown>).custom_request_date as string) ||
           currentRequest?.request_date ||
           '',
         payment_method_id: (item as unknown as Record<string, unknown>).payment_method_id as
@@ -478,6 +478,7 @@ export function AddRequestDialog({
           subtotal: item.unit_price * item.quantity,
           sort_order: localItems.indexOf(item) + 1,
           payment_method_id: item.payment_method_id || null,
+          custom_request_date: item.request_date || null,
           advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
           item_number: `${currentRequest.code}-${dbEditableItems.length + idx + 1}`,
@@ -496,6 +497,7 @@ export function AddRequestDialog({
           quantity: item.quantity,
           subtotal: item.unit_price * item.quantity,
           payment_method_id: item.payment_method_id || null,
+          custom_request_date: item.request_date || null,
           advanced_by: item.advanced_by === '_pending' ? null : item.advanced_by || null,
           advanced_by_name: item.advanced_by_name || null,
         }
