@@ -38,7 +38,7 @@ import { recalculateExpenseStats } from '@/features/finance/payments/services/ex
 import { logger } from '@/lib/utils/logger'
 import { cn } from '@/lib/utils'
 import { alert, confirm } from '@/lib/ui/alert-dialog'
-import { formatDate, getTodayString } from '@/lib/utils/format-date'
+import { getTodayString } from '@/lib/utils/format-date'
 import { useWorkspaceId } from '@/lib/workspace-context'
 import { useAuthStore } from '@/stores/auth-store'
 import {
@@ -106,23 +106,6 @@ interface TourAllocation {
 
 type RequestMode = 'tour' | 'batch' | 'company'
 
-// @deprecated 週四預設是 Corner 專屬規則、其他租戶不適用、已改用 getTodayString()
-// 保留函式本體以防萬一、未來 workspace 設定上線後可做成 config
-function _getTodayString(): string {
-  const today = new Date()
-  const dayOfWeek = today.getDay() // 0=週日, 1=週一, ..., 4=週四
-
-  let daysUntilThursday = 4 - dayOfWeek
-  if (daysUntilThursday <= 0) {
-    // 今天是週四或之後，跳到下週四
-    daysUntilThursday += 7
-  }
-
-  const nextThursday = new Date(today)
-  nextThursday.setDate(today.getDate() + daysUntilThursday)
-
-  return formatDate(nextThursday)
-}
 
 export function AddRequestDialog({
   open,
@@ -181,9 +164,7 @@ export function AddRequestDialog({
   const [batchDescription, setBatchDescription] = useState('')
   const [batchTotalAmount, setBatchTotalAmount] = useState(0)
   const [batchNote, setBatchNote] = useState('')
-  const [batchPaymentMethodId, setBatchPaymentMethodId] = useState<string | undefined>(
-    'e554fee7-412f-4b58-a7b3-c08602c624d2' // 預設：匯款
-  )
+  const [batchPaymentMethodId, setBatchPaymentMethodId] = useState<string | undefined>(undefined)
   const [tourAllocations, setTourAllocations] = useState<TourAllocation[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -848,7 +829,7 @@ export function AddRequestDialog({
               request_type: ADD_REQUEST_DIALOG_LABELS.供應商支出,
               request_category: 'tour',
               batch_id: batchId, // 批次 ID：同批請款單共用此 ID
-              payment_method_id: batchPaymentMethodId || 'd6e2b71f-0d06-4119-9047-c709f31dfc31',
+              payment_method_id: batchPaymentMethodId || null,
             })
 
             // 建立品項（帶獨立編號如 HND260328A-I01-1）
