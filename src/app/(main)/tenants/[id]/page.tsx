@@ -41,6 +41,8 @@ interface Workspace {
   premium_enabled?: boolean
   premium_expires_at?: string
   default_password?: string | null
+  admin_id?: string | null
+  admin_employee_number?: string | null
 }
 
 interface WorkspaceFeature {
@@ -316,8 +318,32 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                 size="sm"
                 className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold/10"
                 onClick={async () => {
+                  if (!workspace?.admin_id) {
+                    toast({ title: '找不到此租戶的管理員', variant: 'destructive' })
+                    return
+                  }
                   const defaultPw = workspace?.default_password || '0000'
-                  toast({ title: `已重設密碼為 ${defaultPw}` })
+                  try {
+                    const res = await fetch('/api/auth/reset-employee-password', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        employee_id: workspace.admin_id,
+                        new_password: defaultPw,
+                      }),
+                    })
+                    if (!res.ok) {
+                      const err = await res.json().catch(() => ({}))
+                      toast({
+                        title: err?.error || err?.message || '重設失敗',
+                        variant: 'destructive',
+                      })
+                      return
+                    }
+                    toast({ title: `已重設密碼為 ${defaultPw}` })
+                  } catch (err) {
+                    toast({ title: '重設失敗、請稍後再試', variant: 'destructive' })
+                  }
                 }}
               >
                 重設密碼
