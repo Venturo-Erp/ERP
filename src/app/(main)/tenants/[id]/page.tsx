@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { useToast } from '@/components/ui/use-toast'
+import { alert as showAlert } from '@/lib/ui/alert-dialog'
 import { supabase } from '@/lib/supabase/client'
 import { Building2, Save, Loader2, Sparkles, Users, Settings2 } from 'lucide-react'
 import { ModuleLoading } from '@/components/module-loading'
@@ -319,7 +320,7 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                 className="border-morandi-gold text-morandi-gold hover:bg-morandi-gold/10"
                 onClick={async () => {
                   if (!workspace?.admin_id) {
-                    toast({ title: '找不到此租戶的管理員', variant: 'destructive' })
+                    await showAlert('找不到此租戶的管理員', 'error')
                     return
                   }
                   // 預設密碼至少 8 字元（API 驗證最低長度）
@@ -339,15 +340,18 @@ export default function TenantDetailPage({ params }: { params: Promise<{ id: str
                     })
                     if (!res.ok) {
                       const err = await res.json().catch(() => ({}))
-                      toast({
-                        title: err?.error || err?.message || '重設失敗',
-                        variant: 'destructive',
-                      })
+                      await showAlert(
+                        err?.error || err?.message || '重設失敗',
+                        'error'
+                      )
                       return
                     }
-                    toast({ title: `已重設密碼為 ${defaultPw}` })
+                    await showAlert(
+                      `已重設管理員「${adminName || ''}」的密碼為\n\n${defaultPw}\n\n請通知該管理員使用此密碼登入、並盡快修改。`,
+                      'success'
+                    )
                   } catch (err) {
-                    toast({ title: '重設失敗、請稍後再試', variant: 'destructive' })
+                    await showAlert('重設失敗、請稍後再試', 'error')
                   }
                 }}
               >
