@@ -124,6 +124,18 @@ export async function POST(request: NextRequest) {
         logger.error(`Permission denied: not admin`)
         return errorResponse('需要管理員權限', 403, ErrorCode.FORBIDDEN)
       }
+
+      // 🔒 P003-E（2026-04-22）：跨租戶守門。
+      //   原本沒驗 workspace_code 是否對齊登入者的 workspace、
+      //   JINGYAO admin 可以打這支在 Corner 建員工。
+      //   Corner admin 要在別家建員工請走 tenants management 流程、不從這支。
+      if (workspace_code && currentUserWorkspaceCode && workspace_code !== currentUserWorkspaceCode) {
+        logger.error('跨租戶建員工嘗試', {
+          caller_workspace: currentUserWorkspaceCode,
+          target_workspace_code: workspace_code,
+        })
+        return errorResponse('不能在其他公司建員工', 403, ErrorCode.FORBIDDEN)
+      }
     }
 
     // 優先使用前端傳入的真實 email；若無則使用自動生成的格式（向後兼容）

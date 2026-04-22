@@ -64,15 +64,27 @@ export async function POST(request: NextRequest) {
 
     const supabaseAdmin = getSupabaseAdminClient()
 
-    // 1. 查詢員工的 supabase_user_id
+    // 1. 查詢員工的 supabase_user_id + workspace_id（P003-C 2026-04-22：加 workspace 守門）
     const { data: employee, error: empError } = await supabaseAdmin
       .from('employees')
-      .select('id, supabase_user_id, display_name')
+      .select('id, supabase_user_id, display_name, workspace_id')
       .eq('id', employee_id)
       .single()
 
     if (empError || !employee) {
       return errorResponse('找不到此員工', 404, ErrorCode.NOT_FOUND)
+    }
+
+    // 🔒 P003-C（2026-04-22）：只能重設同 workspace 員工的密碼
+    //   原本只查 isAdmin、沒驗 target employee 的 workspace、
+    //   Corner admin 可以打這支重設 JINGYAO 員工的密碼。
+    if (employee.workspace_id !== auth.data.workspaceId) {
+      logger.error('跨租戶重設密碼嘗試', {
+        caller_workspace: auth.data.workspaceId,
+        target_workspace: employee.workspace_id,
+        target_employee: employee_id,
+      })
+      return errorResponse('不能重設其他公司員工的密碼', 403, ErrorCode.FORBIDDEN)
     }
 
     if (!employee.supabase_user_id) {

@@ -51,6 +51,40 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // P003-B（2026-04-22）：跨租戶綁帳號守門。
+    // 原本沒驗 employee_id 是不是屬於 body 的 workspace_id、
+    // 攻擊者可用自己的 access_token 把自己綁到別家公司員工 row。
+    // 修法：查目標 employee 的真實 workspace、驗 body 傳的 workspace_id 對齊、
+    //      拒絕已綁定其他 auth user 的員工被覆蓋。
+    const { data: targetEmp, error: empLookupErr } = await supabaseAdmin
+      .from('employees')
+      .select('id, workspace_id, supabase_user_id')
+      .eq('id', employee_id)
+      .single()
+
+    if (empLookupErr || !targetEmp) {
+      logger.error('找不到目標員工:', { employee_id, err: empLookupErr?.message })
+      return errorResponse('找不到目標員工', 404, ErrorCode.NOT_FOUND)
+    }
+
+    if (workspace_id && workspace_id !== targetEmp.workspace_id) {
+      logger.error('workspace_id 與員工實際所屬不符', {
+        employee_id,
+        body_workspace_id: workspace_id,
+        actual_workspace_id: targetEmp.workspace_id,
+      })
+      return errorResponse('workspace 不符', 403, ErrorCode.FORBIDDEN)
+    }
+
+    if (targetEmp.supabase_user_id && targetEmp.supabase_user_id !== supabase_user_id) {
+      logger.error('目標員工已綁定其他帳號、拒絕覆蓋', {
+        employee_id,
+        existing: targetEmp.supabase_user_id,
+        attempted: supabase_user_id,
+      })
+      return errorResponse('此員工已綁定其他帳號', 403, ErrorCode.FORBIDDEN)
+    }
+
     // 1. 更新 employees.supabase_user_id（繞過 RLS）
     const { error: updateError } = await supabaseAdmin
       .from('employees')
@@ -65,23 +99,25 @@ export async function POST(request: NextRequest) {
     logger.log('已更新 employees.supabase_user_id:', supabase_user_id)
 
     // 2. 更新 auth.users 的 metadata（使用 admin）
-    if (workspace_id) {
-      const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(
-        supabase_user_id,
-        {
-          user_metadata: {
-            workspace_id,
-            employee_id,
-          },
-        }
-      )
-
-      if (metadataError) {
-        logger.warn('更新 user_metadata 失敗:', metadataError)
-        // 不回傳錯誤，因為 supabase_user_id 已經設好了
-      } else {
-        logger.log('已更新 user_metadata:', { workspace_id, employee_id })
+    // 用員工的真實 workspace_id（SSOT、不信 body 傳的）
+    const { error: metadataError } = await supabaseAdmin.auth.admin.updateUserById(
+      supabase_user_id,
+      {
+        user_metadata: {
+          workspace_id: targetEmp.workspace_id,
+          employee_id,
+        },
       }
+    )
+
+    if (metadataError) {
+      logger.warn('更新 user_metadata 失敗:', metadataError)
+      // 不回傳錯誤，因為 supabase_user_id 已經設好了
+    } else {
+      logger.log('已更新 user_metadata:', {
+        workspace_id: targetEmp.workspace_id,
+        employee_id,
+      })
     }
 
     return successResponse(null)

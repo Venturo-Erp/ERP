@@ -80,6 +80,24 @@ export async function POST(request: NextRequest) {
       return errorResponse('找不到此電子郵件的使用者', 404, ErrorCode.NOT_FOUND)
     }
 
+    // 🔒 P003-D（2026-04-22）：跨租戶守門。
+    //   原本只查 isAdmin、用 email 全域查 auth.users、重設任何人密碼、沒驗 target 屬哪家。
+    //   修法：從 employees 反查 target 的 workspace_id、跟登入者 workspace 比對、不符 → 403。
+    const { data: targetEmp } = await supabaseAdmin
+      .from('employees')
+      .select('workspace_id')
+      .eq('supabase_user_id', user.id)
+      .maybeSingle()
+
+    if (!targetEmp || targetEmp.workspace_id !== auth.data.workspaceId) {
+      logger.error('跨租戶重設密碼嘗試', {
+        caller_workspace: auth.data.workspaceId,
+        target_user_id: user.id,
+        target_workspace: targetEmp?.workspace_id ?? null,
+      })
+      return errorResponse('不能重設其他公司用戶的密碼', 403, ErrorCode.FORBIDDEN)
+    }
+
     // 使用 admin API 更新密碼
     const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
       password: new_password,
